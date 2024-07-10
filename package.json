@@ -14,7 +14,7 @@
     "lerna": "^8.1.6"
   },
   "scripts": {
-    "gpt-commit": "git add . && commitgpt && git push",
+    "gpt-commit": "git add . && commitgpt",
     "next": "lerna version",
     "testnet": "lerna publish prerelease",
     "production": "lerna publish --conventional-commits --conventional-graduate"
