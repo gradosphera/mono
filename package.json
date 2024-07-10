@@ -1,7 +1,7 @@
 {
   "name": "monocoop",
   "private": true,
-  "dependencies":{
+  "dependencies": {
     "cooparser-ts": "workspace:*",
     "coopdoc-generator-ts": "workspace:*",
     "coop-notificator": "workspace:*",
@@ -11,5 +11,9 @@
   },
   "devDependencies": {
     "lerna": "^8.1.6"
+  },
+  "scripts": {
+    "publish:testnet": "lerna version --conventional-graduate --conventional-prerelease testnet && lerna publish from-package --dist-tag testnet",
+    "publish:production": "lerna version --conventional-graduate && lerna publish from-package --dist-tag latest"
   }
 }
