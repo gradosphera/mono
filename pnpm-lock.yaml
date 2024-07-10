@@ -598,6 +598,9 @@ importers:
       '@wharfkit/antelope':
         specifier: ^1.0.7
         version: 1.0.8
+      '@wharfkit/contract':
+        specifier: ^1.1.5
+        version: 1.1.5
       '@wharfkit/session':
         specifier: ^1.3.1
         version: 1.3.1
@@ -607,9 +610,6 @@ importers:
       axios:
         specifier: ^1.2.1
         version: 1.7.2
-      coopdoc-generator-ts:
-        specifier: workspace:*
-        version: link:../coopdoc-generator-ts
       cooptypes:
         specifier: workspace:*
         version: link:../cooptypes
