@@ -13,7 +13,7 @@
     "lerna": "^8.1.6"
   },
   "scripts": {
-    "publish:testnet": "lerna publish --conventional-prerelease --preid testnet --dist-tag testnet",
-    "publish:production": "lerna publish --conventional-graduate --dist-tag latest"
+    "publish:testnet": "lerna publish --conventional-prerelease --preid testnet --dist-tag testnet --yes",
+    "publish:production": "lerna publish --conventional-graduate --dist-tag latest --yes"
   }
 }
