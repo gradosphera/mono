@@ -2,6 +2,7 @@
   "name": "monocoop",
   "private": true,
   "dependencies": {
+    "lerna": "^8.1.6",
     "commitgpt": "^2.0.0",
     "coop-notificator": "workspace:*",
     "cooparser-ts": "workspace:*",
@@ -11,7 +12,6 @@
     "terminal": "workspace:*"
   },
   "devDependencies": {
-    "lerna": "^8.1.6"
   },
   "scripts": {
     "gpt-commit": "git add . && commitgpt",

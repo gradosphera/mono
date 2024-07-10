@@ -19,21 +19,6 @@
     ".": {
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
-    },
-    "./templates/*": {
-      "types": "./dist/Templates/index.d.ts",
-      "import": "./dist/Templates/index.mjs",
-      "require": "./dist/Templates/index.cjs"
-    },
-    "./generator/*": {
-      "types": "./dist/Services/Generator/index.d.ts",
-      "import": "./dist/Services/Generator/index.mjs",
-      "require": "./dist/Services/Generator/index.cjs"
-    },
-    "./templator": {
-      "types": "./dist/Services/Templator/index.d.ts",
-      "import": "./dist/Services/Templator/index.mjs",
-      "require": "./dist/Services/Templator/index.cjs"
     }
   },
   "main": "./dist/index.mjs",
