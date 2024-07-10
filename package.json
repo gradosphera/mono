@@ -16,7 +16,7 @@
   "scripts": {
     "gpt-commit": "git add . && commitgpt",
     "next": "lerna version",
-    "testnet": "lerna publish prerelease",
-    "production": "lerna publish --conventional-commits --conventional-graduate"
+    "testnet": "lerna publish prerelease --message 'chore(release): publish [TESTNET]'",
+    "production": "lerna publish --conventional-commits --conventional-graduate --message 'chore(release): publish [PROD]'"
   }
 }
