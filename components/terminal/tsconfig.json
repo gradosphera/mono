@@ -1,0 +1,19 @@
+{
+  "extends": "@quasar/app-vite/tsconfig-preset",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "skipLibCheck": true
+  },
+  "vueCompilerOptions": {
+    "plugins": ["@vue/language-plugin-pug"]
+  },
+  "exclude": [
+    "./Env-example.ts",
+    "./dist",
+    "./.quasar",
+    "./node_modules",
+    "./src-capacitor",
+    "./src-cordova",
+    "./quasar.config.*.temporary.compiled*"
+  ]
+}

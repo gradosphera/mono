@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  coopback:
+    container_name: coopback
+    build: ./
+    image: coopback
+    env_file:
+      - ./.env
+    network_mode: 'host'
+    restart: unless-stopped

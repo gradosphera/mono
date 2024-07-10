@@ -1,0 +1,161 @@
+import eosjsecc from 'eosjs-ecc';
+import ApiError from '../utils/ApiError';
+import { getActions, getTables } from '../utils/getFetch';
+
+import * as coopService from './coop.service';
+const { verify, sha256 } = eosjsecc;
+import config from '../config/config';
+import { Generator } from 'coopdoc-generator-ts';
+import type { IGenerate, IGetDocuments } from '../types';
+import {Cooperative, SovietContract} from 'cooptypes'
+import { User } from '../models';
+import { IUser } from '../models/user.model';
+
+export const generator = new Generator();
+
+export const connectGenerator = async () => {
+  await generator.connect(config.mongoose.url);
+};
+
+export const generateDocument = async (options: IGenerate) => {
+  return await generator.generate(options);
+};
+
+// Шаг 1: Создание новой функции для сборки complexDocument
+export async function buildComplexDocument(raw_action_document: Cooperative.Blockchain.IAction): Promise<Cooperative.Documents.IComplexDocument> {
+  let statement = {} as Cooperative.Documents.IComplexStatement;
+  let decision = {} as Cooperative.Documents.IComplexDecision;
+  let act = {} as Cooperative.Documents.IComplexAct;
+
+  const raw_document = raw_action_document.data as SovietContract.Actions.Registry.NewSubmitted.INewSubmitted;
+
+  // Готовим заявления
+  {
+    const document = await generator.getDocument({ hash: raw_document.document.hash });
+    const user = await User.findOne({ username: raw_document.username });
+
+    if (user) {
+
+      const user_data = await user?.getPrivateData()
+
+      const action: Cooperative.Blockchain.IExtendedAction = {
+        ...raw_action_document,
+        user: user_data,
+      };
+
+      statement = { action, document };
+
+    }
+
+  }
+
+  // Готовим решения
+  {
+    let decision_extended_action = {} as Cooperative.Blockchain.IExtendedAction
+
+    const decision_action = (
+      await getActions(`${process.env.SIMPLE_EXPLORER_API}/get-actions`, {
+        filter: JSON.stringify({
+          account: process.env.SOVIET_CONTRACT,
+          name: SovietContract.Actions.Registry.NewDecision.actionName,
+          receiver: process.env.COOPNAME,
+          'data.decision_id': String(raw_document.decision_id),
+        }),
+        page: 1,
+        limit: 1,
+      })
+    )?.results[0];
+
+    if (decision_action) {
+      const user = await User.findOne({ username: decision_action?.data?.username });
+
+      if (user) {
+        const user_data = user.getPrivateData()
+
+        decision_extended_action = {
+          ...decision_action,
+          user: (await user?.getPrivateData()) || null,
+        };
+
+        const document = await generator.getDocument({ hash: decision_action?.data?.document?.hash });
+
+        decision = {
+          document,
+          action: decision_extended_action,
+          votes_for: [],
+          votes_against: [],
+        };
+
+      }
+    }
+
+  }
+
+  // Готовим акты
+  const acts: Cooperative.Documents.IComplexAct[] = [];
+
+  return { statement, decision, acts };
+}
+
+
+
+
+export const queryDocuments = async (
+  filter: any,
+  page: number = 1,
+  limit: number = 100
+): Promise<Cooperative.Documents.IGetComplexDocuments> => {
+  const actions = await getActions<SovietContract.Actions.Registry.NewResolved.INewResolved>(
+    `${process.env.SIMPLE_EXPLORER_API}/get-actions`,
+    {
+      filter: JSON.stringify({
+        account: process.env.SOVIET_CONTRACT,
+        name: SovietContract.Actions.Registry.NewResolved.actionName,
+        receiver: process.env.COOPNAME,
+        ...filter,
+      }),
+      page,
+      limit,
+    }
+  );
+
+  let response: Cooperative.Documents.IGetComplexDocuments = {
+    results: [],
+    page,
+    limit,
+  };
+
+  for (const raw_action_document of actions.results) {
+    const complexDocument = await buildComplexDocument(raw_action_document);
+
+    if (complexDocument.decision.action)
+      response.results.push(complexDocument);
+  }
+
+
+  return response;
+};
+
+export const getDocuments = async (account) => {
+  // let data = await getActions('/v2/history/get_actions', {
+  //   "filter": "soviettest1:statement",
+  //   "account": account,
+  // })
+  // for (const action of data.actions) {
+  //   action.decision = (await getActions('/v2/history/get_actions', {
+  //     "account": account,
+  //     "filter": "soviettest1:decision",
+  //     "@decision.decision_id": action.act.data.decision_id,
+  //   }))?.actions?.[0]
+  //   if (action.act.data.action == 'joincoop') {
+  //     try {
+  //       action.verified = await verify(action.act.data.statement.sign, action.act.data.statement.hash, action.act.data.statement.pkey)
+  //     } catch(e: any){
+  //       console.error(e)
+  //       action.verified = false
+  //       action.verify_message = e.message
+  //     }
+  //   }
+  // }
+  // return data.actions
+};

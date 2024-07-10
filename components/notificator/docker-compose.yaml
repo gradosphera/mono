@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  notificator:
+    container_name: notificator
+    build: ./
+    image: notificator
+    env_file:
+      - ./.env
+    network_mode: 'host'
+    restart: unless-stopped

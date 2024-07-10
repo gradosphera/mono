@@ -1,0 +1,373 @@
+import app from '../../src/app';
+import request from 'supertest';
+import httpStatus from 'http-status';
+import { setupTestDB } from '../utils/setupTestDB';
+import faker from 'faker';
+import { generateUsername } from '../utils/generateUsername';
+import { User } from '../../src/models';
+import { IGenerateJoinCoop, IGeneratedDocument, IIndividualData } from 'coopdoc-generator-ts';
+import { IDocument, IJoinCooperative } from '../../src/types';
+import ecc from 'eosjs-ecc'
+
+setupTestDB();
+
+describe('Проверка данных', () => {
+  let newUser;
+
+  beforeEach(() => {
+    const email = faker.internet.email().toLowerCase()
+    newUser = {
+      email: email,
+      password: 'password1',
+      role: 'user',
+      public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+      username: generateUsername(),
+      referer: '',
+      type: 'individual',
+      individual_data: {
+        first_name: faker.name.firstName(),
+        last_name: faker.name.lastName(),
+        middle_name: '',
+        birthdate: '2023-04-01',
+        phone: '+1234567890',
+        email: email,
+        full_address: 'Russia, Moscow, Tverskaya street, 10',
+      },
+    };
+  });
+
+  describe('POST /v1/users/join-cooperative', () => {
+    let newUser;
+
+    beforeEach(() => {
+      const email = faker.internet.email().toLowerCase()
+      newUser = {
+        email: email,
+        password: 'password1',
+        role: 'user',
+        public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+        username: generateUsername(),
+        referer: '',
+        type: 'individual',
+        individual_data: {
+          first_name: faker.name.firstName(),
+          last_name: faker.name.lastName(),
+          middle_name: '',
+          birthdate: '2023-04-01',
+          phone: '+1234567890',
+          email: email,
+          full_address: 'Russia, Moscow, Tverskaya street, 10',
+        },
+      };
+    });
+
+    test('should successfully create a new user', async () => {
+      const registeredUser = await request(app).post('/v1/users').send(newUser).expect(httpStatus.CREATED);
+
+      expect(registeredUser.body.tokens.access.token).toBeDefined();
+
+      const dbUser = await User.findOne({username: newUser.username});
+      expect(dbUser).toBeDefined();
+      expect(dbUser?.status).toBe('created');
+    });
+
+    test('should generate a document for joining the cooperative', async () => {
+      const registeredUser = await request(app).post('/v1/users').send(newUser).expect(httpStatus.CREATED);
+
+      expect(registeredUser.body.tokens.access.token).toBeDefined();
+
+      const dbUser = await User.findOne({username: newUser.username});
+      expect(dbUser).toBeDefined();
+      expect(dbUser?.status).toBe('created');
+
+      const privateData = await dbUser?.getPrivateData() as IIndividualData;
+
+      expect(privateData).toBeDefined();
+
+      const options: IGenerateJoinCoop = {
+        action: 'joincoop',
+        code: 'registrator',
+        coopname: 'voskhod',
+        username: newUser.username,
+        signature: 'this is imaged signature'
+      };
+
+      let res = await request(app).post('/v1/data/generate').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(options);
+      console.log("res.body: ", res.body)
+
+      expect(res.status).toBe(httpStatus.CREATED);
+
+      expect(res.body.meta).toBeDefined();
+      expect(res.body.binary).toBeDefined();
+      expect(res.body.html).toBeDefined();
+      expect(res.body.hash).toBeDefined();
+    });
+
+    test('should regenerate the generated document', async () => {
+      const registeredUser = await request(app).post('/v1/users').send(newUser).expect(httpStatus.CREATED);
+
+      expect(registeredUser.body.tokens.access.token).toBeDefined();
+
+      const dbUser = await User.findOne({username: newUser.username});
+      expect(dbUser).toBeDefined();
+      expect(dbUser?.status).toBe('created');
+
+      const privateData = await dbUser?.getPrivateData() as IIndividualData;
+
+      expect(privateData).toBeDefined();
+
+      const options: IGenerateJoinCoop = {
+        action: 'joincoop',
+        code: 'registrator',
+        coopname: 'voskhod',
+        username: newUser.username,
+        signature: 'this is imaged signature'
+      };
+
+      let res = await request(app).post('/v1/data/generate').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(options);
+
+      expect(res.status).toBe(httpStatus.CREATED);
+
+      expect(res.body.meta).toBeDefined();
+      expect(res.body.binary).toBeDefined();
+      expect(res.body.html).toBeDefined();
+      expect(res.body.hash).toBeDefined();
+
+      let res_regenerated = await request(app).post('/v1/data/generate').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(res.body.meta);
+
+      expect(res.status).toBe(httpStatus.CREATED);
+
+      expect(res.body.hash).toEqual(res_regenerated.body.hash);
+    });
+
+
+    test('should return 500 error if signature is invalid', async () => {
+      const registeredUser = await request(app).post('/v1/users').send(newUser).expect(httpStatus.CREATED);
+      expect(registeredUser.body.tokens.access.token).toBeDefined();
+      const dbUser = await User.findOne({username: newUser.username});
+      expect(dbUser).toBeDefined();
+      expect(dbUser?.status).toBe('created');
+      const privateData = await dbUser?.getPrivateData() as IIndividualData;
+      expect(privateData).toBeDefined();
+      const options: IGenerateJoinCoop = {
+        action: 'joincoop',
+        code: 'registrator',
+        coopname: 'voskhod',
+        username: newUser.username,
+        signature: 'any imaged signature'
+      };
+      let res = await request(app).post('/v1/data/generate').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(options);
+      expect(res.status).toBe(httpStatus.CREATED);
+
+      const generatedDocument: IGeneratedDocument = res.body;
+
+      const signedDocument: IDocument = {
+        hash: generatedDocument.hash,
+        meta: generatedDocument.meta,
+        signature: 'invalid_signature',
+        public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+      };
+
+      const joinCoopData: IJoinCooperative = {
+        username: newUser.username,
+        document: signedDocument
+      };
+
+      let joincoop_result = await request(app).post('/v1/users/join-cooperative').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(joinCoopData);
+      console.log(joincoop_result.body);
+      expect(joincoop_result.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
+    });
+
+
+    test('should return 400 error if public_key is mismatch', async () => {
+      const registeredUser = await request(app).post('/v1/users').send(newUser).expect(httpStatus.CREATED);
+      expect(registeredUser.body.tokens.access.token).toBeDefined();
+      const dbUser = await User.findOne({username: newUser.username});
+      expect(dbUser).toBeDefined();
+      expect(dbUser?.status).toBe('created');
+      const privateData = await dbUser?.getPrivateData() as IIndividualData;
+      expect(privateData).toBeDefined();
+      const options: IGenerateJoinCoop = {
+        action: 'joincoop',
+        code: 'registrator',
+        coopname: 'voskhod',
+        username: newUser.username,
+        signature: 'any imaged signature'
+      };
+      let res = await request(app).post('/v1/data/generate').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(options);
+      expect(res.status).toBe(httpStatus.CREATED);
+
+      const generatedDocument: IGeneratedDocument = res.body;
+
+      const sign = await ecc.sign(generatedDocument.hash, '5JA8KCpXbCfWA9fS4zHKgcBPbnNaRha8iKHhZLV7ks9Gs3LenpU')
+
+      const signedDocument: IDocument = {
+        hash: generatedDocument.hash,
+        meta: generatedDocument.meta,
+        signature: sign,
+        public_key: 'EOS6FJnarqm25tRS8EoW5dLgW47C42tKa32BKCu98u2xhsbzwR1c8',
+      };
+
+      const joinCoopData: IJoinCooperative = {
+        username: newUser.username,
+        document: signedDocument
+      };
+
+      let joincoop_result = await request(app).post('/v1/users/join-cooperative').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(joinCoopData);
+      console.log(joincoop_result.body);
+      expect(joincoop_result.status).toBe(httpStatus.BAD_REQUEST);
+    });
+
+
+    test('should join the cooperative', async () => {
+      const registeredUser = await request(app).post('/v1/users').send(newUser).expect(httpStatus.CREATED);
+
+      expect(registeredUser.body.tokens.access.token).toBeDefined();
+
+      const dbUser = await User.findOne({username: newUser.username});
+      expect(dbUser).toBeDefined();
+      expect(dbUser?.status).toBe('created');
+
+      const privateData = await dbUser?.getPrivateData() as IIndividualData;
+
+      expect(privateData).toBeDefined();
+
+      const options: IGenerateJoinCoop = {
+        action: 'joincoop',
+        code: 'registrator',
+        coopname: 'voskhod',
+        username: newUser.username,
+        signature: 'this is imaged signature'
+      };
+
+      let res = await request(app).post('/v1/data/generate').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(options);
+
+      expect(res.status).toBe(httpStatus.CREATED);
+
+      expect(res.body.meta).toBeDefined();
+      expect(res.body.binary).toBeDefined();
+      expect(res.body.html).toBeDefined();
+      expect(res.body.hash).toBeDefined();
+
+      let res_regenerated = await request(app).post('/v1/data/generate').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(res.body.meta);
+
+      expect(res.status).toBe(httpStatus.CREATED);
+
+      expect(res.body.hash).toEqual(res_regenerated.body.hash);
+
+      const generatedDocument: IGeneratedDocument = res.body;
+
+      const sign = await ecc.sign(generatedDocument.hash, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3')
+
+      const signedDocument: IDocument = {
+        hash: generatedDocument.hash,
+        meta: generatedDocument.meta,
+        signature: sign,
+        public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+      };
+
+      const joinCoopData: IJoinCooperative = {
+        username: newUser.username,
+        document: signedDocument
+      };
+
+      let joincoop_result = await request(app).post('/v1/users/join-cooperative').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(joinCoopData);
+      console.log(joincoop_result.body);
+      expect(joincoop_result.status).toBe(httpStatus.OK);
+
+      const dbUser2 = await User.findOne({username: newUser.username});
+      expect(dbUser2).toBeDefined();
+      expect(dbUser2?.status).toBe('joined');
+      expect(dbUser2?.statement).toBeDefined()
+      console.log(dbUser2);
+    });
+
+
+    test('получаем платежный ордер на вступление', async () => {
+      const registeredUser = await request(app).post('/v1/users').send(newUser).expect(httpStatus.CREATED);
+
+      expect(registeredUser.body.tokens.access.token).toBeDefined();
+
+      const dbUser = await User.findOne({username: newUser.username});
+      expect(dbUser).toBeDefined();
+      expect(dbUser?.status).toBe('created');
+
+      const privateData = await dbUser?.getPrivateData() as IIndividualData;
+
+      expect(privateData).toBeDefined();
+
+      const options: IGenerateJoinCoop = {
+        action: 'joincoop',
+        code: 'registrator',
+        coopname: 'voskhod',
+        username: newUser.username,
+        signature: 'this is imaged signature'
+      };
+
+      let res = await request(app).post('/v1/data/generate').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(options);
+
+      expect(res.status).toBe(httpStatus.CREATED);
+
+      expect(res.body.meta).toBeDefined();
+      expect(res.body.binary).toBeDefined();
+      expect(res.body.html).toBeDefined();
+      expect(res.body.hash).toBeDefined();
+
+      let res_regenerated = await request(app).post('/v1/data/generate').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(res.body.meta);
+
+      expect(res.status).toBe(httpStatus.CREATED);
+
+      expect(res.body.hash).toEqual(res_regenerated.body.hash);
+
+      const generatedDocument: IGeneratedDocument = res.body;
+
+      const sign = await ecc.sign(generatedDocument.hash, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3')
+
+      const signedDocument: IDocument = {
+        hash: generatedDocument.hash,
+        meta: generatedDocument.meta,
+        signature: sign,
+        public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+      };
+
+      const joinCoopData: IJoinCooperative = {
+        username: newUser.username,
+        document: signedDocument
+      };
+
+      let joincoop_result = await request(app).post('/v1/users/join-cooperative').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send(joinCoopData);
+      console.log(joincoop_result.body);
+      expect(joincoop_result.status).toBe(httpStatus.OK);
+
+      const dbUser2 = await User.findOne({username: newUser.username});
+      expect(dbUser2).toBeDefined();
+      expect(dbUser2?.status).toBe('joined');
+      expect(dbUser2?.statement).toBeDefined()
+      console.log(dbUser2);
+
+      const initialPayment = await request(app).post('/v1/orders/initial').set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`).send({username: newUser.username})
+      console.log('result: ', initialPayment.body)
+
+      expect(initialPayment.status).toBe(httpStatus.CREATED)
+      expect(initialPayment.body?.confirmation_token).toBeDefined()
+      expect(initialPayment.body?.order_id).toBeDefined()
+
+    });
+
+  });
+  // test('регистрируем пользователя в блокчейне', async () => {
+  //   await request(app)
+  //   .post('/v1/auth/register')
+  //   // .set('Authorization', `Bearer ${adminAccessToken}`)
+  //   .send(newUser)
+  //   .expect(httpStatus.BAD_REQUEST);
+  // })
+
+  // test('should return 201 and successfully register user if request data is ok', async () => {
+  //   await request(app)
+  //   .post('/v1/data/generate')
+  //   // .set('Authorization', `Bearer ${adminAccessToken}`)
+  //   .send(newUser)
+  //   .expect(httpStatus.BAD_REQUEST);
+  // })
+})
