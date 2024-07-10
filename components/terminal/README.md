@@ -1,6 +1,6 @@
 # Terminal App (terminal)
 
-A Terminal Project
+A Terminal Project.
 
 ## Install the dependencies
 ```bash
