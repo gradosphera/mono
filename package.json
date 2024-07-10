@@ -14,7 +14,7 @@
   },
   "scripts": {
     "next": "lerna version",
-    "publish:testnet": "lerna version prerelease --preid testnet --no-push --yes && lerna publish from-package --dist-tag testnet --yes",
-    "publish": "lerna version patch --no-push --yes && lerna publish from-package --dist-tag latest --yes"
+    "publish:testnet": "lerna publish prerelease",
+    "publish": "lerna publish"
   }
 }
