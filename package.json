@@ -14,6 +14,7 @@
   },
   "scripts": {
     "next": "lerna version",
-    "publish:testnet": "lerna publish prerelease"
+    "publish:testnet": "lerna publish prerelease",
+    "publish:production": "lerna publish"
   }
 }
