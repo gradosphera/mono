@@ -2,10 +2,11 @@
   "name": "monocoop",
   "private": true,
   "dependencies": {
-    "cooparser-ts": "workspace:*",
-    "coopdoc-generator-ts": "workspace:*",
+    "commitgpt": "^2.0.0",
     "coop-notificator": "workspace:*",
+    "cooparser-ts": "workspace:*",
     "coopback": "workspace:*",
+    "coopdoc-generator-ts": "workspace:*",
     "cooptypes": "workspace:*",
     "terminal": "workspace:*"
   },
