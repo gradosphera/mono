@@ -1,16 +1,13 @@
 {
-  "version": "0.0.9",
-  "npmClient": "npm",
-  "useWorkspaces": true,
-  "packages": [
-    "packages/*"
-  ],
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "version": "independent",
+  "packages": ["components/*"],
+  "npmClient": "pnpm",
   "command": {
     "publish": {
       "conventionalCommits": true,
       "preid": "testnet",
       "message": "chore(release): publish"
-    },
-    "version": {}
+    }
   }
 }
