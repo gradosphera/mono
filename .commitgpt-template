@@ -1,9 +1,11 @@
-suggest 10 commit messages based on the following diff:
-{{diff}}
-commit messages should:
- - follow conventional commits
- - message format should be: <type>[scope]: <description>
+Предложи 10 сообщений о коммите, основанных на следующем diff: {{diff}} 
 
-examples:
- - fix(authentication): add password regex pattern
- - feat(storage): add new test cases
+Сообщениях о коммитах должны:
+
+- следовать conventional commits
+- формат сообщения должен быть: <type>[scope]: <description>
+
+примеры:
+  - fix(authentication): добавлен regex для пароля
+  - feat(storage): добавлены новые тесты
+
