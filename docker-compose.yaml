@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  notificator:
+    container_name: notificator
+    build: 
+      context: ./
+      dockerfile: components/notificator/Dockerfile
+    image: notificator
+    env_file:
+      - components/notificator/.env
+    network_mode: 'host'
+    restart: unless-stopped
