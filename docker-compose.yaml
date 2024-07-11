@@ -3,11 +3,28 @@ version: '3'
 services:
   notificator:
     container_name: notificator
-    build: 
-      context: ./
-      dockerfile: components/notificator/Dockerfile
+    build:
+      context: ./components/notificator
+      dockerfile: Dockerfile
     image: notificator
     env_file:
       - components/notificator/.env
     network_mode: 'host'
     restart: unless-stopped
+    volumes:
+      - ./:/app
+    command: pnpm -F coop-notificator run start
+
+  coopback:
+    container_name: coopback
+    build:
+      context: ./components/coopback
+      dockerfile: Dockerfile
+    image: coopback
+    env_file:
+      - components/coopback/.env
+    network_mode: 'host'
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+    command: pnpm -F coopback run start
