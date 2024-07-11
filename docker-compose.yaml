@@ -29,3 +29,18 @@ services:
     volumes:
       - ./:/app
     command: pnpm -F coopback run start
+
+
+  cooparser:
+    container_name: cooparser
+    build:
+      context: ./components/cooparser
+      dockerfile: Dockerfile
+    image: cooparser
+    env_file:
+      - components/cooparser/.env
+    network_mode: 'host'
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+    command: pnpm -F cooparser-ts run start
