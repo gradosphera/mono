@@ -14,7 +14,7 @@
   "scripts": {
     "deploy-testnet": "git checkout testnet && git merge main && git push origin testnet && git checkout main",
     "deploy-production": "git checkout production && git merge testnet && git push origin production && git checkout main",
-    "start": "pm2 start ecosystem.config.json --no-daemon",
+    "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "test": "jest -i --colors --verbose --detectOpenHandles",
     "test:watch": "jest -i --watchAll",
