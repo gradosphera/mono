@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.9](https://github.com/hagopj13/node-express-boilerplate/compare/coopback@1.7.9-testnet.0...coopback@1.7.9) (2024-07-11)
+
+**Note:** Version bump only for package coopback
+
+
+
+
+
 ## [1.7.8](https://github.com/hagopj13/node-express-boilerplate/compare/coopback@1.7.8-testnet.0...coopback@1.7.8) (2024-07-10)
 
 **Note:** Version bump only for package coopback
