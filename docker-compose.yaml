@@ -15,6 +15,7 @@ services:
       - ./:/app
     command: pnpm -F coop-notificator run start
     # command: tail -f /dev/null
+    
   coopback:
     container_name: coopback
     build:
