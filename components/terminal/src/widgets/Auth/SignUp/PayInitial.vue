@@ -18,18 +18,24 @@ div
 import { ref, computed, watch, onMounted } from 'vue'
 import { useCreateUser, createUserStore as store } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
-import { BASE_PAYMENT_FEE, COOPNAME, INITIAL_PAYMENT, CURRENCY } from 'src/shared/config';
+import { BASE_PAYMENT_FEE, COOPNAME, CURRENCY } from 'src/shared/config';
 import { LocalStorage } from 'quasar';
+import { useCurrentUserStore } from 'src/entities/User';
+import { useCooperativeStore } from 'src/entities/Cooperative';
 
 const emit = defineEmits(['update:data', 'update:step'])
 
 const api = useCreateUser()
 
 const step = computed(() => store.step)
+const user = useCurrentUserStore()
+const coop = useCooperativeStore()
 
 const currentStep = 6
 
-onMounted(() => {
+onMounted(async () => {
+  await coop.loadPublicCooperativeData(COOPNAME)
+
   if (step.value === currentStep)
     createInitialPayment()
 })
@@ -39,7 +45,7 @@ watch(step, (newValue) => {
     createInitialPayment()
 })
 
-const initialPayment = ref(parseFloat(INITIAL_PAYMENT))
+const initialPayment = computed(() => user.userAccount?.type === 'organization' ? parseFloat(coop.publicCooperativeData.org_registration) : parseFloat(coop.publicCooperativeData.registration))
 const baseFee = ref(parseFloat(BASE_PAYMENT_FEE))
 
 const toPay = computed(() => {

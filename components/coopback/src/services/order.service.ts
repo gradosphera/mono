@@ -105,14 +105,20 @@ export async function createDeposit(username: string, data: ICreateDeposit): Pro
 
 export async function createInitialOrder(username: string, data: ICreateInitialPayment): Promise<ICreatedPayment> {
   let cooperative = await generator.constructCooperative(process.env.COOPNAME as string);
-  // console.log('constructed cooperative: ', cooperative);
 
   if (!cooperative) throw new Error('Кооператив не найден');
+
+  const user = await getUserByUsername(username);
+  let amount = '';
+
+  if (user.type === 'individual' || user.type === 'entrepreneur') amount = cooperative.registration;
+  else amount = cooperative.org_registration;
+
+  console.log('amount: ', cooperative);
 
   const [, symbol] = cooperative.initial.split(' ');
   let order_id = 0;
 
-  const amount = cooperative.registration;
   let paymentDetails = {} as PaymentDetails; // Инициализация переменной для деталей
 
   // 1. Создаёшь ордер в базе и получаешь внутренний айди

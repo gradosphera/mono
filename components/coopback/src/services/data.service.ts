@@ -7,7 +7,7 @@ const { verify, sha256 } = eosjsecc;
 import config from '../config/config';
 import { Generator } from 'coopdoc-generator-ts';
 import type { IGenerate, IGetDocuments } from '../types';
-import {Cooperative, SovietContract} from 'cooptypes'
+import { Cooperative, SovietContract } from 'cooptypes';
 import { User } from '../models';
 import { IUser } from '../models/user.model';
 
@@ -22,7 +22,9 @@ export const generateDocument = async (options: IGenerate) => {
 };
 
 // Шаг 1: Создание новой функции для сборки complexDocument
-export async function buildComplexDocument(raw_action_document: Cooperative.Blockchain.IAction): Promise<Cooperative.Documents.IComplexDocument> {
+export async function buildComplexDocument(
+  raw_action_document: Cooperative.Blockchain.IAction
+): Promise<Cooperative.Documents.IComplexDocument> {
   let statement = {} as Cooperative.Documents.IComplexStatement;
   let decision = {} as Cooperative.Documents.IComplexDecision;
   let act = {} as Cooperative.Documents.IComplexAct;
@@ -35,8 +37,7 @@ export async function buildComplexDocument(raw_action_document: Cooperative.Bloc
     const user = await User.findOne({ username: raw_document.username });
 
     if (user) {
-
-      const user_data = await user?.getPrivateData()
+      const user_data = await user?.getPrivateData();
 
       const action: Cooperative.Blockchain.IExtendedAction = {
         ...raw_action_document,
@@ -44,14 +45,14 @@ export async function buildComplexDocument(raw_action_document: Cooperative.Bloc
       };
 
       statement = { action, document };
-
+    } else {
+      throw new ApiError(400, 'Ошибка, один из пользователей не найден. Обратитесь в поддержку.');
     }
-
   }
 
   // Готовим решения
   {
-    let decision_extended_action = {} as Cooperative.Blockchain.IExtendedAction
+    let decision_extended_action = {} as Cooperative.Blockchain.IExtendedAction;
 
     const decision_action = (
       await getActions(`${process.env.SIMPLE_EXPLORER_API}/get-actions`, {
@@ -68,9 +69,9 @@ export async function buildComplexDocument(raw_action_document: Cooperative.Bloc
 
     if (decision_action) {
       const user = await User.findOne({ username: decision_action?.data?.username });
-
+      console.log(user);
       if (user) {
-        const user_data = user.getPrivateData()
+        const user_data = user.getPrivateData();
 
         decision_extended_action = {
           ...decision_action,
@@ -85,10 +86,11 @@ export async function buildComplexDocument(raw_action_document: Cooperative.Bloc
           votes_for: [],
           votes_against: [],
         };
-
+        console.log(decision);
+      } else {
+        throw new ApiError(400, 'Ошибка, один из пользователей не найден. Обратитесь в поддержку.');
       }
     }
-
   }
 
   // Готовим акты
@@ -96,9 +98,6 @@ export async function buildComplexDocument(raw_action_document: Cooperative.Bloc
 
   return { statement, decision, acts };
 }
-
-
-
 
 export const queryDocuments = async (
   filter: any,
@@ -128,10 +127,8 @@ export const queryDocuments = async (
   for (const raw_action_document of actions.results) {
     const complexDocument = await buildComplexDocument(raw_action_document);
 
-    if (complexDocument.decision.action)
-      response.results.push(complexDocument);
+    if (complexDocument.decision.action) response.results.push(complexDocument);
   }
-
 
   return response;
 };

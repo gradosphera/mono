@@ -1,11 +1,10 @@
 <template lang="pug">
 q-layout(view="hHh LpR fFf")
-  q-header(v-if="!loggedIn && config.headerEnabled" bordered :class="headerClass" reveal :reveal-offset="500").header
+  q-header(v-if="!loggedIn" bordered :class="headerClass").header
     q-toolbar()
       q-toolbar-title()
-        q-btn(stretch flat class="btn-title" :dense="isMobile" @click="goToIndex")
-          img(:src="HeaderLogo" alt="" style="height: 50px;").q-pa-sm
-          p(v-if="!isMobile").q-ml-xs {{ COOP_SHORT_NAME }}
+        q-btn(stretch flat class="btn-title" :dense="isMobile" @click="goToIndex").q-ml-sm
+          p {{ COOP_SHORT_NAME }}
 
       q-btn(stretch flat @click="toogleDark")
         q-icon(:name="isDark ? 'brightness_3' : 'brightness_7'")
@@ -25,15 +24,20 @@ q-layout(view="hHh LpR fFf")
   q-drawer(v-if="loggedIn && isMobile" v-model="rightDrawerOpen" behavior="mobile" side="right" persistent :mini-width="71" :width="71" class="drawer-right")
     Menu(:mini="false")
 
+  //футер контактов
+  q-footer(v-if="!loggedIn" :class="headerClass")
+    ContactsFooter(:text="footerText")
+
+
   //футер мобильного меню
   q-footer(v-if="loggedIn && isMobile" :class="footerClass" style="height: 55px; border-top: 1px solid #00800038 !important; " :style="{ 'background': $q.dark.isActive ? 'black' : 'white' }")
     mobileMenu(@toogle-more="toggleRightDrawer")
 
   //контейнер всех страниц
-  q-page-container.full-height
-    q-page(class="page" ).full-height
-      router-view(v-slot="{ Component }").full-height
-        component(:is="Component" ).full-height
+  q-page-container
+    q-page(class="page" )
+      router-view(v-slot="{ Component }")
+        component(:is="Component" ).q-pa-sm
 
 
 </template>
@@ -44,13 +48,14 @@ import { useRouter, useRoute } from 'vue-router'
 import { useQuasar, Cookies, LocalStorage } from 'quasar'
 import { useWindowSize } from 'vue-window-size'
 import config from 'src/app/config'
-import HeaderLogo from 'src/assets/logo-white.png?url'
+
 import Menu from 'src/components/menu/drawerMenu.vue'
 import mobileMenu from 'src/components/menu/footerMobileMenu.vue'
 import { COOPNAME, COOP_SHORT_NAME } from 'src/shared/config'
 import { useCurrentUserStore } from 'src/entities/User'
 import { useSessionStore } from 'src/entities/Session'
 const session = useSessionStore()
+import { ContactsFooter } from 'src/shared/ui/Footer'
 
 const $q = useQuasar()
 
@@ -58,6 +63,17 @@ const isDark = computed(() => $q.dark.isActive)
 
 const headerClass = computed(() => (isDark.value ? 'text-white bg-dark' : 'text-black bg-light'))
 const footerClass = computed(() => (isDark.value ? 'text-white' : 'text-black'))
+
+import { useCooperativeStore } from 'src/entities/Cooperative';
+const cooperativeStore = useCooperativeStore()
+
+cooperativeStore.loadContacts()
+
+const footerText = computed(() => {
+  if (cooperativeStore.contacts && cooperativeStore.contacts.details)
+    return `${cooperativeStore.contacts.full_name}, ИНН: ${cooperativeStore.contacts.details.inn}, ОГРН: ${cooperativeStore.contacts.details.ogrn}, телефон: ${cooperativeStore.contacts.phone}, почта: ${cooperativeStore.contacts.email}`
+  else return ''
+})
 
 defineExpose({
   $q,

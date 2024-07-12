@@ -117,7 +117,7 @@ const getTitle = (action: string, user: any) => {
     change: 'Обмен на маркете',
   }
   let title = actions[action]
-
+  console.log(user)
   if (user.first_name)
     title += ` ${user.last_name} ${user.first_name} ${user.middle_name}`
   else title += ` ${user.short_name}`

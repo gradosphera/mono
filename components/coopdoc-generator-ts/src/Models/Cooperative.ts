@@ -7,8 +7,7 @@ import type { MongoDBConnector } from '../Services/Databazor'
 import { individualSchema } from '../Schema/IndividualSchema'
 import { getFetch } from '../Utils/getFetch'
 import { getEnvVar } from '../config'
-import { organizationSchema } from './Organization'
-import { Organization, type OrganizationData } from './Organization'
+import { Organization, organizationSchema } from './Organization'
 import type { IndividualData } from './Individual'
 import { Individual } from './Individual'
 
@@ -48,9 +47,9 @@ export class Cooperative {
   async getOne(username: string, block_num?: number): Promise<CooperativeData> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
-    const organization = await new Organization(this.storage).getOne({ username, ...block_filter })
+    const organizationPrivateData = await new Organization(this.storage).getOne({ username, ...block_filter })
 
-    if (!organization)
+    if (!organizationPrivateData)
       throw new Error('Информация о организации не обнаружена в базе данных.')
 
     const cooperative_response = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
@@ -61,9 +60,9 @@ export class Cooperative {
       }),
     }))
 
-    const cooperative = cooperative_response.results[0]?.value as RegistratorContract.Tables.Organizations.IOrganization
+    const cooperativeBlockchainData = cooperative_response.results[0]?.value as RegistratorContract.Tables.Organizations.IOrganization
 
-    if (!cooperative)
+    if (!cooperativeBlockchainData)
       throw new Error('Информация о кооперативе не обнаружена в базе данных.')
 
     const soviet_response = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
@@ -97,14 +96,8 @@ export class Cooperative {
     }
 
     this.cooperative = {
-      ...organization as OrganizationData,
-      announce: cooperative?.announce,
-      description: cooperative?.description,
-      is_branched: cooperative?.is_branched,
-      is_enrolled: cooperative?.is_enrolled,
-      initial: cooperative?.initial,
-      registration: cooperative?.registration,
-      minimum: cooperative?.minimum,
+      ...organizationPrivateData,
+      ...cooperativeBlockchainData,
       chairman,
       members,
       totalMembers: members.length,

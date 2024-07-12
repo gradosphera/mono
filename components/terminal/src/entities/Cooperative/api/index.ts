@@ -26,7 +26,7 @@ async function loadAdmins(coopname: string): Promise<IAdministratorData[]> {
 }
 
 async function loadCooperativeData(): Promise<Cooperative.Model.IContacts> {
-  return (await sendGET('/v1/coop/info', {})) as Cooperative.Model.IContacts;
+  return (await sendGET('/v1/coop/info', {}, true)) as Cooperative.Model.IContacts;
 }
 
 async function loadPublicCooperativeData(

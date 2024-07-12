@@ -14,8 +14,10 @@
   "devDependencies": {
   },
   "scripts": {
-    "dev": "lerna run dev --parallel --scope coopback --scope terminal --scope cooparser-ts --scope coop-notificator",
-    "dev:types": "lerna run dev --parallel --scope cooptypes",
+    "dev": "lerna run dev --parallel",
+    "dev:services": "lerna run dev --parallel --scope coopback --scope cooparser-ts --scope coop-notificator --scope cooptypes --scope coopdoc-generator-ts",
+    "dev:libs": "lerna run dev --parallel --scope cooptypes",
+    "dev:terminal": "lerna run dev --scope terminal",
     "gpt-commit": "git add . && commitgpt",
     "next": "lerna version",
     "testnet": "lerna publish prerelease --message 'chore(release): publish [TESTNET]'",

@@ -74,6 +74,8 @@ export interface IOrgData {
   description: string
   initial: IAsset
   minimum: IAsset
+  org_initial: IAsset
+  org_minimum: IAsset
 }
 
 export interface IOrganization {
@@ -88,6 +90,9 @@ export interface IOrganization {
   registration: IAsset
   initial: IAsset
   minimum: IAsset
+  org_initial: IAsset
+  org_minimum: IAsset
+  org_registration: IAsset
 }
 
 export interface IPlotData {
