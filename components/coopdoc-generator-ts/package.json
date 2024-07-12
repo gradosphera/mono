@@ -37,12 +37,10 @@
   ],
   "scripts": {
     "build": "unbuild",
-    "dev": "unbuild --stub",
+    "dev": "concurrently -n 'GENERATOR' -c 'bgGreen.black' \"nodemon --watch src --exec 'unbuild'\"",
     "lint": "eslint .",
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish",
-    "start": "esno src/index.ts",
-    "parse": "esno scripts/parse.ts",
     "test": "vitest --dir test --testTimeout=120000 --exclude documents --watch=false",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
@@ -73,6 +71,7 @@
     "@types/node": "^20.12.11",
     "@types/nunjucks": "^3.2.6",
     "bumpp": "^9.4.1",
+    "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "esno": "^4.7.0",
     "lint-staged": "^15.2.2",

@@ -1,6 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
-import xss from 'xss-clean'
+import xss from 'xss-clean';
 import mongoSanitize from 'express-mongo-sanitize';
 import compression from 'compression';
 import cors from 'cors';
@@ -8,20 +8,21 @@ import passport from 'passport';
 import httpStatus from 'http-status';
 import config from './config/config';
 import morgan from './config/morgan';
-import jwtStrategy from './config/passport'
+import jwtStrategy from './config/passport';
 import authLimiter from './middlewares/rateLimiter';
 import routes from './routes/v1/index';
 import { errorConverter, errorHandler } from './middlewares/error';
 import ApiError from './utils/ApiError';
 
 import { connectGenerator } from './services/data.service';
-
 // Подключите генератор
-connectGenerator().then(() => {
-  console.log('Generator connected');
-}).catch((error) => {
-  console.error('Failed to connect generator:', error);
-});
+connectGenerator()
+  .then(() => {
+    console.log('Generator connected');
+  })
+  .catch((error) => {
+    console.error('Failed to connect generator:', error);
+  });
 
 const app = express();
 

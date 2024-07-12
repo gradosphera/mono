@@ -2,18 +2,20 @@
   "name": "monocoop",
   "private": true,
   "dependencies": {
-    "lerna": "^8.1.6",
     "commitgpt": "^2.0.0",
     "coop-notificator": "workspace:*",
     "cooparser-ts": "workspace:*",
     "coopback": "workspace:*",
     "coopdoc-generator-ts": "workspace:*",
     "cooptypes": "workspace:*",
+    "lerna": "^8.1.6",
     "terminal": "workspace:*"
   },
   "devDependencies": {
   },
   "scripts": {
+    "dev": "lerna run dev --parallel --scope coopback --scope terminal --scope cooparser-ts --scope coop-notificator",
+    "dev:types": "lerna run dev --parallel --scope cooptypes",
     "gpt-commit": "git add . && commitgpt",
     "next": "lerna version",
     "testnet": "lerna publish prerelease --message 'chore(release): publish [TESTNET]'",

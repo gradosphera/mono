@@ -169,7 +169,7 @@ export async function createInitialOrder(username: string, data: ICreateInitialP
       type: 'registration',
       quantity: amount,
     };
-
+    console.log('amount: ', amount);
     order_id = await blockchainService.createOrder(order);
 
     // 4. Обновляешь ордер идентификатором ордера в блокчейне (order_id)

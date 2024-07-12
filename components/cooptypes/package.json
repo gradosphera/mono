@@ -30,7 +30,6 @@
   ],
   "scripts": {
     "build": "unbuild",
-    "dev": "unbuild --stub",
     "lint": "eslint .",
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish && pnpm gh-pages --nojekyll -d docs",
@@ -38,7 +37,8 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks",
-    "doc": "typedoc"
+    "doc": "typedoc",
+    "dev": "concurrently -n 'TYPES' -c 'bgMagenta.white' \"nodemon --watch src --ext ts --exec 'unbuild'\""
   },
   "dependencies": {
     "@typescript-eslint/parser": "^7.8.0"
@@ -51,6 +51,7 @@
     "@types/node": "^20.12.8",
     "better-docs": "^2.7.3",
     "bumpp": "^9.4.1",
+    "concurrently": "^8.2.2",
     "eslint": "^9.1.1",
     "esno": "^4.7.0",
     "gh-pages": "^6.1.1",
