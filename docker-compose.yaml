@@ -12,7 +12,7 @@ services:
     network_mode: 'host'
     restart: unless-stopped
     volumes:
-      - ./:/app
+      - ./components/notificator/:/app
     command: pnpm -F coop-notificator run start
     # command: tail -f /dev/null
     
@@ -27,7 +27,7 @@ services:
     network_mode: 'host'
     restart: unless-stopped
     volumes:
-      - ./:/app
+      - ./components/coopback/:/app
     command: pnpm -F coopback run start
 
 
@@ -42,5 +42,5 @@ services:
     network_mode: 'host'
     restart: unless-stopped
     volumes:
-      - ./:/app
+      - ./components/cooparser/:/app
     command: pnpm -F cooparser-ts run start
