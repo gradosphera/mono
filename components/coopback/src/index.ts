@@ -7,6 +7,7 @@ import { connectGenerator } from './services/data.service';
 
 let server: any;
 
+
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(async () => {
   logger.info('Connected to MongoDB');
   // logger.info('Update soviet auth');
