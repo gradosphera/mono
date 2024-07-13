@@ -3,6 +3,78 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.24](https://github.com/coopenomics/monocoop/compare/terminal@0.1.23-alpha.1...terminal@0.1.24) (2024-07-13)
+
+**Note:** Version bump only for package terminal
+
+
+
+
+
+## [0.1.23](https://github.com/coopenomics/monocoop/compare/terminal@0.1.23-alpha.0...terminal@0.1.23) (2024-07-13)
+
+**Note:** Version bump only for package terminal
+
+
+
+
+
+## [0.1.22](https://github.com/coopenomics/monocoop/compare/terminal@0.1.22-alpha.0...terminal@0.1.22) (2024-07-13)
+
+**Note:** Version bump only for package terminal
+
+
+
+
+
+## [0.1.21](https://github.com/coopenomics/monocoop/compare/terminal@0.1.21-alpha.0...terminal@0.1.21) (2024-07-13)
+
+**Note:** Version bump only for package terminal
+
+
+
+
+
+## [0.1.20](https://github.com/coopenomics/monocoop/compare/terminal@0.1.20-alpha.0...terminal@0.1.20) (2024-07-13)
+
+**Note:** Version bump only for package terminal
+
+
+
+
+
+## [0.1.19](https://github.com/coopenomics/monocoop/compare/terminal@0.1.19-alpha.2...terminal@0.1.19) (2024-07-13)
+
+**Note:** Version bump only for package terminal
+
+
+
+
+
+## [0.1.18](https://github.com/coopenomics/monocoop/compare/terminal@0.1.16-alpha.6...terminal@0.1.18) (2024-07-13)
+
+**Note:** Version bump only for package terminal
+
+
+
+
+
+## [0.1.17](https://github.com/coopenomics/monocoop/compare/terminal@0.1.16-alpha.6...terminal@0.1.17) (2024-07-13)
+
+**Note:** Version bump only for package terminal
+
+
+
+
+
+## [0.1.16](https://github.com/coopenomics/monocoop/compare/terminal@0.1.16-alpha.6...terminal@0.1.16) (2024-07-13)
+
+**Note:** Version bump only for package terminal
+
+
+
+
+
 ## [0.1.15](https://github.com/coopenomics/monocoop/compare/terminal@0.1.15-testnet.1...terminal@0.1.15) (2024-07-13)
 
 **Note:** Version bump only for package terminal
