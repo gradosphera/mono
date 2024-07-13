@@ -15,12 +15,8 @@
   },
   "scripts": {
     "dev": "lerna run dev --parallel",
-    "dev:services": "lerna run dev --parallel --scope coopback --scope cooparser-ts --scope coop-notificator --scope cooptypes --scope coopdoc-generator-ts",
-    "dev:libs": "lerna run dev --parallel --scope cooptypes",
-    "dev:terminal": "lerna run dev --scope terminal",
     "gpt-commit": "git add . && commitgpt",
-    "next": "lerna version",
-    "testnet": "git checkout testnet && git merge dev && lerna publish prerelease --message 'chore(release): publish' && git push && git checkout dev",
-    "production": "git checkout main && lerna publish --conventional-commits --conventional-graduate --message 'chore(release): publish'"
+    "testnet": "git checkout testnet && git merge dev && git push && lerna publish prerelease && git push && git checkout dev && git merge testnet",
+    "production": "git checkout testnet && lerna publish --conventional-commits --conventional-graduate && git push && git checkout main && git merge main && git checkout dev"
   }
 }
