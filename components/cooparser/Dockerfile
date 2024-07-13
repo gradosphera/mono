@@ -7,3 +7,5 @@ RUN corepack enable pnpm \
     && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
+
+COPY package.json ./

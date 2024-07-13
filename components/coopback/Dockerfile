@@ -9,6 +9,8 @@ RUN corepack enable pnpm \
 
 WORKDIR /app
 
+COPY package.json ./
+
 # Install dependencies for Puppeteer
 RUN apk add --no-cache \
     chromium \
