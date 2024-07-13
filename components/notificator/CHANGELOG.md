@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.16](https://github.com/copenomics/coop-notificator/compare/coop-notificator@0.0.16-testnet.1...coop-notificator@0.0.16) (2024-07-13)
+
+**Note:** Version bump only for package coop-notificator
+
+
+
+
+
 ## [0.0.15](https://github.com/copenomics/coop-notificator/compare/coop-notificator@0.0.15-testnet.0...coop-notificator@0.0.15) (2024-07-11)
 
 **Note:** Version bump only for package coop-notificator
