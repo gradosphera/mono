@@ -20,7 +20,7 @@
     "dev:terminal": "lerna run dev --scope terminal",
     "gpt-commit": "git add . && commitgpt",
     "next": "lerna version",
-    "testnet": "lerna publish prerelease --message 'chore(release): publish [TESTNET]'",
-    "production": "lerna publish --conventional-commits --conventional-graduate --message 'chore(release): publish [PROD]'"
+    "testnet": "git checkout testnet && git merge main && lerna publish prerelease --message 'chore(release): publish [TESTNET]'",
+    "production": "git checkout main && lerna publish --conventional-commits --conventional-graduate --message 'chore(release): publish [PROD]'"
   }
 }
