@@ -15,9 +15,12 @@ const isLoaded = ref(false)
 
 onMounted(async () => {
   try {
+
     removeLoader()
     isLoaded.value = true
+
   } catch (e: unknown) {
+
     console.error(e)
     handleException(e)
     router.push({ name: 'somethingBad' })
