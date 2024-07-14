@@ -72,5 +72,6 @@
   },
   "lint-staged": {
     "*": "eslint --fix"
-  }
+  },
+  "gitHead": "9f1bb73326ac0ddd16c2956d18ce0bd8ba0c3ad3"
 }

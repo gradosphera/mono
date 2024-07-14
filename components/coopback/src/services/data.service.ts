@@ -69,7 +69,7 @@ export async function buildComplexDocument(
 
     if (decision_action) {
       const user = await User.findOne({ username: decision_action?.data?.username });
-      console.log(user);
+
       if (user) {
         const user_data = user.getPrivateData();
 
@@ -86,7 +86,6 @@ export async function buildComplexDocument(
           votes_for: [],
           votes_against: [],
         };
-        console.log(decision);
       } else {
         // throw new ApiError(400, 'Ошибка, один из пользователей не найден. Обратитесь в поддержку.');
       }
