@@ -37,7 +37,7 @@ q-layout(view="hHh LpR fFf")
   q-page-container
     q-page(class="page" )
       router-view(v-slot="{ Component }")
-        component(:is="Component" ).q-pa-sm
+        component(:is="Component" )
 
 
 </template>

@@ -14,6 +14,7 @@ import {
   NOT_AUTHORIZED_HOME_PAGE,
 } from 'src/shared/config';
 import { IUserAccountData, useCurrentUserStore } from 'src/entities/User';
+import { useMenuStore } from 'src/entities/Menu';
 
 export default route(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
@@ -39,13 +40,21 @@ export default route(function (/* { store, ssrContext } */) {
   });
 
   router.beforeEach(
-    (
+    async (
       to: RouteLocationNormalizedGeneric,
       from: RouteLocationNormalizedGeneric,
       next: any
     ) => {
       const currentUser = useCurrentUserStore();
       const session = useSessionStore();
+
+      if (!session.isAuth && !currentUser.userAccount){
+        await session.init()
+        await currentUser.loadProfile(session.username, COOPNAME)
+      }
+
+      const menuStore = useMenuStore()
+      menuStore.setRoutes(routes)
 
       if (to.name == 'index') {
         if (session.isAuth)

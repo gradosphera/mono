@@ -46,7 +46,7 @@ export async function buildComplexDocument(
 
       statement = { action, document };
     } else {
-      throw new ApiError(400, 'Ошибка, один из пользователей не найден. Обратитесь в поддержку.');
+      // throw new ApiError(400, 'Ошибка, один из пользователей не найден. Обратитесь в поддержку.');
     }
   }
 
@@ -88,7 +88,7 @@ export async function buildComplexDocument(
         };
         console.log(decision);
       } else {
-        throw new ApiError(400, 'Ошибка, один из пользователей не найден. Обратитесь в поддержку.');
+        // throw new ApiError(400, 'Ошибка, один из пользователей не найден. Обратитесь в поддержку.');
       }
     }
   }

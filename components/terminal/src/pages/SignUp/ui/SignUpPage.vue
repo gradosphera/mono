@@ -1,5 +1,5 @@
 <template lang="pug">
-.row.justify-center.q-mt-lg
+.row.justify-center.q-mt-lg.q-pa-sm
   .col-md-6.col-sm-8.col-xs-12
     SignUp(v-if="!registeredAndloggedIn").q-pt-lg
     AlreadyRegistered(v-else).q-pt-lg
