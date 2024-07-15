@@ -1,11 +1,12 @@
+import type { Socket } from 'socket.io'
 import { Server } from 'socket.io'
 
 // eslint-disable-next-line node/prefer-global/process
 const PORT = Number(process.env.SOCKET_PORT)
 
-export const io = new Server()
+export const io: Server = new Server()
 
-io.on('connection', (socket) => {
+io.on('connection', (socket: Socket) => {
   console.log('WS-клиент подключен', socket.id)
 
   socket.on('disconnect', () => {
