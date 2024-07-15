@@ -18,7 +18,6 @@ export interface IAccount {
   storages: IName[]
   verifications: IVerification[]
   registered_at: ITimePointSec
-  signature_expires_at: ITimePointSec
 }
 
 export interface IBalances extends IBalancesBase {
@@ -35,9 +34,32 @@ export interface IChangekey {
   public_key: IPublicKey
 }
 
+export interface ICheck {
+  hash: IChecksum256
+  public_key: IPublicKey
+  signature: ISignature
+}
+
 export interface IConfirmreg {
   coopname: IName
-  member: IName
+  username: IName
+}
+
+export interface ICooperative {
+  username: IName
+  parent_username: IName
+  announce: string
+  description: string
+  is_cooperative: boolean
+  is_branched: boolean
+  is_enrolled: boolean
+  coop_type: IName
+  registration: IAsset
+  initial: IAsset
+  minimum: IAsset
+  org_registration: IAsset
+  org_initial: IAsset
+  org_minimum: IAsset
 }
 
 export interface IDocument {
@@ -45,6 +67,9 @@ export interface IDocument {
   public_key: IPublicKey
   signature: ISignature
   meta: string
+}
+
+export interface IFix {
 }
 
 export interface IInit {
@@ -63,7 +88,6 @@ export interface INewaccount {
   referer: IName
   username: IName
   public_key: IPublicKey
-  signature_hash: string
   meta: string
 }
 
@@ -76,23 +100,6 @@ export interface IOrgData {
   minimum: IAsset
   org_initial: IAsset
   org_minimum: IAsset
-}
-
-export interface IOrganization {
-  username: IName
-  parent_username: IName
-  announce: string
-  description: string
-  is_cooperative: boolean
-  is_branched: boolean
-  is_enrolled: boolean
-  coop_type: IName
-  registration: IAsset
-  initial: IAsset
-  minimum: IAsset
-  org_initial: IAsset
-  org_minimum: IAsset
-  org_registration: IAsset
 }
 
 export interface IPlotData {
@@ -118,11 +125,21 @@ export interface IReguser {
   registrator: IName
   coopname: IName
   username: IName
+  type: IName
 }
 
 export interface IUpdate {
   username: IName
   meta: string
+}
+
+export interface IUpdatecoop {
+  coopname: IName
+  username: IName
+  initial: IAsset
+  minimum: IAsset
+  org_initial: IAsset
+  org_minimum: IAsset
 }
 
 export interface IVerificate {

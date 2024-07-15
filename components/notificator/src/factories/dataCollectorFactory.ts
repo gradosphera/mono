@@ -13,7 +13,8 @@ export class DataCollectorFactory {
 
       return new DataCollectorClass()
     }
-    catch (error) {
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    catch (error: any) {
       return new DefaultDataCollector()
     }
   }

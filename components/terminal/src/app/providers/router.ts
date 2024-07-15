@@ -51,7 +51,12 @@ export default route(function (/* { store, ssrContext } */) {
       if (!session.isAuth && !currentUser.userAccount){
         await session.init()
         if (session.isAuth)
-          await currentUser.loadProfile(session.username, COOPNAME)
+          try{
+            await currentUser.loadProfile(session.username, COOPNAME)
+          } catch(e: any){
+            console.error(e)
+          }
+
       }
 
       const menuStore = useMenuStore()

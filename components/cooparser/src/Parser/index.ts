@@ -7,8 +7,14 @@ import { loadReader } from '../Reader'
 export class Parser {
   async start() {
     const reader = await loadReader(db)
-    BlockParser(db, reader)
-    ActionsParser(db, reader)
-    DeltasParser(db, reader)
+    try {
+      BlockParser(db, reader)
+      ActionsParser(db, reader)
+      DeltasParser(db, reader)
+    }
+    catch (e) {
+      console.error('Ошибка: ', e)
+      this.start()
+    }
   }
 }

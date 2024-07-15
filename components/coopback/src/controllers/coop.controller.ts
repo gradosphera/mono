@@ -2,33 +2,18 @@ import catchAsync from '../utils/catchAsync';
 import { coopService, dataService } from '../services';
 import { Cooperative } from 'cooptypes';
 import { generator } from '../services/data.service';
+import ApiError from '../utils/ApiError';
+import httpStatus from 'http-status';
 
 export const loadInfo = catchAsync(async (req, res) => {
-  const cooperative: Cooperative.Model.ICooperativeData | null = await generator.constructCooperative(
-    String(process.env.COOPNAME)
-  );
+  const cooperative = await coopService.loadInfo(String(process.env.COOPNAME));
+  res.send(cooperative);
+});
 
-  if (!cooperative) throw new Error('Кооператив не найден');
+export const loadContacts = catchAsync(async (req, res) => {
+  const contacts = await coopService.loadContacts(String(process.env.COOPNAME));
 
-  const announce = cooperative?.announce
-    ? JSON.parse(cooperative.announce)
-    : { phone: cooperative?.phone, email: cooperative?.email };
-
-  const result = {
-    full_name: cooperative?.full_name,
-    full_address: cooperative?.full_address,
-    details: cooperative?.details,
-    phone: announce.phone,
-    email: announce.email,
-    description: cooperative?.description,
-    chairman: {
-      first_name: cooperative?.chairman.first_name,
-      last_name: cooperative?.chairman.last_name,
-      middle_name: cooperative?.chairman.middle_name,
-    },
-  };
-
-  res.send(result);
+  res.send(contacts);
 });
 
 export const loadAgenda = catchAsync(async (req, res) => {
@@ -49,12 +34,4 @@ export const loadStaff = catchAsync(async (req, res) => {
   const { coopname } = req.query;
   const staff = await coopService.loadStaff(coopname);
   res.send(staff);
-});
-
-export const loadMembers = catchAsync(async (req, res) => {
-  const { coopname } = req.query;
-
-  const members = await coopService.loadMembers(coopname);
-
-  res.send(members);
 });

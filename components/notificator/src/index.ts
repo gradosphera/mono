@@ -1,8 +1,12 @@
-import Redis from 'ioredis'
 import dotenv from 'dotenv'
+import Redis from 'ioredis'
+
 import { NotificationHandlerFactory } from './factories/notificationHandlerFactory'
+import { startSocketServer } from './utils/sockets'
 
 dotenv.config()
+
+startSocketServer()
 
 const consumer = `consumer-${Math.random()}`
 
@@ -32,9 +36,10 @@ async function createConsumerGroup(stream: string, group: string) {
 }
 
 async function handleMessage(group: string, messageId: string, message: string) {
-  const event: any = JSON.parse(message)
-  const handler = NotificationHandlerFactory.createHandler(group, event.type)
   try {
+    const event: any = JSON.parse(message)
+    const handler = NotificationHandlerFactory.createHandler(group, event.type)
+
     if (handler)
       await handler.handle(event.event)
     else
@@ -63,7 +68,7 @@ async function consumeMessages(group: string) {
 
 // Главная функция выполнения
 (async () => {
-  const groups = ['emailGroup'] // , 'pushGroup', ''websocketGroup''
+  const groups = ['emailGroup', 'websocketGroup'] // , 'pushGroup'
   for (const group of groups)
     await createConsumerGroup('notifications', group)
 

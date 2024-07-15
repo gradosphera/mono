@@ -49,11 +49,11 @@ export const subsribedActions: IActionConfig[] = [
   { code: 'soviet', action: 'newresolved' },
 
   { code: 'soviet', action: 'newdecision' },
-
   // // registrator.joincoop
   { code: 'soviet', action: 'joincoop' },
   { code: 'soviet', action: 'joincoopdec' },
 
+  { code: 'soviet', action: 'updateboard', notify: true },
 ]
 
 // --------------------------

@@ -4,7 +4,7 @@ import blank from 'src/pages/blank/blank.vue';
 import permissionDenied from 'src/pages/_layouts/permissionDenied.vue';
 
 // import sovietPage from 'src/components/soviet/index.vue'
-// import { CoopSettingsPage } from 'src/pages/CoopSettings';
+import { CoopSettingsPage } from 'src/pages/CoopSettings';
 import { WalletPage } from 'src/pages/wallet';
 import { ModerationPage } from 'src/pages/marketplace/Moderation';
 import { CreateParentOfferPage } from 'src/pages/marketplace/CreateParentOffer';
@@ -48,17 +48,17 @@ const baseRoutes = [
 
 
       //страница управления кооперативом
-      // {
-      //   path: ':coopname/settings',
-      //   name: 'soviet',
-      //   component: CoopSettingsPage,
-      //   meta: {
-      //     is_desktop_menu: true,
-      //     title: 'Настройки',
-      //     icon: 'fa-solid fa-cog',
-      //     roles: ['admin'],
-      //   },
-      // },
+      {
+        path: ':coopname/settings',
+        name: 'soviet',
+        component: CoopSettingsPage,
+        meta: {
+          is_desktop_menu: true,
+          title: 'Настройки',
+          icon: 'fa-solid fa-cog',
+          roles: ['chairman', 'member'],
+        },
+      },
       {
         path: ':coopname/agenda',
         name: 'agenda',
@@ -67,7 +67,7 @@ const baseRoutes = [
           is_desktop_menu: true,
           title: 'Повестка',
           icon: 'fa-solid fa-check-to-slot',
-          roles: ['admin'],
+          roles: ['chairman', 'member'],
         },
       },
       {
@@ -78,7 +78,7 @@ const baseRoutes = [
           is_desktop_menu: true,
           title: 'Пайщики',
           icon: 'fa-solid fa-users',
-          roles: ['admin'],
+          roles: ['chairman', 'member'],
         },
       },
       {
@@ -89,7 +89,7 @@ const baseRoutes = [
           is_desktop_menu: true,
           title: 'Документы',
           icon: 'fa-solid fa-file-invoice',
-          roles: ['admin'],
+          roles: ['chairman', 'member'],
         },
       },
       {

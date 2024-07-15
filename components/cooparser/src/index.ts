@@ -45,6 +45,6 @@ app.get('/get-current-block', async (req: any, res: any) => {
 
 // Глобальный обработчик ошибок
 app.use((err: any, req: any, res: any, _next: any) => {
-  console.error(err)
+  console.error('глобальная ошибка: ', err)
   res.status(500).send(err.message)
 })

@@ -16,9 +16,9 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
     const hasRequiredRights = requiredRights.every((requiredRight) => userRights?.includes(requiredRight));
 
     // if (process.env.IS_PRODUCTION) {
-      if (!hasRequiredRights && req.params.username !== user.username) {
-        return reject(new ApiError(FORBIDDEN, 'Недостаточно прав доступа'));
-      }
+    if (!hasRequiredRights && req.params.username !== user.username) {
+      return reject(new ApiError(FORBIDDEN, 'Недостаточно прав доступа'));
+    }
     // }
   }
 

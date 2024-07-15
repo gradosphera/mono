@@ -13,15 +13,23 @@ Handlebars.registerHelper('eq', (a, b) => {
 })
 
 export class EmailTemplateStrategy implements ITemplateStrategy {
-  private message: HandlebarsTemplateDelegate
-  public subject: HandlebarsTemplateDelegate
+  public message!: HandlebarsTemplateDelegate
+  public subject!: HandlebarsTemplateDelegate
+  public process: boolean
 
   constructor(templateFile: string) {
-    const templatePath = path.resolve(__dirname, `../../emailTemplates/${templateFile}`)
-    const { notificationTemplate } = importSync(templatePath)
+    try {
+      const templatePath = path.resolve(__dirname, `../../emailTemplates/${templateFile}`)
+      const { notificationTemplate } = importSync(templatePath)
 
-    this.subject = Handlebars.compile(notificationTemplate.subject)
-    this.message = Handlebars.compile(notificationTemplate.message)
+      this.subject = Handlebars.compile(notificationTemplate.subject)
+      this.message = Handlebars.compile(notificationTemplate.message)
+      this.process = true
+    }
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    catch (e: any) {
+      this.process = false
+    }
   }
 
   fillMessage(data: any): string {

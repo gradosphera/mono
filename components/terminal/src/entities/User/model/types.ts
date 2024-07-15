@@ -41,6 +41,6 @@ export interface IUserAccountData {
 
 export interface ICopenomicsAccount
   extends Partial<RegistratorContract.Tables.Accounts.IAccount>,
-    Partial<RegistratorContract.Tables.Organizations.IOrganization> {}
+    Partial<RegistratorContract.Tables.Cooperatives.ICooperative> {}
 
 export type IBlockchainAccountResult = AccountResult;

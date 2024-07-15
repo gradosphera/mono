@@ -34,8 +34,8 @@ export async function postRequest(url: string, data: any): Promise<any> {
     })
     return response.data
   }
-  catch (error) {
-    console.error('Ошибка при выполнении POST запроса:', error)
+  catch (error: any) {
+    console.error('Ошибка при выполнении POST запроса:', error.message)
     throw error
   }
 }

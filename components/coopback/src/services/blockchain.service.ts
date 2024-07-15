@@ -83,23 +83,21 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
     username: user.username,
     public_key: user.public_key,
     meta: '',
-    signature_hash: '' // LEGACY - delete it later
-  }
+  };
 
   const registerUserData: RegistratorContract.Actions.RegisterUser.IRegistrerUser = {
     coopname: process.env.COOPNAME as string,
     registrator: process.env.COOPNAME as string,
     username: user.username,
-  }
+    type: user.type,
+  };
 
   const joinCooperativeData: RegistratorContract.Actions.JoinCooperative.IJoinCooperative = {
     coopname: process.env.COOPNAME as string,
     registrator: process.env.COOPNAME as string,
     username: user.username,
-    document: {...user.statement, meta: JSON.stringify(user.statement.meta)},
-  }
-
-  console.log("joinCooperativeData: ", joinCooperativeData)
+    document: { ...user.statement, meta: JSON.stringify(user.statement.meta) },
+  };
 
   const actions = [
     {
@@ -115,7 +113,7 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
     },
     {
       account: RegistratorContract.contractName.production,
-      name: RegistratorContract.Actions.RegisterUser.actionName,//reguser
+      name: RegistratorContract.Actions.RegisterUser.actionName, //reguser
       authorization: [
         {
           actor: process.env.COOPNAME as string,
@@ -146,7 +144,6 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
       ],
       data: orderData,
     },
-
   ];
 
   const result = await eos.transact(

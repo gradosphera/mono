@@ -18,4 +18,4 @@ export const scope = ContractNames._gateway
  * @interface
  * Таблица содержит переводы черновиков документов.
  */
-export type IDeposits = Gateway.IDeposits
+export type IDeposits = Gateway.IOnedeposit

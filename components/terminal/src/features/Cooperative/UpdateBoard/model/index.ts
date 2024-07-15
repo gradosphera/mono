@@ -8,7 +8,7 @@ export function useUpdateBoard() {
     data: SovietContract.Actions.Boards.UpdateBoard.IUpdateBoard
   ): Promise<TransactResult | undefined> {
     const session = useSessionStore();
-
+    console.log('action: ', data)
     const result = useGlobalStore().transact({
       account: SovietContract.contractName.production,
       name: SovietContract.Actions.Boards.UpdateBoard.actionName,

@@ -25,23 +25,28 @@ async function loadAdmins(coopname: string): Promise<IAdministratorData[]> {
   })) as IAdministratorData[];
 }
 
-async function loadCooperativeData(): Promise<Cooperative.Model.IContacts> {
-  return (await sendGET('/v1/coop/info', {}, true)) as Cooperative.Model.IContacts;
+async function loadPrivateCooperativeData(): Promise<Cooperative.Model.ICooperativeData> {
+  return (await sendGET('/v1/coop/info', {}, false)) as Cooperative.Model.ICooperativeData;
 }
+
+async function loadContacts(): Promise<Cooperative.Model.IContacts> {
+  return (await sendGET('/v1/coop/contacts', {}, true)) as Cooperative.Model.IContacts;
+}
+
 
 async function loadPublicCooperativeData(
   coopname: string
-): Promise<RegistratorContract.Tables.Organizations.IOrganization> {
+): Promise<RegistratorContract.Tables.Cooperatives.ICooperative> {
   return (
     await fetchTable(
       RegistratorContract.contractName.production,
       RegistratorContract.contractName.production,
-      RegistratorContract.Tables.Organizations.tableName,
+      RegistratorContract.Tables.Cooperatives.tableName,
       coopname,
       coopname,
       1
     )
-  )[0] as RegistratorContract.Tables.Organizations.IOrganization;
+  )[0] as RegistratorContract.Tables.Cooperatives.ICooperative;
 }
 
 async function loadCooperativeAddresses(
@@ -59,5 +64,6 @@ export const api = {
   loadCooperativeAddresses,
   loadPublicCooperativeData,
   loadAdmins,
-  loadCooperativeData
+  loadPrivateCooperativeData,
+  loadContacts,
 };

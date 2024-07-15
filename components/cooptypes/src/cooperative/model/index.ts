@@ -1,8 +1,8 @@
 import type { SovietContract } from '../../contracts'
-import type { IOrganization } from '../../contracts/registrator/tables/organizations'
+import type { ICooperative } from '../../contracts/registrator/tables/cooperatives'
 import type { Details, IIndividualData, IOrganizationData } from '../users'
 
-export interface ICooperativeData extends IOrganizationData, IOrganization {
+export interface ICooperativeData extends IOrganizationData, ICooperative {
   members: MembersData[]
   chairman: IIndividualData
   totalMembers: number

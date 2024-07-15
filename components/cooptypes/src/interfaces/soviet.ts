@@ -234,6 +234,9 @@ export interface IExec {
   decision_id: IUint64
 }
 
+export interface IFix {
+}
+
 export interface IFundwithdraw {
   coopname: IName
   username: IName
@@ -255,7 +258,6 @@ export interface IJoincoops {
   id: IUint64
   username: IName
   is_paid: boolean
-  statement: IDocument
   notice: string
 }
 
@@ -319,6 +321,7 @@ export interface IParticipants {
   is_initial: boolean
   is_minimum: boolean
   has_vote: boolean
+  type: IName
 }
 
 export interface IProgcomarket {

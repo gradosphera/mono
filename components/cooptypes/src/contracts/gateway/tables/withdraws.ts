@@ -15,4 +15,4 @@ export const scope = ContractNames._gateway
  * @interface
  * Таблица содержит переводы черновиков документов.
  */
-export type IWithdraws = Gateway.IWithdraws
+export type IWithdraws = Gateway.IOnewithdraw

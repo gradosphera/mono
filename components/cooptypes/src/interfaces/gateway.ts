@@ -33,19 +33,6 @@ export interface IDeposit {
   quantity: IAsset
 }
 
-export interface IDeposits {
-  id: IUint64
-  username: IName
-  coopname: IName
-  type: IName
-  token_contract: IName
-  quantity: IAsset
-  status: IName
-  link: string
-  memo: string
-  expired_at: ITimePointSec
-}
-
 export interface IDocument {
   hash: IChecksum256
   public_key: IPublicKey
@@ -77,6 +64,32 @@ export interface INewwithdrid {
   id: IUint64
 }
 
+export interface IOnedeposit {
+  id: IUint64
+  username: IName
+  coopname: IName
+  type: IName
+  token_contract: IName
+  quantity: IAsset
+  status: IName
+  link: string
+  memo: string
+  expired_at: ITimePointSec
+}
+
+export interface IOnewithdraw {
+  id: IUint64
+  username: IName
+  coopname: IName
+  bank_data_id: string
+  token_contract: IName
+  quantity: IAsset
+  status: IName
+  document: IDocument
+  memo: string
+  created_at: ITimePointSec
+}
+
 export interface IWithdraw {
   coopname: IName
   username: IName
@@ -89,19 +102,6 @@ export interface IWithdraw {
 export interface IWithdrawauth {
   coopname: IName
   withdraw_id: IUint64
-}
-
-export interface IWithdraws {
-  id: IUint64
-  username: IName
-  coopname: IName
-  bank_data_id: string
-  token_contract: IName
-  quantity: IAsset
-  status: IName
-  document: IDocument
-  memo: string
-  created_at: ITimePointSec
 }
 
 export interface IWthdcomplete {

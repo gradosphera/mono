@@ -113,12 +113,16 @@ module.exports = configure(function (/* ctx */) {
       // https: true
       open: false, // opens browser window automatically
       port: 3005,
+      hmr:{
+        overlay: false
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
     framework: {
       config: {},
       lang: 'ru',
+
       iconSet: 'material-icons', // Quasar icon set
 
       // For special cases outside of where the auto-import strategy can have an impact

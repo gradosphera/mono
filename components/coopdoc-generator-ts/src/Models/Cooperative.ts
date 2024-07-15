@@ -56,11 +56,11 @@ export class Cooperative {
       filter: JSON.stringify({
         code: RegistratorContract.contractName.production,
         scope: RegistratorContract.contractName.production,
-        table: RegistratorContract.Tables.Organizations.tableName,
+        table: RegistratorContract.Tables.Cooperatives.tableName,
       }),
     }))
 
-    const cooperativeBlockchainData = cooperative_response.results[0]?.value as RegistratorContract.Tables.Organizations.IOrganization
+    const cooperativeBlockchainData = cooperative_response.results[0]?.value as RegistratorContract.Tables.Cooperatives.ICooperative
 
     if (!cooperativeBlockchainData)
       throw new Error('Информация о кооперативе не обнаружена в базе данных.')

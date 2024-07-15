@@ -13,6 +13,6 @@ export const scope = ContractNames._registrator
 
 /**
  * @interface
- * Таблица содержит реестр организаций-пайщиков кооператива.
+ * Таблица содержит реестр кооперативов.
  */
-export type IOrganization = Registrator.IOrganization
+export type ICooperative = Registrator.ICooperative

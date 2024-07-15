@@ -67,7 +67,7 @@ export const installInitialCooperativeData = async () => {
     registration: '2.0000 RUB',
     initial: '1.0000 RUB',
     minimum: '1.0000 RUB',
-  } as RegistratorContract.Tables.Organizations.IOrganization);
+  } as RegistratorContract.Tables.Cooperatives.ICooperative);
 
   await insertDelta(delta1);
 

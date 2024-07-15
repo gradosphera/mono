@@ -51,7 +51,8 @@
     "dotenv": "^16.4.5",
     "handlebars": "^4.7.8",
     "import-sync": "^2.2.2",
-    "ioredis": "^5.4.1"
+    "ioredis": "^5.4.1",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.18.1",

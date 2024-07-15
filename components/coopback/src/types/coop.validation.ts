@@ -9,12 +9,6 @@ export interface loadAgenda {
   };
 }
 
-export interface loadMembers {
-  query?: {
-    coopname: string;
-  };
-}
-
 export interface loadStaff {
   query?: {
     coopname: string;

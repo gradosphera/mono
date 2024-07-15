@@ -6,14 +6,17 @@ export class PushNotificationHandler extends BaseHandler {
   async handle(_event: any) {
     const { account, name } = _event
 
-    const dataCollector = await DataCollectorFactory.createDataCollector(account, name)
-    const eventData = await dataCollector.collect(_event)
-
     const pushTemplateStrategy = TemplateFactory.createTemplateStrategy('push', account, name)
-    const message = pushTemplateStrategy.fillMessage(eventData)
-    const subject = pushTemplateStrategy.fillSubject(eventData)
 
-    this.sendPushNotification(_event.receipt.receiver, subject, message)
+    if (!pushTemplateStrategy.process) {
+      const dataCollector = await DataCollectorFactory.createDataCollector(account, name)
+      const eventData = await dataCollector.collect(_event)
+
+      const message = pushTemplateStrategy.fillMessage(eventData)
+      const subject = pushTemplateStrategy.fillSubject(eventData)
+
+      this.sendPushNotification(_event.receipt.receiver, subject, message)
+    }
   }
 
   sendPushNotification(to: string, subject: string, message: string) {

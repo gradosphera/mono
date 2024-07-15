@@ -45,7 +45,8 @@ watch(step, (newValue) => {
     createInitialPayment()
 })
 
-const initialPayment = computed(() => user.userAccount?.type === 'organization' ? parseFloat(coop.publicCooperativeData.org_registration) : parseFloat(coop.publicCooperativeData.registration))
+const initialPayment = computed(() => user.userAccount?.type === 'organization' ? parseFloat(String(coop.publicCooperativeData?.org_registration)) : parseFloat(String(coop.publicCooperativeData?.registration)))
+
 const baseFee = ref(parseFloat(BASE_PAYMENT_FEE))
 
 const toPay = computed(() => {

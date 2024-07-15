@@ -5,6 +5,6 @@
 export * as Accounts from './accounts'
 
 /**
- * Таблица содержит реестр организаций системы.
+ * Таблица содержит реестр кооперативов системы.
  */
-export * as Organizations from './organizations'
+export * as Cooperatives from './cooperatives'

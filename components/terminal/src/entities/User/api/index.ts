@@ -21,12 +21,12 @@ async function loadCopenomicsAccount(
     await fetchTable(
       RegistratorContract.contractName.production,
       RegistratorContract.contractName.production,
-      RegistratorContract.Tables.Organizations.tableName,
+      RegistratorContract.Tables.Cooperatives.tableName,
       username,
       username,
       LimitsList.One
     )
-  )[0] as RegistratorContract.Tables.Organizations.IOrganization;
+  )[0] as RegistratorContract.Tables.Cooperatives.ICooperative;
 
   const account = (
     await fetchTable(

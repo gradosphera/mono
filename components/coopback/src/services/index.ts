@@ -6,3 +6,4 @@ export * as blockchainService from './blockchain.service';
 export * as orderService from './order.service';
 export * as dataService from './data.service';
 export * as coopService from './coop.service';
+export * as wsService from './ws.service';

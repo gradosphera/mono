@@ -7,14 +7,17 @@ export class EmailNotificationHandler extends BaseHandler {
   async handle(event: any) {
     const { account, name } = event
 
-    const dataCollector = await DataCollectorFactory.createDataCollector(account, name)
-    const eventData = await dataCollector.collect(event)
-
     const emailTemplateStrategy = TemplateFactory.createTemplateStrategy('email', account, name)
-    const message = emailTemplateStrategy.fillMessage(eventData)
-    const subject = emailTemplateStrategy.fillSubject(eventData)
 
-    await this.sendEmail(event.receipt.receiver, subject, message)
+    if (emailTemplateStrategy.process) {
+      const dataCollector = await DataCollectorFactory.createDataCollector(account, name)
+      const eventData = await dataCollector.collect(event)
+
+      const message = emailTemplateStrategy.fillMessage(eventData)
+      const subject = emailTemplateStrategy.fillSubject(eventData)
+
+      await this.sendEmail(event.receipt.receiver, subject, message)
+    }
   }
 
   async sendEmail(to: string, subject: string, message: string) {

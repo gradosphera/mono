@@ -2,8 +2,10 @@ import { getActions } from '../utils/getFetch';
 import { generator } from './data.service';
 import { userService, blockchainService } from './index';
 import { Cooperative, SovietContract } from 'cooptypes';
+import ApiError from '../utils/ApiError';
+import httpStatus from 'http-status';
 
-const loadAgenda = async (coopname: string): Promise<Cooperative.Documents.IAgenda[]> => {
+export const loadAgenda = async (coopname: string): Promise<Cooperative.Documents.IAgenda[]> => {
   const api = await blockchainService.getApi();
 
   const decisions = (await blockchainService.lazyFetch(
@@ -34,7 +36,7 @@ const loadAgenda = async (coopname: string): Promise<Cooperative.Documents.IAgen
   return agenda;
 };
 
-const loadStaff = async (coopname) => {
+export const loadStaff = async (coopname) => {
   const api = await blockchainService.getApi();
 
   const staff = await blockchainService.lazyFetch(api, process.env.SOVIET_CONTRACT, coopname, 'staff');
@@ -51,60 +53,33 @@ const loadStaff = async (coopname) => {
   return staff;
 };
 
-const loadMembers = async (coopname) => {
-  // const api = await blockchainService.getApi()
-  // const soviet = (await blockchainService.lazyFetch(
-  //   api,
-  //   process.env.SOVIET_CONTRACT,
-  //   coopname,
-  //   'boards',
-  //   "soviet",
-  //   "soviet",
-  //   1,
-  //   'i64',
-  //   2
-  // ))[0]
-  // for (const member of soviet.members) {
-  //   const user = await userService.getUserByUsername(member.username)
-  //   if (user) {
-  //     member.is_organization = user.is_organization
-  //     member.user_profile = user.user_profile
-  //     member.org_profile = user.organization_profile
-  //   }
-  // }
-  // return soviet.members
+export const loadInfo = async (coopname: string) => {
+  const cooperative: Cooperative.Model.ICooperativeData | null = await generator.constructCooperative(coopname);
+
+  if (!cooperative) throw new ApiError(httpStatus.NO_CONTENT, 'Кооператив не найден');
+  else return cooperative;
 };
 
-const loadSoviet = async (api, coopname) => {
-  const [soviet] = await blockchainService.lazyFetch(
-    api,
-    process.env.SOVIET_CONTRACT,
-    coopname,
-    'boards',
-    'soviet',
-    'soviet',
-    1,
-    'i64',
-    2
-  );
+export const loadContacts = async (coopname: string) => {
+  const cooperative: Cooperative.Model.ICooperativeData | null = await generator.constructCooperative(coopname);
 
-  soviet.chairman = soviet.members.find((el) => el.position == 'chairman').username;
+  if (!cooperative) throw new Error('Кооператив не найден');
 
-  return soviet;
+  const announce = cooperative?.announce
+    ? JSON.parse(cooperative.announce)
+    : { phone: cooperative?.phone, email: cooperative?.email };
+
+  return {
+    full_name: cooperative?.full_name,
+    full_address: cooperative?.full_address,
+    details: cooperative?.details,
+    phone: announce.phone,
+    email: announce.email,
+    description: cooperative?.description,
+    chairman: {
+      first_name: cooperative?.chairman.first_name,
+      last_name: cooperative?.chairman.last_name,
+      middle_name: cooperative?.chairman.middle_name,
+    },
+  };
 };
-
-const getDecision = async (api, coopname, decision_id) => {
-  const [decision] = await blockchainService.lazyFetch(
-    api,
-    process.env.SOVIET_CONTRACT,
-    coopname,
-    'decisions',
-    decision_id,
-    decision_id,
-    1
-  );
-
-  return decision;
-};
-
-export { loadAgenda, loadStaff, loadMembers, getDecision };
