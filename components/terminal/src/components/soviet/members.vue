@@ -32,7 +32,7 @@ div.row
 
         template(#body="props")
           q-tr(:key="`m_${props.row.username}`" :props="props")
-            q-td {{ props.row.position_title }}
+            //- q-td {{ props.row.position_title }}
 
             q-td {{ props.row.username }}
             q-td {{ props.row.data?.user_profile?.last_name }}
@@ -193,7 +193,7 @@ const updateBoard = async () => {
 
 
 const columns = [
-  { name: 'position_title', align: 'left', label: 'Позиция', field: 'position_title', sortable: true },
+  // { name: 'position_title', align: 'left', label: 'Позиция', field: 'position_title', sortable: true },
 
   { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
   { name: 'last_name', align: 'left', label: 'Фамилия', field: 'last_name', sortable: true },

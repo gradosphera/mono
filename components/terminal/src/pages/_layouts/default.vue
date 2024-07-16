@@ -4,6 +4,9 @@ q-layout(view="hHh LpR fFf")
     q-toolbar()
       q-toolbar-title()
         q-btn(stretch flat class="btn-title" :dense="isMobile" @click="goToIndex").q-ml-sm
+          //- img(:src="HeaderLogo" alt="" style="height: 50px;").q-pa-sm
+          //- q-icon(name="far fa-circle").q-pa-sm
+
           p {{ COOP_SHORT_NAME }}
 
       q-btn(stretch flat @click="toogleDark")
@@ -48,7 +51,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useQuasar, Cookies, LocalStorage } from 'quasar'
 import { useWindowSize } from 'vue-window-size'
 import config from 'src/app/config'
-
+// import HeaderLogo from '~/assets/logo-white.png?url'
 import Menu from 'src/components/menu/drawerMenu.vue'
 import mobileMenu from 'src/components/menu/footerMobileMenu.vue'
 import { COOPNAME, COOP_SHORT_NAME } from 'src/shared/config'

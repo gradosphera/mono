@@ -39,7 +39,7 @@ export const getUsers = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['username', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
-  filter.role = 'user';
+  filter.role = { $ne: 'service' };
 
   const users = await userService.queryUsers(filter, options);
 
