@@ -1,0 +1,1582 @@
+
+<!doctype html>
+<html lang="ru" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../protocols/emission/">
+      
+      
+        <link rel="next" href="../invest/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.25">
+    
+    
+      
+        <title>Разработчикам - Цифровой Кошелёк</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          Перейти к содержанию
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Верхний колонтитул">
+    <a href="../doctrine" title="Цифровой Кошелёк" class="md-header__button md-logo" aria-label="Цифровой Кошелёк" data-md-component="logo">
+      
+  <img src="../assets/logo-white.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Цифровой Кошелёк
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Разработчикам
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Поиск" placeholder="Поиск" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Поиск">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Поделиться" aria-label="Поделиться" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Очистить" aria-label="Очистить" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Инициализация поиска
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/copenomics" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Вкладки" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../doctrine/" class="md-tabs__link">
+        
+  
+    
+  
+  Доктрина
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../manual/introduction/" class="md-tabs__link">
+          
+  
+  Руководство
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../info/" class="md-tabs__link">
+        
+  
+    
+  
+  Справка
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../protocols/emission/" class="md-tabs__link">
+          
+  
+  Протоколы
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+    
+  
+  Разработчикам
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../invest/" class="md-tabs__link">
+        
+  
+    
+  
+  Инвесторам
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../connect/" class="md-tabs__link">
+        
+  
+    
+  
+  Подключение
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://forum.copenomics.world" class="md-tabs__link">
+        
+  
+    
+  
+  Форум
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contacts/" class="md-tabs__link">
+        
+  
+    
+  
+  Контакты
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../blog/" class="md-tabs__link">
+        
+  
+    
+  
+  Блог
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Навигация" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../doctrine" title="Цифровой Кошелёк" class="md-nav__button md-logo" aria-label="Цифровой Кошелёк" data-md-component="logo">
+      
+  <img src="../assets/logo-white.png" alt="logo">
+
+    </a>
+    Цифровой Кошелёк
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/copenomics" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../doctrine/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Доктрина
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Доктрина
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../doctrine/platforma_pokolenii/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Платформа Поколений
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../doctrine/economica_znanii/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Экономика Знаний
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../doctrine/edinoe_soznanie/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Единое Сознание
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../doctrine/upravlenie_budushim/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Управление будущим
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../doctrine/operacionnaya_sistema/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Операционная система
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../doctrine/digital_cooperative/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Потребительская кооперация
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../doctrine/digital_wallet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Цифровой кошелёк
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Руководство
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Руководство
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual/introduction/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Введение
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Руководителям
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Руководителям
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Регистрация
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Регистрация
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual/introduction/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Введение
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../info/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Справка
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Протоколы
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Протоколы
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../protocols/emission/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Эмиссии
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Разработчикам
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Разработчикам
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Назначение
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Компоненты
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../invest/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Инвесторам
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../connect/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Подключение
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://forum.copenomics.world" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Форум
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contacts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Контакты
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+  
+  
+    <li class="md-nav__item">
+      <a href="../blog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Блог
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Назначение
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Компоненты
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="_1">Введение<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<p>Добро пожаловать. Данный раздел создан для технических специалистов, которые принимают или планируют принять участие в строительстве кооперативной экономики. Здесь представлена общая техническая документация программного комплекса Цифрового Кошелька, необходимая для интеграций действующих продуктов и разработки новых на его основе.</p>
+<h2 id="_2">Назначение<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>Система предназначена автоматизировать документооборот в потребительских кооперативах посредством <a href="/#-">кооперативных смарт-контрактов</a> и технологии блокчейн, реализующих принципы <a href="/metodology">методологии</a> потребительской кооперации <a href="https://союз-русь.рф/">"СПО РУСЬ"</a>.  </p>
+<!-- Запуская программный комплекс Цифрового Кошелька и подключаясь к Кооперативной Экономике, вы поддерживаете создание справедливого мира единого сознания без ссудного процента и циклических кризисов перепроизводства долга. [Подробнее](/). -->
+
+<h2 id="_3">Компоненты<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Ниже представлены ссылки на низкоуровневую техническую документацию. Данный раздел, как и сам продукт Цифрового Кошелька, находится в разработке, поэтому, финализация документации в этом разделе пока преждевременна. </p>
+<!-- [Смарт-контракты](#){ .md-button .md-button--primary } [Блокчейн](#){ .md-button .md-button--primary } [API](#){ .md-button .md-button--primary } [Библиотека типов](#){ .md-button .md-button--primary } [Генератор документов](#){ .md-button .md-button--primary }  -->
+
+<div class="grid cards">
+<ul>
+<li>
+<p><strong>Блокчейн</strong></p>
+<hr />
+<p>Документация к блокчейн-протоколу EOSIO &amp; ANTELOPE, который лежит в основе программного комплекса Цифрового Кошелька. </p>
+<p><a href="https://developers.eos.io"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Подробнее</a>
+<a href="https://github.com/blockchain"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Репозиторий</a></p>
+</li>
+<li>
+<p><strong>Смарт-контракты</strong></p>
+<hr />
+<p>Документация к кооперативным смарт-контрактам. </p>
+<p><a href="/contracts"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Подробнее</a>
+<a href="https://github.com/copenomics/contracts"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Репозиторий</a></p>
+</li>
+<li>
+<p><strong>Библиотека типов</strong></p>
+<hr />
+<p>Библиотека типов предоставит информацию о интерфейсах действий и таблиц смарт-контрактов, при необходимости, прямо в вашу IDE.</p>
+<p><a href="/cooptypes"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Подробнее</a>
+<a href="https://github.com/copenomics/cooptypes"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Репозиторий</a></p>
+</li>
+<li>
+<p><strong>Библиотека таблиц и транзакций</strong></p>
+<hr />
+<p>Компонент предоставляет программный интерфейс для интеграции клиентской части вашего приложения. Библиотека предоставляет методы для получения информации из таблиц блокчейна и отправки транзакций действий в него.  </p>
+<p><a href="https://wharfkit.com/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Подробнее</a></p>
+</li>
+<li>
+<p><strong>Библиотека кошелька</strong></p>
+<hr />
+<p>Компонент предоставляет программный интерфейс для интеграции клиентской части вашего приложения. Библиотека готова к работе со всеми модулями программного комплекса Цифрового Кошелька сразу после конфигурации. Использовать её - это самый простой и быстрый способ интегрироваться с Кооперативной Экономикой. </p>
+<p><a href="#"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> В разработке</a></p>
+</li>
+<li>
+<p><strong>Генератор и хранилище документов</strong></p>
+<hr />
+<p>Компонент предоставляет методы для генерации, хранения и извлечения цифровых документов кооператива. </p>
+<p><a href="https://github.com/copenomics/generator"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Репозиторий</a></p>
+</li>
+<li>
+<p><strong>Парсер таблиц и действий</strong></p>
+<hr />
+<p>Библиотека считывает цепочку блоков, распаковывает её и извлекает из неё дельты таблиц и факты исполнения действий. Может использоваться для построения сервисов, которым недостаточно стандартного API блокчейна для работы с данными. </p>
+<p><a href="https://github.com/copenomics/parser"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Репозиторий</a></p>
+</li>
+<li>
+<p><strong>Контроллер кооператива</strong></p>
+<hr />
+<p>Основной бэкенд-сервис, представляющий систему авторизации для доступа к документам кооператива и инструментам управления им. </p>
+<p><a href="https://copenomics.world/coopback"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Подробнее</a>
+<a href="https://github.com/copenomics/coopback"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Репозиторий</a></p>
+</li>
+<li>
+<p><strong>Терминал</strong></p>
+<hr />
+<p>Базовый компонент кошелька для построения WEB, DESKTOP, MOBILE, PWA приложений на основе фреймворков <a href="https://quasar.dev">QUASAR</a> и <a href="https://vuejs.org">VueJS</a>. Цифровой Кошелёк уже интегрирован в систему и предоставляет основу для быстрого старта в создании кооперативных приложений. </p>
+<p><a href="#"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> В разработке</a></p>
+</li>
+</ul>
+</div>
+<!-- 
+
+## Архитектура доступа
+
+Архитектура доступа к Цифровому Кооперативу принципиально состоит из двух слоёв: 
+
+- Публичный слой хранит кооперативные смарт-контракты, аккаунты пользователей и свод программных правил бизнес-логики системы, написанные на языке C/C++. Бизнес логика смарт-контрактов едина для всех кооперативов системы и поставляется вместе с нодой блокчейна в процессе её синхронизации. Блокчейн не хранит никакую чувствительную личную информацию пользователей или кооперативов, а только лишь обезличенные и стандартизированные правила участия в кооперативной экономике. Авторизация производится посредством проверки прав доступа на основе цифровой подписи идентификатора аккаунта пользователя. 
+
+- Приватный слой хранит личную информацию пользователей конкретных кооператива. Все кооперативы запускаются на выделенных серверах, где каждый кооператив контролирует свои данные самостоятельно, и никто кроме него не имеет доступа к его данным, если это не предусмотрено. В этом слое хранится реестр пайщиков, их заявлений и решений совета. Никто кроме совета не имеет доступа к этому хранилищу. Авторизация производится посредством проверки прав доступа на основе JWT-токена, извлекаемого из приватного ключа пользователя. 
+
+Таким образом, для каждого пользователя в системе есть как минимум две точки авторизации и две базы данных. 
+
+
+## Подготовка
+Для того, чтобы начать работу с системой, вам потребуется подготовить соответствующее программное окружение. 
+
+
+### Блокчейн 
+Запуск блокчейна осуществляется посредством сборки из исходного кода репозитория или запуском контейнера. Запуск блокчейна может осуществляться в нескольких режимах для разных целей: 
+
+- режим локального тестнета. Здесь запускается "чистый" блокчейн, в котором могут быть развернуты смарт-контракты для тестов. Эта сборка необходима разработчикам смарт-контрактов и делегатам, которые тестируют их перед обновлением согласно [протоколу](/protocols). 
+
+- режим рабочей сети. Здесь запускается блокчейн для синхронизации с основной сетью. Режим используется делегатами для того, чтобы принимать участие в производстве блоков, а также, API-нодами, которые могут являться доверенными источниками данных для кооперативов. 
+
+- режим тестовой сети. Режим аналогичен рабочей сети, только в любой момент сеть может быть перезагружена. Используется разработчикам для тестов в обход необходимости полной установки всех смарт-контрактов и их инициализации согласно протоколу. 
+
+
+Мы здесь и далее будем рассматривать режим запуска локального тестнета в окружении операционной системы UBUNTU 22.04. Если вам требуется синхронизировать блокчейн с рабочей сетью или тестнетом, пожалуйста, обратитесь к [протоколу синхронизации](/protocol/sync) за дополнительными инструкциями.
+
+
+__Запуск из контейнера__
+Для запуска блокчейна из контейнера вам потребуется установленный [docker](https://docker.io). После установки для своей операционной системы, предварительно создаём папку для блокчейна, его конфига и данных: 
+<div class="highlight"><pre><span></span><code>mkdir $HOME/blockchain
+mkdir $HOME/blockchain/config
+mkdir $HOME/blockchain/eosio-wallet
+</code></pre></div>
+
+Создаём файл конфига
+<div class="highlight"><pre><span></span><code>touch $HOME/blockchain/config/config.ini
+</code></pre></div>
+
+И помещаем в него конфигурацию:
+<div class="highlight"><pre><span></span><code># подключаем плагины
+plugin = eosio::chain_plugin
+plugin = eosio::producer_plugin
+plugin = eosio::chain_api_plugin
+plugin = eosio::http_plugin
+plugin = eosio::producer_api_plugin
+plugin = eosio::state_history_plugin
+
+# устанавливаем системного производителя блоков и его ключи
+producer-name = eosio
+
+# это стардартные ключи для локального тестнета
+signature-provider = EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV=KEY:5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+
+# включаем режим производства блоков
+enable-stale-production = true
+
+# устанавливаем предельное время исполнения транзакции в микросекундах
+max-transaction-time = 300000
+abi-serializer-max-time-ms = 30000
+http-max-response-time-ms = 30000
+
+# открываем порт для подключения командного кошелька
+http-server-address = 0.0.0.0:8888
+
+# подключаем вывод консоли контрактов в лог ноды
+contracts-console = true
+
+# подключаем трассировку истории состояния
+trace-history = true
+state-history-endpoint = 0.0.0.0:8080
+</code></pre></div>
+
+После чего, производим запуск контейнера: 
+<div class="highlight"><pre><span></span><code>docker run --name node -d -p 8888:8888 -p 8080:8080 \-v $HOME/blockchain/data:/mnt/dev/data \-v $HOME/blockchain/config:/mnt/dev/config \-v $HOME/blockchain/eosio-wallet:/root/eosio-wallet \dicoop/leap_v4.0.5 \/bin/bash -c &#39;/usr/local/bin/nodeos -d /mnt/dev/data --config-dir /mnt/dev/config --disable-replay-opts&#39;
+</code></pre></div>
+
+В результате запуска, в логах контейнера вы увидите процесс производства блоков: 
+
+![screen_blocks2.jpg](assets/screen_blocks2.jpg)
+
+
+
+__Сборка из исходников__
+Инструкция сборки из исходного кода описана в [репозитории](https://github.com/copenomics/blockchain). 
+
+
+
+### Смарт-контракты
+Для того, чтобы компилировать смарт-контракты, вам потребуется пакет [Contract Develpment Tools](https://github.com/copenomics/cdt). Его также можно установить из контейнера или собрать из исходников. 
+
+__Запуск из контейнера__
+Для запуска из контейнера создайте папку, в которой будут находится смарт-контракты:
+
+<div class="highlight"><pre><span></span><code>mkdir $HOME/contracts
+</code></pre></div>
+
+Выполните команду для запуска контейнера:
+<div class="highlight"><pre><span></span><code>docker run -it --name cdt \
+  --volume $HOME/contracts:/project \
+  -w /project \
+  dicoop/cdt_v4.1.0 /bin/bash
+</code></pre></div>
+
+Теперь вы находитесь в контейнере и директории с вашими контрактами, которые можете компилировать. Подробнее о работе с контрактами и командным кошельком смотри соответствующий раздел. 
+
+__Сборка из исходников__
+Процесс сборки CDT из исходного кода описан в [репозитории](https://github.com/copenomics/cdt).
+
+
+### Бэкенд
+Для программной работы с любым кооперативом вам потребуется бэкенд-контроллер. Контроллер - это проприетарный программный комплекс, который распространяется по лицензии CC BY-NC-SA 4.0 для кооперативов, подключенных к системе. 
+
+Если вы разрабатываете программное обеспечение для уже подключенного к системе кооператива, то запросите доступ к репозиторию контроллера у председателя или воспользуйтесь публичным контроллером тестового кооператива, который доступен для разработчиков по ссылке: https://docs.copenomics.world/controller. 
+
+### Фронтенд
+Для разработки фронтенда, вы можете использовать любой javascript-подобный фреймворк и подключить его с помощью прилагающихся библиотек к контроллеру и блокчейну. 
+
+Мы поставляем проприетарное программное обеспечение мультиплатформенного терминала доступа на основе фреймворка QUASAR по лицензии CC BY-NC-SA 4.0 для кооперативов, подключенных к системе. 
+
+Запросите доступ к репозиторию терминала у председателя действующего кооператива или воспользуйтесь начальным скелетоном для начала новой разработки по ссылке: https://github.com/copenomics/terminal-skeleton. 
+
+
+### Кошелёк
+Если Ваш кооператив уже подключен к системе, то у вас есть идентификатор кооператива и приватный ключ доступа, с помощью которого, мы уже можете начать строительство своего кооперативного приложения. Для этого, как минимум, вам необходимо инициализировать кошелёк с приватным ключом для подписи действий смарт-контрактов. 
+
+Мы рекомендуем использовать ![SDK Wharfkit](https://wharfkit.com). 
+
+Инструкция подготовки: 
+
+<div class="highlight"><pre><span></span><code>import { Session } from &quot;@wharfkit/session&quot;
+import { WalletPluginPrivateKey } from &quot;@wharfkit/wallet-plugin-privatekey&quot;
+
+const args = {
+  chain: {
+    id: &quot;73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d&quot;,
+    url: &quot;https://testnet.copenomics.world&quot;,
+  },
+  actor: &quot;tester111111&quot;,
+  permission: &quot;active&quot;,
+  walletPlugin: new WalletPluginPrivateKey(
+    &quot;5Jtoxgny5tT7NiNFp1MLogviuPJ9NniWjnU4wKzaX4t7pL4kJ8s&quot;
+  ),
+}
+
+const options = {
+  // Additional options
+}
+
+const session = new Session(args, options)
+</code></pre></div>
+
+Теперь вы можете применять сформированную сессию для отправки транзакций в любые смарт-контракты системы. Для чтения же информации из таблиц блокчейна вам потребуется ApiClient: 
+
+<div class="highlight"><pre><span></span><code>import { APIClient } from &quot;@wharfkit/antelope&quot;
+
+const client = new APIClient({
+  url: &quot;https://testnet.copenomics.world&quot;,
+})
+</code></pre></div>
+
+Теперь вы можете получать информацию о состоянии блокчейна и его таблиц: 
+<div class="highlight"><pre><span></span><code>client.v1.chain.get_info().then((response) =&gt; {
+  console.log(response)
+})
+</code></pre></div>
+
+Все доступные действия в смарт-контрактах и таблицах ЦК можно найти в пакете документации ![cooptypes](/cooptypes). Подробнее о том, как совершать транзакции и получать информацию из таблиц, смотри в документации ![wharfkit](https://wharfkit.com)
+
+
+## Методы действий
+Теперь, когда подготовка завершена, мы можем перейти к основной части - методам управления цифровым кооперативом. Начнём с самого начала. У Вас есть потребительский кооператив, который подключился к системе ![на сайте](/connect). 
+
+### Совет
+При подключении цифрового кооператива председателю и членам совета были выданы ключи и права доступа, с помощью которых они могут управлять кооперативом. Рассмотрим основные процессы управления. 
+
+## Вход
+Для того, чтобы иметь возможность совершать действия управления, членам совета, да и просто пайщикам, необходимо войти в бэкенд кооператива. Фронтенд обеспечивает вход автоматически, но поскольку эта документация для разработчиков и инженеров, то давайте детально рассмотрим процесс. 
+
+При регистрации пайщику / члену совета / председателю был выдан идентификатор аккаунта и ключ доступа. Они, как пара, используются для входа в систему кооператива. 
+
+## Получить повестку
+
+
+
+## Администраторы
+
+## Регистрация аккаунта
+
+## Приём пайщика
+
+## Получение таблиц
+
+## Получение документов
+
+## Получение истории
+
+## Получение пользователей
+
+## Получение повестки
+
+## Голосование по вопросам
+
+## Протокол собрания
+
+## Общее собрание
+
+## Создание кооперативного участка
+
+## Управление
+
+## Стать делегатом
+
+ -->
+
+<!-- - Регистрация пайщика
+- Создать документ
+- Восстановить документ
+- Получить каталог документов
+- 
+ -->
+
+<!-- 
+
+Данная документация предоставляет техническое описание экосистемы Цифрового Кооператива. Экосистема базируется на технологиях блокчейна и смарт-контрактов, создавая стандартизированное окружение для ведения онлайн деятельности в соответствии с законодательством.
+
+Цифровой Кооператив соединяет принципы кооперативного движения с возможностями блокчейн технологий. Стандартизированные смарт-контракты обеспечивают автоматизацию и прозрачность процессов, соответствуя нормам законодательства.
+
+Подробнее о ЦЭ тут потом.
+
+**Ключевые характеристики:**
+
+- Прозрачность: Все операции внутри кооператива являются открытыми для проверки участниками.
+- Стандартизация: Экосистема предоставляет унифицированные инструменты для работы, адаптируемые под различные нужды.
+- Соответствие законам: Смарт-контракты разработаны с учетом требований законодательства.
+- Открытый код: Экосистема включает в себя репозитории, обозреватели документов и маркетплейсы, делая цифровые решения доступными всем участникам.
+- Цифровые подписи: Все операции подтверждаются и защищаются с помощью цифровых подписей, гарантируя их подлинность и безопасность.
+
+... дополнить и развернуть
+
+## Подключить кооператив
+
+Вы можете подключить свой кооператив к платформе цифровой экономики. Для подключения, вам необходимо заполнить заявление на вступление у одного из верифицированных кооперативов на платформе:
+
+!!! note "Список верифицированных регистраторов"
+
+Подключение к цифровой экономике осуществляется с помощью веб-клиента (сайта, мобильного или десктопного приложения), которые поставляются кооперативами для кооперативов. Некоторые клиенты можно получить в маркетплейсе сразу после регистрации юридического лица на платформе:
+
+[Открыть маркетплейс](#){ .md-button .md-button--primary }
+ -->
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  К началу
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Нижний колонтитул" >
+        
+          
+          <a href="../protocols/emission/" class="md-footer__link md-footer__link--prev" aria-label="Назад: Эмиссии">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Назад
+              </span>
+              <div class="md-ellipsis">
+                Эмиссии
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../invest/" class="md-footer__link md-footer__link--next" aria-label="Вперед: Инвесторам">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Вперед
+              </span>
+              <div class="md-ellipsis">
+                Инвесторам
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      ПК «ВОСХОД» &copy; 2024
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.path", "navigation.tabs", "navigation.sections", "navigation.instant", "navigation.instant.prefetch", "navigation.expand", "search.share", "navigation.top", "navigation.footer"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e \u0432 \u0431\u0443\u0444\u0435\u0440", "clipboard.copy": "\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432 \u0431\u0443\u0444\u0435\u0440", "search.result.more.one": "\u0415\u0449\u0451 1 \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.more.other": "\u0415\u0449\u0451 # \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.none": "\u0421\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e", "search.result.one": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e 1 \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0435", "search.result.other": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439: #", "search.result.placeholder": "\u041d\u0430\u0447\u043d\u0438\u0442\u0435 \u043f\u0435\u0447\u0430\u0442\u0430\u0442\u044c \u0434\u043b\u044f \u043f\u043e\u0438\u0441\u043a\u0430", "search.result.term.missing": "\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442", "select.version": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432\u0435\u0440\u0441\u0438\u044e"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
+      
+    
+  </body>
+</html>
