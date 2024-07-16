@@ -32,7 +32,6 @@ div
 
         template(#body="props")
           q-tr(:key="`m_${props.row.username}`" :props="props")
-            q-td {{ props.row.position_title }}
 
             q-td {{ props.row.username }}
             q-td {{ props.row.last_name }}
@@ -70,9 +69,8 @@ div
   </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { Notify } from 'quasar';
-import moment from 'moment-with-locales-es6'
 import { readBlockchain } from 'src/shared/api'
 import { useSessionStore } from 'src/entities/Session';
 import { useUpdateBoard } from 'src/features/Cooperative/UpdateBoard';
@@ -86,15 +84,9 @@ const showAdd = ref(false)
 
 const members = computed(() => coop.privateCooperativeData?.members || [])
 
-let members_reserve: any = []
-
 const persona = ref({
   username: '',
   position_title: 'Член совета',
-})
-
-watch(members, () => {
-  members_reserve = JSON.parse(JSON.stringify(members.value))
 })
 
 const loadMembers = async () => {
@@ -210,8 +202,6 @@ const updateBoard = async (new_members: any) => {
 
 
 const columns = [
-  { name: 'position_title', align: 'left', label: 'Позиция', field: 'position_title', sortable: true },
-
   { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
   { name: 'last_name', align: 'left', label: 'Фамилия', field: 'last_name', sortable: true },
   { name: 'first_name', align: 'left', label: 'Имя', field: 'first_name', sortable: true },
