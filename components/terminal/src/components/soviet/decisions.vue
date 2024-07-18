@@ -35,6 +35,7 @@ div.row.justify-center
 
               q-btn(size="sm" color="primary" dense :icon="props.expand ? 'remove' : 'add'" round @click="props.expand = !props.expand")
             q-td {{ props.row.table.id }}
+            q-td {{ props.row.table.username }}
             q-td
               q-badge {{ getTitle(props.row.table.type, props.row.documents.statement.action.user) }}
 
@@ -42,18 +43,31 @@ div.row.justify-center
             //-   q-checkbox(@click="updateValidation(props.row.id)" :model-value="props.row.validated")
 
             q-td
-              q-btn(v-if="isVotedFor(props.row.table) || !isVotedAny(props.row.table)" :disabled="isVotedAny(props.row.table)" dense flat icon="fa-regular fa-thumbs-down" @click="voteAgainst(props.row.table.id)").text-red
+              //- p Проголосовало {{  props.row.table.votes_for.length + props.row.table.votes_against.length}} из {{totalMembers}}
 
-              q-btn(v-if="isVotedAgainst(props.row.table)" disabled dense flat icon="fas fa-thumbs-down").text-red
+
+              q-btn(v-if="isVotedFor(props.row.table) || !isVotedAny(props.row.table)" :disabled="isVotedAny(props.row.table)" dense flat @click="voteAgainst(props.row.table.id)").text-red
+                q-icon(name="fa-regular fa-thumbs-down")
+                p.q-pl-xs {{props.row.table.votes_against.length}}
+
+              q-btn(v-if="isVotedAgainst(props.row.table)" disabled dense flat).text-red
+                q-icon(name="fas fa-thumbs-down")
+                p.q-pl-xs {{props.row.table.votes_against.length}}
+
               q-checkbox( v-model="props.row.table.approved" disable :true-value="1" :false-value="0" )
 
-              q-btn(v-if="isVotedAgainst(props.row.table) || !isVotedAny(props.row.table)" :disabled="isVotedAny(props.row.table)" dense flat icon="fa-regular fa-thumbs-up" @click="voteFor(props.row.table.id)").text-green
+              q-btn(v-if="isVotedAgainst(props.row.table) || !isVotedAny(props.row.table)" :disabled="isVotedAny(props.row.table)" dense flat @click="voteFor(props.row.table.id)").text-green
+                p.q-pr-xs {{props.row.table.votes_for.length}}
+                q-icon(name="fa-regular fa-thumbs-up" style="transform: scaleX(-1)")
 
-              q-btn(v-if="isVotedFor(props.row.table)" disabled dense flat icon="fas fa-thumbs-up").text-green
+              q-btn(v-if="isVotedFor(props.row.table)" disabled dense flat ).text-green
+                p.q-pr-xs {{props.row.table.votes_for.length}}
+                q-icon(name="fas fa-thumbs-up" style="transform: scaleX(-1)")
 
             q-td
-              q-checkbox(v-if="!isProcess(props.row.table.id)" :model-value="props.row.table.authorized" :true-value="1" :false-value="0" @click="updateAuthorized(props.row.table.username, props.row.table.id)")
-              q-spinner(v-if="isProcess(props.row.table.id)" size="md")
+              q-btn( :loading="isProcess(props.row.table.id)" @click="updateAuthorized(props.row.table.username, props.row.table.id)") утвердить
+              //- q-checkbox(v-if="!isProcess(props.row.table.id)" :model-value="props.row.table.authorized" :true-value="1" :false-value="0" @click="updateAuthorized(props.row.table.username, props.row.table.id)")
+              //- q-spinner(v-if="isProcess(props.row.table.id)" size="md")
 
           q-tr(v-show="props.expand" :key="`e_${props.row.table.id}`" :props="props" class="q-virtual-scroll--with-prev")
             q-td(colspan="100%")
@@ -76,16 +90,24 @@ import { useVoteForDecision } from 'src/features/Cooperative/VoteForDecision';
 import { useAuthorizeAndExecDecision } from 'src/features/Cooperative/AuthorizeAndExecDecision';
 import { useVoteAgainstDecision } from 'src/features/Cooperative/VoteAgainstDecision';
 import { COOPNAME } from 'src/shared/config';
+import { useCooperativeStore } from '../../entities/Cooperative/model/stores';
 const session = useSessionStore()
 const onLoading = ref(false)
 
 const columns = [
   { name: 'id', align: 'left', label: '№', field: 'id', sortable: true },
+  { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
+
   { name: 'caption', align: 'left', label: 'Повестка', field: 'caption', sortable: true },
   // { name: 'validated', align: 'left', label: 'Проверено', field: 'validated', sortable: true },
-  { name: 'approved', align: 'left', label: 'Принято', field: 'approved', sortable: true },
-  { name: 'authorized', align: 'left', label: 'Утверждено', field: 'authorized', sortable: true },
+  { name: 'approved', align: 'left', label: 'Голосование', field: 'approved', sortable: true },
+  { name: 'authorized', align: 'left', label: '', field: 'authorized', sortable: true },
 ] as any
+
+const coop = useCooperativeStore()
+coop.loadPrivateCooperativeData()
+
+// const totalMembers = computed(() => coop.privateCooperativeData?.totalMembers)
 
 const decisions = ref([] as Cooperative.Documents.IAgenda[])
 

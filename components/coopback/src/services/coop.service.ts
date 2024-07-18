@@ -1,7 +1,7 @@
 import { getActions } from '../utils/getFetch';
 import { generator } from './data.service';
 import { userService, blockchainService } from './index';
-import { Cooperative, SovietContract } from 'cooptypes';
+import { Cooperative, RegistratorContract, SovietContract } from 'cooptypes';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 
@@ -63,11 +63,30 @@ export const loadInfo = async (coopname: string) => {
 export const loadContacts = async (coopname: string) => {
   const cooperative: Cooperative.Model.ICooperativeData | null = await generator.constructCooperative(coopname);
 
-  if (!cooperative) throw new Error('Кооператив не найден');
+  if (!cooperative) throw new ApiError(httpStatus.NOT_FOUND, 'Кооператив не найден');
 
-  const announce = cooperative?.announce
-    ? JSON.parse(cooperative.announce)
-    : { phone: cooperative?.phone, email: cooperative?.email };
+  const api = await blockchainService.getApi();
+  const coopAccount = (
+    await blockchainService.lazyFetch(
+      api,
+      RegistratorContract.contractName.production,
+      RegistratorContract.contractName.production,
+      RegistratorContract.Tables.Accounts.tableName,
+      coopname,
+      coopname,
+      1
+    )
+  )[0];
+
+  if (!coopAccount) throw new ApiError(httpStatus.NOT_FOUND, 'Аккаунт не найден');
+
+  let announce: Cooperative.Users.IAccountMeta = { phone: cooperative?.phone, email: cooperative?.email };
+
+  if (coopAccount.meta) {
+    try {
+      announce = JSON.parse(coopAccount.meta);
+    } catch (e: any) {}
+  }
 
   return {
     full_name: cooperative?.full_name,

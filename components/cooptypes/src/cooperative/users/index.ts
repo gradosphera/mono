@@ -67,3 +67,8 @@ export interface IEntrepreneurData {
 }
 
 export type IUserData = IIndividualData | IOrganizationData | IEntrepreneurData
+
+export interface IAccountMeta {
+  phone: string
+  email: string
+}

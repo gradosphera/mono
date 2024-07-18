@@ -1,17 +1,23 @@
 <template lang="pug">
 div
   q-tabs( v-model="tab" dense switch-indicator inline-label outside-arrows mobile-arrows align="justify" active-bg-color="teal" active-color="white" indicator-color="secondary" style="border-bottom: 1px solid teal;")
-    q-tab(name="Реквизиты" label="Реквизиты")
-
     q-tab(name="Совет" label="Совет")
 
     //- q-tab(name="Участки" label="Участки")
+
+    //- q-tab(name="Уполномоченные" label="Уполномоченные")
 
     //- q-tab(name="Администраторы" label="Администраторы")
 
     //- q-tab(name="Фонды" label="Фонды")
 
-    //- q-tab(name="Контакты" label="Контакты")
+    //- q-tab(name="Приложения" label="Приложения")
+
+    //- q-tab(name="Реквизиты" label="Реквизиты")
+
+    q-tab(name="Контакты" label="Контакты")
+
+
 
 
   //- p info {{ info }}
@@ -29,6 +35,8 @@ div
     q-tab-panel(name="Совет")
       CooperativeMembers
 
+    q-tab-panel(name="Контакты")
+      ChangeCooperativeContacts
 
     //- q-tab-panel(name="Участки")
     //-   p Действующие участки
@@ -59,12 +67,15 @@ div
   </template>
 
 <script setup lang="ts">//
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { CooperativeDetails } from 'src/widgets/Cooperative/Details';
 import { CooperativeMembers } from 'src/widgets/Cooperative/Members';
+import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
+
 // import { COOPNAME } from 'src/shared/config'
 import { useCooperativeStore } from 'src/entities/Cooperative';
 // const coopname = computed(() => COOPNAME)
+
 const tab = ref('Реквизиты')
 
 const coop = useCooperativeStore()

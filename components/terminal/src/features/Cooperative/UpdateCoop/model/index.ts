@@ -1,17 +1,17 @@
 import { TransactResult } from '@wharfkit/session';
-import { SovietContract } from 'cooptypes';
+import { RegistratorContract } from 'cooptypes';
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
 
-export function useVoteAgainstDecision() {
-  async function voteAgainstDecision(
-    data: SovietContract.Actions.Decisions.VoteAgainst.IVoteAgainstDecision
+export function useUpdateCoop() {
+  async function updateCoop(
+    data: RegistratorContract.Actions.UpdateCoop.IUpdateCoop
   ): Promise<TransactResult | undefined> {
     const session = useSessionStore();
 
     const result = useGlobalStore().transact({
-      account: SovietContract.contractName.production,
-      name: SovietContract.Actions.Decisions.VoteAgainst.actionName,
+      account: RegistratorContract.contractName.production,
+      name: RegistratorContract.Actions.UpdateCoop.actionName,
       authorization: [
         {
           actor: session.username,
@@ -23,5 +23,5 @@ export function useVoteAgainstDecision() {
 
     return result;
   }
-  return { voteAgainstDecision };
+  return { updateCoop };
 }

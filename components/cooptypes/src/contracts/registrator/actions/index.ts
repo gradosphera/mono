@@ -9,6 +9,11 @@ export * as VerificateAccount from './verificateAccount'
 export * as UpdateAccount from './updateAccount'
 
 /**
+ * Действие обновления публичных регистрационных данных кооператива
+ */
+export * as UpdateCoop from './updateCoop'
+
+/**
  * Действие создания нового аккаунта
  */
 export * as CreateAccount from './createAccount'

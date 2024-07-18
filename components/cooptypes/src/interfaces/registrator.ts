@@ -69,9 +69,6 @@ export interface IDocument {
   meta: string
 }
 
-export interface IFix {
-}
-
 export interface IInit {
 }
 
@@ -128,8 +125,9 @@ export interface IReguser {
   type: IName
 }
 
-export interface IUpdate {
+export interface IUpdateaccnt {
   username: IName
+  account_to_change: IName
   meta: string
 }
 
@@ -140,6 +138,8 @@ export interface IUpdatecoop {
   minimum: IAsset
   org_initial: IAsset
   org_minimum: IAsset
+  announce: string
+  description: string
 }
 
 export interface IVerificate {
