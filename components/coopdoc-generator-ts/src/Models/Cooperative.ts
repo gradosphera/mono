@@ -7,7 +7,8 @@ import type { MongoDBConnector } from '../Services/Databazor'
 import { individualSchema } from '../Schema/IndividualSchema'
 import { getFetch } from '../Utils/getFetch'
 import { getEnvVar } from '../config'
-import { Organization, organizationSchema } from './Organization'
+import { organizationSchema } from '../Schema'
+import { Organization } from './Organization'
 import type { IndividualData } from './Individual'
 import { Individual } from './Individual'
 
@@ -21,6 +22,9 @@ export const CooperativeSchema: JSONSchemaType<CooperativeData> = {
     registration: { type: 'string' },
     initial: { type: 'string' },
     minimum: { type: 'string' },
+    org_registration: { type: 'string' },
+    org_initial: { type: 'string' },
+    org_minimum: { type: 'string' },
     totalMembers: { type: 'number' },
     members: {
       type: 'array',
@@ -28,7 +32,7 @@ export const CooperativeSchema: JSONSchemaType<CooperativeData> = {
     },
     ...organizationSchema.properties,
   },
-  required: [...organizationSchema.required, 'is_branched', 'registration', 'initial', 'minimum', 'members', 'totalMembers'],
+  required: [...organizationSchema.required, 'is_branched', 'registration', 'initial', 'minimum', 'org_registration', 'org_initial', 'org_minimum', 'members', 'totalMembers'],
   additionalProperties: true,
 }
 
@@ -41,7 +45,7 @@ export class Cooperative {
   constructor(storage: MongoDBConnector) {
     this.storage = storage
     this.cooperative = null
-    this.data_service = new DataService<CooperativeData>(storage, 'IndividualData')
+    this.data_service = new DataService<CooperativeData>(storage, 'CooperativeData')
   }
 
   async getOne(username: string, block_num?: number): Promise<CooperativeData> {
@@ -77,7 +81,7 @@ export class Cooperative {
     const soviet = soviet_response.results[0]?.value as SovietContract.Tables.Boards.IBoards
 
     if (!soviet)
-      throw new Error('Совет кооператива не обранужен в базе данных.')
+      throw new Error('Совет кооператива не обнаружен в базе данных.')
 
     const userModel = new Individual(this.storage)
 
@@ -95,6 +99,7 @@ export class Cooperative {
         chairman = { ...member, ...userData }
     }
 
+    console.log(cooperativeBlockchainData)
     this.cooperative = {
       ...organizationPrivateData,
       ...cooperativeBlockchainData,
@@ -102,6 +107,8 @@ export class Cooperative {
       members,
       totalMembers: members.length,
     }
+
+    console.log(this.cooperative)
 
     this.validate()
 

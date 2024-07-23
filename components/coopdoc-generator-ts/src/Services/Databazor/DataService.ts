@@ -1,4 +1,4 @@
-import type { Collection, Filter } from 'mongodb'
+import type { Collection, DeleteResult, Filter } from 'mongodb'
 import { getCurrentBlock } from '../../Utils/getCurrentBlock'
 import type { MongoDBConnector } from './MongoDBConnector'
 
@@ -20,13 +20,16 @@ class DataService<T extends IDocument> {
     return document as T | null
   }
 
-  async getMany(filter: Filter<T>): Promise<T[]> {
+  async getMany(filter: Filter<T>, groupByFields: string | string[]): Promise<T[]> {
+    const groupFields = Array.isArray(groupByFields) ? groupByFields : [groupByFields]
+    const groupId = groupFields.reduce((acc, field) => ({ ...acc, [field]: `$${field}` }), {})
+
     const aggregateOptions = [
       { $match: filter },
-      { $sort: { _created_at: -1 } },
+      { $sort: { created_at: -1 } },
       {
         $group: {
-          _id: '$_id',
+          _id: groupId,
           doc: { $first: '$$ROOT' },
         },
       },
@@ -47,6 +50,11 @@ class DataService<T extends IDocument> {
 
     const document: any = { _created_at: new Date(), block_num: currentBlock, ...data }
     return await this.collection.insertOne(document)
+  }
+
+  async deleteMany(filter: Filter<T>): Promise<DeleteResult> {
+    const deleted = await this.collection.deleteMany(filter)
+    return deleted
   }
 }
 

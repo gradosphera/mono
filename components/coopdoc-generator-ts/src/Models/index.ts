@@ -1,5 +1,4 @@
 export * from './Individual'
 export * from './Organization'
-export * from '../Schema/BankAccount'
 export * from './Entrepreneur'
 export * from './Cooperative'

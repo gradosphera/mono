@@ -1,7 +1,7 @@
 export * from './Interfaces'
 
-import type { Filter, InsertOneResult } from 'mongodb'
-import type { Actions, IFilterDocuments, IGeneratedDocument } from './Interfaces'
+import type { DeleteResult, Filter, InsertOneResult } from 'mongodb'
+import type { Actions, IFilterDocuments, IGeneratedDocument, IPaymentMethod } from './Interfaces'
 import type { IGenerate } from './Interfaces/Documents'
 import { JoinCoop, JoinCoopDecision } from './Actions'
 import { MongoDBConnector } from './Services/Databazor'
@@ -11,8 +11,9 @@ import { Entrepreneur, Organization } from './Models'
 import { Cooperative, type CooperativeData } from './Models/Cooperative'
 
 import type { DocFactory } from './Factory'
+import { PaymentMethod } from './Models/PaymentMethod'
 
-export type dataTypes = 'individual' | 'entrepreneur' | 'organization'
+export type dataTypes = 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod'
 export type { OrganizationData as IOrganizationData } from './Models'
 export type { IndividualData as IIndividualData } from './Models'
 export type { EntrepreneurData as IEntrepreneurData } from './Models'
@@ -25,10 +26,11 @@ export interface IGenerator {
   getDocument: (filter: Filter<IFilterDocuments>) => Promise<IGeneratedDocument>
 
   constructCooperative: (username: string, block_num?: number) => Promise<CooperativeData | null>
-  save: ((type: 'individual', data: IndividualData) => Promise<InsertOneResult>) & ((type: 'entrepreneur', data: EntrepreneurData) => Promise<InsertOneResult>) & ((type: 'organization', data: OrganizationData) => Promise<InsertOneResult>)
-  get: (type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData>) => Promise<IndividualData | EntrepreneurData | OrganizationData | null>
-  list: (type: dataTypes) => Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[]>
-  getHistory: (type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData>) => Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[]>
+  save: ((type: 'individual', data: IndividualData) => Promise<InsertOneResult>) & ((type: 'entrepreneur', data: EntrepreneurData) => Promise<InsertOneResult>) & ((type: 'organization', data: OrganizationData) => Promise<InsertOneResult>) & ((type: 'paymentMethod', data: IPaymentMethod) => Promise<InsertOneResult>)
+  get: (type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod>) => Promise<IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod | null>
+  del: (type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod>) => Promise<DeleteResult>
+  list: (type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod>) => Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[] | IPaymentMethod[]>
+  getHistory: (type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod>) => Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[] | IPaymentMethod[]>
 
 }
 
@@ -49,7 +51,6 @@ export class Generator implements IGenerator {
     this.factories = {
       'registrator::joincoop': new JoinCoop.JoinCoopTemplateFactory(this.storage),
       'registrator::joincoopdec': new JoinCoopDecision.DecisionOfJoinCoopTemplateFactory(this.storage),
-      // joincoopdec: new JoinCoopDecTemplateFactory(),
     }
     await this.storage.connect()
   }
@@ -78,31 +79,38 @@ export class Generator implements IGenerator {
   async save(type: 'entrepreneur', data: EntrepreneurData): Promise<InsertOneResult>
   async save(type: 'organization', data: OrganizationData): Promise<InsertOneResult>
 
-  async save(type: dataTypes, data: IndividualData | EntrepreneurData | OrganizationData): Promise<InsertOneResult> {
+  async save(type: 'paymentMethod', data: IPaymentMethod): Promise<InsertOneResult>
+
+  async save(type: dataTypes, data: IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod): Promise<InsertOneResult> {
     const model = this.getModel(type, data)
     return model.save()
   }
 
+  async del(type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod>): Promise<DeleteResult> {
+    const model = this.getModel(type)
+    return model.del(filter)
+  }
+
   // Универсальные методы получения одного объекта
-  async get(type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData>): Promise<IndividualData | EntrepreneurData | OrganizationData | null> {
+  async get(type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod>): Promise<IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod | null> {
     const model = this.getModel(type)
     return model.getOne(filter)
   }
 
   // Универсальные методы получения списка объектов
-  async list(type: dataTypes): Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[]> {
+  async list(type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod>): Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[] | IPaymentMethod[]> {
     const model = this.getModel(type)
-    return model.getMany({})
+    return model.getMany(filter)
   }
 
-  // Универсальные методы получения истории
-  async getHistory(type: 'individual' | 'entrepreneur' | 'organization', filter: Filter<IndividualData | EntrepreneurData | OrganizationData>): Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[]> {
+  // // Универсальные методы получения истории
+  async getHistory(type: 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod', filter: Filter<IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod>): Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[] | IPaymentMethod[]> {
     const model = this.getModel(type)
     return model.getHistory(filter)
   }
 
   // Вспомогательный метод для получения модели
-  getModel(type: dataTypes, data?: IndividualData | EntrepreneurData | OrganizationData) {
+  getModel(type: dataTypes, data?: IndividualData | EntrepreneurData | OrganizationData | IPaymentMethod) {
     switch (type) {
       case 'individual':
         return new Individual(this.storage, data as IndividualData)
@@ -110,6 +118,9 @@ export class Generator implements IGenerator {
         return new Entrepreneur(this.storage, data as EntrepreneurData)
       case 'organization':
         return new Organization(this.storage, data as OrganizationData)
+      case 'paymentMethod':
+        return new PaymentMethod(this.storage, data as IPaymentMethod)
+
       default:
         throw new Error(`Unknown type: ${type}`)
     }

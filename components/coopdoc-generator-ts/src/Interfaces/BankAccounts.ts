@@ -11,3 +11,16 @@ export interface IBankAccount {
     kpp: string // < кпп
   }
 }
+
+export interface ISbpDetails {
+  phone: string
+}
+
+export interface IPaymentMethod {
+  username: string
+  method_id: number
+  user_type: 'individual' | 'entrepreneur' | 'organization'
+  method_type: 'sbp' | 'bank_transfer'
+  is_default: boolean
+  data: ISbpDetails | IBankAccount
+}

@@ -1,5 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { RegistratorContract, SovietContract } from 'cooptypes'
+import type { IPaymentMethod } from '../src'
 import { Generator } from '../src'
 import type { IndividualData, OrganizationData } from '../src/Models'
 import type { IGeneratedDocument } from '../src/Interfaces/Documents'
@@ -27,8 +28,6 @@ beforeEach(async () => {
 })
 
 describe('тест генератора документов', async () => {
-  // const signature = loadSignatureFile()
-
   it('устанавливаем шаблоны документов', async () => {
     const storage = new MongoDBConnector(mongoUri)
     await storage.connect()
@@ -141,6 +140,9 @@ describe('тест генератора документов', async () => {
           registration: '2.0000 RUB',
           initial: '1.0000 RUB',
           minimum: '1.0000 RUB',
+          org_initial: '100.0000 RUB',
+          org_minimum: '1000.0000 RUB',
+          org_registration: '1100.0000 RUB',
         } as RegistratorContract.Tables.Cooperatives.ICooperative,
       })
 
@@ -197,6 +199,35 @@ describe('тест генератора документов', async () => {
     })
 
     expect(individual._id).toEqual(saved.insertedId)
+  })
+
+  it('сохранение, извлечение и удаление банковских реквизитов пользователя', async () => {
+    const paymentData: IPaymentMethod = {
+      username: 'ant',
+      method_id: 1,
+      user_type: 'individual',
+      method_type: 'sbp',
+      is_default: true,
+      data: {
+        phone: '+7-111-111-111-11',
+      },
+    }
+
+    const saved = await generator.save('paymentMethod', paymentData)
+    const paymentMethod = await generator.get('paymentMethod', { username: 'ant', method_id: paymentData.method_id }) as any
+
+    Object.keys(paymentData).forEach((field) => {
+      expect(paymentMethod[field]).toBeDefined()
+    })
+
+    expect(paymentMethod._id).toEqual(saved.insertedId)
+
+    const paymentList = await generator.list('paymentMethod', { username: 'ant', method_id: paymentData.method_id })
+
+    expect(paymentList.length).toEqual(1)
+
+    const deleted = await generator.del('paymentMethod', { method_id: paymentData.method_id })
+    expect(deleted.deletedCount).toEqual(1)
   })
 
   it('сохранение данных кооператива', async () => {

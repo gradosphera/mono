@@ -1,4 +1,4 @@
-import type { Filter, InsertOneResult } from 'mongodb'
+import type { DeleteResult, Filter, InsertOneResult } from 'mongodb'
 import type { Cooperative } from 'cooptypes'
 import type { ValidateResult } from '../Services/Validator'
 import { Validator } from '../Services/Validator'
@@ -31,10 +31,14 @@ export class Entrepreneur {
   }
 
   async getMany(filter: Filter<EntrepreneurData>): Promise<EntrepreneurData[]> {
-    return this.data_service.getMany(filter)
+    return this.data_service.getMany(filter, 'username')
   }
 
   async getHistory(filter: Filter<EntrepreneurData>): Promise<EntrepreneurData[]> {
     return this.data_service.getHistory(filter)
+  }
+
+  async del(filter: Filter<EntrepreneurData>): Promise<DeleteResult> {
+    return this.data_service.deleteMany(filter)
   }
 }

@@ -80,8 +80,6 @@ export abstract class DocFactory {
   }
 
   async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<IDecisionData> {
-    // TODO запретить снимать голоса
-
     const votes_for_actions = (await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-actions`, new URLSearchParams({
       filter: JSON.stringify({
         'account': process.env.SOVIET_CONTRACT,
@@ -201,10 +199,6 @@ export abstract class DocFactory {
 
   async saveDraft(document: IGeneratedDocument): Promise<void> {
     await this.storage.saveDraft(document)
-
-    // TODO вынести сохранение на диск в отдельный сервис
-    // const filename = `!${document.meta.title}-${document.meta.username}-${document.meta.created_at}.pdf`
-    // await saveBufferToDisk(document.binary, filename)
   }
 
   async getMeta<T extends IMetaDocumentPartial>({

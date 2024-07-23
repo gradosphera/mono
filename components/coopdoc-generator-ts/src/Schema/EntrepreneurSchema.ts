@@ -1,6 +1,6 @@
 import type { JSONSchemaType } from 'ajv'
 import type { EntrepreneurData } from '../Models/Entrepreneur'
-import { BankAccountSchema } from './BankAccount'
+import { BankAccountSchema } from './BankAccountSchema'
 
 export const entrepreneurSchema: JSONSchemaType<EntrepreneurData> = {
   type: 'object',
