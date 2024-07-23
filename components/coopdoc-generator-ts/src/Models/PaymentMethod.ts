@@ -3,41 +3,41 @@ import type { ValidateResult } from '../Services/Validator'
 import { Validator } from '../Services/Validator'
 import DataService from '../Services/Databazor/DataService'
 import type { MongoDBConnector } from '../Services/Databazor'
-import type { IPaymentMethod } from '../Interfaces'
+import type { PaymentData } from '../Interfaces'
 import { paymentMethodSchema } from '../Schema'
 
 export class PaymentMethod {
-  paymentMethod?: IPaymentMethod
-  private data_service: DataService<IPaymentMethod>
+  paymentMethod?: PaymentData
+  private data_service: DataService<PaymentData>
 
-  constructor(storage: MongoDBConnector, data?: IPaymentMethod) {
+  constructor(storage: MongoDBConnector, data?: PaymentData) {
     this.paymentMethod = data
-    this.data_service = new DataService<IPaymentMethod>(storage, 'PaymentData')
+    this.data_service = new DataService(storage, 'PaymentData')
   }
 
   validate(): ValidateResult {
-    return new Validator(paymentMethodSchema, this.paymentMethod as IPaymentMethod).validate()
+    return new Validator(paymentMethodSchema, this.paymentMethod as PaymentData).validate()
   }
 
-  async save(): Promise<InsertOneResult<IPaymentMethod>> {
+  async save(): Promise<InsertOneResult<PaymentData>> {
     await this.validate()
 
-    return await this.data_service.save(this.paymentMethod as IPaymentMethod)
+    return await this.data_service.save(this.paymentMethod as PaymentData)
   }
 
-  async getOne(filter: Filter<IPaymentMethod>): Promise<IPaymentMethod | null> {
+  async getOne(filter: Filter<PaymentData>): Promise<PaymentData | null> {
     return this.data_service.getOne(filter)
   }
 
-  async getMany(filter: Filter<IPaymentMethod>): Promise<IPaymentMethod[]> {
+  async getMany(filter: Filter<PaymentData>): Promise<PaymentData[]> {
     return this.data_service.getMany(filter, 'method_id')
   }
 
-  async getHistory(filter: Filter<IPaymentMethod>): Promise<IPaymentMethod[]> {
+  async getHistory(filter: Filter<PaymentData>): Promise<PaymentData[]> {
     return this.data_service.getHistory(filter)
   }
 
-  async del(filter: Filter<IPaymentMethod>): Promise<DeleteResult> {
+  async del(filter: Filter<PaymentData>): Promise<DeleteResult> {
     return this.data_service.deleteMany(filter)
   }
 }

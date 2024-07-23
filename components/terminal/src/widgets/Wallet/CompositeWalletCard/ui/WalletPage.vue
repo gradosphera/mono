@@ -15,7 +15,6 @@ div(v-if="hasAuth").padding-top
         leave-active-class="animate__animated animate__fadeOutUp"
       )
 
-
         q-card(v-if="showWallet")
           WalletCard(:username="username")
 
@@ -28,7 +27,7 @@ div(v-if="hasAuth").padding-top
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { PersonalCard } from 'src/widgets/PersonalCard/ui'
+import { PersonalCard } from 'src/widgets/Wallet/PersonalCard/ui'
 import { WalletCard } from 'src/widgets/Wallet/WalletCard'
 import { useSessionStore } from 'src/entities/Session'
 const showWallet = ref(true)

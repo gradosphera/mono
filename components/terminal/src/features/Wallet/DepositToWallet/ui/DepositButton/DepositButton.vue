@@ -1,17 +1,17 @@
 <template lang="pug">
-  div.DepositPreparator
-    q-btn(color="primary" @click="showDialog=true") Совершить взнос
-    q-dialog(v-model="showDialog" @hide="clear")
-      ModalBase(v-if="!paymentOrder" :title='"Введите сумму"' )
-        Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm
-          q-input(v-model="quantity" filled type="number" :min="0" :step="1000" :rules="[val => val > 0 || 'Сумма взноса должна быть положительной']")
-            template(#append)
-              p.q-pa-sm {{ CURRENCY }}
-            template(#hint)
-              span комиссия провайдера {{feePercent}}%, к оплате {{toPay}}
-      ModalBase(v-else :title='"Совершите взнос"' style="min-height: 200px !important;")
-        template(v-if="paymentOrder.provider == 'yookassa'")
-          Yookassa(:payment-order="paymentOrder" @payment-fail="paymentFail" @payment-success="paymentSuccess")
+div.DepositPreparator
+  q-btn(color="primary" @click="showDialog=true") Совершить взнос
+  q-dialog(v-model="showDialog" @hide="clear")
+    ModalBase(v-if="!paymentOrder" :title='"Введите сумму"' )
+      Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm
+        q-input(v-model="quantity" filled type="number" :min="0" :step="1000" :rules="[val => val > 0 || 'Сумма взноса должна быть положительной']")
+          template(#append)
+            p.q-pa-sm {{ CURRENCY }}
+          template(#hint)
+            span комиссия провайдера {{feePercent}}%, к оплате {{toPay}}
+    ModalBase(v-else :title='"Совершите взнос"' style="min-height: 200px !important;")
+      template(v-if="paymentOrder.provider == 'yookassa'")
+        Yookassa(:payment-order="paymentOrder" @payment-fail="paymentFail" @payment-success="paymentSuccess")
 
   </template>
 

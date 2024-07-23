@@ -70,3 +70,7 @@ export interface IPaymentOrder {
     url: string;
   };
 }
+
+export interface ICreateWithdraw {
+  quantity: string;
+}

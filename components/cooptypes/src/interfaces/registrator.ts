@@ -69,6 +69,9 @@ export interface IDocument {
   meta: string
 }
 
+export interface IFix {
+}
+
 export interface IInit {
 }
 
@@ -99,19 +102,7 @@ export interface IOrgData {
   org_minimum: IAsset
 }
 
-export interface IPlotData {
-  announce: string
-  description: string
-}
-
-export interface IRegdepartmnt {
-  registrator: IName
-  coopname: IName
-  username: IName
-  params: IPlotData
-}
-
-export interface IRegorg {
+export interface IRegcoop {
   registrator: IName
   coopname: IName
   username: IName

@@ -16,7 +16,7 @@ export interface ISbpDetails {
   phone: string
 }
 
-export interface IPaymentMethod {
+export interface PaymentData {
   username: string
   method_id: number
   user_type: 'individual' | 'entrepreneur' | 'organization'

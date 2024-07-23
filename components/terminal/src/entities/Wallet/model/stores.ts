@@ -6,6 +6,7 @@ import {
   IWithdrawData,
   IPaymentOrder,
   ExtendedProgramWalletData,
+  ICreateWithdraw,
 } from './types';
 import { ILoadUserWallet, ICreateDeposit } from './types';
 import { Ref, ref } from 'vue';
@@ -22,7 +23,7 @@ interface IWalletStore {
   withdraws: Ref<IWithdrawData[]>;
   update: (params: ILoadUserWallet) => Promise<void>;
   createDeposit: (params: ICreateDeposit) => Promise<IPaymentOrder>;
-  createWithdraw: () => Promise<void>;
+  createWithdraw: (params: ICreateWithdraw) => Promise<void>;
 }
 
 export const useWalletStore = defineStore(namespace, (): IWalletStore => {
@@ -61,8 +62,9 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
   ): Promise<IPaymentOrder> => {
     return sendPOST('/v1/orders/deposit', params);
   };
-  const createWithdraw = async () => {
-    //TODO
+
+  const createWithdraw = async (params: ICreateWithdraw): Promise<void> => {
+    console.log('here', params)
   };
 
   return {

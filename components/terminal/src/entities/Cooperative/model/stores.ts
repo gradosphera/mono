@@ -8,12 +8,14 @@ import {
   ILoadCooperativeAddresses,
   IAdministratorData,
 } from './types';
-import { Cooperative, RegistratorContract } from 'cooptypes';
+import { Cooperative, FundContract, RegistratorContract } from 'cooptypes';
 
 const namespace = 'cooperative';
 
 interface ICooperativeStore {
   // методы
+  loadFunds: (coopname: string) => Promise<void>;
+
   loadAddresses: (params: ILoadCooperativeAddresses) => Promise<void>;
   loadMarketPrograms: (params: ILoadCoopMarketPrograms) => Promise<void>;
   loadPrivateCooperativeData: () => Promise<void>;
@@ -27,6 +29,11 @@ interface ICooperativeStore {
   contacts: Ref<Cooperative.Model.IContacts | undefined>
   publicCooperativeData: Ref<RegistratorContract.Tables.Cooperatives.ICooperative | undefined>;
   privateCooperativeData: Ref<Cooperative.Model.ICooperativeData | undefined>;
+
+  fundWallet: Ref<FundContract.Tables.FundWallet.IFundWallet | undefined>
+  accumulationFunds: Ref<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>
+  expenseFunds: Ref<FundContract.Tables.ExpensedFunds.IExpensedFund[]>
+
 }
 
 export const useCooperativeStore = defineStore(
@@ -36,10 +43,22 @@ export const useCooperativeStore = defineStore(
     const addresses = ref([] as IAddressesData[]);
     const admins = ref([] as IAdministratorData[]);
     const publicCooperativeData = ref<RegistratorContract.Tables.Cooperatives.ICooperative>();
-
     const privateCooperativeData = ref<Cooperative.Model.ICooperativeData>()
+    const fundWallet = ref<FundContract.Tables.FundWallet.IFundWallet>()
+    const accumulationFunds = ref<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>([])
+    const expenseFunds = ref<FundContract.Tables.ExpensedFunds.IExpensedFund[]>([])
 
     const contacts = ref<Cooperative.Model.IContacts>()
+
+    const loadFunds = async(coopname: string) : Promise<void> => {
+      fundWallet.value = await api.loadFundWallet(coopname)
+      accumulationFunds.value = (await api.loadAccumulationFunds(coopname)).map(el => ({
+        ...el,
+        percent: Number(el.percent) / 10000
+      }));
+
+      expenseFunds.value = await api.loadExpenseFunds(coopname)
+    }
 
     const loadContacts = async(): Promise<void> => {
       contacts.value = await api.loadContacts()
@@ -74,6 +93,7 @@ export const useCooperativeStore = defineStore(
     };
 
     return {
+      loadFunds,
       loadMarketPrograms,
       loadAddresses,
       loadContacts,
@@ -86,6 +106,10 @@ export const useCooperativeStore = defineStore(
       publicCooperativeData,
       loadAdmins,
       admins,
+
+      fundWallet,
+      accumulationFunds,
+      expenseFunds
     };
   }
 );

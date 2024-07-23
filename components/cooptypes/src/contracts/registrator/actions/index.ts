@@ -26,7 +26,7 @@ export * as RegisterUser from './registerUser'
 /**
  * Действие регистрации карточки организации в кооперативе
  */
-export * as RegisterOrganization from './registerOrganization'
+export * as RegisterCooperative from './registerCooperative'
 
 /**
  * Действие замены активного ключа пользователя за подписью системного аккаунта делегатов.

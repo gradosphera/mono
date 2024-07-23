@@ -7,9 +7,9 @@ export const authorizations = [{ permissions: [Permissions.active, Permissions.s
 /**
  * Имя действия
  */
-export const actionName = 'regorg'
+export const actionName = 'regcoop'
 
 /**
  * @interface
  */
-export type IRegisterOrganization = Registrator.IRegorg
+export type IRegisterCooperative = Registrator.IRegcoop

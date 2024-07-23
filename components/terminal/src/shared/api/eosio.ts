@@ -42,6 +42,9 @@ async function internalFetchTable(
     | 'ninth'
     | 'tenth'
 ): Promise<any[]> {
+
+  const key_type = 'i64'
+
   const data = await readBlockchain.v1.chain.get_table_rows({
     code,
     scope,
@@ -50,6 +53,7 @@ async function internalFetchTable(
     upper_bound,
     limit,
     index_position,
+    key_type
   });
 
   let result = data.rows;
@@ -89,6 +93,7 @@ export async function fetchTable(
     | 'ninth'
     | 'tenth'
 ): Promise<any[]> {
+
   return internalFetchTable(
     code,
     scope,

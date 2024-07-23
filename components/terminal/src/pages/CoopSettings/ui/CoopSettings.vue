@@ -9,11 +9,14 @@ div
 
     //- q-tab(name="Администраторы" label="Администраторы")
 
-    //- q-tab(name="Фонды" label="Фонды")
+    //- q-tab(name="Описание" label="Описание")
+    q-tab(name="Взносы" label="Взносы")
+
+    q-tab(name="Фонды" label="Фонды")
 
     //- q-tab(name="Приложения" label="Приложения")
 
-    //- q-tab(name="Реквизиты" label="Реквизиты")
+    q-tab(name="Реквизиты" label="Реквизиты")
 
     q-tab(name="Контакты" label="Контакты")
 
@@ -34,6 +37,12 @@ div
 
     q-tab-panel(name="Совет")
       CooperativeMembers
+
+    //- q-tab-panel(name="Описание")
+    //-   SetCooperativeDescription
+
+    q-tab-panel(name="Взносы")
+      ChangeCooperativeContributions
 
     q-tab-panel(name="Контакты")
       ChangeCooperativeContacts
@@ -59,10 +68,8 @@ div
     //-   div.text-h6 Программы
     //-     p Lorem ipsum dolor sit amet consectetur adipisicing elit.
 
-    //- q-tab-panel(name="Фонды")
-    //-   div.text-h6 Фонды
-    //-     p Lorem ipsum dolor sit amet consectetur adipisicing elit.
-
+    q-tab-panel(name="Фонды")
+      ChangeCooperativeFunds
 
   </template>
 
@@ -71,6 +78,9 @@ import { ref } from 'vue'
 import { CooperativeDetails } from 'src/widgets/Cooperative/Details';
 import { CooperativeMembers } from 'src/widgets/Cooperative/Members';
 import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
+// import { SetCooperativeDescription } from 'src/widgets/Cooperative/Description/ui';
+import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
+import { ChangeCooperativeFunds } from 'src/widgets/Cooperative/Funds';
 
 // import { COOPNAME } from 'src/shared/config'
 import { useCooperativeStore } from 'src/entities/Cooperative';

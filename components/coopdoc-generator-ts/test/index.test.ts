@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { RegistratorContract, SovietContract } from 'cooptypes'
-import type { IPaymentMethod } from '../src'
+import type { PaymentData } from '../src'
 import { Generator } from '../src'
 import type { IndividualData, OrganizationData } from '../src/Models'
 import type { IGeneratedDocument } from '../src/Interfaces/Documents'
@@ -202,7 +202,7 @@ describe('тест генератора документов', async () => {
   })
 
   it('сохранение, извлечение и удаление банковских реквизитов пользователя', async () => {
-    const paymentData: IPaymentMethod = {
+    const paymentData: PaymentData = {
       username: 'ant',
       method_id: 1,
       user_type: 'individual',

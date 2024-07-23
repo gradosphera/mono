@@ -7,7 +7,7 @@ import {
   ILoadCoopMarketPrograms,
   ILoadCooperativeAddresses,
 } from '../model';
-import {Cooperative, RegistratorContract } from 'cooptypes';
+import {Cooperative, FundContract, RegistratorContract } from 'cooptypes';
 
 async function loadMarketPrograms(
   params: ILoadCoopMarketPrograms
@@ -31,6 +31,40 @@ async function loadPrivateCooperativeData(): Promise<Cooperative.Model.ICooperat
 
 async function loadContacts(): Promise<Cooperative.Model.IContacts> {
   return (await sendGET('/v1/coop/contacts', {}, true)) as Cooperative.Model.IContacts;
+}
+
+async function loadFundWallet(coopname: string): Promise<FundContract.Tables.FundWallet.IFundWallet>{
+  return (
+    await fetchTable(
+      FundContract.contractName.production,
+      coopname,
+      FundContract.Tables.FundWallet.tableName,
+      0,
+      0,
+      1
+    )
+  )[0] as FundContract.Tables.FundWallet.IFundWallet;
+}
+
+async function loadAccumulationFunds(coopname: string): Promise<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>{
+  return (
+    await fetchTable(
+      FundContract.contractName.production,
+      coopname,
+      FundContract.Tables.AccumulatedFunds.tableName,
+    )
+  )as FundContract.Tables.AccumulatedFunds.IAccumulatedFund[];
+}
+
+
+async function loadExpenseFunds(coopname: string): Promise<FundContract.Tables.ExpensedFunds.IExpensedFund[]>{
+  return (
+    await fetchTable(
+      FundContract.contractName.production,
+      coopname,
+      FundContract.Tables.ExpensedFunds.tableName,
+    )
+  )as FundContract.Tables.ExpensedFunds.IExpensedFund[];
 }
 
 
@@ -66,4 +100,7 @@ export const api = {
   loadAdmins,
   loadPrivateCooperativeData,
   loadContacts,
+  loadFundWallet,
+  loadAccumulationFunds,
+  loadExpenseFunds
 };

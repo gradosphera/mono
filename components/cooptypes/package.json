@@ -37,7 +37,7 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks",
-    "doc": "typedoc",
+    "docs": "typedoc",
     "dev": "concurrently -n 'TYPES' -c 'bgMagenta.white' \"nodemon --watch src --ext ts --exec 'unbuild'\""
   },
   "dependencies": {

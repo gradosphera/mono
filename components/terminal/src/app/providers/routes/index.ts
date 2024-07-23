@@ -5,7 +5,7 @@ import permissionDenied from 'src/pages/_layouts/permissionDenied.vue';
 
 // import sovietPage from 'src/components/soviet/index.vue'
 import { CoopSettingsPage } from 'src/pages/CoopSettings';
-import { WalletPage } from 'src/pages/wallet';
+import { UserHomePage } from 'src/pages/UserHome/ui';
 import { ModerationPage } from 'src/pages/marketplace/Moderation';
 import { CreateParentOfferPage } from 'src/pages/marketplace/CreateParentOffer';
 import { ShowcasePage } from 'src/pages/marketplace/Showcase';
@@ -34,13 +34,13 @@ const baseRoutes = [
 
       //страница кошелька пользователя
       {
-        path: '/:coopname/wallet',
-        name: 'wallet',
-        component: WalletPage,
+        path: '/:coopname/home',
+        name: 'home',
+        component: UserHomePage,
         children: [],
         meta: {
           is_desktop_menu: true,
-          title: 'Кошелек',
+          title: 'Профиль',
           icon: 'fa-solid fa-id-card',
           roles: [],
         },

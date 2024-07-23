@@ -24,12 +24,11 @@ export interface IAddprogbal {
 export interface IAddress {
   id: IUint64
   coopname: IName
-  departname: IName
   data: IAddressData
-  meta: string
 }
 
 export interface IAddressData {
+  full_address: string
   latitude: string
   longitude: string
   country: string
@@ -42,7 +41,9 @@ export interface IAddressData {
   unit_number: string
   directions: string
   phone_number: string
+  email: string
   business_hours: string
+  meta: string
 }
 
 export interface IAddstaff {
@@ -140,9 +141,7 @@ export interface ICountsBase {
 export interface ICreaddress {
   coopname: IName
   chairman: IName
-  departname: IName
   data: IAddressData
-  meta: string
 }
 
 export interface ICreateboard {
@@ -213,9 +212,7 @@ export interface IEditaddress {
   coopname: IName
   chairman: IName
   address_id: IUint64
-  departname: IName
   data: IAddressData
-  meta: string
 }
 
 export interface IEditprog {
