@@ -9,7 +9,7 @@ import { Cooperative } from 'cooptypes';
 const { isEmail } = validator;
 const { compare, hash } = bcryptjs;
 
-export interface IUser extends Document {
+export interface IUser {
   username: string;
   status: 'created' | 'joined' | 'payed' | 'registered' | 'active' | 'failed' | 'blocked';
   message: string;
@@ -152,7 +152,11 @@ userSchema.statics.isEmailTaken = async function (email) {
 userSchema.methods.getPrivateData = async function (): Promise<
   Cooperative.Users.IIndividualData | Cooperative.Users.IEntrepreneurData | Cooperative.Users.IOrganizationData | null
 > {
-  return await generator.get(this.type, { username: this.username });
+  return (await generator.get(this.type, { username: this.username })) as
+    | Cooperative.Users.IIndividualData
+    | Cooperative.Users.IEntrepreneurData
+    | Cooperative.Users.IOrganizationData
+    | null;
 };
 
 userSchema.methods.isPasswordMatch = async function (password) {

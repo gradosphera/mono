@@ -10,12 +10,12 @@ export const errorConverter = (err, req, res, next) => {
   if (!(error instanceof ApiError)) {
     if (error instanceof RpcError) {
       const message = error.json.error.details[0].message.replace('assertion failure with message: ', ''); // Получаем первую строку ошибки
-      const statusCode = error.json.code
-      const subCode = error.json.error.code
+      const statusCode = error.json.code;
+      const subCode = error.json.error.code;
       error = new ApiError(statusCode, message, true, undefined, subCode);
-
     } else {
-      const statusCode = error.statusCode || (error instanceof mongoose.Error ? httpStatus.BAD_REQUEST : httpStatus.INTERNAL_SERVER_ERROR);
+      const statusCode =
+        error.statusCode || (error instanceof mongoose.Error ? httpStatus.BAD_REQUEST : httpStatus.INTERNAL_SERVER_ERROR);
       const message = error.message || httpStatus[statusCode];
       error = new ApiError(statusCode, message, false, err.stack);
     }
@@ -25,7 +25,6 @@ export const errorConverter = (err, req, res, next) => {
 
 // eslint-disable-next-line no-unused-vars
 export const errorHandler = (err, req, res, next) => {
-
   let { statusCode, message } = err;
   if (config.env === 'production' && !err.isOperational) {
     statusCode = httpStatus.INTERNAL_SERVER_ERROR;

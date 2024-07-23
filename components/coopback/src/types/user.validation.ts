@@ -76,7 +76,7 @@ export interface ICreateUser {
   password: string;
   public_key: string;
   referer?: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'chairman' | 'member';
   type: 'individual' | 'entrepreneur' | 'organization';
   username: string;
 }
@@ -243,7 +243,7 @@ export interface RCreateUser {
     password: string;
     public_key: string;
     referer?: string;
-    role: 'user' | 'admin';
+    role: 'user' | 'chairman' | 'member';
     type: 'individual' | 'entrepreneur' | 'organization';
     username: string;
   };

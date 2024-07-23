@@ -96,7 +96,7 @@ describe('Auth routes', () => {
 
       expect(res.body.user).toEqual({
         id: expect.anything(),
-        name: userOne.name,
+        username: userOne.username,
         email: userOne.email,
         role: userOne.role,
         is_email_verified: userOne.is_email_verified,
@@ -221,7 +221,7 @@ describe('Auth routes', () => {
     test('should return 401 error if refresh token is expired', async () => {
       await insertUsers([userOne]);
       const expires = moment().subtract(1, 'minutes');
-      const refreshToken = tokenService.generateToken(userOne._id, expires);
+      const refreshToken = tokenService.generateToken(userOne._id, expires, tokenTypes.REFRESH);
       await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
 
       await request(app).post('/v1/auth/refresh-tokens').send({ refreshToken }).expect(httpStatus.UNAUTHORIZED);
@@ -249,7 +249,7 @@ describe('Auth routes', () => {
 
       expect(sendResetPasswordEmailSpy).toHaveBeenCalledWith(userOne.email, expect.any(String));
       const resetPasswordToken = sendResetPasswordEmailSpy.mock.calls[0][1];
-      const dbResetPasswordTokenDoc = await Token.findOne({ token: resetPasswordToken, user: userOne._id });
+      const dbResetPasswordTokenDoc = await Token.findOne({ token: resetPasswordToken, user: userOne._id.toString() });
       expect(dbResetPasswordTokenDoc).toBeDefined();
     });
 
@@ -278,11 +278,18 @@ describe('Auth routes', () => {
         .expect(httpStatus.NO_CONTENT);
 
       const dbUser = await User.findById(userOne._id);
-      const isPasswordMatch = await bcrypt.compare('password2', dbUser.password);
-      expect(isPasswordMatch).toBe(true);
+      expect(dbUser).not.toBeUndefined();
 
-      const dbResetPasswordTokenCount = await Token.countDocuments({ user: userOne._id, type: tokenTypes.RESET_PASSWORD });
-      expect(dbResetPasswordTokenCount).toBe(0);
+      if (dbUser) {
+        const isPasswordMatch = await bcrypt.compare('password2', dbUser.password);
+        expect(isPasswordMatch).toBe(true);
+
+        const dbResetPasswordTokenCount = await Token.countDocuments({
+          user: userOne._id.toString(),
+          type: tokenTypes.RESET_PASSWORD,
+        });
+        expect(dbResetPasswordTokenCount).toBe(0);
+      }
     });
 
     test('should return 400 if reset password token is missing', async () => {
@@ -373,7 +380,7 @@ describe('Auth routes', () => {
 
       expect(sendVerificationEmailSpy).toHaveBeenCalledWith(userOne.email, expect.any(String));
       const verifyEmailToken = sendVerificationEmailSpy.mock.calls[0][1];
-      const dbVerifyEmailToken = await Token.findOne({ token: verifyEmailToken, user: userOne._id });
+      const dbVerifyEmailToken = await Token.findOne({ token: verifyEmailToken, user: userOne._id.toString() });
 
       expect(dbVerifyEmailToken).toBeDefined();
     });
@@ -389,7 +396,7 @@ describe('Auth routes', () => {
     test('should return 204 and verify the email', async () => {
       await insertUsers([userOne]);
       const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-      const verifyEmailToken = tokenService.generateToken(userOne._id, expires);
+      const verifyEmailToken = tokenService.generateToken(userOne._id, expires, tokenTypes.VERIFY_EMAIL);
       await tokenService.saveToken(verifyEmailToken, userOne._id, expires, tokenTypes.VERIFY_EMAIL);
 
       await request(app)
@@ -400,10 +407,14 @@ describe('Auth routes', () => {
 
       const dbUser = await User.findById(userOne._id);
 
+      expect(dbUser).not.toBeUndefined();
+
+      if (!dbUser) return;
+
       expect(dbUser.is_email_verified).toBe(true);
 
       const dbVerifyEmailToken = await Token.countDocuments({
-        user: userOne._id,
+        user: userOne._id.toString(),
         type: tokenTypes.VERIFY_EMAIL,
       });
       expect(dbVerifyEmailToken).toBe(0);
@@ -418,7 +429,7 @@ describe('Auth routes', () => {
     test('should return 401 if verify email token is blacklisted', async () => {
       await insertUsers([userOne]);
       const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-      const verifyEmailToken = tokenService.generateToken(userOne._id, expires);
+      const verifyEmailToken = tokenService.generateToken(userOne._id, expires, tokenTypes.VERIFY_EMAIL);
       await tokenService.saveToken(verifyEmailToken, userOne._id, expires, tokenTypes.VERIFY_EMAIL, true);
 
       await request(app)
@@ -431,7 +442,7 @@ describe('Auth routes', () => {
     test('should return 401 if verify email token is expired', async () => {
       await insertUsers([userOne]);
       const expires = moment().subtract(1, 'minutes');
-      const verifyEmailToken = tokenService.generateToken(userOne._id, expires);
+      const verifyEmailToken = tokenService.generateToken(userOne._id, expires, tokenTypes.VERIFY_EMAIL);
       await tokenService.saveToken(verifyEmailToken, userOne._id, expires, tokenTypes.VERIFY_EMAIL);
 
       await request(app)
@@ -443,7 +454,7 @@ describe('Auth routes', () => {
 
     test('should return 401 if user is not found', async () => {
       const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-      const verifyEmailToken = tokenService.generateToken(userOne._id, expires);
+      const verifyEmailToken = tokenService.generateToken(userOne._id, expires, tokenTypes.VERIFY_EMAIL);
       await tokenService.saveToken(verifyEmailToken, userOne._id, expires, tokenTypes.VERIFY_EMAIL);
 
       await request(app)
@@ -582,7 +593,8 @@ describe('Auth middleware', () => {
     });
     const next = jest.fn();
 
-    await auth(...roleRights.get('admin'))(req, httpMocks.createResponse(), next);
+    const chairmanRights = roleRights.get('chairman') || [];
+    await auth(...chairmanRights)(req, httpMocks.createResponse(), next);
 
     expect(next).toHaveBeenCalledWith();
   });

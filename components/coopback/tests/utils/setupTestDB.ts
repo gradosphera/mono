@@ -5,7 +5,7 @@ import { connectGenerator, generator } from '../../src/services/data.service';
 export const setupTestDB = () => {
   beforeAll(async () => {
     await mongoose.connect(config.mongoose.url, config.mongoose.options);
-    await connectGenerator()
+    await connectGenerator();
   });
 
   beforeEach(async () => {
@@ -17,4 +17,3 @@ export const setupTestDB = () => {
     await generator.disconnect();
   });
 };
-

@@ -1,7 +1,7 @@
-import { SovietContract, RegistratorContract } from 'cooptypes';
+import { SovietContract, RegistratorContract, DraftContract } from 'cooptypes';
 import { IAction, ITable } from '../../src/types/common';
 import mongoose from 'mongoose';
-import { Cooperative } from 'cooptypes';
+import { DocumentsRegistry } from 'coopdoc-generator-ts';
 
 export const insertAction = async (action: IAction) => {
   const collection = mongoose.connection.db.collection('actions'); // Замените на имя вашей коллекции
@@ -18,43 +18,6 @@ export const insertDelta = async (delta: ITable) => {
   await collection.insertOne(delta);
 };
 
-export const fixtureVoskhod = (): Cooperative.Users.IOrganizationData => {
-  return {
-    username: 'voskhod',
-    type: 'coop',
-    is_cooperative: true,
-    short_name: 'Voskhod',
-    full_name: 'ПК ВОСХОД',
-    represented_by: {
-      first_name: 'Алексей',
-      last_name: 'Муравьев',
-      middle_name: 'Николаевич',
-      position: 'Председатель',
-      based_on: 'Решения общего собрания №1',
-    },
-    country: 'Russia',
-    city: 'Moscow',
-    full_address: '123 Main St, Moscow, Russia',
-    email: 'contact@orgco.com',
-    phone: '+71234567890',
-    details: {
-      inn: '1234567890',
-      ogrn: '1234567890123',
-    },
-    bank_account: {
-      account_number: '40817810099910004312',
-      currency: 'RUB',
-      card_number: '1234567890123456',
-      bank_name: 'Sberbank',
-      details: {
-        bik: '123456789',
-        corr: '30101810400000000225',
-        kpp: '123456789',
-      },
-    },
-  };
-};
-
 export const installInitialCooperativeData = async () => {
   const delta1 = fixtureDelta(0, 'registrator', 'registrator', 'orgs', '1', {
     username: 'voskhod',
@@ -67,6 +30,9 @@ export const installInitialCooperativeData = async () => {
     registration: '2.0000 RUB',
     initial: '1.0000 RUB',
     minimum: '1.0000 RUB',
+    org_registration: '20.0000 RUB',
+    org_initial: '10.0000 RUB',
+    org_minimum: '10.0000 RUB',
   } as RegistratorContract.Tables.Cooperatives.ICooperative);
 
   await insertDelta(delta1);
@@ -89,6 +55,34 @@ export const installInitialCooperativeData = async () => {
   } as SovietContract.Tables.Boards.IBoards);
 
   await insertDelta(delta2);
+  const k = 1;
+
+  for (const id in DocumentsRegistry) {
+    const template = DocumentsRegistry[id as unknown as keyof typeof DocumentsRegistry];
+
+    await insertDelta(
+      fixtureDelta(0, 'draft', 'draft', 'drafts', String(k), {
+        id: String(k),
+        creator: 'eosio',
+        version: String(1),
+        default_translation_id: String(k),
+        registry_id: Number(id),
+        title: template.title,
+        description: template.description,
+        context: template.context,
+        model: JSON.stringify(template.model),
+      } as DraftContract.Tables.Drafts.IDraft)
+    );
+
+    await insertDelta(
+      fixtureDelta(0, 'draft', 'draft', 'translations', String(k), {
+        id: String(k),
+        draft_id: String(k),
+        lang: 'ru',
+        data: JSON.stringify(template.translations.ru),
+      } as DraftContract.Tables.Translations.ITranslation)
+    );
+  }
 };
 
 export const fixtureDelta = (

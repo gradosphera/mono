@@ -1,3 +1,5 @@
+import { generateUsername } from '../../utils/generateUsername';
+
 const faker = require('faker');
 const { User } = require('../../../src/models');
 
@@ -10,6 +12,9 @@ describe('User model', () => {
         email: faker.internet.email().toLowerCase(),
         password: 'password1',
         role: 'user',
+        public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+        type: 'individual',
+        username: generateUsername(),
       };
     });
 
