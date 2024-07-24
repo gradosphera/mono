@@ -1,9 +1,8 @@
 import type { JSONSchemaType } from 'ajv'
 import type { Cooperative } from 'cooptypes'
-import type { IndividualData, OrganizationData } from '../Models'
 import type { DocumentsMappingByActionAndCode } from '../Templates/registry'
-import type { EntrepreneurData } from '../Models/Entrepreneur'
 import type { CooperativeData } from '../Models/Cooperative'
+import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData } from '../Models'
 
 // Определение базового интерфейса для мета-информации
 export type IMetaDocument = Cooperative.Documents.IMetaDocument
@@ -41,9 +40,9 @@ export interface ITemplate<T> {
 }
 
 export interface ICombinedData {
-  individual?: IndividualData
-  organization?: OrganizationData
-  entrepreneur?: EntrepreneurData
+  individual?: ExternalIndividualData
+  organization?: ExternalOrganizationData
+  entrepreneur?: ExternalEntrepreneurData
   coop: CooperativeData
   meta: IMetaDocument
 }

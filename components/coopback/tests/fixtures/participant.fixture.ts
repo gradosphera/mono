@@ -4,11 +4,12 @@ import faker from 'faker';
 import User from '../../src/models/user.model';
 import { generateUsername } from '../utils/generateUsername';
 import { Cooperative } from 'cooptypes';
+import { ICreateUser } from '../../src/types';
 
 const password = 'password1';
 const email1 = faker.internet.email().toLowerCase();
 
-export const participantOne = {
+export const participantOne: ICreateUser = {
   email: email1,
   password,
   username: generateUsername(),

@@ -1,22 +1,26 @@
 export * from './Interfaces'
+export * from './Templates'
 
-import type { DeleteResult, Filter, InsertOneResult } from 'mongodb'
-import type { Actions, IFilterDocuments, IGeneratedDocument, PaymentData } from './Interfaces'
+import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
+import type { Actions, IFilterDocuments, IGeneratedDocument, externalDataTypes, externalDataTypesArrays, internalFilterTypes } from './Interfaces'
 import type { IGenerate } from './Interfaces/Documents'
 import { JoinCoop, JoinCoopDecision } from './Actions'
 import { MongoDBConnector } from './Services/Databazor'
-import { Individual, type IndividualData } from './Models/Individual'
-import type { EntrepreneurData, OrganizationData } from './Models'
+import type { ExternalIndividualData } from './Models/Individual'
+import { Individual } from './Models/Individual'
+import type { ExternalEntrepreneurData, ExternalOrganizationData } from './Models'
 import { Entrepreneur, Organization } from './Models'
 import { Cooperative, type CooperativeData } from './Models/Cooperative'
 
 import type { DocFactory } from './Factory'
+import type { PaymentData } from './Models/PaymentMethod'
 import { PaymentMethod } from './Models/PaymentMethod'
 
 export type dataTypes = 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod'
-export type { OrganizationData as IOrganizationData } from './Models'
-export type { IndividualData as IIndividualData } from './Models'
-export type { EntrepreneurData as IEntrepreneurData } from './Models'
+
+export type { ExternalOrganizationData as IOrganizationData } from './Models'
+export type { ExternalIndividualData as IIndividualData } from './Models'
+export type { ExternalEntrepreneurData as IEntrepreneurData } from './Models'
 export type { CooperativeData as ICooperativeData } from './Models'
 
 export interface IGenerator {
@@ -26,12 +30,11 @@ export interface IGenerator {
   getDocument: (filter: Filter<IFilterDocuments>) => Promise<IGeneratedDocument>
 
   constructCooperative: (username: string, block_num?: number) => Promise<CooperativeData | null>
-  save: ((type: 'individual', data: IndividualData) => Promise<InsertOneResult>) & ((type: 'entrepreneur', data: EntrepreneurData) => Promise<InsertOneResult>) & ((type: 'organization', data: OrganizationData) => Promise<InsertOneResult>) & ((type: 'paymentMethod', data: PaymentData) => Promise<InsertOneResult>)
-  get: (type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | PaymentData>) => Promise<IndividualData | EntrepreneurData | OrganizationData | PaymentData | null>
-  del: (type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | PaymentData>) => Promise<DeleteResult>
-  list: (type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | PaymentData>) => Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[] | PaymentData[]>
-  getHistory: (type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | PaymentData>) => Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[] | PaymentData[]>
-
+  save: ((type: 'individual', data: ExternalIndividualData) => Promise<InsertOneResult>) & ((type: 'entrepreneur', data: ExternalEntrepreneurData) => Promise<InsertOneResult>) & ((type: 'organization', data: ExternalOrganizationData) => Promise<InsertOneResult>) & ((type: 'paymentMethod', data: PaymentData) => Promise<InsertOneResult>)
+  get: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypes | null>
+  del: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<UpdateResult>
+  list: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypesArrays>
+  getHistory: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypesArrays>
 }
 
 export class Generator implements IGenerator {
@@ -57,7 +60,7 @@ export class Generator implements IGenerator {
 
   // Метод отключения от хранилища
   async disconnect(): Promise<void> {
-    this.storage.disconnect()
+    await this.storage.disconnect()
   }
 
   // Метод генерации документа
@@ -75,49 +78,49 @@ export class Generator implements IGenerator {
     return await this.storage.getDocument(filter)
   }
 
-  async save(type: 'individual', data: IndividualData): Promise<InsertOneResult>
-  async save(type: 'entrepreneur', data: EntrepreneurData): Promise<InsertOneResult>
-  async save(type: 'organization', data: OrganizationData): Promise<InsertOneResult>
+  async save(type: 'individual', data: ExternalIndividualData): Promise<InsertOneResult>
+  async save(type: 'entrepreneur', data: ExternalEntrepreneurData): Promise<InsertOneResult>
+  async save(type: 'organization', data: ExternalOrganizationData): Promise<InsertOneResult>
 
   async save(type: 'paymentMethod', data: PaymentData): Promise<InsertOneResult>
 
-  async save(type: dataTypes, data: IndividualData | EntrepreneurData | OrganizationData | PaymentData): Promise<InsertOneResult> {
+  async save(type: dataTypes, data: externalDataTypes): Promise<InsertOneResult> {
     const model = this.getModel(type, data)
     return model.save()
   }
 
-  async del(type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | PaymentData>): Promise<DeleteResult> {
+  async del(type: dataTypes, filter: Filter<internalFilterTypes>): Promise<UpdateResult> {
     const model = this.getModel(type)
     return model.del(filter)
   }
 
   // Универсальные методы получения одного объекта
-  async get(type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | PaymentData>): Promise<IndividualData | EntrepreneurData | OrganizationData | PaymentData | null> {
+  async get(type: dataTypes, filter: Filter<internalFilterTypes>): Promise<externalDataTypes | null> {
     const model = this.getModel(type)
     return model.getOne(filter)
   }
 
   // Универсальные методы получения списка объектов
-  async list(type: dataTypes, filter: Filter<IndividualData | EntrepreneurData | OrganizationData | PaymentData>): Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[] | PaymentData[]> {
+  async list(type: dataTypes, filter: Filter<internalFilterTypes>): Promise<externalDataTypesArrays> {
     const model = this.getModel(type)
     return model.getMany(filter)
   }
 
   // // Универсальные методы получения истории
-  async getHistory(type: 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod', filter: Filter<IndividualData | EntrepreneurData | OrganizationData | PaymentData>): Promise<IndividualData[] | EntrepreneurData[] | OrganizationData[] | PaymentData[]> {
+  async getHistory(type: 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod', filter: Filter<internalFilterTypes>): Promise<externalDataTypesArrays> {
     const model = this.getModel(type)
     return model.getHistory(filter)
   }
 
   // Вспомогательный метод для получения модели
-  getModel(type: dataTypes, data?: IndividualData | EntrepreneurData | OrganizationData | PaymentData) {
+  getModel(type: dataTypes, data?: externalDataTypes) {
     switch (type) {
       case 'individual':
-        return new Individual(this.storage, data as IndividualData)
+        return new Individual(this.storage, data as ExternalIndividualData)
       case 'entrepreneur':
-        return new Entrepreneur(this.storage, data as EntrepreneurData)
+        return new Entrepreneur(this.storage, data as ExternalEntrepreneurData)
       case 'organization':
-        return new Organization(this.storage, data as OrganizationData)
+        return new Organization(this.storage, data as ExternalOrganizationData)
       case 'paymentMethod':
         return new PaymentMethod(this.storage, data as PaymentData)
 

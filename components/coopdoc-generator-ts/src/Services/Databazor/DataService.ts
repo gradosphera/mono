@@ -1,5 +1,4 @@
-import type { Collection, DeleteResult, Filter } from 'mongodb'
-import { getCurrentBlock } from '../../Utils/getCurrentBlock'
+import type { Collection, Filter, UpdateResult } from 'mongodb'
 import type { MongoDBConnector } from './MongoDBConnector'
 
 export interface IDocument {
@@ -16,7 +15,7 @@ class DataService<T extends IDocument> {
   }
 
   async getOne(filter: Filter<T>): Promise<T | null> {
-    const document = await this.collection.findOne(filter, { sort: { _id: -1 } })
+    const document = await this.collection.findOne({ ...filter }, { sort: { _id: -1 } })
     return document as T | null
   }
 
@@ -25,7 +24,7 @@ class DataService<T extends IDocument> {
     const groupId = groupFields.reduce((acc, field) => ({ ...acc, [field]: `$${field}` }), {})
 
     const aggregateOptions = [
-      { $match: filter },
+      { $match: { ...filter } },
       { $sort: { created_at: -1 } },
       {
         $group: {
@@ -46,14 +45,13 @@ class DataService<T extends IDocument> {
   }
 
   async save(data: T) {
-    const currentBlock = await getCurrentBlock()
-
-    const document: any = { _created_at: new Date(), block_num: currentBlock, ...data }
+    const document: any = { _created_at: new Date(), ...data }
     return await this.collection.insertOne(document)
   }
 
-  async deleteMany(filter: Filter<T>): Promise<DeleteResult> {
-    const deleted = await this.collection.deleteMany(filter)
+  async updateMany(filter: Filter<T>, dataForUpdate: Partial<T>): Promise<UpdateResult> {
+    const deleted = await this.collection.updateMany(filter, { $set: dataForUpdate })
+
     return deleted
   }
 }

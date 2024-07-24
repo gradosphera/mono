@@ -23,7 +23,7 @@ export interface IUser {
   is_email_verified: boolean;
   statement: {
     hash: string;
-    meta: any;
+    meta: Object;
     public_key: string;
     signature: string;
   };
@@ -134,6 +134,7 @@ const userSchema = new Schema<IUser, IUserModel>(
     },
   },
   {
+    minimize: false,
     timestamps: true,
     toJSON: { virtuals: true },
   }
@@ -152,11 +153,13 @@ userSchema.statics.isEmailTaken = async function (email) {
 userSchema.methods.getPrivateData = async function (): Promise<
   Cooperative.Users.IIndividualData | Cooperative.Users.IEntrepreneurData | Cooperative.Users.IOrganizationData | null
 > {
-  return (await generator.get(this.type, { username: this.username })) as
+  const result = (await generator.get(this.type, { username: this.username })) as
     | Cooperative.Users.IIndividualData
     | Cooperative.Users.IEntrepreneurData
     | Cooperative.Users.IOrganizationData
     | null;
+
+  return result;
 };
 
 userSchema.methods.isPasswordMatch = async function (password) {

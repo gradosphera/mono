@@ -14,7 +14,7 @@ export const IGenerate = Joi.object({
 }).unknown(true);
 
 export const RGenerate = Joi.object({
-  body: IGenerate.required()
+  body: IGenerate.required(),
 }).required();
 
 export const IGetDocuments = Joi.object({
@@ -24,14 +24,14 @@ export const IGetDocuments = Joi.object({
   sortBy: Joi.string(),
   limit: Joi.number().integer(),
   page: Joi.number().integer(),
-})
+}).unknown(true);
 
 export const RGetDocuments = Joi.object({
-  query: IGetDocuments
-})
+  query: IGetDocuments,
+});
 
 export const RGetMyDocuments = Joi.object({
   query: Joi.object().keys({
-    username: Joi.string()
+    username: Joi.string(),
   }),
-})
+});

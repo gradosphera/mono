@@ -1,45 +1,103 @@
-import type { DeleteResult, Filter, InsertOneResult } from 'mongodb'
+import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
 import type { Cooperative } from 'cooptypes'
 import type { ValidateResult } from '../Services/Validator'
 import { Validator } from '../Services/Validator'
 import DataService from '../Services/Databazor/DataService'
 import type { MongoDBConnector } from '../Services/Databazor'
 import { organizationSchema } from '../Schema'
+import type { IBankAccount } from '../Interfaces'
+import { getCurrentBlock } from '../Utils/getCurrentBlock'
+import type { PaymentData } from './PaymentMethod'
+import { PaymentMethod } from './PaymentMethod'
 
-export type OrganizationData = Cooperative.Users.IOrganizationData
+export type ExternalOrganizationData = Cooperative.Users.IOrganizationData
+
+export type InternalOrganizationData = Omit<ExternalOrganizationData, 'bank_account'> & {
+  block_num: number
+  deleted: boolean
+  bank_account?: Cooperative.Users.IBankAccount
+}
 
 export class Organization {
-  organization?: OrganizationData
-  private data_service: DataService<OrganizationData>
+  db: MongoDBConnector
+  organization?: ExternalOrganizationData
+  private data_service: DataService<InternalOrganizationData>
 
-  constructor(storage: MongoDBConnector, data?: OrganizationData) {
+  constructor(storage: MongoDBConnector, data?: ExternalOrganizationData) {
+    this.db = storage
     this.organization = data
-    this.data_service = new DataService<OrganizationData>(storage, 'OrgData')
+    this.data_service = new DataService<InternalOrganizationData>(storage, 'OrgData')
   }
 
   validate(): ValidateResult {
-    return new Validator(organizationSchema, this.organization as OrganizationData).validate()
+    return new Validator(organizationSchema, this.organization as ExternalOrganizationData).validate()
   }
 
-  async save(): Promise<InsertOneResult<OrganizationData>> {
+  async save(): Promise<InsertOneResult<InternalOrganizationData>> {
     await this.validate()
 
-    return await this.data_service.save(this.organization as OrganizationData)
+    if (!this.organization)
+      throw new Error('Данные организации не предоставлены для сохранения')
+
+    const { bank_account, ...organization_for_save } = this.organization
+
+    const bankData: PaymentData = {
+      username: this.organization.username,
+      method_id: 1,
+      user_type: 'organization',
+      method_type: 'bank_transfer',
+      is_default: true,
+      data: bank_account as Cooperative.Users.IBankAccount,
+      deleted: false,
+    }
+
+    const paymentMethod = await new PaymentMethod(this.db, bankData)
+    await paymentMethod.validate()
+    await paymentMethod.save()
+
+    const currentBlock = await getCurrentBlock()
+
+    const orgForSave: InternalOrganizationData = {
+      ...organization_for_save,
+      deleted: false,
+      block_num: currentBlock,
+    }
+
+    return await this.data_service.save(orgForSave)
   }
 
-  async getOne(filter: Filter<OrganizationData>): Promise<OrganizationData | null> {
-    return this.data_service.getOne(filter)
+  async getOne(filter: Filter<InternalOrganizationData>): Promise<ExternalOrganizationData | null> {
+    const org = await this.data_service.getOne(filter)
+    const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
+
+    if (org) {
+      org.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: org.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
+    }
+
+    return org as ExternalOrganizationData
   }
 
-  async getMany(filter: Filter<OrganizationData>): Promise<OrganizationData[]> {
-    return this.data_service.getMany(filter, 'username')
+  async getMany(filter: Filter<InternalOrganizationData>): Promise<ExternalOrganizationData[]> {
+    const orgs = await this.data_service.getMany(filter, 'username')
+    const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
+
+    for (const org of orgs) {
+      org.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: org.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
+    }
+    return orgs as ExternalOrganizationData[]
   }
 
-  async getHistory(filter: Filter<OrganizationData>): Promise<OrganizationData[]> {
-    return this.data_service.getHistory(filter)
+  async getHistory(filter: Filter<InternalOrganizationData>): Promise<ExternalOrganizationData[]> {
+    const orgs = await this.data_service.getHistory(filter)
+    const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
+
+    for (const org of orgs) {
+      org.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: org.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
+    }
+    return orgs as ExternalOrganizationData[]
   }
 
-  async del(filter: Filter<OrganizationData>): Promise<DeleteResult> {
-    return this.data_service.deleteMany(filter)
+  async del(filter: Filter<InternalOrganizationData>): Promise<UpdateResult> {
+    return this.data_service.updateMany({ ...filter }, { deleted: true })
   }
 }

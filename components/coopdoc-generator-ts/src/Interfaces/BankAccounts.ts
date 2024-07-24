@@ -1,22 +1,14 @@
+import type { Cooperative } from 'cooptypes'
+
 export type Currency = 'RUB' | 'Other'
 
-export interface IBankAccount {
-  currency: Currency
-  card_number?: string // < номер карты
-  bank_name: string // < наименование банка
-  account_number: string // < номер счёта
-  details: {
-    bik: string // < бик
-    corr: string // < корр счёт
-    kpp: string // < кпп
-  }
-}
+export type IBankAccount = Cooperative.Users.IBankAccount
 
 export interface ISbpDetails {
   phone: string
 }
 
-export interface PaymentData {
+export interface IPaymentData {
   username: string
   method_id: number
   user_type: 'individual' | 'entrepreneur' | 'organization'

@@ -3,42 +3,71 @@
  * Do not modify this file manually
  */
 
-export interface forgotPassword {
-  body?: {
+export interface IForgotPassword {
+  email: string;
+}
+
+export interface ILogin {
+  email: string;
+  password: string;
+}
+
+export interface ILogout {
+  refreshToken: string;
+}
+
+export interface IRefreshTokens {
+  refreshToken: string;
+}
+
+export interface IResetPasswordBody {
+  password: string;
+}
+
+export interface IResetPasswordQuery {
+  token: string;
+}
+
+export interface IVerifyEmail {
+  token: string;
+}
+
+export interface RForgotPassword {
+  body: {
     email: string;
   };
 }
 
-export interface login {
-  body?: {
+export interface RLogin {
+  body: {
+    email: string;
     password: string;
-    username: string;
   };
 }
 
-export interface logout {
-  body?: {
+export interface RLogout {
+  body: {
     refreshToken: string;
   };
 }
 
-export interface refreshTokens {
-  body?: {
+export interface RRefreshTokens {
+  body: {
     refreshToken: string;
   };
 }
 
-export interface resetPassword {
-  body?: {
+export interface RResetPassword {
+  body: {
     password: string;
   };
-  query?: {
+  query: {
     token: string;
   };
 }
 
-export interface verifyEmail {
-  query?: {
+export interface RVerifyEmail {
+  query: {
     token: string;
   };
 }

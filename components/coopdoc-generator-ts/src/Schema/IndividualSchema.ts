@@ -1,7 +1,7 @@
 import type { JSONSchemaType } from 'ajv'
-import type { IndividualData } from '../Models/Individual'
+import type { ExternalIndividualData } from '../Models/Individual'
 
-export const individualSchema: JSONSchemaType<IndividualData> = {
+export const individualSchema: JSONSchemaType<ExternalIndividualData> = {
   type: 'object',
   properties: {
     username: { type: 'string' },
@@ -12,7 +12,6 @@ export const individualSchema: JSONSchemaType<IndividualData> = {
     full_address: { type: 'string' },
     phone: { type: 'string' },
     email: { type: 'string', format: 'email' },
-    // signature: { type: 'string' },
   },
   required: ['username', 'first_name', 'last_name', 'birthdate', 'full_address', 'phone'],
   additionalProperties: true,

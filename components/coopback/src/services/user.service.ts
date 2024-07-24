@@ -120,6 +120,19 @@ export const getUserByUsername = async (username: string) => {
 };
 
 /**
+ * Get user by username
+ * @param {string} id
+ * @returns {Promise<User>}
+ */
+export const getUserById = async (_id: string) => {
+  const user = await User.findById(_id);
+
+  if (!user) throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
+
+  return user;
+};
+
+/**
  * Get user by email
  * @param {string} email
  * @returns {Promise<User>}
@@ -134,8 +147,8 @@ export const getUserByEmail = async (email: string) => {
  * @param {Object} updateBody
  * @returns {Promise<User>}
  */
-export const updateUserById = async (username, updateBody) => {
-  const user = await getUserByUsername(username);
+export const updateUserById = async (id, updateBody) => {
+  const user = await getUserById(id);
   if (!user) {
     throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
   }
@@ -143,6 +156,27 @@ export const updateUserById = async (username, updateBody) => {
     throw new ApiError(http.BAD_REQUEST, 'Email already taken');
   }
   Object.assign(user, updateBody);
+  await user.save();
+  return user;
+};
+
+/**
+ * Update user by username
+ * @param {string} username
+ * @param {Object} updateBody
+ * @returns {Promise<User>}
+ */
+export const updateUserByUsername = async (username, updateBody) => {
+  const user = await getUserByUsername(username);
+
+  if (!user) {
+    throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
+  }
+  if (updateBody.email && (await User.isEmailTaken(updateBody.email))) {
+    throw new ApiError(http.BAD_REQUEST, 'Email already taken');
+  }
+  Object.assign(user, updateBody);
+
   await user.save();
   return user;
 };
@@ -159,14 +193,4 @@ export const deleteUserById = async (username) => {
   }
   await user.remove();
   return user;
-};
-
-export default {
-  createUser,
-  queryUsers,
-  getUserByUsername,
-  getUserByEmail,
-  updateUserById,
-  deleteUserById,
-  createServiceUser,
 };

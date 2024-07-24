@@ -11,12 +11,13 @@ export class Database {
   private sync: Collection | undefined
 
   constructor() {
+    console.log('mongo2: ', mongoUri)
     this.client = new MongoClient(mongoUri)
   }
 
   async connect() {
     await this.client.connect()
-    this.db = this.client.db('cooperative')
+    this.db = this.client.db()
     this.actions = this.db.collection('actions')
     this.deltas = this.db.collection('deltas')
     this.sync = this.db.collection('sync')

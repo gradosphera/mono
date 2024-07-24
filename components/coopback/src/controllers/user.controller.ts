@@ -39,11 +39,19 @@ export const getUsers = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['username', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
-  filter.role = { $ne: 'service' };
+  Object.keys(filter).forEach((key) => {
+    if (filter[key] !== undefined) {
+      filter[key] = { $eq: filter[key], $ne: 'service' };
+    } else {
+      filter[key] = { $ne: 'service' };
+    }
+  });
 
   const users = await userService.queryUsers(filter, options);
-
-  const result = {} as IGetResponse; //
+  const result = {} as IGetResponse & {
+    totalPages: number;
+    totalResults: number;
+  }; //
 
   //TODO wrong format answer
   const data = [] as any;
@@ -56,6 +64,8 @@ export const getUsers = catchAsync(async (req, res) => {
   result.results = data;
   result.limit = users.limit;
   result.page = users.page;
+  result.totalPages = users.totalPages;
+  result.totalResults = users.totalResults;
 
   res.send(result);
 });
@@ -73,7 +83,10 @@ export const getUser = catchAsync(async (req, res) => {
 });
 
 export const updateUser = catchAsync(async (req, res) => {
-  const user = await userService.updateUserById(req.params.username, req.body);
+  if (req.user.role !== 'member' && req.user.role !== 'chairman')
+    throw new ApiError(httpStatus.FORBIDDEN, 'Только председатель или член совета может обновить данные пользователя');
+
+  const user = await userService.updateUserByUsername(req.params.username, req.body);
   res.send(user);
 });
 

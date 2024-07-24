@@ -39,6 +39,7 @@ const tokenSchema = new Schema<IToken>(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
   }
 );
 

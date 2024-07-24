@@ -1,16 +1,22 @@
-import type { DeleteResult, Filter, InsertOneResult } from 'mongodb'
+import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
 import type { ValidateResult } from '../Services/Validator'
 import { Validator } from '../Services/Validator'
 import DataService from '../Services/Databazor/DataService'
 import type { MongoDBConnector } from '../Services/Databazor'
-import type { PaymentData } from '../Interfaces'
+import type { IPaymentData } from '../Interfaces'
 import { paymentMethodSchema } from '../Schema'
 
+export type PaymentData = IPaymentData & {
+  deleted: boolean
+}
+
 export class PaymentMethod {
+  db: MongoDBConnector
   paymentMethod?: PaymentData
   private data_service: DataService<PaymentData>
 
   constructor(storage: MongoDBConnector, data?: PaymentData) {
+    this.db = storage
     this.paymentMethod = data
     this.data_service = new DataService(storage, 'PaymentData')
   }
@@ -37,7 +43,7 @@ export class PaymentMethod {
     return this.data_service.getHistory(filter)
   }
 
-  async del(filter: Filter<PaymentData>): Promise<DeleteResult> {
-    return this.data_service.deleteMany(filter)
+  async del(filter: Filter<PaymentData>): Promise<UpdateResult> {
+    return this.data_service.updateMany({ ...filter, deleted: false }, { deleted: true })
   }
 }

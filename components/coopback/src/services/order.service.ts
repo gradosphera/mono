@@ -114,8 +114,6 @@ export async function createInitialOrder(username: string, data: ICreateInitialP
   if (user.type === 'individual' || user.type === 'entrepreneur') amount = cooperative.registration;
   else amount = cooperative.org_registration;
 
-  console.log('amount: ', cooperative);
-
   const [, symbol] = cooperative.initial.split(' ');
   let order_id = 0;
 
@@ -175,7 +173,7 @@ export async function createInitialOrder(username: string, data: ICreateInitialP
       type: 'registration',
       quantity: amount,
     };
-    console.log('amount: ', amount);
+
     order_id = await blockchainService.createOrder(order);
 
     // 4. Обновляешь ордер идентификатором ордера в блокчейне (order_id)

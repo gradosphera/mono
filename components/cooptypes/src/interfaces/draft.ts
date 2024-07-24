@@ -48,8 +48,6 @@ export interface INewid {
 export interface IOnedraft {
   id: IUint64
   registry_id: IUint64
-  creator: IName
-  actions: IName[]
   version: IUint64
   default_translation_id: IUint64
   title: string
@@ -60,10 +58,7 @@ export interface IOnedraft {
 
 export interface ITranslation {
   id: IUint64
-  creator: IName
   draft_id: IUint64
   lang: IName
   data: string
-  is_published: boolean
-  is_approved: boolean
 }

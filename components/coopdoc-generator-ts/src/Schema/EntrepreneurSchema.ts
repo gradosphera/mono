@@ -1,8 +1,8 @@
 import type { JSONSchemaType } from 'ajv'
-import type { EntrepreneurData } from '../Models/Entrepreneur'
+import type { ExternalEntrepreneurData } from '../Models/Entrepreneur'
 import { BankAccountSchema } from './BankAccountSchema'
 
-export const entrepreneurSchema: JSONSchemaType<EntrepreneurData> = {
+export const entrepreneurSchema: JSONSchemaType<ExternalEntrepreneurData> = {
   type: 'object',
   properties: {
     username: { type: 'string' },
@@ -29,7 +29,6 @@ export const entrepreneurSchema: JSONSchemaType<EntrepreneurData> = {
       required: BankAccountSchema.required,
       properties: BankAccountSchema.properties,
     },
-    // signature: { type: 'string' },
   },
   required: ['username', 'email', 'first_name', 'last_name', 'birthdate', 'phone', 'country', 'city', 'full_address', 'details', 'bank_account'],
   additionalProperties: true,

@@ -9,7 +9,8 @@ import { getFetch } from '../Utils/getFetch'
 import { getEnvVar } from '../config'
 import { organizationSchema } from '../Schema'
 import { Organization } from './Organization'
-import type { IndividualData } from './Individual'
+
+import type { ExternalIndividualData } from './Individual'
 import { Individual } from './Individual'
 
 export type CooperativeData = CooperativeApi.Model.ICooperativeData
@@ -38,12 +39,12 @@ export const CooperativeSchema: JSONSchemaType<CooperativeData> = {
 
 export class Cooperative {
   cooperative: CooperativeData | null
-  storage: MongoDBConnector
+  db: MongoDBConnector
 
   private data_service: DataService<CooperativeData>
 
   constructor(storage: MongoDBConnector) {
-    this.storage = storage
+    this.db = storage
     this.cooperative = null
     this.data_service = new DataService<CooperativeData>(storage, 'CooperativeData')
   }
@@ -51,7 +52,7 @@ export class Cooperative {
   async getOne(username: string, block_num?: number): Promise<CooperativeData> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
-    const organizationPrivateData = await new Organization(this.storage).getOne({ username, ...block_filter })
+    const organizationPrivateData = await new Organization(this.db).getOne({ username, ...block_filter })
 
     if (!organizationPrivateData)
       throw new Error('Информация о организации не обнаружена в базе данных.')
@@ -83,13 +84,13 @@ export class Cooperative {
     if (!soviet)
       throw new Error('Совет кооператива не обнаружен в базе данных.')
 
-    const userModel = new Individual(this.storage)
+    const userModel = new Individual(this.db)
 
     const members = [] as MembersData[]
-    let chairman = {} as IndividualData
+    let chairman = {} as ExternalIndividualData
 
     for (const member of soviet.members) {
-      const userData = await userModel.getOne({ username: member.username, ...block_filter }) as IndividualData
+      const userData = await userModel.getOne({ username: member.username, ...block_filter }) as ExternalIndividualData
       if (!userData)
         throw new Error(`Пользователь ${member.username} не найден в базе данных.`)
 
@@ -99,7 +100,6 @@ export class Cooperative {
         chairman = { ...member, ...userData }
     }
 
-    console.log(cooperativeBlockchainData)
     this.cooperative = {
       ...organizationPrivateData,
       ...cooperativeBlockchainData,
@@ -107,8 +107,6 @@ export class Cooperative {
       members,
       totalMembers: members.length,
     }
-
-    console.log(this.cooperative)
 
     this.validate()
 

@@ -8,13 +8,21 @@ import { User } from '../../src/models';
 import { IGenerateJoinCoop, IGeneratedDocument, IIndividualData } from 'coopdoc-generator-ts';
 import { IDocument, IJoinCooperative } from '../../src/types';
 import ecc from 'eosjs-ecc';
+import { admin, chairman, insertUsers, voskhod } from '../fixtures/user.fixture';
+import { installInitialCooperativeData } from '../fixtures/document.fixture';
+import { PrivateKey } from '@wharfkit/antelope';
 
 setupTestDB();
 
 describe('Проверка данных', () => {
   let newUser;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    const coopData = voskhod;
+
+    await insertUsers([coopData, chairman, admin]);
+    await installInitialCooperativeData();
+
     const email = faker.internet.email().toLowerCase();
     newUser = {
       email: email,
@@ -39,7 +47,7 @@ describe('Проверка данных', () => {
   describe('POST /v1/users/join-cooperative', () => {
     let newUser;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       const email = faker.internet.email().toLowerCase();
       newUser = {
         email: email,
@@ -97,7 +105,7 @@ describe('Проверка данных', () => {
         .post('/v1/data/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
-      console.log('res.body: ', res.body);
+      // console.log('res.body: ', res.body);
 
       expect(res.status).toBe(httpStatus.CREATED);
 
@@ -146,6 +154,8 @@ describe('Проверка данных', () => {
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(res.body.meta);
 
+      // console.log('res.body', res_regenerated.body);
+
       expect(res.status).toBe(httpStatus.CREATED);
 
       expect(res.body.hash).toEqual(res_regenerated.body.hash);
@@ -191,7 +201,7 @@ describe('Проверка данных', () => {
         .post('/v1/users/join-cooperative')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(joinCoopData);
-      console.log(joincoop_result.body);
+      // console.log(joincoop_result.body);
       expect(joincoop_result.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
     });
 
@@ -216,11 +226,15 @@ describe('Проверка данных', () => {
         .post('/v1/data/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
+
       expect(res.status).toBe(httpStatus.CREATED);
 
       const generatedDocument: IGeneratedDocument = res.body;
 
-      const sign = await ecc.sign(generatedDocument.hash, '5JA8KCpXbCfWA9fS4zHKgcBPbnNaRha8iKHhZLV7ks9Gs3LenpU');
+      // const sign = await ecc.sign(generatedDocument.hash, '5JA8KCpXbCfWA9fS4zHKgcBPbnNaRha8iKHhZLV7ks9Gs3LenpU');
+      const key = '5JA8KCpXbCfWA9fS4zHKgcBPbnNaRha8iKHhZLV7ks9Gs3LenpU';
+      const wif = await PrivateKey.fromString(key);
+      const sign = await wif.signDigest(generatedDocument.hash).toString();
 
       const signedDocument: IDocument = {
         hash: generatedDocument.hash,
@@ -238,7 +252,7 @@ describe('Проверка данных', () => {
         .post('/v1/users/join-cooperative')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(joinCoopData);
-      console.log(joincoop_result.body);
+      // console.log(joincoop_result.body);
       expect(joincoop_result.status).toBe(httpStatus.BAD_REQUEST);
     });
 
@@ -287,7 +301,9 @@ describe('Проверка данных', () => {
 
       const generatedDocument: IGeneratedDocument = res.body;
 
-      const sign = await ecc.sign(generatedDocument.hash, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');
+      const key = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3';
+      const wif = await PrivateKey.fromString(key);
+      const sign = await wif.signDigest(generatedDocument.hash).toString();
 
       const signedDocument: IDocument = {
         hash: generatedDocument.hash,
@@ -305,14 +321,14 @@ describe('Проверка данных', () => {
         .post('/v1/users/join-cooperative')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(joinCoopData);
-      console.log(joincoop_result.body);
+      // console.log(joincoop_result.body);
       expect(joincoop_result.status).toBe(httpStatus.OK);
 
       const dbUser2 = await User.findOne({ username: newUser.username });
       expect(dbUser2).toBeDefined();
       expect(dbUser2?.status).toBe('joined');
       expect(dbUser2?.statement).toBeDefined();
-      console.log(dbUser2);
+      // console.log(dbUser2);
     });
 
     test('получаем платежный ордер на вступление', async () => {
@@ -360,7 +376,9 @@ describe('Проверка данных', () => {
 
       const generatedDocument: IGeneratedDocument = res.body;
 
-      const sign = await ecc.sign(generatedDocument.hash, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');
+      const key = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3';
+      const wif = await PrivateKey.fromString(key);
+      const sign = await wif.signDigest(generatedDocument.hash).toString();
 
       const signedDocument: IDocument = {
         hash: generatedDocument.hash,
@@ -378,26 +396,28 @@ describe('Проверка данных', () => {
         .post('/v1/users/join-cooperative')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(joinCoopData);
-      console.log(joincoop_result.body);
+      // console.log(joincoop_result.body);
       expect(joincoop_result.status).toBe(httpStatus.OK);
 
       const dbUser2 = await User.findOne({ username: newUser.username });
       expect(dbUser2).toBeDefined();
       expect(dbUser2?.status).toBe('joined');
       expect(dbUser2?.statement).toBeDefined();
-      console.log(dbUser2);
+      // console.log(dbUser2);
 
       const initialPayment = await request(app)
         .post('/v1/orders/initial')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
-        .send({ username: newUser.username });
-      console.log('result: ', initialPayment.body);
+        .send({ provider: 'yookassa' });
 
       expect(initialPayment.status).toBe(httpStatus.CREATED);
-      expect(initialPayment.body?.confirmation_token).toBeDefined();
+      expect(initialPayment.body?.details?.token).toBeDefined();
       expect(initialPayment.body?.order_id).toBeDefined();
+      expect(initialPayment.body?.provider).toBe('yookassa');
     });
   });
+
+  // ---
   // test('регистрируем пользователя в блокчейне', async () => {
   //   await request(app)
   //   .post('/v1/auth/register')

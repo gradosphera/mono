@@ -18,6 +18,8 @@ type testUser = Omit<IUser, 'getPrivateData' | 'isPasswordMatch' | 'private_data
   individual_data?: Cooperative.Users.IIndividualData;
   organization_data?: Cooperative.Users.IOrganizationData;
   entrepreneur_data?: Cooperative.Users.IEntrepreneurData;
+  block_num: number;
+  deleted: boolean;
 };
 
 const email1 = faker.internet.email().toLowerCase();
@@ -41,7 +43,7 @@ export const admin: testUser = {
   public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
   statement: {
     hash: '',
-    meta: undefined,
+    meta: {},
     public_key: '',
     signature: '',
   },
@@ -57,8 +59,11 @@ export const admin: testUser = {
     email: email1,
     full_address: 'Russia, Moscow, Tverskaya street, 3',
   },
+  block_num: 0,
+  deleted: false,
 };
 
+const usernameOne = generateUsername();
 export const userOne: testUser = {
   _id: generateRandomId(),
   email: email2,
@@ -68,18 +73,18 @@ export const userOne: testUser = {
   is_registered: true,
   role: 'user',
   is_email_verified: false,
-  username: generateUsername(),
+  username: usernameOne,
   public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
   statement: {
     hash: '',
-    meta: undefined,
+    meta: {},
     public_key: '',
     signature: '',
   },
   referer: '',
   type: 'individual',
   individual_data: {
-    username: generateUsername(),
+    username: usernameOne,
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     middle_name: '',
@@ -88,8 +93,11 @@ export const userOne: testUser = {
     email: email2,
     full_address: 'Russia, Moscow, Tverskaya street, 1',
   },
+  block_num: 0,
+  deleted: false,
 };
 
+const usernameTwo = generateUsername();
 export const userTwo: testUser = {
   _id: generateRandomId(),
   email: email3,
@@ -99,18 +107,18 @@ export const userTwo: testUser = {
   is_registered: true,
   role: 'user',
   is_email_verified: false,
-  username: generateUsername(),
+  username: usernameTwo,
   public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
   statement: {
     hash: '',
-    meta: undefined,
+    meta: {},
     public_key: '',
     signature: '',
   },
   referer: '',
   type: 'individual',
   individual_data: {
-    username: generateUsername(),
+    username: usernameTwo,
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
     middle_name: '',
@@ -119,6 +127,8 @@ export const userTwo: testUser = {
     email: email3,
     full_address: 'Russia, Moscow, Tverskaya street, 2',
   },
+  block_num: 0,
+  deleted: false,
 };
 
 export const chairman: testUser = {
@@ -134,7 +144,7 @@ export const chairman: testUser = {
   public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
   statement: {
     hash: '',
-    meta: undefined,
+    meta: {},
     public_key: '',
     signature: '',
   },
@@ -150,6 +160,8 @@ export const chairman: testUser = {
     email: email4,
     full_address: 'Russia, Moscow, Tverskaya street, 1',
   },
+  block_num: 0,
+  deleted: false,
 };
 
 export const voskhod: testUser = {
@@ -165,7 +177,7 @@ export const voskhod: testUser = {
   public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
   statement: {
     hash: '',
-    meta: undefined,
+    meta: {},
     public_key: '',
     signature: '',
   },
@@ -205,35 +217,83 @@ export const voskhod: testUser = {
       },
     },
   },
+  block_num: 0,
+  deleted: false,
 };
 
-export const insertPrivateEntrepreneurUserData = async (data: Cooperative.Users.IEntrepreneurData) => {
+export const insertPrivateEntrepreneurUserData = async (data: any) => {
   const collection = mongoose.connection.db.collection('EntrepreneurData'); // Замените на имя вашей коллекции
-  await collection.insertOne(data);
+  await collection.insertOne({ ...data });
 };
 
-export const insertPrivateIndividualUserData = async (data: Cooperative.Users.IIndividualData) => {
+export const insertPrivateIndividualUserData = async (data: any) => {
   const collection = mongoose.connection.db.collection('IndividualData'); // Замените на имя вашей коллекции
-  await collection.insertOne(data);
+  await collection.insertOne({ ...data });
 };
 
-export const insertPrivateOrganizationUserData = async (data: Cooperative.Users.IOrganizationData) => {
+export const insertPrivateOrganizationUserData = async (data: any) => {
   const collection = mongoose.connection.db.collection('OrgData'); // Замените на имя вашей коллекции
-  await collection.insertOne(data);
+  await collection.insertOne({ ...data });
+};
+
+export interface IPaymentData {
+  username: string;
+  method_id: number;
+  user_type: 'individual' | 'entrepreneur' | 'organization';
+  method_type: 'sbp' | 'bank_transfer';
+  is_default: boolean;
+  data: any;
+}
+
+export const insertPaymentMethod = async (data: IPaymentData, block_num: number) => {
+  const collection = mongoose.connection.db.collection('PaymentData'); // Замените на имя вашей коллекции
+  await collection.insertOne({ ...data, block_num, _created_at: new Date() });
 };
 
 export const insertUsers = async (users: testUser[]) => {
   for (const user of users) {
-    const { type, individual_data, organization_data, entrepreneur_data, ...rest } = user;
+    const { type, individual_data, organization_data, entrepreneur_data, block_num, ...rest } = user;
 
     await User.insertMany([{ ...rest, type, password: hashedPassword }]);
 
     if (type === 'individual' && individual_data) {
-      await insertPrivateIndividualUserData({ ...individual_data, username: rest.username });
+      await insertPrivateIndividualUserData({
+        ...individual_data,
+        username: rest.username,
+        block_num,
+        _created_at: new Date(),
+      });
     } else if (type === 'organization' && organization_data) {
-      await insertPrivateOrganizationUserData({ ...organization_data, username: rest.username });
+      const { bank_account, ...org_data } = organization_data;
+      await insertPrivateOrganizationUserData({ ...org_data, username: rest.username, block_num, _created_at: new Date() });
+
+      await insertPaymentMethod(
+        {
+          username: rest.username,
+          method_id: 1,
+          user_type: 'organization',
+          method_type: 'bank_transfer',
+          is_default: true,
+          data: bank_account,
+        },
+        block_num
+      );
     } else if (type === 'entrepreneur' && entrepreneur_data) {
-      await insertPrivateEntrepreneurUserData({ ...entrepreneur_data, username: rest.username });
+      const { bank_account, ...entr_data } = entrepreneur_data;
+
+      await insertPrivateEntrepreneurUserData({ ...entr_data, username: rest.username, block_num, _created_at: new Date() });
+
+      await insertPaymentMethod(
+        {
+          username: rest.username,
+          method_id: 1,
+          user_type: 'organization',
+          method_type: 'bank_transfer',
+          is_default: true,
+          data: bank_account,
+        },
+        block_num
+      );
     }
   }
 };

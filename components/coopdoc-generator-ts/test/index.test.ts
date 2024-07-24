@@ -1,8 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { RegistratorContract, SovietContract } from 'cooptypes'
-import type { PaymentData } from '../src'
 import { Generator } from '../src'
-import type { IndividualData, OrganizationData } from '../src/Models'
 import type { IGeneratedDocument } from '../src/Interfaces/Documents'
 import { saveBufferToDisk } from '../src/Utils/saveBufferToDisk'
 import { loadBufferFromDisk } from '../src/Utils/loadBufferFromDisk'
@@ -13,7 +11,8 @@ import { MongoDBConnector } from '../src/Services/Databazor'
 const mongoUri = 'mongodb://127.0.0.1:27017/cooperative'
 const coopname = 'voskhod'
 
-import type { EntrepreneurData } from '../src/Models/Entrepreneur'
+import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData } from '../src/Models'
+import type { PaymentData } from '../src/Models/PaymentMethod'
 import { signatureExample } from './signatureExample'
 
 const generator = new Generator()
@@ -178,7 +177,7 @@ describe('тест генератора документов', async () => {
   })
 
   it('сохранение и извлечение данных пользователя', async () => {
-    const userData: IndividualData = {
+    const userData: ExternalIndividualData = {
       username: 'ant',
       first_name: 'Имя',
       last_name: 'Фамилия',
@@ -211,10 +210,12 @@ describe('тест генератора документов', async () => {
       data: {
         phone: '+7-111-111-111-11',
       },
+      deleted: false,
     }
 
     const saved = await generator.save('paymentMethod', paymentData)
     const paymentMethod = await generator.get('paymentMethod', { username: 'ant', method_id: paymentData.method_id }) as any
+    expect(paymentMethod.deleted).toEqual(false)
 
     Object.keys(paymentData).forEach((field) => {
       expect(paymentMethod[field]).toBeDefined()
@@ -226,12 +227,15 @@ describe('тест генератора документов', async () => {
 
     expect(paymentList.length).toEqual(1)
 
-    const deleted = await generator.del('paymentMethod', { method_id: paymentData.method_id })
-    expect(deleted.deletedCount).toEqual(1)
+    await generator.del('paymentMethod', { username: 'ant', method_id: paymentData.method_id })
+
+    const updatedPaymentMethod = await generator.get('paymentMethod', { username: 'ant', method_id: paymentData.method_id }) as any
+
+    expect(updatedPaymentMethod.deleted).toEqual(true)
   })
 
   it('сохранение данных кооператива', async () => {
-    const organizationData: OrganizationData = {
+    const organizationData: ExternalOrganizationData = {
       username: 'voskhod',
       type: 'coop',
       is_cooperative: true,
@@ -342,7 +346,7 @@ describe('тест генератора документов', async () => {
   })
 
   it('сохранение данных организации', async () => {
-    const organizationData: OrganizationData = {
+    const organizationData: ExternalOrganizationData = {
       username: 'exampleorg',
       type: 'ooo',
       is_cooperative: false,
@@ -437,7 +441,7 @@ describe('тест генератора документов', async () => {
   })
 
   it('сохранение данных индивидуального предпринимателя', async () => {
-    const entrepreneurData: EntrepreneurData = {
+    const entrepreneurData: ExternalEntrepreneurData = {
       username: 'entrepreneur',
       first_name: 'John',
       last_name: 'Doe',
@@ -466,13 +470,13 @@ describe('тест генератора документов', async () => {
     }
 
     const saved = await generator.save('entrepreneur', entrepreneurData)
-
-    const organization = await generator.get('entrepreneur', { username: entrepreneurData.username }) as any
-
-    expect(organization._id).toEqual(saved.insertedId)
+    console.log(saved)
+    const entrepreneur = await generator.get('entrepreneur', { username: entrepreneurData.username }) as any
+    console.log(entrepreneur)
+    expect(entrepreneur._id).toEqual(saved.insertedId)
 
     Object.keys(entrepreneurData).forEach((field) => {
-      expect(organization[field]).toBeDefined()
+      expect(entrepreneur[field]).toBeDefined()
     })
   })
 

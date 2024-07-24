@@ -3,19 +3,18 @@ import type { JSONSchemaType } from 'ajv'
 import type { IDecisionData, IMetaDocument, ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Services/Validator'
 import { individualSchema } from '../Schema/IndividualSchema'
-import type { IndividualData, OrganizationData } from '../Models'
 import { organizationSchema } from '../Schema'
 import { type CooperativeData, CooperativeSchema } from '../Models/Cooperative'
-import type { EntrepreneurData } from '../Models/Entrepreneur'
 import { entrepreneurSchema } from '../Schema/EntrepreneurSchema'
 import { decisionSchema } from '../Schema/DecisionSchema'
+import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData } from '../Models'
 
 // Модель данных
 export interface IJoinCoopDecisionAction {
   type: string
-  individual?: IndividualData
-  organization?: OrganizationData
-  entrepreneur?: EntrepreneurData
+  individual?: ExternalIndividualData
+  organization?: ExternalOrganizationData
+  entrepreneur?: ExternalEntrepreneurData
   coop: CooperativeData
   decision: IDecisionData
   meta: IMetaDocument

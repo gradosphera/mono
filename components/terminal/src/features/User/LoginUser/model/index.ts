@@ -3,11 +3,11 @@ import { useGlobalStore } from 'src/shared/store'
 import { api } from '../api'
 
 export function useLoginUser() {
-  async function login(username: string, wif: string): Promise<void> {
-    const user = await api.loginUser(username, wif)
+  async function login(email: string, wif: string): Promise<void> {
+    const auth = await api.loginUser(email, wif)
     const globalStore = useGlobalStore()
-    await globalStore.setWif(username, wif)
-    await globalStore.setTokens(user.tokens)
+    await globalStore.setWif(auth.user.username, wif)
+    await globalStore.setTokens(auth.tokens)
 
     const session = useSessionStore()
     await session.init()

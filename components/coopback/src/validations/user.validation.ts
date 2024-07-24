@@ -112,7 +112,7 @@ export const RGetUser = Joi.object({
 
 export const RUpdateUser = Joi.object({
   params: Joi.object().keys({
-    username: Joi.required().custom(objectId),
+    username: Joi.string().required(),
   }),
   body: Joi.object()
     .keys({

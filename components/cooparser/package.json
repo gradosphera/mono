@@ -41,6 +41,7 @@
     "deploy-production": "git checkout production && git merge testnet && git push origin production && git checkout main",
     "build": "unbuild",
     "dev": "concurrently -n 'PARSER' -c 'bgBlue.white' \"nodemon --watch src --ext ts,js,env --exec 'esno' src/index.ts\"",
+    "dev:test": "NODE_ENV=test concurrently -n 'PARSER' -c 'bgBlue.white' \"nodemon --watch src --ext ts,js,env --exec 'esno' src/index.ts\"",
     "lint": "eslint .",
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish",

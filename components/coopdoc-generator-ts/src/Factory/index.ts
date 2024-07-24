@@ -1,9 +1,8 @@
 import type { JSONSchemaType } from 'ajv'
 import moment from 'moment-timezone'
 import { DraftContract, SovietContract } from 'cooptypes'
-import type { ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, ITemplate, ITranslations } from '../Interfaces'
+import type { ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, ITemplate, ITranslations, externalDataTypes } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
-import type { IndividualData, OrganizationData } from '../Models'
 import { Individual, Organization } from '../Models'
 import type { IDecisionData, IGenerate } from '../Interfaces/Documents'
 import { PDFService } from '../Services/Generator'
@@ -11,7 +10,6 @@ import packageJson from '../../package.json'
 import { Validator } from '../Services/Validator'
 import type { CooperativeData } from '../Models/Cooperative'
 import { Cooperative } from '../Models/Cooperative'
-import type { EntrepreneurData } from '../Models/Entrepreneur'
 import { Entrepreneur } from '../Models/Entrepreneur'
 import { getFetch } from '../Utils/getFetch'
 import { getEnvVar } from '../config'
@@ -32,16 +30,16 @@ export abstract class DocFactory {
     return new Validator(schema, combinedData).validate()
   }
 
-  async getUser(username: string, block_num?: number): Promise<{ type: string, data: IndividualData | OrganizationData | EntrepreneurData }> {
+  async getUser(username: string, block_num?: number): Promise<{ type: string, data: externalDataTypes }> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
     const individual = await new Individual(this.storage).getOne({ username, ...block_filter })
     const organization = await new Organization(this.storage).getOne({ username, ...block_filter })
     const entrepreneur = await new Entrepreneur(this.storage).getOne({ username, ...block_filter })
 
-    const userData: { type: string, data: IndividualData | OrganizationData | EntrepreneurData } = {
+    const userData: { type: string, data: externalDataTypes } = {
       type: '',
-      data: {} as IndividualData | OrganizationData | EntrepreneurData,
+      data: {} as externalDataTypes,
     }
 
     if (individual) {
@@ -172,7 +170,7 @@ export abstract class DocFactory {
   }
 
   async generatePDF(
-    data: IndividualData | OrganizationData | EntrepreneurData,
+    data: externalDataTypes,
     context: string,
     vars: ICombinedData,
     translation: ITranslations,
@@ -187,7 +185,7 @@ export abstract class DocFactory {
     return document
   }
 
-  getFullName(data: IndividualData | OrganizationData | EntrepreneurData): string {
+  getFullName(data: externalDataTypes): string {
     if ('first_name' in data)
       return `${data.last_name} ${data.first_name} ${data.middle_name}`
 

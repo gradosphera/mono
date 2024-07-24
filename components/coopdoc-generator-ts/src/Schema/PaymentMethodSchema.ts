@@ -1,8 +1,8 @@
 import type { JSONSchemaType } from 'ajv'
-import type { IPaymentMethod } from '../Interfaces'
+import type { IPaymentData } from '../Interfaces'
 import { BankAccountSchema } from './BankAccountSchema'
 
-export const paymentMethodSchema: JSONSchemaType<IPaymentMethod> = {
+export const paymentMethodSchema: JSONSchemaType<IPaymentData> = {
   type: 'object',
   properties: {
     username: { type: 'string' },
@@ -30,5 +30,5 @@ export const paymentMethodSchema: JSONSchemaType<IPaymentMethod> = {
     },
   },
   required: ['username', 'method_id', 'user_type', 'method_type', 'is_default', 'data'],
-  additionalProperties: false,
+  additionalProperties: true,
 }

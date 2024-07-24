@@ -27,12 +27,12 @@ export const installInitialCooperativeData = async () => {
     is_cooperative: true,
     is_branched: false,
     coop_type: 'conscoop',
-    registration: '2.0000 RUB',
-    initial: '1.0000 RUB',
-    minimum: '1.0000 RUB',
-    org_registration: '20.0000 RUB',
-    org_initial: '10.0000 RUB',
-    org_minimum: '10.0000 RUB',
+    registration: '2.0000 TRUB',
+    initial: '1.0000 TRUB',
+    minimum: '1.0000 TRUB',
+    org_registration: '20.0000 TRUB',
+    org_initial: '10.0000 TRUB',
+    org_minimum: '10.0000 TRUB',
   } as RegistratorContract.Tables.Cooperatives.ICooperative);
 
   await insertDelta(delta1);
@@ -66,7 +66,7 @@ export const installInitialCooperativeData = async () => {
         creator: 'eosio',
         version: String(1),
         default_translation_id: String(k),
-        registry_id: Number(id),
+        registry_id: String(id),
         title: template.title,
         description: template.description,
         context: template.context,

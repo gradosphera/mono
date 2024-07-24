@@ -1,8 +1,8 @@
 import type { JSONSchemaType } from 'ajv'
-import type { OrganizationData } from '../Models/Organization'
+import type { ExternalOrganizationData } from '../Models/Organization'
 import { BankAccountSchema } from './BankAccountSchema'
 
-export const organizationSchema: JSONSchemaType<OrganizationData> = {
+export const organizationSchema: JSONSchemaType<ExternalOrganizationData> = {
   type: 'object',
   properties: {
     username: { type: 'string' },

@@ -9,11 +9,21 @@ export const setupTestDB = () => {
   });
 
   beforeEach(async () => {
+    // const db = mongoose.connection.db;
+    // const collections = ['IndividualData', 'OrgData', 'EntrepreneurData', 'PaymentData'];
+
+    // await Promise.all(
+    //   collections.map(async (name) => {
+    //     const collection = db.collection(name);
+    //     return collection.deleteMany({});
+    //   })
+    // );
+
     await Promise.all(Object.values(mongoose.connection.collections).map(async (collection) => collection.deleteMany({})));
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
     await generator.disconnect();
+    await mongoose.disconnect();
   });
 };
