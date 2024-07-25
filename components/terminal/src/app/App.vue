@@ -3,6 +3,8 @@ router-view(v-if="isLoaded")
 </template>
 
 <script setup lang="ts">
+console.log('on start')
+
 import { onMounted, ref } from 'vue'
 import { FailAlert } from 'src/shared/api/alerts'
 import { handleException } from 'src/shared/api';

@@ -45,6 +45,8 @@ export default route(function (/* { store, ssrContext } */) {
       from: RouteLocationNormalizedGeneric,
       next: any
     ) => {
+      console.log('on router start')
+
       const currentUser = useCurrentUserStore();
       const session = useSessionStore();
 
