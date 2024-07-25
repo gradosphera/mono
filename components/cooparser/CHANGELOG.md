@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.17](https://github.com/copenomics/cooparser/compare/cooparser-ts@1.0.17-alpha.2...cooparser-ts@1.0.17) (2024-07-25)
+
+**Note:** Version bump only for package cooparser-ts
+
+
+
+
+
 ## [1.0.16](https://github.com/copenomics/cooparser/compare/cooparser-ts@1.0.16-alpha.0...cooparser-ts@1.0.16) (2024-07-15)
 
 **Note:** Version bump only for package cooparser-ts

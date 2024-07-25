@@ -1,6 +1,6 @@
 {
   "name": "coopback",
-  "version": "1.7.27-alpha.5",
+  "version": "1.7.27",
   "description": "",
   "private": true,
   "bin": "bin/createNodejsApp.js",
