@@ -11,7 +11,7 @@ import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 import { ICreatedPayment, IYandexIPN, PaymentDetails } from '../types/common';
 import { Cooperative } from 'cooptypes';
-import type { Filter } from 'mongodb';
+import { FilterQuery } from 'mongoose';
 
 const { connection } = mongoose;
 
@@ -19,11 +19,11 @@ export const savePaymentMethod = async (data: Cooperative.Payments.IPaymentData)
   return await generator.save('paymentMethod', data);
 };
 
-export const deletePaymentMethod = async (filter: Filter<Cooperative.Payments.IPaymentData>) => {
+export const deletePaymentMethod = async (filter: FilterQuery<Cooperative.Payments.IPaymentData>) => {
   return await generator.del('paymentMethod', filter as any);
 };
 
-export const listPaymentMethods = async (filter: Filter<Cooperative.Payments.IPaymentData>) => {
+export const listPaymentMethods = async (filter: FilterQuery<Cooperative.Payments.IPaymentData>) => {
   return await generator.list('paymentMethod', filter as any);
 };
 
