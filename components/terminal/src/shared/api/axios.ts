@@ -4,7 +4,7 @@ import { useGlobalStore } from '../store';
 
 export async function sendGET(
   url: string,
-  params: object,
+  params?: object,
   skip_auth = false
 ): Promise<any> {
   try {
@@ -41,7 +41,7 @@ export async function sendGET(
 
 export async function sendPOST(
   url: string,
-  data: object,
+  data?: object,
   skip_auth = false
 ): Promise<any> {
   try {

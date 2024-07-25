@@ -339,7 +339,7 @@ describe('Проверка получения документов', () => {
 
       expect(res.status).toBe(httpStatus.OK);
 
-      const list = await request(app).get(`/v1/payments/methods`).set('Authorization', `Bearer ${adminAccessToken}`).send();
+      const list = await request(app).get(`/v1/payments/methods/`).set('Authorization', `Bearer ${adminAccessToken}`).send();
 
       expect(list.status).toBe(httpStatus.OK);
 
