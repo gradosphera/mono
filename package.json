@@ -10,6 +10,7 @@
     "cooptypes": "workspace:*",
     "gh-pages": "^6.1.1",
     "lerna": "^8.1.6",
+    "lint-staged": "^15.2.7",
     "terminal": "workspace:*"
   },
   "scripts": {
