@@ -76,7 +76,7 @@ const receiver = computed(() => props.receiver)
 const loadDocuments = async () => {
   try {
     onLoading.value = true
-    documents.value = (await sendGET('/v1/data/get-documents', {
+    documents.value = (await sendGET('/v1/documents/get-documents', {
       filter: {
         receiver: receiver.value ? receiver.value : route.params.coopname
       },

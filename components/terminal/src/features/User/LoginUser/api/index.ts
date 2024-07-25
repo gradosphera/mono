@@ -2,11 +2,11 @@ import { sendPOST } from 'src/shared/api';
 import { hashSHA256 } from 'src/shared/api/crypto';
 import { ICreatedUser } from 'src/shared/lib/types/user';
 
-async function loginUser(username: string, wif: string): Promise<ICreatedUser> {
+async function loginUser(email: string, wif: string): Promise<ICreatedUser> {
   const password = await hashSHA256(wif);
 
   const data = {
-    username,
+    email,
     password,
   };
 

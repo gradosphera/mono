@@ -1,7 +1,7 @@
 import config from '../src/config/config';
 import { User } from '../src/models';
 import { tokenService } from '../src/services';
-import userService from '../src/services/user.service';
+import { userService } from '../src/services';
 import mongoose from 'mongoose';
 
 const args = process.argv.slice(2);

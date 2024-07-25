@@ -28,6 +28,7 @@
     "docker:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up",
     "docker:test": "docker-compose -f docker-compose.yml -f docker-compose.test.yml up",
     "types": "ts-node scripts/types.ts",
+    "init": "ts-node scripts/init.ts",
     "swagger": "ts-node scripts/swagger.ts",
     "typecheck": "tsc --noEmit",
     "docs-watch": "swagger-ui-watcher ./src/docs/swagger.json",
