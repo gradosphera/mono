@@ -8,8 +8,8 @@ import { User } from '../../src/models';
 import { IGenerateJoinCoop, IGeneratedDocument, IIndividualData } from 'coopdoc-generator-ts';
 import { IDocument, IJoinCooperative } from '../../src/types';
 import ecc from 'eosjs-ecc';
-import { admin, chairman, insertUsers, userTwo, voskhod } from '../fixtures/user.fixture';
-import { adminAccessToken } from '../fixtures/token.fixture';
+import { admin, chairman, insertUsers, userOne, userTwo, voskhod } from '../fixtures/user.fixture';
+import { adminAccessToken, userOneAccessToken } from '../fixtures/token.fixture';
 import { fixtureAction, insertAction, insertActions, installInitialCooperativeData } from '../fixtures/document.fixture';
 import { SovietContract } from 'cooptypes';
 import { participantOne } from '../fixtures/participant.fixture';
@@ -19,14 +19,25 @@ const public_key = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV';
 setupTestDB();
 
 describe('Проверка получения документов', () => {
-  describe('GET /v1/data/get-documents', () => {
-    test('Нельзя без авторизации админа получить все документы', async () => {
-      const documents = await request(app).get('/v1/data/get-documents').send();
+  describe('GET /v1/documents/get-documents', () => {
+    test('Нельзя без авторизации получить все документы', async () => {
+      const documents = await request(app).get('/v1/documents/get-documents').send();
 
       expect(documents.status).toBe(httpStatus.UNAUTHORIZED);
     });
 
-    test('Успешное получение списка документов', async () => {
+    test('Нельзя без авторизации админа получить все документы', async () => {
+      await insertUsers([userOne]);
+
+      const documents = await request(app)
+        .get('/v1/documents/get-documents')
+        .set('Authorization', `Bearer ${userOneAccessToken}`)
+        .send();
+
+      expect(documents.status).toBe(httpStatus.FORBIDDEN);
+    });
+
+    test('Успешное генерация и извлечение списка документов', async () => {
       const coopData = voskhod;
 
       await insertUsers([coopData, chairman, admin]);
@@ -46,7 +57,7 @@ describe('Проверка получения документов', () => {
       };
 
       let res = await request(app)
-        .post('/v1/data/generate')
+        .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
 
@@ -200,7 +211,7 @@ describe('Проверка получения документов', () => {
 
       //получаем документ
       const documents = await request(app)
-        .get('/v1/data/get-documents')
+        .get('/v1/documents/get-documents')
         .set('Authorization', `Bearer ${adminAccessToken}`)
         .query({ limit: 1 })
         .send();

@@ -1,5 +1,5 @@
 import { getActions } from '../utils/getFetch';
-import { generator } from './data.service';
+import { generator } from './document.service';
 import { userService, blockchainService } from './index';
 import { Cooperative, RegistratorContract, SovietContract } from 'cooptypes';
 import ApiError from '../utils/ApiError';

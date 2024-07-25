@@ -225,7 +225,12 @@ describe('тест генератора документов', async () => {
 
     const paymentList = await generator.list('paymentMethod', { username: 'ant', method_id: paymentData.method_id })
 
-    expect(paymentList.length).toEqual(1)
+    expect(paymentList.limit).toBeDefined()
+    expect(paymentList.results).toBeDefined()
+    expect(paymentList.totalPages).toBeDefined()
+    expect(paymentList.totalResults).toBeDefined()
+
+    expect(paymentList.results.length).toEqual(1)
 
     await generator.del('paymentMethod', { username: 'ant', method_id: paymentData.method_id })
 

@@ -1,7 +1,7 @@
 import http from 'http-status';
 import { User } from '../models';
 import ApiError from '../utils/ApiError';
-import { generator } from './data.service';
+import { generator } from './document.service';
 import { ICreateUser, IJoinCooperative } from '../types/user.validation';
 import ecc from 'eosjs-ecc';
 import { PublicKey, Signature } from '@wharfkit/antelope';

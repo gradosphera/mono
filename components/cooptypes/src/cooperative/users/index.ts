@@ -1,21 +1,10 @@
+import type { IBankAccount } from '../payments'
+
 export type Country = 'Russia' | 'Other'
 
 export interface Details {
   inn: string
   ogrn: string
-}
-export type Currency = 'RUB' | 'Other'
-
-export interface IBankAccount {
-  currency: Currency
-  card_number?: string // < номер карты
-  bank_name: string // < наименование банка
-  account_number: string // < номер счёта
-  details: {
-    bik: string // < бик
-    corr: string // < корр счёт
-    kpp: string // < кпп
-  }
 }
 
 export interface IIndividualData {
@@ -27,6 +16,8 @@ export interface IIndividualData {
   full_address: string
   phone: string
   email: string
+  block_num?: number
+  deleted?: boolean
 }
 
 export interface IOrganizationData {
@@ -49,6 +40,8 @@ export interface IOrganizationData {
   email: string
   details: Details
   bank_account: IBankAccount
+  block_num?: number
+  deleted?: boolean
 }
 
 export interface IEntrepreneurData {
@@ -64,6 +57,8 @@ export interface IEntrepreneurData {
   full_address: string
   details: Details
   bank_account: IBankAccount
+  block_num?: number
+  deleted?: boolean
 }
 
 export type IUserData = IIndividualData | IOrganizationData | IEntrepreneurData

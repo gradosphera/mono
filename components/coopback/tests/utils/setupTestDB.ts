@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import config from '../../src/config/config';
-import { connectGenerator, generator } from '../../src/services/data.service';
+import { connectGenerator, generator } from '../../src/services/document.service';
 
 export const setupTestDB = () => {
   beforeAll(async () => {
@@ -9,15 +9,15 @@ export const setupTestDB = () => {
   });
 
   beforeEach(async () => {
-    // const db = mongoose.connection.db;
-    // const collections = ['IndividualData', 'OrgData', 'EntrepreneurData', 'PaymentData'];
+    const db = mongoose.connection.db;
+    const collections = ['IndividualData', 'OrgData', 'EntrepreneurData', 'PaymentData'];
 
-    // await Promise.all(
-    //   collections.map(async (name) => {
-    //     const collection = db.collection(name);
-    //     return collection.deleteMany({});
-    //   })
-    // );
+    await Promise.all(
+      collections.map(async (name) => {
+        const collection = db.collection(name);
+        return collection.deleteMany({});
+      })
+    );
 
     await Promise.all(Object.values(mongoose.connection.collections).map(async (collection) => collection.deleteMany({})));
   });

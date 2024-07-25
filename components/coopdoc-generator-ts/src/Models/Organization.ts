@@ -13,9 +13,7 @@ import { PaymentMethod } from './PaymentMethod'
 export type ExternalOrganizationData = Cooperative.Users.IOrganizationData
 
 export type InternalOrganizationData = Omit<ExternalOrganizationData, 'bank_account'> & {
-  block_num: number
-  deleted: boolean
-  bank_account?: Cooperative.Users.IBankAccount
+  bank_account?: Cooperative.Payments.IBankAccount
 }
 
 export class Organization {
@@ -40,6 +38,7 @@ export class Organization {
       throw new Error('Данные организации не предоставлены для сохранения')
 
     const { bank_account, ...organization_for_save } = this.organization
+    const currentBlock = await getCurrentBlock()
 
     const bankData: PaymentData = {
       username: this.organization.username,
@@ -47,15 +46,14 @@ export class Organization {
       user_type: 'organization',
       method_type: 'bank_transfer',
       is_default: true,
-      data: bank_account as Cooperative.Users.IBankAccount,
+      data: bank_account as Cooperative.Payments.IBankAccount,
       deleted: false,
+      block_num: currentBlock,
     }
 
     const paymentMethod = await new PaymentMethod(this.db, bankData)
     await paymentMethod.validate()
     await paymentMethod.save()
-
-    const currentBlock = await getCurrentBlock()
 
     const orgForSave: InternalOrganizationData = {
       ...organization_for_save,
@@ -77,14 +75,24 @@ export class Organization {
     return org as ExternalOrganizationData
   }
 
-  async getMany(filter: Filter<InternalOrganizationData>): Promise<ExternalOrganizationData[]> {
-    const orgs = await this.data_service.getMany(filter, 'username')
+  async getMany(filter: Filter<InternalOrganizationData>): Promise<Cooperative.Documents.IGetResponse<ExternalOrganizationData>> {
+    const response = (await this.data_service.getMany({ deleted: false, ...filter }, 'username'))
+    const orgs = response.results
     const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
 
     for (const org of orgs) {
       org.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: org.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
     }
-    return orgs as ExternalOrganizationData[]
+
+    const result: Cooperative.Documents.IGetResponse<ExternalOrganizationData> = {
+      results: orgs as ExternalOrganizationData[],
+      page: response.page,
+      limit: response.limit,
+      totalResults: response.totalResults,
+      totalPages: response.totalPages,
+    }
+
+    return result
   }
 
   async getHistory(filter: Filter<InternalOrganizationData>): Promise<ExternalOrganizationData[]> {

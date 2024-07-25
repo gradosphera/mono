@@ -91,3 +91,11 @@ export interface IGenerateJoinCoop extends IGenerate {
 export interface IGenerateJoinCoopDecision extends IGenerate {
   decision_id: number
 }
+
+export interface IGetResponse<T> {
+  results: T[]
+  page: number
+  limit: number
+  totalResults: number
+  totalPages: number
+}

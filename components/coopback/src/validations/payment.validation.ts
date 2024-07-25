@@ -2,21 +2,20 @@ import * as Joi from 'joi';
 
 export const ICreateDeposit = Joi.object().keys({
   quantity: Joi.string().required(),
-  provider: Joi.string().valid('yookassa').required()
-})
+  provider: Joi.string().valid('yookassa').required(),
+});
 
 export const ICreateInitialPayment = Joi.object().keys({
-  provider: Joi.string().valid('yookassa').required()
-})
+  provider: Joi.string().valid('yookassa').required(),
+});
 
 export const RCreateDeposit = {
   body: ICreateDeposit.required(),
-}
+};
 
 export const RCreateInitialPayment = {
   body: ICreateInitialPayment.required(),
-}
-
+};
 
 export const IRecieveIPN = Joi.object({
   type: Joi.string().required(),
@@ -28,15 +27,21 @@ export const IRecieveIPN = Joi.object({
     amount: Joi.object({
       value: Joi.string().required(),
       currency: Joi.string().required(),
-    }).required().unknown(true),
+    })
+      .required()
+      .unknown(true),
     income_amount: Joi.object({
       value: Joi.string().required(),
       currency: Joi.string().required(),
-    }).required().unknown(true),
+    })
+      .required()
+      .unknown(true),
     refunded_amount: Joi.object({
       value: Joi.string().required(),
       currency: Joi.string().required(),
-    }).required().unknown(true),
+    })
+      .required()
+      .unknown(true),
     authorization_details: Joi.object({
       rrn: Joi.string(),
       auth_code: Joi.string(),
@@ -62,15 +67,70 @@ export const IRecieveIPN = Joi.object({
         issuer_name: Joi.string(),
       }).unknown(true),
       title: Joi.string(),
-    }).required().unknown(true),
+    })
+      .required()
+      .unknown(true),
     refundable: Joi.boolean(),
     test: Joi.boolean(),
-  }).required().unknown(true),
+  })
+    .required()
+    .unknown(true),
 });
 
 export const RRecieveIPN = {
-  body: IRecieveIPN.required()
-}
+  body: IRecieveIPN.required(),
+};
+
+const RussianBankDetailsSchema = Joi.object({
+  bik: Joi.string().required(),
+  corr: Joi.string().required(),
+  kpp: Joi.string().required(),
+});
+
+export const IBankAccount = Joi.object({
+  currency: Joi.string().required().valid('RUB', 'Other'),
+  card_number: Joi.string().default(''),
+  bank_name: Joi.string().required(),
+  account_number: Joi.string().required(),
+  details: RussianBankDetailsSchema.required(),
+});
+
+export const ISbpDetails = Joi.object({
+  phone: Joi.string().required(),
+});
+
+export const RGetListPaymentMethods = Joi.object({
+  params: {
+    username: Joi.string().optional(),
+  },
+});
+
+const MethodTypes = Joi.string().valid('sbp', 'bank_transfer');
+
+export const ISavePaymentMethod = Joi.object({
+  username: Joi.string().required(),
+  method_id: Joi.number().required(),
+  method_type: MethodTypes.required(),
+  data: Joi.alternatives().try(ISbpDetails, IBankAccount).required(),
+});
+
+export const RSavePaymentMethod = Joi.object({
+  params: {
+    username: Joi.string().required(),
+  },
+  body: ISavePaymentMethod.required(),
+});
+
+export const IDeletePaymentMethod = Joi.object({
+  method_id: Joi.number().required(),
+});
+
+export const RDeletePaymentMethod = Joi.object({
+  params: {
+    username: Joi.string().required(),
+  },
+  body: IDeletePaymentMethod.required(),
+});
 
 /**
  * @swagger

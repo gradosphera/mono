@@ -29,6 +29,8 @@ export const entrepreneurSchema: JSONSchemaType<ExternalEntrepreneurData> = {
       required: BankAccountSchema.required,
       properties: BankAccountSchema.properties,
     },
+    deleted: { type: 'boolean', nullable: true },
+    block_num: { type: 'number', nullable: true },
   },
   required: ['username', 'email', 'first_name', 'last_name', 'birthdate', 'phone', 'country', 'city', 'full_address', 'details', 'bank_account'],
   additionalProperties: true,

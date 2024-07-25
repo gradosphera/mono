@@ -247,7 +247,7 @@ export interface IPaymentData {
 
 export const insertPaymentMethod = async (data: IPaymentData, block_num: number) => {
   const collection = mongoose.connection.db.collection('PaymentData'); // Замените на имя вашей коллекции
-  await collection.insertOne({ ...data, block_num, _created_at: new Date() });
+  await collection.insertOne({ ...data, block_num, _created_at: new Date(), deleted: false });
 };
 
 export const insertUsers = async (users: testUser[]) => {

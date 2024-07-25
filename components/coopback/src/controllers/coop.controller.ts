@@ -1,7 +1,7 @@
 import catchAsync from '../utils/catchAsync';
-import { coopService, dataService } from '../services';
+import { coopService, documentService } from '../services';
 import { Cooperative } from 'cooptypes';
-import { generator } from '../services/data.service';
+import { generator } from '../services/document.service';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 
@@ -23,7 +23,7 @@ export const loadAgenda = catchAsync(async (req, res) => {
   const complexAgenda: Cooperative.Documents.IComplexAgenda[] = [];
 
   for (const { action, table } of agenda) {
-    const documents = await dataService.buildComplexDocument(action);
+    const documents = await documentService.buildComplexDocument(action);
     if (documents.statement.document) complexAgenda.push({ documents, action, table });
   }
 

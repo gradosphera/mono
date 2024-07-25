@@ -12,6 +12,8 @@ export const individualSchema: JSONSchemaType<ExternalIndividualData> = {
     full_address: { type: 'string' },
     phone: { type: 'string' },
     email: { type: 'string', format: 'email' },
+    deleted: { type: 'boolean', nullable: true },
+    block_num: { type: 'number', nullable: true },
   },
   required: ['username', 'first_name', 'last_name', 'birthdate', 'full_address', 'phone'],
   additionalProperties: true,

@@ -8,7 +8,7 @@ import { individualSchema } from '../Schema/IndividualSchema'
 import { getCurrentBlock } from '../Utils/getCurrentBlock'
 
 export type ExternalIndividualData = Cooperative.Users.IIndividualData
-export type InternalIndividualData = ExternalIndividualData & { deleted: boolean, block_num: number }
+export type InternalIndividualData = ExternalIndividualData
 
 export class Individual {
   individual?: ExternalIndividualData
@@ -44,7 +44,7 @@ export class Individual {
     return this.data_service.getOne(filter)
   }
 
-  async getMany(filter: Filter<InternalIndividualData>): Promise<ExternalIndividualData[]> {
+  async getMany(filter: Filter<InternalIndividualData>): Promise<Cooperative.Documents.IGetResponse<ExternalIndividualData>> {
     return this.data_service.getMany(filter, 'username')
   }
 

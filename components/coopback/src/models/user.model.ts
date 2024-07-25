@@ -3,7 +3,7 @@ import validator from 'validator/index';
 import bcryptjs from 'bcryptjs';
 import { toJSON, paginate } from './plugins/index';
 import { roles } from '../config/roles';
-import { generator } from '../services/data.service';
+import { generator } from '../services/document.service';
 import { Cooperative } from 'cooptypes';
 
 const { isEmail } = validator;

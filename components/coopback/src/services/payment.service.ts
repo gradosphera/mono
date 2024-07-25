@@ -6,12 +6,26 @@ import { getUserByUsername } from './user.service';
 import * as blockchainService from './blockchain.service';
 import logger from '../config/logger';
 import { ICreateDeposit, ICreateInitialPayment } from '../types';
-import { generator } from './data.service';
+import { generator } from './document.service';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 import { ICreatedPayment, IYandexIPN, PaymentDetails } from '../types/common';
+import { Cooperative } from 'cooptypes';
+import type { Filter } from 'mongodb';
 
 const { connection } = mongoose;
+
+export const savePaymentMethod = async (data: Cooperative.Payments.IPaymentData) => {
+  return await generator.save('paymentMethod', data);
+};
+
+export const deletePaymentMethod = async (filter: Filter<Cooperative.Payments.IPaymentData>) => {
+  return await generator.del('paymentMethod', filter as any);
+};
+
+export const listPaymentMethods = async (filter: Filter<Cooperative.Payments.IPaymentData>) => {
+  return await generator.list('paymentMethod', filter as any);
+};
 
 function getAmountPlusFee(amount: number, provider: string): number {
   const matrix = {
@@ -271,8 +285,3 @@ export async function catchIPN(ipnBody: IYandexIPN) {
     }
   }
 }
-
-export default {
-  createInitialOrder,
-  catchIPN,
-};

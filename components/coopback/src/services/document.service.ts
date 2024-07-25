@@ -1,7 +1,6 @@
 import eosjsecc from 'eosjs-ecc';
 import ApiError from '../utils/ApiError';
 import { getActions, getTables } from '../utils/getFetch';
-
 import * as coopService from './coop.service';
 const { verify, sha256 } = eosjsecc;
 import config from '../config/config';
@@ -130,28 +129,4 @@ export const queryDocuments = async (
   }
 
   return response;
-};
-
-export const getDocuments = async (account) => {
-  // let data = await getActions('/v2/history/get_actions', {
-  //   "filter": "soviettest1:statement",
-  //   "account": account,
-  // })
-  // for (const action of data.actions) {
-  //   action.decision = (await getActions('/v2/history/get_actions', {
-  //     "account": account,
-  //     "filter": "soviettest1:decision",
-  //     "@decision.decision_id": action.act.data.decision_id,
-  //   }))?.actions?.[0]
-  //   if (action.act.data.action == 'joincoop') {
-  //     try {
-  //       action.verified = await verify(action.act.data.statement.sign, action.act.data.statement.hash, action.act.data.statement.pkey)
-  //     } catch(e: any){
-  //       console.error(e)
-  //       action.verified = false
-  //       action.verify_message = e.message
-  //     }
-  //   }
-  // }
-  // return data.actions
 };

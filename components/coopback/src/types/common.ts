@@ -1,5 +1,5 @@
 import { IEntrepreneurData, IGeneratedDocument, IIndividualData, IOrganizationData } from 'coopdoc-generator-ts';
-import { SovietContract } from 'cooptypes';
+import { Cooperative, SovietContract } from 'cooptypes';
 
 // Определение унифицированного типа для деталей платежа
 export interface PaymentDetails {
@@ -59,11 +59,7 @@ export interface ICreatedPayment {
   details: PaymentDetails;
 }
 
-export interface IGetResponse {
-  results: any[];
-  page: number;
-  limit: number;
-}
+export type IGetResponse<T> = Cooperative.Documents.IGetResponse<T>;
 
 export interface IGetActions<T> {
   results: IAction[];

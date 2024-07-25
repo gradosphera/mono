@@ -2,6 +2,7 @@ export * from './Interfaces'
 export * from './Templates'
 
 import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
+import type { Cooperative as CooperativeModel } from 'cooptypes'
 import type { Actions, IFilterDocuments, IGeneratedDocument, externalDataTypes, externalDataTypesArrays, internalFilterTypes } from './Interfaces'
 import type { IGenerate } from './Interfaces/Documents'
 import { JoinCoop, JoinCoopDecision } from './Actions'
@@ -33,7 +34,9 @@ export interface IGenerator {
   save: ((type: 'individual', data: ExternalIndividualData) => Promise<InsertOneResult>) & ((type: 'entrepreneur', data: ExternalEntrepreneurData) => Promise<InsertOneResult>) & ((type: 'organization', data: ExternalOrganizationData) => Promise<InsertOneResult>) & ((type: 'paymentMethod', data: PaymentData) => Promise<InsertOneResult>)
   get: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypes | null>
   del: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<UpdateResult>
-  list: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypesArrays>
+
+  list: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<CooperativeModel.Documents.IGetResponse<internalFilterTypes>>
+
   getHistory: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypesArrays>
 }
 
@@ -81,7 +84,6 @@ export class Generator implements IGenerator {
   async save(type: 'individual', data: ExternalIndividualData): Promise<InsertOneResult>
   async save(type: 'entrepreneur', data: ExternalEntrepreneurData): Promise<InsertOneResult>
   async save(type: 'organization', data: ExternalOrganizationData): Promise<InsertOneResult>
-
   async save(type: 'paymentMethod', data: PaymentData): Promise<InsertOneResult>
 
   async save(type: dataTypes, data: externalDataTypes): Promise<InsertOneResult> {
@@ -101,7 +103,7 @@ export class Generator implements IGenerator {
   }
 
   // Универсальные методы получения списка объектов
-  async list(type: dataTypes, filter: Filter<internalFilterTypes>): Promise<externalDataTypesArrays> {
+  async list(type: dataTypes, filter: Filter<internalFilterTypes>): Promise<CooperativeModel.Documents.IGetResponse<externalDataTypes>> {
     const model = this.getModel(type)
     return model.getMany(filter)
   }

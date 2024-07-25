@@ -13,9 +13,7 @@ import { PaymentMethod } from './PaymentMethod'
 export type ExternalEntrepreneurData = Cooperative.Users.IEntrepreneurData
 
 export type InternalEntrepreneurData = Omit<ExternalEntrepreneurData, 'bank_account'> & {
-  deleted: boolean
-  bank_account?: Cooperative.Users.IBankAccount
-  block_num: number
+  bank_account?: Cooperative.Payments.IBankAccount
 }
 
 export class Entrepreneur {
@@ -41,21 +39,22 @@ export class Entrepreneur {
 
     const { bank_account, ...entr_for_save } = this.entrepreneur
 
+    const currentBlock = await getCurrentBlock()
+
     const bankData: PaymentData = {
       username: this.entrepreneur.username,
       method_id: 1,
       user_type: 'entrepreneur',
       method_type: 'bank_transfer',
       is_default: true,
-      data: bank_account as Cooperative.Users.IBankAccount,
+      data: bank_account as Cooperative.Payments.IBankAccount,
       deleted: false,
+      block_num: currentBlock,
     }
 
     const paymentMethod = await new PaymentMethod(this.db, bankData)
     await paymentMethod.validate()
     await paymentMethod.save()
-
-    const currentBlock = await getCurrentBlock()
 
     const entrForSave: InternalEntrepreneurData = {
       ...entr_for_save,
@@ -75,15 +74,24 @@ export class Entrepreneur {
     return entr as ExternalEntrepreneurData
   }
 
-  async getMany(filter: Filter<InternalEntrepreneurData>): Promise<ExternalEntrepreneurData[]> {
-    const entrepreneurs = await this.data_service.getMany(filter, 'username')
+  async getMany(filter: Filter<InternalEntrepreneurData>): Promise<Cooperative.Documents.IGetResponse<ExternalEntrepreneurData>> {
+    const response = await this.data_service.getMany({ deleted: false, ...filter }, 'username')
+    const entrepreneurs = response.results
     const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
 
     for (const entr of entrepreneurs) {
       entr.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: entr.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
     }
 
-    return entrepreneurs as ExternalEntrepreneurData[]
+    const result: Cooperative.Documents.IGetResponse<ExternalEntrepreneurData> = {
+      results: entrepreneurs as ExternalEntrepreneurData[],
+      page: response.page,
+      limit: response.limit,
+      totalResults: response.totalResults,
+      totalPages: response.totalPages,
+    }
+
+    return result
   }
 
   async getHistory(filter: Filter<InternalEntrepreneurData>): Promise<ExternalEntrepreneurData[]> {

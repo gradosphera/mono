@@ -28,6 +28,8 @@ export const paymentMethodSchema: JSONSchemaType<IPaymentData> = {
         },
       ],
     },
+    deleted: { type: 'boolean', nullable: true },
+    block_num: { type: 'number', nullable: true },
   },
   required: ['username', 'method_id', 'user_type', 'method_type', 'is_default', 'data'],
   additionalProperties: true,

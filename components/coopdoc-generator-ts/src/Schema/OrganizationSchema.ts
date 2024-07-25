@@ -41,6 +41,8 @@ export const organizationSchema: JSONSchemaType<ExternalOrganizationData> = {
       required: BankAccountSchema.required,
       properties: BankAccountSchema.properties,
     },
+    deleted: { type: 'boolean', nullable: true },
+    block_num: { type: 'number', nullable: true },
   },
   required: ['username', 'type', 'is_cooperative', 'short_name', 'full_name', 'represented_by', 'country', 'city', 'full_address', 'email', 'phone', 'details', 'bank_account'],
   additionalProperties: true,

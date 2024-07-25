@@ -3,7 +3,7 @@ import app from './app';
 import config from './config/config';
 import logger from './config/logger';
 import { updateAuth } from './services/auth.service';
-import { connectGenerator } from './services/data.service';
+import { connectGenerator } from './services/document.service';
 import { initSocketConnection } from './controllers/ws.controller';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
@@ -17,7 +17,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(async () => 
   await connectGenerator();
 
   //подключаемся к ws-серверу
-  initSocketConnection(SERVER_URL);
+  await initSocketConnection(SERVER_URL);
 
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);

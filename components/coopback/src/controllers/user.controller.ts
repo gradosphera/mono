@@ -1,11 +1,12 @@
-import http, { CREATED } from 'http-status';
+import http from 'http-status';
 import ApiError from '../utils/ApiError';
 import catchAsync from '../utils/catchAsync';
-import { userService, blockchainService, tokenService, orderService } from '../services';
-import { IJoinCooperative, RCreateUser, RJoinCooperative } from '../types';
+import { userService, tokenService } from '../services';
+import { RCreateUser, RJoinCooperative } from '../types';
 import httpStatus from 'http-status';
 import pick from '../utils/pick';
 import { IGetResponse } from '../types/common';
+import { IUser } from '../models/user.model';
 
 /**
  * Порядок регистрации:
@@ -48,10 +49,7 @@ export const getUsers = catchAsync(async (req, res) => {
   });
 
   const users = await userService.queryUsers(filter, options);
-  const result = {} as IGetResponse & {
-    totalPages: number;
-    totalResults: number;
-  }; //
+  const result = {} as IGetResponse<IUser>;
 
   //TODO wrong format answer
   const data = [] as any;

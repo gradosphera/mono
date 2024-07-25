@@ -1,5 +1,6 @@
 import * as Joi from 'joi';
 import { password, objectId } from './custom.validation';
+import { IBankAccount } from './payment.validation';
 
 export const IIndividualData = Joi.object({
   first_name: Joi.string().required(),
@@ -22,20 +23,6 @@ const RepresentedBySchema = Joi.object({
 const RussiaDetailsSchema = Joi.object({
   inn: Joi.string().required(),
   ogrn: Joi.string().required(),
-});
-
-const RussianBankDetailsSchema = Joi.object({
-  bik: Joi.string().required(),
-  corr: Joi.string().required(),
-  kpp: Joi.string().required(),
-});
-
-const IBankAccount = Joi.object({
-  currency: Joi.string().required().valid('RUB', 'Other'),
-  card_number: Joi.string().default(''),
-  bank_name: Joi.string().required(),
-  account_number: Joi.string().required(),
-  details: RussianBankDetailsSchema.required(),
 });
 
 export const IOrganizationData = Joi.object({

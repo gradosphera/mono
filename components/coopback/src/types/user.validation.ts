@@ -283,6 +283,6 @@ export interface RUpdateUser {
     password?: string;
   };
   params?: {
-    username: any;
+    username: string;
   };
 }

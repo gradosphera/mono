@@ -1,4 +1,5 @@
 import type { Collection, Filter, UpdateResult } from 'mongodb'
+import type { Cooperative } from 'cooptypes'
 import type { MongoDBConnector } from './MongoDBConnector'
 
 export interface IDocument {
@@ -19,13 +20,18 @@ class DataService<T extends IDocument> {
     return document as T | null
   }
 
-  async getMany(filter: Filter<T>, groupByFields: string | string[]): Promise<T[]> {
+  async getMany(
+    filter: Filter<T>,
+    groupByFields: string | string[],
+    page: number = 1,
+    limit: number = 100,
+  ): Promise<Cooperative.Documents.IGetResponse<T>> {
     const groupFields = Array.isArray(groupByFields) ? groupByFields : [groupByFields]
     const groupId = groupFields.reduce((acc, field) => ({ ...acc, [field]: `$${field}` }), {})
 
     const aggregateOptions = [
-      { $match: { ...filter } },
-      { $sort: { created_at: -1 } },
+      { $match: filter },
+      { $sort: { _created_at: -1 } },
       {
         $group: {
           _id: groupId,
@@ -35,8 +41,29 @@ class DataService<T extends IDocument> {
       { $replaceRoot: { newRoot: '$doc' } },
     ]
 
-    const result = await this.collection.aggregate(aggregateOptions).toArray()
-    return result as T[]
+    const totalResult = await this.collection.aggregate([
+      ...aggregateOptions,
+      { $count: 'total' },
+    ]).toArray()
+
+    const totalResults = totalResult[0]?.total || 0
+    const totalPages = Math.ceil(totalResults / limit)
+
+    const results = await this.collection.aggregate([
+      ...aggregateOptions,
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
+    ]).toArray()
+
+    const result: Cooperative.Documents.IGetResponse<T> = {
+      results: results as T[],
+      page,
+      limit,
+      totalPages,
+      totalResults,
+    }
+
+    return result
   }
 
   async getHistory(filter: Filter<T>): Promise<T[]> {

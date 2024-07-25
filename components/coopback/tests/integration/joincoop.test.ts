@@ -102,7 +102,7 @@ describe('Проверка данных', () => {
       };
 
       let res = await request(app)
-        .post('/v1/data/generate')
+        .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
       // console.log('res.body: ', res.body);
@@ -138,7 +138,7 @@ describe('Проверка данных', () => {
       };
 
       let res = await request(app)
-        .post('/v1/data/generate')
+        .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
 
@@ -150,7 +150,7 @@ describe('Проверка данных', () => {
       expect(res.body.hash).toBeDefined();
 
       let res_regenerated = await request(app)
-        .post('/v1/data/generate')
+        .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(res.body.meta);
 
@@ -178,7 +178,7 @@ describe('Проверка данных', () => {
         skip_save: false,
       };
       let res = await request(app)
-        .post('/v1/data/generate')
+        .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
       expect(res.status).toBe(httpStatus.CREATED);
@@ -223,7 +223,7 @@ describe('Проверка данных', () => {
         skip_save: false,
       };
       let res = await request(app)
-        .post('/v1/data/generate')
+        .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
 
@@ -279,7 +279,7 @@ describe('Проверка данных', () => {
       };
 
       let res = await request(app)
-        .post('/v1/data/generate')
+        .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
 
@@ -291,7 +291,7 @@ describe('Проверка данных', () => {
       expect(res.body.hash).toBeDefined();
 
       let res_regenerated = await request(app)
-        .post('/v1/data/generate')
+        .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(res.body.meta);
 
@@ -329,91 +329,6 @@ describe('Проверка данных', () => {
       expect(dbUser2?.status).toBe('joined');
       expect(dbUser2?.statement).toBeDefined();
       // console.log(dbUser2);
-    });
-
-    test('получаем платежный ордер на вступление', async () => {
-      const registeredUser = await request(app).post('/v1/users').send(newUser).expect(httpStatus.CREATED);
-
-      expect(registeredUser.body.tokens.access.token).toBeDefined();
-
-      const dbUser = await User.findOne({ username: newUser.username });
-      expect(dbUser).toBeDefined();
-      expect(dbUser?.status).toBe('created');
-
-      const privateData = (await dbUser?.getPrivateData()) as IIndividualData;
-
-      expect(privateData).toBeDefined();
-
-      const options: IGenerateJoinCoop = {
-        action: 'joincoop',
-        code: 'registrator',
-        coopname: 'voskhod',
-        username: newUser.username,
-        signature: 'this is imaged signature',
-        skip_save: false,
-      };
-
-      let res = await request(app)
-        .post('/v1/data/generate')
-        .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
-        .send(options);
-
-      expect(res.status).toBe(httpStatus.CREATED);
-
-      expect(res.body.meta).toBeDefined();
-      expect(res.body.binary).toBeDefined();
-      expect(res.body.html).toBeDefined();
-      expect(res.body.hash).toBeDefined();
-
-      let res_regenerated = await request(app)
-        .post('/v1/data/generate')
-        .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
-        .send(res.body.meta);
-
-      expect(res.status).toBe(httpStatus.CREATED);
-
-      expect(res.body.hash).toEqual(res_regenerated.body.hash);
-
-      const generatedDocument: IGeneratedDocument = res.body;
-
-      const key = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3';
-      const wif = await PrivateKey.fromString(key);
-      const sign = await wif.signDigest(generatedDocument.hash).toString();
-
-      const signedDocument: IDocument = {
-        hash: generatedDocument.hash,
-        meta: generatedDocument.meta,
-        signature: sign,
-        public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
-      };
-
-      const joinCoopData: IJoinCooperative = {
-        username: newUser.username,
-        statement: signedDocument,
-      };
-
-      let joincoop_result = await request(app)
-        .post('/v1/users/join-cooperative')
-        .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
-        .send(joinCoopData);
-      // console.log(joincoop_result.body);
-      expect(joincoop_result.status).toBe(httpStatus.OK);
-
-      const dbUser2 = await User.findOne({ username: newUser.username });
-      expect(dbUser2).toBeDefined();
-      expect(dbUser2?.status).toBe('joined');
-      expect(dbUser2?.statement).toBeDefined();
-      // console.log(dbUser2);
-
-      const initialPayment = await request(app)
-        .post('/v1/orders/initial')
-        .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
-        .send({ provider: 'yookassa' });
-
-      expect(initialPayment.status).toBe(httpStatus.CREATED);
-      expect(initialPayment.body?.details?.token).toBeDefined();
-      expect(initialPayment.body?.order_id).toBeDefined();
-      expect(initialPayment.body?.provider).toBe('yookassa');
     });
   });
 
@@ -428,7 +343,7 @@ describe('Проверка данных', () => {
 
   // test('should return 201 and successfully register user if request data is ok', async () => {
   //   await request(app)
-  //   .post('/v1/data/generate')
+  //   .post('/v1/documents/generate')
   //   // .set('Authorization', `Bearer ${adminAccessToken}`)
   //   .send(newUser)
   //   .expect(httpStatus.BAD_REQUEST);
