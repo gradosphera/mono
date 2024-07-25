@@ -83,7 +83,7 @@ export default route(function (/* { store, ssrContext } */) {
           return;
         }
       }
-      console.log('11')
+      console.log('11', currentUser)
       if (hasAccess(to, currentUser.userAccount)) {
         console.log('12')
         next(); // Продолжить переход, если доступ разрешен
