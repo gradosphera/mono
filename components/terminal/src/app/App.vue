@@ -1,7 +1,5 @@
 <template lang='pug'>
-div
-  p here
-  router-view(v-if="isLoaded")
+router-view(v-if="isLoaded")
 </template>
 
 <script setup lang="ts">
