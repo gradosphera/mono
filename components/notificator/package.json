@@ -1,7 +1,7 @@
 {
   "name": "coop-notificator",
   "type": "module",
-  "version": "0.0.21-alpha.1",
+  "version": "0.0.21-alpha.2",
   "private": true,
   "packageManager": "pnpm@9.1.1",
   "description": "_description_",
@@ -63,15 +63,11 @@
     "concurrently": "^8.2.2",
     "eslint": "^9.3.0",
     "esno": "^4.7.0",
-    "lint-staged": "^15.2.2",
     "pnpm": "^9.1.1",
     "rimraf": "^5.0.7",
     "typescript": "^5.4.5",
     "unbuild": "^2.0.0",
     "vite": "^5.2.11",
     "vitest": "^1.6.0"
-  },
-  "lint-staged": {
-    "*": "eslint --fix"
   }
 }
