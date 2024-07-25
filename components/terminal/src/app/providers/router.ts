@@ -49,12 +49,16 @@ export default route(function (/* { store, ssrContext } */) {
 
       const currentUser = useCurrentUserStore();
       const session = useSessionStore();
-
+      console.log('1')
       if (!session.isAuth && !currentUser.userAccount){
+        console.log('2')
         await session.init()
+        console.log('3')
         if (session.isAuth)
           try{
+            console.log('4')
             await currentUser.loadProfile(session.username, COOPNAME)
+            console.log('5')
           } catch(e: any){
             console.error(e)
           }
@@ -63,21 +67,28 @@ export default route(function (/* { store, ssrContext } */) {
 
       const menuStore = useMenuStore()
       menuStore.setRoutes(routes)
-
+      console.log('6')
       if (to.name == 'index') {
-        if (session.isAuth)
+        console.log('7')
+        if (session.isAuth){
+          console.log('8')
           next({ name: AUTHORIZED_HOME_PAGE, params: { coopname: COOPNAME } });
-        else
+        } else {
+          console.log('9')
           next({
             name: NOT_AUTHORIZED_HOME_PAGE,
             params: { coopname: COOPNAME },
           });
-        return;
+          console.log('10')
+          return;
+        }
       }
-
+      console.log('11')
       if (hasAccess(to, currentUser.userAccount)) {
+        console.log('12')
         next(); // Продолжить переход, если доступ разрешен
       } else {
+        console.log('12')
         next({ name: 'permissionDenied' }); // Перенаправить на страницу с сообщением о недостатке прав доступа
       }
     }
