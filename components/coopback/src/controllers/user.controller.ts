@@ -40,23 +40,16 @@ export const getUsers = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['username', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
-  Object.keys(filter).forEach((key) => {
-    if (filter[key] !== undefined) {
-      filter[key] = { $eq: filter[key], $ne: 'service' };
-    } else {
-      filter[key] = { $ne: 'service' };
-    }
-  });
-
   const users = await userService.queryUsers(filter, options);
   const result = {} as IGetResponse<IUser>;
 
-  //TODO wrong format answer
   const data = [] as any;
   for await (let user of users.results) {
     const json = user.toJSON();
-    json.private_data = (await user.getPrivateData()) || {};
-    data.push(json);
+    if (user.type != 'service') {
+      json.private_data = (await user.getPrivateData()) || {};
+      data.push(json);
+    }
   }
 
   result.results = data;
