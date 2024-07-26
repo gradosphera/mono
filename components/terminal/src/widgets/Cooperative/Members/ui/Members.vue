@@ -16,7 +16,7 @@ div
       ).full-height
 
         template(#top)
-          q-btn(icon="add" @click="showAdd = true") добавить участника
+          q-btn(icon="add" @click="showAdd = true" outline) добавить участника
 
 
         template(#header="props")
@@ -124,7 +124,7 @@ const addMember = async () => {
 
   try {
     await updateBoard(members_for_send)
-  } catch(e:any){
+  } catch (e: any) {
 
   }
 
@@ -147,7 +147,7 @@ const removeMember = async (username: string) => {
 
   try {
     await updateBoard(members_for_send)
-  } catch(e:any){
+  } catch (e: any) {
 
   }
   showLoading.value = false

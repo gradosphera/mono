@@ -1,4 +1,4 @@
-import { fetchTable } from '../../../shared/api';
+import { fetchTable, sendGET } from '../../../shared/api';
 
 import {
   ContractsList,
@@ -14,6 +14,9 @@ import {
   IProgramWalletData,
   ICoopMarketProgramData,
   ExtendedProgramWalletData,
+  IGetPaymentMethods,
+  IGetResponsePaymentMethodData,
+  IPaymentMethodData,
 } from '../model';
 
 import {
@@ -153,6 +156,14 @@ async function loadUserProgramWalletsData(
   return extendedProgramWallets;
 }
 
+async function loadMethods(params: IGetPaymentMethods): Promise<IPaymentMethodData[]> {
+  const {username} = params
+  const methods = (await sendGET(`/v1/payments/methods/${username}`)) as IGetResponsePaymentMethodData;
+
+  return methods.results;
+}
+
+
 export const api = {
   loadSingleUserWalletData,
   loadSingleUserDepositData,
@@ -161,4 +172,5 @@ export const api = {
   loadUserDepositsData,
   loadUserWithdrawsData,
   loadUserProgramWalletsData,
+  loadMethods
 };

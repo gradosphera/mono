@@ -19,7 +19,7 @@ const localCoop = ref({
 })
 
 const save = async () => {
-  const {updateCoop} = useUpdateCoop()
+  const { updateCoop } = useUpdateCoop()
   const session = useSessionStore()
   if (coop.publicCooperativeData)
     try {
@@ -36,7 +36,7 @@ const save = async () => {
       await coop.loadPublicCooperativeData(COOPNAME)
 
       SuccessAlert('Размеры взносов успешно обновлены')
-    } catch(e: any){
+    } catch (e: any) {
       FailAlert(`${e.message}`)
     }
   else {
@@ -75,5 +75,6 @@ div.q-pa-md
     q-input(filled v-model="localCoop.org_minimum" label="Минимальный паевый взнос")
       template(#append)
         p.q-pa-sm {{ CURRENCY }}
-  q-btn(@click="save") Сохранить
+  q-btn(@click="save" outline) Сохранить
+
   </template>

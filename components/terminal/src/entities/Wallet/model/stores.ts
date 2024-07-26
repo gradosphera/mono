@@ -7,6 +7,7 @@ import {
   IPaymentOrder,
   ExtendedProgramWalletData,
   ICreateWithdraw,
+  IPaymentMethodData,
 } from './types';
 import { ILoadUserWallet, ICreateDeposit } from './types';
 import { Ref, ref } from 'vue';
@@ -21,16 +22,28 @@ interface IWalletStore {
   program_wallets: Ref<ExtendedProgramWalletData[]>;
   deposits: Ref<IDepositData[]>;
   withdraws: Ref<IWithdrawData[]>;
+  methods: Ref<IPaymentMethodData[]>;
+
   update: (params: ILoadUserWallet) => Promise<void>;
+
+  //TODO move to Features
   createDeposit: (params: ICreateDeposit) => Promise<IPaymentOrder>;
   createWithdraw: (params: ICreateWithdraw) => Promise<void>;
 }
 
 export const useWalletStore = defineStore(namespace, (): IWalletStore => {
-  const wallet = ref({} as IWalletData);
-  const deposits = ref([] as IDepositData[]);
-  const withdraws = ref([] as IWithdrawData[]);
-  const program_wallets = ref([] as ExtendedProgramWalletData[]);
+  const wallet = ref<IWalletData>({
+    username: '',
+    coopname: '',
+    available: `0.0000 ${CURRENCY}`,
+    blocked: `0.0000 ${CURRENCY}`,
+    minimum: `0.0000 ${CURRENCY}`,
+  });
+
+  const deposits = ref<IDepositData[]>([]);
+  const withdraws = ref<IWithdrawData[]>([]);
+  const program_wallets = ref<ExtendedProgramWalletData[]>([]);
+  const methods = ref<IPaymentMethodData[]>([]);
 
   const createEmptyWallet = (): IWalletData => ({
     username: '',
@@ -40,6 +53,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
     minimum: `0.0000 ${CURRENCY}`,
   });
 
+
   const update = async (params: ILoadUserWallet) => {
     try {
       const data = await Promise.all([
@@ -47,11 +61,14 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
         api.loadUserDepositsData(params),
         api.loadUserWithdrawsData(params),
         api.loadUserProgramWalletsData(params),
+        api.loadMethods(params)
       ]);
       wallet.value = data[0] ?? createEmptyWallet();
       deposits.value = data[1] ?? [];
       withdraws.value = data[2] ?? [];
       program_wallets.value = data[3] ?? [];
+      methods.value = data[4] ?? [];
+
     } catch (e: any) {
       console.log(e);
     }
@@ -72,6 +89,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
     program_wallets,
     deposits,
     withdraws,
+    methods,
     update,
     createDeposit,
     createWithdraw,

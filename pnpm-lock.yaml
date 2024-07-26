@@ -664,6 +664,9 @@ importers:
       quasar:
         specifier: ^2.16.0
         version: 2.16.6
+      swiper:
+        specifier: ^11.1.7
+        version: 11.1.7
       vite:
         specifier: 2.9.16
         version: 2.9.16(sass@1.77.8)
@@ -9455,6 +9458,10 @@ packages:
   swagger2openapi@7.0.8:
     resolution: {integrity: sha512-upi/0ZGkYgEcLeGieoz8gT74oWHA0E7JivX7aN9mAf+Tc7BQoRBvnIGHoPDw+f9TXTW4s6kGYCZJtauP6OYp7g==}
     hasBin: true
+
+  swiper@11.1.7:
+    resolution: {integrity: sha512-2EpQvhgKb+DNbi8/i9uRXhddivcMZQxca341t2NZYV1xroCR2p4YtYd3azuqRQ4OEBGcG4nv3aN24O80bMipow==}
+    engines: {node: '>= 4.7.0'}
 
   synckit@0.6.2:
     resolution: {integrity: sha512-Vhf+bUa//YSTYKseDiiEuQmhGCoIF3CVBhunm3r/DQnYiGT4JssmnKQc44BIyOZRK2pKjXXAgbhfmbeoC9CJpA==}
@@ -21422,6 +21429,8 @@ snapshots:
       yargs: 17.0.1
     transitivePeerDependencies:
       - encoding
+
+  swiper@11.1.7: {}
 
   synckit@0.6.2:
     dependencies:

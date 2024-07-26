@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-btn(color="primary" @click="showDialog = true") получить возврат
+  q-btn(@click="showDialog = true" outline) получить возврат
 
   q-dialog(v-model="showDialog" @hide="clear")
     ModalBase( :title='"Введите сумму"' )

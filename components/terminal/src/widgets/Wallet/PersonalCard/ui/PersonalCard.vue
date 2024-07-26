@@ -2,7 +2,8 @@
 q-card(v-if="currentUser?.username" flat bordered).q-pa-md.digital-certificate
   div.row
     div.col-md-4.col-xs-12
-      p.text-bold.full-width.text-sm.text-center УДОСТОВЕРЕНИЕ ПАЙЩИКА
+      //- p.text-bold.full-width.text-sm.text-center УДОСТОВЕРЕНИЕ ПАЙЩИКА
+
       div(style="flex-grow: 1; display: flex; justify-content: center;")
         AutoAvatar(style="width: 125px;" :username="currentUser.username").q-pa-sm.q-pt-lg
     div.col-md-8.col-xs-12
@@ -61,39 +62,39 @@ q-card(v-if="currentUser?.username" flat bordered).q-pa-md.digital-certificate
   </template>
 
 <script lang="ts" setup>
-    import type { IEntrepreneurData, IIndividualData, IOrganizationData } from 'src/entities/User'
-    import { AutoAvatar } from '.';
-    import { useCurrentUserStore } from 'src/entities/User'
-    import { computed } from 'vue';
-    const currentUser = useCurrentUserStore()
+import type { IEntrepreneurData, IIndividualData, IOrganizationData } from 'src/entities/User'
+import { AutoAvatar } from '.';
+import { useCurrentUserStore } from 'src/entities/User'
+import { computed } from 'vue';
+const currentUser = useCurrentUserStore()
 
-    const userType = computed(() => currentUser.userAccount?.type)
+const userType = computed(() => currentUser.userAccount?.type)
 
-    const individualProfile = computed(() => {
-      if (userType.value === 'individual') {
-        return currentUser.userAccount?.private_data as IIndividualData
-      }
-      return null
-    })
+const individualProfile = computed(() => {
+  if (userType.value === 'individual') {
+    return currentUser.userAccount?.private_data as IIndividualData
+  }
+  return null
+})
 
-    const entrepreneurProfile = computed(() => {
-      if (userType.value === 'entrepreneur') {
-        return currentUser.userAccount?.private_data as IEntrepreneurData
-      }
-      return null
-    })
+const entrepreneurProfile = computed(() => {
+  if (userType.value === 'entrepreneur') {
+    return currentUser.userAccount?.private_data as IEntrepreneurData
+  }
+  return null
+})
 
-    const organizationProfile = computed(() => {
-      if (userType.value === 'organization') {
-        return currentUser.userAccount?.private_data as IOrganizationData
-      }
-      return null
-    })
+const organizationProfile = computed(() => {
+  if (userType.value === 'organization') {
+    return currentUser.userAccount?.private_data as IOrganizationData
+  }
+  return null
+})
 
-    const userProfile = computed(() => {
-      if (userType.value === 'individual' || userType.value === 'entrepreneur') {
-        return individualProfile?.value || entrepreneurProfile?.value
-      }
-      return organizationProfile?.value
-    })
-    </script>
+const userProfile = computed(() => {
+  if (userType.value === 'individual' || userType.value === 'entrepreneur') {
+    return individualProfile?.value || entrepreneurProfile?.value
+  }
+  return organizationProfile?.value
+})
+</script>

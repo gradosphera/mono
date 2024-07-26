@@ -74,3 +74,17 @@ export interface IPaymentOrder {
 export interface ICreateWithdraw {
   quantity: string;
 }
+
+import { Cooperative } from 'cooptypes';
+
+export type IPaymentMethodData = Cooperative.Payments.IPaymentData
+export type IGetResponsePaymentMethodData = Cooperative.Documents.IGetResponse<IPaymentMethodData>
+
+export interface IGetPaymentMethods {
+  username?: string
+}
+
+export interface IDeletePaymentMethod {
+  username: string;
+  method_id: number;
+}

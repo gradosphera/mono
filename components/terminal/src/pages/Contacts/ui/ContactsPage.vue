@@ -1,7 +1,6 @@
 <template lang="pug">
 div.row.justify-center
-  div.col-md-6.col-xs-12.q-mt-lg
-    p.text-h6.text-center Контакты
+  div.col-md-6.col-xs-12
     CooperativeContacts.full-width
 
 

@@ -1,5 +1,6 @@
 <template lang="pug">
 q-card(flat bordered).q-pa-md
+  //- p.text-bold.full-width.text-sm.text-center КОШЕЛЁК
   WalletBalance
   div.flex.justify-center.q-gutter-sm.q-pa-md
     DepositButton

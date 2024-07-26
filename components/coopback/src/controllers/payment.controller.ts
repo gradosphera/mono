@@ -80,6 +80,14 @@ export const addPaymentMethod = catchAsync(async (req: RSavePaymentMethod, res) 
 
   const user = await getUserByUsername(req.body.username);
 
+  const method = req.body as any;
+
+  if (method.method_type === 'sbp' && !method.data.phone)
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Не указан телефон для метода СБП');
+
+  if (method.method_type === 'bank_transfer' && !method.data.account_number)
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Не верно указаны реквизиты для банковского платежа');
+
   const paymentData: Cooperative.Payments.IPaymentData = {
     username: req.body.username,
     method_id: req.body.method_id,

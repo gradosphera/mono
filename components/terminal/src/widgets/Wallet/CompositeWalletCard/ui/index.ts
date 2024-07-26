@@ -1,1 +1,1 @@
-export { default as CompositeWalletCard } from './WalletPage.vue'
+export { default as CompositeWalletCard } from './CompositeWalletCard.vue'
