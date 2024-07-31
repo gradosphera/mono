@@ -40,8 +40,18 @@ export class PDFService implements IPDFService {
 
   private static async generatePDFBuffer(htmlContent: string): Promise<Uint8Array> {
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-extensions',
+        '--disable-software-rasterizer',
+      ],
+      timeout: 120000, // увеличиваем общее время ожидания до 2 минут
+      protocolTimeout: 120000, // увеличиваем время ожидания протокола до 2 минут
     })
+
     const page = await browser.newPage()
 
     // const data = await inlineCss(htmlContent, { url: 'about:blank' })
