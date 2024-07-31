@@ -1,15 +1,11 @@
 <template lang='pug'>
 div
-  q-step(:name='3', title='Получите приватный ключ для цифровой подписи', :done='step > 3')
+  q-step(:name='3', title='Получите приватный ключ и надежно сохраните его для цифровой подписи', :done='step > 3')
     div
-      p.full-width Надёжно сохраните идентификатор аккаунта и приватный ключ.
+      p.full-width Приватный ключ используется для входа в систему и подписи документов. Мы рекомендуем сохранить его в менеджере паролей, таком как
+        a(href="https://bitwarden.com").q-ml-xs Bitwarden
+        | .
 
-    q-input.q-mt-lg(
-      v-if='account.username',
-      v-model='account.username',
-      label='Идентификатор аккаунта',
-      :readonly='true'
-    )
 
     q-input.q-mt-lg(
       v-if='account.private_key',
@@ -52,7 +48,7 @@ const step = computed(() => store.step)
 const userData = computed(() => store.userData)
 
 const copyMnemonic = () => {
-  const toCopy = `Имя пользователя: ${account.value.username} \nПриватный ключ: ${account.value.private_key}`
+  const toCopy = `Приватный ключ: ${account.value.private_key}`
 
   copyToClipboard(toCopy)
     .then(() => {

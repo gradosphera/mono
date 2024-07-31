@@ -8,57 +8,23 @@ q-card(v-if="currentUser?.username" flat bordered).q-pa-md.digital-certificate
         AutoAvatar(style="width: 125px;" :username="currentUser.username").q-pa-sm.q-pt-lg
     div.col-md-8.col-xs-12
       q-list( dense )
-        q-item
-          q-item-section
-            q-item-label(caption) Тип
-          q-item-section(side)
-            q-badge(v-if="userType === 'individual'") физическое лицо
-            q-badge(v-if="userType === 'entrepreneur'") индивидуальный предприниматель
-            q-badge(v-if="userType === 'organization'") юридическое лицо
+        div().text-center
+          q-badge(v-if="userType === 'individual'").text-center физическое лицо
+          q-badge(v-if="userType === 'entrepreneur'").text-center индивидуальный предприниматель
+          q-badge(v-if="userType === 'organization'").text-center юридическое лицо
 
-        q-item
-          q-item-section
-            q-item-label(caption) Идентификатор
-          q-item-section(side)
-            q-item-label(lines=2) {{ currentUser.username }}
+        q-input(standout dense label="Идентификатор" v-model="currentUser.username" readonly)
 
-        q-item
-          q-item-section
-            q-item-label(v-if="userType !== 'organization'" caption) ФИО
-            q-item-label(v-else caption) Наименование
-          q-item-section(side)
-            template(v-if="userType === 'individual'")
-              q-item-label(lines=2 caption) {{ individualProfile?.last_name }} {{ individualProfile?.first_name }} {{ individualProfile?.middle_name }}
-            template(v-else-if="userType === 'entrepreneur'")
-              q-item-label(lines=2 caption) {{ entrepreneurProfile?.last_name }} {{ entrepreneurProfile?.first_name }} {{ entrepreneurProfile?.middle_name }}
-            template(v-else)
-              q-item-label(caption) {{ organizationProfile?.short_name }}
+        q-input(standout dense label="Пайщик" readonly v-model="displayName")
 
-        q-item(v-if="userType === 'individual'")
-          q-item-section
-            q-item-label(caption) Дата рождения
-          q-item-section(side) {{ individualProfile?.birthdate }}
+        q-input(v-if="userType === 'individual' && individualProfile" standout dense label="Дата рождения" readonly v-model="individualProfile.birthdate")
 
-        q-item(v-if="userType === 'organization'")
-          q-item-section
-            q-item-label(caption) ИНН / ОГРН
-          q-item-section(side) {{ organizationProfile?.details.inn }} / {{ organizationProfile?.details.ogrn }}
+        q-input(v-if="userType === 'organization' && organizationProfile" standout dense label="ИНН / ОГРН" readonly v-model="inn_ogrn")
 
-        q-item
-          q-item-section
-            q-item-label(caption) Адрес регистрации
-          q-item-section(side)
-            q-item-label(lines=2) {{ userProfile?.full_address }}
+        q-input(v-if="userProfile" standout dense label="Телефон" readonly v-model="userProfile.phone")
 
-        q-item
-          q-item-section
-            q-item-label(caption) Телефон
-          q-item-section(side) {{ userProfile?.phone }}
+        q-input(v-if="userProfile" standout dense label="Почта" readonly v-model="userProfile.email")
 
-        q-item
-          q-item-section
-            q-item-label(caption) Почта
-          q-item-section(side) {{ userProfile?.email }}
   </template>
 
 <script lang="ts" setup>
@@ -97,4 +63,26 @@ const userProfile = computed(() => {
   }
   return organizationProfile?.value
 })
+
+const displayName = computed(() => {
+  if (userType.value === 'individual') {
+    return `${individualProfile.value?.last_name} ${individualProfile.value?.first_name} ${individualProfile.value?.middle_name}`
+  } else if (userType.value === 'entrepreneur') {
+    return `${entrepreneurProfile.value?.last_name} ${entrepreneurProfile.value?.first_name} ${entrepreneurProfile.value?.middle_name}`
+  } else {
+    return organizationProfile.value?.short_name
+  }
+})
+
+const inn_ogrn = computed(() => {
+  if (organizationProfile.value)
+    return `${organizationProfile.value.details.inn} / ${organizationProfile.value.details.ogrn}`
+  else return ''
+})
+
 </script>
+<style>
+.digital-certificate {
+  padding: 50px !important;
+}
+</style>

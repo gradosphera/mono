@@ -6,7 +6,6 @@ q-layout(view="hHh LpR fFf")
         q-btn(stretch flat class="btn-title" :dense="isMobile" @click="goToIndex").q-ml-sm
           //- img(:src="HeaderLogo" alt="" style="height: 50px;").q-pa-sm
           //- q-icon(name="far fa-circle").q-pa-sm
-
           p {{ COOP_SHORT_NAME }}
 
       q-btn(stretch flat @click="toogleDark")
@@ -20,27 +19,23 @@ q-layout(view="hHh LpR fFf")
         p.q-pr-sm вход
         i.fa-solid.fa-right-to-bracket
 
-  q-drawer(v-if="loggedIn" v-model="leftDrawerOpen" :mini="isMini" show-if-above side="left" persistent :mini-width="71" :width="71" class="drawer-left")
-    Menu(:mini="isMini")
 
-  //скрывающееся мобильное меню
-  q-drawer(v-if="loggedIn && isMobile" v-model="rightDrawerOpen" behavior="mobile" side="right" persistent :mini-width="71" :width="71" class="drawer-right")
-    Menu(:mini="false")
+  q-header(v-if="!isMobile && loggedIn" style="border-bottom: 1px solid #00800038 !important; " :style="{ 'background': $q.dark.isActive ? 'black' : 'white' }" :class="headerClass").header
+    Menu(style="border-bottom: 1px solid #00800038 !important; ")
+    SecondLevelMenu
 
   //футер контактов
   q-footer(v-if="!loggedIn" :class="headerClass")
     ContactsFooter(:text="footerText")
 
+  q-footer(v-if="loggedIn && isMobile" style="border-top: 1px solid #00800038 !important; "  :class="headerClass")
+    SecondLevelMenu
+    Menu(style="border-top: 1px solid #00800038 !important; " )
 
-  //футер мобильного меню
-  q-footer(v-if="loggedIn && isMobile" :class="footerClass" style="height: 55px; border-top: 1px solid #00800038 !important; " :style="{ 'background': $q.dark.isActive ? 'black' : 'white' }")
-    mobileMenu(@toogle-more="toggleRightDrawer")
-
-  //контейнер всех страниц
+  //контейнер
   q-page-container
-    q-page(class="page" )
-      router-view(v-slot="{ Component }")
-        component(:is="Component" )
+    q-page
+      router-view
 
 
 </template>
@@ -51,23 +46,28 @@ import { useRouter, useRoute } from 'vue-router'
 import { useQuasar, Cookies, LocalStorage } from 'quasar'
 import { useWindowSize } from 'vue-window-size'
 import config from 'src/app/config'
+
+const router = useRouter()
+const route = useRoute()
+
 // import HeaderLogo from '~/assets/logo-white.png?url'
 import Menu from 'src/components/menu/drawerMenu.vue'
-import mobileMenu from 'src/components/menu/footerMobileMenu.vue'
+
 import { COOPNAME, COOP_SHORT_NAME } from 'src/shared/config'
 import { useCurrentUserStore } from 'src/entities/User'
 import { useSessionStore } from 'src/entities/Session'
 const session = useSessionStore()
 import { ContactsFooter } from 'src/shared/ui/Footer'
+import { SecondLevelMenu } from 'src/entities/Desktop'
 
 const $q = useQuasar()
 
 const isDark = computed(() => $q.dark.isActive)
 
 const headerClass = computed(() => (isDark.value ? 'text-white bg-dark' : 'text-black bg-light'))
-const footerClass = computed(() => (isDark.value ? 'text-white' : 'text-black'))
 
 import { useCooperativeStore } from 'src/entities/Cooperative';
+
 const cooperativeStore = useCooperativeStore()
 
 cooperativeStore.loadContacts()
@@ -82,29 +82,14 @@ defineExpose({
   $q,
 })
 
-const router = useRouter()
-
-const route = useRoute()
 const { width } = useWindowSize()
 
 const leftDrawerOpen = ref<boolean>(false)
-
-const rightDrawerOpen = ref<boolean>(false)
-
-// const toggleLeftDrawer = () => {
-//   leftDrawerOpen.value = !leftDrawerOpen.value
-// }
-
-const toggleRightDrawer = () => {
-  rightDrawerOpen.value = !rightDrawerOpen.value
-}
 
 const showRegisterButton = computed(() => {
   if (!loggedIn.value) {
     if (config.registrator.showRegisterButton) return true
     else return false
-    // if (isIndexRoute.value) return config.registrator.showInIndexHeader
-    // else return config.registrator.showInOtherHeader
   } else return false
 })
 
@@ -122,10 +107,6 @@ if (isMobile.value == true) {
   leftDrawerOpen.value = true
 }
 
-const isMini = computed(() => {
-  return !rightDrawerOpen.value && !rightDrawerOpen.value && !isMobile.value
-})
-
 const loggedIn = computed(() => {
   return useCurrentUserStore().isRegistrationComplete && session.isAuth
 })
@@ -136,6 +117,7 @@ watch(isMobile, (newValue) => {
 })
 
 watch(route, () => {
+  console.log('route', route)
   checkAuth()
   if (isMobile.value)
     leftDrawerOpen.value = false

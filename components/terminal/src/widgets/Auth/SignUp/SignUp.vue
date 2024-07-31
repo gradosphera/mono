@@ -19,7 +19,7 @@ div
       WaitingRegistration(v-model:data='store.userData', v-model:step='store.step')
 
       Welcome(v-model:data='store.userData', v-model:step='store.step')
-  q-btn(@click="logout" size="sm" flat)
+  q-btn(@click="out" size="sm" flat)
     q-icon(name="logout")
     span.q-ml-sm начать с начала
 </template>
@@ -54,7 +54,7 @@ onMounted(() => {
 
 })
 
-const logout = async () => {
+const out = async () => {
   const { logout } = await useLogoutUser()
   await logout()
   clearLocalStorage()
@@ -85,7 +85,6 @@ onBeforeUnmount(() => {
 
 watch(() => currentUser.participantAccount, (newValue) => {
   if (newValue) {
-    console.log('on watch: ', currentUser.participantAccount)
     store.step = 8
     clearLocalStorage()
   }

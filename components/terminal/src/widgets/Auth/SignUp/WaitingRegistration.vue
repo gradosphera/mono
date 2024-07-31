@@ -18,15 +18,10 @@ import { useCurrentUserStore } from 'src/entities/User';
 import { COOPNAME } from 'src/shared/config';
 import { Loader } from 'src/shared/ui/Loader';
 
-const props = defineProps({
-  step: {
-    type: Number,
-    required: true
-  }
-})
 
 const currentStep = 7
-const step = computed(() => props.step)
+
+const step = computed(() => store.step)
 const interval = ref()
 
 watch(step, (newValue) => {
@@ -52,9 +47,7 @@ onBeforeUnmount(() => {
 })
 
 const update = () => {
-  console.log('pn start upate')
   if (store.account.username && !participantAccount.value) {
-    console.log('on update')
     currentUser.loadProfile(store.account.username, COOPNAME)
   } else {
     clearInterval(interval.value)
@@ -62,8 +55,7 @@ const update = () => {
 }
 
 watch(() => participantAccount, (newValue) => {
-  if (newValue){
-    console.log('on wating move')
+  if (newValue) {
     store.step++
   }
 

@@ -5,7 +5,7 @@ const walletStore = useWalletStore()
 
 <template lang="pug">
 div.q-pa-md
-  q-list(v-if="walletStore.program_wallets.length > 0")
+  q-list
     q-item(v-for="program_wallet of walletStore.program_wallets" :key="program_wallet.id" v-ripple clickable)
       q-item-section
         q-item-label {{ program_wallet.program_details.title }}

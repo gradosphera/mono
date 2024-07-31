@@ -102,6 +102,7 @@ module.exports = configure(function (/* ctx */) {
             eslint: {
               lintCommand: 'eslint "./**/*.{js,ts,mjs,cjs,vue}"',
             },
+            overlay: false
           },
           { server: false },
         ],
@@ -111,6 +112,7 @@ module.exports = configure(function (/* ctx */) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
+      vueDevtools: false,
       open: false, // opens browser window automatically
       port: 3005,
       hmr:{

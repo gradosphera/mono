@@ -77,7 +77,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
   const createDeposit = async (
     params: ICreateDeposit
   ): Promise<IPaymentOrder> => {
-    return sendPOST('/v1/orders/deposit', params);
+    return sendPOST('/v1/payments/deposit', params);
   };
 
   const createWithdraw = async (params: ICreateWithdraw): Promise<void> => {

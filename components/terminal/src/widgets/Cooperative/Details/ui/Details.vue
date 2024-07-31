@@ -24,6 +24,8 @@ import { computed } from 'vue';
 const cooperative = useCooperativeStore()
 cooperative.loadContacts()
 
+cooperative.loadPrivateCooperativeData()
+
 const details = computed(() => cooperative.privateCooperativeData)
 const chairman = computed(() => `${details.value?.chairman?.last_name} ${details.value?.chairman?.first_name} ${details.value?.chairman?.middle_name}`)
 

@@ -1,6 +1,7 @@
 import { route } from 'quasar/wrappers';
 import {
   RouteLocationNormalizedGeneric,
+  RouteRecordRaw,
   createMemoryHistory,
   createRouter,
   createWebHashHistory,
@@ -9,19 +10,29 @@ import {
 import { routes } from 'src/app/providers/routes';
 import { useSessionStore } from 'src/entities/Session';
 import {
-  AUTHORIZED_HOME_PAGE,
   COOPNAME,
-  NOT_AUTHORIZED_HOME_PAGE,
 } from 'src/shared/config';
 import { IUserAccountData, useCurrentUserStore } from 'src/entities/User';
-import { useMenuStore } from 'src/entities/Menu';
+import { useDesktopStore } from './desktops';
 
-export default route(function (/* { store, ssrContext } */) {
+export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+
+export default route(async function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : process.env.VUE_ROUTER_MODE === 'history'
     ? createWebHistory
     : createWebHashHistory;
+
+
+  const desktops = useDesktopStore()
+  await desktops.loadDesktops()
+  await desktops.setActiveDesktop(desktops.defaultDesktopHash)
+
+  desktops.currentDesktop?.routes.forEach(route => {
+    routes[0].children?.push(route as RouteRecordRaw)
+  })
 
   const router = createRouter({
     history: createHistory(process.env.VUE_ROUTER_BASE),
@@ -57,20 +68,15 @@ export default route(function (/* { store, ssrContext } */) {
           } catch(e: any){
             console.error(e)
           }
-
       }
 
-      const menuStore = useMenuStore()
-      menuStore.setRoutes(routes)
-
       if (to.name == 'index') {
-        console.log('7')
         if (session.isAuth){
-          next({ name: AUTHORIZED_HOME_PAGE, params: { coopname: COOPNAME } });
+          next({ name: desktops.currentDesktop?.authorizedHome, params: { coopname: COOPNAME } });
           return
         } else {
           next({
-            name: NOT_AUTHORIZED_HOME_PAGE,
+            name: desktops.currentDesktop?.nonAuthorizedHome,
             params: { coopname: COOPNAME },
           });
           return;

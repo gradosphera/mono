@@ -3,8 +3,8 @@ q-card(flat bordered).q-pa-md
   AddPaymentMethodButton(:username="username")
   q-list.full-width.q-mt-lg
     q-item(v-for="method in wallet.methods" :key="method.method_id").q-mt-md.full-width
-      q-card(flat).full-width.row.justify-center
-        div(v-if="method.method_type ==='sbp' && isSBPData(method.data)").col-md-10.col-xs-12
+      q-card(flat).full-width
+        div(v-if="method.method_type ==='sbp' && isSBPData(method.data)")
           div.flex.justify-between
 
             q-badge
@@ -13,7 +13,7 @@ q-card(flat bordered).q-pa-md
             DeletePaymentButton(:size="'xs'" :username="username" :method_id="method.method_id")
           q-input(v-model="method.data.phone" label="Номер телефона" filled readonly)
 
-        div(v-if="method.method_type ==='bank_transfer' && isBankTransferData(method.data)").col-md-10.col-xs-12
+        div(v-if="method.method_type ==='bank_transfer' && isBankTransferData(method.data)")
           div.flex.justify-between
             q-badge
               span №{{ method.method_id }}

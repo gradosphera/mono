@@ -10,6 +10,7 @@ import { ref, watch } from 'vue';
 
 const coop = useCooperativeStore()
 coop.loadPublicCooperativeData(COOPNAME)
+coop.loadPrivateCooperativeData()
 
 const localCoop = ref({
   initial: 0,

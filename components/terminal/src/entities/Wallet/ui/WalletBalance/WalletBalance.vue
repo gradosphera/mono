@@ -4,13 +4,13 @@ const walletStore = useWalletStore()
 </script>
 
 <template lang="pug">
-div.row.flex.justify-around.q-pa-sm
-  div.q-mt-md
-    span.text-grey Паевый счёт
-    p.text-h3 {{ walletStore.wallet.available }}
+div
+  q-input(readonly standout label="Паевый счёт" v-model="walletStore.wallet.available")
+  //- span.text-grey Паевый счёт
+  //- p.text-h3 {{ walletStore.wallet.available }}
 
-  div.q-mt-md.text-right
-    span.text-grey Членский счёт
-    p.text-h3 {{ walletStore.wallet.blocked }}
+
+  q-input(readonly standout label="Членский счёт" v-model="walletStore.wallet.blocked")
+
 
 </template>

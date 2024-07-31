@@ -20,7 +20,7 @@ async function createUser(data: ICreateUser): Promise<ICreatedUser> {
 async function createInitialPayment(
   data: ICreateInitialPayment
 ): Promise<ICreatedPayment> {
-  const response = await sendPOST('/v1/orders/initial', data);
+  const response = await sendPOST('/v1/payments/initial', data);
   return response;
 }
 

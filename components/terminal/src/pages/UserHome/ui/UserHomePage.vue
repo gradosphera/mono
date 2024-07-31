@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-tabs( v-model="tab" dense switch-indicator inline-label outside-arrows mobile-arrows align="justify" active-bg-color="teal" active-color="white" indicator-color="secondary" style="border-bottom: 1px solid teal;")
+  q-tabs( v-model="tab" dense switch-indicator inline-label outside-arrows mobile-arrows align="justify" active-bg-color="teal" active-color="white" indicator-color="secondary"  style="border-bottom: 1px solid teal;")
     q-tab(name="Удостоверение" label="Удостоверение")
     q-tab(name="Кошелёк" label="Кошелёк")
     q-tab(name="Реквизиты" label="Реквизиты")

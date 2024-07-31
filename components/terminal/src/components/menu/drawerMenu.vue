@@ -1,37 +1,36 @@
 <template lang="pug">
 div.menu-container
   div.menu-items
-    div(v-for="route in menuRoutes" :key="route.path")
-      q-btn(
-        v-ripple
-        flat
-        class="cursor-pointer btn-menu"
-        :class="headerClass(route)"
-        @click="open(route)"
-      )
-        q-icon(:name="route.meta.icon").btn-icon.q-pt-xs
-        span.btn-font {{ t(route.meta.title) }}
+    q-btn(
+      v-for="route in menuRoutes" :key="route.path"
+      v-ripple
+      flat
+      class="cursor-pointer btn-menu"
+      :class="headerClass(route)"
+      @click="open(route)"
+    )
+      q-icon(:name="route.meta.icon").btn-icon.q-pt-xs
+      span.btn-font {{ route.meta.title }}
 
   div.control-buttons
-    div
-      q-btn(flat @click="$q.dark.toggle()").btn-menu
-        q-icon(:name="isDark ? 'brightness_7' : 'brightness_3'").btn-icon
-        span.btn-font {{ isDark ? 'светлая' : 'тёмная' }}
-    div
-      q-btn(v-ripple flat class="cursor-pointer btn-menu" @click="logout")
-        q-icon( color="red" name="logout").btn-icon.q-pt-xs
-        div.btn-font Выход
+
+    q-btn(flat @click="$q.dark.toggle()" ).btn-menu
+      q-icon(:name="isDark ? 'brightness_7' : 'brightness_3'").q-pt-xs.btn-icon
+      span.btn-font {{ isDark ? 'светлая' : 'тёмная' }}
+
+    q-btn(v-ripple flat class="cursor-pointer btn-menu" @click="logout")
+      q-icon( color="red" name="logout").q-pt-xs.btn-icon
+      div.btn-font Выход
+
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import { useMenuStore } from 'src/entities/Menu'
-import type { IMenu } from 'src/entities/Menu'
 import { COOPNAME } from 'src/shared/config'
-import { useLogoutUser } from 'src/features/User/Logout/model'
+import { type IRoute, useDesktopStore } from 'src/app/providers/desktops'
+import { useLogoutUser } from 'src/features/User/Logout'
 import { FailAlert } from 'src/shared/api'
 import { useCurrentUserStore } from 'src/entities/User'
 
@@ -41,27 +40,24 @@ const isDark = computed(() => $q.dark.isActive)
 
 const router = useRouter()
 const route = useRoute()
+const user = useCurrentUserStore()
 
-const isRouteActive = (currentRoute: IMenu) => {
-  return route.name === currentRoute.name
+const isRouteActive = (currentRoute: IRoute) => {
+  return route.matched.find(r => r.path === currentRoute.path) || route.name == currentRoute.name
 }
 
-const headerClass = (route: IMenu) => {
+const headerClass = (route: IRoute) => {
   const isActive = isRouteActive(route)
   return isActive ? (isDark.value ? 'text-white bg-teal-8' : 'text-black bg-teal-2') : ''
 }
 
-const currentUser = useCurrentUserStore()
-const menuStore = useMenuStore()
+const desktop = useDesktopStore()
 
-const { t } = useI18n()
+const open = (route: IRoute) => {
+  if (route.children)
+    router.push({ name: route.children[0].name, params: { coopname: COOPNAME } })
+  else router.push({ name: route.name, params: { coopname: COOPNAME } })
 
-const menu = ref<IMenu[]>([])
-
-menu.value = menuStore.getUserDesktopMenu(currentUser?.userAccount?.role)
-
-const open = (route: IMenu) => {
-  router.push({ name: route.name, params: { coopname: COOPNAME } })
 }
 
 
@@ -78,15 +74,23 @@ const logout = async () => {
   }
 }
 
+
+
 const menuRoutes = computed(() => {
-  return menu.value
+  const userRole = user.userAccount?.role || 'user';
+
+  return desktop.firstLevel.filter(
+    (route) => route.meta.roles.includes(userRole) || route.meta.roles.length === 0
+  );
+
 })
+
 </script>
 
 <style lang="scss" scoped>
 .btn-menu {
-  height: 70px;
-  width: 70px;
+  height: 54px;
+  width: 65px;
 }
 
 .btn-icon {
@@ -99,13 +103,13 @@ const menuRoutes = computed(() => {
 
 .logout-btn {
   position: fixed;
-  bottom: 70px;
+  bottom: 54px;
   width: 100%;
 }
 
 .menu-container {
   display: flex;
-  flex-direction: column;
+  // flex-direction: column;
   height: 100%;
 }
 

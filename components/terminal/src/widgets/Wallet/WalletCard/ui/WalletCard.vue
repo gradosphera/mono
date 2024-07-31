@@ -1,12 +1,15 @@
 <template lang="pug">
 q-card(flat bordered).q-pa-md
-  //- p.text-bold.full-width.text-sm.text-center КОШЕЛЁК
-  WalletBalance
-  div.flex.justify-center.q-gutter-sm.q-pa-md
-    DepositButton
-    WithdrawButton
+  div.row
+    div.col-md-6.col-xs-12.q-gutter-sm
+      div.flex.q-pa-sm
+        DepositButton.q-ma-sm
+        WithdrawButton.q-ma-sm
+    div.col-md-6.col-xs-12.q-gutter-sm
+      WalletBalance
   WalletProgramsList
 </template>
+
 
 <script lang="ts" setup>
 import { WalletBalance } from 'src/entities/Wallet/ui'

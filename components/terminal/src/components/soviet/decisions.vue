@@ -1,77 +1,76 @@
 <template lang="pug">
-div.row.justify-center
-  div.col-12
-    q-card(flat)
-      q-table(
-        ref="tableRef" v-model:expanded="expanded"
-        flat
-        bordered
-        :rows="decisions"
-        :columns="columns"
-        :table-colspan="9"
-        row-key="table.id"
-        :pagination="pagination"
-        virtual-scroll
-        :virtual-scroll-item-size="48"
-        :rows-per-page-options="[10]"
-        :loading="onLoading"
-        :no-data-label="'У совета нет голосований на повестке'"
-      ).full-height.full-width
 
-        template(#header="props")
-          q-tr(:props="props")
-            q-th(auto-width)
+q-card(flat)
+  q-table(
+    ref="tableRef" v-model:expanded="expanded"
+    flat
+    bordered
+    :rows="decisions"
+    :columns="columns"
+    :table-colspan="9"
+    row-key="table.id"
+    :pagination="pagination"
+    virtual-scroll
+    :virtual-scroll-item-size="48"
+    :rows-per-page-options="[10]"
+    :loading="onLoading"
+    :no-data-label="'У совета нет голосований на повестке'"
+  ).full-width
 
-            q-th(
-              v-for="col in props.cols"
-              :key="col.name"
-              :props="props"
-            ) {{ col.label }}
+    template(#header="props")
+      q-tr(:props="props")
+        q-th(auto-width)
 
-        template(#body="props")
-          q-tr(:key="`m_${props.row.table.id}`" :props="props")
-            q-td(auto-width)
-              // q-toggle(v-model="props.expand" checked-icon="fas fa-chevron-circle-left" unchecked-icon="fas fa-chevron-circle-right" )
+        q-th(
+          v-for="col in props.cols"
+          :key="col.name"
+          :props="props"
+        ) {{ col.label }}
 
-              q-btn(size="sm" color="primary" dense :icon="props.expand ? 'remove' : 'add'" round @click="props.expand = !props.expand")
-            q-td {{ props.row.table.id }}
-            q-td {{ props.row.table.username }}
-            q-td
-              q-badge {{ getTitle(props.row.table.type, props.row.documents.statement.action.user) }}
+    template(#body="props")
+      q-tr(:key="`m_${props.row.table.id}`" :props="props")
+        q-td(auto-width)
+          // q-toggle(v-model="props.expand" checked-icon="fas fa-chevron-circle-left" unchecked-icon="fas fa-chevron-circle-right" )
 
-            //- q-td
-            //-   q-checkbox(@click="updateValidation(props.row.id)" :model-value="props.row.validated")
+          q-btn(size="sm" color="primary" dense :icon="props.expand ? 'remove' : 'add'" round @click="props.expand = !props.expand")
+        q-td {{ props.row.table.id }}
+        q-td {{ props.row.table.username }}
+        q-td
+          q-badge {{ getTitle(props.row.table.type, props.row.documents.statement.action.user) }}
 
-            q-td
-              //- p Проголосовало {{  props.row.table.votes_for.length + props.row.table.votes_against.length}} из {{totalMembers}}
+        //- q-td
+        //-   q-checkbox(@click="updateValidation(props.row.id)" :model-value="props.row.validated")
+
+        q-td
+          //- p Проголосовало {{  props.row.table.votes_for.length + props.row.table.votes_against.length}} из {{totalMembers}}
 
 
-              q-btn(v-if="isVotedFor(props.row.table) || !isVotedAny(props.row.table)" :disabled="isVotedAny(props.row.table)" dense flat @click="voteAgainst(props.row.table.id)").text-red
-                q-icon(name="fa-regular fa-thumbs-down")
-                p.q-pl-xs {{props.row.table.votes_against.length}}
+          q-btn(v-if="isVotedFor(props.row.table) || !isVotedAny(props.row.table)" :disabled="isVotedAny(props.row.table)" dense flat @click="voteAgainst(props.row.table.id)").text-red
+            q-icon(name="fa-regular fa-thumbs-down")
+            p.q-pl-xs {{props.row.table.votes_against.length}}
 
-              q-btn(v-if="isVotedAgainst(props.row.table)" disabled dense flat).text-red
-                q-icon(name="fas fa-thumbs-down")
-                p.q-pl-xs {{props.row.table.votes_against.length}}
+          q-btn(v-if="isVotedAgainst(props.row.table)" disabled dense flat).text-red
+            q-icon(name="fas fa-thumbs-down")
+            p.q-pl-xs {{props.row.table.votes_against.length}}
 
-              q-checkbox( v-model="props.row.table.approved" disable :true-value="1" :false-value="0" )
+          q-checkbox( v-model="props.row.table.approved" disable :true-value="1" :false-value="0" )
 
-              q-btn(v-if="isVotedAgainst(props.row.table) || !isVotedAny(props.row.table)" :disabled="isVotedAny(props.row.table)" dense flat @click="voteFor(props.row.table.id)").text-green
-                p.q-pr-xs {{props.row.table.votes_for.length}}
-                q-icon(name="fa-regular fa-thumbs-up" style="transform: scaleX(-1)")
+          q-btn(v-if="isVotedAgainst(props.row.table) || !isVotedAny(props.row.table)" :disabled="isVotedAny(props.row.table)" dense flat @click="voteFor(props.row.table.id)").text-green
+            p.q-pr-xs {{props.row.table.votes_for.length}}
+            q-icon(name="fa-regular fa-thumbs-up" style="transform: scaleX(-1)")
 
-              q-btn(v-if="isVotedFor(props.row.table)" disabled dense flat ).text-green
-                p.q-pr-xs {{props.row.table.votes_for.length}}
-                q-icon(name="fas fa-thumbs-up" style="transform: scaleX(-1)")
+          q-btn(v-if="isVotedFor(props.row.table)" disabled dense flat ).text-green
+            p.q-pr-xs {{props.row.table.votes_for.length}}
+            q-icon(name="fas fa-thumbs-up" style="transform: scaleX(-1)")
 
-            q-td
-              q-btn( :loading="isProcess(props.row.table.id)" @click="updateAuthorized(props.row.table.username, props.row.table.id)") утвердить
-              //- q-checkbox(v-if="!isProcess(props.row.table.id)" :model-value="props.row.table.authorized" :true-value="1" :false-value="0" @click="updateAuthorized(props.row.table.username, props.row.table.id)")
-              //- q-spinner(v-if="isProcess(props.row.table.id)" size="md")
+        q-td
+          q-btn( :loading="isProcess(props.row.table.id)" @click="updateAuthorized(props.row.table.username, props.row.table.id)") утвердить
+          //- q-checkbox(v-if="!isProcess(props.row.table.id)" :model-value="props.row.table.authorized" :true-value="1" :false-value="0" @click="updateAuthorized(props.row.table.username, props.row.table.id)")
+          //- q-spinner(v-if="isProcess(props.row.table.id)" size="md")
 
-          q-tr(v-show="props.expand" :key="`e_${props.row.table.id}`" :props="props" class="q-virtual-scroll--with-prev")
-            q-td(colspan="100%")
-              joincoopdoc(v-if="props.row.table.type == 'joincoop'" :documents="props.row.documents")
+      q-tr(v-show="props.expand" :key="`e_${props.row.table.id}`" :props="props" class="q-virtual-scroll--with-prev")
+        q-td(colspan="100%")
+          joincoopdoc(v-if="props.row.table.type == 'joincoop'" :documents="props.row.documents")
 
 
 
