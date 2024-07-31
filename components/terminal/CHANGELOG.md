@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.32](https://github.com/coopenomics/monocoop/compare/terminal@0.1.32-alpha.0...terminal@0.1.32) (2024-07-31)
+
+**Note:** Version bump only for package terminal
+
+
+
+
+
 ## [0.1.31](https://github.com/coopenomics/monocoop/compare/terminal@0.1.31-alpha.0...terminal@0.1.31) (2024-07-26)
 
 **Note:** Version bump only for package terminal
