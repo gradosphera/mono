@@ -3,7 +3,7 @@ div
   q-step(:name='3', title='Получите приватный ключ и надежно сохраните его для цифровой подписи', :done='step > 3')
     div
       p.full-width Приватный ключ используется для входа в систему и подписи документов. Мы рекомендуем сохранить его в менеджере паролей, таком как
-        a(href="https://bitwarden.com").q-ml-xs Bitwarden
+        a(href="https://bitwarden.com" target="_bank").q-ml-xs Bitwarden
         | .
 
 
