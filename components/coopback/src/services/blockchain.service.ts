@@ -6,8 +6,15 @@ import EosApi from 'eosjs-api';
 import getInternalAction from '../utils/getInternalAction';
 import { GatewayContract, RegistratorContract, SovietContract } from 'cooptypes';
 import { IUser } from '../models/user.model';
+import { GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 
 const rpc = new JsonRpc(process.env.BLOCKCHAIN_RPC as string, { fetch });
+
+async function getBlockchainInfo(): Promise<GetInfoResult> {
+  const api = getApi();
+
+  return await api.getInfo({});
+}
 
 /**
  * Получить инстанс для осуществления транзакции в блокчейн.
@@ -22,7 +29,7 @@ async function getInstance(wif) {
   return api;
 }
 
-async function getApi() {
+function getApi() {
   const options = {
     httpEndpoint: process.env.BLOCKCHAIN_RPC, // default, null for cold-storage
     verbose: false, // API logging
@@ -271,4 +278,5 @@ export {
   failOrder,
   completeOrder,
   getSoviet,
+  getBlockchainInfo,
 };

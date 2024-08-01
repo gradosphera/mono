@@ -16,6 +16,7 @@ import ApiError from '../utils/ApiError';
 
 export const generateDocument = catchAsync(async (req: RGenerate, res) => {
   const document = await documentService.generateDocument(req.body);
+  console.log('test');
 
   res.status(httpStatus.CREATED).send(document);
 });
@@ -26,6 +27,7 @@ export const getDocuments = catchAsync(async (req: RGetDocuments, res) => {
   let page = req.query?.page as number;
 
   const documents = await documentService.queryDocuments(filter, page, limit);
+  console.log('test');
 
   res.status(httpStatus.OK).send(documents);
 });

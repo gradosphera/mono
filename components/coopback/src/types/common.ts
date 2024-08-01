@@ -122,7 +122,7 @@ export interface IAction {
   elapsed: number;
 }
 
-export interface IExtendedTable extends ITable {}
+export type IExtendedTable = ITable;
 
 export interface IExtendedAction extends IAction {
   user: IIndividualData | IEntrepreneurData | IOrganizationData | null;

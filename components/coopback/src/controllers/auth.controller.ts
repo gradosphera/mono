@@ -1,17 +1,14 @@
 import httpStatus from 'http-status';
 import catchAsync from '../utils/catchAsync';
 
-import { authService, userService, tokenService, emailService, blockchainService } from '../services';
-import { RForgotPassword, RRefreshTokens, RResetPassword, RSendNotification, RVerifyEmail } from '../types';
+import { authService, tokenService, emailService } from '../services';
+import { RForgotPassword, RRefreshTokens, RResetPassword, RVerifyEmail } from '../types';
 
-const { CREATED, NO_CONTENT } = httpStatus;
+const { NO_CONTENT } = httpStatus;
 
 export const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.loginUserWithEmailAndPassword(email, password);
-
-  // if (user.is_registered === false)
-  //   throw new Error('Регистрация не была завершена. Пожалуйста, подождите решения совета или начните с начала. ');
 
   const tokens = await tokenService.generateAuthTokens(user);
   res.send({ user, tokens });

@@ -7,7 +7,7 @@ async function types(): Promise<void> {
   // Configure your settings here
   const result = await convertFromDirectory({
     schemaDirectory: './src/validations',
-    typeOutputDirectory: './src/types',
+    typeOutputDirectory: './src/types/auto-generated',
     debug: true,
   });
 

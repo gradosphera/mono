@@ -2,7 +2,7 @@ import http from 'http-status';
 import { User } from '../models';
 import ApiError from '../utils/ApiError';
 import { generator } from './document.service';
-import { ICreateUser, IJoinCooperative } from '../types/user.validation';
+import { ICreateUser, IJoinCooperative } from '../types/auto-generated/user.validation';
 import ecc from 'eosjs-ecc';
 import { PublicKey, Signature } from '@wharfkit/antelope';
 import faker from 'faker';

@@ -4,6 +4,13 @@ import { userService, blockchainService } from './index';
 import { Cooperative, RegistratorContract, SovietContract } from 'cooptypes';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
+import Mono, { type IMono } from '../models/mono.model';
+import config from '../config/config';
+
+export const getMonoStatus = async (): Promise<string> => {
+  const mono: IMono = await Mono.findOne({ coopname: process.env.COOPNAME });
+  return mono.status;
+};
 
 export const loadAgenda = async (coopname: string): Promise<Cooperative.Documents.IAgenda[]> => {
   const api = await blockchainService.getApi();

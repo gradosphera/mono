@@ -5,6 +5,8 @@
     "lib": ["ES2015"],
     "outDir": "dist",
     "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "allowJs": false,
     "noImplicitAny": false,
