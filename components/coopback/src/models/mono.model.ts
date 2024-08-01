@@ -1,23 +1,20 @@
-import { getModelForClass, prop, plugin } from '@typegoose/typegoose';
+import mongoose, { Schema } from 'mongoose';
 import { paginate, toJSON } from './plugins';
 
-enum Status {
-  Install = 'install',
-  Active = 'active',
-  Maintenance = 'maintenance',
-}
+const Status = {
+  Install: 'install',
+  Active: 'active',
+  Maintenance: 'maintenance',
+};
 
-class Mono {
-  @prop({ required: true })
-  public coopname!: string;
+const MonoSchema = new Schema({
+  coopname: { type: String, required: true },
+  status: { type: String, required: true, enum: Object.values(Status) },
+});
 
-  @prop({ required: true, enum: Status })
-  public status!: Status;
-}
+MonoSchema.plugin(toJSON);
+MonoSchema.plugin(paginate);
 
-const MonoModel = getModelForClass(Mono);
-
-plugin(MonoModel, toJSON);
-plugin(MonoModel, paginate);
+const MonoModel = mongoose.model('Mono', MonoSchema);
 
 export default MonoModel;

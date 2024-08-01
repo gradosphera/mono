@@ -2,7 +2,6 @@ import { Router } from 'express';
 import auth from '../../middlewares/auth';
 import validate from '../../middlewares/validate';
 import * as coopValidation from '../../validations/coop.validation';
-// import { loadAgenda, loadStaff, } from '../../validations/coop.validation';
 import * as coopController from '../../controllers/coop.controller';
 
 const router = Router();

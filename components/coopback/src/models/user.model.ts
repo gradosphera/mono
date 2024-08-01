@@ -14,6 +14,7 @@ export interface IUser {
   status: 'created' | 'joined' | 'payed' | 'registered' | 'active' | 'failed' | 'blocked';
   message: string;
   is_registered: boolean;
+  has_account: boolean;
   type: 'individual' | 'entrepreneur' | 'organization';
   public_key: string;
   referer: string;
@@ -163,11 +164,13 @@ userSchema.methods.getPrivateData = async function (): Promise<
 };
 
 userSchema.methods.isPasswordMatch = async function (password) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
   return compare(password, user.password);
 };
 
 userSchema.pre('save', async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
   if (user.isModified('password')) {
     user.password = await hash(user.password, 8);

@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 import app from './app';
 import config from './config/config';
 import logger from './config/logger';
-import { updateAuth } from './services/auth.service';
 import { connectGenerator } from './services/document.service';
 import { initSocketConnection } from './controllers/ws.controller';
 
@@ -10,13 +9,13 @@ const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
 let server: any;
 
-mongoose.connect(config.mongoose.url, config.mongoose.options).then(async () => {
+mongoose.connect(config.mongoose.url).then(async () => {
   logger.info('Connected to MongoDB');
 
-  //подключаемся к хранилищу приватных данных
+  // подключаемся к хранилищу приватных данных
   await connectGenerator();
 
-  //подключаемся к ws-серверу
+  // подключаемся к ws-серверу
   await initSocketConnection(SERVER_URL);
 
   server = app.listen(config.port, () => {

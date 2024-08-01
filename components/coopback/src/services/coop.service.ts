@@ -4,11 +4,14 @@ import { userService, blockchainService } from './index';
 import { Cooperative, RegistratorContract, SovietContract } from 'cooptypes';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
-import Mono, { type IMono } from '../models/mono.model';
-import config from '../config/config';
+import { Mono } from '../models';
+import logger from '../config/logger';
 
 export const getMonoStatus = async (): Promise<string> => {
-  const mono: IMono = await Mono.findOne({ coopname: process.env.COOPNAME });
+  const mono = await Mono.findOne({ coopname: process.env.COOPNAME });
+
+  if (!mono) throw new ApiError(httpStatus.BAD_REQUEST, 'Установщик не найден');
+
   return mono.status;
 };
 
@@ -92,7 +95,9 @@ export const loadContacts = async (coopname: string) => {
   if (coopAccount.meta) {
     try {
       announce = JSON.parse(coopAccount.meta);
-    } catch (e: any) {}
+    } catch (e: any) {
+      logger.warn(`Ошибка при получении контактов: ${e.message}`);
+    }
   }
 
   return {

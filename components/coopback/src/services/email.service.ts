@@ -2,7 +2,7 @@ import { createTransport } from 'nodemailer';
 import config from '../config/config';
 import logger from '../config/logger';
 
-const { email, env } = config
+const { email, env } = config;
 
 const transport = createTransport(email.smtp);
 
@@ -58,9 +58,4 @@ If you did not create an account, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
 
-export {
-  transport,
-  sendEmail,
-  sendResetPasswordEmail,
-  sendVerificationEmail,
-};
+export { transport, sendEmail, sendResetPasswordEmail, sendVerificationEmail };

@@ -27,12 +27,12 @@ export const installInitialCooperativeData = async () => {
     is_cooperative: true,
     is_branched: false,
     coop_type: 'conscoop',
-    registration: '2.0000 TRUB',
-    initial: '1.0000 TRUB',
-    minimum: '1.0000 TRUB',
-    org_registration: '20.0000 TRUB',
-    org_initial: '10.0000 TRUB',
-    org_minimum: '10.0000 TRUB',
+    registration: '200.0000 TRUB',
+    initial: '100.0000 TRUB',
+    minimum: '100.0000 TRUB',
+    org_registration: '2000.0000 TRUB',
+    org_initial: '1000.0000 TRUB',
+    org_minimum: '1000.0000 TRUB',
   } as RegistratorContract.Tables.Cooperatives.ICooperative);
 
   await insertDelta(delta1);

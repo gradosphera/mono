@@ -44,7 +44,7 @@ export const getUsers = catchAsync(async (req, res) => {
   const result = {} as IGetResponse<IUser>;
 
   const data = [] as any;
-  for await (let user of users.results) {
+  for await (const user of users.results) {
     const json = user.toJSON();
     if (user.type != 'service') {
       json.private_data = (await user.getPrivateData()) || {};

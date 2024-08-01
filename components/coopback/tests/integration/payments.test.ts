@@ -144,7 +144,7 @@ describe('Проверка получения документов', () => {
         statement: signedDocument,
       };
 
-      let joincoop_result = await request(app)
+      const joincoop_result = await request(app)
         .post('/v1/users/join-cooperative')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(joinCoopData);

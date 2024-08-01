@@ -40,7 +40,7 @@ function getAmountPlusFee(amount: number, provider: string): number {
 }
 
 export async function createDeposit(username: string, data: ICreateDeposit): Promise<ICreatedPayment> {
-  let cooperative = await generator.constructCooperative(process.env.COOPNAME as string);
+  const cooperative = await generator.constructCooperative(process.env.COOPNAME as string);
 
   if (!cooperative) throw new Error('Кооператив не найден');
 
@@ -50,7 +50,7 @@ export async function createDeposit(username: string, data: ICreateDeposit): Pro
     type: 'deposit',
     data: { username, provider: data.provider, quantity: data.quantity },
   });
-  const internal_id = db_order._id;
+  const internal_id = db_order.id;
 
   let order_id = 0;
 
@@ -118,9 +118,9 @@ export async function createDeposit(username: string, data: ICreateDeposit): Pro
 }
 
 export async function createInitialOrder(username: string, data: ICreateInitialPayment): Promise<ICreatedPayment> {
-  let cooperative = await generator.constructCooperative(process.env.COOPNAME as string);
+  const cooperative = await generator.constructCooperative(process.env.COOPNAME as string);
 
-  if (!cooperative) throw new Error('Кооператив не найден');
+  if (!cooperative) throw new ApiError(httpStatus.BAD_REQUEST, 'Кооператив не найден');
 
   const user = await getUserByUsername(username);
   let amount = '';
@@ -139,7 +139,7 @@ export async function createInitialOrder(username: string, data: ICreateInitialP
     type: 'registration',
     data: { provider: data.provider, username, quantity: amount },
   });
-  const internal_id = db_order._id;
+  const internal_id = db_order.id;
 
   if (data.provider === 'yookassa') {
     // 2. Используешь внутренний айди для получения ордера в системе платежей
