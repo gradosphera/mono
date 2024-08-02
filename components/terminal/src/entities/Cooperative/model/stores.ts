@@ -15,7 +15,6 @@ const namespace = 'cooperative';
 interface ICooperativeStore {
   // методы
   loadFunds: (coopname: string) => Promise<void>;
-
   loadAddresses: (params: ILoadCooperativeAddresses) => Promise<void>;
   loadMarketPrograms: (params: ILoadCoopMarketPrograms) => Promise<void>;
   loadPrivateCooperativeData: () => Promise<void>;
@@ -33,7 +32,6 @@ interface ICooperativeStore {
   fundWallet: Ref<FundContract.Tables.FundWallet.IFundWallet | undefined>
   accumulationFunds: Ref<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>
   expenseFunds: Ref<FundContract.Tables.ExpensedFunds.IExpensedFund[]>
-
 }
 
 export const useCooperativeStore = defineStore(

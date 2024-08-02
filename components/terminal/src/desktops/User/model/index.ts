@@ -14,7 +14,7 @@ import { markRaw } from 'vue';
 // import { UserParentOffersPage } from 'src/pages/marketplace/UserParentOffers';
 // import { SuppliesListPage } from 'src/pages/marketplace/SuppliesList';
 // import { UserSuppliesListPage } from 'src/pages/marketplace/UserSuppliesList';
-import { ContactsPage } from 'src/pages/Contacts';
+import { ContactsPage } from 'src/pages/Cooperative/Contacts';
 import { CooperativeDetails } from 'src/widgets/Cooperative/Details';
 import { CooperativeMembers } from 'src/widgets/Cooperative/Members';
 import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
@@ -34,7 +34,6 @@ export const manifest = {
       },
       path: '/:coopname/user',
       name: 'home',
-      // component: markRaw(UserHomePage),
       children: [{
         meta: {
           title: 'Удостоверение',
@@ -167,7 +166,7 @@ export const manifest = {
       ]
     },
 
-    //       //страница управления кооперативом
+
 
 
       // {

@@ -29,10 +29,11 @@ import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { COOPNAME } from 'src/shared/config'
-import { type IRoute, useDesktopStore } from 'src/app/providers/desktops'
 import { useLogoutUser } from 'src/features/User/Logout'
 import { FailAlert } from 'src/shared/api'
 import { useCurrentUserStore } from 'src/entities/User'
+import { type IRoute } from 'src/entities/Desktop/model/types'
+import { useDesktopStore } from 'src/entities/Desktop/model'
 
 const $q = useQuasar()
 
@@ -48,7 +49,7 @@ const isRouteActive = (currentRoute: IRoute) => {
 
 const headerClass = (route: IRoute) => {
   const isActive = isRouteActive(route)
-  return isActive ? (isDark.value ? 'text-white bg-teal-8' : 'text-black bg-teal-2') : ''
+  return isActive ? (isDark.value ? 'text-white bg-teal' : 'text-white bg-teal') : ''
 }
 
 const desktop = useDesktopStore()

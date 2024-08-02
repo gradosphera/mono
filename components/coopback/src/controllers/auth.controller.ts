@@ -7,8 +7,9 @@ import { RForgotPassword, RRefreshTokens, RResetPassword, RVerifyEmail } from '.
 const { NO_CONTENT } = httpStatus;
 
 export const login = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
-  const user = await authService.loginUserWithEmailAndPassword(email, password);
+  const { now, signature, email } = req.body;
+
+  const user = await authService.loginUserWithSignature(email, now, signature);
 
   const tokens = await tokenService.generateAuthTokens(user);
   res.send({ user, tokens });

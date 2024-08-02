@@ -12,6 +12,11 @@ export const contractKit = new ContractKit({
   client: readBlockchain,
 });
 
+export async function getBlockchainInfo() {
+  return (await readBlockchain.v1.chain.get_info());
+}
+
+
 export async function getAccountInfo(account: string): Promise<any> {
   return (await readBlockchain.v1.chain.get_account(account)) as any;
 }

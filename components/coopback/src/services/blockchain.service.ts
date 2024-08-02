@@ -6,14 +6,27 @@ import EosApi from 'eosjs-api';
 import getInternalAction from '../utils/getInternalAction';
 import { GatewayContract, RegistratorContract, SovietContract } from 'cooptypes';
 import { IUser } from '../models/user.model';
-import { GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
+import { GetAccountResult, GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 
 const rpc = new JsonRpc(process.env.BLOCKCHAIN_RPC as string, { fetch });
+
+function hasActiveKey(account, publicKey) {
+  const activePermissions = account.permissions.find((p: any) => p.perm_name === 'active');
+  if (!activePermissions) return false;
+
+  return activePermissions.required_auth.keys.some((key: any) => key.key === publicKey);
+}
 
 async function getBlockchainInfo(): Promise<GetInfoResult> {
   const api = getApi();
 
   return await api.getInfo({});
+}
+
+async function getBlockchainAccount(username): Promise<GetAccountResult> {
+  const api = getApi();
+
+  return await api.getAccount(username);
 }
 
 /**
@@ -279,4 +292,6 @@ export {
   completeOrder,
   getSoviet,
   getBlockchainInfo,
+  getBlockchainAccount,
+  hasActiveKey,
 };

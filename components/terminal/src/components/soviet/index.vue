@@ -1,7 +1,5 @@
 <template lang="pug">
 div
-  //TODO валидация на члена совета
-
   q-tabs( v-model="tab" dense switch-indicator inline-label outside-arrows mobile-arrows align="justify" active-bg-color="teal" active-color="white" indicator-color="secondary")
     // q-tab(name="Дашборд" icon="mail" label="Дашборд")
     //- q-tab(name="Повестка" label="Повестка")
@@ -9,16 +7,16 @@ div
     //- q-tab(name="Пайщики" label="Пайщики")
     //- q-tab(name="Документы" label="Документы")
 
-    //- q-tab(name="Администраторы" label="Администраторы")
+    q-tab(name="Администраторы" label="Администраторы")
 
-    //- q-tab(name="Члены совета" label="Члены совета")
-    //- q-tab(name="Кооператив" label="Кооператив")
+    q-tab(name="Члены совета" label="Члены совета")
+    q-tab(name="Кооператив" label="Кооператив")
 
-    //- // q-tab(name="Участки" icon="people" label="Участки")
+    // q-tab(name="Участки" icon="people" label="Участки")
 
-    //- // q-tab(name="Программы" label="Программы")
-    //- // q-tab(name="Собрания" icon="people" label="Собрания")
-    //- // q-tab(name="Фонды"  label="Фонды")
+    // q-tab(name="Программы" label="Программы")
+    // q-tab(name="Собрания" icon="people" label="Собрания")
+    // q-tab(name="Фонды"  label="Фонды")
 
   q-tab-panels(
     v-model="tab"

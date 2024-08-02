@@ -1,4 +1,5 @@
 import config from '../src/config/config';
+import logger from '../src/config/logger';
 import { User } from '../src/models';
 import { tokenService } from '../src/services';
 import { userService } from '../src/services';
@@ -7,7 +8,7 @@ import mongoose from 'mongoose';
 const args = process.argv.slice(2);
 
 if (args.length < 1) {
-  console.error('Ошибка: Необходимо указать имя пользователя');
+  logger.error('Ошибка: Необходимо указать имя пользователя');
   process.exit(1);
 }
 
@@ -19,9 +20,9 @@ async function createServiceUser(username: string) {
 
     const user = await userService.createServiceUser(username);
     const token = await tokenService.generateServiceAccessToken(user);
-    console.log('token:', token.access.token);
+    logger.log('token:', token.access.token);
   } catch (e: any) {
-    console.log('Ошибка: ', e.message);
+    logger.log('Ошибка: ', e.message);
   }
 
   process.exit(0);

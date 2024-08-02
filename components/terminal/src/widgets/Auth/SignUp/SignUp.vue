@@ -55,6 +55,7 @@ onMounted(() => {
 })
 
 const out = async () => {
+  console.log('on out')
   const { logout } = await useLogoutUser()
   await logout()
   clearLocalStorage()
@@ -69,6 +70,7 @@ const out = async () => {
 }
 
 const clearLocalStorage = () => {
+  console.log('on out 2')
   LocalStorage.removeItem(`${COOPNAME}:email`)
   LocalStorage.removeItem(`${COOPNAME}:userData`)
   LocalStorage.removeItem(`${COOPNAME}:account`)

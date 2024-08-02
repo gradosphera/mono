@@ -1,2 +1,3 @@
 export * from './auto-generated';
-export * from './coop.types';
+export * from './mono.types';
+export * from './common';

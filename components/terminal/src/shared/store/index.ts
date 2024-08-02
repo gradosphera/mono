@@ -22,6 +22,7 @@ interface IGlobalStore {
   init: () => void;
   signDigest: (digest: string) => IMessageSignature;
   hashMessage: (message: string | Uint8Array) => Promise<string>;
+  formActionFromAbi: (action: any) => any;
   transact: (
     actionOrActions: any | any[]
   ) => Promise<TransactResult | undefined>;
@@ -133,47 +134,43 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
   };
 
   async function transact(
-    actionOrActions: any | any[]
+    actionOrActions: any | any[],
+    broadcast = true
   ): Promise<TransactResult | undefined> {
     if (Array.isArray(actionOrActions)) {
-      return await sendActions(actionOrActions);
+      return await sendActions(actionOrActions, broadcast);
     } else {
-      return await sendAction(actionOrActions);
+      return await sendAction(actionOrActions, broadcast);
     }
   }
-
-  const sendAction = async (action: any) => {
-    const session = useSessionStore();
-
-    const { abi } = (await readBlockchain?.v1.chain.get_abi(
-      action.account
-    )) ?? {
+  const formActionFromAbi = async (action: any) => {
+    const { abi } = (await readBlockchain?.v1.chain.get_abi(action.account)) ?? {
       abi: undefined,
     };
-
-    return session.session?.transact({
-      action: Action.from(action, abi),
-    });
+    return Action.from(action, abi);
   };
 
-  const sendActions = async (actions: any[]) => {
+  const sendAction = async (action: any, broadcast: boolean) => {
     const session = useSessionStore();
+    const formedAction = await formActionFromAbi(action);
 
+    return session.session?.transact({
+      action: formedAction,
+    }, { broadcast });
+  };
+
+  const sendActions = async (actions: any[], broadcast: boolean) => {
+    const session = useSessionStore();
     const data = [];
 
     for (const action of actions) {
-      const { abi } = (await readBlockchain?.v1.chain.get_abi(
-        action.account
-      )) ?? {
-        abi: undefined,
-      };
-
-      data.push(Action.from(action, abi));
+      const formedAction = await formActionFromAbi(action);
+      data.push(formedAction);
     }
 
     return session.session?.transact({
       actions: data,
-    });
+    }, { broadcast });
   };
 
   return {
@@ -188,5 +185,6 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
     signDigest,
     hashMessage,
     transact,
+    formActionFromAbi
   };
 });

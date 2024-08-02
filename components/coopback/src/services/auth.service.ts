@@ -1,55 +1,43 @@
 import httpStatus from 'http-status';
 import * as tokenService from './token.service';
 import * as userService from './user.service';
-import { getSoviet } from './blockchain.service';
 import Token from '../models/token.model';
 import ApiError from '../utils/ApiError';
 import { tokenTypes } from '../config/tokens';
 import { IRefreshTokens } from '../types';
+import { getUserByEmail } from './user.service';
+import { Bytes, Checksum256, Signature } from '@wharfkit/antelope';
+import { getBlockchainAccount, getBlockchainInfo, hasActiveKey } from '../services/blockchain.service';
 
-export const updateAuth = async () => {
-  try {
-    const board = await getSoviet(process.env.COOPNAME);
-    // TODO снимать права с тех, кто уже не в совете
-    // eslint-disable-next-line no-restricted-syntax
-    for (const member of board.members) {
-      // eslint-disable-next-line no-await-in-loop
-      const user = await userService.getUserByUsername(member.username);
-      if (member.position === 'chairman' && !user) {
-        // eslint-disable-next-line no-await-in-loop
-        // await userService.createUser({
-        //   username: member.username,
-        //   public_key: '-',
-        //   email: process.env.CHAIRMAN_EMAIL ,
-        //   password: process.env.CHAIRMAN_PASSWORD as string,
-        //   is_registered: true,
-        //   is_organization: false,
-        //   user_profile: {
-        //     first_name: 'Имя',
-        //     last_name: 'Фамилия',
-        //     middle_name: 'Отчество',
-        //     birthday: '23-42-3423',
-        //     phone: '+7902294404',
-        //   },
-        //   signature: '-',
-        //   signature_hash: '-',
-        //   role: 'chairman',
-        // });
-      } else if (member.position === 'chairman' && user) {
-        user.role = 'chairman';
-        user.password = process.env.CHAIRMAN_PASSWORD || 'password';
-        // eslint-disable-next-line no-await-in-loop
-        await user.save();
-      } else if (user) {
-        user.role = 'admin';
-        // eslint-disable-next-line no-await-in-loop
-        await user.save();
-      }
-    }
-  } catch (e: any) {
-    // eslint-disable-next-line no-console
-    console.log('Ошибка при автоматической проверке целевой авторизации: ', e.message);
+export const loginUserWithSignature = async (email, now, signature) => {
+  const user = await getUserByEmail(email);
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
   }
+
+  const bytes = Bytes.fromString(now, 'utf8');
+  const checksum = Checksum256.hash(bytes);
+  const wharf_signature = Signature.from(signature);
+  const publicKey = wharf_signature.recoverDigest(checksum).toLegacyString();
+
+  const info = await getBlockchainInfo();
+  const blockchainDate = new Date(info.head_block_time).getTime();
+  const userData = new Date(now).getTime();
+
+  const differenceInSeconds = (blockchainDate - userData) / 1000;
+
+  if (differenceInSeconds > 30) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Время подписи и время блокчейна превышает допустимое расхождение');
+  }
+
+  const blockchainAccount = await getBlockchainAccount(user.username);
+
+  const hasKey = hasActiveKey(blockchainAccount, publicKey);
+
+  if (!hasKey) throw new ApiError(httpStatus.FORBIDDEN, 'Неверный приватный ключ');
+
+  return user;
 };
 
 /**
@@ -76,7 +64,7 @@ export const logout = async (refreshToken) => {
   if (!refreshTokenDoc) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
   }
-  await refreshTokenDoc.deleteOne({ _id: refreshTokenDoc.id });
+  await refreshTokenDoc.deleteOne();
 };
 
 /**
@@ -91,7 +79,7 @@ export const refreshAuth = async (data: IRefreshTokens) => {
     if (!user) {
       throw new Error();
     }
-    await refreshTokenDoc.deleteOne({ _id: refreshTokenDoc.id });
+    await refreshTokenDoc.deleteOne();
     return tokenService.generateAuthTokens(user);
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');

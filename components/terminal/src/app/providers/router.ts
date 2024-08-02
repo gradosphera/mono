@@ -13,7 +13,8 @@ import {
   COOPNAME,
 } from 'src/shared/config';
 import { IUserAccountData, useCurrentUserStore } from 'src/entities/User';
-import { useDesktopStore } from './desktops';
+import { useDesktopStore } from '../../entities/Desktop/model';
+import { useCardStore } from './card/store';
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -27,6 +28,11 @@ export default route(async function (/* { store, ssrContext } */) {
 
 
   const desktops = useDesktopStore()
+  await desktops.healthCheck()
+
+  const { initWallet } = useCardStore()
+  await initWallet()
+
   await desktops.loadDesktops()
   await desktops.setActiveDesktop(desktops.defaultDesktopHash)
 
@@ -50,6 +56,7 @@ export default route(async function (/* { store, ssrContext } */) {
     },
   });
 
+
   router.beforeEach(
     async (
       to: RouteLocationNormalizedGeneric,
@@ -57,20 +64,20 @@ export default route(async function (/* { store, ssrContext } */) {
       next: any
     ) => {
 
+      desktops.healthCheck()
+      const { initWallet } = useCardStore()
+      await initWallet()
+
       const currentUser = useCurrentUserStore();
       const session = useSessionStore();
 
-      if (!session.isAuth && !currentUser.userAccount){
-        await session.init()
-        if (session.isAuth)
-          try{
-            await currentUser.loadProfile(session.username, COOPNAME)
-          } catch(e: any){
-            console.error(e)
-          }
-      }
-
-      if (to.name == 'index') {
+      /** проверяем установлено ли приложение и не переход ли это на страницу установки */
+      if (desktops.health?.status === 'install' && to.name !== 'install') {
+        /** переадресуем на страницу установки */
+        next({name: 'install', params: { coopname: COOPNAME }})
+        return
+      }  else  if (to.name == 'index') {
+        /** Если переходим на Главную, то определяем её на основе рабочего стола и имеющейся авторизации */
         if (session.isAuth){
           next({ name: desktops.currentDesktop?.authorizedHome, params: { coopname: COOPNAME } });
           return
@@ -84,10 +91,15 @@ export default route(async function (/* { store, ssrContext } */) {
       }
 
       if (hasAccess(to, currentUser.userAccount)) {
+        /** Если переход на любую другую страницу, то проверяем права доступа к ней на основе роли и продолжаем загрузку */
         next(); // Продолжить переход, если доступ разрешен
+        return
       } else {
         next({ name: 'permissionDenied' }); // Перенаправить на страницу с сообщением о недостатке прав доступа
+        return
       }
+
+
     }
   );
 

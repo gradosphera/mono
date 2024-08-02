@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, model, Model } from 'mongoose';
+import mongoose, { Schema, model, Model } from 'mongoose';
 import validator from 'validator/index';
 import bcryptjs from 'bcryptjs';
 import { toJSON, paginate } from './plugins/index';
@@ -24,7 +24,7 @@ export interface IUser {
   is_email_verified: boolean;
   statement: {
     hash: string;
-    meta: Object;
+    meta: object;
     public_key: string;
     signature: string;
   };

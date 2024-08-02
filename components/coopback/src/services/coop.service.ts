@@ -4,16 +4,7 @@ import { userService, blockchainService } from './index';
 import { Cooperative, RegistratorContract, SovietContract } from 'cooptypes';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
-import { Mono } from '../models';
 import logger from '../config/logger';
-
-export const getMonoStatus = async (): Promise<string> => {
-  const mono = await Mono.findOne({ coopname: process.env.COOPNAME });
-
-  if (!mono) throw new ApiError(httpStatus.BAD_REQUEST, 'Установщик не найден');
-
-  return mono.status;
-};
 
 export const loadAgenda = async (coopname: string): Promise<Cooperative.Documents.IAgenda[]> => {
   const api = await blockchainService.getApi();

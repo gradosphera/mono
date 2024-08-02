@@ -5,6 +5,7 @@ import permissionDenied from 'src/pages/_layouts/permissionDenied.vue';
 import { SignUpPage } from 'src/pages/SignUp';
 import { SignInPage } from 'src/pages/SignIn';
 import { RouteRecordRaw } from 'vue-router';
+import { InstallCooperativePage } from 'src/pages/Install';
 
 
 const baseRoutes = [
@@ -26,6 +27,12 @@ const baseRoutes = [
         path: '/permission-denied',
         name: 'permissionDenied',
         component: permissionDenied,
+      },
+      {
+        path: ':coopname/install',
+        name: 'install',
+        component: InstallCooperativePage,
+        children: [],
       },
       {
         path: ':coopname/auth/signin',

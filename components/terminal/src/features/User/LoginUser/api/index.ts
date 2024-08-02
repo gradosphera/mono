@@ -1,18 +1,17 @@
-import { sendPOST } from 'src/shared/api';
-import { hashSHA256 } from 'src/shared/api/crypto';
+import { Bytes, Checksum256, PrivateKey } from '@wharfkit/session';
+import { getBlockchainInfo, sendPOST } from 'src/shared/api';
 import { ICreatedUser } from 'src/shared/lib/types/user';
 
+
 async function loginUser(email: string, wif: string): Promise<ICreatedUser> {
-  const password = await hashSHA256(wif);
+  const now = (await getBlockchainInfo()).head_block_time.toString()
 
-  const data = {
-    email,
-    password,
-  };
-
-  const response = await sendPOST('/v1/auth/login', data, true);
-
-  console.log('response: ', response);
+  const privateKey = PrivateKey.fromString(wif)
+  const bytes = Bytes.fromString(now, 'utf8')
+  const checksum = Checksum256.hash(bytes)
+  const signature = privateKey.signDigest(checksum)
+  const response = await sendPOST('/v1/auth/login', {email, now, signature}, true);
+;
   return response;
 }
 

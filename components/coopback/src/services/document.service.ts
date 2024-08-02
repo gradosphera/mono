@@ -1,14 +1,9 @@
-import eosjsecc from 'eosjs-ecc';
-import ApiError from '../utils/ApiError';
-import { getActions, getTables } from '../utils/getFetch';
-import * as coopService from './coop.service';
-const { verify, sha256 } = eosjsecc;
+import { getActions } from '../utils/getFetch';
 import config from '../config/config';
 import { Generator } from 'coopdoc-generator-ts';
-import type { IGenerate, IGetDocuments } from '../types';
+import type { IGenerate } from '../types';
 import { Cooperative, SovietContract } from 'cooptypes';
 import { User } from '../models';
-import { IUser } from '../models/user.model';
 
 export const generator = new Generator();
 
@@ -99,8 +94,8 @@ export async function buildComplexDocument(
 
 export const queryDocuments = async (
   filter: any,
-  page: number = 1,
-  limit: number = 100
+  page = 1,
+  limit = 100
 ): Promise<Cooperative.Documents.IGetComplexDocuments> => {
   const actions = await getActions<SovietContract.Actions.Registry.NewResolved.INewResolved>(
     `${process.env.SIMPLE_EXPLORER_API}/get-actions`,
@@ -116,7 +111,7 @@ export const queryDocuments = async (
     }
   );
 
-  let response: Cooperative.Documents.IGetComplexDocuments = {
+  const response: Cooperative.Documents.IGetComplexDocuments = {
     results: [],
     page,
     limit,

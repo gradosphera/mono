@@ -4,6 +4,7 @@ import userRoute from './user.route';
 import docsRoute from './docs.route';
 import paymentRoute from './payment.route';
 import coopRoute from './coop.route';
+import monoRoute from './mono.route';
 import dataRoute from './document.route';
 import notifyRoute from './notify.route';
 
@@ -12,6 +13,10 @@ import config from '../../config/config';
 const router = Router();
 
 const defaultRoutes = [
+  {
+    path: '/mono',
+    route: monoRoute,
+  },
   {
     path: '/auth',
     route: authRoute,

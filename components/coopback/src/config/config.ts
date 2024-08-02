@@ -23,6 +23,8 @@ const envVarsSchema = Joi.object()
     SMTP_USERNAME: Joi.string().description('username for email server'),
     SMTP_PASSWORD: Joi.string().description('password for email server'),
     EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
+
+    COOPNAME: Joi.string().description('имя аккаунта кооператива'),
   })
   .unknown();
 
@@ -37,7 +39,11 @@ export default {
   port: envVars.PORT,
   mongoose: {
     url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
-    options: {},
+    options: {
+      useCreateIndex: true,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    },
   },
   jwt: {
     secret: envVars.JWT_SECRET,
@@ -57,4 +63,5 @@ export default {
     },
     from: envVars.EMAIL_FROM,
   },
+  coopname: envVars.COOPNAME,
 };

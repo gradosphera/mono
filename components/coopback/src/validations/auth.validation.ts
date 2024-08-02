@@ -20,8 +20,9 @@ export const RForgotPassword = Joi.object({
 
 // Внутренние параметры
 export const ILogin = Joi.object({
+  signature: Joi.string().required(),
   email: Joi.string().email().required(),
-  password: Joi.string().required(),
+  now: Joi.string().required(),
 });
 
 export const ILogout = Joi.object({

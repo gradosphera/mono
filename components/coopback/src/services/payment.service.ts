@@ -237,7 +237,7 @@ export async function catchIPN(ipnBody: IYandexIPN) {
               memo: '',
             });
 
-            console.log('Зарегистрирован новый пользователь: ', user.username);
+            logger.info('Зарегистрирован новый пользователь: ', user.username);
             user.status = 'registered';
             user.is_registered = true;
           } else if (order.type === 'deposit') {
@@ -248,7 +248,7 @@ export async function catchIPN(ipnBody: IYandexIPN) {
               memo: '',
             });
             const quantity = parseFloat(order.data.quantity);
-            console.log(`Принят паевый взнос пользователя: ${user.username} на сумму ${order.data.quantity}`);
+            logger.info(`Принят паевый взнос пользователя: ${user.username} на сумму ${order.data.quantity}`);
           }
 
           await user.save();
@@ -256,7 +256,7 @@ export async function catchIPN(ipnBody: IYandexIPN) {
           order.delivered = true;
           await order.save();
         } catch (e: any) {
-          console.error(e);
+          logger.warn(e);
           order.error = e;
           order.delivered = false;
           await order.save();
@@ -281,6 +281,7 @@ export async function catchIPN(ipnBody: IYandexIPN) {
         });
       }
     } else {
+      logger.warn(`Ордер не найден: `, ipnBody);
       throw new Error(`Ордер не найден`);
     }
   }

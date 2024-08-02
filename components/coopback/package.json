@@ -8,6 +8,7 @@
   "repository": "https://github.com/hagopj13/node-express-boilerplate.git",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
   "license": "MIT",
+  "types": "src/types/index.ts",
   "engines": {
     "node": ">=12.0.0"
   },
@@ -57,7 +58,6 @@
   ],
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
-    "@typegoose/typegoose": "^12.6.0",
     "@types/jest": "^29.5.12",
     "@types/supertest": "^6.0.2",
     "@wharfkit/antelope": "^1.0.7",

@@ -35,6 +35,7 @@
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "axios": "^1.2.1",
     "cooptypes": "workspace:*",
+    "coopback": "workspace:*",
     "dotenv": "^16.4.5",
     "email-regex": "^5.0.0",
     "eosjs": "^22.1.0",

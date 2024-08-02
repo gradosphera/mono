@@ -3,19 +3,19 @@ q-layout(view="hHh LpR fFf")
   q-header(v-if="!loggedIn" bordered :class="headerClass").header
     q-toolbar()
       q-toolbar-title()
-        q-btn(stretch flat class="btn-title" :dense="isMobile" @click="goToIndex").q-ml-sm
+        q-btn(stretch flat class="btn-title" :dense="isMobile" @click="goTo('index')").q-ml-sm
           //- img(:src="HeaderLogo" alt="" style="height: 50px;").q-pa-sm
-          //- q-icon(name="far fa-circle").q-pa-sm
           p {{ COOP_SHORT_NAME }}
 
       q-btn(stretch flat @click="toogleDark")
         q-icon(:name="isDark ? 'brightness_3' : 'brightness_7'")
 
-      q-btn(v-if="showRegisterButton && !isRegistratorPage" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="signup")
+
+      q-btn(v-if="showRegisterButton && !is('signup') && !is('install')" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="signup")
         p.q-pr-sm регистрация
         i.fa-solid.fa-right-to-bracket
 
-      q-btn(v-if="showRegisterButton && isRegistratorPage" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="login")
+      q-btn(v-if="showRegisterButton && is('signup')" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="login")
         p.q-pr-sm вход
         i.fa-solid.fa-right-to-bracket
 
@@ -41,9 +41,9 @@ q-layout(view="hHh LpR fFf")
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useQuasar, Cookies, LocalStorage } from 'quasar'
+import { useQuasar } from 'quasar'
 import { useWindowSize } from 'vue-window-size'
 import config from 'src/app/config'
 
@@ -53,7 +53,7 @@ const route = useRoute()
 // import HeaderLogo from '~/assets/logo-white.png?url'
 import Menu from 'src/components/menu/drawerMenu.vue'
 
-import { COOPNAME, COOP_SHORT_NAME } from 'src/shared/config'
+import { COOP_SHORT_NAME } from 'src/shared/config'
 import { useCurrentUserStore } from 'src/entities/User'
 import { useSessionStore } from 'src/entities/Session'
 const session = useSessionStore()
@@ -84,8 +84,6 @@ defineExpose({
 
 const { width } = useWindowSize()
 
-const leftDrawerOpen = ref<boolean>(false)
-
 const showRegisterButton = computed(() => {
   if (!loggedIn.value) {
     if (config.registrator.showRegisterButton) return true
@@ -93,48 +91,25 @@ const showRegisterButton = computed(() => {
   } else return false
 })
 
-const isRegistratorPage = computed(() => {
-  return route.name == 'signup'
-})
-
 const isMobile = computed(() => {
   return width.value < 1024
 })
 
-if (isMobile.value == true) {
-  leftDrawerOpen.value = false
-} else {
-  leftDrawerOpen.value = true
+
+const is = (what: string) => {
+  return route.name === what
 }
 
 const loggedIn = computed(() => {
   return useCurrentUserStore().isRegistrationComplete && session.isAuth
 })
 
-watch(isMobile, (newValue) => {
-  if (newValue == true) leftDrawerOpen.value = false
-  else leftDrawerOpen.value = true
-})
-
-watch(route, () => {
-  console.log('route', route)
-  checkAuth()
-  if (isMobile.value)
-    leftDrawerOpen.value = false
-})
-
-const checkAuth = () => {
-  if (!loggedIn.value && route.name != 'signin' && route.name != 'signup') {
-    router.push({ name: 'signup', params: { coopname: config.coreHost } })
-  }
-}
-
 const toogleDark = () => {
   $q.dark.toggle()
 }
 
-const goToIndex = () => {
-  router.push({ name: 'index' })
+const goTo = (name: string) => {
+  router.push({ name })
 }
 
 const signup = () => {
@@ -149,14 +124,7 @@ const login = () => {
   router.push({ name: 'signin' })
 }
 
-onMounted(async () => {
-  const ref = Cookies.get('referer') || String(route.query.r || '')
-  if (ref) {
-    LocalStorage.setItem(`${COOPNAME}:referer`, ref)
-  }
 
-  await checkAuth()
-})
 </script>
 
 <style lang="scss">

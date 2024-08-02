@@ -3,35 +3,9 @@ import * as Desktops from 'src/desktops'
 import { computed, ComputedRef, ref, Ref } from 'vue'
 import { FailAlert } from 'src/shared/api'
 import { RouteRecordRaw, type RouteLocationNormalized} from 'vue-router'
-
-
-interface IDesktop {
-  name: string
-  hash: string
-  authorizedHome: string
-  nonAuthorizedHome: string
-  routes: IRoute[]
-  config: object
-}
-
-interface IBlockchainDesktops {
-  defaultHash: string //hash
-  availableHashes: string[] //hashes
-}
-
-interface RouteMeta {
-  title: string;
-  icon: string;
-  roles: string[];
-}
-
-export interface IRoute {
-  path: string;
-  name: string;
-  component?: any;
-  children?: IRoute[];
-  meta: RouteMeta;
-}
+import { IDesktop, IRoute, IBlockchainDesktops, IHealthResponse } from './types'
+import { api } from '../api'
+import { useRouter } from 'vue-router'
 
 
 const desktopHashMap = {
@@ -43,17 +17,17 @@ const desktopHashMap = {
 
 const namespace = 'desktops';
 
-
 interface IDesktopStore {
+  online: Ref<boolean | undefined>
+  health: Ref<IHealthResponse | undefined>
   currentDesktop: Ref<IDesktop | undefined>
   availableDesktops: Ref<IDesktop[]>
   defaultDesktopHash: Ref<string | undefined>
+  healthCheck: () => Promise<void>;
   setActiveDesktop: (hash: string | undefined) => void;
   loadDesktops: () => void;
   getSecondLevel: (currentRoute: RouteLocationNormalized) => RouteRecordRaw[]
   firstLevel: ComputedRef<IRoute[]>;
-
-  // secondLevel: ComputedRef<IRoute[]>;
 }
 
 
@@ -76,6 +50,23 @@ export const useDesktopStore = defineStore(namespace, (): IDesktopStore => {
   const currentDesktop = ref<IDesktop>()
   const availableDesktops = ref<IDesktop[]>([])
   const defaultDesktopHash = ref<string>()
+  const health = ref<IHealthResponse | undefined>()
+  const online = ref<boolean | undefined>()
+
+
+
+  async function healthCheck(): Promise<void> {
+    try {
+
+      health.value = await api.healthCheck()
+
+      if (online.value === false) online.value = true
+
+    } catch (e) {
+      online.value = false
+      setTimeout(healthCheck, 5000)
+    }
+  }
 
   const firstLevel = computed(() => {
     if (currentDesktop.value)
@@ -125,6 +116,8 @@ export const useDesktopStore = defineStore(namespace, (): IDesktopStore => {
   }
 
   return {
+    online,
+    health,
     defaultDesktopHash, //перезапишем через локал-сторадж для пользовательского управления стартовой страницей
     currentDesktop,
     availableDesktops,
@@ -132,5 +125,6 @@ export const useDesktopStore = defineStore(namespace, (): IDesktopStore => {
     loadDesktops,
     getSecondLevel,
     firstLevel,
+    healthCheck
   }
 })

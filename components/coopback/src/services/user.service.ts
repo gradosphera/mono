@@ -191,6 +191,6 @@ export const deleteUserById = async (username) => {
   if (!user) {
     throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
   }
-  await user.deleteOne({ _id: user.id });
+  await user.deleteOne();
   return user;
 };

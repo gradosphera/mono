@@ -11,6 +11,5 @@ router.route('/staff').get(auth('loadStaff'), validate(coopValidation.loadStaff)
 router.route('/info').get(auth('loadInfo'), coopController.loadInfo);
 
 router.route('/contacts').get(coopController.loadContacts);
-router.route('/health').get(coopController.getHealth);
 
 export default router;

@@ -1,23 +1,7 @@
 import catchAsync from '../utils/catchAsync';
 import { coopService, documentService } from '../services';
 import { Cooperative } from 'cooptypes';
-import httpStatus from 'http-status';
-import { getMonoStatus } from '../services/coop.service';
-import { getBlockchainInfo } from '../services/blockchain.service';
-import { IHealthResponse } from '../types';
 import { Request, Response } from 'express';
-
-export const getHealth = catchAsync(async (req: Request, res: Response) => {
-  const status = await getMonoStatus();
-  const blockchain = await getBlockchainInfo();
-
-  const result: IHealthResponse = {
-    status,
-    blockchain,
-  };
-
-  res.status(httpStatus.OK).send(result);
-});
 
 export const loadInfo = catchAsync(async (req: Request, res: Response) => {
   const cooperative = await coopService.loadInfo(String(process.env.COOPNAME));
