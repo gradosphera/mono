@@ -9,7 +9,8 @@ export interface IForgotPassword {
 
 export interface ILogin {
   email: string;
-  password: string;
+  now: string;
+  signature: string;
 }
 
 export interface ILogout {
@@ -20,11 +21,8 @@ export interface IRefreshTokens {
   refreshToken: string;
 }
 
-export interface IResetPasswordBody {
-  password: string;
-}
-
-export interface IResetPasswordQuery {
+export interface IResetKeyBody {
+  public_key: string;
   token: string;
 }
 
@@ -32,7 +30,7 @@ export interface IVerifyEmail {
   token: string;
 }
 
-export interface RForgotPassword {
+export interface RForgotKey {
   body: {
     email: string;
   };
@@ -41,7 +39,8 @@ export interface RForgotPassword {
 export interface RLogin {
   body: {
     email: string;
-    password: string;
+    now: string;
+    signature: string;
   };
 }
 
@@ -57,11 +56,9 @@ export interface RRefreshTokens {
   };
 }
 
-export interface RResetPassword {
+export interface RResetKey {
   body: {
-    password: string;
-  };
-  query: {
+    public_key: string;
     token: string;
   };
 }

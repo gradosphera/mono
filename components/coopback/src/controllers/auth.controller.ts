@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import catchAsync from '../utils/catchAsync';
 
 import { authService, tokenService, emailService } from '../services';
-import { RForgotPassword, RRefreshTokens, RResetPassword, RVerifyEmail } from '../types';
+import { RForgotKey, RRefreshTokens, RResetKey, RVerifyEmail } from '../types';
 
 const { NO_CONTENT } = httpStatus;
 
@@ -25,14 +25,14 @@ export const refreshTokens = catchAsync(async (req: RRefreshTokens, res: any) =>
   res.send(tokens);
 });
 
-export const forgotPassword = catchAsync(async (req: RForgotPassword, res) => {
-  const resetPasswordToken = await tokenService.generateResetPasswordToken(req.body.email);
-  await emailService.sendResetPasswordEmail(req.body.email, resetPasswordToken);
+export const lostKey = catchAsync(async (req: RForgotKey, res) => {
+  const resetKeyToken = await tokenService.generateResetPasswordToken(req.body.email);
+  await emailService.sendResetPasswordEmail(req.body.email, resetKeyToken);
   res.status(NO_CONTENT).send();
 });
 
-export const resetPassword = catchAsync(async (req: RResetPassword, res) => {
-  await authService.resetPassword(req.query.token, req.body.password);
+export const resetKey = catchAsync(async (req: RResetKey, res) => {
+  await authService.resetKey(req.body.token, req.body.public_key);
   res.status(NO_CONTENT).send();
 });
 

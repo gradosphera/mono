@@ -30,6 +30,8 @@ export interface IBalancesBase {
 }
 
 export interface IChangekey {
+  coopname: IName
+  changer: IName
   username: IName
   public_key: IPublicKey
 }

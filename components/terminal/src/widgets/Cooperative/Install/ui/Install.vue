@@ -2,8 +2,8 @@
 div install
 </template>
 <script setup lang="ts">
-import { useInstallCooperative } from 'src/features/InstallCooperative/model';
+// import { useInstallCooperative } from 'src/features/InstallCooperative/model';
 
-const { install, store } = useInstallCooperative()
+// const { install, store } = useInstallCooperative()
 
 </script>

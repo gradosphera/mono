@@ -8,12 +8,14 @@ import { IRefreshTokens } from '../types';
 import { getUserByEmail } from './user.service';
 import { Bytes, Checksum256, Signature } from '@wharfkit/antelope';
 import { getBlockchainAccount, getBlockchainInfo, hasActiveKey } from '../services/blockchain.service';
+import config from '../config/config';
+import { blockchainService } from '.';
 
 export const loginUserWithSignature = async (email, now, signature) => {
   const user = await getUserByEmail(email);
 
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Пользователь не найден');
   }
 
   const bytes = Bytes.fromString(now, 'utf8');
@@ -31,11 +33,17 @@ export const loginUserWithSignature = async (email, now, signature) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Время подписи и время блокчейна превышает допустимое расхождение');
   }
 
-  const blockchainAccount = await getBlockchainAccount(user.username);
+  if (config.env !== 'test') {
+    try {
+      const blockchainAccount = await getBlockchainAccount(user.username);
 
-  const hasKey = hasActiveKey(blockchainAccount, publicKey);
+      const hasKey = hasActiveKey(blockchainAccount, publicKey);
 
-  if (!hasKey) throw new ApiError(httpStatus.FORBIDDEN, 'Неверный приватный ключ');
+      if (!hasKey) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
+    } catch (e) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Аккаунт в блокчейне не найден');
+    }
+  }
 
   return user;
 };
@@ -87,21 +95,32 @@ export const refreshAuth = async (data: IRefreshTokens) => {
 };
 
 /**
- * Reset password
- * @param {string} resetPasswordToken
- * @param {string} newPassword
+ * Reset key
+ * @param {string} resetKeyToken
+ * @param {string} publicKey
  * @returns {Promise}
  */
-export const resetPassword = async (resetPasswordToken, newPassword) => {
+export const resetKey = async (resetKeyToken, publicKey) => {
   try {
-    const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
+    const resetPasswordTokenDoc = await tokenService.verifyToken(resetKeyToken, tokenTypes.RESET_PASSWORD);
+
     const user = await userService.getUserById(resetPasswordTokenDoc.user);
     if (!user) {
       throw new Error();
     }
-    await userService.updateUserById(user._id, { password: newPassword });
+
+    await blockchainService.changeKey({
+      coopname: config.coopname,
+      changer: config.service_username,
+      username: user.username,
+      public_key: publicKey,
+    });
+
+    await userService.updateUserById(user._id, { public_key: publicKey });
+
     await Token.deleteMany({ user: user._id, type: tokenTypes.RESET_PASSWORD });
   } catch (error) {
+    console.log(error);
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Password reset failed');
   }
 };

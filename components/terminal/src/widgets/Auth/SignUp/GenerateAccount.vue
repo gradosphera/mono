@@ -2,8 +2,8 @@
 div
   q-step(:name='3', title='Получите приватный ключ и надежно сохраните его для цифровой подписи', :done='step > 3')
     div
-      p.full-width Приватный ключ используется для входа в систему и подписи документов. Мы рекомендуем сохранить его в менеджере паролей, таком как
-        a(href="https://bitwarden.com" target="_bank").q-ml-xs Bitwarden
+      p.full-width Приватный ключ используется для входа в систему и подписи документов. Мы рекомендуем сохранить его в бесплатном менеджере паролей, таком как
+        a(href="https://bitwarden.com/download" target="_bank").q-ml-xs Bitwarden
         | .
 
 
@@ -48,7 +48,7 @@ const step = computed(() => store.step)
 const userData = computed(() => store.userData)
 
 const copyMnemonic = () => {
-  const toCopy = `Приватный ключ: ${account.value.private_key}`
+  const toCopy = `${account.value.private_key}`
 
   copyToClipboard(toCopy)
     .then(() => {

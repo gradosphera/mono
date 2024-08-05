@@ -7,6 +7,7 @@ import getInternalAction from '../utils/getInternalAction';
 import { GatewayContract, RegistratorContract, SovietContract } from 'cooptypes';
 import { IUser } from '../models/user.model';
 import { GetAccountResult, GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
+import config from '../config/config';
 
 const rpc = new JsonRpc(process.env.BLOCKCHAIN_RPC as string, { fetch });
 
@@ -247,6 +248,34 @@ async function failOrder(data) {
       authorization: [
         {
           actor: process.env.COOPNAME as string,
+          permission: 'active',
+        },
+      ],
+      data,
+    },
+  ];
+
+  await eos.transact(
+    {
+      actions,
+    },
+    {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    }
+  );
+}
+
+export async function changeKey(data: RegistratorContract.Actions.ChangeKey.IChangeKey) {
+  const eos = await getInstance(config.service_wif);
+
+  const actions = [
+    {
+      account: RegistratorContract.contractName.production,
+      name: RegistratorContract.Actions.ChangeKey.actionName,
+      authorization: [
+        {
+          actor: config.service_username,
           permission: 'active',
         },
       ],

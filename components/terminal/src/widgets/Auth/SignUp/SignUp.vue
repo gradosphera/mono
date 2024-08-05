@@ -1,5 +1,7 @@
 <template lang='pug'>
 div
+  //- q-btn(@click="out" dense size="sm" flat) начать с начала
+
   q-card.bordered.q-pa-md.signup(flat)
     p.text-h6.text-center.q-mb-md ВСТУПИТЬ В ПАЙЩИКИ
 
@@ -19,9 +21,8 @@ div
       WaitingRegistration(v-model:data='store.userData', v-model:step='store.step')
 
       Welcome(v-model:data='store.userData', v-model:step='store.step')
-  q-btn(@click="out" size="sm" flat)
-    q-icon(name="logout")
-    span.q-ml-sm начать с начала
+
+
 </template>
 
 <script lang="ts" setup>
@@ -39,8 +40,6 @@ import { createUserStore as store } from 'src/features/User/CreateUser'
 import { COOPNAME } from 'src/shared/config'
 import { LocalStorage } from 'quasar'
 import { useCurrentUserStore } from 'src/entities/User'
-import { useLogoutUser } from 'src/features/User/Logout'
-
 const currentUser = useCurrentUserStore()
 
 onMounted(() => {
@@ -54,23 +53,21 @@ onMounted(() => {
 
 })
 
-const out = async () => {
-  console.log('on out')
-  const { logout } = await useLogoutUser()
-  await logout()
-  clearLocalStorage()
-  LocalStorage.removeItem(`${COOPNAME}:step`)
-  LocalStorage.removeItem(`${COOPNAME}:is_paid`)
-  LocalStorage.removeItem(`${COOPNAME}:userData`)
-  LocalStorage.removeItem(`${COOPNAME}:email`)
-  LocalStorage.removeItem(`${COOPNAME}:account`)
+// const out = async () => {
+//   const { logout } = await useLogoutUser()
+//   await logout()
+//   clearLocalStorage()
+//   LocalStorage.removeItem(`${COOPNAME}:step`)
+//   LocalStorage.removeItem(`${COOPNAME}:is_paid`)
+//   LocalStorage.removeItem(`${COOPNAME}:userData`)
+//   LocalStorage.removeItem(`${COOPNAME}:email`)
+//   LocalStorage.removeItem(`${COOPNAME}:account`)
 
-  store.step = 1
-  window.location.reload()
-}
+//   store.step = 1
+//   window.location.reload()
+// }
 
 const clearLocalStorage = () => {
-  console.log('on out 2')
   LocalStorage.removeItem(`${COOPNAME}:email`)
   LocalStorage.removeItem(`${COOPNAME}:userData`)
   LocalStorage.removeItem(`${COOPNAME}:account`)

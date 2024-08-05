@@ -1,7 +1,13 @@
 <template lang="pug">
 .row.justify-center.q-pa-sm
   .col-md-4.col-sm-6.col-xs-12
-    SignIn(v-if="!registeredAndloggedIn").q-mt-lg
+    div(v-if="!registeredAndloggedIn")
+      SignIn.q-mt-lg
+      div.text-right
+        q-btn(flat size="sm" dense @click="router.push({name: 'lostkey'})") потеряли ключ?
+        q-btn(flat size="sm" dense @click="router.push({name: 'signup'})") нет аккаунта?
+
+
     AlreadyRegistered(v-else).q-mt-lg
 </template>
 <script lang="ts" setup>
@@ -11,6 +17,9 @@ import { SignIn } from 'src/widgets/Auth/SignIn'
 import { computed } from 'vue'
 import { AlreadyRegistered } from 'src/widgets/Auth/AlreadyRegistered'
 import { createUserStore as store } from 'src/features/User/CreateUser'
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
 
 const registeredAndloggedIn = computed(() => {
   return useCurrentUserStore().isRegistrationComplete && useSessionStore().isAuth && store.step == 1

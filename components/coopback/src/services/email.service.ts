@@ -33,12 +33,14 @@ const sendEmail = async (to, subject, text) => {
  * @returns {Promise}
  */
 const sendResetPasswordEmail = async (to, token) => {
-  const subject = 'Reset password';
-  // replace this url with the link to the reset password page of your front-end app
-  const resetPasswordUrl = `http://link-to-app/reset-password?token=${token}`;
-  const text = `Dear user,
-To reset your password, click on this link: ${resetPasswordUrl}
-If you did not request any password resets, then ignore this email.`;
+  const subject = 'Восстановление доступа';
+
+  const resetPasswordUrl = `${config.base_url}/#/${config.coopname}/auth/reset-key?token=${token}`;
+  const text = `Мы получили запрос на перевыпуск приватного ключа,
+Для перевыпуска нажмите на ссылку: ${resetPasswordUrl}. Время действия ссылки - 10 минут.
+
+Если вы не запрашивали перевыпуск ключа - проигнорируйте это сообщение.`;
+
   await sendEmail(to, subject, text);
 };
 

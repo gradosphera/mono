@@ -6,6 +6,8 @@ import { SignUpPage } from 'src/pages/SignUp';
 import { SignInPage } from 'src/pages/SignIn';
 import { RouteRecordRaw } from 'vue-router';
 import { InstallCooperativePage } from 'src/pages/Install';
+import { LostKeyPage } from 'src/pages/Auth/LostKey/ui';
+import { ResetKeyPage } from 'src/pages/Auth/ResetKey';
 
 
 const baseRoutes = [
@@ -38,6 +40,18 @@ const baseRoutes = [
         path: ':coopname/auth/signin',
         name: 'signin',
         component: SignInPage,
+        children: [],
+      },
+      {
+        path: ':coopname/auth/lost-key',
+        name: 'lostkey',
+        component: LostKeyPage,
+        children: [],
+      },
+      {
+        path: ':coopname/auth/reset-key',
+        name: 'resetkey',
+        component: ResetKeyPage,
         children: [],
       },
       {

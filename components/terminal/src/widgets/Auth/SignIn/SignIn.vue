@@ -1,41 +1,44 @@
 <template lang='pug'>
-q-card.bordered.q-pa-md.signup(flat)
-  p.text-h6.text-center.q-mb-md ВХОД ДЛЯ ПАЙЩИКОВ
-  form(@submit.prevent="submit").full-width
+div
+  q-card.bordered.signup(flat)
+    div.q-pa-md
+      p.text-h6.text-center.q-mb-md ВХОД ДЛЯ ПАЙЩИКОВ
+      form(@submit.prevent="submit").full-width
 
-    q-input(
-      v-model="email"
-      label="Введите электронную почту"
-      color="primary"
-      hint=""
-      outlined
-      class="full-width"
-      autocorrect="off"
-      autocapitalize="off"
-      autocomplete="off"
-      spellcheck="false"
-    ).q-mt-lg
+        q-input(
+          v-model="email"
+          label="Введите электронную почту"
+          color="primary"
+          hint=""
+          outlined
+          class="full-width"
+          autocorrect="off"
+          autocapitalize="off"
+          autocomplete="off"
+          spellcheck="false"
+        ).q-mt-lg
 
-    q-input(
-      v-model="privateKey"
-      label="Введите ключ доступа"
-      color="primary"
-      hint=""
-      outlined
-      class="full-width"
-      type="password"
-      autocorrect="off"
-      autocapitalize="off"
-      autocomplete="off"
-      spellcheck="false")
+        q-input(
+          v-model="privateKey"
+          label="Введите ключ доступа"
+          color="primary"
+          hint=""
+          outlined
+          class="full-width"
+          type="password"
+          autocorrect="off"
+          autocapitalize="off"
+          autocomplete="off"
+          spellcheck="false")
 
-    q-btn(
-      type="submit"
-      label="Войти"
-      class="full-width"
-      color="primary"
-      :loading="loading"
-      :disable="!privateKey")
+        q-btn(
+          type="submit"
+          label="Войти"
+          class="full-width"
+          color="primary"
+          :loading="loading"
+          :disable="!privateKey")
+
 
 
 </template>

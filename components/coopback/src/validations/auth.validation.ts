@@ -14,7 +14,7 @@ export const IForgotPassword = Joi.object({
   email: Joi.string().email().required(),
 });
 
-export const RForgotPassword = Joi.object({
+export const RForgotKey = Joi.object({
   body: IForgotPassword.required(),
 });
 
@@ -29,12 +29,9 @@ export const ILogout = Joi.object({
   refreshToken: Joi.string().required(),
 });
 
-export const IResetPasswordQuery = Joi.object({
+export const IResetKeyBody = Joi.object({
+  public_key: Joi.string().required(),
   token: Joi.string().required(),
-});
-
-export const IResetPasswordBody = Joi.object({
-  password: Joi.string().required().custom(password),
 });
 
 export const IVerifyEmail = Joi.object({
@@ -50,9 +47,8 @@ export const RLogout = Joi.object({
   body: ILogout.required(),
 });
 
-export const RResetPassword = Joi.object({
-  query: IResetPasswordQuery.required(),
-  body: IResetPasswordBody.required(),
+export const RResetKey = Joi.object({
+  body: IResetKeyBody.required(),
 });
 
 export const RVerifyEmail = Joi.object({

@@ -10,8 +10,8 @@ const router = Router();
 router.post('/login', validate(authValidation.RLogin), authController.login);
 router.post('/logout', validate(authValidation.RLogout), authController.logout);
 router.post('/refresh-tokens', validate(authValidation.RRefreshTokens), authController.refreshTokens);
-router.post('/forgot-password', validate(authValidation.RForgotPassword), authController.forgotPassword);
-router.post('/reset-password', validate(authValidation.RResetPassword), authController.resetPassword);
+router.post('/lost-key', validate(authValidation.RForgotKey), authController.lostKey);
+router.post('/reset-key', validate(authValidation.RResetKey), authController.resetKey);
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
 router.post('/verify-email', validate(authValidation.RVerifyEmail), authController.verifyEmail);
 

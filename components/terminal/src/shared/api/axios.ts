@@ -11,13 +11,13 @@ export async function sendGET(
     if (!skip_auth) {
       const { tokens } = useGlobalStore();
 
-      if (!tokens || !tokens.access || !tokens.access.token)
-        throw new Error('Ошибка авторизации: токен доступа не найден');
+      // if (!tokens || !tokens.access || !tokens.access.token)
+      //   throw new Error('Ошибка авторизации: токен доступа не найден');
 
       const response = await axios.get(BACKEND_URL + url, {
         params,
         headers: {
-          Authorization: `Bearer ${tokens.access.token}`,
+          Authorization: `Bearer ${tokens?.access?.token}`,
         },
       });
       return response.data;
@@ -48,12 +48,12 @@ export async function sendPOST(
     if (!skip_auth) {
       const { tokens } = useGlobalStore();
 
-      if (!tokens || !tokens.access || !tokens.access.token)
-        throw new Error('Ошибка авторизации: токен доступа не найден');
+      // if (!tokens || !tokens.access || !tokens.access.token)
+      //   throw new Error('Ошибка авторизации: токен доступа не найден');
 
       const response = await axios.post(BACKEND_URL + url, data, {
         headers: {
-          Authorization: `Bearer ${tokens.access.token}`,
+          Authorization: `Bearer ${tokens?.access?.token}`,
         },
       });
       return response.data;

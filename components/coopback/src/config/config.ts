@@ -7,6 +7,9 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
+    BASE_URL: Joi.string().required(),
+    SERVICE_USERNAME: Joi.string().required(),
+    SERVICE_WIF: Joi.string().required(),
     PORT: Joi.number().default(3000),
     MONGODB_URL: Joi.string().required().description('Mongo DB url'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
@@ -36,13 +39,16 @@ if (error) {
 
 export default {
   env: envVars.NODE_ENV,
+  base_url: envVars.BASE_URL,
   port: envVars.PORT,
+  service_wif: envVars.SERVICE_WIF,
+  service_username: envVars.SERVICE_USERNAME,
   mongoose: {
     url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
     options: {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      // useCreateIndex: true,
+      // useNewUrlParser: true,
+      // useUnifiedTopology: true,
     },
   },
   jwt: {
