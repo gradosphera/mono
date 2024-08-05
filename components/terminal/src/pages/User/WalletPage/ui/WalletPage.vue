@@ -2,7 +2,7 @@
 WalletCard(:username="username")
 </template>
 <script lang="ts" setup>
-import { WalletCard } from 'src/widgets/Wallet/WalletCard'
+import { WalletCard } from 'src/widgets/User/WalletCard'
 
 import { computed } from 'vue';
 import { useCurrentUserStore } from 'src/entities/User';

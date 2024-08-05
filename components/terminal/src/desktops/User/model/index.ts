@@ -19,6 +19,7 @@ import { CooperativeDetails } from 'src/widgets/Cooperative/Details';
 import { CooperativeMembers } from 'src/widgets/Cooperative/Members';
 import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
 import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
+import { UserSettingsPage } from 'src/pages/User/SettingsPage';
 
 export const manifest = {
   'name': 'UserDesktop',
@@ -64,6 +65,17 @@ export const manifest = {
           path: 'payment-methods',
           name: 'user-payment-methods',
           component: markRaw(UserPaymentMethodsPage),
+          children: [],
+        },
+        {
+          meta: {
+            title: 'Настройки',
+            icon: '',
+            roles: [],
+          },
+          path: 'settings',
+          name: 'user-settings',
+          component: markRaw(UserSettingsPage),
           children: [],
         }
       ],
