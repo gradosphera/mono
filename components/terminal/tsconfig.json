@@ -2,7 +2,8 @@
   "extends": "@quasar/app-vite/tsconfig-preset",
   "compilerOptions": {
     "baseUrl": ".",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitAny": false
   },
   "vueCompilerOptions": {
     "plugins": ["@vue/language-plugin-pug"]

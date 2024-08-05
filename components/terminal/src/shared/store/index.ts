@@ -161,7 +161,7 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
 
   const sendActions = async (actions: any[], broadcast: boolean) => {
     const session = useSessionStore();
-    const data = [];
+    const data: Action[] = [];
 
     for (const action of actions) {
       const formedAction = await formActionFromAbi(action);

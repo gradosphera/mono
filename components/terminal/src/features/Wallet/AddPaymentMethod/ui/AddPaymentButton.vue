@@ -133,20 +133,20 @@ const handlerSubmit = async (): Promise<void> => {
 
   isSubmitting.value = true
   try {
-    let data = null
+    let data = null as any
 
     if (methodType.value === 'sbp')
       data = sbp.value
     else if (methodType.value === 'bank_transfer')
       data = bank_transfer.value
 
-    if (data != null)
-      await addPaymentMethod({
-        username: username.value,
-        method_id: 0, //autogenerate
-        method_type: methodType.value,
-        data
-      })
+
+    await addPaymentMethod({
+      username: username.value,
+      method_id: 0, //autogenerate
+      method_type: methodType.value,
+      data
+    })
 
     showDialog.value = false
     isSubmitting.value = false
