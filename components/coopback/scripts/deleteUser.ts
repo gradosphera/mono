@@ -17,7 +17,7 @@ async function deleteUser(username: string) {
   try {
     await mongoose.connect(config.mongoose.url, config.mongoose.options);
 
-    await userService.deleteUserById(username);
+    await userService.deleteUserByUsername(username);
 
     console.log('Пользователь удалён: ', username);
   } catch (e: any) {

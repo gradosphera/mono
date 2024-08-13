@@ -26,8 +26,8 @@ export const refreshTokens = catchAsync(async (req: RRefreshTokens, res: any) =>
 });
 
 export const lostKey = catchAsync(async (req: RForgotKey, res) => {
-  const resetKeyToken = await tokenService.generateResetPasswordToken(req.body.email);
-  await emailService.sendResetPasswordEmail(req.body.email, resetKeyToken);
+  const resetKeyToken = await tokenService.generateResetKeyToken(req.body.email);
+  await emailService.sendResetKeyEmail(req.body.email, resetKeyToken);
   res.status(NO_CONTENT).send();
 });
 

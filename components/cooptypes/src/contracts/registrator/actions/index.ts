@@ -49,3 +49,9 @@ export * as ConfirmJoin from './confirmJoin'
  * @private
  */
 export * as Init from './init'
+
+/**
+ * Действие добавления пайщика в обход процедуры регистрации.
+ * @private
+ */
+export * as AddUser from './addUser'

@@ -3,7 +3,7 @@ import { reactive } from 'vue';
 
 interface IInstallCooperative {
   data: {
-    test1: string
+    wif: string
   }
 }
 
@@ -14,11 +14,13 @@ export const useInstallCooperativeStore = defineStore(
   (): IInstallCooperative => {
 
     const data = reactive({
-      test1: 'test'
+      wif: ''
     })
 
     return {
       data
     }
+  }, {
+    persist: true,
   })
 

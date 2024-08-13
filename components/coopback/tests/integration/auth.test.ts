@@ -29,7 +29,6 @@ describe('Auth routes', () => {
 
       newUser = {
         email,
-        password: 'password1',
         role: 'user',
         public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
         username: generateUsername(),
@@ -49,8 +48,6 @@ describe('Auth routes', () => {
 
     test('should return 201 and successfully register user if request data is ok', async () => {
       const res = await request(app).post('/v1/users').send(newUser).expect(httpStatus.CREATED);
-
-      expect(res.body.user).not.toHaveProperty('password');
 
       expect(res.body.user).toEqual({
         id: expect.anything(),
@@ -76,7 +73,6 @@ describe('Auth routes', () => {
 
       expect(dbUser).toBeDefined();
 
-      expect(dbUser?.password).not.toBe(newUser.password);
       expect(dbUser).toMatchObject({ email: newUser.email, role: 'user', is_email_verified: false });
 
       expect(res.body.tokens).toEqual({
@@ -97,26 +93,10 @@ describe('Auth routes', () => {
 
       await request(app).post('/v1/users').send(newUser).expect(httpStatus.BAD_REQUEST);
     });
-
-    test('should return 400 error if password length is less than 8 characters', async () => {
-      newUser.password = 'passwo1';
-
-      await request(app).post('/v1/users').send(newUser).expect(httpStatus.BAD_REQUEST);
-    });
-
-    test('should return 400 error if password does not contain both letters and numbers', async () => {
-      newUser.password = 'password';
-
-      await request(app).post('/v1/users').send(newUser).expect(httpStatus.BAD_REQUEST);
-
-      newUser.password = '11111111';
-
-      await request(app).post('/v1/users').send(newUser).expect(httpStatus.BAD_REQUEST);
-    });
   });
 
   describe('POST /v1/auth/login', () => {
-    test('should return 200 and login user if email and password match', async () => {
+    test('should return 200 and login user if email and signature match', async () => {
       await insertUsers([userOne]);
 
       const now = (await getBlockchainInfo()).head_block_time;
@@ -154,10 +134,16 @@ describe('Auth routes', () => {
     test('should return 401 error if there are no users with that email', async () => {
       const now = (await getBlockchainInfo()).head_block_time;
 
+      const privateKey = PrivateKey.fromString('5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');
+
+      const bytes = Bytes.fromString(now, 'utf8');
+      const checksum = Checksum256.hash(bytes);
+      const signature = privateKey.signDigest(checksum);
+
       const loginCredentials = {
         now,
         email: userOne.email,
-        signature: userOne.password,
+        signature,
       };
 
       const res = await request(app).post('/v1/auth/login').send(loginCredentials).expect(httpStatus.UNAUTHORIZED);
@@ -166,7 +152,9 @@ describe('Auth routes', () => {
     });
 
     // test('should return 401 error if signature is wrong', async () => {
+
     // Восстановить проверку. Необходимо подложить аккаунт тестового юзера в коде вместо обращения к блокчейну.
+
     // await insertUsers([userOne]);
     // const now = (await getBlockchainInfo()).head_block_time;
     // const privateKey = PrivateKey.fromString('5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');
@@ -288,14 +276,14 @@ describe('Auth routes', () => {
       jest.spyOn(emailService.transport, 'sendMail').mockResolvedValue();
     });
 
-    test('should return 204 and send reset password email to the user', async () => {
+    test('should return 204 and send reset key email to the user', async () => {
       await insertUsers([userOne]);
-      const sendResetPasswordEmailSpy = jest.spyOn(emailService, 'sendResetPasswordEmail');
+      const sendResetKeyEmailSpy = jest.spyOn(emailService, 'sendResetKeyEmail');
 
       await request(app).post('/v1/auth/lost-key').send({ email: userOne.email }).expect(httpStatus.NO_CONTENT);
 
-      expect(sendResetPasswordEmailSpy).toHaveBeenCalledWith(userOne.email, expect.any(String));
-      const resetKeyToken = sendResetPasswordEmailSpy.mock.calls[0][1];
+      expect(sendResetKeyEmailSpy).toHaveBeenCalledWith(userOne.email, expect.any(String));
+      const resetKeyToken = sendResetKeyEmailSpy.mock.calls[0][1];
       const dbResetPasswordTokenDoc = await Token.findOne({ token: resetKeyToken, user: userOne._id.toString() });
       expect(dbResetPasswordTokenDoc).toBeDefined();
     });
@@ -314,13 +302,15 @@ describe('Auth routes', () => {
   });
 
   describe('POST /v1/auth/reset-key', () => {
-    test('should return 204 and reset the password', async () => {
+    test('should return 204 and reset the key', async () => {
       await insertUsers([userOne]);
       const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
       const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_PASSWORD);
       await tokenService.saveToken(resetKeyToken, userOne._id, expires, tokenTypes.RESET_PASSWORD);
 
-      const res = await request(app).post('/v1/auth/reset-key').send({ token: resetKeyToken, password: 'password2' });
+      const res = await request(app)
+        .post('/v1/auth/reset-key')
+        .send({ token: resetKeyToken, public_key: userOne.public_key });
 
       expect(res.status).toBe(httpStatus.NO_CONTENT);
 
@@ -328,9 +318,6 @@ describe('Auth routes', () => {
       expect(dbUser).not.toBeUndefined();
 
       if (dbUser) {
-        const isPasswordMatch = await bcrypt.compare('password2', dbUser.password);
-        expect(isPasswordMatch).toBe(true);
-
         const dbResetPasswordTokenCount = await Token.countDocuments({
           user: userOne._id.toString(),
           type: tokenTypes.RESET_PASSWORD,
@@ -339,13 +326,16 @@ describe('Auth routes', () => {
       }
     });
 
-    test('should return 400 if reset password token is missing', async () => {
+    test('should return 400 if reset key token is missing', async () => {
       await insertUsers([userOne]);
 
-      await request(app).post('/v1/auth/reset-key').send({ password: 'password2' }).expect(httpStatus.BAD_REQUEST);
+      await request(app)
+        .post('/v1/auth/reset-key')
+        .send({ public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV' })
+        .expect(httpStatus.BAD_REQUEST);
     });
 
-    test('should return 401 if reset password token is blacklisted', async () => {
+    test('should return 401 if reset key token is blacklisted', async () => {
       await insertUsers([userOne]);
       const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
       const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_PASSWORD);
@@ -357,7 +347,7 @@ describe('Auth routes', () => {
         .expect(httpStatus.UNAUTHORIZED);
     });
 
-    test('should return 401 if reset password token is expired', async () => {
+    test('should return 401 if reset key token is expired', async () => {
       await insertUsers([userOne]);
       const expires = moment().subtract(1, 'minutes');
       const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_PASSWORD);
@@ -378,30 +368,6 @@ describe('Auth routes', () => {
         .post('/v1/auth/reset-key')
         .send({ token: resetKeyToken, public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV' })
         .expect(httpStatus.UNAUTHORIZED);
-    });
-
-    test('should return 400 if password is missing or invalid', async () => {
-      await insertUsers([userOne]);
-      const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-      const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_PASSWORD);
-      await tokenService.saveToken(resetKeyToken, userOne._id, expires, tokenTypes.RESET_PASSWORD);
-
-      await request(app).post('/v1/auth/reset-key').send({ token: resetKeyToken }).expect(httpStatus.BAD_REQUEST);
-
-      await request(app)
-        .post('/v1/auth/reset-key')
-        .send({ token: resetKeyToken, public_key: 'stort' })
-        .expect(httpStatus.BAD_REQUEST);
-
-      await request(app)
-        .post('/v1/auth/reset-key')
-        .send({ token: resetKeyToken, public_key: 'password' })
-        .expect(httpStatus.BAD_REQUEST);
-
-      await request(app)
-        .post('/v1/auth/reset-key')
-        .send({ token: resetKeyToken, public_key: '11111111' })
-        .expect(httpStatus.BAD_REQUEST);
     });
   });
 

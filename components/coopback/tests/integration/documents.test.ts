@@ -56,7 +56,7 @@ describe('Проверка получения документов', () => {
         skip_save: false,
       };
 
-      let res = await request(app)
+      const res = await request(app)
         .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);

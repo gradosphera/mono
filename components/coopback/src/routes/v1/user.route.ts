@@ -11,9 +11,9 @@ router
   .post(validate(userValidation.RCreateUser), userController.createUser)
   .get(auth('getUsers'), validate(userValidation.RGetUsers), userController.getUsers);
 
-router
-  .route('/join-cooperative')
-  .post(validate(userValidation.RJoinCooperative), userController.joinCooperative)
+router.route('/join-cooperative').post(validate(userValidation.RJoinCooperative), userController.joinCooperative);
+
+router.route('/add').post(auth('addUser'), validate(userValidation.RAddUser), userController.addUser);
 
 router
   .route('/:username')

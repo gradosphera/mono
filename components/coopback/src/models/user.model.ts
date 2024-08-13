@@ -19,7 +19,6 @@ export interface IUser {
   public_key: string;
   referer: string;
   email: string;
-  password: string;
   role: string;
   is_email_verified: boolean;
   statement: {
@@ -36,7 +35,6 @@ export interface IUser {
   getPrivateData(): Promise<
     Cooperative.Users.IIndividualData | Cooperative.Users.IEntrepreneurData | Cooperative.Users.IOrganizationData | null
   >;
-  isPasswordMatch(password: string): Promise<boolean>;
 }
 
 interface IUserModel extends Model<IUser> {
@@ -72,7 +70,7 @@ const userSchema = new Schema<IUser, IUserModel>(
     },
     public_key: {
       type: String,
-      required: true,
+      default: '',
     },
     referer: {
       type: String,
@@ -89,18 +87,6 @@ const userSchema = new Schema<IUser, IUserModel>(
           throw new Error('Invalid email');
         }
       },
-    },
-    password: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 8,
-      validate(value) {
-        if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
-          throw new Error('Password must contain at least one letter and one number');
-        }
-      },
-      private: true, // used by the toJSON plugin
     },
     role: {
       type: String,
@@ -162,21 +148,6 @@ userSchema.methods.getPrivateData = async function (): Promise<
 
   return result;
 };
-
-userSchema.methods.isPasswordMatch = async function (password) {
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this;
-  return compare(password, user.password);
-};
-
-userSchema.pre('save', async function (next) {
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this;
-  if (user.isModified('password')) {
-    user.password = await hash(user.password, 8);
-  }
-  next();
-});
 
 const User = model<IUser, IUserModel>('User', userSchema);
 

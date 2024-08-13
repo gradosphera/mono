@@ -12,7 +12,7 @@ export * as ExpensedFunds from './expenseFunds'
 /**
  * Таблица содержит сводную информацию о балансе кошелька всех фондов кооператива.
  */
-export * as FundWallet from './fundWallet'
+export * as CoopWallet from './coopWallet'
 
 /**
  * Таблица содержит информацию о запросах на списание по статьям и выводах из фондов.

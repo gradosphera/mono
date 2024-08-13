@@ -67,7 +67,6 @@ describe('Проверка получения документов', () => {
       const email = faker.internet.email().toLowerCase();
       const newUser = {
         email: email,
-        password: 'password1',
         role: 'user',
         public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
         username: generateUsername(),

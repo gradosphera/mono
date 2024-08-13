@@ -20,6 +20,19 @@ export interface IAccount {
   registered_at: ITimePointSec
 }
 
+export interface IAdduser {
+  registrator: IName
+  coopname: IName
+  referer: IName
+  username: IName
+  type: IName
+  created_at: ITimePointSec
+  initial: IAsset
+  minimum: IAsset
+  spread_initial: boolean
+  meta: string
+}
+
 export interface IBalances extends IBalancesBase {
 }
 
@@ -34,12 +47,6 @@ export interface IChangekey {
   changer: IName
   username: IName
   public_key: IPublicKey
-}
-
-export interface ICheck {
-  hash: IChecksum256
-  public_key: IPublicKey
-  signature: ISignature
 }
 
 export interface IConfirmreg {
@@ -71,9 +78,6 @@ export interface IDocument {
   meta: string
 }
 
-export interface IFix {
-}
-
 export interface IInit {
 }
 
@@ -82,6 +86,9 @@ export interface IJoincoop {
   coopname: IName
   username: IName
   document: IDocument
+}
+
+export interface IMigrate {
 }
 
 export interface INewaccount {

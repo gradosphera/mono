@@ -1,5 +1,5 @@
 import * as Joi from 'joi';
-import { password, objectId } from './custom.validation';
+import { password } from './custom.validation';
 import { IBankAccount } from './payment.validation';
 
 export const IIndividualData = Joi.object({
@@ -57,8 +57,7 @@ export const IEntrepreneurData = Joi.object({
 
 export const ICreateUser = Joi.object({
   email: Joi.string().required().email(),
-  password: Joi.string().required().custom(password),
-  role: Joi.string().required().valid('user', 'chairman', 'member'),
+  role: Joi.string().required().valid('user'),
   public_key: Joi.string().required(),
   username: Joi.string().required().length(12),
   referer: Joi.string().length(12).allow('').optional(),
@@ -66,6 +65,19 @@ export const ICreateUser = Joi.object({
   individual_data: IIndividualData.optional(),
   organization_data: IOrganizationData.optional(),
   entrepreneur_data: IEntrepreneurData.optional(),
+});
+
+export const IAddUser = Joi.object({
+  email: Joi.string().required().email(),
+  referer: Joi.string().length(12).allow('').optional(),
+  type: Joi.string().required().valid('individual', 'entrepreneur', 'organization'),
+  individual_data: IIndividualData.optional(),
+  organization_data: IOrganizationData.optional(),
+  entrepreneur_data: IEntrepreneurData.optional(),
+});
+
+export const RAddUser = Joi.object({
+  body: IAddUser.required(),
 });
 
 export const IDocument = Joi.object().keys({
@@ -104,7 +116,6 @@ export const RUpdateUser = Joi.object({
   body: Joi.object()
     .keys({
       email: Joi.string().email(),
-      password: Joi.string().custom(password),
     })
     .min(1),
 });

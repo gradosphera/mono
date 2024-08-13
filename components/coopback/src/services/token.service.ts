@@ -107,7 +107,7 @@ export const generateAuthTokens = async (user) => {
  * @param {string} email
  * @returns {Promise<string>}
  */
-export const generateResetPasswordToken = async (email) => {
+export const generateResetKeyToken = async (email) => {
   const user = await userService.getUserByEmail(email);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
@@ -116,6 +116,22 @@ export const generateResetPasswordToken = async (email) => {
   const resetKeyToken = generateToken(user.id, expires, tokenTypes.RESET_PASSWORD);
   await saveToken(resetKeyToken, user.id, expires, tokenTypes.RESET_PASSWORD);
   return resetKeyToken;
+};
+
+/**
+ * Generate invite token
+ * @param {string} email
+ * @returns {Promise<string>}
+ */
+export const generateInviteToken = async (email) => {
+  const user = await userService.getUserByEmail(email);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
+  }
+  const expires = moment().add(config.jwt.inviteExpirationMinutes, 'minutes');
+  const inviteToken = generateToken(user.id, expires, tokenTypes.INVITE);
+  await saveToken(inviteToken, user.id, expires, tokenTypes.INVITE);
+  return inviteToken;
 };
 
 /**

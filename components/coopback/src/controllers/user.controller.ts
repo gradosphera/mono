@@ -1,12 +1,14 @@
 import http from 'http-status';
 import ApiError from '../utils/ApiError';
 import catchAsync from '../utils/catchAsync';
-import { userService, tokenService } from '../services';
-import { RCreateUser, RJoinCooperative } from '../types';
+import { userService, tokenService, emailService } from '../services';
+import { IAddUser, ICreateUser, RCreateUser, RJoinCooperative } from '../types';
 import httpStatus from 'http-status';
 import pick from '../utils/pick';
 import { IGetResponse } from '../types/common';
 import { IUser } from '../models/user.model';
+import { Request, Response } from 'express';
+import { generateUsername } from '../../tests/utils/generateUsername';
 
 /**
  * Порядок регистрации:
@@ -28,6 +30,30 @@ export const createUser = catchAsync(async (req: RCreateUser, res) => {
   const tokens = await tokenService.generateAuthTokens(user);
 
   res.status(http.CREATED).send({ user, tokens });
+});
+
+export const addUser = catchAsync(async (req: Request, res: Response) => {
+  const body: IAddUser = req.body;
+
+  const newUser: ICreateUser = {
+    ...body,
+    public_key: '',
+    role: 'user',
+    username: generateUsername(),
+  };
+
+  const user = await userService.createUser(newUser);
+
+  try {
+    await blockchainService.addUser(newUser);
+    const token = await tokenService.generateInviteToken(user.email);
+    await emailService.sendInviteEmail(req.body.email, token);
+  } catch (e) {
+    console.log('blockchain error: ', e.mesage);
+    await userService.deleteUserByUsername(newUser.username);
+  }
+
+  res.status(httpStatus.CREATED).send({ user });
 });
 
 export const joinCooperative = catchAsync(async (req: RJoinCooperative, res) => {
@@ -82,6 +108,6 @@ export const updateUser = catchAsync(async (req, res) => {
 });
 
 export const deleteUser = catchAsync(async (req, res) => {
-  await userService.deleteUserById(req.params.username);
+  await userService.deleteUserByUsername(req.params.username);
   res.status(http.NO_CONTENT).send();
 });

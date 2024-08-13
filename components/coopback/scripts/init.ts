@@ -25,7 +25,7 @@ async function init() {
       email: 'dacom.dark.sun@gmail.com',
       password,
       public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
-      role: 'chairman',
+      role: 'user',
       type: 'individual',
       individual_data: {
         first_name: 'Иван',

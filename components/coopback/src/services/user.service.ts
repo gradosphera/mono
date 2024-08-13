@@ -3,7 +3,6 @@ import { User } from '../models';
 import ApiError from '../utils/ApiError';
 import { generator } from './document.service';
 import { ICreateUser, IJoinCooperative } from '../types/auto-generated/user.validation';
-import ecc from 'eosjs-ecc';
 import { PublicKey, Signature } from '@wharfkit/antelope';
 import faker from 'faker';
 import { randomBytes } from 'crypto';
@@ -28,6 +27,7 @@ export const createServiceUser = async (username: string) => {
 export const createUser = async (userBody: ICreateUser) => {
   //TODO проверяем на существование пользователя
   //допускаем обновление личных данных, если пользователь находится в статусе 'created'
+
   const exist = await User.findOne({ email: userBody.email });
 
   if (userBody.type === 'individual' && !userBody.individual_data)
@@ -186,7 +186,7 @@ export const updateUserByUsername = async (username, updateBody) => {
  * @param {string} username
  * @returns {Promise<User>}
  */
-export const deleteUserById = async (username) => {
+export const deleteUserByUsername = async (username) => {
   const user = await getUserByUsername(username);
   if (!user) {
     throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');

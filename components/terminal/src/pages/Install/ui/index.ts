@@ -1,1 +1,1 @@
-export {default as InstallCooperativePage} from './Install.vue'
+export {default as InstallCooperativePage} from './InstallCooperativePage.vue'

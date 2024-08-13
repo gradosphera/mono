@@ -18,7 +18,7 @@
     "project": "./tsconfig.json"
   },
   "rules": {
-    "no-console": "error",
+    "no-console": "warn",
     "func-names": "off",
     "no-underscore-dangle": "off",
     "consistent-return": "off",

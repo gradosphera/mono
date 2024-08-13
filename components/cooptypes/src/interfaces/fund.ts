@@ -36,6 +36,11 @@ export interface IAddexpense {
   quantity: IAsset
 }
 
+export interface IAddinitial {
+  coopname: IName
+  quantity: IAsset
+}
+
 export interface IAuthorize {
   coopname: IName
   type: IName
@@ -46,6 +51,15 @@ export interface IComplete {
   coopname: IName
   username: IName
   withdraw_id: IUint64
+}
+
+export interface ICoopwallet {
+  id: IUint64
+  coopname: IName
+  circulating_account: ISimpleWallet
+  initial_account: ISimpleWallet
+  accumulative_account: ISimpleWallet
+  accumulative_expense_account: ISimpleWallet
 }
 
 export interface ICounts extends ICountsBase {
@@ -140,6 +154,9 @@ export interface IInit {
   initial: IAsset
 }
 
+export interface IMigrate {
+}
+
 export interface INewfund {
   coopname: IName
   type: IName
@@ -150,6 +167,11 @@ export interface INewwithdraw {
   coopname: IName
   type: IName
   id: IUint64
+}
+
+export interface ISimpleWallet {
+  available: IAsset
+  withdrawed: IAsset
 }
 
 export interface ISpreadamount {

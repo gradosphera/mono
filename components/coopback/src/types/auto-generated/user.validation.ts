@@ -3,6 +3,80 @@
  * Do not modify this file manually
  */
 
+export interface IAddUser {
+  email: string;
+  entrepreneur_data?: {
+    bank_account: {
+      account_number: string;
+      bank_name: string;
+      card_number?: string;
+      currency: 'RUB' | 'Other';
+      details: {
+        bik: string;
+        corr: string;
+        kpp: string;
+      };
+    };
+    birthdate: string;
+    city: string;
+    country: 'Russia' | 'Other';
+    details: {
+      inn: string;
+      ogrn: string;
+    };
+    email: string;
+    first_name: string;
+    full_address: string;
+    last_name: string;
+    middle_name: string;
+    phone: string;
+  };
+  individual_data?: {
+    birthdate: string;
+    email: string;
+    first_name: string;
+    full_address: string;
+    last_name: string;
+    middle_name: string;
+    phone: string;
+  };
+  organization_data?: {
+    bank_account: {
+      account_number: string;
+      bank_name: string;
+      card_number?: string;
+      currency: 'RUB' | 'Other';
+      details: {
+        bik: string;
+        corr: string;
+        kpp: string;
+      };
+    };
+    city: string;
+    country: 'Russia' | 'Other';
+    details: {
+      inn: string;
+      ogrn: string;
+    };
+    email: string;
+    full_address: string;
+    full_name: string;
+    is_cooperative: boolean;
+    phone: string;
+    represented_by: {
+      based_on: string;
+      first_name: string;
+      last_name: string;
+      middle_name: string;
+      position: string;
+    };
+    short_name: string;
+    type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+  };
+  referer?: string;
+  type: 'individual' | 'entrepreneur' | 'organization';
+}
+
 export interface ICreateUser {
   email: string;
   entrepreneur_data?: {
@@ -73,10 +147,9 @@ export interface ICreateUser {
     short_name: string;
     type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
   };
-  password: string;
-  public_key: string;
+  public_key?: string;
   referer?: string;
-  role: 'user' | 'chairman' | 'member';
+  role: 'user';
   type: 'individual' | 'entrepreneur' | 'organization';
   username: string;
 }
@@ -169,6 +242,82 @@ export interface IOrganizationData {
   type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
 }
 
+export interface RAddUser {
+  body: {
+    email: string;
+    entrepreneur_data?: {
+      bank_account: {
+        account_number: string;
+        bank_name: string;
+        card_number?: string;
+        currency: 'RUB' | 'Other';
+        details: {
+          bik: string;
+          corr: string;
+          kpp: string;
+        };
+      };
+      birthdate: string;
+      city: string;
+      country: 'Russia' | 'Other';
+      details: {
+        inn: string;
+        ogrn: string;
+      };
+      email: string;
+      first_name: string;
+      full_address: string;
+      last_name: string;
+      middle_name: string;
+      phone: string;
+    };
+    individual_data?: {
+      birthdate: string;
+      email: string;
+      first_name: string;
+      full_address: string;
+      last_name: string;
+      middle_name: string;
+      phone: string;
+    };
+    organization_data?: {
+      bank_account: {
+        account_number: string;
+        bank_name: string;
+        card_number?: string;
+        currency: 'RUB' | 'Other';
+        details: {
+          bik: string;
+          corr: string;
+          kpp: string;
+        };
+      };
+      city: string;
+      country: 'Russia' | 'Other';
+      details: {
+        inn: string;
+        ogrn: string;
+      };
+      email: string;
+      full_address: string;
+      full_name: string;
+      is_cooperative: boolean;
+      phone: string;
+      represented_by: {
+        based_on: string;
+        first_name: string;
+        last_name: string;
+        middle_name: string;
+        position: string;
+      };
+      short_name: string;
+      type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+    };
+    referer?: string;
+    type: 'individual' | 'entrepreneur' | 'organization';
+  };
+}
+
 export interface RCreateUser {
   body: {
     email: string;
@@ -243,7 +392,7 @@ export interface RCreateUser {
     password: string;
     public_key: string;
     referer?: string;
-    role: 'user' | 'chairman' | 'member';
+    role: 'user';
     type: 'individual' | 'entrepreneur' | 'organization';
     username: string;
   };

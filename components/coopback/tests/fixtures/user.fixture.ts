@@ -7,10 +7,6 @@ import { Cooperative } from 'cooptypes';
 import { ICreateUser } from '../../src/types';
 import { ObjectId } from 'mongodb';
 
-const password = 'password1';
-const salt = bcrypt.genSaltSync(8);
-const hashedPassword = bcrypt.hashSync(password, salt);
-
 const generateRandomId = () => new mongoose.Types.ObjectId();
 
 type testUser = Omit<IUser, 'getPrivateData' | 'isPasswordMatch' | 'private_data'> & {
@@ -33,7 +29,6 @@ const adminUsername = generateUsername();
 export const admin: testUser = {
   _id: generateRandomId(),
   email: email1,
-  password,
   status: 'active',
   has_account: false,
   message: '',
@@ -68,7 +63,6 @@ const usernameOne = generateUsername();
 export const userOne: testUser = {
   _id: generateRandomId(),
   email: email2,
-  password,
   has_account: false,
   status: 'active',
   message: '',
@@ -104,7 +98,6 @@ export const userTwo: testUser = {
   _id: generateRandomId(),
   email: email3,
   has_account: false,
-  password,
   status: 'active',
   message: '',
   is_registered: true,
@@ -138,7 +131,6 @@ export const chairman: testUser = {
   _id: generateRandomId(),
   email: email4,
   has_account: false,
-  password,
   status: 'active',
   message: '',
   is_registered: true,
@@ -171,7 +163,6 @@ export const chairman: testUser = {
 export const voskhod: testUser = {
   _id: generateRandomId(),
   email: email5,
-  password,
   has_account: false,
   status: 'active',
   message: '',
@@ -259,7 +250,7 @@ export const insertUsers = async (users: testUser[]) => {
   for (const user of users) {
     const { type, individual_data, organization_data, entrepreneur_data, block_num, ...rest } = user;
 
-    await User.insertMany([{ ...rest, type, password: hashedPassword }]);
+    await User.insertMany([{ ...rest, type }]);
 
     if (type === 'individual' && individual_data) {
       await insertPrivateIndividualUserData({

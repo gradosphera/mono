@@ -41,24 +41,10 @@ export const loginUserWithSignature = async (email, now, signature) => {
 
       if (!hasKey) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
     } catch (e) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Аккаунт в блокчейне не найден');
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
     }
   }
 
-  return user;
-};
-
-/**
- * Login with email and password
- * @param {string} email
- * @param {string} password
- * @returns {Promise<User>}
- */
-export const loginUserWithEmailAndPassword = async (email, password) => {
-  const user = await userService.getUserByEmail(email);
-  if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-  }
   return user;
 };
 
@@ -102,26 +88,26 @@ export const refreshAuth = async (data: IRefreshTokens) => {
  */
 export const resetKey = async (resetKeyToken, publicKey) => {
   try {
-    const resetPasswordTokenDoc = await tokenService.verifyToken(resetKeyToken, tokenTypes.RESET_PASSWORD);
+    const resetKeyTokenDoc = await tokenService.verifyToken(resetKeyToken, tokenTypes.RESET_PASSWORD);
 
-    const user = await userService.getUserById(resetPasswordTokenDoc.user);
+    const user = await userService.getUserById(resetKeyTokenDoc.user);
     if (!user) {
       throw new Error();
     }
 
-    await blockchainService.changeKey({
-      coopname: config.coopname,
-      changer: config.service_username,
-      username: user.username,
-      public_key: publicKey,
-    });
+    if (config.env !== 'test')
+      await blockchainService.changeKey({
+        coopname: config.coopname,
+        changer: config.service_username,
+        username: user.username,
+        public_key: publicKey,
+      });
 
     await userService.updateUserById(user._id, { public_key: publicKey });
 
     await Token.deleteMany({ user: user._id, type: tokenTypes.RESET_PASSWORD });
   } catch (error) {
-    console.log(error);
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password reset failed');
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Token reset failed');
   }
 };
 

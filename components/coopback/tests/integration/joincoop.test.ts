@@ -26,7 +26,6 @@ describe('Проверка данных', () => {
     const email = faker.internet.email().toLowerCase();
     newUser = {
       email: email,
-      password: 'password1',
       role: 'user',
       public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
       username: generateUsername(),
@@ -51,7 +50,6 @@ describe('Проверка данных', () => {
       const email = faker.internet.email().toLowerCase();
       newUser = {
         email: email,
-        password: 'password1',
         role: 'user',
         public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
         username: generateUsername(),
