@@ -1,9 +1,10 @@
 import { UserIdentityPage } from 'src/pages/User/IdentityPage';
 import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
 import { UserWalletPage } from 'src/pages/User/WalletPage';
-import decisions from 'src/components/soviet/decisions.vue';
-import participants from 'src/components/soviet/participants.vue';
-import documents from 'src/components/soviet/documents.vue';
+
+import { ListOfQuestionsWidget } from 'src/widgets/Cooperative/Agenda/ListOfQuestions';
+import { ListOfDocumentsWidget } from 'src/widgets/Cooperative/Documents/ListOfDocuments';
+
 import { markRaw } from 'vue';
 // import { Commutator } from 'src/widgets/Commutator';
 
@@ -20,6 +21,7 @@ import { CooperativeMembers } from 'src/widgets/Cooperative/Members';
 import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
 import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
 import { UserSettingsPage } from 'src/pages/User/SettingsPage';
+import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants';
 
 export const manifest = {
   'name': 'UserDesktop',
@@ -93,7 +95,7 @@ export const manifest = {
         {
           path: 'agenda',
           name: 'agenda',
-          component: markRaw(decisions),
+          component: markRaw(ListOfQuestionsWidget),
           meta: {
             title: 'Повестка',
             icon: 'fa-solid fa-check-to-slot',
@@ -103,7 +105,7 @@ export const manifest = {
         {
           path: 'participants',
           name: 'participants',
-          component: markRaw(participants),
+          component: markRaw(ListOfParticipantsPage),
           meta: {
             title: 'Пайщики',
             icon: 'fa-solid fa-users',
@@ -113,7 +115,7 @@ export const manifest = {
         {
           path: 'documents',
           name: 'documents',
-          component: markRaw(documents),
+          component: markRaw(ListOfDocumentsWidget),
           meta: {
             title: 'Документы',
             icon: 'fa-solid fa-file-invoice',

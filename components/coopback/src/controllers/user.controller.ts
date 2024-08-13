@@ -1,7 +1,7 @@
 import http from 'http-status';
 import ApiError from '../utils/ApiError';
 import catchAsync from '../utils/catchAsync';
-import { userService, tokenService, emailService } from '../services';
+import { userService, tokenService, emailService, blockchainService } from '../services';
 import { IAddUser, ICreateUser, RCreateUser, RJoinCooperative } from '../types';
 import httpStatus from 'http-status';
 import pick from '../utils/pick';
@@ -9,6 +9,8 @@ import { IGetResponse } from '../types/common';
 import { IUser } from '../models/user.model';
 import { Request, Response } from 'express';
 import { generateUsername } from '../../tests/utils/generateUsername';
+import config from '../config/config';
+import logger from '../config/logger';
 
 /**
  * Порядок регистрации:
@@ -45,11 +47,19 @@ export const addUser = catchAsync(async (req: Request, res: Response) => {
   const user = await userService.createUser(newUser);
 
   try {
-    await blockchainService.addUser(newUser);
+    await blockchainService.addUser({
+      ...body,
+      ...newUser,
+      registrator: config.service_username,
+      referer: body.referer ? body.referer : '',
+      coopname: config.coopname,
+      meta: '',
+    });
+
     const token = await tokenService.generateInviteToken(user.email);
     await emailService.sendInviteEmail(req.body.email, token);
   } catch (e) {
-    console.log('blockchain error: ', e.mesage);
+    logger.warn('error on add user: ', e);
     await userService.deleteUserByUsername(newUser.username);
   }
 

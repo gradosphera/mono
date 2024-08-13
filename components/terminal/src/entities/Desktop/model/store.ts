@@ -5,8 +5,6 @@ import { FailAlert } from 'src/shared/api'
 import { RouteRecordRaw, type RouteLocationNormalized} from 'vue-router'
 import { IDesktop, IRoute, IBlockchainDesktops, IHealthResponse } from './types'
 import { api } from '../api'
-import { useRouter } from 'vue-router'
-
 
 const desktopHashMap = {
   'hash1': Desktops.UserDesktopModel.manifest, //User

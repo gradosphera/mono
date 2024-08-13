@@ -29,7 +29,7 @@ interface ICooperativeStore {
   publicCooperativeData: Ref<RegistratorContract.Tables.Cooperatives.ICooperative | undefined>;
   privateCooperativeData: Ref<Cooperative.Model.ICooperativeData | undefined>;
 
-  fundWallet: Ref<FundContract.Tables.FundWallet.IFundWallet | undefined>
+  coopWallet: Ref<FundContract.Tables.CoopWallet.ICoopWallet | undefined>
   accumulationFunds: Ref<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>
   expenseFunds: Ref<FundContract.Tables.ExpensedFunds.IExpensedFund[]>
 }
@@ -42,14 +42,14 @@ export const useCooperativeStore = defineStore(
     const admins = ref([] as IAdministratorData[]);
     const publicCooperativeData = ref<RegistratorContract.Tables.Cooperatives.ICooperative>();
     const privateCooperativeData = ref<Cooperative.Model.ICooperativeData>()
-    const fundWallet = ref<FundContract.Tables.FundWallet.IFundWallet>()
+    const coopWallet = ref<FundContract.Tables.CoopWallet.ICoopWallet>()
     const accumulationFunds = ref<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>([])
     const expenseFunds = ref<FundContract.Tables.ExpensedFunds.IExpensedFund[]>([])
 
     const contacts = ref<Cooperative.Model.IContacts>()
 
     const loadFunds = async(coopname: string) : Promise<void> => {
-      fundWallet.value = await api.loadFundWallet(coopname)
+      coopWallet.value = await api.loadCoopWallet(coopname)
       accumulationFunds.value = (await api.loadAccumulationFunds(coopname)).map(el => ({
         ...el,
         percent: Number(el.percent) / 10000
@@ -105,7 +105,7 @@ export const useCooperativeStore = defineStore(
       loadAdmins,
       admins,
 
-      fundWallet,
+      coopWallet,
       accumulationFunds,
       expenseFunds
     };

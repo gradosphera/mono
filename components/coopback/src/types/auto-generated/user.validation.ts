@@ -4,6 +4,7 @@
  */
 
 export interface IAddUser {
+  created_at: string;
   email: string;
   entrepreneur_data?: {
     bank_account: {
@@ -40,6 +41,8 @@ export interface IAddUser {
     middle_name: string;
     phone: string;
   };
+  initial: string;
+  minimum: string;
   organization_data?: {
     bank_account: {
       account_number: string;
@@ -74,6 +77,7 @@ export interface IAddUser {
     type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
   };
   referer?: string;
+  spread_initial: boolean;
   type: 'individual' | 'entrepreneur' | 'organization';
 }
 
@@ -147,7 +151,7 @@ export interface ICreateUser {
     short_name: string;
     type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
   };
-  public_key?: string;
+  public_key: string;
   referer?: string;
   role: 'user';
   type: 'individual' | 'entrepreneur' | 'organization';
@@ -244,6 +248,7 @@ export interface IOrganizationData {
 
 export interface RAddUser {
   body: {
+    created_at: string;
     email: string;
     entrepreneur_data?: {
       bank_account: {
@@ -280,6 +285,9 @@ export interface RAddUser {
       middle_name: string;
       phone: string;
     };
+    initial: string;
+    meta?: string;
+    minimum: string;
     organization_data?: {
       bank_account: {
         account_number: string;
@@ -314,6 +322,7 @@ export interface RAddUser {
       type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
     };
     referer?: string;
+    spread_initial: boolean;
     type: 'individual' | 'entrepreneur' | 'organization';
   };
 }
@@ -389,7 +398,6 @@ export interface RCreateUser {
       short_name: string;
       type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
     };
-    password: string;
     public_key: string;
     referer?: string;
     role: 'user';
@@ -429,7 +437,6 @@ export interface RJoinCooperative {
 export interface RUpdateUser {
   body?: {
     email?: string;
-    password?: string;
   };
   params?: {
     username: string;

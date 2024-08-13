@@ -23,17 +23,15 @@ import {
   IUserData,
   useCurrentUserStore,
 } from 'src/entities/User';
-import { hashSHA256 } from 'src/shared/api/crypto';
 
 export interface ICreateUser {
   email: string;
   entrepreneur_data?: IEntrepreneurData;
   individual_data?: IIndividualData;
   organization_data?: IOrganizationData;
-  password: string;
   public_key: string;
   referer?: string;
-  role: 'user' | 'admin';
+  role: 'user';
   type: 'individual' | 'entrepreneur' | 'organization';
   username: string;
 }
@@ -150,7 +148,6 @@ export function useCreateUser() {
     userData: IUserData,
     account: IGeneratedAccount
   ): Promise<void> {
-    const password = await hashSHA256(account.private_key);
 
     const synthData = { type: userData.type } as any;
 
@@ -167,9 +164,8 @@ export function useCreateUser() {
       email,
       username: account.username,
       public_key: account.public_key,
-      password,
     };
-    console.log(data);
+
     const { user, tokens } = await api.createUser(data);
 
     const globalStore = useGlobalStore();

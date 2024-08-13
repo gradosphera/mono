@@ -266,6 +266,34 @@ async function failOrder(data) {
   );
 }
 
+export async function addUser(data: RegistratorContract.Actions.AddUser.IAddUser) {
+  const eos = await getInstance(config.service_wif);
+
+  const actions = [
+    {
+      account: RegistratorContract.contractName.production,
+      name: RegistratorContract.Actions.AddUser.actionName,
+      authorization: [
+        {
+          actor: config.service_username,
+          permission: 'active',
+        },
+      ],
+      data,
+    },
+  ];
+
+  await eos.transact(
+    {
+      actions,
+    },
+    {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    }
+  );
+}
+
 export async function changeKey(data: RegistratorContract.Actions.ChangeKey.IChangeKey) {
   const eos = await getInstance(config.service_wif);
 

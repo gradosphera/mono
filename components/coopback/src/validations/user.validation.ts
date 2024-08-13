@@ -74,6 +74,12 @@ export const IAddUser = Joi.object({
   individual_data: IIndividualData.optional(),
   organization_data: IOrganizationData.optional(),
   entrepreneur_data: IEntrepreneurData.optional(),
+
+  spread_initial: Joi.boolean().required(),
+
+  created_at: Joi.string().required(),
+  initial: Joi.string().required(),
+  minimum: Joi.string().required(),
 });
 
 export const RAddUser = Joi.object({

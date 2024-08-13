@@ -35,21 +35,11 @@ div.row.justify-center
           q-td {{ props.row.statement?.action?.data?.decision_id }}
 
           q-td {{ props.row.statement?.document?.full_title }}
-          //- {{ getHumanActionName(props.row.act.data.action) }}
 
-          //- q-td {{ moment(props.row.statement.document).format('DD.MM.YY HH:mm:ss') }}
-
-          //- q-td {{ props.row.act.data.username }}
-
-
-        //- p {{ props.row?.statement?.action?.transaction_id }}
         q-tr(v-if="expanded.get(props.row?.statement?.action?.transaction_id)" :key="`e_${props.row?.statement?.action?.transaction_id}`" :props="props" class="q-virtual-scroll--with-prev")
           q-td(colspan="100%")
-            joincoopdoc(v-if="props.row?.statement?.action?.data?.action == 'joincoop'" :documents="props.row")
+            RegistratorJoincoopDocument(v-if="props.row?.statement?.action?.data?.action == 'joincoop'" :documents="props.row")
 
-
-        // div(v-else)
-        //   p.full-width.text-center.text-grey.no-select у кооператива нет документов
 
 </template>
 
@@ -58,7 +48,7 @@ import { onMounted, ref, computed, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import { Notify } from 'quasar'
 import { sendGET } from 'src/shared/api';
-import joincoopdoc from './docs/joincoop.vue'
+import { RegistratorJoincoopDocument } from 'src/entities/Document/ui/Templates/RegistratorJoincoop';
 const route = useRoute()
 const documents = ref([])
 const onLoading = ref(false)

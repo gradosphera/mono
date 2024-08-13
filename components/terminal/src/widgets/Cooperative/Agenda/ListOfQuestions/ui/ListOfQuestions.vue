@@ -70,7 +70,7 @@ q-card(flat)
 
       q-tr(v-show="props.expand" :key="`e_${props.row.table.id}`" :props="props" class="q-virtual-scroll--with-prev")
         q-td(colspan="100%")
-          joincoopdoc(v-if="props.row.table.type == 'joincoop'" :documents="props.row.documents")
+          RegistratorJoincoopDocument(v-if="props.row.table.type == 'joincoop'" :documents="props.row.documents")
 
 
 
@@ -81,7 +81,7 @@ import { ref, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 import { Notify } from 'quasar'
-import joincoopdoc from './docs/joincoop.vue'
+import { RegistratorJoincoopDocument } from 'src/entities/Document/ui/Templates/RegistratorJoincoop';
 import { sendGET } from 'src/shared/api';
 import { useSessionStore } from 'src/entities/Session';
 import { Cooperative, SovietContract } from 'cooptypes'
@@ -89,7 +89,7 @@ import { useVoteForDecision } from 'src/features/Cooperative/VoteForDecision';
 import { useAuthorizeAndExecDecision } from 'src/features/Cooperative/AuthorizeAndExecDecision';
 import { useVoteAgainstDecision } from 'src/features/Cooperative/VoteAgainstDecision';
 import { COOPNAME } from 'src/shared/config';
-import { useCooperativeStore } from '../../entities/Cooperative/model/stores';
+import { useCooperativeStore } from 'src/entities/Cooperative/model/stores';
 const session = useSessionStore()
 const onLoading = ref(false)
 

@@ -33,17 +33,17 @@ async function loadContacts(): Promise<Cooperative.Model.IContacts> {
   return (await sendGET('/v1/coop/contacts', {}, true)) as Cooperative.Model.IContacts;
 }
 
-async function loadFundWallet(coopname: string): Promise<FundContract.Tables.FundWallet.IFundWallet>{
+async function loadCoopWallet(coopname: string): Promise<FundContract.Tables.CoopWallet.ICoopWallet>{
   return (
     await fetchTable(
       FundContract.contractName.production,
       coopname,
-      FundContract.Tables.FundWallet.tableName,
+      FundContract.Tables.CoopWallet.tableName,
       0,
       0,
       1
     )
-  )[0] as FundContract.Tables.FundWallet.IFundWallet;
+  )[0] as FundContract.Tables.CoopWallet.ICoopWallet;
 }
 
 async function loadAccumulationFunds(coopname: string): Promise<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>{
@@ -100,7 +100,7 @@ export const api = {
   loadAdmins,
   loadPrivateCooperativeData,
   loadContacts,
-  loadFundWallet,
+  loadCoopWallet,
   loadAccumulationFunds,
   loadExpenseFunds
 };

@@ -8,7 +8,7 @@ div
     q-stepper(v-model='store.step', vertical, animated, flat, done-color='primary')
       EmailInput
 
-      DataInput
+      SetUserData
 
       GenerateAccount
 
@@ -22,14 +22,13 @@ div
 
       Welcome(v-model:data='store.userData', v-model:step='store.step')
 
-
 </template>
 
 <script lang="ts" setup>
 import { watch, onMounted, onBeforeUnmount } from 'vue'
 import EmailInput from './EmailInput.vue'
 import GenerateAccount from './GenerateAccount.vue'
-import DataInput from './DataInput.vue'
+import SetUserData from './SetUserData.vue'
 import SignStatement from './SignStatement.vue'
 import ReadStatement from './ReadStatement.vue'
 import PayInitial from './PayInitial.vue'

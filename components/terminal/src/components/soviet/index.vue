@@ -28,11 +28,8 @@ div
     //   p Дашборд
 
     q-tab-panel(name="Кооператив")
-      cooperative
-        // boards.col-md-12.col-xs-12.q-pa-md
-
-    q-tab-panel(name="Члены совета")
-      members
+      //- cooperative
+      // boards.col-md-12.col-xs-12.q-pa-md
 
     q-tab-panel(name="Участки")
       p Действующие участки
@@ -43,13 +40,13 @@ div
       staff
 
     q-tab-panel(name="Повестка")
-      decisions
+      //- decisions
 
     q-tab-panel(name="Пайщики")
-      participants
+      //- participants
 
     q-tab-panel(name="Документы")
-      documents(:receiver="coopname")
+      //- documents(:receiver="coopname")
 
     q-tab-panel(name="Программы")
       div.text-h6 Программы
@@ -67,15 +64,8 @@ div
 </template>
 
 <script setup lang="ts">//
-import { computed, ref } from 'vue'
-import cooperative from './cooperative.vue'
-import members from './members.vue'
+import { ref } from 'vue'
 import staff from './staff.vue'
-import decisions from './decisions.vue'
-import participants from './participants.vue'
-import documents from './documents.vue'
-import { COOPNAME } from 'src/shared/config'
-const coopname = computed(() => COOPNAME)
 const tab = ref('Повестка')
 
 </script>
