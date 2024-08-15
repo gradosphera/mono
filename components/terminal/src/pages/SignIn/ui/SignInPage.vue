@@ -13,9 +13,9 @@
 <script lang="ts" setup>
 import { useSessionStore } from 'src/entities/Session';
 import { useCurrentUserStore } from 'src/entities/User';
-import { SignIn } from 'src/widgets/Auth/SignIn'
+import { SignIn } from 'src/widgets/Registrator/SignIn'
 import { computed } from 'vue'
-import { AlreadyRegistered } from 'src/widgets/Auth/AlreadyRegistered'
+import { AlreadyRegistered } from 'src/widgets/Registrator/AlreadyRegistered'
 import { useRouter } from 'vue-router';
 import { useRegistratorStore } from 'src/entities/Registrator';
 const store = useRegistratorStore().state

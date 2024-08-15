@@ -11,7 +11,7 @@ div.q-pa-md
 <script lang="ts" setup>
 import { Cooperative } from 'cooptypes';
 import { useCooperativeStore } from 'src/entities/Cooperative';
-import { useUpdateMeta } from 'src/features/User/UpdateMeta';
+import { useUpdateMeta } from 'src/features/Registrator/UpdateMeta';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { COOPNAME } from 'src/shared/config';
 import { ref, watch } from 'vue';
@@ -22,7 +22,7 @@ const email = ref()
 
 watch(() => coop.contacts, (newValue: Cooperative.Model.IContacts | undefined) => {
 
-  if (newValue){
+  if (newValue) {
     phone.value = newValue.phone
     email.value = newValue.email
   }
@@ -45,7 +45,7 @@ const update = async () => {
     )
 
     SuccessAlert('Контакты успешно обновлены')
-  } catch(e: any){
+  } catch (e: any) {
     FailAlert(`Возникла ошибка при обновлении: ${e.message}`)
   }
 }

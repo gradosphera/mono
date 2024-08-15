@@ -6,7 +6,7 @@
 
 </template>
 <script lang="ts" setup>
-import { LostKey } from 'src/widgets/Auth/LostKey/ui';
+import { LostKey } from 'src/widgets/Registrator/LostKey/ui';
 import { useRouter } from 'vue-router';
 const router = useRouter()
 

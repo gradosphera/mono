@@ -28,9 +28,9 @@ q-card(v-if="currentUser?.username" flat bordered).q-pa-md.digital-certificate
   </template>
 
 <script lang="ts" setup>
-import type { IEntrepreneurData, IIndividualData, IOrganizationData } from 'src/entities/User'
 import { AutoAvatar } from '.';
 import { useCurrentUserStore } from 'src/entities/User'
+import type { IEntrepreneurData, IIndividualData, IOrganizationData } from 'src/shared/lib/types/user/IUserData';
 import { computed } from 'vue';
 const currentUser = useCurrentUserStore()
 

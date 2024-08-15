@@ -18,7 +18,7 @@ div.menu-container
       q-icon(:name="isDark ? 'brightness_7' : 'brightness_3'").q-pt-xs.btn-icon
       span.btn-font {{ isDark ? 'светлая' : 'тёмная' }}
 
-    q-btn(v-ripple flat class="cursor-pointer btn-menu" @click="logout")
+    q-btn(flat class="cursor-pointer btn-menu" @click="logout")
       q-icon( color="red" name="logout").q-pt-xs.btn-icon
       div.btn-font Выход
 
@@ -29,7 +29,7 @@ import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { COOPNAME } from 'src/shared/config'
-import { useLogoutUser } from 'src/features/User/Logout'
+import { useLogoutUser } from 'src/features/Registrator/Logout'
 import { FailAlert } from 'src/shared/api'
 import { useCurrentUserStore } from 'src/entities/User'
 import { type IRoute } from 'src/entities/Desktop/model/types'

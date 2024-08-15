@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { reactive } from 'vue';
 import { IGeneratedAccount } from 'src/shared/lib/types/user';
-import { IUserData } from 'src/entities/User';
+import { IUserData } from 'src/shared/lib/types/user/IUserData';
+
 
 const namespace = 'registrator';
 
@@ -139,6 +140,7 @@ export const useRegistratorStore = defineStore(
     const clearUserData = () => {
       state.step = 1
       state.email = ''
+      state.account = clearObjectValues(state.account);
       state.userData = clearObjectValues(state.userData);
       state.payment.provider = 'yookassa'
     }

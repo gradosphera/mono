@@ -11,9 +11,9 @@
 <script lang="ts" setup>
 import { useSessionStore } from 'src/entities/Session';
 import { useCurrentUserStore } from 'src/entities/User';
-import { SignUp } from 'src/widgets/Auth/SignUp'
+import { SignUp } from 'src/widgets/Registrator/SignUp'
 import { computed } from 'vue'
-import { AlreadyRegistered } from 'src/widgets/Auth/AlreadyRegistered'
+import { AlreadyRegistered } from 'src/widgets/Registrator/AlreadyRegistered'
 import { useRouter } from 'vue-router';
 
 import { useRegistratorStore } from 'src/entities/Registrator';

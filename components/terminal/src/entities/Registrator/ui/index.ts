@@ -1,1 +1,1 @@
-export * from './UserDataForm'
+export * from '../../../shared/ui/UserDataInputs/UserDataForm'

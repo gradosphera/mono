@@ -5,5 +5,5 @@
 
 </template>
 <script lang="ts" setup>
-import { ResetKey } from 'src/widgets/Auth/ResetKey';
+import { ResetKey } from 'src/widgets/Registrator/ResetKey';
 </script>

@@ -1,16 +1,6 @@
-import { RegistratorContract, Cooperative } from 'cooptypes';
+import { RegistratorContract } from 'cooptypes';
 import { AccountResult } from 'eosjs/dist/eosjs-rpc-interfaces';
-
-export type IEntrepreneurData = Cooperative.Users.IEntrepreneurData;
-export type IIndividualData = Cooperative.Users.IIndividualData;
-export type IOrganizationData = Cooperative.Users.IOrganizationData;
-
-export interface IUserData {
-  type: 'individual' | 'entrepreneur' | 'organization';
-  entrepreneur_data?: IEntrepreneurData;
-  individual_data?: IIndividualData;
-  organization_data?: IOrganizationData;
-}
+import { IEntrepreneurData, IIndividualData, IOrganizationData } from 'src/shared/lib/types/user/IUserData';
 
 export interface ILoadPrivateProfile {
   coopname: string;
