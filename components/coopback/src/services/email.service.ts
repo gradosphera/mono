@@ -51,11 +51,13 @@ export const sendResetKeyEmail = async (to, token) => {
  * @returns {Promise}
  */
 export const sendInviteEmail = async (to, token) => {
-  const subject = 'Восстановление доступа';
+  const subject = 'Приглашение в Цифровой Кооператив';
 
   const inviteUrl = `${config.base_url}/#/${config.coopname}/auth/reset-key?token=${token}`;
-  const text = `Вам отправлено приглашение на подключение к Цифровому Кооперативу в качестве пайщика.
-Для того, чтобы воспользоваться приглашени, нажмите на ссылку: ${token}. Время действия ссылки - 24 часа.`;
+  const text = `Вам отправлено приглашение на подключение к Цифровому Кооперативу в качестве действующего пайщика.
+Для того, чтобы воспользоваться приглашением и получить ключ доступа, пожалуйста, нажмите на ссылку: ${inviteUrl}
+
+Время действия ссылки - 24 часа.`;
 
   await sendEmail(to, subject, text);
 };

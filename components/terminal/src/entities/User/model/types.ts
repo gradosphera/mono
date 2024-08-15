@@ -28,7 +28,7 @@ export interface IPrivateProfile {
 
 export interface IUserAccountData {
   username: string;
-  status: 'created' | 'joined' | 'payed' | 'registered' | 'active' | 'blocked';
+  status: 'created' | 'joined' | 'payed' | 'registered' | 'active' | 'blocked' | 'failed';
   is_registered: boolean;
   type: 'individual' | 'entrepreneur' | 'organization';
   public_key: string;

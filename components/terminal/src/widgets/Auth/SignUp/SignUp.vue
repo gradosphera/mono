@@ -1,6 +1,5 @@
 <template lang='pug'>
 div
-  //- q-btn(@click="out" dense size="sm" flat) начать с начала
 
   q-card.bordered.q-pa-md.signup(flat)
     p.text-h6.text-center.q-mb-md ВСТУПИТЬ В ПАЙЩИКИ
@@ -16,11 +15,12 @@ div
 
       SignStatement
 
-      PayInitial(v-model:data='store.userData', v-model:step='store.step')
+      PayInitial(v-model:step='store.step')
 
-      WaitingRegistration(v-model:data='store.userData', v-model:step='store.step')
+      WaitingRegistration(v-model:step='store.step')
 
-      Welcome(v-model:data='store.userData', v-model:step='store.step')
+      Welcome(v-model:step='store.step')
+  q-btn(@click="out" dense size="sm" flat) начать с начала
 
 </template>
 
@@ -35,11 +35,15 @@ import PayInitial from './PayInitial.vue'
 import WaitingRegistration from './WaitingRegistration.vue'
 import Welcome from './Welcome.vue'
 
-import { createUserStore as store } from 'src/features/User/CreateUser'
 import { COOPNAME } from 'src/shared/config'
-import { LocalStorage } from 'quasar'
 import { useCurrentUserStore } from 'src/entities/User'
 const currentUser = useCurrentUserStore()
+
+import { useRegistratorStore } from 'src/entities/Registrator'
+import { useLogoutUser } from 'src/features/User/Logout'
+const { state, clearUserData } = useRegistratorStore()
+
+const store = state
 
 onMounted(() => {
   if (!currentUser.isRegistrationComplete) {
@@ -52,57 +56,39 @@ onMounted(() => {
 
 })
 
-// const out = async () => {
-//   const { logout } = await useLogoutUser()
-//   await logout()
-//   clearLocalStorage()
-//   LocalStorage.removeItem(`${COOPNAME}:step`)
-//   LocalStorage.removeItem(`${COOPNAME}:is_paid`)
-//   LocalStorage.removeItem(`${COOPNAME}:userData`)
-//   LocalStorage.removeItem(`${COOPNAME}:email`)
-//   LocalStorage.removeItem(`${COOPNAME}:account`)
 
-//   store.step = 1
-//   window.location.reload()
-// }
+const out = async () => {
+  const { logout } = await useLogoutUser()
+  await logout()
+
+  clearLocalStorage()
+
+  window.location.reload()
+}
 
 const clearLocalStorage = () => {
-  LocalStorage.removeItem(`${COOPNAME}:email`)
-  LocalStorage.removeItem(`${COOPNAME}:userData`)
-  LocalStorage.removeItem(`${COOPNAME}:account`)
+  clearUserData()
 }
 
 onBeforeUnmount(() => {
   if (store.step == 8) {
-    store.step = 1
     clearLocalStorage()
-    LocalStorage.removeItem(`${COOPNAME}:step`)
-    LocalStorage.removeItem(`${COOPNAME}:is_paid`)
   }
 })
 
 watch(() => currentUser.participantAccount, (newValue) => {
   if (newValue) {
-    store.step = 8
     clearLocalStorage()
+    store.step = 8
   }
 })
 
 watch(
   () => [store.step, store.email, store.account, store.userData],
   () => {
-    if (store.step == 4) {
-      LocalStorage.setItem(`${COOPNAME}:account`, JSON.stringify(store.account))
-    }
-
     if (store.step >= 4) {
       currentUser.loadProfile(store.account.username, COOPNAME)
-      LocalStorage.setItem(`${COOPNAME}:step`, store.step)
     }
-
-
-    LocalStorage.setItem(`${COOPNAME}:email`, store.email)
-    LocalStorage.setItem(`${COOPNAME}:userData`, JSON.stringify(store.userData))
   }
 )
 </script>

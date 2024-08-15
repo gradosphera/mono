@@ -45,6 +45,9 @@ export const addUser = catchAsync(async (req: Request, res: Response) => {
   };
 
   const user = await userService.createUser(newUser);
+  user.status = 'registered';
+  user.is_registered = true;
+  await user.save();
 
   try {
     await blockchainService.addUser({
@@ -55,12 +58,14 @@ export const addUser = catchAsync(async (req: Request, res: Response) => {
       coopname: config.coopname,
       meta: '',
     });
-
+    console.log('user: ', user);
     const token = await tokenService.generateInviteToken(user.email);
     await emailService.sendInviteEmail(req.body.email, token);
-  } catch (e) {
+  } catch (e: any) {
+    console.log('on e: ', e);
     logger.warn('error on add user: ', e);
     await userService.deleteUserByUsername(newUser.username);
+    throw new ApiError(httpStatus.BAD_GATEWAY, e.message);
   }
 
   res.status(httpStatus.CREATED).send({ user });

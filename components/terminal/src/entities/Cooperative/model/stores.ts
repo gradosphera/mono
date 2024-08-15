@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { Ref, ref } from 'vue';
+import { Ref, ref, ComputedRef, computed } from 'vue';
 import { api } from '../api';
 import {
   IAddressesData,
@@ -32,6 +32,8 @@ interface ICooperativeStore {
   coopWallet: Ref<FundContract.Tables.CoopWallet.ICoopWallet | undefined>
   accumulationFunds: Ref<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>
   expenseFunds: Ref<FundContract.Tables.ExpensedFunds.IExpensedFund[]>
+
+  governSymbol: ComputedRef<string>
 }
 
 export const useCooperativeStore = defineStore(
@@ -45,6 +47,13 @@ export const useCooperativeStore = defineStore(
     const coopWallet = ref<FundContract.Tables.CoopWallet.ICoopWallet>()
     const accumulationFunds = ref<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>([])
     const expenseFunds = ref<FundContract.Tables.ExpensedFunds.IExpensedFund[]>([])
+
+    const governSymbol = computed(() => {
+      if (publicCooperativeData.value) {
+        const [, symbol] = publicCooperativeData.value.initial.split(' ')
+        return symbol
+      } else return ''
+    })
 
     const contacts = ref<Cooperative.Model.IContacts>()
 
@@ -104,7 +113,7 @@ export const useCooperativeStore = defineStore(
       publicCooperativeData,
       loadAdmins,
       admins,
-
+      governSymbol,
       coopWallet,
       accumulationFunds,
       expenseFunds

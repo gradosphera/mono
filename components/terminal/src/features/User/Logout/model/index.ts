@@ -2,6 +2,7 @@ import { useSessionStore } from 'src/entities/Session'
 import { useGlobalStore } from 'src/shared/store'
 import { api } from '../api'
 import { useCurrentUserStore } from 'src/entities/User'
+
 export function useLogoutUser() {
   async function logout(): Promise<void> {
     const global = useGlobalStore()

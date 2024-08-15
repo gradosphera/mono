@@ -16,8 +16,9 @@ import { useCurrentUserStore } from 'src/entities/User';
 import { SignIn } from 'src/widgets/Auth/SignIn'
 import { computed } from 'vue'
 import { AlreadyRegistered } from 'src/widgets/Auth/AlreadyRegistered'
-import { createUserStore as store } from 'src/features/User/CreateUser'
 import { useRouter } from 'vue-router';
+import { useRegistratorStore } from 'src/entities/Registrator';
+const store = useRegistratorStore().state
 
 const router = useRouter()
 

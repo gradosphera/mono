@@ -6,7 +6,6 @@ import { IGeneratedAccount, ISendStatement } from 'src/shared/lib/types/user';
 
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
-import { reactive } from 'vue';
 import { COOPNAME } from 'src/shared/config';
 import { DigitalDocument } from 'src/entities/Document';
 import { IGenerateJoinCoop } from 'src/entities/Document';
@@ -15,7 +14,6 @@ import {
   ICreatedPayment,
   ICreateInitialPayment,
 } from 'src/shared/lib/types/payments';
-import { LocalStorage } from 'quasar';
 import {
   IEntrepreneurData,
   IIndividualData,
@@ -23,6 +21,8 @@ import {
   IUserData,
   useCurrentUserStore,
 } from 'src/entities/User';
+import { useRegistratorStore } from 'src/entities/Registrator'
+
 
 export interface ICreateUser {
   email: string;
@@ -36,69 +36,24 @@ export interface ICreateUser {
   username: string;
 }
 
-export const createUserStore = reactive({
-  step: (LocalStorage.getItem(`${COOPNAME}:step`) as number) || 1,
-  role: 'user',
-  email: (LocalStorage.getItem(`${COOPNAME}:email`) as string) || '',
-  account: LocalStorage.getItem(`${COOPNAME}:account`)
-    ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      JSON.parse(LocalStorage.getItem(`${COOPNAME}:account`)!)
-    : ({ username: '', private_key: '', public_key: '' } as IGeneratedAccount),
-  userData: LocalStorage.getItem(`${COOPNAME}:userData`)
-    ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      JSON.parse(LocalStorage.getItem(`${COOPNAME}:userData`)!)
-    : ({
-        type: 'individual',
-        individual_data: {middle_name: ''},
-        organization_data: {
-          details: {},
-          bank_account: { details: {} },
-          represented_by: {middle_name: ''},
-        },
-        entrepreneur_data: { middle_name: '', details: {}, bank_account: { details: {} } },
-      } as IUserData),
-  signature: '',
-  inLoading: false,
-  agreements: {
-    condidential: false,
-    digital_signature: false,
-    wallet: false,
-    ustav: false,
-    user: false,
-    self_paid: false,
-  },
-  statement: {
-    hash: '',
-    meta: {},
-    public_key: '',
-    signature: '',
-  },
-  payment: {
-    provider: 'yookassa',
-    details: {
-      token: '',
-      url: '',
-    },
-  },
-  is_paid: (LocalStorage.getItem(`${COOPNAME}:is_paid`) as boolean) || false,
-});
-
 export function useCreateUser() {
+  const store = useRegistratorStore().state
+
   async function createInitialPayment(): Promise<ICreatedPayment> {
     const data: ICreateInitialPayment = {
       provider: 'yookassa',
     };
 
     const result = await api.createInitialPayment(data);
-    createUserStore.payment = result;
+    store.payment = result;
 
     return result;
   }
 
   async function sendStatement(): Promise<void> {
     const data: ISendStatement = {
-      username: createUserStore.account.username,
-      statement: createUserStore.statement,
+      username: store.account.username,
+      statement: store.statement,
     };
 
     await api.sendStatement(data);
@@ -106,12 +61,12 @@ export function useCreateUser() {
 
   async function signStatement(): Promise<IObjectedDocument> {
     const data: IGenerateJoinCoop = {
-      signature: createUserStore.signature,
+      signature: store.signature,
       skip_save: false,
       code: 'registrator',
       action: 'joincoop',
       coopname: COOPNAME,
-      username: createUserStore.account.username,
+      username: store.account.username,
     };
 
     const document = await new DigitalDocument().generate(data);
@@ -119,14 +74,14 @@ export function useCreateUser() {
     const globalStore = useGlobalStore();
     const digital_signature = await globalStore.signDigest(document.hash);
 
-    createUserStore.statement = {
+    store.statement = {
       hash: document.hash,
       meta: document.meta,
       public_key: digital_signature.public_key,
       signature: digital_signature.signature,
     } as IObjectedDocument;
 
-    return createUserStore.statement;
+    return store.statement;
   }
 
   async function generateStatementWithoutSignature(username: string) {

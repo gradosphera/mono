@@ -28,7 +28,9 @@ import { ref, computed, watch } from 'vue'
 import { useCreateUser } from 'src/features/User/CreateUser'
 import { debounce } from 'quasar'
 import { COOP_SHORT_NAME } from 'src/shared/config'
-import { createUserStore as store } from 'src/features/User/CreateUser'
+import { useRegistratorStore } from 'src/entities/Registrator'
+const store = useRegistratorStore().state
+
 
 const api = useCreateUser()
 
@@ -61,9 +63,12 @@ watch(email, checkEmailExists)
 const setEmail = () => {
   if (isValidEmail.value && !isEmailExist.value) {
     store.email = email.value
-    store.userData.individual_data.email = email.value
-    store.userData.organization_data.email = email.value
-    store.userData.entrepreneur_data.email = email.value
+    if (store.userData.individual_data)
+      store.userData.individual_data.email = email.value
+    if (store.userData.organization_data)
+      store.userData.organization_data.email = email.value
+    if (store.userData.entrepreneur_data)
+      store.userData.entrepreneur_data.email = email.value
 
     store.step = step.value + 1
   }

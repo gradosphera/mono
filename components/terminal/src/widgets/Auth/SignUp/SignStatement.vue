@@ -29,9 +29,12 @@ div
 import { ref, computed, watch, onBeforeMount, nextTick, onMounted } from 'vue'
 import { useCreateUser } from 'src/features/User/CreateUser'
 import { Notify } from 'quasar'
-import { createUserStore as store } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
+
+import { useRegistratorStore } from 'src/entities/Registrator'
+const store = useRegistratorStore().state
+
 
 const api = useCreateUser()
 

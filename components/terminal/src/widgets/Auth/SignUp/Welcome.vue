@@ -18,16 +18,11 @@ div
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import type { IGeneratedAccount } from 'src/shared/lib/types/user';
 import { COOP_SHORT_NAME } from 'src/shared/config'
 import { useRouter } from 'vue-router';
 const router = useRouter()
 
 const props = defineProps({
-  data: {
-    type: Object as () => IGeneratedAccount,
-    required: true
-  },
   step: {
     type: Number,
     required: true

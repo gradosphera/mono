@@ -113,11 +113,7 @@ const goTo = (name: string) => {
 }
 
 const signup = () => {
-  if (session.isAuth) {
-    router.push({ name: 'index' })
-  } else {
-    router.push({ name: 'signup' })
-  }
+  router.push({ name: 'signup' })
 }
 
 const login = () => {

@@ -9,7 +9,7 @@ import {
   ICreatedPayment,
   ICreateInitialPayment,
 } from 'src/shared/lib/types/payments';
-import { ICreateUser } from '../model';
+import { ICreateUser } from '../model/ICreateUser';
 
 async function createUser(data: ICreateUser): Promise<ICreatedUser> {
   const response = await sendPOST('/v1/users', data, true);

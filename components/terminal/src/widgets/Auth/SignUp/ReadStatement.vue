@@ -36,8 +36,11 @@ div
 import { ref, computed, watch, onMounted } from 'vue'
 import { useCreateUser } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
-import { createUserStore as store } from 'src/features/User/CreateUser'
 import { Loader } from 'src/shared/ui/Loader';
+
+import { useRegistratorStore } from 'src/entities/Registrator'
+const store = useRegistratorStore().state
+
 
 const { generateStatementWithoutSignature } = useCreateUser()
 

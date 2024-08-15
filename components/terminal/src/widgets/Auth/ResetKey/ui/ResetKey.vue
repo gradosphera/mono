@@ -65,7 +65,6 @@ const copyMnemonic = () => {
     })
 }
 
-
 const finish = async () => {
   try {
 
@@ -78,6 +77,7 @@ const finish = async () => {
 
     SuccessAlert('Ключ доступа успешно установлен')
     loading.value = false
+
     router.push({ name: 'signin' })
 
   } catch (e: any) {

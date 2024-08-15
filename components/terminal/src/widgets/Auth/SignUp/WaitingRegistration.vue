@@ -5,19 +5,21 @@ div
     title="Получите решение совета о приёме Вас в пайщики кооператива"
     :done="step > 7"
   )
+    template(v-if="currentUser?.userAccount?.status !== 'failed'")
+      p Ожидаем, когда совет рассмотрит Ваше заявление и примет решение о приёме Вас в пайщики. Это может занять до 24 часов. Вы получите уведомление, когда решение будет принято. Эту страницу можно закрыть, а при необходимости, войти с другого устройства с помощью ключа доступа, который был сохранён ранее.
+      Loader
+    template(v-else)
+      p Произошла ошибка при регистрации. Пожалуйста, обратитесь в подержку для устранения проблемы.
 
-    p Ожидаем, когда совет рассмотрит Ваше заявление и примет решение о приёме Вас в пайщики. Это может занять до 24 часов. Вы получите уведомление, когда решение будет принято. Эту страницу можно закрыть, а при необходимости, войти с другого устройства с помощью ключа доступа, который был сохранён ранее.
-    Loader
-
-  </template>
+</template>
 
 <script lang="ts" setup>
 import { ref, computed, watch, onBeforeUnmount, onMounted } from 'vue'
-import { createUserStore as store } from 'src/features/User/CreateUser'
 import { useCurrentUserStore } from 'src/entities/User';
 import { COOPNAME } from 'src/shared/config';
 import { Loader } from 'src/shared/ui/Loader';
-
+import { useRegistratorStore } from 'src/entities/Registrator'
+const store = useRegistratorStore().state
 
 const currentStep = 7
 

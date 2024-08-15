@@ -48,12 +48,17 @@ export const saveToken = async (token, userId, expires, type, blacklisted = fals
 /**
  * Verify token and return token doc (or throw an error if it is not valid)
  * @param {string} token
- * @param {string} type
+ * @param {string[]} types
  * @returns {Promise<Token>}
  */
-export const verifyToken = async (token, type) => {
+export const verifyToken = async (token, types) => {
   const payload = jwt.verify(token, config.jwt.secret);
-  const tokenDoc = await Token.findOne({ token, type, user: payload.sub, blacklisted: false });
+  const tokenDoc = await Token.findOne({
+    token,
+    $or: types.map((type) => ({ type })),
+    user: payload.sub,
+    blacklisted: false,
+  });
   if (!tokenDoc) {
     throw new Error('Token not found');
   }

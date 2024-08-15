@@ -16,12 +16,13 @@ div
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useCreateUser, createUserStore as store } from 'src/features/User/CreateUser'
+import { useCreateUser } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
 import { BASE_PAYMENT_FEE, COOPNAME, CURRENCY } from 'src/shared/config';
-import { LocalStorage } from 'quasar';
 import { useCurrentUserStore } from 'src/entities/User';
 import { useCooperativeStore } from 'src/entities/Cooperative';
+import { useRegistratorStore } from 'src/entities/Registrator'
+const store = useRegistratorStore().state
 
 const emit = defineEmits(['update:data', 'update:step'])
 
@@ -104,7 +105,6 @@ const initWidget = () => {
     checkout.on('success', () => {
       //Код, который нужно выполнить после успешной оплаты.
       store.is_paid = true
-      LocalStorage.setItem(`${COOPNAME}:is_paid`, true)
 
       //Удаление инициализированного виджета
       checkout.destroy();
