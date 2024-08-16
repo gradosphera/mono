@@ -26,7 +26,7 @@ div(v-if="step")
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { UserDataForm } from 'src/shared/ui/UserDataInputs/UserDataForm';
+import { UserDataForm } from 'src/shared/ui/UserDataForm/UserDataForm';
 
 import { useRegistratorStore } from 'src/entities/Registrator'
 const store = useRegistratorStore().state

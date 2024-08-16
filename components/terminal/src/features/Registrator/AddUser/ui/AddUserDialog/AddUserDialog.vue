@@ -19,7 +19,7 @@ div
               template(#top)
                 q-input(@change="changeEmail" v-model="state.email" filled label="Электронная почта" :rules='[validateEmail, validateExists]').q-mb-md
 
-              template(#bottom="{userDataForm, notEmpty}")
+              template(#bottom="{userDataForm}")
 
                 q-input(
                   filled
@@ -50,7 +50,6 @@ div
                     p {{ coop.governSymbol }}
                     q-btn(icon="sync" flat dense @click="refresh('minimum')")
 
-
                 q-card(flat).q-mt-md
 
                   q-item(tag="label" v-ripple)
@@ -79,7 +78,7 @@ div
 
 
                 div.q-mt-lg
-                  q-btn(flat @click="showAdd = false") Назад
+                  q-btn(flat @click="showAdd = false") Отмена
                   q-btn(color="primary" @click="addUserNow(userDataForm)") Добавить
 
 
@@ -91,7 +90,7 @@ div
  * 3. Кнопка сброса возвращает системные параметры взносов.
  */
 import { computed, onMounted, ref, watch } from 'vue';
-import { UserDataForm } from 'src/shared/ui/UserDataInputs/UserDataForm';
+import { UserDataForm } from 'src/shared/ui/UserDataForm/UserDataForm';
 import { useAddUser } from '../../model';
 import { useCooperativeStore } from 'src/entities/Cooperative';
 
@@ -99,6 +98,7 @@ import { useRegistratorStore } from 'src/entities/Registrator';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useCreateUser } from 'src/features/Registrator/CreateUser';
 import { COOPNAME } from 'src/shared/config';
+import { notEmpty } from 'src/shared/lib/utils';
 
 const { state, addUserState, clearUserData } = useRegistratorStore()
 const spread_minimum = ref(true) //TODO REPLACE IT!

@@ -26,12 +26,9 @@ export function useAddUser() {
     let minimum = ''
 
     if (synthData.type === 'individual') {
-      console.log('on add inidividual', state.userData, addUserState)
-
       synthData.individual_data = state.userData.individual_data;
       initial = `${addUserState.initial.toFixed(4)} ${coop.governSymbol}`
       minimum = `${addUserState.minimum.toFixed(4)} ${coop.governSymbol}`
-
     } else if (synthData.type === 'organization') {
       synthData.organization_data = state.userData.organization_data;
       initial = `${addUserState.org_initial.toFixed(4)} ${coop.governSymbol}`
@@ -52,7 +49,6 @@ export function useAddUser() {
       spread_initial: addUserState.spread_initial,
     };
 
-    console.log('addUser2: ', data)
     await api.addUser(data);
   }
 
