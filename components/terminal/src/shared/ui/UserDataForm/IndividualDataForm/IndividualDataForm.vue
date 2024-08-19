@@ -1,5 +1,6 @@
 <template lang="pug">
 div(v-if="userData.individual_data").q-gutter-md.q-mt-md
+  slot(name="top")
   q-input(v-model="userData.individual_data.last_name" filled hint="Иванов" label="Фамилия" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
   q-input(v-model="userData.individual_data.first_name" filled hint="Иван" label="Имя" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
   q-input(v-model="userData.individual_data.middle_name" filled hint="Иванович" label="Отчество" :rules="[val => validatePersonalName(val)]" autocomplete="off")
@@ -26,7 +27,7 @@ div(v-if="userData.individual_data").q-gutter-md.q-mt-md
 
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { validatePersonalName, notEmpty, notEmptyPhone } from 'src/shared/lib/utils';
 
 import type { IUserData } from 'src/shared/lib/types/user/IUserData';
@@ -34,5 +35,6 @@ import type { IUserData } from 'src/shared/lib/types/user/IUserData';
 const props = defineProps<{ userData: IUserData }>();
 
 const userData = ref<IUserData>(props.userData)
+
 
 </script>

@@ -23,9 +23,9 @@ import logger from '../config/logger';
  * 7. (joinCooperative) Пользователь подписывает заявление на вступление и вызывает метод joinCooperative, прикладывая подписанное заявление.
  * 8. Система сохраняет подписанное заявление
  * 9. (createInitialPayment) Пользователь получает ордер на оплату.
- * 9. Пользователь оплачивает ордер.
  * 10. Система принимает оплату и регистрирует аккаунт в блокчейне.
  * 11. (trx confirmpay) Пользователь подписывает велком-письмо с подтверждением собственноручности оплаты (транзакция в блокчейне для активации)
+ * 12. Регистрация продолжается ожиданием решения совета
  */
 export const createUser = catchAsync(async (req: RCreateUser, res) => {
   const user = await userService.createUser(req.body);
@@ -88,7 +88,7 @@ export const getUsers = catchAsync(async (req, res) => {
   for await (const user of users.results) {
     const json = user.toJSON();
     if (user.type != 'service') {
-      json.private_data = (await user.getPrivateData()) || {};
+      json.private_data = await user.getPrivateData();
       data.push(json);
     }
   }
@@ -109,7 +109,9 @@ export const getUser = catchAsync(async (req, res) => {
   }
   const json = user.toJSON();
 
-  json.private_data = await user.getPrivateData();
+  if (user.type != 'service') {
+    json.private_data = await user.getPrivateData();
+  }
 
   res.send(json);
 });

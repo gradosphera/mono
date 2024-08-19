@@ -15,7 +15,7 @@ export interface IUser {
   message: string;
   is_registered: boolean;
   has_account: boolean;
-  type: 'individual' | 'entrepreneur' | 'organization';
+  type: 'individual' | 'entrepreneur' | 'organization' | 'service';
   public_key: string;
   referer: string;
   email: string;
@@ -78,7 +78,7 @@ const userSchema = new Schema<IUser, IUserModel>(
     },
     email: {
       type: String,
-      required: true,
+      required: false,
       unique: true,
       trim: true,
       lowercase: true,

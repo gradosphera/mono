@@ -33,6 +33,10 @@ export default route(async function (/* { store, ssrContext } */) {
   const { initWallet } = useCardStore()
   await initWallet()
 
+  const currentUser = useCurrentUserStore();
+  const session = useSessionStore();
+
+  console.log('on load desktops', currentUser)
   await desktops.loadDesktops()
   await desktops.setActiveDesktop(desktops.defaultDesktopHash)
 
@@ -63,13 +67,8 @@ export default route(async function (/* { store, ssrContext } */) {
       from: RouteLocationNormalizedGeneric,
       next: any
     ) => {
-
+      console.log('on router before')
       desktops.healthCheck()
-      const { initWallet } = useCardStore()
-      await initWallet()
-
-      const currentUser = useCurrentUserStore();
-      const session = useSessionStore();
 
       /** проверяем установлено ли приложение и не переход ли это на страницу установки */
       if (desktops.health?.status === 'install' && to.name !== 'install') {

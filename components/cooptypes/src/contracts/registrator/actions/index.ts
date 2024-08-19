@@ -55,3 +55,15 @@ export * as Init from './init'
  * @private
  */
 export * as AddUser from './addUser'
+
+/**
+ * Действие изменения статуса подключенного кооператива.
+ * @private
+ */
+export * as SetCoopStatus from './setCoopStatus'
+
+/**
+ * Удаление кооператива из реестра подключений
+ * @private
+ */
+export * as DeleteCooperative from './deleteCooperative'

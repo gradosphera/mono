@@ -73,7 +73,7 @@ export const verifyToken = async (token, types) => {
 export const generateServiceAccessToken = async (user) => {
   const accessTokenExpires = moment().add(100, 'years'); // Пример с очень долгим сроком действия
   const accessToken = generateToken(user.id, accessTokenExpires, tokenTypes.ACCESS);
-
+  console.log('on generate', accessToken);
   return {
     access: {
       token: accessToken,

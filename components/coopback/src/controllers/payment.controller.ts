@@ -91,7 +91,8 @@ export const addPaymentMethod = catchAsync(async (req: RSavePaymentMethod, res) 
   const paymentData: Cooperative.Payments.IPaymentData = {
     username: req.body.username,
     method_id: req.body.method_id,
-    user_type: user.type,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    user_type: user.type as any,
     method_type: req.body.method_type,
     is_default: false,
     data: req.body.data,

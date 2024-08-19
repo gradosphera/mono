@@ -15,15 +15,10 @@ async function init() {
 
     await mongoose.connect(config.mongoose.url, config.mongoose.options);
     const wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3';
-    const password = await crypto.createHash('sha256').update(wif).digest('hex');
-    const hashed_password = await hash(password, 8);
-
-    console.log('password: ', hashed_password);
 
     await userService.createUser({
       username: 'ant',
       email: 'dacom.dark.sun@gmail.com',
-      password,
       public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
       role: 'user',
       type: 'individual',
@@ -46,7 +41,6 @@ async function init() {
     const voskhod = await userService.createUser({
       username: 'voskhod',
       email: 'chairman.voskhod@gmail.com',
-      password,
       public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
       role: 'user',
       type: 'organization',

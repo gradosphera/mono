@@ -146,7 +146,7 @@ export interface ICreaddress {
 
 export interface ICreateboard {
   coopname: IName
-  chairman: IName
+  username: IName
   type: IName
   members: IBoardMember[]
   name: string
@@ -402,7 +402,7 @@ export interface IUnblockbal {
 
 export interface IUpdateboard {
   coopname: IName
-  chairman: IName
+  username: IName
   board_id: IUint64
   members: IBoardMember[]
   name: string

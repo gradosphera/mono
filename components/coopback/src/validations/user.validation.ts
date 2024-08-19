@@ -58,7 +58,7 @@ export const IEntrepreneurData = Joi.object({
 export const ICreateUser = Joi.object({
   email: Joi.string().required().email(),
   role: Joi.string().required().valid('user'),
-  public_key: Joi.string().required(),
+  public_key: Joi.string().optional(),
   username: Joi.string().required().length(12),
   referer: Joi.string().length(12).allow('').optional(),
   type: Joi.string().required().valid('individual', 'entrepreneur', 'organization'),

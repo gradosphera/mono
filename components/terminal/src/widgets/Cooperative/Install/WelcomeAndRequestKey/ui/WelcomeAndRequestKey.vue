@@ -2,23 +2,22 @@
 div
   p.text-h6.full-width.text-center Установка
   div.q-mt-md
-    span Установщик настроит параметры работы Вашего Цифрового Кооператива. Для продолжения введите ключ Кооператива, который был выдан Вам при подключении:
-    q-input(filled label="Ключ Кооператива" v-model="wif" type="password" autocomplete="off").q-mt-md
-  SetInstallKeyButton
-
+    div(v-if="!isEntered")
+      span Установщик настроит параметры работы Вашего Цифрового Кооператива. Для продолжения введите ключ Кооператива, который был выдан Вам при подключении:
+      RequestKeyForm
+    div(v-else)
+      span Добавьте персональные данные председателя и членов совета для завершения установки.
+      SetSovietForm.q-mt-lg
 </template>
 <script setup lang="ts">
+import { useCurrentUserStore } from 'src/entities/User';
+import { RequestKeyForm } from 'src/features/Installer';
+import { SetSovietForm } from 'src/features/Installer';
 
-import { useInstallCooperativeStore } from 'src/entities/Installer/model';
-import { SetInstallKeyButton } from 'src/features/Install';
+import { computed } from 'vue';
 
-import { ref, watch } from 'vue';
+const currentUser = useCurrentUserStore()
 
-const wif = ref('')
-
-const install = useInstallCooperativeStore()
-watch(wif, (newValue: string) => install.data.wif = newValue)
-
-install.data.wif = ''
+const isEntered = computed(() => currentUser?.userAccount?.username)
 
 </script>

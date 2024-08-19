@@ -16,7 +16,9 @@ export const updateBoard = async (action: SovietContract.Actions.Boards.UpdateBo
     await user.save();
   }
 
-  const chairman = await userService.getUserByUsername(action.chairman);
+  const chairman_username = action.members.find((el) => el.position == 'chairman')?.username;
+
+  const chairman = await userService.getUserByUsername(chairman_username as string);
   chairman.role = 'chairman';
   await chairman.save();
 };

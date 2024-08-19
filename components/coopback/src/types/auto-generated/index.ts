@@ -6,6 +6,7 @@
 export * from './auth.validation';
 export * from './coop.validation';
 export * from './document.validation';
+export * from './mono.validation';
 export * from './notify.validation';
 export * from './payment.validation';
 export * from './user.validation';

@@ -8,6 +8,7 @@
   "vueCompilerOptions": {
     "plugins": ["@vue/language-plugin-pug"]
   },
+  // "include": ["./**/*.vue", "./**/*.ts"],
   "exclude": [
     "./Env-example.ts",
     "./dist",

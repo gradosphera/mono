@@ -17,12 +17,11 @@ const [username] = args;
 async function createServiceUser(username: string) {
   try {
     await mongoose.connect(config.mongoose.url, config.mongoose.options);
-
     const user = await userService.createServiceUser(username);
     const token = await tokenService.generateServiceAccessToken(user);
-    logger.log('token:', token.access.token);
+    console.log('token:', token.access.token);
   } catch (e: any) {
-    logger.log('Ошибка: ', e.message);
+    logger.error('Ошибка: ', e.message);
   }
 
   process.exit(0);

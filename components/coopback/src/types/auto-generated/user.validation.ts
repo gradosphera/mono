@@ -151,7 +151,7 @@ export interface ICreateUser {
     short_name: string;
     type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
   };
-  public_key: string;
+  public_key?: string;
   referer?: string;
   role: 'user';
   type: 'individual' | 'entrepreneur' | 'organization';
@@ -286,7 +286,6 @@ export interface RAddUser {
       phone: string;
     };
     initial: string;
-    meta?: string;
     minimum: string;
     organization_data?: {
       bank_account: {
@@ -398,7 +397,7 @@ export interface RCreateUser {
       short_name: string;
       type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
     };
-    public_key: string;
+    public_key?: string;
     referer?: string;
     role: 'user';
     type: 'individual' | 'entrepreneur' | 'organization';

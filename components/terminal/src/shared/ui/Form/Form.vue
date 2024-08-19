@@ -24,7 +24,7 @@ const cancel = (): void => {
 q-form(@submit.prevent="handlerSubmit")
   template(#default)
     slot
-    div.flex.q-mt-md
+    div.flex
       q-btn(v-if="showCancel" flat @click="cancel") {{ buttonCancelTxt }}
       q-btn(:class="{'full-width': !showCancel}" type="submit" :loading="isSubmitting" color="primary") {{ buttonSubmitTxt }}
 

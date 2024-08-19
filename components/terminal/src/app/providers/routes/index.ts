@@ -2,12 +2,12 @@ import layout from 'src/pages/_layouts/default.vue';
 import index from 'src/pages/index.vue';
 import blank from 'src/pages/blank/blank.vue';
 import permissionDenied from 'src/pages/_layouts/permissionDenied.vue';
-import { SignUpPage } from 'src/pages/SignUp';
-import { SignInPage } from 'src/pages/SignIn';
+import { SignUpPage } from 'src/pages/Registrator/SignUp';
+import { SignInPage } from 'src/pages/Registrator/SignIn';
 import { RouteRecordRaw } from 'vue-router';
-import { InstallCooperativePage } from 'src/pages/Install';
-import { LostKeyPage } from 'src/pages/Auth/LostKey/ui';
-import { ResetKeyPage } from 'src/pages/Auth/ResetKey';
+import { InstallCooperativePage } from 'src/pages/Installer';
+import { LostKeyPage } from 'src/pages/Registrator/LostKey/ui';
+import { ResetKeyPage } from 'src/pages/Registrator/ResetKey';
 
 
 const baseRoutes = [

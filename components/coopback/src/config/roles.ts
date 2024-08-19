@@ -1,6 +1,6 @@
 const allRoles = {
   user: [''],
-  service: ['addUser', 'sendNotification'],
+  service: ['addUser', 'sendNotification', 'install'],
   chairman: ['addUser', 'getUsers', 'manageUsers', 'loadAgenda', 'loadStaff', 'getDocuments', 'loadInfo'],
   member: ['getUsers', 'manageUsers', 'loadAgenda', 'loadStaff', 'getDocuments', 'loadInfo'],
 };

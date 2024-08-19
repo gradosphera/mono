@@ -22,6 +22,7 @@ import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contribu
 import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
 import { UserSettingsPage } from 'src/pages/User/SettingsPage';
 import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants';
+import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
 
 export const manifest = {
   'name': 'UserDesktop',
@@ -180,7 +181,17 @@ export const manifest = {
       ]
     },
 
+    {
+      meta: {
+        title: 'Подключения',
+        icon: 'fas fa-link',
+        roles: ['chairman', 'member'],
+      },
+      path: '/:coopname/connections',
+      name: 'connections',
+      component: markRaw(UnionPageListOfCooperatives),
 
+    },
 
 
       // {

@@ -84,9 +84,9 @@ async function getCooperative(coopname) {
 
   const [cooperative] = await lazyFetch(
     api,
-    process.env.REGISTRATOR_CONTRACT,
-    process.env.REGISTRATOR_CONTRACT,
-    'orgs',
+    RegistratorContract.contractName.production,
+    RegistratorContract.contractName.production,
+    RegistratorContract.Tables.Cooperatives.tableName,
     coopname,
     coopname,
     1
@@ -168,6 +168,36 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
   ];
 
   const result = await eos.transact(
+    {
+      actions,
+    },
+    {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    }
+  );
+}
+
+async function createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICreateboard) {
+  const eos = await getInstance(config.service_wif);
+
+  console.log('data: ', data);
+
+  const actions = [
+    {
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Boards.CreateBoard.actionName,
+      authorization: [
+        {
+          actor: config.service_username,
+          permission: 'active',
+        },
+      ],
+      data,
+    },
+  ];
+
+  await eos.transact(
     {
       actions,
     },
@@ -351,4 +381,5 @@ export {
   getBlockchainInfo,
   getBlockchainAccount,
   hasActiveKey,
+  createBoard,
 };

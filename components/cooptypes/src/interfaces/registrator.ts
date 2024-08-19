@@ -69,6 +69,8 @@ export interface ICooperative {
   org_registration: IAsset
   org_initial: IAsset
   org_minimum: IAsset
+  status: IName
+  created_at: ITimePointSec
 }
 
 export interface IDocument {
@@ -114,7 +116,6 @@ export interface IOrgData {
 export interface IRegcoop {
   registrator: IName
   coopname: IName
-  username: IName
   params: IOrgData
 }
 
@@ -123,6 +124,12 @@ export interface IReguser {
   coopname: IName
   username: IName
   type: IName
+}
+
+export interface IStcoopstatus {
+  coopname: IName
+  username: IName
+  status: IName
 }
 
 export interface IUpdateaccnt {
@@ -154,4 +161,9 @@ export interface IVerification {
   created_at: ITimePointSec
   last_update: ITimePointSec
   notice: string
+}
+
+export interface IDelcoop {
+  registrator: IName
+  coopname: IName
 }

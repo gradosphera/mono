@@ -5,17 +5,12 @@ import { generator } from './document.service';
 import { ICreateUser, IJoinCooperative } from '../types/auto-generated/user.validation';
 import { PublicKey, Signature } from '@wharfkit/antelope';
 import faker from 'faker';
-import { randomBytes } from 'crypto';
 
 export const createServiceUser = async (username: string) => {
-  const password = randomBytes(16).toString('hex');
   return User.create({
     username,
     type: 'service',
     role: 'service',
-    public_key: 'thanks-no-need',
-    password,
-    email: faker.internet.email().toLowerCase(),
   });
 };
 

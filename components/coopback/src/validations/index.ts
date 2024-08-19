@@ -5,3 +5,4 @@ export * as orderValidation from './payment.validation';
 export * as coopValidation from './coop.validation';
 export * as customValidation from './custom.validation';
 export * as notifyValidation from './notify.validation';
+export * as monoValidation from './mono.validation';
