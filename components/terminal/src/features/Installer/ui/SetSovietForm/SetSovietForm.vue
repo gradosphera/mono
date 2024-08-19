@@ -1,16 +1,16 @@
 <template lang="pug">
-div(v-if="install")
-  div(v-for="(member,index) in install.soviet" v-bind:key="member.id")
+div(v-if="installStore")
+  div(v-for="(member,index) in installStore.soviet" v-bind:key="member.id")
     q-card(style="margin-bottom: 50px;")
 
       q-badge(v-if="member.role=='chairman'" style="position: absolute; top: -15px;" label="Председатель совета" color="black")
       q-badge(v-if="member.role=='member'" style="position: absolute; top: -15px;" label="Член совета" color="black")
 
       q-btn(style="position: absolute; top: -20px; right: 0px;" flat v-if="member.role != 'chairman'" @click="del(member.id)" icon="close" dense size="sm" round)
-      p {{ install.soviet[index] }}
-      IndividualDataForm(v-model:userData="install.soviet[index]")
+      p {{ installStore.soviet[index] }}
+      IndividualDataForm(v-model:userData="installStore.soviet[index]")
         template(#top)
-          q-input(filled v-model="install.soviet[index].individual_data.email" label="Электронная почта")
+          q-input(filled v-model="installStore.soviet[index].individual_data.email" label="Электронная почта")
 
   div.flex.justify-around
     q-btn(@click="add" color="primary" icon="add") добавить члена
@@ -20,44 +20,44 @@ div(v-if="install")
 <script lang="ts" setup>
 
 import { useInstallCooperativeStore } from 'src/entities/Installer/model';
-import { computed } from 'vue';
-const install = useInstallCooperativeStore()
+const installStore = useInstallCooperativeStore()
 import { IndividualDataForm } from 'src/shared/ui/UserDataForm/IndividualDataForm';
 import type { IIndividualData } from 'src/shared/lib/types/user/IUserData';
-import { api } from '../../api';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useDesktopStore } from 'src/entities/Desktop/model';
-import { useRouter } from 'vue-router';
+import { useInstallCooperative } from '../../model';
 
-install.is_finish = false
+installStore.is_finish = false
 
 const add = () => {
   let role = 'chairman'
-  if (install.soviet.length > 0)
+  if (installStore.soviet.length > 0)
     role = 'member'
 
-  install.soviet.push({id: Date.now(), role, type: 'individual', individual_data: {} as IIndividualData})
+  installStore.soviet.push({id: Date.now(), role, type: 'individual', individual_data: {} as IIndividualData})
 }
 
 const del = (id: number) => {
-  install.soviet = install.soviet.filter(el => el.id !==  id)
+  installStore.soviet = installStore.soviet.filter(el => el.id !==  id)
 }
 
 const next = async () => {
 
-  const forInstall = install.soviet.map(el => ({role: el.role as 'chairman' | 'member', individual_data: el.individual_data}))
+  const forInstall = installStore.soviet.map(el => ({role: el.role as 'chairman' | 'member', individual_data: el.individual_data}))
   try {
-    await api.install(forInstall)
+    const {install} = useInstallCooperative()
+
+    await install(forInstall)
     useDesktopStore().healthCheck()
-    install.is_finish = true
+    installStore.is_finish = true
     SuccessAlert('Установка произведена успешно')
-  } catch(e){
+  } catch(e: any){
     FailAlert(e.message)
   }
 
 }
 
-if (install.soviet.length == 0)
+if (installStore.soviet.length == 0)
   add()
 
 </script>

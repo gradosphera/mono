@@ -172,7 +172,7 @@ const updateBoard = async (new_members: any) => {
 
     await coop.updateBoard({
       coopname: COOPNAME,
-      chairman: useSessionStore().username,
+      username: useSessionStore().username,
       board_id: 0,
       members: new_members,
       name: 'Совет',
