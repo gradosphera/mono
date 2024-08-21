@@ -15,4 +15,4 @@ export const scope = Actors._coopname
  * @interface
  * Таблица хранит целевые потребительские программы контракта маркетплейса.
  */
-export type IMarketPrograms = Soviet.IProgcomarket
+export type IProgram = Soviet.IProgram

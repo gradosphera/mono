@@ -24,6 +24,7 @@ export interface IAddprogbal {
 export interface IAddress {
   id: IUint64
   coopname: IName
+  braname: IName
   data: IAddressData
 }
 
@@ -52,6 +53,16 @@ export interface IAddstaff {
   username: IName
   rights: IRight[]
   position_title: string
+}
+
+export interface IAdduser {
+  coopname: IName
+  username: IName
+  type: IName
+  created_at: ITimePointSec
+  initial: IAsset
+  minimum: IAsset
+  spread_initial: boolean
 }
 
 export interface IAuthorize {
@@ -129,6 +140,13 @@ export interface IChanges {
   return_product_decision_id: IUint64
 }
 
+export interface ICnfrmindoc {
+  coopname: IName
+  registrator: IName
+  username: IName
+  indoc_id: IUint64
+}
+
 export interface ICounts extends ICountsBase {
 }
 
@@ -141,6 +159,7 @@ export interface ICountsBase {
 export interface ICreaddress {
   coopname: IName
   chairman: IName
+  braname: IName
   data: IAddressData
 }
 
@@ -153,9 +172,21 @@ export interface ICreateboard {
   description: string
 }
 
-export interface ICreateprog {
+export interface ICreatebranch {
   coopname: IName
   chairman: IName
+  braname: IName
+  name: string
+  description: string
+  authorizer: IName
+  trusted: IName[]
+}
+
+export interface ICreateprog {
+  coopname: IName
+  username: IName
+  draft_id: IUint64
+  hash_of_conditions: IChecksum256
   title: string
   announce: string
   description: string
@@ -164,6 +195,7 @@ export interface ICreateprog {
   calculation_type: IName
   fixed_membership_contribution: IAsset
   membership_percent_fee: IUint64
+  meta: string
 }
 
 export interface IDecision {
@@ -183,15 +215,29 @@ export interface IDecision {
   created_at: ITimePointSec
 }
 
+export interface IDeclnindoc {
+  coopname: IName
+  registrator: IName
+  username: IName
+  indoc_id: IUint64
+  comment: string
+}
+
 export interface IDeladdress {
   coopname: IName
   chairman: IName
   address_id: IUint64
 }
 
+export interface IDeletebranch {
+  coopname: IName
+  chairman: IName
+  braname: IName
+}
+
 export interface IDisableprog {
   coopname: IName
-  id: IUint64
+  program_id: IUint64
 }
 
 export interface IDisautomate {
@@ -211,18 +257,33 @@ export interface IDocument {
 export interface IEditaddress {
   coopname: IName
   chairman: IName
+  braname: IName
   address_id: IUint64
   data: IAddressData
 }
 
+export interface IEditbranch {
+  coopname: IName
+  chairman: IName
+  braname: IName
+  name: string
+  description: string
+  authorizer: IName
+  trusted: IName[]
+}
+
 export interface IEditprog {
   coopname: IName
-  id: IUint64
+  username: IName
+  program_id: IUint64
+  draft_id: IUint64
+  hash_of_conditions: IChecksum256
   title: string
   announce: string
   description: string
   preview: string
   images: string
+  meta: string
 }
 
 export interface IExec {
@@ -231,14 +292,20 @@ export interface IExec {
   decision_id: IUint64
 }
 
-export interface IFix {
-}
-
 export interface IFundwithdraw {
   coopname: IName
   username: IName
   type: IName
   withdraw_id: IUint64
+  document: IDocument
+}
+
+export interface IIndocument {
+  id: IUint64
+  coopname: IName
+  username: IName
+  type: IName
+  secondary_id: IUint64
   document: IDocument
 }
 
@@ -256,6 +323,16 @@ export interface IJoincoops {
   username: IName
   is_paid: boolean
   notice: string
+}
+
+export interface IJoinprog {
+  coopname: IName
+  username: IName
+  document: IDocument
+  program_id: IUint64
+}
+
+export interface IMigrate {
 }
 
 export interface INewact {
@@ -309,7 +386,7 @@ export interface IOnewallet {
   minimum: IAsset
 }
 
-export interface IParticipants {
+export interface IParticipant {
   username: IName
   created_at: ITimePointSec
   last_update: ITimePointSec
@@ -321,9 +398,11 @@ export interface IParticipants {
   type: IName
 }
 
-export interface IProgcomarket {
+export interface IProgram {
   id: IUint64
   coopname: IName
+  draft_registry_id: IUint64
+  hash_of_conditions: IChecksum256
   is_active: boolean
   title: string
   announce: string
@@ -334,6 +413,8 @@ export interface IProgcomarket {
   calculation_type: IName
   membership_percent_fee: IUint64
   fixed_membership_contribution: IAsset
+  start_at: ITimePointSec
+  expired_at: ITimePointSec
 }
 
 export interface IProgwallet {
@@ -342,6 +423,7 @@ export interface IProgwallet {
   program_id: IUint64
   username: IName
   available: IAsset
+  document: IDocument
 }
 
 export interface IRecieved {

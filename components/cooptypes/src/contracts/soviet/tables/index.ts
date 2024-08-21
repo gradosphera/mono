@@ -39,9 +39,9 @@ export * as Decisions from './decisions'
 export * as JoinCoops from './joinCoops'
 
 /**
- * Таблица хранит целевые потребительские программы контракта маркетплейса.
+ * Таблица хранит целевые потребительские программы.
  */
-export * as MarketPrograms from './marketPrograms'
+export * as Programs from './programs'
 
 /**
  * Таблица хранит информацию о пайщиках.

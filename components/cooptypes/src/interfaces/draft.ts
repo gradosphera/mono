@@ -13,6 +13,8 @@ export interface ICountsBase {
 }
 
 export interface ICreatedraft {
+  scope: IName
+  username: IName
   registry_id: IUint64
   lang: IName
   title: string
@@ -23,25 +25,37 @@ export interface ICreatedraft {
 }
 
 export interface ICreatetrans {
+  scope: IName
+  username: IName
   draft_id: IUint64
   lang: IName
   data: string
 }
 
 export interface IDeldraft {
+  scope: IName
+  username: IName
   draft_id: IUint64
 }
 
 export interface IDeltrans {
+  scope: IName
+  username: IName
   translate_id: IUint64
 }
 
 export interface IEdittrans {
+  scope: IName
+  username: IName
   translate_id: IUint64
   data: string
 }
 
+export interface IMigrate {
+}
+
 export interface INewid {
+  scope: IName
   id: IUint64
 }
 

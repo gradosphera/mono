@@ -15,4 +15,4 @@ export const scope = Actors._coopname
  * @interface
  * Таблица хранит публичную часть реестра пайщиков кооператива.
  */
-export type IParticipants = Soviet.IParticipants
+export type IParticipants = Soviet.IParticipant
