@@ -1,11 +1,11 @@
 import { SovietContract } from 'cooptypes';
 import { IUser } from 'src/shared/lib/types/user';
 
-export type ICoopMarketProgramData =
-  SovietContract.Tables.MarketPrograms.IMarketPrograms;
+export type ICoopProgramData =
+  SovietContract.Tables.Programs.IProgram;
 export type IAddressesData = SovietContract.Tables.Addresses.IAddress;
 
-export interface ILoadCoopMarketPrograms {
+export interface ILoadCoopPrograms {
   coopname: string;
 }
 

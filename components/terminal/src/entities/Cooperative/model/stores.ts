@@ -3,8 +3,8 @@ import { Ref, ref, ComputedRef, computed } from 'vue';
 import { api } from '../api';
 import {
   IAddressesData,
-  ICoopMarketProgramData,
-  ILoadCoopMarketPrograms,
+  ICoopProgramData,
+  ILoadCoopPrograms,
   ILoadCooperativeAddresses,
   IAdministratorData,
 } from './types';
@@ -16,14 +16,14 @@ interface ICooperativeStore {
   // методы
   loadFunds: (coopname: string) => Promise<void>;
   loadAddresses: (params: ILoadCooperativeAddresses) => Promise<void>;
-  loadMarketPrograms: (params: ILoadCoopMarketPrograms) => Promise<void>;
+  loadPrograms: (params: ILoadCoopPrograms) => Promise<void>;
   loadPrivateCooperativeData: () => Promise<void>;
   loadContacts: () => Promise<void>;
   loadPublicCooperativeData: (coopname: string) => Promise<void>;
   loadAdmins: (coopname: string) => Promise<void>;
   // данные
   admins: Ref<IAdministratorData[]>;
-  marketPrograms: Ref<ICoopMarketProgramData[]>;
+  Programs: Ref<ICoopProgramData[]>;
   addresses: Ref<IAddressesData[]>;
   contacts: Ref<Cooperative.Model.IContacts | undefined>
   publicCooperativeData: Ref<RegistratorContract.Tables.Cooperatives.ICooperative | undefined>;
@@ -39,7 +39,7 @@ interface ICooperativeStore {
 export const useCooperativeStore = defineStore(
   namespace,
   (): ICooperativeStore => {
-    const marketPrograms = ref([] as ICoopMarketProgramData[]);
+    const Programs = ref([] as ICoopProgramData[]);
     const addresses = ref([] as IAddressesData[]);
     const admins = ref([] as IAdministratorData[]);
     const publicCooperativeData = ref<RegistratorContract.Tables.Cooperatives.ICooperative>();
@@ -83,10 +83,10 @@ export const useCooperativeStore = defineStore(
       );
     };
 
-    const loadMarketPrograms = async (
-      params: ILoadCoopMarketPrograms
+    const loadPrograms = async (
+      params: ILoadCoopPrograms
     ): Promise<void> => {
-      marketPrograms.value = await api.loadMarketPrograms(params);
+      Programs.value = await api.loadPrograms(params);
     };
 
     const loadAddresses = async (
@@ -101,12 +101,12 @@ export const useCooperativeStore = defineStore(
 
     return {
       loadFunds,
-      loadMarketPrograms,
+      loadPrograms,
       loadAddresses,
       loadContacts,
       loadPublicCooperativeData,
       loadPrivateCooperativeData,
-      marketPrograms,
+      Programs,
       addresses,
       contacts,
       privateCooperativeData,

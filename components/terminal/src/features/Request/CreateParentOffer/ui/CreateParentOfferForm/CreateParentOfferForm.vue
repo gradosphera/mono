@@ -20,8 +20,8 @@ const props = defineProps({
 })
 
 const cooperativeStore = useCooperativeStore()
-cooperativeStore.loadMarketPrograms({ coopname: props.coopname })
-const programs = computed(() => cooperativeStore.marketPrograms)
+cooperativeStore.loadPrograms({ coopname: props.coopname })
+const programs = computed(() => cooperativeStore.Programs)
 
 const isSubmitting = ref(false)
 

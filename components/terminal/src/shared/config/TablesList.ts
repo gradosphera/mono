@@ -6,7 +6,7 @@ export enum TablesList {
   Deposits = 'deposits', //* Таблица депозитов пайщиков кооператива */
   Withdraws = 'withdraws', //* Таблица возвратов пайщиков кооператива */
   ProgramWallets = 'progwallets', //* Таблица кошельков программ кооператива */
-  CoopMarketPrograms = 'progcomarket', //* Таблица балансов ЦПП пайщика кооператива */
+  CoopPrograms = 'progcomarket', //* Таблица балансов ЦПП пайщика кооператива */
   CoopMarketRequests = 'exchange',
   CooperativeAddresses = 'addresses',
 }

@@ -3,20 +3,20 @@ import { ContractsList, TablesList } from 'src/shared/config';
 import {
   IAddressesData,
   IAdministratorData,
-  ICoopMarketProgramData,
-  ILoadCoopMarketPrograms,
+  ICoopProgramData,
+  ILoadCoopPrograms,
   ILoadCooperativeAddresses,
 } from '../model';
-import {Cooperative, FundContract, RegistratorContract } from 'cooptypes';
+import {Cooperative, FundContract, RegistratorContract, SovietContract } from 'cooptypes';
 
-async function loadMarketPrograms(
-  params: ILoadCoopMarketPrograms
-): Promise<ICoopMarketProgramData[]> {
+async function loadPrograms(
+  params: ILoadCoopPrograms
+): Promise<ICoopProgramData[]> {
   return (await fetchTable(
-    ContractsList.Soviet,
+    SovietContract.contractName.production,
     params.coopname,
-    TablesList.CoopMarketPrograms
-  )) as ICoopMarketProgramData[];
+    SovietContract.Tables.Programs.tableName
+  )) as ICoopProgramData[];
 }
 
 async function loadAdmins(coopname: string): Promise<IAdministratorData[]> {
@@ -94,7 +94,7 @@ async function loadCooperativeAddresses(
 }
 
 export const api = {
-  loadMarketPrograms,
+  loadPrograms,
   loadCooperativeAddresses,
   loadPublicCooperativeData,
   loadAdmins,

@@ -12,7 +12,7 @@ import {
   IDepositData,
   IWithdrawData,
   IProgramWalletData,
-  ICoopMarketProgramData,
+  ICoopProgramData,
   ExtendedProgramWalletData,
   IGetPaymentMethods,
   IGetResponsePaymentMethodData,
@@ -123,8 +123,8 @@ async function loadUserProgramWalletsData(
   const programs = (await fetchTable(
     ContractsList.Soviet,
     params.coopname,
-    TablesList.CoopMarketPrograms
-  )) as ICoopMarketProgramData[];
+    TablesList.CoopPrograms
+  )) as ICoopProgramData[];
 
   const program_wallets = (await fetchTable(
     ContractsList.Soviet,

@@ -2,12 +2,13 @@ import { SovietContract, GatewayContract } from 'cooptypes';
 
 export type IProgramWalletData =
   SovietContract.Tables.ProgramWallets.IProgramWallet;
-export type ICoopMarketProgramData =
-  SovietContract.Tables.MarketPrograms.IMarketPrograms;
+
+  export type ICoopProgramData =
+  SovietContract.Tables.Programs.IProgram;
 
 export type ExtendedProgramWalletData = IProgramWalletData & {
   program_type: string;
-  program_details: ICoopMarketProgramData; // | или другие типы будущих программ
+  program_details: ICoopProgramData; // | или другие типы будущих программ
 };
 
 export type IDepositData = GatewayContract.Tables.Deposits.IDeposits;
