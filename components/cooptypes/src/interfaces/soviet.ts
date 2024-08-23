@@ -185,7 +185,8 @@ export interface ICreatebranch {
 export interface ICreateprog {
   coopname: IName
   username: IName
-  draft_id: IUint64
+  program_type: IName
+  draft_registry_id: IUint64
   hash_of_conditions: IChecksum256
   title: string
   announce: string
@@ -276,7 +277,7 @@ export interface IEditprog {
   coopname: IName
   username: IName
   program_id: IUint64
-  draft_id: IUint64
+  draft_registry_id: IUint64
   hash_of_conditions: IChecksum256
   title: string
   announce: string
@@ -401,6 +402,7 @@ export interface IParticipant {
 export interface IProgram {
   id: IUint64
   coopname: IName
+  program_type: IName
   draft_registry_id: IUint64
   hash_of_conditions: IChecksum256
   is_active: boolean

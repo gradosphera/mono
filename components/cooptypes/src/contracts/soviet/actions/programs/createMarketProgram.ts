@@ -16,6 +16,6 @@ export const actionName = 'createprog'
 
 /**
  * @interface
- * Действие редактирует целевую потребительскую программу маркетплейса.
+ * Действие редактирует целевую потребительскую программу.
  */
-export type ICreateMarketProgram = Soviet.ICreateprog
+export type ICreateProgram = Soviet.ICreateprog

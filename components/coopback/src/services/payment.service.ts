@@ -198,7 +198,10 @@ export async function createInitialOrder(username: string, data: ICreateInitialP
 }
 
 export async function catchIPN(ipnBody: IYandexIPN) {
+  if (!connection.db) throw new Error('Нет подключения');
+
   const payments = await connection.db.collection('payments');
+
   const exist = await payments.findOne({ 'object.id': ipnBody.object.id });
 
   if (!exist) {

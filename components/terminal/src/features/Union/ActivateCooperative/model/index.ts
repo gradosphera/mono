@@ -1,5 +1,5 @@
 import { TransactResult } from '@wharfkit/session';
-import { RegistratorContract, SovietContract } from 'cooptypes';
+import { RegistratorContract } from 'cooptypes';
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
 

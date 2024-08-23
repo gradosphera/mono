@@ -57,3 +57,8 @@ export * as ProgramWallets from './programWallets'
  * Таблица содержит сводный баланс пайщиков кооператива.
  */
 export * as Wallets from './wallets'
+
+/**
+ * Таблица содержит заявления пайщиков кооператива, которые ожидают приёма, но не требуют решения совета.
+ */
+export * as IncomeDocuments from './incomeDocuments'

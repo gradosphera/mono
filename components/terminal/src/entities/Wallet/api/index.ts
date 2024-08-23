@@ -28,6 +28,7 @@ import {
   ILoadUserProgramWallets,
   ILoadUserWithdraws,
 } from '../model';
+import { SovietContract } from 'cooptypes';
 
 async function loadSingleUserWalletData(
   params: ILoadSingleUserWallet
@@ -121,15 +122,15 @@ async function loadUserProgramWalletsData(
   params: ILoadUserProgramWallets
 ): Promise<ExtendedProgramWalletData[]> {
   const programs = (await fetchTable(
-    ContractsList.Soviet,
+    SovietContract.contractName.production,
     params.coopname,
-    TablesList.CoopPrograms
+    SovietContract.Tables.Programs.tableName
   )) as ICoopProgramData[];
 
   const program_wallets = (await fetchTable(
-    ContractsList.Soviet,
+    SovietContract.contractName.production,
     params.coopname,
-    TablesList.ProgramWallets,
+    SovietContract.Tables.ProgramWallets.tableName,
     params.username,
     params.username,
     LimitsList.None,

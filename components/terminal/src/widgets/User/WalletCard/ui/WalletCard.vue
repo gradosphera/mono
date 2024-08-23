@@ -31,15 +31,15 @@ const props = defineProps({
 
 const username = computed(() => props.username)
 
-const update = () => {
-  wallet.update({ coopname: COOPNAME, username: username.value })
+const updateUserWallet = () => {
+  wallet.loadUserWalet({ coopname: COOPNAME, username: username.value })
 }
 
-update()
+updateUserWallet()
 
 const interval = setInterval(() => {
-  update()
-}, 3000)
+  updateUserWallet()
+}, 10000)
 
 onBeforeUnmount(() => {
   clearInterval(interval)

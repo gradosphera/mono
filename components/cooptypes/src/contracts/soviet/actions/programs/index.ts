@@ -12,3 +12,8 @@ export * as EditMarketProgram from './editMarketProgram'
  * Действие отключает целевую потребительскую программу маркетплейса.
  */
 export * as DisableMarketProgram from './disableMarketProgram'
+
+/**
+ * Действие отправки заявления на присоединение к ЦПП Кооператива
+ */
+export * as JoinProgram from './joinProgram'

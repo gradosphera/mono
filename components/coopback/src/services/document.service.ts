@@ -30,7 +30,7 @@ export async function buildComplexDocument(
     const document = await generator.getDocument({ hash: raw_document.document.hash });
     const user = await User.findOne({ username: raw_document.username });
 
-    if (user) {
+    if (user && user.type != 'service') {
       const user_data = await user?.getPrivateData();
 
       const action: Cooperative.Blockchain.IExtendedAction = {

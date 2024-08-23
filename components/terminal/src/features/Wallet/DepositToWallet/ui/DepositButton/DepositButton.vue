@@ -27,7 +27,7 @@ import { BASE_PAYMENT_FEE, COOPNAME, CURRENCY } from 'src/shared/config'
 import { SuccessAlert, FailAlert } from 'src/shared/api'
 import { useSessionStore } from 'src/entities/Session'
 
-const { createDeposit, update } = useWalletStore()
+const { createDeposit, loadUserWalet } = useWalletStore()
 
 //TODO move username to Session entity
 const session = useSessionStore()
@@ -80,7 +80,7 @@ const paymentFail = (): void => {
 }
 
 const paymentSuccess = (): void => {
-  update({ coopname: COOPNAME, username: session.username as string } as ILoadUserWallet)
+  loadUserWalet({ coopname: COOPNAME, username: session.username as string } as ILoadUserWallet)
   clear()
   SuccessAlert('Платеж успешно принят')
 }

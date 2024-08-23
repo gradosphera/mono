@@ -24,9 +24,9 @@ interface IWalletStore {
   withdraws: Ref<IWithdrawData[]>;
   methods: Ref<IPaymentMethodData[]>;
 
-  update: (params: ILoadUserWallet) => Promise<void>;
+  loadUserWalet: (params: ILoadUserWallet) => Promise<void>;
 
-  //TODO move to Features
+  //TODO move to features
   createDeposit: (params: ICreateDeposit) => Promise<IPaymentOrder>;
   createWithdraw: (params: ICreateWithdraw) => Promise<void>;
 }
@@ -45,16 +45,17 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
   const program_wallets = ref<ExtendedProgramWalletData[]>([]);
   const methods = ref<IPaymentMethodData[]>([]);
 
-  const createEmptyWallet = (): IWalletData => ({
-    username: '',
-    coopname: '',
-    available: `0.0000 ${CURRENCY}`,
-    blocked: `0.0000 ${CURRENCY}`,
-    minimum: `0.0000 ${CURRENCY}`,
-  });
 
+  const loadUserWalet = async (params: ILoadUserWallet) => {
 
-  const update = async (params: ILoadUserWallet) => {
+    const createEmptyWallet = (): IWalletData => ({
+      username: '',
+      coopname: '',
+      available: `0.0000 ${CURRENCY}`,
+      blocked: `0.0000 ${CURRENCY}`,
+      minimum: `0.0000 ${CURRENCY}`,
+    });
+
     try {
       const data = await Promise.all([
         api.loadSingleUserWalletData(params),
@@ -90,7 +91,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
     deposits,
     withdraws,
     methods,
-    update,
+    loadUserWalet,
     createDeposit,
     createWithdraw,
   };

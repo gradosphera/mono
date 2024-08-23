@@ -96,7 +96,7 @@ const wallet = useWalletStore()
 
 const username = computed(() => props.username)
 
-wallet.update({ coopname: COOPNAME, username: username.value })
+wallet.loadUserWalet({ coopname: COOPNAME, username: username.value })
 
 function isSBPData(data: ISBPData | IBankTransferData): data is ISBPData {
   return (data as ISBPData).phone !== undefined;

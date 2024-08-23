@@ -68,7 +68,7 @@ api.getTableRows(
     })
 ```
 
-Те же параметры scope, table, code могут быть использованы для получения информации из модуля [COOPARSER](https://github.com/copenomics/cooparser). Последнее используется, когда необходимо получить исторические данные и нет необходимости проверять их актуальность по наличию таблиц в блокчейне. Однако, таблицы в блокчейне необходимо всегда проверять перед отправкой любой транзакции действия. Нельзя полагаться на данные из парсера при подготовке транзакции действия.
+Те же параметры scope, table, code могут быть использованы для получения информации из модуля [COOPARSER](https://github.com/coopenomics/cooparser). Последнее используется, когда необходимо получить исторические данные и нет необходимости проверять их актуальность по наличию таблиц в блокчейне. Однако, таблицы в блокчейне необходимо всегда проверять перед отправкой любой транзакции действия. Нельзя полагаться на данные из парсера при подготовке транзакции действия.
 
 ### Транзакция действий
 Состояние любого смарт-контракта может изменяться только с помощью действий. Для того, чтобы совершить действия, необходимо сформировать и отправить транзакцию с помощью библиотеки eosjs или альтернатив.
@@ -113,7 +113,7 @@ const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), te
 
 ## Лицензия
 
-[MIT](./LICENSE) License © 2024-PRESENT [CBS VOSKHOD](https://github.com/copenomics)
+[MIT](./LICENSE) License © 2024-PRESENT [CBS VOSKHOD](https://github.com/coopenomics)
 
 <!-- Badges -->
 
@@ -123,7 +123,7 @@ const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), te
 [npm-downloads-href]: https://npmjs.com/package/cooptypes
 [bundle-src]: https://img.shields.io/bundlephobia/minzip/cooptypes?style=flat&colorA=080f12&colorB=1fa669&label=minzip
 [bundle-href]: https://bundlephobia.com/result?p=cooptypes
-[license-src]: https://img.shields.io/github/license/copenomics/cooptypes.svg?style=flat&colorA=080f12&colorB=1fa669
-[license-href]: https://github.com/copenomics/cooptypes/blob/main/LICENSE
+[license-src]: https://img.shields.io/github/license/coopenomics/cooptypes.svg?style=flat&colorA=080f12&colorB=1fa669
+[license-href]: https://github.com/coopenomics/cooptypes/blob/main/LICENSE
 [jsdocs-src]: https://img.shields.io/badge/jsdocs-reference-080f12?style=flat&colorA=080f12&colorB=1fa669
 [jsdocs-href]: https://www.jsdocs.io/package/cooptypes

@@ -73,6 +73,11 @@ export interface ICooperative {
   created_at: ITimePointSec
 }
 
+export interface IDelcoop {
+  registrator: IName
+  coopname: IName
+}
+
 export interface IDocument {
   hash: IChecksum256
   public_key: IPublicKey
@@ -161,9 +166,4 @@ export interface IVerification {
   created_at: ITimePointSec
   last_update: ITimePointSec
   notice: string
-}
-
-export interface IDelcoop {
-  registrator: IName
-  coopname: IName
 }

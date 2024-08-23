@@ -9,8 +9,8 @@
     "coopdoc-generator-ts": "workspace:*",
     "cooptypes": "workspace:*",
     "gh-pages": "^6.1.1",
-    "lerna": "^8.1.6",
-    "lint-staged": "^15.2.7",
+    "lerna": "^8.1.8",
+    "lint-staged": "^15.2.9",
     "terminal": "workspace:*"
   },
   "scripts": {

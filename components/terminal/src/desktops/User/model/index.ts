@@ -43,6 +43,7 @@ export const manifest = {
           title: 'Удостоверение',
           icon: '',
           roles: [],
+          programs: ['wallet']
         },
         path: 'identity',
         name: 'user-identity',

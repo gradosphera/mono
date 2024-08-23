@@ -20,7 +20,8 @@ declare module 'vue-router' {
   // Расширяем интерфейс RouteMeta, добавляя новые свойства
   interface RouteMeta {
     roles?: string[];
-    // title: string
-    // icon: string
+    programs?: string[]
+    title: string
+    icon: string
   }
 }

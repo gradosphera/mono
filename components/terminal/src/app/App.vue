@@ -1,5 +1,7 @@
 <template lang='pug'>
-router-view(v-if="isLoaded")
+div
+  router-view(v-if="isLoaded")
+  RootPopup
 </template>
 
 <script setup lang="ts">
@@ -12,6 +14,8 @@ import { useDesktopStore } from 'src/entities/Desktop/model';
 import { Cookies, LocalStorage, QSpinner, useQuasar } from 'quasar';
 import { COOPNAME } from 'src/shared/config';
 import { useCardStore } from './providers/card/store';
+
+import { RootPopup } from 'src/widgets/Desktop/RootPopup';
 
 const $q = useQuasar()
 

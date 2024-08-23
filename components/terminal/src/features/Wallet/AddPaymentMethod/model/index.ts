@@ -33,7 +33,7 @@ export function useAddPaymentMethod() {
 
   async function addPaymentMethod(params: IAddPaymentMethod) {
 
-    await store.update({
+    await store.loadUserWalet({
       coopname: COOPNAME,
       username: params.username,
     })
@@ -44,7 +44,7 @@ export function useAddPaymentMethod() {
     console.log(store.methods, store.methods.length, params.method_id)
     await sendPOST(`/v1/payments/methods/${params.username}/add`, params)
 
-    await store.update({
+    await store.loadUserWalet({
       coopname: COOPNAME,
       username: session.username
     })
