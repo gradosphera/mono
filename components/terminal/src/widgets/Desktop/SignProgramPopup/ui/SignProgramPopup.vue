@@ -1,8 +1,8 @@
 <template lang="pug">
 div
-  p has_requirements {{ required }}
-  p programs {{ coop_programs }}
-  p user_programs {{ user_programs }}
+  //- p has_requirements {{ required }}
+  //- p programs {{ coop_programs }}
+  //- p user_programs {{ user_programs }}
 
 
 </template>
