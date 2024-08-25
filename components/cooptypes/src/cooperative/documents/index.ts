@@ -72,6 +72,14 @@ export interface IComplexAgenda extends IAgenda {
   documents: IComplexDocument
 }
 
+export interface IGetResponse<T> {
+  results: T[]
+  page: number
+  limit: number
+  totalResults: number
+  totalPages: number
+}
+
 /**
  * Общий интерфейс для генерации/регенерации документа
  */
@@ -92,10 +100,9 @@ export interface IGenerateJoinCoopDecision extends IGenerate {
   decision_id: number
 }
 
-export interface IGetResponse<T> {
-  results: T[]
-  page: number
-  limit: number
-  totalResults: number
-  totalPages: number
+/** Интерфейс генерации документа для присоединения к программе ЦПП */
+export interface IGenerateJoinProgram extends IGenerate {
+  registry_id: number
+  protocol_number: string
+  protocol_day_month_year: string
 }

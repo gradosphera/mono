@@ -25,7 +25,9 @@ class TransExtension {
     args.forEach((value, index) => {
       translation = translation.replace(new RegExp(`\\{${index}\\}`, 'g'), value)
     })
-    return translation
+    translation = translation.replace(/\n/g, '<br>')
+
+    return new nunjucks.runtime.SafeString(translation as unknown as string)
   }
 }
 

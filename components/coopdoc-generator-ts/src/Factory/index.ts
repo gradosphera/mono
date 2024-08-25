@@ -170,7 +170,7 @@ export abstract class DocFactory {
   }
 
   async generatePDF(
-    data: externalDataTypes,
+    data: externalDataTypes | null,
     context: string,
     vars: ICombinedData,
     translation: ITranslations,
@@ -185,13 +185,14 @@ export abstract class DocFactory {
     return document
   }
 
-  getFullName(data: externalDataTypes): string {
-    if ('first_name' in data)
-      return `${data.last_name} ${data.first_name} ${data.middle_name}`
+  getFullName(data: externalDataTypes | null): string {
+    if (data) {
+      if ('first_name' in data)
+        return `${data.last_name} ${data.first_name} ${data.middle_name}`
 
-    if ('represented_by' in data)
-      return `${data.represented_by.last_name} ${data.represented_by.first_name} ${data.represented_by.middle_name}`
-
+      if ('represented_by' in data)
+        return `${data.represented_by.last_name} ${data.represented_by.first_name} ${data.represented_by.middle_name}`
+    }
     return ''
   }
 
