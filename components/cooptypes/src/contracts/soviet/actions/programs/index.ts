@@ -1,17 +1,17 @@
 /**
- * Действие создаёт целевую потребительскую программу маркетплейса.
+ * Действие создаёт целевую потребительскую маркетплейса.
  */
-export * as CreateMarketProgram from './createMarketProgram'
+export * as CreateProgram from './createProgram'
 
 /**
  * Действие редактирует целевую потребительскую программу маркетплейса.
  */
-export * as EditMarketProgram from './editMarketProgram'
+export * as EditProgram from './editProgram'
 
 /**
  * Действие отключает целевую потребительскую программу маркетплейса.
  */
-export * as DisableMarketProgram from './disableMarketProgram'
+export * as DisableProgram from './disableProgram'
 
 /**
  * Действие отправки заявления на присоединение к ЦПП Кооператива
