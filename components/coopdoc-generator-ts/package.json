@@ -49,7 +49,6 @@
     "ajv-formats": "^3.0.1",
     "ajv-i18n": "^4.2.0",
     "axios": "^1.7.2",
-    "cooparser-ts": "workspace:*",
     "cooptypes": "workspace:*",
     "dotenv": "^16.4.5",
     "eosjs-ecc": "^4.0.7",
