@@ -2,7 +2,7 @@
   "name": "coopdoc-generator-ts",
   "type": "module",
   "version": "1.0.75",
-  "private": true,
+  "private": false,
   "packageManager": "pnpm@9.0.6",
   "description": "",
   "author": "Alex Ant <chairman.voskhod@gmail.com>",
