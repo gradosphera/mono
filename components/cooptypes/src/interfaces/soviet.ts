@@ -187,7 +187,6 @@ export interface ICreateprog {
   username: IName
   program_type: IName
   draft_registry_id: IUint64
-  hash_of_conditions: IChecksum256
   title: string
   announce: string
   description: string
@@ -278,7 +277,6 @@ export interface IEditprog {
   username: IName
   program_id: IUint64
   draft_registry_id: IUint64
-  hash_of_conditions: IChecksum256
   title: string
   announce: string
   description: string
@@ -307,6 +305,8 @@ export interface IIndocument {
   username: IName
   type: IName
   secondary_id: IUint64
+  draft_registry_id: IUint64
+  version: IUint64
   document: IDocument
 }
 
@@ -331,6 +331,7 @@ export interface IJoinprog {
   username: IName
   document: IDocument
   program_id: IUint64
+  version: IUint64
 }
 
 export interface IMigrate {
@@ -401,10 +402,9 @@ export interface IParticipant {
 
 export interface IProgram {
   id: IUint64
+  draft_registry_id: IUint64
   coopname: IName
   program_type: IName
-  draft_registry_id: IUint64
-  hash_of_conditions: IChecksum256
   is_active: boolean
   title: string
   announce: string
@@ -423,6 +423,7 @@ export interface IProgwallet {
   id: IUint64
   coopname: IName
   program_id: IUint64
+  version: IUint64
   username: IName
   available: IAsset
   document: IDocument

@@ -1,3 +1,4 @@
+import { DraftContract } from 'cooptypes'
 import type { IJoinCoopAction } from '../Templates/100.ParticipantApplication'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IMetaDocument, ITemplate } from '../Interfaces'
@@ -20,7 +21,7 @@ export class JoinCoopTemplateFactory extends DocFactory {
       template = ParticipantApplicationTemplate
     }
     else {
-      template = await this.getTemplate(registry_id, options.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, registry_id, options.block_num)
     }
 
     const user = await super.getUser(options.username, options.block_num)

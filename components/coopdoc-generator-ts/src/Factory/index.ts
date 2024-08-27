@@ -123,13 +123,13 @@ export abstract class DocFactory {
     }
   }
 
-  async getTemplate<T>(registry_id: number, block_num?: number): Promise<ITemplate<T>> {
+  async getTemplate<T>(scope: string, registry_id: number, block_num?: number): Promise<ITemplate<T>> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
     const templateResponse = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
       filter: JSON.stringify({
         'code': DraftContract.contractName.production,
-        'scope': DraftContract.contractName.production,
+        'scope': scope,
         'table': DraftContract.Tables.Drafts.tableName,
         'value.registry_id': String(registry_id),
         ...block_filter,
@@ -144,7 +144,7 @@ export abstract class DocFactory {
     const translationsResponse = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
       filter: JSON.stringify({
         'code': DraftContract.contractName.production,
-        'scope': DraftContract.contractName.production,
+        'scope': scope,
         'table': 'translations',
         'value.draft_id': String(draft.id),
         ...block_filter,

@@ -23,7 +23,7 @@ export class JoinProgramTemplateFactory extends DocFactory {
       template = DocumentsRegistry[options.registry_id as keyof typeof DocumentsRegistry]
     }
     else {
-      template = await this.getTemplate(options.registry_id, options.block_num)
+      template = await this.getTemplate(options.coopname, options.registry_id, options.block_num)
     }
 
     const coop = await super.getCooperative(options.coopname, options.block_num)

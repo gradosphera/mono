@@ -338,7 +338,7 @@ describe('тест генератора документов', async () => {
 
     console.log('hash1: ', hash1)
     console.log('hash2: ', hash2)
-    // console.log(document)
+    console.log(document.meta)
 
     expect(hash1).toEqual(hash2)
   })

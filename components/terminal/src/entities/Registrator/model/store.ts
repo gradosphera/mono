@@ -143,6 +143,13 @@ export const useRegistratorStore = defineStore(
       state.account = clearObjectValues(state.account);
       state.userData = clearObjectValues(state.userData);
       state.payment.provider = 'yookassa'
+      state.is_paid = false
+      state.statement = {
+        hash: '',
+        meta: {},
+        public_key: '',
+        signature: '',
+      }
     }
 
 
