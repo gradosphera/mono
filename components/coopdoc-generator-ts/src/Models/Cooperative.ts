@@ -46,7 +46,7 @@ export class Cooperative {
   constructor(storage: MongoDBConnector) {
     this.db = storage
     this.cooperative = null
-    this.data_service = new DataService<CooperativeData>(storage, 'CooperativeData')
+    this.data_service = new DataService<CooperativeData>(storage, 'cooperatives')
   }
 
   async getOne(username: string, block_num?: number): Promise<CooperativeData> {

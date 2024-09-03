@@ -95,7 +95,7 @@ async function getCooperative(coopname) {
 }
 
 async function registerBlockchainAccount(user: IUser, orderData: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit) {
-  const eos = await getInstance(process.env.REGISTRATOR_WIF);
+  const eos = await getInstance(process.env.SERVICE_WIF);
 
   const newaccount: RegistratorContract.Actions.CreateAccount.ICreateAccount = {
     registrator: process.env.COOPNAME as string,
@@ -209,11 +209,11 @@ async function createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICrea
 }
 
 async function createOrder(data) {
-  const eos = await getInstance(process.env.REGISTRATOR_WIF);
+  const eos = await getInstance(process.env.SERVICE_WIF);
 
   const actions = [
     {
-      account: process.env.GATEWAY_CONTRACT as string,
+      account: GatewayContract.contractName.production,
       name: 'deposit',
       authorization: [
         {
@@ -241,7 +241,7 @@ async function createOrder(data) {
 }
 
 async function completeOrder(data: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit) {
-  const eos = await getInstance(process.env.REGISTRATOR_WIF);
+  const eos = await getInstance(process.env.SERVICE_WIF);
 
   const actions = [
     {
@@ -269,11 +269,11 @@ async function completeOrder(data: GatewayContract.Actions.CompleteDeposit.IComp
 }
 
 async function failOrder(data) {
-  const eos = await getInstance(process.env.REGISTRATOR_WIF);
+  const eos = await getInstance(process.env.SERVICE_WIF);
 
   const actions = [
     {
-      account: process.env.GATEWAY_CONTRACT as string,
+      account: GatewayContract.contractName.production,
       name: 'dpfail',
       authorization: [
         {
@@ -355,7 +355,7 @@ export async function changeKey(data: RegistratorContract.Actions.ChangeKey.ICha
 async function getSoviet(coopname) {
   const api = await getApi();
 
-  const soviet = (await lazyFetch(api, process.env.SOVIET_CONTRACT, coopname, 'boards'))[0];
+  const soviet = (await lazyFetch(api, SovietContract.contractName.production, coopname, 'boards'))[0];
 
   return soviet;
 }
@@ -363,7 +363,7 @@ async function getSoviet(coopname) {
 async function fetchAllParticipants() {
   const api = await getApi();
 
-  const participants = await lazyFetch(api, process.env.SOVIET_CONTRACT, process.env.COOPNAME, 'participants');
+  const participants = await lazyFetch(api, SovietContract.contractName.production, process.env.COOPNAME, 'participants');
   return participants;
 }
 

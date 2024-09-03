@@ -28,11 +28,11 @@ export const manifest = {
   'name': 'UserDesktop',
   'hash': 'hash1',
   'authorizedHome': 'user-identity',
-  'nonAuthorizedHome': 'signin',
+  'nonAuthorizedHome': 'signup',
   'routes': [
     {
       meta: {
-        title: 'Пайщик',
+        title: 'Карта',
         icon: 'fa-solid fa-id-card',
         roles: [],
       },

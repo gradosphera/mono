@@ -1,5 +1,4 @@
 <template lang="pug">
-
 q-tabs(
   v-if="routes"
   dense
@@ -12,7 +11,7 @@ q-tabs(
   active-bg-color="teal"
   active-color="white"
   indicator-color="secondary"
-)
+).second-menu
 
   q-route-tab(
     v-for="route in routes"
@@ -26,7 +25,6 @@ q-tabs(
 
 </template>
 <script lang="ts" setup>
-
 import { useCurrentUserStore } from 'src/entities/User';
 import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -50,3 +48,10 @@ init()
 
 watch(route, () => init())
 </script>
+
+<style>
+
+.second-menu .q-tab__label {
+  font-size: 12px !important;
+}
+</style>

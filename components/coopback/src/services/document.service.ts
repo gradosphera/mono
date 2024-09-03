@@ -51,7 +51,7 @@ export async function buildComplexDocument(
     const decision_action = (
       await getActions(`${process.env.SIMPLE_EXPLORER_API}/get-actions`, {
         filter: JSON.stringify({
-          account: process.env.SOVIET_CONTRACT,
+          account: SovietContract.contractName.production,
           name: SovietContract.Actions.Registry.NewDecision.actionName,
           receiver: process.env.COOPNAME,
           'data.decision_id': String(raw_document.decision_id),
@@ -101,7 +101,7 @@ export const queryDocuments = async (
     `${process.env.SIMPLE_EXPLORER_API}/get-actions`,
     {
       filter: JSON.stringify({
-        account: process.env.SOVIET_CONTRACT,
+        account: SovietContract.contractName.production,
         name: SovietContract.Actions.Registry.NewResolved.actionName,
         receiver: process.env.COOPNAME,
         ...filter,

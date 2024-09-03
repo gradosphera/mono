@@ -24,7 +24,7 @@ export class Organization {
   constructor(storage: MongoDBConnector, data?: ExternalOrganizationData) {
     this.db = storage
     this.organization = data
-    this.data_service = new DataService<InternalOrganizationData>(storage, 'OrgData')
+    this.data_service = new DataService<InternalOrganizationData>(storage, 'organizations')
   }
 
   validate(): ValidateResult {

@@ -18,7 +18,7 @@ export class PaymentMethod {
   constructor(storage: MongoDBConnector, data?: PaymentData) {
     this.db = storage
     this.paymentMethod = data
-    this.data_service = new DataService(storage, 'PaymentData')
+    this.data_service = new DataService(storage, 'paymentMethods')
   }
 
   validate(): ValidateResult {

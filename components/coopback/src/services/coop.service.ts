@@ -11,7 +11,7 @@ export const loadAgenda = async (coopname: string): Promise<Cooperative.Document
 
   const decisions = (await blockchainService.lazyFetch(
     api,
-    process.env.SOVIET_CONTRACT as string,
+    SovietContract.contractName.production as string,
     coopname,
     'decisions'
   )) as SovietContract.Tables.Decisions.IDecision[];
@@ -22,7 +22,7 @@ export const loadAgenda = async (coopname: string): Promise<Cooperative.Document
     const action = (
       await getActions(`${process.env.SIMPLE_EXPLORER_API}/get-actions`, {
         filter: JSON.stringify({
-          account: process.env.SOVIET_CONTRACT,
+          account: SovietContract.contractName.production,
           name: SovietContract.Actions.Registry.NewSubmitted.actionName,
           receiver: process.env.COOPNAME,
           'data.decision_id': String(table.id),
@@ -40,7 +40,7 @@ export const loadAgenda = async (coopname: string): Promise<Cooperative.Document
 export const loadStaff = async (coopname) => {
   const api = await blockchainService.getApi();
 
-  const staff = await blockchainService.lazyFetch(api, process.env.SOVIET_CONTRACT, coopname, 'staff');
+  const staff = await blockchainService.lazyFetch(api, SovietContract.contractName.production, coopname, 'staff');
 
   for (const staf of staff) {
     const user = await userService.getUserByUsername(staf.username);

@@ -42,7 +42,7 @@ export class JoinCoopTemplateFactory extends DocFactory {
       signature: string
     }
 
-    const data_service = new DataService<SignatureData>(this.storage, 'SignatureData')
+    const data_service = new DataService<SignatureData>(this.storage, 'signatures')
 
     // пропуск сохранения необходим при вступлении для того, чтобы подготовить документ только для отображения без сохранения
     if (!options.skip_save) {

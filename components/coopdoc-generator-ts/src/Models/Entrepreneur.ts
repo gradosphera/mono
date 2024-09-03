@@ -24,7 +24,7 @@ export class Entrepreneur {
   constructor(storage: MongoDBConnector, data?: ExternalEntrepreneurData) {
     this.db = storage
     this.entrepreneur = data
-    this.data_service = new DataService<InternalEntrepreneurData>(storage, 'EntrepreneurData')
+    this.data_service = new DataService<InternalEntrepreneurData>(storage, 'entrepreneurs')
   }
 
   validate(): ValidateResult {

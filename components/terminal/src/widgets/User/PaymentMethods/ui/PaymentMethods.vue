@@ -7,7 +7,7 @@ q-card(flat bordered).q-pa-md
         div(v-if="method.method_type ==='sbp' && isSBPData(method.data)")
           div.flex.justify-between
 
-            q-badge
+            q-badge(color="accent")
               span №{{ method.method_id }}
               span(v-if="method.method_type ==='sbp'").q-pl-xs СБП
             DeletePaymentButton(:size="'xs'" :username="username" :method_id="method.method_id")
@@ -15,7 +15,7 @@ q-card(flat bordered).q-pa-md
 
         div(v-if="method.method_type ==='bank_transfer' && isBankTransferData(method.data)")
           div.flex.justify-between
-            q-badge
+            q-badge(color="accent")
               span №{{ method.method_id }}
               span(v-if="method.method_type ==='bank_transfer'").q-pl-xs Банковский перевод
             DeletePaymentButton(:size="'xs'" :username="username" :method_id="method.method_id")

@@ -1,6 +1,11 @@
 <template lang="pug">
 div
   q-btn(@click="showDialog=true" outline) добавить метод
+
+  q-badge(flat rounded color="grey").q-ml-sm
+    q-icon(name="far fa-question")
+    q-tooltip Используйте, чтобы добавить метод возврата паевого взноса. Каким именно методом вам вернуть паевый взнос вы сможете выбрать при создании заявления на возврат.
+
   q-dialog(v-model="showDialog" @hide="clear")
     ModalBase(:title='"Добавить метод платежа"' )
       Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm

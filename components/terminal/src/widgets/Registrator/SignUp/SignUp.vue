@@ -22,10 +22,11 @@ div
       Welcome(v-model:step='store.step')
   q-btn(@click="out" dense size="sm" flat) начать с начала
 
+
 </template>
 
 <script lang="ts" setup>
-import { watch, onMounted, onBeforeUnmount } from 'vue'
+import { watch, onMounted, onBeforeUnmount, computed } from 'vue'
 import EmailInput from './EmailInput.vue'
 import GenerateAccount from './GenerateAccount.vue'
 import SetUserData from './SetUserData.vue'
@@ -41,10 +42,11 @@ const currentUser = useCurrentUserStore()
 
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { useLogoutUser } from 'src/features/Registrator/Logout'
+import { useSessionStore } from 'src/entities/Session'
 const { state, clearUserData } = useRegistratorStore()
-
+const session = useSessionStore()
 const store = state
-
+const username = computed(() => session.username)
 onMounted(() => {
   if (!currentUser.isRegistrationComplete) {
 
@@ -87,7 +89,7 @@ watch(
   () => [store.step, store.email, store.account, store.userData],
   () => {
     if (store.step >= 4) {
-      currentUser.loadProfile(store.account.username, COOPNAME)
+      currentUser.loadProfile(username.value, COOPNAME)
     }
   }
 )

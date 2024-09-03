@@ -16,7 +16,7 @@ export class Individual {
 
   constructor(storage: MongoDBConnector, data?: ExternalIndividualData) {
     this.individual = data
-    this.data_service = new DataService<InternalIndividualData>(storage, 'IndividualData')
+    this.data_service = new DataService<InternalIndividualData>(storage, 'individuals')
   }
 
   validate(): ValidateResult {

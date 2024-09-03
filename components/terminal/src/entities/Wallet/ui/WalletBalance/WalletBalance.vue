@@ -5,12 +5,7 @@ const walletStore = useWalletStore()
 
 <template lang="pug">
 div
-  q-input(readonly standout label="Паевый счёт" v-model="walletStore.wallet.available")
-  //- span.text-grey Паевый счёт
-  //- p.text-h3 {{ walletStore.wallet.available }}
-
-
-  q-input(readonly standout label="Членский счёт" v-model="walletStore.wallet.blocked")
-
+q-input(readonly standout label="Паевый счёт" v-model="walletStore.wallet.available" style="font-size: 18px;")
+q-input(readonly standout label="Членский счёт" v-model="walletStore.wallet.blocked" style="font-size: 18px;")
 
 </template>

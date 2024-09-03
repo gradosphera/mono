@@ -14,6 +14,7 @@ const baseRoutes = [
   {
     path: '/',
     component: layout,
+    name: 'base',
     children: [
       {
         path: '',
