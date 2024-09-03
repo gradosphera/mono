@@ -60,7 +60,7 @@ export class JoinCoopTemplateFactory extends DocFactory {
       }
       else {
         // если подпись указана - сохраняем в хранилище
-        const data_service = new DataService<SignatureData>(this.storage, 'SignatureData')
+        const data_service = new DataService<SignatureData>(this.storage, 'signatures')
         await data_service.save({ username: options.username, block_num: meta.block_num, signature })
       }
     }
