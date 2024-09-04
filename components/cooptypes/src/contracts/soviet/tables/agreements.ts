@@ -4,7 +4,7 @@ import { Actors } from '../../../common'
 /**
  * Имя таблицы
  */
-export const tableName = 'indocuments'
+export const tableName = 'agreements'
 
 /**
  * Таблица хранится в {@link Actors._coopname | области памяти кооператива}.
@@ -14,4 +14,4 @@ export const scope = Actors._coopname
 /**
  * @interface
  */
-export type IIncomeDocument = Soviet.IIndocument
+export type IAgreement = Soviet.IAgreement

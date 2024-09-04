@@ -1,3 +1,4 @@
+/* eslint-disable node/prefer-global/process */
 import dotenv from 'dotenv'
 import Redis from 'ioredis'
 
@@ -10,11 +11,8 @@ startSocketServer()
 
 const consumer = `consumer-${Math.random()}`
 
-// eslint-disable-next-line node/prefer-global/process
 const redisPort = Number(process.env.REDIS_PORT) || 6379
-// eslint-disable-next-line node/prefer-global/process
 const redisHost = process.env.REDIS_HOST
-// eslint-disable-next-line node/prefer-global/process
 const redisPassword = process.env.REDIS_PASSWORD
 
 const redis = new Redis({
@@ -68,7 +66,7 @@ async function consumeMessages(group: string) {
 
 // Главная функция выполнения
 (async () => {
-  const groups = ['emailGroup', 'websocketGroup'] // , 'pushGroup'
+  const groups = [`${process.env.COOPNAME}-email`, `${process.env.COOPNAME}-websocket`] // push
   for (const group of groups)
     await createConsumerGroup('notifications', group)
 

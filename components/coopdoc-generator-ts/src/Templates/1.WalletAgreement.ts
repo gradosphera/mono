@@ -1,31 +1,16 @@
 import type { JSONSchemaType } from 'ajv'
-
 import type { IMetaDocument, ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Services/Validator'
-import { type CooperativeData, CooperativeSchema } from '../Models/Cooperative'
 
 // Модель данных
-export interface IJoinProgram {
-  coop: CooperativeData
-  protocol_number: string
-  protocol_day_month_year: string
+export interface Interface {
   meta: IMetaDocument
 }
 
 // Схема для сверки
-export const joinProgram: JSONSchemaType<IJoinProgram> = {
+export const Schema: JSONSchemaType<Interface> = {
   type: 'object',
   properties: {
-    coop: {
-      type: 'object',
-      properties: {
-        ...CooperativeSchema.properties,
-      },
-      required: [...CooperativeSchema.required],
-      additionalProperties: true,
-    },
-    protocol_number: { type: 'string' },
-    protocol_day_month_year: { type: 'string' },
     meta: {
       type: 'object',
       properties: {
@@ -35,14 +20,14 @@ export const joinProgram: JSONSchemaType<IJoinProgram> = {
       additionalProperties: true,
     },
   },
-  required: ['coop', 'protocol_number', 'protocol_day_month_year', 'meta'],
+  required: ['meta'],
   additionalProperties: true,
 }
 
-export const JoinProgramTemplate: ITemplate<IJoinProgram> = {
+export const Template: ITemplate<Interface> = {
   title: 'Форма присоединения к ЦПП «ЦИФРОВОЙ КОШЕЛЕК»',
   description: 'Форма присоединения к целевой потребительской программе «ЦИФРОВОЙ КОШЕЛЕК»',
-  model: joinProgram,
+  model: Schema,
   context: `<div style=\"text-align: right; margin:\">\n<p style=\"margin: 0px !important\">{% trans 'APPROVED' %}</p>\n<p style=\"margin: 0px !important\">{% trans 'protocol' %} {{ protocol_number }}</p>\n<p style=\"margin: 0px !important\">{{ coop.full_name }} </p>\n<p style=\"margin: 0px !important\">{% trans 'from' %} {{ protocol_day_month_year }}</p>\n</div>\n<div style=\"text-align: center\">\n<h1 class=\"header\"> {% trans 'PROVISION' %}</h1>\n{% trans 'consumer_program_title' %}\n</div>\n<p>{% trans 'consumer_program_provision_intro' %} {{ coop.short_name }} {% trans 'cooperative_hereto' %}</p>\n<p>{% trans 'legal_basis' %}</p>\n<p>{% trans 'program_duration' %}</p>\n<p>{% trans 'program_provision_status' %}</p>\n<div style=\"text-align: center\">\n<h3>{% trans 'terms_program' %}</h3>\n</div>\n<p>{% trans 'consumer_program_terms' %}</p>\n<div style=\"text-align: center\">\n<h3>{% trans 'program_goals' %}</h3>\n</div>\n<p>{% trans 'goal_efficiency' %}</p>\n<p>{% trans 'goal_transparency' %}</p>\n<div style=\"text-align: center\"><h3>{% trans 'program_participation_procedure' %}</h3></div>\n<p>{% trans 'program_participation_terms' %}</p>\n<p>{% trans 'offer_acceptance' %}</p>\n<p>{% trans 'procedure_participation' %}</p>\n<div style=\"text-align: center\"><h3>{% trans 'user_cabinet' %}</h3></div>\n<p>{% trans 'site_access' %}</p>\n<p>{% trans 'unique_code' %}</p>\n<p>{% trans 'digital_signature' %}</p>\n<p>{% trans 'identification' %}</p>\n<p>{% trans 'information_security' %}</p>\n<div style=\"text-align: center\"><h3>{% trans 'program_interaction_mechanism' %}</h3></div>\n<p>{% trans 'program_share_contribution' %}</p>\n<p>{% trans 'share_contribution_procedure' %}</p>\n<p>{% trans 'fund_management' %}</p>\n<p>{% trans 'application_to_council' %}</p>\n<p>{% trans 'share_contribution_return' %}</p>\n<p>{% trans 'claim_return' %}</p>\n<p>{% trans 'payment_confirmation' %}</p>\n<p>{% trans 'novation_agreement' %}</p>\n<p>{% trans 'novation_agreement_terms' %}</p>\n<div style=\"text-align: center\"><h3>{% trans 'program_rights_obligations' %}</h3></div>\n<p>{% trans 'participant_rights' %}</p>\n<p>{% trans 'participant_obligations' %}</p>\n<p>{% trans 'cooperative_obligations' %}</p>\n<p>{% trans 'cooperative_rights' %}</p>\n<div style=\"text-align: center\"><h3>{% trans 'force_majeure' %}</h3></div>\n<p>{% trans 'legal_changes' %}</p>\n<p>{% trans 'program_modification' %}</p>\n<p>{% trans 'force_majeure_cases' %}</p>\n<div style=\"text-align: center\"><h3>{% trans 'program_communication' %}</h3></div>\n<p>{% trans 'communication_channels' %}</p>\n<p>{% trans 'alternative_methods' %}</p>\n<p>{% trans 'program_additional_conditions' %}</p>\n<p>{% trans 'governing_documents' %}</p>\n<p>{% trans 'changes_amendments' %}</p>\n<div class=\"signature\">\n{% trans 'acceptance_agreement' %}</div>`,
   translations: {
     ru: {

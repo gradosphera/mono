@@ -2,21 +2,15 @@ import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IMetaDocument } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 import { DocumentsRegistry } from '../Templates'
-import type { IGenerateJoinProgram } from '../Interfaces/Actions'
-import type { IJoinProgram } from '../Templates/1000.ProgramProvision'
+import type { IGenerateAgreement } from '../Interfaces/Actions'
+import type { Interface } from '../Templates/1.WalletAgreement'
 
-export class JoinProgramTemplateFactory extends DocFactory {
+export class Factory extends DocFactory {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
-  async generateDocument(options: IGenerateJoinProgram): Promise<IGeneratedDocument> {
-    // TODO
-    /**
-     * Получаем шаблон программы по registry_id из options (registry_id)
-     * Получаем из бд парсера
-     */
-
+  async generateDocument(options: IGenerateAgreement): Promise<IGeneratedDocument> {
     let template
 
     if (process.env.SOURCE === 'local') {
@@ -26,18 +20,13 @@ export class JoinProgramTemplateFactory extends DocFactory {
       template = await this.getTemplate(options.coopname, options.registry_id, options.block_num)
     }
 
-    const coop = await super.getCooperative(options.coopname, options.block_num)
-
     const meta: IMetaDocument = await super.getMeta({
       title: template.title,
       ...options,
     }) // Генерируем мета-данные
 
-    const combinedData: IJoinProgram = {
+    const combinedData: Interface = {
       meta,
-      coop,
-      protocol_number: options.protocol_number,
-      protocol_day_month_year: options.protocol_day_month_year,
     }
 
     // валидируем скомбинированные данные

@@ -11,7 +11,6 @@ function getEnvVar(key: string): string {
   return envVar
 }
 export const node_env = getEnvVar('NODE_ENV')
-console.log('ENV: ', node_env)
 export const eosioApi = getEnvVar('API')
 export const shipApi = getEnvVar('SHIP')
 export const mongoUri = `${getEnvVar('MONGO_EXPLORER_URI')}${node_env === 'test' ? '-test' : ''}`

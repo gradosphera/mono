@@ -1,5 +1,5 @@
 import { DraftContract } from 'cooptypes'
-import type { IJoinCoopDecisionAction } from '../Templates/501.DecisionOfParticipantApplication'
+import type { Interface } from '../Templates/501.DecisionOfParticipantApplication'
 import { DocFactory } from '../Factory'
 import type {
   IDecisionData,
@@ -8,12 +8,12 @@ import type {
   ITemplate,
 } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
-import { DecisionOfParticipantApplicationTemplate } from '../Templates/501.DecisionOfParticipantApplication'
+import { Template } from '../Templates/501.DecisionOfParticipantApplication'
 import type { IGenerateJoinCoopDecision } from '../Interfaces/Actions'
 
 export const registry_id = 501
 
-export class DecisionOfJoinCoopTemplateFactory extends DocFactory {
+export class Factory extends DocFactory {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
@@ -21,10 +21,10 @@ export class DecisionOfJoinCoopTemplateFactory extends DocFactory {
   async generateDocument(
     options: IGenerateJoinCoopDecision,
   ): Promise<IGeneratedDocument> {
-    let template: ITemplate<IJoinCoopDecisionAction>
+    let template: ITemplate<Interface>
 
     if (process.env.SOURCE === 'local') {
-      template = DecisionOfParticipantApplicationTemplate
+      template = Template
     }
     else {
       template = await this.getTemplate(DraftContract.contractName.production, registry_id, options.block_num)
@@ -52,7 +52,7 @@ export class DecisionOfJoinCoopTemplateFactory extends DocFactory {
       meta.created_at,
     )
 
-    const combinedData: IJoinCoopDecisionAction = {
+    const combinedData: Interface = {
       ...userData,
       meta,
       coop,

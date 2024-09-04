@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { RegistratorContract, SovietContract } from 'cooptypes'
-import { Generator, type IGenerateJoinProgram } from '../src'
+import { Generator, type IGenerateAgreement } from '../src'
 import type { IGeneratedDocument } from '../src/Interfaces/Documents'
 import { saveBufferToDisk } from '../src/Utils/saveBufferToDisk'
 import { loadBufferFromDisk } from '../src/Utils/loadBufferFromDisk'
@@ -299,7 +299,7 @@ describe('тест генератора документов', async () => {
   })
 
   it('генерируем заявление на присоединение к ЦПП', async () => {
-    const params: IGenerateJoinProgram = {
+    const params: IGenerateAgreement = {
       code: 'soviet',
       action: 'joinprog',
       coopname: 'voskhod',

@@ -1,15 +1,15 @@
 import * as ParticipantApplication from './100.ParticipantApplication'
 import * as DecisionOfParticipantApplication from './501.DecisionOfParticipantApplication'
-import * as ProgramProvision from './1000.ProgramProvision'
+import * as WalletAgreement from './1.WalletAgreement'
 
 export const DocumentsRegistry = {
-  100: ParticipantApplication.ParticipantApplicationTemplate,
-  501: DecisionOfParticipantApplication.DecisionOfParticipantApplicationTemplate,
-  1000: ProgramProvision.JoinProgramTemplate,
+  1: WalletAgreement.Template,
+  100: ParticipantApplication.Template,
+  501: DecisionOfParticipantApplication.Template,
 }
 
 export interface DocumentsMappingByActionAndCode {
-  'registrator::joincoop': ParticipantApplication.IJoinCoopAction // Тип данных для документа 'registrator::joincoop'
-  'registrator::joincoopdec': DecisionOfParticipantApplication.IJoinCoopDecisionAction // Тип данных для документа 'registrator::joincoopdec'
-  'soviet::joinprog': ProgramProvision.IJoinProgram
+  'registrator::joincoop': ParticipantApplication.Interface // Тип данных для документа 'registrator::joincoop'
+  'registrator::joincoopdec': DecisionOfParticipantApplication.Interface // Тип данных для документа 'registrator::joincoopdec'
+  'soviet::sndagreement': WalletAgreement.Interface
 }

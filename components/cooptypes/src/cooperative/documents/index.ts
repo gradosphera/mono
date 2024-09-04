@@ -91,18 +91,32 @@ export interface IGenerate extends Omit<Partial<IMetaDocument>, 'registry_id' | 
   [key: string]: any
 }
 
+/**
+ * Интерфейс генерации заявления на вступление в кооператив
+ */
 export interface IGenerateJoinCoop extends IGenerate {
   signature: string
   skip_save: boolean
 }
 
+/**
+ * Интерфейс генерации решения совета
+ */
 export interface IGenerateJoinCoopDecision extends IGenerate {
   decision_id: number
 }
 
-/** Интерфейс генерации документа для присоединения к программе ЦПП */
-export interface IGenerateJoinProgram extends IGenerate {
+/**
+ * Интерфейс генерации соглашения
+ */
+export interface IGenerateAgreement extends IGenerate {
   registry_id: number
-  protocol_number: string
-  protocol_day_month_year: string
 }
+
+// LEGACY
+/** Интерфейс генерации документа для присоединения к программе ЦПП */
+// export interface IGenerateJoinProgram extends IGenerate {
+//   registry_id: number
+//   protocol_number: string
+//   protocol_day_month_year: string
+// }

@@ -59,6 +59,6 @@ export * as ProgramWallets from './programWallets'
 export * as Wallets from './wallets'
 
 /**
- * Таблица содержит заявления пайщиков кооператива, которые ожидают приёма, но не требуют решения совета.
+ * Таблица содержит подписанные пайщиками документы соглашений с кооперативом
  */
-export * as IncomeDocuments from './incomeDocuments'
+export * as Agreements from './agreements'

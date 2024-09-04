@@ -5,3 +5,5 @@ export type IGenerate = Cooperative.Documents.IGenerate;
 export type IGenerateJoinCoop = Cooperative.Documents.IGenerateJoinCoop;
 export type IGenerateJoinCoopDecision =
   Cooperative.Documents.IGenerateJoinCoopDecision;
+
+export type IGenerateAgreement = Cooperative.Documents.IGenerateAgreement

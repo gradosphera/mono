@@ -43,7 +43,7 @@ export interface ICombinedData {
   individual?: ExternalIndividualData
   organization?: ExternalOrganizationData
   entrepreneur?: ExternalEntrepreneurData
-  coop: CooperativeData
+  coop?: CooperativeData
   meta: IMetaDocument
 }
 

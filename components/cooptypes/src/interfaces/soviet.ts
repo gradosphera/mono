@@ -65,6 +65,19 @@ export interface IAdduser {
   spread_initial: boolean
 }
 
+export interface IAgreement {
+  id: IUint64
+  coopname: IName
+  username: IName
+  type: IName
+  secondary_id: IUint64
+  draft_registry_id: IUint64
+  version: IUint64
+  document: IDocument
+  status: IName
+  updated_at: ITimePointSec
+}
+
 export interface IAuthorize {
   coopname: IName
   chairman: IName
@@ -140,11 +153,11 @@ export interface IChanges {
   return_product_decision_id: IUint64
 }
 
-export interface ICnfrmindoc {
+export interface IConfirmagree {
   coopname: IName
-  registrator: IName
+  administrator: IName
   username: IName
-  indoc_id: IUint64
+  agreement_id: IUint64
 }
 
 export interface ICounts extends ICountsBase {
@@ -215,11 +228,11 @@ export interface IDecision {
   created_at: ITimePointSec
 }
 
-export interface IDeclnindoc {
+export interface IDeclineagree {
   coopname: IName
-  registrator: IName
+  administrator: IName
   username: IName
-  indoc_id: IUint64
+  agreement_id: IUint64
   comment: string
 }
 
@@ -299,17 +312,6 @@ export interface IFundwithdraw {
   document: IDocument
 }
 
-export interface IIndocument {
-  id: IUint64
-  coopname: IName
-  username: IName
-  type: IName
-  secondary_id: IUint64
-  draft_registry_id: IUint64
-  version: IUint64
-  document: IDocument
-}
-
 export interface IInit {
 }
 
@@ -324,14 +326,6 @@ export interface IJoincoops {
   username: IName
   is_paid: boolean
   notice: string
-}
-
-export interface IJoinprog {
-  coopname: IName
-  username: IName
-  document: IDocument
-  program_id: IUint64
-  version: IUint64
 }
 
 export interface IMigrate {
@@ -423,10 +417,8 @@ export interface IProgwallet {
   id: IUint64
   coopname: IName
   program_id: IUint64
-  version: IUint64
   username: IName
   available: IAsset
-  document: IDocument
 }
 
 export interface IRecieved {
@@ -455,6 +447,15 @@ export interface ISetrights {
   chairman: IName
   username: IName
   rights: IRight[]
+}
+
+export interface ISndagreement {
+  coopname: IName
+  username: IName
+  agreement_type: IName
+  secondary_id: IUint64
+  draft_registry_id: IUint64
+  document: IDocument
 }
 
 export interface IStaff {

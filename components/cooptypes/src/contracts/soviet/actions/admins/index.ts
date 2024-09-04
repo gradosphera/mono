@@ -23,13 +23,3 @@ export * as SetRights from './setRights'
  * @private
  */
 export * as Init from './init'
-
-/**
- * Действие подтверждения приёма заявления пайщика
- */
-export * as ConfirmIncomeDocument from './confirmIncomeDocument'
-
-/**
- * Действие отклонения приёма заявления пайщика
- */
-export * as DeclineIncomeDocument from './declineIncomeDocument'

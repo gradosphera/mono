@@ -12,9 +12,9 @@ export const authorizations = [
 /**
  * Имя действия
  */
-export const actionName = 'joinprog'
+export const actionName = 'sndagreement'
 
 /**
  * Действие отправки заявления на присоединение к ЦПП кооператива
  */
-export type IJoinProgram = Soviet.IJoinprog
+export type ISendAgreement = Soviet.ISndagreement

@@ -11,7 +11,6 @@ export class Database {
   private sync: Collection | undefined
 
   constructor() {
-    console.log('mongo2: ', mongoUri)
     this.client = new MongoClient(mongoUri)
   }
 

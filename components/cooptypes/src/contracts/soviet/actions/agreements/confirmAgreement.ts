@@ -12,10 +12,10 @@ export const authorizations = [
 /**
  * Имя действия
  */
-export const actionName = 'cnfrmindoc'
+export const actionName = 'confirmagree'
 
 /**
  * @interface
  * Действие подтверждает приём заявления администратором
  */
-export type IConfirmIncomeDocument = Soviet.ICnfrmindoc
+export type IConfirmAgreement = Soviet.IConfirmagree

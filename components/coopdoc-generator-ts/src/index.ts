@@ -5,7 +5,9 @@ import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
 import type { Cooperative as CooperativeModel } from 'cooptypes'
 import type { Actions, IFilterDocuments, IGeneratedDocument, externalDataTypes, externalDataTypesArrays, internalFilterTypes } from './Interfaces'
 import type { IGenerate } from './Interfaces/Documents'
-import { JoinCoop, JoinCoopDecision, JoinProgram } from './Actions'
+import { JoinCoop, JoinCoopDecision } from './Actions'
+import * as Registry from './Actions'
+
 import { MongoDBConnector } from './Services/Databazor'
 import type { ExternalIndividualData } from './Models/Individual'
 import { Individual } from './Models/Individual'
@@ -55,9 +57,9 @@ export class Generator implements IGenerator {
 
     // Инициализация фабрик для разных типов документов
     this.factories = {
-      'registrator::joincoop': new JoinCoop.JoinCoopTemplateFactory(this.storage),
-      'registrator::joincoopdec': new JoinCoopDecision.DecisionOfJoinCoopTemplateFactory(this.storage),
-      'soviet::joinprog': new JoinProgram.JoinProgramTemplateFactory(this.storage),
+      'registrator::joincoop': new Registry.JoinCoop.Factory(this.storage),
+      'registrator::joincoopdec': new Registry.JoinCoopDecision.Factory(this.storage),
+      'soviet::sndagreement': new Registry.SendAgreement.Factory(this.storage),
     }
     await this.storage.connect()
   }

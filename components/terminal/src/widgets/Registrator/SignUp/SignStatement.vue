@@ -74,6 +74,11 @@ const setSignature = async (): Promise<void> => {
     onSign.value = true
     store.signature = sign
     await api.signStatement()
+
+    // await api.signWalletAgreement()
+    // ...
+
+
     await api.sendStatement()
     onSign.value = false
     store.step++

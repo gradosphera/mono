@@ -1,3 +1,3 @@
 export * as JoinCoop from './registrator.joincoop'
 export * as JoinCoopDecision from './registrator.joincoopdec'
-export * as JoinProgram from './soviet.joinprog'
+export * as SendAgreement from './soviet.sndagreement'

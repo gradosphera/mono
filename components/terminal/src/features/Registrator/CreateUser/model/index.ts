@@ -19,6 +19,7 @@ import {
 } from 'src/entities/User';
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { IEntrepreneurData, IIndividualData, IOrganizationData, IUserData } from 'src/shared/lib/types/user/IUserData';
+import type { SovietContract } from 'cooptypes';
 
 
 export interface ICreateUser {
@@ -80,6 +81,33 @@ export function useCreateUser() {
 
     return store.statement;
   }
+
+
+  async function signWalletAgreement(): Promise<IObjectedDocument> {
+    const data: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
+      coopname: '',
+      username: '',
+      agreement_type: '',
+      secondary_id: '',
+      draft_registry_id: '',
+      document: undefined
+    };
+
+    const document = await new DigitalDocument().generate(data);
+
+    const globalStore = useGlobalStore();
+    const digital_signature = await globalStore.signDigest(document.hash);
+
+    store.statement = {
+      hash: document.hash,
+      meta: document.meta,
+      public_key: digital_signature.public_key,
+      signature: digital_signature.signature,
+    } as IObjectedDocument;
+
+    return store.statement;
+  }
+
 
   async function generateStatementWithoutSignature(username: string) {
     const data: IGenerateJoinCoop = {

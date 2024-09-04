@@ -1,24 +1,24 @@
 import { DraftContract } from 'cooptypes'
-import type { IJoinCoopAction } from '../Templates/100.ParticipantApplication'
+import type { Interface } from '../Templates/100.ParticipantApplication'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
-import { ParticipantApplicationTemplate } from '../Templates/100.ParticipantApplication'
+import { Template } from '../Templates/100.ParticipantApplication'
 import DataService from '../Services/Databazor/DataService'
 import type { IGenerateJoinCoop } from '../Interfaces/Actions'
 
 export const registry_id = 100
 
-export class JoinCoopTemplateFactory extends DocFactory {
+export class Factory extends DocFactory {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
   async generateDocument(options: IGenerateJoinCoop): Promise<IGeneratedDocument> {
-    let template: ITemplate<IJoinCoopAction>
+    let template: ITemplate<Interface>
 
     if (process.env.SOURCE === 'local') {
-      template = ParticipantApplicationTemplate
+      template = Template
     }
     else {
       template = await this.getTemplate(DraftContract.contractName.production, registry_id, options.block_num)
@@ -65,7 +65,7 @@ export class JoinCoopTemplateFactory extends DocFactory {
       }
     }
 
-    const combinedData: IJoinCoopAction = { ...userData, meta, coop, type: user.type, signature }
+    const combinedData: Interface = { ...userData, meta, coop, type: user.type, signature }
 
     // валидируем скомбинированные данные
     await super.validate(combinedData, template.model)

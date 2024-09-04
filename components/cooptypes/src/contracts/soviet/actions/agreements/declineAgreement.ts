@@ -12,10 +12,10 @@ export const authorizations = [
 /**
  * Имя действия
  */
-export const actionName = 'declnindoc'
+export const actionName = 'declineagree'
 
 /**
  * @interface
  * Действие отклоняет заявление пайщика администратором
  */
-export type IDeclineIncomeDocument = Soviet.IDeclnindoc
+export type IDeclineAgreement = Soviet.IDeclineagree
