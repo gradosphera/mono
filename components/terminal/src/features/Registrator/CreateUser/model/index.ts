@@ -19,8 +19,8 @@ import {
 } from 'src/entities/User';
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { IEntrepreneurData, IIndividualData, IOrganizationData, IUserData } from 'src/shared/lib/types/user/IUserData';
-import type { SovietContract } from 'cooptypes';
-
+import type { Cooperative, SovietContract } from 'cooptypes';
+import { WalletAgreement } from 'coopdoc-generator-ts';
 
 export interface ICreateUser {
   email: string;
@@ -58,11 +58,10 @@ export function useCreateUser() {
   }
 
   async function signStatement(): Promise<IObjectedDocument> {
-    const data: IGenerateJoinCoop = {
+    const data: Cooperative.Documents.IGenerateJoinCoop = {
+      registry_id: 100,
       signature: store.signature,
       skip_save: false,
-      code: 'registrator',
-      action: 'joincoop',
       coopname: COOPNAME,
       username: store.account.username,
     };
@@ -83,14 +82,11 @@ export function useCreateUser() {
   }
 
 
-  async function signWalletAgreement(): Promise<IObjectedDocument> {
-    const data: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
-      coopname: '',
-      username: '',
-      agreement_type: '',
-      secondary_id: '',
-      draft_registry_id: '',
-      document: undefined
+  async function signWalletAgreement(): Promise<void> {
+    const data: IGenerateWalletAgreement= {
+      registry_id: WalletAgreement.registry_id,
+      coopname: COOPNAME,
+      username: store.account.username,
     };
 
     const document = await new DigitalDocument().generate(data);
@@ -98,7 +94,7 @@ export function useCreateUser() {
     const globalStore = useGlobalStore();
     const digital_signature = await globalStore.signDigest(document.hash);
 
-    store.statement = {
+    store.walletAgreement = {
       hash: document.hash,
       meta: document.meta,
       public_key: digital_signature.public_key,
@@ -117,6 +113,7 @@ export function useCreateUser() {
       action: 'joincoop',
       coopname: COOPNAME,
       username,
+      registry_id: 0
     };
     const document = await new DigitalDocument().generate(data);
 
@@ -187,5 +184,6 @@ export function useCreateUser() {
     signStatement,
     sendStatement,
     createInitialPayment,
+    signWalletAgreement
   };
 }

@@ -1,5 +1,13 @@
 import type { Cooperative } from 'cooptypes'
 
 export type IGenerateJoinCoopDecision = Cooperative.Documents.IGenerateJoinCoopDecision
-export type IGenerateJoinCoop = Cooperative.Documents.IGenerateJoinCoop
+
+/**
+ * Интерфейс генерации заявления на вступление в кооператив
+ */
+export interface IGenerateJoinCoop extends IGenerate {
+  signature: string
+  skip_save: boolean
+}
+
 export type IGenerateAgreement = Cooperative.Documents.IGenerateAgreement

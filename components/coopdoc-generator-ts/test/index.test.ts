@@ -1,18 +1,18 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { RegistratorContract, SovietContract } from 'cooptypes'
-import { Generator, type IGenerateAgreement } from '../src'
+import { Generator, type IGenerateWalletAgreement } from '../src'
 import type { IGeneratedDocument } from '../src/Interfaces/Documents'
 import { saveBufferToDisk } from '../src/Utils/saveBufferToDisk'
 import { loadBufferFromDisk } from '../src/Utils/loadBufferFromDisk'
 import { calculateSha256 } from '../src/Utils/calculateSHA'
-import { DocumentsRegistry } from '../src/Templates'
 import { MongoDBConnector } from '../src/Services/Databazor'
 
-const mongoUri = 'mongodb://127.0.0.1:27017/cooperative'
+const mongoUri = 'mongodb://127.0.0.1:27017/cooperative-test'
 const coopname = 'voskhod'
 
 import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData } from '../src/Models'
 import type { PaymentData } from '../src/Models/PaymentMethod'
+import { Registry } from '../src/templates'
 import { signatureExample } from './signatureExample'
 
 const generator = new Generator()
@@ -41,7 +41,7 @@ describe('тест генератора документов', async () => {
       return
 
     let i = 0
-    for (const [key, value] of Object.entries(DocumentsRegistry)) {
+    for (const [key, value] of Object.entries(Registry)) {
       i++
       await deltas.insertOne({
         block_num: 0,
@@ -55,10 +55,10 @@ describe('тест генератора документов', async () => {
           registry_id: String(key),
           version: 1,
           default_translation_id: String(i),
-          title: value.title,
-          description: value.description,
-          context: value.context,
-          model: JSON.stringify(value.model),
+          title: value.Template.title,
+          description: value.Template.description,
+          context: value.Template.context,
+          model: JSON.stringify(value.Template.model),
         },
       })
 
@@ -73,7 +73,7 @@ describe('тест генератора документов', async () => {
           id: String(i),
           draft_id: String(i),
           lang: 'ru',
-          data: JSON.stringify(value.translations.ru),
+          data: JSON.stringify(value.Template.translations.ru),
         },
       })
 
@@ -299,13 +299,11 @@ describe('тест генератора документов', async () => {
   })
 
   it('генерируем заявление на присоединение к ЦПП', async () => {
-    const params: IGenerateAgreement = {
-      code: 'soviet',
-      action: 'joinprog',
+    const params: IGenerateWalletAgreement = {
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
-      registry_id: 1000,
+      registry_id: 1,
       protocol_number: '01-01-2024',
       protocol_day_month_year: '1 января 2024 г.',
     }
@@ -343,238 +341,232 @@ describe('тест генератора документов', async () => {
     expect(hash1).toEqual(hash2)
   })
 
-  //   it('генерируем заявление на вступление физического лица', async () => {
-  //     const document: IGeneratedDocument = await generator.generate({
-  //       code: 'registrator',
-  //       action: 'joincoop',
-  //       coopname: 'voskhod',
-  //       username: 'ant',
-  //       lang: 'ru',
-  //       signature: signatureExample,
-  //     })
+  it('генерируем заявление на вступление физического лица', async () => {
+    const document: IGeneratedDocument = await generator.generate({
+      registry_id: 100,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      signature: signatureExample,
+    })
 
-  //     const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
-  //     await saveBufferToDisk(document.binary, filename1)
+    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(document.binary, filename1)
 
-  //     const regenerated_document: IGeneratedDocument = await generator.generate({
-  //       ...document.meta,
-  //     })
-  //     const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
-  //     await saveBufferToDisk(regenerated_document.binary, filename2)
+    const regenerated_document: IGeneratedDocument = await generator.generate({
+      ...document.meta,
+    })
+    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(regenerated_document.binary, filename2)
 
-  //     expect(document.meta).toEqual(regenerated_document.meta)
-  //     expect(document.hash).toEqual(regenerated_document.hash)
+    expect(document.meta).toEqual(regenerated_document.meta)
+    expect(document.hash).toEqual(regenerated_document.hash)
 
-  //     const document_from_disk1 = await loadBufferFromDisk(filename1)
-  //     const document_from_disk2 = await loadBufferFromDisk(filename2)
+    const document_from_disk1 = await loadBufferFromDisk(filename1)
+    const document_from_disk2 = await loadBufferFromDisk(filename2)
 
-  //     const hash1 = calculateSha256(document_from_disk1)
-  //     const hash2 = calculateSha256(document_from_disk2)
+    const hash1 = calculateSha256(document_from_disk1)
+    const hash2 = calculateSha256(document_from_disk2)
 
-  //     const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
+    const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
 
-  //     expect(getted_document).toBeDefined()
-  //     expect(getted_document.hash).toEqual(document.hash)
+    expect(getted_document).toBeDefined()
+    expect(getted_document.hash).toEqual(document.hash)
 
-  //     // console.log('hash1: ', hash1)
-  //     // console.log('hash2: ', hash2)
-  //     // console.log(document)
+    // console.log('hash1: ', hash1)
+    // console.log('hash2: ', hash2)
+    // console.log(document)
 
-  //     expect(hash1).toEqual(hash2)
+    expect(hash1).toEqual(hash2)
 
-  //     const decision_document: IGeneratedDocument = await generator.generate({
-  //       code: 'registrator',
-  //       action: 'joincoopdec',
-  //       coopname: 'voskhod',
-  //       username: 'ant',
-  //       lang: 'ru',
-  //       decision_id: 1,
-  //     })
+    const decision_document: IGeneratedDocument = await generator.generate({
+      registry_id: 501,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      decision_id: 1,
+    })
 
-  //     const filename3 = `${decision_document.meta.title}-${decision_document.meta.username}.pdf`
-  //     await saveBufferToDisk(decision_document.binary, filename3)
-  //   })
+    const filename3 = `${decision_document.meta.title}-${decision_document.meta.username}.pdf`
+    await saveBufferToDisk(decision_document.binary, filename3)
+  })
 
-  //   it('сохранение данных организации', async () => {
-  //     const organizationData: ExternalOrganizationData = {
-  //       username: 'exampleorg',
-  //       type: 'ooo',
-  //       is_cooperative: false,
-  //       short_name: 'ExampleOrg',
-  //       full_name: 'Примерная организация',
-  //       represented_by: {
-  //         first_name: 'Иван',
-  //         last_name: 'Иванов',
-  //         middle_name: 'Иванович',
-  //         position: 'Директор',
-  //         based_on: 'Устава организации',
-  //       },
-  //       country: 'Russia',
-  //       city: 'Moscow',
-  //       full_address: '456 Main St, Moscow, Russia',
-  //       email: 'contact@exampleorg.com',
-  //       phone: '+71234567890',
-  //       details: {
-  //         inn: '0987654321',
-  //         ogrn: '0987654321098',
-  //       },
-  //       bank_account: {
-  //         account_number: '40817810099910004312',
-  //         currency: 'RUB',
-  //         card_number: '0987654321098765',
-  //         bank_name: 'Example Bank',
-  //         details: {
-  //           bik: '098765432',
-  //           corr: '30101810400000000225',
-  //           kpp: '098765432',
-  //         },
-  //       },
-  //     }
+  it('сохранение данных организации', async () => {
+    const organizationData: ExternalOrganizationData = {
+      username: 'exampleorg',
+      type: 'ooo',
+      is_cooperative: false,
+      short_name: 'ExampleOrg',
+      full_name: 'Примерная организация',
+      represented_by: {
+        first_name: 'Иван',
+        last_name: 'Иванов',
+        middle_name: 'Иванович',
+        position: 'Директор',
+        based_on: 'Устава организации',
+      },
+      country: 'Russia',
+      city: 'Moscow',
+      full_address: '456 Main St, Moscow, Russia',
+      email: 'contact@exampleorg.com',
+      phone: '+71234567890',
+      details: {
+        inn: '0987654321',
+        ogrn: '0987654321098',
+      },
+      bank_account: {
+        account_number: '40817810099910004312',
+        currency: 'RUB',
+        card_number: '0987654321098765',
+        bank_name: 'Example Bank',
+        details: {
+          bik: '098765432',
+          corr: '30101810400000000225',
+          kpp: '098765432',
+        },
+      },
+    }
 
-  //     const saved = await generator.save('organization', organizationData)
+    const saved = await generator.save('organization', organizationData)
 
-  //     const organization = await generator.get('organization', { username: organizationData.username }) as any
+    const organization = await generator.get('organization', { username: organizationData.username }) as any
 
-  //     expect(organization._id).toEqual(saved.insertedId)
+    expect(organization._id).toEqual(saved.insertedId)
 
-  //     Object.keys(organizationData).forEach((field) => {
-  //       expect(organization[field]).toBeDefined()
-  //     })
-  //   })
+    Object.keys(organizationData).forEach((field) => {
+      expect(organization[field]).toBeDefined()
+    })
+  })
 
-  //   it('генерируем заявление на вступление юридического лица', async () => {
-  //     const document: IGeneratedDocument = await generator.generate({
-  //       code: 'registrator',
-  //       action: 'joincoop',
-  //       coopname: 'voskhod',
-  //       username: 'exampleorg',
-  //       lang: 'ru',
-  //       signature: signatureExample,
-  //     })
+  it('генерируем заявление на вступление юридического лица', async () => {
+    const document: IGeneratedDocument = await generator.generate({
+      registry_id: 100,
+      coopname: 'voskhod',
+      username: 'exampleorg',
+      lang: 'ru',
+      signature: signatureExample,
+    })
 
-  //     const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
-  //     await saveBufferToDisk(document.binary, filename1)
+    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(document.binary, filename1)
 
-  //     const regenerated_document: IGeneratedDocument = await generator.generate({
-  //       ...document.meta,
-  //     })
+    const regenerated_document: IGeneratedDocument = await generator.generate({
+      ...document.meta,
+    })
 
-  //     const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
-  //     await saveBufferToDisk(regenerated_document.binary, filename2)
+    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(regenerated_document.binary, filename2)
 
-  //     expect(document.meta).toEqual(regenerated_document.meta)
-  //     expect(document.hash).toEqual(regenerated_document.hash)
+    expect(document.meta).toEqual(regenerated_document.meta)
+    expect(document.hash).toEqual(regenerated_document.hash)
 
-  //     const document_from_disk1 = await loadBufferFromDisk(filename1)
-  //     const document_from_disk2 = await loadBufferFromDisk(filename2)
+    const document_from_disk1 = await loadBufferFromDisk(filename1)
+    const document_from_disk2 = await loadBufferFromDisk(filename2)
 
-  //     const hash1 = calculateSha256(document_from_disk1)
-  //     const hash2 = calculateSha256(document_from_disk2)
+    const hash1 = calculateSha256(document_from_disk1)
+    const hash2 = calculateSha256(document_from_disk2)
 
-  //     // console.log('hash1: ', hash1)
-  //     // console.log('hash2: ', hash2)
-  //     // console.log(document)
+    // console.log('hash1: ', hash1)
+    // console.log('hash2: ', hash2)
+    // console.log(document)
 
-  //     expect(hash1).toEqual(hash2)
+    expect(hash1).toEqual(hash2)
 
-  //     const decision_document: IGeneratedDocument = await generator.generate({
-  //       code: 'registrator',
-  //       action: 'joincoopdec',
-  //       coopname: 'voskhod',
-  //       username: 'exampleorg',
-  //       lang: 'ru',
-  //       decision_id: 2,
-  //     })
+    const decision_document: IGeneratedDocument = await generator.generate({
+      registry_id: 501,
+      coopname: 'voskhod',
+      username: 'exampleorg',
+      lang: 'ru',
+      decision_id: 2,
+    })
 
-  //     const filename3 = `${decision_document.meta.title}-${decision_document.meta.username}.pdf`
-  //     await saveBufferToDisk(decision_document.binary, filename3)
-  //   })
+    const filename3 = `${decision_document.meta.title}-${decision_document.meta.username}.pdf`
+    await saveBufferToDisk(decision_document.binary, filename3)
+  })
 
-  //   it('сохранение данных индивидуального предпринимателя', async () => {
-  //     const entrepreneurData: ExternalEntrepreneurData = {
-  //       username: 'entrepreneur',
-  //       first_name: 'John',
-  //       last_name: 'Doe',
-  //       middle_name: 'Middle',
-  //       birthdate: '2023-04-01',
-  //       phone: '+1234567890',
-  //       email: 'john.doe@example.com',
-  //       full_address: 'переулок правды д. 1',
-  //       country: 'Russia',
-  //       city: 'Moscow',
-  //       details: {
-  //         inn: '0987654321',
-  //         ogrn: '0987654321098',
-  //       },
-  //       bank_account: {
-  //         account_number: '40817810099910004312',
-  //         currency: 'RUB',
-  //         card_number: '0987654321098765',
-  //         bank_name: 'Example Bank',
-  //         details: {
-  //           bik: '098765432',
-  //           corr: '30101810400000000225',
-  //           kpp: '098765432',
-  //         },
-  //       },
-  //     }
+  it('сохранение данных индивидуального предпринимателя', async () => {
+    const entrepreneurData: ExternalEntrepreneurData = {
+      username: 'entrepreneur',
+      first_name: 'John',
+      last_name: 'Doe',
+      middle_name: 'Middle',
+      birthdate: '2023-04-01',
+      phone: '+1234567890',
+      email: 'john.doe@example.com',
+      full_address: 'переулок правды д. 1',
+      country: 'Russia',
+      city: 'Moscow',
+      details: {
+        inn: '0987654321',
+        ogrn: '0987654321098',
+      },
+      bank_account: {
+        account_number: '40817810099910004312',
+        currency: 'RUB',
+        card_number: '0987654321098765',
+        bank_name: 'Example Bank',
+        details: {
+          bik: '098765432',
+          corr: '30101810400000000225',
+          kpp: '098765432',
+        },
+      },
+    }
 
-  //     const saved = await generator.save('entrepreneur', entrepreneurData)
-  //     console.log(saved)
-  //     const entrepreneur = await generator.get('entrepreneur', { username: entrepreneurData.username }) as any
-  //     console.log(entrepreneur)
-  //     expect(entrepreneur._id).toEqual(saved.insertedId)
+    const saved = await generator.save('entrepreneur', entrepreneurData)
+    console.log(saved)
+    const entrepreneur = await generator.get('entrepreneur', { username: entrepreneurData.username }) as any
+    console.log(entrepreneur)
+    expect(entrepreneur._id).toEqual(saved.insertedId)
 
-  //     Object.keys(entrepreneurData).forEach((field) => {
-  //       expect(entrepreneur[field]).toBeDefined()
-  //     })
-  //   })
+    Object.keys(entrepreneurData).forEach((field) => {
+      expect(entrepreneur[field]).toBeDefined()
+    })
+  })
 
-  //   it('генерируем заявление на вступление индивидуального предпринимателя', async () => {
-  //     const document: IGeneratedDocument = await generator.generate({
-  //       code: 'registrator',
-  //       action: 'joincoop',
-  //       coopname: 'voskhod',
-  //       username: 'entrepreneur',
-  //       lang: 'ru',
-  //       signature: signatureExample,
-  //     })
+  it('генерируем заявление на вступление индивидуального предпринимателя', async () => {
+    const document: IGeneratedDocument = await generator.generate({
+      registry_id: 100,
+      coopname: 'voskhod',
+      username: 'entrepreneur',
+      lang: 'ru',
+      signature: signatureExample,
+    })
 
-  //     const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
-  //     await saveBufferToDisk(document.binary, filename1)
+    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(document.binary, filename1)
 
-  //     const regenerated_document: IGeneratedDocument = await generator.generate({
-  //       ...document.meta,
-  //     })
+    const regenerated_document: IGeneratedDocument = await generator.generate({
+      ...document.meta,
+    })
 
-  //     const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
-  //     await saveBufferToDisk(regenerated_document.binary, filename2)
+    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(regenerated_document.binary, filename2)
 
-  //     expect(document.meta).toEqual(regenerated_document.meta)
-  //     expect(document.hash).toEqual(regenerated_document.hash)
+    expect(document.meta).toEqual(regenerated_document.meta)
+    expect(document.hash).toEqual(regenerated_document.hash)
 
-  //     const document_from_disk1 = await loadBufferFromDisk(filename1)
-  //     const document_from_disk2 = await loadBufferFromDisk(filename2)
+    const document_from_disk1 = await loadBufferFromDisk(filename1)
+    const document_from_disk2 = await loadBufferFromDisk(filename2)
 
-  //     const hash1 = calculateSha256(document_from_disk1)
-  //     const hash2 = calculateSha256(document_from_disk2)
+    const hash1 = calculateSha256(document_from_disk1)
+    const hash2 = calculateSha256(document_from_disk2)
 
-  //     // console.log('hash1: ', hash1)
-  //     // console.log('hash2: ', hash2)
-  //     // console.log(document)
+    // console.log('hash1: ', hash1)
+    // console.log('hash2: ', hash2)
+    // console.log(document)
 
-  //     expect(hash1).toEqual(hash2)
+    expect(hash1).toEqual(hash2)
 
-  //     const decision_document: IGeneratedDocument = await generator.generate({
-  //       code: 'registrator',
-  //       action: 'joincoopdec',
-  //       coopname: 'voskhod',
-  //       username: 'entrepreneur',
-  //       lang: 'ru',
-  //       decision_id: 3,
-  //     })
+    const decision_document: IGeneratedDocument = await generator.generate({
+      registry_id: 501,
+      coopname: 'voskhod',
+      username: 'entrepreneur',
+      lang: 'ru',
+      decision_id: 3,
+    })
 
-//     const filename3 = `${decision_document.meta.title}-${decision_document.meta.username}.pdf`
-//     await saveBufferToDisk(decision_document.binary, filename3)
-//   })
+    const filename3 = `${decision_document.meta.title}-${decision_document.meta.username}.pdf`
+    await saveBufferToDisk(decision_document.binary, filename3)
+  })
 })

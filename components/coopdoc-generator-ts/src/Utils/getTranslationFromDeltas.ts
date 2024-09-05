@@ -1,4 +1,4 @@
-import { DraftContract } from 'cooptypes/index'
+import { DraftContract } from 'cooptypes'
 import { getEnvVar } from '../config'
 import { getFetch } from './getFetch'
 

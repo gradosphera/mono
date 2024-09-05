@@ -12,8 +12,6 @@ export interface IChainDocument {
 
 // Определение базового интерфейса для мета-информации
 export interface IMetaDocument {
-  code: string
-  action: string
   title: string
   registry_id: number
   lang: LangType
@@ -83,9 +81,8 @@ export interface IGetResponse<T> {
 /**
  * Общий интерфейс для генерации/регенерации документа
  */
-export interface IGenerate extends Omit<Partial<IMetaDocument>, 'registry_id' | 'title'> {
-  code: string
-  action: string
+export interface IGenerate extends Omit<Partial<IMetaDocument>, 'title'> {
+  registry_id: number
   coopname: string
   username: string
   [key: string]: any
@@ -109,14 +106,6 @@ export interface IGenerateJoinCoopDecision extends IGenerate {
 /**
  * Интерфейс генерации соглашения
  */
-export interface IGenerateAgreement extends IGenerate {
+export interface IGenerateWalletAgreement extends IGenerate {
   registry_id: number
 }
-
-// LEGACY
-/** Интерфейс генерации документа для присоединения к программе ЦПП */
-// export interface IGenerateJoinProgram extends IGenerate {
-//   registry_id: number
-//   protocol_number: string
-//   protocol_day_month_year: string
-// }

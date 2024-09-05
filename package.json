@@ -11,7 +11,7 @@
     "eslint": "^9.9.1",
     "gh-pages": "^6.1.1",
     "lerna": "^8.1.8",
-    "lint-staged": "^15.2.9",
+    "lint-staged": "^15.2.10",
     "terminal": "workspace:*"
   },
   "scripts": {

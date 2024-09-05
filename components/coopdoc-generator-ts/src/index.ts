@@ -1,12 +1,10 @@
 export * from './Interfaces'
-export * from './Templates'
-
+export * from './templates'
 import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
 import type { Cooperative as CooperativeModel } from 'cooptypes'
-import type { Actions, IFilterDocuments, IGeneratedDocument, externalDataTypes, externalDataTypesArrays, internalFilterTypes } from './Interfaces'
+import type { IFilterDocuments, IGeneratedDocument, Numbers, externalDataTypes, externalDataTypesArrays, internalFilterTypes } from './Interfaces'
 import type { IGenerate } from './Interfaces/Documents'
-import { JoinCoop, JoinCoopDecision } from './Actions'
-import * as Registry from './Actions'
+import * as Actions from './Actions'
 
 import { MongoDBConnector } from './Services/Databazor'
 import type { ExternalIndividualData } from './Models/Individual'
@@ -45,7 +43,7 @@ export interface IGenerator {
 export class Generator implements IGenerator {
   // Определение фабрик
   factories!: {
-    [K in Actions]: DocFactory
+    [K in Numbers]: DocFactory<IGenerate>
   }
 
   // Определение хранилища
@@ -57,9 +55,9 @@ export class Generator implements IGenerator {
 
     // Инициализация фабрик для разных типов документов
     this.factories = {
-      'registrator::joincoop': new Registry.JoinCoop.Factory(this.storage),
-      'registrator::joincoopdec': new Registry.JoinCoopDecision.Factory(this.storage),
-      'soviet::sndagreement': new Registry.SendAgreement.Factory(this.storage),
+      1: new Actions.WalletAgreement.Factory(this.storage),
+      100: new Actions.ParticipantApplication.Factory(this.storage),
+      501: new Actions.DecisionOfParticipantApplication.Factory(this.storage),
     }
     await this.storage.connect()
   }
@@ -71,10 +69,10 @@ export class Generator implements IGenerator {
 
   // Метод генерации документа
   async generate(options: IGenerate): Promise<IGeneratedDocument> {
-    const factory = this.factories[`${options.code}::${options.action}` as Actions] // Get the factory
+    const factory = this.factories[options.registry_id as Numbers] // Get the factory
 
     if (!factory)
-      throw new Error(`Фабрика для документа типа ${options.code}::${options.action} не найдена.`)
+      throw new Error(`Фабрика для документа №${options.registry_id} не найдена.`)
 
     // синтезируем документ
     return await factory.generateDocument(options)

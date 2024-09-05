@@ -1,6 +1,6 @@
 import type { JSONSchemaType } from 'ajv'
 import type { Cooperative } from 'cooptypes'
-import type { DocumentsMappingByActionAndCode } from '../Templates/registry'
+import type { Registry } from '../templates/registry'
 import type { CooperativeData } from '../Models/Cooperative'
 import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData } from '../Models'
 
@@ -47,7 +47,7 @@ export interface ICombinedData {
   meta: IMetaDocument
 }
 
-export type Actions = keyof DocumentsMappingByActionAndCode
+export type Numbers = keyof typeof Registry
 export type LangType = 'ru'
 
 export interface IMetaDocumentPartial extends Partial<IMetaDocument> {
@@ -57,9 +57,8 @@ export interface IMetaDocumentPartial extends Partial<IMetaDocument> {
   title: string
 }
 
-export interface IGenerate extends Omit<Partial<IMetaDocument>, 'registry_id' | 'title'> {
-  code: string
-  action: string
+export interface IGenerate extends Omit<Partial<IMetaDocument>, 'title'> {
+  registry_id: number
   coopname: string
   username: string
   [key: string]: any

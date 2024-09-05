@@ -77,7 +77,7 @@ export class PDFService implements IPDFService {
     pdfDoc.setTitle(meta.title)
     pdfDoc.setLanguage(meta.lang)
     pdfDoc.setProducer(meta.version)
-    pdfDoc.setSubject(`документ для действия: ${meta.code}::${meta.action}`)
+    pdfDoc.setSubject(`Шаблона документа по реестру №${meta.registry_id}`)
     pdfDoc.setCreator(meta.generator)
     pdfDoc.setCreationDate(dateWithTimezone)
     pdfDoc.setModificationDate(dateWithTimezone)

@@ -1,27 +1,23 @@
 import { DraftContract } from 'cooptypes'
-import type { Interface } from '../Templates/100.ParticipantApplication'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
-import { Template } from '../Templates/100.ParticipantApplication'
 import DataService from '../Services/Databazor/DataService'
-import type { IGenerateJoinCoop } from '../Interfaces/Actions'
+import { ParticipantApplication } from '../templates'
 
-export const registry_id = 100
-
-export class Factory extends DocFactory {
+export class Factory extends DocFactory<ParticipantApplication.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
-  async generateDocument(options: IGenerateJoinCoop): Promise<IGeneratedDocument> {
-    let template: ITemplate<Interface>
+  async generateDocument(options: ParticipantApplication.Action): Promise<IGeneratedDocument> {
+    let template: ITemplate<ParticipantApplication.Model>
 
     if (process.env.SOURCE === 'local') {
-      template = Template
+      template = ParticipantApplication.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, registry_id, options.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, ParticipantApplication.registry_id, options.block_num)
     }
 
     const user = await super.getUser(options.username, options.block_num)
@@ -34,7 +30,7 @@ export class Factory extends DocFactory {
 
     let { signature, ...modifiedOptions } = options
 
-    const meta: IMetaDocument = await super.getMeta({ registry_id, title: template.title, ...modifiedOptions }) // Генерируем мета-данные
+    const meta: IMetaDocument = await super.getMeta({ title: template.title, ...modifiedOptions }) // Генерируем мета-данные
 
     interface SignatureData {
       username: string
@@ -65,7 +61,7 @@ export class Factory extends DocFactory {
       }
     }
 
-    const combinedData: Interface = { ...userData, meta, coop, type: user.type, signature }
+    const combinedData: ParticipantApplication.Model = { ...userData, meta, coop, type: user.type, signature }
 
     // валидируем скомбинированные данные
     await super.validate(combinedData, template.model)

@@ -17,8 +17,8 @@ import { getCurrentBlock } from '../Utils/getCurrentBlock'
 
 const packageVersion = packageJson.version
 
-export abstract class DocFactory {
-  abstract generateDocument(options: IGenerate): Promise<IGeneratedDocument>
+export abstract class DocFactory<T extends IGenerate> {
+  abstract generateDocument(options: T): Promise<IGeneratedDocument>
 
   public storage: MongoDBConnector
 
@@ -80,9 +80,9 @@ export abstract class DocFactory {
   async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<IDecisionData> {
     const votes_for_actions = (await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-actions`, new URLSearchParams({
       filter: JSON.stringify({
-        'account': process.env.SOVIET_CONTRACT,
+        'account': SovietContract.contractName.production,
         'name': SovietContract.Actions.Decisions.VoteFor.actionName,
-        'receiver': process.env.SOVIET_CONTRACT,
+        'receiver': SovietContract.contractName.production,
         'data.decision_id': String(decision_id),
         'data.coopname': coopname,
       }),
@@ -93,9 +93,9 @@ export abstract class DocFactory {
 
     const votes_against_actions = (await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-actions`, new URLSearchParams({
       filter: JSON.stringify({
-        'account': process.env.SOVIET_CONTRACT,
+        'account': SovietContract.contractName.production,
         'name': SovietContract.Actions.Decisions.VoteAgainst.actionName,
-        'receiver': process.env.SOVIET_CONTRACT,
+        'receiver': SovietContract.contractName.production,
         'data.decision_id': String(decision_id),
         'data.coopname': coopname,
       }),
@@ -201,8 +201,6 @@ export abstract class DocFactory {
   }
 
   async getMeta<T extends IMetaDocumentPartial>({
-    code,
-    action,
     title,
     username,
     coopname,
@@ -220,8 +218,8 @@ export abstract class DocFactory {
     if (!title)
       throw new Error('Заголовок документа должен быть установлен')
 
-    if (!code || !action)
-      throw new Error('Параметры действия должны быть переданы')
+    if (!registry_id)
+      throw new Error('Параметр номера документа в реестре должен быть передан')
 
     if (created_at)
       dateWithTimezone = moment.tz(created_at, 'DD.MM.YYYY HH:mm', timezone).format('DD.MM.YYYY HH:mm').toString()
@@ -232,8 +230,6 @@ export abstract class DocFactory {
       block_num = await getCurrentBlock()
 
     return {
-      code,
-      action,
       title,
       lang,
       registry_id,

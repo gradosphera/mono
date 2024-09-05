@@ -36,7 +36,7 @@ import { useRegistratorStore } from 'src/entities/Registrator'
 const store = useRegistratorStore().state
 
 
-const api = useCreateUser()
+const createUser = useCreateUser()
 
 const step = computed(() => store.step)
 const around = ref()
@@ -73,13 +73,15 @@ const setSignature = async (): Promise<void> => {
   try {
     onSign.value = true
     store.signature = sign
-    await api.signStatement()
+    await createUser.signStatement()
 
     // await api.signWalletAgreement()
     // ...
 
 
-    await api.sendStatement()
+    await createUser.sendStatement()
+
+
     onSign.value = false
     store.step++
   } catch (e: any) {

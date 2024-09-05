@@ -1,5 +1,4 @@
 import { DraftContract } from 'cooptypes'
-import type { Interface } from '../Templates/501.DecisionOfParticipantApplication'
 import { DocFactory } from '../Factory'
 import type {
   IDecisionData,
@@ -8,26 +7,24 @@ import type {
   ITemplate,
 } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
-import { Template } from '../Templates/501.DecisionOfParticipantApplication'
-import type { IGenerateJoinCoopDecision } from '../Interfaces/Actions'
 
-export const registry_id = 501
+import { DecisionOfParticipantApplication } from '../templates'
 
-export class Factory extends DocFactory {
+export class Factory extends DocFactory<DecisionOfParticipantApplication.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
   async generateDocument(
-    options: IGenerateJoinCoopDecision,
+    options: DecisionOfParticipantApplication.Action,
   ): Promise<IGeneratedDocument> {
-    let template: ITemplate<Interface>
+    let template: ITemplate<DecisionOfParticipantApplication.Model>
 
     if (process.env.SOURCE === 'local') {
-      template = Template
+      template = DecisionOfParticipantApplication.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, registry_id, options.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, DecisionOfParticipantApplication.registry_id, options.block_num)
     }
 
     const user = await super.getUser(options.username, options.block_num)
@@ -40,7 +37,6 @@ export class Factory extends DocFactory {
 
     // TODO необходимо строго типизировать мета-данные документов друг под друга!
     const meta: IMetaDocument = await super.getMeta({
-      registry_id,
       title: template.title,
       ...options,
     }) // Генерируем мета-данные
@@ -52,7 +48,7 @@ export class Factory extends DocFactory {
       meta.created_at,
     )
 
-    const combinedData: Interface = {
+    const combinedData: DecisionOfParticipantApplication.Model = {
       ...userData,
       meta,
       coop,

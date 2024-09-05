@@ -85,8 +85,8 @@ const initialUserDataState: ICreateUserData = {
   },
 };
 
-// Начальное состояние для statement
-const initialStatementState = {
+// Начальное состояние для любого документа
+const initialDocumentState = {
   hash: '',
   meta: {},
   public_key: '',
@@ -124,7 +124,10 @@ export const useRegistratorStore = defineStore(
       signature: '',
       inLoading: false,
       agreements: structuredClone(initialAgreementsState),
-      statement: structuredClone(initialStatementState),
+      statement: structuredClone(initialDocumentState),
+      walletAgreement: structuredClone(initialDocumentState),
+      //TODO добавить прочие соглашения
+
       payment: structuredClone(initialPaymentState),
       is_paid: false,
     });
@@ -149,7 +152,7 @@ export const useRegistratorStore = defineStore(
       state.userData = structuredClone(initialUserDataState);
       state.payment = structuredClone(initialPaymentState);
       state.is_paid = false;
-      state.statement = structuredClone(initialStatementState);
+      state.statement = structuredClone(initialDocumentState);
     };
 
     return {
