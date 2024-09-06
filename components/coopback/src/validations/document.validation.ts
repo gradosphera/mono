@@ -1,8 +1,7 @@
 import * as Joi from 'joi';
 
 export const IGenerate = Joi.object({
-  code: Joi.string().required(),
-  action: Joi.string().required(),
+  registry_id: Joi.number().required(),
   coopname: Joi.string().required(),
   username: Joi.string().required(),
   generator: Joi.string().optional(),

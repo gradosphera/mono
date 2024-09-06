@@ -6,7 +6,7 @@ import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 import logger from '../config/logger';
 
-export const loadAgenda = async (coopname: string): Promise<Cooperative.Documents.IAgenda[]> => {
+export const loadAgenda = async (coopname: string): Promise<Cooperative.Document.IAgenda[]> => {
   const api = await blockchainService.getApi();
 
   const decisions = (await blockchainService.lazyFetch(
@@ -16,7 +16,7 @@ export const loadAgenda = async (coopname: string): Promise<Cooperative.Document
     'decisions'
   )) as SovietContract.Tables.Decisions.IDecision[];
 
-  const agenda = [] as Cooperative.Documents.IAgenda[];
+  const agenda = [] as Cooperative.Document.IAgenda[];
 
   for (const table of decisions) {
     const action = (

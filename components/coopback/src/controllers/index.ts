@@ -5,3 +5,4 @@ export * as paymentController from './payment.controller';
 export * as coopController from './coop.controller';
 export * as notifyController from './notify.controller';
 export * as monoController from './mono.controller';
+export * as participantController from './participant.controller';

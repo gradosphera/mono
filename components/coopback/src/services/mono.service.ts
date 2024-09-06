@@ -7,7 +7,7 @@ import { IAddUser, ICreateUser, IHealthStatus, IInstall } from '../types';
 import { generateUsername } from '../../tests/utils/generateUsername';
 import { generator } from './document.service';
 import { blockchainService, emailService, tokenService, userService } from '.';
-import { IUser } from '../models/user.model';
+import { IUser, userStatus } from '../models/user.model';
 import axios from 'axios';
 import { getBlockchainInfo } from './blockchain.service';
 import { RegistratorContract } from 'cooptypes';
@@ -61,7 +61,7 @@ export const install = async (soviet: IInstall): Promise<void> => {
       };
 
       const user = await userService.createUser(createUser);
-      user.status = 'registered';
+      user.status = userStatus['4_Registered'];
       user.is_registered = true;
       await user.save();
 

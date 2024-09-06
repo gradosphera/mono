@@ -12,6 +12,7 @@ import httpStatus from 'http-status';
 import { ICreatedPayment, IYandexIPN, PaymentDetails } from '../types/common';
 import { Cooperative } from 'cooptypes';
 import { FilterQuery } from 'mongoose';
+import { userStatus } from '../models/user.model';
 
 const { connection } = mongoose;
 
@@ -241,7 +242,7 @@ export async function catchIPN(ipnBody: IYandexIPN) {
             });
 
             logger.info('Зарегистрирован новый пользователь: ', user.username);
-            user.status = 'registered';
+            user.status = userStatus['4_Registered'];
             user.is_registered = true;
           } else if (order.type === 'deposit') {
             await blockchainService.completeOrder({
@@ -271,7 +272,7 @@ export async function catchIPN(ipnBody: IYandexIPN) {
             memo: '',
           });
 
-          user.status = 'failed';
+          user.status = userStatus['10_Failed'];
           user.message = e.message;
           await user.save();
         }

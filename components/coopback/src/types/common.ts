@@ -59,7 +59,7 @@ export interface ICreatedPayment {
   details: PaymentDetails;
 }
 
-export type IGetResponse<T> = Cooperative.Documents.IGetResponse<T>;
+export type IGetResponse<T> = Cooperative.Document.IGetResponse<T>;
 
 export interface IGetActions<T> {
   results: IAction[];

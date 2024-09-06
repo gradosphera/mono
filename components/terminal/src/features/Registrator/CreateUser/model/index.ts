@@ -8,7 +8,6 @@ import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
 import { COOPNAME } from 'src/shared/config';
 import { DigitalDocument } from 'src/entities/Document';
-import { IGenerateJoinCoop } from 'src/entities/Document';
 import { IObjectedDocument } from 'src/shared/lib/types/document';
 import {
   ICreatedPayment,
@@ -19,8 +18,7 @@ import {
 } from 'src/entities/User';
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { IEntrepreneurData, IIndividualData, IOrganizationData, IUserData } from 'src/shared/lib/types/user/IUserData';
-import type { Cooperative, SovietContract } from 'cooptypes';
-import { WalletAgreement } from 'coopdoc-generator-ts';
+import { Cooperative } from 'cooptypes';
 
 export interface ICreateUser {
   email: string;
@@ -57,16 +55,26 @@ export function useCreateUser() {
     await api.sendStatement(data);
   }
 
+  async function sendAgreement(): Promise<void> {
+    const data: ISendStatement = {
+      username: store.account.username,
+      statement: store.statement,
+    };
+
+    await api.sendStatement(data);
+  }
+
+
   async function signStatement(): Promise<IObjectedDocument> {
-    const data: Cooperative.Documents.IGenerateJoinCoop = {
-      registry_id: 100,
+    const data = {
+      registry_id: Cooperative.Registry.ParticipantApplication.registry_id,
       signature: store.signature,
       skip_save: false,
       coopname: COOPNAME,
       username: store.account.username,
-    };
+    }
 
-    const document = await new DigitalDocument().generate(data);
+    const document = await new DigitalDocument().generate<Cooperative.Registry.ParticipantApplication.Action>(data);
 
     const globalStore = useGlobalStore();
     const digital_signature = await globalStore.signDigest(document.hash);
@@ -82,9 +90,9 @@ export function useCreateUser() {
   }
 
 
-  async function signWalletAgreement(): Promise<void> {
-    const data: IGenerateWalletAgreement= {
-      registry_id: WalletAgreement.registry_id,
+  async function signWalletAgreement(): Promise<IObjectedDocument> {
+    const data: Cooperative.Registry.WalletAgreement.Action= {
+      registry_id: Cooperative.Registry.WalletAgreement.registry_id,
       coopname: COOPNAME,
       username: store.account.username,
     };
@@ -101,21 +109,19 @@ export function useCreateUser() {
       signature: digital_signature.signature,
     } as IObjectedDocument;
 
-    return store.statement;
+    return store.walletAgreement;
   }
 
 
   async function generateStatementWithoutSignature(username: string) {
-    const data: IGenerateJoinCoop = {
+
+    const document = await new DigitalDocument().generate<Cooperative.Registry.ParticipantApplication.Action>({
       signature: '',
       skip_save: true,
-      code: 'registrator',
-      action: 'joincoop',
       coopname: COOPNAME,
       username,
-      registry_id: 0
-    };
-    const document = await new DigitalDocument().generate(data);
+      registry_id: Cooperative.Registry.ParticipantApplication.registry_id
+    });
 
     return document;
   }

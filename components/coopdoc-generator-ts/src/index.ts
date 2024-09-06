@@ -35,7 +35,7 @@ export interface IGenerator {
   get: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypes | null>
   del: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<UpdateResult>
 
-  list: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<CooperativeModel.Documents.IGetResponse<internalFilterTypes>>
+  list: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<CooperativeModel.Document.IGetResponse<internalFilterTypes>>
 
   getHistory: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypesArrays>
 }
@@ -53,11 +53,11 @@ export class Generator implements IGenerator {
   async connect(mongoUri: string): Promise<void> {
     this.storage = new MongoDBConnector(mongoUri)
 
-    // Инициализация фабрик для разных типов документов
+    // Инициализация фабрик документов
     this.factories = {
-      1: new Actions.WalletAgreement.Factory(this.storage),
-      100: new Actions.ParticipantApplication.Factory(this.storage),
-      501: new Actions.DecisionOfParticipantApplication.Factory(this.storage),
+      [Actions.WalletAgreement.Template.registry_id]: new Actions.WalletAgreement.Factory(this.storage),
+      [Actions.ParticipantApplication.Template.registry_id]: new Actions.ParticipantApplication.Factory(this.storage),
+      [Actions.DecisionOfParticipantApplication.Template.registry_id]: new Actions.DecisionOfParticipantApplication.Factory(this.storage),
     }
     await this.storage.connect()
   }
@@ -72,7 +72,7 @@ export class Generator implements IGenerator {
     const factory = this.factories[options.registry_id as Numbers] // Get the factory
 
     if (!factory)
-      throw new Error(`Фабрика для документа №${options.registry_id} не найдена.`)
+      throw new Error(`Фабрика для документа #${options.registry_id} не найдена.`)
 
     // синтезируем документ
     return await factory.generateDocument(options)
@@ -104,7 +104,7 @@ export class Generator implements IGenerator {
   }
 
   // Универсальные методы получения списка объектов
-  async list(type: dataTypes, filter: Filter<internalFilterTypes>): Promise<CooperativeModel.Documents.IGetResponse<externalDataTypes>> {
+  async list(type: dataTypes, filter: Filter<internalFilterTypes>): Promise<CooperativeModel.Document.IGetResponse<externalDataTypes>> {
     const model = this.getModel(type)
     return model.getMany(filter)
   }

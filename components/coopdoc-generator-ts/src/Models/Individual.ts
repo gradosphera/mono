@@ -44,7 +44,7 @@ export class Individual {
     return this.data_service.getOne(filter)
   }
 
-  async getMany(filter: Filter<InternalIndividualData>): Promise<Cooperative.Documents.IGetResponse<ExternalIndividualData>> {
+  async getMany(filter: Filter<InternalIndividualData>): Promise<Cooperative.Document.IGetResponse<ExternalIndividualData>> {
     return this.data_service.getMany(filter, 'username')
   }
 

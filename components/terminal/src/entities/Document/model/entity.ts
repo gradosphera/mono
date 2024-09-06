@@ -4,8 +4,9 @@ import { api } from '../api'
 export class DigitalDocument {
   public data!: IGeneratedDocument
 
-  async generate(data: IGenerate): Promise<IGeneratedDocument> {
-    this.data = await api.generateDocument(data)
-    return this.data
+  async generate<T extends IGenerate>(data: T): Promise<IGeneratedDocument> {
+    this.data = await api.generateDocument(data);
+    return this.data;
   }
+
 }

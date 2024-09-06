@@ -8,6 +8,9 @@ import { GatewayContract, RegistratorContract, SovietContract } from 'cooptypes'
 import { IUser } from '../models/user.model';
 import { GetAccountResult, GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 import config from '../config/config';
+import TempDocument, { tempdocType } from '../models/tempDocument.model';
+import ApiError from '../utils/ApiError';
+import httpStatus from 'http-status';
 
 const rpc = new JsonRpc(process.env.BLOCKCHAIN_RPC as string, { fetch });
 
@@ -113,12 +116,17 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
     type: user.type,
   };
 
+  const statement = await TempDocument.findOne({ username: user.username, type: tempdocType.JoinStatement });
+  if (!statement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено заявление на вступление');
+
   const joinCooperativeData: RegistratorContract.Actions.JoinCooperative.IJoinCooperative = {
     coopname: process.env.COOPNAME as string,
     registrator: process.env.COOPNAME as string,
     username: user.username,
-    document: { ...user.statement, meta: JSON.stringify(user.statement.meta) },
+    document: { ...statement.document, meta: JSON.stringify(statement.document.meta) },
   };
+
+  //TODO добавить здесь соглашений
 
   const actions = [
     {

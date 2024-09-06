@@ -8,9 +8,8 @@ export interface IGenerate {
    * Unknown Property
    */
   [x: string]: unknown;
-  action: string;
+  registry_id: number;
   block_num?: number;
-  code: string;
   coopname: string;
   created_at?: string;
   generator?: string;
@@ -39,9 +38,8 @@ export interface RGenerate {
      * Unknown Property
      */
     [x: string]: unknown;
-    action: string;
+    registry_id: number;
     block_num?: number;
-    code: string;
     coopname: string;
     created_at?: string;
     generator?: string;

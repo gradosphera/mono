@@ -18,7 +18,7 @@ export const loadAgenda = catchAsync(async (req: Request, res: Response) => {
   const { coopname } = req.query;
   const agenda = await coopService.loadAgenda(coopname as string);
 
-  const complexAgenda: Cooperative.Documents.IComplexAgenda[] = [];
+  const complexAgenda: Cooperative.Document.IComplexAgenda[] = [];
 
   for (const { action, table } of agenda) {
     const documents = await documentService.buildComplexDocument(action);

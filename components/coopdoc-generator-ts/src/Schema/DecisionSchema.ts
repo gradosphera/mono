@@ -1,7 +1,7 @@
 import type { JSONSchemaType } from 'ajv'
-import type { IDecisionData } from '../Interfaces'
+import type { Cooperative } from 'cooptypes'
 
-export const decisionSchema: JSONSchemaType<IDecisionData> = {
+export const decisionSchema: JSONSchemaType<Cooperative.Document.IDecisionData> = {
   type: 'object',
   properties: {
     id: { type: 'number' },

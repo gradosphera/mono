@@ -64,7 +64,6 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
           chain: {
             id: CHAIN_ID,
             url: CHAIN_URL,
-            systemToken: SYSTEM_TOKEN
           },
           walletPlugin: new WalletPluginPrivateKey(
             globalStore.wif as PrivateKey

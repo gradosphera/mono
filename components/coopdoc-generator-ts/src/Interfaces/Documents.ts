@@ -5,17 +5,7 @@ import type { CooperativeData } from '../Models/Cooperative'
 import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData } from '../Models'
 
 // Определение базового интерфейса для мета-информации
-export type IMetaDocument = Cooperative.Documents.IMetaDocument
-
-export interface IDecisionData {
-  id: number
-  date: string
-  time: string
-  votes_for: number
-  votes_against: number
-  votes_abstained: number
-  voters_percent: number
-}
+export type IMetaDocument = Cooperative.Document.IMetaDocument
 
 export interface IGeneratedDocument {
   full_title?: string
@@ -57,9 +47,4 @@ export interface IMetaDocumentPartial extends Partial<IMetaDocument> {
   title: string
 }
 
-export interface IGenerate extends Omit<Partial<IMetaDocument>, 'title'> {
-  registry_id: number
-  coopname: string
-  username: string
-  [key: string]: any
-}
+export type IGenerate = Cooperative.Document.IGenerate

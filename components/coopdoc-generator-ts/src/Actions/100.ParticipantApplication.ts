@@ -5,6 +5,8 @@ import type { MongoDBConnector } from '../Services/Databazor'
 import DataService from '../Services/Databazor/DataService'
 import { ParticipantApplication } from '../templates'
 
+export { ParticipantApplication as Template } from '../templates'
+
 export class Factory extends DocFactory<ParticipantApplication.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)

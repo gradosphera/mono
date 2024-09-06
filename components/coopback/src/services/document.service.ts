@@ -12,16 +12,17 @@ export const connectGenerator = async () => {
 };
 
 export const generateDocument = async (options: IGenerate) => {
+  console.log('options', options);
   return await generator.generate(options);
 };
 
 // Шаг 1: Создание новой функции для сборки complexDocument
 export async function buildComplexDocument(
   raw_action_document: Cooperative.Blockchain.IAction
-): Promise<Cooperative.Documents.IComplexDocument> {
-  let statement = {} as Cooperative.Documents.IComplexStatement;
-  let decision = {} as Cooperative.Documents.IComplexDecision;
-  let act = {} as Cooperative.Documents.IComplexAct;
+): Promise<Cooperative.Document.IComplexDocument> {
+  let statement = {} as Cooperative.Document.IComplexStatement;
+  let decision = {} as Cooperative.Document.IComplexDecision;
+  let act = {} as Cooperative.Document.IComplexAct;
 
   const raw_document = raw_action_document.data as SovietContract.Actions.Registry.NewSubmitted.INewSubmitted;
 
@@ -87,7 +88,7 @@ export async function buildComplexDocument(
   }
 
   // Готовим акты
-  const acts: Cooperative.Documents.IComplexAct[] = [];
+  const acts: Cooperative.Document.IComplexAct[] = [];
 
   return { statement, decision, acts };
 }
@@ -96,7 +97,7 @@ export const queryDocuments = async (
   filter: any,
   page = 1,
   limit = 100
-): Promise<Cooperative.Documents.IGetComplexDocuments> => {
+): Promise<Cooperative.Document.IGetComplexDocuments> => {
   const actions = await getActions<SovietContract.Actions.Registry.NewResolved.INewResolved>(
     `${process.env.SIMPLE_EXPLORER_API}/get-actions`,
     {
@@ -111,7 +112,7 @@ export const queryDocuments = async (
     }
   );
 
-  const response: Cooperative.Documents.IGetComplexDocuments = {
+  const response: Cooperative.Document.IGetComplexDocuments = {
     results: [],
     page,
     limit,

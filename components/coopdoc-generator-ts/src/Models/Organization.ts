@@ -75,7 +75,7 @@ export class Organization {
     return org as ExternalOrganizationData
   }
 
-  async getMany(filter: Filter<InternalOrganizationData>): Promise<Cooperative.Documents.IGetResponse<ExternalOrganizationData>> {
+  async getMany(filter: Filter<InternalOrganizationData>): Promise<Cooperative.Document.IGetResponse<ExternalOrganizationData>> {
     const response = (await this.data_service.getMany({ deleted: false, ...filter }, 'username'))
     const orgs = response.results
     const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
@@ -84,7 +84,7 @@ export class Organization {
       org.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: org.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
     }
 
-    const result: Cooperative.Documents.IGetResponse<ExternalOrganizationData> = {
+    const result: Cooperative.Document.IGetResponse<ExternalOrganizationData> = {
       results: orgs as ExternalOrganizationData[],
       page: response.page,
       limit: response.limit,

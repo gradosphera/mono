@@ -1,17 +1,25 @@
 import mongoose, { Schema, model, Model } from 'mongoose';
 import validator from 'validator/index';
-import bcryptjs from 'bcryptjs';
 import { toJSON, paginate } from './plugins/index';
 import { roles } from '../config/roles';
 import { generator } from '../services/document.service';
 import { Cooperative } from 'cooptypes';
 
 const { isEmail } = validator;
-const { compare, hash } = bcryptjs;
+
+export enum userStatus {
+  '1_Created' = 'created',
+  '2_Joined' = 'joined',
+  '3_Payed' = 'payed',
+  '4_Registered' = 'registered',
+  '5_Active' = 'active',
+  '10_Failed' = 'failed',
+  '200_Blocked' = 'blocked',
+}
 
 export interface IUser {
   username: string;
-  status: 'created' | 'joined' | 'payed' | 'registered' | 'active' | 'failed' | 'blocked';
+  status: userStatus;
   message: string;
   is_registered: boolean;
   has_account: boolean;
@@ -21,12 +29,12 @@ export interface IUser {
   email: string;
   role: string;
   is_email_verified: boolean;
-  statement: {
-    hash: string;
-    meta: object;
-    public_key: string;
-    signature: string;
-  };
+  // statement: {
+  //   hash: string;
+  //   meta: object;
+  //   public_key: string;
+  //   signature: string;
+  // };
   private_data:
     | Cooperative.Users.IIndividualData
     | Cooperative.Users.IEntrepreneurData
@@ -52,8 +60,8 @@ const userSchema = new Schema<IUser, IUserModel>(
     },
     status: {
       type: String,
-      enum: ['created', 'joined', 'payed', 'registered', 'active', 'failed', 'blocked'],
-      default: 'created',
+      enum: Object.values(userStatus),
+      default: userStatus['1_Created'],
     },
     message: {
       type: String,
@@ -101,24 +109,24 @@ const userSchema = new Schema<IUser, IUserModel>(
       type: Boolean,
       default: false,
     },
-    statement: {
-      public_key: {
-        type: String,
-        default: '',
-      },
-      signature: {
-        type: String,
-        default: '',
-      },
-      meta: {
-        type: Object,
-        default: {},
-      },
-      hash: {
-        type: String,
-        default: '',
-      },
-    },
+    // statement: {
+    //   public_key: {
+    //     type: String,
+    //     default: '',
+    //   },
+    //   signature: {
+    //     type: String,
+    //     default: '',
+    //   },
+    //   meta: {
+    //     type: Object,
+    //     default: {},
+    //   },
+    //   hash: {
+    //     type: String,
+    //     default: '',
+    //   },
+    // },
   },
   {
     minimize: false,

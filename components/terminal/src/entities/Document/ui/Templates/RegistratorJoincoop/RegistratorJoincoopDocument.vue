@@ -13,7 +13,7 @@ import { Cooperative } from 'cooptypes'
 
 const props = defineProps({
   documents: {
-    type: Object as () => Cooperative.Documents.IComplexDocument,
+    type: Object as () => Cooperative.Document.IComplexDocument,
     required: true
   },
 })

@@ -47,7 +47,7 @@ const props = defineProps({
     required: true,
   },
   doc: {
-    type: Object as () => Cooperative.Documents.IGeneratedDocument,
+    type: Object as () => Cooperative.Document.IGeneratedDocument,
     required: true
   }
 })

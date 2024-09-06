@@ -41,7 +41,7 @@ export class PaymentMethod {
     return this.data_service.getOne(filter)
   }
 
-  async getMany(filter: Filter<PaymentData>): Promise<Cooperative.Documents.IGetResponse<PaymentData>> {
+  async getMany(filter: Filter<PaymentData>): Promise<Cooperative.Document.IGetResponse<PaymentData>> {
     return this.data_service.getMany({ deleted: false, ...filter }, ['username', 'method_id'])
   }
 

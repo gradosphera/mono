@@ -25,7 +25,7 @@ async function createInitialPayment(
 }
 
 async function sendStatement(data: ISendStatement): Promise<void> {
-  await sendPOST('/v1/users/join-cooperative', data);
+  await sendPOST('/v1/participants/join-cooperative', data);
 }
 
 async function emailIsExist(email: string): Promise<boolean> {

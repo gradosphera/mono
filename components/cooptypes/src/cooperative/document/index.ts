@@ -109,3 +109,13 @@ export interface IGenerateJoinCoopDecision extends IGenerate {
 export interface IGenerateWalletAgreement extends IGenerate {
   registry_id: number
 }
+
+export interface IDecisionData {
+  id: number
+  date: string
+  time: string
+  votes_for: number
+  votes_against: number
+  votes_abstained: number
+  voters_percent: number
+}

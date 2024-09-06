@@ -79,7 +79,7 @@ export interface ICreateWithdraw {
 import { Cooperative } from 'cooptypes';
 
 export type IPaymentMethodData = Cooperative.Payments.IPaymentData
-export type IGetResponsePaymentMethodData = Cooperative.Documents.IGetResponse<IPaymentMethodData>
+export type IGetResponsePaymentMethodData = Cooperative.Document.IGetResponse<IPaymentMethodData>
 
 export interface IGetPaymentMethods {
   username?: string

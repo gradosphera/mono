@@ -58,35 +58,6 @@ export const createUser = async (userBody: ICreateUser) => {
 };
 
 /**
- * Join a Cooperative
- *
- */
-export const joinCooperative = async (data: IJoinCooperative): Promise<void> => {
-  const user = await getUserByUsername(data.username);
-
-  if (!user) {
-    throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
-  }
-
-  user.statement = data.statement;
-  user.status = 'joined';
-
-  const hash = data.statement.hash;
-  const public_key = PublicKey.from(data.statement.public_key);
-  const signature = Signature.from(data.statement.signature);
-
-  const verified: boolean = signature.verifyDigest(hash, public_key);
-
-  if (!verified) {
-    throw new ApiError(http.INTERNAL_SERVER_ERROR, 'Invalid signature');
-  }
-
-  if (user.public_key !== data.statement.public_key) throw new ApiError(http.BAD_REQUEST, 'Public keys are mismatched');
-
-  await user.save();
-};
-
-/**
  * Query for users
  * @param {Object} filter - Mongo filter
  * @param {Object} options - Query options

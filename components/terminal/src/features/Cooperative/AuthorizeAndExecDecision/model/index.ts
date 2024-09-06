@@ -12,9 +12,8 @@ export function useAuthorizeAndExecDecision() {
   ): Promise<TransactResult | undefined> {
     const session = useSessionStore();
 
-    const document = await new DigitalDocument().generate({
-      code: 'registrator',
-      action: 'joincoopdec',
+    const document = await new DigitalDocument().generate<Cooperative.Registry.DecisionOfParticipantApplication.Action>({
+      registry_id: Cooperative.Registry.DecisionOfParticipantApplication.registry_id,
       coopname: COOPNAME,
       username,
       lang: 'ru',
@@ -27,7 +26,7 @@ export function useAuthorizeAndExecDecision() {
 
     const signed_hash_of_document = useGlobalStore().signDigest(document.hash);
 
-    const chainDocument: Cooperative.Documents.IChainDocument = {
+    const chainDocument: Cooperative.Document.IChainDocument = {
       hash: document.hash,
       meta: JSON.stringify(document.meta),
       signature: signed_hash_of_document.signature,

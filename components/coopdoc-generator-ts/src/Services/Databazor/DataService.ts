@@ -25,7 +25,7 @@ class DataService<T extends IDocument> {
     groupByFields: string | string[],
     page: number = 1,
     limit: number = 100,
-  ): Promise<Cooperative.Documents.IGetResponse<T>> {
+  ): Promise<Cooperative.Document.IGetResponse<T>> {
     const groupFields = Array.isArray(groupByFields) ? groupByFields : [groupByFields]
     const groupId = groupFields.reduce((acc, field) => ({ ...acc, [field]: `$${field}` }), {})
 
@@ -55,7 +55,7 @@ class DataService<T extends IDocument> {
       { $limit: limit },
     ]).toArray()
 
-    const result: Cooperative.Documents.IGetResponse<T> = {
+    const result: Cooperative.Document.IGetResponse<T> = {
       results: results as T[],
       page,
       limit,

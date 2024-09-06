@@ -74,7 +74,7 @@ export class Entrepreneur {
     return entr as ExternalEntrepreneurData
   }
 
-  async getMany(filter: Filter<InternalEntrepreneurData>): Promise<Cooperative.Documents.IGetResponse<ExternalEntrepreneurData>> {
+  async getMany(filter: Filter<InternalEntrepreneurData>): Promise<Cooperative.Document.IGetResponse<ExternalEntrepreneurData>> {
     const response = await this.data_service.getMany({ deleted: false, ...filter }, 'username')
     const entrepreneurs = response.results
     const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
@@ -83,7 +83,7 @@ export class Entrepreneur {
       entr.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: entr.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
     }
 
-    const result: Cooperative.Documents.IGetResponse<ExternalEntrepreneurData> = {
+    const result: Cooperative.Document.IGetResponse<ExternalEntrepreneurData> = {
       results: entrepreneurs as ExternalEntrepreneurData[],
       page: response.page,
       limit: response.limit,

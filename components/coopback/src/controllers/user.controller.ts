@@ -2,11 +2,11 @@ import http from 'http-status';
 import ApiError from '../utils/ApiError';
 import catchAsync from '../utils/catchAsync';
 import { userService, tokenService, emailService, blockchainService } from '../services';
-import { IAddUser, ICreateUser, RCreateUser, RJoinCooperative } from '../types';
+import { IAddUser, ICreateUser, RCreateUser } from '../types';
 import httpStatus from 'http-status';
 import pick from '../utils/pick';
 import { IGetResponse } from '../types/common';
-import { IUser } from '../models/user.model';
+import { IUser, userStatus } from '../models/user.model';
 import { Request, Response } from 'express';
 import { generateUsername } from '../../tests/utils/generateUsername';
 import config from '../config/config';
@@ -45,7 +45,7 @@ export const addUser = catchAsync(async (req: Request, res: Response) => {
   };
 
   const user = await userService.createUser(newUser);
-  user.status = 'registered';
+  user.status = userStatus['4_Registered'];
   user.is_registered = true;
   await user.save();
 
@@ -58,23 +58,16 @@ export const addUser = catchAsync(async (req: Request, res: Response) => {
       coopname: config.coopname,
       meta: '',
     });
-    console.log('user: ', user);
+
     const token = await tokenService.generateInviteToken(user.email);
     await emailService.sendInviteEmail(req.body.email, token);
   } catch (e: any) {
-    console.log('on e: ', e);
     logger.warn('error on add user: ', e);
     await userService.deleteUserByUsername(newUser.username);
     throw new ApiError(httpStatus.BAD_GATEWAY, e.message);
   }
 
   res.status(httpStatus.CREATED).send({ user });
-});
-
-export const joinCooperative = catchAsync(async (req: RJoinCooperative, res) => {
-  await userService.joinCooperative(req.body);
-
-  res.status(httpStatus.OK).send();
 });
 
 export const getUsers = catchAsync(async (req, res) => {

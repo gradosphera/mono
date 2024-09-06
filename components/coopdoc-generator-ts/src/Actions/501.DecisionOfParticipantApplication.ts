@@ -1,7 +1,6 @@
-import { DraftContract } from 'cooptypes'
+import { type Cooperative, DraftContract } from 'cooptypes'
 import { DocFactory } from '../Factory'
 import type {
-  IDecisionData,
   IGeneratedDocument,
   IMetaDocument,
   ITemplate,
@@ -9,6 +8,8 @@ import type {
 import type { MongoDBConnector } from '../Services/Databazor'
 
 import { DecisionOfParticipantApplication } from '../templates'
+
+export { DecisionOfParticipantApplication as Template } from '../templates'
 
 export class Factory extends DocFactory<DecisionOfParticipantApplication.Action> {
   constructor(storage: MongoDBConnector) {
@@ -41,7 +42,7 @@ export class Factory extends DocFactory<DecisionOfParticipantApplication.Action>
       ...options,
     }) // Генерируем мета-данные
 
-    const decision: IDecisionData = await super.getDecision(
+    const decision: Cooperative.Document.IDecisionData = await super.getDecision(
       coop,
       options.coopname,
       options.decision_id,

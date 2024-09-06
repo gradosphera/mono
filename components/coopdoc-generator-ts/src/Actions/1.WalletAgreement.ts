@@ -3,6 +3,8 @@ import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
+export { WalletAgreement as Template } from '../templates'
+
 export class Factory extends DocFactory<WalletAgreement.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)

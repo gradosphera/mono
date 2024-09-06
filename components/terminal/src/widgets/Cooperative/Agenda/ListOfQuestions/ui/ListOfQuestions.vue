@@ -108,14 +108,14 @@ coop.loadPrivateCooperativeData()
 
 // const totalMembers = computed(() => coop.privateCooperativeData?.totalMembers)
 
-const decisions = ref([] as Cooperative.Documents.IAgenda[])
+const decisions = ref([] as Cooperative.Document.IAgenda[])
 
 const loadAgenda = async (hidden?: boolean) => {
   try {
     onLoading.value = hidden == true ? false : true
     decisions.value = (await sendGET('/v1/coop/agenda', {
       coopname: route.params.coopname,
-    }) as Cooperative.Documents.IComplexAgenda[])
+    }) as Cooperative.Document.IComplexAgenda[])
     onLoading.value = false
   } catch (e: any) {
     onLoading.value = false

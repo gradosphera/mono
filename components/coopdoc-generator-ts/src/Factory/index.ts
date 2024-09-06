@@ -1,10 +1,11 @@
 import type { JSONSchemaType } from 'ajv'
 import moment from 'moment-timezone'
+import type { Cooperative as TCooperative } from 'cooptypes'
 import { DraftContract, SovietContract } from 'cooptypes'
 import type { ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, ITemplate, ITranslations, externalDataTypes } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 import { Individual, Organization } from '../Models'
-import type { IDecisionData, IGenerate } from '../Interfaces/Documents'
+import type { IGenerate } from '../Interfaces/Documents'
 import { PDFService } from '../Services/Generator'
 import packageJson from '../../package.json'
 import { Validator } from '../Services/Validator'
@@ -77,7 +78,7 @@ export abstract class DocFactory<T extends IGenerate> {
     return coop
   }
 
-  async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<IDecisionData> {
+  async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<TCooperative.Document.IDecisionData> {
     const votes_for_actions = (await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-actions`, new URLSearchParams({
       filter: JSON.stringify({
         'account': SovietContract.contractName.production,
