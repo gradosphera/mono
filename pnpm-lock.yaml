@@ -646,9 +646,6 @@ importers:
       coopback:
         specifier: workspace:*
         version: link:../coopback
-      coopdoc-generator-ts:
-        specifier: workspace:*
-        version: link:../coopdoc-generator-ts
       cooptypes:
         specifier: workspace:*
         version: link:../cooptypes
