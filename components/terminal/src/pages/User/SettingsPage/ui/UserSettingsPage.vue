@@ -1,5 +1,5 @@
 <template lang="pug">
-div.row.justify-center.q-mt-lg
+div.row.justify-center.q-pt-lg
   div.col-md-6.col-xs-12
     LogoutCard
     //- ExitCard.q-mt-lg

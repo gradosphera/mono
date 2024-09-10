@@ -12,3 +12,8 @@ export * as DeclineAgreement from './declineAgreement'
  * Действие отправки заявления на присоединение к ЦПП Кооператива
  */
 export * as SendAgreement from './sendAgreement'
+
+/**
+ * Действие создания внутри-кооперативного соглашения.
+ */
+export * as MakeCoagreement from './makeCoagreement'

@@ -147,7 +147,7 @@ export abstract class DocFactory<T extends IGenerate> {
         'code': DraftContract.contractName.production,
         'scope': scope,
         'table': 'translations',
-        'value.draft_id': String(draft.id),
+        'value.draft_id': String(draft.registry_id),
         ...block_filter,
       }),
     }))
@@ -206,6 +206,7 @@ export abstract class DocFactory<T extends IGenerate> {
     username,
     coopname,
     registry_id,
+    links = [],
     lang = 'ru',
     generator = 'coopjs',
     version = packageVersion, // TODO перенести в .env
@@ -235,6 +236,7 @@ export abstract class DocFactory<T extends IGenerate> {
       lang,
       registry_id,
       generator,
+      links,
       version,
       coopname,
       username,

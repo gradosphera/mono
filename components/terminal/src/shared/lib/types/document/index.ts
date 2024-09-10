@@ -1,6 +1,8 @@
+import type { Cooperative } from 'cooptypes';
+
 export interface IObjectedDocument {
   hash: string;
-  meta: object;
+  meta: Cooperative.Document.IMetaDocument;
   public_key: string;
   signature: string;
 }

@@ -31,8 +31,11 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
     const coop = await super.getCooperative(options.coopname, options.block_num)
 
     let { signature, ...modifiedOptions } = options
-
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...modifiedOptions }) // Генерируем мета-данные
+
+    console.log('generator options: ', options)
+
+    console.log('generator meta: ', meta)
 
     interface SignatureData {
       username: string

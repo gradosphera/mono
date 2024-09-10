@@ -3,7 +3,7 @@
  * Do not modify this file manually
  */
 
-export type IInstall = {
+export type IInstall = ({
   individual_data: {
     birthdate: string;
     email: string;
@@ -14,10 +14,10 @@ export type IInstall = {
     phone: string;
   };
   role: 'chairman' | 'member';
-}[];
+})[];
 
 export interface RInstall {
-  body: {
+  body: ({
     individual_data: {
       birthdate: string;
       email: string;
@@ -28,5 +28,5 @@ export interface RInstall {
       phone: string;
     };
     role: 'chairman' | 'member';
-  }[];
+  })[];
 }

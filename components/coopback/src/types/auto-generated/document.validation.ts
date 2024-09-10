@@ -8,12 +8,13 @@ export interface IGenerate {
    * Unknown Property
    */
   [x: string]: unknown;
-  registry_id: number;
   block_num?: number;
   coopname: string;
   created_at?: string;
   generator?: string;
   lang?: 'ru';
+  links?: string[];
+  registry_id: number;
   timezone?: string;
   username: string;
   version?: string;
@@ -38,12 +39,13 @@ export interface RGenerate {
      * Unknown Property
      */
     [x: string]: unknown;
-    registry_id: number;
     block_num?: number;
     coopname: string;
     created_at?: string;
     generator?: string;
     lang?: 'ru';
+    links?: string[];
+    registry_id: number;
     timezone?: string;
     username: string;
     version?: string;

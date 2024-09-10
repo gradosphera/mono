@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+
+.documents-gap {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
 .padding-top {
   padding-top: 50px;
 }

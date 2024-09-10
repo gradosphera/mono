@@ -146,7 +146,6 @@ async function loadUserProgramWalletsData(
       if (programInfo) {
         return {
           ...wallet,
-          program_type: 'coopmarket',
           program_details: programInfo,
         } as ExtendedProgramWalletData;
       }
@@ -164,6 +163,21 @@ async function loadMethods(params: IGetPaymentMethods): Promise<IPaymentMethodDa
   return methods.results;
 }
 
+async function loadUserAgreements(coopname: string, username: string): Promise<SovietContract.Tables.Agreements.IAgreement[]> {
+  return (
+    await fetchTable(
+      SovietContract.contractName.production,
+      coopname,
+      SovietContract.Tables.Agreements.tableName,
+      username,
+      username,
+      LimitsList.None,
+      'secondary'
+    )
+  ) as SovietContract.Tables.Agreements.IAgreement[];
+
+}
+
 
 export const api = {
   loadSingleUserWalletData,
@@ -173,5 +187,6 @@ export const api = {
   loadUserDepositsData,
   loadUserWithdrawsData,
   loadUserProgramWalletsData,
-  loadMethods
+  loadMethods,
+  loadUserAgreements
 };

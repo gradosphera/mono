@@ -32,7 +32,7 @@ export const manifest = {
   'routes': [
     {
       meta: {
-        title: 'Карта',
+        title: 'Профиль',
         icon: 'fa-solid fa-id-card',
         roles: [],
       },

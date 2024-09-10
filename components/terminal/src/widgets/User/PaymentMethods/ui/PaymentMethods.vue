@@ -1,5 +1,5 @@
 <template lang="pug">
-q-card(flat bordered).q-pa-md
+div(flat bordered).q-pa-md
   AddPaymentMethodButton(:username="username")
   q-list.full-width.q-mt-lg
     q-item(v-for="method in wallet.methods" :key="method.method_id").q-mt-md.full-width

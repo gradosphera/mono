@@ -46,4 +46,5 @@ export interface ICreatedUser {
 export interface ISendStatement {
   username: string;
   statement: IObjectedDocument;
+  wallet_agreement: IObjectedDocument;
 }

@@ -14,6 +14,7 @@ export const IMetaJSONSchema: JSONSchemaType<IMetaDocument> = {
     created_at: { type: 'string' },
     block_num: { type: 'number' },
     timezone: { type: 'string' },
+    links: { type: 'array', items: { type: 'string' } },
   },
   required: [
     'title',

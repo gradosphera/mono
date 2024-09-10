@@ -2,7 +2,7 @@
 div
   q-step(:name='5', title='Подпишите заявление на вступление', :done='step > 5')
     div(v-if='onSign')
-      Loader(:text='`Подписываем заявление...`')
+      Loader(:text='loadingText')
     div(v-else)
       .bg-grey-2(v-if='!onSign' ref='around', style='border: 0.1px solid grey; min-height: 300px;')
         canvas(
@@ -41,6 +41,7 @@ const createUser = useCreateUser()
 const step = computed(() => store.step)
 const around = ref()
 const onSign = ref(false)
+const loadingText = ref('')
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const drawing = ref<boolean>(false)
@@ -73,14 +74,18 @@ const setSignature = async (): Promise<void> => {
   try {
     onSign.value = true
     store.signature = sign
+
+    loadingText.value = 'Подписываем соглашение о ЦПП "Цифровой Кошелёк"'
+
+    await createUser.signWalletAgreement()
+
+    loadingText.value = 'Подписываем заявление'
+
     await createUser.signStatement()
 
-    // await api.signWalletAgreement()
-    // ...
-
-
-    await createUser.sendStatement()
-
+    //посылаем
+    await createUser.sendStatementAndAgreements()
+    loadingText.value = ''
 
     onSign.value = false
     store.step++

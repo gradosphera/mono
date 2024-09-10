@@ -88,7 +88,7 @@ watch(() => currentUser.participantAccount, (newValue) => {
 watch(
   () => [store.step, store.email, store.account, store.userData],
   () => {
-    if (store.step >= 4) {
+    if (store.step >= 4 && store.step < 8) {
       currentUser.loadProfile(username.value, COOPNAME)
     }
   }

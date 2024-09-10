@@ -158,13 +158,6 @@ export interface ICreateUser {
   username: string;
 }
 
-export interface IDocument {
-  hash: string;
-  meta: object;
-  public_key: string;
-  signature: string;
-}
-
 export interface IEntrepreneurData {
   bank_account: {
     account_number: string;
@@ -200,16 +193,6 @@ export interface IIndividualData {
   last_name: string;
   middle_name: string;
   phone: string;
-}
-
-export interface IJoinCooperative {
-  statement: {
-    hash: string;
-    meta: object;
-    public_key: string;
-    signature: string;
-  };
-  username: string;
 }
 
 export interface IOrganizationData {
@@ -418,18 +401,6 @@ export interface RGetUsers {
     role?: string;
     sortBy?: string;
     username?: string;
-  };
-}
-
-export interface RJoinCooperative {
-  body: {
-    statement: {
-      hash: string;
-      meta: object;
-      public_key: string;
-      signature: string;
-    };
-    username: string;
   };
 }
 

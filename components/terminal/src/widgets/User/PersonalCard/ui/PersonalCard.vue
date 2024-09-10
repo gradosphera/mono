@@ -1,5 +1,5 @@
 <template lang="pug">
-q-card(v-if="currentUser?.username" flat bordered).q-pa-md.digital-certificate
+div(v-if="currentUser?.username" flat bordered).q-pa-md.digital-certificate
   div.row
     div.col-md-4.col-xs-12
       //- p.text-bold.full-width.text-sm.text-center УДОСТОВЕРЕНИЕ ПАЙЩИКА

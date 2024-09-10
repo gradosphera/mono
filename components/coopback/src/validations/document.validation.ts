@@ -10,6 +10,7 @@ export const IGenerate = Joi.object({
   created_at: Joi.string().optional(),
   block_num: Joi.number().optional(),
   timezone: Joi.string().optional(),
+  links: Joi.array().items(Joi.string()).default([]),
 }).unknown(true);
 
 export const RGenerate = Joi.object({

@@ -27,7 +27,7 @@ export interface ICreatedraft {
 export interface ICreatetrans {
   scope: IName
   username: IName
-  draft_id: IUint64
+  registry_id: IUint64
   lang: IName
   data: string
 }
@@ -35,13 +35,23 @@ export interface ICreatetrans {
 export interface IDeldraft {
   scope: IName
   username: IName
-  draft_id: IUint64
+  registry_id: IUint64
 }
 
 export interface IDeltrans {
   scope: IName
   username: IName
   translate_id: IUint64
+}
+
+export interface IEditdraft {
+  scope: IName
+  username: IName
+  registry_id: IUint64
+  title: string
+  description: string
+  context: string
+  model: string
 }
 
 export interface IEdittrans {
@@ -60,7 +70,6 @@ export interface INewid {
 }
 
 export interface IOnedraft {
-  id: IUint64
   registry_id: IUint64
   version: IUint64
   default_translation_id: IUint64

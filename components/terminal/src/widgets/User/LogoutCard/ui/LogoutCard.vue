@@ -21,7 +21,7 @@ const logout = async () => {
 
   try {
     await logout()
-    router.push({ name: 'index' })
+    router.push({ name: 'signin' })
 
   } catch (e: any) {
     FailAlert('Ошибка при выходе: ' + e.message)

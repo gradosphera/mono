@@ -12,7 +12,7 @@ export const connectGenerator = async () => {
 };
 
 export const generateDocument = async (options: IGenerate) => {
-  console.log('options', options);
+  console.log('controller generate: ', options);
   return await generator.generate(options);
 };
 
@@ -22,13 +22,23 @@ export async function buildComplexDocument(
 ): Promise<Cooperative.Document.IComplexDocument> {
   let statement = {} as Cooperative.Document.IComplexStatement;
   let decision = {} as Cooperative.Document.IComplexDecision;
-  let act = {} as Cooperative.Document.IComplexAct;
+  const act = {} as Cooperative.Document.IComplexAct;
+  const links: Cooperative.Document.IGeneratedDocument[] = [];
 
   const raw_document = raw_action_document.data as SovietContract.Actions.Registry.NewSubmitted.INewSubmitted;
 
   // Готовим заявления
   {
     const document = await generator.getDocument({ hash: raw_document.document.hash });
+    console.log('document: ', document);
+
+    if (document)
+      for (const link of document.meta.links) {
+        console.log('look for link: ', link);
+        const linked_document = await generator.getDocument({ hash: link });
+        links.push(linked_document);
+      }
+
     const user = await User.findOne({ username: raw_document.username });
 
     if (user && user.type != 'service') {
@@ -40,8 +50,6 @@ export async function buildComplexDocument(
       };
 
       statement = { action, document };
-    } else {
-      // throw new ApiError(400, 'Ошибка, один из пользователей не найден. Обратитесь в поддержку.');
     }
   }
 
@@ -66,14 +74,18 @@ export async function buildComplexDocument(
       const user = await User.findOne({ username: decision_action?.data?.username });
 
       if (user) {
-        const user_data = user.getPrivateData();
-
         decision_extended_action = {
           ...decision_action,
           user: (await user?.getPrivateData()) || null,
         };
 
         const document = await generator.getDocument({ hash: decision_action?.data?.document?.hash });
+
+        if (document)
+          for (const link of document.meta.links) {
+            const linked_document = await generator.getDocument({ hash: link });
+            links.push(linked_document);
+          }
 
         decision = {
           document,
@@ -90,7 +102,7 @@ export async function buildComplexDocument(
   // Готовим акты
   const acts: Cooperative.Document.IComplexAct[] = [];
 
-  return { statement, decision, acts };
+  return { statement, decision, acts, links };
 }
 
 export const queryDocuments = async (
@@ -123,6 +135,6 @@ export const queryDocuments = async (
 
     if (complexDocument.decision.action) response.results.push(complexDocument);
   }
-
+  console.log(response);
   return response;
 };

@@ -13,6 +13,7 @@ import { ILoadUserWallet, ICreateDeposit } from './types';
 import { Ref, ref } from 'vue';
 import { sendPOST } from 'src/shared/api';
 import { CURRENCY } from 'src/shared/config';
+import type { SovietContract } from 'cooptypes';
 
 const namespace = 'wallet';
 
@@ -23,6 +24,7 @@ interface IWalletStore {
   deposits: Ref<IDepositData[]>;
   withdraws: Ref<IWithdrawData[]>;
   methods: Ref<IPaymentMethodData[]>;
+  agreements: Ref<SovietContract.Tables.Agreements.IAgreement[]>;
 
   loadUserWalet: (params: ILoadUserWallet) => Promise<void>;
 
@@ -44,6 +46,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
   const withdraws = ref<IWithdrawData[]>([]);
   const program_wallets = ref<ExtendedProgramWalletData[]>([]);
   const methods = ref<IPaymentMethodData[]>([]);
+  const agreements = ref<SovietContract.Tables.Agreements.IAgreement[]>([]);
 
 
   const loadUserWalet = async (params: ILoadUserWallet) => {
@@ -62,13 +65,16 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
         api.loadUserDepositsData(params),
         api.loadUserWithdrawsData(params),
         api.loadUserProgramWalletsData(params),
-        api.loadMethods(params)
+        api.loadMethods(params),
+        api.loadUserAgreements(params.coopname, params.username)
       ]);
+
       wallet.value = data[0] ?? createEmptyWallet();
       deposits.value = data[1] ?? [];
       withdraws.value = data[2] ?? [];
       program_wallets.value = data[3] ?? [];
       methods.value = data[4] ?? [];
+      agreements.value = data[5] ?? [];
 
     } catch (e: any) {
       console.log(e);
@@ -91,6 +97,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
     deposits,
     withdraws,
     methods,
+    agreements,
     loadUserWalet,
     createDeposit,
     createWithdraw,

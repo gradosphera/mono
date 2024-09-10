@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-btn(@click="showDialog=true" outline) добавить метод
+  q-btn(@click="showDialog=true" flat icon="add") добавить метод
 
   q-badge(flat rounded color="grey").q-ml-sm
     q-icon(name="far fa-question")

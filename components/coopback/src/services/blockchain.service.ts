@@ -127,6 +127,18 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
   };
 
   //TODO добавить здесь соглашений
+  const walletAgreement = await TempDocument.findOne({ username: user.username, type: tempdocType.WalletAgreement });
+  if (!walletAgreement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено заявление на вступление');
+
+  const walletAgreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
+    coopname: process.env.COOPNAME as string,
+    administrator: process.env.COOPNAME as string,
+    username: user.username,
+    agreement_type: 'wallet',
+    program_id: 1,
+    draft_registry_id: 1,
+    document: { ...walletAgreement.document, meta: JSON.stringify(walletAgreement.document.meta) },
+  };
 
   const actions = [
     {
@@ -172,6 +184,17 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
         },
       ],
       data: orderData,
+    },
+    {
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
+      authorization: [
+        {
+          actor: process.env.COOPNAME as string,
+          permission: 'active',
+        },
+      ],
+      data: walletAgreementData,
     },
   ];
 

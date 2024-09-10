@@ -15,7 +15,7 @@ div
       )
 
 
-      q-checkbox(v-model="i_save", label="Я сохранил имя и ключ в надёжном месте")
+      q-checkbox(v-model="i_save", label="Я сохранил ключ")
       div.row.q-mt-md
         q-btn.col-md-6.col-xs-12(flat, @click='copyMnemonic')
           i.fa.fa-copy

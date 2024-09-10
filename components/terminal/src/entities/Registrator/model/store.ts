@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { reactive } from 'vue';
 import { IGeneratedAccount } from 'src/shared/lib/types/user';
 import { IUserData, type ICreateUserData } from 'src/shared/lib/types/user/IUserData';
+import type { Cooperative } from 'cooptypes';
 
 const namespace = 'registrator';
 
@@ -88,7 +89,7 @@ const initialUserDataState: ICreateUserData = {
 // Начальное состояние для любого документа
 const initialDocumentState = {
   hash: '',
-  meta: {},
+  meta: {} as Cooperative.Document.IMetaDocument,
   public_key: '',
   signature: '',
 };
@@ -149,6 +150,7 @@ export const useRegistratorStore = defineStore(
       state.step = 1;
       state.email = '';
       state.account = structuredClone(initialAccountState);
+      state.agreements = structuredClone(initialAgreementsState);
       state.userData = structuredClone(initialUserDataState);
       state.payment = structuredClone(initialPaymentState);
       state.is_paid = false;

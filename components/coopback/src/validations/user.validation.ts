@@ -86,13 +86,6 @@ export const RAddUser = Joi.object({
   body: IAddUser.required(),
 });
 
-export const IDocument = Joi.object().keys({
-  hash: Joi.string().required(),
-  signature: Joi.string().required(),
-  public_key: Joi.string().required(),
-  meta: Joi.object().required(),
-});
-
 // API
 
 export const RCreateUser = Joi.object({
@@ -124,15 +117,6 @@ export const RUpdateUser = Joi.object({
       email: Joi.string().email(),
     })
     .min(1),
-});
-
-export const IJoinCooperative = Joi.object({
-  username: Joi.string().required(),
-  statement: IDocument.required(),
-});
-
-export const RJoinCooperative = Joi.object({
-  body: IJoinCooperative.required(),
 });
 
 /**

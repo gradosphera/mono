@@ -22,6 +22,7 @@ export interface IMetaDocument {
   created_at: string
   block_num: number
   timezone: string
+  links: string[]
 }
 
 export interface IGeneratedDocument {
@@ -53,6 +54,7 @@ export interface IComplexDocument {
   statement: IComplexStatement
   decision: IComplexDecision
   acts: IComplexAct[]
+  links: IGeneratedDocument[]
 }
 
 export interface IGetComplexDocuments {

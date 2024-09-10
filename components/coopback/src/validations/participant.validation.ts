@@ -10,6 +10,7 @@ export const IDocument = Joi.object().keys({
 export const IJoinCooperative = Joi.object({
   username: Joi.string().required(),
   statement: IDocument.required(),
+  wallet_agreement: IDocument.required(),
 });
 
 export const RJoinCooperative = Joi.object({

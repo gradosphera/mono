@@ -1,9 +1,12 @@
 <template lang="pug">
 .row.justify-center
-  div.col-md-8.col-xs-12
-    BaseDocument(:doc="complexDocument.statement.document" :action="complexDocument.statement.action" style="margin-bottom: 50px;")
+  div.documents-gap.col-md-8.col-xs-12
+    BaseDocument(:doc="complexDocument.statement.document" :action="complexDocument.statement.action")
     BaseDocument(v-if="complexDocument.decision.document" :doc="complexDocument.decision.document" :action="complexDocument.decision.action")
 
+    BaseDocument(:doc="complexDocument.links[0]" :action="complexDocument.statement.action")
+
+    //- p links {{complexDocument.links}}
 </template>
 
 <script setup lang="ts">

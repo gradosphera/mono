@@ -70,8 +70,8 @@ export interface IAgreement {
   coopname: IName
   username: IName
   type: IName
-  secondary_id: IUint64
-  draft_registry_id: IUint64
+  program_id: IUint64
+  draft_id: IUint64
   version: IUint64
   document: IDocument
   status: IName
@@ -153,6 +153,13 @@ export interface IChanges {
   return_product_decision_id: IUint64
 }
 
+export interface ICoagreement {
+  type: IName
+  coopname: IName
+  program_id: IUint64
+  draft_id: IUint64
+}
+
 export interface IConfirmagree {
   coopname: IName
   administrator: IName
@@ -198,8 +205,7 @@ export interface ICreatebranch {
 export interface ICreateprog {
   coopname: IName
   username: IName
-  program_type: IName
-  draft_registry_id: IUint64
+  draft_id: IUint64
   title: string
   announce: string
   description: string
@@ -289,7 +295,7 @@ export interface IEditprog {
   coopname: IName
   username: IName
   program_id: IUint64
-  draft_registry_id: IUint64
+  draft_id: IUint64
   title: string
   announce: string
   description: string
@@ -326,6 +332,14 @@ export interface IJoincoops {
   username: IName
   is_paid: boolean
   notice: string
+}
+
+export interface IMakecoagreem {
+  coopname: IName
+  administrator: IName
+  type: IName
+  draft_id: IUint64
+  program_id: IUint64
 }
 
 export interface IMigrate {
@@ -396,9 +410,9 @@ export interface IParticipant {
 
 export interface IProgram {
   id: IUint64
-  draft_registry_id: IUint64
-  coopname: IName
+  draft_id: IUint64
   program_type: IName
+  coopname: IName
   is_active: boolean
   title: string
   announce: string
@@ -417,6 +431,7 @@ export interface IProgwallet {
   id: IUint64
   coopname: IName
   program_id: IUint64
+  agreement_id: IUint64
   username: IName
   available: IAsset
 }
@@ -451,10 +466,9 @@ export interface ISetrights {
 
 export interface ISndagreement {
   coopname: IName
+  administrator: IName
   username: IName
   agreement_type: IName
-  secondary_id: IUint64
-  draft_registry_id: IUint64
   document: IDocument
 }
 

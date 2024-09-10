@@ -1,13 +1,14 @@
 <template lang="pug">
-q-card(flat bordered).q-pa-md
-  div.row.justify-center
-    div.col-md-6.col-xs-12.q-gutter-sm
+div.row.justify-center.q-pt-lg
+  div.col-md-6.col-xs-12.q-gutter-sm
+    div(flat bordered).q-pa-md
+      WalletBalance
+
       div.row.q-pa-sm.justify-center
         div.flex
           DepositButton.q-ma-sm
           WithdrawButton.q-ma-sm
 
-      WalletBalance
 
       WalletProgramsList
 </template>

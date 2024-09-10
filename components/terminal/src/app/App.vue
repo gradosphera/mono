@@ -1,7 +1,7 @@
 <template lang='pug'>
-div
-  router-view(v-if="isLoaded")
-  RootPopup
+div(v-if="isLoaded")
+  router-view
+  RequireAgreements
 </template>
 
 <script setup lang="ts">
@@ -15,7 +15,7 @@ import { Cookies, LocalStorage, QSpinner, useQuasar } from 'quasar';
 import { COOPNAME } from 'src/shared/config';
 import { useCardStore } from './providers/card/store';
 
-import { RootPopup } from 'src/widgets/Desktop/RootPopup';
+import { RequireAgreements } from 'src/widgets/Agreementer/RequireAgreements/ui';
 
 const $q = useQuasar()
 
@@ -29,7 +29,7 @@ const isLoaded = ref(false)
 const enableLoading = () => {
   $q.loading.show({
     spinner: QSpinner,
-    message: 'Цифровой Кооператив ушел оффлайн, но обещал вернуться. Пожалуйста, проверьте ваше интернет-соединение. А мы попытаемся его восстановить.',
+    message: 'Цифровой Кооператив ушел на техническое обслуживание.',
     spinnerSize: 50,
   })
 }

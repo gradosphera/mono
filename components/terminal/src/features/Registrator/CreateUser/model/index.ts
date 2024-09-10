@@ -46,19 +46,11 @@ export function useCreateUser() {
     return result;
   }
 
-  async function sendStatement(): Promise<void> {
+  async function sendStatementAndAgreements(): Promise<void> {
     const data: ISendStatement = {
       username: store.account.username,
       statement: store.statement,
-    };
-
-    await api.sendStatement(data);
-  }
-
-  async function sendAgreement(): Promise<void> {
-    const data: ISendStatement = {
-      username: store.account.username,
-      statement: store.statement,
+      wallet_agreement: store.walletAgreement
     };
 
     await api.sendStatement(data);
@@ -72,10 +64,13 @@ export function useCreateUser() {
       skip_save: false,
       coopname: COOPNAME,
       username: store.account.username,
+      links: [store.walletAgreement.hash]
     }
+    console.log('store.statement: ', store.statement)
 
+    console.log('data for sign: ', data)
     const document = await new DigitalDocument().generate<Cooperative.Registry.ParticipantApplication.Action>(data);
-
+    console.log('generated document: ', document)
     const globalStore = useGlobalStore();
     const digital_signature = await globalStore.signDigest(document.hash);
 
@@ -97,17 +92,13 @@ export function useCreateUser() {
       username: store.account.username,
     };
 
-    const document = await new DigitalDocument().generate(data);
+    const document = new DigitalDocument();
+    await document.generate(data);
+    await document.sign();
 
-    const globalStore = useGlobalStore();
-    const digital_signature = await globalStore.signDigest(document.hash);
+    store.walletAgreement = document.signedDocument as IObjectedDocument;
 
-    store.walletAgreement = {
-      hash: document.hash,
-      meta: document.meta,
-      public_key: digital_signature.public_key,
-      signature: digital_signature.signature,
-    } as IObjectedDocument;
+    console.log('walletAgreement: ', store.walletAgreement)
 
     return store.walletAgreement;
   }
@@ -188,8 +179,8 @@ export function useCreateUser() {
     createUser,
     generateStatementWithoutSignature,
     signStatement,
-    sendStatement,
+    sendStatementAndAgreements,
     createInitialPayment,
-    signWalletAgreement
+    signWalletAgreement,
   };
 }
