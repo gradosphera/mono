@@ -10,7 +10,8 @@ div(v-if="step")
       template(#bottom="{userDataForm}")
         q-checkbox(v-model='store.agreements.condidential' full-width filled).q-mt-lg
           | Я даю своё согласие на обработку своих персональных данных в соответствии с
-          a(@click.stop='(event) => event.stopPropagation()' href='/documents/regulation_on_the_procedure_and_rules_for_using_a_simple_electronic_signature.pdf' target='_blank').q-ml-xs Политикой Конфиденциальности
+          ReadAgreementDialog(v-if="privacyAgreement" :agreement="privacyAgreement" v-model:agree="store.agreements.condidential" text="политикой конфиденциальности")
+            AgreementReader(:agreement="privacyAgreement").q-mb-lg
 
         q-btn(flat, @click="store.step--")
           i.fa.fa-arrow-left
@@ -22,16 +23,26 @@ div(v-if="step")
           label="Продолжить"
           @click="setData(userDataForm)"
         ).q-mt-lg.q-mb-lg
-    </template>
+
+</template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { UserDataForm } from 'src/shared/ui/UserDataForm/UserDataForm';
 
 import { useRegistratorStore } from 'src/entities/Registrator'
+import { useAgreementStore } from 'src/entities/Agreement';
+import { ReadAgreementDialog } from 'src/features/Agreementer/ReadAgreementDialog';
+import { AgreementReader } from 'src/features/Agreementer/GenerateAgreement';
+
 const store = useRegistratorStore().state
 
 const step = computed(() => store.step)
+const agreementer = useAgreementStore()
+
+const privacyAgreement = computed(() => {
+  return agreementer.cooperativeAgreements.find(el => el.type == 'privacy')
+})
 
 const setData = (userDataForm: any) => {
   userDataForm.validate().then(async (success: boolean) => {

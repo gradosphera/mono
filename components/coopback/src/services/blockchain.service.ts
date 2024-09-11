@@ -138,6 +138,39 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
     document: { ...walletAgreement.document, meta: JSON.stringify(walletAgreement.document.meta) },
   };
 
+  const privacyAgreement = await TempDocument.findOne({ username: user.username, type: tempdocType.PrivacyAgreement });
+  if (!privacyAgreement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено соглашение о политике конфиденциальности');
+
+  const privacyAgreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
+    coopname: process.env.COOPNAME as string,
+    administrator: process.env.COOPNAME as string,
+    username: user.username,
+    agreement_type: 'privacy',
+    document: { ...privacyAgreement.document, meta: JSON.stringify(privacyAgreement.document.meta) },
+  };
+
+  const signatureAgreement = await TempDocument.findOne({ username: user.username, type: tempdocType.SignatureAgreement });
+  if (!signatureAgreement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено соглашение о правилах использования ЭЦП');
+
+  const signatureAgreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
+    coopname: process.env.COOPNAME as string,
+    administrator: process.env.COOPNAME as string,
+    username: user.username,
+    agreement_type: 'signature',
+    document: { ...signatureAgreement.document, meta: JSON.stringify(signatureAgreement.document.meta) },
+  };
+
+  const userAgreement = await TempDocument.findOne({ username: user.username, type: tempdocType.UserAgreement });
+  if (!userAgreement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено подписанное пользовательское соглашение');
+
+  const userAgreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
+    coopname: process.env.COOPNAME as string,
+    administrator: process.env.COOPNAME as string,
+    username: user.username,
+    agreement_type: 'user',
+    document: { ...userAgreement.document, meta: JSON.stringify(userAgreement.document.meta) },
+  };
+
   const actions = [
     {
       account: RegistratorContract.contractName.production,
@@ -194,6 +227,39 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
       ],
       data: walletAgreementData,
     },
+    {
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
+      authorization: [
+        {
+          actor: process.env.COOPNAME as string,
+          permission: 'active',
+        },
+      ],
+      data: signatureAgreementData,
+    },
+    {
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
+      authorization: [
+        {
+          actor: process.env.COOPNAME as string,
+          permission: 'active',
+        },
+      ],
+      data: privacyAgreementData,
+    },
+    {
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
+      authorization: [
+        {
+          actor: process.env.COOPNAME as string,
+          permission: 'active',
+        },
+      ],
+      data: userAgreementData,
+    },
   ];
 
   const result = await eos.transact(
@@ -205,6 +271,8 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
       expireSeconds: 30,
     }
   );
+
+  console.dir(result, { depth: null });
 }
 
 async function createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICreateboard) {

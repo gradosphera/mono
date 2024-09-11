@@ -23,6 +23,7 @@ import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
 import { UserSettingsPage } from 'src/pages/User/SettingsPage';
 import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants';
 import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
+import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 
 export const manifest = {
   'name': 'UserDesktop',
@@ -43,7 +44,7 @@ export const manifest = {
           title: 'Удостоверение',
           icon: '',
           roles: [],
-          programs: ['wallet']
+          agreements: agreementsBase
         },
         path: 'identity',
         name: 'user-identity',

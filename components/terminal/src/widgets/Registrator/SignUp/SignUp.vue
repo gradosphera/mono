@@ -3,7 +3,6 @@ div
 
   q-card.bordered.q-pa-md.signup(flat)
     p.text-h6.text-center.q-mb-md ВСТУПИТЬ В ПАЙЩИКИ
-
     q-stepper(v-model='store.step', vertical, animated, flat, done-color='primary')
       EmailInput
 
@@ -43,11 +42,18 @@ const currentUser = useCurrentUserStore()
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { useLogoutUser } from 'src/features/Registrator/Logout'
 import { useSessionStore } from 'src/entities/Session'
+import { useAgreementStore } from 'src/entities/Agreement'
+import { useWalletStore } from 'src/entities/Wallet'
+
 const { state, clearUserData } = useRegistratorStore()
 const session = useSessionStore()
 const store = state
 const username = computed(() => session.username)
+const agreementer = useAgreementStore()
+const wallet = useWalletStore()
+
 onMounted(() => {
+  agreementer.loadCooperativeAgreements(COOPNAME)
   if (!currentUser.isRegistrationComplete) {
 
     if (currentUser.userAccount?.status === 'registered' || currentUser.userAccount?.status === 'active' || currentUser.userAccount?.status === 'blocked') {
@@ -90,6 +96,7 @@ watch(
   () => {
     if (store.step >= 4 && store.step < 8) {
       currentUser.loadProfile(username.value, COOPNAME)
+      wallet.loadUserWalet({coopname: COOPNAME, username: username.value})
     }
   }
 )

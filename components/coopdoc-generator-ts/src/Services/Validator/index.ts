@@ -37,6 +37,7 @@ export class Validator implements Validatable {
     const validateFn: ReturnType<typeof ajv.compile> = ajv.compile(this.schema)
 
     const valid = validateFn(this.data)
+
     let error = ''
 
     if (!valid) {

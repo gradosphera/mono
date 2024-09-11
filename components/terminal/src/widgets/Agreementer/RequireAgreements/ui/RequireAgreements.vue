@@ -8,16 +8,17 @@ div
 import { SignAgreementDialog } from 'src/features/Agreementer/SignAgreementDialog';
 import { useAgreementStore } from 'src/entities/Agreement';
 import { COOPNAME } from 'src/shared/config';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { AgreementReader } from 'src/features/Agreementer/GenerateAgreement';
 import { useWalletStore } from 'src/entities/Wallet';
+import { useSessionStore } from 'src/entities/Session';
 
 const route = useRoute()
 const agreementer = useAgreementStore()
 const wallet = useWalletStore()
 
-const required = computed(() => (route.meta?.programs || []))//TODO change to agreements
+const required = computed(() => (route.meta?.agreements || []))//TODO change to agreements
 
 const userAgreements = computed(() => wallet.agreements)
 const templates = computed(() => agreementer.agreementsTemplates)
@@ -56,6 +57,12 @@ const init = async () => {
   agreementer.loadCooperativeAgreements(COOPNAME)
   agreementer.loadAgreementTemplates(COOPNAME)
 }
+const session = useSessionStore()
+
+watch(() => session.isAuth, (newValue) => {
+  if(newValue)
+    init()
+})
 
 init()
 

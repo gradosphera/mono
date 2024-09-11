@@ -4,7 +4,7 @@
     BaseDocument(:doc="complexDocument.statement.document" :action="complexDocument.statement.action")
     BaseDocument(v-if="complexDocument.decision.document" :doc="complexDocument.decision.document" :action="complexDocument.decision.action")
 
-    BaseDocument(:doc="complexDocument.links[0]" :action="complexDocument.statement.action")
+    BaseDocument(v-for="doc in complexDocument.links" v-bind:key="doc.hash" :doc="doc" :action="complexDocument.statement.action")
 
     //- p links {{complexDocument.links}}
 </template>

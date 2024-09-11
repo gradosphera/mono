@@ -12,7 +12,6 @@ export const connectGenerator = async () => {
 };
 
 export const generateDocument = async (options: IGenerate) => {
-  console.log('controller generate: ', options);
   return await generator.generate(options);
 };
 
@@ -30,11 +29,9 @@ export async function buildComplexDocument(
   // Готовим заявления
   {
     const document = await generator.getDocument({ hash: raw_document.document.hash });
-    console.log('document: ', document);
 
     if (document)
       for (const link of document.meta.links) {
-        console.log('look for link: ', link);
         const linked_document = await generator.getDocument({ hash: link });
         links.push(linked_document);
       }
@@ -135,6 +132,6 @@ export const queryDocuments = async (
 
     if (complexDocument.decision.action) response.results.push(complexDocument);
   }
-  console.log(response);
+
   return response;
 };

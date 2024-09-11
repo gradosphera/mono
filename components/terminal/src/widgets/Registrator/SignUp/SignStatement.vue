@@ -75,9 +75,21 @@ const setSignature = async (): Promise<void> => {
     onSign.value = true
     store.signature = sign
 
-    loadingText.value = 'Подписываем соглашение о ЦПП "Цифровой Кошелёк"'
+    loadingText.value = 'Подписываем положение о ЦПП "Цифровой Кошелёк"'
 
     await createUser.signWalletAgreement()
+
+    loadingText.value = 'Подписываем соглашение о политике конфиденциальности'
+
+    await createUser.signPrivacyAgreement()
+
+    loadingText.value = 'Подписываем соглашение о порядке и правилах использования ЭЦП'
+
+    await createUser.signSignatureAgreement()
+
+    loadingText.value = 'Подписываем пользовательское соглашение'
+
+    await createUser.signUserAgreement()
 
     loadingText.value = 'Подписываем заявление'
 

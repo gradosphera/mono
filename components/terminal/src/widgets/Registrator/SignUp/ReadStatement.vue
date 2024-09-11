@@ -14,15 +14,22 @@ div
     div(v-if='!isLoading').q-gutter-sm
       q-checkbox(v-model='store.agreements.digital_signature' full-width)
         | Я прочитал и принимаю
-        a(@click.stop='(event) => event.stopPropagation()' href='/documents/regulation_on_the_procedure_and_rules_for_using_a_simple_electronic_signature.pdf' target='_blank').q-ml-xs положение о порядке и правилах использования простой электронной подписи
+        ReadAgreementDialog(v-if="signatureAgreement" :agreement="signatureAgreement" v-model:agree="store.agreements.digital_signature" text="положение о порядке и правилах использования простой электронной подписи")
+          AgreementReader(:agreement="signatureAgreement").q-mb-lg
+
       q-checkbox(v-model='store.agreements.wallet' full-width)
         | Я прочитал и принимаю
-        a(@click.stop='(event) => event.stopPropagation()' href='/documents/regulation_on_the_cpp_wallet.pdf' target='_blank').q-ml-xs положение о целевой потребительской программе "Цифровой Кошелёк"
+        ReadAgreementDialog(v-if="walletAgreement" :agreement="walletAgreement" v-model:agree="store.agreements.wallet" text="положение о целевой потребительской программе 'Цифровой Кошелёк'")
+          AgreementReader(:agreement="walletAgreement").q-mb-lg
+
       q-checkbox(v-model='store.agreements.user' full-width)
         | Я прочитал и принимаю
-        a(@click.stop='(event) => event.stopPropagation()' href='/documents/user_agreement.pdf' target='_blank').q-ml-xs пользовательское соглашение
+        ReadAgreementDialog(v-if="userAgreement" :agreement="userAgreement" v-model:agree="store.agreements.user" text="пользовательское соглашение")
+          AgreementReader(:agreement="userAgreement").q-mb-lg
+
       q-checkbox(v-model='store.agreements.ustav' full-width)
         | Я прочитал и принимаю
+
         a(@click.stop='(event) => event.stopPropagation()' href='/documents/ustav.pdf' target='_blank').q-ml-xs Устав кооператива
 
     div(v-if="!isLoading").q-mt-lg
@@ -37,8 +44,14 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useCreateUser } from 'src/features/Registrator/CreateUser'
 import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
+import { ReadAgreementDialog } from 'src/features/Agreementer/ReadAgreementDialog';
+import { useAgreementStore } from 'src/entities/Agreement'
+import { AgreementReader } from 'src/features/Agreementer/GenerateAgreement';
+
+const agreementer = useAgreementStore()
 
 import { useRegistratorStore } from 'src/entities/Registrator'
+import { COOPNAME } from 'src/shared/config';
 const store = useRegistratorStore().state
 
 
@@ -70,6 +83,8 @@ const loadStatement = async (): Promise<void> => {
 
 onMounted(() => {
   if (step.value === currentStep.value) {
+
+
     loadStatement()
   }
 })
@@ -83,6 +98,21 @@ watch(step, (value: number) => {
 const next = () => {
   store.step = currentStep.value + 1
 }
+
+const signatureAgreement = computed(() => {
+  return agreementer.cooperativeAgreements.find(el => el.type == 'signature')
+})
+
+const walletAgreement = computed(() => {
+  return agreementer.cooperativeAgreements.find(el => el.type == 'wallet')
+})
+
+
+const userAgreement = computed(() => {
+  return agreementer.cooperativeAgreements.find(el => el.type == 'user')
+})
+
+
 </script>
 <style>
 .statement {

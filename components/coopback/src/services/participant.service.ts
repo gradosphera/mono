@@ -25,6 +25,7 @@ const verifyDocumentSignature = (user: IUser, document: IDocument): void => {
  *
  */
 export const joinCooperative = async (data: IJoinCooperative): Promise<void> => {
+  console.log('data: ', data);
   const user = await getUserByUsername(data.username);
 
   if (!user) {

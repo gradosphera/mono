@@ -6,15 +6,17 @@ export const useGenerateAgreement = () => {
 
   const generateAgreement = async (coopname: string, username: string, registry_id: number) => {
     const agreementStore = useAgreementStore()
+    const exist = agreementStore.generatedAgreements.find(agreement => agreement.meta.registry_id == registry_id)
 
-    const agreement = await new DigitalDocument().generate({
-      registry_id,
-      coopname,
-      username
-    })
+    if (!exist){
+      const agreement = await new DigitalDocument().generate({
+        registry_id,
+        coopname,
+        username
+      })
 
-    agreementStore.generatedAgreements.push(agreement)
-
+      agreementStore.generatedAgreements.push(agreement)
+    }
   }
 
   return {
