@@ -62,3 +62,8 @@ export * as Wallets from './wallets'
  * Таблица содержит подписанные пайщиками документы соглашений с кооперативом
  */
 export * as Agreements from './agreements'
+
+/**
+ * Таблица содержит реестр внутри-кооперативных соглашений/положений с пайщиками
+ */
+export * as CoopAgreements from './coopAgreements'

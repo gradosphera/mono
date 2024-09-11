@@ -1,21 +1,17 @@
+import * as WalletAgreement from './1.WalletAgreement'
+import * as RegulationElectronicSignaturet from './2.RegulationElectronicSignature'
+import * as PrivacyPolicy from './3.PrivacyPolicy'
+import * as UserAgreement from './4.UserAgreement'
+import * as CoopenomicsAgreement from './50.CoopenomicsAgreement'
 import * as ParticipantApplication from './100.ParticipantApplication'
 import * as DecisionOfParticipantApplication from './501.DecisionOfParticipantApplication'
-import * as WalletAgreement from './1.WalletAgreement'
 
 export const Registry = {
   1: WalletAgreement,
+  2: RegulationElectronicSignaturet,
+  3: PrivacyPolicy,
+  4: UserAgreement,
+  50: CoopenomicsAgreement,
   100: ParticipantApplication,
   501: DecisionOfParticipantApplication,
-}
-
-export interface IRegistry {
-  1: WalletAgreement.Action // Тип данных для документа
-  100: ParticipantApplication.Action // Тип данных для документа
-  501: DecisionOfParticipantApplication.Action // Тип данных для документа
-}
-
-export interface MRegistry {
-  1: WalletAgreement.Model // Тип данных для документа
-  100: ParticipantApplication.Model // Тип данных для документа
-  501: DecisionOfParticipantApplication.Model // Тип данных для документа
 }

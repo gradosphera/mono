@@ -14,6 +14,7 @@ export async function BlockParser(db: Database, reader: EosioShipReaderResolved)
     setTimeout(() => process.exit(1), 10000)
   })
 
+
   blocks$.subscribe(async (block: IBlock) => {
     // console.log('new block: ', block)
     // process.stdout.write('\r') // Возврат каретки в начало строки

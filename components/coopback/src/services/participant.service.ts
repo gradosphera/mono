@@ -26,7 +26,7 @@ const verifyDocumentSignature = (user: IUser, document: IDocument): void => {
  */
 export const joinCooperative = async (data: IJoinCooperative): Promise<void> => {
   const user = await getUserByUsername(data.username);
-  console.log(data);
+
   if (!user) {
     throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
   }
@@ -37,6 +37,9 @@ export const joinCooperative = async (data: IJoinCooperative): Promise<void> => 
 
   verifyDocumentSignature(user, data.statement);
   verifyDocumentSignature(user, data.wallet_agreement);
+  verifyDocumentSignature(user, data.user_agreement);
+  verifyDocumentSignature(user, data.privacy_agreement);
+  verifyDocumentSignature(user, data.signature_agreement);
 
   const session = await mongoose.startSession();
 
@@ -50,6 +53,24 @@ export const joinCooperative = async (data: IJoinCooperative): Promise<void> => 
     await TempDocument.findOneAndUpdate(
       { username: user.username, type: tempdocType.WalletAgreement },
       { $set: { document: data.wallet_agreement } },
+      { upsert: true, new: true, session }
+    );
+
+    await TempDocument.findOneAndUpdate(
+      { username: user.username, type: tempdocType.PrivacyAgreement },
+      { $set: { document: data.privacy_agreement } },
+      { upsert: true, new: true, session }
+    );
+
+    await TempDocument.findOneAndUpdate(
+      { username: user.username, type: tempdocType.SignatureAgreement },
+      { $set: { document: data.signature_agreement } },
+      { upsert: true, new: true, session }
+    );
+
+    await TempDocument.findOneAndUpdate(
+      { username: user.username, type: tempdocType.UserAgreement },
+      { $set: { document: data.user_agreement } },
       { upsert: true, new: true, session }
     );
 

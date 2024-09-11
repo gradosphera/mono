@@ -1,16 +1,19 @@
-import type { agreementType } from 'src/entities/Agreement'
+import { useAgreementStore, type agreementType } from 'src/entities/Agreement'
 import { DigitalDocument } from 'src/entities/Document'
 
 
 export const useGenerateAgreement = () => {
 
-  const generateAgreement = async (coopname: string, username: string, type: agreementType) => {
+  const generateAgreement = async (coopname: string, username: string, registry_id: number) => {
+    const agreementStore = useAgreementStore()
 
-    return new DigitalDocument().generate({
-      registry_id: type,
+    const agreement = await new DigitalDocument().generate({
+      registry_id,
       coopname,
       username
     })
+
+    agreementStore.generatedAgreements.push(agreement)
 
   }
 

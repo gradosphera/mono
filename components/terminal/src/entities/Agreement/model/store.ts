@@ -9,33 +9,41 @@ const namespace = 'agreementer';
 interface IAgreementStore {
   /*  доменный интерфейс кошелька пользователя */
   agreementsTemplates: Ref<DraftContract.Tables.Drafts.IDraft[]>
-  agreements: Ref<SovietContract.Tables.Agreements.IAgreement[]>;
-
-  generatedWalletAgreement: Ref<IGeneratedDocument | null>
+  agreementsOfAllParticipants: Ref<SovietContract.Tables.Agreements.IAgreement[]>;
+  cooperativeAgreements: Ref<SovietContract.Tables.CoopAgreements.ICoopAgreement[]>;
+  generatedAgreements: Ref<IGeneratedDocument[]>
   loadAgreementsOfAllParticipants: (coopname: string) => Promise<void>;
   loadAgreementTemplates: (coopname: string) => Promise<void>;
-
+  loadCooperativeAgreements: (coopname: string) => Promise<void>;
 }
 
 export const useAgreementStore = defineStore(namespace, (): IAgreementStore => {
   const agreementsTemplates = ref<DraftContract.Tables.Drafts.IDraft[]>([]);
-  const agreements = ref<SovietContract.Tables.Agreements.IAgreement[]>([]);
+  const agreementsOfAllParticipants = ref<SovietContract.Tables.Agreements.IAgreement[]>([]);
 
-  const generatedWalletAgreement = ref<IGeneratedDocument | null>(null)
+  const cooperativeAgreements = ref<SovietContract.Tables.CoopAgreements.ICoopAgreement[]>([]);
+
+  const generatedAgreements = ref<IGeneratedDocument[]>([])
 
   const loadAgreementsOfAllParticipants = async (coopname: string) => {
-    agreements.value = await api.loadAllAgreements(coopname)
+    agreementsOfAllParticipants.value = await api.loadAgreementsOfAllParticipants(coopname)
   }
 
   const loadAgreementTemplates = async (coopname: string) => {
     agreementsTemplates.value = await api.loadAgreementTemplates(coopname)
   }
 
+  const loadCooperativeAgreements = async (coopname: string) => {
+    cooperativeAgreements.value = await api.loadCooperativeAgreements(coopname)
+  }
+
   return {
+    cooperativeAgreements,
     agreementsTemplates,
-    agreements,
+    agreementsOfAllParticipants,
     loadAgreementsOfAllParticipants,
     loadAgreementTemplates,
-    generatedWalletAgreement
+    loadCooperativeAgreements,
+    generatedAgreements
   };
 });

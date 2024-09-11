@@ -126,8 +126,11 @@ export const useRegistratorStore = defineStore(
       inLoading: false,
       agreements: structuredClone(initialAgreementsState),
       statement: structuredClone(initialDocumentState),
+
       walletAgreement: structuredClone(initialDocumentState),
-      //TODO добавить прочие соглашения
+      privacyAgreement: structuredClone(initialDocumentState),
+      signatureAgreement: structuredClone(initialDocumentState),
+      userAgreement: structuredClone(initialDocumentState),
 
       payment: structuredClone(initialPaymentState),
       is_paid: false,
@@ -155,6 +158,10 @@ export const useRegistratorStore = defineStore(
       state.payment = structuredClone(initialPaymentState);
       state.is_paid = false;
       state.statement = structuredClone(initialDocumentState);
+      state.walletAgreement = structuredClone(initialDocumentState);
+      state.privacyAgreement = structuredClone(initialDocumentState);
+      state.signatureAgreement = structuredClone(initialDocumentState);
+      state.userAgreement = structuredClone(initialDocumentState);
     };
 
     return {

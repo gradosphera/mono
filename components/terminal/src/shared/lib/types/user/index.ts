@@ -47,4 +47,7 @@ export interface ISendStatement {
   username: string;
   statement: IObjectedDocument;
   wallet_agreement: IObjectedDocument;
+  privacy_agreement: IObjectedDocument;
+  signature_agreement: IObjectedDocument;
+  user_agreement: IObjectedDocument;
 }

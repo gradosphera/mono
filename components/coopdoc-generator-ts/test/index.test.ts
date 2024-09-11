@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { RegistratorContract, SovietContract } from 'cooptypes'
-import { Generator, type IGenerateWalletAgreement } from '../src'
+import { Generator } from '../src'
 import type { IGeneratedDocument } from '../src/Interfaces/Documents'
 import { saveBufferToDisk } from '../src/Utils/saveBufferToDisk'
 import { loadBufferFromDisk } from '../src/Utils/loadBufferFromDisk'
@@ -12,7 +12,7 @@ const coopname = 'voskhod'
 
 import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData } from '../src/Models'
 import type { PaymentData } from '../src/Models/PaymentMethod'
-import { Registry } from '../src/templates'
+import { CoopenomicsAgreement, PrivacyPolicy, Registry, RegulationElectronicSignature, UserAgreement, WalletAgreement } from '../src/templates'
 import { signatureExample } from './signatureExample'
 
 const generator = new Generator()
@@ -298,12 +298,184 @@ describe('тест генератора документов', async () => {
     }
   })
 
-  it('генерируем заявление на присоединение к ЦПП', async () => {
-    const params: IGenerateWalletAgreement = {
+  it('генерируем заявление на присоединение к ЦПП "Цифровой Кошелёк"', async () => {
+    const params: WalletAgreement.Action = {
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
-      registry_id: 1,
+      registry_id: WalletAgreement.registry_id,
+      protocol_number: '01-01-2024',
+      protocol_day_month_year: '1 января 2024 г.',
+    }
+
+    const document: IGeneratedDocument = await generator.generate(params)
+
+    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(document.binary, filename1)
+
+    const regenerated_document: IGeneratedDocument = await generator.generate({
+      ...document.meta,
+    })
+
+    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(regenerated_document.binary, filename2)
+
+    expect(document.meta).toEqual(regenerated_document.meta)
+    expect(document.hash).toEqual(regenerated_document.hash)
+
+    const document_from_disk1 = await loadBufferFromDisk(filename1)
+    const document_from_disk2 = await loadBufferFromDisk(filename2)
+
+    const hash1 = calculateSha256(document_from_disk1)
+    const hash2 = calculateSha256(document_from_disk2)
+
+    const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
+
+    expect(getted_document).toBeDefined()
+    expect(getted_document.hash).toEqual(document.hash)
+
+    console.log('hash1: ', hash1)
+    console.log('hash2: ', hash2)
+    console.log(document.meta)
+
+    expect(hash1).toEqual(hash2)
+  })
+
+  it('генерируем согласие с правилами ЭЦП', async () => {
+    const params: RegulationElectronicSignature.Action = {
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      registry_id: RegulationElectronicSignature.registry_id,
+      protocol_number: '01-01-2024',
+      protocol_day_month_year: '1 января 2024 г.',
+    }
+
+    const document: IGeneratedDocument = await generator.generate(params)
+
+    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(document.binary, filename1)
+
+    const regenerated_document: IGeneratedDocument = await generator.generate({
+      ...document.meta,
+    })
+
+    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(regenerated_document.binary, filename2)
+
+    expect(document.meta).toEqual(regenerated_document.meta)
+    expect(document.hash).toEqual(regenerated_document.hash)
+
+    const document_from_disk1 = await loadBufferFromDisk(filename1)
+    const document_from_disk2 = await loadBufferFromDisk(filename2)
+
+    const hash1 = calculateSha256(document_from_disk1)
+    const hash2 = calculateSha256(document_from_disk2)
+
+    const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
+
+    expect(getted_document).toBeDefined()
+    expect(getted_document.hash).toEqual(document.hash)
+
+    console.log('hash1: ', hash1)
+    console.log('hash2: ', hash2)
+    console.log(document.meta)
+
+    expect(hash1).toEqual(hash2)
+  })
+
+  it('генерируем согласие с политикой конфиденциальности', async () => {
+    const params: PrivacyPolicy.Action = {
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      registry_id: PrivacyPolicy.registry_id,
+      protocol_number: '01-01-2024',
+      protocol_day_month_year: '1 января 2024 г.',
+    }
+
+    const document: IGeneratedDocument = await generator.generate(params)
+
+    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(document.binary, filename1)
+
+    const regenerated_document: IGeneratedDocument = await generator.generate({
+      ...document.meta,
+    })
+
+    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(regenerated_document.binary, filename2)
+
+    expect(document.meta).toEqual(regenerated_document.meta)
+    expect(document.hash).toEqual(regenerated_document.hash)
+
+    const document_from_disk1 = await loadBufferFromDisk(filename1)
+    const document_from_disk2 = await loadBufferFromDisk(filename2)
+
+    const hash1 = calculateSha256(document_from_disk1)
+    const hash2 = calculateSha256(document_from_disk2)
+
+    const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
+
+    expect(getted_document).toBeDefined()
+    expect(getted_document.hash).toEqual(document.hash)
+
+    console.log('hash1: ', hash1)
+    console.log('hash2: ', hash2)
+    console.log(document.meta)
+
+    expect(hash1).toEqual(hash2)
+  })
+
+  it('генерируем согласие с пользовательским соглашением', async () => {
+    const params: UserAgreement.Action = {
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      registry_id: UserAgreement.registry_id,
+      protocol_number: '01-01-2024',
+      protocol_day_month_year: '1 января 2024 г.',
+    }
+
+    const document: IGeneratedDocument = await generator.generate(params)
+
+    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(document.binary, filename1)
+
+    const regenerated_document: IGeneratedDocument = await generator.generate({
+      ...document.meta,
+    })
+
+    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
+    await saveBufferToDisk(regenerated_document.binary, filename2)
+
+    expect(document.meta).toEqual(regenerated_document.meta)
+    expect(document.hash).toEqual(regenerated_document.hash)
+
+    const document_from_disk1 = await loadBufferFromDisk(filename1)
+    const document_from_disk2 = await loadBufferFromDisk(filename2)
+
+    const hash1 = calculateSha256(document_from_disk1)
+    const hash2 = calculateSha256(document_from_disk2)
+
+    const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
+
+    expect(getted_document).toBeDefined()
+    expect(getted_document.hash).toEqual(document.hash)
+
+    console.log('hash1: ', hash1)
+    console.log('hash2: ', hash2)
+    console.log(document.meta)
+
+    expect(hash1).toEqual(hash2)
+  })
+
+  it('генерируем согласие с пользовательским соглашением платформы "Кооперативная Экономика"', async () => {
+    const params: CoopenomicsAgreement.Action = {
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      registry_id: CoopenomicsAgreement.registry_id,
       protocol_number: '01-01-2024',
       protocol_day_month_year: '1 января 2024 г.',
     }

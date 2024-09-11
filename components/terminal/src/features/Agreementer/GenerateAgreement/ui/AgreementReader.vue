@@ -1,42 +1,36 @@
 <template lang="pug">
-  div(v-if="agreement")
-    DocumentHtmlReader(:html="agreement.html")
-  </template>
+div(v-if="agreement")
+  DocumentHtmlReader(:html="agreement.html")
+</template>
 
 <script setup lang="ts">
   import { COOPNAME } from 'src/shared/config';
   import { useGenerateAgreement } from '../model';
   import { useSessionStore } from 'src/entities/Session';
-  import { onMounted, ref } from 'vue';
+  import { computed, onMounted } from 'vue';
   import { FailAlert } from 'src/shared/api';
   import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader';
-  import type { IGeneratedDocument } from 'src/entities/Document';
-  import { agreementType, useAgreementStore } from 'src/entities/Agreement';
+  import { useAgreementStore } from 'src/entities/Agreement';
+  import { SovietContract } from 'cooptypes';
   const session = useSessionStore();
 
-  const agreementStore = useAgreementStore()
-
   const { generateAgreement } = useGenerateAgreement();
+  const agreementer = useAgreementStore()
 
-  const agreement = ref<IGeneratedDocument | null >(null)
+  const agreement = computed(() => agreementer.generatedAgreements.find(el => el.meta.registry_id == props.agreement.draft_id))
 
   const props = defineProps({
-    type: {
-      type: String,
+    agreement: {
+      type: Object as () => SovietContract.Tables.CoopAgreements.ICoopAgreement,
       required: true,
     },
   });
 
   onMounted(async () => {
     try {
-      if (props.type === 'wallet') {
-        agreement.value = await generateAgreement(COOPNAME, session.username, agreementType.wallet);
-        agreementStore.generatedWalletAgreement = agreement.value
-      } else {
-        FailAlert('Неизвестный тип соглашения')
-      }
-    } catch(e){
-      FailAlert('Возникла ошибка при генерации соглашения, пожалуйста, обратитесь в поддержку');
+      await generateAgreement(COOPNAME, session.username, Number(props.agreement.draft_id));
+    } catch(e: any){
+      FailAlert(`Возникла ошибка при генерации соглашения, пожалуйста, обратитесь в поддержку с сообщением: ${e.message}`);
     }
 
   });

@@ -4,6 +4,9 @@ import { paginate, toJSON } from './plugins';
 export enum tempdocType {
   JoinStatement = 'joinStatement',
   WalletAgreement = 'walletAgreement',
+  SignatureAgreement = 'signatureAgreement',
+  PrivacyAgreement = 'privacyAgreement',
+  UserAgreement = 'userAgreement',
 }
 
 export interface ITempDocument {

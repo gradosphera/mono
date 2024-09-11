@@ -135,8 +135,6 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
     administrator: process.env.COOPNAME as string,
     username: user.username,
     agreement_type: 'wallet',
-    program_id: 1,
-    draft_registry_id: 1,
     document: { ...walletAgreement.document, meta: JSON.stringify(walletAgreement.document.meta) },
   };
 

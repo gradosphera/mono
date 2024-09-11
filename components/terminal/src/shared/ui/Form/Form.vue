@@ -3,6 +3,7 @@ const emit = defineEmits(['cancel'])
 interface IFormProps {
   handlerSubmit: (e?: Event) => Promise<void>
   isSubmitting?: boolean
+  showSubmit?: boolean
   showCancel?: boolean
   buttonSubmitTxt?: string
   buttonCancelTxt?: string
@@ -11,6 +12,7 @@ interface IFormProps {
 withDefaults(defineProps<IFormProps>(), {
   isSubmitting: false,
   showCancel: true,
+  showSubmit: true,
   buttonSubmitTxt: 'Продолжить',
   buttonCancelTxt: 'Отменить',
 })
@@ -26,6 +28,6 @@ q-form(@submit.prevent="handlerSubmit")
     slot
     div.flex
       q-btn(v-if="showCancel" flat @click="cancel") {{ buttonCancelTxt }}
-      q-btn(:class="{'full-width': !showCancel}" type="submit" :loading="isSubmitting" color="primary") {{ buttonSubmitTxt }}
+      q-btn(v-if="showSubmit" :class="{'full-width': !showCancel}" type="submit" :loading="isSubmitting" color="primary") {{ buttonSubmitTxt }}
 
 </template>

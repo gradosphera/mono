@@ -11,7 +11,25 @@ export interface IDocument {
 }
 
 export interface IJoinCooperative {
+  privacy_agreement: {
+    hash: string;
+    meta: object;
+    public_key: string;
+    signature: string;
+  };
+  signature_agreement: {
+    hash: string;
+    meta: object;
+    public_key: string;
+    signature: string;
+  };
   statement: {
+    hash: string;
+    meta: object;
+    public_key: string;
+    signature: string;
+  };
+  user_agreement: {
     hash: string;
     meta: object;
     public_key: string;
@@ -28,7 +46,25 @@ export interface IJoinCooperative {
 
 export interface RJoinCooperative {
   body: {
+    privacy_agreement: {
+      hash: string;
+      meta: object;
+      public_key: string;
+      signature: string;
+    };
+    signature_agreement: {
+      hash: string;
+      meta: object;
+      public_key: string;
+      signature: string;
+    };
     statement: {
+      hash: string;
+      meta: object;
+      public_key: string;
+      signature: string;
+    };
+    user_agreement: {
       hash: string;
       meta: object;
       public_key: string;

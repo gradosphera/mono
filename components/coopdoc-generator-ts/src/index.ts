@@ -16,6 +16,7 @@ import { Cooperative, type CooperativeData } from './Models/Cooperative'
 import type { DocFactory } from './Factory'
 import type { PaymentData } from './Models/PaymentMethod'
 import { PaymentMethod } from './Models/PaymentMethod'
+import { Registry } from './templates'
 
 export type dataTypes = 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod'
 
@@ -55,9 +56,13 @@ export class Generator implements IGenerator {
 
     // Инициализация фабрик документов
     this.factories = {
-      [Actions.WalletAgreement.Template.registry_id]: new Actions.WalletAgreement.Factory(this.storage),
-      [Actions.ParticipantApplication.Template.registry_id]: new Actions.ParticipantApplication.Factory(this.storage),
-      [Actions.DecisionOfParticipantApplication.Template.registry_id]: new Actions.DecisionOfParticipantApplication.Factory(this.storage),
+      [Actions.WalletAgreement.Template.registry_id]: new Actions.WalletAgreement.Factory(this.storage), // 1
+      [Actions.RegulationElectronicSignature.Template.registry_id]: new Actions.RegulationElectronicSignature.Factory(this.storage), // 2
+      [Actions.PrivacyPolicy.Template.registry_id]: new Actions.PrivacyPolicy.Factory(this.storage), // 3
+      [Actions.UserAgreement.Template.registry_id]: new Actions.UserAgreement.Factory(this.storage), // 4
+      [Actions.CoopenomicsAgreement.Template.registry_id]: new Actions.UserAgreement.Factory(this.storage), // 50
+      [Actions.ParticipantApplication.Template.registry_id]: new Actions.ParticipantApplication.Factory(this.storage), // 100
+      [Actions.DecisionOfParticipantApplication.Template.registry_id]: new Actions.DecisionOfParticipantApplication.Factory(this.storage), // 501
     }
     await this.storage.connect()
   }

@@ -22,9 +22,7 @@ export async function getAccountInfo(account: string): Promise<any> {
 }
 export async function transact(
   transaction: any,
-  params: any = { blocksBehind: 3, expireSeconds: 30 }
 ): Promise<TransactResult | undefined> {
-  console.log(params);
   return useGlobalStore().transact(transaction);
 }
 

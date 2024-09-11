@@ -1,8 +1,18 @@
 import { DraftContract, SovietContract } from 'cooptypes';
 import { fetchTable } from 'src/shared/api';
 
+async function loadCooperativeAgreements(coopname: string): Promise<SovietContract.Tables.CoopAgreements.ICoopAgreement[]> {
+  return (
+    await fetchTable(
+      SovietContract.contractName.production,
+      coopname,
+      SovietContract.Tables.CoopAgreements.tableName,
+    )
+  ) as SovietContract.Tables.CoopAgreements.ICoopAgreement[];
+}
 
-async function loadAllAgreements(coopname: string): Promise<SovietContract.Tables.Agreements.IAgreement[]> {
+
+async function loadAgreementsOfAllParticipants(coopname: string): Promise<SovietContract.Tables.Agreements.IAgreement[]> {
   return (
     await fetchTable(
       SovietContract.contractName.production,
@@ -26,4 +36,4 @@ async function loadAgreementTemplates(coopname: string): Promise<DraftContract.T
 }
 
 
-export const api = {loadAllAgreements, loadAgreementTemplates}
+export const api = {loadCooperativeAgreements, loadAgreementsOfAllParticipants, loadAgreementTemplates}
