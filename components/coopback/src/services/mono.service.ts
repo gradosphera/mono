@@ -13,8 +13,6 @@ import { getBlockchainInfo } from './blockchain.service';
 import { RegistratorContract } from 'cooptypes';
 
 export const install = async (soviet: IInstall): Promise<void> => {
-  console.log('IInstall: ', soviet);
-
   const mono = await Mono.findOne({ coopname: config.coopname });
   const info = await getBlockchainInfo();
   const coop = await blockchainService.getCooperative(config.coopname);
@@ -31,8 +29,6 @@ export const install = async (soviet: IInstall): Promise<void> => {
 
   try {
     for (const member of soviet) {
-      console.log(member);
-
       const username = generateUsername();
       sovietExt.push({ ...member, username });
 

@@ -29,3 +29,36 @@ export interface IContacts {
     middle_name: string
   }
 }
+
+export interface ICovars {
+  coopname: string
+
+  full_abbr: string
+  full_abbr_genitive: string
+  full_abbr_dative: string
+
+  short_abbr: string
+  website: string
+  name: string
+
+  confidential_link: string
+  confidential_email: string
+  contact_email: string
+
+  wallet_agreement: {
+    protocol_number: string
+    protocol_day_month_year: string
+  }
+  signature_agreement: {
+    protocol_number: string
+    protocol_day_month_year: string
+  }
+  privacy_agreement: {
+    protocol_number: string
+    protocol_day_month_year: string
+  }
+  user_agreement: {
+    protocol_number: string
+    protocol_day_month_year: string
+  }
+}

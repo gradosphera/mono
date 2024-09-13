@@ -1,4 +1,5 @@
 import type { IGenerate, IMetaDocument } from '../../document'
+import type { ICooperativeData } from '../../model'
 
 export const registry_id = 3
 
@@ -10,12 +11,25 @@ export interface Action extends IGenerate {
 // Модель данных документа
 export interface Model {
   meta: IMetaDocument
+  coop: ICooperativeData
+  covars: {
+    name: string
+    short_abbr: string
+    full_abbr_dative: string
+    website: string
+    confidential_email: string
+    confidential_link: string
+    privacy_agreement: {
+      protocol_number: string
+      protocol_day_month_year: string
+    }
+  }
 }
 
 export const title = 'Согласие с условиями политики обработки конфиденциальных данных'
 export const description = 'Форма согласия с условиями политики обработки конфиденциальных данных'
 
-export const context = '<div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'APPROVED\' %}</p>\n<p style="margin: 0px !important">{% trans \'protocol\' %} {{ protocol_number }}</p>\n<p style="margin: 0px !important">{{ coop.full_name }} </p>\n<p style="margin: 0px !important">{% trans \'from\' %} {{ protocol_day_month_year }}</p>\n</div>\n<div style="text-align: center">\n<h1 class="header"> {% trans \'PRIVACY_POLICY\' %}</h1>\n</div>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_1\' %}</bold>\n</div>\n<p> {% trans \'privacy_policy_text_1_1\' %} {{full_abbr_dative}} {% trans \'privacy_policy_text_1_2\' %} "{{ name}}" {{website}}.</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_2\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_2_1\' %} {{website}}; {% trans \'privacy_policy_text_2_2\' %} {{website}}; {% trans \'privacy_policy_text_2_3\' %}  {{website}}; {% trans \'privacy_policy_text_2_4\' %}</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_3_1\' %} {{short_abbr}} "{{name}}":</bold>\n</div>\n<p>{% trans \'privacy_policy_text_3\' %}</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_4\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_4_1\' %}  {{short_abbr}}  "{{name}}"{% trans \'privacy_policy_text_4_2\' %} {{confidential_email}} {% trans \'privacy_policy_text_4_3\' %}</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_5\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_5_1\' %} {{website}} {% trans \'privacy_policy_text_5_2\' %} </p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_6\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_6_1\' %} {{confidential_email}} {% trans \'privacy_policy_text_6_2\' %} {{confidential_email}} {% trans \'privacy_policy_text_6_3\' %}</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_7\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_7\' %}</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_8\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_8_1\' %} {{confidential_email}}. {% trans \'privacy_policy_text_8_2\' %} {{confidential_link}}.</p>\n\n'
+export const context = '<div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'APPROVED\' %}</p>\n<p style="margin: 0px !important">{% trans \'protocol\' %} {{ covars.privacy_agreement.protocol_number }}</p>\n<p style="margin: 0px !important">{{ coop.full_name }} </p>\n<p style="margin: 0px !important">{% trans \'from\' %} {{ covars.privacy_agreement.protocol_day_month_year }}</p>\n</div>\n<div style="text-align: center">\n<h1 class="header"> {% trans \'PRIVACY_POLICY\' %}</h1>\n</div>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_1\' %}</bold>\n</div>\n<p> {% trans \'privacy_policy_text_1_1\' %} {{covars.full_abbr_dative}} {% trans \'privacy_policy_text_1_2\' %} "{{ covars.name}}" {{covars.website}}.</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_2\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_2_1\' %} {{covars.website}}; {% trans \'privacy_policy_text_2_2\' %} {{covars.website}}; {% trans \'privacy_policy_text_2_3\' %}  {{covars.website}}; {% trans \'privacy_policy_text_2_4\' %}</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_3_1\' %} {{covars.short_abbr}} "{{covars.name}}":</bold>\n</div>\n<p>{% trans \'privacy_policy_text_3\' %}</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_4\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_4_1\' %}  {{covars.short_abbr}}  "{{covars.name}}"{% trans \'privacy_policy_text_4_2\' %} {{covars.confidential_email}} {% trans \'privacy_policy_text_4_3\' %}</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_5\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_5_1\' %} {{covars.website}} {% trans \'privacy_policy_text_5_2\' %} </p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_6\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_6_1\' %} {{covars.confidential_email}} {% trans \'privacy_policy_text_6_2\' %} {{covars.confidential_email}} {% trans \'privacy_policy_text_6_3\' %}</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_7\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_7\' %}</p>\n<div style="text-align: left">\n<bold>{% trans \'privacy_policy_title_8\' %}</bold>\n</div>\n<p>{% trans \'privacy_policy_text_8_1\' %} {{covars.confidential_email}}. {% trans \'privacy_policy_text_8_2\' %} {{covars.confidential_link}}.</p>\n\n'
 
 export const translations = {
   ru: {

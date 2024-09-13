@@ -1,4 +1,5 @@
 import type { IGenerate, IMetaDocument } from '../../document'
+import type { ICooperativeData } from '../../model'
 
 export const registry_id = 4
 
@@ -10,12 +11,30 @@ export interface Action extends IGenerate {
 // Модель данных документа
 export interface Model {
   meta: IMetaDocument
+  coop: ICooperativeData
+  user: {
+    full_name: string
+  }
+  covars: {
+    name: string
+    full_abbr: string
+    short_abbr: string
+    full_abbr_genitive: string
+    full_abbr_dative: string
+    confidential_email: string
+    confidential_link: string
+    website: string
+    user_agreement: {
+      protocol_number: string
+      protocol_day_month_year: string
+    }
+  }
 }
 
 export const title = 'Согласие с условиями пользовательского соглашения'
 export const description = 'Форма согласия с условиями пользовательского соглашения'
 
-export const context = '<div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'APPROVED\' %}</p>\n<p style="margin: 0px !important">{% trans \'protocol\' %} {{ protocol_number }}</p>\n<p style="margin: 0px !important">{{ coop.full_name }} </p>\n<p style="margin: 0px !important">{% trans \'from\' %} {{ protocol_day_month_year }}</p>\n</div>\n<div style="text-align: center">\n<h1 class="header"> {% trans \'USER_AGREEMENT\' %} {{full_abbr_genitive}} "{{name}}"</h1>\n</div>\n<div style="text-align: left">\n<p>{{full_abbr}} "{{name}}" {% trans \'user_agreement_text_2\' %} {{chairman_full_name}} {% trans \'user_agreement_text_3\' %} {{website}} {% trans \'user_agreement_text_4\' %} </p>\n<p> {% trans \'user_agreement_text_5\' %} {{FIO_Paishik}}</p>\n<p> {% trans \'user_agreement_text_6\' %}{{full_abbr_genitive}} "{{name}}" {{chairman_full_name}}</p>\n<p>{{date_user_agreement}}</p>'
+export const context = '<div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'APPROVED\' %}</p>\n<p style="margin: 0px !important">{% trans \'protocol\' %} {{ covars.user_agreement.protocol_number }}</p>\n<p style="margin: 0px !important">{{ covars.full_abbr_genitive }} {{covars.name}}</p>\n<p style="margin: 0px !important">{% trans \'from\' %} {{ covars.user_agreement.protocol_day_month_year }}</p>\n</div>\n<div style="text-align: center">\n<h1 class="header"> {% trans \'USER_AGREEMENT\' %} {{covars.full_abbr_genitive}} "{{covars.name}}"</h1>\n</div>\n<div style="text-align: left">\n<p>{{covars.full_abbr}} "{{covars.name}}" {% trans \'user_agreement_text_2\' %} {{coop.chairman.last_name}} {{coop.chairman.first_name}} {{coop.chairman.middle_name}}  {% trans \'user_agreement_text_3\' %} {{covars.website}} {% trans \'user_agreement_text_4\' %} </p>\n<p> {% trans \'user_agreement_text_5\' %} {{user.full_name}}</p>\n<p> {% trans \'user_agreement_text_6\' %} {{covars.full_abbr_genitive}} "{{covars.name}}" {{coop.chairman.last_name}} {{coop.chairman.first_name}} {{coop.chairman.middle_name}}.</p>\n<p>{{meta.created_at}}</p>'
 
 export const translations = {
   ru: {

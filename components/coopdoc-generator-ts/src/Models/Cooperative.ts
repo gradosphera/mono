@@ -1,13 +1,11 @@
-import type { JSONSchemaType } from 'ajv'
 import { RegistratorContract, SovietContract } from 'cooptypes'
 import type { Cooperative as CooperativeApi } from 'cooptypes'
 import { type ValidateResult, Validator } from '../Services/Validator'
 import DataService from '../Services/Databazor/DataService'
 import type { MongoDBConnector } from '../Services/Databazor'
-import { individualSchema } from '../Schema/IndividualSchema'
 import { getFetch } from '../Utils/getFetch'
 import { getEnvVar } from '../config'
-import { organizationSchema } from '../Schema'
+import { CooperativeSchema } from '../Schema/CooperativeSchema'
 import { Organization } from './Organization'
 
 import type { ExternalIndividualData } from './Individual'
@@ -15,27 +13,6 @@ import { Individual } from './Individual'
 
 export type CooperativeData = CooperativeApi.Model.ICooperativeData
 export type MembersData = CooperativeApi.Model.MembersData
-
-export const CooperativeSchema: JSONSchemaType<CooperativeData> = {
-  type: 'object',
-  properties: {
-    is_branched: { type: 'boolean' },
-    registration: { type: 'string' },
-    initial: { type: 'string' },
-    minimum: { type: 'string' },
-    org_registration: { type: 'string' },
-    org_initial: { type: 'string' },
-    org_minimum: { type: 'string' },
-    totalMembers: { type: 'number' },
-    members: {
-      type: 'array',
-      items: individualSchema,
-    },
-    ...organizationSchema.properties,
-  },
-  required: [...organizationSchema.required, 'is_branched', 'registration', 'initial', 'minimum', 'org_registration', 'org_initial', 'org_minimum', 'members', 'totalMembers'],
-  additionalProperties: true,
-}
 
 export class Cooperative {
   cooperative: CooperativeData | null

@@ -1,4 +1,5 @@
 import type { IGenerate, IMetaDocument } from '../../document'
+import type { ICooperativeData } from '../../model'
 
 export const registry_id = 2
 
@@ -10,12 +11,23 @@ export interface Action extends IGenerate {
 // Модель данных документа
 export interface Model {
   meta: IMetaDocument
+  coop: ICooperativeData
+  covars: {
+    name: string
+    short_abbr: string
+    full_abbr_genitive: string
+    website: string
+    signature_agreement: {
+      protocol_number: string
+      protocol_day_month_year: string
+    }
+  }
 }
 
 export const title = 'Согласие с условиями положения о простой электронной подписи'
 export const description = 'Форма согласия с условиями положения о простой электронной подписи'
 
-export const context = '<div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'APPROVED\' %}</p>\n<p style="margin: 0px !important">{% trans \'protocol\' %} {{ protocol_number }}</p>\n<p style="margin: 0px !important">{{ coop.full_name }} </p>\n<p style="margin: 0px !important">{% trans \'from\' %} {{ protocol_day_month_year }}</p>\n</div>\n<div style="text-align: center">\n<h1 class="header"> {% trans \'PROVISION\' %} {{full_abbr_genitive}} "{{name}}"</h1>\n</div>\n<div style="text-align: left">\n<h3>{% trans \'regulation_pep_title_1\' %}</h3>\n</div>\n<p> {% trans \'regulation_text_1_1\' %} {{website}}. {% trans \'regulation_text_1_2\' %} {{full_abbr_genitive}} "{{name}}" {% trans \'regulation_text_1_4\' %} {{short_abbr}} "{{name}}" {% trans \'regulation_text_1_6\' %} {{short_abbr}} "{{name}}" {% trans \'regulation_text_1_8\' %} {{short_abbr}} "{{name}}".{% trans \'regulation_text_1_10\' %} </p>\n<div style="text-align: left">\n<h3>{% trans \'regulation_pep_title_2\' %}</h3>\n</div>\n<p>{% trans \'regulation_text_2_1\' %} {{short_abbr}} "{{name}}",  {% trans \'regulation_text_2_3\' %}</p>\n<div style="text-align: left">\n<h3>{% trans \'regulation_pep_title_3\' %} </h3>\n</div>\n<p>{% trans \'regulation_text_3_1\' %} {{website}} {% trans \'regulation_text_3_2\' %}</p>\n<div style="text-align: left">\n<h3>{% trans \'regulation_pep_title_4\' %}</h3>\n</div>\n<p>{% trans \'regulation_pep_text_4\' %} </p>\n<div style="text-align: left">\n<h3>{% trans \'regulation_pep_title_5\' %}</h3>\n</div>\n<p>{% trans \'regulation_pep_text_5\' %} </p>\n<div class="signature">\n{% trans \'acceptance_agreement\' %}</div>\n<div style="text-align: center">\n<h1 class="header"> {% trans \'PRIL_PROVISION\' %} </h1>\n</div>\n<p>{% trans \'PRIL_PROVISION_TEXT\' %}</p>'
+export const context = '<div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'APPROVED\' %}'
 
 export const translations = {
   ru: {

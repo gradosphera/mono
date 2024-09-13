@@ -2,6 +2,7 @@ import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
 import type { IGenerate, IMetaDocument, ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
+import { CooperativeSchema, CovarsSchema } from '../Schema'
 
 export const registry_id = Cooperative.Registry.WalletAgreement.registry_id
 
@@ -15,16 +16,11 @@ export type Model = Cooperative.Registry.WalletAgreement.Model
 export const Schema: JSONSchemaType<Model> = {
   type: 'object',
   properties: {
-    meta: {
-      type: 'object',
-      properties: {
-        ...IMetaJSONSchema.properties,
-      },
-      required: [...IMetaJSONSchema.required],
-      additionalProperties: true,
-    },
+    coop: CooperativeSchema,
+    meta: IMetaJSONSchema,
+    covars: CovarsSchema,
   },
-  required: ['meta'],
+  required: ['meta', 'coop', 'covars'],
   additionalProperties: true,
 }
 

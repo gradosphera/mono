@@ -15,14 +15,16 @@ export type Model = Cooperative.Registry.UserAgreement.Model
 export const Schema: JSONSchemaType<Model> = {
   type: 'object',
   properties: {
-    meta: {
-      type: 'object',
-      properties: {
-        ...IMetaJSONSchema.properties,
-      },
-      required: [...IMetaJSONSchema.required],
-      additionalProperties: true,
-    },
+    meta: IMetaJSONSchema,
+    // {
+    //   type: 'object',
+    //   properties: {
+    //     ...IMetaJSONSchema.properties,
+    //   },
+    //   required: [...IMetaJSONSchema.required],
+    //   additionalProperties: true,
+    // },
+
   },
   required: ['meta'],
   additionalProperties: true,
