@@ -1,5 +1,5 @@
 import type { IGenerate, IMetaDocument } from '../../document'
-import type { ICooperativeData } from '../../model'
+import type { ICooperativeData, ICovars } from '../../model'
 
 export const registry_id = 1
 
@@ -12,12 +12,7 @@ export interface Action extends IGenerate {
 export interface Model {
   meta: IMetaDocument
   coop: ICooperativeData
-  covars: {
-    wallet_agreement: {
-      protocol_number: string
-      protocol_day_month_year: string
-    }
-  }
+  covars: ICovars
 }
 
 export const title = 'Согласие с условиями ЦПП «ЦИФРОВОЙ КОШЕЛЕК»'

@@ -4,7 +4,7 @@ import type { Cooperative as TCooperative } from 'cooptypes'
 import { DraftContract, SovietContract } from 'cooptypes'
 import type { ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, ITemplate, ITranslations, externalDataTypes } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
-import { Individual, Organization } from '../Models'
+import { Covars, type ICovars, Individual, Organization } from '../Models'
 import type { IGenerate } from '../Interfaces/Documents'
 import { PDFService } from '../Services/Generator'
 import packageJson from '../../package.json'
@@ -15,6 +15,7 @@ import { Entrepreneur } from '../Models/Entrepreneur'
 import { getFetch } from '../Utils/getFetch'
 import { getEnvVar } from '../config'
 import { getCurrentBlock } from '../Utils/getCurrentBlock'
+import type { IOrganizationData } from '..'
 
 const packageVersion = packageJson.version
 
@@ -29,6 +30,16 @@ export abstract class DocFactory<T extends IGenerate> {
 
   async validate(combinedData: ICombinedData, schema: any) {
     return new Validator(schema, combinedData).validate()
+  }
+
+  async getOrganization(username: string, block_num?: number): Promise<IOrganizationData> {
+    const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
+
+    const organization = await new Organization(this.storage).getOne({ username, ...block_filter })
+    if (!organization)
+      throw new Error('Организация не найдена')
+
+    return organization
   }
 
   async getUser(username: string, block_num?: number): Promise<{ type: string, data: externalDataTypes }> {
@@ -76,6 +87,16 @@ export abstract class DocFactory<T extends IGenerate> {
     if (!coop)
       throw new Error('Кооператив не найден')
     return coop
+  }
+
+  async getCovars(coopname: string, block_num?: number): Promise<ICovars> {
+    const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
+
+    const covars = await new Covars(this.storage).getOne({ coopname, ...block_filter })
+
+    if (!covars)
+      throw new Error('Переменные кооператива не найдены')
+    return covars
   }
 
   async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<TCooperative.Document.IDecisionData> {

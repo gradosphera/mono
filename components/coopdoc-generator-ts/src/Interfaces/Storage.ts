@@ -1,5 +1,5 @@
 import type { Document } from 'mongodb'
-import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData, InternalEntrepreneurData, InternalIndividualData, InternalOrganizationData } from '../Models'
+import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData, ICovars, InternalEntrepreneurData, InternalIndividualData, InternalOrganizationData } from '../Models'
 import type { PaymentData } from '../Models/PaymentMethod'
 import type { IGeneratedDocument } from './Documents'
 import type { IPaymentData } from './BankAccounts'
@@ -34,6 +34,6 @@ export interface IBCState {
 export interface IFilterDocuments extends Document, IGeneratedDocument {
 }
 
-export type internalFilterTypes = InternalIndividualData | InternalEntrepreneurData | InternalOrganizationData | IPaymentData
-export type externalDataTypes = ExternalIndividualData | ExternalEntrepreneurData | ExternalOrganizationData | PaymentData
-export type externalDataTypesArrays = ExternalIndividualData[] | ExternalEntrepreneurData[] | ExternalOrganizationData[] | PaymentData[]
+export type internalFilterTypes = InternalIndividualData | InternalEntrepreneurData | InternalOrganizationData | IPaymentData | ICovars
+export type externalDataTypes = ExternalIndividualData | ExternalEntrepreneurData | ExternalOrganizationData | PaymentData | ICovars
+export type externalDataTypesArrays = ExternalIndividualData[] | ExternalEntrepreneurData[] | ExternalOrganizationData[] | PaymentData[] | ICovars[]

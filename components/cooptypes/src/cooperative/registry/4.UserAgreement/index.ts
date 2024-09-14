@@ -1,5 +1,5 @@
 import type { IGenerate, IMetaDocument } from '../../document'
-import type { ICooperativeData } from '../../model'
+import type { ICooperativeData, ICovars } from '../../model'
 
 export const registry_id = 4
 
@@ -15,20 +15,7 @@ export interface Model {
   user: {
     full_name: string
   }
-  covars: {
-    name: string
-    full_abbr: string
-    short_abbr: string
-    full_abbr_genitive: string
-    full_abbr_dative: string
-    confidential_email: string
-    confidential_link: string
-    website: string
-    user_agreement: {
-      protocol_number: string
-      protocol_day_month_year: string
-    }
-  }
+  covars: ICovars
 }
 
 export const title = 'Согласие с условиями пользовательского соглашения'

@@ -1,5 +1,5 @@
 import type { IGenerate, IMetaDocument } from '../../document'
-import type { ICooperativeData } from '../../model'
+import type { ICooperativeData, ICovars } from '../../model'
 import type { IOrganizationData } from '../../users'
 
 export const registry_id = 50
@@ -13,17 +13,8 @@ export interface Action extends IGenerate {
 export interface Model {
   meta: IMetaDocument
   coop: ICooperativeData
-
   partner: IOrganizationData
-
-  covars: {
-    contact_email: string
-    coopenomics_agreement: {
-      protocol_number: string
-      protocol_day_month_year: string
-    }
-  }
-
+  covars: ICovars
 }
 
 export const title = 'Пользовательское соглашение (оферта) о присоединении к платформе "Кооперативная Экономика"'

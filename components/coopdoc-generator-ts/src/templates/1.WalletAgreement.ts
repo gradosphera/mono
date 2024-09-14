@@ -16,8 +16,8 @@ export type Model = Cooperative.Registry.WalletAgreement.Model
 export const Schema: JSONSchemaType<Model> = {
   type: 'object',
   properties: {
-    coop: CooperativeSchema,
     meta: IMetaJSONSchema,
+    coop: CooperativeSchema,
     covars: CovarsSchema,
   },
   required: ['meta', 'coop', 'covars'],

@@ -31,20 +31,19 @@ export interface IContacts {
 }
 
 export interface ICovars {
-  coopname: string
+  block_num?: number
+  deleted?: boolean
 
+  coopname: string
   full_abbr: string
   full_abbr_genitive: string
   full_abbr_dative: string
-
   short_abbr: string
   website: string
   name: string
-
   confidential_link: string
   confidential_email: string
   contact_email: string
-
   wallet_agreement: {
     protocol_number: string
     protocol_day_month_year: string
