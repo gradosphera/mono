@@ -10,7 +10,7 @@ import { MongoDBConnector } from '../src/Services/Databazor'
 const mongoUri = 'mongodb://127.0.0.1:27017/cooperative-test'
 const coopname = 'voskhod'
 
-import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData } from '../src/Models'
+import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData, ICovars } from '../src/Models'
 import type { PaymentData } from '../src/Models/PaymentMethod'
 import { CoopenomicsAgreement, PrivacyPolicy, Registry, RegulationElectronicSignature, UserAgreement, WalletAgreement } from '../src/templates'
 import { signatureExample } from './signatureExample'
@@ -285,6 +285,48 @@ describe('тест генератора документов', async () => {
     })
 
     expect(organization._id).toEqual(saved.insertedId)
+  })
+
+  it('сохранение и извлечение переменных кооператива', async () => {
+    const covars: ICovars = {
+      coopname: 'voskhod',
+      full_abbr: 'потребительский кооператив',
+      full_abbr_genitive: 'потребительского кооператива',
+      full_abbr_dative: 'потребительскому кооперативу',
+      short_abbr: 'ПК',
+      website: 'цифровой-кооператив.рф',
+      name: 'Восход',
+      confidential_link: 'coopenomics.world/privacy',
+      confidential_email: 'privacy@coopenomics.world',
+      contact_email: 'contact@coopenomics.world',
+      wallet_agreement: {
+        protocol_number: '10-04-2024',
+        protocol_day_month_year: '10 апреля 2024 г.',
+      },
+      signature_agreement: {
+        protocol_number: '10-04-2024',
+        protocol_day_month_year: '10 апреля 2024 г.',
+      },
+      privacy_agreement: {
+        protocol_number: '10-04-2024',
+        protocol_day_month_year: '10 апреля 2024 г.',
+      },
+      user_agreement: {
+        protocol_number: '10-04-2024',
+        protocol_day_month_year: '10 апреля 2024 г.',
+      },
+    }
+
+    const saved = await generator.save('covars', covars)
+    const extractedCovars = await generator.get('covars', { coopname: covars.coopname }) as any
+
+    expect(extractedCovars).toBeDefined()
+
+    Object.keys(covars).forEach((field) => {
+      expect(extractedCovars[field]).toBeDefined()
+    })
+
+    expect(extractedCovars._id).toEqual(saved.insertedId)
   })
 
   it('синтезируем сборку модели кооператива', async () => {

@@ -6,7 +6,7 @@ export const memberSchema: JSONSchemaType<ExternalIndividualData & { is_chairman
   type: 'object',
   properties: {
     ...individualSchema.properties,
-    is_chairnam: { type: Boolean },
+    is_chairnam: { type: 'boolean' },
   },
   required: [...individualSchema.required, 'is_chairman'],
   additionalProperties: true,
