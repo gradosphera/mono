@@ -15,13 +15,13 @@ export interface Model {
   user: {
     full_name: string
   }
-  covars: IVars
+  vars: IVars
 }
 
 export const title = 'Согласие с условиями пользовательского соглашения'
 export const description = 'Форма согласия с условиями пользовательского соглашения'
 
-export const context = '<div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'APPROVED\' %}</p>\n<p style="margin: 0px !important">{% trans \'protocol\' %} {{ covars.user_agreement.protocol_number }}</p>\n<p style="margin: 0px !important">{{ covars.full_abbr_genitive }} {{covars.name}}</p>\n<p style="margin: 0px !important">{% trans \'from\' %} {{ covars.user_agreement.protocol_day_month_year }}</p>\n</div>\n<div style="text-align: center">\n<h1 class="header"> {% trans \'USER_AGREEMENT\' %} {{covars.full_abbr_genitive}} "{{covars.name}}"</h1>\n</div>\n<div style="text-align: left">\n<p>{{covars.full_abbr}} "{{covars.name}}" {% trans \'user_agreement_text_2\' %} {{coop.chairman.last_name}} {{coop.chairman.first_name}} {{coop.chairman.middle_name}}  {% trans \'user_agreement_text_3\' %} {{covars.website}} {% trans \'user_agreement_text_4\' %} </p>\n<p> {% trans \'user_agreement_text_5\' %} {{user.full_name}}</p>\n<p> {% trans \'user_agreement_text_6\' %} {{covars.full_abbr_genitive}} "{{covars.name}}" {{coop.chairman.last_name}} {{coop.chairman.first_name}} {{coop.chairman.middle_name}}.</p>\n<p>{{meta.created_at}}</p>'
+export const context = '<div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'APPROVED\' %}</p>\n<p style="margin: 0px !important">{% trans \'protocol\' %} {{ vars.user_agreement.protocol_number }}</p>\n<p style="margin: 0px !important">{{ vars.full_abbr_genitive }} {{vars.name}}</p>\n<p style="margin: 0px !important">{% trans \'from\' %} {{ vars.user_agreement.protocol_day_month_year }}</p>\n</div>\n<div style="text-align: center">\n<h1 class="header"> {% trans \'USER_AGREEMENT\' %} {{vars.full_abbr_genitive}} "{{vars.name}}"</h1>\n</div>\n<div style="text-align: left">\n<p>{{vars.full_abbr}} "{{vars.name}}" {% trans \'user_agreement_text_2\' %} {{coop.chairman.last_name}} {{coop.chairman.first_name}} {{coop.chairman.middle_name}}  {% trans \'user_agreement_text_3\' %} {{vars.website}} {% trans \'user_agreement_text_4\' %} </p>\n<p> {% trans \'user_agreement_text_5\' %} {{user.full_name}}</p>\n<p> {% trans \'user_agreement_text_6\' %} {{vars.full_abbr_genitive}} "{{vars.name}}" {{coop.chairman.last_name}} {{coop.chairman.first_name}} {{coop.chairman.middle_name}}.</p>\n<p>{{meta.created_at}}</p>'
 
 export const translations = {
   ru: {

@@ -8,6 +8,7 @@ const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
     BASE_URL: Joi.string().required(),
+    SERVER_SECRET: Joi.string().required(),
     SERVICE_USERNAME: Joi.string().required(),
     SERVICE_WIF: Joi.string().required(),
     PORT: Joi.number().default(3000),
@@ -44,6 +45,7 @@ export default {
   env: envVars.NODE_ENV,
   base_url: envVars.BASE_URL,
   port: envVars.PORT,
+  server_secret: envVars.SERVER_SECRET,
   service_wif: envVars.SERVICE_WIF,
   service_username: envVars.SERVICE_USERNAME,
   mongoose: {

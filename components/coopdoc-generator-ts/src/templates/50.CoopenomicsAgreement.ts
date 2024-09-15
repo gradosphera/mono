@@ -18,10 +18,10 @@ export const Schema: JSONSchemaType<Model> = {
   properties: {
     meta: IMetaJSONSchema,
     coop: CooperativeSchema,
-    covars: VarsSchema,
+    vars: VarsSchema,
     partner: organizationSchema,
   },
-  required: ['meta', 'coop', 'covars', 'partner'],
+  required: ['meta', 'coop', 'vars', 'partner'],
   additionalProperties: true,
 }
 

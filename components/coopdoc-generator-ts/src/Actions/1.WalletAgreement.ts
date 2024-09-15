@@ -23,12 +23,12 @@ export class Factory extends DocFactory<WalletAgreement.Action> {
 
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...options })
     const coop = await super.getCooperative(options.coopname, options.block_num)
-    const covars = await super.getVars(options.coopname, options.block_num)
+    const vars = await super.getVars(options.coopname, options.block_num)
 
     const combinedData: WalletAgreement.Model = {
       meta,
       coop,
-      covars,
+      vars,
     }
 
     await super.validate(combinedData, template.model)

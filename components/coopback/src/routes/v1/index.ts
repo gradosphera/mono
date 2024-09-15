@@ -4,7 +4,7 @@ import userRoute from './user.route';
 import docsRoute from './docs.route';
 import paymentRoute from './payment.route';
 import coopRoute from './coop.route';
-import monoRoute from './mono.route';
+import monoRoute from './system.route';
 import dataRoute from './document.route';
 import notifyRoute from './notify.route';
 import participantsRoute from './participant.route';

@@ -10,7 +10,9 @@ import { blockchainService, emailService, tokenService, userService } from '.';
 import { IUser, userStatus } from '../models/user.model';
 import axios from 'axios';
 import { getBlockchainInfo } from './blockchain.service';
-import { RegistratorContract } from 'cooptypes';
+import { RegistratorContract, type Cooperative } from 'cooptypes';
+import type { ISetVars } from '../types/auto-generated/system.validation';
+import { VarsSchema } from 'coopdoc-generator-ts';
 
 export const install = async (soviet: IInstall): Promise<void> => {
   const mono = await Mono.findOne({ coopname: config.coopname });
@@ -124,4 +126,12 @@ export const getMonoStatus = async (): Promise<IHealthStatus> => {
   if (!mono) throw new ApiError(httpStatus.BAD_REQUEST, 'Установщик не найден');
 
   return mono.status;
+};
+
+export const setVars = async (vars: ISetVars): Promise<void> => {
+  await generator.save('vars', vars);
+};
+
+export const getVarsSchema = async (): Promise<unknown> => {
+  return VarsSchema;
 };

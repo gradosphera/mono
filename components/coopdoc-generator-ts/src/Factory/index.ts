@@ -92,11 +92,11 @@ export abstract class DocFactory<T extends IGenerate> {
   async getVars(coopname: string, block_num?: number): Promise<IVars> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
-    const covars = await new Vars(this.storage).getOne({ coopname, ...block_filter })
+    const vars = await new Vars(this.storage).getOne({ coopname, ...block_filter })
 
-    if (!covars)
+    if (!vars)
       throw new Error('Переменные кооператива не найдены')
-    return covars
+    return vars
   }
 
   async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<TCooperative.Document.IDecisionData> {

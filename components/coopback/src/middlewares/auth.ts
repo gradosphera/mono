@@ -6,6 +6,13 @@ import { roleRights } from '../config/roles';
 const { UNAUTHORIZED, FORBIDDEN } = httpStatus;
 
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
+  const serverSecret = process.env.SERVER_SECRET;
+
+  // Проверка заголовка server-secret
+  if (serverSecret && req.headers['server-secret'] === serverSecret) {
+    return resolve();
+  }
+
   if (err || info || !user) {
     return reject(new ApiError(UNAUTHORIZED, 'Please authenticate'));
   }

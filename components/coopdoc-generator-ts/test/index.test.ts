@@ -288,7 +288,7 @@ describe('тест генератора документов', async () => {
   })
 
   it('сохранение и извлечение переменных кооператива', async () => {
-    const covars: IVars = {
+    const vars: IVars = {
       coopname: 'voskhod',
       full_abbr: 'потребительский кооператив',
       full_abbr_genitive: 'потребительского кооператива',
@@ -317,12 +317,12 @@ describe('тест генератора документов', async () => {
       },
     }
 
-    const saved = await generator.save('covars', covars)
-    const extractedCovars = await generator.get('covars', { coopname: covars.coopname }) as any
+    const saved = await generator.save('vars', vars)
+    const extractedCovars = await generator.get('vars', { coopname: vars.coopname }) as any
 
     expect(extractedCovars).toBeDefined()
 
-    Object.keys(covars).forEach((field) => {
+    Object.keys(vars).forEach((field) => {
       expect(extractedCovars[field]).toBeDefined()
     })
 

@@ -1,5 +1,7 @@
 export * from './Interfaces'
 export * from './templates'
+export * from './Schema'
+
 import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
 import type { Cooperative as CooperativeModel } from 'cooptypes'
 import type { IFilterDocuments, IGeneratedDocument, Numbers, externalDataTypes, externalDataTypesArrays, internalFilterTypes } from './Interfaces'
@@ -18,7 +20,7 @@ import type { PaymentData } from './Models/PaymentMethod'
 import { PaymentMethod } from './Models/PaymentMethod'
 import { Registry } from './templates'
 
-export type dataTypes = 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'covars'
+export type dataTypes = 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'vars'
 
 export type { ExternalOrganizationData as IOrganizationData } from './Models'
 export type { ExternalIndividualData as IIndividualData } from './Models'
@@ -32,7 +34,7 @@ export interface IGenerator {
   getDocument: (filter: Filter<IFilterDocuments>) => Promise<IGeneratedDocument>
 
   constructCooperative: (username: string, block_num?: number) => Promise<CooperativeData | null>
-  save: ((type: 'individual', data: ExternalIndividualData) => Promise<InsertOneResult>) & ((type: 'entrepreneur', data: ExternalEntrepreneurData) => Promise<InsertOneResult>) & ((type: 'organization', data: ExternalOrganizationData) => Promise<InsertOneResult>) & ((type: 'paymentMethod', data: PaymentData) => Promise<InsertOneResult>) & ((type: 'covars', data: IVars) => Promise<InsertOneResult>)
+  save: ((type: 'individual', data: ExternalIndividualData) => Promise<InsertOneResult>) & ((type: 'entrepreneur', data: ExternalEntrepreneurData) => Promise<InsertOneResult>) & ((type: 'organization', data: ExternalOrganizationData) => Promise<InsertOneResult>) & ((type: 'paymentMethod', data: PaymentData) => Promise<InsertOneResult>) & ((type: 'vars', data: IVars) => Promise<InsertOneResult>)
   get: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypes | null>
   del: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<UpdateResult>
 
@@ -91,7 +93,7 @@ export class Generator implements IGenerator {
   async save(type: 'entrepreneur', data: ExternalEntrepreneurData): Promise<InsertOneResult>
   async save(type: 'organization', data: ExternalOrganizationData): Promise<InsertOneResult>
   async save(type: 'paymentMethod', data: PaymentData): Promise<InsertOneResult>
-  async save(type: 'covars', data: IVars): Promise<InsertOneResult>
+  async save(type: 'vars', data: IVars): Promise<InsertOneResult>
 
   async save(type: dataTypes, data: externalDataTypes): Promise<InsertOneResult> {
     const model = this.getModel(type, data)
@@ -116,7 +118,7 @@ export class Generator implements IGenerator {
   }
 
   // // Универсальные методы получения истории
-  async getHistory(type: 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'covars', filter: Filter<internalFilterTypes>): Promise<externalDataTypesArrays> {
+  async getHistory(type: 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'vars', filter: Filter<internalFilterTypes>): Promise<externalDataTypesArrays> {
     const model = this.getModel(type)
     return model.getHistory(filter)
   }
@@ -132,7 +134,7 @@ export class Generator implements IGenerator {
         return new Organization(this.storage, data as ExternalOrganizationData)
       case 'paymentMethod':
         return new PaymentMethod(this.storage, data as PaymentData)
-      case 'covars':
+      case 'vars':
         return new Vars(this.storage, data as IVars)
 
       default:

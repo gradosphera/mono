@@ -15,7 +15,7 @@ export class Vars {
 
   constructor(storage: MongoDBConnector, data?: IVars) {
     this.data = data
-    this.data_service = new DataService<IVars>(storage, 'covars')
+    this.data_service = new DataService<IVars>(storage, 'vars')
   }
 
   validate(): ValidateResult {
