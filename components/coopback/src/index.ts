@@ -6,7 +6,7 @@ import config from './config/config';
 import logger from './config/logger';
 import { connectGenerator } from './services/document.service';
 import { initSocketConnection } from './controllers/ws.controller';
-import { monoService } from './services';
+import { systemService } from './services';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
@@ -15,7 +15,7 @@ let server: any;
 mongoose.connect(config.mongoose.url).then(async () => {
   logger.info('Connected to MongoDB');
 
-  await monoService.init();
+  await systemService.init();
 
   // подключаемся к хранилищу приватных данных
   await connectGenerator();

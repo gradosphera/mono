@@ -7,5 +7,5 @@ export * as paymentService from './payment.service';
 export * as documentService from './document.service';
 export * as coopService from './coop.service';
 export * as wsService from './ws.service';
-export * as monoService from './mono.service';
+export * as systemService from './system.service';
 export * as participantService from './participant.service';
