@@ -22,7 +22,7 @@ export class Factory extends DocFactory<CoopenomicsAgreement.Action> {
 
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...options })
     const coop = await super.getCooperative(options.coopname, options.block_num)
-    const covars = await super.getCovars(options.coopname, options.block_num)
+    const covars = await super.getVars(options.coopname, options.block_num)
     const partner = await super.getOrganization(options.coopname, options.block_num)
 
     const combinedData: CoopenomicsAgreement.Model = {

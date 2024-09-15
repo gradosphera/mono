@@ -1,3 +1,4 @@
+import { DraftContract } from 'cooptypes'
 import { RegulationElectronicSignature } from '../templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IMetaDocument, ITemplate } from '../Interfaces'
@@ -17,12 +18,12 @@ export class Factory extends DocFactory<RegulationElectronicSignature.Action> {
       template = RegulationElectronicSignature.Template
     }
     else {
-      template = await this.getTemplate(options.coopname, RegulationElectronicSignature.registry_id, options.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, RegulationElectronicSignature.registry_id, options.block_num)
     }
 
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...options })
     const coop = await super.getCooperative(options.coopname, options.block_num)
-    const covars = await super.getCovars(options.coopname, options.block_num)
+    const covars = await super.getVars(options.coopname, options.block_num)
 
     const combinedData: RegulationElectronicSignature.Model = {
       meta,

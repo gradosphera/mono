@@ -1,5 +1,5 @@
 import type { IGenerate, IMetaDocument } from '../../document'
-import type { ICooperativeData, ICovars } from '../../model'
+import type { ICooperativeData, IVars } from '../../model'
 
 export const registry_id = 3
 
@@ -12,7 +12,7 @@ export interface Action extends IGenerate {
 export interface Model {
   meta: IMetaDocument
   coop: ICooperativeData
-  covars: ICovars
+  covars: IVars
 }
 
 export const title = 'Согласие с условиями политики обработки конфиденциальных данных'

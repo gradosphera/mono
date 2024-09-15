@@ -4,7 +4,7 @@ import type { Cooperative as TCooperative } from 'cooptypes'
 import { DraftContract, SovietContract } from 'cooptypes'
 import type { ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, ITemplate, ITranslations, externalDataTypes } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
-import { Covars, type ICovars, Individual, Organization } from '../Models'
+import { type IVars, Individual, Organization, Vars } from '../Models'
 import type { IGenerate } from '../Interfaces/Documents'
 import { PDFService } from '../Services/Generator'
 import packageJson from '../../package.json'
@@ -89,10 +89,10 @@ export abstract class DocFactory<T extends IGenerate> {
     return coop
   }
 
-  async getCovars(coopname: string, block_num?: number): Promise<ICovars> {
+  async getVars(coopname: string, block_num?: number): Promise<IVars> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
-    const covars = await new Covars(this.storage).getOne({ coopname, ...block_filter })
+    const covars = await new Vars(this.storage).getOne({ coopname, ...block_filter })
 
     if (!covars)
       throw new Error('Переменные кооператива не найдены')

@@ -1,3 +1,4 @@
+import { DraftContract } from 'cooptypes'
 import { PrivacyPolicy } from '../templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IMetaDocument, ITemplate } from '../Interfaces'
@@ -17,12 +18,12 @@ export class Factory extends DocFactory<PrivacyPolicy.Action> {
       template = PrivacyPolicy.Template
     }
     else {
-      template = await this.getTemplate(options.coopname, PrivacyPolicy.registry_id, options.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, PrivacyPolicy.registry_id, options.block_num)
     }
 
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...options })
     const coop = await super.getCooperative(options.coopname, options.block_num)
-    const covars = await super.getCovars(options.coopname, options.block_num)
+    const covars = await super.getVars(options.coopname, options.block_num)
 
     const combinedData: PrivacyPolicy.Model = {
       meta,

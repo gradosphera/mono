@@ -30,7 +30,7 @@ export interface IContacts {
   }
 }
 
-export interface ICovars {
+export interface IVars {
   block_num?: number
   deleted?: boolean
 

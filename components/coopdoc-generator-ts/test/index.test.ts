@@ -10,7 +10,7 @@ import { MongoDBConnector } from '../src/Services/Databazor'
 const mongoUri = 'mongodb://127.0.0.1:27017/cooperative-test'
 const coopname = 'voskhod'
 
-import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData, ICovars } from '../src/Models'
+import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData, IVars } from '../src/Models'
 import type { PaymentData } from '../src/Models/PaymentMethod'
 import { CoopenomicsAgreement, PrivacyPolicy, Registry, RegulationElectronicSignature, UserAgreement, WalletAgreement } from '../src/templates'
 import { signatureExample } from './signatureExample'
@@ -288,7 +288,7 @@ describe('тест генератора документов', async () => {
   })
 
   it('сохранение и извлечение переменных кооператива', async () => {
-    const covars: ICovars = {
+    const covars: IVars = {
       coopname: 'voskhod',
       full_abbr: 'потребительский кооператив',
       full_abbr_genitive: 'потребительского кооператива',

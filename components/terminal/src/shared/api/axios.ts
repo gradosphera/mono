@@ -28,7 +28,7 @@ export async function sendGET(
       return response.data;
     }
   } catch (e: any) {
-    console.error(e);
+    console.log(e.message)
     if (e.response && e.response.data && e.response.data.message) {
       // TODO обработать e.response.data.subcode как тип ошибки от блокчейна по https://github.com/EOSIO/eos/blob/v1.1.4/libraries/chain/include/eosio/chain/exceptions.hpp
       throw new Error(e.response.data.message);
@@ -62,7 +62,7 @@ export async function sendPOST(
       return response.data;
     }
   } catch (e: any) {
-    console.error(e);
+    console.error(e.message);
     if (e.response && e.response.data && e.response.data.message) {
       //TODO обработать e.response.data.subcode как тип ошибки от блокчейна по https://github.com/EOSIO/eos/blob/v1.1.4/libraries/chain/include/eosio/chain/exceptions.hpp
       throw new Error(e.response.data.message);

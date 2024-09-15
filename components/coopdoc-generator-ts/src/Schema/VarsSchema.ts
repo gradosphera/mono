@@ -2,10 +2,10 @@ import type { JSONSchemaType } from 'ajv'
 import type { Cooperative } from 'cooptypes'
 import type { IMetaDocument } from '../Interfaces'
 import { PrivacyPolicy, RegulationElectronicSignature, UserAgreement, WalletAgreement } from '../templates'
-import type { CooperativeData, ICovars } from '../Models'
+import type { CooperativeData, IVars } from '../Models'
 import { CooperativeSchema } from './CooperativeSchema'
 
-export const CovarsSchema: JSONSchemaType<ICovars> = {
+export const VarsSchema: JSONSchemaType<IVars> = {
   type: 'object',
   properties: {
     deleted: { type: 'boolean', nullable: true },
