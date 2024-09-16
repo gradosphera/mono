@@ -1,7 +1,7 @@
 <template lang="pug">
 div
   SignAgreementDialog(v-for="agreement of required_agreements" v-bind:key="agreement.type" :agreement="agreement" :is_modify="is_modify")
-    AgreementReader(:agreement="agreement")
+    AgreementReader(:agreement="agreement").q-mb-lg
 </template>
 
 <script lang="ts" setup>
