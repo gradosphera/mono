@@ -1,7 +1,7 @@
 {
   "name": "coopdoc-generator-ts",
   "type": "module",
-  "version": "1.0.11-alpha.1",
+  "version": "1.0.11-alpha.2",
   "private": false,
   "packageManager": "pnpm@9.0.6",
   "description": "",
@@ -50,7 +50,7 @@
     "ajv-formats": "^3.0.1",
     "ajv-i18n": "^4.2.0",
     "axios": "^1.7.2",
-    "cooptypes": "^1.0.22-alpha.5",
+    "cooptypes": "^1.0.22-alpha.6",
     "dotenv": "^16.4.5",
     "eosjs-ecc": "^4.0.7",
     "handlebars": "^4.7.8",

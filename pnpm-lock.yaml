@@ -362,8 +362,8 @@ importers:
         specifier: ^1.7.2
         version: 1.7.7
       cooptypes:
-        specifier: 1.0.22-alpha.5
-        version: 1.0.22-alpha.5(eslint@8.57.0)(typescript@5.6.2)
+        specifier: ^1.0.22-alpha.6
+        version: 1.0.22-alpha.6(eslint@8.57.0)(typescript@5.6.2)
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -4137,7 +4137,7 @@ packages:
   cookiejar@2.1.4:
     resolution: {integrity: sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==}
 
-  cooptypes@1.0.22-alpha.5:
+  cooptypes@1.0.22-alpha.6:
     resolution: {integrity: sha512-tfea7f5z+AbKjhH9WSE5cZf2TE8mn2qwfnI0xVXo/18SAZK076LD9juy3ulgQWpMEIUu7QciShbqzuYZL8cggg==}
 
   core-js-compat@3.38.1:
@@ -13641,7 +13641,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.3.1
+      debug: 4.3.7(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -14783,7 +14783,7 @@ snapshots:
 
   cookiejar@2.1.4: {}
 
-  cooptypes@1.0.22-alpha.5(eslint@8.57.0)(typescript@5.6.2):
+  cooptypes@1.0.22-alpha.6(eslint@8.57.0)(typescript@5.6.2):
     dependencies:
       '@typescript-eslint/parser': 7.18.0(eslint@8.57.0)(typescript@5.6.2)
     transitivePeerDependencies:
