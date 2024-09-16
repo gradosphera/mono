@@ -362,8 +362,8 @@ importers:
         specifier: ^1.7.2
         version: 1.7.7
       cooptypes:
-        specifier: ^1.0.22-alpha.6
-        version: 1.0.22-alpha.6(eslint@8.57.0)(typescript@5.6.2)
+        specifier: workspace:*
+        version: link:../cooptypes
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -4136,9 +4136,6 @@ packages:
 
   cookiejar@2.1.4:
     resolution: {integrity: sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==}
-
-  cooptypes@1.0.22-alpha.6:
-    resolution: {integrity: sha512-tfea7f5z+AbKjhH9WSE5cZf2TE8mn2qwfnI0xVXo/18SAZK076LD9juy3ulgQWpMEIUu7QciShbqzuYZL8cggg==}
 
   core-js-compat@3.38.1:
     resolution: {integrity: sha512-JRH6gfXxGmrzF3tZ57lFx97YARxCXPaMzPo6jELZhv88pBH5VXpQ+y0znKGlFnzuaihqhLbefxSJxWJMPtfDzw==}
@@ -13030,19 +13027,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.6.2)':
-    dependencies:
-      '@typescript-eslint/scope-manager': 7.18.0
-      '@typescript-eslint/types': 7.18.0
-      '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.6.2)
-      '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.3.7(supports-color@5.5.0)
-      eslint: 8.57.0
-    optionalDependencies:
-      typescript: 5.6.2
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/parser@7.18.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)':
     dependencies:
       '@typescript-eslint/scope-manager': 7.18.0
@@ -13641,7 +13625,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.3.7(supports-color@5.5.0)
+      debug: 4.3.1
     transitivePeerDependencies:
       - supports-color
 
@@ -14782,14 +14766,6 @@ snapshots:
   cookie@0.6.0: {}
 
   cookiejar@2.1.4: {}
-
-  cooptypes@1.0.22-alpha.6(eslint@8.57.0)(typescript@5.6.2):
-    dependencies:
-      '@typescript-eslint/parser': 7.18.0(eslint@8.57.0)(typescript@5.6.2)
-    transitivePeerDependencies:
-      - eslint
-      - supports-color
-      - typescript
 
   core-js-compat@3.38.1:
     dependencies:
