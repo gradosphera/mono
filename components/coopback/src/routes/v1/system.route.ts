@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { systemController } from '../../controllers';
+import { settingController, systemController } from '../../controllers';
 import auth from '../../middlewares/auth';
 import validate from '../../middlewares/validate';
 import { systemValidation } from '../../validations';
@@ -14,5 +14,11 @@ router.route('/set-vars').post(auth('set-vars'), validate(systemValidation.RSetV
 router.route('/get-vars').post(auth(), validate(systemValidation.RSetVars), systemController.setVars);
 
 router.route('/health').get(systemController.getHealth);
+
+router.route('/settings').get(auth('manageSettings'), settingController.getSettings);
+
+router
+  .route('/settings')
+  .post(auth('manageSettings'), validate(systemValidation.RUpdateSettings), settingController.updateSettings);
 
 export default router;

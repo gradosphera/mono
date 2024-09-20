@@ -2,12 +2,13 @@ import { Router } from 'express';
 import authRoute from './auth.route';
 import userRoute from './user.route';
 import docsRoute from './docs.route';
-import paymentRoute from './payment.route';
+import orderRoute from './order.route';
 import coopRoute from './coop.route';
 import monoRoute from './system.route';
 import dataRoute from './document.route';
 import notifyRoute from './notify.route';
 import participantsRoute from './participant.route';
+import methodRoute from './method.route';
 
 import config from '../../config/config';
 
@@ -35,8 +36,12 @@ const defaultRoutes = [
     route: dataRoute,
   },
   {
-    path: '/payments',
-    route: paymentRoute,
+    path: '/methods',
+    route: methodRoute,
+  },
+  {
+    path: '/orders',
+    route: orderRoute,
   },
   {
     path: '/coop',

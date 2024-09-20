@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { paymentController } from '../../controllers';
+import { methodController, orderController } from '../../controllers';
 import validate from '../../middlewares/validate';
-import * as paymentValidation from '../../validations/payment.validation';
+import { orderValidation } from '../../validations';
 import auth from '../../middlewares/auth';
-import { Request, Response } from 'express';
 
 const router = Router();
 
@@ -41,7 +40,7 @@ const router = Router();
  *       200:
  *         description: Успешное выполнение запроса.
  */
-router.route('/ipn').post(validate(paymentValidation.RRecieveIPN), paymentController.catchIPN);
+router.route('/:provider/ipn').post(validate(orderValidation.RRecieveIPN), orderController.catchIPN);
 
 /**
  * @swagger
@@ -66,9 +65,7 @@ router.route('/ipn').post(validate(paymentValidation.RRecieveIPN), paymentContro
  *             schema:
  *               $ref: '#/components/schemas/ICreatedPayment'
  */
-router
-  .route('/initial')
-  .post(auth(), validate(paymentValidation.RCreateInitialPayment), paymentController.createInitialPayment);
+router.route('/initial').post(auth(), validate(orderValidation.RCreateInitialPayment), orderController.createInitialPayment);
 
 /**
  * @swagger
@@ -93,18 +90,12 @@ router
  *             schema:
  *               $ref: '#/components/schemas/ICreatedPayment'
  */
-router.route('/deposit').post(auth(), validate(paymentValidation.RCreateDeposit), paymentController.createDeposit);
+router.route('/deposit').post(auth(), validate(orderValidation.RCreateDeposit), orderController.createDeposit);
 
 router
-  .route('/methods/:username?')
-  .get(auth('getUsers'), validate(paymentValidation.RGetListPaymentMethods), paymentController.listPaymentMethods);
+  .route('/set-order-status')
+  .post(auth('manageUsers'), validate(orderValidation.RSetOrderStatus), orderController.setStatus);
 
-router
-  .route('/methods/:username/add')
-  .post(auth('manageUsers'), validate(paymentValidation.RSavePaymentMethod), paymentController.addPaymentMethod);
-
-router
-  .route('/methods/:username/delete')
-  .post(auth('manageUsers'), validate(paymentValidation.RDeletePaymentMethod), paymentController.deletePaymentMethod);
+router.route('/:username?').get(auth('manageUsers'), validate(orderValidation.RGetOrders), orderController.getOrders);
 
 export default router;

@@ -6,10 +6,14 @@ import { Request, Response } from 'express';
 import catchAsync from '../utils/catchAsync';
 import { systemService } from '../services';
 import type { ISetVars, RSetVars } from '../types/auto-generated/system.validation';
+import logger from '../config/logger';
 
 export const install = catchAsync(async (req: RInstall, res: Response) => {
   const { body } = req;
   await systemService.install(body as IInstall);
+
+  logger.info('System installed', { source: 'install', vars: req.body });
+
   res.status(httpStatus.OK).send();
 });
 
@@ -27,6 +31,7 @@ export const getHealth = catchAsync(async (req: Request, res: Response) => {
 
 export const setVars = catchAsync(async (req: RSetVars, res: Response) => {
   await systemService.setVars(req.body as ISetVars);
+  logger.info('New vars installed', { source: 'setVars', vars: req.body });
   res.status(httpStatus.OK).send();
 });
 

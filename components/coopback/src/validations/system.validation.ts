@@ -44,3 +44,9 @@ export const ISetVars = Joi.object({
 export const RSetVars = Joi.object({
   body: ISetVars.required(),
 });
+
+export const RUpdateSettings = Joi.object({
+  body: Joi.object({
+    settings: Joi.object().required(),
+  }).required(),
+});

@@ -43,6 +43,7 @@ const initialUserDataState: ICreateUserData = {
     phone: '',
     email: '',
     details: {
+      kpp: '',
       inn: '',
       ogrn: '',
     },
@@ -96,10 +97,9 @@ const initialDocumentState = {
 
 // Начальное состояние для payment
 const initialPaymentState = {
-  provider: 'yookassa',
+  provider: '',
   details: {
-    token: '',
-    url: '',
+    data: '',
   },
 };
 

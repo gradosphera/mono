@@ -1,0 +1,8 @@
+2024-09-20 09:50:49 [31merror[39m: ValidationError: provider.name: Path `provider.name` is required. - {"source":"unexpectedErrorHandler"}
+2024-09-20 10:04:13 [31merror[39m: ValidationError: provider.name: Path `provider.name` is required. - {"source":"unexpectedErrorHandler"}
+2024-09-20 10:06:06 [31merror[39m: ValidationError: Settings validation failed: provider.name: Path `provider.name` is required.
+    at model.Document.invalidate (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/mongoose@8.6.2_socks@2.8.3/node_modules/mongoose/lib/document.js:3312:32)
+    at /Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/mongoose@8.6.2_socks@2.8.3/node_modules/mongoose/lib/document.js:3073:17
+    at /Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/mongoose@8.6.2_socks@2.8.3/node_modules/mongoose/lib/schemaType.js:1388:9
+    at processTicksAndRejections (node:internal/process/task_queues:77:11) - {"statusCode":400,"isOperational":false}
+2024-09-20 10:06:06 [31merror[39m: ::ffff:127.0.0.1 - POST /v1/system/settings 500 - 136.969 ms - message: Settings validation failed: provider.name: Path `provider.name` is required.

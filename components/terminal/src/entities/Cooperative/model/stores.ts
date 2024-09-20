@@ -21,6 +21,7 @@ interface ICooperativeStore {
   loadContacts: () => Promise<void>;
   loadPublicCooperativeData: (coopname: string) => Promise<void>;
   loadAdmins: (coopname: string) => Promise<void>;
+
   // данные
   admins: Ref<IAdministratorData[]>;
   programs: Ref<ICoopProgramData[]>;

@@ -158,7 +158,7 @@ async function loadUserProgramWalletsData(
 
 async function loadMethods(params: IGetPaymentMethods): Promise<IPaymentMethodData[]> {
   const {username} = params
-  const methods = (await sendGET(`/v1/payments/methods/${username}`)) as IGetResponsePaymentMethodData;
+  const methods = (await sendGET(`/v1/methods/${username}`)) as IGetResponsePaymentMethodData;
 
   return methods.results;
 }

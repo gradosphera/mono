@@ -2,6 +2,7 @@ import { io, Socket } from 'socket.io-client';
 import { IAction } from '../types/common';
 import { SovietContract } from 'cooptypes';
 import { wsService } from '../services';
+import logger from '../config/logger';
 
 let clientSocket: Socket | undefined;
 
@@ -10,7 +11,7 @@ export const initSocketConnection = (serverUrl: string): void => {
   clientSocket = io(serverUrl);
 
   clientSocket.on('connect', () => {
-    console.log('Успешное подключение к серверу оповещений.');
+    logger.info('Success connection to notification server', { source: 'initSocketConnection' });
   });
 
   clientSocket.on('event', (event: IAction) => {
@@ -18,7 +19,7 @@ export const initSocketConnection = (serverUrl: string): void => {
   });
 
   clientSocket.on('connect_error', (error: Error) => {
-    console.error('Ошибка подключения к серверу оповещений:');
+    logger.error('Fail connect to notification server', { source: 'initSocketConnection' });
   });
 };
 
@@ -26,7 +27,7 @@ export const initSocketConnection = (serverUrl: string): void => {
 export const closeSocketConnection = (): void => {
   if (clientSocket) {
     clientSocket.disconnect();
-    console.log('Client disconnected from server');
+    logger.info('Client disconnected from server', { source: 'closeSocketConnection' });
     clientSocket = undefined;
   }
 };

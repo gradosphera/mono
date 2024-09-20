@@ -57,7 +57,7 @@ describe('Проверка получения документов', () => {
     };
   });
 
-  describe('GET /v1/payments/initial', () => {
+  describe('GET /v1/orders/initial', () => {
     test('получаем платежный ордер на вступление', async () => {
       const coopData = voskhod;
 
@@ -104,7 +104,7 @@ describe('Проверка получения документов', () => {
         skip_save: false,
       };
 
-      let res = await request(app)
+      const res = await request(app)
         .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
@@ -116,7 +116,7 @@ describe('Проверка получения документов', () => {
       expect(res.body.html).toBeDefined();
       expect(res.body.hash).toBeDefined();
 
-      let res_regenerated = await request(app)
+      const res_regenerated = await request(app)
         .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(res.body.meta);
@@ -157,7 +157,7 @@ describe('Проверка получения документов', () => {
       // console.log(dbUser2);
 
       const initialPayment = await request(app)
-        .post('/v1/payments/initial')
+        .post('/v1/orders/initial')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send({ provider: 'yookassa' });
 
@@ -167,13 +167,13 @@ describe('Проверка получения документов', () => {
       expect(initialPayment.body?.provider).toBe('yookassa');
     });
   });
-  describe('POST /v1/payments/methods/:username + add', () => {
+  describe('POST /v1/methods/:username + add', () => {
     test('401 при добавлении реквизитов самому себе без авторизации', async () => {
       await insertUsers([userOne]);
 
       sbpPaymentData.username = userOne.username;
 
-      const documents = await request(app).post(`/v1/payments/methods/${userOne.username}/add`).send(sbpPaymentData);
+      const documents = await request(app).post(`/v1/methods/${userOne.username}/add`).send(sbpPaymentData);
 
       expect(documents.status).toBe(httpStatus.UNAUTHORIZED);
     });
@@ -184,7 +184,7 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       const documents = await request(app)
-        .post(`/v1/payments/methods/${userTwo.username}/add`)
+        .post(`/v1/methods/${userTwo.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData);
 
@@ -197,14 +197,14 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       const documents = await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData);
 
       expect(documents.status).toBe(httpStatus.OK);
 
       const list = await request(app)
-        .get(`/v1/payments/methods/${userOne.username}`)
+        .get(`/v1/methods/${userOne.username}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send();
 
@@ -217,14 +217,14 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       const documents = await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${adminAccessToken}`)
         .send(sbpPaymentData);
 
       expect(documents.status).toBe(httpStatus.OK);
 
       const list = await request(app)
-        .get(`/v1/payments/methods/${userOne.username}`)
+        .get(`/v1/methods/${userOne.username}`)
         .set('Authorization', `Bearer ${adminAccessToken}`)
         .send();
 
@@ -237,13 +237,13 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       const documents = await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData);
 
       expect(documents.status).toBe(httpStatus.OK);
 
-      const list = await request(app).get(`/v1/payments/methods`).set('Authorization', `Bearer ${adminAccessToken}`).send();
+      const list = await request(app).get(`/v1/methods`).set('Authorization', `Bearer ${adminAccessToken}`).send();
       expect(list.status).toBe(httpStatus.OK);
 
       expect(list.body).toEqual({
@@ -261,7 +261,7 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData)
         .expect(httpStatus.OK);
@@ -269,13 +269,13 @@ describe('Проверка получения документов', () => {
       bankPaymentData.username = userOne.username;
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(bankPaymentData)
         .expect(httpStatus.OK);
 
       const list = await request(app)
-        .get(`/v1/payments/methods/${userOne.username}`)
+        .get(`/v1/methods/${userOne.username}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send();
 
@@ -296,22 +296,22 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData)
         .expect(httpStatus.OK);
 
       bankPaymentData.username = userTwo.username;
 
-      let res = await request(app)
-        .post(`/v1/payments/methods/${userTwo.username}/add`)
+      const res = await request(app)
+        .post(`/v1/methods/${userTwo.username}/add`)
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send(bankPaymentData);
 
       expect(res.status).toBe(httpStatus.OK);
 
       const list = await request(app)
-        .get(`/v1/payments/methods/${userTwo.username}`)
+        .get(`/v1/methods/${userTwo.username}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send();
 
@@ -324,21 +324,21 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData)
         .expect(httpStatus.OK);
 
       bankPaymentData.username = userTwo.username;
 
-      let res = await request(app)
-        .post(`/v1/payments/methods/${userTwo.username}/add`)
+      const res = await request(app)
+        .post(`/v1/methods/${userTwo.username}/add`)
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send(bankPaymentData);
 
       expect(res.status).toBe(httpStatus.OK);
 
-      const list = await request(app).get(`/v1/payments/methods/`).set('Authorization', `Bearer ${adminAccessToken}`).send();
+      const list = await request(app).get(`/v1/methods/`).set('Authorization', `Bearer ${adminAccessToken}`).send();
 
       expect(list.status).toBe(httpStatus.OK);
 
@@ -357,7 +357,7 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData)
         .expect(httpStatus.OK);
@@ -366,15 +366,15 @@ describe('Проверка получения документов', () => {
 
       sbpPaymentData2.data = { phone: '111111111' };
 
-      let res = await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+      const res = await request(app)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData2);
 
       expect(res.status).toBe(httpStatus.OK);
 
       const list = await request(app)
-        .get(`/v1/payments/methods/${userOne.username}`)
+        .get(`/v1/methods/${userOne.username}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send();
 
@@ -393,14 +393,14 @@ describe('Проверка получения документов', () => {
     });
   });
 
-  describe('POST /v1/payments/methods/:username/delete', () => {
+  describe('POST /v1/methods/:username/delete', () => {
     test('200 при удалении собственных реквизитов после добавления', async () => {
       await insertUsers([userOne, userTwo, admin]);
 
       sbpPaymentData.username = userOne.username;
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData)
         .expect(httpStatus.OK);
@@ -410,13 +410,13 @@ describe('Проверка получения документов', () => {
       };
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/delete`)
+        .post(`/v1/methods/${userOne.username}/delete`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(dataForDelete)
         .expect(httpStatus.OK);
 
       const list = await request(app)
-        .get(`/v1/payments/methods/${userOne.username}`)
+        .get(`/v1/methods/${userOne.username}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send();
 
@@ -438,7 +438,7 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData)
         .expect(httpStatus.OK);
@@ -448,7 +448,7 @@ describe('Проверка получения документов', () => {
       };
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/delete`)
+        .post(`/v1/methods/${userOne.username}/delete`)
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send(dataForDelete)
         .expect(httpStatus.FORBIDDEN);
@@ -460,13 +460,13 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData)
         .expect(httpStatus.OK);
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData)
         .expect(httpStatus.OK);
@@ -476,13 +476,13 @@ describe('Проверка получения документов', () => {
       };
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/delete`)
+        .post(`/v1/methods/${userOne.username}/delete`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(dataForDelete)
         .expect(httpStatus.OK);
 
       const list = await request(app)
-        .get(`/v1/payments/methods/${userOne.username}`)
+        .get(`/v1/methods/${userOne.username}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send();
 
@@ -504,7 +504,7 @@ describe('Проверка получения документов', () => {
       sbpPaymentData.username = userOne.username;
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/add`)
+        .post(`/v1/methods/${userOne.username}/add`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(sbpPaymentData)
         .expect(httpStatus.OK);
@@ -514,13 +514,13 @@ describe('Проверка получения документов', () => {
       };
 
       await request(app)
-        .post(`/v1/payments/methods/${userOne.username}/delete`)
+        .post(`/v1/methods/${userOne.username}/delete`)
         .set('Authorization', `Bearer ${adminAccessToken}`)
         .send(dataForDelete)
         .expect(httpStatus.OK);
 
       const list = await request(app)
-        .get(`/v1/payments/methods/${userOne.username}`)
+        .get(`/v1/methods/${userOne.username}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send();
 

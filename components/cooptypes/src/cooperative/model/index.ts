@@ -1,6 +1,6 @@
 import type { SovietContract } from '../../contracts'
 import type { ICooperative } from '../../contracts/registrator/tables/cooperatives'
-import type { Details, IIndividualData, IOrganizationData } from '../users'
+import type { IIndividualData, IOrganizationData } from '../users'
 
 export interface ICooperativeData extends IOrganizationData, ICooperative {
   members: MembersData[]
@@ -20,7 +20,7 @@ export interface IAnnounce {
 export interface IContacts {
   full_name: string
   full_address: string
-  details: Details
+  details: { inn: string, ogrn: string, kpp: string }
   phone: string
   email: string
   chairman: {

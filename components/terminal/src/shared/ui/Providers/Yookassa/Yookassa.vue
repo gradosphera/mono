@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import type { IPaymentOrder } from 'src/shared/lib/types/payments';
 import { onMounted } from 'vue'
-import type { IPaymentOrder } from 'src/entities/Wallet'
 
 const props = defineProps<{
   paymentOrder: IPaymentOrder
@@ -17,13 +17,8 @@ onMounted(() => {
   script.onload = () => {
     // Инициализация виджета после загрузки скрипта
     const checkout = new window.YooMoneyCheckoutWidget({
-      confirmation_token: props.paymentOrder.details.token,
+      confirmation_token: props.paymentOrder.details.data,
 
-      //Настройка виджета
-      // customization: {
-      //Выбор способа оплаты для отображения
-      // payment_methods: ['sbp']
-      // },
       error_callback: function (error: any) {
         // Обработка ошибок инициализации
         emit('paymentFail')

@@ -4,7 +4,7 @@ div
     div(v-if='!store.is_paid' )
       p Пожалуйста, совершите оплату регистрационного взноса {{ initialPayment }} {{ CURRENCY }} со своего банковского счёта. Комиссия провайдера {{ feePercent }}%, всего к оплате: {{ toPay }} {{ CURRENCY }}.
 
-      div(id='paymentForm').full-width
+      PayWithProvider(:payment-order="store.payment" :provider="provider" @payment-fail="paymentFail" @payment-success="paymentSuccess")
 
     div(v-else).full-width
       p.q-mt-lg.q-mb-lg Ваш платёж успешно принят.
@@ -22,10 +22,13 @@ import { BASE_PAYMENT_FEE, COOPNAME, CURRENCY } from 'src/shared/config';
 import { useCurrentUserStore } from 'src/entities/User';
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useRegistratorStore } from 'src/entities/Registrator'
+// import { Yookassa } from 'src/shared/ui/Providers/Yookassa';
+import { PayWithProvider } from 'src/shared/ui/PayWithProvider';
+
 const store = useRegistratorStore().state
 
 const emit = defineEmits(['update:data', 'update:step'])
-
+const provider = ref('yookassa')
 const api = useCreateUser()
 
 const step = computed(() => store.step)
@@ -64,15 +67,12 @@ const feePercent = computed(() => {
 })
 
 
-const confirmation_token = computed(() => store.payment.details.token)
+// const confirmation_token = computed(() => store.payment.details.token)
 
 const createInitialPayment = async () => {
   try {
-    console.log('currentStep', currentStep)
-    console.log('step', step.value)
     if (!store.is_paid) {
-      await api.createInitialPayment()
-      initWidget()
+      await api.createInitialPayment(provider.value)
     }
   } catch (e: any) {
     FailAlert('Возникла ошибка на этапе оплаты. Попробуйте позже или обратитесь в поддержку.')
@@ -80,50 +80,14 @@ const createInitialPayment = async () => {
   }
 }
 
-const initWidget = () => {
-  const script = document.createElement('script')
-  script.src = 'https://yookassa.ru/checkout-widget/v1/checkout-widget.js'
-  script.async = true
-  document.head.appendChild(script)
-
-  script.onload = () => {
-    // Инициализация виджета после загрузки скрипта
-    const checkout = new window.YooMoneyCheckoutWidget({
-      confirmation_token: confirmation_token.value,
-      error_callback: function (error: any) {
-        FailAlert('Возникла ошибка на этапе оплаты. Попробуйте позже или обратитесь в поддержку.')
-        console.error(error)
-      }
-    })
-
-    // Отображение платежной формы в контейнере
-    checkout.render('paymentForm')
-      .then(() => {
-        // Код, который нужно выполнить после отображения платежной формы.
-      })
-
-    checkout.on('success', () => {
-      //Код, который нужно выполнить после успешной оплаты.
-      store.is_paid = true
-
-      //Удаление инициализированного виджета
-      checkout.destroy();
-    });
-
-
-    checkout.on('fail', () => {
-      //Код, который нужно выполнить после неудачной оплаты.
-      FailAlert('Возникла ошибка на этапе оплаты. Попробуйте позже или обратитесь в поддержку.')
-      //Удаление инициализированного виджета
-      checkout.destroy();
-    });
-
-  }
-
-  script.onerror = () => {
-    console.error('Ошибка при загрузке скрипта ЮKassa')
-  }
+const paymentFail = (): void => {
+  FailAlert('Возникла ошибка на этапе оплаты. Попробуйте позже или обратитесь в поддержку.')
 }
+
+const paymentSuccess = (): void => {
+  store.is_paid = true
+}
+
 
 const next = () => {
   emit('update:step', step.value + 1)

@@ -5,7 +5,7 @@ span(@click.stop='(event) => showDialog(event)' style="color: blue; text-decorat
       div.row.justify-center
         div(style="padding-bottom: 100px;").col-md-8.col-col-xs-12
           Loader(v-if="isLoading" :text='`Загружаем документ...`')
-          Form(:handler-submit="ok" :is-submitting="isSubmitting" :showSubmit="!isLoading" :showCancel="!isLoading" button-cancel-text="Отменить" :button-submit-txt="'Подтвердить'" @cancel="clear").q-pa-md
+          Form(:handler-submit="ok" :is-submitting="isSubmitting" :showSubmit="!isLoading" :showCancel="!isLoading" button-cancel-text="Отменить" button-submit-txt="Подтвердить" @cancel="clear").q-pa-md
             slot
 
 </template>
@@ -25,7 +25,8 @@ const emit = defineEmits(['update:agree'])
 const show = ref(false)
 const isSubmitting = ref(false)
 
-const ok = () => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ok = (e?: Event) => {
   emit('update:agree', true)
   show.value = false
 }

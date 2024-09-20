@@ -1,62 +1,70 @@
-import mongoose, { Schema, Document, model } from 'mongoose';
+import mongoose, { Schema, Document, model, type Model } from 'mongoose';
 import { toJSON, paginate } from './plugins/index';
+import AutoIncrementFactory from 'mongoose-sequence';
+import { generateOrderSecret } from '../services/order.service';
 
-interface IOrder extends Document {
+const AutoIncrement = AutoIncrementFactory(mongoose);
+
+export interface IOrder {
+  id?: string;
+  secret: string;
   creator: string;
+  status: 'pending' | 'paid' | 'completed' | 'failed' | 'expired';
   type: string;
-  data: {
-    username: string;
-    provider: string;
-    quantity: string;
-  };
+  provider: string;
+  message?: string;
+  username: string;
+  quantity: string;
   order_id?: number;
-  payed?: boolean;
-  delivered?: boolean;
-  error?: object;
   expired_at?: Date;
 }
 
-const orderSchema = new Schema<IOrder>(
+interface IOrderModel extends Model<IOrder> {
+  isEmailTaken(email: string, excludeUsername?: mongoose.Types.ObjectId): Promise<boolean>;
+  paginate(filter, options): any;
+}
+
+const orderSchema = new Schema<IOrder, IOrderModel>(
   {
     creator: {
       type: String,
       required: true,
     },
+    secret: {
+      type: String,
+      required: true,
+      private: true,
+      default: () => generateOrderSecret(16), // Генерация секрета по умолчанию
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'paid', 'completed', 'failed', 'expired'],
+      default: 'pending',
+    },
+    message: {
+      type: String,
+      required: false,
+    },
     type: {
       type: String,
       required: true,
     },
-    data: {
-      provider: {
-        type: String,
-        required: true,
-      },
-      username: {
-        type: String,
-        required: true,
-      },
-      quantity: {
-        type: String,
-        required: true,
-      },
+    provider: {
+      type: String,
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    quantity: {
+      type: String,
+      required: true,
     },
     order_id: {
       type: Number,
       required: false,
-    },
-    payed: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    delivered: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    error: {
-      type: Object,
-      required: false,
+      unique: true,
     },
     expired_at: {
       type: Date,
@@ -75,10 +83,12 @@ const orderSchema = new Schema<IOrder>(
 // add plugin that converts mongoose to json
 orderSchema.plugin(toJSON);
 orderSchema.plugin(paginate);
+// Добавляем автоинкремент для поля order_id
+orderSchema.plugin(AutoIncrement, { inc_field: 'order_id' });
 
 /**
  * @typedef Order
  */
-const Order = model<IOrder>('Order', orderSchema);
+const Order = model<IOrder, IOrderModel>('Order', orderSchema);
 
 export default Order;

@@ -13,3 +13,5 @@ coverage
 
 .env-mixed
 .env-local
+
+logs/*

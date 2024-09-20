@@ -207,6 +207,9 @@ importers:
       http-status:
         specifier: ^1.4.0
         version: 1.7.4
+      ioredis:
+        specifier: ^5.4.1
+        version: 5.4.1
       ip:
         specifier: ^2.0.1
         version: 2.0.1
@@ -234,6 +237,12 @@ importers:
       mongoose:
         specifier: ^8.5.2
         version: 8.6.2(socks@2.8.3)
+      mongoose-sequence:
+        specifier: ^6.0.1
+        version: 6.0.1(mongoose@8.6.2(socks@2.8.3))
+      mongoose-version:
+        specifier: ^1.1.0
+        version: 1.1.0
       morgan:
         specifier: ^1.9.1
         version: 1.10.0
@@ -279,6 +288,9 @@ importers:
       winston:
         specifier: ^3.2.1
         version: 3.14.2
+      winston-daily-rotate-file:
+        specifier: ^5.0.0
+        version: 5.0.0(winston@3.14.2)
       xss-clean:
         specifier: ^0.1.1
         version: 0.1.4
@@ -658,6 +670,9 @@ importers:
       eosjs:
         specifier: ^22.1.0
         version: 22.1.0
+      express:
+        specifier: ^4.21.0
+        version: 4.21.0
       idb:
         specifier: ^8.0.0
         version: 8.0.0
@@ -5534,6 +5549,9 @@ packages:
     resolution: {integrity: sha512-ZDsQNbrv6qRi1YTDOEWzf5J2KjZ9KMI1Q2SGeTkCJmNNW25Jg4TW4UMcmoqcg4WrAyKRcpBXdbWRxkfrOzVRbA==}
     engines: {node: '>= 10'}
 
+  file-stream-rotator@0.6.1:
+    resolution: {integrity: sha512-u+dBid4PvZw17PmDeRcNOtCP9CCK/9lRN2w+r1xIS7yOL9JFrIBKTvrYsxT4P0pGtThYTn++QS5ChHaUov3+zQ==}
+
   filelist@1.0.4:
     resolution: {integrity: sha512-w1cEuf3S+DrLCQL7ET6kz+gmlJdbq9J7yXCSjK/OZCPA+qEN1WyF4ZAf0YYJa4/shHJra2t/d/r8SV4Ji+x+8Q==}
 
@@ -7356,6 +7374,14 @@ packages:
       socks:
         optional: true
 
+  mongoose-sequence@6.0.1:
+    resolution: {integrity: sha512-uXnLCW9pu2V49Xw8BmdXdeRugd2mv+ntu3nT2Bbm33pNRmmvHE2GKA+8BASKoQt960McLX4VL78wkb492f6MoQ==}
+    peerDependencies:
+      mongoose: '>=5'
+
+  mongoose-version@1.1.0:
+    resolution: {integrity: sha512-95j90SS0zRvMjMxwHcrTP9VYh2ghFQry01BygBC6kk5OSjDMjKbCwzpeg8soPxoTRG264cpP0MiGCaD12tvSKw==}
+
   mongoose@8.6.2:
     resolution: {integrity: sha512-ErbDVvuUzUfyQpXvJ6sXznmZDICD8r6wIsa0VKjJtB6/LZncqwUn5Um040G1BaNo6L3Jz+xItLSwT0wZmSmUaQ==}
     engines: {node: '>=16.20.1'}
@@ -7640,6 +7666,10 @@ packages:
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
+
+  object-hash@3.0.0:
+    resolution: {integrity: sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==}
+    engines: {node: '>= 6'}
 
   object-inspect@1.13.2:
     resolution: {integrity: sha512-IRZSRuzJiynemAXPYtPe5BoI/RESNYR7TYm50MC5Mqbd3Jmw5y790sErYw3V6SryFJD64b74qQQs9wn5Bg/k3g==}
@@ -10261,6 +10291,12 @@ packages:
   window-size@0.1.0:
     resolution: {integrity: sha512-1pTPQDKTdd61ozlKGNCjhNRd+KPmgLSGa3mZTHoOliaGcESD8G1PXhh7c1fgiPjVbNVfgy2Faw4BI8/m0cC8Mg==}
     engines: {node: '>= 0.8.0'}
+
+  winston-daily-rotate-file@5.0.0:
+    resolution: {integrity: sha512-JDjiXXkM5qvwY06733vf09I2wnMXpZEhxEVOSPenZMii+g7pcDcTBt2MRugnoi8BwVSuCT2jfRXBUy+n1Zz/Yw==}
+    engines: {node: '>=8'}
+    peerDependencies:
+      winston: ^3
 
   winston-transport@4.7.1:
     resolution: {integrity: sha512-wQCXXVgfv/wUPOfb2x0ruxzwkcZfxcktz6JIMUaPLmcNhO4bZTwA/WtDWK74xV3F2dKu8YadrFv0qhwYjVEwhA==}
@@ -13625,7 +13661,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.3.1
+      debug: 4.3.7(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -16764,7 +16800,7 @@ snapshots:
 
   extract-zip@2.0.1:
     dependencies:
-      debug: 4.3.1
+      debug: 4.3.7(supports-color@5.5.0)
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
@@ -16854,6 +16890,10 @@ snapshots:
   file-selector@0.2.4:
     dependencies:
       tslib: 2.7.0
+
+  file-stream-rotator@0.6.1:
+    dependencies:
+      moment: 2.30.1
 
   filelist@1.0.4:
     dependencies:
@@ -17415,7 +17455,7 @@ snapshots:
   https-proxy-agent@5.0.0:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.1
+      debug: 4.3.7(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -19033,6 +19073,18 @@ snapshots:
     optionalDependencies:
       socks: 2.8.3
 
+  mongoose-sequence@6.0.1(mongoose@8.6.2(socks@2.8.3)):
+    dependencies:
+      async: 3.2.6
+      lodash: 4.17.21
+      mongoose: 8.6.2(socks@2.8.3)
+
+  mongoose-version@1.1.0:
+    dependencies:
+      debug: 2.6.9
+    transitivePeerDependencies:
+      - supports-color
+
   mongoose@8.6.2(socks@2.8.3):
     dependencies:
       bson: 6.8.0
@@ -19429,6 +19481,8 @@ snapshots:
   oauth-sign@0.9.0: {}
 
   object-assign@4.1.1: {}
+
+  object-hash@3.0.0: {}
 
   object-inspect@1.13.2: {}
 
@@ -22450,6 +22504,14 @@ snapshots:
   wildcard@2.0.1: {}
 
   window-size@0.1.0: {}
+
+  winston-daily-rotate-file@5.0.0(winston@3.14.2):
+    dependencies:
+      file-stream-rotator: 0.6.1
+      object-hash: 3.0.0
+      triple-beam: 1.4.1
+      winston: 3.14.2
+      winston-transport: 4.7.1
 
   winston-transport@4.7.1:
     dependencies:

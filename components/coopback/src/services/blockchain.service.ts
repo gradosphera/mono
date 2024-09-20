@@ -11,6 +11,7 @@ import config from '../config/config';
 import TempDocument, { tempdocType } from '../models/tempDocument.model';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
+import type { IOrder } from '../models/order.model';
 
 const rpc = new JsonRpc(process.env.BLOCKCHAIN_RPC as string, { fetch });
 
@@ -97,8 +98,23 @@ async function getCooperative(coopname) {
   return cooperative;
 }
 
-async function registerBlockchainAccount(user: IUser, orderData: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit) {
-  const eos = await getInstance(process.env.SERVICE_WIF);
+async function registerBlockchainAccount(user: IUser, order: IOrder) {
+  const eos = await getInstance(config.service_wif);
+
+  const createDeposit: GatewayContract.Actions.CreateDeposit.ICreateDeposit = {
+    coopname: config.coopname,
+    username: user.username,
+    type: 'registration',
+    quantity: order.quantity,
+    deposit_id: order.order_id as number,
+  };
+
+  const completeDeposit: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit = {
+    coopname: config.coopname,
+    admin: config.service_username,
+    deposit_id: order.order_id as number,
+    memo: '',
+  };
 
   const newaccount: RegistratorContract.Actions.CreateAccount.ICreateAccount = {
     registrator: process.env.COOPNAME as string,
@@ -177,7 +193,7 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
       name: RegistratorContract.Actions.CreateAccount.actionName,
       authorization: [
         {
-          actor: process.env.COOPNAME as string,
+          actor: config.service_username,
           permission: 'active',
         },
       ],
@@ -188,7 +204,7 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
       name: RegistratorContract.Actions.RegisterUser.actionName, //reguser
       authorization: [
         {
-          actor: process.env.COOPNAME as string,
+          actor: config.service_username,
           permission: 'active',
         },
       ],
@@ -199,7 +215,7 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
       name: RegistratorContract.Actions.JoinCooperative.actionName,
       authorization: [
         {
-          actor: process.env.COOPNAME as string,
+          actor: config.service_username,
           permission: 'active',
         },
       ],
@@ -207,21 +223,32 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
     },
     {
       account: GatewayContract.contractName.production,
-      name: GatewayContract.Actions.CompleteDeposit.actionName,
+      name: GatewayContract.Actions.CreateDeposit.actionName,
       authorization: [
         {
-          actor: process.env.COOPNAME as string,
+          actor: config.service_username,
           permission: 'active',
         },
       ],
-      data: orderData,
+      data: createDeposit,
+    },
+    {
+      account: GatewayContract.contractName.production,
+      name: GatewayContract.Actions.CompleteDeposit.actionName,
+      authorization: [
+        {
+          actor: config.service_username,
+          permission: 'active',
+        },
+      ],
+      data: completeDeposit,
     },
     {
       account: SovietContract.contractName.production,
       name: SovietContract.Actions.Agreements.SendAgreement.actionName,
       authorization: [
         {
-          actor: process.env.COOPNAME as string,
+          actor: config.service_username,
           permission: 'active',
         },
       ],
@@ -232,7 +259,7 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
       name: SovietContract.Actions.Agreements.SendAgreement.actionName,
       authorization: [
         {
-          actor: process.env.COOPNAME as string,
+          actor: config.service_username,
           permission: 'active',
         },
       ],
@@ -243,7 +270,7 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
       name: SovietContract.Actions.Agreements.SendAgreement.actionName,
       authorization: [
         {
-          actor: process.env.COOPNAME as string,
+          actor: config.service_username,
           permission: 'active',
         },
       ],
@@ -254,7 +281,7 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
       name: SovietContract.Actions.Agreements.SendAgreement.actionName,
       authorization: [
         {
-          actor: process.env.COOPNAME as string,
+          actor: config.service_username,
           permission: 'active',
         },
       ],
@@ -272,13 +299,13 @@ async function registerBlockchainAccount(user: IUser, orderData: GatewayContract
     }
   );
 
-  console.dir(result, { depth: null });
+  // console.dir(result, { depth: null });
 }
 
 async function createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICreateboard) {
   const eos = await getInstance(config.service_wif);
 
-  console.log('data: ', data);
+  // console.log('data: ', data);
 
   const actions = [
     {
@@ -337,20 +364,46 @@ async function createOrder(data) {
   return order_id;
 }
 
-async function completeOrder(data: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit) {
+async function completeDeposit(order: IOrder) {
   const eos = await getInstance(process.env.SERVICE_WIF);
 
+  const createDeposit: GatewayContract.Actions.CreateDeposit.ICreateDeposit = {
+    coopname: config.coopname,
+    username: order.username,
+    type: 'deposit',
+    quantity: order.quantity,
+    deposit_id: order.order_id as number,
+  };
+
+  const completeDeposit: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit = {
+    coopname: config.coopname,
+    admin: config.service_username,
+    deposit_id: order.order_id as number,
+    memo: '',
+  };
+
   const actions = [
+    {
+      account: GatewayContract.contractName.production,
+      name: GatewayContract.Actions.CreateDeposit.actionName,
+      authorization: [
+        {
+          actor: config.service_username,
+          permission: 'active',
+        },
+      ],
+      data: createDeposit,
+    },
     {
       account: GatewayContract.contractName.production,
       name: GatewayContract.Actions.CompleteDeposit.actionName,
       authorization: [
         {
-          actor: process.env.COOPNAME as string,
+          actor: config.service_username,
           permission: 'active',
         },
       ],
-      data,
+      data: completeDeposit,
     },
   ];
 
@@ -473,7 +526,7 @@ export {
   createOrder,
   getCooperative,
   failOrder,
-  completeOrder,
+  completeDeposit,
   getSoviet,
   getBlockchainInfo,
   getBlockchainAccount,

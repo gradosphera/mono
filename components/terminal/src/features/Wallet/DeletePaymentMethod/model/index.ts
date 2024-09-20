@@ -15,7 +15,7 @@ export function useDeletePaymentMethod() {
   async function deletePaymentMethod(params: IDeletePaymentMethod) {
     const {username, method_id} = params
 
-    await sendPOST(`/v1/payments/methods/${username}/delete`, {method_id})
+    await sendPOST(`/v1/methods/${username}/delete`, {method_id})
 
     await store.loadUserWalet({
       coopname: COOPNAME,

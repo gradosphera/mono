@@ -3,13 +3,14 @@ import { Action, PrivateKey } from '@wharfkit/antelope';
 import { defineStore } from 'pinia';
 import { ref, Ref } from 'vue';
 import { decrypt, encrypt, hashSHA256 } from '../api/crypto';
-import { COOPNAME } from '../config';
+import { COOPNAME, NODE_ENV } from '../config';
 import { IMessageSignature } from '../lib/types/crypto';
 import { useSessionStore } from 'src/entities/Session';
 import { TransactResult } from '@wharfkit/session';
 import { readBlockchain } from '../api';
 import { ITokens } from '../lib/types/user';
 import { getFromIndexedDB, setToIndexedDB } from '../api/indexDB';
+import config from 'src/app/config';
 
 interface IGlobalStore {
   hasCreditials: Ref<boolean>;
@@ -70,6 +71,9 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
       wif.value = PrivateKey.fromString(decryptedKey);
       tokens.value = JSON.parse(decryptedTokens);
       username.value = decryptedUsername;
+
+      if (NODE_ENV === 'development')
+        console.log('tokens: ', tokens)
 
       // Установите hasCreditials в true
       hasCreditials.value = true;

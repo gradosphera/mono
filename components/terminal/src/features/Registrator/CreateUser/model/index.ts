@@ -11,7 +11,6 @@ import { DigitalDocument } from 'src/entities/Document';
 import { IObjectedDocument } from 'src/shared/lib/types/document';
 import {
   ICreatedPayment,
-  ICreateInitialPayment,
 } from 'src/shared/lib/types/payments';
 import {
   useCurrentUserStore,
@@ -19,6 +18,7 @@ import {
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { IEntrepreneurData, IIndividualData, IOrganizationData, IUserData } from 'src/shared/lib/types/user/IUserData';
 import { Cooperative } from 'cooptypes';
+import { createInitialPaymentOrder } from 'src/shared/api';
 
 export interface ICreateUser {
   email: string;
@@ -35,12 +35,8 @@ export interface ICreateUser {
 export function useCreateUser() {
   const store = useRegistratorStore().state
 
-  async function createInitialPayment(): Promise<ICreatedPayment> {
-    const data: ICreateInitialPayment = {
-      provider: 'yookassa',
-    };
-
-    const result = await api.createInitialPayment(data);
+  async function createInitialPayment(provider: string): Promise<ICreatedPayment> {
+    const result = await createInitialPaymentOrder(provider);
     store.payment = result;
 
     return result;

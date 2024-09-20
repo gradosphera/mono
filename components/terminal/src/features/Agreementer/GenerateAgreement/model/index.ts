@@ -1,6 +1,5 @@
-import { useAgreementStore, type agreementType } from 'src/entities/Agreement'
+import { useAgreementStore } from 'src/entities/Agreement'
 import { DigitalDocument } from 'src/entities/Document'
-
 
 export const useGenerateAgreement = () => {
 

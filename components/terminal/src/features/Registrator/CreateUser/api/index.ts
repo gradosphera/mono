@@ -5,22 +5,11 @@ import {
   ISendStatement,
 } from 'src/shared/lib/types/user';
 import { sendPOST } from 'src/shared/api';
-import {
-  ICreatedPayment,
-  ICreateInitialPayment,
-} from 'src/shared/lib/types/payments';
 import { ICreateUser } from '../model';
 
 async function createUser(data: ICreateUser): Promise<ICreatedUser> {
   const response = await sendPOST('/v1/users', data, true);
 
-  return response;
-}
-
-async function createInitialPayment(
-  data: ICreateInitialPayment
-): Promise<ICreatedPayment> {
-  const response = await sendPOST('/v1/payments/initial', data);
   return response;
 }
 
@@ -63,5 +52,4 @@ export const api = {
   generateUsername,
   generateKeys,
   sendStatement,
-  createInitialPayment,
 };

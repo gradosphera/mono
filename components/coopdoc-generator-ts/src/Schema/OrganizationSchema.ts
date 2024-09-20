@@ -29,10 +29,11 @@ export const organizationSchema: JSONSchemaType<ExternalOrganizationData> = {
     full_address: { type: 'string' },
     details: {
       type: 'object',
-      required: ['inn', 'ogrn'],
+      required: ['inn', 'ogrn', 'kpp'],
       properties: {
         inn: { type: 'string' },
         ogrn: { type: 'string' },
+        kpp: { type: 'string' },
       },
       additionalProperties: true,
     },

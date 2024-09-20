@@ -14,14 +14,6 @@ import routes from './routes/v1/index';
 import { errorConverter, errorHandler } from './middlewares/error';
 import ApiError from './utils/ApiError';
 
-// import { connectGenerator } from './services/data.service';
-// Подключите генератор
-// connectGenerator()
-//   .then(() => {})
-//   .catch((error) => {
-//     console.error('Failed to connect generator:', error);
-//   });
-
 const app = express();
 
 if (config.env !== 'test') {

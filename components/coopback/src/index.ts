@@ -40,7 +40,7 @@ const exitHandler = () => {
 };
 
 const unexpectedErrorHandler = (error: any) => {
-  logger.error(error);
+  logger.error(error, { source: 'unexpectedErrorHandler' });
   exitHandler();
 };
 

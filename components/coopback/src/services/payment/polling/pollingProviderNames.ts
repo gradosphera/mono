@@ -1,0 +1,1 @@
+export const pollingProviderNames = ['sberbank'];

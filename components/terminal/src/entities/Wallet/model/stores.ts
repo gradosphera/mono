@@ -4,12 +4,13 @@ import {
   IWalletData,
   IDepositData,
   IWithdrawData,
-  IPaymentOrder,
   ExtendedProgramWalletData,
   ICreateWithdraw,
   IPaymentMethodData,
 } from './types';
-import { ILoadUserWallet, ICreateDeposit } from './types';
+import { IPaymentOrder } from 'src/shared/lib/types/payments';
+import { ILoadUserWallet } from './types';
+import { ICreateDeposit } from 'src/shared/lib/types/payments';
 import { Ref, ref } from 'vue';
 import { sendPOST } from 'src/shared/api';
 import { CURRENCY } from 'src/shared/config';
@@ -84,7 +85,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
   const createDeposit = async (
     params: ICreateDeposit
   ): Promise<IPaymentOrder> => {
-    return sendPOST('/v1/payments/deposit', params);
+    return sendPOST('/v1/orders/deposit', params);
   };
 
   const createWithdraw = async (params: ICreateWithdraw): Promise<void> => {

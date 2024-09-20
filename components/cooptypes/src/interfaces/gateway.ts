@@ -29,6 +29,7 @@ export interface ICountsBase {
 export interface IDeposit {
   coopname: IName
   username: IName
+  deposit_id: IUint64
   type: IName
   quantity: IAsset
 }

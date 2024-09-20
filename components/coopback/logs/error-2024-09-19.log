@@ -1,0 +1,74 @@
+2024-09-19 13:33:56 [31merror[39m: TypeError: Cannot read properties of undefined (reading 'username')
+    at /Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/controllers/order.controller.ts:23:29
+    at Generator.next (<anonymous>)
+    at /Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/controllers/order.controller.ts:8:71
+    at new Promise (<anonymous>)
+    at __awaiter (/Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/controllers/order.controller.ts:4:12)
+    at /Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/controllers/order.controller.ts:22:75
+    at /Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/utils/catchAsync.ts:2:19
+    at Layer.handle [as handle_request] (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/express@4.21.0/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/express@4.21.0/node_modules/express/lib/router/route.js:149:13)
+    at /Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/middlewares/validate.ts:21:10 - {"statusCode":500,"isOperational":false}
+2024-09-19 13:33:56 [31merror[39m: ::ffff:127.0.0.1 - POST /v1/orders/deposit 500 - 58.591 ms - message: Cannot read properties of undefined (reading 'username')
+2024-09-19 13:41:22 [31merror[39m: Error: Неверный символ для платежа
+    at Object.<anonymous> (/Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/services/order.service.ts:74:39)
+    at Generator.next (<anonymous>)
+    at fulfilled (/Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/services/order.service.ts:5:58)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5) - {"statusCode":500,"isOperational":false}
+2024-09-19 13:41:22 [31merror[39m: ::ffff:127.0.0.1 - POST /v1/orders/deposit 500 - 52.896 ms - message: Неверный символ для платежа
+2024-09-19 13:43:06 [31merror[39m: Error: Неверный символ для платежа
+    at Object.<anonymous> (/Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/services/order.service.ts:74:39)
+    at Generator.next (<anonymous>)
+    at fulfilled (/Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/services/order.service.ts:5:58)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5) - {"statusCode":400,"isOperational":true}
+2024-09-19 13:43:06 [31merror[39m: ::ffff:127.0.0.1 - POST /v1/orders/deposit 400 - 361.152 ms - message: Неверный символ для платежа
+2024-09-19 17:34:22 [31merror[39m: Error happen on createOrder process: Провайдер bank не поддерживается
+2024-09-19 17:34:22 [31merror[39m: Error: Провайдер bank не поддерживается
+    at Function.createProvider (/Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/services/payment/providerFactory.ts:14:15)
+    at /Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/services/order.service.ts:46:40
+    at Generator.next (<anonymous>)
+    at fulfilled (/Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/services/order.service.ts:5:58)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5) - {"statusCode":500,"isOperational":false}
+2024-09-19 17:34:22 [31merror[39m: ::ffff:127.0.0.1 - POST /v1/orders/initial 500 - 221.457 ms - message: Провайдер bank не поддерживается
+2024-09-19 20:04:07 [31merror[39m: Fail connect to notification server - {"source":"initSocketConnection"}
+2024-09-19 20:04:07 [31merror[39m: Fail connect to notification server - {"source":"initSocketConnection"}
+2024-09-19 20:04:09 [31merror[39m: Fail connect to notification server - {"source":"initSocketConnection"}
+2024-09-19 20:04:12 [31merror[39m: Fail connect to notification server - {"source":"initSocketConnection"}
+2024-09-19 20:04:17 [31merror[39m: Fail connect to notification server - {"source":"initSocketConnection"}
+2024-09-19 20:04:22 [31merror[39m: Fail connect to notification server - {"source":"initSocketConnection"}
+2024-09-19 20:06:11 [31merror[39m: ValidationError: Settings validation failed: provider.token: Path `provider.token` is required.
+    at model.Document.invalidate (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/mongoose@8.6.2_socks@2.8.3/node_modules/mongoose/lib/document.js:3312:32)
+    at /Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/mongoose@8.6.2_socks@2.8.3/node_modules/mongoose/lib/document.js:3073:17
+    at /Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/mongoose@8.6.2_socks@2.8.3/node_modules/mongoose/lib/schemaType.js:1388:9
+    at processTicksAndRejections (node:internal/process/task_queues:77:11) - {"statusCode":400,"isOperational":false}
+2024-09-19 20:06:11 [31merror[39m: ::ffff:127.0.0.1 - GET /v1/system/settings 500 - 56.167 ms - message: Settings validation failed: provider.token: Path `provider.token` is required.
+2024-09-19 20:08:18 [31merror[39m: MongooseError: Model.findOne() no longer accepts a callback
+    at Function.findOne (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/mongoose@8.6.2_socks@2.8.3/node_modules/mongoose/lib/model.js:2032:11)
+    at model.<anonymous> (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/mongoose-version@1.1.0/node_modules/mongoose-version/lib/strategies/array.js:77:20)
+    at callMiddlewareFunction (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/kareem@2.6.3/node_modules/kareem/index.js:628:27)
+    at model.next (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/kareem@2.6.3/node_modules/kareem/index.js:93:7)
+    at _next (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/kareem@2.6.3/node_modules/kareem/index.js:146:10)
+    at /Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/kareem@2.6.3/node_modules/kareem/index.js:653:30
+    at processTicksAndRejections (node:internal/process/task_queues:77:11) - {"statusCode":400,"isOperational":false}
+2024-09-19 20:08:18 [31merror[39m: ::ffff:127.0.0.1 - GET /v1/system/settings 500 - 44.588 ms - message: Model.findOne() no longer accepts a callback
+2024-09-19 20:13:16 [31merror[39m: Error: "settings" is required, "order_id" is not allowed, "status" is not allowed
+    at /Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/middlewares/validate.ts:18:17
+    at Layer.handle [as handle_request] (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/express@4.21.0/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/express@4.21.0/node_modules/express/lib/router/route.js:149:13)
+    at /Users/darksun/dacom-code/foundation/monocoop/components/coopback/src/middlewares/auth.ts:40:19
+    at processTicksAndRejections (node:internal/process/task_queues:95:5) - {"statusCode":400,"isOperational":true}
+2024-09-19 20:13:16 [31merror[39m: ::ffff:127.0.0.1 - POST /v1/system/settings 400 - 58.851 ms - message: "settings" is required, "order_id" is not allowed, "status" is not allowed
+2024-09-19 20:14:45 [31merror[39m: SyntaxError: Unexpected token ''', ...""client": 'test'
+		}"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at parse (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/body-parser@1.20.3/node_modules/body-parser/lib/types/json.js:92:19)
+    at /Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/body-parser@1.20.3/node_modules/body-parser/lib/read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:206:9)
+    at invokeCallback (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/raw-body@2.5.2/node_modules/raw-body/index.js:238:16)
+    at done (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/raw-body@2.5.2/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/raw-body@2.5.2/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:518:28)
+    at IncomingMessage.emit (node:domain:488:12)
+    at endReadableNT (node:internal/streams/readable:1696:12) - {"statusCode":400,"isOperational":false}
+2024-09-19 20:14:45 [31merror[39m: ::ffff:127.0.0.1 - POST /v1/system/settings 500 - 10.960 ms - message: Unexpected token ''', ...""client": 'test'
+		}"... is not valid JSON

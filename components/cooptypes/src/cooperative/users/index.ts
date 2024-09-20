@@ -2,11 +2,6 @@ import type { IBankAccount } from '../payments'
 
 export type Country = 'Russia' | 'Other'
 
-export interface Details {
-  inn: string
-  ogrn: string
-}
-
 export interface IIndividualData {
   username: string
   first_name: string
@@ -38,7 +33,7 @@ export interface IOrganizationData {
   full_address: string
   phone: string
   email: string
-  details: Details
+  details: { inn: string, ogrn: string, kpp: string }
   bank_account: IBankAccount
   block_num?: number
   deleted?: boolean
@@ -55,7 +50,7 @@ export interface IEntrepreneurData {
   country: Country
   city: string
   full_address: string
-  details: Details
+  details: { inn: string, ogrn: string }
   bank_account: IBankAccount
   block_num?: number
   deleted?: boolean

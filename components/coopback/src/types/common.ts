@@ -1,56 +1,9 @@
 import { IEntrepreneurData, IGeneratedDocument, IIndividualData, IOrganizationData } from 'coopdoc-generator-ts';
 import { Cooperative, SovietContract } from 'cooptypes';
 
-// Определение унифицированного типа для деталей платежа
+// Определение типа для деталей платежа
 export interface PaymentDetails {
-  url: string; // URL для перенаправления пользователя
-  token: string; // Токен для создания встроенной формы оплаты
-}
-
-export interface IYandexIPN {
-  type: string;
-  event: string;
-  object: {
-    id: string;
-    status: string;
-    paid: boolean;
-    amount: {
-      value: string;
-      currency: string;
-    };
-    income_amount: {
-      value: string;
-      currency: string;
-    };
-    authorization_details: {
-      rrn: string;
-      auth_code: string;
-      three_d_secure: {
-        applied: boolean;
-      };
-    };
-    created_at: string;
-    description: string;
-    expires_at: string;
-    metadata: Record<string, unknown>;
-    payment_method: {
-      type: string;
-      id: string;
-      saved: boolean;
-      card: {
-        first6: string;
-        last4: string;
-        expiry_month: string;
-        expiry_year: string;
-        card_type: string;
-        issuer_country: string;
-        issuer_name: string;
-      };
-      title: string;
-    };
-    refundable: boolean;
-    test: boolean;
-  };
+  data: any; // строка с данными платежа
 }
 
 export interface ICreatedPayment {

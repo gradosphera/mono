@@ -1,9 +1,10 @@
 export * as authValidation from './auth.validation';
 export * as userValidation from './user.validation';
 export * as documentValidation from './document.validation';
-export * as orderValidation from './payment.validation';
+export * as orderValidation from './order.validation';
 export * as coopValidation from './coop.validation';
 export * as customValidation from './custom.validation';
 export * as notifyValidation from './notify.validation';
 export * as systemValidation from './system.validation';
 export * as participantValidation from './participant.validation';
+export * as methodValidation from './method.validation';

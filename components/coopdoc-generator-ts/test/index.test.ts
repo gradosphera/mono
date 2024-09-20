@@ -261,6 +261,7 @@ describe('тест генератора документов', async () => {
       details: {
         inn: '1234567890',
         ogrn: '1234567890123',
+        kpp: '123456789',
       },
       bank_account: {
         account_number: '40817810099910004312',
@@ -625,6 +626,7 @@ describe('тест генератора документов', async () => {
       email: 'contact@exampleorg.com',
       phone: '+71234567890',
       details: {
+        kpp: '123456789',
         inn: '0987654321',
         ogrn: '0987654321098',
       },

@@ -59,6 +59,7 @@ export interface IAddUser {
     country: 'Russia' | 'Other';
     details: {
       inn: string;
+      kpp: string;
       ogrn: string;
     };
     email: string;
@@ -134,6 +135,7 @@ export interface ICreateUser {
     country: 'Russia' | 'Other';
     details: {
       inn: string;
+      kpp: string;
       ogrn: string;
     };
     email: string;
@@ -211,6 +213,7 @@ export interface IOrganizationData {
   country: 'Russia' | 'Other';
   details: {
     inn: string;
+    kpp: string;
     ogrn: string;
   };
   email: string;
@@ -286,6 +289,7 @@ export interface RAddUser {
       country: 'Russia' | 'Other';
       details: {
         inn: string;
+        kpp: string;
         ogrn: string;
       };
       email: string;
@@ -363,6 +367,7 @@ export interface RCreateUser {
       country: 'Russia' | 'Other';
       details: {
         inn: string;
+        kpp: string;
         ogrn: string;
       };
       email: string;

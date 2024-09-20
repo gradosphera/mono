@@ -44,6 +44,17 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
   )
 
   q-input(
+    v-model="userData.organization_data.details.kpp"
+    filled
+    mask="#########"
+    label="КПП организации"
+    hint="9 цифр"
+    :rules="[val => notEmpty(val), val => val.length === 9 || 'КПП должен содержать 9 цифр']"
+    autocomplete="off"
+  )
+
+
+  q-input(
     v-model="userData.organization_data.bank_account.bank_name"
     filled
     label="Наименование банка"

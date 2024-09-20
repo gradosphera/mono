@@ -58,20 +58,6 @@ export interface ILoadUserWallet {
   username: string;
 }
 
-export interface ICreateDeposit {
-  quantity: string;
-  provider: 'yookassa';
-}
-
-export interface IPaymentOrder {
-  order_id: string | number; // Идентификатор платежа в блокчейне
-  provider: string; // Идентификатор банковского процессинга
-  details: {
-    token: string;
-    url: string;
-  };
-}
-
 export interface ICreateWithdraw {
   quantity: string;
 }

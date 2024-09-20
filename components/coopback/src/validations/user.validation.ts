@@ -1,6 +1,5 @@
 import * as Joi from 'joi';
-import { password } from './custom.validation';
-import { IBankAccount } from './payment.validation';
+import { IBankAccount } from './method.validation';
 
 export const IIndividualData = Joi.object({
   first_name: Joi.string().required(),
@@ -23,6 +22,7 @@ const RepresentedBySchema = Joi.object({
 const RussiaDetailsSchema = Joi.object({
   inn: Joi.string().required(),
   ogrn: Joi.string().required(),
+  kpp: Joi.string().required(),
 });
 
 export const IOrganizationData = Joi.object({
@@ -36,7 +36,11 @@ export const IOrganizationData = Joi.object({
   full_address: Joi.string().required(),
   email: Joi.string().email().required(),
   phone: Joi.string().required(),
-  details: RussiaDetailsSchema.required(),
+  details: Joi.object({
+    inn: Joi.string().required(),
+    ogrn: Joi.string().required(),
+    kpp: Joi.string().required(),
+  }).required(),
 
   bank_account: IBankAccount.required(),
 });
@@ -51,7 +55,10 @@ export const IEntrepreneurData = Joi.object({
   country: Joi.string().valid('Russia', 'Other').required(),
   city: Joi.string().required(),
   full_address: Joi.string().required(),
-  details: RussiaDetailsSchema.required(),
+  details: Joi.object({
+    inn: Joi.string().required(),
+    ogrn: Joi.string().required(),
+  }).required(),
   bank_account: IBankAccount.required(),
 });
 
