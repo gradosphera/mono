@@ -4,10 +4,8 @@
  */
 
 export interface ICreateDeposit {
-  provider: string;
   quantity: string;
 }
 
-export interface ICreateInitialPayment {
-  provider: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ICreateInitialPayment {}

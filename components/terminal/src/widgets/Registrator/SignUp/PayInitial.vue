@@ -4,7 +4,7 @@ div
     div(v-if='!store.is_paid' )
       p Пожалуйста, совершите оплату регистрационного взноса {{ initialPayment }} {{ CURRENCY }} со своего банковского счёта. Комиссия провайдера {{ feePercent }}%, всего к оплате: {{ toPay }} {{ CURRENCY }}.
 
-      PayWithProvider(:payment-order="store.payment" :provider="provider" @payment-fail="paymentFail" @payment-success="paymentSuccess")
+      PayWithProvider(:payment-order="store.payment" @payment-fail="paymentFail" @payment-success="paymentSuccess")
 
     div(v-else).full-width
       p.q-mt-lg.q-mb-lg Ваш платёж успешно принят.
@@ -28,7 +28,6 @@ import { PayWithProvider } from 'src/shared/ui/PayWithProvider';
 const store = useRegistratorStore().state
 
 const emit = defineEmits(['update:data', 'update:step'])
-const provider = ref('yookassa')
 const api = useCreateUser()
 
 const step = computed(() => store.step)
@@ -72,7 +71,7 @@ const feePercent = computed(() => {
 const createInitialPayment = async () => {
   try {
     if (!store.is_paid) {
-      await api.createInitialPayment(provider.value)
+      await api.createInitialPayment()
     }
   } catch (e: any) {
     FailAlert('Возникла ошибка на этапе оплаты. Попробуйте позже или обратитесь в поддержку.')

@@ -6,6 +6,7 @@ import {
 } from 'src/shared/lib/types/user';
 import { sendPOST } from 'src/shared/api';
 import { ICreateUser } from '../model';
+import type { ICreatedPayment } from 'coopback';
 
 async function createUser(data: ICreateUser): Promise<ICreatedUser> {
   const response = await sendPOST('/v1/users', data, true);
@@ -46,10 +47,19 @@ const generateUsername = (): string => {
   return result;
 };
 
+
+async function createInitialPaymentOrder(
+): Promise<ICreatedPayment> {
+  const response = await sendPOST('/v1/orders/initial', {});
+  return response;
+}
+
+
 export const api = {
   createUser,
   emailIsExist,
   generateUsername,
   generateKeys,
   sendStatement,
+  createInitialPaymentOrder
 };

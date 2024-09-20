@@ -2,20 +2,15 @@ import * as Joi from 'joi';
 
 export const ICreateDeposit = Joi.object().keys({
   quantity: Joi.string().required(),
-  provider: Joi.string().required(),
 });
 
-export const ICreateInitialPayment = Joi.object().keys({
-  provider: Joi.string().required(),
-});
+export const ICreateInitialPayment = Joi.object().keys({});
 
 export const RCreateDeposit = {
   body: ICreateDeposit.required(),
 };
 
-export const RCreateInitialPayment = {
-  body: ICreateInitialPayment.required(),
-};
+export const RCreateInitialPayment = {};
 
 export const RRecieveIPN = {
   body: Joi.object().required().unknown(true),

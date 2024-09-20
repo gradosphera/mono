@@ -8,7 +8,6 @@ export interface PaymentDetails {
 
 export interface ICreatedPayment {
   provider: string;
-  order_id: string | number;
   details: PaymentDetails;
 }
 

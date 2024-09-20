@@ -1,2 +1,2 @@
-export * as UpdateSettingsModel from './UpdateSettings/model'
+export * from './UpdateSettings'
 

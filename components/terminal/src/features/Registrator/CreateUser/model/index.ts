@@ -18,7 +18,6 @@ import {
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { IEntrepreneurData, IIndividualData, IOrganizationData, IUserData } from 'src/shared/lib/types/user/IUserData';
 import { Cooperative } from 'cooptypes';
-import { createInitialPaymentOrder } from 'src/shared/api';
 
 export interface ICreateUser {
   email: string;
@@ -35,8 +34,8 @@ export interface ICreateUser {
 export function useCreateUser() {
   const store = useRegistratorStore().state
 
-  async function createInitialPayment(provider: string): Promise<ICreatedPayment> {
-    const result = await createInitialPaymentOrder(provider);
+  async function createInitialPayment(): Promise<ICreatedPayment> {
+    const result = await api.createInitialPaymentOrder();
     store.payment = result;
 
     return result;

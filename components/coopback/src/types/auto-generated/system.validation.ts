@@ -98,3 +98,9 @@ export interface RSetVars {
     website: string;
   };
 }
+
+export interface RUpdateSettings {
+  body: {
+    settings: object;
+  };
+}

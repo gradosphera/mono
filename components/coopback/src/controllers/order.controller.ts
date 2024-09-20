@@ -28,7 +28,7 @@ export const createDeposit = catchAsync(async (req: any, res: Response) => {
 
 export const createInitialPayment = catchAsync(async (req: any, res: Response) => {
   const username = req.user.username;
-  const result = await orderService.createInitialOrder(username, req.body as ICreateInitialPayment);
+  const result = await orderService.createInitialOrder(username);
   res.status(http.CREATED).send(result);
 });
 

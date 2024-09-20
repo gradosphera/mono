@@ -11,6 +11,7 @@ import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 import { redisPublisher } from './redis.service';
 import crypto from 'crypto';
+import Settings from '../models/settings.model';
 
 export async function createOrder(
   username: string,
@@ -73,12 +74,12 @@ export async function createDeposit(username: string, data: ICreateDeposit): Pro
   const quantity = `${parseFloat(amount).toFixed(4)} ${symbol}`;
   if (symbol_initial != symbol) throw new ApiError(httpStatus.BAD_REQUEST, 'Неверный символ для платежа');
 
-  const provider = data.provider;
+  const provider = (await Settings.getSettings()).provider.name;
 
   return createOrder(username, provider, 'deposit', quantity);
 }
 
-export async function createInitialOrder(username: string, data: ICreateInitialPayment): Promise<ICreatedPayment> {
+export async function createInitialOrder(username: string): Promise<ICreatedPayment> {
   const cooperative = await generator.constructCooperative(process.env.COOPNAME as string);
   if (!cooperative) throw new Error('Кооператив не найден');
 
@@ -92,7 +93,8 @@ export async function createInitialOrder(username: string, data: ICreateInitialP
     amount = cooperative.org_registration;
   }
 
-  const provider = data.provider;
+  const provider = (await Settings.getSettings()).provider.name;
+
   return createOrder(username, provider, 'registration', amount);
 }
 

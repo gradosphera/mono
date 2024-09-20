@@ -64,8 +64,7 @@ const handlerSubmit = async (): Promise<void> => {
   isSubmitting.value = true
   try {
     paymentOrder.value = (await createDeposit({
-      quantity: `${parseFloat(quantity.value.toString()).toFixed(4)} ${CURRENCY}`,
-      provider: 'yookassa',
+      quantity: `${parseFloat(quantity.value.toString()).toFixed(4)} ${CURRENCY}`
     })) as IPaymentOrder
     isSubmitting.value = false
   } catch (e: any) {

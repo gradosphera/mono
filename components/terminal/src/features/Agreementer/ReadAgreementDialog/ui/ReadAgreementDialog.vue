@@ -25,8 +25,7 @@ const emit = defineEmits(['update:agree'])
 const show = ref(false)
 const isSubmitting = ref(false)
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const ok = (e?: Event) => {
+const ok = async() => {
   emit('update:agree', true)
   show.value = false
 }
