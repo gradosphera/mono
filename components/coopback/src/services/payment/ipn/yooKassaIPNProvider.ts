@@ -4,7 +4,7 @@ import { IPNProvider } from './ipnProvider';
 import Redis from 'ioredis';
 import type { PaymentDetails } from '../../../types';
 import IPN from '../../../models/ipn.model';
-import { checkPaymentAmount, getAmountPlusFee } from '../../order.service';
+import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../order.service';
 import mongoose from 'mongoose';
 import logger from '../../../config/logger';
 
@@ -125,9 +125,25 @@ class YooKassaIPNProvider implements IPNProvider {
         logger.info('Order found', { source: 'handleIPN', orderId: order.id });
 
         if (event === 'payment.succeeded') {
-          const result = checkPaymentAmount(request.object.income_amount, order.quantity, this.tolerance_percent);
+          const [, symbol] = order.quantity.split(' ');
 
-          if (result.status == 'success') {
+          const symbol_result = checkPaymentSymbol(request.object.income_amount.currency, symbol);
+
+          if (symbol_result.status == 'error') {
+            logger.warn('Payment symbol verification failed', {
+              source: 'handleIPN',
+              orderId: order.id,
+              message: symbol_result.message,
+            });
+
+            await Order.updateOne({ _id: order.id }, { status: 'failed', message: symbol_result.message });
+            redis.publish('orderStatusUpdate', JSON.stringify({ orderId: order.id, status: 'failed' }));
+            return;
+          }
+
+          const result = checkPaymentAmount(request.object.income_amount.value, order.quantity, this.tolerance_percent);
+
+          if (result.status === 'success') {
             // Обработка успешного платежа
             logger.info('Payment amount verified, updating order status to paid', {
               source: 'handleIPN',
@@ -163,7 +179,7 @@ class YooKassaIPNProvider implements IPNProvider {
     }
   }
 
-  async createPayment(amount: string, description: string, secret: string): Promise<PaymentDetails> {
+  async createPayment(amount: string, description: string, order_id: number, secret: string): Promise<PaymentDetails> {
     const amount_plus_fee = getAmountPlusFee(parseFloat(amount), this.fee_percent);
     const payment = await this.checkout.createPayment(
       {

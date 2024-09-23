@@ -48,11 +48,14 @@ export async function createOrder(
 
       const paymentDetails = await provider.createPayment(
         amount,
-        type === 'deposit' ? 'Паевый взнос' : 'Регистрационный взнос',
+        type === 'deposit'
+          ? `Добровольный паевый взнос №${db_order.order_id}`
+          : `Добровольный вступительный взнос №${db_order.order_id}`,
+        db_order.order_id as number,
         secret
       );
 
-      logger.info('Order created', { type, username, provider, amount, source: 'createDeposit' });
+      logger.info('Order created', { providerName, type, username, provider, amount, source: 'createDeposit' });
 
       result = { provider: providerName, details: paymentDetails };
     });
@@ -98,7 +101,12 @@ export async function createInitialOrder(username: string): Promise<ICreatedPaym
   return createOrder(username, provider, 'registration', amount);
 }
 
-export function checkPaymentAmount(incomeAmount, expectedAmount, tolerancePercentage) {
+export function checkPaymentSymbol(incomeSymbol: string, extectedSymbol: string) {
+  if (incomeSymbol != extectedSymbol) return { status: 'error', message: `${incomeSymbol} != expectedSymbol` };
+  else return { status: 'success', message: '' };
+}
+
+export function checkPaymentAmount(incomeAmount: string, expectedAmount: string, tolerancePercentage: number) {
   //погрешность возникает при округлении суммы платежа на стороне провайдера при расчете им процентов комиссии
   const tolerance = parseFloat(expectedAmount) * (tolerancePercentage / 100); // Абсолютное значение погрешности
 

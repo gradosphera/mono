@@ -11,7 +11,7 @@ import { handleException } from 'src/shared/api';
 import { useRoute, useRouter } from 'vue-router'
 import 'src/app/styles/quasar-variables.sass'
 import { useDesktopStore } from 'src/entities/Desktop/model';
-import { Cookies, LocalStorage, QSpinner, useQuasar } from 'quasar';
+import { Cookies, LocalStorage, QSpinnerGears, useQuasar } from 'quasar';
 import { COOPNAME } from 'src/shared/config';
 import { useCardStore } from './providers/card/store';
 
@@ -28,8 +28,8 @@ const isLoaded = ref(false)
 
 const enableLoading = () => {
   $q.loading.show({
-    spinner: QSpinner,
-    message: 'Цифровой Кооператив ушел на техническое обслуживание.',
+    spinner: QSpinnerGears,
+    message: 'Техническое обслуживание..',
     spinnerSize: 50,
   })
 }

@@ -7,6 +7,7 @@ const AutoIncrement = AutoIncrementFactory(mongoose);
 
 export interface IOrder {
   id?: string;
+  order_id?: number;
   secret: string;
   creator: string;
   status: 'pending' | 'paid' | 'completed' | 'failed' | 'expired';
@@ -15,7 +16,6 @@ export interface IOrder {
   message?: string;
   username: string;
   quantity: string;
-  order_id?: number;
   expired_at?: Date;
 }
 
@@ -26,6 +26,11 @@ interface IOrderModel extends Model<IOrder> {
 
 const orderSchema = new Schema<IOrder, IOrderModel>(
   {
+    order_id: {
+      type: Number,
+      required: false,
+      unique: true,
+    },
     creator: {
       type: String,
       required: true,
@@ -60,11 +65,6 @@ const orderSchema = new Schema<IOrder, IOrderModel>(
     quantity: {
       type: String,
       required: true,
-    },
-    order_id: {
-      type: Number,
-      required: false,
-      unique: true,
     },
     expired_at: {
       type: Date,
