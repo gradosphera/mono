@@ -7,6 +7,7 @@ import httpStatus from 'http-status';
 import { IPNProviderFactory } from '../services/payment/ipn/ipnProviderFactory';
 import pick from '../utils/pick';
 import logger from '../config/logger';
+import mongoose from 'mongoose';
 
 export const catchIPN = catchAsync(async (req: Request, res: Response) => {
   const providerName = req.params.provider;
@@ -33,17 +34,29 @@ export const createInitialPayment = catchAsync(async (req: any, res: Response) =
 });
 
 export const getOrders = catchAsync(async (req: Request, res: Response) => {
-  const filter = pick(req.query, ['username', 'status']);
+  const filter = pick(req.query, ['username', 'id', 'order_id', 'status']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  console.log(filter, options);
+
+  const orders = await orderService.getOrders(filter, options);
+  res.status(httpStatus.OK).send(orders);
+});
+
+export const getMyOrders = catchAsync(async (req: Request, res: Response) => {
+  console.log(req.params);
+
+  const filter = pick(req.query, ['status', 'id']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+  filter.username = req.params.username;
+
   const orders = await orderService.getOrders(filter, options);
   res.status(httpStatus.OK).send(orders);
 });
 
 export const setStatus = catchAsync(async (req: Request, res: Response) => {
-  const { status, order_id } = req.body;
+  const { status, id } = req.body;
 
-  await orderService.setStatus(order_id, status);
+  await orderService.setStatus(id, status);
 
   res.status(httpStatus.OK).send();
 });

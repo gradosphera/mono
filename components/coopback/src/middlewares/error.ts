@@ -7,6 +7,7 @@ import { RpcError } from 'eosjs';
 
 export const errorConverter = (err, req, res, next) => {
   let error = err;
+  console.log(error);
   if (!(error instanceof ApiError)) {
     if (error instanceof RpcError) {
       const message = error.json.error.details[0].message.replace('assertion failure with message: ', ''); // Получаем первую строку ошибки
@@ -26,6 +27,7 @@ export const errorConverter = (err, req, res, next) => {
 // eslint-disable-next-line no-unused-vars
 export const errorHandler = (err, req, res, next?) => {
   let { statusCode, message } = err;
+  console.error(err);
   if (config.env === 'production' && !err.isOperational) {
     statusCode = httpStatus.INTERNAL_SERVER_ERROR;
     message = httpStatus[httpStatus.INTERNAL_SERVER_ERROR];

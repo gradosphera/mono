@@ -1,22 +1,35 @@
-import mongoose, { Schema, Document, model, type Model } from 'mongoose';
+import mongoose, { Schema, Document, model, type Model, type ObjectId } from 'mongoose';
 import { toJSON, paginate } from './plugins/index';
 import AutoIncrementFactory from 'mongoose-sequence';
 import { generateOrderSecret } from '../services/order.service';
+import type { PaymentDetails } from '../types';
 
 const AutoIncrement = AutoIncrementFactory(mongoose);
+
+export enum orderStatus {
+  'pending' = 'pending',
+  'paid' = 'paid',
+  'completed' = 'completed',
+  'failed' = 'failed',
+  'expired' = 'expired',
+  'refunded' = 'refunded',
+}
 
 export interface IOrder {
   id?: string;
   order_id?: number;
   secret: string;
   creator: string;
-  status: 'pending' | 'paid' | 'completed' | 'failed' | 'expired';
-  type: string;
+  status: orderStatus;
+  type: 'registration' | 'deposit';
   provider: string;
   message?: string;
   username: string;
   quantity: string;
+  symbol: string;
+  details?: PaymentDetails;
   expired_at?: Date;
+  user: ObjectId;
 }
 
 interface IOrderModel extends Model<IOrder> {
@@ -43,8 +56,8 @@ const orderSchema = new Schema<IOrder, IOrderModel>(
     },
     status: {
       type: String,
-      enum: ['pending', 'paid', 'completed', 'failed', 'expired'],
-      default: 'pending',
+      enum: Object.values(orderStatus),
+      default: orderStatus.pending,
     },
     message: {
       type: String,
@@ -52,6 +65,7 @@ const orderSchema = new Schema<IOrder, IOrderModel>(
     },
     type: {
       type: String,
+      enum: ['registration', 'deposit'],
       required: true,
     },
     provider: {
@@ -66,6 +80,22 @@ const orderSchema = new Schema<IOrder, IOrderModel>(
       type: String,
       required: true,
     },
+    symbol: {
+      type: String,
+      required: true,
+    },
+    details: {
+      type: {
+        data: { type: Schema.Types.Mixed, required: true },
+        amount_plus_fee: { type: String, required: true },
+        amount_without_fee: { type: String, required: true },
+        fee_amount: { type: String, required: true },
+        fee_percent: { type: Number, required: true },
+        fact_fee_percent: { type: Number, required: true },
+        tolerance_percent: { type: Number, required: true },
+      },
+      required: false, // Поле может быть не обязательным
+    },
     expired_at: {
       type: Date,
       default: () => {
@@ -74,11 +104,24 @@ const orderSchema = new Schema<IOrder, IOrderModel>(
         return now;
       },
     },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Связь с пользователем
   },
   {
     timestamps: true,
   }
 );
+
+// Хук после find для автоматического добавления private_data
+orderSchema.post('find', async function (docs) {
+  for (const doc of docs) {
+    // Наполняем пользователя с помощью populate
+    await doc.populate('user');
+    // Если пользователь найден, вызываем асинхронный метод getPrivateData
+    if (doc.user) {
+      doc.user.private_data = await doc.user.getPrivateData();
+    }
+  }
+});
 
 // add plugin that converts mongoose to json
 orderSchema.plugin(toJSON);

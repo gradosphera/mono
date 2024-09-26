@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
 
+import mongoose from 'mongoose';
+
 const paginate = (schema) => {
   /**
    * @typedef {Object} QueryResult
@@ -20,6 +22,11 @@ const paginate = (schema) => {
    * @returns {Promise<QueryResult>}
    */
   schema.statics.paginate = async function (filter, options) {
+    if (filter.id) {
+      filter._id = new mongoose.Types.ObjectId(String(filter.id));
+      delete filter.id;
+    }
+
     let sort = '';
     if (options.sortBy) {
       const sortingCriteria: (string | never)[] = []; // Update the type of sortingCriteria array
@@ -29,9 +36,9 @@ const paginate = (schema) => {
       });
       sort = sortingCriteria.join(' ');
     } else {
-      sort = 'createdAt';
+      sort = '-createdAt';
     }
-
+    console.log('sort: ', sort);
     const limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
     const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
     const skip = (page - 1) * limit;

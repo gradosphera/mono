@@ -11,9 +11,9 @@ export const authorizations = [{ permissions: [Permissions.active, Permissions.s
 /**
  * Имя действия
  */
-export const actionName = 'dpfail'
+export const actionName = 'dprefund'
 
 /**
  * @interface
  */
-export type IFailDeposit = Gateway.IDpfail
+export type IRefundDeposit = Gateway.IDprefund

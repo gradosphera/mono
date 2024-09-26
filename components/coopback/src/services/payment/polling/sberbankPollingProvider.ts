@@ -6,7 +6,7 @@ import { redisPublisher } from '../../redis.service';
 import { PaymentState } from '../../../models/paymentState.model';
 import axios from 'axios';
 import logger from '../../../config/logger';
-import { checkPaymentAmount, checkPaymentSymbol } from '../../order.service';
+import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../order.service';
 
 interface Link {
   href: string;
@@ -59,24 +59,33 @@ class SberbankPollingProvider implements PollingProvider {
 
   public async createPayment(
     amount: string,
+    symbol: string,
     description: string,
     order_id: number,
     secret: string
   ): Promise<PaymentDetails> {
     // eslint-disable-next-line prettier/prettier
     const cooperative = await generator.constructCooperative(process.env.COOPNAME as string);
-    cooperative?.bank_account.bank_name;
+    const amount_plus_fee = getAmountPlusFee(parseFloat(amount), this.fee_percent).toFixed(2);
+    const fee_amount = (parseFloat(amount_plus_fee) - parseFloat(amount)).toFixed(2);
+    const fact_fee_percent = Math.round((parseFloat(fee_amount) / parseFloat(amount)) * 100 * 100) / 100;
 
     const invoice = `ST00012|Name=${cooperative?.full_name}|PersonalAcc=${
       cooperative?.bank_account.account_number
     }|BankName=${cooperative?.bank_account.bank_name}|BIC=${cooperative?.bank_account.details.bik}|CorrespAcc=${
       cooperative?.bank_account.details.corr
-    }|Sum=${parseInt(amount)}00|Purpose=${description}. Без НДС|PayeeINN=${cooperative?.details.inn}|KPP=${
+    }|Sum=${parseInt(amount)}00|Purpose=${description}. Без НДС.|PayeeINN=${cooperative?.details.inn}|KPP=${
       cooperative?.details.kpp
     };`;
 
     const result: PaymentDetails = {
       data: invoice,
+      amount_plus_fee: `${amount_plus_fee} ${symbol}`,
+      amount_without_fee: amount,
+      fee_amount: `${fee_amount} ${symbol}`,
+      fee_percent: this.fee_percent,
+      fact_fee_percent,
+      tolerance_percent: this.tolerance_percent,
     };
 
     return result;
@@ -182,7 +191,7 @@ class SberbankPollingProvider implements PollingProvider {
             order.status = 'failed';
             order.message = symbol_check.message;
             await order.save();
-            redisPublisher.publish('orderStatusUpdate', JSON.stringify({ orderId: order.id, status: 'failed' }));
+            redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
             break;
           }
 
@@ -194,7 +203,7 @@ class SberbankPollingProvider implements PollingProvider {
             order.status = 'failed';
             order.message = amount_check.message;
             await order.save();
-            redisPublisher.publish('orderStatusUpdate', JSON.stringify({ orderId: order.id, status: 'failed' }));
+            redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
             break;
           }
 
@@ -202,7 +211,7 @@ class SberbankPollingProvider implements PollingProvider {
           order.status = 'paid';
           await order.save();
 
-          redisPublisher.publish('orderStatusUpdate', JSON.stringify({ orderId: order.id, status: 'paid' }));
+          redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'paid' }));
         }
 
         // Обновление состояния после обработки текущей страницы

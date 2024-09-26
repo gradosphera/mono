@@ -131,6 +131,11 @@ export interface IBoards {
   last_update: ITimePointSec
 }
 
+export interface ICancelreg {
+  coopname: IName
+  username: IName
+}
+
 export interface ICancelvote {
   coopname: IName
   member: IName
@@ -394,6 +399,7 @@ export interface IOnewallet {
   available: IAsset
   blocked: IAsset
   minimum: IAsset
+  initial: IAsset
 }
 
 export interface IParticipant {
@@ -485,6 +491,7 @@ export interface ISubbalance {
   coopname: IName
   username: IName
   quantity: IAsset
+  skip_available_check: boolean
 }
 
 export interface ISubprogbal {

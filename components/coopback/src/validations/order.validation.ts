@@ -17,17 +17,36 @@ export const RRecieveIPN = {
   params: Joi.object({ provider: Joi.string().required() }).required(),
 };
 
-export const RGetOrders = {
-  params: Joi.object().keys({
-    username: Joi.string().optional(),
-  }),
+export const IGetCoopOrders = Joi.object().keys({
+  username: Joi.string(),
+  sortBy: Joi.string().allow(''),
+  limit: Joi.number().integer(),
+  page: Joi.number().integer(),
+  id: Joi.string(),
+});
+
+export const RGetCoopOrders = Joi.object({
+  query: IGetCoopOrders,
+});
+
+export const IGetMyOrders = Joi.object().keys({
+  sortBy: Joi.string(),
+  limit: Joi.number().integer(),
+  page: Joi.number().integer(),
+});
+
+export const RGetMyOrders = {
+  params: Joi.object({
+    username: Joi.string().required(),
+  }).required(),
+  query: IGetMyOrders,
 };
 
 export const RSetOrderStatus = {
   body: Joi.object()
     .keys({
-      order_id: Joi.string().optional(),
-      status: Joi.string().required(),
+      id: Joi.string().optional(),
+      status: Joi.string().valid('paid', 'refunded').required(),
     })
     .required(),
 };

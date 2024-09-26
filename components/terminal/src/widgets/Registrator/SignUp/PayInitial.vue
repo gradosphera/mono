@@ -1,30 +1,27 @@
 <template lang='pug'>
 div
   q-step(:name='6', title='Оплатите вступительный взнос', :done='step > 6')
-    div(v-if='!store.is_paid' )
-      p Пожалуйста, совершите оплату регистрационного взноса {{ initialPayment }} {{ CURRENCY }} со своего банковского счёта. Комиссия провайдера {{ feePercent }}%, всего к оплате: {{ toPay }} {{ CURRENCY }}.
+    div(v-if="store.payment.details")
 
+      p Пожалуйста, совершите оплату регистрационного взноса {{ formatAssetToReadable(store.payment.details.amount_without_fee) }}. Комиссия провайдера {{ store.payment.details.fact_fee_percent }}%, всего к оплате: {{ store.payment.details.amount_plus_fee }}.
+      div.q-mt-md
+        span.text-bold Внимание!
+        span.q-ml-xs Оплату необходимо произвести с банковского счета, который принадлежит именно Вам. При поступлении средств с другого счета, оплата будет аннулирована, а вступление в кооператив приостановлено.
       PayWithProvider(:payment-order="store.payment" @payment-fail="paymentFail" @payment-success="paymentSuccess")
 
-    div(v-else).full-width
-      p.q-mt-lg.q-mb-lg Ваш платёж успешно принят.
-      q-checkbox( v-model='store.agreements.self_paid') я подтверждаю, что совершил оплату со своего банковского счёта
-
-      div.q-mt-lg
-        q-btn.q-mt-lg.q-mb-lg(color='primary', label='Продолжить', :disabled='!store.agreements.self_paid' @click='next')
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useCreateUser } from 'src/features/Registrator/CreateUser'
 import { FailAlert } from 'src/shared/api';
-import { BASE_PAYMENT_FEE, COOPNAME, CURRENCY } from 'src/shared/config';
+import { BASE_PAYMENT_FEE, COOPNAME } from 'src/shared/config';
 import { useCurrentUserStore } from 'src/entities/User';
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useRegistratorStore } from 'src/entities/Registrator'
 // import { Yookassa } from 'src/shared/ui/Providers/Yookassa';
 import { PayWithProvider } from 'src/shared/ui/PayWithProvider';
-
+import { formatAssetToReadable } from 'src/shared/lib/utils/formatAssetToReadable';
 const store = useRegistratorStore().state
 
 const emit = defineEmits(['update:data', 'update:step'])
@@ -48,23 +45,12 @@ watch(step, (newValue) => {
     createInitialPayment()
 })
 
-const initialPayment = computed(() => user.userAccount?.type === 'organization' ? parseFloat(String(coop.publicCooperativeData?.org_registration)) : parseFloat(String(coop.publicCooperativeData?.registration)))
-
-const baseFee = ref(parseFloat(BASE_PAYMENT_FEE))
-
-const toPay = computed(() => {
-  return (initialPayment.value / ((100 - baseFee.value) / 100)).toFixed(2)
+watch(() => store.is_paid, (newValue) => {
+  if (newValue === true){
+    store.agreements.self_paid = true
+    next()
+  }
 })
-
-const feePercent = computed(() => {
-  // Сумма без учета комиссии
-  const amountWithoutFee = initialPayment.value / ((100 - baseFee.value) / 100);
-  // Сумма комиссии
-  const feeAmount = amountWithoutFee - initialPayment.value;
-  // Процент комиссии
-  return ((feeAmount / initialPayment.value) * 100).toFixed(2);
-})
-
 
 // const confirmation_token = computed(() => store.payment.details.token)
 

@@ -3,15 +3,16 @@ import { getUserByUsername } from './user.service';
 import { blockchainService } from '.';
 import logger from '../config/logger';
 import { userStatus } from '../models/user.model';
-import type { IOrder } from '../models/order.model';
+import { orderStatus, type IOrder } from '../models/order.model';
 import { redisSubscriber } from './redis.service';
 
 export class PaymentEffectProcessor {
-  static async processPaymentEffect(orderId: string, status: string) {
-    const order = await Order.findById(orderId);
+  static async processPaymentEffect(id: string, status: string) {
+    console.log('Id: ', id);
+    const order = await Order.findById(id);
 
     if (!order) {
-      logger.error(`Order with id ${orderId} not found`, { source: 'processPaymentEffect' });
+      logger.error(`Order with id ${id} not found`, { source: 'processPaymentEffect' });
       return;
     }
 
@@ -21,12 +22,12 @@ export class PaymentEffectProcessor {
         break;
 
       case 'failed':
-        logger.warn(`Payment for order ${orderId} failed`, { source: 'processPaymentEffect' });
+        logger.warn(`Payment for order ${id} failed`, { source: 'processPaymentEffect' });
         // Здесь можно добавить логику повторных попыток или обработки неуспешного платежа
         break;
 
       default:
-        logger.info(`Status ${status} for order ${orderId} does not require processing`, { source: 'processPaymentEffect' });
+        logger.info(`Status ${status} for order ${id} does not require processing`, { source: 'processPaymentEffect' });
     }
   }
 
@@ -45,16 +46,16 @@ export class PaymentEffectProcessor {
         user.is_registered = true;
         await user.save();
 
-        await Order.updateOne({ _id: order.id }, { status: 'completed' });
+        await Order.updateOne({ _id: order.id }, { status: orderStatus.completed });
       } else if (order.type === 'deposit') {
         await blockchainService.completeDeposit(order);
 
-        await Order.updateOne({ _id: order.id }, { status: 'completed' });
+        await Order.updateOne({ _id: order.id }, { status: orderStatus.completed });
 
         logger.info(`User ${user.username} made a share contribution of ${order.quantity}`, { source: 'process' });
       }
     } catch (e: any) {
-      await Order.updateOne({ _id: order.id }, { status: 'failed', message: e.message });
+      await Order.updateOne({ _id: order.id }, { status: orderStatus.failed, message: e.message });
       logger.error(`Error processing blockchain transaction for order: ${order.id} with message: ${e.message}`, e);
     }
   }
@@ -65,8 +66,8 @@ redisSubscriber.subscribe('orderStatusUpdate');
 redisSubscriber.on('message', async (channel, message) => {
   if (channel === 'orderStatusUpdate') {
     try {
-      const { orderId, status } = JSON.parse(message);
-      await PaymentEffectProcessor.processPaymentEffect(orderId, status);
+      const { id, status } = JSON.parse(message);
+      await PaymentEffectProcessor.processPaymentEffect(id, status);
     } catch (error) {
       logger.error('Error processing Redis message:', error);
     }

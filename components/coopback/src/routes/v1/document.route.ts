@@ -6,12 +6,16 @@ import { documentController } from '../../controllers';
 
 const router = express.Router();
 
-router.route('/generate').post(auth(), validate(documentValidation.RGenerate), documentController.generateDocument);
+router
+  .route('/generate')
+  .post(auth('generateDocument'), validate(documentValidation.RGenerate), documentController.generateDocument);
 
 router
   .route('/get-documents')
   .get(auth('getDocuments'), validate(documentValidation.RGetDocuments), documentController.getDocuments);
 
-router.route('/get-my-documents').get(auth(), validate(documentValidation.RGetDocuments), documentController.getDocuments);
+router
+  .route('/get-my-documents')
+  .get(auth('getMyDocuments'), validate(documentValidation.RGetDocuments), documentController.getDocuments);
 
 export default router;

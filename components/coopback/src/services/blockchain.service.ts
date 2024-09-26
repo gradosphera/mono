@@ -12,6 +12,7 @@ import TempDocument, { tempdocType } from '../models/tempDocument.model';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 import type { IOrder } from '../models/order.model';
+import type { IBCAction } from '../types';
 
 const rpc = new JsonRpc(process.env.BLOCKCHAIN_RPC as string, { fetch });
 
@@ -32,6 +33,21 @@ async function getBlockchainAccount(username): Promise<GetAccountResult> {
   const api = getApi();
 
   return await api.getAccount(username);
+}
+
+export async function transact(actions: any): Promise<any> {
+  const instance = await getInstance(config.service_wif);
+  const result = await instance.transact(
+    {
+      actions,
+    },
+    {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    }
+  );
+
+  return result;
 }
 
 /**
@@ -500,6 +516,22 @@ export async function changeKey(data: RegistratorContract.Actions.ChangeKey.ICha
       expireSeconds: 30,
     }
   );
+}
+
+export async function cancelOrder(data: GatewayContract.Actions.RefundDeposit.IRefundDeposit) {
+  const action: IBCAction = {
+    account: GatewayContract.contractName.production,
+    name: GatewayContract.Actions.RefundDeposit.actionName,
+    authorization: [
+      {
+        actor: config.service_username,
+        permission: 'active',
+      },
+    ],
+    data,
+  };
+
+  return await transact([action]);
 }
 
 async function getSoviet(coopname) {

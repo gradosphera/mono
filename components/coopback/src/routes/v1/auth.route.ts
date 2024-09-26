@@ -12,7 +12,7 @@ router.post('/logout', validate(authValidation.RLogout), authController.logout);
 router.post('/refresh-tokens', validate(authValidation.RRefreshTokens), authController.refreshTokens);
 router.post('/lost-key', validate(authValidation.RForgotKey), authController.lostKey);
 router.post('/reset-key', validate(authValidation.RResetKey), authController.resetKey);
-router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
+router.post('/send-verification-email', auth('sendVerificationEmail'), authController.sendVerificationEmail);
 router.post('/verify-email', validate(authValidation.RVerifyEmail), authController.verifyEmail);
 
 export default router;

@@ -1,6 +1,7 @@
 import { UserIdentityPage } from 'src/pages/User/IdentityPage';
 import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
 import { UserWalletPage } from 'src/pages/User/WalletPage';
+import { ListOfOrdersPage } from 'src/pages/Cooperative/ListOfOrders';
 
 import { ListOfQuestionsWidget } from 'src/widgets/Cooperative/Agenda/ListOfQuestions';
 import { ListOfDocumentsWidget } from 'src/widgets/Cooperative/Documents/ListOfDocuments';
@@ -121,6 +122,17 @@ export const manifest = {
           component: markRaw(ListOfDocumentsWidget),
           meta: {
             title: 'Документы',
+            icon: 'fa-solid fa-file-invoice',
+            roles: ['chairman', 'member'],
+          },
+        },
+
+        {
+          path: 'orders/:username?',
+          name: 'orders',
+          component: markRaw(ListOfOrdersPage),
+          meta: {
+            title: 'Платежи',
             icon: 'fa-solid fa-file-invoice',
             roles: ['chairman', 'member'],
           },

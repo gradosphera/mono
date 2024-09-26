@@ -8,14 +8,14 @@ const router = Router();
 
 router
   .route('/:username?')
-  .get(auth('manageUsers'), validate(methodValidation.RGetListPaymentMethods), methodController.listPaymentMethods);
+  .get(auth('manageMyMethods'), validate(methodValidation.RGetListPaymentMethods), methodController.listPaymentMethods);
 
 router
   .route('/:username/add')
-  .post(auth('manageUsers'), validate(methodValidation.RSavePaymentMethod), methodController.addPaymentMethod);
+  .post(auth('manageMyMethods'), validate(methodValidation.RSavePaymentMethod), methodController.addPaymentMethod);
 
 router
   .route('/:username/delete')
-  .post(auth('manageUsers'), validate(methodValidation.RDeletePaymentMethod), methodController.deletePaymentMethod);
+  .post(auth('manageMyMethods'), validate(methodValidation.RDeletePaymentMethod), methodController.deletePaymentMethod);
 
 export default router;

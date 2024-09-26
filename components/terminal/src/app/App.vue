@@ -1,5 +1,5 @@
 <template lang='pug'>
-div(v-if="isLoaded")
+div(v-if="isLoaded").breable-text
   router-view
   RequireAgreements
 </template>

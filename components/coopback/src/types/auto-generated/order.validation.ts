@@ -7,5 +7,31 @@ export interface ICreateDeposit {
   quantity: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ICreateInitialPayment {}
+
+export interface IGetCoopOrders {
+  id?: string;
+  limit?: number;
+  page?: number;
+  sort?: string;
+  sortBy?: string;
+  username?: string;
+}
+
+export interface IGetMyOrders {
+  limit?: number;
+  page?: number;
+  sort?: string;
+  sortBy?: string;
+}
+
+export interface RGetCoopOrders {
+  query: {
+    id?: string;
+    limit?: number;
+    page?: number;
+    sort?: string;
+    sortBy?: string;
+    username?: string;
+  };
+}

@@ -14,6 +14,7 @@ export enum userStatus {
   '4_Registered' = 'registered',
   '5_Active' = 'active',
   '10_Failed' = 'failed',
+  '100_Refunded' = 'refunded',
   '200_Blocked' = 'blocked',
 }
 
@@ -35,6 +36,12 @@ export interface IUser {
   //   public_key: string;
   //   signature: string;
   // };
+  // Временное поле для хранения private_data
+  _privateData?:
+    | Cooperative.Users.IIndividualData
+    | Cooperative.Users.IEntrepreneurData
+    | Cooperative.Users.IOrganizationData
+    | null;
   private_data:
     | Cooperative.Users.IIndividualData
     | Cooperative.Users.IEntrepreneurData
@@ -145,16 +152,27 @@ userSchema.statics.isEmailTaken = async function (email) {
   return !!user;
 };
 
+// Виртуальное свойство для private_data
+userSchema
+  .virtual('private_data')
+  .get(function () {
+    return this._privateData; // Чтение из временного поля
+  })
+  .set(function (value) {
+    this._privateData = value; // Установка временного поля
+  });
+
+// Асинхронный метод получения private_data
 userSchema.methods.getPrivateData = async function (): Promise<
   Cooperative.Users.IIndividualData | Cooperative.Users.IEntrepreneurData | Cooperative.Users.IOrganizationData | null
 > {
-  const result = (await generator.get(this.type, { username: this.username })) as
+  const privateData = (await generator.get(this.type, { username: this.username })) as
     | Cooperative.Users.IIndividualData
     | Cooperative.Users.IEntrepreneurData
     | Cooperative.Users.IOrganizationData
     | null;
-
-  return result;
+  this.private_data = privateData; // Устанавливаем виртуальное свойство
+  return privateData;
 };
 
 const User = model<IUser, IUserModel>('User', userSchema);

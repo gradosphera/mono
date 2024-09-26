@@ -72,7 +72,6 @@ const loadDocuments = async () => {
       },
     })).results
     onLoading.value = false
-    console.log('docunets: ', documents.value)
   } catch (e: any) {
     onLoading.value = false
     console.log(e)

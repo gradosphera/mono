@@ -65,7 +65,9 @@ router.route('/:provider/ipn').post(validate(orderValidation.RRecieveIPN), order
  *             schema:
  *               $ref: '#/components/schemas/ICreatedPayment'
  */
-router.route('/initial').post(auth(), validate(orderValidation.RCreateInitialPayment), orderController.createInitialPayment);
+router
+  .route('/initial')
+  .post(auth('initialPayment'), validate(orderValidation.RCreateInitialPayment), orderController.createInitialPayment);
 
 /**
  * @swagger
@@ -90,12 +92,15 @@ router.route('/initial').post(auth(), validate(orderValidation.RCreateInitialPay
  *             schema:
  *               $ref: '#/components/schemas/ICreatedPayment'
  */
-router.route('/deposit').post(auth(), validate(orderValidation.RCreateDeposit), orderController.createDeposit);
+router
+  .route('/deposit')
+  .post(auth('createDeposit'), validate(orderValidation.RCreateDeposit), orderController.createDeposit);
 
 router
   .route('/set-order-status')
-  .post(auth('manageUsers'), validate(orderValidation.RSetOrderStatus), orderController.setStatus);
+  .post(auth('manageOrders'), validate(orderValidation.RSetOrderStatus), orderController.setStatus);
 
-router.route('/:username?').get(auth('manageUsers'), validate(orderValidation.RGetOrders), orderController.getOrders);
+router.route('/all').get(auth('manageOrders'), validate(orderValidation.RGetCoopOrders), orderController.getOrders);
+router.route('/:username').get(auth('getMyOrders'), validate(orderValidation.RGetMyOrders), orderController.getMyOrders);
 
 export default router;

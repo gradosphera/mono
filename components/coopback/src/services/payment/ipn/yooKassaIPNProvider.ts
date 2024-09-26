@@ -7,6 +7,8 @@ import IPN from '../../../models/ipn.model';
 import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../order.service';
 import mongoose from 'mongoose';
 import logger from '../../../config/logger';
+import Settings from '../../../models/settings.model';
+import type { isDeepStrictEqual } from 'util';
 
 const redis = new Redis();
 
@@ -99,17 +101,9 @@ interface IIpnRequest {
 }
 
 class YooKassaIPNProvider implements IPNProvider {
-  private checkout: YooCheckout;
-  public tolerance_percent = 0.05; /// (0.0005%) < Допустимая погрешность приёма платежей
+  public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 3.5; ///%
 
-  constructor() {
-    this.checkout = new YooCheckout({
-      shopId: process.env.YA_SHOP_ID as string,
-      secretKey: process.env.YA_SHOP_SECRET as string,
-      token: process.env.YA_ACCESS_TOKEN as string,
-    });
-  }
   async handleIPN(request: IIpnRequest): Promise<void> {
     const { event, object } = request;
 
@@ -122,7 +116,7 @@ class YooKassaIPNProvider implements IPNProvider {
       const order = await Order.findOne({ secret });
 
       if (order) {
-        logger.info('Order found', { source: 'handleIPN', orderId: order.id });
+        logger.info('Order found', { source: 'handleIPN', id: order.id });
 
         if (event === 'payment.succeeded') {
           const [, symbol] = order.quantity.split(' ');
@@ -132,12 +126,12 @@ class YooKassaIPNProvider implements IPNProvider {
           if (symbol_result.status == 'error') {
             logger.warn('Payment symbol verification failed', {
               source: 'handleIPN',
-              orderId: order.id,
+              id: order.id,
               message: symbol_result.message,
             });
 
             await Order.updateOne({ _id: order.id }, { status: 'failed', message: symbol_result.message });
-            redis.publish('orderStatusUpdate', JSON.stringify({ orderId: order.id, status: 'failed' }));
+            redis.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
             return;
           }
 
@@ -147,28 +141,30 @@ class YooKassaIPNProvider implements IPNProvider {
             // Обработка успешного платежа
             logger.info('Payment amount verified, updating order status to paid', {
               source: 'handleIPN',
-              orderId: order.id,
+              id: order.id,
             });
 
+            console.log('order: ', order);
+
             await Order.updateOne({ _id: order.id }, { status: 'paid' });
-            redis.publish('orderStatusUpdate', JSON.stringify({ orderId: order.id, status: 'paid' }));
+            redis.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'paid' }));
           } else {
             // Обработка неудачного платежа
             logger.warn('Payment amount verification failed', {
               source: 'handleIPN',
-              orderId: order.id,
+              id: order.id,
               message: result.message,
             });
 
             await Order.updateOne({ _id: order.id }, { status: 'failed', message: result.message });
-            redis.publish('orderStatusUpdate', JSON.stringify({ orderId: order.id, status: 'failed' }));
+            redis.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
           }
         } else if (event === 'payment.failed') {
           // Обработка неудачного платежа
-          logger.warn('Payment failed event received', { source: 'handleIPN', orderId: order.id });
+          logger.warn('Payment failed event received', { source: 'handleIPN', id: order.id });
 
           await Order.updateOne({ _id: order.id }, { status: 'failed' });
-          redis.publish('orderStatusUpdate', JSON.stringify({ orderId: order.id, status: 'failed' }));
+          redis.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
         }
       } else {
         //TODO платеж есть, а ордера на него нет. Что делаем?
@@ -179,13 +175,31 @@ class YooKassaIPNProvider implements IPNProvider {
     }
   }
 
-  async createPayment(amount: string, description: string, order_id: number, secret: string): Promise<PaymentDetails> {
-    const amount_plus_fee = getAmountPlusFee(parseFloat(amount), this.fee_percent);
-    const payment = await this.checkout.createPayment(
+  async createPayment(
+    amount: string,
+    symbol: string,
+    description: string,
+    order_id: number,
+    secret: string
+  ): Promise<PaymentDetails> {
+    const settings = await Settings.getSettings();
+
+    const checkout = new YooCheckout({
+      shopId: settings.provider.client,
+      secretKey: settings.provider.secret,
+    });
+
+    const amount_plus_fee = getAmountPlusFee(parseFloat(amount), this.fee_percent).toFixed(2);
+    const fee_amount = (parseFloat(amount_plus_fee) - parseFloat(amount)).toFixed(2);
+
+    // Фактический процент комиссии
+    const fact_fee_percent = Math.round((parseFloat(fee_amount) / parseFloat(amount)) * 100 * 100) / 100;
+
+    const payment = await checkout.createPayment(
       {
         description,
         amount: {
-          value: amount_plus_fee.toFixed(2),
+          value: amount_plus_fee,
           currency: 'RUB',
         },
         confirmation: {
@@ -200,6 +214,12 @@ class YooKassaIPNProvider implements IPNProvider {
     );
     return {
       data: payment?.confirmation?.confirmation_token || '',
+      amount_plus_fee: `${amount_plus_fee} ${symbol}`,
+      amount_without_fee: amount,
+      fee_amount: `${fee_amount} ${symbol}`,
+      fee_percent: this.fee_percent,
+      fact_fee_percent,
+      tolerance_percent: this.tolerance_percent,
     };
   }
 }

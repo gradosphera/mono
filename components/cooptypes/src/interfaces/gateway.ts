@@ -8,6 +8,15 @@ export type ISignature = string
 export type ITimePointSec = string
 export type IUint64 = number | string
 
+export interface IAdduser {
+  coopname: IName
+  username: IName
+  initial: IAsset
+  minimum: IAsset
+  created_at: ITimePointSec
+  spread_initial: boolean
+}
+
 export interface IBalances extends IBalancesBase {
 }
 
@@ -48,16 +57,36 @@ export interface IDpcomplete {
   memo: string
 }
 
-export interface IDpfail {
+export interface IDprefund {
   coopname: IName
   admin: IName
   deposit_id: IUint64
   memo: string
 }
 
+export interface IMigrate {
+}
+
+export interface INewdeposit {
+  coopname: IName
+  username: IName
+  deposit_id: IUint64
+  type: IName
+  amount: IAsset
+  deposited_at: ITimePointSec
+}
+
 export interface INewdepositid {
   username: IName
   id: IUint64
+}
+
+export interface INewwithdraw {
+  coopname: IName
+  username: IName
+  withdraw_id: IUint64
+  type: IName
+  amount: IAsset
 }
 
 export interface INewwithdrid {

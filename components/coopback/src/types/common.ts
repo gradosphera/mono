@@ -1,16 +1,6 @@
 import { IEntrepreneurData, IGeneratedDocument, IIndividualData, IOrganizationData } from 'coopdoc-generator-ts';
 import { Cooperative, SovietContract } from 'cooptypes';
 
-// Определение типа для деталей платежа
-export interface PaymentDetails {
-  data: any; // строка с данными платежа
-}
-
-export interface ICreatedPayment {
-  provider: string;
-  details: PaymentDetails;
-}
-
 export type IGetResponse<T> = Cooperative.Document.IGetResponse<T>;
 
 export interface IGetActions<T> {
@@ -116,4 +106,16 @@ export interface IAgenda {
 
 export interface IComplexAgenda extends IAgenda {
   document: IComplexDocument;
+}
+
+export interface IBCAction<T> {
+  account: string;
+  name: string;
+  authorization: [
+    {
+      actor: string;
+      permission: string;
+    }
+  ];
+  data: T;
 }

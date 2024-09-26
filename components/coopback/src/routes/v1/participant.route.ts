@@ -8,6 +8,6 @@ const router = Router();
 
 router
   .route('/join-cooperative')
-  .post(auth(), validate(participantValidation.RJoinCooperative), participantController.joinCooperative);
+  .post(auth('joinCooperative'), validate(participantValidation.RJoinCooperative), participantController.joinCooperative);
 
 export default router;

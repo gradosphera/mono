@@ -11,13 +11,13 @@ export async function getRequest(url: string, params: Record<string, any>): Prom
       params,
       headers: {
         // eslint-disable-next-line node/prefer-global/process
-        Authorization: `Bearer ${process.env.COOPBACK_TOKEN}`,
+        'server-secret': process.env.SERVER_SECRET,
       },
     })
     return response.data
   }
-  catch (error) {
-    console.error('Ошибка при выполнении GET запроса:', error)
+  catch (error: any) {
+    console.error('Ошибка при выполнении GET запроса:', error.message)
     throw error
   }
 }
@@ -29,13 +29,13 @@ export async function postRequest(url: string, data: any): Promise<any> {
     const response = await axios.post(`${process.env.COOPBACK_URL}/v1/${url}`, data, {
       headers: {
         // eslint-disable-next-line node/prefer-global/process
-        Authorization: `Bearer ${process.env.COOPBACK_TOKEN}`,
+        'server-secret': process.env.SERVER_SECRET,
       },
     })
     return response.data
   }
   catch (error: any) {
-    console.error('Ошибка при выполнении POST запроса:', error)
+    console.error('Ошибка при выполнении POST запроса:', error.message)
     throw error
   }
 }

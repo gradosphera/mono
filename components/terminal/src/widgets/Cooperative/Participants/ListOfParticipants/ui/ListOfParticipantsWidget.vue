@@ -40,7 +40,7 @@ q-table(
       q-td {{ props.row.private_data?.phone }}
       q-td {{ props.row.private_data?.email }}
       q-td {{ moment(props.row.private_data?.birthdate).format('DD.MM.YY') }}
-      q-td {{ moment(props.row.private_data._created_at).format('DD.MM.YY HH:mm:ss') }}
+      q-td {{ moment(props.row.private_data?._created_at).format('DD.MM.YY HH:mm:ss') }}
 
 
     q-tr(v-show="props.expand" :key="`e_${props.row.username}`" :props="props" class="q-virtual-scroll--with-prev")

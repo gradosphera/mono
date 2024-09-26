@@ -6,11 +6,16 @@ div.DepositPreparator
       Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm
         q-input(v-model="quantity" filled type="number" :min="0" :step="1000" :rules="[val => val > 0 || 'Сумма взноса должна быть положительной']")
           template(#append)
-            p.q-pa-sm {{ CURRENCY }}
-          template(#hint)
-            span комиссия провайдера {{feePercent}}%, к оплате {{toPay}}
+            span.q-pa-sm {{ CURRENCY }}
+
     ModalBase(v-else :title='"Совершите взнос"' style="min-height: 200px !important;")
-      PayWithProvider(:payment-order="paymentOrder" :provider="provider" @payment-fail="paymentFail" @payment-success="paymentSuccess")
+      div(style="max-width:400px").q-pa-md
+        p Пожалуйста, совершите оплату паевого взноса {{ formatAssetToReadable(paymentOrder.details.amount_without_fee) }}. Комиссия провайдера {{ paymentOrder.details.fact_fee_percent }}%, всего к оплате: {{ paymentOrder.details.amount_plus_fee }}.
+
+        span.text-bold Внимание!
+        span.q-ml-xs Оплату необходимо произвести с банковского счета, который принадлежит именно Вам. При поступлении средств с другого счета, оплата будет аннулирована.
+
+      PayWithProvider(:payment-order="paymentOrder" @payment-fail="paymentFail" @payment-success="paymentSuccess").q-mb-md
 
   </template>
 
@@ -25,10 +30,9 @@ import { BASE_PAYMENT_FEE, COOPNAME, CURRENCY } from 'src/shared/config'
 import { SuccessAlert, FailAlert } from 'src/shared/api'
 import { useSessionStore } from 'src/entities/Session'
 import type { IPaymentOrder } from 'src/shared/lib/types/payments'
+import { formatAssetToReadable } from 'src/shared/lib/utils/formatAssetToReadable'
 
 const { createDeposit, loadUserWalet } = useWalletStore()
-
-const provider = ref('yookassa')
 
 //TODO move username to Session entity
 const session = useSessionStore()

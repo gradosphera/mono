@@ -10,9 +10,9 @@ export * as CreateDeposit from './createDeposit'
 export * as CompleteDeposit from './completeDeposit'
 
 /**
- * Действие `dpfail` используется для обозначения неудачи в обработке депозита, устанавливая его статус в 'failed' и обновляя заметку.
+ * Действие используется для отмены платежа вступительного или паевого взноса.
  */
-export * as FailDeposit from './failDeposit'
+export * as RefundDeposit from './refundDeposit'
 
 /**
  * Действие вызывается контрактом автоматически по ходу выполнения логики для возврата идентификатора нового депозита.

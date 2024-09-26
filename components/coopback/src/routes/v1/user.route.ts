@@ -15,7 +15,7 @@ router.route('/add').post(auth('addUser'), validate(userValidation.RAddUser), us
 
 router
   .route('/:username')
-  .get(auth('getUsers'), validate(userValidation.RGetUser), userController.getUser)
+  .get(auth('getSelf'), validate(userValidation.RGetUser), userController.getUser)
   .patch(auth('manageUsers'), validate(userValidation.RUpdateUser), userController.updateUser);
 
 export default router;

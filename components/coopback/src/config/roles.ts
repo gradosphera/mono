@@ -1,18 +1,24 @@
+const user = [
+  'getSelf',
+  'initialPayment',
+  'generateDocument',
+  'getMyDocuments',
+  'getMyOrders',
+  'sendVerificationEmail',
+  'manageMyMethods',
+  'createDeposit',
+  'joinCooperative',
+  'getVars',
+];
+
+const member = ['getUsers', 'manageUsers', 'loadAgenda', 'loadStaff', 'getDocuments', 'loadInfo', 'manageOrders'];
+
+const chairman = [...user, ...member, 'addUser', 'setVars', 'manageSettings'];
+
 const allRoles = {
-  user: [''],
-  service: ['addUser', 'sendNotification', 'install'],
-  chairman: [
-    'addUser',
-    'getUsers',
-    'manageUsers',
-    'loadAgenda',
-    'loadStaff',
-    'getDocuments',
-    'loadInfo',
-    'set-vars',
-    'manageSettings',
-  ],
-  member: ['getUsers', 'manageUsers', 'loadAgenda', 'loadStaff', 'getDocuments', 'loadInfo'],
+  user,
+  member,
+  chairman,
 };
 
 export const roles = Object.keys(allRoles);

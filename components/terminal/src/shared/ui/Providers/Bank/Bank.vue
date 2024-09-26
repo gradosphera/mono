@@ -62,7 +62,6 @@ onBeforeUnmount(() => {
 
 const generateQRCode = () => {
   if (qrElement.value) {
-    console.log('on generate: ', props.paymentOrder.details.data)
     QRCode.toCanvas(qrElement.value, props.paymentOrder.details.data, {width: 400}, function (error) {
       if (error) console.error(error);
     });
@@ -85,13 +84,13 @@ const downloadQR = () => {
 
 <template lang="pug">
 div
-  q-input(label="Cумма платежа" v-model="amount" readonly)
   q-input(label="Получатель" v-model="orderData.name" readonly)
   q-input(label="Банк получателя" v-model="orderData.bankname" readonly)
   q-input(label="БИК" v-model="orderData.bic" readonly)
   q-input(label="КПП" v-model="orderData.kpp" readonly)
   q-input(label="Корреспондентский счёт" v-model="orderData.correspacc" readonly)
   q-input(label="Номер счёта" v-model="orderData.personalacc" readonly)
+  q-input(label="Cумма платежа" v-model="amount" readonly)
   q-input(label="Назначение платежа" v-model="orderData.purpose" readonly)
 
   div.full-width.text-center

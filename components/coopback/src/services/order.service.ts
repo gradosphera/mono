@@ -1,17 +1,22 @@
-import { Order } from '../models/index';
-import mongoose from 'mongoose';
+import { Order, User } from '../models/index';
+import mongoose, { type ObjectId } from 'mongoose';
 import { getUserByUsername } from './user.service';
 import logger from '../config/logger';
-import { ICreateDeposit, ICreateInitialPayment } from '../types';
+import { ICreateDeposit, ICreateInitialPayment, type IBCAction } from '../types';
 import { generator } from './document.service';
-import { ICreatedPayment } from '../types/common';
+import { ICreatedPayment } from '../types';
 import { ProviderFactory } from './payment/providerFactory';
-import type { IOrder } from '../models/order.model';
+import { orderStatus, type IOrder } from '../models/order.model';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 import { redisPublisher } from './redis.service';
 import crypto from 'crypto';
 import Settings from '../models/settings.model';
+import _ from 'lodash'; // lodash для глубокого клонирования
+import { blockchainService, userService } from '.';
+import config from '../config/config';
+import { GatewayContract } from 'cooptypes';
+import { userStatus } from '../models/user.model';
 
 export async function createOrder(
   username: string,
@@ -24,18 +29,24 @@ export async function createOrder(
   if (!cooperative) throw new Error('Кооператив не найден');
 
   const session = await mongoose.startSession();
+
+  const [, symbol] = amount.split(' ');
+
   let result;
   try {
     await session.withTransaction(async () => {
+      const user = await getUserByUsername(username);
       // Создание ордера
       const order: IOrder = {
         creator: process.env.COOPNAME as string,
         secret: generateOrderSecret(),
-        status: 'pending',
+        status: orderStatus.pending,
         type: type,
         provider: providerName,
         username,
         quantity: amount,
+        symbol: symbol,
+        user: user._id as unknown as ObjectId,
       };
 
       const db_order = new Order(order);
@@ -48,12 +59,17 @@ export async function createOrder(
 
       const paymentDetails = await provider.createPayment(
         amount,
+        symbol,
         type === 'deposit'
           ? `Добровольный паевый взнос №${db_order.order_id}`
           : `Добровольный вступительный взнос №${db_order.order_id}`,
         db_order.order_id as number,
         secret
       );
+
+      db_order.details = paymentDetails;
+
+      await db_order.save({ session });
 
       logger.info('Order created', { providerName, type, username, provider, amount, source: 'createDeposit' });
 
@@ -134,20 +150,36 @@ export function getAmountPlusFee(amount: number, fee: number): number {
   return amount / ((100 - fee) / 100);
 }
 
-export async function setStatus(orderId: string, status: string) {
-  const order = await Order.findById(orderId);
+export async function setStatus(id: string, status: string) {
+  const order = await Order.findById(id);
 
   if (!order) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Ордер не найден');
   }
 
-  // Обновляем статус ордера в базе данных
-  await Order.updateOne({ _id: orderId }, { status });
+  if (status == 'refunded') {
+    await blockchainService.cancelOrder({
+      coopname: config.coopname,
+      admin: config.service_username,
+      deposit_id: order.order_id as number,
+      memo: '',
+    });
+
+    if (order.type === 'registration') {
+      const user = await userService.getUserByUsername(order.username);
+      user.status = userStatus['100_Refunded'];
+      user.save();
+    }
+  }
+
+  //обновляем статус
+  order.status = orderStatus[status];
+  await order.save();
 
   // Отправляем обновление через Redis, чтобы обработчик мог выполнить действия
-  redisPublisher.publish('orderStatusUpdate', JSON.stringify({ orderId, status }));
+  redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id, status }));
 
-  logger.info(`Статус ордера ${orderId} обновлен до ${status}`, { source: 'setStatus' });
+  logger.info(`Статус ордера ${id} обновлен до ${status}`, { source: 'setStatus' });
 }
 
 export async function getOrders(filter, options) {

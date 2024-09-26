@@ -8,7 +8,7 @@ const { UNAUTHORIZED, FORBIDDEN } = httpStatus;
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
   const serverSecret = process.env.SERVER_SECRET;
 
-  // Проверка заголовка server-secret
+  // Check for server-secret header
   if (serverSecret && req.headers['server-secret'] === serverSecret) {
     return resolve();
   }
@@ -16,14 +16,27 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
   if (err || info || !user) {
     return reject(new ApiError(UNAUTHORIZED, 'Please authenticate'));
   }
+
   req.user = user;
 
-  if (requiredRights.length) {
-    const userRights = roleRights.get(user.role);
-    const hasRequiredRights = requiredRights.every((requiredRight) => userRights?.includes(requiredRight));
+  console.log('Required rights:', requiredRights);
 
-    if (!hasRequiredRights && req.params.username !== user.username) {
-      //
+  const userRights = roleRights.get(user.role) || [];
+
+  // Determine if user has the required rights
+  const hasRequiredRights = requiredRights.every((requiredRight) => userRights.includes(requiredRight));
+
+  // Check if user is accessing their own resource
+  const isOwnResource = req.params.username === user.username;
+
+  if (requiredRights.length) {
+    // If rights are required but user doesn't have them, deny access
+    if (!hasRequiredRights) {
+      return reject(new ApiError(FORBIDDEN, 'Недостаточно прав доступа'));
+    }
+  } else {
+    // If no rights are required, ensure user is accessing their own resource
+    if (!isOwnResource) {
       return reject(new ApiError(FORBIDDEN, 'Недостаточно прав доступа'));
     }
   }
