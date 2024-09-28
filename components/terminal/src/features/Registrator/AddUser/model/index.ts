@@ -2,7 +2,7 @@ import { api } from '../api';
 
 import { useRegistratorStore } from 'src/entities/Registrator'
 
-import { IAddUser } from 'coopback';
+import type { IAddUser } from 'coopback';
 
 import emailRegex from 'email-regex';
 import { useCooperativeStore } from 'src/entities/Cooperative';

@@ -50,9 +50,13 @@ onBeforeUnmount(() => {
   }
 })
 
-const update = () => {
+const update = async () => {
   if (store.account.username && !participantAccount.value) {
-    currentUser.loadProfile(store.account.username, COOPNAME)
+    try {
+      await currentUser.loadProfile(store.account.username, COOPNAME)
+    } catch(e: any){
+      console.log('error: ', e.message)
+    }
   } else {
     clearInterval(interval.value)
   }

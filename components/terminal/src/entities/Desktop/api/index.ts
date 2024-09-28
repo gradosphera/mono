@@ -1,4 +1,4 @@
-import { IHealthResponse } from 'coopback';
+import type { IHealthResponse } from 'coopback';
 import { sendGET } from 'src/shared/api';
 
 async function healthCheck(): Promise<IHealthResponse> {

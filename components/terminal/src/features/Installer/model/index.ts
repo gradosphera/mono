@@ -1,6 +1,6 @@
 import { useInstallCooperativeStore } from 'src/entities/Installer/model'
 import { api } from '../api'
-import { IInstall } from 'coopback'
+import type { IInstall } from 'coopback'
 
 export const useInstallCooperative = () => {
   const store = useInstallCooperativeStore()

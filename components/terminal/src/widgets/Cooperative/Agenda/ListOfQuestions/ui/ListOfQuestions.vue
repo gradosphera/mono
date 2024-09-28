@@ -47,20 +47,20 @@ q-card(flat)
 
           q-btn(v-if="isVotedFor(props.row.table) || !isVotedAny(props.row.table)" :disabled="isVotedAny(props.row.table)" dense flat @click="voteAgainst(props.row.table.id)").text-red
             q-icon(name="fa-regular fa-thumbs-down")
-            p.q-pl-xs {{props.row.table.votes_against.length}}
+            span.q-pl-xs {{props.row.table.votes_against.length}}
 
           q-btn(v-if="isVotedAgainst(props.row.table)" disabled dense flat).text-red
             q-icon(name="fas fa-thumbs-down")
-            p.q-pl-xs {{props.row.table.votes_against.length}}
+            span.q-pl-xs {{props.row.table.votes_against.length}}
 
           q-checkbox( v-model="props.row.table.approved" disable :true-value="1" :false-value="0" )
 
           q-btn(v-if="isVotedAgainst(props.row.table) || !isVotedAny(props.row.table)" :disabled="isVotedAny(props.row.table)" dense flat @click="voteFor(props.row.table.id)").text-green
-            p.q-pr-xs {{props.row.table.votes_for.length}}
+            span.q-pr-xs {{props.row.table.votes_for.length}}
             q-icon(name="fa-regular fa-thumbs-up" style="transform: scaleX(-1)")
 
           q-btn(v-if="isVotedFor(props.row.table)" disabled dense flat ).text-green
-            p.q-pr-xs {{props.row.table.votes_for.length}}
+            span.q-pr-xs {{props.row.table.votes_for.length}}
             q-icon(name="fas fa-thumbs-up" style="transform: scaleX(-1)")
 
         q-td

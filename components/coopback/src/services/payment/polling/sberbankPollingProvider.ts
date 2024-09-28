@@ -7,6 +7,7 @@ import { PaymentState } from '../../../models/paymentState.model';
 import axios from 'axios';
 import logger from '../../../config/logger';
 import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../order.service';
+import { orderStatus } from '../../../models/order.model';
 
 interface Link {
   href: string;
@@ -188,7 +189,7 @@ class SberbankPollingProvider implements PollingProvider {
 
           if (symbol_check.status === 'error') {
             logger.warn(symbol_check.message);
-            order.status = 'failed';
+            order.status = orderStatus.failed;
             order.message = symbol_check.message;
             await order.save();
             redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
@@ -200,7 +201,7 @@ class SberbankPollingProvider implements PollingProvider {
 
           if (amount_check.status === 'error') {
             logger.warn(amount_check.message);
-            order.status = 'failed';
+            order.status = orderStatus.failed;
             order.message = amount_check.message;
             await order.save();
             redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
@@ -208,7 +209,7 @@ class SberbankPollingProvider implements PollingProvider {
           }
 
           //отмечаем ордер оплаченным если все проверки пройдены
-          order.status = 'paid';
+          order.status = orderStatus.paid;
           await order.save();
 
           redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'paid' }));

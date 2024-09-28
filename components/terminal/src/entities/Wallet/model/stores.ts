@@ -41,6 +41,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
     available: `0.0000 ${CURRENCY}`,
     blocked: `0.0000 ${CURRENCY}`,
     minimum: `0.0000 ${CURRENCY}`,
+    initial: `0.0000 ${CURRENCY}`,
   });
 
   const deposits = ref<IDepositData[]>([]);
@@ -58,6 +59,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
       available: `0.0000 ${CURRENCY}`,
       blocked: `0.0000 ${CURRENCY}`,
       minimum: `0.0000 ${CURRENCY}`,
+      initial: `0.0000 ${CURRENCY}`,
     });
 
     try {

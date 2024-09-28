@@ -42,10 +42,8 @@ const onlineCheck = () => {
   if (desktop.online === false) {
     enableLoading()
   } else {
-    card.initWallet()
     disableLoading()
   }
-
 }
 
 onlineCheck()
@@ -67,7 +65,7 @@ onMounted(async () => {
 
     console.error(e)
     handleException(e)
-    router.push({ name: 'somethingBad' })
+    // router.push({ name: 'somethingBad' })
     isLoaded.value = true
     removeLoader()
   }

@@ -2,6 +2,14 @@ import type { IBankAccount } from '../payments'
 
 export type Country = 'Russia' | 'Other'
 
+export interface IPassportData {
+  series: number
+  number: number
+  issued_by: string
+  issued_at: string
+  code: string
+}
+
 export interface IIndividualData {
   username: string
   first_name: string
@@ -11,6 +19,7 @@ export interface IIndividualData {
   full_address: string
   phone: string
   email: string
+  passport?: IPassportData
   block_num?: number
   deleted?: boolean
 }

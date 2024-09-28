@@ -37,6 +37,11 @@
               q-btn(size="sm" color="primary" round dense :icon="expanded.get(props.row.order_id) ? 'remove' : 'add'" @click="toggleExpand(props.row.order_id)")
             q-td {{props.row.order_id}}
             q-td {{getNameFromUserData(props.row.user?.private_data)}}
+            q-td {{props.row.user?.username}}
+            q-td
+              q-badge(v-if="props.row.type ==='registration'") регистрационный
+              q-badge(v-if="props.row.type ==='deposit'") паевый
+
             q-td {{ props.row.quantity }}
             q-td {{ formatToHumanDate(props.row.createdAt) }}
             q-td {{ formatToHumanDate(props.row.updatedAt) }}
@@ -46,14 +51,13 @@
               q-badge(v-if="props.row.status ==='pending'" color="orange") ожидание оплаты
               q-badge(v-if="props.row.status ==='failed'" color="red") ошибка
               q-badge(v-if="props.row.status ==='paid'" color="orange") оплачен
+              q-badge(v-if="props.row.status ==='refunded'" color="grey") отменён
             q-td
-
               q-btn-dropdown(size="sm" label="действия" flat dense v-model="dropdowns[props.row.order_id]")
                 q-list(dense)
-                  q-item(dense)
-                    SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_id)")
-                  q-item(dense)
-                    SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_id)")
+                  SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_id)")
+                  SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_id)")
+                  SetOrderCompletedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_id)")
 
           q-tr(v-if="expanded.get(props.row.order_id)" :key="`e_${props.row.order_id}`" :props="props" class="q-virtual-scroll--with-prev")
             q-td(colspan="100%")
@@ -71,6 +75,7 @@
   import { useOrderStore } from 'src/entities/Order';
   import { SetOrderPaidStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderPaidStatusButton';
   import { SetOrderRefundedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderRefundedStatusButton';
+  import { SetOrderCompletedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderCompletedStatusButton';
 
   const orderStore = useOrderStore()
   const orders = computed(() => orderStore.orders)
@@ -165,8 +170,10 @@
 
 
   const columns = [
-    { name: 'id', align: 'left', label: '№', field: 'order_id', sortable: true },
+    { name: 'order_id', align: 'left', label: '№', field: 'order_id', sortable: true },
     { name: 'name', align: 'left', label: 'ФИО | Наименование', field: '', sortable: false },
+    { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
+    { name: 'type', align: 'left', label: 'Тип платежа', field: 'type', sortable: true },
     { name: 'quantity', align: 'left', label: 'Сумма', field: '', sortable: false },
     { name: 'createdAt', align: 'left', label: 'Создан', field: 'createdAt', sortable: true },
     { name: 'updatedAt', align: 'left', label: 'Обновлён', field: 'updatedAt', sortable: true },

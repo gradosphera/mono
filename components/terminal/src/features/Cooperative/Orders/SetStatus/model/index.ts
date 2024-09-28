@@ -14,5 +14,10 @@ export const useSetStatus = () => {
     setTimeout(() => orderStore.updateCoopOrders({username: orderStore.username, id}), 2000)
   }
 
-  return {setPaidStatus, setRefundedStatus}
+  const setCompletedStatus = async (id: string) => {
+    await api.setStatus(id, 'completed')
+    setTimeout(() => orderStore.updateCoopOrders({username: orderStore.username, id}), 2000)
+  }
+
+  return {setPaidStatus, setRefundedStatus, setCompletedStatus}
 }

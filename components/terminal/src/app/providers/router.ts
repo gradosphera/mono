@@ -32,6 +32,7 @@ async function initializeStores() {
   await desktops.setActiveDesktop(desktops.defaultDesktopHash)
 
   await initWallet();
+
   return { desktops, initWallet };
 }
 

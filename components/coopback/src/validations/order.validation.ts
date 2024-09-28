@@ -46,7 +46,7 @@ export const RSetOrderStatus = {
   body: Joi.object()
     .keys({
       id: Joi.string().optional(),
-      status: Joi.string().valid('paid', 'refunded').required(),
+      status: Joi.string().valid('paid', 'refunded', 'completed').required(),
     })
     .required(),
 };

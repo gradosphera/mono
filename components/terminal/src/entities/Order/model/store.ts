@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { Ref, ref } from 'vue';
 import type { IGetResponse, IOrderResponse } from 'coopback';
 import { api } from '../api';
-import { IGetCoopOrders, IGetMyOrders } from 'coopback';
+import type { IGetCoopOrders, IGetMyOrders } from 'coopback';
 
 
 interface IOrderStore {

@@ -1,14 +1,14 @@
 <template lang="pug">
 q-item(dense clickable flat size="sm" @click="showDialog=true").full-width
   div.q-pa-sm
-    q-icon(name="fa-regular fa-square-check").q-mr-xs
-    span отметить оплаченным
+    q-icon(name="fa-solid fa-square-check").q-mr-xs
+    span отметить обработанным
 
   q-dialog(v-model="showDialog" @hide="close")
-    ModalBase(title='отметить оплаченным')
-      Form(:handler-submit="setPaid" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="close").q-pa-sm
+    ModalBase(title='отметить обработанным')
+      Form(:handler-submit="setCompleted" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="close").q-pa-sm
         div(style="max-width: 300px;")
-          p Вы уверены, что хотите отметить счёт оплаченным? Система обработает платеж сразу после получения отметки: совет кооператива получит пакет документов для голосования о приёме нового пайщика, или, паевый взнос будет зачислен в кошелёк.
+          p Вы уверены, что хотите отметить платеж обработанным? Отметка НЕ приводит к изменению лицевых счетов и не выполняет никаких действий по обработке платежа, а только заменяет статус платежа.
 
 </template>
 <script lang="ts" setup>
@@ -17,7 +17,7 @@ import { useSetStatus } from '../../model';
 import { ref } from 'vue';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
-const {setPaidStatus} = useSetStatus()
+const {setCompletedStatus} = useSetStatus()
 const isSubmitting = ref(false)
 const showDialog = ref(false)
 
@@ -35,9 +35,9 @@ const close = () => {
   emit('close')
 }
 
-const setPaid = async() => {
+const setCompleted = async() => {
   try {
-    await setPaidStatus(props.id)
+    await setCompletedStatus(props.id)
     SuccessAlert('Статус ордера обновлён')
     close()
   } catch(e: any) {

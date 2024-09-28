@@ -39,6 +39,7 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
 
   // Инициализация
   const init = async () => {
+
     try {
       // Получите зашифрованный ключ и токены из хранилища
       const encryptedKey = await getFromIndexedDB(
@@ -72,8 +73,8 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
       tokens.value = JSON.parse(decryptedTokens);
       username.value = decryptedUsername;
 
-      if (NODE_ENV === 'development')
-        console.log('tokens: ', tokens)
+      // if (NODE_ENV === 'development')
+      //   console.log('tokens: ', tokens)
 
       // Установите hasCreditials в true
       hasCreditials.value = true;

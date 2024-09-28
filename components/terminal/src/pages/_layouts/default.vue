@@ -5,18 +5,18 @@ q-layout(view="hHh LpR fFf")
       q-toolbar-title()
         q-btn(stretch flat class="btn-title" :dense="isMobile" @click="goTo('index')").q-ml-sm
           //- img(:src="HeaderLogo" alt="" style="height: 50px;").q-pa-sm
-          p {{ COOP_SHORT_NAME }}
+          span {{ COOP_SHORT_NAME }}
 
       q-btn(stretch flat @click="toogleDark")
         q-icon(:name="isDark ? 'brightness_3' : 'brightness_7'")
 
 
       q-btn(v-if="showRegisterButton && !is('signup') && !is('install')" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="signup")
-        p.q-pr-sm регистрация
+        span.q-pr-sm регистрация
         i.fa-solid.fa-right-to-bracket
 
       q-btn(v-if="showRegisterButton && is('signup')" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="login")
-        p.q-pr-sm вход
+        span.q-pr-sm вход
         i.fa-solid.fa-right-to-bracket
 
 

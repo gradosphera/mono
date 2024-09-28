@@ -39,9 +39,7 @@ export const useCurrentUserStore = defineStore(
       participantAccount: userEntity.participantAccount,
       isRegistrationComplete: computed(
         () =>
-          (userEntity.userAccount.value?.status === 'registered' ||
-            userEntity.userAccount.value?.status === 'active' ||
-            false) &&
+          (userEntity.userAccount.value || false) &&
           userEntity.participantAccount.value != null
       ),
     };
@@ -63,9 +61,7 @@ export const useAnyUserStore = defineStore(namespaceAnyUser, (): IUserStore => {
     participantAccount: userEntity.participantAccount,
     isRegistrationComplete: computed(
       () =>
-        (userEntity.userAccount.value?.status === 'registered' ||
-          userEntity.userAccount.value?.status === 'active' ||
-          false) &&
+        (userEntity.userAccount.value || false) &&
         userEntity.participantAccount.value != null
     ),
   };

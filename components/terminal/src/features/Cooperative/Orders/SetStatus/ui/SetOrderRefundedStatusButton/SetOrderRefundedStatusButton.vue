@@ -1,12 +1,15 @@
 <template lang="pug">
-q-btn(flat size="sm" @click="showDialog=true" icon="cancel") отметить отмененным
+q-item(dense clickable flat size="sm" @click="showDialog=true").full-width
+  div.q-pa-sm
+    q-icon(name="cancel").q-mr-xs
+    span отметить отмененным
+
   q-dialog(v-model="showDialog" @hide="close")
     ModalBase(title='отметить отменённым')
-      Form(:handler-submit="setPaid" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="close").q-pa-sm
+      Form(:handler-submit="setRefund" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="close").q-pa-sm
         div(style="max-width: 300px;")
           p Вы уверены, что хотите отметить платеж отмененным? Система обработает возврат платежа по лицевому счёту пайщика сразу после получения отметки.
           p При отмене уже зачисленного паевого взноса, баланс аккаунта будет уменьшен. В случае отмены вступительного взноса - действие аккаунта будет приостановлено.
-
 
 </template>
 <script lang="ts" setup>
@@ -25,7 +28,7 @@ const props = defineProps({
   id: {
     type: String,
     required: true
-  }
+  },
 })
 
 const close = () => {

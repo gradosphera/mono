@@ -8,7 +8,6 @@ import { redisSubscriber } from './redis.service';
 
 export class PaymentEffectProcessor {
   static async processPaymentEffect(id: string, status: string) {
-    console.log('Id: ', id);
     const order = await Order.findById(id);
 
     if (!order) {
@@ -44,6 +43,7 @@ export class PaymentEffectProcessor {
 
         user.status = userStatus['4_Registered'];
         user.is_registered = true;
+        user.has_account = true;
         await user.save();
 
         await Order.updateOne({ _id: order.id }, { status: orderStatus.completed });

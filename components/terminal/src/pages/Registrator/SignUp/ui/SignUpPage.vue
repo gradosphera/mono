@@ -19,7 +19,6 @@ import { useRouter } from 'vue-router';
 import { useRegistratorStore } from 'src/entities/Registrator';
 const store = useRegistratorStore().state
 
-
 const router = useRouter()
 
 const registeredAndloggedIn = computed(() => {

@@ -19,21 +19,17 @@ export const useCardStore = defineStore(namespace, (): ICardStore => {
   const session = useSessionStore();
 
   async function initWallet(): Promise<void> {
-    if (!session.isAuth && !currentUser.userAccount){
+    // if (!session.isAuth && !currentUser.userAccount){
       await session.init()
       if (session.isAuth)
         try{
           await currentUser.loadProfile(session.username, COOPNAME)
           await userWallet.loadUserWalet({coopname: COOPNAME, username: session.username})
-
-          //TODO load userAgreements
-          //TODO load userPaymentMethods
-
-          // await
         } catch(e: any){
           console.error(e)
         }
-    }
+    // }
+    setTimeout(() => initWallet(), 10000)
   }
 
   return {

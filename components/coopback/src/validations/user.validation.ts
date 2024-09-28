@@ -9,6 +9,13 @@ export const IIndividualData = Joi.object({
   full_address: Joi.string().required(),
   phone: Joi.string().required(),
   email: Joi.string().email().required(),
+  passport: Joi.object({
+    series: Joi.number().required(),
+    number: Joi.number().required(),
+    issued_by: Joi.string().required(),
+    issued_at: Joi.string().required(),
+    code: Joi.string().required(),
+  }).optional(), // паспорт опционален
 });
 
 const RepresentedBySchema = Joi.object({

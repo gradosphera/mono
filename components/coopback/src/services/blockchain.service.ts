@@ -116,22 +116,9 @@ async function getCooperative(coopname) {
 
 async function registerBlockchainAccount(user: IUser, order: IOrder) {
   const eos = await getInstance(config.service_wif);
+  const actions = [] as any;
 
-  const createDeposit: GatewayContract.Actions.CreateDeposit.ICreateDeposit = {
-    coopname: config.coopname,
-    username: user.username,
-    type: 'registration',
-    quantity: order.quantity,
-    deposit_id: order.order_id as number,
-  };
-
-  const completeDeposit: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit = {
-    coopname: config.coopname,
-    admin: config.service_username,
-    deposit_id: order.order_id as number,
-    memo: '',
-  };
-
+  // Создаем newaccount
   const newaccount: RegistratorContract.Actions.CreateAccount.ICreateAccount = {
     registrator: process.env.COOPNAME as string,
     coopname: process.env.COOPNAME as string,
@@ -141,6 +128,20 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     meta: '',
   };
 
+  actions.push({
+    account: RegistratorContract.contractName.production,
+    name: RegistratorContract.Actions.CreateAccount.actionName,
+    authorization: [
+      {
+        actor: config.service_username,
+        permission: 'active',
+      },
+    ],
+    data: newaccount,
+  });
+
+  // Создаем registerUserData
+
   const registerUserData: RegistratorContract.Actions.RegisterUser.IRegistrerUser = {
     coopname: process.env.COOPNAME as string,
     registrator: process.env.COOPNAME as string,
@@ -148,6 +149,21 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     type: user.type,
   };
 
+  //не следует создавать аккаунт в случаях, если он уже есть у пользователя
+
+  actions.push({
+    account: RegistratorContract.contractName.production,
+    name: RegistratorContract.Actions.RegisterUser.actionName,
+    authorization: [
+      {
+        actor: config.service_username,
+        permission: 'active',
+      },
+    ],
+    data: registerUserData,
+  });
+
+  // Проверяем наличие заявления на вступление и создаем joinCooperativeData
   const statement = await TempDocument.findOne({ username: user.username, type: tempdocType.JoinStatement });
   if (!statement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено заявление на вступление');
 
@@ -157,8 +173,58 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     username: user.username,
     document: { ...statement.document, meta: JSON.stringify(statement.document.meta) },
   };
+  actions.push({
+    account: RegistratorContract.contractName.production,
+    name: RegistratorContract.Actions.JoinCooperative.actionName,
+    authorization: [
+      {
+        actor: config.service_username,
+        permission: 'active',
+      },
+    ],
+    data: joinCooperativeData,
+  });
 
-  //TODO добавить здесь соглашений
+  // Создаем createDeposit
+  const createDeposit: GatewayContract.Actions.CreateDeposit.ICreateDeposit = {
+    coopname: config.coopname,
+    username: user.username,
+    type: 'registration',
+    quantity: order.quantity,
+    deposit_id: order.order_id as number,
+  };
+  actions.push({
+    account: GatewayContract.contractName.production,
+    name: GatewayContract.Actions.CreateDeposit.actionName,
+    authorization: [
+      {
+        actor: config.service_username,
+        permission: 'active',
+      },
+    ],
+    data: createDeposit,
+  });
+
+  // Создаем completeDeposit
+  const completeDeposit: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit = {
+    coopname: config.coopname,
+    admin: config.service_username,
+    deposit_id: order.order_id as number,
+    memo: '',
+  };
+  actions.push({
+    account: GatewayContract.contractName.production,
+    name: GatewayContract.Actions.CompleteDeposit.actionName,
+    authorization: [
+      {
+        actor: config.service_username,
+        permission: 'active',
+      },
+    ],
+    data: completeDeposit,
+  });
+
+  // Проверяем наличие соглашения на кошелек и создаем walletAgreementData
   const walletAgreement = await TempDocument.findOne({ username: user.username, type: tempdocType.WalletAgreement });
   if (!walletAgreement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено заявление на вступление');
 
@@ -169,18 +235,19 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     agreement_type: 'wallet',
     document: { ...walletAgreement.document, meta: JSON.stringify(walletAgreement.document.meta) },
   };
+  actions.push({
+    account: SovietContract.contractName.production,
+    name: SovietContract.Actions.Agreements.SendAgreement.actionName,
+    authorization: [
+      {
+        actor: config.service_username,
+        permission: 'active',
+      },
+    ],
+    data: walletAgreementData,
+  });
 
-  const privacyAgreement = await TempDocument.findOne({ username: user.username, type: tempdocType.PrivacyAgreement });
-  if (!privacyAgreement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено соглашение о политике конфиденциальности');
-
-  const privacyAgreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
-    coopname: process.env.COOPNAME as string,
-    administrator: process.env.COOPNAME as string,
-    username: user.username,
-    agreement_type: 'privacy',
-    document: { ...privacyAgreement.document, meta: JSON.stringify(privacyAgreement.document.meta) },
-  };
-
+  // Проверяем наличие соглашения по ЭЦП и создаем signatureAgreementData
   const signatureAgreement = await TempDocument.findOne({ username: user.username, type: tempdocType.SignatureAgreement });
   if (!signatureAgreement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено соглашение о правилах использования ЭЦП');
 
@@ -191,7 +258,42 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     agreement_type: 'signature',
     document: { ...signatureAgreement.document, meta: JSON.stringify(signatureAgreement.document.meta) },
   };
+  actions.push({
+    account: SovietContract.contractName.production,
+    name: SovietContract.Actions.Agreements.SendAgreement.actionName,
+    authorization: [
+      {
+        actor: config.service_username,
+        permission: 'active',
+      },
+    ],
+    data: signatureAgreementData,
+  });
 
+  // Проверяем наличие соглашения о конфиденциальности и создаем privacyAgreementData
+  const privacyAgreement = await TempDocument.findOne({ username: user.username, type: tempdocType.PrivacyAgreement });
+  if (!privacyAgreement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено соглашение о политике конфиденциальности');
+
+  const privacyAgreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
+    coopname: process.env.COOPNAME as string,
+    administrator: process.env.COOPNAME as string,
+    username: user.username,
+    agreement_type: 'privacy',
+    document: { ...privacyAgreement.document, meta: JSON.stringify(privacyAgreement.document.meta) },
+  };
+  actions.push({
+    account: SovietContract.contractName.production,
+    name: SovietContract.Actions.Agreements.SendAgreement.actionName,
+    authorization: [
+      {
+        actor: config.service_username,
+        permission: 'active',
+      },
+    ],
+    data: privacyAgreementData,
+  });
+
+  // Проверяем наличие пользовательского соглашения и создаем userAgreementData
   const userAgreement = await TempDocument.findOne({ username: user.username, type: tempdocType.UserAgreement });
   if (!userAgreement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено подписанное пользовательское соглашение');
 
@@ -202,108 +304,17 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     agreement_type: 'user',
     document: { ...userAgreement.document, meta: JSON.stringify(userAgreement.document.meta) },
   };
-
-  const actions = [
-    {
-      account: RegistratorContract.contractName.production,
-      name: RegistratorContract.Actions.CreateAccount.actionName,
-      authorization: [
-        {
-          actor: config.service_username,
-          permission: 'active',
-        },
-      ],
-      data: newaccount,
-    },
-    {
-      account: RegistratorContract.contractName.production,
-      name: RegistratorContract.Actions.RegisterUser.actionName, //reguser
-      authorization: [
-        {
-          actor: config.service_username,
-          permission: 'active',
-        },
-      ],
-      data: registerUserData,
-    },
-    {
-      account: RegistratorContract.contractName.production,
-      name: RegistratorContract.Actions.JoinCooperative.actionName,
-      authorization: [
-        {
-          actor: config.service_username,
-          permission: 'active',
-        },
-      ],
-      data: joinCooperativeData,
-    },
-    {
-      account: GatewayContract.contractName.production,
-      name: GatewayContract.Actions.CreateDeposit.actionName,
-      authorization: [
-        {
-          actor: config.service_username,
-          permission: 'active',
-        },
-      ],
-      data: createDeposit,
-    },
-    {
-      account: GatewayContract.contractName.production,
-      name: GatewayContract.Actions.CompleteDeposit.actionName,
-      authorization: [
-        {
-          actor: config.service_username,
-          permission: 'active',
-        },
-      ],
-      data: completeDeposit,
-    },
-    {
-      account: SovietContract.contractName.production,
-      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
-      authorization: [
-        {
-          actor: config.service_username,
-          permission: 'active',
-        },
-      ],
-      data: walletAgreementData,
-    },
-    {
-      account: SovietContract.contractName.production,
-      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
-      authorization: [
-        {
-          actor: config.service_username,
-          permission: 'active',
-        },
-      ],
-      data: signatureAgreementData,
-    },
-    {
-      account: SovietContract.contractName.production,
-      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
-      authorization: [
-        {
-          actor: config.service_username,
-          permission: 'active',
-        },
-      ],
-      data: privacyAgreementData,
-    },
-    {
-      account: SovietContract.contractName.production,
-      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
-      authorization: [
-        {
-          actor: config.service_username,
-          permission: 'active',
-        },
-      ],
-      data: userAgreementData,
-    },
-  ];
+  actions.push({
+    account: SovietContract.contractName.production,
+    name: SovietContract.Actions.Agreements.SendAgreement.actionName,
+    authorization: [
+      {
+        actor: config.service_username,
+        permission: 'active',
+      },
+    ],
+    data: userAgreementData,
+  });
 
   const result = await eos.transact(
     {
@@ -349,7 +360,7 @@ async function createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICrea
 }
 
 async function createOrder(data) {
-  const eos = await getInstance(process.env.SERVICE_WIF);
+  const eos = await getInstance(config.service_wif);
 
   const actions = [
     {
@@ -381,7 +392,7 @@ async function createOrder(data) {
 }
 
 async function completeDeposit(order: IOrder) {
-  const eos = await getInstance(process.env.SERVICE_WIF);
+  const eos = await getInstance(config.service_wif);
 
   const createDeposit: GatewayContract.Actions.CreateDeposit.ICreateDeposit = {
     coopname: config.coopname,
@@ -435,7 +446,7 @@ async function completeDeposit(order: IOrder) {
 }
 
 async function failOrder(data) {
-  const eos = await getInstance(process.env.SERVICE_WIF);
+  const eos = await getInstance(config.service_wif);
 
   const actions = [
     {
@@ -519,7 +530,7 @@ export async function changeKey(data: RegistratorContract.Actions.ChangeKey.ICha
 }
 
 export async function cancelOrder(data: GatewayContract.Actions.RefundDeposit.IRefundDeposit) {
-  const action: IBCAction = {
+  const action: IBCAction<GatewayContract.Actions.RefundDeposit.IRefundDeposit> = {
     account: GatewayContract.contractName.production,
     name: GatewayContract.Actions.RefundDeposit.actionName,
     authorization: [
