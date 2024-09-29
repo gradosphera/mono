@@ -20,6 +20,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
     confidential_link: { type: 'string' },
     confidential_email: { type: 'string' },
     contact_email: { type: 'string' },
+    passport_request: { type: 'string' },
     wallet_agreement: {
       type: 'object',
       properties: {
@@ -48,6 +49,15 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       additionalProperties: true,
     },
     user_agreement: {
+      type: 'object',
+      properties: {
+        protocol_number: { type: 'string' },
+        protocol_day_month_year: { type: 'string' },
+      },
+      required: ['protocol_day_month_year', 'protocol_number'],
+      additionalProperties: true,
+    },
+    participant_application: {
       type: 'object',
       properties: {
         protocol_number: { type: 'string' },
