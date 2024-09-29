@@ -18,7 +18,7 @@ defineProps({
 
 .statement {
   word-wrap: break-word;
-  white-space: pre-wrap;
+  /* white-space: pre-wrap; */
 }
 .statement h1 {
   font-weight: 700 !important;

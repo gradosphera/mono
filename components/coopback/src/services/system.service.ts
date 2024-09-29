@@ -7,7 +7,7 @@ import { IAddUser, ICreateUser, IHealthStatus, IInstall } from '../types';
 import { generateUsername } from '../../tests/utils/generateUsername';
 import { generator } from './document.service';
 import { blockchainService, emailService, tokenService, userService } from '.';
-import { IUser, userStatus } from '../models/user.model';
+import { IUser, userStatus } from '../types/user.types';
 import axios from 'axios';
 import { getBlockchainInfo } from './blockchain.service';
 import { RegistratorContract, type Cooperative } from 'cooptypes';

@@ -178,7 +178,7 @@ class YooKassaIPNProvider implements IPNProvider {
     amount: string,
     symbol: string,
     description: string,
-    order_id: number,
+    order_num: number,
     secret: string
   ): Promise<PaymentDetails> {
     const settings = await Settings.getSettings();

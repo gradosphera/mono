@@ -6,7 +6,7 @@ import { IAddUser, ICreateUser, RCreateUser } from '../types';
 import httpStatus from 'http-status';
 import pick from '../utils/pick';
 import { IGetResponse } from '../types/common';
-import { IUser, userStatus } from '../models/user.model';
+import { IUser, userStatus } from '../types';
 import { Request, Response } from 'express';
 import { generateUsername } from '../../tests/utils/generateUsername';
 import config from '../config/config';
@@ -75,38 +75,13 @@ export const getUsers = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
   const users = await userService.queryUsers(filter, options);
-  const result = {} as IGetResponse<IUser>;
-
-  const data = [] as any;
-  for await (const user of users.results) {
-    const json = user.toJSON();
-    if (user.type != 'service') {
-      json.private_data = await user.getPrivateData();
-      data.push(json);
-    }
-  }
-
-  result.results = data;
-  result.limit = users.limit;
-  result.page = users.page;
-  result.totalPages = users.totalPages;
-  result.totalResults = users.totalResults;
-
-  res.send(result);
+  res.send(users);
 });
 
 export const getUser = catchAsync(async (req, res) => {
   const user = await userService.getUserByUsername(req.params.username);
-  if (!user) {
-    throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
-  }
-  const json = user.toJSON();
 
-  if (user.type != 'service') {
-    json.private_data = await user.getPrivateData();
-  }
-
-  res.send(json);
+  res.send(user);
 });
 
 export const updateUser = catchAsync(async (req, res) => {

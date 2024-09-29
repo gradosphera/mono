@@ -7,7 +7,7 @@ export interface PaymentProvider {
     amount: string,
     symbol: string,
     description: string,
-    order_id: number,
+    order_num: number,
     secret: string
   ): Promise<PaymentDetails>;
 }

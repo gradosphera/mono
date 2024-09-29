@@ -20,13 +20,13 @@ div.DepositPreparator
   </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { Form } from 'src/shared/ui/Form'
 import { ModalBase } from 'src/shared/ui/ModalBase'
 import { useWalletStore } from 'src/entities/Wallet'
 import type { ILoadUserWallet } from 'src/entities/Wallet/model'
 import { PayWithProvider } from 'src/shared/ui/PayWithProvider'
-import { BASE_PAYMENT_FEE, COOPNAME, CURRENCY } from 'src/shared/config'
+import { COOPNAME, CURRENCY } from 'src/shared/config'
 import { SuccessAlert, FailAlert } from 'src/shared/api'
 import { useSessionStore } from 'src/entities/Session'
 import type { IPaymentOrder } from 'src/shared/lib/types/payments'
@@ -47,22 +47,6 @@ const clear = (): void => {
   paymentOrder.value = null
   quantity.value = 1000
 }
-
-const baseFee = parseFloat(BASE_PAYMENT_FEE)
-
-
-const toPay = computed(() => {
-  return (quantity.value / ((100 - baseFee) / 100)).toFixed(2)
-})
-
-const feePercent = computed(() => {
-  // Сумма без учета комиссии
-  const amountWithoutFee = quantity.value / ((100 - baseFee) / 100);
-  // Сумма комиссии
-  const feeAmount = amountWithoutFee - quantity.value;
-  // Процент комиссии
-  return ((feeAmount / quantity.value) * 100).toFixed(2);
-})
 
 const handlerSubmit = async (): Promise<void> => {
   isSubmitting.value = true

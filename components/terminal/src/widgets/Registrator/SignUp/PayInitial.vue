@@ -12,14 +12,12 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { computed, watch, onMounted } from 'vue'
 import { useCreateUser } from 'src/features/Registrator/CreateUser'
 import { FailAlert } from 'src/shared/api';
-import { BASE_PAYMENT_FEE, COOPNAME } from 'src/shared/config';
-import { useCurrentUserStore } from 'src/entities/User';
+import { COOPNAME } from 'src/shared/config';
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useRegistratorStore } from 'src/entities/Registrator'
-// import { Yookassa } from 'src/shared/ui/Providers/Yookassa';
 import { PayWithProvider } from 'src/shared/ui/PayWithProvider';
 import { formatAssetToReadable } from 'src/shared/lib/utils/formatAssetToReadable';
 const store = useRegistratorStore().state
@@ -28,7 +26,6 @@ const emit = defineEmits(['update:data', 'update:step'])
 const api = useCreateUser()
 
 const step = computed(() => store.step)
-const user = useCurrentUserStore()
 const coop = useCooperativeStore()
 
 const currentStep = 6

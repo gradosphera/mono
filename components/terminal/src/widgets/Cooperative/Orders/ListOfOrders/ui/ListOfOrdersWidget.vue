@@ -32,10 +32,10 @@
             ) {{ col.label }}
 
         template(#body="props")
-          q-tr(:key="`m_${props.row.order_id}`" :props="props")
+          q-tr(:key="`m_${props.row.order_num}`" :props="props")
             q-td(auto-width)
-              q-btn(size="sm" color="primary" round dense :icon="expanded.get(props.row.order_id) ? 'remove' : 'add'" @click="toggleExpand(props.row.order_id)")
-            q-td {{props.row.order_id}}
+              q-btn(size="sm" color="primary" round dense :icon="expanded.get(props.row.order_num) ? 'remove' : 'add'" @click="toggleExpand(props.row.order_num)")
+            q-td {{props.row.order_num}}
             q-td {{getNameFromUserData(props.row.user?.private_data)}}
             q-td {{props.row.user?.username}}
             q-td
@@ -53,13 +53,13 @@
               q-badge(v-if="props.row.status ==='paid'" color="orange") оплачен
               q-badge(v-if="props.row.status ==='refunded'" color="grey") отменён
             q-td
-              q-btn-dropdown(size="sm" label="действия" flat dense v-model="dropdowns[props.row.order_id]")
+              q-btn-dropdown(size="sm" label="действия" flat dense v-model="dropdowns[props.row.order_num]")
                 q-list(dense)
-                  SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_id)")
-                  SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_id)")
-                  SetOrderCompletedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_id)")
+                  SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
+                  SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
+                  SetOrderCompletedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
 
-          q-tr(v-if="expanded.get(props.row.order_id)" :key="`e_${props.row.order_id}`" :props="props" class="q-virtual-scroll--with-prev")
+          q-tr(v-if="expanded.get(props.row.order_num)" :key="`e_${props.row.order_num}`" :props="props" class="q-virtual-scroll--with-prev")
             q-td(colspan="100%")
               div(v-if="props.row.status=='failed'")
                 p Причина ошибки: {{props.row.message}}
@@ -170,7 +170,7 @@
 
 
   const columns = [
-    { name: 'order_id', align: 'left', label: '№', field: 'order_id', sortable: true },
+    { name: 'order_num', align: 'left', label: '№', field: 'order_num', sortable: true },
     { name: 'name', align: 'left', label: 'ФИО | Наименование', field: '', sortable: false },
     { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
     { name: 'type', align: 'left', label: 'Тип платежа', field: 'type', sortable: true },

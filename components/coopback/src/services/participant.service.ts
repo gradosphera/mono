@@ -5,7 +5,7 @@ import { getUserByUsername } from './user.service';
 import http from 'http-status';
 import TempDocument, { tempdocType } from '../models/tempDocument.model';
 import mongoose from 'mongoose';
-import { userStatus, type IUser } from '../models/user.model';
+import { userStatus, type IUser } from '../types/user.types';
 
 const verifyDocumentSignature = (user: IUser, document: IDocument): void => {
   const { hash, public_key, signature } = document;

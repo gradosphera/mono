@@ -13,7 +13,6 @@ export interface IGetCoopOrders {
   id?: string;
   limit?: number;
   page?: number;
-  sort?: string;
   sortBy?: string;
   username?: string;
 }
@@ -21,16 +20,14 @@ export interface IGetCoopOrders {
 export interface IGetMyOrders {
   limit?: number;
   page?: number;
-  sort?: string;
   sortBy?: string;
 }
 
 export interface RGetCoopOrders {
-  query: {
+  query?: {
     id?: string;
     limit?: number;
     page?: number;
-    sort?: string;
     sortBy?: string;
     username?: string;
   };

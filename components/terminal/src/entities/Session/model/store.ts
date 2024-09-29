@@ -4,7 +4,7 @@ import { computed, ComputedRef, Ref, ref } from 'vue';
 import { Session } from '@wharfkit/session';
 import { WalletPluginPrivateKey } from '@wharfkit/wallet-plugin-privatekey';
 import { FailAlert, readBlockchain } from 'src/shared/api';
-import { CHAIN_ID, CHAIN_URL, SYSTEM_TOKEN } from 'src/shared/config';
+import { CHAIN_ID, CHAIN_URL } from 'src/shared/config';
 import { PrivateKey, Serializer } from '@wharfkit/antelope';
 import { GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 

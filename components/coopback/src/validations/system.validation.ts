@@ -23,6 +23,7 @@ export const ISetVars = Joi.object({
   confidential_link: Joi.string().required(),
   confidential_email: Joi.string().required(),
   contact_email: Joi.string().required(),
+  passport_request: Joi.string().required().valid('yes', 'no'),
   wallet_agreement: Joi.object({
     protocol_number: Joi.string().required(),
     protocol_day_month_year: Joi.string().required(),
@@ -36,6 +37,10 @@ export const ISetVars = Joi.object({
     protocol_day_month_year: Joi.string().required(),
   }).required(),
   user_agreement: Joi.object({
+    protocol_number: Joi.string().required(),
+    protocol_day_month_year: Joi.string().required(),
+  }).required(),
+  participant_application: Joi.object({
     protocol_number: Joi.string().required(),
     protocol_day_month_year: Joi.string().required(),
   }).required(),

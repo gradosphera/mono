@@ -163,7 +163,7 @@ describe('Проверка получения документов', () => {
 
       expect(initialPayment.status).toBe(httpStatus.CREATED);
       expect(initialPayment.body?.details?.token).toBeDefined();
-      expect(initialPayment.body?.order_id).toBeDefined();
+      expect(initialPayment.body?.order_num).toBeDefined();
       expect(initialPayment.body?.provider).toBe('yookassa');
     });
   });

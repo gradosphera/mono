@@ -9,7 +9,7 @@ const router = Router();
 router.route('/install').post(auth('install'), validate(systemValidation.RInstall), systemController.install);
 
 router.route('/get-vars-schema').post(auth('getVars'), systemController.getVarsSchema);
-router.route('/get-vars').post(auth('getVars'), validate(systemValidation.RSetVars), systemController.setVars);
+router.route('/get-vars').post(auth('getVars'), systemController.setVars);
 
 router.route('/set-vars').post(auth('setVars'), validate(systemValidation.RSetVars), systemController.setVars);
 

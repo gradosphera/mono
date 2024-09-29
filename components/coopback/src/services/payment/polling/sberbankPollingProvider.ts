@@ -7,7 +7,7 @@ import { PaymentState } from '../../../models/paymentState.model';
 import axios from 'axios';
 import logger from '../../../config/logger';
 import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../order.service';
-import { orderStatus } from '../../../models/order.model';
+import { orderStatus } from '../../../types/order.types';
 import config from '../../../config/config';
 
 interface Link {
@@ -63,7 +63,7 @@ class SberbankPollingProvider implements PollingProvider {
     amount: string,
     symbol: string,
     description: string,
-    order_id: number,
+    order_num: number,
     secret: string
   ): Promise<PaymentDetails> {
     // eslint-disable-next-line prettier/prettier
@@ -178,7 +178,7 @@ class SberbankPollingProvider implements PollingProvider {
 
           logger.info(`Обработка транзакции ${transaction.id} с номером заказа ${orderNumber}`);
 
-          const order = await Order.findOne({ order_id: orderNumber });
+          const order = await Order.findOne({ order_num: orderNumber });
 
           if (!order) {
             logger.warn(`Не найден заказ с номером ${orderNumber} по транзакции ${transaction.id}`);

@@ -10,6 +10,7 @@ q-item(dense clickable flat size="sm" @click="showDialog=true").full-width
         div(style="max-width: 300px;")
           p Вы уверены, что хотите отметить счёт оплаченным? Система обработает платеж сразу после получения отметки: совет кооператива получит пакет документов для голосования о приёме нового пайщика, или, паевый взнос будет зачислен в кошелёк.
 
+
 </template>
 <script lang="ts" setup>
 import { FailAlert, SuccessAlert } from 'src/shared/api';

@@ -1,4 +1,4 @@
-import { GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
+import type { GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 
 export type IHealthStatus = 'install' | 'active' | 'maintenance';
 

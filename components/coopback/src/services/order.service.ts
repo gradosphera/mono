@@ -6,7 +6,7 @@ import { ICreateDeposit, ICreateInitialPayment, type IBCAction } from '../types'
 import { generator } from './document.service';
 import { ICreatedPayment } from '../types';
 import { ProviderFactory } from './payment/providerFactory';
-import { orderStatus, type IOrder } from '../models/order.model';
+import { orderStatus, type IOrder } from '../types/order.types';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 import { redisPublisher } from './redis.service';
@@ -16,7 +16,7 @@ import _ from 'lodash'; // lodash для глубокого клонирован
 import { blockchainService, userService } from '.';
 import config from '../config/config';
 import { GatewayContract } from 'cooptypes';
-import { userStatus } from '../models/user.model';
+import { userStatus } from '../types/user.types';
 
 export async function createOrder(
   username: string,
@@ -36,22 +36,30 @@ export async function createOrder(
   try {
     await session.withTransaction(async () => {
       const user = await getUserByUsername(username);
-      // Создание ордера
-      const order: IOrder = {
-        creator: process.env.COOPNAME as string,
-        secret: generateOrderSecret(),
-        status: orderStatus.pending,
-        type: type,
-        provider: providerName,
-        username,
-        quantity: amount,
-        symbol: symbol,
-        user: user._id as unknown as ObjectId,
-      };
+      let db_order;
+      console.log('user.initial_order', user.initial_order);
 
-      const db_order = new Order(order);
+      if (type === 'registration' && user.initial_order) {
+        db_order = await Order.findOne({ _id: user.initial_order }); //add expiration
+      }
 
-      await db_order.save({ session });
+      if (!db_order) {
+        db_order = new Order({
+          creator: process.env.COOPNAME as string,
+          secret: generateOrderSecret(),
+          status: orderStatus.pending,
+          type: type,
+          provider: providerName,
+          username,
+          quantity: amount,
+          symbol: symbol,
+          user: user._id as unknown as ObjectId,
+        });
+        user.initial_order = db_order._id;
+
+        await db_order.save({ session });
+        await user.save({ session });
+      }
 
       const secret = db_order.secret;
 
@@ -61,9 +69,9 @@ export async function createOrder(
         amount,
         symbol,
         type === 'deposit'
-          ? `Добровольный паевый взнос №${db_order.order_id}`
-          : `Добровольный вступительный взнос №${db_order.order_id}`,
-        db_order.order_id as number,
+          ? `Добровольный паевый взнос №${db_order.order_num}`
+          : `Добровольный вступительный взнос №${db_order.order_num}`,
+        db_order.order_num as number,
         secret
       );
 
@@ -161,7 +169,7 @@ export async function setStatus(id: string, status: string) {
     await blockchainService.cancelOrder({
       coopname: config.coopname,
       admin: config.service_username,
-      deposit_id: order.order_id as number,
+      deposit_id: order.order_num as number,
       memo: '',
     });
 

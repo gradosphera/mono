@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import faker from 'faker';
-import User, { IUser } from '../../src/models/user.model';
+import User from '../../src/models/user.model';
 import { generateUsername } from '../utils/generateUsername';
 import { Cooperative } from 'cooptypes';
-import { ICreateUser } from '../../src/types';
+import { ICreateUser, type IUser } from '../../src/types';
 import { ObjectId } from 'mongodb';
 
 const generateRandomId = () => new mongoose.Types.ObjectId();

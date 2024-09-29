@@ -39,6 +39,13 @@ export interface IAddUser {
     full_address: string;
     last_name: string;
     middle_name: string;
+    passport?: {
+      code: string;
+      issued_at: string;
+      issued_by: string;
+      number: number;
+      series: number;
+    };
     phone: string;
   };
   initial: string;
@@ -117,6 +124,13 @@ export interface ICreateUser {
     full_address: string;
     last_name: string;
     middle_name: string;
+    passport?: {
+      code: string;
+      issued_at: string;
+      issued_by: string;
+      number: number;
+      series: number;
+    };
     phone: string;
   };
   organization_data?: {
@@ -194,6 +208,13 @@ export interface IIndividualData {
   full_address: string;
   last_name: string;
   middle_name: string;
+  passport?: {
+    code: string;
+    issued_at: string;
+    issued_by: string;
+    number: number;
+    series: number;
+  };
   phone: string;
 }
 
@@ -269,6 +290,13 @@ export interface RAddUser {
       full_address: string;
       last_name: string;
       middle_name: string;
+      passport?: {
+        code: string;
+        issued_at: string;
+        issued_by: string;
+        number: number;
+        series: number;
+      };
       phone: string;
     };
     initial: string;
@@ -349,6 +377,13 @@ export interface RCreateUser {
       full_address: string;
       last_name: string;
       middle_name: string;
+      passport?: {
+        code: string;
+        issued_at: string;
+        issued_by: string;
+        number: number;
+        series: number;
+      };
       phone: string;
     };
     organization_data?: {

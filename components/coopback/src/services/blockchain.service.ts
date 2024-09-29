@@ -5,13 +5,13 @@ import fetch from 'isomorphic-fetch';
 import EosApi from 'eosjs-api';
 import getInternalAction from '../utils/getInternalAction';
 import { GatewayContract, RegistratorContract, SovietContract } from 'cooptypes';
-import { IUser } from '../models/user.model';
+import { IUser } from '../types/user.types';
 import { GetAccountResult, GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 import config from '../config/config';
 import TempDocument, { tempdocType } from '../models/tempDocument.model';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
-import type { IOrder } from '../models/order.model';
+import type { IOrder } from '../types/order.types';
 import type { IBCAction } from '../types';
 
 const rpc = new JsonRpc(process.env.BLOCKCHAIN_RPC as string, { fetch });
@@ -191,7 +191,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     username: user.username,
     type: 'registration',
     quantity: order.quantity,
-    deposit_id: order.order_id as number,
+    deposit_id: order.order_num as number,
   };
   actions.push({
     account: GatewayContract.contractName.production,
@@ -209,7 +209,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
   const completeDeposit: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit = {
     coopname: config.coopname,
     admin: config.service_username,
-    deposit_id: order.order_id as number,
+    deposit_id: order.order_num as number,
     memo: '',
   };
   actions.push({
@@ -386,9 +386,9 @@ async function createOrder(data) {
     }
   );
 
-  const order_id = getInternalAction(result, 'newdepositid').id;
+  const order_num = getInternalAction(result, 'newdepositid').id;
 
-  return order_id;
+  return order_num;
 }
 
 async function completeDeposit(order: IOrder) {
@@ -399,13 +399,13 @@ async function completeDeposit(order: IOrder) {
     username: order.username,
     type: 'deposit',
     quantity: order.quantity,
-    deposit_id: order.order_id as number,
+    deposit_id: order.order_num as number,
   };
 
   const completeDeposit: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit = {
     coopname: config.coopname,
     admin: config.service_username,
-    deposit_id: order.order_id as number,
+    deposit_id: order.order_num as number,
     memo: '',
   };
 

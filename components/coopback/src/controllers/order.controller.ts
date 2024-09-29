@@ -34,7 +34,7 @@ export const createInitialPayment = catchAsync(async (req: any, res: Response) =
 });
 
 export const getOrders = catchAsync(async (req: Request, res: Response) => {
-  const filter = pick(req.query, ['username', 'id', 'order_id', 'status']);
+  const filter = pick(req.query, ['username', 'id', 'order_num', 'status']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
   const orders = await orderService.getOrders(filter, options);

@@ -4,53 +4,9 @@ import { toJSON, paginate } from './plugins/index';
 import { roles } from '../config/roles';
 import { generator } from '../services/document.service';
 import { Cooperative } from 'cooptypes';
+import { userStatus, type IUser } from '../types/user.types';
 
 const { isEmail } = validator;
-
-export enum userStatus {
-  '1_Created' = 'created',
-  '2_Joined' = 'joined',
-  '3_Payed' = 'payed',
-  '4_Registered' = 'registered',
-  '5_Active' = 'active',
-  '10_Failed' = 'failed',
-  '100_Refunded' = 'refunded',
-  '200_Blocked' = 'blocked',
-}
-
-export interface IUser {
-  username: string;
-  status: userStatus;
-  message: string;
-  is_registered: boolean;
-  has_account: boolean;
-  type: 'individual' | 'entrepreneur' | 'organization' | 'service';
-  public_key: string;
-  referer: string;
-  email: string;
-  role: string;
-  is_email_verified: boolean;
-  // statement: {
-  //   hash: string;
-  //   meta: object;
-  //   public_key: string;
-  //   signature: string;
-  // };
-  // Временное поле для хранения private_data
-  _privateData?:
-    | Cooperative.Users.IIndividualData
-    | Cooperative.Users.IEntrepreneurData
-    | Cooperative.Users.IOrganizationData
-    | null;
-  private_data:
-    | Cooperative.Users.IIndividualData
-    | Cooperative.Users.IEntrepreneurData
-    | Cooperative.Users.IOrganizationData
-    | null;
-  getPrivateData(): Promise<
-    Cooperative.Users.IIndividualData | Cooperative.Users.IEntrepreneurData | Cooperative.Users.IOrganizationData | null
-  >;
-}
 
 interface IUserModel extends Model<IUser> {
   isEmailTaken(email: string, excludeUsername?: mongoose.Types.ObjectId): Promise<boolean>;
@@ -116,24 +72,10 @@ const userSchema = new Schema<IUser, IUserModel>(
       type: Boolean,
       default: false,
     },
-    // statement: {
-    //   public_key: {
-    //     type: String,
-    //     default: '',
-    //   },
-    //   signature: {
-    //     type: String,
-    //     default: '',
-    //   },
-    //   meta: {
-    //     type: Object,
-    //     default: {},
-    //   },
-    //   hash: {
-    //     type: String,
-    //     default: '',
-    //   },
-    // },
+    initial_order: {
+      type: Schema.Types.ObjectId,
+      ref: 'Order',
+    },
   },
   {
     minimize: false,
@@ -151,6 +93,21 @@ userSchema.statics.isEmailTaken = async function (email) {
 
   return !!user;
 };
+
+// Хук после find для автоматического добавления private_data
+userSchema.post('find', async function (docs) {
+  for (const doc of docs) {
+    // Наполняем пользователя с помощью populate
+    doc.private_data = await doc.getPrivateData();
+  }
+});
+
+// Хук после findOne для автоматического добавления private_data
+userSchema.post('findOne', async function (doc) {
+  if (doc) {
+    doc.private_data = await doc.getPrivateData();
+  }
+});
 
 // Виртуальное свойство для private_data
 userSchema

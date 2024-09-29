@@ -1,36 +1,10 @@
-import mongoose, { Schema, Document, model, type Model, type ObjectId } from 'mongoose';
+import mongoose, { Schema, Document, model, type Model } from 'mongoose';
 import { toJSON, paginate } from './plugins/index';
 import AutoIncrementFactory from 'mongoose-sequence';
 import { generateOrderSecret } from '../services/order.service';
-import type { PaymentDetails } from '../types';
+import { type IOrder, orderStatus } from '../types/order.types';
 
 const AutoIncrement = AutoIncrementFactory(mongoose);
-
-export enum orderStatus {
-  'pending' = 'pending',
-  'paid' = 'paid',
-  'completed' = 'completed',
-  'failed' = 'failed',
-  'expired' = 'expired',
-  'refunded' = 'refunded',
-}
-
-export interface IOrder {
-  id?: string;
-  order_id?: number;
-  secret: string;
-  creator: string;
-  status: orderStatus;
-  type: 'registration' | 'deposit';
-  provider: string;
-  message?: string;
-  username: string;
-  quantity: string;
-  symbol: string;
-  details?: PaymentDetails;
-  expired_at?: Date;
-  user: ObjectId;
-}
 
 interface IOrderModel extends Model<IOrder> {
   isEmailTaken(email: string, excludeUsername?: mongoose.Types.ObjectId): Promise<boolean>;
@@ -39,7 +13,7 @@ interface IOrderModel extends Model<IOrder> {
 
 const orderSchema = new Schema<IOrder, IOrderModel>(
   {
-    order_id: {
+    order_num: {
       type: Number,
       required: false,
       unique: true,
@@ -120,14 +94,20 @@ orderSchema.post('find', async function (docs) {
     if (doc.user) {
       doc.user.private_data = await doc.user.getPrivateData();
     }
+
+    // Проверяем поле expired_at и обновляем статус
+    if (doc.status != orderStatus.expired && doc.expired_at && new Date() > doc.expired_at) {
+      doc.status = orderStatus.expired;
+      await doc.save(); // Сохраняем изменения в документе
+    }
   }
 });
 
 // add plugin that converts mongoose to json
 orderSchema.plugin(toJSON);
 orderSchema.plugin(paginate);
-// Добавляем автоинкремент для поля order_id
-orderSchema.plugin(AutoIncrement, { inc_field: 'order_id' });
+// Добавляем автоинкремент для поля order_num
+orderSchema.plugin(AutoIncrement, { inc_field: 'order_num' });
 
 /**
  * @typedef Order

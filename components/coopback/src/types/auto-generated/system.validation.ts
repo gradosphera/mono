@@ -11,6 +11,13 @@ export type IInstall = ({
     full_address: string;
     last_name: string;
     middle_name: string;
+    passport?: {
+      code: string;
+      issued_at: string;
+      issued_by: string;
+      number: number;
+      series: number;
+    };
     phone: string;
   };
   role: 'chairman' | 'member';
@@ -29,6 +36,11 @@ export interface ISetVars {
   full_abbr_dative: string;
   full_abbr_genitive: string;
   name: string;
+  participant_application: {
+    protocol_day_month_year: string;
+    protocol_number: string;
+  };
+  passport_request: 'yes' | 'no';
   privacy_agreement: {
     protocol_day_month_year: string;
     protocol_number: string;
@@ -58,6 +70,13 @@ export interface RInstall {
       full_address: string;
       last_name: string;
       middle_name: string;
+      passport?: {
+        code: string;
+        issued_at: string;
+        issued_by: string;
+        number: number;
+        series: number;
+      };
       phone: string;
     };
     role: 'chairman' | 'member';
@@ -78,6 +97,11 @@ export interface RSetVars {
     full_abbr_dative: string;
     full_abbr_genitive: string;
     name: string;
+    participant_application: {
+      protocol_day_month_year: string;
+      protocol_number: string;
+    };
+    passport_request: 'yes' | 'no';
     privacy_agreement: {
       protocol_day_month_year: string;
       protocol_number: string;

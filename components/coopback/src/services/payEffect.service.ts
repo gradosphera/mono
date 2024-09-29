@@ -2,8 +2,8 @@ import { Order } from '../models';
 import { getUserByUsername } from './user.service';
 import { blockchainService } from '.';
 import logger from '../config/logger';
-import { userStatus } from '../models/user.model';
-import { orderStatus, type IOrder } from '../models/order.model';
+import { userStatus } from '../types/user.types';
+import { orderStatus, type IOrder } from '../types/order.types';
 import { redisSubscriber } from './redis.service';
 import config from '../config/config';
 

@@ -20,10 +20,10 @@ const router = Router();
  *     ICreatedPayment:
  *       type: object
  *       required:
- *         - order_id
+ *         - order_num
  *         - confirmation_token
  *       properties:
- *         order_id:
+ *         order_num:
  *           type: number
  *         confirmation_token:
  *           type: string
