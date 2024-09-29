@@ -1,4 +1,4 @@
-# Terminal App (terminal)
+# Terminal App
 
 A Terminal Project
 

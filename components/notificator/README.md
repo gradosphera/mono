@@ -6,8 +6,6 @@
 [![JSDocs][jsdocs-src]][jsdocs-href]
 [![License][license-src]][license-href]
 
-_description_
-
 > **Note**:
 > Replace `coop-notificator`, `_description_` and `antfu` globally to use this template.
 
