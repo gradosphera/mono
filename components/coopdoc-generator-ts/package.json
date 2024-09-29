@@ -50,7 +50,7 @@
     "ajv-formats": "^3.0.1",
     "ajv-i18n": "^4.2.0",
     "axios": "^1.7.2",
-    "cooptypes": "workspace:*",
+    "cooptypes": "1.0.26-alpha.3",
     "dotenv": "^16.4.5",
     "eosjs-ecc": "^4.0.7",
     "handlebars": "^4.7.8",
@@ -91,5 +91,5 @@
       "vite@>=5.1.0 <=5.1.6": ">=5.1.7"
     }
   },
-  "gitHead": "39ad600d008966ddb7f73587987905c47958e4b3"
+  "gitHead": "5ba05409c4a208ba2004c3f0d1f14e993b5f63ae"
 }
