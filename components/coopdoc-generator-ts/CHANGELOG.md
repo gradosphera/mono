@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.2](https://github.com/copenomics/coopdoc-generator-ts/compare/v2.0.2-alpha.1...v2.0.2) (2024-09-29)
+
+**Note:** Version bump only for package coopdoc-generator-ts
+
+
+
+
+
 ## [1.0.21](https://github.com/copenomics/coopdoc-generator-ts/compare/coopdoc-generator-ts@1.0.21-alpha.3...coopdoc-generator-ts@1.0.21) (2024-09-29)
 
 **Note:** Version bump only for package coopdoc-generator-ts
