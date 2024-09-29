@@ -8,6 +8,7 @@ import axios from 'axios';
 import logger from '../../../config/logger';
 import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../order.service';
 import { orderStatus } from '../../../models/order.model';
+import config from '../../../config/config';
 
 interface Link {
   href: string;
@@ -192,7 +193,10 @@ class SberbankPollingProvider implements PollingProvider {
             order.status = orderStatus.failed;
             order.message = symbol_check.message;
             await order.save();
-            redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
+            redisPublisher.publish(
+              `${config.coopname}:orderStatusUpdate`,
+              JSON.stringify({ id: order.id, status: 'failed' })
+            );
             break;
           }
 
@@ -204,7 +208,10 @@ class SberbankPollingProvider implements PollingProvider {
             order.status = orderStatus.failed;
             order.message = amount_check.message;
             await order.save();
-            redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
+            redisPublisher.publish(
+              `${config.coopname}:orderStatusUpdate`,
+              JSON.stringify({ id: order.id, status: 'failed' })
+            );
             break;
           }
 
@@ -212,7 +219,7 @@ class SberbankPollingProvider implements PollingProvider {
           order.status = orderStatus.paid;
           await order.save();
 
-          redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'paid' }));
+          redisPublisher.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status: 'paid' }));
         }
 
         // Обновление состояния после обработки текущей страницы

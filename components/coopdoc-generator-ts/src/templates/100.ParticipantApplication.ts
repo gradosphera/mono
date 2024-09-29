@@ -5,7 +5,7 @@ import type { IGenerate, IMetaDocument, ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { individualSchema } from '../Schema/IndividualSchema'
 import type { ExternalIndividualData, ExternalOrganizationData } from '../Models'
-import { organizationSchema } from '../Schema'
+import { VarsSchema, organizationSchema } from '../Schema'
 import { CooperativeSchema } from '../Schema/CooperativeSchema'
 import type { ExternalEntrepreneurData } from '../Models/Entrepreneur'
 import { entrepreneurSchema } from '../Schema/EntrepreneurSchema'
@@ -66,6 +66,7 @@ export const Schema: JSONSchemaType<Model> = {
     signature: {
       type: 'string',
     },
+    vars: VarsSchema,
     meta: {
       type: 'object',
       properties: {

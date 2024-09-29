@@ -5,6 +5,7 @@ import logger from '../config/logger';
 import { userStatus } from '../models/user.model';
 import { orderStatus, type IOrder } from '../models/order.model';
 import { redisSubscriber } from './redis.service';
+import config from '../config/config';
 
 export class PaymentEffectProcessor {
   static async processPaymentEffect(id: string, status: string) {
@@ -61,10 +62,10 @@ export class PaymentEffectProcessor {
   }
 }
 
-redisSubscriber.subscribe('orderStatusUpdate');
+redisSubscriber.subscribe(`${config.coopname}:orderStatusUpdate`);
 
 redisSubscriber.on('message', async (channel, message) => {
-  if (channel === 'orderStatusUpdate') {
+  if (channel === `${config.coopname}:orderStatusUpdate`) {
     try {
       const { id, status } = JSON.parse(message);
       await PaymentEffectProcessor.processPaymentEffect(id, status);

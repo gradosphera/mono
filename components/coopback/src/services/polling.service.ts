@@ -29,7 +29,7 @@ export async function initPolling() {
     //     if (status === 'paid' || status === 'failed') {
     //       // Обновляем ордер и отправляем информацию через Redis
     //       await Order.updateOne({ _id: order._id }, { status });
-    //       redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status }));
+    //       redisPublisher.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status }));
     //     }
     //   } catch (error) {
     //     console.error(`Ошибка при опросе ордера ${order.id}:`, error);

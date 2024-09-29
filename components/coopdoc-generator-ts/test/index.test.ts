@@ -15,11 +15,37 @@ import type { PaymentData } from '../src/Models/PaymentMethod'
 import { CoopenomicsAgreement, PrivacyPolicy, Registry, RegulationElectronicSignature, UserAgreement, WalletAgreement } from '../src/templates'
 import { signatureExample } from './signatureExample'
 
+// eslint-disable-next-line ts/no-require-imports
+const fs = require('node:fs').promises
+
+import path from 'node:path'
+
+async function deleteAllFiles(folderPath: string) {
+  try {
+    const absolutePath = path.resolve(folderPath)
+    const files = await fs.readdir(absolutePath)
+
+    for (const file of files) {
+      const filePath = path.join(absolutePath, file)
+      const stat = await fs.stat(filePath)
+
+      if (stat.isFile()) {
+        await fs.unlink(filePath) // Удаляет файл
+        console.log(`Deleted: ${filePath}`)
+      }
+    }
+    console.log('All files deleted successfully.')
+  }
+  catch (err) {
+    console.error(`Error while deleting files: ${err.message}`)
+  }
+}
+
 const generator = new Generator()
 generator.connect(mongoUri)
 
 beforeAll(async () => {
-
+  await deleteAllFiles('./documents')
 })
 
 beforeEach(async () => {
@@ -186,6 +212,13 @@ describe('тест генератора документов', async () => {
       phone: '+1234567890',
       email: 'john.doe@example.com',
       full_address: 'Переулок Правды д. 1',
+      passport: {
+        series: 7122,
+        number: 112233,
+        issued_by: 'отделом УФМС по г. Москва',
+        issued_at: '22.04.2010',
+        code: '111-232',
+      },
     }
 
     const saved = await generator.save('individual', userData)
@@ -300,6 +333,7 @@ describe('тест генератора документов', async () => {
       confidential_link: 'coopenomics.world/privacy',
       confidential_email: 'privacy@coopenomics.world',
       contact_email: 'contact@coopenomics.world',
+      passport_request: 'yes',
       wallet_agreement: {
         protocol_number: '10-04-2024',
         protocol_day_month_year: '10 апреля 2024 г.',
@@ -313,6 +347,10 @@ describe('тест генератора документов', async () => {
         protocol_day_month_year: '10 апреля 2024 г.',
       },
       user_agreement: {
+        protocol_number: '10-04-2024',
+        protocol_day_month_year: '10 апреля 2024 г.',
+      },
+      participant_application: {
         protocol_number: '10-04-2024',
         protocol_day_month_year: '10 апреля 2024 г.',
       },
@@ -611,18 +649,18 @@ describe('тест генератора документов', async () => {
       username: 'exampleorg',
       type: 'ooo',
       is_cooperative: false,
-      short_name: 'ExampleOrg',
-      full_name: 'Примерная организация',
+      short_name: 'Ромашка',
+      full_name: 'Ромашка',
       represented_by: {
         first_name: 'Иван',
         last_name: 'Иванов',
         middle_name: 'Иванович',
         position: 'Директор',
-        based_on: 'Устава организации',
+        based_on: 'решения собрания учредителей №22',
       },
       country: 'Russia',
       city: 'Moscow',
-      full_address: '456 Main St, Moscow, Russia',
+      full_address: 'г. Москва, ул. Арбат д. 22, офис 306',
       email: 'contact@exampleorg.com',
       phone: '+71234567890',
       details: {
@@ -634,7 +672,7 @@ describe('тест генератора документов', async () => {
         account_number: '40817810099910004312',
         currency: 'RUB',
         card_number: '0987654321098765',
-        bank_name: 'Example Bank',
+        bank_name: 'ПАО СБЕРБАНК',
         details: {
           bik: '098765432',
           corr: '30101810400000000225',

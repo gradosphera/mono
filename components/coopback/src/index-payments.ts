@@ -19,16 +19,16 @@ mongoose.connect(config.mongoose.url).then(async () => {
   // подключаемся к хранилищу приватных данных
   await connectGenerator();
 
-  redis.subscribe('orderStatusUpdate', (err, count) => {
+  redis.subscribe(`${config.coopname}:orderStatusUpdate`, (err, count) => {
     if (err) {
-      console.error('Failed to subscribe: ', err);
+      logger.error('Failed to subscribe: ', err);
     } else {
-      console.log(`Subscribed successfully! This client is currently subscribed to ${count} channels.`);
+      logger.info(`Subscribed successfully! This client is currently subscribed to ${count} channels.`);
     }
   });
 
   redis.on('message', (channel, message) => {
-    if (channel === 'orderStatusUpdate' && message) {
+    if (channel === `${config.coopname}:orderStatusUpdate` && message) {
       const { orderId, status } = JSON.parse(message);
       // Дальнейшая обработка
     }

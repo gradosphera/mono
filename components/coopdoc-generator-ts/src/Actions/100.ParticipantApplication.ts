@@ -33,10 +33,6 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
     let { signature, ...modifiedOptions } = options
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...modifiedOptions }) // Генерируем мета-данные
 
-    console.log('generator options: ', options)
-
-    console.log('generator meta: ', meta)
-
     interface SignatureData {
       username: string
       block_num: number
@@ -66,7 +62,9 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
       }
     }
 
-    const combinedData: ParticipantApplication.Model = { ...userData, meta, coop, type: user.type, signature }
+    const vars = await super.getVars(options.coopname, options.block_num)
+
+    const combinedData: ParticipantApplication.Model = { ...userData, meta, coop, type: user.type, vars, signature }
 
     // валидируем скомбинированные данные
     await super.validate(combinedData, template.model)

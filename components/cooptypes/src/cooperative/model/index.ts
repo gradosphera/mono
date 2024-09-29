@@ -44,6 +44,7 @@ export interface IVars {
   confidential_link: string
   confidential_email: string
   contact_email: string
+  passport_request: 'yes' | 'no'
   wallet_agreement: {
     protocol_number: string
     protocol_day_month_year: string
@@ -57,6 +58,10 @@ export interface IVars {
     protocol_day_month_year: string
   }
   user_agreement: {
+    protocol_number: string
+    protocol_day_month_year: string
+  }
+  participant_application: {
     protocol_number: string
     protocol_day_month_year: string
   }

@@ -177,7 +177,7 @@ export async function setStatus(id: string, status: string) {
   await order.save();
 
   // Отправляем обновление через Redis, чтобы обработчик мог выполнить действия
-  redisPublisher.publish('orderStatusUpdate', JSON.stringify({ id, status }));
+  redisPublisher.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id, status }));
 
   logger.info(`Статус ордера ${id} обновлен до ${status}`, { source: 'setStatus' });
 }

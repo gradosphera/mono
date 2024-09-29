@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import logger from '../../../config/logger';
 import Settings from '../../../models/settings.model';
 import type { isDeepStrictEqual } from 'util';
+import config from '../../../config/config';
 
 const redis = new Redis();
 
@@ -131,7 +132,7 @@ class YooKassaIPNProvider implements IPNProvider {
             });
 
             await Order.updateOne({ _id: order.id }, { status: 'failed', message: symbol_result.message });
-            redis.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
+            redis.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status: 'failed' }));
             return;
           }
 
@@ -144,10 +145,8 @@ class YooKassaIPNProvider implements IPNProvider {
               id: order.id,
             });
 
-            console.log('order: ', order);
-
             await Order.updateOne({ _id: order.id }, { status: 'paid' });
-            redis.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'paid' }));
+            redis.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status: 'paid' }));
           } else {
             // Обработка неудачного платежа
             logger.warn('Payment amount verification failed', {
@@ -157,14 +156,14 @@ class YooKassaIPNProvider implements IPNProvider {
             });
 
             await Order.updateOne({ _id: order.id }, { status: 'failed', message: result.message });
-            redis.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
+            redis.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status: 'failed' }));
           }
         } else if (event === 'payment.failed') {
           // Обработка неудачного платежа
           logger.warn('Payment failed event received', { source: 'handleIPN', id: order.id });
 
           await Order.updateOne({ _id: order.id }, { status: 'failed' });
-          redis.publish('orderStatusUpdate', JSON.stringify({ id: order.id, status: 'failed' }));
+          redis.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status: 'failed' }));
         }
       } else {
         //TODO платеж есть, а ордера на него нет. Что делаем?
