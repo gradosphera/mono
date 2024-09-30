@@ -178,8 +178,27 @@ export abstract class DocFactory<T extends IGenerate> {
     if (!translations.length)
       throw new Error('Ни один перевод не найден')
 
+    /**
+     * Код ниже обеспечивает группировку языковых версий, если их было несколько, оставляя только актуальные.
+     * В целом, этот код можно исключить, если в запрос языковых версий добавить опцию лимита == 1. Т.к. в некоторых случаях
+     * мы можем получить несколько версий, что в дальнейшем при формировании объекта из массива приводит к неожиданным результатам, когда
+     * последней версией документа может стать одна из старых.
+     */
+    const filteredTranslations: any = Object.values(
+      translations.reduce((acc: any, curr: any) => {
+        const lang = curr.value.lang
+
+        // Если ключ (язык) уже существует в аккумуляторе, проверяем block_num
+        if (!acc[lang] || acc[lang].block_num < curr.block_num) {
+          acc[lang] = curr // Обновляем запись, если block_num больше
+        }
+
+        return acc
+      }, {} as Record<string, typeof translations[0]>),
+    )
+
     const translationsObj: any = Object.fromEntries(
-      translations.map(({ value }: { value: DraftContract.Tables.Translations.ITranslation }) => [value.lang, JSON.parse(value.data)]),
+      filteredTranslations.map(({ value }: { value: any }) => [value.lang, JSON.parse(value.data)]),
     )
 
     return {

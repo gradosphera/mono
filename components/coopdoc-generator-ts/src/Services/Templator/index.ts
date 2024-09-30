@@ -1,5 +1,4 @@
 import nunjucks from 'nunjucks'
-import { v4 as uuidv4 } from 'uuid' // Импортируем функцию для генерации UUID
 import type { ITranslations, NestedRecord } from '../../Interfaces'
 
 export interface ITemplateEngine {
@@ -8,6 +7,11 @@ export interface ITemplateEngine {
 
 class TransExtension {
   tags = ['trans']
+  private readonly translation: ITranslations
+
+  constructor(translation: ITranslations) {
+    this.translation = translation
+  }
 
   parse(parser: any, nodes: any) {
     const tok = parser.nextToken()
@@ -16,34 +20,27 @@ class TransExtension {
     return new nodes.CallExtension(this, 'run', args)
   }
 
-  run(context: any, key: string, ...args: string[]): string {
-    const translations = context.lookup('translation') || {}
-    let translation = translations[key] || key
+  run(_context: any, key: string, ...args: string[]): string | NestedRecord {
+    let translation = this.translation[key] || key
     args.forEach((value, index) => {
       translation = translation.replace(new RegExp(`\\{${index}\\}`, 'g'), value)
     })
     translation = translation.replace(/\n/g, '<br>')
-    return new nunjucks.runtime.SafeString(translation).toString()
+
+    return new nunjucks.runtime.SafeString(translation as unknown as string)
   }
 }
 
 export class TemplateEngine implements ITemplateEngine {
   private readonly env: nunjucks.Environment
-  private readonly translation: ITranslations
 
   constructor(translation: ITranslations) {
-    this.translation = translation
-    this.env = new nunjucks.Environment(null, { noCache: true }) // Отключаем кэширование
-    const transExtension = new TransExtension()
-    const uniqueExtensionName = `TransExtension_${uuidv4()}` // Генерируем уникальное имя
-    this.env.addExtension(uniqueExtensionName, transExtension)
+    this.env = new nunjucks.Environment()
+    const transExtension = new TransExtension(translation)
+    this.env.addExtension('TransExtension', transExtension)
   }
 
   renderTemplate(template: string, vars: any): string {
-    const context = {
-      ...vars,
-      translation: this.translation,
-    }
-    return this.env.renderString(template, context)
+    return this.env.renderString(template, vars)
   }
 }
