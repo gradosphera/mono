@@ -89,6 +89,7 @@
     "joi-to-typescript": "^4.13.0",
     "jsonwebtoken": "^8.5.1",
     "jspdf": "^2.5.1",
+    "lodash": "^4.17.21",
     "moment": "^2.24.0",
     "mongoose": "^8.5.2",
     "mongoose-sequence": "^6.0.1",
