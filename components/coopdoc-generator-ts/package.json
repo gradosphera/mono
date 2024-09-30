@@ -60,7 +60,8 @@
     "mongodb": "^6.6.1",
     "nunjucks": "^3.2.4",
     "pdf-lib": "^1.17.1",
-    "puppeteer": "^22.8.0"
+    "puppeteer": "^22.8.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.17.0",

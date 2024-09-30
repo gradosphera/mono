@@ -19,8 +19,6 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
 
   req.user = user;
 
-  console.log('Required rights:', requiredRights);
-
   const userRights = roleRights.get(user.role) || [];
 
   // Determine if user has the required rights

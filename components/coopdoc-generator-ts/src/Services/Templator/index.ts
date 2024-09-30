@@ -1,4 +1,5 @@
 import nunjucks from 'nunjucks'
+import { v4 as uuidv4 } from 'uuid' // Импортируем функцию для генерации UUID
 import type { ITranslations, NestedRecord } from '../../Interfaces'
 
 export interface ITemplateEngine {
@@ -32,9 +33,10 @@ export class TemplateEngine implements ITemplateEngine {
 
   constructor(translation: ITranslations) {
     this.translation = translation
-    this.env = new nunjucks.Environment()
+    this.env = new nunjucks.Environment(null, { noCache: true }) // Отключаем кэширование
     const transExtension = new TransExtension()
-    this.env.addExtension('TransExtension', transExtension)
+    const uniqueExtensionName = `TransExtension_${uuidv4()}` // Генерируем уникальное имя
+    this.env.addExtension(uniqueExtensionName, transExtension)
   }
 
   renderTemplate(template: string, vars: any): string {
