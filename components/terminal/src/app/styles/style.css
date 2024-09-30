@@ -11,6 +11,11 @@
   gap: 25px;
 }
 
+.statement {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
 .padding-top {
   padding-top: 50px;
 }

@@ -7,7 +7,7 @@ q-card(style="word-break: break-all !important; white-space: normal !important;"
       span.q-ml-sm.text-grey подговка {{doc.meta.title}}
   div(v-if="!loading")
 
-    div(v-html="doc.html").description.q-pa-xs
+    div(v-html="safeHtml").description.q-pa-xs
 
     div.row.q-mt-lg.q-pa-sm.justify-center
       q-card(style="word-break: break-all; text-wrap: pretty;" flat bordered).col-md-8.col-xs-12.q-pa-sm
@@ -36,10 +36,11 @@ q-card(style="word-break: break-all !important; white-space: normal !important;"
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Cooperative, SovietContract } from 'cooptypes'
 import { Signature, PublicKey } from '@wharfkit/antelope';
 import { useGlobalStore } from 'src/shared/store';
+import DOMPurify from 'dompurify';
 
 const props = defineProps({
   action: {
@@ -58,6 +59,13 @@ const loading = ref(false)
 const signature_verified = ref(false)
 
 const regeneratedHash = ref()
+
+// Функция для декодирования и очистки HTML
+function sanitizeHtml(html: string) {
+    return DOMPurify.sanitize(html);
+}
+
+const safeHtml = computed(() => sanitizeHtml(doc.value.html));
 
 
 const hashBuffer = async () => {

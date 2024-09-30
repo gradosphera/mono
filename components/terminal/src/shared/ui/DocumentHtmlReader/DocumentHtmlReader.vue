@@ -1,14 +1,25 @@
 <template lang="pug">
-div(v-html='html').statement
+div(v-html="safeHtml").statement
 </template>
 
 <script setup lang="ts">
-defineProps({
+import { computed } from 'vue';
+import DOMPurify from 'dompurify';
+
+const props = defineProps({
   html: {
     type: String,
     required: true
   }
 })
+
+// Функция для декодирования и очистки HTML
+function sanitizeHtml(html: string) {
+  return DOMPurify.sanitize(html);
+}
+
+const safeHtml = computed(() => sanitizeHtml(props.html));
+
 </script>
 
 <style>
@@ -16,10 +27,6 @@ defineProps({
   padding: 0px !important;
 }
 
-.statement {
-  word-wrap: break-word;
-  /* white-space: pre-wrap; */
-}
 .statement h1 {
   font-weight: 700 !important;
   line-height: 4.5rem !important;

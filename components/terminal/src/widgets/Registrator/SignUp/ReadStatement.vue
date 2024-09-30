@@ -114,9 +114,3 @@ const userAgreement = computed(() => {
 
 
 </script>
-<style>
-.statement {
-  word-wrap: break-word;
-  white-space: pre-wrap;
-}
-</style>
