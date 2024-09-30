@@ -11,7 +11,7 @@ const user = [
   'getVars',
 ];
 
-const member = ['getUsers', 'manageUsers', 'loadAgenda', 'loadStaff', 'getDocuments', 'loadInfo', 'manageOrders'];
+const member = [...user, 'getUsers', 'manageUsers', 'loadAgenda', 'loadStaff', 'getDocuments', 'loadInfo', 'manageOrders'];
 
 const chairman = [...user, ...member, 'addUser', 'setVars', 'manageSettings'];
 
