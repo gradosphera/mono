@@ -7,11 +7,6 @@ export interface ITemplateEngine {
 
 class TransExtension {
   tags = ['trans']
-  private readonly translation: ITranslations
-
-  constructor(translation: ITranslations) {
-    this.translation = translation
-  }
 
   parse(parser: any, nodes: any) {
     const tok = parser.nextToken()
@@ -20,27 +15,33 @@ class TransExtension {
     return new nodes.CallExtension(this, 'run', args)
   }
 
-  run(_context: any, key: string, ...args: string[]): string | NestedRecord {
-    let translation = this.translation[key] || key
+  run(context: any, key: string, ...args: string[]): string {
+    const translations = context.lookup('translation') || {}
+    let translation = translations[key] || key
     args.forEach((value, index) => {
       translation = translation.replace(new RegExp(`\\{${index}\\}`, 'g'), value)
     })
     translation = translation.replace(/\n/g, '<br>')
-
-    return new nunjucks.runtime.SafeString(translation as unknown as string)
+    return new nunjucks.runtime.SafeString(translation).toString()
   }
 }
 
 export class TemplateEngine implements ITemplateEngine {
   private readonly env: nunjucks.Environment
+  private readonly translation: ITranslations
 
   constructor(translation: ITranslations) {
+    this.translation = translation
     this.env = new nunjucks.Environment()
-    const transExtension = new TransExtension(translation)
+    const transExtension = new TransExtension()
     this.env.addExtension('TransExtension', transExtension)
   }
 
   renderTemplate(template: string, vars: any): string {
-    return this.env.renderString(template, vars)
+    const context = {
+      ...vars,
+      translation: this.translation,
+    }
+    return this.env.renderString(template, context)
   }
 }
