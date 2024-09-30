@@ -37,6 +37,7 @@
     "compression": "^1.7.4",
     "coopback": "workspace:*",
     "cooptypes": "workspace:*",
+    "dompurify": "^3.1.7",
     "dotenv": "^16.4.5",
     "email-regex": "^5.0.0",
     "eosjs": "^22.1.0",
