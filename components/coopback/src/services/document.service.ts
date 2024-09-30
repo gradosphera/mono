@@ -30,7 +30,7 @@ export async function buildComplexDocument(
   {
     const document = await generator.getDocument({ hash: raw_document.document.hash });
 
-    if (document && document.meta.links)
+    if (document && document.meta.links && Array.isArray(document.meta.links))
       for (const link of document.meta.links) {
         const linked_document = await generator.getDocument({ hash: link });
         links.push(linked_document);
