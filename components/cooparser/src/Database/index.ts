@@ -51,7 +51,7 @@ export class Database {
 
     const pipeline = [
       { $match: filter },
-      { $sort: { block_num: -1, _id: -1 } },
+      { $sort: { block_num: -1 } },
       { $group: { _id: '$primary_key', doc: { $first: '$$ROOT' } } },
       // { $match: { 'doc.present': true } },
       { $replaceRoot: { newRoot: '$doc' } },
@@ -79,7 +79,7 @@ export class Database {
 
     const result = await this.actions.aggregate([
       { $match: query },
-      { $sort: { block_num: -1, _id: -1 } },
+      { $sort: { block_num: -1 } },
       { $group: { _id: '$global_sequence', doc: { $first: '$$ROOT' } } },
       { $replaceRoot: { newRoot: '$doc' } },
       { $skip: (page - 1) * limit },
