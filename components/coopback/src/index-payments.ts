@@ -6,10 +6,7 @@ import config from './config/config';
 import logger from './config/logger';
 import { connectGenerator } from './services/document.service';
 import { initPolling } from './services/polling.service';
-import Redis from 'ioredis';
-
-// Подключаемся к Redis
-const redis = new Redis();
+import { redisSubscriber } from './services/redis.service';
 
 let server: any;
 
@@ -19,7 +16,7 @@ mongoose.connect(config.mongoose.url).then(async () => {
   // подключаемся к хранилищу приватных данных
   await connectGenerator();
 
-  redis.subscribe(`${config.coopname}:orderStatusUpdate`, (err, count) => {
+  redisSubscriber.subscribe(`${config.coopname}:orderStatusUpdate`, (err, count) => {
     if (err) {
       logger.error('Failed to subscribe: ', err);
     } else {
@@ -27,7 +24,7 @@ mongoose.connect(config.mongoose.url).then(async () => {
     }
   });
 
-  redis.on('message', (channel, message) => {
+  redisSubscriber.on('message', (channel, message) => {
     if (channel === `${config.coopname}:orderStatusUpdate` && message) {
       const { orderId, status } = JSON.parse(message);
       // Дальнейшая обработка
