@@ -168,7 +168,7 @@ export async function setStatus(id: string, status: string) {
   if (status == 'refunded') {
     await blockchainService.cancelOrder({
       coopname: config.coopname,
-      admin: config.service_username,
+      admin: config.coopname,
       deposit_id: order.order_num as number,
       memo: '',
     });

@@ -61,6 +61,12 @@ export interface ISetVars {
   website: string;
 }
 
+export interface ISetWif {
+  permission: 'active';
+  username: string;
+  wif: string;
+}
+
 export interface RInstall {
   body: ({
     individual_data: {
@@ -120,6 +126,14 @@ export interface RSetVars {
       protocol_number: string;
     };
     website: string;
+  };
+}
+
+export interface RSetWif {
+  body: {
+    permission: 'active';
+    username: string;
+    wif: string;
   };
 }
 

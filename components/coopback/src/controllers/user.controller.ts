@@ -53,7 +53,7 @@ export const addUser = catchAsync(async (req: Request, res: Response) => {
     await blockchainService.addUser({
       ...body,
       ...newUser,
-      registrator: config.service_username,
+      registrator: config.coopname,
       referer: body.referer ? body.referer : '',
       coopname: config.coopname,
       meta: '',

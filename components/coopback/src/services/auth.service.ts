@@ -98,7 +98,7 @@ export const resetKey = async (resetKeyToken, publicKey) => {
     if (config.env !== 'test')
       await blockchainService.changeKey({
         coopname: config.coopname,
-        changer: config.service_username,
+        changer: config.coopname,
         username: user.username,
         public_key: publicKey,
       });

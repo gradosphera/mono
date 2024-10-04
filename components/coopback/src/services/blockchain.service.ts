@@ -13,6 +13,7 @@ import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 import type { IOrder } from '../types/order.types';
 import type { IBCAction } from '../types';
+import Vault from '../models/vault.model';
 
 const rpc = new JsonRpc(process.env.BLOCKCHAIN_RPC as string, { fetch });
 
@@ -36,7 +37,7 @@ async function getBlockchainAccount(username): Promise<GetAccountResult> {
 }
 
 export async function transact(actions: any): Promise<any> {
-  const instance = await getInstance(config.service_wif);
+  const instance = await getInstance(config.coopname);
   const result = await instance.transact(
     {
       actions,
@@ -57,7 +58,11 @@ export async function transact(actions: any): Promise<any> {
  * @returns {eosjs-api}
  */
 
-async function getInstance(wif) {
+async function getInstance(username: string) {
+  const wif = await Vault.getWif(username);
+
+  if (!wif) throw new ApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
   const signatureProvider = new JsSignatureProvider([wif]);
   const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
   return api;
@@ -65,7 +70,7 @@ async function getInstance(wif) {
 
 function getApi() {
   const options = {
-    httpEndpoint: process.env.BLOCKCHAIN_RPC, // default, null for cold-storage
+    httpEndpoint: process.env.BLOCKCHAIN_RPC, //
     verbose: false, // API logging
     fetchConfiguration: {},
   };
@@ -115,7 +120,7 @@ async function getCooperative(coopname) {
 }
 
 async function registerBlockchainAccount(user: IUser, order: IOrder) {
-  const eos = await getInstance(config.service_wif);
+  const eos = await getInstance(config.coopname);
   const actions = [] as any;
 
   // Создаем newaccount
@@ -133,7 +138,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     name: RegistratorContract.Actions.CreateAccount.actionName,
     authorization: [
       {
-        actor: config.service_username,
+        actor: config.coopname,
         permission: 'active',
       },
     ],
@@ -156,7 +161,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     name: RegistratorContract.Actions.RegisterUser.actionName,
     authorization: [
       {
-        actor: config.service_username,
+        actor: config.coopname,
         permission: 'active',
       },
     ],
@@ -178,7 +183,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     name: RegistratorContract.Actions.JoinCooperative.actionName,
     authorization: [
       {
-        actor: config.service_username,
+        actor: config.coopname,
         permission: 'active',
       },
     ],
@@ -198,7 +203,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     name: GatewayContract.Actions.CreateDeposit.actionName,
     authorization: [
       {
-        actor: config.service_username,
+        actor: config.coopname,
         permission: 'active',
       },
     ],
@@ -208,7 +213,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
   // Создаем completeDeposit
   const completeDeposit: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit = {
     coopname: config.coopname,
-    admin: config.service_username,
+    admin: config.coopname,
     deposit_id: order.order_num as number,
     memo: '',
   };
@@ -217,7 +222,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     name: GatewayContract.Actions.CompleteDeposit.actionName,
     authorization: [
       {
-        actor: config.service_username,
+        actor: config.coopname,
         permission: 'active',
       },
     ],
@@ -240,7 +245,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     name: SovietContract.Actions.Agreements.SendAgreement.actionName,
     authorization: [
       {
-        actor: config.service_username,
+        actor: config.coopname,
         permission: 'active',
       },
     ],
@@ -263,7 +268,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     name: SovietContract.Actions.Agreements.SendAgreement.actionName,
     authorization: [
       {
-        actor: config.service_username,
+        actor: config.coopname,
         permission: 'active',
       },
     ],
@@ -286,7 +291,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     name: SovietContract.Actions.Agreements.SendAgreement.actionName,
     authorization: [
       {
-        actor: config.service_username,
+        actor: config.coopname,
         permission: 'active',
       },
     ],
@@ -309,7 +314,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     name: SovietContract.Actions.Agreements.SendAgreement.actionName,
     authorization: [
       {
-        actor: config.service_username,
+        actor: config.coopname,
         permission: 'active',
       },
     ],
@@ -330,7 +335,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
 }
 
 async function createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICreateboard) {
-  const eos = await getInstance(config.service_wif);
+  const eos = await getInstance(config.coopname);
 
   // console.log('data: ', data);
 
@@ -340,7 +345,7 @@ async function createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICrea
       name: SovietContract.Actions.Boards.CreateBoard.actionName,
       authorization: [
         {
-          actor: config.service_username,
+          actor: config.coopname,
           permission: 'active',
         },
       ],
@@ -360,7 +365,7 @@ async function createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICrea
 }
 
 async function createOrder(data) {
-  const eos = await getInstance(config.service_wif);
+  const eos = await getInstance(config.coopname);
 
   const actions = [
     {
@@ -392,7 +397,7 @@ async function createOrder(data) {
 }
 
 async function completeDeposit(order: IOrder) {
-  const eos = await getInstance(config.service_wif);
+  const eos = await getInstance(config.coopname);
 
   const createDeposit: GatewayContract.Actions.CreateDeposit.ICreateDeposit = {
     coopname: config.coopname,
@@ -404,7 +409,7 @@ async function completeDeposit(order: IOrder) {
 
   const completeDeposit: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit = {
     coopname: config.coopname,
-    admin: config.service_username,
+    admin: config.coopname,
     deposit_id: order.order_num as number,
     memo: '',
   };
@@ -415,7 +420,7 @@ async function completeDeposit(order: IOrder) {
       name: GatewayContract.Actions.CreateDeposit.actionName,
       authorization: [
         {
-          actor: config.service_username,
+          actor: config.coopname,
           permission: 'active',
         },
       ],
@@ -426,7 +431,7 @@ async function completeDeposit(order: IOrder) {
       name: GatewayContract.Actions.CompleteDeposit.actionName,
       authorization: [
         {
-          actor: config.service_username,
+          actor: config.coopname,
           permission: 'active',
         },
       ],
@@ -446,7 +451,7 @@ async function completeDeposit(order: IOrder) {
 }
 
 async function failOrder(data) {
-  const eos = await getInstance(config.service_wif);
+  const eos = await getInstance(config.coopname);
 
   const actions = [
     {
@@ -474,7 +479,7 @@ async function failOrder(data) {
 }
 
 export async function addUser(data: RegistratorContract.Actions.AddUser.IAddUser) {
-  const eos = await getInstance(config.service_wif);
+  const eos = await getInstance(config.coopname);
 
   const actions = [
     {
@@ -482,7 +487,7 @@ export async function addUser(data: RegistratorContract.Actions.AddUser.IAddUser
       name: RegistratorContract.Actions.AddUser.actionName,
       authorization: [
         {
-          actor: config.service_username,
+          actor: config.coopname,
           permission: 'active',
         },
       ],
@@ -502,7 +507,7 @@ export async function addUser(data: RegistratorContract.Actions.AddUser.IAddUser
 }
 
 export async function changeKey(data: RegistratorContract.Actions.ChangeKey.IChangeKey) {
-  const eos = await getInstance(config.service_wif);
+  const eos = await getInstance(config.coopname);
 
   const actions = [
     {
@@ -510,7 +515,7 @@ export async function changeKey(data: RegistratorContract.Actions.ChangeKey.ICha
       name: RegistratorContract.Actions.ChangeKey.actionName,
       authorization: [
         {
-          actor: config.service_username,
+          actor: config.coopname,
           permission: 'active',
         },
       ],
@@ -535,7 +540,7 @@ export async function cancelOrder(data: GatewayContract.Actions.RefundDeposit.IR
     name: GatewayContract.Actions.RefundDeposit.actionName,
     authorization: [
       {
-        actor: config.service_username,
+        actor: config.coopname,
         permission: 'active',
       },
     ],

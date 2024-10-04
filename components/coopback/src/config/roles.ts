@@ -13,7 +13,7 @@ const user = [
 
 const member = [...user, 'getUsers', 'manageUsers', 'loadAgenda', 'loadStaff', 'getDocuments', 'loadInfo', 'manageOrders'];
 
-const chairman = [...user, ...member, 'addUser', 'setVars', 'manageSettings'];
+const chairman = [...user, ...member, 'addUser', 'setVars', 'manageSettings', 'setWif'];
 
 const allRoles = {
   user,

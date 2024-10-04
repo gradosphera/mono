@@ -9,10 +9,25 @@ import { generator } from './document.service';
 import { blockchainService, emailService, tokenService, userService } from '.';
 import { IUser, userStatus } from '../types/user.types';
 import axios from 'axios';
-import { getBlockchainInfo } from './blockchain.service';
+import { getBlockchainAccount, getBlockchainInfo, hasActiveKey } from './blockchain.service';
 import { RegistratorContract, type Cooperative } from 'cooptypes';
-import type { ISetVars } from '../types/auto-generated/system.validation';
+import type { ISetVars, ISetWif } from '../types/auto-generated/system.validation';
 import { VarsSchema } from 'coopdoc-generator-ts';
+import Vault, { type wifPermissions } from '../models/vault.model';
+import { PrivateKey } from '@wharfkit/antelope';
+
+export const setWif = async (params: ISetWif): Promise<void> => {
+  //check auth
+  const blockchainAccount = await getBlockchainAccount(params.username);
+
+  const publicKey = PrivateKey.fromString(params.wif).toPublic().toLegacyString();
+
+  const hasKey = hasActiveKey(blockchainAccount, publicKey);
+
+  if (!hasKey) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
+
+  await Vault.setWif(params.username, params.wif, params.permission as wifPermissions);
+};
 
 export const install = async (soviet: IInstall): Promise<void> => {
   const mono = await Mono.findOne({ coopname: config.coopname });
@@ -35,7 +50,7 @@ export const install = async (soviet: IInstall): Promise<void> => {
       sovietExt.push({ ...member, username });
 
       const addUser: RegistratorContract.Actions.AddUser.IAddUser = {
-        registrator: config.service_username,
+        registrator: config.coopname,
         coopname: config.coopname,
         referer: '',
         username,
@@ -83,7 +98,7 @@ export const install = async (soviet: IInstall): Promise<void> => {
     //TODO создаёт доску совета
     await blockchainService.createBoard({
       coopname: config.coopname,
-      username: config.service_username,
+      username: config.coopname,
       type: 'soviet',
       members: members,
       name: 'Совет',
@@ -130,6 +145,10 @@ export const getMonoStatus = async (): Promise<IHealthStatus> => {
 
 export const setVars = async (vars: ISetVars): Promise<void> => {
   await generator.save('vars', vars);
+};
+
+export const getVars = async (): Promise<Cooperative.Model.IVars> => {
+  return (await generator.get('vars', {})) as Cooperative.Model.IVars;
 };
 
 export const getVarsSchema = async (): Promise<unknown> => {

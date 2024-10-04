@@ -12,6 +12,16 @@ export const RInstall = Joi.object({
   body: IInstall.required(),
 });
 
+export const ISetWif = Joi.object({
+  username: Joi.string().required(),
+  permission: Joi.string().required().valid('active'),
+  wif: Joi.string().required(),
+});
+
+export const RSetWif = Joi.object({
+  body: ISetWif.required(),
+});
+
 export const ISetVars = Joi.object({
   coopname: Joi.string().required(),
   full_abbr: Joi.string().required(),

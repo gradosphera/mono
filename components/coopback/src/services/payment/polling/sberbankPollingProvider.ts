@@ -78,7 +78,7 @@ class SberbankPollingProvider implements PollingProvider {
       cooperative?.bank_account.details.corr
     }|Sum=${parseInt(amount)}00|Purpose=${description}. Без НДС.|PayeeINN=${cooperative?.details.inn}|KPP=${
       cooperative?.details.kpp
-    };`;
+    }`;
 
     const result: PaymentDetails = {
       data: invoice,

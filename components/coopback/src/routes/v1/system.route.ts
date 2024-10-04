@@ -6,12 +6,18 @@ import { systemValidation } from '../../validations';
 
 const router = Router();
 
+//init - устанавливает данные организации кооператива
+router.route('/init').post(auth('init'), validate(systemValidation.RInstall), systemController.install);
+
 router.route('/install').post(auth('install'), validate(systemValidation.RInstall), systemController.install);
 
-router.route('/get-vars-schema').post(auth('getVars'), systemController.getVarsSchema);
-router.route('/get-vars').post(auth('getVars'), systemController.setVars);
+router.route('/wif').post(auth('setWif'), validate(systemValidation.RSetWif), systemController.setWif);
 
-router.route('/set-vars').post(auth('setVars'), validate(systemValidation.RSetVars), systemController.setVars);
+//wif
+
+router.route('/vars/schema').get(auth('getVars'), systemController.getVarsSchema);
+router.route('/vars').get(auth('getVars'), systemController.getVars);
+router.route('/vars').post(auth('setVars'), validate(systemValidation.RSetVars), systemController.setVars);
 
 router.route('/health').get(systemController.getHealth);
 
