@@ -1,7 +1,5 @@
 # Terminal App
 
-A Terminal Project
-
 ## Install the dependencies
 ```bash
 yarn
