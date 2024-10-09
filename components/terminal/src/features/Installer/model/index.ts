@@ -9,7 +9,7 @@ export const useInstallCooperative = () => {
       throw new Error('Ключ не установлен')
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const soviet = store.soviet.map(({ id, ...rest }) => rest);
+    const soviet = store.soviet.map(({ id, type, ...rest }) => rest);
     console.log('soviet in install', soviet)
 
     await api.install({wif: store.wif, soviet})

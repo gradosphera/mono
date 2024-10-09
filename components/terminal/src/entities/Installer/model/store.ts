@@ -5,6 +5,7 @@ import { Ref, ref } from 'vue';
 interface data {
   id: number,
   role: 'chairman' | 'member',
+  type: 'individual',
   individual_data: IIndividualData
 }
 

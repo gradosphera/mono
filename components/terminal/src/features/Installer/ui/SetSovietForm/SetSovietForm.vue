@@ -23,7 +23,7 @@ div(v-if="installStore")
 import { useInstallCooperativeStore } from 'src/entities/Installer/model';
 const installStore = useInstallCooperativeStore()
 import { IndividualDataForm } from 'src/shared/ui/UserDataForm/IndividualDataForm';
-import type { IIndividualData } from 'src/shared/lib/types/user/IUserData';
+import type { IIndividualData, IUserData } from 'src/shared/lib/types/user/IUserData';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useInstallCooperative } from '../../model';
@@ -37,7 +37,7 @@ const add = () => {
   if (installStore.soviet.length > 0)
     role = 'member'
 
-  installStore.soviet.push({id: Date.now(), role, individual_data: {} as IIndividualData})
+  installStore.soviet.push({id: Date.now(), type: 'individual', role, individual_data: {} as IIndividualData})
 }
 
 const del = (id: number) => {
