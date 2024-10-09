@@ -4,12 +4,12 @@ import { Ref, ref } from 'vue';
 
 interface data {
   id: number,
-  role: string,
-  type: 'individual',
+  role: 'chairman' | 'member',
   individual_data: IIndividualData
 }
 
 interface IInstallCooperative {
+  wif: Ref<string | undefined>
   is_finish: Ref<boolean>
   soviet: Ref<data[]>
 }
@@ -22,10 +22,12 @@ export const useInstallCooperativeStore = defineStore(
 
     const soviet = ref([])
     const is_finish = ref(false)
+    const wif = ref()
 
     return {
       soviet,
-      is_finish
+      is_finish,
+      wif
     }
   }, {
     persist: true,

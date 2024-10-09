@@ -49,11 +49,6 @@ watch(() => userData.value?.organization_data?.type, (newValue) => {
 
 const localUserDataForm = ref(null)
 
-
-
-
-
-
 </script>
 <style>
 .dataInput .q-btn-selected {

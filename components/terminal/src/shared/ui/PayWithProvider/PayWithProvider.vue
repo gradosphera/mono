@@ -2,9 +2,8 @@
 import type { IPaymentOrder } from 'src/shared/lib/types/payments';
 import { BankProvider } from '../Providers/Bank';
 import { Yookassa } from '../Providers/Yookassa';
-import { onMounted } from 'vue';
 
-const props = defineProps<{
+defineProps<{
   paymentOrder: IPaymentOrder
 }>()
 

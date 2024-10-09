@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import { useAgreementStore } from 'src/entities/Agreement/model/store';
 import { useSessionStore } from 'src/entities/Session';
 import { useCurrentUserStore } from 'src/entities/User';
 import { useWalletStore } from 'src/entities/Wallet';

@@ -1,6 +1,6 @@
 import mongoose, { Schema, type Model } from 'mongoose';
 import { paginate, toJSON } from './plugins';
-import { IHealthStatus } from '../types';
+import { decrypt, encrypt } from '../utils/aes';
 
 export interface IVault {
   username: string;
@@ -29,7 +29,15 @@ VaultSchema.statics.getWif = async function (
   permission: wifPermissions = wifPermissions.Active
 ): Promise<string | null> {
   const vault = await this.findOne({ username, permission });
-  return vault ? vault.wif : null;
+  if (vault) {
+    try {
+      return decrypt(vault.wif); // Расшифровываем WIF перед возвратом
+    } catch (error) {
+      console.error('Ошибка при расшифровке WIF:', error);
+      return null;
+    }
+  }
+  return null;
 };
 
 // Метод для обновления или создания WIF с дефолтным значением permission
@@ -38,9 +46,11 @@ VaultSchema.statics.setWif = async function (
   wif: string,
   permission: wifPermissions = wifPermissions.Active
 ): Promise<boolean> {
+  const encryptedWif = encrypt(wif); // Шифруем WIF перед сохранением
+
   const result = await this.findOneAndUpdate(
     { username, permission },
-    { wif },
+    { wif: encryptedWif },
     { new: true, upsert: true } // upsert создает новую запись, если не существует
   );
 

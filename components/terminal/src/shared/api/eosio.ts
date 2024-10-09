@@ -1,8 +1,9 @@
 import { TransactResult } from '@wharfkit/session';
-import { APIClient } from '@wharfkit/antelope';
+import { APIClient, PrivateKey } from '@wharfkit/antelope';
 import { ContractKit } from '@wharfkit/contract';
 import { CHAIN_URL } from '../config/Env';
 import { useGlobalStore } from '../store';
+import { Account } from '@wharfkit/account'
 
 export const readBlockchain = new APIClient({
   url: CHAIN_URL,
@@ -16,6 +17,18 @@ export async function getBlockchainInfo() {
   return (await readBlockchain.v1.chain.get_info());
 }
 
+
+export async function isValidWif(username: string, wif: string, permission: string): Promise<boolean> {
+  const account_info = await getAccountInfo(username)
+  const accountArgs = {
+    data: account_info,
+    client: readBlockchain,
+  }
+  const account = new Account(accountArgs)
+  const activePermissions = account.permission(permission)
+  const publicKey = PrivateKey.fromString(wif).toPublic().toLegacyString();
+  return activePermissions.required_auth.keys.some((key) => key.key.toLegacyString() === publicKey);
+}
 
 export async function getAccountInfo(account: string): Promise<any> {
   return (await readBlockchain.v1.chain.get_account(account)) as any;

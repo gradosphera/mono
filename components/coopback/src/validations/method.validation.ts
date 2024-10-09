@@ -8,7 +8,7 @@ const RussianBankDetailsSchema = Joi.object({
 
 export const IBankAccount = Joi.object({
   currency: Joi.string().required().valid('RUB', 'Other'),
-  card_number: Joi.string().default(''),
+  card_number: Joi.string().default('').optional().allow(''),
   bank_name: Joi.string().required(),
   account_number: Joi.string().required(),
   details: RussianBankDetailsSchema.required(),

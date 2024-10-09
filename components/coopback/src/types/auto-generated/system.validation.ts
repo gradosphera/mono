@@ -3,25 +3,102 @@
  * Do not modify this file manually
  */
 
-export type IInstall = ({
-  individual_data: {
-    birthdate: string;
-    email: string;
-    first_name: string;
-    full_address: string;
-    last_name: string;
-    middle_name: string;
-    passport?: {
-      code: string;
-      issued_at: string;
-      issued_by: string;
-      number: number;
-      series: number;
+export interface IInit {
+  organization_data: {
+    bank_account: {
+      account_number: string;
+      bank_name: string;
+      card_number?: string;
+      currency: 'RUB' | 'Other';
+      details: {
+        bik: string;
+        corr: string;
+        kpp: string;
+      };
     };
+    city: string;
+    country: 'Russia' | 'Other';
+    details: {
+      inn: string;
+      kpp: string;
+      ogrn: string;
+    };
+    email: string;
+    full_address: string;
+    full_name: string;
+    is_cooperative: boolean;
     phone: string;
+    represented_by: {
+      based_on: string;
+      first_name: string;
+      last_name: string;
+      middle_name: string;
+      position: string;
+    };
+    short_name: string;
+    type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
   };
-  role: 'chairman' | 'member';
-})[];
+  vars: {
+    /**
+     * Unknown Property
+     */
+    [x: string]: unknown;
+    confidential_email: string;
+    confidential_link: string;
+    contact_email: string;
+    coopname: string;
+    full_abbr: string;
+    full_abbr_dative: string;
+    full_abbr_genitive: string;
+    name: string;
+    participant_application: {
+      protocol_day_month_year: string;
+      protocol_number: string;
+    };
+    passport_request: 'yes' | 'no';
+    privacy_agreement: {
+      protocol_day_month_year: string;
+      protocol_number: string;
+    };
+    short_abbr: string;
+    signature_agreement: {
+      protocol_day_month_year: string;
+      protocol_number: string;
+    };
+    user_agreement: {
+      protocol_day_month_year: string;
+      protocol_number: string;
+    };
+    wallet_agreement: {
+      protocol_day_month_year: string;
+      protocol_number: string;
+    };
+    website: string;
+  };
+}
+
+export interface IInstall {
+  soviet: {
+    individual_data: {
+      birthdate: string;
+      email: string;
+      first_name: string;
+      full_address: string;
+      last_name: string;
+      middle_name: string;
+      passport?: {
+        code: string;
+        issued_at: string;
+        issued_by: string;
+        number: number;
+        series: number;
+      };
+      phone: string;
+    };
+    role: 'chairman' | 'member';
+  }[];
+  wif: string;
+}
 
 export interface ISetVars {
   /**
@@ -67,26 +144,105 @@ export interface ISetWif {
   wif: string;
 }
 
-export interface RInstall {
-  body: ({
-    individual_data: {
-      birthdate: string;
-      email: string;
-      first_name: string;
-      full_address: string;
-      last_name: string;
-      middle_name: string;
-      passport?: {
-        code: string;
-        issued_at: string;
-        issued_by: string;
-        number: number;
-        series: number;
+export interface RInit {
+  body: {
+    organization_data: {
+      bank_account: {
+        account_number: string;
+        bank_name: string;
+        card_number?: string;
+        currency: 'RUB' | 'Other';
+        details: {
+          bik: string;
+          corr: string;
+          kpp: string;
+        };
       };
+      city: string;
+      country: 'Russia' | 'Other';
+      details: {
+        inn: string;
+        kpp: string;
+        ogrn: string;
+      };
+      email: string;
+      full_address: string;
+      full_name: string;
+      is_cooperative: boolean;
       phone: string;
+      represented_by: {
+        based_on: string;
+        first_name: string;
+        last_name: string;
+        middle_name: string;
+        position: string;
+      };
+      short_name: string;
+      type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
     };
-    role: 'chairman' | 'member';
-  })[];
+    vars: {
+      /**
+       * Unknown Property
+       */
+      [x: string]: unknown;
+      confidential_email: string;
+      confidential_link: string;
+      contact_email: string;
+      coopname: string;
+      full_abbr: string;
+      full_abbr_dative: string;
+      full_abbr_genitive: string;
+      name: string;
+      participant_application: {
+        protocol_day_month_year: string;
+        protocol_number: string;
+      };
+      passport_request: 'yes' | 'no';
+      privacy_agreement: {
+        protocol_day_month_year: string;
+        protocol_number: string;
+      };
+      short_abbr: string;
+      signature_agreement: {
+        protocol_day_month_year: string;
+        protocol_number: string;
+      };
+      user_agreement: {
+        protocol_day_month_year: string;
+        protocol_number: string;
+      };
+      wallet_agreement: {
+        protocol_day_month_year: string;
+        protocol_number: string;
+      };
+      website: string;
+    };
+  };
+}
+
+export interface RInstall {
+  body: {
+    soviet: {
+      individual_data: {
+        birthdate: string;
+        email: string;
+        first_name: string;
+        full_address: string;
+        last_name: string;
+        middle_name: string;
+        passport?: {
+          code: string;
+          issued_at: string;
+          issued_by: string;
+          number: number;
+          series: number;
+        };
+        phone: string;
+      };
+      role: 'chairman' | 'member';
+    }[];
+    wif: string;
+  };
 }
 
 export interface RSetVars {

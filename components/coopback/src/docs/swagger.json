@@ -14,78 +14,22 @@
     }
   ],
   "paths": {
-    "/auth/register": {
-      "post": {
-        "summary": "Register as user",
-        "tags": ["Auth"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["name", "email", "password"],
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "email": {
-                    "type": "string",
-                    "format": "email",
-                    "description": "must be unique"
-                  },
-                  "password": {
-                    "type": "string",
-                    "format": "password",
-                    "minLength": 8,
-                    "description": "At least one number and one letter"
-                  }
-                },
-                "example": {
-                  "name": "fake name",
-                  "email": "fake@example.com",
-                  "password": "password1"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "user": {
-                      "$ref": "#/components/schemas/User"
-                    },
-                    "tokens": {
-                      "$ref": "#/components/schemas/AuthTokens"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/DuplicateEmail"
-          }
-        }
-      }
-    },
     "/auth/login": {
       "post": {
         "summary": "Login",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email", "password"],
+                "required": [
+                  "email",
+                  "password"
+                ],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -143,14 +87,18 @@
     "/auth/logout": {
       "post": {
         "summary": "Logout",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["refreshToken"],
+                "required": [
+                  "refreshToken"
+                ],
                 "properties": {
                   "refreshToken": {
                     "type": "string"
@@ -176,14 +124,18 @@
     "/auth/refresh-tokens": {
       "post": {
         "summary": "Refresh auth tokens",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["refreshToken"],
+                "required": [
+                  "refreshToken"
+                ],
                 "properties": {
                   "refreshToken": {
                     "type": "string"
@@ -217,14 +169,18 @@
       "post": {
         "summary": "Forgot password",
         "description": "An email will be sent to reset password.",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email"],
+                "required": [
+                  "email"
+                ],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -251,7 +207,9 @@
     "/auth/reset-password": {
       "post": {
         "summary": "Reset password",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -269,7 +227,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["password"],
+                "required": [
+                  "password"
+                ],
                 "properties": {
                   "password": {
                     "type": "string",
@@ -310,7 +270,9 @@
       "post": {
         "summary": "Send verification email",
         "description": "An email will be sent to verify email.",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -329,7 +291,9 @@
     "/auth/verify-email": {
       "post": {
         "summary": "verify email",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -364,7 +328,9 @@
     },
     "/orders/ipn": {
       "post": {
-        "tags": ["Orders"],
+        "tags": [
+          "Orders"
+        ],
         "summary": "Обработка IPN уведомления",
         "description": "Маршрут для обработки IPN уведомления.",
         "responses": {
@@ -376,7 +342,9 @@
     },
     "/orders/initial": {
       "post": {
-        "tags": ["Orders"],
+        "tags": [
+          "Orders"
+        ],
         "summary": "Создание регистрационного платежа",
         "description": "Маршрут для создания регистрационного платежа.",
         "security": [
@@ -410,7 +378,9 @@
     },
     "/orders/deposit": {
       "post": {
-        "tags": ["Orders"],
+        "tags": [
+          "Orders"
+        ],
         "summary": "Создание депозита в кошелёк",
         "description": "Маршрут для создания депозита.",
         "security": [
@@ -446,7 +416,9 @@
       "post": {
         "summary": "Создать пользователя",
         "description": "Только администраторы могут создавать новых пользователей.",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -487,7 +459,9 @@
       "get": {
         "summary": "Получить всех пользователей",
         "description": "Только администратор может получить всех пользователей",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -587,7 +561,9 @@
       "get": {
         "summary": "Получить пользователя",
         "description": "Авторизованные пользователи могут получать только свою собственную информацию. Только администраторы могут получать информацию о других пользователях.",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -629,7 +605,9 @@
       "patch": {
         "summary": "Обновить пользователя",
         "description": "Только администраторы могут обновлять информацию о других пользователях.",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -694,6 +672,51 @@
           }
         }
       }
+    },
+    "/users/add": {
+      "post": {
+        "summary": "Добавить пользователя без заявления",
+        "description": "Только администраторы могут добавлять новых пользователей без прохождения процедуры подачи заявления. Это используется для добавления действующих пайщиков.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IAddUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Пользователь успешно добавлен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -744,14 +767,25 @@
           },
           "status": {
             "type": "string",
-            "enum": ["created", "joined", "payed", "registered", "active", "blocked"]
+            "enum": [
+              "created",
+              "joined",
+              "payed",
+              "registered",
+              "active",
+              "blocked"
+            ]
           },
           "is_registered": {
             "type": "boolean"
           },
           "type": {
             "type": "string",
-            "enum": ["individual", "entrepreneur", "organization"]
+            "enum": [
+              "individual",
+              "entrepreneur",
+              "organization"
+            ]
           },
           "public_key": {
             "type": "string"
@@ -787,7 +821,10 @@
       },
       "ICreatedPayment": {
         "type": "object",
-        "required": ["order_num", "confirmation_token"],
+        "required": [
+          "order_num",
+          "confirmation_token"
+        ],
         "properties": {
           "order_num": {
             "type": "number"
@@ -799,7 +836,10 @@
       },
       "ICreateDeposit": {
         "type": "object",
-        "required": ["username", "quantity"],
+        "required": [
+          "username",
+          "quantity"
+        ],
         "properties": {
           "username": {
             "type": "string"
@@ -811,7 +851,9 @@
       },
       "ICreateInitialPayment": {
         "type": "object",
-        "required": ["username"],
+        "required": [
+          "username"
+        ],
         "properties": {
           "username": {
             "type": "string"
@@ -844,7 +886,15 @@
             "format": "email"
           }
         },
-        "required": ["first_name", "last_name", "middle_name", "birthdate", "full_address", "phone", "email"]
+        "required": [
+          "first_name",
+          "last_name",
+          "middle_name",
+          "birthdate",
+          "full_address",
+          "phone",
+          "email"
+        ]
       },
       "RepresentedBySchema": {
         "type": "object",
@@ -865,7 +915,13 @@
             "type": "string"
           }
         },
-        "required": ["first_name", "last_name", "middle_name", "position", "based_on"]
+        "required": [
+          "first_name",
+          "last_name",
+          "middle_name",
+          "position",
+          "based_on"
+        ]
       },
       "RussiaDetailsSchema": {
         "type": "object",
@@ -877,7 +933,10 @@
             "type": "string"
           }
         },
-        "required": ["inn", "ogrn"]
+        "required": [
+          "inn",
+          "ogrn"
+        ]
       },
       "RussianBankDetailsSchema": {
         "type": "object",
@@ -895,14 +954,22 @@
             "type": "string"
           }
         },
-        "required": ["bik", "inn", "corr", "kpp"]
+        "required": [
+          "bik",
+          "inn",
+          "corr",
+          "kpp"
+        ]
       },
       "IBankAccount": {
         "type": "object",
         "properties": {
           "currency": {
             "type": "string",
-            "enum": ["RUB", "Other"]
+            "enum": [
+              "RUB",
+              "Other"
+            ]
           },
           "card_number": {
             "type": "string"
@@ -917,7 +984,13 @@
             "$ref": "#/components/schemas/RussianBankDetailsSchema"
           }
         },
-        "required": ["currency", "card_number", "bank_name", "account_number", "details"]
+        "required": [
+          "currency",
+          "card_number",
+          "bank_name",
+          "account_number",
+          "details"
+        ]
       },
       "IOrganizationData": {
         "type": "object",
@@ -937,7 +1010,10 @@
           },
           "country": {
             "type": "string",
-            "enum": ["Russia", "Other"]
+            "enum": [
+              "Russia",
+              "Other"
+            ]
           },
           "city": {
             "type": "string"
@@ -997,7 +1073,10 @@
           },
           "country": {
             "type": "string",
-            "enum": ["Russia", "Other"]
+            "enum": [
+              "Russia",
+              "Other"
+            ]
           },
           "city": {
             "type": "string"
@@ -1038,7 +1117,10 @@
           },
           "role": {
             "type": "string",
-            "enum": ["user", "admin"]
+            "enum": [
+              "user",
+              "admin"
+            ]
           },
           "public_key": {
             "type": "string"
@@ -1053,7 +1135,11 @@
           },
           "type": {
             "type": "string",
-            "enum": ["individual", "entrepreneur", "organization"]
+            "enum": [
+              "individual",
+              "entrepreneur",
+              "organization"
+            ]
           },
           "individual_data": {
             "$ref": "#/components/schemas/IIndividualData"
@@ -1065,7 +1151,14 @@
             "$ref": "#/components/schemas/IEntrepreneurData"
           }
         },
-        "required": ["email", "password", "role", "public_key", "username", "type"]
+        "required": [
+          "email",
+          "password",
+          "role",
+          "public_key",
+          "username",
+          "type"
+        ]
       },
       "IDocument": {
         "type": "object",
@@ -1083,7 +1176,12 @@
             "type": "object"
           }
         },
-        "required": ["hash", "signature", "public_key", "meta"]
+        "required": [
+          "hash",
+          "signature",
+          "public_key",
+          "meta"
+        ]
       },
       "IJoinCooperative": {
         "type": "object",
@@ -1095,7 +1193,10 @@
             "$ref": "#/components/schemas/IDocument"
           }
         },
-        "required": ["username", "document"]
+        "required": [
+          "username",
+          "document"
+        ]
       }
     },
     "responses": {
@@ -1167,7 +1268,7 @@
   "tags": [
     {
       "name": "Auth",
-      "description": "Authentication"
+      "description": "Управление аудентификацией"
     },
     {
       "name": "Orders",

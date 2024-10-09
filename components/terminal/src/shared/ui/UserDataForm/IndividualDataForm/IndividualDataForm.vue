@@ -27,7 +27,7 @@ div(v-if="userData.individual_data").q-gutter-md.q-mt-md
 
 </template>
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { validatePersonalName, notEmpty, notEmptyPhone } from 'src/shared/lib/utils';
 
 import type { IUserData } from 'src/shared/lib/types/user/IUserData';

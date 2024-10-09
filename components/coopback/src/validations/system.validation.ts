@@ -1,12 +1,17 @@
 import * as Joi from 'joi';
-import { IIndividualData } from './user.validation';
+import { IIndividualData, IOrganizationData } from './user.validation';
 
-export const IInstall = Joi.array().items(
-  Joi.object({
-    role: Joi.string().required().valid('chairman', 'member'),
-    individual_data: IIndividualData.required(),
-  })
-);
+export const IInstall = Joi.object({
+  wif: Joi.string().required(), // поле wif - обязательная строка
+  soviet: Joi.array()
+    .items(
+      Joi.object({
+        role: Joi.string().required().valid('chairman', 'member'), // поле role - обязательная строка с валидными значениями
+        individual_data: IIndividualData.required(), // поле individual_data - обязательное
+      })
+    )
+    .required(), // массив soviet - обязателен
+});
 
 export const RInstall = Joi.object({
   body: IInstall.required(),
@@ -64,4 +69,13 @@ export const RUpdateSettings = Joi.object({
   body: Joi.object({
     settings: Joi.object().required(),
   }).required(),
+});
+
+export const IInit = Joi.object({
+  organization_data: IOrganizationData.required(),
+  vars: ISetVars.required(),
+});
+
+export const RInit = Joi.object({
+  body: IInit.required(),
 });

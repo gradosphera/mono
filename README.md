@@ -1,6 +1,14 @@
 # MONOCOOP
 
 Моно-репозиторий компонент Цифрового Кооператива.
+
+## Инициализация
+```
+curl -X POST http://127.0.0.1:2998/v1/system/init \
+-H "Content-Type: application/json" \
+-H "server-secret: SECRET" \
+-d @init-cooperative1.json
+```
     
 ## Лицензия
 Продукт Потребительского Кооператива "ВОСХОД" распространяется по лицензии BY-NC-SA 4.0. 

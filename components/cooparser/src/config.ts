@@ -54,6 +54,7 @@ export const subsribedActions: IActionConfig[] = [
   { code: 'soviet', action: 'joincoopdec' },
 
   { code: 'soviet', action: 'updateboard', notify: true },
+  { code: 'soviet', action: 'createboard', notify: true },
 ]
 
 // --------------------------

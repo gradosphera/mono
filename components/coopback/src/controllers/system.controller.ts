@@ -5,9 +5,15 @@ import { IHealthResponse, IInstall, RInstall } from '../types';
 import { Request, Response } from 'express';
 import catchAsync from '../utils/catchAsync';
 import { systemService } from '../services';
-import type { ISetVars, RSetVars, RSetWif } from '../types/auto-generated/system.validation';
+import type { IInit, ISetVars, RInit, RSetVars, RSetWif } from '../types/auto-generated/system.validation';
 import logger from '../config/logger';
-import Vault from '../models/vault.model';
+
+export const init = catchAsync(async (req: RInit, res: Response) => {
+  const { body } = req;
+  await systemService.init(body as IInit);
+
+  res.status(httpStatus.OK).send();
+});
 
 export const install = catchAsync(async (req: RInstall, res: Response) => {
   const { body } = req;

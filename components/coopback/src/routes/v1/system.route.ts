@@ -7,9 +7,9 @@ import { systemValidation } from '../../validations';
 const router = Router();
 
 //init - устанавливает данные организации кооператива
-router.route('/init').post(auth('init'), validate(systemValidation.RInstall), systemController.install);
+router.route('/init').post(auth('init'), validate(systemValidation.RInit), systemController.init);
 
-router.route('/install').post(auth('install'), validate(systemValidation.RInstall), systemController.install);
+router.route('/install').post(validate(systemValidation.RInstall), systemController.install);
 
 router.route('/wif').post(auth('setWif'), validate(systemValidation.RSetWif), systemController.setWif);
 

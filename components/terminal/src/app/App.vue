@@ -8,21 +8,18 @@ div(v-if="isLoaded").breable-text
 import { onMounted, ref, watch } from 'vue'
 import { FailAlert } from 'src/shared/api/alerts'
 import { handleException } from 'src/shared/api';
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import 'src/app/styles/quasar-variables.sass'
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { Cookies, LocalStorage, QSpinnerGears, useQuasar } from 'quasar';
 import { COOPNAME } from 'src/shared/config';
-import { useCardStore } from './providers/card/store';
 
 import { RequireAgreements } from 'src/widgets/Agreementer/RequireAgreements/ui';
 
 const $q = useQuasar()
 
-const router = useRouter()
 const route = useRoute()
 const desktop = useDesktopStore()
-const card = useCardStore()
 
 const isLoaded = ref(false)
 

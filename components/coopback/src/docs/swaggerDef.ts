@@ -3,7 +3,7 @@ import config from '../config/config';
 const swaggerDef = {
   openapi: '3.0.0',
   info: {
-    title: "API Цифрового Кооператива",
+    title: 'API Цифрового Кооператива',
     // description: `Модуль предоставляет:
 
     //   - API для хранения персональных данных пользователей

@@ -47,13 +47,10 @@ import { Loader } from 'src/shared/ui/Loader';
 import { ReadAgreementDialog } from 'src/features/Agreementer/ReadAgreementDialog';
 import { useAgreementStore } from 'src/entities/Agreement'
 import { AgreementReader } from 'src/features/Agreementer/GenerateAgreement';
-
 const agreementer = useAgreementStore()
 
 import { useRegistratorStore } from 'src/entities/Registrator'
-import { COOPNAME } from 'src/shared/config';
 const store = useRegistratorStore().state
-
 
 const { generateStatementWithoutSignature } = useCreateUser()
 

@@ -6,7 +6,6 @@ export const authorizations = [{ permissions: [Permissions.active], actor: Contr
 /**
  * Имя действия
  */
-
 export const actionName = 'init'
 /**
  * @interface

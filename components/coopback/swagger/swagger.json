@@ -1,0 +1,439 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"RCreateUser": {
+				"properties": {
+					"body": {
+						"properties": {
+							"username": {
+								"type": "string"
+							},
+							"type": {
+								"type": "string",
+								"enum": [
+									"individual",
+									"entrepreneur",
+									"organization"
+								]
+							},
+							"role": {
+								"type": "string",
+								"enum": [
+									"user"
+								],
+								"nullable": false
+							},
+							"referer": {
+								"type": "string"
+							},
+							"public_key": {
+								"type": "string"
+							},
+							"organization_data": {
+								"properties": {
+									"type": {
+										"type": "string",
+										"enum": [
+											"coop",
+											"ooo",
+											"oao",
+											"zao",
+											"pao",
+											"ao"
+										]
+									},
+									"short_name": {
+										"type": "string"
+									},
+									"represented_by": {
+										"properties": {
+											"position": {
+												"type": "string"
+											},
+											"middle_name": {
+												"type": "string"
+											},
+											"last_name": {
+												"type": "string"
+											},
+											"first_name": {
+												"type": "string"
+											},
+											"based_on": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"position",
+											"middle_name",
+											"last_name",
+											"first_name",
+											"based_on"
+										],
+										"type": "object"
+									},
+									"phone": {
+										"type": "string"
+									},
+									"is_cooperative": {
+										"type": "boolean"
+									},
+									"full_name": {
+										"type": "string"
+									},
+									"full_address": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"details": {
+										"properties": {
+											"ogrn": {
+												"type": "string"
+											},
+											"kpp": {
+												"type": "string"
+											},
+											"inn": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"ogrn",
+											"kpp",
+											"inn"
+										],
+										"type": "object"
+									},
+									"country": {
+										"type": "string",
+										"enum": [
+											"Russia",
+											"Other"
+										]
+									},
+									"city": {
+										"type": "string"
+									},
+									"bank_account": {
+										"properties": {
+											"details": {
+												"properties": {
+													"kpp": {
+														"type": "string"
+													},
+													"corr": {
+														"type": "string"
+													},
+													"bik": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"kpp",
+													"corr",
+													"bik"
+												],
+												"type": "object"
+											},
+											"currency": {
+												"type": "string",
+												"enum": [
+													"RUB",
+													"Other"
+												]
+											},
+											"card_number": {
+												"type": "string"
+											},
+											"bank_name": {
+												"type": "string"
+											},
+											"account_number": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"details",
+											"currency",
+											"bank_name",
+											"account_number"
+										],
+										"type": "object"
+									}
+								},
+								"required": [
+									"type",
+									"short_name",
+									"represented_by",
+									"phone",
+									"is_cooperative",
+									"full_name",
+									"full_address",
+									"email",
+									"details",
+									"country",
+									"city",
+									"bank_account"
+								],
+								"type": "object"
+							},
+							"individual_data": {
+								"properties": {
+									"phone": {
+										"type": "string"
+									},
+									"passport": {
+										"properties": {
+											"series": {
+												"type": "number",
+												"format": "double"
+											},
+											"number": {
+												"type": "number",
+												"format": "double"
+											},
+											"issued_by": {
+												"type": "string"
+											},
+											"issued_at": {
+												"type": "string"
+											},
+											"code": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"series",
+											"number",
+											"issued_by",
+											"issued_at",
+											"code"
+										],
+										"type": "object"
+									},
+									"middle_name": {
+										"type": "string"
+									},
+									"last_name": {
+										"type": "string"
+									},
+									"full_address": {
+										"type": "string"
+									},
+									"first_name": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"birthdate": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"phone",
+									"middle_name",
+									"last_name",
+									"full_address",
+									"first_name",
+									"email",
+									"birthdate"
+								],
+								"type": "object"
+							},
+							"entrepreneur_data": {
+								"properties": {
+									"phone": {
+										"type": "string"
+									},
+									"middle_name": {
+										"type": "string"
+									},
+									"last_name": {
+										"type": "string"
+									},
+									"full_address": {
+										"type": "string"
+									},
+									"first_name": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"details": {
+										"properties": {
+											"ogrn": {
+												"type": "string"
+											},
+											"inn": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"ogrn",
+											"inn"
+										],
+										"type": "object"
+									},
+									"country": {
+										"type": "string",
+										"enum": [
+											"Russia",
+											"Other"
+										]
+									},
+									"city": {
+										"type": "string"
+									},
+									"birthdate": {
+										"type": "string"
+									},
+									"bank_account": {
+										"properties": {
+											"details": {
+												"properties": {
+													"kpp": {
+														"type": "string"
+													},
+													"corr": {
+														"type": "string"
+													},
+													"bik": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"kpp",
+													"corr",
+													"bik"
+												],
+												"type": "object"
+											},
+											"currency": {
+												"type": "string",
+												"enum": [
+													"RUB",
+													"Other"
+												]
+											},
+											"card_number": {
+												"type": "string"
+											},
+											"bank_name": {
+												"type": "string"
+											},
+											"account_number": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"details",
+											"currency",
+											"bank_name",
+											"account_number"
+										],
+										"type": "object"
+									}
+								},
+								"required": [
+									"phone",
+									"middle_name",
+									"last_name",
+									"full_address",
+									"first_name",
+									"email",
+									"details",
+									"country",
+									"city",
+									"birthdate",
+									"bank_account"
+								],
+								"type": "object"
+							},
+							"email": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"username",
+							"type",
+							"role",
+							"email"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"body"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "coopback",
+		"version": "2.0.7",
+		"license": {
+			"name": "MIT"
+		},
+		"contact": {
+			"name": "Alex Ant ",
+			"email": "dacom.dark.sun@gmail.com"
+		}
+	},
+	"paths": {
+		"/users": {
+			"post": {
+				"operationId": "CreateUser",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"tokens": {},
+										"user": {}
+									},
+									"required": [
+										"tokens",
+										"user"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RCreateUser"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}

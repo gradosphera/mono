@@ -1,0 +1,13 @@
+{
+  "entryFile": "src/index.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/controllers/*.ts"],
+  "spec": {
+    "outputDirectory": "./swagger",
+    "specVersion": 3
+  },
+  "exclude": ["node_modules", "dist"],
+  "tsNode": true,
+  "ignore": ["**/dist/**/*"],
+  "debug": true
+}

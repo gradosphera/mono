@@ -1,6 +1,6 @@
 <template lang="pug">
 div.row.justify-center.q-pt-lg
-  div.col-md-6.col-xs-12
+  div.col-md-4.col-sm-6.col-xs-12
     InstallCooperativeWidgetBase
 </template>
 

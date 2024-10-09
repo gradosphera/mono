@@ -11,10 +11,11 @@ import { IUser, userStatus } from '../types/user.types';
 import axios from 'axios';
 import { getBlockchainAccount, getBlockchainInfo, hasActiveKey } from './blockchain.service';
 import { RegistratorContract, type Cooperative } from 'cooptypes';
-import type { ISetVars, ISetWif } from '../types/auto-generated/system.validation';
+import type { IInit, ISetVars, ISetWif } from '../types/auto-generated/system.validation';
 import { VarsSchema } from 'coopdoc-generator-ts';
 import Vault, { type wifPermissions } from '../models/vault.model';
 import { PrivateKey } from '@wharfkit/antelope';
+import { createUser } from './user.service';
 
 export const setWif = async (params: ISetWif): Promise<void> => {
   //check auth
@@ -29,7 +30,7 @@ export const setWif = async (params: ISetWif): Promise<void> => {
   await Vault.setWif(params.username, params.wif, params.permission as wifPermissions);
 };
 
-export const install = async (soviet: IInstall): Promise<void> => {
+export const install = async (data: IInstall): Promise<void> => {
   const mono = await Mono.findOne({ coopname: config.coopname });
   const info = await getBlockchainInfo();
   const coop = await blockchainService.getCooperative(config.coopname);
@@ -40,9 +41,16 @@ export const install = async (soviet: IInstall): Promise<void> => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Установка уже выполнена');
   }
 
+  await setWif({
+    permission: 'active',
+    username: config.coopname,
+    wif: data.wif,
+  });
+
   const users = [] as IUser[];
   const members = [] as any;
   const sovietExt = [] as any;
+  const soviet = data.soviet;
 
   try {
     for (const member of soviet) {
@@ -120,25 +128,30 @@ export const install = async (soviet: IInstall): Promise<void> => {
     }
   );
 
-  logger.info('MONO активирован');
+  logger.info('Система установлена');
 };
 
-export const init = async (): Promise<void> => {
+export const init = async (data: IInit): Promise<void> => {
   const mono = await Mono.findOne({ coopname: config.coopname });
 
-  if (!mono)
-    await Mono.create({
-      coopname: config.coopname,
-      status: 'install',
-    });
+  if (mono) throw new ApiError(httpStatus.BAD_REQUEST, 'MONO уже инициализирован');
 
-  logger.info('MONO инициализирован');
+  await Mono.create({
+    coopname: config.coopname,
+    status: 'install',
+  });
+
+  await setVars(data.vars);
+
+  await generator.save('organization', { username: config.coopname, ...data.organization_data });
+
+  logger.info('Система инициализирована');
 };
 
 export const getMonoStatus = async (): Promise<IHealthStatus> => {
   const mono = await Mono.findOne({ coopname: config.coopname });
 
-  if (!mono) throw new ApiError(httpStatus.BAD_REQUEST, 'Установщик не найден');
+  if (!mono) throw new ApiError(httpStatus.BAD_REQUEST, 'Система не инициализирована');
 
   return mono.status;
 };

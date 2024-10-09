@@ -36,4 +36,8 @@ async function processEvent(event: IAction) {
   if (event.receiver === SovietContract.contractName.production && event.name === 'updateboard') {
     wsService.updateBoard(event.data);
   }
+
+  if (event.receiver === SovietContract.contractName.production && event.name === 'createboard') {
+    wsService.updateBoard(event.data);
+  }
 }

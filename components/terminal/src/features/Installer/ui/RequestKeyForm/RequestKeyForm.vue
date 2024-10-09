@@ -1,19 +1,6 @@
 <template lang="pug">
 form(@submit.prevent="submit").full-width
   q-input(
-    v-model="email"
-    label="Введите электронную почту"
-    color="primary"
-    hint=""
-    outlined
-    class="full-width"
-    autocorrect="off"
-    autocapitalize="off"
-    autocomplete="off"
-    spellcheck="false"
-  ).q-mt-lg
-
-  q-input(
     v-model="privateKey"
     label="Введите ключ доступа"
     color="primary"
@@ -37,25 +24,27 @@ form(@submit.prevent="submit").full-width
 </template>
   <script lang="ts" setup>
   import { useInstallCooperativeStore } from 'src/entities/Installer/model';
-  import { useCurrentUserStore } from 'src/entities/User';
-  import { useLoginUser } from 'src/features/Registrator/LoginUser';
-  import { FailAlert } from 'src/shared/api';
-  import { COOPNAME } from 'src/shared/config';
-  import { useGlobalStore } from 'src/shared/store';
+  import { FailAlert, isValidWif } from 'src/shared/api';
   import { ref } from 'vue';
+  import { COOPNAME } from 'src/shared/config';
 
-  const email = ref('')
   const privateKey = ref('')
   const loading = ref(false)
-  const currentUser = useCurrentUserStore()
-  const globalStore = useGlobalStore()
+
+  const installStore = useInstallCooperativeStore()
 
   const submit = async () => {
     loading.value = true
     try {
-      const { login } = useLoginUser()
-      await login(email.value, privateKey.value)
-      await currentUser.loadProfile(globalStore.username, COOPNAME)
+      const isValid = await isValidWif(COOPNAME, privateKey.value, 'active')
+
+      if (!isValid) {
+        loading.value = false
+        FailAlert('Неверный ключ доступа')
+        return
+      }
+
+      installStore.wif = privateKey.value
 
       loading.value = false
 

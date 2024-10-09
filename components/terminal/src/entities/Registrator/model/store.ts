@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { reactive } from 'vue';
 import { IGeneratedAccount } from 'src/shared/lib/types/user';
-import { IUserData, type ICreateUserData } from 'src/shared/lib/types/user/IUserData';
+import { type ICreateUserData } from 'src/shared/lib/types/user/IUserData';
 import type { Cooperative } from 'cooptypes';
 
 const namespace = 'registrator';

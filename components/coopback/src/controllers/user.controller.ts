@@ -5,12 +5,26 @@ import { userService, tokenService, emailService, blockchainService } from '../s
 import { IAddUser, ICreateUser, RCreateUser } from '../types';
 import httpStatus from 'http-status';
 import pick from '../utils/pick';
-import { IGetResponse } from '../types/common';
+// import { IGetResponse } from '../types/common';
 import { IUser, userStatus } from '../types';
 import { Request, Response } from 'express';
 import { generateUsername } from '../../tests/utils/generateUsername';
 import config from '../config/config';
 import logger from '../config/logger';
+// import { Body, Controller, Get, Path, Post, Query, Route, SuccessResponse } from 'tsoa';
+
+// @Route('users')
+// export default class UsersController extends Controller {
+//   @SuccessResponse(201, 'Created') // Указываем статус 201 и описание
+//   @Post()
+//   public async createUser(@Body() req: RCreateUser): Promise<{ user: IUser; tokens: any }> {
+//     const user = await userService.createUser(req.body);
+//     const tokens = await tokenService.generateAuthTokens(user);
+
+//     this.setStatus(201); // Устанавливаем статус 201 Created
+//     return { user, tokens }; // Возвращаем объект в ответ
+//   }
+// }
 
 /**
  * Порядок регистрации:
@@ -27,6 +41,7 @@ import logger from '../config/logger';
  * 11. (trx confirmpay) Пользователь подписывает велком-письмо с подтверждением собственноручности оплаты (транзакция в блокчейне для активации)
  * 12. Регистрация продолжается ожиданием решения совета
  */
+
 export const createUser = catchAsync(async (req: RCreateUser, res) => {
   const user = await userService.createUser(req.body);
   const tokens = await tokenService.generateAuthTokens(user);

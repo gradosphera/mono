@@ -13,14 +13,9 @@ div.menu-container
       span.btn-font {{ route.meta.title }}
 
   div.control-buttons
-
     q-btn(flat @click="$q.dark.toggle()" ).btn-menu
       q-icon(:name="isDark ? 'brightness_7' : 'brightness_3'").q-pt-xs.btn-icon
       span.btn-font {{ isDark ? 'светлая' : 'тёмная' }}
-
-    //- q-btn(flat class="cursor-pointer btn-menu" @click="logout")
-    //-   q-icon( color="red" name="logout").q-pt-xs.btn-icon
-    //-   div.btn-font Выход
 
 </template>
 
@@ -29,8 +24,6 @@ import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { COOPNAME } from 'src/shared/config'
-import { useLogoutUser } from 'src/features/Registrator/Logout'
-import { FailAlert } from 'src/shared/api'
 import { useCurrentUserStore } from 'src/entities/User'
 import { type IRoute } from 'src/entities/Desktop/model/types'
 import { useDesktopStore } from 'src/entities/Desktop/model'
@@ -60,22 +53,6 @@ const open = (route: IRoute) => {
   else router.push({ name: route.name, params: { coopname: COOPNAME } })
 
 }
-
-
-const logout = async () => {
-  const { logout } = useLogoutUser()
-
-  try {
-    await logout()
-    router.push({ name: 'index' })
-
-  } catch (e: any) {
-    console.log(e)
-    FailAlert('Ошибка при выходе: ' + e.message)
-  }
-}
-
-
 
 const menuRoutes = computed(() => {
   const userRole = user.userAccount?.role || 'user';

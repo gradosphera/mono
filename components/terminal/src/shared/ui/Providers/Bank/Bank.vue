@@ -20,8 +20,6 @@ const props = defineProps<{
   paymentOrder: IPaymentOrder;
 }>();
 
-const emit = defineEmits(['paymentSuccess', 'paymentFail']);
-
 const qrElement = ref<HTMLCanvasElement | null>(null);
 const coop = useCooperativeStore()
 
