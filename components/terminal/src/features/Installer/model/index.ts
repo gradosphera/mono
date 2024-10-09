@@ -10,7 +10,6 @@ export const useInstallCooperative = () => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const soviet = store.soviet.map(({ id, type, ...rest }) => rest);
-    console.log('soviet in install', soviet)
 
     await api.install({wif: store.wif, soviet})
   }
