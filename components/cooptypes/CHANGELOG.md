@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.8](https://github.com/coopenomics/cooptypes/compare/v2.0.7...v2.0.8) (2024-10-09)
+
+**Note:** Version bump only for package cooptypes
+
+
+
+
+
 ## [2.0.2](https://github.com/coopenomics/cooptypes/compare/v2.0.2-alpha.1...v2.0.2) (2024-09-29)
 
 **Note:** Version bump only for package cooptypes
