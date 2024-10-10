@@ -70,7 +70,7 @@ export async function createOrder(
         symbol,
         type === 'deposit'
           ? `Добровольный паевый взнос №${db_order.order_num}`
-          : `Добровольный вступительный взнос №${db_order.order_num}`,
+          : `Добровольный вступительный и минимальный паевый взнос №${secret}`,
         db_order.order_num as number,
         secret
       );
