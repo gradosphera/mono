@@ -1,0 +1,4 @@
+local.env
+prod.env
+test.env
+node_modules
