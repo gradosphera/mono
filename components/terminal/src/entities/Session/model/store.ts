@@ -20,11 +20,14 @@ interface ISessionStore {
     info: GetInfoResult | undefined;
   }>;
   getInfo: () => Promise<void>;
+  loadComplete: Ref<boolean>;
 }
 
 export const useSessionStore = defineStore('session', (): ISessionStore => {
   const globalStore = useGlobalStore();
   const isAuth = ref(false);
+  const loadComplete = ref(false);
+
   const session = ref();
   const BCInfo = ref<{
     connected: boolean;
@@ -86,5 +89,6 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
     username,
     close,
     getInfo,
+    loadComplete
   };
 });

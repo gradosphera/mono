@@ -24,6 +24,8 @@ export const useCardStore = defineStore(namespace, (): ICardStore => {
         try{
           await currentUser.loadProfile(session.username, COOPNAME)
           await userWallet.loadUserWalet({coopname: COOPNAME, username: session.username})
+          session.loadComplete = true
+
         } catch(e: any){
           console.error(e)
         }

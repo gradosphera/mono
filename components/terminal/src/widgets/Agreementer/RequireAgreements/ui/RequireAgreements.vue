@@ -28,6 +28,8 @@ const is_modify=ref(false)
 // Для всех соглашений, которые пользователь должен подписать
 const required_agreements = computed(() => {
   // Получаем подписанные соглашения
+  if (!session.loadComplete)
+    return []
 
   // Фильтруем соглашения, которые необходимы пользователю
   return cooperativeAgreements.value.filter(agreement => {

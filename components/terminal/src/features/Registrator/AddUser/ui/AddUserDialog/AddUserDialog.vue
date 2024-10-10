@@ -79,7 +79,7 @@ div
 
                 div.q-mt-lg
                   q-btn(flat @click="showAdd = false") Отмена
-                  q-btn(color="primary" @click="addUserNow(userDataForm)") Добавить
+                  q-btn(color="primary" @click="addUserNow(userDataForm)" :loading="loading") Добавить
 
 
 </template>
@@ -198,19 +198,21 @@ const changeEmail = () => {
 }
 
 const showAdd = ref(false)
+const loading = ref(false)
 
 const addUserNow = (userDataForm: any) => {
   userDataForm.validate().then(async (success: boolean) => {
     if (success) {
       try {
-
+        loading.value = true
         await addUser()
         SuccessAlert('Пайщик добавлен в реестр, а приглашение отправлено на его email');
         showAdd.value = false
         addUserState.created_at = ''
         clearUserData()
-
+        loading.value = false
       } catch (e: any) {
+        loading.value = false
         FailAlert(`Возникла ошибка: ${e.message}`)
       }
 
