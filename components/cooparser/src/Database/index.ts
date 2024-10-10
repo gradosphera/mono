@@ -51,18 +51,14 @@ export class Database {
 
     const pipeline = [
       { $match: filter },
-      { $sort: { block_num: -1 } },
       { $group: { _id: '$primary_key', doc: { $first: '$$ROOT' } } },
-      // { $match: { 'doc.present': true } },
       { $replaceRoot: { newRoot: '$doc' } },
+      { $sort: { block_num: -1 } },
+      { $skip: (page - 1) * limit }, // Применяется внутри пайплайна
+      { $limit: limit }, // Применяется внутри пайплайна
     ]
 
-    const [result] = await Promise.all([
-      this.deltas.aggregate(pipeline)
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .toArray(),
-    ])
+    const result = await this.deltas.aggregate(pipeline).toArray()
 
     return {
       results: result as IDelta[],
@@ -79,9 +75,9 @@ export class Database {
 
     const result = await this.actions.aggregate([
       { $match: query },
-      { $sort: { block_num: -1 } },
       { $group: { _id: '$global_sequence', doc: { $first: '$$ROOT' } } },
       { $replaceRoot: { newRoot: '$doc' } },
+      { $sort: { block_num: -1 } },
       { $skip: (page - 1) * limit },
       { $limit: limit },
     ]).toArray()
