@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.9](https://github.com/coopenomics/monocoop/compare/v2.0.8...v2.0.9) (2024-10-10)
+
+**Note:** Version bump only for package monocoop
+
+
+
+
+
 ## [2.0.8](https://github.com/coopenomics/monocoop/compare/v2.0.7...v2.0.8) (2024-10-09)
 
 **Note:** Version bump only for package monocoop
