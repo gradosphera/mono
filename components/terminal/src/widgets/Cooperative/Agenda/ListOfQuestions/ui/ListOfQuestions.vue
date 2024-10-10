@@ -1,8 +1,7 @@
 <template lang="pug">
-
 q-card(flat)
   q-table(
-    ref="tableRef" v-model:expanded="expanded"
+    ref="tableRef"
     flat
     bordered
     :rows="decisions"
@@ -30,9 +29,8 @@ q-card(flat)
     template(#body="props")
       q-tr(:key="`m_${props.row.table.id}`" :props="props")
         q-td(auto-width)
-          // q-toggle(v-model="props.expand" checked-icon="fas fa-chevron-circle-left" unchecked-icon="fas fa-chevron-circle-right" )
+          q-btn(size="sm" color="primary" dense :icon="expanded.get(props.row.table.id) ? 'remove' : 'add'" round @click="toggleExpand(props.row.table.id)")
 
-          q-btn(size="sm" color="primary" dense :icon="props.expand ? 'remove' : 'add'" round @click="props.expand = !props.expand")
         q-td {{ props.row.table.id }}
         q-td {{ props.row.table.username }}
         q-td
@@ -64,11 +62,9 @@ q-card(flat)
             q-icon(name="fas fa-thumbs-up" style="transform: scaleX(-1)")
 
         q-td
-          q-btn( :loading="isProcess(props.row.table.id)" @click="updateAuthorized(props.row.table.username, props.row.table.id)") утвердить
-          //- q-checkbox(v-if="!isProcess(props.row.table.id)" :model-value="props.row.table.authorized" :true-value="1" :false-value="0" @click="updateAuthorized(props.row.table.username, props.row.table.id)")
-          //- q-spinner(v-if="isProcess(props.row.table.id)" size="md")
+          q-btn(size="sm" color="teal" v-if="currentUser.isChairman" :loading="isProcess(props.row.table.id)" @click="updateAuthorized(props.row.table.username, props.row.table.id)") утвердить
 
-      q-tr(v-show="props.expand" :key="`e_${props.row.table.id}`" :props="props" class="q-virtual-scroll--with-prev")
+      q-tr(v-if="expanded.get(props.row.table.id)" :key="`e_${props.row.table.id}`" :props="props" class="q-virtual-scroll--with-prev")
         q-td(colspan="100%")
           RegistratorJoincoopDocument(v-if="props.row.table.type == 'joincoop'" :documents="props.row.documents")
 
@@ -77,7 +73,7 @@ q-card(flat)
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeUnmount } from 'vue'
+import { ref, onBeforeUnmount, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 import { Notify } from 'quasar'
@@ -90,14 +86,16 @@ import { useAuthorizeAndExecDecision } from 'src/features/Cooperative/AuthorizeA
 import { useVoteAgainstDecision } from 'src/features/Cooperative/VoteAgainstDecision';
 import { COOPNAME } from 'src/shared/config';
 import { useCooperativeStore } from 'src/entities/Cooperative/model/stores';
+import { useCurrentUserStore } from 'src/entities/User';
 const session = useSessionStore()
 const onLoading = ref(false)
+const currentUser = useCurrentUserStore()
 
 const columns = [
   { name: 'id', align: 'left', label: '№', field: 'id', sortable: true },
   { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
 
-  { name: 'caption', align: 'left', label: 'Повестка', field: 'caption', sortable: true },
+  { name: 'caption', align: 'left', label: 'Пункт', field: 'caption', sortable: true },
   // { name: 'validated', align: 'left', label: 'Проверено', field: 'validated', sortable: true },
   { name: 'approved', align: 'left', label: 'Голосование', field: 'approved', sortable: true },
   { name: 'authorized', align: 'left', label: '', field: 'authorized', sortable: true },
@@ -105,6 +103,13 @@ const columns = [
 
 const coop = useCooperativeStore()
 coop.loadPrivateCooperativeData()
+
+const expanded = reactive(new Map()) // Используем Map для отслеживания состояния развертывания каждой записи
+
+// Функция для переключения состояния развертывания
+const toggleExpand = (id: any) => {
+  expanded.set(id, !expanded.get(id))
+}
 
 // const totalMembers = computed(() => coop.privateCooperativeData?.totalMembers)
 
@@ -138,7 +143,7 @@ const getTitle = (action: string, user: any) => {
     change: 'Обмен на маркете',
   }
   let title = actions[action]
-  console.log(user)
+
   if (user.first_name)
     title += ` ${user.last_name} ${user.first_name} ${user.middle_name}`
   else title += ` ${user.short_name}`
@@ -193,7 +198,7 @@ const updateAuthorized = async (username: string, decision_id: number) => {
 
   } catch (e: any) {
     authorizeLoading.value[decision_id] = false
-    console.log('json:', e.json)
+
     Notify.create({
       message: e.message,
       type: 'negative',
@@ -220,7 +225,7 @@ const voteFor = async (decision_id: number) => {
     const result = await voteForDecision(
       decision_id
     )
-    console.log('result: ', result)
+
     Notify.create({
       message: 'Голос принят',
       type: 'positive',
@@ -258,7 +263,6 @@ const voteAgainst = async (decision_id: number) => {
   }
 }
 
-const expanded = ref([])
 const tableRef = ref(null)
 const pagination = ref({ rowsPerPage: 10 })
 </script>

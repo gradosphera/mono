@@ -51,7 +51,7 @@ export class Database {
 
     const pipeline = [
       { $match: filter },
-      { $sort: { primary_key: 1, block_num: -1 } }, // Сортировка по primary_key и block_num
+      { $sort: { block_num: -1 } }, // Сортировка по primary_key и block_num
       { $group: { _id: '$primary_key', doc: { $first: '$$ROOT' } } },
       { $replaceRoot: { newRoot: '$doc' } },
       { $sort: { block_num: -1 } },
@@ -76,7 +76,7 @@ export class Database {
 
     const result = await this.actions.aggregate([
       { $match: query },
-      { $sort: { global_sequence: 1, block_num: -1 } }, // Сортировка по primary_key и block_num
+      { $sort: { block_num: -1 } }, // Сортировка по primary_key и block_num
       { $group: { _id: '$global_sequence', doc: { $first: '$$ROOT' } } },
       { $replaceRoot: { newRoot: '$doc' } },
       { $sort: { block_num: -1 } },

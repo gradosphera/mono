@@ -36,9 +36,10 @@ export class Cooperative {
 
     const cooperative_response = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
       filter: JSON.stringify({
-        code: RegistratorContract.contractName.production,
-        scope: RegistratorContract.contractName.production,
-        table: RegistratorContract.Tables.Cooperatives.tableName,
+        'code': RegistratorContract.contractName.production,
+        'scope': RegistratorContract.contractName.production,
+        'table': RegistratorContract.Tables.Cooperatives.tableName,
+        'value.username': username,
       }),
     }))
 

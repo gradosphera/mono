@@ -10,28 +10,27 @@ q-card(style="word-break: break-all !important; white-space: normal !important;"
     div(v-html="safeHtml").description.q-pa-xs
 
     div.row.q-mt-lg.q-pa-sm.justify-center
-      q-card(style="word-break: break-all; text-wrap: pretty;" flat bordered).col-md-8.col-xs-12.q-pa-sm
-
+      q-card(style="word-break: break-all !important; text-wrap: pretty;" flat).col-md-8.col-xs-12.q-pa-sm.verify-card
         div.q-mr-lg.q-mt-md
-          q-badge(:color="doc.hash == regeneratedHash ? 'green' : 'red'").text-center.q-pa-sm
+          q-badge(:color="doc.hash == regeneratedHash ? 'teal' : 'red'").text-center.q-pa-xs
             q-icon(:name="doc.hash == regeneratedHash ? 'check_circle' : 'cancel'" ).q-mr-sm
-            span(style="font-size: 14px;") контрольная сумма
-          p(style="font-size: 12px;").q-mr-lg.q-ml-lg.text-grey {{ doc.hash }}
+            span контрольная сумма
+          p.q-mr-lg.q-ml-lg.text-grey {{ doc.hash }}
 
         div.q-mr-lg.q-mt-md
-          q-badge(:color="signature_verified ? 'green' : 'red'").text-center.q-pa-sm
+          q-badge(:color="signature_verified ? 'teal' : 'red'").text-center.q-pa-xs
             q-icon(:name="signature_verified ? 'check_circle' : 'cancel'" ).q-mr-sm
-            span(style="font-size: 14px;") цифровая подпись
-          p(style="font-size: 12px;").q-mr-lg.q-ml-lg.text-grey {{ actionDocumentData?.document?.signature }}
+            span цифровая подпись
+          p.q-mr-lg.q-ml-lg.text-grey {{ actionDocumentData?.document?.signature }}
 
         div.q-mr-lg.q-mt-md
-          q-badge(:color="signature_verified ? 'green' : 'red'").text-center.q-pa-sm
+          q-badge(:color="signature_verified ? 'teal' : 'red'").text-center.q-pa-xs
             q-icon(:name="signature_verified ? 'check_circle' : 'cancel'" ).q-mr-sm
-            span(style="font-size: 14px;") публичный ключ
-          p(style="font-size: 12px;").q-mr-lg.q-ml-lg.text-grey {{ actionDocumentData?.document?.public_key }}
+            span публичный ключ
+          p.q-mr-lg.q-ml-lg.text-grey {{ actionDocumentData?.document?.public_key }}
 
-        div.q-pa-md.text-center
-          q-btn(icon="download" @click="download") скачать
+        div.text-center
+          q-btn(size="sm" color="primary" icon="download" @click="download") скачать
 
 </template>
 
@@ -62,7 +61,7 @@ const regeneratedHash = ref()
 
 // Функция для декодирования и очистки HTML
 function sanitizeHtml(html: string) {
-    return DOMPurify.sanitize(html);
+  return DOMPurify.sanitize(html);
 }
 
 const safeHtml = computed(() => sanitizeHtml(doc.value.html));
@@ -128,4 +127,23 @@ async function download() {
   word-wrap: break-word !important;
   white-space: normal !important;
 }
+
+.digital-document .header {
+  text-align: center;
+  word-break: break-word !important;
+}
+
+.description {
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+.description p {
+  margin: 0 !important;
+}
+
+.verify-card {
+  font-size: 10px !important;
+}
+
 </style>

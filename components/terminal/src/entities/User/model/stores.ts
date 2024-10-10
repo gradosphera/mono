@@ -20,6 +20,7 @@ interface IUserStore {
   participantAccount: Ref<SovietContract.Tables.Participants.IParticipants | null>;
   userAccount: Ref<IUserAccountData | null>;
   isRegistrationComplete: ComputedRef<boolean>;
+  isChairman: ComputedRef<boolean>;
 }
 
 const namespaceCurrentUser = 'currentUser';
@@ -42,6 +43,7 @@ export const useCurrentUserStore = defineStore(
           (userEntity.userAccount.value || false) &&
           userEntity.participantAccount.value != null
       ),
+      isChairman: computed(() => userEntity.userAccount.value?.role === 'chairman')
     };
   }
 );
@@ -64,5 +66,6 @@ export const useAnyUserStore = defineStore(namespaceAnyUser, (): IUserStore => {
         (userEntity.userAccount.value || false) &&
         userEntity.participantAccount.value != null
     ),
+    isChairman: computed(() => userEntity.userAccount.value?.role === 'chairman')
   };
 });

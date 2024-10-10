@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-btn(outline @click="showAdd = true") добавить пайщика
+  q-btn(flat @click="showAdd = true") добавить пайщика
   q-dialog(v-model="showAdd" persistent :maximized="false" )
     q-card
       div()
