@@ -1,79 +1,86 @@
 <template lang="pug">
 div(flat bordered).q-pa-md
-  AddPaymentMethodButton(:username="username")
-  q-list.full-width.q-mt-lg
-    q-item(v-for="method in wallet.methods" :key="method.method_id").q-mt-md.full-width
+  p.text-h6 Изменить персональные реквизиты
+
+  p Указанные ниже реквизиты используются кооперативом для возврата паевых взносов пайщику.
+
+  q-list.full-width
+    q-item(v-for="(method, index) in wallet.methods" :key="method.method_id").full-width
       q-card(flat).full-width
         div(v-if="method.method_type ==='sbp' && isSBPData(method.data)")
-          div.flex.justify-between
+          div(style="max-width: 300px").flex.justify-between
 
-            q-badge(color="accent")
-              span №{{ method.method_id }}
+            span
+              span {{ index + 1}}.
               span(v-if="method.method_type ==='sbp'").q-pl-xs СБП
             DeletePaymentButton(:size="'xs'" :username="username" :method_id="method.method_id")
-          q-input(v-model="method.data.phone" label="Номер телефона" filled readonly)
 
-        div(v-if="method.method_type ==='bank_transfer' && isBankTransferData(method.data)")
+
+            q-input(v-model="method.data.phone" label="Номер телефона" standout="bg-teal text-white" readonly).full-width
+
+        div(style="max-width: 300px" v-if="method.method_type ==='bank_transfer' && isBankTransferData(method.data)")
           div.flex.justify-between
-            q-badge(color="accent")
-              span №{{ method.method_id }}
+            span
+              span {{ index + 1 }}.
               span(v-if="method.method_type ==='bank_transfer'").q-pl-xs Банковский перевод
             DeletePaymentButton(:size="'xs'" :username="username" :method_id="method.method_id")
 
+          div
+            q-select(
+              v-model="method.data.currency"
+              readonly
+              label="Валюта счёта"
+              standout="bg-teal text-white"
+              :options="[{ label: 'RUB', value: 'RUB' }]"
+              emit-value
+              map-options
+            )
 
-          q-select(
-            v-model="method.data.currency"
-            readonly
-            label="Валюта счёта"
-            filled
-            :options="[{ label: 'RUB', value: 'RUB' }]"
-            emit-value
-            map-options
-          )
+            q-input(
+              v-model="method.data.bank_name"
+              readonly
+              standout="bg-teal text-white"
+              label="Наименование банка"
+              autocomplete="off"
+            )
 
-          q-input(
-            v-model="method.data.bank_name"
-            readonly
-            filled
-            label="Наименование банка"
-            autocomplete="off"
-          )
+            q-input(
+              v-model="method.data.details.corr"
+              standout="bg-teal text-white"
+              readonly
+              mask="####################"
+              label="Корреспондентский счет"
+              autocomplete="off"
+            )
 
-          q-input(
-            v-model="method.data.details.corr"
-            filled
-            readonly
-            mask="####################"
-            label="Корреспондентский счет"
-            autocomplete="off"
-          )
+            q-input(
+              v-model="method.data.details.bik"
+              readonly
+              standout="bg-teal text-white"
+              mask="#########"
+              label="БИК"
+              autocomplete="off"
+            )
 
-          q-input(
-            v-model="method.data.details.bik"
-            readonly
-            filled
-            mask="#########"
-            label="БИК"
-            autocomplete="off"
-          )
+            q-input(
+              v-model="method.data.details.kpp"
+              readonly
+              standout="bg-teal text-white"
+              mask="#########"
+              label="КПП"
+              autocomplete="off"
+            )
 
-          q-input(
-            v-model="method.data.details.kpp"
-            readonly
-            filled
-            mask="#########"
-            label="КПП"
-            autocomplete="off"
-          )
+            q-input(
+              v-model="method.data.account_number"
+              standout="bg-teal text-white"
+              readonly
+              mask="####################"
+              label="Номер счета"
+              autocomplete="off"
+            )
+    AddPaymentMethodButton(:username="username")
 
-          q-input(
-            v-model="method.data.account_number"
-            filled
-            readonly
-            mask="####################"
-            label="Номер счета"
-            autocomplete="off"
-          )
 
 </template>
 

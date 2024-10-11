@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { RegistratorContract, SovietContract } from 'cooptypes'
 import { Generator } from '../src'
@@ -17,8 +18,6 @@ import { signatureExample } from './signatureExample'
 
 // eslint-disable-next-line ts/no-require-imports
 const fs = require('node:fs').promises
-
-import path from 'node:path'
 
 async function deleteAllFiles(folderPath: string) {
   try {

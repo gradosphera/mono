@@ -27,7 +27,7 @@ q-form(@submit.prevent="handlerSubmit")
   template(#default)
     slot
     div.flex
-      q-btn(v-if="showCancel" flat @click="cancel") {{ buttonCancelTxt }}
-      q-btn(v-if="showSubmit" :class="{'full-width': !showCancel}" type="submit" :loading="isSubmitting" color="primary") {{ buttonSubmitTxt }}
+      q-btn(v-if="showCancel" flat @click="cancel" size="sm") {{ buttonCancelTxt }}
+      q-btn(v-if="showSubmit" :class="{'full-width': !showCancel}" size="sm" type="submit" :loading="isSubmitting" color="primary") {{ buttonSubmitTxt }}
 
 </template>

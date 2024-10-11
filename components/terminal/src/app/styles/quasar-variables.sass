@@ -78,6 +78,13 @@ $primary   : teal !default
 $secondary : grey !default
 $accent    : orange !default
 
+// Темный градиент с минимальным затемнением и плавным переходом
+$primary-gradient-dark: linear-gradient(100deg, darken($primary, 0%), darken($primary, 40%))
+
+.bg-gradient-dark
+  background: $primary-gradient-dark
+  color: white
+
 // used by dark mode
 $dark-page : #121212 !default
 $dark      : #1d1d1d !default

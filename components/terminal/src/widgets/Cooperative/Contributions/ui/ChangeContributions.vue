@@ -58,24 +58,30 @@ watch(() => coop.publicCooperativeData, (newCoop: RegistratorContract.Tables.Coo
 </script>
 <template lang="pug">
 div.q-pa-md
+  p.text-h6 Изменить суммы взносов в кооперативе
+
   span Для физических лиц и индивидуальных предпринимателей:
-  div.q-pa-md.q-gutter-sm
-    q-input(filled v-model="localCoop.initial" label="Вступительный взнос")
-      template(#append)
-        p.q-pa-sm {{ CURRENCY }}
+  div(style="max-width: 300px")
+    div.q-pa-md.q-gutter-sm
+      q-input(standout="bg-teal text-white" v-model="localCoop.initial" label="Вступительный взнос")
+        template(#append)
+          span.text-overline {{ CURRENCY }}
 
-    q-input(filled v-model="localCoop.minimum" label="Минимальный паевый взнос")
-      template(#append)
-        p.q-pa-sm {{ CURRENCY }}
+      q-input(standout="bg-teal text-white" v-model="localCoop.minimum" label="Минимальный паевый взнос")
+        template(#append)
+          span.text-overline {{ CURRENCY }}
 
-  span.q-mt-lg Для юридических лиц:
-  div.q-pa-md.q-gutter-sm
-    q-input(filled v-model="localCoop.org_initial" label="Вступительный взнос")
-      template(#append)
-        p.q-pa-sm {{ CURRENCY }}
-    q-input(filled v-model="localCoop.org_minimum" label="Минимальный паевый взнос")
-      template(#append)
-        p.q-pa-sm {{ CURRENCY }}
-  q-btn(@click="save" outline) Сохранить
+    span.q-mt-lg Для юридических лиц:
+    div.q-pa-md.q-gutter-sm
+      q-input(standout="bg-teal text-white" v-model="localCoop.org_initial" label="Вступительный взнос")
+        template(#append)
+          span.text-overline {{ CURRENCY }}
+      q-input(standout="bg-teal text-white" v-model="localCoop.org_minimum" label="Минимальный паевый взнос")
+        template(#append)
+          span.text-overline {{ CURRENCY }}
+
+  q-btn(@click="save" size="sm" color="primary")
+    q-icon(name="save").q-mr-sm
+    span Сохранить
 
   </template>

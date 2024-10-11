@@ -16,7 +16,7 @@ div
       ).full-height
 
         template(#top)
-          q-btn(icon="add" @click="showAdd = true" outline) добавить участника
+          q-btn(icon="add" @click="showAdd = true" color="primary" size="sm") добавить участника
 
 
         template(#header="props")
@@ -48,7 +48,7 @@ div
   q-dialog(v-model="showAdd" persistent :maximized="false" )
     q-card
       div()
-        q-bar.bg-primary.text-white
+        q-bar.bg-gradient-dark
           span Добавить члена совета
           q-space
           q-btn(v-close-popup dense flat icon="close")
@@ -58,7 +58,7 @@ div
           div.q-pa-md
             p Внимание! Вы собираетесь добавить участника в совет кооператива. Введите идентификатор аккаунта для добавления:
             div.q-pa-md
-              q-input(v-model="persona.username" label="Идентификатор имени аккаунта" filled)
+              q-input(v-model="persona.username" label="Идентификатор имени аккаунта" standout="bg-teal text-white")
               //- q-input(v-model="persona.position_title" label="Позиция")
           div
             q-btn(flat @click="showAdd = false") Отменить

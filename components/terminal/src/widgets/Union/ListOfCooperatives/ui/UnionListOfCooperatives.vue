@@ -4,7 +4,6 @@ div
     v-if="coops"
     ref="tableRef" v-model:expanded="expanded"
     flat
-    bordered
     :rows="coops"
     :columns="columns"
     :table-colspan="9"
@@ -44,7 +43,7 @@ div
         q-td {{ moment(props.row.created_at).format('DD.MM.YY HH:mm:ss') }}
 
         q-td
-          q-btn-dropdown( label="действия" flat)
+          q-btn-dropdown( label="действия" flat size="sm")
             q-list
               q-item(v-if="props.row.status !== 'active'" clickable v-close-popup @click="activate(props.row.username)")
                 q-item-section

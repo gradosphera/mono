@@ -1,14 +1,42 @@
 <template lang="pug">
 div
-  q-card(v-if="contacts && contacts.details" flat bordered).q-pa-sm
+  q-card(v-if="contacts && contacts.details" flat).q-pa-sm
     //- p.text-h6.text-center Контакты
-    q-input(type="textarea" autogrow readonly label="Наименование организации" v-model="contacts.full_name")
-    q-input(type="textarea" autogrow readonly label="ИНН" v-model="contacts.details.inn")
-    q-input(type="textarea" autogrow readonly label="ОГРН" v-model="contacts.details.ogrn")
-    q-input(type="textarea" autogrow readonly label="Юридический адрес" v-model="contacts.full_address")
-    q-input(type="textarea" autogrow readonly label="Телефон" v-model="contacts.phone")
-    q-input(type="textarea" autogrow readonly label="Электронная почта" v-model="contacts.email")
-    q-input(type="textarea" autogrow readonly label="Председатель" v-model="chairman")
+
+    q-item
+      q-item-section
+        q-item-label(caption) Наименование организации
+        q-item-label {{ contacts.full_name }}
+
+    q-item
+      q-item-section
+        q-item-label(caption) ИНН
+        q-item-label {{ contacts.details.inn }}
+
+    q-item
+      q-item-section
+        q-item-label(caption) ОГРН
+        q-item-label {{ contacts.details.ogrn }}
+
+    q-item
+      q-item-section
+        q-item-label(caption) Юридический адрес
+        q-item-label {{ contacts.full_address }}
+
+    q-item
+      q-item-section
+        q-item-label(caption) Телефон
+        q-item-label {{ contacts.phone }}
+
+    q-item
+      q-item-section
+        q-item-label(caption) Электронная почта
+        q-item-label {{ contacts.email }}
+
+    q-item
+      q-item-section
+        q-item-label(caption) Председатель
+        q-item-label {{ chairman }}
 
 </template>
 

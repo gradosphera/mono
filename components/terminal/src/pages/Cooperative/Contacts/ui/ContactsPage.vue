@@ -1,9 +1,5 @@
 <template lang="pug">
-div.row.justify-center
-  div.col-md-6.col-xs-12
-    CooperativeContacts.full-width
-
-
+CooperativeContacts.full-width.q-pa-md
 </template>
 
 <script lang="ts" setup>

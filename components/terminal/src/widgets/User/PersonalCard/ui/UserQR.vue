@@ -1,5 +1,5 @@
 <template lang="pug">
-div menu
+div qr
 </template>
 <script lang="ts" setup>
 </script>

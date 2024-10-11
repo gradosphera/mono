@@ -3,7 +3,6 @@ q-card(flat)
   q-table(
     ref="tableRef"
     flat
-    bordered
     :rows="decisions"
     :columns="columns"
     :table-colspan="9"

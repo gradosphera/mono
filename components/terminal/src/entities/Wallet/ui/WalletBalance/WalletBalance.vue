@@ -4,8 +4,27 @@ const walletStore = useWalletStore()
 </script>
 
 <template lang="pug">
-div
-q-input(readonly standout label="Паевый счёт" v-model="walletStore.wallet.available" style="font-size: 18px;")
-q-input(readonly standout label="Членский счёт" v-model="walletStore.wallet.blocked" style="font-size: 18px;")
+q-list(flat).q-gutter-sm
+  q-item
+    q-item-section
+      q-item-label(caption) Паевый счёт
+      q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.available }}
+
+  q-item
+    q-item-section
+      q-item-label(caption) Минимальный паевый счёт
+      q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.minimum }}
+
+  q-item
+    q-item-section
+      q-item-label(caption) Заблокировано в целевых программах
+      q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.blocked }}
+
+
+  q-item(v-for="program_wallet of walletStore.program_wallets" :key="program_wallet.id" v-ripple clickable)
+    q-item-section
+      q-item-label(caption) {{ program_wallet.program_details.title }}
+
+      q-item-label(style="font-size: 20px;").text-bold {{program_wallet.available}}
 
 </template>

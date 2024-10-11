@@ -1,5 +1,5 @@
 <template lang='pug'>
-div.q-pa-xs.text-center {{ text }}
+div.contact-footer.q-pa-xs.text-grey-7.text-center {{ text }}
 </template>
 
 <script setup lang='ts'>
@@ -12,6 +12,13 @@ const props = defineProps({
     default: ''
   }
 });
+
 const text = computed(() => props.text)
 
 </script>
+
+<style>
+.contact-footer {
+  font-size: 12px !important;
+}
+</style>

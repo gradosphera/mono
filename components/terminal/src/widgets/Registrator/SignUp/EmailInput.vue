@@ -5,7 +5,7 @@ div
 
     q-input.q-mt-lg(
       v-model.trim='email',
-      outlined,
+      standout="bg-teal text-white",
       type='email',
       label='Введите email',
       :readonly='inLoading',

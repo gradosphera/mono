@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-img(:src="ava").bg-secondary.rounded-borders
+  q-img(:src="ava").bg-grey.rounded-borders
 </template>
 
 <script setup lang="ts">

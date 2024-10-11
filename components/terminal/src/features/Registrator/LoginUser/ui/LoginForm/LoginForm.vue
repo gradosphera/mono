@@ -5,7 +5,7 @@ form(@submit.prevent="submit").full-width
     label="Введите электронную почту"
     color="primary"
     hint=""
-    outlined
+    standout="bg-teal text-white"
     class="full-width"
     autocorrect="off"
     autocapitalize="off"
@@ -18,12 +18,12 @@ form(@submit.prevent="submit").full-width
     label="Введите ключ доступа"
     color="primary"
     hint=""
-    outlined
+    standout="bg-teal text-white"
     class="full-width"
     type="password"
     autocorrect="off"
     autocapitalize="off"
-    autocomplete="off"
+    autocomplete="on"
     spellcheck="false")
 
   q-btn(

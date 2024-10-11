@@ -10,7 +10,7 @@ div(v-if="installStore")
 
       IndividualDataForm(v-model:userData="installStore.soviet[index]").q-mt-lg
         template(#top)
-          q-input(filled v-model="installStore.soviet[index].individual_data.email" label="Электронная почта")
+          q-input(standout="bg-teal text-white" v-model="installStore.soviet[index].individual_data.email" label="Электронная почта")
 
   div.flex.justify-around
     q-btn(@click="add" color="primary" icon="add") добавить члена

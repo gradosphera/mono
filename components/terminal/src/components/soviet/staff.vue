@@ -57,8 +57,8 @@ div
                     span.text-grey.full-width Разрешения {{ props.row.username }}
                     div(v-for="(right, index) of props.row.rights" :key="index" ).q-pa-sm
                       q-card
-                        q-input(v-model="right.contract" square filled label="Контракт")
-                        q-input(v-model="right.action_name" square filled label="Действие")
+                        q-input(v-model="right.contract" square standout="bg-teal text-white" label="Контракт")
+                        q-input(v-model="right.action_name" square standout="bg-teal text-white" label="Действие")
                         q-btn( icon="fas fa-trash" size="xs" flat color="grey" @click="rmRight(index, props.row.username)").full-width
 
                     q-btn(flat color="primary" size="lg" icon="fas fa-plus" @click="addRight(props.row.username)")

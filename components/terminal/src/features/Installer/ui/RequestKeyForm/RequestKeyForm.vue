@@ -5,7 +5,7 @@ form(@submit.prevent="submit").full-width
     label="Введите ключ доступа"
     color="primary"
     hint=""
-    outlined
+    standout="bg-teal text-white"
     class="full-width"
     type="password"
     autocorrect="off"

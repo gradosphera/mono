@@ -1,25 +1,25 @@
 <template lang="pug">
 div
-  q-btn(@click="showAdd=true") Добавить
+  q-btn(@click="showAdd=true" color="primary") Добавить
   q-dialog(v-model="showAdd" persistent :maximized="false" )
     ModalBase(:title='"Добавить кооператив"' )
       Form(:handler-submit="addNow" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Добавить'" @cancel="clear").q-pa-md
-        q-input(filled label="Имя аккаунта" v-model="data.coopname" :rules="[val => notEmpty(val)]")
-        q-input(filled label="Краткое описание" v-model="data.params.description" type="textarea" :rules="[val => notEmpty(val)]")
+        q-input(standout="bg-teal text-white" label="Имя аккаунта" v-model="data.coopname" :rules="[val => notEmpty(val)]")
+        q-input(standout="bg-teal text-white" label="Краткое описание" v-model="data.params.description" type="textarea" :rules="[val => notEmpty(val)]")
 
-        q-input(filled label="Вступительный взнос для физлиц и ИП" v-model="data.params.initial" type="number" :min="0" :rules="[val => notEmpty(val)]")
+        q-input(standout="bg-teal text-white" label="Вступительный взнос для физлиц и ИП" v-model="data.params.initial" type="number" :min="0" :rules="[val => notEmpty(val)]")
           template(#append)
             p {{CURRENCY}}
 
-        q-input(filled label="Минимальный паевый взнос для физлиц и ИП" v-model="data.params.minimum" type="number" :min="0" :rules="[val => notEmpty(val)]")
+        q-input(standout="bg-teal text-white" label="Минимальный паевый взнос для физлиц и ИП" v-model="data.params.minimum" type="number" :min="0" :rules="[val => notEmpty(val)]")
           template(#append)
             p {{CURRENCY}}
 
-        q-input(filled label="Вступительный взнос для организаций" v-model="data.params.org_initial" type="number" :min="0" :rules="[val => notEmpty(val)]")
+        q-input(standout="bg-teal text-white" label="Вступительный взнос для организаций" v-model="data.params.org_initial" type="number" :min="0" :rules="[val => notEmpty(val)]")
           template(#append)
             p {{CURRENCY}}
 
-        q-input(filled label="Минимальный паевый взнос для организаций" v-model="data.params.org_minimum" type="number" :min="0"  :rules="[val => notEmpty(val)]")
+        q-input(standout="bg-teal text-white" label="Минимальный паевый взнос для организаций" v-model="data.params.org_minimum" type="number" :min="0"  :rules="[val => notEmpty(val)]")
           template(#append)
             p {{CURRENCY}}
 

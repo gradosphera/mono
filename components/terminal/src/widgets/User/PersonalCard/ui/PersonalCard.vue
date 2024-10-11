@@ -1,34 +1,57 @@
 <template lang="pug">
-div(v-if="currentUser?.username" flat bordered).q-pa-md.digital-certificate
+div(v-if="currentUser?.username" flat bordered).q-pa-md
   div.row
     div.col-md-4.col-xs-12
-      //- p.text-bold.full-width.text-sm.text-center УДОСТОВЕРЕНИЕ ПАЙЩИКА
-
       div(style="flex-grow: 1; display: flex; justify-content: center;")
+        //- UserQR
+
         AutoAvatar(style="width: 125px;" :username="currentUser.username").q-pa-sm.q-pt-lg
+
     div.col-md-8.col-xs-12
-      q-list( dense )
-        div().text-center
-          q-badge(v-if="userType === 'individual'").text-center физическое лицо
-          q-badge(v-if="userType === 'entrepreneur'").text-center индивидуальный предприниматель
-          q-badge(v-if="userType === 'organization'").text-center юридическое лицо
+      div
+        div
+          q-item
+            q-item-section
+              q-item-label(caption) Пайщик
+              q-item-label {{ displayName }}
 
-        q-input(standout dense label="Идентификатор" v-model="currentUser.username" readonly)
 
-        q-input(standout dense label="Пайщик" readonly v-model="displayName")
+          q-item
+            q-item-section
+              q-item-label(caption) Зарегистрирован как
+              q-item-label(v-if="userType === 'individual'") физическое лицо
+              q-item-label(v-if="userType === 'entrepreneur'") индивидуальный предприниматель
+              q-item-label(v-if="userType === 'organization'") юридическое лицо
 
-        q-input(v-if="userType === 'individual' && individualProfile" standout dense label="Дата рождения" readonly v-model="individualProfile.birthdate")
+          q-item
+            q-item-section
+              q-item-label(caption) Имя аккаунта
+              q-item-label {{ currentUser.username }}
 
-        q-input(v-if="userType === 'organization' && organizationProfile" standout dense label="ИНН / ОГРН" readonly v-model="inn_ogrn")
+          q-item(v-if="userType === 'individual' && individualProfile")
+            q-item-section
+              q-item-label(caption) Дата рождения
+              q-item-label {{ individualProfile.birthdate }}
 
-        q-input(v-if="userProfile" standout dense label="Телефон" readonly v-model="userProfile.phone")
+          q-item(v-if="userType === 'organization' && organizationProfile")
+            q-item-section
+              q-item-label(caption) ИНН / ОГРН
+              q-item-label {{ inn_ogrn }}
 
-        q-input(v-if="userProfile" standout dense label="Почта" readonly v-model="userProfile.email")
+          q-item(v-if="userProfile")
+            q-item-section
+              q-item-label(caption) Телефон
+              q-item-label {{ userProfile.phone }}
+
+          q-item(v-if="userProfile")
+            q-item-section
+              q-item-label(caption) Почта
+              q-item-label {{ userProfile.email }}
 
   </template>
 
 <script lang="ts" setup>
-import { AutoAvatar } from '.';
+import { AutoAvatar, UserQR } from '.';
 import { useCurrentUserStore } from 'src/entities/User'
 import type { IEntrepreneurData, IIndividualData, IOrganizationData } from 'src/shared/lib/types/user/IUserData';
 import { computed } from 'vue';
@@ -82,7 +105,5 @@ const inn_ogrn = computed(() => {
 
 </script>
 <style>
-.digital-certificate {
-  padding: 50px !important;
-}
+
 </style>

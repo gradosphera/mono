@@ -7,7 +7,7 @@ div
     form(@submit.prevent="submit").q-mt-md.full-width
       q-input(label="Введите электронную почту"
         v-model="email"
-        outlined
+        standout="bg-teal text-white"
         autocorrect="off"
         autocapitalize="off"
         autocomplete="off"

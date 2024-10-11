@@ -62,7 +62,7 @@ export class Generator implements IGenerator {
       [Actions.RegulationElectronicSignature.Template.registry_id]: new Actions.RegulationElectronicSignature.Factory(this.storage), // 2
       [Actions.PrivacyPolicy.Template.registry_id]: new Actions.PrivacyPolicy.Factory(this.storage), // 3
       [Actions.UserAgreement.Template.registry_id]: new Actions.UserAgreement.Factory(this.storage), // 4
-      [Actions.CoopenomicsAgreement.Template.registry_id]: new Actions.UserAgreement.Factory(this.storage), // 50
+      [Actions.CoopenomicsAgreement.Template.registry_id]: new Actions.CoopenomicsAgreement.Factory(this.storage), // 50
       [Actions.ParticipantApplication.Template.registry_id]: new Actions.ParticipantApplication.Factory(this.storage), // 100
       [Actions.DecisionOfParticipantApplication.Template.registry_id]: new Actions.DecisionOfParticipantApplication.Factory(this.storage), // 501
     }

@@ -8,7 +8,7 @@ div(v-if="step")
 
     UserDataForm(v-model:userData="store.userData")
       template(#bottom="{userDataForm}")
-        q-checkbox(v-model='store.agreements.condidential' full-width filled).q-mt-lg
+        q-checkbox(v-model='store.agreements.condidential' full-width standout="bg-teal text-white").q-mt-lg
           | Я даю своё согласие на обработку своих персональных данных в соответствии с
           ReadAgreementDialog(v-if="privacyAgreement" :agreement="privacyAgreement" v-model:agree="store.agreements.condidential" text="политикой конфиденциальности")
             AgreementReader(:agreement="privacyAgreement").q-mb-lg

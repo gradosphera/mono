@@ -1,12 +1,14 @@
 <template lang="pug">
 div.DepositPreparator
-  q-btn(@click="showDialog=true" flat icon="fa-solid fa-chevron-up" size="md") Совершить взнос
+  q-btn(@click="showDialog=true" color="primary" size="sm")
+    q-icon(name="fa-solid fa-chevron-up").q-mr-sm
+    span Совершить взнос
   q-dialog(v-model="showDialog" @hide="clear")
     ModalBase(v-if="!paymentOrder" :title='"Введите сумму"' )
       Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm
-        q-input(v-model="quantity" filled type="number" :min="0" :step="1000" :rules="[val => val > 0 || 'Сумма взноса должна быть положительной']")
+        q-input(v-model="quantity" standout="bg-teal text-white" type="number" :min="0" :step="1000" :rules="[val => val > 0 || 'Сумма взноса должна быть положительной']")
           template(#append)
-            span.q-pa-sm {{ CURRENCY }}
+            span.text-overline {{ CURRENCY }}
 
     ModalBase(v-else :title='"Совершите взнос"' style="min-height: 200px !important;")
       div(style="max-width:400px").q-pa-md

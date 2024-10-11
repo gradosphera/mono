@@ -1,10 +1,10 @@
 <template lang="pug">
 div
-q-card(flat bordered).q-pa-md
-  span.text-h6 Выход из Приложения
-  div
+q-card(flat).q-pa-md
+  p.text-h6 Выйти из приложения
+  div.q-pa-sm
     span Для повторного входа потребуется ввести ключ доступа, выданный при регистрации.
-  q-btn(color="orange" @click="logout").q-mt-md
+  q-btn(size="sm" color="primary" @click="logout").q-mt-md
     q-icon( color="white" name="logout")
     span.q-ml-sm Выйти
 

@@ -28,8 +28,8 @@ q-tabs(
 import { useCurrentUserStore } from 'src/entities/User';
 import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useDesktopStore } from '../../model';
-import { type IRoute } from '../../model/types';
+import { useDesktopStore } from 'src/entities/Desktop/model';
+import { type IRoute } from 'src/entities/Desktop/model/types';
 
 const desktop = useDesktopStore()
 const routes = ref<IRoute[]>([])

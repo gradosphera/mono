@@ -79,24 +79,25 @@ div
   q-table(flat :rows-per-page-options="[0]" :rows="expenseFunds" :columns="columns" row-key="id")
     template(#top)
       div.full-width
-        p.text-h6 Фонды списания
-        p Фонды списания используются для фиксации расходов кооператива из кошелька членских взносов.
+        p.text-h6 Изменить фонды списания
+        p Фонды списания используются для фиксации расходов кооператива с накопительного счёта невозвратных членских взносов кооператива, которые остались после распределения по фондам накопления.
 
       div.q-mt-lg.full-width
-        q-btn(icon="add" @click="showAdd = true" color="primary") добавить фонд
+        q-btn(icon="add" @click="showAdd = true" color="primary" size="sm") добавить фонд
 
     template(v-slot:body="props")
       q-tr(:props="props" :key="props.row.id")
+
         q-td(:props="props" key="id") {{ props.row.id }}
         q-td(:props="props" key="name")
-          q-input(v-model="props.row.name" :readonly="props.row.id <= 3" filled dense)
+          q-input(v-model="props.row.name" :readonly="props.row.id <= 5" standout="bg-teal text-white" dense)
 
         q-td(:props="props" key="description")
-          q-input( placeholder="Место для заметки" v-model="props.row.description" filled dense)
+          q-input( placeholder="Место для заметки" v-model="props.row.description" standout="bg-teal text-white" dense)
 
         q-td
-          q-btn(@click="saveFund(props.row)" label="Обновить" color="primary" dense).q-ma-xs
-          q-btn(@click="delFund(props.row)"  label="Удалить" color="primary" dense).q-ma-xs
+          q-btn(@click="saveFund(props.row)" label="Обновить" color="primary" size="sm" dense).q-ma-xs
+          q-btn(@click="delFund(props.row)"  label="Удалить" color="primary" size="sm" dense).q-ma-xs
 
   AddExpenseFund(:showAdd="showAdd" @close="showAdd = false")
 

@@ -1,11 +1,15 @@
 <template lang="pug">
 div.q-pa-md
-  p Контактные данные для отображения в разделе 'Контакты':
-  div.q-pa-md
-    q-input(v-model="phone" label="Телефон")
-    q-input(v-model="email" label="Е-почта")
+  p.text-h6 Изменить контакты кооператива
+  p Контактные данные, которые отображаются в разделе 'Контакты' для пайщиков:
 
-  q-btn(@click='update') Сохранить
+  div.q-pa-md.q-gutter-sm
+    q-input(v-model="phone" standout="bg-teal text-white" label="Телефон" style="max-width: 300px;")
+    q-input(v-model="email" standout="bg-teal text-white" label="Е-почта" style="max-width: 300px;")
+
+  q-btn(@click='update' size="sm" color="primary")
+    q-icon(name="save").q-mr-sm
+    span сохранить
 
 </template>
 <script lang="ts" setup>

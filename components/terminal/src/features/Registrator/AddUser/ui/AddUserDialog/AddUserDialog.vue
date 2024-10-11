@@ -1,10 +1,12 @@
 <template lang="pug">
 div
-  q-btn(flat @click="showAdd = true") добавить пайщика
+  q-btn(size="sm" @click="showAdd = true" color="primary")
+    q-icon(name="add")
+    span добавить пайщика
   q-dialog(v-model="showAdd" persistent :maximized="false" )
     q-card
       div()
-        q-bar.bg-primary.text-white
+        q-bar.bg-gradient-dark.text-white
           span Добавить пайщика
           q-space
           q-btn(v-close-popup dense flat icon="close")
@@ -17,12 +19,12 @@ div
 
             UserDataForm(v-model:userData="state.userData")
               template(#top)
-                q-input(@change="changeEmail" v-model="state.email" filled label="Электронная почта" :rules='[validateEmail, validateExists]').q-mb-md
+                q-input(@change="changeEmail" v-model="state.email" standout="bg-teal text-white" label="Электронная почта" :rules='[validateEmail, validateExists]').q-mb-md
 
               template(#bottom="{userDataForm}")
 
                 q-input(
-                  filled
+                  standout="bg-teal text-white"
                   v-model="addUserState.created_at"
                   mask="datetime"
                   label="Дата и время подписания заявления"
@@ -33,7 +35,7 @@ div
                 ).q-mt-md
 
                 q-input(
-                  filled
+                  standout="bg-teal text-white"
                   v-model="initial"
                   type="number"
                   :min="0"
@@ -42,12 +44,12 @@ div
                   hint="был оплачен пайщиком при вступлении"
                   ).q-mt-md
                   template(#append)
-                    p {{ coop.governSymbol }}
+                    span.text-overline {{ coop.governSymbol }}
                     q-btn(icon="sync" flat dense @click="refresh('initial')")
 
-                q-input(filled v-model="minimum" hint="был оплачен пайщиком при вступлении" type="number" label="Размер минимального паевого взноса" :rules="[val => moreThenZero(val)]").q-mt-md
+                q-input(standout="bg-teal text-white" v-model="minimum" hint="был оплачен пайщиком при вступлении" type="number" label="Размер минимального паевого взноса" :rules="[val => moreThenZero(val)]").q-mt-md
                   template(#append)
-                    p {{ coop.governSymbol }}
+                    span.text-overline {{ coop.governSymbol }}
                     q-btn(icon="sync" flat dense @click="refresh('minimum')")
 
                 q-card(flat).q-mt-md
@@ -57,13 +59,9 @@ div
                       q-checkbox(v-model="addUserState.spread_initial")
 
                     q-item-section
-                      template(v-if="addUserState.spread_initial")
-                        q-item-label Начислить вступительный взнос
-                        q-item-label(caption) Вступительный взнос будет начислен в кошелек кооператива и доступен для списания по счету хозяйственной деятельности для руководства кооператива.
+                      q-item-label Начислить вступительный взнос
+                      q-item-label(caption) Вступительный взнос будет зачислен на счёт кошелька кооператива и станет доступен для списания по фонду хозяйственной деятельности.
 
-                      template(v-else)
-                        q-item-label Не начислять вступительный взнос
-                        q-item-label(caption) Вступительный взнос НЕ будет начислен в кошелек кооператива. Считаем, что учет вступительного взноса производился и будет производиться вне цифровой системы.
 
                 q-card(flat).q-mt-md
 

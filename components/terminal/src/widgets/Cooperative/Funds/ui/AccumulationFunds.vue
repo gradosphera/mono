@@ -92,27 +92,27 @@ div
   q-table(flat :rows-per-page-options="[0]" :rows="accumulationFunds" :columns="columns" row-key="id")
     template(#top)
       div.full-width
-        p.text-h6 Фонды накопления
-        p Все членские взносы распределяются по фондам накопления, а остаток после распределения заносится на баланс кошелька членских взносов для дальнейших расходов по фондам списания.
+        p.text-h6 Изменить фонды накопления
+        p Все невозвратные членские взносы кооператива распределяются по фондам накопления в указанных соотношениях. Остаток после распределения заносится на накопительный счёт фондов списания, откуда расходуется по служебным запискам членов совета.
 
       div.q-mt-lg.full-width
-        q-btn(icon="add" @click="showAdd = true" color="primary") добавить фонд
+        q-btn(icon="add" @click="showAdd = true" color="primary" size="sm") добавить фонд
 
     template(v-slot:body="props")
       q-tr(:props="props" :key="props.row.id")
         q-td(:props="props" key="id") {{ props.row.id }}
         q-td(:props="props" key="name")
-          q-input(v-model="props.row.name" :label="getLabel(props.row.id)" :readonly="props.row.id <= 3" filled dense)
+          q-input(v-model="props.row.name" :label="getLabel(props.row.id)" :readonly="props.row.id <= 3" standout="bg-teal text-white" dense)
 
         q-td(:props="props" key="description")
-          q-input( placeholder="Место для заметки" v-model="props.row.description" filled dense)
+          q-input( placeholder="Место для заметки" v-model="props.row.description" standout="bg-teal text-white" dense)
 
         q-td(:props="props" key="percent")
-          q-input( v-model="props.row.percent" type="number" filled dense)
+          q-input( v-model="props.row.percent" type="number" standout="bg-teal text-white" dense)
 
         q-td
-          q-btn(@click="saveFund(props.row)" label="Обновить" color="primary" dense).q-ma-xs
-          q-btn(@click="delFund(props.row)" :disabled="props.row.id <= 3" label="Удалить" color="primary" dense).q-ma-xs
+          q-btn(@click="saveFund(props.row)" label="Обновить" color="primary" dense size="sm").q-ma-xs
+          q-btn(@click="delFund(props.row)" :disabled="props.row.id <= 3" label="Удалить" color="primary" dense size="sm").q-ma-xs
     template(#bottom)
       p {{ totalAccumulationPercent }}% от каждого членского взноса распределяется среди всех фондов накопления, а {{ totalExpensePercent }}% направляются на кошелёк членских взносов кооператива для дальнейших расходов по фондам списания.
   AddAccumulationFund(:showAdd="showAdd" @close="showAdd = false")

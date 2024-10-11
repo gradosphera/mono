@@ -1,64 +1,61 @@
 <template lang="pug">
-q-layout(view="hHh LpR fFf")
-  q-header(v-if="!loggedIn" bordered :class="headerClass").header
+q-layout(view="hHh LpR fff")
+  q-header(bordered :class="headerClass").header
     q-toolbar()
+      q-btn(v-if="loggedIn" stretch icon="menu" flat @click="leftDrawerOpen = !leftDrawerOpen")
+      q-btn(stretch flat class="btn-title" dense @click="goTo('index')").q-pl-md.q-pr-md
+        span {{ COOP_SHORT_NAME }}
+
       q-toolbar-title()
-        q-btn(stretch flat class="btn-title" :dense="isMobile" @click="goTo('index')").q-ml-sm
-          //- img(:src="HeaderLogo" alt="" style="height: 50px;").q-pa-sm
-          span {{ COOP_SHORT_NAME }}
 
-      q-btn(stretch flat @click="toogleDark")
-        q-icon(:name="isDark ? 'brightness_3' : 'brightness_7'")
+      ToogleDarkLight(:showText="true")
 
+      template(v-if="!loggedIn")
+        q-btn(v-if="showRegisterButton && !is('signup') && !is('install')" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="signup")
+          span.q-pr-sm регистрация
+          i.fa-solid.fa-right-to-bracket
 
-      q-btn(v-if="showRegisterButton && !is('signup') && !is('install')" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="signup")
-        span.q-pr-sm регистрация
-        i.fa-solid.fa-right-to-bracket
+        q-btn(v-if="showRegisterButton && is('signup')" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="login")
+          span.q-pr-sm вход
+          i.fa-solid.fa-right-to-bracket
 
-      q-btn(v-if="showRegisterButton && is('signup')" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="login")
-        span.q-pr-sm вход
-        i.fa-solid.fa-right-to-bracket
+  q-drawer(v-model="leftDrawerOpen" side="left" bordered :width="200")
+    LeftDrawerMenu
 
+  //- q-header(v-if="!isMobile && loggedIn" style="border-bottom: 1px solid #00800038 !important; " :style="{ 'background': $q.dark.isActive ? 'black' : 'white' }" :class="headerClass").header
 
-  q-header(v-if="!isMobile && loggedIn" style="border-bottom: 1px solid #00800038 !important; " :style="{ 'background': $q.dark.isActive ? 'black' : 'white' }" :class="headerClass").header
-    Menu(style="border-bottom: 1px solid #00800038 !important; ")
-    SecondLevelMenu
 
   //футер контактов
-  q-footer(v-if="!loggedIn" :class="headerClass")
+  q-footer(v-if="!loggedIn" :class="headerClass" bordered)
     ContactsFooter(:text="footerText")
 
-  q-footer(v-if="loggedIn && isMobile" style="border-top: 1px solid #00800038 !important; "  :class="headerClass")
-    SecondLevelMenu
-    Menu(style="border-top: 1px solid #00800038 !important; " )
+  //- q-footer(v-if="loggedIn && isMobile" style="border-top: 1px solid #00800038 !important; "  :class="headerClass")
+    //- SecondLevelMenu
+    //- Menu(style="border-top: 1px solid #00800038 !important; " )
 
   //контейнер
   q-page-container
-    q-page
+    q-page.q-pb-lg
       router-view
-
 
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useWindowSize } from 'vue-window-size'
 import config from 'src/app/config'
-
+import { ToogleDarkLight } from 'src/shared/ui/ToogleDarkLight'
 const router = useRouter()
 const route = useRoute()
 
-// import HeaderLogo from '~/assets/logo-white.png?url'
-import Menu from 'src/components/menu/drawerMenu.vue'
-
+import { LeftDrawerMenu } from 'src/widgets/Desktop/LeftDrawerMenu'
 import { COOP_SHORT_NAME } from 'src/shared/config'
 import { useCurrentUserStore } from 'src/entities/User'
 import { useSessionStore } from 'src/entities/Session'
 const session = useSessionStore()
 import { ContactsFooter } from 'src/shared/ui/Footer'
-import { SecondLevelMenu } from 'src/entities/Desktop'
 
 const $q = useQuasar()
 
@@ -72,10 +69,20 @@ const cooperativeStore = useCooperativeStore()
 
 cooperativeStore.loadContacts()
 
+const leftDrawerOpen = ref(true)
+
 const footerText = computed(() => {
   if (cooperativeStore.contacts && cooperativeStore.contacts.details)
     return `${cooperativeStore.contacts.full_name}, ИНН: ${cooperativeStore.contacts.details.inn}, ОГРН: ${cooperativeStore.contacts.details.ogrn}, телефон: ${cooperativeStore.contacts.phone}, почта: ${cooperativeStore.contacts.email}`
   else return ''
+})
+
+onMounted(() => {
+  if (isMobile.value)
+    leftDrawerOpen.value = false
+
+  if (!loggedIn.value)
+    leftDrawerOpen.value = false
 })
 
 defineExpose({
@@ -126,9 +133,6 @@ const login = () => {
 <style lang="scss">
 .btn-title {
   font-size: 20px;
-  height: 60px;
-  padding-top: 2px;
-  padding-bottom: 6px;
 }
 
 .btn-menu {
@@ -142,7 +146,6 @@ const login = () => {
 }
 
 .q-toolbar {
-  border-bottom: 1px solid #00800038;
   padding-left: 0px !important;
   padding-right: 0px !important;
 }

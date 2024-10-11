@@ -2,7 +2,6 @@
 q-table(
   ref="tableRef" v-model:expanded="expanded"
   flat
-  bordered
   :rows="participants.results"
   :columns="columns"
   :table-colspan="9"

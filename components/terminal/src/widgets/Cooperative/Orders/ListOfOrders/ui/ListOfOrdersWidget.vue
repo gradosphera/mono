@@ -6,7 +6,6 @@
         ref="tableRef"
         class="my-sticky-dynamic"
         flat
-        bordered
         :rows="orders.results"
         row-key="id"
         :columns="columns"
@@ -57,7 +56,7 @@
                 q-list(dense)
                   SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
                   SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
-                  SetOrderCompletedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
+                  //- SetOrderCompletedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
 
           q-tr(v-if="expanded.get(props.row.order_num)" :key="`e_${props.row.order_num}`" :props="props" class="q-virtual-scroll--with-prev")
             q-td(colspan="100%")
@@ -75,7 +74,7 @@
   import { useOrderStore } from 'src/entities/Order';
   import { SetOrderPaidStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderPaidStatusButton';
   import { SetOrderRefundedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderRefundedStatusButton';
-  import { SetOrderCompletedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderCompletedStatusButton';
+  // import { SetOrderCompletedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderCompletedStatusButton';
 
   const orderStore = useOrderStore()
   const orders = computed(() => orderStore.orders)

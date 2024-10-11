@@ -3,29 +3,29 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
   q-select(
     v-model="userData.organization_data.type"
     label="Выберите тип организации"
-    filled
+    standout="bg-teal text-white"
     :options="[{ label: 'ООО', value: 'ooo' }, { label: 'Потребительский Кооператив', value: 'coop' }]"
     emit-value
     map-options).q-mb-md
-  q-input(v-model="userData.organization_data.short_name" filled hint="ООО Ромашка" label="Краткое наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.full_name" filled hint="Общество Ограниченной Ответственности 'Ромашка'" label="Полное наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.represented_by.last_name" filled label="Фамилия представителя" hint="Иванов" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.represented_by.first_name" filled label="Имя представителя" hint="Иван" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.represented_by.middle_name" filled label="Отчество представителя" hint="Иванович" :rules="[val => validatePersonalName(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.short_name" standout="bg-teal text-white" hint="ООО Ромашка" label="Краткое наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.full_name" standout="bg-teal text-white" hint="Общество Ограниченной Ответственности 'Ромашка'" label="Полное наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.last_name" standout="bg-teal text-white" label="Фамилия представителя" hint="Иванов" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.first_name" standout="bg-teal text-white" label="Имя представителя" hint="Иван" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.middle_name" standout="bg-teal text-white" label="Отчество представителя" hint="Иванович" :rules="[val => validatePersonalName(val)]" autocomplete="off")
 
-  q-input(v-model="userData.organization_data.represented_by.based_on" filled label="Представитель действует на основании" hint="решения учредителей №1 от 01.01.2021 г" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.represented_by.position" filled label="Должность представителя" hint="Директор" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.based_on" standout="bg-teal text-white" label="Представитель действует на основании" hint="решения учредителей №1 от 01.01.2021 г" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.position" standout="bg-teal text-white" label="Должность представителя" hint="Директор" :rules="[val => notEmpty(val)]" autocomplete="off")
 
-  q-input(v-model="userData.organization_data.phone" filled label="Номер телефона представителя"  mask="+7 (###) ###-##-##" fill-mask  hint="+7 (###) ###-##-##" :rules="[val => notEmpty(val), val => notEmptyPhone(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.phone" standout="bg-teal text-white" label="Номер телефона представителя"  mask="+7 (###) ###-##-##" fill-mask  hint="+7 (###) ###-##-##" :rules="[val => notEmpty(val), val => notEmptyPhone(val)]" autocomplete="off")
 
-  q-select(v-model="userData.organization_data.country" filled map-options emit-value option-label="label" option-value="value" label="Страна" :options="[{ label: 'Россия', value: 'Russia' }]" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.city" filled label="Город" hint="Москва" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.full_address" filled hint="г. Москва, ул. Арбат, д.12" label="Юридический адрес регистрации" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-select(v-model="userData.organization_data.country" standout="bg-teal text-white" map-options emit-value option-label="label" option-value="value" label="Страна" :options="[{ label: 'Россия', value: 'Russia' }]" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.city" standout="bg-teal text-white" label="Город" hint="Москва" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.full_address" standout="bg-teal text-white" hint="г. Москва, ул. Арбат, д.12" label="Юридический адрес регистрации" :rules="[val => notEmpty(val)]" autocomplete="off")
 
 
   q-input(
     v-model="userData.organization_data.details.inn"
-    filled
+    standout="bg-teal text-white"
     mask="############"
     label="ИНН организации"
     hint="10 или 12 цифр"
@@ -35,7 +35,7 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
 
   q-input(
     v-model="userData.organization_data.details.ogrn"
-    filled
+    standout="bg-teal text-white"
     mask="###############"
     label="ОГРН организации"
     hint="13 или 15 цифр"
@@ -45,7 +45,7 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
 
   q-input(
     v-model="userData.organization_data.details.kpp"
-    filled
+    standout="bg-teal text-white"
     mask="#########"
     label="КПП организации"
     hint="9 цифр"
@@ -56,7 +56,7 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
 
   q-input(
     v-model="userData.organization_data.bank_account.bank_name"
-    filled
+    standout="bg-teal text-white"
     label="Наименование банка"
     hint="ПАО Сбербанк"
     :rules="[val => notEmpty(val)]"
@@ -65,7 +65,7 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
 
   q-input(
     v-model="userData.organization_data.bank_account.details.corr"
-    filled
+    standout="bg-teal text-white"
     mask="####################"
     label="Корреспондентский счет"
     hint="20 цифр"
@@ -74,7 +74,7 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
   )
   q-input(
     v-model="userData.organization_data.bank_account.details.bik"
-    filled
+    standout="bg-teal text-white"
     mask="#########"
     label="БИК"
     hint="9 цифр"
@@ -84,7 +84,7 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
 
   q-input(
     v-model="userData.organization_data.bank_account.details.kpp"
-    filled
+    standout="bg-teal text-white"
     mask="#########"
     label="КПП (банка)"
     hint="9 цифр"
@@ -94,7 +94,7 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
 
   q-input(
     v-model="userData.organization_data.bank_account.account_number"
-    filled
+    standout="bg-teal text-white"
     mask="####################"
     label="Номер счета"
     hint="20 цифр"
@@ -105,7 +105,7 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
   q-select(
     v-model="userData.organization_data.bank_account.currency"
     label="Валюта счёта"
-    filled
+    standout="bg-teal text-white"
     :options="[{ label: 'RUB', value: 'RUB' }]"
     emit-value
     :rules="[val => notEmpty(val)]"

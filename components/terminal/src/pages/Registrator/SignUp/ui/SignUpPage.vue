@@ -1,10 +1,10 @@
 <template lang="pug">
-.row.justify-center.q-mt-lg.q-pa-sm
+.row.justify-center.q-pa-sm
   .col-md-6.col-sm-8.col-xs-12
     div(v-if="!registeredAndloggedIn")
       SignUp.q-pt-lg
-      div.text-right
-        q-btn(flat size="sm" dense @click="router.push({name: 'signin'})") уже есть аккаунт?
+      //- div.text-right
+      //-   q-btn(flat size="sm" dense @click="router.push({name: 'signin'})") уже есть аккаунт?
     AlreadyRegistered(v-else).q-pt-lg
 
 </template>

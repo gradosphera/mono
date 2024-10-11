@@ -16,7 +16,7 @@ const title = computed(() => props.title)
 
 <template lang="pug">
 q-card(style="min-width: 350px; max-width: 100%;")
-  q-bar(style="background: 'primary'")
+  q-bar.bg-gradient-dark.text-white
     span {{ title }}
     q-space
     q-btn(v-if="show_close" v-close-popup dense flat icon="close")

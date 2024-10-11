@@ -34,7 +34,7 @@ export const manifest = {
   'routes': [
     {
       meta: {
-        title: 'Профиль',
+        title: 'Централ',
         icon: 'fa-solid fa-id-card',
         roles: [],
       },
@@ -64,17 +64,6 @@ export const manifest = {
         },
         {
           meta: {
-            title: 'Реквизиты',
-            icon: '',
-            roles: [],
-          },
-          path: 'payment-methods',
-          name: 'user-payment-methods',
-          component: markRaw(UserPaymentMethodsPage),
-          children: [],
-        },
-        {
-          meta: {
             title: 'Настройки',
             icon: '',
             roles: [],
@@ -83,19 +72,7 @@ export const manifest = {
           name: 'user-settings',
           component: markRaw(UserSettingsPage),
           children: [],
-        }
-      ],
-    },
-
-    {
-      meta: {
-        title: 'Совет',
-        icon: 'fa-regular fa-circle',
-        roles: ['chairman', 'member'],
-      },
-      path: '/:coopname/soviet',
-      name: 'soviet',
-      children: [
+        },
         {
           path: 'agenda',
           name: 'agenda',
@@ -103,7 +80,7 @@ export const manifest = {
           meta: {
             title: 'Повестка',
             icon: 'fa-solid fa-check-to-slot',
-            roles: [],
+            roles: ['chairman', 'member'],
           },
         },
         {
@@ -137,30 +114,16 @@ export const manifest = {
             roles: ['chairman', 'member'],
           },
         },
-
-      ]
-    },
-
-    //КООПЕРАТИВ
-    {
-      meta: {
-        title: 'Кооператив',
-        icon: 'fa-solid fa-cog',
-        roles: ['chairman', 'member'],
-      },
-      path: '/:coopname/settings',
-      name: 'settings',
-      children: [
-        {
-          path: 'details',
-          name: 'settings-details',
-          component: markRaw(CooperativeDetails),
-          meta: {
-            title: 'Реквизиты',
-            icon: 'fa-solid fa-check-to-slot',
-            roles: [],
-          },
-        },
+        // {
+        //   path: 'details',
+        //   name: 'settings-details',
+        //   component: markRaw(CooperativeDetails),
+        //   meta: {
+        //     title: 'Реквизиты',
+        //     icon: 'fa-solid fa-check-to-slot',
+        //     roles: [],
+        //   },
+        // },
         {
           path: 'members',
           name: 'settings-members',
@@ -171,41 +134,67 @@ export const manifest = {
             roles: ['chairman', 'member'],
           },
         },
+        // {
+        //   path: 'contributions',
+        //   name: 'settings-contributions',
+        //   component: markRaw(ChangeCooperativeContributions),
+        //   meta: {
+        //     title: 'Взносы',
+        //     icon: 'fa-solid fa-file-invoice',
+        //     roles: ['chairman', 'member'],
+        //   },
+        // },
         {
-          path: 'contributions',
-          name: 'settings-contributions',
-          component: markRaw(ChangeCooperativeContributions),
-          meta: {
-            title: 'Взносы',
-            icon: 'fa-solid fa-file-invoice',
-            roles: ['chairman', 'member'],
-          },
-        },
+          // meta: {
+            // title: 'Подключения',
+            // icon: 'fas fa-link',
+            // roles: ['chairman', 'member'],
+          // },
+          path: '/:coopname/connections',
+          name: 'connections',
+          component: markRaw(UnionPageListOfCooperatives),
 
+        },
         {
-          path: 'contacts',
-          name: 'settings-contacts',
-          component: markRaw(ChangeCooperativeContacts),
+          path: ':coopname/contacts',
+          name: 'contacts',
+          component: markRaw(ContactsPage),
           meta: {
             title: 'Контакты',
-            icon: 'fa-solid fa-file-invoice',
-            roles: ['chairman', 'member'],
+            icon: 'fa-solid fa-info',
+            roles: [],
           },
         },
-      ]
+      ],
     },
 
-    {
-      meta: {
-        title: 'Подключения',
-        icon: 'fas fa-link',
-        roles: ['chairman', 'member'],
-      },
-      path: '/:coopname/connections',
-      name: 'connections',
-      component: markRaw(UnionPageListOfCooperatives),
+    // {
+    //   meta: {
+    //     title: 'Совет',
+    //     icon: 'fa-regular fa-circle',
+    //     roles: ['chairman', 'member'],
+    //   },
+    //   path: '/:coopname/soviet',
+    //   name: 'soviet',
+    //   children: [
 
-    },
+    //   ]
+    // },
+
+    //КООПЕРАТИВ
+    // {
+    //   meta: {
+    //     title: 'Кооператив',
+    //     icon: 'fa-solid fa-cog',
+    //     roles: ['chairman', 'member'],
+    //   },
+    //   path: '/:coopname/settings',
+    //   name: 'settings',
+    //   children: [
+
+    //   ]
+    // },
+
 
 
       // {
@@ -295,16 +284,16 @@ export const manifest = {
       //   ],
       // },
       //страница контактов
-      {
-        path: ':coopname/contacts',
-        name: 'contacts',
-        component: markRaw(ContactsPage),
-        meta: {
-          title: 'Контакты',
-          icon: 'fa-solid fa-info',
-          roles: [],
-        },
-      },
+      // {
+      //   path: ':coopname/contacts',
+      //   name: 'contacts',
+      //   component: markRaw(ContactsPage),
+      //   meta: {
+      //     title: 'Контакты',
+      //     icon: 'fa-solid fa-info',
+      //     roles: [],
+      //   },
+      // },
       // {
       //   path: ':coopname/commutator',
       //   name: 'commutator',

@@ -1,24 +1,24 @@
 <template lang="pug">
 div
-  q-btn(@click="showDialog=true" flat icon="add") добавить метод
+  q-btn(@click="showDialog=true" color="primary" size="sm" icon="add") добавить реквизиты
 
-  q-badge(flat rounded color="grey").q-ml-sm
-    q-icon(name="far fa-question")
-    q-tooltip Используйте, чтобы добавить метод возврата паевого взноса. Каким именно методом вам вернуть паевый взнос вы сможете выбрать при создании заявления на возврат.
+  //- q-badge(flat rounded color="grey").q-ml-sm
+  //-   q-icon(name="far fa-question")
+  //-   q-tooltip Используйте, чтобы добавить метод возврата паевого взноса. Каким именно методом вам вернуть паевый взнос вы сможете выбрать при создании заявления на возврат.
 
   q-dialog(v-model="showDialog" @hide="clear")
     ModalBase(:title='"Добавить метод платежа"' )
       Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm
-        q-select(v-model="methodType" filled :options="methods" map-options emit-value option-label="title" option-value="value" label="Выберите способ получения платежа" :rules="[val => notEmpty(val)]")
+        q-select(v-model="methodType" standout="bg-teal text-white" :options="methods" map-options emit-value option-label="title" option-value="value" label="Выберите способ получения платежа" :rules="[val => notEmpty(val)]")
 
         div(v-if="methodType=='sbp'")
-          q-input(v-model="sbp.phone" filled mask="+7 (###) ###-##-##" fill-mask label="Номер телефона" hint="Имя и фамилия получателя должны совпадать с теми, которые указаны в Удостоверении." :rules="[val => notEmpty(val)]" autocomplete="off").q-mb-lg
+          q-input(v-model="sbp.phone" standout="bg-teal text-white" mask="+7 (###) ###-##-##" fill-mask label="Номер телефона" hint="Имя и фамилия получателя должны совпадать с теми, которые указаны в Удостоверении." :rules="[val => notEmpty(val)]" autocomplete="off").q-mb-lg
 
         div(v-if="methodType=='bank_transfer'")
           q-select(
             v-model="bank_transfer.currency"
             label="Валюта счёта"
-            filled
+            standout="bg-teal text-white"
             :options="[{ label: 'RUB', value: 'RUB' }]"
             emit-value
             :rules="[val => notEmpty(val)]"
@@ -26,7 +26,7 @@ div
           )
           q-input(
             v-model="bank_transfer.bank_name"
-            filled
+            standout="bg-teal text-white"
             label="Наименование банка"
             :rules="[val => notEmpty(val)]"
             autocomplete="off"
@@ -34,7 +34,7 @@ div
 
           q-input(
             v-model="bank_transfer.details.corr"
-            filled
+            standout="bg-teal text-white"
             mask="####################"
             label="Корреспондентский счет"
             :rules="[val => notEmpty(val), val => val.length === 20 || 'ожидаем 20 цифр']"
@@ -43,7 +43,7 @@ div
 
           q-input(
             v-model="bank_transfer.details.bik"
-            filled
+            standout="bg-teal text-white"
             mask="#########"
             label="БИК"
             :rules="[val => notEmpty(val), val => val.length === 9 || 'ожидаем 9 цифр']"
@@ -52,7 +52,7 @@ div
 
           q-input(
             v-model="bank_transfer.details.kpp"
-            filled
+            standout="bg-teal text-white"
             mask="#########"
             label="КПП"
             :rules="[val => notEmpty(val), val => val.length === 9 || 'ожидаем 9 цифр']"
@@ -61,7 +61,7 @@ div
 
           q-input(
             v-model="bank_transfer.account_number"
-            filled
+            standout="bg-teal text-white"
             mask="####################"
             label="Номер счета"
             :rules="[val => notEmpty(val), val => val.length === 20 || 'ожидаем 20 цифр']"

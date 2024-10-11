@@ -3,8 +3,8 @@
 div.row.justify-center
   div.col-12
     q-table(
-      ref="tableRef" flat
-      bordered
+      ref="tableRef"
+      flat
       :rows="documents"
       :columns="columns"
       :table-colspan="9"
