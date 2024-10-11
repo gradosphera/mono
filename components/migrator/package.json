@@ -1,6 +1,6 @@
 {
   "name": "migrator",
-  "version": "1.0.0",
+  "version": "2.0.10-alpha.1",
   "description": "",
   "private": true,
   "type": "module",
@@ -14,8 +14,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "coopdoc-generator-ts": "^2.0.8",
-    "cooptypes": "^2.0.8",
+    "coopdoc-generator-ts": "workspace:*",
+    "cooptypes": "^2.0.10-alpha.1",
     "dotenv": "^16.4.5",
     "eosjs": "^22.1.0",
     "esno": "^4.8.0",
