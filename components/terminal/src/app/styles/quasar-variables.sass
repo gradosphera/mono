@@ -79,7 +79,7 @@ $secondary : grey !default
 $accent    : orange !default
 
 // Темный градиент с минимальным затемнением и плавным переходом
-$primary-gradient-dark: linear-gradient(100deg, color.adjust($primary, $lightness: 0%), color.adjust($primary, $lightness: -40%))
+$primary-gradient-dark: linear-gradient(100deg, adjust-color($primary, $lightness: 0%), adjust-color($primary, $lightness: -40%))
 
 .bg-gradient-dark
   background: $primary-gradient-dark

@@ -109,7 +109,7 @@ export const useDesktopStore = defineStore(namespace, (): IDesktopStore => {
     defaultDesktopHash.value = defaultHash
 
     availableHashes.map(hash => availableDesktops.value.push(
-      desktopHashMap[hash as keyof typeof desktopHashMap]
+      desktopHashMap[hash as any]
     ))
   }
 

@@ -1,23 +1,23 @@
 <template lang="pug">
+div
 div(v-if="localRequest").row.justify-around.q-pt-lg
   div.col-md-6.col-xs-12
     //виджет предпросмотра
     ImageCarousel(v-if="localRequest.data.images" :images="localRequest.data.images")
-
     q-card(flat bordered).q-pa-md.q-mt-lg
       div(v-if="!showEdit").text-h6.q-mb-md {{ localRequest.data.title }}
-      q-input(v-else v-model="localRequest.data.title" :readonly="!showEdit" :standout="bg-teal text-white"="showEdit" label="Заголовок" type="text")
+      q-input(v-else v-model="localRequest.data.title" :readonly="!showEdit" standout="bg-teal text-white" label="Заголовок" type="text")
       div(v-if="!showEdit").description {{ localRequest.data.description }}
       q-input(v-else v-model="localRequest.data.description" standout="bg-teal text-white" label="Описание" type="textarea" rows="7").q-mt-md
 
   div.col-md-4.col-xs-12
     q-card(v-if="!showBuy" flat bordered).no-select
       div.q-pa-md
-        q-input(v-model="localRequest.remain_units" :readonly="!showEdit" :standout="bg-teal text-white"="showEdit" label="Остаток" type="number")
+        q-input(v-model="localRequest.remain_units" :readonly="!showEdit" standout="bg-teal text-white" label="Остаток" type="number")
           template(#append)
             p единиц
 
-        q-input(v-model="price" :readonly="!showEdit" :standout="bg-teal text-white"="showEdit" label="Цена" type="number" step="100" min="0")
+        q-input(v-model="price" :readonly="!showEdit" standout="bg-teal text-white" label="Цена" type="number" step="100" min="0")
           template(#append)
             p {{ symbol }}
 
