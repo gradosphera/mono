@@ -114,6 +114,8 @@ const loggedIn = computed(() => {
 watch(loggedIn, (newValue) => {
   if (newValue == false)
     leftDrawerOpen.value = false
+  else
+    leftDrawerOpen.value = true
 })
 
 const toogleDark = () => {
@@ -166,9 +168,4 @@ const login = () => {
   border-right: 1px solid #00800038 !important;
 }
 
-.no-wrap {
-  white-space: nowrap;        /* Запрещает перенос текста */
-  overflow: hidden;           /* Обрезает текст, если он не помещается */
-  text-overflow: ellipsis;    /* Добавляет троеточие, если текст обрезан */
-}
 </style>
