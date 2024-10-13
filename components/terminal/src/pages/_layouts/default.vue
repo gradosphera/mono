@@ -3,19 +3,19 @@ q-layout(view="hHh LpR fff")
   q-header(bordered :class="headerClass").header
     q-toolbar()
       q-btn(v-if="loggedIn" stretch icon="menu" flat @click="leftDrawerOpen = !leftDrawerOpen")
-      q-btn(stretch flat class="btn-title" dense @click="goTo('index')").q-pl-md.q-pr-md
-        span {{ COOP_SHORT_NAME }}
-
       q-toolbar-title()
+        q-btn(:size="isMobile ? 'md' : 'lg'" flat @click="goTo('index')")
+          span {{ COOP_SHORT_NAME }}
 
-      ToogleDarkLight(:showText="true")
+
+      ToogleDarkLight(:showText="true" :isMobile="isMobile")
 
       template(v-if="!loggedIn")
-        q-btn(v-if="showRegisterButton && !is('signup') && !is('install')" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="signup")
+        q-btn(v-if="showRegisterButton && !is('signup') && !is('install')" color="primary" class="btn-menu" stretch :size="isMobile ? 'sm' : 'lg'" :dense="isMobile" @click="signup")
           span.q-pr-sm регистрация
           i.fa-solid.fa-right-to-bracket
 
-        q-btn(v-if="showRegisterButton && is('signup')" color="primary" class="btn-menu" stretch size="lg" :dense="isMobile" @click="login")
+        q-btn(v-if="showRegisterButton && is('signup')" color="primary" class="btn-menu" stretch :size="isMobile ? 'sm' : 'lg'"  @click="login" :dense="isMobile" )
           span.q-pr-sm вход
           i.fa-solid.fa-right-to-bracket
 
@@ -41,7 +41,7 @@ q-layout(view="hHh LpR fff")
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useWindowSize } from 'vue-window-size'
@@ -99,7 +99,7 @@ const showRegisterButton = computed(() => {
 })
 
 const isMobile = computed(() => {
-  return width.value < 1024
+  return width.value < 768
 })
 
 
@@ -109,6 +109,11 @@ const is = (what: string) => {
 
 const loggedIn = computed(() => {
   return useCurrentUserStore().isRegistrationComplete && session.isAuth
+})
+
+watch(loggedIn, (newValue) => {
+  if (newValue == false)
+    leftDrawerOpen.value = false
 })
 
 const toogleDark = () => {
@@ -149,6 +154,9 @@ const login = () => {
   padding-left: 0px !important;
   padding-right: 0px !important;
 }
+.q-toolbar__title{
+  padding: 0px !important;
+}
 
 .drawer-right {
   border-left: 1px solid #00800038 !important;
@@ -156,5 +164,11 @@ const login = () => {
 
 .drawer-left {
   border-right: 1px solid #00800038 !important;
+}
+
+.no-wrap {
+  white-space: nowrap;        /* Запрещает перенос текста */
+  overflow: hidden;           /* Обрезает текст, если он не помещается */
+  text-overflow: ellipsis;    /* Добавляет троеточие, если текст обрезан */
 }
 </style>

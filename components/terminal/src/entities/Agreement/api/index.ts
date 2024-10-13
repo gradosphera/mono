@@ -25,13 +25,20 @@ async function loadAgreementsOfAllParticipants(coopname: string): Promise<Soviet
 
 
 async function loadAgreementTemplates(coopname: string): Promise<DraftContract.Tables.Drafts.IDraft[]> {
-  return (
-    await fetchTable(
+
+    const global = await fetchTable(
+      DraftContract.contractName.production,
+      DraftContract.contractName.production,
+      DraftContract.Tables.Drafts.tableName,
+    )
+
+    const coop = await fetchTable(
       DraftContract.contractName.production,
       coopname,
       DraftContract.Tables.Drafts.tableName,
     )
-  ) as DraftContract.Tables.Drafts.IDraft[];
+
+    return [...global, ...coop] as DraftContract.Tables.Drafts.IDraft[];
 
 }
 

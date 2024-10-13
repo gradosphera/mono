@@ -34,6 +34,7 @@ const required_agreements = computed(() => {
   // Фильтруем соглашения, которые необходимы пользователю
   return cooperativeAgreements.value.filter(agreement => {
     // Условие: тип соглашения должен быть в required.value
+
     if (required.value.includes(agreement.type)) {
       // Найти, если пользователь уже подписал это соглашение
       const userAgreement = userAgreements.value.find(ua => ua.type === agreement.type);
@@ -41,7 +42,7 @@ const required_agreements = computed(() => {
       if (userAgreement) {
         // Найти соответствующий шаблон для соглашения
         const template = templates.value.find(t => t.registry_id === agreement.draft_id);
-
+        console.log('template: ', template, userAgreement)
         // Проверить, если версия подписанного соглашения у пользователя отличается от последнего шаблона
         if (template && template.version !== userAgreement.version) {
           is_modify.value = true

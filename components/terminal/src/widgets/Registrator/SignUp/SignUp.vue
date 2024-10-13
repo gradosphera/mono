@@ -1,7 +1,7 @@
 <template lang='pug'>
 div
 
-  q-card.bordered.q-pa-md.signup(flat)
+  q-card.q-pa-md.signup(flat)
     p.text-h6.text-center.q-mb-md ВСТУПИТЬ В ПАЙЩИКИ
     q-stepper(v-model='store.step', vertical, animated, flat, done-color='primary')
       EmailInput

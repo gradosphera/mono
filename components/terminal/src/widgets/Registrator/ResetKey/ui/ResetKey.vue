@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-card(flat).bordered.q-pa-md
+  q-card(flat).q-pa-md
     div(v-if="token")
       p.text-subtitle1.text-center СОХРАНИТЕ КЛЮЧ
       span.q-mt-md Новый приватный ключ доступа сгенерирован для вас. Пожалуйста, подтвердите надёжное сохранение. Мы рекомендуем сохранить его в бесплатном менеджере паролей, таком как

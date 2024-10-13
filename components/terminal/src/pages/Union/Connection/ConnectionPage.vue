@@ -19,7 +19,7 @@ div.row.justify-center.q-pa-md
 
       p.text-h6 Кооператив на подключении
       p Статус:
-        q-badge(v-if="coop.status == 'pending'" color="orange").q-ml-sm на утверждении
+        q-badge(v-if="coop.status == 'pending'" color="orange").q-ml-sm ожидание
         q-badge(v-if="coop.status == 'active'" color="teal").q-ml-sm активен
         q-badge(v-if="coop.status == 'blocked'" color="red").q-ml-sm заблокирован
 

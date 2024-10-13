@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-card().bordered.q-pa-md
+  q-card(flat).q-pa-md
     p.text-subtitle1.text-center ПЕРЕВЫПУСК КЛЮЧА
 
 
