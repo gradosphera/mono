@@ -1,8 +1,8 @@
 <template lang="pug">
-q-item(dense clickable flat size="sm" @click="showDialog=true").full-width
+q-item(clickable flat size="sm" @click="showDialog=true").full-width
   div.q-pa-sm
     q-icon(name="fa-regular fa-square-check").q-mr-xs
-    span отметить оплаченным
+    span оплачен
 
   q-dialog(v-model="showDialog" @hide="close")
     ModalBase(title='отметить оплаченным')

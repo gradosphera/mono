@@ -65,7 +65,7 @@ q-card(flat)
 
       q-tr(v-if="expanded.get(props.row.table.id)" :key="`e_${props.row.table.id}`" :props="props" class="q-virtual-scroll--with-prev")
         q-td(colspan="100%")
-          RegistratorJoincoopDocument(v-if="props.row.table.type == 'joincoop'" :documents="props.row.documents")
+          ComplexDocument(v-if="props.row.table.type == 'joincoop'" :documents="props.row.documents")
 
 
 
@@ -76,7 +76,7 @@ import { ref, onBeforeUnmount, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 import { Notify } from 'quasar'
-import { RegistratorJoincoopDocument } from 'src/entities/Document/ui/Templates/RegistratorJoincoop';
+import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
 import { sendGET } from 'src/shared/api';
 import { useSessionStore } from 'src/entities/Session';
 import { Cooperative, SovietContract } from 'cooptypes'

@@ -39,12 +39,6 @@ export * as ChangeKey from './changeKey'
 export * as JoinCooperative from './joinCooperative'
 
 /**
- * Действие, которое вызывается контрактом _soviet для подтверждения заявки на вступление в кооператив после принятия советом решения.
- * @private
- */
-export * as ConfirmJoin from './confirmJoin'
-
-/**
  * Действие, которые вызывается системным контрактом для инициализации.
  * @private
  */

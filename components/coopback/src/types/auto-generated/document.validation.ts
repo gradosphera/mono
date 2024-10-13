@@ -25,12 +25,17 @@ export interface IGetDocuments {
    * Unknown Property
    */
   [x: string]: unknown;
-  filter?: {
-    receiver?: string;
+  filter: {
+    /**
+     * Unknown Property
+     */
+    [x: string]: unknown;
+    receiver: string;
   };
   limit?: number;
   page?: number;
   sortBy?: string;
+  type?: 'newsubmitted' | 'newresolved';
 }
 
 export interface RGenerate {
@@ -58,12 +63,17 @@ export interface RGetDocuments {
      * Unknown Property
      */
     [x: string]: unknown;
-    filter?: {
-      receiver?: string;
+    filter: {
+      /**
+       * Unknown Property
+       */
+      [x: string]: unknown;
+      receiver: string;
     };
     limit?: number;
     page?: number;
     sortBy?: string;
+    type?: 'newsubmitted' | 'newresolved';
   };
 }
 

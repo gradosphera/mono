@@ -1,10 +1,9 @@
 import { UserIdentityPage } from 'src/pages/User/IdentityPage';
-import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
+// import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
 import { UserWalletPage } from 'src/pages/User/WalletPage';
 import { ListOfOrdersPage } from 'src/pages/Cooperative/ListOfOrders';
 
 import { ListOfQuestionsWidget } from 'src/widgets/Cooperative/Agenda/ListOfQuestions';
-import { ListOfDocumentsWidget } from 'src/widgets/Cooperative/Documents/ListOfDocuments';
 
 import { markRaw } from 'vue';
 // import { Commutator } from 'src/widgets/Commutator';
@@ -17,14 +16,16 @@ import { markRaw } from 'vue';
 // import { SuppliesListPage } from 'src/pages/Marketplace/SuppliesList';
 // import { UserSuppliesListPage } from 'src/pages/Marketplace/UserSuppliesList';
 import { ContactsPage } from 'src/pages/Cooperative/Contacts';
-import { CooperativeDetails } from 'src/widgets/Cooperative/Details';
+// import { CooperativeDetails } from 'src/widgets/Cooperative/Details';
 import { CooperativeMembers } from 'src/widgets/Cooperative/Members';
-import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
-import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
+// import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
+// import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
 import { UserSettingsPage } from 'src/pages/User/SettingsPage';
 import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants';
 import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
+import { ConnectionPage } from 'src/pages/Union/Connection';
+import { ListOfDocumentsPage } from 'src/pages/Documentor/ListOfDocuments';
 
 export const manifest = {
   'name': 'UserDesktop',
@@ -96,7 +97,7 @@ export const manifest = {
         {
           path: 'documents',
           name: 'documents',
-          component: markRaw(ListOfDocumentsWidget),
+          component: markRaw(ListOfDocumentsPage),
           meta: {
             title: 'Документы',
             icon: 'fa-solid fa-file-invoice',
@@ -156,7 +157,18 @@ export const manifest = {
 
         },
         {
-          path: ':coopname/contacts',
+          // meta: {
+            // title: 'Подключения',
+            // icon: 'fas fa-link',
+            // roles: ['chairman', 'member'],
+          // },
+          path: '/:coopname/connect',
+          name: 'connect',
+          component: markRaw(ConnectionPage),
+
+        },
+        {
+          path: '/:coopname/contacts',
           name: 'contacts',
           component: markRaw(ContactsPage),
           meta: {

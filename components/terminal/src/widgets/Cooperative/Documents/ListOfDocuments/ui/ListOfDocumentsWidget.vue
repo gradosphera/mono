@@ -15,6 +15,16 @@ div.row.justify-center
       :loading='onLoading'
       :no-data-label="'документы не найдены'"
     ).full-height
+      template(#top v-if="showFilter")
+        q-btn-toggle(
+          size="sm"
+          v-model="documentType"
+          spread
+          toggle-color="teal"
+          color="white"
+          text-color="black"
+          :options="[{label: 'Все входящие', value: 'newsubmitted'}, {label: 'Только утверждённые', value: 'newresolved'}]"
+        ).full-width
 
       template(#header="props")
 
@@ -28,49 +38,75 @@ div.row.justify-center
           ) {{ col.label }}
 
       template(#body="props")
-        q-tr(:key="`m_${props.row?.statement?.action?.transaction_id}`" :props="props")
+        q-tr(:key="`m_${props.row?.statement?.action?.global_sequence}`" :props="props")
           q-td(auto-width)
-            q-btn(size="sm" color="primary" round dense :icon="expanded.get(props.row?.statement?.action?.transaction_id) ? 'remove' : 'add'" @click="toggleExpand(props.row?.statement?.action?.transaction_id)")
+            q-btn(v-if="!expand" size="sm" color="primary" round dense :icon="expanded.get(props.row?.statement?.action?.global_sequence) ? 'remove' : 'add'" @click="toggleExpand(props.row?.statement?.action?.global_sequence)")
 
-          q-td {{ props.row.statement?.action?.data?.decision_id }}
+          q-td {{ props.row.statement?.action?.data?.document.hash.substring(0, 10) }}
 
           q-td {{ props.row.statement?.document?.full_title }}
 
-        q-tr(v-if="expanded.get(props.row?.statement?.action?.transaction_id)" :key="`e_${props.row?.statement?.action?.transaction_id}`" :props="props" class="q-virtual-scroll--with-prev")
+        q-tr(v-if="expanded.get(props.row?.statement?.action?.global_sequence) || expand" :key="`e_${props.row?.statement?.action?.global_sequence}`" :props="props" class="q-virtual-scroll--with-prev")
           q-td(colspan="100%")
-            RegistratorJoincoopDocument(v-if="props.row?.statement?.action?.data?.action == 'joincoop'" :documents="props.row")
+            ComplexDocument(:documents="props.row")
 
 
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, reactive } from 'vue'
-import { useRoute } from 'vue-router'
+import { onMounted, ref, computed, reactive, watch } from 'vue'
 import { Notify } from 'quasar'
 import { sendGET } from 'src/shared/api';
-import { RegistratorJoincoopDocument } from 'src/entities/Document/ui/Templates/RegistratorJoincoop';
-const route = useRoute()
-const documents = ref([])
+import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
+import type { IComplexDocument, IGetDocuments } from 'coopback';
+
+const documents = ref<IComplexDocument[]>([])
 const onLoading = ref(false)
 
 const props = defineProps({
-  receiver: {
+  filter: {
+    type: Object,
+    required: true,
+    validator: (value: any) => {
+      // Проверка на наличие поля 'receiver' и типа string
+      return typeof value.receiver === 'string'
+    }
+  },
+  expand: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  showFilter: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  documentType: {
     type: String,
     required: false,
-    default: null
-  },
+  }
 })
 
-const receiver = computed(() => props.receiver)
+const receiver = computed(() => props.filter.receiver)
+const documentType = ref(props.documentType || 'newsubmitted')
 
 const loadDocuments = async () => {
   try {
     onLoading.value = true
-    documents.value = (await sendGET('/v1/documents/get-documents', {
+
+    const data: IGetDocuments = {
       filter: {
-        receiver: receiver.value ? receiver.value : route.params.coopname
+        receiver: receiver.value,
+        ...props.filter
       },
-    })).results
+      type: documentType.value as 'newresolved' | 'newsubmitted'
+    }
+
+    documents.value = (await sendGET('/v1/documents/get-documents', {
+      ...data
+    })).results as IComplexDocument[]
+
     onLoading.value = false
   } catch (e: any) {
     onLoading.value = false
@@ -84,6 +120,13 @@ const loadDocuments = async () => {
 
 onMounted(() => {
   loadDocuments()
+})
+
+watch(documentType, (newValue, oldValue) => {
+  if (newValue != oldValue) {
+    documents.value = []
+    loadDocuments()
+  }
 })
 
 // const getHumanActionName = (action) => {
@@ -111,4 +154,3 @@ const toggleExpand = (id: any) => {
 const tableRef = ref(null)
 const pagination = ref({ rowsPerPage: 10 })
 </script>
-src/app/config

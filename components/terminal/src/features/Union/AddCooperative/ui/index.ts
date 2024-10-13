@@ -1,1 +1,1 @@
-export {default as AddCooperativeDialog} from './AddCooperativeDialog.vue'
+export {default as AddCooperativeForm} from './AddCooperativeForm.vue'

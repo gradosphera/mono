@@ -1,15 +1,15 @@
 <template lang="pug">
 div.row
   div.col-md-12.col-xs-12
-    PaymentMethodsCard(:username="session.username")
-    hr
-    ChangeCooperativeFunds(v-if="isChairman")
-    hr
-    ChangeCooperativeContributions(v-if="isChairman")
-    hr
-    ChangeCooperativeContacts(v-if="isChairman")
-    hr
-    LogoutCard
+    PaymentMethodsCard(:username="session.username").q-pb-lg
+
+    ChangeCooperativeFunds(v-if="isChairman").q-pb-lg
+
+    ChangeCooperativeContributions(v-if="isChairman").q-pb-lg
+
+    ChangeCooperativeContacts(v-if="isChairman").q-pb-lg
+
+    LogoutCard.q-pb-lg
     //- ExitCard.q-mt-lg
 
 </template>

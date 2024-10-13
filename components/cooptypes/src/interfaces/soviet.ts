@@ -108,6 +108,13 @@ export interface IAutosigner {
   decision_id: IUint64
 }
 
+export interface IBlock {
+  coopname: IName
+  admin: IName
+  username: IName
+  message: string
+}
+
 export interface IBlockbal {
   coopname: IName
   username: IName
@@ -134,6 +141,7 @@ export interface IBoards {
 export interface ICancelreg {
   coopname: IName
   username: IName
+  message: string
 }
 
 export interface ICancelvote {
@@ -499,6 +507,14 @@ export interface ISubprogbal {
   username: IName
   program_id: IUint64
   quantity: IAsset
+}
+
+export interface IUnblock {
+  coopname: IName
+  admin: IName
+  username: IName
+  is_registration: boolean
+  message: string
 }
 
 export interface IUnblockbal {

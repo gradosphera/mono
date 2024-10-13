@@ -102,7 +102,23 @@ export async function buildComplexDocument(
   return { statement, decision, acts, links };
 }
 
+function toDotNotation(obj, prefix = '') {
+  return Object.keys(obj).reduce((acc, key) => {
+    const value = obj[key];
+    const newKey = prefix ? `${prefix}.${key}` : key;
+
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      Object.assign(acc, toDotNotation(value, newKey));
+    } else {
+      acc[newKey] = value;
+    }
+
+    return acc;
+  }, {});
+}
+
 export const queryDocuments = async (
+  type: string,
   filter: any,
   page = 1,
   limit = 100
@@ -112,9 +128,8 @@ export const queryDocuments = async (
     {
       filter: JSON.stringify({
         account: SovietContract.contractName.production,
-        name: SovietContract.Actions.Registry.NewResolved.actionName,
-        receiver: process.env.COOPNAME,
-        ...filter,
+        name: type, //< newresolved | newsubmitted
+        ...toDotNotation(filter),
       }),
       page,
       limit,
@@ -130,7 +145,7 @@ export const queryDocuments = async (
   for (const raw_action_document of actions.results) {
     const complexDocument = await buildComplexDocument(raw_action_document);
 
-    if (complexDocument.decision.action) response.results.push(complexDocument);
+    if (complexDocument.statement.action) response.results.push(complexDocument);
   }
 
   return response;

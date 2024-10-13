@@ -12,10 +12,14 @@ export const generateDocument = catchAsync(async (req: RGenerate, res) => {
 
 export const getDocuments = catchAsync(async (req: RGetDocuments, res) => {
   const filter = req.query?.filter;
+  console.log('req.query', req.query);
+
   const limit = req.query?.limit as number;
   const page = req.query?.page as number;
-
-  const documents = await documentService.queryDocuments(filter, page, limit);
+  const type = req.query?.type as string;
+  console.log('type on request', type);
+  console.log('filter on request', filter);
+  const documents = await documentService.queryDocuments(type, filter, page, limit);
 
   res.status(httpStatus.OK).send(documents);
 });

@@ -54,8 +54,8 @@
             q-td
               q-btn-dropdown(size="sm" label="действия" flat dense v-model="dropdowns[props.row.order_num]")
                 q-list(dense)
-                  SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
                   SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
+                  SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
                   //- SetOrderCompletedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
 
           q-tr(v-if="expanded.get(props.row.order_num)" :key="`e_${props.row.order_num}`" :props="props" class="q-virtual-scroll--with-prev")

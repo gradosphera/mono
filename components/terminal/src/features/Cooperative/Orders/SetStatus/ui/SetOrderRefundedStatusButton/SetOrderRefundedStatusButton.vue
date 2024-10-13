@@ -1,8 +1,8 @@
 <template lang="pug">
-q-item(dense clickable flat size="sm" @click="showDialog=true").full-width
+q-item(clickable flat size="sm" @click="showDialog=true").full-width
   div.q-pa-sm
     q-icon(name="cancel").q-mr-xs
-    span отметить отмененным
+    span отменен
 
   q-dialog(v-model="showDialog" @hide="close")
     ModalBase(title='отметить отменённым')

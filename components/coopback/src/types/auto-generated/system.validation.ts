@@ -78,7 +78,7 @@ export interface IInit {
 }
 
 export interface IInstall {
-  soviet: {
+  soviet: ({
     individual_data: {
       birthdate: string;
       email: string;
@@ -96,7 +96,7 @@ export interface IInstall {
       phone: string;
     };
     role: 'chairman' | 'member';
-  }[];
+  })[];
   wif: string;
 }
 
@@ -222,7 +222,7 @@ export interface RInit {
 
 export interface RInstall {
   body: {
-    soviet: {
+    soviet: ({
       individual_data: {
         birthdate: string;
         email: string;
@@ -240,7 +240,7 @@ export interface RInstall {
         phone: string;
       };
       role: 'chairman' | 'member';
-    }[];
+    })[];
     wif: string;
   };
 }

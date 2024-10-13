@@ -1,3 +1,4 @@
+import { DraftContract } from 'cooptypes'
 import { CoopenomicsAgreement } from '../templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IMetaDocument, ITemplate } from '../Interfaces'
@@ -17,13 +18,13 @@ export class Factory extends DocFactory<CoopenomicsAgreement.Action> {
       template = CoopenomicsAgreement.Template
     }
     else {
-      template = await this.getTemplate(options.coopname, CoopenomicsAgreement.registry_id, options.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, CoopenomicsAgreement.registry_id, options.block_num)
     }
 
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...options })
     const coop = await super.getCooperative(options.coopname, options.block_num)
     const vars = await super.getVars(options.coopname, options.block_num)
-    const partner = await super.getOrganization(options.coopname, options.block_num)
+    const partner = await super.getOrganization(options.username, options.block_num)
 
     const combinedData: CoopenomicsAgreement.Model = {
       meta,

@@ -49,11 +49,6 @@ export interface IChangekey {
   public_key: IPublicKey
 }
 
-export interface IConfirmreg {
-  coopname: IName
-  username: IName
-}
-
 export interface ICooperative {
   username: IName
   parent_username: IName
@@ -71,6 +66,7 @@ export interface ICooperative {
   org_minimum: IAsset
   status: IName
   created_at: ITimePointSec
+  document: IDocument
 }
 
 export interface IDelcoop {
@@ -119,9 +115,10 @@ export interface IOrgData {
 }
 
 export interface IRegcoop {
-  registrator: IName
   coopname: IName
+  username: IName
   params: IOrgData
+  document: IDocument
 }
 
 export interface IReguser {

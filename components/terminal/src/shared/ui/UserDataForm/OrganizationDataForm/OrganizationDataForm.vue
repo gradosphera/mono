@@ -4,17 +4,17 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
     v-model="userData.organization_data.type"
     label="Выберите тип организации"
     standout="bg-teal text-white"
-    :options="[{ label: 'ООО', value: 'ooo' }, { label: 'Потребительский Кооператив', value: 'coop' }]"
+    :options="[{ label: 'Потребительский Кооператив', value: 'coop' }, { label: 'ООО', value: 'ooo' }]"
     emit-value
     map-options).q-mb-md
-  q-input(v-model="userData.organization_data.short_name" standout="bg-teal text-white" hint="ООО Ромашка" label="Краткое наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.full_name" standout="bg-teal text-white" hint="Общество Ограниченной Ответственности 'Ромашка'" label="Полное наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.short_name" standout="bg-teal text-white" hint="ПК Ромашка" label="Краткое наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.full_name" standout="bg-teal text-white" hint="Потребительский Кооператив 'Ромашка'" label="Полное наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
   q-input(v-model="userData.organization_data.represented_by.last_name" standout="bg-teal text-white" label="Фамилия представителя" hint="Иванов" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
   q-input(v-model="userData.organization_data.represented_by.first_name" standout="bg-teal text-white" label="Имя представителя" hint="Иван" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
   q-input(v-model="userData.organization_data.represented_by.middle_name" standout="bg-teal text-white" label="Отчество представителя" hint="Иванович" :rules="[val => validatePersonalName(val)]" autocomplete="off")
 
-  q-input(v-model="userData.organization_data.represented_by.based_on" standout="bg-teal text-white" label="Представитель действует на основании" hint="решения учредителей №1 от 01.01.2021 г" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.represented_by.position" standout="bg-teal text-white" label="Должность представителя" hint="Директор" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.based_on" standout="bg-teal text-white" label="Представитель действует на основании" hint="решения общего собрания №102 от 01.01.2025 г" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.position" standout="bg-teal text-white" label="Должность представителя" hint="председатель" :rules="[val => notEmpty(val)]" autocomplete="off")
 
   q-input(v-model="userData.organization_data.phone" standout="bg-teal text-white" label="Номер телефона представителя"  mask="+7 (###) ###-##-##" fill-mask  hint="+7 (###) ###-##-##" :rules="[val => notEmpty(val), val => notEmptyPhone(val)]" autocomplete="off")
 

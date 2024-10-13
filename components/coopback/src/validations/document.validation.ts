@@ -19,8 +19,11 @@ export const RGenerate = Joi.object({
 
 export const IGetDocuments = Joi.object({
   filter: Joi.object({
-    receiver: Joi.string(),
-  }),
+    receiver: Joi.string().required(),
+  })
+    .required()
+    .unknown(true),
+  type: Joi.string().optional().valid('newsubmitted', 'newresolved').default('newresolved'),
   sortBy: Joi.string(),
   limit: Joi.number().integer(),
   page: Joi.number().integer(),

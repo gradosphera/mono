@@ -16,7 +16,7 @@ div
     :no-data-label="'Нет кооперативов'"
   ).full-height
     template(#top)
-      AddCooperativeDialog
+
 
     template(#header="props")
 
@@ -34,6 +34,7 @@ div
         q-td(auto-width)
           q-btn(size="sm" color="primary" round dense :icon="props.expand ? 'remove' : 'add'" @click="props.expand = !props.expand")
         q-td {{ props.row.username }}
+        q-td {{ props.row.announce }}
 
         q-td
           q-badge(v-if="props.row.status === 'active'" color="teal") активен
@@ -51,13 +52,14 @@ div
               q-item(v-if="props.row.status !== 'blocked'" clickable v-close-popup @click="block(props.row.username)")
                 q-item-section
                   q-item-label Заблокировать
-              q-item(clickable v-close-popup @click="deleteCoop(props.row.username)")
-                q-item-section
-                  q-item-label Удалить
+              //- q-item(clickable v-close-popup @click="deleteCoop(props.row.username)")
+              //-   q-item-section
+              //-     q-item-label Удалить
 
       q-tr(v-show="props.expand" :key="`e_${props.row.username}`" :props="props" class="q-virtual-scroll--with-prev")
         q-td(colspan="100%")
           slot(:expand="props.expand" :receiver="props.row.username")
+          ListOfDocumentsWidget(:expand="true" :documentType="'newsubmitted'" :filter="{receiver: props.row.username, data: getDataFilter(props.row.document.hash)}")
 
 </template>
 <script setup lang="ts">
@@ -67,11 +69,19 @@ import { useUnionStore } from 'src/entities/Union/model';
 import { computed, ref } from 'vue';
 import moment from 'moment-with-locales-es6'
 import { useDeleteCooperative } from 'src/features/Union/DeleteCooperative';
-import { AddCooperativeDialog } from 'src/features/Union/AddCooperative/ui';
 import { useActivateCooperative } from 'src/features/Union/ActivateCooperative';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { useBlockCooperative } from 'src/features/Union/BlockCooperative';
 const union = useUnionStore()
+
+import { ListOfDocumentsWidget } from 'src/widgets/Cooperative/Documents/ListOfDocuments';
+const getDataFilter = (hash: string) => {
+  return {
+    document: {
+      hash: hash.toUpperCase()
+    }
+  }
+}
 
 const coops = computed(() => union.coops)
 
@@ -119,6 +129,8 @@ const onLoading = ref(false)
 
 const columns = [
   { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
+  { name: 'announce', align: 'left', label: 'Сайт', field: 'announce', sortable: false },
+
   { name: 'status', align: 'left', label: 'Статус', field: 'status', sortable: true },
   {
     name: 'created_at',
