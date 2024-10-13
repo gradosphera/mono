@@ -1,3 +1,4 @@
 {
-  "lastMigration": "009_edit_draft_1.ts"
+  "local": "010_edit_all_drafts.ts",
+  "test": "010_edit_all_drafts.ts"
 }
