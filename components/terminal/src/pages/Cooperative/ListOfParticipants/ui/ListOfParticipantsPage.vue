@@ -4,8 +4,7 @@ ListOfParticipantsWidget
     AddUserDialog
 
   template(#default="{ expand, receiver }")
-
-    ListOfDocumentsWidget(v-if="expand" :receiver="receiver")
+    ListOfDocumentsWidget(v-if="expand" :filter="{receiver: receiver}")
 </template>
 
 <script lang="ts" setup>
