@@ -42,7 +42,6 @@ const required_agreements = computed(() => {
       if (userAgreement) {
         // Найти соответствующий шаблон для соглашения
         const template = templates.value.find(t => t.registry_id === agreement.draft_id);
-        console.log('template: ', template, userAgreement)
         // Проверить, если версия подписанного соглашения у пользователя отличается от последнего шаблона
         if (template && template.version !== userAgreement.version) {
           is_modify.value = true

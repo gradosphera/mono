@@ -23,6 +23,8 @@
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@headlessui/vue": "^1.7.22",
+    "@openreplay/tracker": "^14.0.9",
+    "@openreplay/tracker-assist": "^9.0.1",
     "@quasar/extras": "^1.16.4",
     "@sentry/browser": "^8.12.0",
     "@sentry/tracing": "^7.114.0",

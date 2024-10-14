@@ -11,11 +11,11 @@ q-layout(view="hHh LpR fff")
       ToogleDarkLight(:showText="true" :isMobile="isMobile")
 
       template(v-if="!loggedIn")
-        q-btn(v-if="showRegisterButton && !is('signup') && !is('install')" color="primary" class="btn-menu" stretch :size="isMobile ? 'sm' : 'lg'" :dense="isMobile" @click="signup")
+        q-btn(v-if="showRegisterButton && !is('signup') && !is('install')" color="primary" class="btn-menu" stretch :size="isMobile ? 'sm' : 'lg'" @click="signup")
           span.q-pr-sm регистрация
           i.fa-solid.fa-right-to-bracket
 
-        q-btn(v-if="showRegisterButton && is('signup')" color="primary" class="btn-menu" stretch :size="isMobile ? 'sm' : 'lg'"  @click="login" :dense="isMobile" )
+        q-btn(v-if="showRegisterButton && is('signup')" color="primary" class="btn-menu" stretch :size="isMobile ? 'sm' : 'lg'"  @click="login" )
           span.q-pr-sm вход
           i.fa-solid.fa-right-to-bracket
 

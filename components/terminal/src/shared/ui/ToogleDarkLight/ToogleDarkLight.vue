@@ -1,7 +1,7 @@
 <template lang="pug">
 q-btn(:size="isMobile ? 'sm' : 'md'" :dense="isMobile" flat @click="$q.dark.toggle()" stretch)
   q-icon(:name="isDark ? 'brightness_7' : 'brightness_3'").q-pt-xs
-  p(v-if="showText").btn-font {{ isDark ? 'день' : 'ночь' }}
+  //- p(v-if="showText").btn-font {{ isDark ? 'день' : 'ночь' }}
 </template>
 <script setup lang="ts">
 
