@@ -69,6 +69,7 @@ const submit = async () => {
     loading.value = false
 
   } catch (e: any) {
+    console.error(e)
     loading.value = false
     FailAlert(e.message)
   }
