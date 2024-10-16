@@ -151,9 +151,8 @@ export const init = async (data: IInit): Promise<void> => {
 export const getMonoStatus = async (): Promise<IHealthStatus> => {
   const mono = await Mono.findOne({ coopname: config.coopname });
 
-  if (!mono) throw new ApiError(httpStatus.BAD_REQUEST, 'Система не инициализирована');
-
-  return mono.status;
+  if (!mono) return 'maintenance';
+  else return mono.status;
 };
 
 export const setVars = async (vars: ISetVars): Promise<void> => {
