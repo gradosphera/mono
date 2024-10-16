@@ -1,9 +1,12 @@
 import { SovietContract } from 'cooptypes';
 import { userService } from '.';
 import { User } from '../models';
+import config from '../config/config';
 
 export const updateBoard = async (action: SovietContract.Actions.Boards.UpdateBoard.IUpdateBoard): Promise<void> => {
   //сброс всех прав
+  if (action.coopname != config.coopname) return;
+
   const users = await User.find({ role: { $in: ['member', 'chairman'] } }).exec();
   for (const user of users) {
     user.role = 'user';
