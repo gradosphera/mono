@@ -6,6 +6,7 @@ import config from './config/config';
 import logger from './config/logger';
 import { connectGenerator } from './services/document.service';
 import { initSocketConnection } from './controllers/ws.controller';
+import { initializeDefaultPlugins, pluginFactory } from './factories/pluginFactory';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
@@ -19,6 +20,12 @@ mongoose.connect(config.mongoose.url).then(async () => {
 
   // подключаемся к ws-серверу
   await initSocketConnection(SERVER_URL);
+
+  // Инициализация дефолтных плагинов
+  await initializeDefaultPlugins();
+
+  // Запуск плагинов
+  await pluginFactory(app);
 
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);

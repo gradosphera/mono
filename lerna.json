@@ -2,7 +2,8 @@
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
   "version": "2.1.0",
   "packages": [
-    "components/*"
+    "components/*",
+    "components/coopback/src/plugins/*"
   ],
   "npmClient": "pnpm",
   "command": {
