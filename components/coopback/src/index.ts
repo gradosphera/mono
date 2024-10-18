@@ -24,8 +24,8 @@ mongoose.connect(config.mongoose.url).then(async () => {
   // Инициализация дефолтных плагинов
   await initializeDefaultPlugins();
 
-  // Запуск плагинов
-  await pluginFactory(app);
+  // // Запуск плагинов
+  await pluginFactory();
 
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);

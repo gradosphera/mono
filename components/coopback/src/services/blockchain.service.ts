@@ -1,6 +1,5 @@
 import { Api, JsonRpc } from 'eosjs';
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';
-import { TextEncoder, TextDecoder } from 'util';
 import fetch from 'isomorphic-fetch';
 import EosApi from 'eosjs-api';
 import getInternalAction from '../utils/getInternalAction';
@@ -64,7 +63,7 @@ async function getInstance(username: string) {
   if (!wif) throw new ApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
   const signatureProvider = new JsSignatureProvider([wif]);
-  const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+  const api = new Api({ rpc, signatureProvider });
   return api;
 }
 
