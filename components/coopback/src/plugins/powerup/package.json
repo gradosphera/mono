@@ -1,6 +1,7 @@
 {
   "name": "powerup",
   "version": "2.1.2",
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,5 +9,6 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "gitHead": "7b59ea4b96991ed06abdc92e6d7835632845e3a5"
 }
