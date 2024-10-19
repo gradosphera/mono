@@ -58,7 +58,14 @@ export const useDesktopStore = defineStore(namespace, (): IDesktopStore => {
 
       health.value = await api.healthCheck()
 
-      if (online.value === false) online.value = true
+      if (health.value.status != 'maintenance'){
+        if (online.value === false){
+          online.value = true
+        }
+      } else {
+        online.value = false
+        setTimeout(healthCheck, 5000)
+      }
 
     } catch (e) {
       online.value = false

@@ -1,10 +1,9 @@
 import { Api, JsonRpc } from 'eosjs';
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';
-import { TextEncoder, TextDecoder } from 'util';
 import fetch from 'isomorphic-fetch';
 import EosApi from 'eosjs-api';
 import getInternalAction from '../utils/getInternalAction';
-import { GatewayContract, RegistratorContract, SovietContract } from 'cooptypes';
+import { GatewayContract, RegistratorContract, SovietContract, type SystemContract } from 'cooptypes';
 import { IUser } from '../types/user.types';
 import { GetAccountResult, GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 import config from '../config/config';
@@ -64,7 +63,7 @@ async function getInstance(username: string) {
   if (!wif) throw new ApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
   const signatureProvider = new JsSignatureProvider([wif]);
-  const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+  const api = new Api({ rpc, signatureProvider });
   return api;
 }
 
@@ -548,6 +547,38 @@ export async function cancelOrder(data: GatewayContract.Actions.RefundDeposit.IR
   };
 
   return await transact([action]);
+}
+
+export async function powerUp(username: string, quantity: string): Promise<void> {
+  const data: SystemContract.Actions.Powerup.IPowerup = {
+    payer: username,
+    receiver: username,
+    days: 1,
+    payment: quantity,
+    transfer: false,
+  };
+
+  const actions = [
+    {
+      account: 'eosio',
+      name: 'powerup',
+      authorization: [
+        {
+          actor: username,
+          permission: 'active',
+        },
+      ],
+      data,
+    },
+  ];
+
+  try {
+    const result = await transact(actions);
+    console.log('Транзакция powerup выполнена:', result);
+  } catch (error) {
+    console.error('Ошибка при выполнении транзакции powerup:', error);
+    throw error;
+  }
 }
 
 async function getSoviet(coopname) {

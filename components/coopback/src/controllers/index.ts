@@ -8,3 +8,4 @@ export * as systemController from './system.controller';
 export * as participantController from './participant.controller';
 export * as methodController from './method.controller';
 export * as settingController from './setting.controller';
+export * as pluginController from './plugin.controller';

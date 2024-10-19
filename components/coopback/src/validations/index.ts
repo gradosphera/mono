@@ -8,3 +8,4 @@ export * as notifyValidation from './notify.validation';
 export * as systemValidation from './system.validation';
 export * as participantValidation from './participant.validation';
 export * as methodValidation from './method.validation';
+export * as pluginValidation from './plugin.validation';

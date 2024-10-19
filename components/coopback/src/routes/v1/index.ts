@@ -9,6 +9,7 @@ import dataRoute from './document.route';
 import notifyRoute from './notify.route';
 import participantsRoute from './participant.route';
 import methodRoute from './method.route';
+import pluginRoute from './plugin.route';
 
 import config from '../../config/config';
 
@@ -50,6 +51,10 @@ const defaultRoutes = [
   {
     path: '/notify',
     route: notifyRoute,
+  },
+  {
+    path: '/plugins',
+    route: pluginRoute,
   },
 ];
 

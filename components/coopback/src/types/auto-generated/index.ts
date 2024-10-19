@@ -10,5 +10,6 @@ export * from './method.validation';
 export * from './notify.validation';
 export * from './order.validation';
 export * from './participant.validation';
+export * from './plugin.validation';
 export * from './system.validation';
 export * from './user.validation';
