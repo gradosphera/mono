@@ -2,14 +2,14 @@ import { expose } from 'threads/worker';
 import mongoose from 'mongoose';
 import { PluginRegistry } from '../plugins';
 import rootConfig from '../config/config';
-
-const initializePlugin = async (pluginName: string, config: any) => {
+import { PluginConfig } from '../models/pluginConfig.model';
+const initializePlugin = async (pluginName: string) => {
   try {
     // Устанавливаем соединение с базой данных
     await mongoose.connect(rootConfig.mongoose.url);
 
     const plugin = new PluginRegistry[pluginName].Plugin();
-    await plugin.initialize(config);
+    await plugin.initialize();
 
     return `Плагин ${pluginName} инициализирован успешно.`;
   } catch (error: any) {

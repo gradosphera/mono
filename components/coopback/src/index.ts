@@ -44,6 +44,7 @@ const exitHandler = () => {
 };
 
 const unexpectedErrorHandler = (error: any) => {
+  console.log(error);
   logger.error(error, { source: 'unexpectedErrorHandler' });
   exitHandler();
 };

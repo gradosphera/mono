@@ -3,7 +3,7 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';
 import fetch from 'isomorphic-fetch';
 import EosApi from 'eosjs-api';
 import getInternalAction from '../utils/getInternalAction';
-import { GatewayContract, RegistratorContract, SovietContract } from 'cooptypes';
+import { GatewayContract, RegistratorContract, SovietContract, type SystemContract } from 'cooptypes';
 import { IUser } from '../types/user.types';
 import { GetAccountResult, GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 import config from '../config/config';
@@ -547,6 +547,38 @@ export async function cancelOrder(data: GatewayContract.Actions.RefundDeposit.IR
   };
 
   return await transact([action]);
+}
+
+export async function powerUp(username: string, quantity: string): Promise<void> {
+  const data: SystemContract.Actions.Powerup.IPowerup = {
+    payer: username,
+    receiver: username,
+    days: 1,
+    payment: quantity,
+    transfer: false,
+  };
+
+  const actions = [
+    {
+      account: 'eosio',
+      name: 'powerup',
+      authorization: [
+        {
+          actor: username,
+          permission: 'active',
+        },
+      ],
+      data,
+    },
+  ];
+
+  try {
+    const result = await transact(actions);
+    console.log('Транзакция powerup выполнена:', result);
+  } catch (error) {
+    console.error('Ошибка при выполнении транзакции powerup:', error);
+    throw error;
+  }
 }
 
 async function getSoviet(coopname) {

@@ -1,11 +1,28 @@
 import { spawn, Thread, Worker } from 'threads';
-import { PluginConfig } from '../models/plugin.model';
+import { PluginConfig } from '../models/pluginConfig.model';
 
 // Объект для хранения запущенных воркеров
 const workerMap: { [key: string]: { worker: any; thread: Worker } } = {};
 
 export const initializeDefaultPlugins = async () => {
-  const defaultPlugins = [{ name: 'powerup', enabled: true, config: { optionA: true } }];
+  const defaultPlugins = [
+    {
+      name: 'powerup',
+      enabled: true,
+      config: {
+        dailyPackageSize: 5, // Размер ежедневного пакета в AXON
+        topUpAmount: 5, // Сумма пополнения при достижении порога (в AXON)
+        systemSymbol: 'AXON',
+        systemPrecision: 4,
+        thresholds: {
+          cpu: 5000, // Порог CPU в микросекундах
+          net: 1024, // Порог NET в байтах
+          ram: 10240, // Порог RAM в байтах
+        },
+      },
+    },
+  ];
+
   for (const plugin of defaultPlugins) {
     const existingPlugin = await PluginConfig.findOne({ name: plugin.name });
     if (!existingPlugin) {
@@ -60,7 +77,7 @@ export const initializeWorkerByName = async (pluginName: string) => {
   // Воркеры работают в фоне
   worker.then(async (workerInstance) => {
     try {
-      const result = await workerInstance.initializePlugin(pluginName, pluginData.config);
+      const result = await workerInstance.initializePlugin(pluginName);
       console.log(result); // Плагин инициализирован успешно
     } catch (err) {
       console.error(err); // Обработка ошибки

@@ -1,4 +1,4 @@
-import { PluginConfig } from '../models/plugin.model';
+import { PluginConfig } from '../models/pluginConfig.model';
 import Joi from 'joi';
 import { PluginRegistry } from '../plugins';
 import parse from 'joi-to-json';
@@ -7,15 +7,18 @@ import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 
 // Динамическое создание объектов и сбор схем
-const pluginSchemas = Object.entries(PluginRegistry).reduce((schemas, [key, PluginModule]) => {
-  const pluginInstance = new PluginModule.Plugin();
-  schemas[pluginInstance.name] = pluginInstance.pluginSchema;
-  return schemas;
-}, {} as { [key: string]: Joi.ObjectSchema });
+const getPluginSchemasInternal = () => {
+  const pluginSchemas = Object.entries(PluginRegistry).reduce((schemas, [key, PluginModule]) => {
+    const pluginInstance = new PluginModule.Plugin();
+    schemas[pluginInstance.name] = pluginInstance.pluginSchema;
+    return schemas;
+  }, {} as { [key: string]: Joi.ObjectSchema });
+  return pluginSchemas;
+};
 
 // Функция для обновления конфигурации плагина
 export const updatePluginConfig = async (pluginName: string, enabled: boolean, config: any) => {
-  const schema = pluginSchemas[pluginName];
+  const schema = getPluginSchemasInternal()[pluginName];
   if (!schema) {
     throw new ApiError(httpStatus.BAD_REQUEST, `Схема для плагина ${pluginName} не найдена.`);
   }
@@ -39,7 +42,7 @@ export const updatePluginConfig = async (pluginName: string, enabled: boolean, c
 
 // Метод для извлечения Joi схемы
 export const getPluginSchema = (pluginName: string) => {
-  const pluginInstance = pluginSchemas[pluginName];
+  const pluginInstance = getPluginSchemasInternal()[pluginName];
 
   if (!pluginInstance) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Плагин не найден');
