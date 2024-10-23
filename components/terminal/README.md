@@ -1,4 +1,4 @@
-# Terminal App.
+# Terminal App
 
 ## Install the dependencies
 ```bash
