@@ -716,10 +716,10 @@ importers:
         specifier: ^1.7.4
         version: 1.7.4
       coopback:
-        specifier: workspace:*
+        specifier: 2.1.2-alpha.1
         version: link:../coopback
       cooptypes:
-        specifier: workspace:*
+        specifier: 2.1.1
         version: link:../cooptypes
       dompurify:
         specifier: ^3.1.7
@@ -6790,7 +6790,7 @@ packages:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
     engines: {node: '>= 6.0.0'}
     dependencies:
-      debug: 4.3.1
+      debug: 4.3.7(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -11800,7 +11800,7 @@ packages:
     engines: {node: '>= 10.17.0'}
     hasBin: true
     dependencies:
-      debug: 4.3.1
+      debug: 4.3.7(supports-color@5.5.0)
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
@@ -12817,7 +12817,7 @@ packages:
     engines: {node: '>= 6'}
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.1
+      debug: 4.3.7(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
     dev: false
