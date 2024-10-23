@@ -716,7 +716,7 @@ importers:
         specifier: ^1.7.4
         version: 1.7.4
       coopback:
-        specifier: 2.1.2-alpha.1
+        specifier: workspace:*
         version: link:../coopback
       cooptypes:
         specifier: 2.1.1
