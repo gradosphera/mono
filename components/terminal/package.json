@@ -43,7 +43,7 @@
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "axios": "^1.2.1",
     "compression": "^1.7.4",
-    "coopback": "2.1.2-alpha.1",
+    "coopback": "workspace:*",
     "cooptypes": "2.1.1",
     "dompurify": "^3.1.7",
     "dotenv": "^16.4.5",
