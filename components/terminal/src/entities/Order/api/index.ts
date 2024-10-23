@@ -1,4 +1,4 @@
-import type { IGetCoopOrders, IGetResponse, IOrderResponse } from 'coopback'
+import type { IGetCoopOrders, IGetResponse, IOrderResponse } from '@coopenomics/controller'
 import { sendGET } from 'src/shared/api'
 
 const loadCoopOrders = async(params: IGetCoopOrders): Promise<IGetResponse<IOrderResponse>> => {

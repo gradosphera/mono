@@ -6,7 +6,7 @@ import {
 } from 'src/shared/lib/types/user';
 import { sendPOST } from 'src/shared/api';
 import { ICreateUser } from '../model';
-import type { ICreatedPayment } from 'coopback';
+import type { ICreatedPayment } from '@coopenomics/controller';
 
 async function createUser(data: ICreateUser): Promise<ICreatedUser> {
   const response = await sendPOST('/v1/users', data, true);

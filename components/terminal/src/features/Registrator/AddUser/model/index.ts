@@ -2,7 +2,7 @@ import { api } from '../api';
 
 import { useRegistratorStore } from 'src/entities/Registrator'
 
-import type { IAddUser } from 'coopback';
+import type { IAddUser } from '@coopenomics/controller';
 
 import emailRegex from 'email-regex';
 import { useCooperativeStore } from 'src/entities/Cooperative';
@@ -48,7 +48,7 @@ export function useAddUser() {
       minimum,
       spread_initial: addUserState.spread_initial,
     };
-    console.log("data: ", data, addUserState.created_at)
+    console.log('data: ', data, addUserState.created_at)
 
     await api.addUser(data);
   }

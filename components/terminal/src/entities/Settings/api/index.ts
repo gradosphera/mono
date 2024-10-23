@@ -1,4 +1,4 @@
-import type { ISettings } from 'coopback';
+import type { ISettings } from '@coopenomics/controller';
 import { sendGET } from 'src/shared/api';
 
 async function loadSettings(): Promise<ISettings> {
