@@ -5,6 +5,9 @@
   "productName": "Terminal App",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "deploy-testnet": "git checkout testnet && git merge main && git push origin testnet && git checkout main",
     "deploy-production": "git checkout production && git merge testnet && git push origin production && git checkout main",
@@ -12,7 +15,10 @@
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "concurrently -n 'TERMINAL' -c 'bgRed.white' \"quasar dev -m ssr\"",
-    "build": "quasar build"
+    "build:site": "quasar build",
+    "build:lib": "vite build",
+    "build": "npm run build:site && npm run build:lib",
+    "prepublishOnly": "npm run build:lib"
   },
   "dependencies": {
     "@dicebear/collection": "^9.0.1",
@@ -37,8 +43,8 @@
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "axios": "^1.2.1",
     "compression": "^1.7.4",
-    "coopback": "workspace:*",
-    "cooptypes": "workspace:*",
+    "coopback": "2.1.2-alpha.1",
+    "cooptypes": "2.1.1",
     "dompurify": "^3.1.7",
     "dotenv": "^16.4.5",
     "email-regex": "^5.0.0",
@@ -85,5 +91,6 @@
     "node": "^20 || ^18 || ^16",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
-  }
+  },
+  "gitHead": "0b6076cb61cf644eb0b54875795461db6ac26626"
 }
