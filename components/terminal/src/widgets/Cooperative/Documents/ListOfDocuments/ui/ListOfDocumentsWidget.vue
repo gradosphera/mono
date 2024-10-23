@@ -58,7 +58,7 @@ import { onMounted, ref, computed, reactive, watch } from 'vue'
 import { Notify } from 'quasar'
 import { sendGET } from 'src/shared/api';
 import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
-import type { IComplexDocument, IGetDocuments } from 'coopback';
+import type { IComplexDocument, IGetDocuments } from '@coopenomics/controller';
 
 const documents = ref<IComplexDocument[]>([])
 const onLoading = ref(false)
