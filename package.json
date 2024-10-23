@@ -5,7 +5,7 @@
     "commitgpt": "^2.0.0",
     "coop-notificator": "workspace:*",
     "cooparser-ts": "workspace:*",
-    "coopback": "workspace:*",
+    "@coopenomics/controller": "workspace:*",
     "coopdoc-generator-ts": "workspace:*",
     "cooptypes": "workspace:*",
     "migrator": "workspace:*",
@@ -16,8 +16,8 @@
     "@coopenomics/terminal": "workspace:*"
   },
   "scripts": {
-    "dev:terminal": "lerna run dev --parallel --scope terminal",
-    "dev:backend": "lerna run dev --parallel --scope cooparser-ts --scope coopback --scope coop-notificator",
+    "dev:terminal": "lerna run dev --parallel --scope @coopenomics/terminal",
+    "dev:backend": "lerna run dev --parallel --scope cooparser-ts --scope @coopenomics/controller --scope coop-notificator",
     "dev:lib": "lerna run dev --parallel --scope coopdoc-generator-ts --scope cooptypes",
     "dev:all": "lerna run dev --parallel",
     "gpt-commit": "git add . && commitgpt",
