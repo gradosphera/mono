@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/terminal",
-  "version": "2.1.2-alpha.5",
+  "version": "2.1.2-alpha.6",
   "description": "A Terminal Project",
   "productName": "Terminal App",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
@@ -21,6 +21,7 @@
     "prepublishOnly": "npm run build:lib"
   },
   "dependencies": {
+    "@coopenomics/controller": "workspace:*",
     "@dicebear/collection": "^9.0.1",
     "@dicebear/core": "^9.0.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
@@ -43,7 +44,6 @@
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "axios": "^1.2.1",
     "compression": "^1.7.4",
-    "@coopenomics/controller": "workspace:*",
     "cooptypes": "workspace:*",
     "dompurify": "^3.1.7",
     "dotenv": "^16.4.5",
