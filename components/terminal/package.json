@@ -15,9 +15,8 @@
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "concurrently -n 'TERMINAL' -c 'bgRed.white' \"quasar dev -m ssr\"",
-    "build:site": "quasar build",
     "build:lib": "vite build",
-    "build": "npm run build:site && npm run build:lib",
+    "build": "quasar build",
     "prepublishOnly": "npm run build:lib"
   },
   "dependencies": {
