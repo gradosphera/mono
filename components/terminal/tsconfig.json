@@ -4,10 +4,10 @@
     "baseUrl": ".",
     "skipLibCheck": true,
     "noImplicitAny": false,
-    // "declaration": true,                // Включаем генерацию деклараций типов
-    // "declarationDir": "./dist/types",   // Папка, куда будут сохранены сгенерированные типы
+    "declaration": true,                // Включаем генерацию деклараций типов
+    "declarationDir": "./dist/types",   // Папка, куда будут сохранены сгенерированные типы
     // "emitDeclarationOnly": true,        // Генерировать только типы, без JS-кода
-    // "outDir": "./dist",                 // Папка для сборки JS
+    "outDir": "./dist/library",                 // Папка для сборки JS
   },
   "vueCompilerOptions": {
     "plugins": ["@vue/language-plugin-pug"]
