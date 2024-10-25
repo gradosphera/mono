@@ -10,9 +10,9 @@ class DataService<T extends IDocument> {
   private collection: Collection<T>
   private state: Collection
 
-  constructor(private dbConnector: MongoDBConnector, collectionName: string) {
-    this.collection = this.dbConnector.getCollection<T>(collectionName)
-    this.state = this.dbConnector.getCollection('sync')
+  constructor(dbConnector: MongoDBConnector, collectionName: string) {
+    this.collection = dbConnector.getCollection<T>(collectionName)
+    this.state = dbConnector.getCollection('sync')
   }
 
   async getOne(filter: Filter<T>): Promise<T | null> {

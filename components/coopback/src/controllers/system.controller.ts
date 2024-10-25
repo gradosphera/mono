@@ -19,7 +19,7 @@ export const install = catchAsync(async (req: RInstall, res: Response) => {
   const { body } = req;
   await systemService.install(body as IInstall);
 
-  logger.info('System installed', { source: 'install', vars: req.body });
+  logger.info('System installed');
 
   res.status(httpStatus.OK).send();
 });
