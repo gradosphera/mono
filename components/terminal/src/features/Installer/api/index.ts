@@ -1,4 +1,4 @@
-import type { IInstall } from 'coopback';
+import type { IInstall } from '@coopenomics/controller';
 import { sendPOST } from 'src/shared/api';
 
 async function install(data: IInstall): Promise<void> {

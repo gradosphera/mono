@@ -1,5 +1,5 @@
 import { api } from '../api'
-import { type ISettings } from 'coopback'
+import { type ISettings } from '@coopenomics/controller'
 import { useSettingsStore } from 'src/entities/Settings'
 
 export const useUpdateSettings = () => {

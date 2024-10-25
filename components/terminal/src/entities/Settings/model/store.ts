@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { api } from '../api'
 import { ref, type Ref } from 'vue';
-import type { ISettings } from 'coopback';
+import type { ISettings } from '@coopenomics/controller';
 
 const namespace = 'settings';
 

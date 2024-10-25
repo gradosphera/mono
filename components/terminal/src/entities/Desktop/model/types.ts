@@ -26,4 +26,4 @@ export interface IRoute {
   meta: RouteMeta;
 }
 
-export type { IHealthResponse } from 'coopback'
+export type { IHealthResponse } from '@coopenomics/controller'

@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 import { Ref, ref } from 'vue';
-import type { IGetResponse, IOrderResponse } from 'coopback';
+import type { IGetResponse, IOrderResponse } from '@coopenomics/controller';
 import { api } from '../api';
-import type { IGetCoopOrders, IGetMyOrders } from 'coopback';
+import type { IGetCoopOrders, IGetMyOrders } from '@coopenomics/controller';
 
 
 interface IOrderStore {

@@ -1,8 +1,8 @@
 {
-  "name": "coopback",
-  "version": "2.1.2",
+  "name": "@coopenomics/controller",
+  "version": "2.1.2-alpha.8",
   "description": "",
-  "private": true,
+  "private": false,
   "bin": "bin/createNodejsApp.js",
   "main": "src/index.ts",
   "repository": "https://github.com/hagopj13/node-express-boilerplate.git",
@@ -11,6 +11,9 @@
   "types": "src/types/index.ts",
   "engines": {
     "node": ">=12.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "deploy-testnet": "git checkout testnet && git merge main && git push origin testnet && git checkout main",

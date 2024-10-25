@@ -1,10 +1,13 @@
 {
-  "name": "terminal",
-  "version": "2.1.2",
+  "name": "@coopenomics/terminal",
+  "version": "2.1.2-alpha.10",
   "description": "A Terminal Project",
   "productName": "Terminal App",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
-  "private": true,
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "deploy-testnet": "git checkout testnet && git merge main && git push origin testnet && git checkout main",
     "deploy-production": "git checkout production && git merge testnet && git push origin production && git checkout main",
@@ -12,9 +15,12 @@
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "concurrently -n 'TERMINAL' -c 'bgRed.white' \"quasar dev -m ssr\"",
-    "build": "quasar build"
+    "build:lib": "vite build",
+    "build": "quasar build",
+    "prepublishOnly": "npm run build:lib"
   },
   "dependencies": {
+    "@coopenomics/controller": "workspace:*",
     "@dicebear/collection": "^9.0.1",
     "@dicebear/core": "^9.0.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
@@ -37,7 +43,6 @@
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "axios": "^1.2.1",
     "compression": "^1.7.4",
-    "coopback": "workspace:*",
     "cooptypes": "workspace:*",
     "dompurify": "^3.1.7",
     "dotenv": "^16.4.5",
@@ -85,5 +90,6 @@
     "node": "^20 || ^18 || ^16",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
-  }
+  },
+  "gitHead": "0686c6ab00447d41b529fc0a2ad7637ff50448a0"
 }

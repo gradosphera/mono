@@ -199,32 +199,32 @@ export default router;
  *
  */
 
-/**
- * @swagger
- * /users/add:
- *   post:
- *     summary: Добавить пользователя без заявления
- *     description: Только администраторы могут добавлять новых пользователей без прохождения процедуры подачи заявления. Это используется для добавления действующих пайщиков.
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             "$ref": '#/components/schemas/IAddUser'
- *     responses:
- *       "201":
- *         description: Пользователь успешно добавлен
- *         content:
- *           application/json:
- *             schema:
- *                $ref: '#/components/schemas/User'
- *       "400":
- *         $ref: '#/components/responses/BadRequest'
- *       "401":
- *         $ref: '#/components/responses/Unauthorized'
- *       "403":
- *         $ref: '#/components/responses/Forbidden'
- */
+// /**
+//  * @swagger
+//  * /users/add:
+//  *   post:
+//  *     summary: Добавить пользователя без заявления
+//  *     description: Только администраторы могут добавлять новых пользователей без прохождения процедуры подачи заявления. Это используется для добавления действующих пайщиков.
+//  *     tags: [Users]
+//  *     security:
+//  *       - bearerAuth: []
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             "$ref": '#/components/schemas/IAddUser'
+//  *     responses:
+//  *       "201":
+//  *         description: Пользователь успешно добавлен
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *                $ref: '#/components/schemas/User'
+//  *       "400":
+//  *         $ref: '#/components/responses/BadRequest'
+//  *       "401":
+//  *         $ref: '#/components/responses/Unauthorized'
+//  *       "403":
+//  *         $ref: '#/components/responses/Forbidden'
+//  */
