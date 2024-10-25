@@ -14,7 +14,7 @@ div(v-if="installStore")
 
   div.flex.justify-around
     q-btn(@click="add" color="primary" icon="add") добавить члена
-    q-btn(@click="next" color="primary" icon="done" @loading="loading") завершить
+    q-btn(@click="next" color="primary" icon="done" :loading="loading") завершить
 
 
 </template>
@@ -23,11 +23,11 @@ div(v-if="installStore")
 import { useInstallCooperativeStore } from 'src/entities/Installer/model';
 const installStore = useInstallCooperativeStore()
 import { IndividualDataForm } from 'src/shared/ui/UserDataForm/IndividualDataForm';
-import type { IIndividualData, IUserData } from 'src/shared/lib/types/user/IUserData';
+import type { IIndividualData } from 'src/shared/lib/types/user/IUserData';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useInstallCooperative } from '../../model';
-import { onBeforeUnmount, ref } from 'vue';
+import { ref } from 'vue';
 
 installStore.is_finish = false
 
