@@ -25,6 +25,7 @@ q-list(
   import { useRoute, useRouter } from 'vue-router';
   import { useDesktopStore } from 'src/entities/Desktop/model';
   import { type IRoute } from 'src/entities/Desktop/model/types';
+import { COOPNAME } from 'src/shared/config';
 
   const desktop = useDesktopStore()
   const routes = ref<IRoute[]>([])
@@ -46,7 +47,7 @@ q-list(
 
   // Функция навигации при клике на элемент
   const navigate = (routeToNavigate: IRoute) => {
-    router.push({ name: routeToNavigate.name, params: { coopname: 'voskhod' } });
+    router.push({ name: routeToNavigate.name, params: { coopname: COOPNAME } });
   }
 
   init()
