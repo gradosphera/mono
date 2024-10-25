@@ -3,6 +3,7 @@ import { IAction } from '../types/common';
 import { SovietContract } from 'cooptypes';
 import { wsService } from '../services';
 import logger from '../config/logger';
+import config from '../config/config';
 
 let clientSocket: Socket | undefined;
 
@@ -33,11 +34,13 @@ export const closeSocketConnection = (): void => {
 };
 
 async function processEvent(event: IAction) {
-  if (event.receiver === SovietContract.contractName.production && event.name === 'updateboard') {
-    wsService.updateBoard(event.data);
-  }
+  if (event.receiver === config.coopname) {
+    if (event.name === 'updateboard') {
+      wsService.updateBoard(event.data);
+    }
 
-  if (event.receiver === SovietContract.contractName.production && event.name === 'createboard') {
-    wsService.updateBoard(event.data);
+    if (event.name === 'createboard') {
+      wsService.updateBoard(event.data);
+    }
   }
 }
