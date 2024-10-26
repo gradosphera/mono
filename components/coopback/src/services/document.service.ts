@@ -11,6 +11,10 @@ export const connectGenerator = async () => {
   await generator.connect(config.mongoose.url);
 };
 
+export const diconnectGenerator = async () => {
+  await generator.disconnect();
+};
+
 export const generateDocument = async (options: IGenerate) => {
   return await generator.generate(options);
 };

@@ -216,6 +216,7 @@ export abstract class DocFactory<T extends IGenerate> {
     vars: ICombinedData,
     translation: ITranslations,
     meta: IMetaDocument,
+    // skip_save: boolean = false,
   ): Promise<IGeneratedDocument> {
     const pdfService = new PDFService()
     const document: IGeneratedDocument = await pdfService.generateDocument(context, vars, translation, meta)

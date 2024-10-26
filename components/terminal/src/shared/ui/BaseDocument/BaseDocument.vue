@@ -29,8 +29,9 @@ q-card(style="word-break: break-all !important; white-space: normal !important;"
             span публичный ключ
           p.q-mr-lg.q-ml-lg.text-grey {{ actionDocumentData?.document?.public_key }}
 
-        div.text-center
+        div.text-center.q-gutter-sm
           q-btn(size="sm" color="primary" icon="download" @click="download") скачать
+          q-btn(size="sm" color="primary" icon="fa-solid fa-check-double" @click="regenerate" :loading="onRegenerate") сверить
 
 </template>
 
@@ -40,6 +41,8 @@ import { Cooperative, SovietContract } from 'cooptypes'
 import { Signature, PublicKey } from '@wharfkit/antelope';
 import { useGlobalStore } from 'src/shared/store';
 import DOMPurify from 'dompurify';
+import { DigitalDocument } from 'src/entities/Document';
+import { FailAlert, SuccessAlert } from 'src/shared/api';
 
 const props = defineProps({
   action: {
@@ -58,6 +61,24 @@ const loading = ref(false)
 const signature_verified = ref(false)
 
 const regeneratedHash = ref()
+const onRegenerate = ref(false)
+
+const regenerate = async() => {
+  try {
+    onRegenerate.value = true
+
+    const regeneration = await new DigitalDocument().generate({...doc.value.meta})
+
+    if (regeneration.hash == regeneratedHash.value)
+      SuccessAlert('Сверка прошла успешно: аналогичный документ восстановлен из исходных данных')
+    else
+      FailAlert('Сверка прошла безуспешно: аналогичный документ невозможно получить из исходных данных')
+
+    onRegenerate.value = false
+  } catch(e){
+    onRegenerate.value = false
+  }
+}
 
 // Функция для декодирования и очистки HTML
 function sanitizeHtml(html: string) {

@@ -8,7 +8,7 @@ const router = express.Router();
 
 router
   .route('/generate')
-  .post(auth('generateDocument'), validate(documentValidation.RGenerate), documentController.generateDocument);
+  .post(auth('regenerateDocument'), validate(documentValidation.RGenerate), documentController.generateDocument);
 
 router
   .route('/get-documents')

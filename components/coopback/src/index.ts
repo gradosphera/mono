@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import app from './app';
 import config from './config/config';
 import logger from './config/logger';
-import { connectGenerator } from './services/document.service';
+import { connectGenerator, diconnectGenerator } from './services/document.service';
 import { initSocketConnection } from './controllers/ws.controller';
 import { initializeDefaultPlugins, pluginFactory } from './factories/pluginFactory';
 import { paymentService } from './services';
@@ -36,7 +36,7 @@ mongoose.connect(config.mongoose.url).then(async () => {
   });
 });
 
-const exitHandler = () => {
+const exitHandler = async () => {
   if (server) {
     server.close(() => {
       logger.info('Server closed');
@@ -47,17 +47,20 @@ const exitHandler = () => {
   }
 };
 
-const unexpectedErrorHandler = (error: any) => {
+const unexpectedErrorHandler = async (error: any) => {
   console.log(error);
+  await diconnectGenerator();
+  await mongoose.disconnect();
   logger.error(error, { source: 'unexpectedErrorHandler' });
-  exitHandler();
+  await exitHandler();
 };
 
 process.on('uncaughtException', unexpectedErrorHandler);
 process.on('unhandledRejection', unexpectedErrorHandler);
 
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   logger.info('SIGTERM received');
+  await mongoose.disconnect();
   if (server) {
     server.close();
   }

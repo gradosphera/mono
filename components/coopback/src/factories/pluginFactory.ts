@@ -69,7 +69,8 @@ export const initializeWorkerByName = async (pluginName: string) => {
 
   // Запускаем новый воркер
   const thread = new Worker('../workers/plugin.worker.ts');
-  const worker = spawn(thread); // Не используем await, чтобы не блокировать основной поток
+  const worker = spawn(thread, { timeout: 30000 }); // Не используем await, чтобы не блокировать основной поток
+  //таймаут выше для локальных машин
 
   // Сохраняем воркера и поток в объекте по имени плагина
   workerMap[pluginName] = { worker, thread };

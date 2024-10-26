@@ -1,7 +1,6 @@
 const user = [
   'getSelf',
   'initialPayment',
-  'generateDocument',
   'getMyDocuments',
   'getMyOrders',
   'sendVerificationEmail',
@@ -11,7 +10,17 @@ const user = [
   'getVars',
 ];
 
-const member = [...user, 'getUsers', 'manageUsers', 'loadAgenda', 'loadStaff', 'getDocuments', 'loadInfo', 'manageOrders'];
+const member = [
+  ...user,
+  'getUsers',
+  'manageUsers',
+  'loadAgenda',
+  'loadStaff',
+  'getDocuments',
+  'loadInfo',
+  'manageOrders',
+  'regenerateDocument',
+];
 
 const chairman = [...user, ...member, 'addUser', 'setVars', 'manageSettings', 'setWif', 'setPlugin'];
 

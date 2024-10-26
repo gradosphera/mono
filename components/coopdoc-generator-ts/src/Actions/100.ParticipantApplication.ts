@@ -73,7 +73,7 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
     const translation = template.translations[meta.lang]
 
     // генерируем документ
-    const document: IGeneratedDocument = await super.generatePDF(user.data, template.context, combinedData, translation, meta)
+    const document: IGeneratedDocument = await super.generatePDF(user.data, template.context, combinedData, translation, meta, options.skip_save)
 
     // сохраняем его в бд
     if (!options.skip_save)
