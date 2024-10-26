@@ -7,6 +7,7 @@ import logger from './config/logger';
 import { connectGenerator } from './services/document.service';
 import { initSocketConnection } from './controllers/ws.controller';
 import { initializeDefaultPlugins, pluginFactory } from './factories/pluginFactory';
+import { paymentService } from './services';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
@@ -20,6 +21,9 @@ mongoose.connect(config.mongoose.url).then(async () => {
 
   // подключаемся к ws-серверу
   await initSocketConnection(SERVER_URL);
+
+  // Запуск фабрики платежей
+  await paymentService.init();
 
   // Инициализация дефолтных плагинов
   await initializeDefaultPlugins();

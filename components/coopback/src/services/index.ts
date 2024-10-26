@@ -11,6 +11,6 @@ export * as systemService from './system.service';
 export * as participantService from './participant.service';
 export * as redisService from './redis.service';
 export * as methodService from './method.service';
-export * as payEffectService from './payEffect.service';
+export * as paymentService from './payment.service';
 export * as settingService from './setting.service';
 export * as pluginService from './plugin.service';

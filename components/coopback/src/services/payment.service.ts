@@ -8,7 +8,7 @@ import { redisSubscriber } from './redis.service';
 import config from '../config/config';
 
 export class PaymentEffectProcessor {
-  static async processPaymentEffect(id: string, status: string) {
+  public async processPaymentEffect(id: string, status: string) {
     const order = await Order.findById(id);
 
     if (!order) {
@@ -31,7 +31,7 @@ export class PaymentEffectProcessor {
     }
   }
 
-  private static async process(order: IOrder) {
+  private async process(order: IOrder) {
     logger.info(`Processing blockchain data for order ${order.id}`, { source: 'process' });
 
     try {
@@ -62,15 +62,17 @@ export class PaymentEffectProcessor {
   }
 }
 
-redisSubscriber.subscribe(`${config.coopname}:orderStatusUpdate`);
+export const init = () => {
+  redisSubscriber.subscribe(`${config.coopname}:orderStatusUpdate`);
 
-redisSubscriber.on('message', async (channel, message) => {
-  if (channel === `${config.coopname}:orderStatusUpdate`) {
-    try {
-      const { id, status } = JSON.parse(message);
-      await PaymentEffectProcessor.processPaymentEffect(id, status);
-    } catch (error) {
-      logger.error('Error processing Redis message:', error);
+  redisSubscriber.on('message', async (channel, message) => {
+    if (channel === `${config.coopname}:orderStatusUpdate`) {
+      try {
+        const { id, status } = JSON.parse(message);
+        await new PaymentEffectProcessor().processPaymentEffect(id, status);
+      } catch (error) {
+        logger.error('Error processing Redis message:', error);
+      }
     }
-  }
-});
+  });
+};
