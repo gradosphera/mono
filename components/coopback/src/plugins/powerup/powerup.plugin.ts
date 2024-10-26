@@ -108,6 +108,9 @@ export class Plugin implements IPlugin {
       await blockchainService.powerUp(username, quantity);
 
       this.data.config.lastDailyReplenishmentDate = new Date();
+      this.data.markModified('config'); // Помечаем config как измененное поле
+
+      await this.data.save();
 
       await this.log({
         type: 'daily',
@@ -120,8 +123,6 @@ export class Plugin implements IPlugin {
           cpu_limit: account.cpu_limit,
         },
       });
-
-      await this.data.save();
 
       logger.info('Ежедневное пополнение выполнено успешно');
     } catch (error) {
