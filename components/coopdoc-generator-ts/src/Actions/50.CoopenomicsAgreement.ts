@@ -20,10 +20,13 @@ export class Factory extends DocFactory<CoopenomicsAgreement.Action> {
     else {
       template = await this.getTemplate(DraftContract.contractName.production, CoopenomicsAgreement.registry_id, data.block_num)
     }
-
+    console.log('data', data)
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data })
+    console.log('meta: ', meta)
+
     const coop = await super.getCooperative(data.coopname, data.block_num)
     const vars = await super.getVars(data.coopname, data.block_num)
+    console.log('vars', vars)
     const partner = await super.getOrganization(data.username, data.block_num)
 
     const combinedData: CoopenomicsAgreement.Model = {
@@ -38,6 +41,8 @@ export class Factory extends DocFactory<CoopenomicsAgreement.Action> {
     const translation = template.translations[meta.lang]
 
     const document: IGeneratedDocument = await super.generatePDF(null, template.context, combinedData, translation, meta, options?.skip_save)
+
+    console.log('document: ', document.hash, document.meta)
 
     return document
   }

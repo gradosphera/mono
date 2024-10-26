@@ -16,7 +16,7 @@ class DataService<T extends IDocument> {
   }
 
   async getOne(filter: Filter<T>): Promise<T | null> {
-    const document = await this.collection.findOne({ ...filter })
+    const document = await this.collection.findOne({ ...filter }, { sort: { _id: -1 } })
     return document as T | null
   }
 
