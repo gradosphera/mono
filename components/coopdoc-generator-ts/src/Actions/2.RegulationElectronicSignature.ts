@@ -1,7 +1,7 @@
 import { DraftContract } from 'cooptypes'
 import { RegulationElectronicSignature } from '../templates'
 import { DocFactory } from '../Factory'
-import type { IGeneratedDocument, IMetaDocument, ITemplate } from '../Interfaces'
+import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
 export { RegulationElectronicSignature as Template } from '../templates'
@@ -11,19 +11,19 @@ export class Factory extends DocFactory<RegulationElectronicSignature.Action> {
     super(storage)
   }
 
-  async generateDocument(options: RegulationElectronicSignature.Action): Promise<IGeneratedDocument> {
+  async generateDocument(data: RegulationElectronicSignature.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
     let template: ITemplate<RegulationElectronicSignature.Model>
 
     if (process.env.SOURCE === 'local') {
       template = RegulationElectronicSignature.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, RegulationElectronicSignature.registry_id, options.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, RegulationElectronicSignature.registry_id, data.block_num)
     }
 
-    const meta: IMetaDocument = await super.getMeta({ title: template.title, ...options })
-    const coop = await super.getCooperative(options.coopname, options.block_num)
-    const vars = await super.getVars(options.coopname, options.block_num)
+    const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data })
+    const coop = await super.getCooperative(data.coopname, data.block_num)
+    const vars = await super.getVars(data.coopname, data.block_num)
 
     const combinedData: RegulationElectronicSignature.Model = {
       meta,
@@ -35,9 +35,7 @@ export class Factory extends DocFactory<RegulationElectronicSignature.Action> {
 
     const translation = template.translations[meta.lang]
 
-    const document: IGeneratedDocument = await super.generatePDF(null, template.context, combinedData, translation, meta)
-
-    await super.saveDraft(document)
+    const document: IGeneratedDocument = await super.generatePDF(null, template.context, combinedData, translation, meta, options?.skip_save)
 
     return document
   }

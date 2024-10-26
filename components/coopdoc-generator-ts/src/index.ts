@@ -5,7 +5,7 @@ export * from './Schema'
 import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
 import type { Cooperative as CooperativeModel } from 'cooptypes'
 import type { IFilterDocuments, IGeneratedDocument, Numbers, externalDataTypes, externalDataTypesArrays, internalFilterTypes } from './Interfaces'
-import type { IGenerate } from './Interfaces/Documents'
+import type { IGenerate, IGenerationOptions } from './Interfaces/Documents'
 import * as Actions from './Actions'
 
 import { MongoDBConnector } from './Services/Databazor'
@@ -30,7 +30,7 @@ export type { CooperativeData as ICooperativeData } from './Models'
 export interface IGenerator {
   connect: (mongoUri: string) => Promise<void>
   disconnect: () => Promise<void>
-  generate: (options: IGenerate) => Promise<IGeneratedDocument>
+  generate: (data: IGenerate, options?: IGenerationOptions) => Promise<IGeneratedDocument>
   getDocument: (filter: Filter<IFilterDocuments>) => Promise<IGeneratedDocument>
 
   constructCooperative: (username: string, block_num?: number) => Promise<CooperativeData | null>
@@ -75,14 +75,14 @@ export class Generator implements IGenerator {
   }
 
   // Метод генерации документа
-  async generate(options: IGenerate): Promise<IGeneratedDocument> {
-    const factory = this.factories[options.registry_id as Numbers] // Get the factory
+  async generate(data: IGenerate, options?: IGenerationOptions): Promise<IGeneratedDocument> {
+    const factory = this.factories[data.registry_id as Numbers] // Get the factory
 
     if (!factory)
-      throw new Error(`Фабрика для документа #${options.registry_id} не найдена.`)
+      throw new Error(`Фабрика для документа #${data.registry_id} не найдена.`)
 
     // синтезируем документ
-    return await factory.generateDocument(options)
+    return await factory.generateDocument(data, options)
   }
 
   async getDocument(filter: Filter<IFilterDocuments>): Promise<IGeneratedDocument> {

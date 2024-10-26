@@ -2,6 +2,7 @@ import { type Cooperative, DraftContract } from 'cooptypes'
 import { DocFactory } from '../Factory'
 import type {
   IGeneratedDocument,
+  IGenerationOptions,
   IMetaDocument,
   ITemplate,
 } from '../Interfaces'
@@ -17,7 +18,8 @@ export class Factory extends DocFactory<DecisionOfParticipantApplication.Action>
   }
 
   async generateDocument(
-    options: DecisionOfParticipantApplication.Action,
+    data: DecisionOfParticipantApplication.Action,
+    options?: IGenerationOptions,
   ): Promise<IGeneratedDocument> {
     let template: ITemplate<DecisionOfParticipantApplication.Model>
 
@@ -25,27 +27,27 @@ export class Factory extends DocFactory<DecisionOfParticipantApplication.Action>
       template = DecisionOfParticipantApplication.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, DecisionOfParticipantApplication.registry_id, options.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, DecisionOfParticipantApplication.registry_id, data.block_num)
     }
 
-    const user = await super.getUser(options.username, options.block_num)
+    const user = await super.getUser(data.username, data.block_num)
 
     const userData = {
       [user.type]: user.data,
     }
 
-    const coop = await super.getCooperative(options.coopname, options.block_num)
+    const coop = await super.getCooperative(data.coopname, data.block_num)
 
     // TODO необходимо строго типизировать мета-данные документов друг под друга!
     const meta: IMetaDocument = await super.getMeta({
       title: template.title,
-      ...options,
+      ...data,
     }) // Генерируем мета-данные
 
     const decision: Cooperative.Document.IDecisionData = await super.getDecision(
       coop,
-      options.coopname,
-      options.decision_id,
+      data.coopname,
+      data.decision_id,
       meta.created_at,
     )
 
@@ -70,10 +72,8 @@ export class Factory extends DocFactory<DecisionOfParticipantApplication.Action>
       combinedData,
       translation,
       meta,
+      options?.skip_save,
     )
-
-    // сохраняем его в бд
-    await super.saveDraft(document)
 
     // возвращаем
     return document

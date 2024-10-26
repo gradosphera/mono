@@ -121,3 +121,7 @@ export interface IDecisionData {
   votes_abstained: number
   voters_percent: number
 }
+
+export interface IGenerationOptions {
+  skip_save: boolean
+}

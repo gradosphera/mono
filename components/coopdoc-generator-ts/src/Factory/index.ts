@@ -5,7 +5,7 @@ import { DraftContract, SovietContract } from 'cooptypes'
 import type { ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, ITemplate, ITranslations, externalDataTypes } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 import { type IVars, Individual, Organization, Vars } from '../Models'
-import type { IGenerate } from '../Interfaces/Documents'
+import type { IGenerate, IGenerationOptions } from '../Interfaces/Documents'
 import { PDFService } from '../Services/Generator'
 import packageJson from '../../package.json'
 import { Validator } from '../Services/Validator'
@@ -20,7 +20,7 @@ import type { IOrganizationData } from '..'
 const packageVersion = packageJson.version
 
 export abstract class DocFactory<T extends IGenerate> {
-  abstract generateDocument(options: T): Promise<IGeneratedDocument>
+  abstract generateDocument(data: T, options?: IGenerationOptions): Promise<IGeneratedDocument>
 
   public storage: MongoDBConnector
 
@@ -216,13 +216,16 @@ export abstract class DocFactory<T extends IGenerate> {
     vars: ICombinedData,
     translation: ITranslations,
     meta: IMetaDocument,
-    // skip_save: boolean = false,
+    skip_save: boolean = false,
   ): Promise<IGeneratedDocument> {
     const pdfService = new PDFService()
     const document: IGeneratedDocument = await pdfService.generateDocument(context, vars, translation, meta)
     const full_name = this.getFullName(data)
 
     document.full_title = `${document.meta.title} - ${full_name} - ${document.meta.created_at}.pdf`
+
+    if (!skip_save)
+      await this.saveDraft(document)
 
     return document
   }

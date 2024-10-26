@@ -48,3 +48,7 @@ export interface IMetaDocumentPartial extends Partial<IMetaDocument> {
 }
 
 export type IGenerate = Cooperative.Document.IGenerate
+
+export interface IGenerationOptions {
+  skip_save: boolean
+}
