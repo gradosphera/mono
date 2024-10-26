@@ -18,7 +18,7 @@ export class PaymentEffectProcessor {
 
     switch (status) {
       case 'paid':
-        if (order.status != 'completed') await PaymentEffectProcessor.process(order);
+        if (order.status != 'completed') await this.process(order);
         break;
 
       case 'failed':
