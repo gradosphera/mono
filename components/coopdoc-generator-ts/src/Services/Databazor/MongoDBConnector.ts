@@ -52,6 +52,7 @@ export class MongoDBConnector {
     if (!this.documents)
       throw new Error('Database not connected')
 
+    // await this.documents.insertOne({ hash: document.hash, document })
     await this.documents.updateOne({ hash: document.hash }, { $set: { ...document } }, { upsert: true })
   }
 }

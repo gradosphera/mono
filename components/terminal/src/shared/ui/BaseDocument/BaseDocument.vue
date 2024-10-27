@@ -31,6 +31,8 @@ q-card(style="word-break: break-all !important; white-space: normal !important;"
 
         div.text-center.q-gutter-sm
           q-btn(size="sm" color="primary" icon="download" @click="download") скачать
+          q-btn(size="sm" color="primary" icon="download" @click="download2") скачать2
+
           q-btn(size="sm" color="primary" icon="fa-solid fa-check-double" @click="regenerate" :loading="onRegenerate") сверить
 
 </template>
@@ -62,14 +64,15 @@ const signature_verified = ref(false)
 
 const regeneratedHash = ref()
 const onRegenerate = ref(false)
+const regenerated = ref()
 
 const regenerate = async() => {
   try {
     onRegenerate.value = true
 
-    const regeneration = await new DigitalDocument().generate({...doc.value.meta})
+    regenerated.value = await new DigitalDocument().generate({...doc.value.meta})
 
-    if (regeneration.hash == regeneratedHash.value)
+    if (regenerated.value.hash == regeneratedHash.value)
       SuccessAlert('Сверка прошла успешно: аналогичный документ восстановлен из исходных данных')
     else
       FailAlert('Сверка прошла безуспешно: аналогичный документ невозможно получить из исходных данных')
@@ -114,6 +117,26 @@ const verifySignature = () => {
 }
 
 verifySignature()
+
+
+async function download2() {
+  // Преобразование base64 строки в Blob
+  const response = await fetch(`data:application/pdf;base64,${regenerated.value.binary.toString()}`);
+  const blob = await response.blob();
+
+  // Создание временной ссылки для скачивания файла
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = regenerated.value.full_title ? regenerated.value.full_title : `${regenerated.value.meta.title} - ${regenerated.value.meta.username} - ${regenerated.value.meta.created_at}.pdf`;
+
+  // Имитация клика по ссылке для начала скачивания
+  document.body.appendChild(link);
+  link.click();
+
+  // Очистка после скачивания
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
+}
 
 
 async function download() {
