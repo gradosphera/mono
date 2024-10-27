@@ -121,8 +121,9 @@ verifySignature()
 
 async function download2() {
   // Преобразование base64 строки в Blob
-  const response = await fetch(`data:application/pdf;base64,${regenerated.value.binary.toString()}`);
-  const blob = await response.blob();
+  console.log('regenerated: ', regenerated)
+  const binaryData = new Uint8Array(Object.values(regenerated.value.binary));
+  const blob = new Blob([binaryData], { type: 'application/pdf' });
 
   // Создание временной ссылки для скачивания файла
   const link = document.createElement('a');
