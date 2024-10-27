@@ -6,6 +6,7 @@ import moment from 'moment-timezone'
 import type { IGeneratedDocument, IMetaDocument, ITranslations } from '../../Interfaces'
 import { TemplateEngine } from '../Templator'
 import { calculateSha256 } from '../../Utils/calculateSHA'
+import { ArialBase64 } from '../../Fonts/arial'
 
 export interface IPDFService {
   generateDocument: (
@@ -42,9 +43,6 @@ export class PDFService implements IPDFService {
 
   private static async generatePDFBuffer(htmlContent: string): Promise<Uint8Array> {
     // Читаем шрифт из файла и кодируем в Base64
-    const fontPath = path.join(process.cwd(), 'src', 'Fonts', 'Arial.ttf')
-
-    const fontData = fs.readFileSync(fontPath).toString('base64')
 
     const browser = await puppeteer.launch({
       args: [
@@ -66,7 +64,7 @@ export class PDFService implements IPDFService {
     <style>
       @font-face {
         font-family: 'Arial';
-        src: url(data:font/ttf;base64,${fontData}) format('truetype');
+        src: url(data:font/ttf;base64,${ArialBase64}) format('truetype');
       }
       * {
         font-family: 'Arial', sans-serif;
