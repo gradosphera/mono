@@ -52,12 +52,21 @@ export class PDFService implements IPDFService {
         '--disable-gpu',
         '--disable-extensions',
         '--disable-software-rasterizer',
+        '--deterministic-fetch', // для предсказуемости загрузки данных
+        '--enable-use-zoom-for-dsf', // подавляет случайные изменения в масштабировании
       ],
       timeout: 120000,
       protocolTimeout: 120000,
     })
 
     const page = await browser.newPage()
+
+    // Устанавливаем фиксированные параметры viewport для стабильного рендеринга
+    await page.setViewport({
+      width: 1280,
+      height: 1024,
+      deviceScaleFactor: 2, // Увеличиваем DPI для большей предсказуемости
+    })
 
     // CSS для встраивания шрифта Arial с использованием Base64
     const fontStyle = `
@@ -84,7 +93,14 @@ export class PDFService implements IPDFService {
     // Добавьте задержку перед созданием PDF
     await new Promise(resolve => setTimeout(resolve, 1000))
 
-    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true })
+    // Генерация PDF с дополнительными параметрами для стабильности
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      scale: 1, // Устанавливаем фиксированный скейлинг
+      preferCSSPageSize: true, // Убедиться, что CSS задает размер страницы
+    })
+
     await browser.close()
     return new Uint8Array(pdfBuffer)
   }
@@ -100,6 +116,8 @@ export class PDFService implements IPDFService {
     pdfDoc.setCreator(meta.generator)
     pdfDoc.setCreationDate(dateWithTimezone)
     pdfDoc.setModificationDate(dateWithTimezone)
-    return pdfDoc.save()
+    pdfDoc.setProducer('') // Очищает Producer, если нужно
+
+    return pdfDoc.save({ useObjectStreams: false })
   }
 }
