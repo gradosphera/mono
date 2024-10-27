@@ -54,6 +54,7 @@ export class PDFService implements IPDFService {
         '--disable-software-rasterizer',
         '--deterministic-fetch', // для предсказуемости загрузки данных
         '--enable-use-zoom-for-dsf', // подавляет случайные изменения в масштабировании
+        '--disable-font-subpixel-positioning', // Дополнительный флаг для стабильности
       ],
       timeout: 120000,
       protocolTimeout: 120000,
@@ -91,7 +92,7 @@ export class PDFService implements IPDFService {
     await page.evaluateHandle('document.fonts.ready')
 
     // Добавьте задержку перед созданием PDF
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 3000))
 
     // Генерация PDF с дополнительными параметрами для стабильности
     const pdfBuffer = await page.pdf({
