@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import puppeteer from 'puppeteer'
 import { PDFDocument } from 'pdf-lib'
 import moment from 'moment-timezone'
@@ -39,6 +41,11 @@ export class PDFService implements IPDFService {
   }
 
   private static async generatePDFBuffer(htmlContent: string): Promise<Uint8Array> {
+    // Читаем шрифт из файла и кодируем в Base64
+    const fontPath = path.resolve(__dirname, '../../Fonts/Arial.ttf')
+
+    const fontData = fs.readFileSync(fontPath).toString('base64')
+
     const browser = await puppeteer.launch({
       args: [
         '--no-sandbox',
@@ -48,24 +55,38 @@ export class PDFService implements IPDFService {
         '--disable-extensions',
         '--disable-software-rasterizer',
       ],
-      timeout: 120000, // увеличиваем общее время ожидания до 2 минут
-      protocolTimeout: 120000, // увеличиваем время ожидания протокола до 2 минут
+      timeout: 120000,
+      protocolTimeout: 120000,
     })
 
     const page = await browser.newPage()
 
-    // const data = await inlineCss(htmlContent, { url: 'about:blank' })
-    // const template = hb.compile(htmlContent, { strict: true })
-    // const result = template({})
+    // CSS для встраивания шрифта Arial с использованием Base64
+    const fontStyle = `
+    <style>
+      @font-face {
+        font-family: 'Arial';
+        src: url(data:font/ttf;base64,${fontData}) format('truetype');
+      }
+      * {
+        font-family: 'Arial', sans-serif;
+      }
+    </style>
+  `
 
-    await page.setContent(htmlContent, {
+    // Вставляем CSS-шрифт в HTML-контент
+    const htmlWithFontStyle = fontStyle + htmlContent
+
+    await page.setContent(htmlWithFontStyle, {
       waitUntil: 'networkidle0',
     })
+
+    await page.evaluateHandle('document.fonts.ready')
 
     // Добавьте задержку перед созданием PDF
     await new Promise(resolve => setTimeout(resolve, 1000))
 
-    const pdfBuffer = await page.pdf({ format: 'A4' })
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true })
     await browser.close()
     return new Uint8Array(pdfBuffer)
   }

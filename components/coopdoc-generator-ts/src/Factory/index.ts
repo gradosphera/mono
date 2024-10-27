@@ -221,10 +221,6 @@ export abstract class DocFactory<T extends IGenerate> {
     const pdfService = new PDFService()
     const document: IGeneratedDocument = await pdfService.generateDocument(context, vars, translation, meta)
     const full_name = this.getFullName(data)
-    console.log('context: ', context)
-    console.log('translation: ', translation)
-    console.log('vars: ', vars)
-    console.log('document: ', document.hash, document.meta)
 
     document.full_title = `${document.meta.title} - ${full_name} - ${document.meta.created_at}.pdf`
 
