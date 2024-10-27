@@ -42,7 +42,7 @@ export class PDFService implements IPDFService {
 
   private static async generatePDFBuffer(htmlContent: string): Promise<Uint8Array> {
     // Читаем шрифт из файла и кодируем в Base64
-    const fontPath = path.resolve(__dirname, '../../Fonts/Arial.ttf')
+    const fontPath = path.join(process.cwd(), 'src', 'Fonts', 'Arial.ttf')
 
     const fontData = fs.readFileSync(fontPath).toString('base64')
 
