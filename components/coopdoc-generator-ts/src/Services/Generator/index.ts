@@ -1,12 +1,16 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { exec } from 'node:child_process'
 import puppeteer from 'puppeteer'
 import { PDFDocument } from 'pdf-lib'
 import moment from 'moment-timezone'
+import { v4 as uuidv4 } from 'uuid'
 import type { IGeneratedDocument, IMetaDocument, ITranslations } from '../../Interfaces'
 import { TemplateEngine } from '../Templator'
 import { calculateSha256 } from '../../Utils/calculateSHA'
 import { ArialBase64 } from '../../Fonts/arial'
+
+const weasyPrintVersion = '62.3'
 
 export interface IPDFService {
   generateDocument: (
@@ -42,68 +46,55 @@ export class PDFService implements IPDFService {
   }
 
   private static async generatePDFBuffer(htmlContent: string): Promise<Uint8Array> {
-    // Читаем шрифт из файла и кодируем в Base64
+    const tempId = uuidv4() // Генерируем уникальный ID для временных файлов
+    const tempDir = path.join(__dirname, 'tmp')
 
-    const browser = await puppeteer.launch({
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--disable-extensions',
-        '--disable-software-rasterizer',
-        '--deterministic-fetch', // для предсказуемости загрузки данных
-        '--enable-use-zoom-for-dsf', // подавляет случайные изменения в масштабировании
-        '--disable-font-subpixel-positioning', // Дополнительный флаг для стабильности
-      ],
-      timeout: 120000,
-      protocolTimeout: 120000,
-    })
+    // Создаем папку tmp, если её нет
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir)
+    }
 
-    const page = await browser.newPage()
+    const tempHtmlPath = path.join(tempDir, `${tempId}.html`)
+    const tempPdfPath = path.join(tempDir, `${tempId}.pdf`)
 
-    // Устанавливаем фиксированные параметры viewport для стабильного рендеринга
-    await page.setViewport({
-      width: 1280,
-      height: 1024,
-      deviceScaleFactor: 2, // Увеличиваем DPI для большей предсказуемости
-    })
-
-    // CSS для встраивания шрифта Arial с использованием Base64
+    // CSS с указанием кодировки и шрифтом для кириллицы
     const fontStyle = `
-    <style>
-      @font-face {
-        font-family: 'Arial';
-        src: url(data:font/ttf;base64,${ArialBase64}) format('truetype');
-      }
-      * {
-        font-family: 'Arial', sans-serif;
-      }
-    </style>
-  `
+      <style>
+        @font-face {
+          font-family: 'Arial';
+          src: url(data:font/ttf;base64,${ArialBase64}) format('truetype');
+        }
+        * {
+          font-family: 'Arial', sans-serif;
+        }
+      </style>
+      <meta charset="UTF-8">
+    `
 
-    // Вставляем CSS-шрифт в HTML-контент
+    // Объединяем CSS и HTML-контент
     const htmlWithFontStyle = fontStyle + htmlContent
 
-    await page.setContent(htmlWithFontStyle, {
-      waitUntil: 'networkidle0',
+    // Сохраняем HTML-контент во временный файл
+    fs.writeFileSync(tempHtmlPath, htmlWithFontStyle, { encoding: 'utf8' })
+
+    return new Promise((resolve, reject) => {
+      // Запускаем WeasyPrint для конвертации HTML в PDF
+      exec(`SOURCE_DATE_EPOCH=0 weasyprint ${tempHtmlPath} ${tempPdfPath}`, (error) => {
+        if (error) {
+          // Удаляем временные файлы при ошибке
+          fs.unlinkSync(tempHtmlPath)
+          reject(error)
+        }
+        else {
+          // Читаем PDF-файл и возвращаем его как Uint8Array
+          const pdfBuffer = fs.readFileSync(tempPdfPath)
+          // Удаляем временные файлы после завершения
+          fs.unlinkSync(tempHtmlPath)
+          fs.unlinkSync(tempPdfPath)
+          resolve(new Uint8Array(pdfBuffer))
+        }
+      })
     })
-
-    await page.evaluateHandle('document.fonts.ready')
-
-    // Добавьте задержку перед созданием PDF
-    await new Promise(resolve => setTimeout(resolve, 3000))
-
-    // Генерация PDF с дополнительными параметрами для стабильности
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      scale: 1, // Устанавливаем фиксированный скейлинг
-      preferCSSPageSize: true, // Убедиться, что CSS задает размер страницы
-    })
-
-    await browser.close()
-    return new Uint8Array(pdfBuffer)
   }
 
   private static async updateMetadata(pdfBuffer: ArrayBuffer, meta: IMetaDocument): Promise<Uint8Array> {
@@ -112,12 +103,11 @@ export class PDFService implements IPDFService {
     const pdfDoc = await PDFDocument.load(pdfBuffer)
     pdfDoc.setTitle(meta.title)
     pdfDoc.setLanguage(meta.lang)
-    pdfDoc.setProducer(meta.version)
     pdfDoc.setSubject(`Шаблона документа по реестру №${meta.registry_id}`)
-    pdfDoc.setCreator(meta.generator)
+    pdfDoc.setCreator(`${meta.generator}-${meta.version}`)
     pdfDoc.setCreationDate(dateWithTimezone)
     pdfDoc.setModificationDate(dateWithTimezone)
-    pdfDoc.setProducer('') // Очищает Producer, если нужно
+    pdfDoc.setProducer(`weasyprint-v${weasyPrintVersion}`)
 
     return pdfDoc.save({ useObjectStreams: false })
   }

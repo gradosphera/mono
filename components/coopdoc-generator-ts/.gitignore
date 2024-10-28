@@ -11,3 +11,4 @@ node_modules
 temp
 documents/*
 .env
+src/Services/Generator/tmp
