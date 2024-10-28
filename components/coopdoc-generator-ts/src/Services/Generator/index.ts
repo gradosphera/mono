@@ -10,7 +10,7 @@ import { TemplateEngine } from '../Templator'
 import { calculateSha256 } from '../../Utils/calculateSHA'
 import { ArialBase64 } from '../../Fonts/arial'
 
-const weasyPrintVersion = '62.3'
+const weasyPrintVersion = '61.2' // фиксируем в Dockerfile и мета-данных каждого документа
 
 export interface IPDFService {
   generateDocument: (
