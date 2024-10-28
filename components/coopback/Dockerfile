@@ -1,47 +1,30 @@
+# Базовый образ Node.js
 FROM node:alpine AS base
 
-# ENV PNPM_HOME="/pnpm"
-# ENV PATH="$PNPM_HOME:$PATH"
-
+# Включение pnpm
 RUN corepack enable pnpm \
     && corepack prepare pnpm@latest --activate
 
-
+# Устанавливаем рабочую директорию
 WORKDIR /app
 
+# Копируем package.json
 COPY package.json ./
 
-# Install dependencies for Puppeteer
+# Установка зависимостей для WeasyPrint
 RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    && apk add --no-cache --virtual .build-deps \
-    curl \
+    python3 \
+    py3-pip \
+    libpango \
+    libcairo \
+    libffi \
+    libjpeg-turbo \
+    gdk-pixbuf \
+    pango \
+    cairo \
+    libxml2 \
+    libxslt \
+    libressl \
+    && pip3 install WeasyPrint==62.3 \
     && rm -rf /var/cache/*
 
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-# RUN mkdir -p /usr/src/node-app && chown -R node:node /usr/src/node-app
-
-# WORKDIR /usr/src/node-app
-
-# COPY package.json pnpm-lock.yaml ./
-
-# USER node
-
-# FROM base AS prod-deps
-# RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
-
-# FROM base AS build
-# RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-
-# COPY --chown=node:node . .
-
-# EXPOSE 3000
-
-# CMD ["npx", "ts-node", "src/index.ts"]
