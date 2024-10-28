@@ -27,7 +27,8 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
   // Check if user is accessing their own resource
   const isOwnResource =
     (req.params.username && req.params.username === user.username) ||
-    (req.body.username && req.body.username === user.username);
+    (req.body.username && req.body.username === user.username) ||
+    (req.body.data && req.body.data.username && req.body.data.username === user.username);
 
   if (!isOwnResource && (!hasRequiredRights || !requiredRights.length)) {
     return reject(new ApiError(FORBIDDEN, 'Недостаточно прав доступа'));

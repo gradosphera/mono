@@ -158,7 +158,7 @@ export function useCreateUser() {
       coopname: COOPNAME,
       username,
       registry_id: Cooperative.Registry.ParticipantApplication.registry_id
-    });
+  });
 
     return document;
   }
