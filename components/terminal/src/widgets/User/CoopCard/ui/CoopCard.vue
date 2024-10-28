@@ -1,28 +1,23 @@
 <template lang="pug">
 div.q-pa-md
-  q-card(bordered flat round class="cooperative-card" style="border-radius: 20px;")
-    div.row
-      DepositButton.col-6
-      WithdrawButton.col-6
-    div.flex.justify-between
-      AutoAvatar(style="width: 60px;" :username="currentUser.username").q-pa-sm.q-pt-lg
-      div.text-right.q-pa-sm
-        p VIRTUAL
+  div.row.q-pt-md
+    div.col-md-6.col-xs-12
+      q-card(bordered flat round class="cooperative-card" style="border-radius: 20px;").q-mx-auto
+        div.row
+          DepositButton.col-6
+          WithdrawButton.col-6
+        div.flex.justify-between
+          AutoAvatar(style="width: 60px;" :username="currentUser.username").q-pa-sm.q-pt-lg
+          div.text-right.q-pa-sm
+            p VIRTUAL
 
-    div.q-pa-sm
-      div.text-subtitle1 {{formattedUsername}}
-      div 01/2106
-      div.text-subtitle2 {{displayName}}
+        div.q-pa-sm
+          div.text-subtitle1 {{formattedUsername}}
+          div 01/2106
+          div.text-subtitle2 {{displayName}}
 
-  div
-    div.q-pa-md
-      div.flex
-
-
-      div.row.justify-between.q-mt-lg
-        div.col-md-4.col-xs-12
-          WalletBalance
-        div.col-md-4.col-xs-12.q-mt-lg
+    div.col-md-6.col-xs-12
+      WalletBalance
 
 </template>
 
