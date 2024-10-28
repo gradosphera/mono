@@ -1,14 +1,5 @@
-FROM ubuntu:20.04 AS base
-
-# Установка переменных для timezone и отключение интерактивных вопросов
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Etc/UTC
-
-# Обновление и установка необходимых пакетов для Node.js и WeasyPrint
-RUN apt-get update && \
-    apt-get install -y tzdata curl gnupg python3 python3-pip && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs
+# Базовый образ Node.js на Alpine
+FROM node:alpine AS base
 
 # Включение pnpm
 RUN corepack enable pnpm \
@@ -20,16 +11,29 @@ WORKDIR /app
 # Копируем package.json
 COPY package.json ./
 
-# Установка зависимостей для WeasyPrint
-RUN apt-get install -y \
-    libpango-1.0-0 \
-    libharfbuzz0b \
-    libpangoft2-1.0-0 \
+# Установка системных зависимостей для WeasyPrint и создание виртуального окружения
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    gcc \
+    musl-dev \
+    python3-dev \
+    pango \
+    zlib-dev \
+    jpeg-dev \
+    openjpeg-dev \
+    g++ \
     libffi-dev \
-    libjpeg-dev \
-    libopenjp2-7-dev \
-    && pip3 install WeasyPrint==61.2 \
-    && rm -rf /var/lib/apt/lists/*
+    harfbuzz-subset \
+    && python3 -m venv /venv \
+    && /venv/bin/pip install WeasyPrint==62.3 \
+    && rm -rf /var/cache/*
+
+# Установка пути к виртуальному окружению в PATH
+ENV PATH="/venv/bin:$PATH"
 
 # Проверка наличия команды weasyprint
 RUN weasyprint --version
+
+# CMD для запуска weasyprint
+# CMD ["weasyprint", "input.html", "output.pdf"]

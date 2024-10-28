@@ -31,7 +31,7 @@ q-card(style="word-break: break-all !important; white-space: normal !important;"
 
         div.text-center.q-gutter-sm
           q-btn(size="sm" color="primary" icon="download" @click="download") скачать
-          q-btn(size="sm" color="primary" icon="download" @click="download2") скачать2
+          //- q-btn(size="sm" color="primary" icon="download" @click="download2") скачать2
 
           q-btn(size="sm" color="primary" icon="fa-solid fa-check-double" @click="regenerate" :loading="onRegenerate") сверить
 
@@ -118,26 +118,27 @@ const verifySignature = () => {
 
 verifySignature()
 
+// TODO удалить позже
+// использовали для отладки сверки. Позволяет скачать регенерированный документ после нажатия на кнопку сверки.
+// async function download2() {
+//   // Преобразование base64 строки в Blob
+//   console.log('regenerated: ', regenerated)
+//   const binaryData = new Uint8Array(Object.values(regenerated.value.binary));
+//   const blob = new Blob([binaryData], { type: 'application/pdf' });
 
-async function download2() {
-  // Преобразование base64 строки в Blob
-  console.log('regenerated: ', regenerated)
-  const binaryData = new Uint8Array(Object.values(regenerated.value.binary));
-  const blob = new Blob([binaryData], { type: 'application/pdf' });
+//   // Создание временной ссылки для скачивания файла
+//   const link = document.createElement('a');
+//   link.href = URL.createObjectURL(blob);
+//   link.download = regenerated.value.full_title ? regenerated.value.full_title : `${regenerated.value.meta.title} - ${regenerated.value.meta.username} - ${regenerated.value.meta.created_at}.pdf`;
 
-  // Создание временной ссылки для скачивания файла
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = regenerated.value.full_title ? regenerated.value.full_title : `${regenerated.value.meta.title} - ${regenerated.value.meta.username} - ${regenerated.value.meta.created_at}.pdf`;
+//   // Имитация клика по ссылке для начала скачивания
+//   document.body.appendChild(link);
+//   link.click();
 
-  // Имитация клика по ссылке для начала скачивания
-  document.body.appendChild(link);
-  link.click();
-
-  // Очистка после скачивания
-  document.body.removeChild(link);
-  URL.revokeObjectURL(link.href);
-}
+//   // Очистка после скачивания
+//   document.body.removeChild(link);
+//   URL.revokeObjectURL(link.href);
+// }
 
 
 async function download() {
