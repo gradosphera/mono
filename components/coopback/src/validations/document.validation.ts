@@ -12,7 +12,9 @@ export const IGenerate = Joi.object({
     block_num: Joi.number().optional(),
     timezone: Joi.string().optional(),
     links: Joi.array().items(Joi.string()).default([]),
-  }).required(),
+  })
+    .required()
+    .unknown(true),
   options: Joi.object({
     skip_save: Joi.boolean().default(false).optional(),
   }).optional(),
