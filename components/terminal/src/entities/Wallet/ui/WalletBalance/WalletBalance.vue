@@ -21,7 +21,7 @@ q-list(flat).q-gutter-sm
       q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.blocked }}
 
 
-  q-item(v-for="program_wallet of walletStore.program_wallets" :key="program_wallet.id" v-ripple clickable)
+  q-item(v-for="program_wallet of walletStore.program_wallets" :key="program_wallet.id")
     q-item-section
       q-item-label(caption) {{ program_wallet.program_details.title }}
 

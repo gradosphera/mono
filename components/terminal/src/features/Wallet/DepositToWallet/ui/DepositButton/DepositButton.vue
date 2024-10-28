@@ -1,8 +1,7 @@
 <template lang="pug">
-div.DepositPreparator
-  q-btn(@click="showDialog=true" color="primary" size="sm")
-    q-icon(name="fa-solid fa-chevron-up").q-mr-sm
-    span Совершить взнос
+q-btn(@click="showDialog=true" color="primary" size="sm").border-radius-buttons
+  q-icon(name="fa-solid fa-chevron-up").q-mr-sm
+  span Совершить взнос
   q-dialog(v-model="showDialog" @hide="clear")
     ModalBase(v-if="!paymentOrder" :title='"Введите сумму"' )
       Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm
@@ -17,7 +16,7 @@ div.DepositPreparator
         span.text-bold Внимание!
         span.q-ml-xs Оплату необходимо произвести с банковского счета, который принадлежит именно Вам. При поступлении средств с другого счета, оплата будет аннулирована.
 
-      PayWithProvider(:payment-order="paymentOrder" @payment-fail="paymentFail" @payment-success="paymentSuccess").q-mb-md
+      PayWithProvider(:payment-order="paymentOrder" @payment-fail="paymentFail" @payment-success="paymentSuccess").q-mb-md.q-pa-md
 
   </template>
 
@@ -75,3 +74,11 @@ const paymentSuccess = (): void => {
   SuccessAlert('Платеж успешно принят')
 }
 </script>
+<style scoped>
+.border-radius-buttons {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  border-bottom-left-radius: 0px !important;
+}
+</style>

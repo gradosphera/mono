@@ -26,6 +26,7 @@ import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives'
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import { ConnectionPage } from 'src/pages/Union/Connection';
 import { ListOfDocumentsPage } from 'src/pages/Documentor/ListOfDocuments';
+import { CoopCardPage } from 'src/pages/User/CardPage';
 
 export const manifest = {
   'name': 'UserDesktop',
@@ -41,28 +42,41 @@ export const manifest = {
       },
       path: '/:coopname/user',
       name: 'home',
-      children: [{
-        meta: {
-          title: 'Удостоверение',
-          icon: '',
-          roles: [],
-          agreements: agreementsBase
-        },
-        path: 'identity',
-        name: 'user-identity',
-        component: markRaw(UserIdentityPage),
-        children: [],
-        },{
+      children: [
+        {
           meta: {
-            title: 'Кошелёк',
+            title: 'Карта пайщика',
             icon: '',
             roles: [],
+            agreements: agreementsBase
           },
-          path: 'wallet',
-          name: 'user-wallet',
-          component: markRaw(UserWalletPage),
+          path: 'coop-card',
+          name: 'coop-card',
+          component: markRaw(CoopCardPage),
           children: [],
         },
+        // {
+        // meta: {
+        //   title: 'Удостоверение',
+        //   icon: '',
+        //   roles: [],
+        //   agreements: agreementsBase
+        // },
+        // path: 'identity',
+        // name: 'user-identity',
+        // component: markRaw(UserIdentityPage),
+        // children: [],
+        // },{
+        //   meta: {
+        //     title: 'Кошелёк',
+        //     icon: '',
+        //     roles: [],
+        //   },
+        //   path: 'wallet',
+        //   name: 'user-wallet',
+        //   component: markRaw(UserWalletPage),
+        //   children: [],
+        // },
         {
           path: 'agenda',
           name: 'agenda',
