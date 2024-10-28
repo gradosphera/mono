@@ -30,7 +30,7 @@ export interface RGetPluginConfig {
 }
 
 export interface RGetPluginList {
-  query: {
+  query?: {
     name: string;
   };
 }

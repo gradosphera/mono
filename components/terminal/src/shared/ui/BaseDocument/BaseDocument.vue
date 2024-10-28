@@ -70,7 +70,7 @@ const regenerate = async() => {
   try {
     onRegenerate.value = true
 
-    regenerated.value = await new DigitalDocument().generate({...doc.value.meta})
+    regenerated.value = await new DigitalDocument().generate({...doc.value.meta}, {skip_save: true})
 
     if (regenerated.value.hash == regeneratedHash.value)
       SuccessAlert('Сверка прошла успешно: аналогичный документ восстановлен из исходных данных')

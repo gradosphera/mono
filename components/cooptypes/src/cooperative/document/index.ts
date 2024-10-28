@@ -1,6 +1,10 @@
 import type { SovietContract } from '../../contracts'
 import type { IAction, IExtendedAction } from '../blockchain'
 
+export interface IGenerationOptions {
+  skip_save?: boolean
+}
+
 export type LangType = 'ru'
 
 export interface IChainDocument {
@@ -120,8 +124,4 @@ export interface IDecisionData {
   votes_against: number
   votes_abstained: number
   voters_percent: number
-}
-
-export interface IGenerationOptions {
-  skip_save: boolean
 }

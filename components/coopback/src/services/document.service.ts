@@ -15,8 +15,8 @@ export const diconnectGenerator = async () => {
   await generator.disconnect();
 };
 
-export const generateDocument = async (options: IGenerate) => {
-  return await generator.generate(options);
+export const generateDocument = async (body: IGenerate) => {
+  return await generator.generate(body.data, body.options);
 };
 
 // Шаг 1: Создание новой функции для сборки complexDocument

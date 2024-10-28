@@ -2,6 +2,7 @@ import type { IGenerate, IGeneratedDocument } from './types'
 import { api } from '../api'
 import { useGlobalStore } from 'src/shared/store';
 import type { IObjectedDocument } from 'src/shared/lib/types/document';
+import type { Cooperative } from 'cooptypes';
 
 export class DigitalDocument {
   public data: IGeneratedDocument | undefined
@@ -11,10 +12,10 @@ export class DigitalDocument {
     this.data = document
   }
 
-  async generate<T extends IGenerate>(data: T): Promise<IGeneratedDocument> {
-    this.data = await api.generateDocument(data);
+  async generate<T extends IGenerate>(data: T, options?: Cooperative.Document.IGenerationOptions): Promise<IGeneratedDocument> {
+    this.data = await api.generateDocument(data, options);
     return this.data;
-  }
+  }n
 
   async sign(): Promise<void> {
     const globalStore = useGlobalStore()

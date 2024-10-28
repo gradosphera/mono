@@ -1,16 +1,21 @@
 import * as Joi from 'joi';
 
 export const IGenerate = Joi.object({
-  registry_id: Joi.number().required(),
-  coopname: Joi.string().required(),
-  username: Joi.string().required(),
-  generator: Joi.string().optional(),
-  version: Joi.string().optional(),
-  lang: Joi.string().valid('ru').optional(),
-  created_at: Joi.string().optional(),
-  block_num: Joi.number().optional(),
-  timezone: Joi.string().optional(),
-  links: Joi.array().items(Joi.string()).default([]),
+  data: Joi.object({
+    registry_id: Joi.number().required(),
+    coopname: Joi.string().required(),
+    username: Joi.string().required(),
+    generator: Joi.string().optional(),
+    version: Joi.string().optional(),
+    lang: Joi.string().valid('ru').optional(),
+    created_at: Joi.string().optional(),
+    block_num: Joi.number().optional(),
+    timezone: Joi.string().optional(),
+    links: Joi.array().items(Joi.string()).default([]),
+  }).required(),
+  options: Joi.object({
+    skip_save: Joi.boolean().default(false).optional(),
+  }).optional(),
 }).unknown(true);
 
 export const RGenerate = Joi.object({
