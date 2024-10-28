@@ -31,7 +31,7 @@ import { CoopCardPage } from 'src/pages/User/CardPage';
 export const manifest = {
   'name': 'UserDesktop',
   'hash': 'hash1',
-  'authorizedHome': 'user-identity',
+  'authorizedHome': 'coop-card',
   'nonAuthorizedHome': 'signup',
   'routes': [
     {
