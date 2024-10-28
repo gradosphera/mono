@@ -86,12 +86,6 @@ const inn_ogrn = computed(() => {
     return `${organizationProfile.value.details.inn} / ${organizationProfile.value.details.ogrn}`
   else return ''
 })
-defineProps({
-  username: {
-    type: String,
-    required: true,
-  },
-})
 
 </script>
 <style lang="scss" scoped>
