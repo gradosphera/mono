@@ -64,17 +64,6 @@ export const manifest = {
           children: [],
         },
         {
-          meta: {
-            title: 'Настройки',
-            icon: '',
-            roles: [],
-          },
-          path: 'settings',
-          name: 'user-settings',
-          component: markRaw(UserSettingsPage),
-          children: [],
-        },
-        {
           path: 'agenda',
           name: 'agenda',
           component: markRaw(ListOfQuestionsWidget),
@@ -90,6 +79,16 @@ export const manifest = {
           component: markRaw(ListOfParticipantsPage),
           meta: {
             title: 'Пайщики',
+            icon: 'fa-solid fa-users',
+            roles: ['chairman', 'member'],
+          },
+        },
+        {
+          path: 'members',
+          name: 'settings-members',
+          component: markRaw(CooperativeMembers),
+          meta: {
+            title: 'Совет',
             icon: 'fa-solid fa-users',
             roles: ['chairman', 'member'],
           },
@@ -125,16 +124,7 @@ export const manifest = {
         //     roles: [],
         //   },
         // },
-        {
-          path: 'members',
-          name: 'settings-members',
-          component: markRaw(CooperativeMembers),
-          meta: {
-            title: 'Члены Совета',
-            icon: 'fa-solid fa-users',
-            roles: ['chairman', 'member'],
-          },
-        },
+
         // {
         //   path: 'contributions',
         //   name: 'settings-contributions',
@@ -176,6 +166,17 @@ export const manifest = {
             icon: 'fa-solid fa-info',
             roles: [],
           },
+        },
+        {
+          meta: {
+            title: 'Настройки',
+            icon: '',
+            roles: [],
+          },
+          path: 'settings',
+          name: 'user-settings',
+          component: markRaw(UserSettingsPage),
+          children: [],
         },
       ],
     },
