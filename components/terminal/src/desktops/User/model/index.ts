@@ -193,17 +193,17 @@ export const manifest = {
           component: markRaw(UserSettingsPage),
           children: [],
         },
-        {
-          meta: {
-            title: 'Поддержка',
-            icon: '',
-            roles: [],
-          },
-          path: 'support',
-          name: 'support',
-          component: markRaw(SupportPage),
-          children: [],
-        },
+        // {
+        //   meta: {
+        //     title: 'Поддержка',
+        //     icon: '',
+        //     roles: [],
+        //   },
+        //   path: 'support',
+        //   name: 'support',
+        //   component: markRaw(SupportPage),
+        //   children: [],
+        // },
       ],
     },
 

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020", // Более новый target для Node.js
+    "lib": ["es2020"],
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false // Опция для инъекции зависимостей
+  },
+  "exclude": ["dist", "build"]
+}

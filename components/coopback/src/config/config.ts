@@ -30,6 +30,7 @@ const envVarsSchema = Joi.object()
     EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
 
     COOPNAME: Joi.string().description('имя аккаунта кооператива'),
+    GRAPHQL_SERVICE: Joi.string().description('адрес сервиса GRAPHQL').default('http://localhost:4090'),
   })
   .unknown();
 
@@ -72,4 +73,5 @@ export default {
     from: envVars.EMAIL_FROM,
   },
   coopname: envVars.COOPNAME,
+  graphql_service: envVars.GRAPHQL_SERVICE,
 };

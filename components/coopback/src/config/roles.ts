@@ -8,6 +8,7 @@ const user = [
   'createDeposit',
   'joinCooperative',
   'getVars',
+  'readGraph',
 ];
 
 const member = [

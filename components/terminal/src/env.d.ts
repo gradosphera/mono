@@ -11,6 +11,7 @@ declare namespace NodeJS {
 declare global {
   interface Window {
     YooMoneyCheckoutWidget: any;
+    chatwootSDK: any;
   }
 }
 
