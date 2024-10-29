@@ -27,6 +27,7 @@ import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import { ConnectionPage } from 'src/pages/Union/Connection';
 import { ListOfDocumentsPage } from 'src/pages/Documentor/ListOfDocuments';
 import { CoopCardPage } from 'src/pages/User/CardPage';
+import { SupportPage } from 'src/pages/Support';
 
 export const manifest = {
   'name': 'UserDesktop',
@@ -190,6 +191,17 @@ export const manifest = {
           path: 'settings',
           name: 'user-settings',
           component: markRaw(UserSettingsPage),
+          children: [],
+        },
+        {
+          meta: {
+            title: 'Поддержка',
+            icon: '',
+            roles: [],
+          },
+          path: 'support',
+          name: 'support',
+          component: markRaw(SupportPage),
           children: [],
         },
       ],

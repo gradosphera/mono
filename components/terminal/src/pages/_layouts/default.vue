@@ -35,7 +35,7 @@ q-layout(view="hHh LpR fff")
 
   //контейнер
   q-page-container
-    q-page.q-pb-lg
+    q-page
       router-view
 
 </template>
