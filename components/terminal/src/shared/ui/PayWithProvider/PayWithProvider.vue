@@ -13,7 +13,7 @@ const emit = defineEmits(['paymentSuccess', 'paymentFail'])
 
 <template lang="pug">
 div(v-if="paymentOrder.details?.data")
-  BankProvider(v-if="paymentOrder.provider=='sberbank'" :payment-order="paymentOrder" @payment-fail="emit('paymentFail')" @payment-success="emit('paymentSuccess')")
+  BankProvider(v-if="paymentOrder.provider=='qrpay'" :payment-order="paymentOrder" @payment-fail="emit('paymentFail')" @payment-success="emit('paymentSuccess')")
   Yookassa(v-if="paymentOrder.provider=='yookassa'" :payment-order="paymentOrder" @payment-fail="emit('paymentFail')" @payment-success="emit('paymentSuccess')")
 
 </template>

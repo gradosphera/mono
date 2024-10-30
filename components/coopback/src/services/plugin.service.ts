@@ -8,12 +8,12 @@ import httpStatus from 'http-status';
 
 // Динамическое создание объектов и сбор схем
 const getPluginSchemasInternal = () => {
-  const pluginSchemas = Object.entries(PluginRegistry).reduce((schemas, [key, PluginModule]) => {
+  const configSchemass = Object.entries(PluginRegistry).reduce((schemas, [key, PluginModule]) => {
     const pluginInstance = new PluginModule.Plugin();
-    schemas[pluginInstance.name] = pluginInstance.pluginSchema;
+    schemas[pluginInstance.name] = pluginInstance.configSchemas;
     return schemas;
   }, {} as { [key: string]: Joi.ObjectSchema });
-  return pluginSchemas;
+  return configSchemass;
 };
 
 // Функция для обновления конфигурации плагина
@@ -68,4 +68,38 @@ export const queryPlugins = async (filter, options) => {
   const plugins = await PluginConfig.paginate(filter, options);
 
   return plugins;
+};
+
+// Функция для инициализации дефолтных плагинов
+export const initializeDefaultPlugins = async () => {
+  const defaultPlugins = [
+    {
+      name: 'powerup',
+      enabled: true,
+      config: {
+        dailyPackageSize: 5,
+        topUpAmount: 5,
+        systemSymbol: 'AXON',
+        systemPrecision: 4,
+        thresholds: {
+          cpu: 5000,
+          net: 1024,
+          ram: 10240,
+        },
+      },
+    },
+    {
+      name: 'qrpay',
+      enabled: true,
+      config: {},
+    },
+  ];
+
+  for (const plugin of defaultPlugins) {
+    const existingPlugin = await PluginConfig.findOne({ name: plugin.name });
+    if (!existingPlugin) {
+      await PluginConfig.create(plugin);
+      console.log(`Дефолтный плагин ${plugin.name} добавлен в базу.`);
+    }
+  }
 };

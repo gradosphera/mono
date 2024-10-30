@@ -1,14 +1,17 @@
 import { YooCheckout } from '@a2seven/yoo-checkout';
-import { Order } from '../../../models';
-import { IPNProvider } from './ipnProvider';
+import { Order } from '../../models';
+import { IPNProvider } from '../../services/payment/ipn/ipnProvider';
 
-import type { PaymentDetails } from '../../../types';
-import IPN from '../../../models/ipn.model';
-import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../order.service';
-import logger from '../../../config/logger';
-import Settings from '../../../models/settings.model';
-import config from '../../../config/config';
-import { redisPublisher } from '../../redis.service';
+import type { PaymentDetails } from '../../types';
+import IPN from '../../models/ipn.model';
+import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../services/order.service';
+import logger from '../../config/logger';
+import Settings from '../../models/settings.model';
+import config from '../../config/config';
+import { redisPublisher } from '../../services/redis.service';
+import type { IPlugin, IPluginSchema } from '../../types/plugin.types';
+import Joi from 'joi';
+import { PluginConfig } from '../../models/pluginConfig.model';
 
 interface IIpnRequest {
   event: string;
@@ -98,11 +101,36 @@ interface IIpnRequest {
   type: string;
 }
 
-class YooKassaIPNProvider implements IPNProvider {
+// Интерфейс для параметров конфигурации плагина powerup
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IConfig {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ILog {}
+
+export class Plugin extends IPNProvider implements IPlugin<IConfig> {
+  constructor() {
+    super(); // Вызов конструктора IPNProvider
+  }
+
+  name = 'yookassa';
+  plugin!: IPluginSchema<IConfig>;
+
+  async initialize(config: any): Promise<void> {
+    const pluginData = await PluginConfig.findOne({ name: this.name });
+    if (!pluginData) throw new Error('Конфиг не найден');
+
+    this.plugin = pluginData;
+
+    logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
+  }
+
+  public configSchemas = Joi.object<IConfig>({});
+
   public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 3.5; ///%
 
-  async handleIPN(request: IIpnRequest): Promise<void> {
+  public async handleIPN(request: IIpnRequest): Promise<void> {
     const { event, object } = request;
 
     const exist = (await IPN.findOne({ 'data.object.id': request.object.id }))?.data as IIpnRequest;
@@ -177,7 +205,7 @@ class YooKassaIPNProvider implements IPNProvider {
     }
   }
 
-  async createPayment(
+  public async createPayment(
     amount: string,
     symbol: string,
     description: string,
@@ -226,4 +254,4 @@ class YooKassaIPNProvider implements IPNProvider {
   }
 }
 
-export default YooKassaIPNProvider;
+export default Plugin;

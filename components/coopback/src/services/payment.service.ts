@@ -76,3 +76,13 @@ export const init = () => {
     }
   });
 };
+
+export const providers: Record<string, any> = {};
+
+export const registerProvider = (name: string, providerInstance: any) => {
+  providers[name] = providerInstance;
+};
+
+export const getProvider = (name: string) => {
+  return providers[name];
+};

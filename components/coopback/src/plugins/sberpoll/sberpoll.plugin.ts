@@ -1,14 +1,18 @@
-import { PollingProvider } from './pollingProvider';
-import { Order } from '../../../models';
-import type { PaymentDetails } from '../../../types';
-import { generator } from '../../document.service';
-import { redisPublisher } from '../../redis.service';
-import { PaymentState } from '../../../models/paymentState.model';
+import { PollingProvider } from '../../services/payment/polling/pollingProvider';
+import { Order } from '../../models';
+import type { PaymentDetails } from '../../types';
+import { generator } from '../../services/document.service';
+import { redisPublisher } from '../../services/redis.service';
+import { PaymentState } from '../../models/paymentState.model';
 import axios from 'axios';
-import logger from '../../../config/logger';
-import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../order.service';
-import { orderStatus } from '../../../types/order.types';
-import config from '../../../config/config';
+import logger from '../../config/logger';
+import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../services/order.service';
+import { orderStatus } from '../../types/order.types';
+import config from '../../config/config';
+import type { IPlugin, IPluginSchema } from '../../types/plugin.types';
+import { PluginConfig } from '../../models/pluginConfig.model';
+import Joi from 'joi';
+import { PluginLog } from '../../models/pluginLog.model';
 
 interface Link {
   href: string;
@@ -52,12 +56,37 @@ interface StatementTransactionsV2 {
   transactions: StatementTransactionV2[];
 }
 
-class SberbankPollingProvider implements PollingProvider {
+// Интерфейс для параметров конфигурации плагина powerup
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IConfig {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ILog {}
+
+export class Plugin extends PollingProvider implements IPlugin<IConfig> {
+  constructor() {
+    super(); // Вызов конструктора PollingProvider
+  }
+
+  name = 'sberpoll';
+  plugin!: IPluginSchema<IConfig>;
+  public configSchemas = Joi.object<IConfig>({});
+
   public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 0; ///%
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor() {}
+  async initialize(config: any): Promise<void> {
+    const pluginData = await PluginConfig.findOne({ name: this.name });
+    if (!pluginData) throw new Error('Конфиг не найден');
+
+    this.plugin = pluginData;
+
+    logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin);
+  }
+
+  private async log(action: ILog) {
+    await PluginLog.create({ name: this.name, log: action });
+  }
 
   public async createPayment(
     amount: string,
@@ -245,4 +274,4 @@ class SberbankPollingProvider implements PollingProvider {
   }
 }
 
-export default SberbankPollingProvider;
+export default Plugin;

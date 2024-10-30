@@ -4,7 +4,7 @@ import httpStatus from 'http-status';
 import type { RGetPluginConfig, RGetPluginList, RGetPluginSchema, RSetPlugin } from '../types';
 import ApiError from '../utils/ApiError';
 import catchAsync from '../utils/catchAsync';
-import { restartWorker, terminateWorker } from '../factories/pluginFactory';
+import { restartWorker, terminateWorker } from '../plugins/pluginFactory';
 import pick from '../utils/pick';
 
 export const getPluginList = catchAsync(async (req: RGetPluginList, res: Response) => {

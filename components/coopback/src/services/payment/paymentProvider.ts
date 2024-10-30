@@ -1,9 +1,9 @@
 import type { PaymentDetails } from '../../types';
 
-export interface PaymentProvider {
-  tolerance_percent: number;
-  fee_percent: number;
-  createPayment(
+export abstract class PaymentProvider {
+  public abstract tolerance_percent: number;
+  public abstract fee_percent: number;
+  public abstract createPayment(
     amount: string,
     symbol: string,
     description: string,

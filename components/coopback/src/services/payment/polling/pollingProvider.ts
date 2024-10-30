@@ -1,5 +1,5 @@
-import type { PaymentProvider } from '../paymentProvider';
+import { PaymentProvider } from '../paymentProvider';
 
-export interface PollingProvider extends PaymentProvider {
-  sync(): Promise<void>;
+export abstract class PollingProvider extends PaymentProvider {
+  public abstract sync(): Promise<void>;
 }

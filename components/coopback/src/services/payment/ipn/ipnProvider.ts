@@ -1,5 +1,5 @@
-import type { PaymentProvider } from '../paymentProvider';
+import { PaymentProvider } from '../paymentProvider';
 
-export interface IPNProvider extends PaymentProvider {
-  handleIPN(request: any): Promise<void>;
+export abstract class IPNProvider extends PaymentProvider {
+  public abstract handleIPN(request: any): Promise<void>;
 }

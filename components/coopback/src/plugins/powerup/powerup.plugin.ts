@@ -1,4 +1,4 @@
-import { IPlugin, type IPluginLog, type IPluginSchema } from '../../types/plugin.types';
+import { IPlugin, type IPluginSchema } from '../../types/plugin.types';
 import Joi from 'joi';
 import cron from 'node-cron';
 import { blockchainService } from '../../services';
@@ -6,8 +6,6 @@ import logger from '../../config/logger';
 import { default as coopConfig } from '../../config/config';
 import { PluginConfig } from '../../models/pluginConfig.model';
 import { PluginLog } from '../../models/pluginLog.model';
-import type { IGetPluginConfig } from '../../types';
-import type { Document, Types } from 'mongoose';
 
 // Интерфейс для параметров конфигурации плагина powerup
 export interface IConfig {
@@ -35,11 +33,11 @@ export interface ILog {
   };
 }
 
-export class Plugin implements IPlugin {
+export class Plugin implements IPlugin<IConfig> {
   name = 'powerup';
-  data!: IPluginSchema<IConfig>;
+  plugin!: IPluginSchema<IConfig>;
 
-  public pluginSchema = Joi.object<IConfig>({
+  public configSchemas = Joi.object<IConfig>({
     dailyPackageSize: Joi.number().required(),
     topUpAmount: Joi.number().required(),
     thresholds: Joi.object({
@@ -53,12 +51,12 @@ export class Plugin implements IPlugin {
     const pluginData = await PluginConfig.findOne({ name: this.name });
     if (!pluginData) throw new Error('Конфиг не найден');
 
-    this.data = pluginData;
+    this.plugin = pluginData;
 
-    logger.info(`Инициализация ${this.name} с конфигурацией`, this.data);
+    logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
 
     // Проверяем, было ли ежедневное пополнение в последние 24 часа
-    const lastDate = this.data.config.lastDailyReplenishmentDate;
+    const lastDate = this.plugin.config.lastDailyReplenishmentDate;
     const now = new Date();
 
     if (lastDate) {
@@ -87,16 +85,16 @@ export class Plugin implements IPlugin {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    await new Promise(() => {});
+    // await new Promise(() => {});
   }
 
   private getQuantity(amount: number): string {
-    return `${amount.toFixed(this.data.config.systemPrecision)} ${this.data.config.systemSymbol}`;
+    return `${amount.toFixed(this.plugin.config.systemPrecision)} ${this.plugin.config.systemSymbol}`;
   }
 
   // Ежедневная задача пополнения
   private async runDailyTask() {
-    const quantity = this.getQuantity(this.data.config.dailyPackageSize);
+    const quantity = this.getQuantity(this.plugin.config.dailyPackageSize);
 
     logger.info(`Выполнение ежедневного пополнения на сумму ${quantity}`);
 
@@ -107,10 +105,10 @@ export class Plugin implements IPlugin {
 
       await blockchainService.powerUp(username, quantity);
 
-      this.data.config.lastDailyReplenishmentDate = new Date();
-      this.data.markModified('config'); // Помечаем config как измененное поле
+      this.plugin.config.lastDailyReplenishmentDate = new Date();
+      this.plugin.markModified('config'); // Помечаем config как измененное поле
 
-      await this.data.save();
+      await this.plugin.save();
 
       await this.log({
         type: 'daily',
@@ -154,24 +152,24 @@ export class Plugin implements IPlugin {
       // Проверяем пороги и пополняем при необходимости
       let needPowerUp = false;
 
-      if (cpuLimit.available <= this.data.config.thresholds.cpu) {
+      if (cpuLimit.available <= this.plugin.config.thresholds.cpu) {
         logger.info(`CPU квота ниже порога (${cpuLimit.available} µs).`);
         needPowerUp = true;
       }
 
-      if (netLimit.available <= this.data.config.thresholds.net) {
+      if (netLimit.available <= this.plugin.config.thresholds.net) {
         logger.info(`NET квота ниже порога (${netLimit.available} bytes).`);
         needPowerUp = true;
       }
 
-      if (availableRam <= this.data.config.thresholds.ram) {
+      if (availableRam <= this.plugin.config.thresholds.ram) {
         logger.info(`RAM квота ниже порога (${availableRam} bytes).`);
         needPowerUp = true;
       }
 
       if (needPowerUp) {
         // Выполняем пополнение ресурсов
-        const quantity = this.getQuantity(this.data.config.topUpAmount);
+        const quantity = this.getQuantity(this.plugin.config.topUpAmount);
         await blockchainService.powerUp(username, quantity);
         logger.info(`Пополнение выполнено на сумму ${quantity}.`);
 

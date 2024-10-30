@@ -1,12 +1,11 @@
-import { Order, User } from '../models/index';
+import { Order } from '../models/index';
 import mongoose, { type ObjectId } from 'mongoose';
 import { getUserByUsername } from './user.service';
 import logger from '../config/logger';
-import { ICreateDeposit, ICreateInitialPayment, type IBCAction } from '../types';
+import { ICreateDeposit } from '../types';
 import { generator } from './document.service';
 import { ICreatedPayment } from '../types';
-import { ProviderFactory } from './payment/providerFactory';
-import { orderStatus, type IOrder } from '../types/order.types';
+import { orderStatus } from '../types/order.types';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
 import { redisPublisher } from './redis.service';
@@ -15,8 +14,8 @@ import Settings from '../models/settings.model';
 import _ from 'lodash'; // lodash для глубокого клонирования
 import { blockchainService, userService } from '.';
 import config from '../config/config';
-import { GatewayContract } from 'cooptypes';
 import { userStatus } from '../types/user.types';
+import { providers } from './payment.service';
 
 export async function createOrder(
   username: string,
@@ -37,7 +36,6 @@ export async function createOrder(
     await session.withTransaction(async () => {
       const user = await getUserByUsername(username);
       let db_order;
-      console.log('user.initial_order', user.initial_order);
 
       if (type === 'registration' && user.initial_order) {
         db_order = await Order.findOne({ _id: user.initial_order }); //add expiration
@@ -63,7 +61,7 @@ export async function createOrder(
 
       const secret = db_order.secret;
 
-      const provider = ProviderFactory.createProvider(providerName);
+      const provider = providers[providerName];
 
       const paymentDetails = await provider.createPayment(
         amount,

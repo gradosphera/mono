@@ -4,16 +4,15 @@ import { orderService } from '../services';
 import { ICreateDeposit, ICreateInitialPayment } from '../types';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
-import { IPNProviderFactory } from '../services/payment/ipn/ipnProviderFactory';
 import pick from '../utils/pick';
 import logger from '../config/logger';
-import mongoose from 'mongoose';
+import { getProvider } from '../services/payment.service';
 
 export const catchIPN = catchAsync(async (req: Request, res: Response) => {
   const providerName = req.params.provider;
   logger.info(`Recieve new IPN for provider ${providerName}`, { body: req.body, source: 'catchIPN' });
 
-  const provider = IPNProviderFactory.createProvider(providerName);
+  const provider = getProvider(providerName);
 
   // Обрабатываем IPN данные
   await provider.handleIPN(req.body);

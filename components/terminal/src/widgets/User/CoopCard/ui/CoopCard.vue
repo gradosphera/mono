@@ -9,11 +9,11 @@ div.q-pa-md
         div.flex.justify-between
           AutoAvatar(style="width: 60px;" :username="currentUser.username").q-pa-sm.q-pt-lg
           div.text-right.q-pa-sm
-            p VIRTUAL
-
+            div(style="letter-spacing: 3px;").text-grey VIRTUAL
+            div.text-overline
+              span 01/2106
         div.q-pa-sm
           div.text-subtitle1 {{formattedUsername}}
-          div 01/2106
           div.text-subtitle2 {{displayName}}
 
     div.col-md-6.col-xs-12

@@ -6,8 +6,9 @@ import config from './config/config';
 import logger from './config/logger';
 import { connectGenerator, diconnectGenerator } from './services/document.service';
 import { initSocketConnection } from './controllers/ws.controller';
-import { initializeDefaultPlugins, pluginFactory } from './factories/pluginFactory';
+import { pluginFactory } from './plugins/pluginFactory';
 import { paymentService } from './services';
+import { initializeDefaultPlugins } from './services/plugin.service';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
