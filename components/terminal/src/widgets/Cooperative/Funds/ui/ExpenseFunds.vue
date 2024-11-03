@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { FundContract } from 'cooptypes';
 import { useEditFund } from 'src/features/Cooperative/EditFund';
 import { COOPNAME } from 'src/shared/config';
@@ -9,14 +9,20 @@ import { useCooperativeStore } from 'src/entities/Cooperative';
 import AddExpenseFund from './AddExpenseFund.vue'
 import { useDeleteFund } from 'src/features/Cooperative/DeleteFund';
 
-defineProps({
-  expenseFunds: {
-    type: Object as () => FundContract.Tables.ExpensedFunds.IExpensedFund[],
-    required: true
-  }
-})
-
 const coop = useCooperativeStore()
+
+const loadFunds = async () => {
+  try {
+    await coop.loadFunds(COOPNAME)
+  } catch(e: any){
+    FailAlert(e.message)
+  }
+}
+
+loadFunds()
+
+const expenseFunds = computed(() => coop.expenseFunds)
+
 const showAdd = ref(false)
 
 const session = useSessionStore()
@@ -69,19 +75,22 @@ const saveFund = async (fund: FundContract.Tables.AccumulatedFunds.IAccumulatedF
 const columns = ref([
   { name: 'id', label: 'ID', field: 'id', align: 'left' },
   { name: 'name', label: 'Название', field: 'name', align: 'left' },
-  { name: 'description', label: 'Заметка', field: 'description', align: 'left' }
+  // { name: 'description', label: 'Заметка', field: 'description', align: 'left' }
 ] as any)
+
+const getLabel = (id: any) => {
+  if (id <= 5)
+    return 'обязательный'
+}
 
 </script>
 
 <template lang="pug">
 div
-  q-table(flat :rows-per-page-options="[0]" :rows="expenseFunds" :columns="columns" row-key="id")
+  q-table(v-if="expenseFunds" flat :rows-per-page-options="[0]" :rows="expenseFunds" :columns="columns" row-key="id")
     template(#top)
       div.full-width
-        p.text-h6 Изменить фонды списания
-        p Фонды списания используются для фиксации расходов кооператива с накопительного счёта невозвратных членских взносов кооператива, которые остались после распределения по фондам накопления.
-
+        p Фонды списания используются для фиксации расходов кооператива с накопительного счёта невозвратных членских взносов кооператива, которые остались после распределения по фондам накопления. Первые два фонда являются обязательными.
       div.q-mt-lg.full-width
         q-btn(icon="add" @click="showAdd = true" color="primary" size="sm") добавить фонд
 
@@ -90,10 +99,10 @@ div
 
         q-td(:props="props" key="id") {{ props.row.id }}
         q-td(:props="props" key="name")
-          q-input(v-model="props.row.name" :readonly="props.row.id <= 5" standout="bg-teal text-white" dense)
+          q-input(v-model="props.row.name" :label="getLabel(props.row.id)" :readonly="props.row.id <= 5" standout="bg-teal text-white" dense)
 
-        q-td(:props="props" key="description")
-          q-input( placeholder="Место для заметки" v-model="props.row.description" standout="bg-teal text-white" dense)
+        //- q-td(:props="props" key="description")
+        //-   q-input( placeholder="Место для заметки" v-model="props.row.description" standout="bg-teal text-white" dense)
 
         q-td
           q-btn(@click="saveFund(props.row)" label="Обновить" color="primary" size="sm" dense).q-ma-xs

@@ -1,171 +1,78 @@
+<!-- Layout.vue -->
 <template lang="pug">
-q-layout(view="hHh LpR fff")
-  q-header(bordered :class="headerClass").header
-    q-toolbar()
-      q-btn(v-if="loggedIn" stretch icon="menu" flat @click="leftDrawerOpen = !leftDrawerOpen")
-      q-toolbar-title()
-        q-btn(:size="isMobile ? 'md' : 'lg'" flat @click="goTo('index')")
-          span {{ COOP_SHORT_NAME }}
+  q-layout(view="hHh LpR fff")
+    Header(:showDrawer="showDrawer" @toggle-left-drawer="toggleLeftDrawer")
 
+    q-drawer(v-if="showDrawer" v-model="leftDrawerOpen" side="left" bordered :width="200")
+      LeftDrawerMenu
 
-      ToogleDarkLight(:showText="true" :isMobile="isMobile")
+    q-footer(v-if="!loggedIn" :class="headerClass" bordered)
+      ContactsFooter(:text="footerText")
 
-      template(v-if="!loggedIn")
-        q-btn(v-if="showRegisterButton && !is('signup') && !is('install')" color="primary" class="btn-menu" stretch :size="isMobile ? 'sm' : 'lg'" @click="signup")
-          span.q-pr-sm регистрация
-          i.fa-solid.fa-right-to-bracket
+    q-page-container
+      q-page
+        router-view
+  </template>
 
-        q-btn(v-if="showRegisterButton && is('signup')" color="primary" class="btn-menu" stretch :size="isMobile ? 'sm' : 'lg'"  @click="login" )
-          span.q-pr-sm вход
-          i.fa-solid.fa-right-to-bracket
+  <script setup lang="ts">
+  import { computed, onMounted, ref, watch } from 'vue'
+  import { useQuasar } from 'quasar'
+  import { useWindowSize } from 'vue-window-size'
+  import { useCurrentUserStore } from 'src/entities/User'
+  import { useSessionStore } from 'src/entities/Session'
+  import { useCooperativeStore } from 'src/entities/Cooperative'
+  import { Header } from 'src/widgets/Header'
+  import { LeftDrawerMenu } from 'src/widgets/Desktop/LeftDrawerMenu'
+  import { ContactsFooter } from 'src/shared/ui/Footer'
+  import { useRoute } from 'vue-router'
+  import { COOPNAME } from 'src/shared/config'
 
-  q-drawer(v-model="leftDrawerOpen" side="left" bordered :width="200")
-    LeftDrawerMenu
+  const session = useSessionStore()
+  const cooperativeStore = useCooperativeStore()
+  cooperativeStore.loadContacts()
+  const route = useRoute()
+  const showDrawer = computed(() => route.params.coopname === COOPNAME)
 
-  //- q-header(v-if="!isMobile && loggedIn" style="border-bottom: 1px solid #00800038 !important; " :style="{ 'background': $q.dark.isActive ? 'black' : 'white' }" :class="headerClass").header
+  const $q = useQuasar()
+  const { width } = useWindowSize()
+  const leftDrawerOpen = ref(true)
 
+  const isDark = computed(() => $q.dark.isActive)
+  const headerClass = computed(() =>
+    isDark.value ? 'text-white bg-dark' : 'text-black bg-light'
+  )
+  const isMobile = computed(() => width.value < 768)
+  const loggedIn = computed(
+    () => useCurrentUserStore().isRegistrationComplete && session.isAuth
+  )
+  const footerText = computed(() => {
+    if (cooperativeStore.contacts && cooperativeStore.contacts.details) {
+      return `${cooperativeStore.contacts.full_name}, ИНН: ${cooperativeStore.contacts.details.inn}, ОГРН: ${cooperativeStore.contacts.details.ogrn}, телефон: ${cooperativeStore.contacts.phone}, почта: ${cooperativeStore.contacts.email}`
+    }
+    return ''
+  })
 
-  //футер контактов
-  q-footer(v-if="!loggedIn" :class="headerClass" bordered)
-    ContactsFooter(:text="footerText")
+  onMounted(() => {
+    if (isMobile.value || !loggedIn.value) {
+      leftDrawerOpen.value = false
+    }
+  })
 
-  //- q-footer(v-if="loggedIn && isMobile" style="border-top: 1px solid #00800038 !important; "  :class="headerClass")
-    //- SecondLevelMenu
-    //- Menu(style="border-top: 1px solid #00800038 !important; " )
+  watch(loggedIn, (newValue) => {
+    leftDrawerOpen.value = newValue
+  })
 
-  //контейнер
-  q-page-container
-    q-page
-      router-view
+  const toggleLeftDrawer = () => {
+    leftDrawerOpen.value = !leftDrawerOpen.value
+  }
+  </script>
 
-</template>
+  <style lang="scss">
+  .drawer-right {
+    border-left: 1px solid #00800038 !important;
+  }
 
-<script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useQuasar } from 'quasar'
-import { useWindowSize } from 'vue-window-size'
-import config from 'src/app/config'
-import { ToogleDarkLight } from 'src/shared/ui/ToogleDarkLight'
-const router = useRouter()
-const route = useRoute()
-
-import { LeftDrawerMenu } from 'src/widgets/Desktop/LeftDrawerMenu'
-import { COOP_SHORT_NAME } from 'src/shared/config'
-import { useCurrentUserStore } from 'src/entities/User'
-import { useSessionStore } from 'src/entities/Session'
-const session = useSessionStore()
-import { ContactsFooter } from 'src/shared/ui/Footer'
-
-const $q = useQuasar()
-
-const isDark = computed(() => $q.dark.isActive)
-
-const headerClass = computed(() => (isDark.value ? 'text-white bg-dark' : 'text-black bg-light'))
-
-import { useCooperativeStore } from 'src/entities/Cooperative';
-
-const cooperativeStore = useCooperativeStore()
-
-cooperativeStore.loadContacts()
-
-const leftDrawerOpen = ref(true)
-
-const footerText = computed(() => {
-  if (cooperativeStore.contacts && cooperativeStore.contacts.details)
-    return `${cooperativeStore.contacts.full_name}, ИНН: ${cooperativeStore.contacts.details.inn}, ОГРН: ${cooperativeStore.contacts.details.ogrn}, телефон: ${cooperativeStore.contacts.phone}, почта: ${cooperativeStore.contacts.email}`
-  else return ''
-})
-
-onMounted(() => {
-  if (isMobile.value)
-    leftDrawerOpen.value = false
-
-  if (!loggedIn.value)
-    leftDrawerOpen.value = false
-})
-
-defineExpose({
-  $q,
-})
-
-const { width } = useWindowSize()
-
-const showRegisterButton = computed(() => {
-  if (!loggedIn.value) {
-    if (config.registrator.showRegisterButton) return true
-    else return false
-  } else return false
-})
-
-const isMobile = computed(() => {
-  return width.value < 768
-})
-
-
-const is = (what: string) => {
-  return route.name === what
-}
-
-const loggedIn = computed(() => {
-  return useCurrentUserStore().isRegistrationComplete && session.isAuth
-})
-
-watch(loggedIn, (newValue) => {
-  if (newValue == false)
-    leftDrawerOpen.value = false
-  else
-    leftDrawerOpen.value = true
-})
-
-const toogleDark = () => {
-  $q.dark.toggle()
-}
-
-const goTo = (name: string) => {
-  router.push({ name })
-}
-
-const signup = () => {
-  router.push({ name: 'signup' })
-}
-
-const login = () => {
-  router.push({ name: 'signin' })
-}
-
-
-</script>
-
-<style lang="scss">
-.btn-title {
-  font-size: 20px;
-}
-
-.btn-menu {
-  font-size: 20px;
-  height: 60px;
-}
-
-.menu {
-  right: 0px;
-  z-index: 1000;
-}
-
-.q-toolbar {
-  padding-left: 0px !important;
-  padding-right: 0px !important;
-}
-.q-toolbar__title{
-  padding: 0px !important;
-}
-
-.drawer-right {
-  border-left: 1px solid #00800038 !important;
-}
-
-.drawer-left {
-  border-right: 1px solid #00800038 !important;
-}
-
-</style>
+  .drawer-left {
+    border-right: 1px solid #00800038 !important;
+  }
+  </style>

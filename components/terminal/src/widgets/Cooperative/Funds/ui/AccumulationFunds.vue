@@ -9,20 +9,26 @@ import { useCooperativeStore } from 'src/entities/Cooperative';
 import AddAccumulationFund from './AddAccumulationFund.vue'
 import { useDeleteFund } from 'src/features/Cooperative/DeleteFund';
 
-const props = defineProps({
-  accumulationFunds: {
-    type: Object as () => FundContract.Tables.AccumulatedFunds.IAccumulatedFund[],
-    required: true
-  }
-})
-
 const coop = useCooperativeStore()
+
+const loadFunds = async () => {
+  try {
+    await coop.loadFunds(COOPNAME)
+  } catch(e: any){
+    FailAlert(e.message)
+  }
+}
+
+loadFunds()
+
+const accumulationFunds = computed(() => coop.accumulationFunds)
+
 const showAdd = ref(false)
 
 const session = useSessionStore()
 
 const totalAccumulationPercent = computed(() =>
-  props.accumulationFunds.reduce((sum, item) => sum + Number(item.percent), 0)
+  accumulationFunds.value.reduce((sum, item) => sum + Number(item.percent), 0)
 );
 
 const totalExpensePercent = computed(() => (100 - totalAccumulationPercent.value).toFixed(2))
@@ -81,7 +87,7 @@ const getLabel = (id: any) => {
 const columns = ref([
   { name: 'id', label: 'ID', field: 'id', align: 'left' },
   { name: 'name', label: 'Название', field: 'name', align: 'left' },
-  { name: 'description', label: 'Заметка', field: 'description', align: 'left' },
+  // { name: 'description', label: 'Заметка', field: 'description', align: 'left' },
   { name: 'percent', label: 'Процент', field: 'percent', align: 'left' }
 ] as any)
 
@@ -89,24 +95,19 @@ const columns = ref([
 
 <template lang="pug">
 div
-  q-table(flat :rows-per-page-options="[0]" :rows="accumulationFunds" :columns="columns" row-key="id")
+  q-table(v-if="accumulationFunds" flat :rows-per-page-options="[0]" :rows="accumulationFunds" :columns="columns" row-key="id")
     template(#top)
       div.full-width
-        p.text-h6 Изменить фонды накопления
-        p Все невозвратные членские взносы кооператива распределяются по фондам накопления в указанных соотношениях. Остаток после распределения заносится на накопительный счёт фондов списания, откуда расходуется по служебным запискам членов совета.
-
+        p Все невозвратные членские взносы кооператива в первую очередь распределяются по фондам накопления в указанных соотношениях. Остаток после распределения заносится на накопительный счёт фондов списания. Первые три фонда являются обязательными.
       div.q-mt-lg.full-width
         q-btn(icon="add" @click="showAdd = true" color="primary" size="sm") добавить фонд
-
     template(v-slot:body="props")
       q-tr(:props="props" :key="props.row.id")
         q-td(:props="props" key="id") {{ props.row.id }}
         q-td(:props="props" key="name")
           q-input(v-model="props.row.name" :label="getLabel(props.row.id)" :readonly="props.row.id <= 3" standout="bg-teal text-white" dense)
-
-        q-td(:props="props" key="description")
-          q-input( placeholder="Место для заметки" v-model="props.row.description" standout="bg-teal text-white" dense)
-
+        //- q-td(:props="props" key="description")
+        //-   q-input( placeholder="Место для заметки" v-model="props.row.description" standout="bg-teal text-white" dense)
         q-td(:props="props" key="percent")
           q-input( v-model="props.row.percent" type="number" standout="bg-teal text-white" dense)
 
@@ -114,7 +115,7 @@ div
           q-btn(@click="saveFund(props.row)" label="Обновить" color="primary" dense size="sm").q-ma-xs
           q-btn(@click="delFund(props.row)" :disabled="props.row.id <= 3" label="Удалить" color="primary" dense size="sm").q-ma-xs
     template(#bottom)
-      p {{ totalAccumulationPercent }}% от каждого членского взноса распределяется среди всех фондов накопления, а {{ totalExpensePercent }}% направляются на кошелёк членских взносов кооператива для дальнейших расходов по фондам списания.
+      p {{ totalAccumulationPercent }}% от каждого членского взноса распределяется среди фондов накопления, а {{ totalExpensePercent }}% направляется на накопительный кошелёк фондов списания.
   AddAccumulationFund(:showAdd="showAdd" @close="showAdd = false")
 
 </template>

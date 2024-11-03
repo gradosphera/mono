@@ -98,16 +98,16 @@ export const manifest = {
             roles: ['chairman', 'member'],
           },
         },
-        {
-          path: 'members',
-          name: 'settings-members',
-          component: markRaw(CooperativeMembers),
-          meta: {
-            title: 'Совет',
-            icon: 'fa-solid fa-users',
-            roles: ['chairman', 'member'],
-          },
-        },
+        // {
+        //   path: 'members',
+        //   name: 'settings-members',
+        //   component: markRaw(CooperativeMembers),
+        //   meta: {
+        //     title: 'Совет',
+        //     icon: 'fa-solid fa-users',
+        //     roles: ['chairman', 'member'],
+        //   },
+        // },
         {
           path: 'documents',
           name: 'documents',
@@ -182,17 +182,7 @@ export const manifest = {
             roles: [],
           },
         },
-        {
-          meta: {
-            title: 'Настройки',
-            icon: '',
-            roles: [],
-          },
-          path: 'settings',
-          name: 'user-settings',
-          component: markRaw(UserSettingsPage),
-          children: [],
-        },
+
         // {
         //   meta: {
         //     title: 'Поддержка',

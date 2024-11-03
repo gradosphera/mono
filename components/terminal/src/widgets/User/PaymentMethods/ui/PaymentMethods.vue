@@ -1,10 +1,10 @@
 <template lang="pug">
 div(flat bordered).q-pa-md
-  p.text-h6 Изменить персональные реквизиты
+  p Указанные реквизиты используются кооперативом для возврата паевых взносов пайщику.
 
-  p Указанные ниже реквизиты используются кооперативом для возврата паевых взносов пайщику.
+  AddPaymentMethodButton(:username="username")
 
-  q-list.full-width
+  q-list.full-width.q-mt-lg
     q-item(v-for="(method, index) in wallet.methods" :key="method.method_id").full-width
       q-card(flat).full-width
         div(v-if="method.method_type ==='sbp' && isSBPData(method.data)")
@@ -79,7 +79,6 @@ div(flat bordered).q-pa-md
               label="Номер счета"
               autocomplete="off"
             )
-    AddPaymentMethodButton(:username="username")
 
 
 </template>

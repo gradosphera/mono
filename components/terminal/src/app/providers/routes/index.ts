@@ -8,6 +8,17 @@ import { RouteRecordRaw } from 'vue-router';
 import { InstallCooperativePage } from 'src/pages/Installer';
 import { LostKeyPage } from 'src/pages/Registrator/LostKey/ui';
 import { ResetKeyPage } from 'src/pages/Registrator/ResetKey';
+import { UserSettingsPage } from 'src/pages/User/SettingsPage';
+import CooperativeSettingsPage from 'src/pages/Cooperative/SettingsPage/CooperativeSettingsPage.vue';
+import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
+import { AccumulationFunds, ExpenseFunds } from 'src/widgets/Cooperative/Funds';
+import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
+import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
+import { MembersPage } from 'src/pages/Cooperative/MembersPage';
+import { InstalledApps } from 'src/pages/AppStore/InstalledApps';
+import { AppsShowcase } from 'src/pages/AppStore/AppStoreShowcase';
+import ApplicationPage from 'src/pages/AppStore/ApplicationPage/ApplicationPage.vue';
+import { AppStoreRoute } from 'src/pages/AppStore/AppStoreRoute';
 
 
 const baseRoutes = [
@@ -60,6 +71,87 @@ const baseRoutes = [
         name: 'signup',
         component: SignUpPage,
         children: [],
+      },
+      {
+        path: 'settings/user',
+        name: 'user-settings',
+        component: UserSettingsPage,
+        children: [
+          {
+            path: 'payment-methods',
+            name: 'user-payment-methods',
+            component: UserPaymentMethodsPage,
+            children: [],
+          },
+        ],
+      },
+      {
+        path: 'settings/cooperative',
+        name: 'cooperative-settings',
+        component: CooperativeSettingsPage,
+        children: [
+          {
+            path: 'accumulation-funds',
+            name: 'accumulation-funds',
+            component: AccumulationFunds,
+            children: [],
+          },
+          {
+            path: 'expense-funds',
+            name: 'expense-funds',
+            component: ExpenseFunds,
+            children: [],
+          },
+          {
+            path: 'expense-funds',
+            name: 'expense-funds',
+            component: ExpenseFunds,
+            children: [],
+          },
+          {
+            path: 'initial-contributions',
+            name: 'initial-contributions',
+            component: ChangeCooperativeContributions,
+            children: [],
+          },
+          {
+            path: 'change-contacts',
+            name: 'change-contacts',
+            component: ChangeCooperativeContacts,
+            children: [],
+          },
+          {
+            path: 'members',
+            name: 'members',
+            component: MembersPage,
+            children: [],
+          },
+        ],
+      },
+      {
+        path: 'appstore',
+        name: 'appstore',
+        component: AppStoreRoute,
+        children: [
+          {
+            path: 'showcase',
+            name: 'appstore-showcase',
+            component: AppsShowcase,
+            children: [],
+          },
+          {
+            path: 'installed',
+            name: 'appstore-installed',
+            component: InstalledApps,
+            children: [],
+          },
+          {
+            path: 'application/:id',
+            name: 'appstore-application',
+            component: ApplicationPage,
+            children: [],
+          },
+        ],
       },
       {
         path: '/:pathMatch(.*)*',

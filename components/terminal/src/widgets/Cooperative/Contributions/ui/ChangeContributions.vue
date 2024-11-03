@@ -58,11 +58,12 @@ watch(() => coop.publicCooperativeData, (newCoop: RegistratorContract.Tables.Coo
 </script>
 <template lang="pug">
 div.q-pa-md
-  p.text-h6 Изменить суммы взносов в кооперативе
+  p Вступительные и минимальные паевые взносы принимаются от новых пайщиков при их вступлении в кооператив.
 
-  span Для физических лиц и индивидуальных предпринимателей:
-  div(style="max-width: 300px")
-    div.q-pa-md.q-gutter-sm
+  div.q-mb-lg
+    q-card(flat).q-pa-md.q-gutter-sm.q-mt-lg.q-mb-lg
+      p.text-overline ФИЗИЧЕСКИЕ ЛИЦА И ИНДИВИДУАЛЬНЫЕ ПРЕДПРИНИМАТЕЛИ
+
       q-input(standout="bg-teal text-white" v-model="localCoop.initial" label="Вступительный взнос")
         template(#append)
           span.text-overline {{ CURRENCY }}
@@ -71,8 +72,8 @@ div.q-pa-md
         template(#append)
           span.text-overline {{ CURRENCY }}
 
-    span.q-mt-lg Для юридических лиц:
-    div.q-pa-md.q-gutter-sm
+    q-card(flat).q-pa-md.q-gutter-sm
+      p.text-overline ЮРИДИЧЕСКИЕ ЛИЦА
       q-input(standout="bg-teal text-white" v-model="localCoop.org_initial" label="Вступительный взнос")
         template(#append)
           span.text-overline {{ CURRENCY }}

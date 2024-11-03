@@ -64,7 +64,7 @@ watch(localShowAdd, (newValue) => {
 q-dialog(v-model="localShowAdd" persistent :maximized="false" )
   q-card
     div()
-      q-bar.bg-primary.text-white
+      q-bar.bg-gradient-dark.text-white
         span Добавить фонд накопления
         q-space
         q-btn(v-close-popup dense flat icon="close")
@@ -72,8 +72,8 @@ q-dialog(v-model="localShowAdd" persistent :maximized="false" )
 
       div
         q-input(standout="bg-teal text-white" label="Название фонда" v-model="name")
-        q-input(standout="bg-teal text-white" label="Заметка для фонда (не обязательно)" v-model="description")
-        q-input(standout="bg-teal text-white" label="Процент фона" v-model="percent" type="number" min=0 step=1)
+        //- q-input(standout="bg-teal text-white" label="Заметка для фонда (не обязательно)" v-model="description")
+        q-input(standout="bg-teal text-white" label="Процент фонда" v-model="percent" type="number" min=0 step=1)
       q-btn(flat @click="localShowAdd = false") отменить
       q-btn(color="primary" @click="addFund") добавить
 </template>
