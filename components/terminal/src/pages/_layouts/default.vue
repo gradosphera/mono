@@ -21,7 +21,7 @@
   import { useCurrentUserStore } from 'src/entities/User'
   import { useSessionStore } from 'src/entities/Session'
   import { useCooperativeStore } from 'src/entities/Cooperative'
-  import { Header } from 'src/widgets/Header'
+  import { Header } from 'src/widgets/Header/CommonHeader'
   import { LeftDrawerMenu } from 'src/widgets/Desktop/LeftDrawerMenu'
   import { ContactsFooter } from 'src/shared/ui/Footer'
   import { useRoute } from 'vue-router'
