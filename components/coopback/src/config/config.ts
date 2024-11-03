@@ -1,52 +1,74 @@
 import dotenv from 'dotenv';
-import Joi from 'joi';
+import { z } from 'zod';
 import path from 'path';
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-const envVarsSchema = Joi.object()
-  .keys({
-    NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
-    BASE_URL: Joi.string().required(),
-    SERVER_SECRET: Joi.string().required(),
-    PORT: Joi.number().default(3000),
-    MONGODB_URL: Joi.string().required().description('Mongo DB url'),
-    JWT_SECRET: Joi.string().required().description('JWT secret key'),
-    JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
-    JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
-    JWT_RESET_PASSWORD_EXPIRATION_MINUTES: Joi.number()
-      .default(10)
-      .description('minutes after which reset password token expires'),
-    JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: Joi.number()
-      .default(10)
-      .description('minutes after which verify email token expires'),
+const envVarsSchema = z.object({
+  NODE_ENV: z.enum(['production', 'development', 'test']),
+  BASE_URL: z.string(),
+  SERVER_SECRET: z.string(),
+  PORT: z
+    .string()
+    .default('3000')
+    .transform((val) => parseInt(val, 10)),
+  MONGODB_URL: z.string().describe('Mongo DB url'),
+  JWT_SECRET: z.string().describe('JWT secret key'),
+  JWT_ACCESS_EXPIRATION_MINUTES: z
+    .string()
+    .default('30')
+    .transform((val) => parseInt(val, 10)),
+  JWT_REFRESH_EXPIRATION_DAYS: z
+    .string()
+    .default('30')
+    .transform((val) => parseInt(val, 10)),
+  JWT_RESET_PASSWORD_EXPIRATION_MINUTES: z
+    .string()
+    .default('10')
+    .transform((val) => parseInt(val, 10)),
+  JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: z
+    .string()
+    .default('10')
+    .transform((val) => parseInt(val, 10)),
+  JWT_INVITE_EXPIRATION_MINUTES: z
+    .string()
+    .default('3600')
+    .transform((val) => parseInt(val, 10)),
+  SMTP_HOST: z.string().default(''), // Задаём пустую строку по умолчанию
+  SMTP_PORT: z
+    .string()
+    .default('587') // Пример порта по умолчанию
+    .transform((val) => parseInt(val, 10)),
+  SMTP_USERNAME: z.string().default(''), // Пустая строка для необязательного значения
+  SMTP_PASSWORD: z.string().default(''), // Пустая строка для необязательного значения
+  EMAIL_FROM: z.string().default(''), // Пустая строка для необязательного значения
+  COOPNAME: z.string().default('default_coopname'), // Задаём дефолтное значение
+  GRAPHQL_SERVICE: z.string().default('http://localhost:4090').describe('адрес сервиса GRAPHQL'),
+});
 
-    JWT_INVITE_EXPIRATION_MINUTES: Joi.number().default(3600).description('minutes after invite token expires'),
+// Валидация переменных окружения
+const envVars = envVarsSchema.safeParse(process.env);
 
-    SMTP_HOST: Joi.string().description('server that will send the emails'),
-    SMTP_PORT: Joi.number().description('port to connect to the email server'),
-    SMTP_USERNAME: Joi.string().description('username for email server'),
-    SMTP_PASSWORD: Joi.string().description('password for email server'),
-    EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
+if (!envVars.success) {
+  const formattedErrors = envVars.error.format();
 
-    COOPNAME: Joi.string().description('имя аккаунта кооператива'),
-    GRAPHQL_SERVICE: Joi.string().description('адрес сервиса GRAPHQL').default('http://localhost:4090'),
-  })
-  .unknown();
+  const errorMessages = Object.keys(formattedErrors)
+    .filter((key) => key !== '_errors')
+    .map((key) => `${key}: параметр не установлен`)
+    .join('\n');
 
-const { value: envVars, error } = envVarsSchema.prefs({ errors: { label: 'key' } }).validate(process.env);
-
-if (error) {
-  throw new Error(`Config validation error: ${error.message}`);
+  console.error('❌ Ошибка конфигурации:\n', errorMessages);
+  process.exit(1); // Завершаем приложение в случае ошибки
 }
 
+// Экспорт настроек
 export default {
-  env: envVars.NODE_ENV,
-  base_url: envVars.BASE_URL,
-  port: envVars.PORT,
-  server_secret: envVars.SERVER_SECRET,
+  env: envVars.data.NODE_ENV,
+  base_url: envVars.data.BASE_URL,
+  port: envVars.data.PORT,
+  server_secret: envVars.data.SERVER_SECRET,
   mongoose: {
-    url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
+    url: envVars.data.MONGODB_URL + (envVars.data.NODE_ENV === 'test' ? '-test' : ''),
     options: {
       // useCreateIndex: true,
       // useNewUrlParser: true,
@@ -54,24 +76,24 @@ export default {
     },
   },
   jwt: {
-    secret: envVars.JWT_SECRET,
-    accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
-    refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
-    resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
-    verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
-    inviteExpirationMinutes: envVars.JWT_INVITE_EXPIRATION_MINUTES,
+    secret: envVars.data.JWT_SECRET,
+    accessExpirationMinutes: envVars.data.JWT_ACCESS_EXPIRATION_MINUTES,
+    refreshExpirationDays: envVars.data.JWT_REFRESH_EXPIRATION_DAYS,
+    resetPasswordExpirationMinutes: envVars.data.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
+    verifyEmailExpirationMinutes: envVars.data.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
+    inviteExpirationMinutes: envVars.data.JWT_INVITE_EXPIRATION_MINUTES,
   },
   email: {
     smtp: {
-      host: envVars.SMTP_HOST,
-      port: envVars.SMTP_PORT,
+      host: envVars.data.SMTP_HOST,
+      port: envVars.data.SMTP_PORT,
       auth: {
-        user: envVars.SMTP_USERNAME,
-        pass: envVars.SMTP_PASSWORD,
+        user: envVars.data.SMTP_USERNAME,
+        pass: envVars.data.SMTP_PASSWORD,
       },
     },
-    from: envVars.EMAIL_FROM,
+    from: envVars.data.EMAIL_FROM,
   },
-  coopname: envVars.COOPNAME,
-  graphql_service: envVars.GRAPHQL_SERVICE,
+  coopname: envVars.data.COOPNAME,
+  graphql_service: envVars.data.GRAPHQL_SERVICE,
 };

@@ -13,7 +13,9 @@ div.q-pa-md
             div.text-overline
               span 01/2106
         div.q-pa-sm
-          div.text-subtitle1 id: {{formattedUsername}}
+          div.text-subtitle1
+            span id:
+            q-badge {{formattedUsername}}
           div.text-subtitle2 {{displayName}}
 
     div.col-md-6.col-xs-12
@@ -35,7 +37,7 @@ const currentUser = useCurrentUserStore()
 const userType = computed(() => currentUser.userAccount?.type)
 
 const formattedUsername = computed(() => {
-  return currentUser.username.replace(/(.{3})/g, '$1-').trim();
+  return currentUser.username.replace(/(.{3})/g, '$1 ').trim();
 });
 
 const individualProfile = computed(() => {
