@@ -3,13 +3,13 @@ q-btn-dropdown(flat :size="isMobile ? 'sm' : 'md'" :dense="isMobile" stretch ico
   q-list
     ToogleDarkLight(:isMobile="isMobile" :showText="true")
 
-    q-item(flat clickable v-close-popup @click="open('user-payment-methods')")
+    q-item(v-if="loggedIn" flat clickable v-close-popup @click="open('user-payment-methods')")
       q-item-section
         q-item-label
           q-icon(name="fa-solid fa-wrench").q-mr-sm
           span.font10px НАСТРОЙКИ ПАЙЩИКА
 
-    q-item(v-if="isChairman" flat clickable v-close-popup @click="open('accumulation-funds')")
+    q-item(v-if="loggedIn && isChairman" flat clickable v-close-popup @click="open('accumulation-funds')")
       q-item-section
         q-item-label
           q-icon(name="fa-solid fa-hammer").q-mr-sm
@@ -21,9 +21,9 @@ q-btn-dropdown(flat :size="isMobile ? 'sm' : 'md'" :dense="isMobile" stretch ico
     //-     q-item-label
     //-       q-icon(name="fa-solid fa-plus").q-mr-sm
     //-       span.font10px МАГАЗИН ПРИЛОЖЕНИЙ
-    hr
+    hr(v-if="loggedIn")
 
-    q-item(flat clickable v-close-popup @click="logout")
+    q-item(v-if="loggedIn" flat clickable v-close-popup @click="logout")
       q-item-section
         q-item-label
           q-icon(name="logout").q-mr-sm
@@ -34,7 +34,17 @@ q-btn-dropdown(flat :size="isMobile ? 'sm' : 'md'" :dense="isMobile" stretch ico
 import { useLogoutUser } from 'src/features/Registrator/Logout';
 import { FailAlert } from 'src/shared/api';
 import { useRouter } from 'vue-router';
-import { ToogleDarkLight } from '../ToogleDarkLight';
+import { ToogleDarkLight } from '../../../shared/ui/ToogleDarkLight';
+import { useCurrentUserStore } from 'src/entities/User';
+import { computed } from 'vue';
+import { useSessionStore } from 'src/entities/Session';
+
+const session = useSessionStore()
+
+const currentUser = useCurrentUserStore()
+const loggedIn = computed(
+  () => currentUser.isRegistrationComplete && session.isAuth
+)
 
 defineProps({
   isMobile: Boolean,

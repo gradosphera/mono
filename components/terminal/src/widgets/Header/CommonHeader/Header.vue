@@ -104,7 +104,7 @@
   import { useSessionStore } from 'src/entities/Session'
   import config from 'src/app/config'
   import { useWindowSize } from 'vue-window-size'
-  import { SettingsDropdown } from 'src/shared/ui/SettingsDropdown'
+  import { SettingsDropdown } from 'src/widgets/Header/SettingsDropdown'
 
   const router = useRouter()
   const route = useRoute()
