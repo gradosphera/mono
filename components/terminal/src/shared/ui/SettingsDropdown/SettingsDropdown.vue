@@ -9,14 +9,14 @@ q-btn-dropdown(flat :size="isMobile ? 'sm' : 'md'" :dense="isMobile" stretch ico
           q-icon(name="fa-solid fa-wrench").q-mr-sm
           span.font10px НАСТРОЙКИ ПАЙЩИКА
 
-    q-item(flat clickable v-close-popup @click="open('accumulation-funds')")
+    q-item(v-if="isChairman" flat clickable v-close-popup @click="open('accumulation-funds')")
       q-item-section
         q-item-label
           q-icon(name="fa-solid fa-hammer").q-mr-sm
           span.font10px НАСТРОЙКИ КООПЕРАТИВА
 
 
-    //- q-item(flat clickable v-close-popup @click="open('appstore-showcase')")
+    //- q-item(flat v-if="isChairman" clickable v-close-popup @click="open('appstore-showcase')")
     //-   q-item-section
     //-     q-item-label
     //-       q-icon(name="fa-solid fa-plus").q-mr-sm
