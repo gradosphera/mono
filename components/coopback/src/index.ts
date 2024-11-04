@@ -11,10 +11,21 @@ import { paymentService } from './services';
 import { initializeDefaultPlugins } from './services/plugin.service';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import expressApp from './app';
+import { MigratorService } from './modules/migrator/migrator.service';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
 async function bootstrap() {
+  // Готовим приложение для запуска миграции
+  const appForMigrator = await NestFactory.createApplicationContext(AppModule);
+
+  // Запускаем миграцию
+  const migrationService = appForMigrator.get(MigratorService);
+  await migrationService.migrateData();
+
+  // Закрываем приложение для миграции и создаём основное приложение
+  await appForMigrator.close();
+
   // Подключение к MongoDB
   await mongoose.connect(config.mongoose.url);
   logger.info('Connected to MongoDB');
