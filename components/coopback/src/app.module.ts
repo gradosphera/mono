@@ -55,8 +55,4 @@ function dynamicImportModules(): any[] {
     // }),
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(expressApp).forRoutes('*'); // Подключаем Express ко всем маршрутам
-  }
-}
+export class AppModule {}

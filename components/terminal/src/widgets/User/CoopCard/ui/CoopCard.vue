@@ -13,9 +13,7 @@ div.q-pa-md
             div.text-overline
               span 01/2106
         div.q-pa-sm
-          div.text-subtitle1
-            span id:
-            q-badge {{formattedUsername}}
+          q-badge {{'@' + formattedUsername}}
           div.text-subtitle2 {{displayName}}
 
     div.col-md-6.col-xs-12

@@ -9,6 +9,8 @@ import { initSocketConnection } from './controllers/ws.controller';
 import { pluginFactory } from './plugins/pluginFactory';
 import { paymentService } from './services';
 import { initializeDefaultPlugins } from './services/plugin.service';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import expressApp from './app';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
@@ -25,7 +27,7 @@ async function bootstrap() {
   await pluginFactory();
 
   // Создаем приложение NestJS и подключаем Express-приложение как middleware
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
 
   // Запуск сервера
   await app.listen(config.port, () => {
