@@ -9,6 +9,7 @@ import { BullModule as NestBullModule } from '@nestjs/bull';
 import { ConfigModule } from '@nestjs/config';
 
 import config from './config/config';
+import { MigratorService } from './modules/migrator/migrator.service';
 
 // Функция для динамического импорта модулей
 function dynamicImportModules(): any[] {
@@ -41,18 +42,19 @@ function dynamicImportModules(): any[] {
         password: process.env.REDIS_PASSWORD,
       },
     }),
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   host: process.env.PROVIDER_DB_HOST,
-    //   port: Number(process.env.PROVIDER_DB_PORT),
-    //   username: process.env.PROVIDER_DB_USERNAME,
-    //   password: process.env.PROVIDER_DB_PASSWORD,
-    //   database: process.env.PROVIDER_DB_DATABASE,
-    //   entities: [path.join(__dirname, 'modules/*/entities/*.{ts,js}')],
-    //   migrations: ['migrations/*.ts'], // Указываем путь на исходные TS файлы миграций
-    //   synchronize: true, //поменять когда-нибудь потом
-    //   logging: false,
-    // }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: config.postgres.host,
+      port: Number(config.postgres.port),
+      username: config.postgres.username,
+      password: config.postgres.password,
+      database: config.postgres.database,
+      entities: [path.join(__dirname, 'modules/*/entities/*.{ts,js}')],
+      migrations: ['migrations/*.ts'], // Указываем путь на исходные TS файлы миграций
+      synchronize: true, //поменять когда-нибудь потом
+      logging: false,
+    }),
   ],
+  providers: [MigratorService],
 })
 export class AppModule {}

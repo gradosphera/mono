@@ -12,10 +12,15 @@ import { initializeDefaultPlugins } from './services/plugin.service';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import expressApp from './app';
 import { MigratorService } from './modules/migrator/migrator.service';
+import { WinstonLoggerService } from './modules/logger/logger.service';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
 async function bootstrap() {
+  // Подключение к MongoDB
+  await mongoose.connect(config.mongoose.url);
+  logger.info('Connected to MongoDB');
+
   // Готовим приложение для запуска миграции
   const appForMigrator = await NestFactory.createApplicationContext(AppModule);
 
@@ -26,10 +31,6 @@ async function bootstrap() {
   // Закрываем приложение для миграции и создаём основное приложение
   await appForMigrator.close();
 
-  // Подключение к MongoDB
-  await mongoose.connect(config.mongoose.url);
-  logger.info('Connected to MongoDB');
-
   // Запуск дополнительных сервисов
   await connectGenerator();
   await initSocketConnection(SERVER_URL);
@@ -39,6 +40,9 @@ async function bootstrap() {
 
   // Создаем приложение NestJS и подключаем Express-приложение как middleware
   const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+
+  // Устанавливаем WinstonLoggerService как глобальный логгер
+  app.useLogger(new WinstonLoggerService());
 
   // Запуск сервера
   await app.listen(config.port, () => {

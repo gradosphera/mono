@@ -44,6 +44,16 @@ const envVarsSchema = z.object({
   EMAIL_FROM: z.string().default(''), // Пустая строка для необязательного значения
   COOPNAME: z.string().default('default_coopname'), // Задаём дефолтное значение
   GRAPHQL_SERVICE: z.string().default('http://localhost:4090').describe('адрес сервиса GRAPHQL'),
+
+  // Новые переменные для PostgreSQL
+  POSTGRES_HOST: z.string().default('127.0.0.1'),
+  POSTGRES_PORT: z
+    .string()
+    .default('5432')
+    .transform((val) => parseInt(val, 10)),
+  POSTGRES_USERNAME: z.string(),
+  POSTGRES_PASSWORD: z.string(),
+  POSTGRES_DATABASE: z.string(),
 });
 
 // Валидация переменных окружения
@@ -96,4 +106,11 @@ export default {
   },
   coopname: envVars.data.COOPNAME,
   graphql_service: envVars.data.GRAPHQL_SERVICE,
+  postgres: {
+    host: envVars.data.POSTGRES_HOST,
+    port: envVars.data.POSTGRES_PORT,
+    username: envVars.data.POSTGRES_USERNAME,
+    password: envVars.data.POSTGRES_PASSWORD,
+    database: envVars.data.POSTGRES_DATABASE,
+  },
 };
