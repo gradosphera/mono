@@ -16,8 +16,13 @@ const logger = winston.createLogger({
     enumerateErrorFormat(),
     winston.format.colorize(),
     winston.format.splat(),
-    winston.format.printf(({ timestamp, level, message, ...meta }) => {
-      return `${timestamp} ${level}: ${message}${Object.keys(meta).length ? ` - ${JSON.stringify(meta)}` : ''}`;
+    winston.format.printf(({ timestamp, level, message, context, meta, ...restMeta }) => {
+      // Проверяем, является ли meta строкой
+      const contextString = typeof meta === 'string' ? `[${meta}]` : context ? `[${context}]` : '';
+      const metaString = typeof meta === 'object' && Object.keys(meta).length ? ` - ${JSON.stringify(meta)}` : '';
+      const additionalMetaString = Object.keys(restMeta).length ? ` - ${JSON.stringify(restMeta)}` : '';
+
+      return `${timestamp} ${level}: ${contextString} ${message}${metaString}${additionalMetaString}`;
     })
   ),
   transports: [

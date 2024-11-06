@@ -1,11 +1,12 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { pluginService } from '../services';
 import httpStatus from 'http-status';
 import type { RGetPluginConfig, RGetPluginList, RGetPluginSchema, RSetPlugin } from '../types';
 import ApiError from '../utils/ApiError';
 import catchAsync from '../utils/catchAsync';
-import { restartWorker, terminateWorker } from '../plugins/pluginFactory';
 import pick from '../utils/pick';
+import { AppLifecycleDomainInteractor } from '~/domain/appstore/interactors/app-lifecycle-domain.interactor';
+import { nestApp } from '..';
 
 export const getPluginList = catchAsync(async (req: RGetPluginList, res: Response) => {
   const filter = pick(req.query, ['name']);
@@ -22,8 +23,10 @@ export const setPluginConfig = catchAsync(async (req: RSetPlugin, res: Response)
   try {
     const updatedConfig = await pluginService.updatePluginConfig(name, enabled, config);
 
-    if (enabled == false) await terminateWorker(name);
-    else await restartWorker(name);
+    const appLifecycleDomainInteractor = nestApp.get(AppLifecycleDomainInteractor);
+
+    if (enabled == false) await appLifecycleDomainInteractor.terminateApp(name);
+    else await appLifecycleDomainInteractor.restartApp(name);
 
     res.status(httpStatus.OK).json({
       message: `Конфигурация плагина ${name} успешно обновлена`,
@@ -48,7 +51,6 @@ export const getPluginSchema = catchAsync(async (req: RGetPluginSchema, res: Res
 // Контроллер для обновления параметров плагинов
 export const getPluginConfig = catchAsync(async (req: RGetPluginConfig, res: Response) => {
   const { name } = req.query;
-  console.log('plugin', name);
   const config = await pluginService.getPluginConfig(name);
 
   res.status(httpStatus.OK).json(config);

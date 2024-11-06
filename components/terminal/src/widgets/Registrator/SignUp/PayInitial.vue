@@ -1,5 +1,5 @@
 <template lang='pug'>
-div
+div(v-if="store.payment?.details?.amount_without_fee")
   q-step(:name='6', title='Оплатите вступительный взнос', :done='step > 6')
     div(v-if="store.payment.details")
 

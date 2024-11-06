@@ -62,27 +62,27 @@ export class PaymentEffectProcessor {
   }
 }
 
-export const init = () => {
-  redisSubscriber.subscribe(`${config.coopname}:orderStatusUpdate`);
+// export const init = () => {
+//   redisSubscriber.subscribe(`${config.coopname}:orderStatusUpdate`);
 
-  redisSubscriber.on('message', async (channel, message) => {
-    if (channel === `${config.coopname}:orderStatusUpdate`) {
-      try {
-        const { id, status } = JSON.parse(message);
-        await new PaymentEffectProcessor().processPaymentEffect(id, status);
-      } catch (error) {
-        logger.error('Error processing Redis message:', error);
-      }
-    }
-  });
-};
+//   redisSubscriber.on('message', async (channel, message) => {
+//     if (channel === `${config.coopname}:orderStatusUpdate`) {
+//       try {
+//         const { id, status } = JSON.parse(message);
+//         await new PaymentEffectProcessor().processPaymentEffect(id, status);
+//       } catch (error) {
+//         logger.error('Error processing Redis message:', error);
+//       }
+//     }
+//   });
+// };
 
-export const providers: Record<string, any> = {};
+// export const providers: Record<string, any> = {};
 
-export const registerProvider = (name: string, providerInstance: any) => {
-  providers[name] = providerInstance;
-};
+// export const registerProvider = (name: string, providerInstance: any) => {
+//   providers[name] = providerInstance;
+// };
 
-export const getProvider = (name: string) => {
-  return providers[name];
-};
+// export const getProvider = (name: string) => {
+//   return providers[name];
+// };

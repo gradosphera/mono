@@ -15,7 +15,8 @@ import _ from 'lodash'; // lodash для глубокого клонирован
 import { blockchainService, userService } from '.';
 import config from '../config/config';
 import { userStatus } from '../types/user.types';
-import { providers } from './payment.service';
+import { nestApp } from '..';
+import { ProviderInteractor } from '~/domain/provider/provider.interactor';
 
 export async function createOrder(
   username: string,
@@ -60,8 +61,9 @@ export async function createOrder(
       }
 
       const secret = db_order.secret;
-
-      const provider = providers[providerName];
+      const providerInteractor = nestApp.get(ProviderInteractor);
+      console.log('providerInteractor: ', providerInteractor);
+      const provider = providerInteractor.getProvider(providerName);
 
       const paymentDetails = await provider.createPayment(
         amount,

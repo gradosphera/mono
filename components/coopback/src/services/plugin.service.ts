@@ -1,6 +1,6 @@
 import { PluginConfig } from '../models/pluginConfig.model';
 import Joi from 'joi';
-import { PluginRegistry } from '../plugins';
+import { PluginRegistry } from '../apps';
 import parse from 'joi-to-json';
 
 import ApiError from '../utils/ApiError';

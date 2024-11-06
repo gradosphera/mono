@@ -6,46 +6,37 @@ import config from './config/config';
 import logger from './config/logger';
 import { connectGenerator, diconnectGenerator } from './services/document.service';
 import { initSocketConnection } from './controllers/ws.controller';
-import { pluginFactory } from './plugins/pluginFactory';
-import { paymentService } from './services';
-import { initializeDefaultPlugins } from './services/plugin.service';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import expressApp from './app';
-import { MigratorService } from './modules/migrator/migrator.service';
-import { WinstonLoggerService } from './modules/logger/logger.service';
+import { WinstonLoggerService } from './modules/logger/logger-app.service';
+import { HttpApiExceptionFilter } from './filters/all-exceptions.filter';
+import { migrateData } from './migrator/migrate';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
+export let nestApp;
+
 async function bootstrap() {
+  // Запускаем миграцию
+  await migrateData();
+
   // Подключение к MongoDB
   await mongoose.connect(config.mongoose.url);
   logger.info('Connected to MongoDB');
 
-  // Готовим приложение для запуска миграции
-  const appForMigrator = await NestFactory.createApplicationContext(AppModule);
-
-  // Запускаем миграцию
-  const migrationService = appForMigrator.get(MigratorService);
-  await migrationService.migrateData();
-
-  // Закрываем приложение для миграции и создаём основное приложение
-  await appForMigrator.close();
-
   // Запуск дополнительных сервисов
   await connectGenerator();
   await initSocketConnection(SERVER_URL);
-  await paymentService.init();
-  await initializeDefaultPlugins();
-  await pluginFactory();
+  // await paymentService.init();
 
   // Создаем приложение NestJS и подключаем Express-приложение как middleware
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+  nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), { logger: new WinstonLoggerService() });
 
-  // Устанавливаем WinstonLoggerService как глобальный логгер
-  app.useLogger(new WinstonLoggerService());
+  // Глобальный фильтр для перехвата всех исключений внутри NestJS
+  nestApp.useGlobalFilters(new HttpApiExceptionFilter());
 
   // Запуск сервера
-  await app.listen(config.port, () => {
+  await nestApp.listen(config.port, () => {
     logger.info(`NestJS app with Express routes running on port ${config.port}`);
   });
 
@@ -71,7 +62,7 @@ async function bootstrap() {
   process.on('SIGTERM', async () => {
     logger.info('SIGTERM received');
     await mongoose.disconnect();
-    await app.close();
+    await nestApp.close();
   });
 }
 

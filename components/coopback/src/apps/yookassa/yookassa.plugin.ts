@@ -12,6 +12,8 @@ import { redisPublisher } from '../../services/redis.service';
 import type { IPlugin, IPluginSchema } from '../../types/plugin.types';
 import Joi from 'joi';
 import { PluginConfig } from '../../models/pluginConfig.model';
+import { nestApp } from '~/index';
+import { ProviderInteractor } from '~/domain/provider/provider.interactor';
 
 interface IIpnRequest {
   event: string;
@@ -123,6 +125,10 @@ export class Plugin extends IPNProvider implements IPlugin<IConfig> {
     this.plugin = pluginData;
 
     logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
+
+    const providerInteractor = nestApp.get(ProviderInteractor);
+    providerInteractor.registerProvider(this.name, this);
+    console.log(`Платежный провайдер ${this.name} успешно зарегистрирован.`);
   }
 
   public configSchemas = Joi.object<IConfig>({});

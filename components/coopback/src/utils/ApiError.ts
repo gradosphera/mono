@@ -6,7 +6,7 @@ export default class ApiError extends Error {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = isOperational;
-    this.subcode = subcode
+    this.subcode = subcode;
     if (stack) {
       this.stack = stack;
     } else {

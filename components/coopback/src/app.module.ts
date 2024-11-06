@@ -1,15 +1,19 @@
 // app.module.ts
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import expressApp from './app'; // путь к вашему Express-приложению
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as glob from 'glob';
 import * as path from 'path';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { BullModule as NestBullModule } from '@nestjs/bull';
 import { ConfigModule } from '@nestjs/config';
-
+import { APP_FILTER } from '@nestjs/core';
 import config from './config/config';
-import { MigratorService } from './modules/migrator/migrator.service';
+import { PaymentModule } from './domain/payment/payment.module';
+import { ProviderModule } from './domain/provider/provider.module';
+import { AppStoreDomainModule } from './domain/appstore/appstore-domain.module';
+import { DatabaseModule } from './infrastructure/database/typeorm/database.module';
+import { QueueModule } from './modules/queue/queue-app.module';
+import { RedisAppModule } from './modules/redis/redis-app.module';
+import { LoggerModule } from './modules/logger/logger-app.module';
+import { HttpApiExceptionFilter } from './filters/all-exceptions.filter';
 
 // Функция для динамического импорта модулей
 function dynamicImportModules(): any[] {
@@ -28,33 +32,25 @@ function dynamicImportModules(): any[] {
 
 @Module({
   imports: [
-    // Подключение к MongoDB через MongooseModule
-    MongooseModule.forRoot(config.mongoose.url),
-
-    ...dynamicImportModules(), // Динамически импортируем все найденные модули
     ConfigModule.forRoot({
       isGlobal: true, // Чтобы .env был доступен глобально
     }),
-    NestBullModule.forRoot({
-      redis: {
-        host: process.env.REDIS_HOST,
-        port: parseInt(process.env.REDIS_PORT as string),
-        password: process.env.REDIS_PASSWORD,
-      },
-    }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: config.postgres.host,
-      port: Number(config.postgres.port),
-      username: config.postgres.username,
-      password: config.postgres.password,
-      database: config.postgres.database,
-      entities: [path.join(__dirname, 'modules/*/entities/*.{ts,js}')],
-      migrations: ['migrations/*.ts'], // Указываем путь на исходные TS файлы миграций
-      synchronize: true, //поменять когда-нибудь потом
-      logging: false,
-    }),
+    ...dynamicImportModules(), // Динамически импортируем все найденные модули
+    RedisAppModule,
+    PaymentModule,
+    ProviderModule,
+    AppStoreDomainModule,
+    MongooseModule.forRoot(config.mongoose.url),
+    DatabaseModule,
+    QueueModule,
+    LoggerModule,
   ],
-  providers: [MigratorService],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpApiExceptionFilter,
+    },
+  ],
+  exports: [],
 })
 export class AppModule {}

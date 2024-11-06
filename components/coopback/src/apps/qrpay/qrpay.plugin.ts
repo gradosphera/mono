@@ -1,19 +1,14 @@
-import { PollingProvider } from '../../services/payment/polling/pollingProvider';
-import { Order } from '../../models';
 import type { PaymentDetails } from '../../types';
 import { generator } from '../../services/document.service';
-import { redisPublisher } from '../../services/redis.service';
-import { PaymentState } from '../../models/paymentState.model';
-import axios from 'axios';
 import logger from '../../config/logger';
-import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../services/order.service';
-import { orderStatus } from '../../types/order.types';
-import config from '../../config/config';
+import { getAmountPlusFee } from '../../services/order.service';
 import type { IPlugin, IPluginSchema } from '../../types/plugin.types';
 import { PluginConfig } from '../../models/pluginConfig.model';
 import Joi from 'joi';
 import { PluginLog } from '../../models/pluginLog.model';
 import { PaymentProvider } from '../../services/payment/paymentProvider';
+import { nestApp } from '~/index';
+import { ProviderInteractor } from '~/domain/provider/provider.interactor';
 
 // Интерфейс для параметров конфигурации плагина powerup
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -38,6 +33,10 @@ export class Plugin extends PaymentProvider implements IPlugin<IConfig> {
     this.plugin = pluginData;
 
     logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin);
+
+    const providerInteractor = nestApp.get(ProviderInteractor);
+    providerInteractor.registerProvider(this.name, this);
+    console.log(`Платежный провайдер ${this.name} успешно зарегистрирован.`);
   }
 
   private async log(action: ILog) {

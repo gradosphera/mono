@@ -4,13 +4,17 @@
     "module": "commonjs",
     "lib": ["ES2015"],
     "outDir": "dist",
+    "baseUrl": "./src",
     "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "allowJs": false,
     "noImplicitAny": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "~/*": ["*"]
+    }
   },
   "include": ["src/**/*.ts", "scripts/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]

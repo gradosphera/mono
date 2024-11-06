@@ -54,6 +54,13 @@ const envVarsSchema = z.object({
   POSTGRES_USERNAME: z.string(),
   POSTGRES_PASSWORD: z.string(),
   POSTGRES_DATABASE: z.string(),
+
+  REDIS_HOST: z.string(),
+  REDIS_PORT: z
+    .string()
+    .default('6379')
+    .transform((val) => parseInt(val, 10)),
+  REDIS_PASSWORD: z.string(),
 });
 
 // Валидация переменных окружения
@@ -112,5 +119,10 @@ export default {
     username: envVars.data.POSTGRES_USERNAME,
     password: envVars.data.POSTGRES_PASSWORD,
     database: envVars.data.POSTGRES_DATABASE,
+  },
+  redis: {
+    host: envVars.data.REDIS_HOST,
+    port: envVars.data.REDIS_PORT,
+    password: envVars.data.REDIS_PASSWORD,
   },
 };

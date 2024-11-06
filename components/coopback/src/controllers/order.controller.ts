@@ -1,18 +1,20 @@
 import http from 'http-status';
 import catchAsync from '../utils/catchAsync';
 import { orderService } from '../services';
-import { ICreateDeposit, ICreateInitialPayment } from '../types';
+import { ICreateDeposit } from '../types';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import pick from '../utils/pick';
 import logger from '../config/logger';
-import { getProvider } from '../services/payment.service';
+import { ProviderInteractor } from '~/domain/provider/provider.interactor';
+import { nestApp } from '..';
 
 export const catchIPN = catchAsync(async (req: Request, res: Response) => {
   const providerName = req.params.provider;
   logger.info(`Recieve new IPN for provider ${providerName}`, { body: req.body, source: 'catchIPN' });
 
-  const provider = getProvider(providerName);
+  const providerInteractor = nestApp.get(ProviderInteractor);
+  const provider = providerInteractor.getProvider(providerName);
 
   // Обрабатываем IPN данные
   await provider.handleIPN(req.body);

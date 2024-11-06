@@ -1,6 +1,6 @@
 import { expose } from 'threads/worker';
 import mongoose from 'mongoose';
-import { PluginRegistry } from '../plugins';
+import { PluginRegistry } from '../apps';
 import rootConfig from '../config/config';
 import { IPNProvider } from '../services/payment/ipn/ipnProvider';
 
