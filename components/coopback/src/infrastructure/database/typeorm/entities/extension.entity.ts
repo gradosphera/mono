@@ -1,5 +1,5 @@
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
+import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 
 @Entity('extensions')
 export class ExtensionEntity<TConfig = any> {
@@ -26,19 +26,19 @@ export class ExtensionEntity<TConfig = any> {
     }
   }
 
+  constructor(partial?: Partial<ExtensionDomainEntity<TConfig>>) {
+    if (partial) {
+      Object.assign(this, partial);
+    }
+  }
+
   // Метод для преобразования ORM-сущности в доменную сущность
   toDomainEntity(): ExtensionDomainEntity<TConfig> {
     return new ExtensionDomainEntity<TConfig>(this.name, this.enabled, this.config, this.createdAt, this.updatedAt);
   }
 
   // Статический метод для создания ORM-сущности из доменной сущности
-  static fromDomainEntity<TConfig>(domainEntity: ExtensionDomainEntity<TConfig>): ExtensionEntity<TConfig> {
-    const ormEntity = new ExtensionEntity<TConfig>();
-    ormEntity.name = domainEntity.name;
-    ormEntity.enabled = domainEntity.enabled;
-    ormEntity.config = domainEntity.config;
-    ormEntity.createdAt = domainEntity.createdAt;
-    ormEntity.updatedAt = domainEntity.updatedAt;
-    return ormEntity;
+  static fromDomainEntity<TConfig>(domainEntity: Partial<ExtensionDomainEntity<TConfig>>): ExtensionEntity<TConfig> {
+    return new ExtensionEntity<TConfig>(domainEntity);
   }
 }

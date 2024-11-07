@@ -1,4 +1,4 @@
-// domain/appstore/entities/appstore-domain.entity.ts
+// domain/appstore/entities/extension-domain.entity.ts
 export class ExtensionDomainEntity<TConfig = any> {
   constructor(
     public readonly name: string,

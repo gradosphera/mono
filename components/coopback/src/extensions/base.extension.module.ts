@@ -1,6 +1,6 @@
 import { OnModuleInit, Injectable } from '@nestjs/common';
 import Joi from 'joi';
-import { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
+import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 
 @Injectable()
 export abstract class BaseExtModule implements OnModuleInit {

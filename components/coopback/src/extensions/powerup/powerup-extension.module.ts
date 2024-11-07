@@ -2,15 +2,18 @@ import Joi from 'joi';
 import cron from 'node-cron';
 import { blockchainService } from '../../services';
 import { default as coopConfig } from '../../config/config';
-import { PluginLog } from '../../models/pluginLog.model';
 import { Inject, Module } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
 import {
-  APP_REPOSITORY,
+  EXTENSION_REPOSITORY,
   type ExtensionDomainRepository,
-} from '~/domain/appstore/repositories/extension-domain.repository.interface';
+} from '~/domain/extension/repositories/extension-domain.repository.interface';
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
-import type { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
+import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
+import {
+  LOG_EXTENSION_REPOSITORY,
+  LogExtensionDomainRepository,
+} from '~/domain/extension/repositories/log-extension-domain.repository.interface';
 
 // Интерфейс для параметров конфигурации плагина powerup
 export interface IConfig {
@@ -40,7 +43,8 @@ export interface ILog {
 
 export class PowerupPlugin extends BaseExtModule {
   constructor(
-    @Inject(APP_REPOSITORY) private readonly appRepository: ExtensionDomainRepository,
+    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
+    @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>,
     private readonly logger: WinstonLoggerService
   ) {
     super();
@@ -61,7 +65,7 @@ export class PowerupPlugin extends BaseExtModule {
   });
 
   async initialize() {
-    const pluginData = await this.appRepository.findByName(this.name);
+    const pluginData = await this.extensionRepository.findByName(this.name);
     if (!pluginData) throw new Error('Конфиг не найден');
 
     this.plugin = pluginData;
@@ -116,7 +120,7 @@ export class PowerupPlugin extends BaseExtModule {
       await blockchainService.powerUp(username, quantity);
 
       this.plugin.config.lastDailyReplenishmentDate = new Date();
-      await this.appRepository.update(this.name, this.plugin);
+      await this.extensionRepository.update(this.name, this.plugin);
 
       await this.log({
         type: 'daily',
@@ -137,7 +141,7 @@ export class PowerupPlugin extends BaseExtModule {
   }
 
   private async log(action: ILog) {
-    await PluginLog.create({ name: this.name, log: action });
+    await this.logExtensionRepository.push(this.name, action);
   }
 
   // Задача проверки и пополнения ресурсов

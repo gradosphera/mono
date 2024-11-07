@@ -8,7 +8,7 @@ import { APP_FILTER } from '@nestjs/core';
 import config from './config/config';
 import { PaymentModule } from './domain/payment/payment.module';
 import { ProviderModule } from './domain/provider/provider.module';
-import { ExtensionDomainModule } from './domain/appstore/extension-domain.module';
+import { ExtensionDomainModule } from './domain/extension/extension-domain.module';
 import { DatabaseModule } from './infrastructure/database/typeorm/database.module';
 import { QueueModule } from './modules/queue/queue-app.module';
 import { RedisAppModule } from './modules/redis/redis-app.module';

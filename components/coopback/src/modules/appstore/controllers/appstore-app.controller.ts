@@ -2,7 +2,7 @@
 
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { AppManagementService } from '../services/appstore-app.service';
-import { ExtensionDomainEntity } from '../../../domain/appstore/entities/extension-domain.entity';
+import { ExtensionDomainEntity } from '../../../domain/extension/entities/extension-domain.entity';
 
 @Controller('appstore')
 export class AppStoreController<TConfig = any> {

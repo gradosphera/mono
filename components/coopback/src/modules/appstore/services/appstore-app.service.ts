@@ -1,8 +1,8 @@
 // modules/appstore/services/AppManagement.service.ts
 
 import { Injectable } from '@nestjs/common';
-import { ExtensionDomainInteractor } from '~/domain/appstore/interactors/extension-domain.interactor';
-import { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
+import { ExtensionDomainInteractor } from '~/domain/extension/interactors/extension-domain.interactor';
+import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 
 @Injectable()
 export class AppManagementService<TConfig = any> {

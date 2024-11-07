@@ -1,7 +1,7 @@
 // domain/appstore/appstore-lifecycle-domain.service.ts
 
 import { Injectable, type INestApplication } from '@nestjs/common';
-import { ExtensionDomainService } from '~/domain/appstore/services/extension-domain.service';
+import { ExtensionDomainService } from '~/domain/extension/services/extension-domain.service';
 import { AppRegistry } from '~/extensions/extensions.registry';
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
 

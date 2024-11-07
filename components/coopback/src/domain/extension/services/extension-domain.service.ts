@@ -1,13 +1,13 @@
 // domain/appstore/services/appstore-domain.service.ts
 
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
-import { APP_REPOSITORY, ExtensionDomainRepository } from '../repositories/extension-domain.repository.interface';
+import { EXTENSION_REPOSITORY, ExtensionDomainRepository } from '../repositories/extension-domain.repository.interface';
 import { ExtensionDomainEntity } from '../entities/extension-domain.entity';
 
 @Injectable()
 export class ExtensionDomainService<TConfig = any> {
   constructor(
-    @Inject(APP_REPOSITORY) private readonly extensionDomainService: ExtensionDomainRepository<TConfig> // Используем токен для инъекции зависимости
+    @Inject(EXTENSION_REPOSITORY) private readonly extensionDomainService: ExtensionDomainRepository<TConfig> // Используем токен для инъекции зависимости
   ) {}
 
   async getAppList(): Promise<ExtensionDomainEntity<TConfig>[]> {

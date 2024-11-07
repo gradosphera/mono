@@ -4,9 +4,12 @@ import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import path from 'path';
 import config from '~/config/config';
-import { APP_REPOSITORY } from '~/domain/appstore/repositories/extension-domain.repository.interface';
-import { TypeOrmAppStoreDomainRepository } from './repositories/typeorm-app.repository';
+import { EXTENSION_REPOSITORY } from '~/domain/extension/repositories/extension-domain.repository.interface';
+import { TypeOrmExtensionDomainRepository } from './repositories/typeorm-extension.repository';
 import { ExtensionEntity } from './entities/extension.entity';
+import { LogExtensionEntity } from './entities/log-extension.entity';
+import { LOG_EXTENSION_REPOSITORY } from '~/domain/extension/repositories/log-extension-domain.repository.interface';
+import { TypeOrmLogExtensionDomainRepository } from './repositories/typeorm-log-extension.repository';
 
 @Global()
 @Module({
@@ -23,14 +26,18 @@ import { ExtensionEntity } from './entities/extension.entity';
       synchronize: true, // Отключите в продакшене
       logging: false,
     }),
-    TypeOrmModule.forFeature([ExtensionEntity]), // Регистрируем сущность для использования в репозитории
+    TypeOrmModule.forFeature([ExtensionEntity, LogExtensionEntity]), // Регистрируем сущность для использования в репозитории
   ],
   providers: [
     {
-      provide: APP_REPOSITORY, // Ключ для инжекции
-      useClass: TypeOrmAppStoreDomainRepository, // Реализация репозитория
+      provide: EXTENSION_REPOSITORY, // Ключ для инжекции
+      useClass: TypeOrmExtensionDomainRepository, // Реализация репозитория
+    },
+    {
+      provide: LOG_EXTENSION_REPOSITORY, // Ключ для инжекции
+      useClass: TypeOrmLogExtensionDomainRepository, // Реализация репозитория
     },
   ],
-  exports: [TypeOrmModule, APP_REPOSITORY], // Экспортируем TypeOrmModule для использования в других модулях
+  exports: [TypeOrmModule, EXTENSION_REPOSITORY, LOG_EXTENSION_REPOSITORY], // Экспортируем TypeOrmModule для использования в других модулях
 })
 export class DatabaseModule {}

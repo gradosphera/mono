@@ -3,7 +3,7 @@
 import { Module } from '@nestjs/common';
 import { ExtensionDomainInteractor } from './interactors/extension-domain.interactor';
 import { ExtensionDomainService } from './services/extension-domain.service';
-import { ExtensionLifecycleDomainService } from '~/domain/appstore/services/extension-lifecycle-domain.service';
+import { ExtensionLifecycleDomainService } from '~/domain/extension/services/extension-lifecycle-domain.service';
 import { ExtensionLifecycleDomainInteractor } from './interactors/extension-lifecycle-domain.interactor';
 import { ExtensionsModule } from '~/extensions/extensions.module';
 import { nestApp } from '~/index';

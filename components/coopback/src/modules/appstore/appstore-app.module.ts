@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppStoreController } from './controllers/appstore-app.controller';
 import { AppManagementService } from './services/appstore-app.service';
-import { ExtensionDomainModule } from '~/domain/appstore/extension-domain.module';
+import { ExtensionDomainModule } from '~/domain/extension/extension-domain.module';
 
 @Module({
   imports: [

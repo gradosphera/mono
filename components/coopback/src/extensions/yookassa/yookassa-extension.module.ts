@@ -13,11 +13,11 @@ import { nestApp } from '~/index';
 import { ProviderInteractor } from '~/domain/provider/provider.interactor';
 import { Inject, Module } from '@nestjs/common';
 import {
-  APP_REPOSITORY,
+  EXTENSION_REPOSITORY,
   type ExtensionDomainRepository,
-} from '~/domain/appstore/repositories/extension-domain.repository.interface';
+} from '~/domain/extension/repositories/extension-domain.repository.interface';
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
-import type { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
+import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 
 interface IIpnRequest {
   event: string;
@@ -116,7 +116,7 @@ export interface ILog {}
 
 export class YookassaPlugin extends IPNProvider {
   constructor(
-    @Inject(APP_REPOSITORY) private readonly appRepository: ExtensionDomainRepository,
+    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
     private readonly logger: WinstonLoggerService
   ) {
     super();
@@ -127,7 +127,7 @@ export class YookassaPlugin extends IPNProvider {
   plugin!: ExtensionDomainEntity<IConfig>;
 
   async initialize(): Promise<void> {
-    const pluginData = await this.appRepository.findByName(this.name);
+    const pluginData = await this.extensionRepository.findByName(this.name);
     if (!pluginData) throw new Error('Конфиг не найден');
 
     this.plugin = pluginData;
@@ -136,7 +136,7 @@ export class YookassaPlugin extends IPNProvider {
 
     const providerInteractor = nestApp.get(ProviderInteractor);
     providerInteractor.registerProvider(this.name, this);
-    console.log(`Платежный провайдер ${this.name} успешно зарегистрирован.`);
+    this.logger.info(`Платежный провайдер ${this.name} успешно зарегистрирован.`);
   }
 
   public configSchemas = Joi.object<IConfig>({});

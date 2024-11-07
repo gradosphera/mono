@@ -5,7 +5,7 @@ import type { RGetPluginConfig, RGetPluginList, RGetPluginSchema, RSetPlugin } f
 import ApiError from '../utils/ApiError';
 import catchAsync from '../utils/catchAsync';
 import pick from '../utils/pick';
-import { ExtensionLifecycleDomainInteractor } from '~/domain/appstore/interactors/extension-lifecycle-domain.interactor';
+import { ExtensionLifecycleDomainInteractor } from '~/domain/extension/interactors/extension-lifecycle-domain.interactor';
 import { nestApp } from '..';
 
 export const getPluginList = catchAsync(async (req: RGetPluginList, res: Response) => {

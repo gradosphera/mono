@@ -4,11 +4,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExtensionEntity } from '../entities/extension.entity';
-import { ExtensionDomainRepository } from '~/domain/appstore/repositories/extension-domain.repository.interface';
-import { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
+import { ExtensionDomainRepository } from '~/domain/extension/repositories/extension-domain.repository.interface';
+import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 
 @Injectable()
-export class TypeOrmAppStoreDomainRepository<TConfig = any> implements ExtensionDomainRepository<TConfig> {
+export class TypeOrmExtensionDomainRepository<TConfig = any> implements ExtensionDomainRepository<TConfig> {
   constructor(
     @InjectRepository(ExtensionEntity)
     private readonly ormRepo: Repository<ExtensionEntity<TConfig>>
@@ -31,6 +31,8 @@ export class TypeOrmAppStoreDomainRepository<TConfig = any> implements Extension
   }
 
   async update(name: string, data: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>> {
+    const domain_data = ExtensionEntity.fromDomainEntity(data);
+
     // Поиск существующей записи по name
     const existingEntity = await this.ormRepo.findOne({ where: { name } });
 
@@ -39,7 +41,7 @@ export class TypeOrmAppStoreDomainRepository<TConfig = any> implements Extension
     }
 
     // Обновление полей существующей записи
-    const updatedEntity = Object.assign(existingEntity, data);
+    const updatedEntity = Object.assign(existingEntity, domain_data);
 
     // Сохранение обновленной записи в базе данных
     await this.ormRepo.save(updatedEntity);

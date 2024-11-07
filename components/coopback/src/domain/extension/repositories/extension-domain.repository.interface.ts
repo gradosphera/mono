@@ -9,4 +9,4 @@ export interface ExtensionDomainRepository<TConfig = any> {
   update(name: string, data: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>>;
 }
 
-export const APP_REPOSITORY = Symbol('ExtensionDomainRepository'); // Создаем уникальный токен
+export const EXTENSION_REPOSITORY = Symbol('ExtensionDomainRepository'); // Создаем уникальный токен

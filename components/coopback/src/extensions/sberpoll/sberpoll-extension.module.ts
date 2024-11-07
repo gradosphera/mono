@@ -9,14 +9,13 @@ import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../
 import { orderStatus } from '../../types/order.types';
 import config from '../../config/config';
 import Joi from 'joi';
-import { PluginLog } from '../../models/pluginLog.model';
 import { Inject, Module } from '@nestjs/common';
 import {
-  APP_REPOSITORY,
+  EXTENSION_REPOSITORY,
   type ExtensionDomainRepository,
-} from '~/domain/appstore/repositories/extension-domain.repository.interface';
+} from '~/domain/extension/repositories/extension-domain.repository.interface';
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
-import type { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
+import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 
 interface Link {
   href: string;
@@ -69,7 +68,7 @@ export interface ILog {}
 
 export class SberpollPlugin extends PollingProvider {
   constructor(
-    @Inject(APP_REPOSITORY) private readonly appRepository: ExtensionDomainRepository,
+    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
     private readonly logger: WinstonLoggerService
   ) {
     super();
@@ -85,17 +84,13 @@ export class SberpollPlugin extends PollingProvider {
   public fee_percent = 0; ///%
 
   async initialize(): Promise<void> {
-    const pluginData = await this.appRepository.findByName(this.name);
+    const pluginData = await this.extensionRepository.findByName(this.name);
 
     if (!pluginData) throw new Error('Конфиг не найден');
 
     this.plugin = pluginData;
 
     this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin);
-  }
-
-  private async log(action: ILog) {
-    await PluginLog.create({ name: this.name, log: action });
   }
 
   public async createPayment(
