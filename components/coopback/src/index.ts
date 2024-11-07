@@ -29,6 +29,14 @@ async function bootstrap() {
   await initSocketConnection(SERVER_URL);
   // await paymentService.init();
 
+  // Добавьте миддлвар для отключения CSP в локальной разработке
+  expressApp.use((req, res, next) => {
+    if (config.env !== 'production') {
+      res.removeHeader('Content-Security-Policy'); // Отключить CSP для локальной разработки
+    }
+    next();
+  });
+
   // Создаем приложение NestJS и подключаем Express-приложение как middleware
   nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), { logger: new WinstonLoggerService() });
 

@@ -1,10 +1,12 @@
+import type { LogExtensionDomainInterface } from '../interfaces/log-extension-domain.interface';
+
 // domain/appstore/entities/log-extension-domain.entity.ts
-export class LogExtensionDomainEntity<TLog = any> {
+export class LogExtensionDomainEntity<TLog = any> implements LogExtensionDomainInterface {
   constructor(
     public readonly id: number,
     public readonly name: string,
     public readonly data: TLog,
-    public readonly createdAt: Date,
-    public readonly updatedAt: Date
+    public readonly created_at: Date,
+    public readonly updated_at: Date
   ) {}
 }

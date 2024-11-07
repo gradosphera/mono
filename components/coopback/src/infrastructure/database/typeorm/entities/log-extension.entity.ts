@@ -1,8 +1,9 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { LogExtensionDomainEntity } from '~/domain/extension/entities/log-extension-domain.entity';
+import type { LogExtensionDomainInterface } from '~/domain/extension/interfaces/log-extension-domain.interface';
 
 @Entity('extensions_logs')
-export class LogExtensionEntity<TLog = any> {
+export class LogExtensionEntity<TLog = any> implements LogExtensionDomainInterface<TLog> {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -13,24 +14,28 @@ export class LogExtensionEntity<TLog = any> {
   data!: TLog;
 
   @CreateDateColumn()
-  createdAt!: Date;
+  created_at!: Date;
 
   @UpdateDateColumn()
-  updatedAt!: Date;
+  updated_at!: Date;
 
-  constructor(partial?: Partial<LogExtensionDomainEntity<TLog>>) {
-    if (partial) {
-      Object.assign(this, partial);
+  constructor(data?: LogExtensionDomainEntity<TLog>) {
+    if (data) {
+      this.id = data.id;
+      this.name = data.name;
+      this.data = data.data;
+      this.created_at = data.created_at;
+      this.updated_at = data.updated_at;
     }
   }
 
   // Метод для преобразования ORM-сущности в доменную сущность
   toDomainEntity(): LogExtensionDomainEntity<TLog> {
-    return new LogExtensionDomainEntity<TLog>(this.id, this.name, this.data, this.createdAt, this.updatedAt);
+    return new LogExtensionDomainEntity<TLog>(this.id, this.name, this.data, this.created_at, this.updated_at);
   }
 
   // Статический метод для создания ORM-сущности из доменной сущности
-  static fromDomainEntity<TLog>(domainEntity: Partial<LogExtensionDomainEntity<TLog>>): LogExtensionEntity<TLog> {
+  static fromDomainEntity<TLog>(domainEntity: LogExtensionDomainEntity<TLog>): LogExtensionEntity<TLog> {
     return new LogExtensionEntity<TLog>(domainEntity);
   }
 }

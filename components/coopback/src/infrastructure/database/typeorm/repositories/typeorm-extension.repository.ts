@@ -31,8 +31,6 @@ export class TypeOrmExtensionDomainRepository<TConfig = any> implements Extensio
   }
 
   async update(name: string, data: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>> {
-    const domain_data = ExtensionEntity.fromDomainEntity(data);
-
     // Поиск существующей записи по name
     const existingEntity = await this.ormRepo.findOne({ where: { name } });
 
@@ -40,12 +38,13 @@ export class TypeOrmExtensionDomainRepository<TConfig = any> implements Extensio
       throw new Error('Запись не найдена');
     }
 
-    // Обновление полей существующей записи
-    const updatedEntity = Object.assign(existingEntity, domain_data);
+    // Обновление только переданных полей
+    if (data.enabled !== undefined) existingEntity.enabled = data.enabled;
+    if (data.config !== undefined) existingEntity.config = data.config;
 
     // Сохранение обновленной записи в базе данных
-    await this.ormRepo.save(updatedEntity);
+    await this.ormRepo.save(existingEntity);
 
-    return updatedEntity.toDomainEntity(); // Предполагается, что у вас есть метод toDomainEntity для преобразования
+    return existingEntity.toDomainEntity();
   }
 }

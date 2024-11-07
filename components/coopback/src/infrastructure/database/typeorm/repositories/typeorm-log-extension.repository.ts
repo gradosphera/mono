@@ -15,7 +15,12 @@ export class TypeOrmLogExtensionDomainRepository<TLog = any> implements LogExten
   ) {}
 
   async push(name: string, data: TLog): Promise<LogExtensionDomainEntity<TLog>> {
-    const ormEntity = this.ormRepo.create(LogExtensionEntity.fromDomainEntity({ name, data }));
+    // Создание сущности напрямую, без использования fromDomainEntity
+    const ormEntity = this.ormRepo.create({
+      name,
+      data,
+    });
+
     const savedEntity = await this.ormRepo.save(ormEntity);
     return savedEntity.toDomainEntity();
   }

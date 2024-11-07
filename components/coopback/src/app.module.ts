@@ -14,6 +14,7 @@ import { QueueModule } from './modules/queue/queue-app.module';
 import { RedisAppModule } from './modules/redis/redis-app.module';
 import { LoggerModule } from './modules/logger/logger-app.module';
 import { HttpApiExceptionFilter } from './filters/all-exceptions.filter';
+import { GraphqlModule } from './infrastructure/graphql/graphql.module';
 
 // Функция для динамического импорта модулей
 function dynamicImportModules(): any[] {
@@ -42,6 +43,7 @@ function dynamicImportModules(): any[] {
     ExtensionDomainModule,
     MongooseModule.forRoot(config.mongoose.url),
     DatabaseModule,
+    GraphqlModule,
     QueueModule,
     LoggerModule,
   ],
