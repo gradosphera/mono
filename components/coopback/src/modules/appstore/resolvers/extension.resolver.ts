@@ -1,21 +1,26 @@
 // modules/appstore/resolvers/appstore.resolver.ts
 
-import { Resolver, Query, Mutation, Args, Directive } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { AppManagementService } from '../services/appstore-app.service';
 import { ExtensionGraphQLDTO } from '../dto/extension-graphql.dto';
 import { ExtensionGraphQLInput } from '../dto/extension-graphql-input.dto';
+import { UseGuards } from '@nestjs/common';
+import { GqlJwtAuthGuard } from '~/modules/auth/guards/graphql-jwt-auth.guard';
+import { RolesGuard } from '~/modules/auth/guards/roles.guard';
+import { AuthRoles } from '~/modules/auth/decorators/auth.decorator';
 
 @Resolver(() => ExtensionGraphQLDTO)
 export class AppStoreResolver<TConfig = any> {
   constructor(private readonly appManagementService: AppManagementService<TConfig>) {}
 
-  @Query(() => [ExtensionGraphQLDTO], { name: 'apps', description: 'get list of extensions' })
+  @Query(() => [ExtensionGraphQLDTO], { name: 'getExtensions', description: 'Get list of extensions' })
   async getAppList(): Promise<ExtensionGraphQLDTO<TConfig>[]> {
     return this.appManagementService.getAppList();
   }
 
-  @Mutation(() => ExtensionGraphQLDTO, { name: 'installApp', description: 'install the extension' })
-  @Directive('@auth(roles: ["chairman"])')
+  @Mutation(() => ExtensionGraphQLDTO, { name: 'installExtension', description: 'Install the extension' })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard) // Сначала JWT-аутентификация, затем проверка ролей
+  @AuthRoles(['chairman']) // Указываем роли, которым разрешен доступ
   async installApp(
     @Args('appData', { type: () => ExtensionGraphQLInput }) appData: Partial<ExtensionGraphQLDTO<TConfig>>
   ): Promise<ExtensionGraphQLDTO<TConfig>> {

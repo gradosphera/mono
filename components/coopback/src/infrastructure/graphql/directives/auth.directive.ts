@@ -8,7 +8,7 @@ export function authDirectiveTransformer(schema: GraphQLSchema, directiveName: s
       const directive = getDirective(schema, fieldConfig, directiveName)?.[0];
       if (directive) {
         const originalDescription = fieldConfig.description || '';
-        const authDescription = `Requires role(s): ${directive.roles.join(', ')}\n\n`;
+        const authDescription = `Required role(s): ${directive.roles.join(', ')}\n\n`;
 
         // Добавляем описание директивы в конец, сохраняя существующее описание
         fieldConfig.description = `${authDescription}${originalDescription}`;

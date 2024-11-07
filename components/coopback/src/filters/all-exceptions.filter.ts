@@ -1,6 +1,4 @@
-// src/filters/http-api-exception.filter.ts
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
+import { ExceptionFilter, Catch, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpApiError } from '../errors/http-api-error';
 import mongoose from 'mongoose';
 import { RpcError } from 'eosjs';
@@ -9,10 +7,7 @@ import config from '../config/config';
 
 @Catch()
 export class HttpApiExceptionFilter implements ExceptionFilter {
-  catch(exception: any, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-
+  catch(exception: any) {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal Server Error';
     let subcode: any = undefined;
@@ -34,17 +29,23 @@ export class HttpApiExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       message = exception.message;
+    } else {
+      // Обработка других ошибок
+      exception = new HttpApiError(statusCode, message, true, exception.stack);
     }
 
-    // Формат ответа
-    const errorResponse = {
-      code: statusCode,
-      message,
-      subcode,
-      ...(config.env === 'development' && { stack: exception.stack }),
-    };
-
+    // Логируем ошибку
     logger.error(exception);
-    response.status(statusCode).json(errorResponse);
+
+    // Бросаем отформатированную ошибку, чтобы GraphQL мог обработать её корректно
+    throw new HttpException(
+      {
+        code: statusCode,
+        message,
+        subcode,
+        ...(config.env === 'development' && { stack: exception.stack }),
+      },
+      statusCode
+    );
   }
 }
