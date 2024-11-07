@@ -1,5 +1,5 @@
 // domain/appstore/entities/appstore-domain.entity.ts
-export class AppStoreDomainEntity<TConfig = any> {
+export class ExtensionDomainEntity<TConfig = any> {
   constructor(
     public readonly name: string,
     public readonly enabled: boolean,

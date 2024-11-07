@@ -14,6 +14,10 @@ export class WinstonLoggerService implements NestLoggerService {
     logger.info(message, { context: this.context, ...(meta && { meta }) });
   }
 
+  info(message: string, meta?: string | Record<string, any>) {
+    logger.info(message, { context: this.context, ...(meta && { meta }) });
+  }
+
   error(message: string, trace?: string, meta?: string | Record<string, any>) {
     logger.error(message, { trace, context: this.context, ...(meta && { meta }) });
   }

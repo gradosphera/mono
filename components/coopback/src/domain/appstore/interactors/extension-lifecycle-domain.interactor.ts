@@ -1,11 +1,11 @@
 // domain/appstore/interactors/AppLifecycleManagementInteractor.ts
 
 import { Injectable } from '@nestjs/common';
-import { AppLifecycleDomainService } from '../services/app-lifecycle-domain.service';
+import { ExtensionLifecycleDomainService } from '../services/extension-lifecycle-domain.service';
 
 @Injectable()
-export class AppLifecycleDomainInteractor {
-  constructor(private readonly appLifecycleService: AppLifecycleDomainService) {}
+export class ExtensionLifecycleDomainInteractor {
+  constructor(private readonly appLifecycleService: ExtensionLifecycleDomainService) {}
 
   async runApps() {
     await this.appLifecycleService.runApps();

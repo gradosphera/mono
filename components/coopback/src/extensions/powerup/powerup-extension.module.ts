@@ -1,11 +1,16 @@
-import { IPlugin, type IPluginSchema } from '../../types/plugin.types';
 import Joi from 'joi';
 import cron from 'node-cron';
 import { blockchainService } from '../../services';
-import logger from '../../config/logger';
 import { default as coopConfig } from '../../config/config';
-import { PluginConfig } from '../../models/pluginConfig.model';
 import { PluginLog } from '../../models/pluginLog.model';
+import { Inject, Module } from '@nestjs/common';
+import { BaseExtModule } from '../base.extension.module';
+import {
+  APP_REPOSITORY,
+  type ExtensionDomainRepository,
+} from '~/domain/appstore/repositories/extension-domain.repository.interface';
+import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import type { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
 
 // Интерфейс для параметров конфигурации плагина powerup
 export interface IConfig {
@@ -33,9 +38,17 @@ export interface ILog {
   };
 }
 
-export class Plugin implements IPlugin<IConfig> {
+export class PowerupPlugin extends BaseExtModule {
+  constructor(
+    @Inject(APP_REPOSITORY) private readonly appRepository: ExtensionDomainRepository,
+    private readonly logger: WinstonLoggerService
+  ) {
+    super();
+    this.logger.setContext(PowerupPlugin.name);
+  }
+
   name = 'powerup';
-  plugin!: IPluginSchema<IConfig>;
+  plugin!: ExtensionDomainEntity<IConfig>;
 
   public configSchemas = Joi.object<IConfig>({
     dailyPackageSize: Joi.number().required(),
@@ -48,44 +61,41 @@ export class Plugin implements IPlugin<IConfig> {
   });
 
   async initialize() {
-    const pluginData = await PluginConfig.findOne({ name: this.name });
+    const pluginData = await this.appRepository.findByName(this.name);
     if (!pluginData) throw new Error('Конфиг не найден');
 
     this.plugin = pluginData;
 
-    logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
+    this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
 
     // Проверяем, было ли ежедневное пополнение в последние 24 часа
-    const lastDate = this.plugin.config.lastDailyReplenishmentDate;
+    const lastDate = new Date(this.plugin.config.lastDailyReplenishmentDate);
     const now = new Date();
 
     if (lastDate) {
       const diffInHours = Math.abs(now.getTime() - lastDate.getTime()) / 36e5; // Разница во времени в часах
       if (diffInHours < 24) {
-        logger.info('Ежедневное пополнение уже выполнялось в последние 24 часа. Повторное пополнение не требуется.');
+        this.logger.info('Ежедневное пополнение уже выполнялось в последние 24 часа. Повторное пополнение не требуется.');
       } else {
-        logger.info('Ежедневное пополнение не выполнялось в последние 24 часа. Выполняем пополнение...');
+        this.logger.info('Ежедневное пополнение не выполнялось в последние 24 часа. Выполняем пополнение...');
         await this.runDailyTask();
       }
     } else {
-      logger.info('Дата последнего пополнения отсутствует. Выполняем пополнение...');
+      this.logger.info('Дата последнего пополнения отсутствует. Выполняем пополнение...');
       await this.runDailyTask();
     }
 
     // Регистрация cron-задачи для ежедневного пополнения
     cron.schedule('0 0 * * *', () => {
-      logger.info('Запуск ежедневной задачи пополнения');
+      this.logger.info('Запуск ежедневной задачи пополнения');
       this.runDailyTask();
     });
 
     // Регистрация cron-задачи для проверки ресурсов каждую минуту
     cron.schedule('* * * * *', () => {
-      logger.info('Запуск задачи проверки ресурсов');
+      this.logger.info('Запуск задачи проверки ресурсов');
       this.runTask();
     });
-
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    // await new Promise(() => {});
   }
 
   private getQuantity(amount: number): string {
@@ -96,7 +106,7 @@ export class Plugin implements IPlugin<IConfig> {
   private async runDailyTask() {
     const quantity = this.getQuantity(this.plugin.config.dailyPackageSize);
 
-    logger.info(`Выполнение ежедневного пополнения на сумму ${quantity}`);
+    this.logger.info(`Выполнение ежедневного пополнения на сумму ${quantity}`);
 
     try {
       // Получаем имя пользователя из окружения или другой конфигурации
@@ -106,9 +116,7 @@ export class Plugin implements IPlugin<IConfig> {
       await blockchainService.powerUp(username, quantity);
 
       this.plugin.config.lastDailyReplenishmentDate = new Date();
-      this.plugin.markModified('config'); // Помечаем config как измененное поле
-
-      await this.plugin.save();
+      await this.appRepository.update(this.name, this.plugin);
 
       await this.log({
         type: 'daily',
@@ -122,7 +130,7 @@ export class Plugin implements IPlugin<IConfig> {
         },
       });
 
-      logger.info('Ежедневное пополнение выполнено успешно');
+      this.logger.info('Ежедневное пополнение выполнено успешно');
     } catch (error) {
       console.error('Ошибка при выполнении ежедневного пополнения:', error);
     }
@@ -134,7 +142,7 @@ export class Plugin implements IPlugin<IConfig> {
 
   // Задача проверки и пополнения ресурсов
   private async runTask() {
-    logger.info(`Задача плагина ${this.name} выполняется...`);
+    this.logger.info(`Задача плагина ${this.name} выполняется...`);
 
     try {
       // Получаем имя пользователя из окружения или другой конфигурации
@@ -153,17 +161,17 @@ export class Plugin implements IPlugin<IConfig> {
       let needPowerUp = false;
 
       if (cpuLimit.available <= this.plugin.config.thresholds.cpu) {
-        logger.info(`CPU квота ниже порога (${cpuLimit.available} µs).`);
+        this.logger.info(`CPU квота ниже порога (${cpuLimit.available} µs).`);
         needPowerUp = true;
       }
 
       if (netLimit.available <= this.plugin.config.thresholds.net) {
-        logger.info(`NET квота ниже порога (${netLimit.available} bytes).`);
+        this.logger.info(`NET квота ниже порога (${netLimit.available} bytes).`);
         needPowerUp = true;
       }
 
       if (availableRam <= this.plugin.config.thresholds.ram) {
-        logger.info(`RAM квота ниже порога (${availableRam} bytes).`);
+        this.logger.info(`RAM квота ниже порога (${availableRam} bytes).`);
         needPowerUp = true;
       }
 
@@ -171,7 +179,7 @@ export class Plugin implements IPlugin<IConfig> {
         // Выполняем пополнение ресурсов
         const quantity = this.getQuantity(this.plugin.config.topUpAmount);
         await blockchainService.powerUp(username, quantity);
-        logger.info(`Пополнение выполнено на сумму ${quantity}.`);
+        this.logger.info(`Пополнение выполнено на сумму ${quantity}.`);
 
         await this.log({
           type: 'now',
@@ -185,10 +193,22 @@ export class Plugin implements IPlugin<IConfig> {
           },
         });
       } else {
-        logger.info('Квоты ресурсов в норме, пополнение не требуется.');
+        this.logger.info('Квоты ресурсов в норме, пополнение не требуется.');
       }
     } catch (error) {
       console.error('Ошибка при проверке и пополнении ресурсов:', error);
     }
+  }
+}
+
+@Module({
+  providers: [PowerupPlugin], // Регистрируем PowerupPlugin как провайдер
+  exports: [PowerupPlugin], // Экспортируем его для доступа в других модулях
+})
+export class PowerupPluginModule {
+  constructor(private readonly powerupPlugin: PowerupPlugin) {}
+
+  async initialize() {
+    await this.powerupPlugin.initialize();
   }
 }

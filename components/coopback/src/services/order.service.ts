@@ -62,7 +62,7 @@ export async function createOrder(
 
       const secret = db_order.secret;
       const providerInteractor = nestApp.get(ProviderInteractor);
-      console.log('providerInteractor: ', providerInteractor);
+
       const provider = providerInteractor.getProvider(providerName);
 
       const paymentDetails = await provider.createPayment(
@@ -79,7 +79,7 @@ export async function createOrder(
 
       await db_order.save({ session });
 
-      logger.info('Order created', { providerName, type, username, provider, amount, source: 'createDeposit' });
+      logger.info('Order created', { providerName, type, username, amount, source: 'createDeposit' });
 
       result = { provider: providerName, details: paymentDetails };
     });

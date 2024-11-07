@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { DataSource } from 'typeorm';
 // Импорт моделей или схем для MongoDB и PostgreSQL
 import { PluginConfig } from '~/models/pluginConfig.model';
-import { AppEntity } from '~/infrastructure/database/typeorm/entities/app.entity';
+import { ExtensionEntity } from '~/infrastructure/database/typeorm/entities/extension.entity';
 import config from '~/config/config';
 import logger from '~/config/logger';
 
@@ -21,7 +21,7 @@ const AppDataSource = new DataSource({
   username: config.postgres.username,
   password: config.postgres.password,
   database: config.postgres.database,
-  entities: [AppEntity],
+  entities: [ExtensionEntity],
   synchronize: true, // Рекомендуется отключить в продакшене
 });
 
@@ -33,7 +33,7 @@ export const migrateData = async () => {
 
     // Получаем данные из MongoDB
     const mongoData = await PluginConfig.find().exec();
-    const postgresRepo = AppDataSource.getRepository(AppEntity);
+    const postgresRepo = AppDataSource.getRepository(ExtensionEntity);
 
     logger.info(`Запускаем миграцию данных mongo - postgres`);
     // Переносим данные в PostgreSQL

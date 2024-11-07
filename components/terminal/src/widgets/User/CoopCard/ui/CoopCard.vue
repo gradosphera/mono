@@ -13,7 +13,7 @@ div.q-pa-md
             div.text-overline
               span 01/2106
         div.q-pa-sm
-          q-badge {{'@' + formattedUsername}}
+          q-badge(style="font-size: 10px") {{formattedUsername.toUpperCase()}}
           div.text-subtitle2 {{displayName}}
 
     div.col-md-6.col-xs-12

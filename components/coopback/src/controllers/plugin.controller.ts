@@ -5,7 +5,7 @@ import type { RGetPluginConfig, RGetPluginList, RGetPluginSchema, RSetPlugin } f
 import ApiError from '../utils/ApiError';
 import catchAsync from '../utils/catchAsync';
 import pick from '../utils/pick';
-import { AppLifecycleDomainInteractor } from '~/domain/appstore/interactors/app-lifecycle-domain.interactor';
+import { ExtensionLifecycleDomainInteractor } from '~/domain/appstore/interactors/extension-lifecycle-domain.interactor';
 import { nestApp } from '..';
 
 export const getPluginList = catchAsync(async (req: RGetPluginList, res: Response) => {
@@ -23,10 +23,10 @@ export const setPluginConfig = catchAsync(async (req: RSetPlugin, res: Response)
   try {
     const updatedConfig = await pluginService.updatePluginConfig(name, enabled, config);
 
-    const appLifecycleDomainInteractor = nestApp.get(AppLifecycleDomainInteractor);
+    const extensionLifecycleDomainInteractor = nestApp.get(ExtensionLifecycleDomainInteractor);
 
-    if (enabled == false) await appLifecycleDomainInteractor.terminateApp(name);
-    else await appLifecycleDomainInteractor.restartApp(name);
+    if (enabled == false) await extensionLifecycleDomainInteractor.terminateApp(name);
+    else await extensionLifecycleDomainInteractor.restartApp(name);
 
     res.status(httpStatus.OK).json({
       message: `Конфигурация плагина ${name} успешно обновлена`,

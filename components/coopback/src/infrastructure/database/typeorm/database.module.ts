@@ -1,10 +1,14 @@
 // infrastructure/database/database.module.ts
 
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import path from 'path';
 import config from '~/config/config';
+import { APP_REPOSITORY } from '~/domain/appstore/repositories/extension-domain.repository.interface';
+import { TypeOrmAppStoreDomainRepository } from './repositories/typeorm-app.repository';
+import { ExtensionEntity } from './entities/extension.entity';
 
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -19,7 +23,14 @@ import config from '~/config/config';
       synchronize: true, // Отключите в продакшене
       logging: false,
     }),
+    TypeOrmModule.forFeature([ExtensionEntity]), // Регистрируем сущность для использования в репозитории
   ],
-  exports: [TypeOrmModule], // Экспортируем TypeOrmModule для использования в других модулях
+  providers: [
+    {
+      provide: APP_REPOSITORY, // Ключ для инжекции
+      useClass: TypeOrmAppStoreDomainRepository, // Реализация репозитория
+    },
+  ],
+  exports: [TypeOrmModule, APP_REPOSITORY], // Экспортируем TypeOrmModule для использования в других модулях
 })
 export class DatabaseModule {}

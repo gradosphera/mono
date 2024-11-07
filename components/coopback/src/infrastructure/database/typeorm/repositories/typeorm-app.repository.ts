@@ -3,30 +3,47 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AppEntity } from '../entities/app.entity';
-import { AppStoreDomainRepository } from '~/domain/appstore/repositories/appstore-domain.repository.interface';
-import { AppStoreDomainEntity } from '~/domain/appstore/entities/appstore-domain.entity';
+import { ExtensionEntity } from '../entities/extension.entity';
+import { ExtensionDomainRepository } from '~/domain/appstore/repositories/extension-domain.repository.interface';
+import { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
 
 @Injectable()
-export class TypeOrmAppStoreDomainRepository<TConfig = any> implements AppStoreDomainRepository<TConfig> {
+export class TypeOrmAppStoreDomainRepository<TConfig = any> implements ExtensionDomainRepository<TConfig> {
   constructor(
-    @InjectRepository(AppEntity)
-    private readonly ormRepo: Repository<AppEntity<TConfig>>
+    @InjectRepository(ExtensionEntity)
+    private readonly ormRepo: Repository<ExtensionEntity<TConfig>>
   ) {}
 
-  async findByName(name: string): Promise<AppStoreDomainEntity<TConfig> | null> {
+  async findByName(name: string): Promise<ExtensionDomainEntity<TConfig> | null> {
     const ormEntity = await this.ormRepo.findOne({ where: { name } });
     return ormEntity ? ormEntity.toDomainEntity() : null;
   }
 
-  async create(data: Partial<AppStoreDomainEntity<TConfig>>): Promise<AppStoreDomainEntity<TConfig>> {
-    const ormEntity = this.ormRepo.create(AppEntity.fromDomainEntity(data as AppStoreDomainEntity<TConfig>));
+  async create(data: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>> {
+    const ormEntity = this.ormRepo.create(ExtensionEntity.fromDomainEntity(data as ExtensionDomainEntity<TConfig>));
     const savedEntity = await this.ormRepo.save(ormEntity);
     return savedEntity.toDomainEntity();
   }
 
-  async findAll(): Promise<AppStoreDomainEntity<TConfig>[]> {
+  async findAll(): Promise<ExtensionDomainEntity<TConfig>[]> {
     const ormEntities = await this.ormRepo.find();
     return ormEntities.map((ormEntity) => ormEntity.toDomainEntity());
+  }
+
+  async update(name: string, data: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>> {
+    // Поиск существующей записи по name
+    const existingEntity = await this.ormRepo.findOne({ where: { name } });
+
+    if (!existingEntity) {
+      throw new Error('Запись не найдена');
+    }
+
+    // Обновление полей существующей записи
+    const updatedEntity = Object.assign(existingEntity, data);
+
+    // Сохранение обновленной записи в базе данных
+    await this.ormRepo.save(updatedEntity);
+
+    return updatedEntity.toDomainEntity(); // Предполагается, что у вас есть метод toDomainEntity для преобразования
   }
 }

@@ -5,14 +5,18 @@ import { generator } from '../../services/document.service';
 import { redisPublisher } from '../../services/redis.service';
 import { PaymentState } from '../../models/paymentState.model';
 import axios from 'axios';
-import logger from '../../config/logger';
 import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../services/order.service';
 import { orderStatus } from '../../types/order.types';
 import config from '../../config/config';
-import type { IPlugin, IPluginSchema } from '../../types/plugin.types';
-import { PluginConfig } from '../../models/pluginConfig.model';
 import Joi from 'joi';
 import { PluginLog } from '../../models/pluginLog.model';
+import { Inject, Module } from '@nestjs/common';
+import {
+  APP_REPOSITORY,
+  type ExtensionDomainRepository,
+} from '~/domain/appstore/repositories/extension-domain.repository.interface';
+import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import type { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
 
 interface Link {
   href: string;
@@ -63,25 +67,31 @@ export interface IConfig {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ILog {}
 
-export class Plugin extends PollingProvider implements IPlugin<IConfig> {
-  constructor() {
-    super(); // Вызов конструктора PollingProvider
+export class SberpollPlugin extends PollingProvider {
+  constructor(
+    @Inject(APP_REPOSITORY) private readonly appRepository: ExtensionDomainRepository,
+    private readonly logger: WinstonLoggerService
+  ) {
+    super();
+    this.logger.setContext(SberpollPlugin.name);
   }
 
   name = 'sberpoll';
-  plugin!: IPluginSchema<IConfig>;
+  plugin!: ExtensionDomainEntity<IConfig>;
+
   public configSchemas = Joi.object<IConfig>({});
 
   public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 0; ///%
 
-  async initialize(config: any): Promise<void> {
-    const pluginData = await PluginConfig.findOne({ name: this.name });
+  async initialize(): Promise<void> {
+    const pluginData = await this.appRepository.findByName(this.name);
+
     if (!pluginData) throw new Error('Конфиг не найден');
 
     this.plugin = pluginData;
 
-    logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin);
+    this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin);
   }
 
   private async log(action: ILog) {
@@ -199,18 +209,18 @@ export class Plugin extends PollingProvider implements IPlugin<IConfig> {
           const orderNumber = this.extractOrderNumber(transaction.paymentPurpose);
 
           if (!orderNumber) {
-            logger.warn(
+            this.logger.warn(
               `Не найден номер заказа в строке назначения платежа: ${transaction.paymentPurpose} транзакции ${transaction.id}`
             );
             break; //прерываем цикл - в платеже не указан номер заказа
           }
 
-          logger.info(`Обработка транзакции ${transaction.id} с номером заказа ${orderNumber}`);
+          this.logger.info(`Обработка транзакции ${transaction.id} с номером заказа ${orderNumber}`);
 
           const order = await Order.findOne({ order_num: orderNumber });
 
           if (!order) {
-            logger.warn(`Не найден заказ с номером ${orderNumber} по транзакции ${transaction.id}`);
+            this.logger.warn(`Не найден заказ с номером ${orderNumber} по транзакции ${transaction.id}`);
             break;
           }
 
@@ -218,7 +228,7 @@ export class Plugin extends PollingProvider implements IPlugin<IConfig> {
           const symbol_check = checkPaymentSymbol(transaction.amountRub.currencyName, symbol);
 
           if (symbol_check.status === 'error') {
-            logger.warn(symbol_check.message);
+            this.logger.warn(symbol_check.message);
             order.status = orderStatus.failed;
             order.message = symbol_check.message;
             await order.save();
@@ -233,7 +243,7 @@ export class Plugin extends PollingProvider implements IPlugin<IConfig> {
           const amount_check = checkPaymentAmount(transaction.amountRub.amount, order.quantity, this.tolerance_percent);
 
           if (amount_check.status === 'error') {
-            logger.warn(amount_check.message);
+            this.logger.warn(amount_check.message);
             order.status = orderStatus.failed;
             order.message = amount_check.message;
             await order.save();
@@ -265,13 +275,23 @@ export class Plugin extends PollingProvider implements IPlugin<IConfig> {
           hasNextPage = false;
         }
       } catch (error) {
-        logger.error(`Ошибка при обработке страницы ${page}:`, error);
+        this.logger.error(`Ошибка при обработке страницы ${page}: ${error}`);
         hasNextPage = false;
       }
     }
 
-    logger.info('Все транзакции обработаны.');
+    this.logger.info('Все транзакции обработаны.');
   }
 }
 
-export default Plugin;
+@Module({
+  providers: [SberpollPlugin], // Регистрируем SberpollPlugin как провайдер
+  exports: [SberpollPlugin], // Экспортируем его для доступа в других модулях
+})
+export class SberpollPluginModule {
+  constructor(private readonly sberpollPlugin: SberpollPlugin) {}
+
+  async initialize() {
+    await this.sberpollPlugin.initialize();
+  }
+}

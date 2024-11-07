@@ -1,18 +1,18 @@
 // modules/appstore/services/AppManagement.service.ts
 
 import { Injectable } from '@nestjs/common';
-import { AppStoreDomainInteractor } from '~/domain/appstore/interactors/appstore-domain.interactor';
-import { AppStoreDomainEntity } from '~/domain/appstore/entities/appstore-domain.entity';
+import { ExtensionDomainInteractor } from '~/domain/appstore/interactors/extension-domain.interactor';
+import { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
 
 @Injectable()
 export class AppManagementService<TConfig = any> {
-  constructor(private readonly appStoreDomainInteractor: AppStoreDomainInteractor<TConfig>) {}
+  constructor(private readonly extensionDomainInteractor: ExtensionDomainInteractor<TConfig>) {}
 
-  async installApp(appData: Partial<AppStoreDomainEntity<TConfig>>): Promise<AppStoreDomainEntity<TConfig>> {
-    return this.appStoreDomainInteractor.installApp(appData);
+  async installApp(appData: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>> {
+    return this.extensionDomainInteractor.installApp(appData);
   }
 
-  async getAppList(): Promise<AppStoreDomainEntity<TConfig>[]> {
-    return this.appStoreDomainInteractor.getAppList();
+  async getAppList(): Promise<ExtensionDomainEntity<TConfig>[]> {
+    return this.extensionDomainInteractor.getAppList();
   }
 }

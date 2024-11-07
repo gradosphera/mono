@@ -1,14 +1,19 @@
 import type { PaymentDetails } from '../../types';
 import { generator } from '../../services/document.service';
-import logger from '../../config/logger';
 import { getAmountPlusFee } from '../../services/order.service';
-import type { IPlugin, IPluginSchema } from '../../types/plugin.types';
-import { PluginConfig } from '../../models/pluginConfig.model';
 import Joi from 'joi';
 import { PluginLog } from '../../models/pluginLog.model';
 import { PaymentProvider } from '../../services/payment/paymentProvider';
 import { nestApp } from '~/index';
 import { ProviderInteractor } from '~/domain/provider/provider.interactor';
+import { Inject, Module } from '@nestjs/common';
+import {
+  APP_REPOSITORY,
+  type ExtensionDomainRepository,
+} from '~/domain/appstore/repositories/extension-domain.repository.interface';
+import { TypeOrmAppStoreDomainRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-app.repository';
+import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import type { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
 
 // Интерфейс для параметров конфигурации плагина powerup
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -17,22 +22,30 @@ export interface IConfig {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ILog {}
 
-export class Plugin extends PaymentProvider implements IPlugin<IConfig> {
+export class QrPayPlugin extends PaymentProvider {
+  constructor(
+    @Inject(APP_REPOSITORY) private readonly appRepository: ExtensionDomainRepository,
+    private readonly logger: WinstonLoggerService
+  ) {
+    super();
+    this.logger.setContext(QrPayPlugin.name);
+  }
+
   name = 'qrpay';
 
-  plugin!: IPluginSchema<IConfig>;
+  plugin!: ExtensionDomainEntity<IConfig>;
   public configSchemas = Joi.object<IConfig>({});
 
   public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 0; ///%
 
-  async initialize(config: any): Promise<void> {
-    const pluginData = await PluginConfig.findOne({ name: this.name });
+  async initialize(): Promise<void> {
+    const pluginData = await this.appRepository.findByName(this.name);
     if (!pluginData) throw new Error('Конфиг не найден');
 
     this.plugin = pluginData;
 
-    logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin);
+    this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin);
 
     const providerInteractor = nestApp.get(ProviderInteractor);
     providerInteractor.registerProvider(this.name, this);
@@ -50,6 +63,7 @@ export class Plugin extends PaymentProvider implements IPlugin<IConfig> {
     order_num: number,
     secret: string
   ): Promise<PaymentDetails> {
+    console.log('on create');
     // eslint-disable-next-line prettier/prettier
     const cooperative = await generator.constructCooperative(process.env.COOPNAME as string);
     const amount_plus_fee = getAmountPlusFee(parseFloat(amount), this.fee_percent).toFixed(2);
@@ -78,4 +92,21 @@ export class Plugin extends PaymentProvider implements IPlugin<IConfig> {
   }
 }
 
-export default Plugin;
+@Module({
+  imports: [],
+  providers: [
+    QrPayPlugin,
+    {
+      provide: APP_REPOSITORY, // токен для инъекции
+      useClass: TypeOrmAppStoreDomainRepository, // Реализация для интерфейса
+    },
+  ], // Регистрируем PowerupPlugin как провайдер
+  exports: [QrPayPlugin], // Экспортируем его для доступа в других модулях
+})
+export class QrPayPluginModule {
+  constructor(private readonly qrPayPlugin: QrPayPlugin) {}
+
+  async initialize() {
+    await this.qrPayPlugin.initialize();
+  }
+}

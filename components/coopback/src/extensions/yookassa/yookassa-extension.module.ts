@@ -5,15 +5,19 @@ import { IPNProvider } from '../../services/payment/ipn/ipnProvider';
 import type { PaymentDetails } from '../../types';
 import IPN from '../../models/ipn.model';
 import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../services/order.service';
-import logger from '../../config/logger';
 import Settings from '../../models/settings.model';
 import config from '../../config/config';
 import { redisPublisher } from '../../services/redis.service';
-import type { IPlugin, IPluginSchema } from '../../types/plugin.types';
 import Joi from 'joi';
-import { PluginConfig } from '../../models/pluginConfig.model';
 import { nestApp } from '~/index';
 import { ProviderInteractor } from '~/domain/provider/provider.interactor';
+import { Inject, Module } from '@nestjs/common';
+import {
+  APP_REPOSITORY,
+  type ExtensionDomainRepository,
+} from '~/domain/appstore/repositories/extension-domain.repository.interface';
+import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import type { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
 
 interface IIpnRequest {
   event: string;
@@ -110,21 +114,25 @@ export interface IConfig {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ILog {}
 
-export class Plugin extends IPNProvider implements IPlugin<IConfig> {
-  constructor() {
-    super(); // Вызов конструктора IPNProvider
+export class YookassaPlugin extends IPNProvider {
+  constructor(
+    @Inject(APP_REPOSITORY) private readonly appRepository: ExtensionDomainRepository,
+    private readonly logger: WinstonLoggerService
+  ) {
+    super();
+    this.logger.setContext(YookassaPlugin.name);
   }
 
   name = 'yookassa';
-  plugin!: IPluginSchema<IConfig>;
+  plugin!: ExtensionDomainEntity<IConfig>;
 
-  async initialize(config: any): Promise<void> {
-    const pluginData = await PluginConfig.findOne({ name: this.name });
+  async initialize(): Promise<void> {
+    const pluginData = await this.appRepository.findByName(this.name);
     if (!pluginData) throw new Error('Конфиг не найден');
 
     this.plugin = pluginData;
 
-    logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
+    this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
 
     const providerInteractor = nestApp.get(ProviderInteractor);
     providerInteractor.registerProvider(this.name, this);
@@ -148,7 +156,7 @@ export class Plugin extends IPNProvider implements IPlugin<IConfig> {
       const order = await Order.findOne({ secret });
 
       if (order) {
-        logger.info('Order found', { source: 'handleIPN', id: order.id });
+        this.logger.info('Order found', { source: 'handleIPN', id: order.id });
 
         if (event === 'payment.succeeded') {
           const [, symbol] = order.quantity.split(' ');
@@ -156,7 +164,7 @@ export class Plugin extends IPNProvider implements IPlugin<IConfig> {
           const symbol_result = checkPaymentSymbol(request.object.income_amount.currency, symbol);
 
           if (symbol_result.status == 'error') {
-            logger.warn('Payment symbol verification failed', {
+            this.logger.warn('Payment symbol verification failed', {
               source: 'handleIPN',
               id: order.id,
               message: symbol_result.message,
@@ -174,7 +182,7 @@ export class Plugin extends IPNProvider implements IPlugin<IConfig> {
 
           if (result.status === 'success') {
             // Обработка успешного платежа
-            logger.info('Payment amount verified, updating order status to paid', {
+            this.logger.info('Payment amount verified, updating order status to paid', {
               source: 'handleIPN',
               id: order.id,
             });
@@ -183,7 +191,7 @@ export class Plugin extends IPNProvider implements IPlugin<IConfig> {
             redisPublisher.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status: 'paid' }));
           } else {
             // Обработка неудачного платежа
-            logger.warn('Payment amount verification failed', {
+            this.logger.warn('Payment amount verification failed', {
               source: 'handleIPN',
               id: order.id,
               message: result.message,
@@ -197,17 +205,20 @@ export class Plugin extends IPNProvider implements IPlugin<IConfig> {
           }
         } else if (event === 'payment.failed') {
           // Обработка неудачного платежа
-          logger.warn('Payment failed event received', { source: 'handleIPN', id: order.id });
+          this.logger.warn('Payment failed event received', { source: 'handleIPN', id: order.id });
 
           await Order.updateOne({ _id: order.id }, { status: 'failed' });
           redisPublisher.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status: 'failed' }));
         }
       } else {
         //TODO платеж есть, а ордера на него нет. Что делаем?
-        logger.error('Payment exists, but order not found', { source: 'handleIPN', requestId: request.object.id });
+        this.logger.error('Payment exists, but order not found', undefined, {
+          source: 'handleIPN',
+          requestId: request.object.id,
+        });
       }
     } else {
-      logger.warn('IPN already processed', { source: 'handleIPN', requestId: request.object.id });
+      this.logger.warn('IPN already processed', { source: 'handleIPN', requestId: request.object.id });
     }
   }
 
@@ -260,4 +271,14 @@ export class Plugin extends IPNProvider implements IPlugin<IConfig> {
   }
 }
 
-export default Plugin;
+@Module({
+  providers: [YookassaPlugin], // Регистрируем SberpollPlugin как провайдер
+  exports: [YookassaPlugin], // Экспортируем его для доступа в других модулях
+})
+export class YookassaPluginModule {
+  constructor(private readonly yookassaPlugin: YookassaPlugin) {}
+
+  async initialize() {
+    await this.yookassaPlugin.initialize();
+  }
+}

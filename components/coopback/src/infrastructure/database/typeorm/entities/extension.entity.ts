@@ -1,8 +1,8 @@
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { AppStoreDomainEntity } from '~/domain/appstore/entities/appstore-domain.entity';
+import { ExtensionDomainEntity } from '~/domain/appstore/entities/extension-domain.entity';
 
-@Entity('apps')
-export class AppEntity<TConfig = any> {
+@Entity('extensions')
+export class ExtensionEntity<TConfig = any> {
   @PrimaryColumn({ unique: true, length: 12 })
   name!: string;
 
@@ -27,13 +27,13 @@ export class AppEntity<TConfig = any> {
   }
 
   // Метод для преобразования ORM-сущности в доменную сущность
-  toDomainEntity(): AppStoreDomainEntity<TConfig> {
-    return new AppStoreDomainEntity<TConfig>(this.name, this.enabled, this.config, this.createdAt, this.updatedAt);
+  toDomainEntity(): ExtensionDomainEntity<TConfig> {
+    return new ExtensionDomainEntity<TConfig>(this.name, this.enabled, this.config, this.createdAt, this.updatedAt);
   }
 
   // Статический метод для создания ORM-сущности из доменной сущности
-  static fromDomainEntity<TConfig>(domainEntity: AppStoreDomainEntity<TConfig>): AppEntity<TConfig> {
-    const ormEntity = new AppEntity<TConfig>();
+  static fromDomainEntity<TConfig>(domainEntity: ExtensionDomainEntity<TConfig>): ExtensionEntity<TConfig> {
+    const ormEntity = new ExtensionEntity<TConfig>();
     ormEntity.name = domainEntity.name;
     ormEntity.enabled = domainEntity.enabled;
     ormEntity.config = domainEntity.config;
