@@ -36,7 +36,8 @@
     "swagger": "ts-node scripts/swagger.ts",
     "typecheck": "tsc --noEmit",
     "docs-watch": "swagger-ui-watcher ./src/docs/swagger.json",
-    "docs": "ts-node scripts/swagger.ts && redoc-cli bundle ./src/docs/swagger.json -o ./docs/index.html"
+    "docs": "ts-node scripts/swagger.ts && redoc-cli bundle ./src/docs/swagger.json -o ./docs/index.html",
+    "generate-client": "zeus ./schema.gql ../coopjs/src --subscriptions graphql-ws"
   },
   "keywords": [
     "node",
@@ -61,6 +62,9 @@
   ],
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
+    "@graphql-codegen/typescript-graphql-request": "^6.2.0",
+    "@graphql-codegen/typescript-resolvers": "^4.4.0",
+    "@graphql-tools/schema": "^10.0.7",
     "@graphql-tools/utils": "^10.5.5",
     "@nestjs/apollo": "^12.2.1",
     "@nestjs/bull": "^10.2.1",
@@ -95,8 +99,11 @@
     "faker": "^5.1.0",
     "glob": "^11.0.0",
     "graphql": "^16.9.0",
+    "graphql-request": "^7.1.2",
     "graphql-tools": "^9.0.2",
     "graphql-type-json": "^0.3.2",
+    "graphql-ws": "^5.16.0",
+    "graphql-zeus": "^7.0.1",
     "helmet": "^4.1.0",
     "html-pdf-node": "^1.0.8",
     "http-proxy-middleware": "^3.0.3",
@@ -123,6 +130,7 @@
     "pdf-lib": "^1.17.1",
     "pm2": "^5.1.0",
     "socket.io-client": "^4.7.5",
+    "spectaql": "^3.0.2",
     "swagger-jsdoc": "^6.0.8",
     "swagger-ui-express": "^4.1.6",
     "threads": "^1.7.0",
@@ -130,10 +138,12 @@
     "ts-node": "^10.9.2",
     "tsd": "^0.31.0",
     "tsoa": "^6.4.0",
+    "typedoc": "^0.25.13",
     "typeorm": "0.3.20",
     "validator": "^13.0.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^5.0.0",
+    "ws": "^8.18.0",
     "xss-clean": "^0.1.1",
     "zod": "^3.23.8"
   },

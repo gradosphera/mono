@@ -1,0 +1,14 @@
+overwrite: true
+schema: './schema.gql' # Укажите путь к вашей схеме (или URL сервера)
+documents: './src/modules/**/operations/*.graphql' # Путь, где будут храниться запросы
+generates:
+  ../coopjs/src/sdk/index.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-graphql-request' # Плагин для генерации клиента
+    config:
+      rawRequest: true
+      namingConvention:
+        typeNames: keep # Оставляем типы без изменений
+        transformUnderscore: true

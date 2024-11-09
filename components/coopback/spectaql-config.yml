@@ -1,0 +1,34 @@
+spectaql:
+  targetDir: ../docs/graphql
+introspection:
+  url: 'http://localhost:2998/graphql'
+
+info:
+  title: 'My API Documentation'
+  description: 'This is an example of API documentation generated with SpectaQL.'
+  # This is non-standard and optional. If omitted, will use "title". Also, only relevant
+  # when building non-embedded.
+  x-htmlTitle: Your HTML page title here
+  termsOfService: 'https://yoursite.com/terms'
+  contact:
+    name: YourSite Support
+    email: support@yoursite.com
+    url: https://yoursite.com/support
+  license:
+    name: Apache 2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+
+  x-introItems:
+    # Can be a Title (for the Nav panel) + URL to simply add a link to somewhere
+    - title: A silly link to our website!
+      url: http://yoursite.com
+    # Can be a Title (for the Nav panel) + description (for the Content panel)
+    # - title: Important thing 1
+    #   description: Some important stuff we wanted you to know. Supports `markdown`
+    # # Can be a Title (for the Nav panel) + file that gets loaded (for the Content panel)
+    # - title: Content from file that supports markdown
+    #   file: ./examples/data/intro-items-markdown.md
+
+  # If you really want to hide the "Documentation by" at the bottom of your output, you can do so here
+  # Default: false
+  x-hidePoweredBy: true

@@ -10,6 +10,7 @@ import { authDirectiveTransformer } from './directives/auth.directive';
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
+      introspection: true,
       autoSchemaFile: 'schema.gql',
       sortSchema: true,
       debug: config.env !== 'production',

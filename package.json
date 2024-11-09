@@ -6,6 +6,7 @@
     "coop-notificator": "workspace:*",
     "cooparser-ts": "workspace:*",
     "@coopenomics/controller": "workspace:*",
+    "@coopenomics/coopjs": "workspace:*",
     "coopdoc-generator-ts": "workspace:*",
     "cooptypes": "workspace:*",
     "migrator": "workspace:*",
