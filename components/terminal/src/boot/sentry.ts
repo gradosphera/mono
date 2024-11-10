@@ -7,6 +7,7 @@ import trackerAssist from '@openreplay/tracker-assist'
 import { useSessionStore } from 'src/entities/Session';
 export default boot(
   ({ app, router }: { app: App<Element>; router: Router }) => {
+    console.log('on senstry loader!')
     if ((NODE_ENV as string) === 'production') {
       const session = useSessionStore()
 

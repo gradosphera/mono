@@ -9,7 +9,7 @@ import { initSocketConnection } from './controllers/ws.controller';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import expressApp from './app';
 import { WinstonLoggerService } from './modules/logger/logger-app.service';
-import { HttpApiExceptionFilter } from './filters/all-exceptions.filter';
+import { GraphQLExceptionFilter } from './filters/graphql-exceptions.filter';
 import { migrateData } from './migrator/migrate';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
@@ -41,7 +41,7 @@ async function bootstrap() {
   nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), { logger: new WinstonLoggerService() });
 
   // Глобальный фильтр для перехвата всех исключений внутри NestJS
-  nestApp.useGlobalFilters(new HttpApiExceptionFilter());
+  nestApp.useGlobalFilters(new GraphQLExceptionFilter());
 
   // Запуск сервера
   await nestApp.listen(config.port, () => {

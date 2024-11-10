@@ -15,10 +15,10 @@ import { AccumulationFunds, ExpenseFunds } from 'src/widgets/Cooperative/Funds';
 import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
 import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
 import { MembersPage } from 'src/pages/Cooperative/MembersPage';
-import { InstalledApps } from 'src/pages/AppStore/InstalledApps';
-import { AppsShowcase } from 'src/pages/AppStore/AppStoreShowcase';
-import ApplicationPage from 'src/pages/AppStore/ApplicationPage/ApplicationPage.vue';
-import { AppStoreRoute } from 'src/pages/AppStore/AppStoreRoute';
+import { InstalledExtensions } from 'src/pages/ExtStore/InstalledExtensions';
+import { ExtensionsShowcase } from 'src/pages/ExtStore/ExtensionsShowcase';
+import { ExtensionPage } from 'src/pages/ExtStore/ExtensionPage';
+import { ExtensionStoreBase } from 'src/pages/ExtStore/BaseRoute';
 
 
 const baseRoutes = [
@@ -131,24 +131,38 @@ const baseRoutes = [
       {
         path: 'appstore',
         name: 'appstore',
-        component: AppStoreRoute,
+        component: ExtensionStoreBase,
         children: [
           {
             path: 'showcase',
             name: 'appstore-showcase',
-            component: AppsShowcase,
+            component: ExtensionsShowcase,
             children: [],
           },
+          {
+            path: 'showcase/:id',
+            name: 'one-extension',
+            component: ExtensionPage,
+            children: [
+              {
+                path: 'install',
+                name: 'install-extension',
+                component: ExtensionPage,
+                children: [],
+              },
+            ],
+          },
+
           {
             path: 'installed',
             name: 'appstore-installed',
-            component: InstalledApps,
+            component: InstalledExtensions,
             children: [],
           },
           {
-            path: 'application/:id',
+            path: 'installed/:id',
             name: 'appstore-application',
-            component: ApplicationPage,
+            component: ExtensionPage,
             children: [],
           },
         ],

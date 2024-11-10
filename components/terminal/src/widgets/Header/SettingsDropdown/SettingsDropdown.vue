@@ -20,7 +20,7 @@ q-btn-dropdown(flat :size="isMobile ? 'sm' : 'md'" :dense="isMobile" stretch ico
     //-   q-item-section
     //-     q-item-label
     //-       q-icon(name="fa-solid fa-plus").q-mr-sm
-    //-       span.font10px МАГАЗИН ПРИЛОЖЕНИЙ
+    //-       span.font10px МАГАЗИН РАСШИРЕНИЙ
     hr(v-if="loggedIn")
 
     q-item(v-if="loggedIn" flat clickable v-close-popup @click="logout")

@@ -1,6 +1,7 @@
 import { useSessionStore } from 'src/entities/Session'
 import { useGlobalStore } from 'src/shared/store'
 import { api } from '../api'
+import {client} from 'src/shared/api/client'
 
 export function useLoginUser() {
   const globalStore = useGlobalStore()
@@ -13,6 +14,8 @@ export function useLoginUser() {
 
     const session = useSessionStore()
     await session.init()
+
+    client.setToken(auth.tokens.access.token)
   }
 
   return {

@@ -1,7 +1,7 @@
 {
   "name": "@coopenomics/coopjs",
-  "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "private": true,
   "packageManager": "pnpm@9.9.0",
   "description": "",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
@@ -13,6 +13,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
+    },
+    "./selectors/*": {
+      "import": "./dist/selectors/*.mjs",
+      "require": "./dist/selectors/*.cjs"
     }
   },
   "main": "./dist/index.mjs",
@@ -37,8 +41,7 @@
     "release": "bumpp && npm publish",
     "start": "esno src/index.ts",
     "test": "vitest",
-    "typecheck": "tsc --noEmit",
-    "prepare": "simple-git-hooks"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "graphql": "^16.9.0",
@@ -57,6 +60,7 @@
     "bumpp": "^9.5.2",
     "eslint": "^9.9.1",
     "esno": "^4.7.0",
+    "glob": "^11.0.0",
     "lint-staged": "^15.2.10",
     "pnpm": "^9.9.0",
     "simple-git-hooks": "^2.11.1",

@@ -796,6 +796,9 @@ importers:
       esno:
         specifier: ^4.7.0
         version: 4.8.0
+      glob:
+        specifier: ^11.0.0
+        version: 11.0.0
       lint-staged:
         specifier: ^15.2.10
         version: 15.2.10
@@ -991,6 +994,9 @@ importers:
       '@coopenomics/controller':
         specifier: workspace:*
         version: link:../coopback
+      '@coopenomics/coopjs':
+        specifier: workspace:*
+        version: link:../coopjs
       '@dicebear/collection':
         specifier: ^9.0.1
         version: 9.2.2(@dicebear/core@9.2.2)

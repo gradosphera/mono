@@ -55,7 +55,7 @@ app.use('/v1', routes);
 
 // Обработка остальных маршрутов, включая неизвестные
 app.use((req, res, next) => {
-  if (req.path === '/graphql') {
+  if (req.path === '/v1/graphql') {
     // Пропустить обработку для маршрута /graphql и позволить NestJS обработать запрос
     return next();
   }

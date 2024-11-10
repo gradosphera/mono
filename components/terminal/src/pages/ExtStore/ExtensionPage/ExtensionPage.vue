@@ -1,4 +1,4 @@
 <template lang="pug">
-div all apps
+div one app
 </template>
 <script lang="ts" setup></script>

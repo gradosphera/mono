@@ -1,6 +1,7 @@
 <!-- Header.vue -->
 <template lang="pug">
-  q-header(v-if="!matched('cooperative-settings') && !matched('user-settings') && !is('appstore')" bordered :class="headerClass").header
+div
+  q-header(v-if="!matched('cooperative-settings') && !matched('user-settings') && !matched('appstore')" bordered :class="headerClass").header
     q-toolbar()
       q-btn(v-if="loggedIn && showDrawer" stretch icon="menu" flat @click="emitToggleLeftDrawer")
       q-btn(v-if="loggedIn && !showDrawer" stretch icon="fas fa-chevron-left" flat @click="goTo('index')")
@@ -50,7 +51,6 @@
       )
         q-route-tab(name="Реквизиты" label="Реквизиты" :to="{name: 'user-payment-methods'}" )
 
-
   q-header(bordered v-if="matched('cooperative-settings')").bg-gradient-dark
     q-toolbar
 
@@ -72,7 +72,6 @@
         q-route-tab(name="Взносы" label="Взносы" :to="{name: 'initial-contributions'}" )
         q-route-tab(name="Контакты" label="Контакты" :to="{name: 'change-contacts'}" )
         q-route-tab(name="Совет" label="Совет" :to="{name: 'members'}" )
-
 
   q-header(bordered v-if="matched('appstore')").bg-gradient-dark
     q-toolbar
@@ -162,11 +161,17 @@
     emit('toggle-left-drawer')
   }
 
+
   const matched = (what: string) => {
+    console.log('what: ', what, route.matched.find(el => el.name === what))
+
     return route.matched.find(el => el.name === what)
   }
 
+
+
   watch(route, () => console.log('route: ', route))
+
 
   </script>
 

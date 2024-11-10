@@ -10,8 +10,14 @@
 require('dotenv').config();
 const { configure } = require('quasar/wrappers');
 const path = require('path');
+const glob = require('glob')
 
 module.exports = configure(function (/* ctx */) {
+  // Ищем все boot файлы в директории extensions
+  const extensionBootFiles = glob
+    .sync('extensions/**/boot.{ts,js}') // Ищем файлы с расширениями .ts и .js
+    .map(file => '../../' + file.replace(/\.(ts|js)$/, '')) // Добавляем ../../ и убираем расширение
+
   return {
     htmlVariables: {
       SITE_TITLE: process.env.SITE_TITLE || 'Цифровой Кооператив',
@@ -27,7 +33,7 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['i18n', 'axios', 'sentry'],
+    boot: ['i18n', 'axios', 'sentry', ...extensionBootFiles],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: [

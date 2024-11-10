@@ -4,7 +4,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import * as glob from 'glob';
 import * as path from 'path';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER } from '@nestjs/core';
 import config from './config/config';
 import { PaymentModule } from './domain/payment/payment.module';
 import { ProviderModule } from './domain/provider/provider.module';
@@ -13,7 +12,6 @@ import { DatabaseModule } from './infrastructure/database/typeorm/database.modul
 import { QueueModule } from './modules/queue/queue-app.module';
 import { RedisAppModule } from './modules/redis/redis-app.module';
 import { LoggerModule } from './modules/logger/logger-app.module';
-import { HttpApiExceptionFilter } from './filters/all-exceptions.filter';
 import { GraphqlModule } from './infrastructure/graphql/graphql.module';
 
 // Функция для динамического импорта модулей
@@ -47,12 +45,7 @@ function dynamicImportModules(): any[] {
     QueueModule,
     LoggerModule,
   ],
-  providers: [
-    {
-      provide: APP_FILTER,
-      useClass: HttpApiExceptionFilter,
-    },
-  ],
+  providers: [],
   exports: [],
 })
 export class AppModule {}
