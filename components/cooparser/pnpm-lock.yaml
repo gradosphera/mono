@@ -14,6 +14,9 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
+      '@types/ws':
+        specifier: ^8.5.13
+        version: 8.5.13
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -44,6 +47,9 @@ importers:
       typedoc-plugin-inline-sources:
         specifier: ^1.0.2
         version: 1.0.2(typedoc@0.25.13(typescript@5.4.5))
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.0
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^2.16.0
@@ -896,6 +902,9 @@ packages:
 
   '@types/whatwg-url@11.0.4':
     resolution: {integrity: sha512-lXCmTWSHJvf0TRSO58nm978b8HJ/EdsSsEKLd3ODHFjo+3VGAyyTp4v50nWvwtzBxSMQrVOK7tcuN0zGPLICMw==}
+
+  '@types/ws@8.5.13':
+    resolution: {integrity: sha512-osM/gWBTPKgHV8XkTunnegTRIsvF6owmf5w+JtAfOw472dptdm0dlGv4xCt6GwQRcC2XVOvvRE/0bAoQcL2QkA==}
 
   '@typescript-eslint/eslint-plugin@7.7.1':
     resolution: {integrity: sha512-KwfdWXJBOviaBVhxO3p5TJiLpNuh2iyXyjmWN0f1nU87pwyvfS0EmjC6ukQVYVFJd/K1+0NWGPDXiyEyQorn0Q==}
@@ -3481,6 +3490,18 @@ packages:
       utf-8-validate:
         optional: true
 
+  ws@8.18.0:
+    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   xml-name-validator@4.0.0:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}
     engines: {node: '>=12'}
@@ -4239,6 +4260,10 @@ snapshots:
   '@types/whatwg-url@11.0.4':
     dependencies:
       '@types/webidl-conversions': 7.0.3
+
+  '@types/ws@8.5.13':
+    dependencies:
+      '@types/node': 20.12.7
 
   '@typescript-eslint/eslint-plugin@7.7.1(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)':
     dependencies:
@@ -7024,6 +7049,8 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@7.5.9: {}
+
+  ws@8.18.0: {}
 
   xml-name-validator@4.0.0: {}
 

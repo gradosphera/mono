@@ -8,6 +8,7 @@
     "strict": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
+    "preserveSymlinks": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true
   }

@@ -19,7 +19,7 @@ const actions_whitelist: () => EosioReaderActionFilter[] = () => subsribedAction
 console.log(subsribedTables)
 console.log(subsribedActions)
 
-export async function loadReader(db: Database) {
+export async function loadReader(db: Database): Promise<ReturnType<typeof createEosioShipReader>> {
   let currentBlock = await db.getCurrentBlock()
 
   const info = await getInfo()
