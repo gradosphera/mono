@@ -129,6 +129,7 @@
     "passport-jwt": "^4.0.0",
     "pdf-lib": "^1.17.1",
     "pm2": "^5.1.0",
+    "reflect-metadata": "^0.1.13",
     "socket.io-client": "^4.7.5",
     "spectaql": "^3.0.2",
     "swagger-jsdoc": "^6.0.8",
