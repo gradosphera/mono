@@ -129,7 +129,7 @@ const baseRoutes = [
         ],
       },
       {
-        path: 'extstore',
+        path: 'extensions',
         name: 'extstore',
         component: ExtensionStoreBase,
         children: [
