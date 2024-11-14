@@ -31,26 +31,26 @@ export const migrateData = async () => {
     await AppDataSource.initialize();
     console.log('Connected to PostgreSQL');
 
-    // Получаем данные из MongoDB
+    // // Получаем данные из MongoDB
     const mongoData = await PluginConfig.find().exec();
     const postgresRepo = AppDataSource.getRepository(ExtensionEntity);
 
     logger.info(`Запускаем миграцию данных mongo - postgres`);
-    // Переносим данные в PostgreSQL
-    for (const data of mongoData) {
-      const app = data.toObject();
+    // // Переносим данные в PostgreSQL
+    // for (const data of mongoData) {
+    //   const app = data.toObject();
 
-      // Проверяем, существует ли запись с таким же значением name
-      const existingApp = await postgresRepo.findOne({ where: { name: app.name } });
+    //   // Проверяем, существует ли запись с таким же значением name
+    //   const existingApp = await postgresRepo.findOne({ where: { name: app.name } });
 
-      if (!existingApp) {
-        // Если записи нет, вставляем новую
-        await postgresRepo.insert(app);
-        logger.info(`Запись с именем ${app.name} добавлена.`);
-      } else {
-        logger.info(`Запись с именем ${app.name} уже существует, пропуск...`);
-      }
-    }
+    //   if (!existingApp) {
+    //     // Если записи нет, вставляем новую
+    //     await postgresRepo.insert(app);
+    //     logger.info(`Запись с именем ${app.name} добавлена.`);
+    //   } else {
+    //     logger.info(`Запись с именем ${app.name} уже существует, пропуск...`);
+    //   }
+    // }
 
     logger.info('Data migration completed successfully');
   } catch (error) {

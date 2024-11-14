@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import httpStatus from 'http-status';
+import config from '~/config/config';
 import ApiError from '~/utils/ApiError';
 
 @Injectable()
@@ -9,14 +10,21 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const ctx = GqlExecutionContext.create(context);
+    const request = ctx.getContext().req;
+
+    // Пропуск гуарда при наличии server-secret
+    if (request.headers['server-secret'] === config.server_secret) {
+      return true;
+    }
+
     // Получаем требуемые роли из метаданных метода
     const allowedRoles = this.reflector.get<string[]>('roles', context.getHandler());
     if (!allowedRoles) {
       return true; // Если роли не заданы, доступ открыт
     }
 
-    const ctx = GqlExecutionContext.create(context);
-    const { user } = ctx.getContext().req;
+    const { user } = request;
 
     // Проверка: имеет ли пользователь одну из разрешенных ролей
     if (allowedRoles.includes(user.role)) {

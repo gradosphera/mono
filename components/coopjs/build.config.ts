@@ -3,14 +3,18 @@ import { glob } from 'glob'
 import { defineBuildConfig } from 'unbuild'
 
 // Поиск всех файлов в директории selectors и создание entry-пунктов
-const selectorEntries = glob
-  .sync('src/selectors/*.ts')
-  // .map(file => file.replace(/\.ts$/, '')) // убираем только расширение, но оставляем src/
-console.log('selectorEntries: ', selectorEntries)
+const queriesEntries = glob
+  .sync('src/queries/*.ts')
+
+const mutationEntries = glob
+  .sync('src/mutations/*.ts')
+
+  
 export default defineBuildConfig({
   entries: [
     'src/index',
-    ...selectorEntries, // Добавляем все файлы из src/selectors в entries
+    ...queriesEntries, // Добавляем все файлы из src/queries в entries
+    ...mutationEntries
   ],
   declaration: true,
   clean: true,

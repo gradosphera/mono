@@ -37,7 +37,7 @@
     "typecheck": "tsc --noEmit",
     "docs-watch": "swagger-ui-watcher ./src/docs/swagger.json",
     "docs": "ts-node scripts/swagger.ts && redoc-cli bundle ./src/docs/swagger.json -o ./docs/index.html",
-    "generate-client": "zeus ./schema.gql ../coopjs/src --subscriptions graphql-ws"
+    "generate-client": "zeus ./schema.gql ../coopjs/src --subscriptions graphql-ws && cp -r ./src/types/shared/* ../coopjs/src/types/controller"
   },
   "keywords": [
     "node",
@@ -146,7 +146,8 @@
     "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.18.0",
     "xss-clean": "^0.1.1",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.24.1",

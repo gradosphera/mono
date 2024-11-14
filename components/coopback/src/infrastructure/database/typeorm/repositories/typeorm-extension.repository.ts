@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, type FindOptionsWhere } from 'typeorm';
 import { ExtensionEntity } from '../entities/extension.entity';
 import { ExtensionDomainRepository } from '~/domain/extension/repositories/extension-domain.repository.interface';
 import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
@@ -19,23 +19,32 @@ export class TypeOrmExtensionDomainRepository<TConfig = any> implements Extensio
     return ormEntity ? ormEntity.toDomainEntity() : null;
   }
 
+  async deleteByName(name: string): Promise<boolean> {
+    const result = await this.ormRepo.delete({ name });
+    return (result.affected ?? 0) > 0; // Возвращает true, если запись была удалена
+  }
+
   async create(data: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>> {
     const ormEntity = this.ormRepo.create(ExtensionEntity.fromDomainEntity(data as ExtensionDomainEntity<TConfig>));
     const savedEntity = await this.ormRepo.save(ormEntity);
     return savedEntity.toDomainEntity();
   }
 
-  async findAll(): Promise<ExtensionDomainEntity<TConfig>[]> {
-    const ormEntities = await this.ormRepo.find();
-    return ormEntities.map((ormEntity) => ormEntity.toDomainEntity());
+  async find(filter: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>[]> {
+    const ormEntities = await this.ormRepo.find({ where: filter as unknown as FindOptionsWhere<ExtensionEntity<TConfig>> });
+    const result = ormEntities.map((ormEntity) => ormEntity.toDomainEntity());
+    return result;
   }
 
-  async update(name: string, data: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>> {
+  async update(data: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>> {
     // Поиск существующей записи по name
+    const name = data.name;
+    if (!name) throw new Error('Имя расширения для обновления обязательный параметр');
+
     const existingEntity = await this.ormRepo.findOne({ where: { name } });
 
     if (!existingEntity) {
-      throw new Error('Запись не найдена');
+      throw new Error('Расширение не найдено в установленных');
     }
 
     // Обновление только переданных полей

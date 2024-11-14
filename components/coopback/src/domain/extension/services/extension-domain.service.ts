@@ -7,15 +7,23 @@ import { ExtensionDomainEntity } from '../entities/extension-domain.entity';
 @Injectable()
 export class ExtensionDomainService<TConfig = any> {
   constructor(
-    @Inject(EXTENSION_REPOSITORY) private readonly extensionDomainService: ExtensionDomainRepository<TConfig> // Используем токен для инъекции зависимости
+    @Inject(EXTENSION_REPOSITORY) private readonly extensionDomainRepository: ExtensionDomainRepository<TConfig> // Используем токен для инъекции зависимости
   ) {}
 
-  async getAppList(): Promise<ExtensionDomainEntity<TConfig>[]> {
-    return this.extensionDomainService.findAll();
+  async getAppList(filter?: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>[]> {
+    return this.extensionDomainRepository.find(filter);
   }
 
   async getAppByName(name: string): Promise<ExtensionDomainEntity<TConfig> | null> {
-    return this.extensionDomainService.findByName(name);
+    return this.extensionDomainRepository.findByName(name);
+  }
+
+  async updateApp(appData: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>> {
+    if (!appData.name) {
+      throw new BadRequestException('Application name is required');
+    }
+
+    return await this.extensionDomainRepository.update(appData);
   }
 
   async installApp(appData: Partial<ExtensionDomainEntity<TConfig>>): Promise<ExtensionDomainEntity<TConfig>> {
@@ -29,7 +37,15 @@ export class ExtensionDomainService<TConfig = any> {
       throw new Error('Application is already installed.');
     }
 
-    return this.extensionDomainService.create(appData);
+    return this.extensionDomainRepository.create(appData);
+  }
+
+  async uninstallApp(appData: Partial<ExtensionDomainEntity<TConfig>>): Promise<boolean> {
+    if (!appData.name) {
+      throw new BadRequestException('Application name is required');
+    }
+
+    return this.extensionDomainRepository.deleteByName(appData.name);
   }
 
   getDefaultApps(): Partial<ExtensionDomainEntity>[] {

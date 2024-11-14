@@ -16,6 +16,7 @@ import {
 } from '~/domain/extension/repositories/extension-domain.repository.interface';
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
+import { z } from 'zod';
 
 interface Link {
   href: string;
@@ -59,9 +60,11 @@ interface StatementTransactionsV2 {
   transactions: StatementTransactionV2[];
 }
 
-// Интерфейс для параметров конфигурации плагина powerup
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IConfig {}
+// Интерфейс для параметров конфигурации плагина
+export const Schema = z.object({});
+
+// Интерфейс для параметров конфигурации плагина
+export type IConfig = z.infer<typeof Schema>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ILog {}
@@ -78,7 +81,7 @@ export class SberpollPlugin extends PollingProvider {
   name = 'sberpoll';
   plugin!: ExtensionDomainEntity<IConfig>;
 
-  public configSchemas = Joi.object<IConfig>({});
+  public configSchemas = Schema;
 
   public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 0; ///%

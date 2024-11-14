@@ -13,10 +13,13 @@ import {
 import { TypeOrmExtensionDomainRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-extension.repository';
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
+import { z } from 'zod';
 
-// Интерфейс для параметров конфигурации плагина powerup
+export const Schema = z.object({});
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IConfig {}
+
+// Интерфейс для параметров конфигурации плагина
+export type IConfig = z.infer<typeof Schema>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ILog {}
@@ -33,7 +36,7 @@ export class QrPayPlugin extends PaymentProvider {
   name = 'qrpay';
 
   plugin!: ExtensionDomainEntity<IConfig>;
-  public configSchemas = Joi.object<IConfig>({});
+  public configSchemas = Schema;
 
   public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 0; ///%

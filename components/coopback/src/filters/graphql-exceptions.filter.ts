@@ -1,4 +1,4 @@
-import { ArgumentsHost, Catch, HttpStatus } from '@nestjs/common';
+import { Catch, HttpStatus } from '@nestjs/common';
 import { GqlExceptionFilter } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
 import mongoose from 'mongoose';

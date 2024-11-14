@@ -1,7 +1,7 @@
 <!-- Header.vue -->
 <template lang="pug">
 div
-  q-header(v-if="!matched('cooperative-settings') && !matched('user-settings') && !matched('appstore')" bordered :class="headerClass").header
+  q-header(v-if="!matched('cooperative-settings') && !matched('user-settings') && !matched('extstore')" bordered :class="headerClass").header
     q-toolbar()
       q-btn(v-if="loggedIn && showDrawer" stretch icon="menu" flat @click="emitToggleLeftDrawer")
       q-btn(v-if="loggedIn && !showDrawer" stretch icon="fas fa-chevron-left" flat @click="goTo('index')")
@@ -73,10 +73,10 @@ div
         q-route-tab(name="Контакты" label="Контакты" :to="{name: 'change-contacts'}" )
         q-route-tab(name="Совет" label="Совет" :to="{name: 'members'}" )
 
-  q-header(bordered v-if="matched('appstore')").bg-gradient-dark
+  q-header(bordered v-if="matched('extstore')").bg-gradient-dark
     q-toolbar
 
-      q-btn(flat icon="fas fa-chevron-left" stretch @click="open('index')")
+      q-btn(flat icon="fas fa-chevron-left" stretch @click="backFromAppstore")
       q-tabs(
         dense
         switch-indicator
@@ -89,7 +89,7 @@ div
         style="height: 50px !important; overflow-x: auto;"
       )
 
-        q-route-tab(name="Все приложения" label="Все приложения" :to="{name: 'appstore-showcase'}" )
+        q-route-tab(name="Все приложения" label="Все приложения" :to="{name: 'extstore-showcase'}" )
         q-route-tab(name="Установленные" label="Установленные" :to="{name: 'appstore-installed'}" )
 
   </template>
@@ -159,6 +159,14 @@ div
 
   const emitToggleLeftDrawer = () => {
     emit('toggle-left-drawer')
+  }
+
+  const backFromAppstore = () => {
+    if (is('extension-install') || is('extension-settings'))
+      open('one-extension')
+    else if (is('one-extension'))
+      open('extstore-showcase')
+    else open('index')
   }
 
 

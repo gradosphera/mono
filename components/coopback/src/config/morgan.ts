@@ -4,7 +4,13 @@ import logger from './logger';
 
 morgan.token('message', (req, res) => res.locals.errorMessage || '');
 
-const getIpFormat = () => (config.env === 'production' ? ':remote-addr - ' : '');
+// Новый токен для определения IP с проверкой нескольких заголовков
+morgan.token('client-ip', (req) => {
+  return req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+});
+
+// Форматы с использованием нового токена 'client-ip'
+const getIpFormat = () => (config.env === 'production' ? ':client-ip - ' : ':remote-addr - ');
 const successResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms`;
 const errorResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms - message: :message`;
 

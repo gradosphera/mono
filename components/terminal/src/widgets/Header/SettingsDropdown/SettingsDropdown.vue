@@ -16,11 +16,11 @@ q-btn-dropdown(flat :size="isMobile ? 'sm' : 'md'" :dense="isMobile" stretch ico
           span.font10px НАСТРОЙКИ КООПЕРАТИВА
 
 
-    //- q-item(flat v-if="isChairman" clickable v-close-popup @click="open('appstore-showcase')")
-    //-   q-item-section
-    //-     q-item-label
-    //-       q-icon(name="fa-solid fa-plus").q-mr-sm
-    //-       span.font10px МАГАЗИН РАСШИРЕНИЙ
+    q-item(flat v-if="isChairman" clickable v-close-popup @click="open('extstore-showcase')")
+      q-item-section
+        q-item-label
+          q-icon(name="fa-solid fa-plus").q-mr-sm
+          span.font10px МАГАЗИН РАСШИРЕНИЙ
     hr(v-if="loggedIn")
 
     q-item(v-if="loggedIn" flat clickable v-close-popup @click="logout")

@@ -1,7 +1,7 @@
-import type { GraphQLClientOptions } from './types'
+import type { ClientConnectionOptions } from './types'
 import WebSocket from 'isomorphic-ws'
 import { SystemContract } from './contracts'
-import { Chain, HEADERS, Subscription as ZeusSubscription } from './zeus'
+import { Chain, Gql, GraphQLError, HOST, Thunder, Subscription as ZeusSubscription, type GraphQLResponse } from './zeus'
 
 export * from './contracts'
 export * from './types'
@@ -21,18 +21,60 @@ class TransactionsClass {
 
 export const Transactions = new TransactionsClass()
 
-export function createClient(options: GraphQLClientOptions) {
-  Object.assign(HEADERS, options.headers || {})
+// Текущие заголовки для запросов, которые можно обновлять
+let currentHeaders: Record<string, string> = {}
 
-  const chain = Chain(options.baseUrl)
+// Функция для создания thunder клиента с использованием baseUrl из options
+function createThunder(baseUrl: string) {
+  return Thunder(async (query, variables) => {
+    const response = await fetch(baseUrl, {
+      body: JSON.stringify({ query, variables }),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...currentHeaders, // Используем текущие заголовки, включая Authorization
+      },
+    });
+    console.log("variables: ", variables)
+    if (!response.ok) {
+      return new Promise((resolve, reject) => {
+        response
+          .text()
+          .then((text) => {
+            try {
+              reject(JSON.parse(text));
+            } catch (err) {
+              reject(text);
+            }
+          })
+          .catch(reject);
+      });
+    }
+
+    const json = await response.json() as GraphQLResponse;
+
+    if (json.errors) {
+      console.log("json.errors", json.errors)
+      throw json.errors;  // Возвращаем массив ошибок, обработанных в NestJS
+    }
+
+    return json.data;
+  });
+}
+
+export function createClient(options: ClientConnectionOptions) {
+  // Инициализируем заголовки при создании клиента
+  currentHeaders = options.headers || {}
+
+  const thunder = createThunder(options.baseUrl)
 
   return {
     setToken: (token: string) => {
-      (HEADERS as Record<string, string>).Authorization = `Bearer ${token}`
+      currentHeaders.Authorization = `Bearer ${token}`
     },
-    Query: chain('query'),
-    Mutation: chain('mutation'),
+    Query: thunder('query'),
+    Mutation: thunder('mutation'),
     Subscription: ZeusSubscription(options.baseUrl.replace(/^http/, 'ws')),
-    Transactions, // Добавляем Transactions в возвращаемый объект
+    Transactions,
   }
 }

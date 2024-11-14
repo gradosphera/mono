@@ -5,7 +5,7 @@ import { AppRegistry } from './extensions.registry';
 @Module({})
 export class ExtensionsModule {
   static register(): DynamicModule {
-    const pluginModules = Object.values(AppRegistry); // Используем модули напрямую из `AppRegistry`
+    const pluginModules = Object.values(AppRegistry).map((plugin) => plugin.class);
 
     return {
       module: ExtensionsModule,

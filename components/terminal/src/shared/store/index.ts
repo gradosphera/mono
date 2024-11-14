@@ -10,6 +10,7 @@ import { TransactResult } from '@wharfkit/session';
 import { readBlockchain } from '../api';
 import { ITokens } from '../lib/types/user';
 import { getFromIndexedDB, setToIndexedDB } from '../api/indexDB';
+import { client } from '../api/client';
 
 interface IGlobalStore {
   hasCreditials: Ref<boolean>;
@@ -77,6 +78,13 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
 
       // Установите hasCreditials в true
       hasCreditials.value = true;
+      console.log('on init', tokens.value?.access.token)
+      if (tokens.value?.access.token){
+        console.log('on set tokens')
+        client.setToken(tokens.value.access.token)
+      }
+
+
     } catch (error: any) {
       await setToIndexedDB(COOPNAME, 'store', 'encryptedKey', '');
       await setToIndexedDB(COOPNAME, 'store', 'encryptedUsername', '');

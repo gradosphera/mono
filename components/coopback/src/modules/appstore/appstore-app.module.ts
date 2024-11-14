@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppStoreController } from './controllers/appstore-app.controller';
 import { AppManagementService } from './services/appstore-app.service';
 import { ExtensionDomainModule } from '~/domain/extension/extension-domain.module';
 import { AppStoreResolver } from './resolvers/extension.resolver';
@@ -8,7 +7,7 @@ import { AppStoreResolver } from './resolvers/extension.resolver';
   imports: [
     ExtensionDomainModule, // Импортируем доменный модуль
   ],
-  controllers: [AppStoreController],
+  controllers: [],
   providers: [AppManagementService, AppStoreResolver],
   exports: [AppManagementService],
 })

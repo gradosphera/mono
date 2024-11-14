@@ -17,8 +17,8 @@ import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
 import { MembersPage } from 'src/pages/Cooperative/MembersPage';
 import { InstalledExtensions } from 'src/pages/ExtStore/InstalledExtensions';
 import { ExtensionsShowcase } from 'src/pages/ExtStore/ExtensionsShowcase';
-import { ExtensionPage } from 'src/pages/ExtStore/ExtensionPage';
 import { ExtensionStoreBase } from 'src/pages/ExtStore/BaseRoute';
+import { ExtensionPage } from 'src/pages/ExtStore/ExtensionPage';
 
 
 const baseRoutes = [
@@ -129,30 +129,16 @@ const baseRoutes = [
         ],
       },
       {
-        path: 'appstore',
-        name: 'appstore',
+        path: 'extstore',
+        name: 'extstore',
         component: ExtensionStoreBase,
         children: [
           {
             path: 'showcase',
-            name: 'appstore-showcase',
+            name: 'extstore-showcase',
             component: ExtensionsShowcase,
             children: [],
           },
-          {
-            path: 'showcase/:id',
-            name: 'one-extension',
-            component: ExtensionPage,
-            children: [
-              {
-                path: 'install',
-                name: 'install-extension',
-                component: ExtensionPage,
-                children: [],
-              },
-            ],
-          },
-
           {
             path: 'installed',
             name: 'appstore-installed',
@@ -160,10 +146,21 @@ const baseRoutes = [
             children: [],
           },
           {
-            path: 'installed/:id',
-            name: 'appstore-application',
+            path: 'extension/:name',
+            name: 'one-extension',
             component: ExtensionPage,
-            children: [],
+            children: [
+              {
+                path: 'settings',
+                name: 'extension-settings',
+                component: ExtensionPage,
+              },
+              {
+                path: 'install',
+                name: 'extension-install',
+                component: ExtensionPage,
+              }
+            ],
           },
         ],
       },

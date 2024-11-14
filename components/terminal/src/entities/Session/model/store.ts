@@ -52,30 +52,36 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
   };
 
   const init = async () => {
-    await globalStore.init();
-    isAuth.value = globalStore.hasCreditials;
+    if (!globalStore.hasCreditials){
 
-    //TODO добавить более детальную проверку авторизации
+      await globalStore.init();
+      isAuth.value = globalStore.hasCreditials;
 
-    getInfo();
+      //TODO добавить более детальную проверку авторизации
 
-    try {
-      if (globalStore.hasCreditials)
-        session.value = new Session({
-          actor: globalStore.username,
-          permission: 'active',
-          chain: {
-            id: CHAIN_ID,
-            url: CHAIN_URL,
-          },
-          walletPlugin: new WalletPluginPrivateKey(
-            globalStore.wif as PrivateKey
-          ),
-        });
-    } catch (e: any) {
-      console.error(e);
-      FailAlert(e.message);
-      //TODO logout
+      getInfo();
+
+      try {
+
+        if (globalStore.hasCreditials){
+
+          session.value = new Session({
+            actor: globalStore.username,
+            permission: 'active',
+            chain: {
+              id: CHAIN_ID,
+              url: CHAIN_URL,
+            },
+            walletPlugin: new WalletPluginPrivateKey(
+              globalStore.wif as PrivateKey
+            ),
+          });
+        }
+      } catch (e: any) {
+        console.error(e);
+        FailAlert(e.message);
+        //TODO logout
+      }
     }
   };
 

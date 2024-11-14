@@ -22,7 +22,7 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
   }
 
   async runApps() {
-    const apps = await this.extensionDomainService.getAppList();
+    const apps = await this.extensionDomainService.getAppList({ enabled: true });
     for (const appData of apps) {
       if (AppRegistry[appData.name]) {
         await this.runApp(appData.name);
@@ -38,12 +38,12 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
 
     const appData = await this.extensionDomainService.getAppByName(appName);
     if (!appData || !appData.enabled) {
-      this.logger.warn(`Расширение ${appName} не найдено или отключено.`);
+      this.logger.info(`Расширение ${appName} не найдено или отключено.`);
       return;
     }
 
     const AppClass = AppRegistry[appName]; // Получаем класс модуля из реестра
-    const appInstance = this.appContext.get(AppClass); // Получаем инстанс модуля напрямую
+    const appInstance = this.appContext.get(AppClass.class); // Получаем инстанс модуля напрямую
 
     await appInstance.initialize(appData.config); // Вызываем инициализацию модуля
     this.activeAppMap[appName] = { appInstance }; // Сохраняем модуль как appInstance
@@ -57,7 +57,7 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
       delete this.activeAppMap[appName];
       this.logger.info(`Расширение ${appName} остановлено.`);
     } else {
-      this.logger.warn(`Расширение ${appName} не найдено.`);
+      this.logger.info(`Расширение ${appName} не найдено.`);
     }
   }
 

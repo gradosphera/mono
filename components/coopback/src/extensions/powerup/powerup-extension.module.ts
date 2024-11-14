@@ -1,4 +1,3 @@
-import Joi from 'joi';
 import cron from 'node-cron';
 import { blockchainService } from '../../services';
 import { default as coopConfig } from '../../config/config';
@@ -14,20 +13,81 @@ import {
   LOG_EXTENSION_REPOSITORY,
   LogExtensionDomainRepository,
 } from '~/domain/extension/repositories/log-extension-domain.repository.interface';
+import { z } from 'zod';
+import type { DeserializedDescriptionOfExtension } from '~/types/shared';
 
-// Интерфейс для параметров конфигурации плагина powerup
-export interface IConfig {
-  dailyPackageSize: number; // Размер ежедневного пакета в AXON
-  topUpAmount: number; // Сумма пополнения при достижении порога (в AXON)
-  systemSymbol: string;
-  systemPrecision: number;
-  lastDailyReplenishmentDate: Date;
-  thresholds: {
-    cpu: number; // Порог CPU в микросекундах
-    net: number; // Порог NET в байтах
-    ram: number; // Порог RAM в байтах
-  };
+// Функция для проверки и сериализации FieldDescription
+function describeField(description: DeserializedDescriptionOfExtension): string {
+  return JSON.stringify(description);
 }
+
+// Определение Zod-схемы
+export const Schema = z.object({
+  dailyPackageSize: z.number().describe(
+    describeField({
+      label: 'Сумма автоматической ежедневной аренды квот',
+      note: 'минимум: 5 AXON',
+      rules: ['val >= 5'],
+      prepend: 'AXON',
+    })
+  ),
+  topUpAmount: z.number().describe(
+    describeField({
+      label: 'Сумма пополнения при достижении минимального порога квот',
+      rules: ['val > 0'],
+      prepend: 'AXON',
+      note: '',
+    })
+  ),
+  thresholds: z.object({
+    cpu: z.number().describe(
+      describeField({
+        label: 'Минимальный остаток квоты CPU',
+        note: '',
+        prepend: 'CPU',
+        append: 'ms',
+        rules: ['val >= 0'],
+      })
+    ),
+    net: z.number().describe(
+      describeField({
+        label: 'Минимальный остаток квоты NET',
+        note: '',
+        prepend: 'NET',
+        append: 'bytes',
+        rules: ['val >= 0'],
+      })
+    ),
+    ram: z.number().describe(
+      describeField({
+        label: 'Минимальный остаток квоты RAM',
+        note: '',
+        prepend: 'RAM',
+        append: 'bytes',
+        rules: ['val >= 0'],
+      })
+    ),
+  }),
+  lastDailyReplenishmentDate: z
+    .string()
+    .default('')
+    .describe(
+      describeField({ label: 'Дата последнего ежедневного пополнения', visible: false, minLength: 10, maxLength: 10 })
+    ),
+  systemPrecision: z
+    .number()
+    .default(4)
+    .describe(describeField({ label: 'Точность системного утилити-токена', visible: false })),
+  systemSymbol: z
+    .string()
+    .default('AXON')
+    .describe(
+      describeField({ label: 'Символ системного утилити-токена', visible: false, minLength: 3, maxLength: 5, maxRows: 4 })
+    ),
+});
+
+// Автоматическое создание типа IConfig на основе Zod-схемы
+export type IConfig = z.infer<typeof Schema>;
 
 export interface ILog {
   type: 'daily' | 'now';
@@ -54,15 +114,7 @@ export class PowerupPlugin extends BaseExtModule {
   name = 'powerup';
   plugin!: ExtensionDomainEntity<IConfig>;
 
-  public configSchemas = Joi.object<IConfig>({
-    dailyPackageSize: Joi.number().required(),
-    topUpAmount: Joi.number().required(),
-    thresholds: Joi.object({
-      cpu: Joi.number().required(),
-      net: Joi.number().required(),
-      ram: Joi.number().required(),
-    }).required(),
-  });
+  public configSchemas = Schema;
 
   async initialize() {
     const pluginData = await this.extensionRepository.findByName(this.name);
@@ -73,7 +125,10 @@ export class PowerupPlugin extends BaseExtModule {
     this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
 
     // Проверяем, было ли ежедневное пополнение в последние 24 часа
-    const lastDate = new Date(this.plugin.config.lastDailyReplenishmentDate);
+    const lastDate = this.plugin.config.lastDailyReplenishmentDate
+      ? new Date(this.plugin.config.lastDailyReplenishmentDate)
+      : null;
+
     const now = new Date();
 
     if (lastDate) {
@@ -119,8 +174,8 @@ export class PowerupPlugin extends BaseExtModule {
 
       await blockchainService.powerUp(username, quantity);
 
-      this.plugin.config.lastDailyReplenishmentDate = new Date();
-      await this.extensionRepository.update(this.name, this.plugin);
+      this.plugin.config.lastDailyReplenishmentDate = new Date().toISOString();
+      await this.extensionRepository.update(this.plugin);
 
       await this.log({
         type: 'daily',

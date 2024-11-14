@@ -14,9 +14,15 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
-    "./selectors/*": {
-      "import": "./dist/selectors/*.mjs",
-      "require": "./dist/selectors/*.cjs"
+    "./queries/*": {
+      "types": "./dist/queries/*.d.ts",
+      "import": "./dist/queries/*.mjs",
+      "require": "./dist/queries/*.cjs"
+    },
+    "./mutations/*": {
+      "types": "./dist/mutations/*.d.ts",
+      "import": "./dist/mutations/*.mjs",
+      "require": "./dist/mutations/*.cjs"
     }
   },
   "main": "./dist/index.mjs",

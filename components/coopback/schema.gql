@@ -8,25 +8,52 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Extension {
-  """Configuration settings for the extension"""
+  """Показывает, доступно ли расширение"""
+  available: Boolean!
+
+  """Настройки конфигурации для расширения"""
   config: JSON
 
-  """Timestamp of when the extension was created"""
+  """Дата создания расширения"""
   created_at: DateTime!
 
-  """Indicates whether the extension is enabled"""
+  """Описание расширения"""
+  description: String
+
+  """Показывает, включено ли расширение"""
   enabled: Boolean!
 
-  """Unique name of the extension"""
+  """Изображение для расширения"""
+  image: String
+
+  """Показывает, установлено ли расширение"""
+  installed: Boolean!
+
+  """Поле инструкция для установки"""
+  instructions: String!
+
+  """Уникальное имя расширения"""
   name: String!
 
-  """Timestamp of the last update to the extension"""
+  """Поле подробного текстового описания"""
+  readme: String!
+
+  """Схема настроек конфигурации для расширения"""
+  schema: JSON
+
+  """Массив тегов для расширения"""
+  tags: [String!]!
+
+  """Заголовок расширения"""
+  title: String
+
+  """Дата последнего обновления расширения"""
   updated_at: DateTime!
 }
 
 input ExtensionInput {
   """Configuration settings for the extension"""
-  config: JSON
+  config: JSON!
 
   """Timestamp of when the extension was created"""
   created_at: DateTime
@@ -41,18 +68,39 @@ input ExtensionInput {
   updated_at: DateTime
 }
 
+input GetExtensionsInput {
+  """Фильтр включенных расширений"""
+  enabled: Boolean
+
+  """Фильтр установленных расширений"""
+  installed: Boolean
+
+  """Фильтр по имени"""
+  name: String
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
 
 type Mutation {
-  """Install the extension"""
-  installExtension(appData: ExtensionInput!): Extension!
+  """Установить расширение"""
+  installExtension(data: ExtensionInput!): Extension!
+
+  """Удалить расширение"""
+  uninstallExtension(data: UninstallExtensionInput!): Boolean!
+
+  """Обновить расширение"""
+  updateExtension(data: ExtensionInput!): Extension!
 }
 
 type Query {
-  """Get list of extensions"""
-  getExtensions: [Extension!]!
-  helloWorld: String!
+  """Получить список расширений"""
+  getExtensions(data: GetExtensionsInput): [Extension!]!
+}
+
+input UninstallExtensionInput {
+  """Фильтр по имени"""
+  name: String!
 }

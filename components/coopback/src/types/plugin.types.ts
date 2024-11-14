@@ -1,4 +1,3 @@
-import type Joi from 'joi';
 import type { Document } from 'mongoose';
 
 export interface IPluginSchema<T> extends Document {

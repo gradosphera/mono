@@ -916,21 +916,39 @@ export type ValueTypes = {
     /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
 	["Extension"]: AliasType<{
-	/** Configuration settings for the extension */
+	/** Показывает, доступно ли расширение */
+	available?:boolean | `@${string}`,
+	/** Настройки конфигурации для расширения */
 	config?:boolean | `@${string}`,
-	/** Timestamp of when the extension was created */
+	/** Дата создания расширения */
 	created_at?:boolean | `@${string}`,
-	/** Indicates whether the extension is enabled */
+	/** Описание расширения */
+	description?:boolean | `@${string}`,
+	/** Показывает, включено ли расширение */
 	enabled?:boolean | `@${string}`,
-	/** Unique name of the extension */
+	/** Изображение для расширения */
+	image?:boolean | `@${string}`,
+	/** Показывает, установлено ли расширение */
+	installed?:boolean | `@${string}`,
+	/** Поле инструкция для установки */
+	instructions?:boolean | `@${string}`,
+	/** Уникальное имя расширения */
 	name?:boolean | `@${string}`,
-	/** Timestamp of the last update to the extension */
+	/** Поле подробного текстового описания */
+	readme?:boolean | `@${string}`,
+	/** Схема настроек конфигурации для расширения */
+	schema?:boolean | `@${string}`,
+	/** Массив тегов для расширения */
+	tags?:boolean | `@${string}`,
+	/** Заголовок расширения */
+	title?:boolean | `@${string}`,
+	/** Дата последнего обновления расширения */
 	updated_at?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["ExtensionInput"]: {
 	/** Configuration settings for the extension */
-	config?: ValueTypes["JSON"] | undefined | null | Variable<any, string>,
+	config: ValueTypes["JSON"] | Variable<any, string>,
 	/** Timestamp of when the extension was created */
 	created_at?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
 	/** Indicates whether the extension is enabled */
@@ -940,39 +958,69 @@ export type ValueTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>
 };
+	["GetExtensionsInput"]: {
+	/** Фильтр включенных расширений */
+	enabled?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр установленных расширений */
+	installed?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по имени */
+	name?: string | undefined | null | Variable<any, string>
+};
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
 	["Mutation"]: AliasType<{
-installExtension?: [{	appData: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
+installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
+uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
+updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
 		__typename?: boolean | `@${string}`
 }>;
 	["Query"]: AliasType<{
-	/** Get list of extensions */
-	getExtensions?:ValueTypes["Extension"],
-	helloWorld?:boolean | `@${string}`,
+getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
 		__typename?: boolean | `@${string}`
-}>
+}>;
+	["UninstallExtensionInput"]: {
+	/** Фильтр по имени */
+	name: string | Variable<any, string>
+}
   }
 
 export type ResolverInputTypes = {
     /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
 	["Extension"]: AliasType<{
-	/** Configuration settings for the extension */
+	/** Показывает, доступно ли расширение */
+	available?:boolean | `@${string}`,
+	/** Настройки конфигурации для расширения */
 	config?:boolean | `@${string}`,
-	/** Timestamp of when the extension was created */
+	/** Дата создания расширения */
 	created_at?:boolean | `@${string}`,
-	/** Indicates whether the extension is enabled */
+	/** Описание расширения */
+	description?:boolean | `@${string}`,
+	/** Показывает, включено ли расширение */
 	enabled?:boolean | `@${string}`,
-	/** Unique name of the extension */
+	/** Изображение для расширения */
+	image?:boolean | `@${string}`,
+	/** Показывает, установлено ли расширение */
+	installed?:boolean | `@${string}`,
+	/** Поле инструкция для установки */
+	instructions?:boolean | `@${string}`,
+	/** Уникальное имя расширения */
 	name?:boolean | `@${string}`,
-	/** Timestamp of the last update to the extension */
+	/** Поле подробного текстового описания */
+	readme?:boolean | `@${string}`,
+	/** Схема настроек конфигурации для расширения */
+	schema?:boolean | `@${string}`,
+	/** Массив тегов для расширения */
+	tags?:boolean | `@${string}`,
+	/** Заголовок расширения */
+	title?:boolean | `@${string}`,
+	/** Дата последнего обновления расширения */
 	updated_at?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["ExtensionInput"]: {
 	/** Configuration settings for the extension */
-	config?: ResolverInputTypes["JSON"] | undefined | null,
+	config: ResolverInputTypes["JSON"],
 	/** Timestamp of when the extension was created */
 	created_at?: ResolverInputTypes["DateTime"] | undefined | null,
 	/** Indicates whether the extension is enabled */
@@ -982,18 +1030,30 @@ export type ResolverInputTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ResolverInputTypes["DateTime"] | undefined | null
 };
+	["GetExtensionsInput"]: {
+	/** Фильтр включенных расширений */
+	enabled?: boolean | undefined | null,
+	/** Фильтр установленных расширений */
+	installed?: boolean | undefined | null,
+	/** Фильтр по имени */
+	name?: string | undefined | null
+};
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
 	["Mutation"]: AliasType<{
-installExtension?: [{	appData: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
+installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
+uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
+updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
 		__typename?: boolean | `@${string}`
 }>;
 	["Query"]: AliasType<{
-	/** Get list of extensions */
-	getExtensions?:ResolverInputTypes["Extension"],
-	helloWorld?:boolean | `@${string}`,
+getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
 		__typename?: boolean | `@${string}`
 }>;
+	["UninstallExtensionInput"]: {
+	/** Фильтр по имени */
+	name: string
+};
 	["schema"]: AliasType<{
 	query?:ResolverInputTypes["Query"],
 	mutation?:ResolverInputTypes["Mutation"],
@@ -1005,20 +1065,38 @@ export type ModelTypes = {
     /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
 	["Extension"]: {
-		/** Configuration settings for the extension */
+		/** Показывает, доступно ли расширение */
+	available: boolean,
+	/** Настройки конфигурации для расширения */
 	config?: ModelTypes["JSON"] | undefined | null,
-	/** Timestamp of when the extension was created */
+	/** Дата создания расширения */
 	created_at: ModelTypes["DateTime"],
-	/** Indicates whether the extension is enabled */
+	/** Описание расширения */
+	description?: string | undefined | null,
+	/** Показывает, включено ли расширение */
 	enabled: boolean,
-	/** Unique name of the extension */
+	/** Изображение для расширения */
+	image?: string | undefined | null,
+	/** Показывает, установлено ли расширение */
+	installed: boolean,
+	/** Поле инструкция для установки */
+	instructions: string,
+	/** Уникальное имя расширения */
 	name: string,
-	/** Timestamp of the last update to the extension */
+	/** Поле подробного текстового описания */
+	readme: string,
+	/** Схема настроек конфигурации для расширения */
+	schema?: ModelTypes["JSON"] | undefined | null,
+	/** Массив тегов для расширения */
+	tags: Array<string>,
+	/** Заголовок расширения */
+	title?: string | undefined | null,
+	/** Дата последнего обновления расширения */
 	updated_at: ModelTypes["DateTime"]
 };
 	["ExtensionInput"]: {
 	/** Configuration settings for the extension */
-	config?: ModelTypes["JSON"] | undefined | null,
+	config: ModelTypes["JSON"],
 	/** Timestamp of when the extension was created */
 	created_at?: ModelTypes["DateTime"] | undefined | null,
 	/** Indicates whether the extension is enabled */
@@ -1028,16 +1106,31 @@ export type ModelTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ModelTypes["DateTime"] | undefined | null
 };
+	["GetExtensionsInput"]: {
+	/** Фильтр включенных расширений */
+	enabled?: boolean | undefined | null,
+	/** Фильтр установленных расширений */
+	installed?: boolean | undefined | null,
+	/** Фильтр по имени */
+	name?: string | undefined | null
+};
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:any;
 	["Mutation"]: {
-		/** Install the extension */
-	installExtension: ModelTypes["Extension"]
+		/** Установить расширение */
+	installExtension: ModelTypes["Extension"],
+	/** Удалить расширение */
+	uninstallExtension: boolean,
+	/** Обновить расширение */
+	updateExtension: ModelTypes["Extension"]
 };
 	["Query"]: {
-		/** Get list of extensions */
-	getExtensions: Array<ModelTypes["Extension"]>,
-	helloWorld: string
+		/** Получить список расширений */
+	getExtensions: Array<ModelTypes["Extension"]>
+};
+	["UninstallExtensionInput"]: {
+	/** Фильтр по имени */
+	name: string
 };
 	["schema"]: {
 	query?: ModelTypes["Query"] | undefined | null,
@@ -1053,20 +1146,38 @@ export type GraphQLTypes = {
 ["DateTime"]: "scalar" & { name: "DateTime" };
 	["Extension"]: {
 	__typename: "Extension",
-	/** Configuration settings for the extension */
+	/** Показывает, доступно ли расширение */
+	available: boolean,
+	/** Настройки конфигурации для расширения */
 	config?: GraphQLTypes["JSON"] | undefined | null,
-	/** Timestamp of when the extension was created */
+	/** Дата создания расширения */
 	created_at: GraphQLTypes["DateTime"],
-	/** Indicates whether the extension is enabled */
+	/** Описание расширения */
+	description?: string | undefined | null,
+	/** Показывает, включено ли расширение */
 	enabled: boolean,
-	/** Unique name of the extension */
+	/** Изображение для расширения */
+	image?: string | undefined | null,
+	/** Показывает, установлено ли расширение */
+	installed: boolean,
+	/** Поле инструкция для установки */
+	instructions: string,
+	/** Уникальное имя расширения */
 	name: string,
-	/** Timestamp of the last update to the extension */
+	/** Поле подробного текстового описания */
+	readme: string,
+	/** Схема настроек конфигурации для расширения */
+	schema?: GraphQLTypes["JSON"] | undefined | null,
+	/** Массив тегов для расширения */
+	tags: Array<string>,
+	/** Заголовок расширения */
+	title?: string | undefined | null,
+	/** Дата последнего обновления расширения */
 	updated_at: GraphQLTypes["DateTime"]
 };
 	["ExtensionInput"]: {
 		/** Configuration settings for the extension */
-	config?: GraphQLTypes["JSON"] | undefined | null,
+	config: GraphQLTypes["JSON"],
 	/** Timestamp of when the extension was created */
 	created_at?: GraphQLTypes["DateTime"] | undefined | null,
 	/** Indicates whether the extension is enabled */
@@ -1076,18 +1187,33 @@ export type GraphQLTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: GraphQLTypes["DateTime"] | undefined | null
 };
+	["GetExtensionsInput"]: {
+		/** Фильтр включенных расширений */
+	enabled?: boolean | undefined | null,
+	/** Фильтр установленных расширений */
+	installed?: boolean | undefined | null,
+	/** Фильтр по имени */
+	name?: string | undefined | null
+};
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]: "scalar" & { name: "JSON" };
 	["Mutation"]: {
 	__typename: "Mutation",
-	/** Install the extension */
-	installExtension: GraphQLTypes["Extension"]
+	/** Установить расширение */
+	installExtension: GraphQLTypes["Extension"],
+	/** Удалить расширение */
+	uninstallExtension: boolean,
+	/** Обновить расширение */
+	updateExtension: GraphQLTypes["Extension"]
 };
 	["Query"]: {
 	__typename: "Query",
-	/** Get list of extensions */
-	getExtensions: Array<GraphQLTypes["Extension"]>,
-	helloWorld: string
+	/** Получить список расширений */
+	getExtensions: Array<GraphQLTypes["Extension"]>
+};
+	["UninstallExtensionInput"]: {
+		/** Фильтр по имени */
+	name: string
 }
     }
 
@@ -1095,5 +1221,7 @@ export type GraphQLTypes = {
 type ZEUS_VARIABLES = {
 	["DateTime"]: ValueTypes["DateTime"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
+	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
 	["JSON"]: ValueTypes["JSON"];
+	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
 }

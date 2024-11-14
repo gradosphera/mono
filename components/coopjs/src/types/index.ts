@@ -1,4 +1,5 @@
 export { type ValueTypes } from '../zeus'
+export * from './controller'
 
 // Утилита для преобразования всех полей типа в обязательные, сохраняя вложенные объекты
 export type MakeAllFieldsRequired<T> = {
@@ -7,7 +8,7 @@ export type MakeAllFieldsRequired<T> = {
     : boolean // Для конечных полей используем boolean
 }
 
-export interface GraphQLClientOptions {
+export interface ClientConnectionOptions {
   baseUrl: string
   headers?: Record<string, string>
 }

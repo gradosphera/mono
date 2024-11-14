@@ -1,5 +1,6 @@
 import { IBaseReadBlockchainErrors } from '../lib/types/errors';
 import { FailAlert } from '../api/alerts';
+import type { GraphQLErrorDetail } from '../lib/types/graphql';
 
 export function createBaseReadBlockchainErrors(
   name: string
@@ -19,4 +20,9 @@ export function handleException(e: unknown): void {
   } else {
     FailAlert('Произошла неизвестная ошибка');
   }
+}
+
+export function extractGraphQLErrorMessages(error: unknown): string {
+  const errors = error as GraphQLErrorDetail[];
+  return errors.map((err) => err.message).join('; ');
 }

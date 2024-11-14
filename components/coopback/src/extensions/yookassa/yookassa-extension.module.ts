@@ -18,6 +18,7 @@ import {
 } from '~/domain/extension/repositories/extension-domain.repository.interface';
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
+import { z } from 'zod';
 
 interface IIpnRequest {
   event: string;
@@ -107,9 +108,10 @@ interface IIpnRequest {
   type: string;
 }
 
-// Интерфейс для параметров конфигурации плагина powerup
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IConfig {}
+export const Schema = z.object({});
+
+// Интерфейс для параметров конфигурации плагина
+export type IConfig = z.infer<typeof Schema>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ILog {}
@@ -139,7 +141,7 @@ export class YookassaPlugin extends IPNProvider {
     this.logger.info(`Платежный провайдер ${this.name} успешно зарегистрирован.`);
   }
 
-  public configSchemas = Joi.object<IConfig>({});
+  public configSchemas = Schema;
 
   public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 3.5; ///%

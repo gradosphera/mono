@@ -1,14 +1,18 @@
 <template lang="pug">
-div all apps
+div.row
+  div(v-for="extension in extStore.extensions" v-bind:key="extension.name").col-md-3.col-xs-12
+    ExtensionCard(:extension="extension")
+
 </template>
 <script lang="ts" setup>
-import { getExtensions } from '@coopenomics/coopjs/selectors/getExtensions';
-import { client } from 'src/shared/api/client';
+import { useExtensionStore } from 'src/entities/Extension/model';
 import { onMounted } from 'vue';
+import { ExtensionCard } from 'src/widgets/ExtStore/ExtensionCard';
+
+const extStore = useExtensionStore()
 
 onMounted(async () => {
-  const { getExtensions: data } = await client.Query({getExtensions})
-  console.log(data)
+  extStore.loadExtensions()
 })
 
 </script>
