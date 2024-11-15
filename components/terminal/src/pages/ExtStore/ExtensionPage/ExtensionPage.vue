@@ -42,11 +42,11 @@ div(v-if="extension").row
       vue-markdown(:source="extension.readme").description.q-mt-md
     div(v-if="(isSettings || isInstall) && extension.schema")
       q-form(ref="myFormRef")
-        div(v-if="isEmpty")
+        div(v-if="isEmpty && !isInstall")
           div.q-pa-md
             p.text-h6 Нет настроек
             span Расширение не предоставило настроек для изменения.
-        div(v-else)
+        div(v-if="!isEmpty")
           vue-markdown(:source="extension.instructions").description.q-mt-md
           ZodForm(:schema="extension.schema" v-model="data")
 
