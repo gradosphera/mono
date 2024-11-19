@@ -36,7 +36,8 @@
     "swagger": "ts-node scripts/swagger.ts",
     "typecheck": "tsc --noEmit",
     "docs-watch": "swagger-ui-watcher ./src/docs/swagger.json",
-    "docs": "ts-node scripts/swagger.ts && redoc-cli bundle ./src/docs/swagger.json -o ./docs/index.html",
+    "docs": "spectaql spectaql-config.yml",
+    "docs2": "ts-node scripts/swagger.ts && redoc-cli bundle ./src/docs/swagger.json -o ./docs/index.html",
     "generate-client": "zeus ./schema.gql ../coopjs/src --subscriptions graphql-ws && cp -r ./src/types/shared/* ../coopjs/src/types/controller"
   },
   "keywords": [
@@ -79,6 +80,9 @@
     "@types/jest": "^29.5.12",
     "@types/supertest": "^6.0.2",
     "@wharfkit/antelope": "^1.0.7",
+    "@wharfkit/contract": "^1.1.5",
+    "@wharfkit/session": "^1.4.0",
+    "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "apollo-server-express": "^3.13.0",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",

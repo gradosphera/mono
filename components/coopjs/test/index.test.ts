@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createClient, type MakeAllFieldsRequired, type ValueTypes } from '../src'
-import { getExtensions } from '../src/selectors/getExtensions'
+import { getExtensions } from '../src/queries/getExtensions'
 import { Gql, $ } from '../src/zeus'
 
 describe('should', () => {

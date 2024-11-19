@@ -34,8 +34,8 @@
                   <a href="#group-Operations-Queries">Queries</a>
                 </h5>
                 <ul class="nav-group-section-items">
+                  <li><a href="#query-getBranches">getBranches</a></li>
                   <li><a href="#query-getExtensions">getExtensions</a></li>
-                  <li><a href="#query-helloWorld">helloWorld</a></li>
                 </ul>
               </li>
               <li class="nav-group-section">
@@ -44,6 +44,8 @@
                 </h5>
                 <ul class="nav-group-section-items">
                   <li><a href="#mutation-installExtension">installExtension</a></li>
+                  <li><a href="#mutation-uninstallExtension">uninstallExtension</a></li>
+                  <li><a href="#mutation-updateExtension">updateExtension</a></li>
                 </ul>
               </li>
               <li><a href="#"></a></li>
@@ -52,12 +54,21 @@
           <div class="nav-group">
             <h4 class="nav-group-title">Types</h4>
             <ul class="nav-group-items">
+              <li><a href="#definition-BankAccount">BankAccount</a></li>
+              <li><a href="#definition-BankAccountDetails">BankAccountDetails</a></li>
               <li><a href="#definition-Boolean">Boolean</a></li>
+              <li><a href="#definition-Branch">Branch</a></li>
               <li><a href="#definition-DateTime">DateTime</a></li>
+              <li><a href="#definition-Details">Details</a></li>
               <li><a href="#definition-Extension">Extension</a></li>
               <li><a href="#definition-ExtensionInput">ExtensionInput</a></li>
+              <li><a href="#definition-GetBranchesInput">GetBranchesInput</a></li>
+              <li><a href="#definition-GetExtensionsInput">GetExtensionsInput</a></li>
               <li><a href="#definition-JSON">JSON</a></li>
+              <li><a href="#definition-Organization">Organization</a></li>
+              <li><a href="#definition-RepresentedBy">RepresentedBy</a></li>
               <li><a href="#definition-String">String</a></li>
+              <li><a href="#definition-UninstallExtensionInput">UninstallExtensionInput</a></li>
             </ul>
           </div>
         </nav>
@@ -94,13 +105,108 @@
                 </div>
                 <div class="example-section welcome-api-endpoints-section example-section-is-code">
                   <h5>API Endpoints</h5>
-                  <pre><code>http://localhost:2998/graphql</code></pre>
+                  <pre><code>http://localhost:2998/v1/graphql</code></pre>
                 </div>
               </div>
             </div>
           </div>
           <h1 id="group-Operations-Queries" class="group-heading" data-traverse-target="group-Operations-Queries">Queries</h1>
+          <section id="query-getBranches" class="operation operation-query" data-traverse-target="query-getBranches">
+            <h2 class="operation-heading ">
+              <code>getBranches</code>
+            </h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="operation-description doc-copy-section">
+                  <h5>Description</h5>
+                  <p>Получить список кооперативных участков</p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="operation-response doc-copy-section">
+                  <h5>Response</h5>
+                  <p> Returns <a href="#definition-Branch"><code>[Branch!]!</code></a>
+                  </p>
+                </div>
+                <div class="operation-arguments doc-copy-section">
+                  <h5>Arguments</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <span class="property-name"><code>data</code></span> - <span class="property-type"><a href="#definition-GetBranchesInput"><code>GetBranchesInput</code></a></span>
+                        </td>
+                        <td>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <h4 class="example-heading">Example</h4>
+                <div class="example-section example-section-is-code operation-query-example">
+                  <h5>Query</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-gql"><span class="hljs-symbol"><span class="hljs-keyword">query</span> getBranches<span class="hljs-tag">(<span class="hljs-code">$data</span>:<span class="hljs-type"> GetBranchesInput)</span> {
+  getBranches(data: <span class="hljs-code">$data</span>)</span> <span class="hljs-tag">{
+    <span class="hljs-symbol">braname</span>
+    <span class="hljs-symbol">organization <span class="hljs-tag">{
+      <span class="hljs-type">...OrganizationFragment</span>
+    }</span></span>
+    <span class="hljs-symbol">trusted</span>
+    <span class="hljs-symbol">trustee</span>
+  }</span></span>
+}
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+                <div class="example-section example-section-is-code operation-variables-example">
+                  <h5>Variables</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span><span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">GetBranchesInput</span><span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+                <div class="example-section example-section-is-code operation-response-example">
+                  <h5>Response</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"getBranches"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+      <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"braname"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"organization"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Organization</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"trusted"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"trustee"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
           <section id="query-getExtensions" class="operation operation-query" data-traverse-target="query-getExtensions">
+            <div class="operation-group-name">
+              <a href="#group-Operations-Queries">Queries</a>
+            </div>
             <h2 class="operation-heading ">
               <code>getExtensions</code>
             </h2>
@@ -108,7 +214,8 @@
               <div class="doc-copy">
                 <div class="operation-description doc-copy-section">
                   <h5>Description</h5>
-                  <p>Get list of extensions</p>
+                  <p>Required role(s): chairman</p>
+                  <p>Получить список расширений</p>
                 </div>
               </div>
             </div>
@@ -119,6 +226,26 @@
                   <p> Returns <a href="#definition-Extension"><code>[Extension!]!</code></a>
                   </p>
                 </div>
+                <div class="operation-arguments doc-copy-section">
+                  <h5>Arguments</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <span class="property-name"><code>data</code></span> - <span class="property-type"><a href="#definition-GetExtensionsInput"><code>GetExtensionsInput</code></a></span>
+                        </td>
+                        <td>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
               <div class="doc-examples">
                 <h4 class="example-heading">Example</h4>
@@ -126,15 +253,33 @@
                   <h5>Query</h5>
                   <html>
                     <head></head>
-                    <body><pre><code class="hljs language-gql"><span class="hljs-symbol"><span class="hljs-keyword">query</span> getExtensions <span class="hljs-tag">{
-  <span class="hljs-symbol">getExtensions <span class="hljs-tag">{
+                    <body><pre><code class="hljs language-gql"><span class="hljs-symbol"><span class="hljs-keyword">query</span> getExtensions<span class="hljs-tag">(<span class="hljs-code">$data</span>:<span class="hljs-type"> GetExtensionsInput)</span> {
+  getExtensions(data: <span class="hljs-code">$data</span>)</span> <span class="hljs-tag">{
+    <span class="hljs-symbol">available</span>
     <span class="hljs-symbol">config</span>
     <span class="hljs-symbol">created_at</span>
+    <span class="hljs-symbol">description</span>
     <span class="hljs-symbol">enabled</span>
+    <span class="hljs-symbol">image</span>
+    <span class="hljs-symbol">installed</span>
+    <span class="hljs-symbol">instructions</span>
     <span class="hljs-symbol">name</span>
+    <span class="hljs-symbol">readme</span>
+    <span class="hljs-symbol"><span class="hljs-keyword">schema</span></span>
+    <span class="hljs-symbol">tags</span>
+    <span class="hljs-symbol">title</span>
     <span class="hljs-symbol">updated_at</span>
   }</span></span>
-}</span></span>
+}
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+                <div class="example-section example-section-is-code operation-variables-example">
+                  <h5>Variables</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span><span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">GetExtensionsInput</span><span class="hljs-punctuation">}</span>
 </code></pre>
                     </body>
                   </html>
@@ -147,55 +292,24 @@
   <span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
     <span class="hljs-attr">"getExtensions"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
       <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"available"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
         <span class="hljs-attr">"config"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
         <span class="hljs-attr">"created_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2007-12-03T10:15:30Z"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"description"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
         <span class="hljs-attr">"enabled"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"image"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"installed"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"instructions"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
         <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"readme"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"schema"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"tags"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">"abc123"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"title"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
         <span class="hljs-attr">"updated_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2007-12-03T10:15:30Z"</span>
       <span class="hljs-punctuation">}</span>
     <span class="hljs-punctuation">]</span>
   <span class="hljs-punctuation">}</span>
 <span class="hljs-punctuation">}</span>
-</code></pre>
-                    </body>
-                  </html>
-                </div>
-              </div>
-            </div>
-          </section>
-          <section id="query-helloWorld" class="operation operation-query" data-traverse-target="query-helloWorld">
-            <div class="operation-group-name">
-              <a href="#group-Operations-Queries">Queries</a>
-            </div>
-            <h2 class="operation-heading ">
-              <code>helloWorld</code>
-            </h2>
-            <div class="doc-row">
-              <div class="doc-copy">
-                <div class="operation-response doc-copy-section">
-                  <h5>Response</h5>
-                  <p> Returns a <a href="#definition-String"><code>String!</code></a>
-                  </p>
-                </div>
-              </div>
-              <div class="doc-examples">
-                <h4 class="example-heading">Example</h4>
-                <div class="example-section example-section-is-code operation-query-example">
-                  <h5>Query</h5>
-                  <html>
-                    <head></head>
-                    <body><pre><code class="hljs language-gql"><span class="hljs-symbol"><span class="hljs-keyword">query</span> helloWorld <span class="hljs-tag">{
-  <span class="hljs-symbol">helloWorld</span>
-}</span></span>
-</code></pre>
-                    </body>
-                  </html>
-                </div>
-                <div class="example-section example-section-is-code operation-response-example">
-                  <h5>Response</h5>
-                  <html>
-                    <head></head>
-                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span><span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-attr">"helloWorld"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">}</span>
 </code></pre>
                     </body>
                   </html>
@@ -213,7 +327,7 @@
                 <div class="operation-description doc-copy-section">
                   <h5>Description</h5>
                   <p>Required role(s): chairman</p>
-                  <p>Install the extension</p>
+                  <p>Установить расширение</p>
                 </div>
               </div>
             </div>
@@ -236,7 +350,7 @@
                     <tbody>
                       <tr>
                         <td>
-                          <span class="property-name"><code>appData</code></span> - <span class="property-type"><a href="#definition-ExtensionInput"><code>ExtensionInput!</code></a></span>
+                          <span class="property-name"><code>data</code></span> - <span class="property-type"><a href="#definition-ExtensionInput"><code>ExtensionInput!</code></a></span>
                         </td>
                         <td>
                         </td>
@@ -251,12 +365,21 @@
                   <h5>Query</h5>
                   <html>
                     <head></head>
-                    <body><pre><code class="hljs language-gql"><span class="hljs-symbol"><span class="hljs-keyword">mutation</span> installExtension<span class="hljs-tag">(<span class="hljs-code">$appData</span>:<span class="hljs-type"> ExtensionInput!</span>)</span> <span class="hljs-tag">{
-  <span class="hljs-symbol">installExtension<span class="hljs-tag">(appData: <span class="hljs-code">$appData</span>)</span> <span class="hljs-tag">{
+                    <body><pre><code class="hljs language-gql"><span class="hljs-symbol"><span class="hljs-keyword">mutation</span> installExtension<span class="hljs-tag">(<span class="hljs-code">$data</span>:<span class="hljs-type"> ExtensionInput!</span>)</span> <span class="hljs-tag">{
+  <span class="hljs-symbol">installExtension<span class="hljs-tag">(data: <span class="hljs-code">$data</span>)</span> <span class="hljs-tag">{
+    <span class="hljs-symbol">available</span>
     <span class="hljs-symbol">config</span>
     <span class="hljs-symbol">created_at</span>
+    <span class="hljs-symbol">description</span>
     <span class="hljs-symbol">enabled</span>
+    <span class="hljs-symbol">image</span>
+    <span class="hljs-symbol">installed</span>
+    <span class="hljs-symbol">instructions</span>
     <span class="hljs-symbol">name</span>
+    <span class="hljs-symbol">readme</span>
+    <span class="hljs-symbol"><span class="hljs-keyword">schema</span></span>
+    <span class="hljs-symbol">tags</span>
+    <span class="hljs-symbol">title</span>
     <span class="hljs-symbol">updated_at</span>
   }</span></span>
 }</span></span>
@@ -268,7 +391,7 @@
                   <h5>Variables</h5>
                   <html>
                     <head></head>
-                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span><span class="hljs-attr">"appData"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ExtensionInput</span><span class="hljs-punctuation">}</span>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span><span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ExtensionInput</span><span class="hljs-punctuation">}</span>
 </code></pre>
                     </body>
                   </html>
@@ -280,10 +403,209 @@
                     <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
     <span class="hljs-attr">"installExtension"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">"available"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
       <span class="hljs-attr">"config"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
       <span class="hljs-attr">"created_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2007-12-03T10:15:30Z"</span><span class="hljs-punctuation">,</span>
-      <span class="hljs-attr">"enabled"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"description"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"enabled"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"image"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"installed"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"instructions"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
       <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"readme"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"schema"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"tags"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">"abc123"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"title"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"updated_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2007-12-03T10:15:30Z"</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="mutation-uninstallExtension" class="operation operation-mutation" data-traverse-target="mutation-uninstallExtension">
+            <div class="operation-group-name">
+              <a href="#group-Operations-Mutations">Mutations</a>
+            </div>
+            <h2 class="operation-heading ">
+              <code>uninstallExtension</code>
+            </h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="operation-description doc-copy-section">
+                  <h5>Description</h5>
+                  <p>Required role(s): chairman</p>
+                  <p>Удалить расширение</p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="operation-response doc-copy-section">
+                  <h5>Response</h5>
+                  <p> Returns a <a href="#definition-Boolean"><code>Boolean!</code></a>
+                  </p>
+                </div>
+                <div class="operation-arguments doc-copy-section">
+                  <h5>Arguments</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <span class="property-name"><code>data</code></span> - <span class="property-type"><a href="#definition-UninstallExtensionInput"><code>UninstallExtensionInput!</code></a></span>
+                        </td>
+                        <td>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <h4 class="example-heading">Example</h4>
+                <div class="example-section example-section-is-code operation-query-example">
+                  <h5>Query</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-gql"><span class="hljs-symbol"><span class="hljs-keyword">mutation</span> uninstallExtension<span class="hljs-tag">(<span class="hljs-code">$data</span>:<span class="hljs-type"> UninstallExtensionInput!</span>)</span> <span class="hljs-tag">{
+  <span class="hljs-symbol">uninstallExtension<span class="hljs-tag">(data: <span class="hljs-code">$data</span>)</span></span>
+}</span></span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+                <div class="example-section example-section-is-code operation-variables-example">
+                  <h5>Variables</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span><span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">UninstallExtensionInput</span><span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+                <div class="example-section example-section-is-code operation-response-example">
+                  <h5>Response</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span><span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-attr">"uninstallExtension"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="mutation-updateExtension" class="operation operation-mutation" data-traverse-target="mutation-updateExtension">
+            <div class="operation-group-name">
+              <a href="#group-Operations-Mutations">Mutations</a>
+            </div>
+            <h2 class="operation-heading ">
+              <code>updateExtension</code>
+            </h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="operation-description doc-copy-section">
+                  <h5>Description</h5>
+                  <p>Required role(s): chairman</p>
+                  <p>Обновить расширение</p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="operation-response doc-copy-section">
+                  <h5>Response</h5>
+                  <p> Returns an <a href="#definition-Extension"><code>Extension!</code></a>
+                  </p>
+                </div>
+                <div class="operation-arguments doc-copy-section">
+                  <h5>Arguments</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <span class="property-name"><code>data</code></span> - <span class="property-type"><a href="#definition-ExtensionInput"><code>ExtensionInput!</code></a></span>
+                        </td>
+                        <td>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <h4 class="example-heading">Example</h4>
+                <div class="example-section example-section-is-code operation-query-example">
+                  <h5>Query</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-gql"><span class="hljs-symbol"><span class="hljs-keyword">mutation</span> updateExtension<span class="hljs-tag">(<span class="hljs-code">$data</span>:<span class="hljs-type"> ExtensionInput!</span>)</span> <span class="hljs-tag">{
+  <span class="hljs-symbol">updateExtension<span class="hljs-tag">(data: <span class="hljs-code">$data</span>)</span> <span class="hljs-tag">{
+    <span class="hljs-symbol">available</span>
+    <span class="hljs-symbol">config</span>
+    <span class="hljs-symbol">created_at</span>
+    <span class="hljs-symbol">description</span>
+    <span class="hljs-symbol">enabled</span>
+    <span class="hljs-symbol">image</span>
+    <span class="hljs-symbol">installed</span>
+    <span class="hljs-symbol">instructions</span>
+    <span class="hljs-symbol">name</span>
+    <span class="hljs-symbol">readme</span>
+    <span class="hljs-symbol"><span class="hljs-keyword">schema</span></span>
+    <span class="hljs-symbol">tags</span>
+    <span class="hljs-symbol">title</span>
+    <span class="hljs-symbol">updated_at</span>
+  }</span></span>
+}</span></span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+                <div class="example-section example-section-is-code operation-variables-example">
+                  <h5>Variables</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span><span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">ExtensionInput</span><span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+                <div class="example-section example-section-is-code operation-response-example">
+                  <h5>Response</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"data"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"updateExtension"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">"available"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"config"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"created_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2007-12-03T10:15:30Z"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"description"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"enabled"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"image"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"installed"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"instructions"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"readme"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"schema"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"tags"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">"abc123"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"title"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
       <span class="hljs-attr">"updated_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2007-12-03T10:15:30Z"</span>
     <span class="hljs-punctuation">}</span>
   <span class="hljs-punctuation">}</span>
@@ -296,7 +618,125 @@
             </div>
           </section>
           <h1 id="group-Types" class="group-heading" data-traverse-target="group-Types">Types</h1>
+          <section id="definition-BankAccount" class="definition definition-object" data-traverse-target="definition-BankAccount">
+            <h2 class="definition-heading">BankAccount</h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="definition-properties doc-copy-section">
+                  <h5>Fields</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Field Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>account_number</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Номер банковского счета </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>bank_name</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Название банка </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>card_number</code></span> - <span class="property-type"><a href="#definition-String"><code>String</code></a></span>
+                        </td>
+                        <td> Номер карты </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>currency</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Валюта счета </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>details</code></span> - <span class="property-type"><a href="#definition-BankAccountDetails"><code>BankAccountDetails!</code></a></span>
+                        </td>
+                        <td> Детали счета </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <div class="example-section example-section-is-code">
+                  <h5>Example</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"account_number"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"bank_name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"card_number"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"currency"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"details"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">BankAccountDetails</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="definition-BankAccountDetails" class="definition definition-object" data-traverse-target="definition-BankAccountDetails">
+            <div class="definition-group-name">
+              <a href="#group-Types">Types</a>
+            </div>
+            <h2 class="definition-heading">BankAccountDetails</h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="definition-properties doc-copy-section">
+                  <h5>Fields</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Field Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>bik</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> БИК банка </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>corr</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Корреспондентский счет </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>kpp</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> КПП банка </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <div class="example-section example-section-is-code">
+                  <h5>Example</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"bik"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"corr"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"kpp"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
           <section id="definition-Boolean" class="definition definition-scalar" data-traverse-target="definition-Boolean">
+            <div class="definition-group-name">
+              <a href="#group-Types">Types</a>
+            </div>
             <h2 class="definition-heading">Boolean</h2>
             <div class="doc-row">
               <div class="doc-copy">
@@ -311,6 +751,65 @@
                   <html>
                     <head></head>
                     <body><pre><code class="hljs language-json"><span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="definition-Branch" class="definition definition-object" data-traverse-target="definition-Branch">
+            <div class="definition-group-name">
+              <a href="#group-Types">Types</a>
+            </div>
+            <h2 class="definition-heading">Branch</h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="definition-properties doc-copy-section">
+                  <h5>Fields</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Field Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>braname</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Уникальное имя кооперативного участка </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>organization</code></span> - <span class="property-type"><a href="#definition-Organization"><code>Organization!</code></a></span>
+                        </td>
+                        <td> Данные организации </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>trusted</code></span> - <span class="property-type"><a href="#definition-String"><code>[String!]!</code></a></span>
+                        </td>
+                        <td> Доверенные аккаунты </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>trustee</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Аккаунт уполномоченного </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <div class="example-section example-section-is-code">
+                  <h5>Example</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"braname"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"organization"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Organization</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"trusted"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">"abc123"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"trustee"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span>
+<span class="hljs-punctuation">}</span>
 </code></pre>
                     </body>
                   </html>
@@ -343,6 +842,59 @@
               </div>
             </div>
           </section>
+          <section id="definition-Details" class="definition definition-object" data-traverse-target="definition-Details">
+            <div class="definition-group-name">
+              <a href="#group-Types">Types</a>
+            </div>
+            <h2 class="definition-heading">Details</h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="definition-properties doc-copy-section">
+                  <h5>Fields</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Field Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>inn</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> ИНН </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>kpp</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> КПП </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>ogrn</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> ОГРН </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <div class="example-section example-section-is-code">
+                  <h5>Example</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"inn"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"kpp"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"ogrn"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
           <section id="definition-Extension" class="definition definition-object" data-traverse-target="definition-Extension">
             <div class="definition-group-name">
               <a href="#group-Types">Types</a>
@@ -361,29 +913,74 @@
                     </thead>
                     <tbody>
                       <tr>
+                        <td data-property-name=""><span class="property-name"><code>available</code></span> - <span class="property-type"><a href="#definition-Boolean"><code>Boolean!</code></a></span>
+                        </td>
+                        <td> Показывает, доступно ли расширение </td>
+                      </tr>
+                      <tr>
                         <td data-property-name=""><span class="property-name"><code>config</code></span> - <span class="property-type"><a href="#definition-JSON"><code>JSON</code></a></span>
                         </td>
-                        <td> Configuration settings for the extension </td>
+                        <td> Настройки конфигурации для расширения </td>
                       </tr>
                       <tr>
                         <td data-property-name=""><span class="property-name"><code>created_at</code></span> - <span class="property-type"><a href="#definition-DateTime"><code>DateTime!</code></a></span>
                         </td>
-                        <td> Timestamp of when the extension was created </td>
+                        <td> Дата создания расширения </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>description</code></span> - <span class="property-type"><a href="#definition-String"><code>String</code></a></span>
+                        </td>
+                        <td> Описание расширения </td>
                       </tr>
                       <tr>
                         <td data-property-name=""><span class="property-name"><code>enabled</code></span> - <span class="property-type"><a href="#definition-Boolean"><code>Boolean!</code></a></span>
                         </td>
-                        <td> Indicates whether the extension is enabled </td>
+                        <td> Показывает, включено ли расширение </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>image</code></span> - <span class="property-type"><a href="#definition-String"><code>String</code></a></span>
+                        </td>
+                        <td> Изображение для расширения </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>installed</code></span> - <span class="property-type"><a href="#definition-Boolean"><code>Boolean!</code></a></span>
+                        </td>
+                        <td> Показывает, установлено ли расширение </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>instructions</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Поле инструкция для установки </td>
                       </tr>
                       <tr>
                         <td data-property-name=""><span class="property-name"><code>name</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
                         </td>
-                        <td> Unique name of the extension </td>
+                        <td> Уникальное имя расширения </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>readme</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Поле подробного текстового описания </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>schema</code></span> - <span class="property-type"><a href="#definition-JSON"><code>JSON</code></a></span>
+                        </td>
+                        <td> Схема настроек конфигурации для расширения </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>tags</code></span> - <span class="property-type"><a href="#definition-String"><code>[String!]!</code></a></span>
+                        </td>
+                        <td> Массив тегов для расширения </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>title</code></span> - <span class="property-type"><a href="#definition-String"><code>String</code></a></span>
+                        </td>
+                        <td> Заголовок расширения </td>
                       </tr>
                       <tr>
                         <td data-property-name=""><span class="property-name"><code>updated_at</code></span> - <span class="property-type"><a href="#definition-DateTime"><code>DateTime!</code></a></span>
                         </td>
-                        <td> Timestamp of the last update to the extension </td>
+                        <td> Дата последнего обновления расширения </td>
                       </tr>
                     </tbody>
                   </table>
@@ -395,10 +992,19 @@
                   <html>
                     <head></head>
                     <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"available"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">"config"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">"created_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2007-12-03T10:15:30Z"</span><span class="hljs-punctuation">,</span>
-  <span class="hljs-attr">"enabled"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"description"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"enabled"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"image"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"installed"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"instructions"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"readme"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"schema"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"tags"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">"abc123"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"title"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">"updated_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2007-12-03T10:15:30Z"</span>
 <span class="hljs-punctuation">}</span>
 </code></pre>
@@ -427,7 +1033,7 @@
                     <tbody>
                       <tr>
                         <td>
-                          <span class="property-name"><code>config</code></span> - <span class="property-type"><a href="#definition-JSON"><code>JSON</code></a></span>
+                          <span class="property-name"><code>config</code></span> - <span class="property-type"><a href="#definition-JSON"><code>JSON!</code></a></span>
                         </td>
                         <td> Configuration settings for the extension </td>
                       </tr>
@@ -467,9 +1073,105 @@
                     <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">"config"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">"created_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2007-12-03T10:15:30Z"</span><span class="hljs-punctuation">,</span>
-  <span class="hljs-attr">"enabled"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
-  <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"enabled"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">"updated_at"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2007-12-03T10:15:30Z"</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="definition-GetBranchesInput" class="definition definition-input-object" data-traverse-target="definition-GetBranchesInput">
+            <div class="definition-group-name">
+              <a href="#group-Types">Types</a>
+            </div>
+            <h2 class="definition-heading">GetBranchesInput</h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="definition-properties doc-copy-section">
+                  <h5>Fields</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Input Field</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <span class="property-name"><code>braname</code></span> - <span class="property-type"><a href="#definition-String"><code>String</code></a></span>
+                        </td>
+                        <td> Фильтр по имени </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <div class="example-section example-section-is-code">
+                  <h5>Example</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span><span class="hljs-attr">"braname"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="definition-GetExtensionsInput" class="definition definition-input-object" data-traverse-target="definition-GetExtensionsInput">
+            <div class="definition-group-name">
+              <a href="#group-Types">Types</a>
+            </div>
+            <h2 class="definition-heading">GetExtensionsInput</h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="definition-properties doc-copy-section">
+                  <h5>Fields</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Input Field</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <span class="property-name"><code>enabled</code></span> - <span class="property-type"><a href="#definition-Boolean"><code>Boolean</code></a></span>
+                        </td>
+                        <td> Фильтр включенных расширений </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="property-name"><code>installed</code></span> - <span class="property-type"><a href="#definition-Boolean"><code>Boolean</code></a></span>
+                        </td>
+                        <td> Фильтр установленных расширений </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="property-name"><code>name</code></span> - <span class="property-type"><a href="#definition-String"><code>String</code></a></span>
+                        </td>
+                        <td> Фильтр по имени </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <div class="example-section example-section-is-code">
+                  <h5>Example</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"enabled"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"installed"</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span>
 <span class="hljs-punctuation">}</span>
 </code></pre>
                     </body>
@@ -503,6 +1205,184 @@
               </div>
             </div>
           </section>
+          <section id="definition-Organization" class="definition definition-object" data-traverse-target="definition-Organization">
+            <div class="definition-group-name">
+              <a href="#group-Types">Types</a>
+            </div>
+            <h2 class="definition-heading">Organization</h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="definition-properties doc-copy-section">
+                  <h5>Fields</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Field Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>bank_account</code></span> - <span class="property-type"><a href="#definition-BankAccount"><code>BankAccount!</code></a></span>
+                        </td>
+                        <td> Банковский счет </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>city</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Город </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>country</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Страна </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>details</code></span> - <span class="property-type"><a href="#definition-Details"><code>Details!</code></a></span>
+                        </td>
+                        <td> Детали организации </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>email</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Email </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>fact_address</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Фактический адрес </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>full_address</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Юридический адрес </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>full_name</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Полное название </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>phone</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Телефон </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>represented_by</code></span> - <span class="property-type"><a href="#definition-RepresentedBy"><code>RepresentedBy!</code></a></span>
+                        </td>
+                        <td> Представитель организации </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>short_name</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Краткое название </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>type</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Тип организации </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>username</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Имя аккаунта организации </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <div class="example-section example-section-is-code">
+                  <h5>Example</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"bank_account"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">BankAccount</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"city"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"country"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"details"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">Details</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"email"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"fact_address"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"full_address"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"full_name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"phone"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"represented_by"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">RepresentedBy</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"short_name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"type"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"username"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="definition-RepresentedBy" class="definition definition-object" data-traverse-target="definition-RepresentedBy">
+            <div class="definition-group-name">
+              <a href="#group-Types">Types</a>
+            </div>
+            <h2 class="definition-heading">RepresentedBy</h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="definition-properties doc-copy-section">
+                  <h5>Fields</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Field Name</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>based_on</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> На основании чего действует </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>first_name</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Имя </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>last_name</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Фамилия </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>middle_name</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Отчество </td>
+                      </tr>
+                      <tr>
+                        <td data-property-name=""><span class="property-name"><code>position</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Должность </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <div class="example-section example-section-is-code">
+                  <h5>Example</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"based_on"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"first_name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"last_name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"middle_name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"position"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"abc123"</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
           <section id="definition-String" class="definition definition-scalar" data-traverse-target="definition-String">
             <div class="definition-group-name">
               <a href="#group-Types">Types</a>
@@ -521,6 +1401,46 @@
                   <html>
                     <head></head>
                     <body><pre><code class="hljs language-gql"><span class="hljs-symbol">"abc123"</span>
+</code></pre>
+                    </body>
+                  </html>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="definition-UninstallExtensionInput" class="definition definition-input-object" data-traverse-target="definition-UninstallExtensionInput">
+            <div class="definition-group-name">
+              <a href="#group-Types">Types</a>
+            </div>
+            <h2 class="definition-heading">UninstallExtensionInput</h2>
+            <div class="doc-row">
+              <div class="doc-copy">
+                <div class="definition-properties doc-copy-section">
+                  <h5>Fields</h5>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Input Field</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <span class="property-name"><code>name</code></span> - <span class="property-type"><a href="#definition-String"><code>String!</code></a></span>
+                        </td>
+                        <td> Фильтр по имени </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="doc-examples">
+                <div class="example-section example-section-is-code">
+                  <h5>Example</h5>
+                  <html>
+                    <head></head>
+                    <body><pre><code class="hljs language-json"><span class="hljs-punctuation">{</span><span class="hljs-attr">"name"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"xyz789"</span><span class="hljs-punctuation">}</span>
 </code></pre>
                     </body>
                   </html>

@@ -2,7 +2,7 @@
 div.q-pa-md
   div.row.q-pt-md
     div.col-md-6.col-xs-12
-      q-card(bordered flat round class="cooperative-card" style="border-radius: 20px;").q-mx-auto
+      q-card(bordered flat round class="cooperative-card" style="border-radius: 20px;")
         div.row
           DepositButton.col-6
           WithdrawButton.col-6
@@ -16,7 +16,7 @@ div.q-pa-md
           q-badge(style="font-size: 10px") {{formattedUsername.toUpperCase()}}
           div.text-subtitle2 {{displayName}}
 
-    div.col-md-6.col-xs-12
+    div.col-md-6.col-xs-12.q-mt-lg
       WalletBalance
 
 </template>

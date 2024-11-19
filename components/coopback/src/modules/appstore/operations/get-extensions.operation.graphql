@@ -1,9 +1,0 @@
-query GetExtensions {
-  getExtensions {
-    name
-    config
-    enabled
-    created_at
-    updated_at
-  }
-}

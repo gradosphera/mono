@@ -1,8 +1,0 @@
-mutation InstallExtension($appData: ExtensionInput!) {
-  installExtension(appData: $appData) {
-    name
-    enabled
-    created_at
-    updated_at
-  }
-}

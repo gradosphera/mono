@@ -11,7 +11,7 @@ export interface IAddUser {
       account_number: string;
       bank_name: string;
       card_number?: string;
-      currency: 'RUB' | 'Other';
+      currency: string;
       details: {
         bik: string;
         corr: string;
@@ -26,6 +26,7 @@ export interface IAddUser {
       ogrn: string;
     };
     email: string;
+    fact_address: string;
     first_name: string;
     full_address: string;
     last_name: string;
@@ -55,7 +56,7 @@ export interface IAddUser {
       account_number: string;
       bank_name: string;
       card_number?: string;
-      currency: 'RUB' | 'Other';
+      currency: string;
       details: {
         bik: string;
         corr: string;
@@ -63,16 +64,16 @@ export interface IAddUser {
       };
     };
     city: string;
-    country: 'Russia' | 'Other';
+    country: string;
     details: {
       inn: string;
       kpp: string;
       ogrn: string;
     };
     email: string;
+    fact_address: string;
     full_address: string;
     full_name: string;
-    is_cooperative: boolean;
     phone: string;
     represented_by: {
       based_on: string;
@@ -96,7 +97,7 @@ export interface ICreateUser {
       account_number: string;
       bank_name: string;
       card_number?: string;
-      currency: 'RUB' | 'Other';
+      currency: string;
       details: {
         bik: string;
         corr: string;
@@ -111,6 +112,7 @@ export interface ICreateUser {
       ogrn: string;
     };
     email: string;
+    fact_address: string;
     first_name: string;
     full_address: string;
     last_name: string;
@@ -138,7 +140,7 @@ export interface ICreateUser {
       account_number: string;
       bank_name: string;
       card_number?: string;
-      currency: 'RUB' | 'Other';
+      currency: string;
       details: {
         bik: string;
         corr: string;
@@ -146,16 +148,16 @@ export interface ICreateUser {
       };
     };
     city: string;
-    country: 'Russia' | 'Other';
+    country: string;
     details: {
       inn: string;
       kpp: string;
       ogrn: string;
     };
     email: string;
+    fact_address: string;
     full_address: string;
     full_name: string;
-    is_cooperative: boolean;
     phone: string;
     represented_by: {
       based_on: string;
@@ -179,7 +181,7 @@ export interface IEntrepreneurData {
     account_number: string;
     bank_name: string;
     card_number?: string;
-    currency: 'RUB' | 'Other';
+    currency: string;
     details: {
       bik: string;
       corr: string;
@@ -194,6 +196,7 @@ export interface IEntrepreneurData {
     ogrn: string;
   };
   email: string;
+  fact_address: string;
   first_name: string;
   full_address: string;
   last_name: string;
@@ -223,7 +226,7 @@ export interface IOrganizationData {
     account_number: string;
     bank_name: string;
     card_number?: string;
-    currency: 'RUB' | 'Other';
+    currency: string;
     details: {
       bik: string;
       corr: string;
@@ -231,16 +234,16 @@ export interface IOrganizationData {
     };
   };
   city: string;
-  country: 'Russia' | 'Other';
+  country: string;
   details: {
     inn: string;
     kpp: string;
     ogrn: string;
   };
   email: string;
+  fact_address: string;
   full_address: string;
   full_name: string;
-  is_cooperative: boolean;
   phone: string;
   represented_by: {
     based_on: string;
@@ -262,7 +265,7 @@ export interface RAddUser {
         account_number: string;
         bank_name: string;
         card_number?: string;
-        currency: 'RUB' | 'Other';
+        currency: string;
         details: {
           bik: string;
           corr: string;
@@ -277,6 +280,7 @@ export interface RAddUser {
         ogrn: string;
       };
       email: string;
+      fact_address: string;
       first_name: string;
       full_address: string;
       last_name: string;
@@ -306,7 +310,7 @@ export interface RAddUser {
         account_number: string;
         bank_name: string;
         card_number?: string;
-        currency: 'RUB' | 'Other';
+        currency: string;
         details: {
           bik: string;
           corr: string;
@@ -314,16 +318,16 @@ export interface RAddUser {
         };
       };
       city: string;
-      country: 'Russia' | 'Other';
+      country: string;
       details: {
         inn: string;
         kpp: string;
         ogrn: string;
       };
       email: string;
+      fact_address: string;
       full_address: string;
       full_name: string;
-      is_cooperative: boolean;
       phone: string;
       represented_by: {
         based_on: string;
@@ -349,7 +353,7 @@ export interface RCreateUser {
         account_number: string;
         bank_name: string;
         card_number?: string;
-        currency: 'RUB' | 'Other';
+        currency: string;
         details: {
           bik: string;
           corr: string;
@@ -364,6 +368,7 @@ export interface RCreateUser {
         ogrn: string;
       };
       email: string;
+      fact_address: string;
       first_name: string;
       full_address: string;
       last_name: string;
@@ -391,7 +396,7 @@ export interface RCreateUser {
         account_number: string;
         bank_name: string;
         card_number?: string;
-        currency: 'RUB' | 'Other';
+        currency: string;
         details: {
           bik: string;
           corr: string;
@@ -399,16 +404,16 @@ export interface RCreateUser {
         };
       };
       city: string;
-      country: 'Russia' | 'Other';
+      country: string;
       details: {
         inn: string;
         kpp: string;
         ogrn: string;
       };
       email: string;
+      fact_address: string;
       full_address: string;
       full_name: string;
-      is_cooperative: boolean;
       phone: string;
       represented_by: {
         based_on: string;

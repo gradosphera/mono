@@ -40,3 +40,8 @@ export * as Admins from './admins'
  * Пространство управления соглашениями.
  */
 export * as Agreements from './agreements'
+
+/**
+ * Пространство управления кооперативными участками.
+ */
+export * as Branches from './branches'

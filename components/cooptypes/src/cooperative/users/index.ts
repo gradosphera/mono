@@ -1,7 +1,5 @@
 import type { IBankAccount } from '../payments'
 
-export type Country = 'Russia' | 'Other'
-
 export interface IPassportData {
   series: number
   number: number
@@ -27,7 +25,6 @@ export interface IIndividualData {
 export interface IOrganizationData {
   username: string
   type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao'
-  is_cooperative: boolean
   short_name: string
   full_name: string
   represented_by: {
@@ -37,9 +34,10 @@ export interface IOrganizationData {
     position: string
     based_on: string
   }
-  country: Country
+  country: string
   city: string
   full_address: string
+  fact_address: string
   phone: string
   email: string
   details: { inn: string, ogrn: string, kpp: string }
@@ -56,9 +54,10 @@ export interface IEntrepreneurData {
   birthdate: string
   phone: string
   email: string
-  country: Country
+  country: string
   city: string
   full_address: string
+  fact_address: string
   details: { inn: string, ogrn: string }
   bank_account: IBankAccount
   block_num?: number

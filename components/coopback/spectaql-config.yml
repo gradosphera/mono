@@ -1,7 +1,7 @@
 spectaql:
   targetDir: ../docs/graphql
 introspection:
-  url: 'http://localhost:2998/graphql'
+  url: 'http://localhost:2998/v1/graphql'
 
 info:
   title: 'My API Documentation'

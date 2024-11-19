@@ -1,6 +1,5 @@
 // modules/appstore/dto/extension-graphql.dto.ts
 import { ObjectType, Field } from '@nestjs/graphql';
-import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import type { ExtensionDomainInterface } from '~/domain/extension/interfaces/extension-domain.interface';
 import { GraphQLJSON } from 'graphql-type-json';
 
@@ -90,36 +89,5 @@ export class ExtensionGraphQLDTO<TConfig = any> implements ExtensionDomainInterf
     this.tags = tags;
     this.readme = readme;
     this.instructions = instructions;
-  }
-
-  // Обновленная функция преобразования доменной сущности в GraphQL DTO с передачей schema как отдельного аргумента
-  static fromDomain(
-    domain: ExtensionDomainEntity<any>,
-    schema: any,
-    title: string,
-    description: string,
-    image: string,
-    available: boolean,
-    installed: boolean,
-    tags: string[],
-    readme: string,
-    instructions: string
-  ): ExtensionGraphQLDTO<any> {
-    return new ExtensionGraphQLDTO(
-      domain.name,
-      available,
-      installed,
-      domain.enabled,
-      domain.config,
-      domain.created_at,
-      domain.updated_at,
-      schema, // Передаем schema как отдельный аргумент,
-      title,
-      description,
-      image,
-      tags,
-      readme,
-      instructions
-    );
   }
 }

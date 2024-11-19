@@ -9,6 +9,10 @@ export interface IGenerate {
    */
   [x: string]: unknown;
   data: {
+    /**
+     * Unknown Property
+     */
+    [x: string]: unknown;
     block_num?: number;
     coopname: string;
     created_at?: string;
@@ -50,6 +54,10 @@ export interface RGenerate {
      */
     [x: string]: unknown;
     data: {
+      /**
+       * Unknown Property
+       */
+      [x: string]: unknown;
       block_num?: number;
       coopname: string;
       created_at?: string;

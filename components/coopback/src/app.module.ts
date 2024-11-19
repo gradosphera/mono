@@ -8,11 +8,13 @@ import config from './config/config';
 import { PaymentModule } from './domain/payment/payment.module';
 import { ProviderModule } from './domain/provider/provider.module';
 import { ExtensionDomainModule } from './domain/extension/extension-domain.module';
-import { DatabaseModule } from './infrastructure/database/typeorm/database.module';
+import { DatabaseModule } from './infrastructure/database/database.module';
 import { QueueModule } from './modules/queue/queue-app.module';
 import { RedisAppModule } from './modules/redis/redis-app.module';
 import { LoggerModule } from './modules/logger/logger-app.module';
 import { GraphqlModule } from './infrastructure/graphql/graphql.module';
+import { BlockchainModule } from './infrastructure/blockchain/blockchain.module';
+import { BranchDomainModule } from './domain/branch/branch-domain.module';
 
 // Функция для динамического импорта модулей
 function dynamicImportModules(): any[] {
@@ -39,11 +41,13 @@ function dynamicImportModules(): any[] {
     PaymentModule,
     ProviderModule,
     ExtensionDomainModule,
+    BranchDomainModule,
     MongooseModule.forRoot(config.mongoose.url),
     DatabaseModule,
     GraphqlModule,
     QueueModule,
     LoggerModule,
+    BlockchainModule,
   ],
   providers: [],
   exports: [],

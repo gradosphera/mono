@@ -61,6 +61,8 @@ const envVarsSchema = z.object({
     .default('6379')
     .transform((val) => parseInt(val, 10)),
   REDIS_PASSWORD: z.string(),
+  BLOCKCHAIN_RPC: z.string(),
+  CHAIN_ID: z.string(),
 });
 
 // Валидация переменных окружения
@@ -84,6 +86,10 @@ export default {
   base_url: envVars.data.BASE_URL,
   port: envVars.data.PORT,
   server_secret: envVars.data.SERVER_SECRET,
+  blockchain: {
+    url: envVars.data.BLOCKCHAIN_RPC,
+    id: envVars.data.CHAIN_ID,
+  },
   mongoose: {
     url: envVars.data.MONGODB_URL + (envVars.data.NODE_ENV === 'test' ? '-test' : ''),
     options: {

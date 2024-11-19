@@ -67,3 +67,8 @@ export * as Agreements from './agreements'
  * Таблица содержит реестр внутри-кооперативных соглашений/положений с пайщиками
  */
 export * as CoopAgreements from './coopAgreements'
+
+/**
+ * Таблица уполномоченных и доверенных по кооперативным участкам
+ */
+export * as Branches from './branches'

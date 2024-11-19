@@ -36,7 +36,7 @@ async function deleteAllFiles(folderPath: string) {
     }
     console.log('All files deleted successfully.')
   }
-  catch (err) {
+  catch (err: any) {
     console.error(`Error while deleting files: ${err.message}`)
   }
 }
@@ -276,7 +276,6 @@ describe('тест генератора документов', async () => {
     const organizationData: ExternalOrganizationData = {
       username: 'voskhod',
       type: 'coop',
-      is_cooperative: true,
       short_name: '"ПК Восход"',
       full_name: 'Потребительский Кооператив "ВОСХОД"',
       represented_by: {
@@ -289,6 +288,7 @@ describe('тест генератора документов', async () => {
       country: 'Russia',
       city: 'Москва',
       full_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
+      fact_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
       email: 'copenomics@yandex.ru',
       phone: '+71234567890',
       details: {
@@ -605,7 +605,6 @@ describe('тест генератора документов', async () => {
     const organizationData: ExternalOrganizationData = {
       username: 'exampleorg',
       type: 'ooo',
-      is_cooperative: false,
       short_name: 'Ромашка',
       full_name: 'Ромашка',
       represented_by: {
@@ -618,6 +617,7 @@ describe('тест генератора документов', async () => {
       country: 'Russia',
       city: 'Moscow',
       full_address: 'г. Москва, ул. Арбат д. 22, офис 306',
+      fact_address: 'г. Москва, ул. Арбат д. 22, офис 306',
       email: 'contact@exampleorg.com',
       phone: '+71234567890',
       details: {
@@ -705,6 +705,7 @@ describe('тест генератора документов', async () => {
       phone: '+1234567890',
       email: 'john.doe@example.com',
       full_address: 'переулок правды д. 1',
+      fact_address: 'переулок правды д. 1',
       country: 'Russia',
       city: 'Moscow',
       details: {
@@ -785,7 +786,6 @@ describe('тест генератора документов', async () => {
     const voskhodData: ExternalOrganizationData = {
       username: 'voskhod',
       type: 'coop',
-      is_cooperative: true,
       short_name: '"ПК Восход"',
       full_name: 'Потребительский Кооператив "ВОСХОД"',
       represented_by: {
@@ -798,6 +798,7 @@ describe('тест генератора документов', async () => {
       country: 'Russia',
       city: 'Москва',
       full_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
+      fact_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
       email: 'copenomics@yandex.ru',
       phone: '+71234567890',
       details: {
@@ -866,7 +867,6 @@ describe('тест генератора документов', async () => {
     const organizationData: ExternalOrganizationData = {
       username: coopname,
       type: 'coop',
-      is_cooperative: true,
       short_name: 'Ромашка',
       full_name: 'Ромашка',
       represented_by: {
@@ -879,6 +879,7 @@ describe('тест генератора документов', async () => {
       country: 'Russia',
       city: 'Moscow',
       full_address: 'г. Москва, ул. Арбат д. 22, офис 306',
+      fact_address: 'г. Москва, ул. Арбат д. 22, офис 306',
       email: 'contact@exampleorg.com',
       phone: '+71234567890',
       details: {

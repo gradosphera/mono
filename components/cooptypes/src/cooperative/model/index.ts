@@ -65,4 +65,8 @@ export interface IVars {
     protocol_number: string
     protocol_day_month_year: string
   }
+  coopenomics_agreement?: {
+    protocol_number: string
+    protocol_day_month_year: string
+  }
 }

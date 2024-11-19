@@ -1,7 +1,5 @@
-export type Currency = 'RUB' | 'Other'
-
 export interface IBankAccount {
-  currency: Currency
+  currency: string
   card_number?: string // < номер карты
   bank_name: string // < наименование банка
   account_number: string // < номер счёта

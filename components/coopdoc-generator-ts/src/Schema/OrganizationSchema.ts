@@ -7,7 +7,6 @@ export const organizationSchema: JSONSchemaType<ExternalOrganizationData> = {
   properties: {
     username: { type: 'string' },
     type: { type: 'string', enum: ['coop', 'ooo', 'oao', 'zao', 'pao', 'ao'] },
-    is_cooperative: { type: 'boolean' },
     short_name: { type: 'string' },
     full_name: { type: 'string' },
     represented_by: {
@@ -22,11 +21,12 @@ export const organizationSchema: JSONSchemaType<ExternalOrganizationData> = {
       },
       additionalProperties: true,
     },
-    country: { type: 'string', enum: ['Russia', 'Other'] },
+    country: { type: 'string' },
     city: { type: 'string' },
     email: { type: 'string' },
     phone: { type: 'string' },
     full_address: { type: 'string' },
+    fact_address: { type: 'string' },
     details: {
       type: 'object',
       required: ['inn', 'ogrn', 'kpp'],
@@ -45,6 +45,6 @@ export const organizationSchema: JSONSchemaType<ExternalOrganizationData> = {
     deleted: { type: 'boolean', nullable: true },
     block_num: { type: 'number', nullable: true },
   },
-  required: ['username', 'type', 'is_cooperative', 'short_name', 'full_name', 'represented_by', 'country', 'city', 'full_address', 'email', 'phone', 'details', 'bank_account'],
+  required: ['username', 'type', 'short_name', 'full_name', 'represented_by', 'country', 'city', 'full_address', 'fact_address', 'email', 'phone', 'details', 'bank_account'],
   additionalProperties: true,
 }

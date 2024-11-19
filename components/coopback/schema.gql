@@ -2,10 +2,96 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type BankAccount {
+  """Номер банковского счета"""
+  account_number: String!
+
+  """Название банка"""
+  bank_name: String!
+
+  """Номер карты"""
+  card_number: String
+
+  """Валюта счета"""
+  currency: String!
+
+  """Детали счета"""
+  details: BankAccountDetails!
+}
+
+type BankAccountDetails {
+  """БИК банка"""
+  bik: String!
+
+  """Корреспондентский счет"""
+  corr: String!
+
+  """КПП банка"""
+  kpp: String!
+}
+
+type Branch {
+  """Банковский счет"""
+  bank_account: BankAccount!
+
+  """Уникальное имя кооперативного участка"""
+  braname: String!
+
+  """Город"""
+  city: String!
+
+  """Страна"""
+  country: String!
+
+  """Детали организации"""
+  details: Details!
+
+  """Email"""
+  email: String!
+
+  """Фактический адрес"""
+  fact_address: String!
+
+  """Полный адрес"""
+  full_address: String!
+
+  """Полное название организации"""
+  full_name: String!
+
+  """Телефон"""
+  phone: String!
+
+  """Представитель организации"""
+  represented_by: RepresentedBy!
+
+  """Краткое название организации"""
+  short_name: String!
+
+  """Доверенные аккаунты"""
+  trusted: [String!]!
+
+  """Аккаунт уполномоченного"""
+  trustee: String!
+
+  """Тип организации"""
+  type: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type Details {
+  """ИНН"""
+  inn: String!
+
+  """КПП"""
+  kpp: String!
+
+  """ОГРН"""
+  ogrn: String!
+}
 
 type Extension {
   """Показывает, доступно ли расширение"""
@@ -68,6 +154,14 @@ input ExtensionInput {
   updated_at: DateTime
 }
 
+input GetBranchesInput {
+  """Фильтр по имени аккаунта кооперативного участка"""
+  braname: String
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+}
+
 input GetExtensionsInput {
   """Фильтр включенных расширений"""
   enabled: Boolean
@@ -96,8 +190,28 @@ type Mutation {
 }
 
 type Query {
+  """Получить список кооперативных участков"""
+  getBranches(data: GetBranchesInput!): [Branch!]!
+
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!
+}
+
+type RepresentedBy {
+  """На основании чего действует"""
+  based_on: String!
+
+  """Имя"""
+  first_name: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String!
+
+  """Должность"""
+  position: String!
 }
 
 input UninstallExtensionInput {

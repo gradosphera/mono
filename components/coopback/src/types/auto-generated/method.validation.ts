@@ -7,7 +7,7 @@ export interface IBankAccount {
   account_number: string;
   bank_name: string;
   card_number?: string;
-  currency: 'RUB' | 'Other';
+  currency: string;
   details: {
     bik: string;
     corr: string;
@@ -22,17 +22,17 @@ export interface IDeletePaymentMethod {
 export interface ISavePaymentMethod {
   data: {
       phone: string;
-    } | ({
+    } | {
       account_number: string;
       bank_name: string;
       card_number?: string;
-      currency: 'RUB' | 'Other';
+      currency: string;
       details: {
         bik: string;
         corr: string;
         kpp: string;
       };
-    });
+    };
   method_id: number;
   method_type: 'sbp' | 'bank_transfer';
   username: string;
@@ -61,17 +61,17 @@ export interface RSavePaymentMethod {
   body: {
     data: {
         phone: string;
-      } | ({
+      } | {
         account_number: string;
         bank_name: string;
         card_number?: string;
-        currency: 'RUB' | 'Other';
+        currency: string;
         details: {
           bik: string;
           corr: string;
           kpp: string;
         };
-      });
+      };
     method_id: number;
     method_type: 'sbp' | 'bank_transfer';
     username: string;

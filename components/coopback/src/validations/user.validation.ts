@@ -34,13 +34,13 @@ const RussiaDetailsSchema = Joi.object({
 
 export const IOrganizationData = Joi.object({
   type: Joi.string().valid('coop', 'ooo', 'oao', 'zao', 'pao', 'ao').required(),
-  is_cooperative: Joi.boolean().required().default(false),
   short_name: Joi.string().required(),
   full_name: Joi.string().required(),
   represented_by: RepresentedBySchema.required(),
-  country: Joi.string().valid('Russia', 'Other').required(),
+  country: Joi.string().required(),
   city: Joi.string().required(),
   full_address: Joi.string().required(),
+  fact_address: Joi.string().required(),
   email: Joi.string().email().required(),
   phone: Joi.string().required(),
   details: Joi.object({
@@ -48,7 +48,6 @@ export const IOrganizationData = Joi.object({
     ogrn: Joi.string().required(),
     kpp: Joi.string().required(),
   }).required(),
-
   bank_account: IBankAccount.required(),
 });
 
@@ -62,6 +61,7 @@ export const IEntrepreneurData = Joi.object({
   country: Joi.string().valid('Russia', 'Other').required(),
   city: Joi.string().required(),
   full_address: Joi.string().required(),
+  fact_address: Joi.string().required(),
   details: Joi.object({
     inn: Joi.string().required(),
     ogrn: Joi.string().required(),

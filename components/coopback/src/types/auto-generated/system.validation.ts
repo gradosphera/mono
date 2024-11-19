@@ -9,7 +9,7 @@ export interface IInit {
       account_number: string;
       bank_name: string;
       card_number?: string;
-      currency: 'RUB' | 'Other';
+      currency: string;
       details: {
         bik: string;
         corr: string;
@@ -17,16 +17,16 @@ export interface IInit {
       };
     };
     city: string;
-    country: 'Russia' | 'Other';
+    country: string;
     details: {
       inn: string;
       kpp: string;
       ogrn: string;
     };
     email: string;
+    fact_address: string;
     full_address: string;
     full_name: string;
-    is_cooperative: boolean;
     phone: string;
     represented_by: {
       based_on: string;
@@ -151,7 +151,7 @@ export interface RInit {
         account_number: string;
         bank_name: string;
         card_number?: string;
-        currency: 'RUB' | 'Other';
+        currency: string;
         details: {
           bik: string;
           corr: string;
@@ -159,16 +159,16 @@ export interface RInit {
         };
       };
       city: string;
-      country: 'Russia' | 'Other';
+      country: string;
       details: {
         inn: string;
         kpp: string;
         ogrn: string;
       };
       email: string;
+      fact_address: string;
       full_address: string;
       full_name: string;
-      is_cooperative: boolean;
       phone: string;
       represented_by: {
         based_on: string;

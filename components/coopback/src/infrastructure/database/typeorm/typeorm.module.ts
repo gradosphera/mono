@@ -1,7 +1,6 @@
-// infrastructure/database/database.module.ts
-
+// infrastructure/database/typeorm/typeorm.module.ts
 import { Global, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule as NestTypeOrmModule } from '@nestjs/typeorm';
 import path from 'path';
 import config from '~/config/config';
 import { EXTENSION_REPOSITORY } from '~/domain/extension/repositories/extension-domain.repository.interface';
@@ -14,7 +13,7 @@ import { TypeOrmLogExtensionDomainRepository } from './repositories/typeorm-log-
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
+    NestTypeOrmModule.forRoot({
       type: 'postgres',
       host: config.postgres.host,
       port: Number(config.postgres.port),
@@ -26,18 +25,18 @@ import { TypeOrmLogExtensionDomainRepository } from './repositories/typeorm-log-
       synchronize: true, // Отключите в продакшене
       logging: false,
     }),
-    TypeOrmModule.forFeature([ExtensionEntity, LogExtensionEntity]), // Регистрируем сущность для использования в репозитории
+    NestTypeOrmModule.forFeature([ExtensionEntity, LogExtensionEntity]),
   ],
   providers: [
     {
-      provide: EXTENSION_REPOSITORY, // Ключ для инжекции
-      useClass: TypeOrmExtensionDomainRepository, // Реализация репозитория
+      provide: EXTENSION_REPOSITORY,
+      useClass: TypeOrmExtensionDomainRepository,
     },
     {
-      provide: LOG_EXTENSION_REPOSITORY, // Ключ для инжекции
-      useClass: TypeOrmLogExtensionDomainRepository, // Реализация репозитория
+      provide: LOG_EXTENSION_REPOSITORY,
+      useClass: TypeOrmLogExtensionDomainRepository,
     },
   ],
-  exports: [TypeOrmModule, EXTENSION_REPOSITORY, LOG_EXTENSION_REPOSITORY], // Экспортируем TypeOrmModule для использования в других модулях
+  exports: [NestTypeOrmModule, EXTENSION_REPOSITORY, LOG_EXTENSION_REPOSITORY],
 })
-export class DatabaseModule {}
+export class TypeOrmModule {}
