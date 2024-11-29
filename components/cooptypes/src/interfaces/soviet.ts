@@ -57,7 +57,6 @@ export interface IAddstaff {
 
 export interface IAddtrusted {
   coopname: IName
-  chairman: IName
   braname: IName
   trusted: IName
 }
@@ -220,7 +219,6 @@ export interface ICreateboard {
 
 export interface ICreatebranch {
   coopname: IName
-  chairman: IName
   braname: IName
   trustee: IName
 }
@@ -273,13 +271,11 @@ export interface IDeladdress {
 
 export interface IDeletebranch {
   coopname: IName
-  chairman: IName
   braname: IName
 }
 
 export interface IDeltrusted {
   coopname: IName
-  chairman: IName
   braname: IName
   trusted: IName
 }
@@ -313,7 +309,6 @@ export interface IEditaddress {
 
 export interface IEditbranch {
   coopname: IName
-  chairman: IName
   braname: IName
   trustee: IName
 }

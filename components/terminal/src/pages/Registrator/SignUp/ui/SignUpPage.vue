@@ -14,12 +14,9 @@ import { useCurrentUserStore } from 'src/entities/User';
 import { SignUp } from 'src/widgets/Registrator/SignUp'
 import { computed } from 'vue'
 import { AlreadyRegistered } from 'src/widgets/Registrator/AlreadyRegistered'
-import { useRouter } from 'vue-router';
 
 import { useRegistratorStore } from 'src/entities/Registrator';
 const store = useRegistratorStore().state
-
-const router = useRouter()
 
 const registeredAndloggedIn = computed(() => {
   return useCurrentUserStore().isRegistrationComplete && useSessionStore().isAuth && store.step == 1

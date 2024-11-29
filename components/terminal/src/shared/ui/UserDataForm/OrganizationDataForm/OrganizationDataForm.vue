@@ -9,19 +9,21 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
     map-options).q-mb-md
   q-input(v-model="userData.organization_data.short_name" standout="bg-teal text-white" hint="ПК Ромашка" label="Краткое наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
   q-input(v-model="userData.organization_data.full_name" standout="bg-teal text-white" hint="Потребительский Кооператив 'Ромашка'" label="Полное наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.represented_by.last_name" standout="bg-teal text-white" label="Фамилия представителя" hint="Иванов" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.represented_by.first_name" standout="bg-teal text-white" label="Имя представителя" hint="Иван" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.represented_by.middle_name" standout="bg-teal text-white" label="Отчество представителя" hint="Иванович" :rules="[val => validatePersonalName(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.last_name" standout="bg-teal text-white" label="Фамилия представителя" hint="" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.first_name" standout="bg-teal text-white" label="Имя представителя" hint="" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.middle_name" standout="bg-teal text-white" label="Отчество представителя" hint="" :rules="[val => validatePersonalName(val)]" autocomplete="off")
 
   q-input(v-model="userData.organization_data.represented_by.based_on" standout="bg-teal text-white" label="Представитель действует на основании" hint="решения общего собрания №102 от 01.01.2025 г" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.represented_by.position" standout="bg-teal text-white" label="Должность представителя" hint="председатель" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.represented_by.position" standout="bg-teal text-white" label="Должность представителя" hint="председатель совета" :rules="[val => notEmpty(val)]" autocomplete="off")
 
-  q-input(v-model="userData.organization_data.phone" standout="bg-teal text-white" label="Номер телефона представителя"  mask="+7 (###) ###-##-##" fill-mask  hint="+7 (###) ###-##-##" :rules="[val => notEmpty(val), val => notEmptyPhone(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.phone" standout="bg-teal text-white" label="Номер телефона представителя"  mask="+7 (###) ###-##-##" fill-mask  hint="" :rules="[val => notEmpty(val), val => notEmptyPhone(val)]" autocomplete="off")
 
   q-select(v-model="userData.organization_data.country" standout="bg-teal text-white" map-options emit-value option-label="label" option-value="value" label="Страна" :options="[{ label: 'Россия', value: 'Russia' }]" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.city" standout="bg-teal text-white" label="Город" hint="Москва" :rules="[val => notEmpty(val)]" autocomplete="off")
-  q-input(v-model="userData.organization_data.full_address" standout="bg-teal text-white" hint="г. Москва, ул. Арбат, д.12" label="Юридический адрес регистрации" :rules="[val => notEmpty(val)]" autocomplete="off")
-
+  q-input(v-model="userData.organization_data.city" standout="bg-teal text-white" label="Город" hint="" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.full_address" standout="bg-teal text-white" hint="" label="Юридический адрес регистрации" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.organization_data.fact_address" standout="bg-teal text-white" hint="" label="Фактический адрес" :rules="[val => notEmpty(val)]" autocomplete="off")
+    template(v-slot:append)
+      q-btn(dense size="sm" color="teal" @click="userData.organization_data.fact_address = userData.organization_data.full_address") совпадает
 
   q-input(
     v-model="userData.organization_data.details.inn"

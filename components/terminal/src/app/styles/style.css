@@ -23,6 +23,11 @@
   gap: 25px;
 }
 
+.text-wrap {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
 .statement {
   word-wrap: break-word;
   white-space: pre-wrap;

@@ -59,12 +59,12 @@ const organizationProfile = computed(() => {
   return null
 })
 
-const userProfile = computed(() => {
-  if (userType.value === 'individual' || userType.value === 'entrepreneur') {
-    return individualProfile?.value || entrepreneurProfile?.value
-  }
-  return organizationProfile?.value
-})
+// const userProfile = computed(() => {
+//   if (userType.value === 'individual' || userType.value === 'entrepreneur') {
+//     return individualProfile?.value || entrepreneurProfile?.value
+//   }
+//   return organizationProfile?.value
+// })
 
 const displayName = computed(() => {
   if (userType.value === 'individual') {
@@ -76,11 +76,11 @@ const displayName = computed(() => {
   }
 })
 
-const inn_ogrn = computed(() => {
-  if (organizationProfile.value)
-    return `${organizationProfile.value.details.inn} / ${organizationProfile.value.details.ogrn}`
-  else return ''
-})
+// const inn_ogrn = computed(() => {
+//   if (organizationProfile.value)
+//     return `${organizationProfile.value.details.inn} / ${organizationProfile.value.details.ogrn}`
+//   else return ''
+// })
 
 </script>
 <style lang="scss" scoped>

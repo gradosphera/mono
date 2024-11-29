@@ -4,7 +4,7 @@ import type { ExtensionDomainInterface } from '~/domain/extension/interfaces/ext
 import { GraphQLJSON } from 'graphql-type-json';
 
 @ObjectType('Extension')
-export class ExtensionGraphQLDTO<TConfig = any> implements ExtensionDomainInterface {
+export class ExtensionDTO<TConfig = any> implements ExtensionDomainInterface {
   @Field(() => String, { description: 'Уникальное имя расширения' })
   name: string;
 

@@ -13,16 +13,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
-    },
-    "./queries/*": {
-      "types": "./dist/queries/*.d.ts",
-      "import": "./dist/queries/*.mjs",
-      "require": "./dist/queries/*.cjs"
-    },
-    "./mutations/*": {
-      "types": "./dist/mutations/*.d.ts",
-      "import": "./dist/mutations/*.mjs",
-      "require": "./dist/mutations/*.cjs"
     }
   },
   "main": "./dist/index.mjs",
@@ -50,6 +40,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@wharfkit/antelope": "^1.0.13",
+    "@wharfkit/contract": "^1.1.5",
+    "@wharfkit/session": "^1.4.0",
+    "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "graphql": "^16.9.0",
     "graphql-request": "^7.1.2",
     "graphql-tag": "^2.12.6",

@@ -1,4 +1,4 @@
-import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
+import { type Filter, type InsertOneResult, UUID, type UpdateResult } from 'mongodb'
 import type { Cooperative } from 'cooptypes'
 import type { ValidateResult } from '../Services/Validator'
 import { Validator } from '../Services/Validator'
@@ -42,11 +42,10 @@ export class Organization {
 
     const bankData: PaymentData = {
       username: this.organization.username,
-      method_id: 1,
-      user_type: 'organization',
+      method_id: new UUID().toString(),
       method_type: 'bank_transfer',
       is_default: true,
-      data: bank_account as Cooperative.Payments.IBankAccount,
+      data: bank_account,
       deleted: false,
       block_num: currentBlock,
     }

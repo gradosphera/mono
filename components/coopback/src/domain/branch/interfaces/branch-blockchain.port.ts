@@ -1,14 +1,14 @@
-import type { SovietContract } from 'cooptypes';
-import { BranchDomainEntity } from '../entities/branch-domain.entity';
-import type { GetBranchesDomainInput } from './get-branches-input.interface';
+import { SovietContract } from 'cooptypes';
+import type { TransactResult } from '@wharfkit/session';
 
 export interface BranchBlockchainPort {
-  // registerBranch(data: { name: string; trustee: string }): Promise<void>;
-  // updateBranch(data: { name: string; trustee: string }): Promise<void>;
+  createBranch(data: SovietContract.Actions.Branches.CreateBranch.ICreateBranch): Promise<TransactResult>;
+  editBranch(data: SovietContract.Actions.Branches.EditBranch.IEditBranch): Promise<TransactResult>;
   getBranches(coopname: string): Promise<SovietContract.Tables.Branches.IBranch[]>;
-  getBranch(coopname: string, braname: string): Promise<SovietContract.Tables.Branches.IBranch>;
-  // addTrustee(): Promise<void>;
-  // deleteTrustee(): Promise<void>;
+  getBranch(coopname: string, braname: string): Promise<SovietContract.Tables.Branches.IBranch | null>;
+  deleteBranch(data: SovietContract.Actions.Branches.DeleteBranch.IDeleteBranch): Promise<TransactResult>;
+  addTrustedAccount(data: SovietContract.Actions.Branches.AddTrusted.IAddTrusted): Promise<TransactResult>;
+  deleteTrustedAccount(data: SovietContract.Actions.Branches.DeleteTrusted.IDeleteTrusted): Promise<TransactResult>;
 }
 
 export const BRANCH_BLOCKCHAIN_PORT = Symbol('BranchBlockchainPort');

@@ -51,7 +51,7 @@ export const createUser = catchAsync(async (req: RCreateUser, res) => {
 
 export const addUser = catchAsync(async (req: Request, res: Response) => {
   const body: IAddUser = req.body;
-  console.log('body: ', body);
+
   const newUser: ICreateUser = {
     ...body,
     public_key: '',

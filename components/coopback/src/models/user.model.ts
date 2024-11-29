@@ -37,7 +37,7 @@ const userSchema = new Schema<IUser, IUserModel>(
     type: {
       type: String,
       required: true,
-      enum: ['individual', 'entrepreneur', 'organization', 'service'],
+      enum: ['individual', 'entrepreneur', 'organization'],
     },
     public_key: {
       type: String,

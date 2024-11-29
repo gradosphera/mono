@@ -22,7 +22,7 @@ const props = defineProps({
     required: true,
   },
   method_id: {
-    type: Number,
+    type: String,
     required: true,
   },
   size: {

@@ -8,6 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@wharfkit/antelope':
+        specifier: ^1.0.13
+        version: 1.0.13
+      '@wharfkit/contract':
+        specifier: ^1.1.5
+        version: 1.1.5
+      '@wharfkit/session':
+        specifier: ^1.4.0
+        version: 1.4.0
+      '@wharfkit/wallet-plugin-privatekey':
+        specifier: ^1.1.0
+        version: 1.1.0(@wharfkit/session@1.4.0)
       graphql:
         specifier: ^16.9.0
         version: 16.9.0
@@ -1040,6 +1052,40 @@ packages:
   '@vue/shared@3.3.10':
     resolution: {integrity: sha512-2y3Y2J1a3RhFa0WisHvACJR2ncvWiVHcP8t0Inxo+NKz+8RKO4ZV8eZgCxRgQoA6ITfV12L4E6POOL9HOU5nqw==}
 
+  '@wharfkit/abicache@1.2.2':
+    resolution: {integrity: sha512-yOsYz2qQpQy7Nb8XZj62pZqp8YnmWDqFlrenYksBb9jl+1aWIpFhWd+14VEez4tUAezRH4UWW+w1SX5vhmUY9A==}
+
+  '@wharfkit/account@1.2.0':
+    resolution: {integrity: sha512-mO+FJEJVGJA3qEBD3LQmF0br157tva66jOwhB7E6UZZwuniXromkV51TKGWJ6hbi6HDwwiA1eSGWyQ6RDTQrSA==}
+
+  '@wharfkit/antelope@1.0.13':
+    resolution: {integrity: sha512-f4O5O8+6Bd5BHpMUHTmlWQmlhX5xYb4AfzT2NJweyqIPqQOstm+aInF42AtUhSALDa8fvoY80YZoqwM0L8TUyw==}
+
+  '@wharfkit/common@1.4.0':
+    resolution: {integrity: sha512-j7A+tcGUqB935mrojfsNCYoSBu6ZcO1nkEANMYVmvjO8VD9ZWm/uPfu9HsdBlnspQIhNeKnQJZuVGdawp0Ioqg==}
+    peerDependencies:
+      '@wharfkit/antelope': ^1.0.0
+
+  '@wharfkit/contract@1.1.5':
+    resolution: {integrity: sha512-I4w2QFvD/zb4uj5z0U4uQJLRCiZEbrT+AJ9/5goGm6SU42fsRud/k55qSBzW8Ij00OAv2h1+e8rR7xzUruXC9g==}
+
+  '@wharfkit/resources@1.3.1':
+    resolution: {integrity: sha512-XgL/yiwcJia8chYySt2dBOxa4BRKPqMeNxaZFvvzLgBI3s7m6MUXlXpZSeBvaQH+dr9D9nlBbmgP7PCBrJITIg==}
+
+  '@wharfkit/session@1.4.0':
+    resolution: {integrity: sha512-U+K9eWbYzFeDshYwgrhyNoF47kYToKFpTe6xFAwaJO+2w0kIkP0vtJFl7ygd06muh7Hu3K1BqrZ3j6+FyyuIyA==}
+
+  '@wharfkit/signing-request@3.2.0':
+    resolution: {integrity: sha512-rIMzqwAKA5vb09+1BI+9fUXbj73JIkYcD1XT/Tom+k/+bqi51JcmC0trjCOjTUOK9UYDabpxYFixrf1ZvQymKw==}
+
+  '@wharfkit/token@1.1.2':
+    resolution: {integrity: sha512-LYAGB7LnE3hxwjNsYYwpxbJ8APi0Y8pmh7i1SeKv13HaPVjuHisTnuPxJm3ndwU7pX9GT3hPyo/By0l3CEuLfw==}
+
+  '@wharfkit/wallet-plugin-privatekey@1.1.0':
+    resolution: {integrity: sha512-45LPj7AOVDm4RugDEhy0fnQX/BcMffeJPjGUCUrLazJ2S0Sti8nNk4nqiJqyme84c/0gq7d65vvwlmVfGtPVEg==}
+    peerDependencies:
+      '@wharfkit/session': ^1.1.0
+
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -1106,6 +1152,9 @@ packages:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
 
+  bn.js@4.12.1:
+    resolution: {integrity: sha512-k8TVBiPkPJT9uHLdOKfFpqcfprwBFOAAXXozRubr7R7PfIuKvQlzcI4M0pALeqXN09vdaMbUdUj+pass+uULAg==}
+
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
@@ -1118,6 +1167,9 @@ packages:
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
+
+  brorand@1.1.0:
+    resolution: {integrity: sha512-cKV8tMCEpQs4hK/ik71d6LrPOnpkpGBR0wzxqr68g2m/LB2GxVYQroAjMJZRVM1Y4BCjCKc3vAamxSzOY2RP+w==}
 
   browserslist@4.23.0:
     resolution: {integrity: sha512-QW8HiM1shhT2GuzkvklfjcKDiWFXHOeFCIA/huJPwHsslwcydgk7X+z2zXpEijP98UCY7HbubZt5J2Zgvf0CaQ==}
@@ -1384,6 +1436,9 @@ packages:
 
   electron-to-chromium@1.4.774:
     resolution: {integrity: sha512-132O1XCd7zcTkzS3FgkAzKmnBuNJjK8WjcTtNuoylj7MYbqw5eXehjQ5OK91g0zm7OTKIPeaAG4CPoRfD9M1Mg==}
+
+  elliptic@6.6.1:
+    resolution: {integrity: sha512-RaddvvMatK2LJHqFJ+YA4WysVN5Ita9E35botqIYspQ4TkRAlCicdzKOjlyv/1Za5RyTNn7di//eEV0uTAfe3g==}
 
   emoji-regex@10.3.0:
     resolution: {integrity: sha512-QpLs9D9v9kArv4lfDEgg1X/gN5XLnf/A6l9cs8SPZLRZR3ZkY9+kwIQTxm+fsSej5UMYGE8fdoaZVIBlqG0XTw==}
@@ -1814,9 +1869,15 @@ packages:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
 
+  hash.js@1.1.7:
+    resolution: {integrity: sha512-taOaskGt4z4SOANNseOviYDvjEJinIkRgmp7LbKP2YTTmVxWBl87s/uzK9r+44BclBSp2X7K1hqeNfz9JbBeXA==}
+
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
+
+  hmac-drbg@1.0.1:
+    resolution: {integrity: sha512-Tti3gMqLdZfhOQY1Mzf/AanLiqh1WTiJgEj26ZuYQ9fbkLomzGchCws4FyrSd4VkpBfiNhaE1On+lOz894jvXg==}
 
   hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
@@ -1930,6 +1991,9 @@ packages:
   jiti@1.21.6:
     resolution: {integrity: sha512-2yTgeWTWzMWkHu6Jp9NKgePDaYHbntiwvYuuJLbbN9vl7DC9DvXKOB2BC3ZZ92D3cvV/aflH0osDfwpHepQ53w==}
     hasBin: true
+
+  js-big-decimal@2.1.0:
+    resolution: {integrity: sha512-6BOJi5gJ/u5KIOiRjwDnYee64wDw48/mzObV10L5ZYZ/u3ujpzJrO1JyIdIYbfxJPhIT7+oKn7d/1Fw1kOsh2w==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -2093,6 +2157,12 @@ packages:
     resolution: {integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==}
     engines: {node: '>=4'}
 
+  minimalistic-assert@1.0.1:
+    resolution: {integrity: sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==}
+
+  minimalistic-crypto-utils@1.0.1:
+    resolution: {integrity: sha512-JIYlbt6g8i5jKfJ3xz7rF0LXmv2TkDxBLUkiBeZ7bAx4GnnNMr8xFpGnOxn6GhTEHx3SjRrZEoU+j04prX1ktg==}
+
   minimatch@10.0.1:
     resolution: {integrity: sha512-ethXTt3SGGR+95gudmqJ1eNhRO7eGEGIgYA9vnPatK4/etz2MEVDno5GMCibdMTuBMyElzIlgxMna3K94XDIDQ==}
     engines: {node: 20 || >=22}
@@ -2240,6 +2310,9 @@ packages:
 
   package-manager-detector@0.2.0:
     resolution: {integrity: sha512-E385OSk9qDcXhcM9LNSe4sdhx8a9mAPrZ4sMLW+tmxl5ZuGtPUcdFu+MPP2jbgiWAZ6Pfe5soGFMd+0Db5Vrog==}
+
+  pako@2.1.0:
+    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -3853,6 +3926,77 @@ snapshots:
 
   '@vue/shared@3.3.10': {}
 
+  '@wharfkit/abicache@1.2.2':
+    dependencies:
+      '@wharfkit/antelope': 1.0.13
+      '@wharfkit/signing-request': 3.2.0
+      pako: 2.1.0
+      tslib: 2.7.0
+
+  '@wharfkit/account@1.2.0':
+    dependencies:
+      '@wharfkit/antelope': 1.0.13
+      '@wharfkit/common': 1.4.0(@wharfkit/antelope@1.0.13)
+      '@wharfkit/contract': 1.1.5
+      '@wharfkit/resources': 1.3.1
+      '@wharfkit/token': 1.1.2
+      tslib: 2.7.0
+
+  '@wharfkit/antelope@1.0.13':
+    dependencies:
+      bn.js: 4.12.1
+      brorand: 1.1.0
+      elliptic: 6.6.1
+      hash.js: 1.1.7
+      pako: 2.1.0
+      tslib: 2.7.0
+
+  '@wharfkit/common@1.4.0(@wharfkit/antelope@1.0.13)':
+    dependencies:
+      '@wharfkit/antelope': 1.0.13
+      tslib: 2.7.0
+
+  '@wharfkit/contract@1.1.5':
+    dependencies:
+      '@wharfkit/abicache': 1.2.2
+      '@wharfkit/antelope': 1.0.13
+      '@wharfkit/signing-request': 3.2.0
+      tslib: 2.7.0
+
+  '@wharfkit/resources@1.3.1':
+    dependencies:
+      '@wharfkit/antelope': 1.0.13
+      bn.js: 4.12.1
+      js-big-decimal: 2.1.0
+      tslib: 2.7.0
+
+  '@wharfkit/session@1.4.0':
+    dependencies:
+      '@wharfkit/abicache': 1.2.2
+      '@wharfkit/account': 1.2.0
+      '@wharfkit/antelope': 1.0.13
+      '@wharfkit/common': 1.4.0(@wharfkit/antelope@1.0.13)
+      '@wharfkit/signing-request': 3.2.0
+      pako: 2.1.0
+      tslib: 2.7.0
+
+  '@wharfkit/signing-request@3.2.0':
+    dependencies:
+      '@wharfkit/antelope': 1.0.13
+      tslib: 2.7.0
+
+  '@wharfkit/token@1.1.2':
+    dependencies:
+      '@wharfkit/antelope': 1.0.13
+      '@wharfkit/contract': 1.1.5
+      bn.js: 4.12.1
+      tslib: 2.7.0
+
+  '@wharfkit/wallet-plugin-privatekey@1.1.0(@wharfkit/session@1.4.0)':
+    dependencies:
+      '@wharfkit/session': 1.4.0
+      tslib: 2.7.0
+
   acorn-jsx@5.3.2(acorn@8.12.1):
     dependencies:
       acorn: 8.12.1
@@ -3909,6 +4053,8 @@ snapshots:
 
   binary-extensions@2.3.0: {}
 
+  bn.js@4.12.1: {}
+
   boolbase@1.0.0: {}
 
   brace-expansion@1.1.11:
@@ -3923,6 +4069,8 @@ snapshots:
   braces@3.0.3:
     dependencies:
       fill-range: 7.1.1
+
+  brorand@1.1.0: {}
 
   browserslist@4.23.0:
     dependencies:
@@ -4210,6 +4358,16 @@ snapshots:
   eastasianwidth@0.2.0: {}
 
   electron-to-chromium@1.4.774: {}
+
+  elliptic@6.6.1:
+    dependencies:
+      bn.js: 4.12.1
+      brorand: 1.1.0
+      hash.js: 1.1.7
+      hmac-drbg: 1.0.1
+      inherits: 2.0.4
+      minimalistic-assert: 1.0.1
+      minimalistic-crypto-utils: 1.0.1
 
   emoji-regex@10.3.0: {}
 
@@ -4790,9 +4948,20 @@ snapshots:
 
   has-flag@4.0.0: {}
 
+  hash.js@1.1.7:
+    dependencies:
+      inherits: 2.0.4
+      minimalistic-assert: 1.0.1
+
   hasown@2.0.2:
     dependencies:
       function-bind: 1.1.2
+
+  hmac-drbg@1.0.1:
+    dependencies:
+      hash.js: 1.1.7
+      minimalistic-assert: 1.0.1
+      minimalistic-crypto-utils: 1.0.1
 
   hookable@5.5.3: {}
 
@@ -4880,6 +5049,8 @@ snapshots:
       '@isaacs/cliui': 8.0.2
 
   jiti@1.21.6: {}
+
+  js-big-decimal@2.1.0: {}
 
   js-tokens@4.0.0: {}
 
@@ -5042,6 +5213,10 @@ snapshots:
 
   min-indent@1.0.1: {}
 
+  minimalistic-assert@1.0.1: {}
+
+  minimalistic-crypto-utils@1.0.1: {}
+
   minimatch@10.0.1:
     dependencies:
       brace-expansion: 2.0.1
@@ -5187,6 +5362,8 @@ snapshots:
   package-json-from-dist@1.0.1: {}
 
   package-manager-detector@0.2.0: {}
+
+  pako@2.1.0: {}
 
   parent-module@1.0.1:
     dependencies:

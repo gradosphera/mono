@@ -21,7 +21,7 @@ export interface IBankTransferData {
 
 export interface IAddPaymentMethod {
   username: string;
-  method_id: number;
+  method_id: string;
   method_type: 'sbp' | 'bank_transfer';
   data: ISBPData | IBankTransferData;
 }
@@ -39,13 +39,15 @@ export function useAddPaymentMethod() {
     })
 
 
-    params.method_id = (store.methods.sort((a, b) => b.method_id - a.method_id)[0]?.method_id || 0) + 1
+    params.method_id = '1'
 
-    console.log(store.methods, store.methods.length, params.method_id)
     await sendPOST(`/v1/methods/${params.username}/add`, params)
 
     await store.loadUserWalet({
       coopname: COOPNAME,
+
+
+
       username: session.username
     })
   }

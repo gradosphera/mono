@@ -1,49 +1,206 @@
 import { BRANCH_BLOCKCHAIN_PORT, BranchBlockchainPort } from '../interfaces/branch-blockchain.port';
-import type { GetBranchesDomainInput } from '../interfaces/get-branches-input.interface';
+import type { GetBranchesDomainInput } from '../interfaces/get-branches-domain-input.interface';
 import { BranchDomainEntity } from '../entities/branch-domain.entity';
 import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { Inject, Injectable } from '@nestjs/common';
+import type { CreateBranchDomainInput } from '../interfaces/create-branch-domain-input.interface';
+import { HttpApiError } from '~/errors/http-api-error';
+import httpStatus from 'http-status';
+import type { EditBranchDomainInput } from '../interfaces/edit-branch-domain-input.interface';
+import type { DeleteBranchDomainInput } from '../interfaces/delete-branch-domain-input';
+import type { AddTrustedAccountDomainInterface } from '../interfaces/add-trusted-account-domain-input.interface';
+import type { DeleteTrustedAccountDomainInterface } from '../interfaces/delete-trusted-account-domain-input.interface';
+import { INDIVIDUAL_REPOSITORY, IndividualRepository } from '~/domain/common/repositories/individual.repository';
+import { IndividualDomainEntity } from '../entities/individual-domain.entity';
+import { OrganizationDomainEntity } from '../entities/organization-domain.entity';
 
 @Injectable()
 export class BranchDomainInteractor {
   constructor(
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
+    @Inject(INDIVIDUAL_REPOSITORY) private readonly individualRepository: IndividualRepository,
     @Inject(BRANCH_BLOCKCHAIN_PORT) private readonly branchBlockchainPort: BranchBlockchainPort
   ) {}
 
+  async getBranch(coopname: string, braname: string): Promise<BranchDomainEntity> {
+    const branch = await this.branchBlockchainPort.getBranch(coopname, braname);
+
+    if (!branch) {
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Кооперативный участок не найден');
+    }
+
+    const databaseData = await this.organizationRepository.findByUsername(braname);
+    const trusteeData = await this.individualRepository.findByUsername(branch.trustee);
+    const trustedData: IndividualDomainEntity[] = [];
+
+    for (const trusted of branch.trusted) {
+      const tr = await this.individualRepository.findByUsername(trusted);
+      trustedData.push(tr);
+    }
+
+    return new BranchDomainEntity(coopname, branch, databaseData, trusteeData, trustedData);
+  }
+
   async getBranches(data: GetBranchesDomainInput): Promise<BranchDomainEntity[]> {
     const branches = await this.branchBlockchainPort.getBranches(data.coopname);
+
+    // Фильтрация до сборки
+    const filteredBranches = data.braname ? branches.filter((branch) => branch.braname === data.braname) : branches;
+
     const result: BranchDomainEntity[] = [];
-
-    for (const branch of branches) {
-      const databaseData = await this.organizationRepository.findByUsername(data.coopname);
-
-      result.push(new BranchDomainEntity(branch, databaseData));
+    for (const branch of filteredBranches) {
+      const branchEntity = await this.getBranch(data.coopname, branch.braname);
+      result.push(branchEntity);
     }
 
     return result;
   }
 
-  // async createBranch(data: CreateBranchInput): Promise<BranchAggregate> {
-  //   // Проверяем существование участка
-  //   const existingBranch = await this.branchRepository.findByName(data.name);
-  //   if (existingBranch) {
-  //     throw new Error('Branch already exists');
-  //   }
+  async createBranch(data: CreateBranchDomainInput): Promise<BranchDomainEntity> {
+    // Проверяем существование участка
+    const existingBranch = await this.branchBlockchainPort.getBranch(data.coopname, data.braname);
 
-  //   // Сохраняем в базе данных
-  //   const branch = await this.branchRepository.save(data);
+    if (existingBranch) {
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Кооперативный участок уже создан');
+    }
+    console.log('data: ', data);
+    // извлекаем информацию о кооперативе
+    const cooperative = await this.organizationRepository.findByUsername(data.coopname);
+    const organizationEntity = new OrganizationDomainEntity(cooperative);
 
-  //   // Уведомляем блокчейн через порт
-  //   await this.blockchainPort.registerBranch({
-  //     name: branch.name,
-  //     trustee: branch.trustee,
-  //   });
+    //извлекаем информацию о председателе
+    const trustee = new IndividualDomainEntity(await this.individualRepository.findByUsername(data.trustee));
 
-  //   // Получаем дополнительные данные из блокчейна
-  //   const blockchainDetails = await this.blockchainPort.getBranchDetails(branch.name);
+    if (!cooperative) throw new HttpApiError(httpStatus.BAD_REQUEST, 'Кооперативный участок не найден');
 
-  //   // Возвращаем агрегат
-  //   return new BranchAggregate(branch, blockchainDetails);
-  // }
+    // комбинируем с входящими данными о КУ
+    const combinedData = new OrganizationDomainEntity({
+      ...organizationEntity,
+      ...data,
+      represented_by: {
+        first_name: trustee.first_name,
+        last_name: trustee.last_name,
+        middle_name: trustee.middle_name,
+        based_on: data.based_on,
+        position: 'председатель кооперативного участка',
+      },
+      username: data.braname,
+    });
+
+    // Сохраняем в базе данных
+    await this.organizationRepository.create(combinedData);
+
+    // Уведомляем блокчейн через порт
+    await this.branchBlockchainPort.createBranch({
+      coopname: data.coopname,
+      braname: data.braname,
+      trustee: data.trustee,
+    });
+
+    return this.getBranch(data.coopname, data.braname);
+  }
+
+  async editBranch(data: EditBranchDomainInput): Promise<BranchDomainEntity> {
+    // Проверяем существование участка
+    const existingBranch = await this.branchBlockchainPort.getBranch(data.coopname, data.braname);
+
+    if (!existingBranch) {
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Кооперативный участок не найден');
+    }
+
+    // Извлекаем информацию о кооперативе
+    const cooperative = await this.organizationRepository.findByUsername(data.coopname);
+
+    if (!cooperative) {
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Кооператив не найден');
+    }
+    const organizationEntity = new OrganizationDomainEntity(cooperative);
+
+    // Извлекаем информацию о председателе
+    const trustee = new IndividualDomainEntity(await this.individualRepository.findByUsername(data.trustee));
+
+    if (!trustee) {
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Председатель не найден');
+    }
+
+    // Комбинируем с новыми данными о КУ
+    const updatedData = new OrganizationDomainEntity({
+      ...organizationEntity,
+      ...data,
+      represented_by: {
+        first_name: trustee.first_name,
+        last_name: trustee.last_name,
+        middle_name: trustee.middle_name,
+        based_on: data.based_on,
+        position: 'председатель кооперативного участка',
+      },
+      username: data.braname,
+    });
+
+    // Обновляем в базе данных
+    await this.organizationRepository.create(updatedData);
+
+    // Уведомляем блокчейн через порт
+    await this.branchBlockchainPort.editBranch({
+      coopname: data.coopname,
+      braname: data.braname,
+      trustee: data.trustee,
+    });
+
+    // Возвращаем обновленный участок
+    return this.getBranch(data.coopname, data.braname);
+  }
+
+  async deleteBranch(data: DeleteBranchDomainInput): Promise<boolean> {
+    // Проверяем существование участка
+    const existingBranch = await this.branchBlockchainPort.getBranch(data.coopname, data.braname);
+
+    if (!existingBranch) {
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Кооперативный участок не найден');
+    }
+
+    // Уведомляем блокчейн через порт
+    await this.branchBlockchainPort.deleteBranch({
+      coopname: data.coopname,
+      braname: data.braname,
+    });
+
+    return true;
+  }
+
+  async addTrustedAccount(data: AddTrustedAccountDomainInterface): Promise<BranchDomainEntity> {
+    // Проверяем существование участка
+    const existingBranch = await this.branchBlockchainPort.getBranch(data.coopname, data.braname);
+
+    if (!existingBranch) {
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Кооперативный участок не найден');
+    }
+
+    // Уведомляем блокчейн через порт
+    await this.branchBlockchainPort.addTrustedAccount({
+      coopname: data.coopname,
+      braname: data.braname,
+      trusted: data.trusted,
+    });
+
+    return await this.getBranch(data.coopname, data.braname);
+  }
+
+  async deleteTrustedAccount(data: DeleteTrustedAccountDomainInterface): Promise<BranchDomainEntity> {
+    // Проверяем существование участка
+    const existingBranch = await this.branchBlockchainPort.getBranch(data.coopname, data.braname);
+
+    if (!existingBranch) {
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Кооперативный участок не найден');
+    }
+
+    // Уведомляем блокчейн через порт
+    await this.branchBlockchainPort.deleteTrustedAccount({
+      coopname: data.coopname,
+      braname: data.braname,
+      trusted: data.trusted,
+    });
+
+    return await this.getBranch(data.coopname, data.braname);
+  }
 }

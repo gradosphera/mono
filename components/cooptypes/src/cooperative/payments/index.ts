@@ -18,8 +18,7 @@ export type MethodTypes = 'sbp' | 'bank_transfer'
 
 export interface IPaymentData {
   username: string
-  method_id: number
-  user_type: 'individual' | 'entrepreneur' | 'organization'
+  method_id: string
   method_type: MethodTypes
   is_default: boolean
   data: ISbpDetails | IBankAccount

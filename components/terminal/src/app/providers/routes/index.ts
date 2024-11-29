@@ -19,6 +19,7 @@ import { InstalledExtensions } from 'src/pages/ExtStore/InstalledExtensions';
 import { ExtensionsShowcase } from 'src/pages/ExtStore/ExtensionsShowcase';
 import { ExtensionStoreBase } from 'src/pages/ExtStore/BaseRoute';
 import { ExtensionPage } from 'src/pages/ExtStore/ExtensionPage';
+import { ListOfBranchesPage } from 'src/pages/Cooperative/ListOfBranches';
 
 
 const baseRoutes = [
@@ -94,6 +95,12 @@ const baseRoutes = [
             path: 'accumulation-funds',
             name: 'accumulation-funds',
             component: AccumulationFunds,
+            children: [],
+          },
+          {
+            path: 'branches',
+            name: 'branches',
+            component: ListOfBranchesPage,
             children: [],
           },
           {

@@ -1,11 +1,11 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { BankAccountGraphQLDTO } from './bank-account.dto';
-import { RepresentedByGraphQLDTO } from './represented-by.dto';
-import { DetailsGraphQLDTO } from './details.dto';
+import { BankAccountDTO } from '../../payment-method/dto/bank-account.dto';
+import { RepresentedByDTO } from './represented-by.dto';
 import type { OrganizationDomainInterface } from '../../../domain/common/interfaces/organization-domain.interface';
+import { OrganizationDetailsDTO } from './organization-details.dto';
 
 @ObjectType('Organization')
-export class OrganizationGraphQLDTO implements OrganizationDomainInterface {
+export class OrganizationDTO implements OrganizationDomainInterface {
   @Field(() => String, { description: 'Имя аккаунта организации' })
   username: string;
 
@@ -18,8 +18,8 @@ export class OrganizationGraphQLDTO implements OrganizationDomainInterface {
   @Field(() => String, { description: 'Полное название' })
   full_name: string;
 
-  @Field(() => RepresentedByGraphQLDTO, { description: 'Представитель организации' })
-  represented_by: RepresentedByGraphQLDTO;
+  @Field(() => RepresentedByDTO, { description: 'Представитель организации' })
+  represented_by: RepresentedByDTO;
 
   @Field(() => String, { description: 'Страна' })
   country: string;
@@ -39,25 +39,25 @@ export class OrganizationGraphQLDTO implements OrganizationDomainInterface {
   @Field(() => String, { description: 'Email' })
   email: string;
 
-  @Field(() => DetailsGraphQLDTO, { description: 'Детали организации' })
-  details: DetailsGraphQLDTO;
+  @Field(() => OrganizationDetailsDTO, { description: 'Детали организации' })
+  details: OrganizationDetailsDTO;
 
-  @Field(() => BankAccountGraphQLDTO, { description: 'Банковский счет' })
-  bank_account: BankAccountGraphQLDTO;
+  @Field(() => BankAccountDTO, { description: 'Банковский счет' })
+  bank_account: BankAccountDTO;
 
   constructor(data: OrganizationDomainInterface) {
     this.username = data.username;
     this.type = data.type;
     this.short_name = data.short_name;
     this.full_name = data.full_name;
-    this.represented_by = new RepresentedByGraphQLDTO(data.represented_by);
+    this.represented_by = new RepresentedByDTO(data.represented_by);
     this.country = data.country;
     this.city = data.city;
     this.full_address = data.full_address;
     this.fact_address = data.fact_address;
     this.phone = data.phone;
     this.email = data.email;
-    this.details = new DetailsGraphQLDTO(data.details);
-    this.bank_account = new BankAccountGraphQLDTO(data.bank_account);
+    this.details = new OrganizationDetailsDTO(data.details);
+    this.bank_account = new BankAccountDTO(data.bank_account);
   }
 }

@@ -11,6 +11,7 @@ import expressApp from './app';
 import { WinstonLoggerService } from './modules/logger/logger-app.service';
 import { GraphQLExceptionFilter } from './filters/graphql-exceptions.filter';
 import { migrateData } from './migrator/migrate';
+import { ValidationPipe } from '@nestjs/common';
 
 const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
@@ -42,6 +43,7 @@ async function bootstrap() {
 
   // Глобальный фильтр для перехвата всех исключений внутри NestJS
   nestApp.useGlobalFilters(new GraphQLExceptionFilter());
+  nestApp.useGlobalPipes(new ValidationPipe({ errorHttpStatusCode: 422 }));
 
   // Запуск сервера
   await nestApp.listen(config.port, () => {

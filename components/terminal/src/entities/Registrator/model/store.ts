@@ -27,7 +27,6 @@ const initialUserDataState: ICreateUserData = {
   },
   organization_data: {
     type: 'coop',
-    is_cooperative: false,
     short_name: '',
     full_name: '',
     represented_by: {
@@ -40,6 +39,7 @@ const initialUserDataState: ICreateUserData = {
     country: 'Russia',
     city: '',
     full_address: '',
+    fact_address: '',
     phone: '',
     email: '',
     details: {

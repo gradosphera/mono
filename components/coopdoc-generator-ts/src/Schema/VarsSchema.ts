@@ -66,6 +66,16 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       required: ['protocol_day_month_year', 'protocol_number'],
       additionalProperties: true,
     },
+    coopenomics_agreement: {
+      type: 'object',
+      properties: {
+        protocol_number: { type: 'string' },
+        protocol_day_month_year: { type: 'string' },
+      },
+      required: ['protocol_day_month_year', 'protocol_number'],
+      additionalProperties: true,
+      nullable: true,
+    },
   },
   required: [ // соблюдать порядок следования!
     // 'deleted', //not_required

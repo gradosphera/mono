@@ -1,7 +1,7 @@
 // domain/appstore/services/appstore-domain.service.ts
 
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
-import { EXTENSION_REPOSITORY, ExtensionDomainRepository } from '../repositories/extension-domain.repository.interface';
+import { EXTENSION_REPOSITORY, ExtensionDomainRepository } from '../repositories/extension-domain.repository';
 import { ExtensionDomainEntity } from '../entities/extension-domain.entity';
 
 @Injectable()

@@ -48,7 +48,6 @@ export function useAddUser() {
       minimum,
       spread_initial: addUserState.spread_initial,
     };
-    console.log('data: ', data, addUserState.created_at)
 
     await api.addUser(data);
   }

@@ -28,7 +28,7 @@ const MethodTypes = Joi.string().valid('sbp', 'bank_transfer');
 
 export const ISavePaymentMethod = Joi.object({
   username: Joi.string().required(),
-  method_id: Joi.number().required(),
+  method_id: Joi.string().required(),
   method_type: MethodTypes.required(),
   data: Joi.alternatives().try(ISbpDetails, IBankAccount).required(),
 });

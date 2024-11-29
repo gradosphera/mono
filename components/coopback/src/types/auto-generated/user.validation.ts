@@ -26,7 +26,6 @@ export interface IAddUser {
       ogrn: string;
     };
     email: string;
-    fact_address: string;
     first_name: string;
     full_address: string;
     last_name: string;
@@ -112,7 +111,6 @@ export interface ICreateUser {
       ogrn: string;
     };
     email: string;
-    fact_address: string;
     first_name: string;
     full_address: string;
     last_name: string;
@@ -196,7 +194,6 @@ export interface IEntrepreneurData {
     ogrn: string;
   };
   email: string;
-  fact_address: string;
   first_name: string;
   full_address: string;
   last_name: string;
@@ -280,7 +277,6 @@ export interface RAddUser {
         ogrn: string;
       };
       email: string;
-      fact_address: string;
       first_name: string;
       full_address: string;
       last_name: string;
@@ -368,7 +364,6 @@ export interface RCreateUser {
         ogrn: string;
       };
       email: string;
-      fact_address: string;
       first_name: string;
       full_address: string;
       last_name: string;

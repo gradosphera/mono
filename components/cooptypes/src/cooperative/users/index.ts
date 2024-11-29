@@ -57,7 +57,6 @@ export interface IEntrepreneurData {
   country: string
   city: string
   full_address: string
-  fact_address: string
   details: { inn: string, ogrn: string }
   bank_account: IBankAccount
   block_num?: number

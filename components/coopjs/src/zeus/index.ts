@@ -910,11 +910,164 @@ export type ScalarCoders = {
 	DateTime?: ScalarResolver;
 	JSON?: ScalarResolver;
 }
-type ZEUS_UNIONS = never
+type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"]
 
 export type ValueTypes = {
-    /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
+    ["AddTrustedAccountInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
+	trusted: string | Variable<any, string>
+};
+	["BankAccount"]: AliasType<{
+	/** Номер банковского счета */
+	account_number?:boolean | `@${string}`,
+	/** Название банка */
+	bank_name?:boolean | `@${string}`,
+	/** Номер карты */
+	card_number?:boolean | `@${string}`,
+	/** Валюта счета */
+	currency?:boolean | `@${string}`,
+	/** Детали счета */
+	details?:ValueTypes["BankAccountDetails"],
+		__typename?: boolean | `@${string}`
+}>;
+	["BankAccountDetails"]: AliasType<{
+	/** БИК банка */
+	bik?:boolean | `@${string}`,
+	/** Корреспондентский счет */
+	corr?:boolean | `@${string}`,
+	/** КПП банка */
+	kpp?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["BankAccountDetailsInput"]: {
+	/** БИК банка */
+	bik: string | Variable<any, string>,
+	/** Корреспондентский счет */
+	corr: string | Variable<any, string>,
+	/** КПП банка */
+	kpp: string | Variable<any, string>
+};
+	["BankAccountInput"]: {
+	/** Номер банковского счета */
+	account_number: string | Variable<any, string>,
+	/** Название банка */
+	bank_name: string | Variable<any, string>,
+	/** Номер карты */
+	card_number?: string | undefined | null | Variable<any, string>,
+	/** Валюта счета */
+	currency: string | Variable<any, string>,
+	/** Детали счета */
+	details: ValueTypes["BankAccountDetailsInput"] | Variable<any, string>
+};
+	["Branch"]: AliasType<{
+	/** Банковский счет */
+	bank_account?:ValueTypes["BankAccount"],
+	/** Уникальное имя кооперативного участка */
+	braname?:boolean | `@${string}`,
+	/** Город */
+	city?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Страна */
+	country?:boolean | `@${string}`,
+	/** Детали организации */
+	details?:ValueTypes["OrganizationDetails"],
+	/** Email */
+	email?:boolean | `@${string}`,
+	/** Фактический адрес */
+	fact_address?:boolean | `@${string}`,
+	/** Полный адрес */
+	full_address?:boolean | `@${string}`,
+	/** Полное название организации */
+	full_name?:boolean | `@${string}`,
+	/** Телефон */
+	phone?:boolean | `@${string}`,
+	/** Представитель организации */
+	represented_by?:ValueTypes["RepresentedBy"],
+	/** Краткое название организации */
+	short_name?:boolean | `@${string}`,
+	/** Доверенные аккаунты */
+	trusted?:ValueTypes["Individual"],
+	/** Председатель кооперативного участка */
+	trustee?:ValueTypes["Individual"],
+	/** Тип организации */
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CreateBankAccountInput"]: {
+	/** Данные для банковского перевода */
+	data: ValueTypes["BankAccountInput"] | Variable<any, string>,
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
+	["CreateBranchInput"]: {
+	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
+	based_on: string | Variable<any, string>,
+	/** Имя аккаунта кооперативного участка */
+	braname: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Электронная почта */
+	email: string | Variable<any, string>,
+	/** Фактический адрес */
+	fact_address: string | Variable<any, string>,
+	/** Полное имя организации кооперативного участка */
+	full_name: string | Variable<any, string>,
+	/** Телефон */
+	phone: string | Variable<any, string>,
+	/** Краткое имя организации кооперативного участка */
+	short_name: string | Variable<any, string>,
+	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
+	trustee: string | Variable<any, string>
+};
+	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
+	["DeleteBankAccountInput"]: {
+	/** Идентификатор метода оплаты */
+	method_id: string | Variable<any, string>,
+	/** Имя пользователя, чей метод оплаты нужно удалить */
+	username: string | Variable<any, string>
+};
+	["DeleteBranchInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>
+};
+	["DeleteTrustedAccountInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
+	trusted: string | Variable<any, string>
+};
+	["EditBranchInput"]: {
+	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
+	based_on: string | Variable<any, string>,
+	/** Имя аккаунта кооперативного участка */
+	braname: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Электронная почта */
+	email: string | Variable<any, string>,
+	/** Фактический адрес */
+	fact_address: string | Variable<any, string>,
+	/** Полное имя организации кооперативного участка */
+	full_name: string | Variable<any, string>,
+	/** Телефон */
+	phone: string | Variable<any, string>,
+	/** Краткое имя организации кооперативного участка */
+	short_name: string | Variable<any, string>,
+	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
+	trustee: string | Variable<any, string>
+};
 	["Extension"]: AliasType<{
 	/** Показывает, доступно ли расширение */
 	available?:boolean | `@${string}`,
@@ -958,6 +1111,12 @@ export type ValueTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>
 };
+	["GetBranchesInput"]: {
+	/** Фильтр по имени аккаунта кооперативного участка */
+	braname?: string | undefined | null | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>
+};
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null | Variable<any, string>,
@@ -966,27 +1125,305 @@ export type ValueTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null | Variable<any, string>
 };
+	["GetPaymentMethodsInput"]: {
+	/** Количество элементов на странице */
+	limit: number | Variable<any, string>,
+	/** Номер страницы */
+	page: number | Variable<any, string>,
+	/** Ключ сортировки (например, "name") */
+	sortBy?: string | undefined | null | Variable<any, string>,
+	/** Направление сортировки ("ASC" или "DESC") */
+	sortOrder: string | Variable<any, string>,
+	/** Имя пользователя для фильтрации методов оплаты */
+	username?: string | undefined | null | Variable<any, string>
+};
+	["Individual"]: AliasType<{
+	/** Дата рождения */
+	birthdate?:boolean | `@${string}`,
+	/** Email */
+	email?:boolean | `@${string}`,
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Полный адрес */
+	full_address?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Данные паспорта */
+	passport?:ValueTypes["Passport"],
+	/** Телефон */
+	phone?:boolean | `@${string}`,
+	/** Имя аккаунта */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
 	["Mutation"]: AliasType<{
+addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
+createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
+createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
+deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
+deletePaymentMethod?: [{	data: ValueTypes["DeleteBankAccountInput"] | Variable<any, string>},boolean | `@${string}`],
+deleteTrustedAccount?: [{	data: ValueTypes["DeleteTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
+editBranch?: [{	data: ValueTypes["EditBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
 installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
+updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
 		__typename?: boolean | `@${string}`
 }>;
+	["OrganizationDetails"]: AliasType<{
+	/** ИНН */
+	inn?:boolean | `@${string}`,
+	/** КПП */
+	kpp?:boolean | `@${string}`,
+	/** ОГРН */
+	ogrn?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["PaymentMethod"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["Passport"]: AliasType<{
+	/** Код подразделения */
+	code?:boolean | `@${string}`,
+	/** Дата выдачи */
+	issued_at?:boolean | `@${string}`,
+	/** Кем выдан */
+	issued_by?:boolean | `@${string}`,
+	/** Номер паспорта */
+	number?:boolean | `@${string}`,
+	/** Серия паспорта */
+	series?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaymentMethod"]: AliasType<{
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Данные метода оплаты */
+	data?:ValueTypes["PaymentMethodData"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default?:boolean | `@${string}`,
+	/** Идентификатор метода оплаты */
+	method_id?:boolean | `@${string}`,
+	/** Тип метода оплаты (например, sbp, bank_transfer) */
+	method_type?:boolean | `@${string}`,
+	/** Дата обновления */
+	updated_at?:boolean | `@${string}`,
+	/** Имя пользователя, к которому привязан метод оплаты */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaymentMethodData"]: AliasType<{		["...on BankAccount"]?: ValueTypes["BankAccount"],
+		["...on SbpAccount"]?: ValueTypes["SbpAccount"]
+		__typename?: boolean | `@${string}`
+}>;
 	["Query"]: AliasType<{
+getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
+getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginationResult"]],
+		__typename?: boolean | `@${string}`
+}>;
+	["RepresentedBy"]: AliasType<{
+	/** На основании чего действует */
+	based_on?:boolean | `@${string}`,
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Должность */
+	position?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["SbpAccount"]: AliasType<{
+	/** Мобильный телефон получателя */
+	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string | Variable<any, string>
+};
+	["UpdateBankAccountInput"]: {
+	/** Данные банковского счёта */
+	data: ValueTypes["BankAccountInput"] | Variable<any, string>,
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean | Variable<any, string>,
+	/** Идентификатор платежного метода */
+	method_id: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
 }
   }
 
 export type ResolverInputTypes = {
-    /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
+    ["AddTrustedAccountInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
+	trusted: string
+};
+	["BankAccount"]: AliasType<{
+	/** Номер банковского счета */
+	account_number?:boolean | `@${string}`,
+	/** Название банка */
+	bank_name?:boolean | `@${string}`,
+	/** Номер карты */
+	card_number?:boolean | `@${string}`,
+	/** Валюта счета */
+	currency?:boolean | `@${string}`,
+	/** Детали счета */
+	details?:ResolverInputTypes["BankAccountDetails"],
+		__typename?: boolean | `@${string}`
+}>;
+	["BankAccountDetails"]: AliasType<{
+	/** БИК банка */
+	bik?:boolean | `@${string}`,
+	/** Корреспондентский счет */
+	corr?:boolean | `@${string}`,
+	/** КПП банка */
+	kpp?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["BankAccountDetailsInput"]: {
+	/** БИК банка */
+	bik: string,
+	/** Корреспондентский счет */
+	corr: string,
+	/** КПП банка */
+	kpp: string
+};
+	["BankAccountInput"]: {
+	/** Номер банковского счета */
+	account_number: string,
+	/** Название банка */
+	bank_name: string,
+	/** Номер карты */
+	card_number?: string | undefined | null,
+	/** Валюта счета */
+	currency: string,
+	/** Детали счета */
+	details: ResolverInputTypes["BankAccountDetailsInput"]
+};
+	["Branch"]: AliasType<{
+	/** Банковский счет */
+	bank_account?:ResolverInputTypes["BankAccount"],
+	/** Уникальное имя кооперативного участка */
+	braname?:boolean | `@${string}`,
+	/** Город */
+	city?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Страна */
+	country?:boolean | `@${string}`,
+	/** Детали организации */
+	details?:ResolverInputTypes["OrganizationDetails"],
+	/** Email */
+	email?:boolean | `@${string}`,
+	/** Фактический адрес */
+	fact_address?:boolean | `@${string}`,
+	/** Полный адрес */
+	full_address?:boolean | `@${string}`,
+	/** Полное название организации */
+	full_name?:boolean | `@${string}`,
+	/** Телефон */
+	phone?:boolean | `@${string}`,
+	/** Представитель организации */
+	represented_by?:ResolverInputTypes["RepresentedBy"],
+	/** Краткое название организации */
+	short_name?:boolean | `@${string}`,
+	/** Доверенные аккаунты */
+	trusted?:ResolverInputTypes["Individual"],
+	/** Председатель кооперативного участка */
+	trustee?:ResolverInputTypes["Individual"],
+	/** Тип организации */
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CreateBankAccountInput"]: {
+	/** Данные для банковского перевода */
+	data: ResolverInputTypes["BankAccountInput"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CreateBranchInput"]: {
+	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
+	based_on: string,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Электронная почта */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полное имя организации кооперативного участка */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Краткое имя организации кооперативного участка */
+	short_name: string,
+	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
+	trustee: string
+};
+	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
+	["DeleteBankAccountInput"]: {
+	/** Идентификатор метода оплаты */
+	method_id: string,
+	/** Имя пользователя, чей метод оплаты нужно удалить */
+	username: string
+};
+	["DeleteBranchInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string
+};
+	["DeleteTrustedAccountInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
+	trusted: string
+};
+	["EditBranchInput"]: {
+	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
+	based_on: string,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Электронная почта */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полное имя организации кооперативного участка */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Краткое имя организации кооперативного участка */
+	short_name: string,
+	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
+	trustee: string
+};
 	["Extension"]: AliasType<{
 	/** Показывает, доступно ли расширение */
 	available?:boolean | `@${string}`,
@@ -1030,6 +1467,12 @@ export type ResolverInputTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ResolverInputTypes["DateTime"] | undefined | null
 };
+	["GetBranchesInput"]: {
+	/** Фильтр по имени аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string
+};
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null,
@@ -1038,21 +1481,147 @@ export type ResolverInputTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetPaymentMethodsInput"]: {
+	/** Количество элементов на странице */
+	limit: number,
+	/** Номер страницы */
+	page: number,
+	/** Ключ сортировки (например, "name") */
+	sortBy?: string | undefined | null,
+	/** Направление сортировки ("ASC" или "DESC") */
+	sortOrder: string,
+	/** Имя пользователя для фильтрации методов оплаты */
+	username?: string | undefined | null
+};
+	["Individual"]: AliasType<{
+	/** Дата рождения */
+	birthdate?:boolean | `@${string}`,
+	/** Email */
+	email?:boolean | `@${string}`,
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Полный адрес */
+	full_address?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Данные паспорта */
+	passport?:ResolverInputTypes["Passport"],
+	/** Телефон */
+	phone?:boolean | `@${string}`,
+	/** Имя аккаунта */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
 	["Mutation"]: AliasType<{
+addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
+createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
+createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
+deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
+deletePaymentMethod?: [{	data: ResolverInputTypes["DeleteBankAccountInput"]},boolean | `@${string}`],
+deleteTrustedAccount?: [{	data: ResolverInputTypes["DeleteTrustedAccountInput"]},ResolverInputTypes["Branch"]],
+editBranch?: [{	data: ResolverInputTypes["EditBranchInput"]},ResolverInputTypes["Branch"]],
 installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
+updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
 		__typename?: boolean | `@${string}`
 }>;
+	["OrganizationDetails"]: AliasType<{
+	/** ИНН */
+	inn?:boolean | `@${string}`,
+	/** КПП */
+	kpp?:boolean | `@${string}`,
+	/** ОГРН */
+	ogrn?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["PaymentMethod"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["Passport"]: AliasType<{
+	/** Код подразделения */
+	code?:boolean | `@${string}`,
+	/** Дата выдачи */
+	issued_at?:boolean | `@${string}`,
+	/** Кем выдан */
+	issued_by?:boolean | `@${string}`,
+	/** Номер паспорта */
+	number?:boolean | `@${string}`,
+	/** Серия паспорта */
+	series?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaymentMethod"]: AliasType<{
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Данные метода оплаты */
+	data?:ResolverInputTypes["PaymentMethodData"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default?:boolean | `@${string}`,
+	/** Идентификатор метода оплаты */
+	method_id?:boolean | `@${string}`,
+	/** Тип метода оплаты (например, sbp, bank_transfer) */
+	method_type?:boolean | `@${string}`,
+	/** Дата обновления */
+	updated_at?:boolean | `@${string}`,
+	/** Имя пользователя, к которому привязан метод оплаты */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaymentMethodData"]: AliasType<{
+	BankAccount?:ResolverInputTypes["BankAccount"],
+	SbpAccount?:ResolverInputTypes["SbpAccount"],
+		__typename?: boolean | `@${string}`
+}>;
 	["Query"]: AliasType<{
+getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
+getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaginationResult"]],
+		__typename?: boolean | `@${string}`
+}>;
+	["RepresentedBy"]: AliasType<{
+	/** На основании чего действует */
+	based_on?:boolean | `@${string}`,
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Должность */
+	position?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["SbpAccount"]: AliasType<{
+	/** Мобильный телефон получателя */
+	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
+};
+	["UpdateBankAccountInput"]: {
+	/** Данные банковского счёта */
+	data: ResolverInputTypes["BankAccountInput"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Идентификатор платежного метода */
+	method_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["schema"]: AliasType<{
 	query?:ResolverInputTypes["Query"],
@@ -1062,8 +1631,158 @@ getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined |
   }
 
 export type ModelTypes = {
-    /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
+    ["AddTrustedAccountInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
+	trusted: string
+};
+	["BankAccount"]: {
+		/** Номер банковского счета */
+	account_number: string,
+	/** Название банка */
+	bank_name: string,
+	/** Номер карты */
+	card_number?: string | undefined | null,
+	/** Валюта счета */
+	currency: string,
+	/** Детали счета */
+	details: ModelTypes["BankAccountDetails"]
+};
+	["BankAccountDetails"]: {
+		/** БИК банка */
+	bik: string,
+	/** Корреспондентский счет */
+	corr: string,
+	/** КПП банка */
+	kpp: string
+};
+	["BankAccountDetailsInput"]: {
+	/** БИК банка */
+	bik: string,
+	/** Корреспондентский счет */
+	corr: string,
+	/** КПП банка */
+	kpp: string
+};
+	["BankAccountInput"]: {
+	/** Номер банковского счета */
+	account_number: string,
+	/** Название банка */
+	bank_name: string,
+	/** Номер карты */
+	card_number?: string | undefined | null,
+	/** Валюта счета */
+	currency: string,
+	/** Детали счета */
+	details: ModelTypes["BankAccountDetailsInput"]
+};
+	["Branch"]: {
+		/** Банковский счет */
+	bank_account: ModelTypes["BankAccount"],
+	/** Уникальное имя кооперативного участка */
+	braname: string,
+	/** Город */
+	city: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: ModelTypes["OrganizationDetails"],
+	/** Email */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное название организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: ModelTypes["RepresentedBy"],
+	/** Краткое название организации */
+	short_name: string,
+	/** Доверенные аккаунты */
+	trusted: Array<ModelTypes["Individual"]>,
+	/** Председатель кооперативного участка */
+	trustee: ModelTypes["Individual"],
+	/** Тип организации */
+	type: string
+};
+	["CreateBankAccountInput"]: {
+	/** Данные для банковского перевода */
+	data: ModelTypes["BankAccountInput"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CreateBranchInput"]: {
+	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
+	based_on: string,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Электронная почта */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полное имя организации кооперативного участка */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Краткое имя организации кооперативного участка */
+	short_name: string,
+	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
+	trustee: string
+};
+	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
+	["DeleteBankAccountInput"]: {
+	/** Идентификатор метода оплаты */
+	method_id: string,
+	/** Имя пользователя, чей метод оплаты нужно удалить */
+	username: string
+};
+	["DeleteBranchInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string
+};
+	["DeleteTrustedAccountInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
+	trusted: string
+};
+	["EditBranchInput"]: {
+	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
+	based_on: string,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Электронная почта */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полное имя организации кооперативного участка */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Краткое имя организации кооперативного участка */
+	short_name: string,
+	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
+	trustee: string
+};
 	["Extension"]: {
 		/** Показывает, доступно ли расширение */
 	available: boolean,
@@ -1106,6 +1825,12 @@ export type ModelTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ModelTypes["DateTime"] | undefined | null
 };
+	["GetBranchesInput"]: {
+	/** Фильтр по имени аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string
+};
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null,
@@ -1114,23 +1839,148 @@ export type ModelTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetPaymentMethodsInput"]: {
+	/** Количество элементов на странице */
+	limit: number,
+	/** Номер страницы */
+	page: number,
+	/** Ключ сортировки (например, "name") */
+	sortBy?: string | undefined | null,
+	/** Направление сортировки ("ASC" или "DESC") */
+	sortOrder: string,
+	/** Имя пользователя для фильтрации методов оплаты */
+	username?: string | undefined | null
+};
+	["Individual"]: {
+		/** Дата рождения */
+	birthdate: string,
+	/** Email */
+	email: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: ModelTypes["Passport"] | undefined | null,
+	/** Телефон */
+	phone: string,
+	/** Имя аккаунта */
+	username: string
+};
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:any;
 	["Mutation"]: {
-		/** Установить расширение */
+		/** Добавить доверенное лицо кооперативного участка */
+	addTrustedAccount: ModelTypes["Branch"],
+	/** Добавить метод оплаты */
+	createBankAccount: ModelTypes["PaymentMethod"],
+	/** Создать кооперативный участок */
+	createBranch: ModelTypes["Branch"],
+	/** Удалить кооперативный участок */
+	deleteBranch: boolean,
+	/** Удалить метод оплаты */
+	deletePaymentMethod: boolean,
+	/** Удалить доверенное лицо кооперативного участка */
+	deleteTrustedAccount: ModelTypes["Branch"],
+	/** Изменить кооперативный участок */
+	editBranch: ModelTypes["Branch"],
+	/** Установить расширение */
 	installExtension: ModelTypes["Extension"],
 	/** Удалить расширение */
 	uninstallExtension: boolean,
+	/** Обновить банковский счёт */
+	updateBankAccount: ModelTypes["PaymentMethod"],
 	/** Обновить расширение */
 	updateExtension: ModelTypes["Extension"]
 };
+	["OrganizationDetails"]: {
+		/** ИНН */
+	inn: string,
+	/** КПП */
+	kpp: string,
+	/** ОГРН */
+	ogrn: string
+};
+	["PaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["PaymentMethod"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["Passport"]: {
+		/** Код подразделения */
+	code: string,
+	/** Дата выдачи */
+	issued_at: string,
+	/** Кем выдан */
+	issued_by: string,
+	/** Номер паспорта */
+	number: number,
+	/** Серия паспорта */
+	series: number
+};
+	["PaymentMethod"]: {
+		/** Дата создания */
+	created_at: ModelTypes["DateTime"],
+	/** Данные метода оплаты */
+	data: ModelTypes["PaymentMethodData"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Идентификатор метода оплаты */
+	method_id: string,
+	/** Тип метода оплаты (например, sbp, bank_transfer) */
+	method_type: string,
+	/** Дата обновления */
+	updated_at: ModelTypes["DateTime"],
+	/** Имя пользователя, к которому привязан метод оплаты */
+	username: string
+};
+	["PaymentMethodData"]:ModelTypes["BankAccount"] | ModelTypes["SbpAccount"];
 	["Query"]: {
-		/** Получить список расширений */
-	getExtensions: Array<ModelTypes["Extension"]>
+		/** Получить список кооперативных участков */
+	getBranches: Array<ModelTypes["Branch"]>,
+	/** Получить список расширений */
+	getExtensions: Array<ModelTypes["Extension"]>,
+	/** Получить список методов оплаты */
+	getPaymentMethods: ModelTypes["PaginationResult"]
+};
+	["RepresentedBy"]: {
+		/** На основании чего действует */
+	based_on: string,
+	/** Имя */
+	first_name: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Должность */
+	position: string
+};
+	["SbpAccount"]: {
+		/** Мобильный телефон получателя */
+	phone: string
 };
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
+};
+	["UpdateBankAccountInput"]: {
+	/** Данные банковского счёта */
+	data: ModelTypes["BankAccountInput"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Идентификатор платежного метода */
+	method_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["schema"]: {
 	query?: ModelTypes["Query"] | undefined | null,
@@ -1142,8 +1992,161 @@ export type GraphQLTypes = {
     // ------------------------------------------------------;
 	// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY);
 	// ------------------------------------------------------;
+	["AddTrustedAccountInput"]: {
+		/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
+	trusted: string
+};
+	["BankAccount"]: {
+	__typename: "BankAccount",
+	/** Номер банковского счета */
+	account_number: string,
+	/** Название банка */
+	bank_name: string,
+	/** Номер карты */
+	card_number?: string | undefined | null,
+	/** Валюта счета */
+	currency: string,
+	/** Детали счета */
+	details: GraphQLTypes["BankAccountDetails"]
+};
+	["BankAccountDetails"]: {
+	__typename: "BankAccountDetails",
+	/** БИК банка */
+	bik: string,
+	/** Корреспондентский счет */
+	corr: string,
+	/** КПП банка */
+	kpp: string
+};
+	["BankAccountDetailsInput"]: {
+		/** БИК банка */
+	bik: string,
+	/** Корреспондентский счет */
+	corr: string,
+	/** КПП банка */
+	kpp: string
+};
+	["BankAccountInput"]: {
+		/** Номер банковского счета */
+	account_number: string,
+	/** Название банка */
+	bank_name: string,
+	/** Номер карты */
+	card_number?: string | undefined | null,
+	/** Валюта счета */
+	currency: string,
+	/** Детали счета */
+	details: GraphQLTypes["BankAccountDetailsInput"]
+};
+	["Branch"]: {
+	__typename: "Branch",
+	/** Банковский счет */
+	bank_account: GraphQLTypes["BankAccount"],
+	/** Уникальное имя кооперативного участка */
+	braname: string,
+	/** Город */
+	city: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: GraphQLTypes["OrganizationDetails"],
+	/** Email */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное название организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: GraphQLTypes["RepresentedBy"],
+	/** Краткое название организации */
+	short_name: string,
+	/** Доверенные аккаунты */
+	trusted: Array<GraphQLTypes["Individual"]>,
+	/** Председатель кооперативного участка */
+	trustee: GraphQLTypes["Individual"],
+	/** Тип организации */
+	type: string
+};
+	["CreateBankAccountInput"]: {
+		/** Данные для банковского перевода */
+	data: GraphQLTypes["BankAccountInput"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CreateBranchInput"]: {
+		/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
+	based_on: string,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Электронная почта */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полное имя организации кооперативного участка */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Краткое имя организации кооперативного участка */
+	short_name: string,
+	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
+	trustee: string
+};
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]: "scalar" & { name: "DateTime" };
+	["DeleteBankAccountInput"]: {
+		/** Идентификатор метода оплаты */
+	method_id: string,
+	/** Имя пользователя, чей метод оплаты нужно удалить */
+	username: string
+};
+	["DeleteBranchInput"]: {
+		/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string
+};
+	["DeleteTrustedAccountInput"]: {
+		/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
+	trusted: string
+};
+	["EditBranchInput"]: {
+		/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
+	based_on: string,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Электронная почта */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полное имя организации кооперативного участка */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Краткое имя организации кооперативного участка */
+	short_name: string,
+	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
+	trustee: string
+};
 	["Extension"]: {
 	__typename: "Extension",
 	/** Показывает, доступно ли расширение */
@@ -1187,6 +2190,12 @@ export type GraphQLTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: GraphQLTypes["DateTime"] | undefined | null
 };
+	["GetBranchesInput"]: {
+		/** Фильтр по имени аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string
+};
 	["GetExtensionsInput"]: {
 		/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null,
@@ -1195,33 +2204,181 @@ export type GraphQLTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetPaymentMethodsInput"]: {
+		/** Количество элементов на странице */
+	limit: number,
+	/** Номер страницы */
+	page: number,
+	/** Ключ сортировки (например, "name") */
+	sortBy?: string | undefined | null,
+	/** Направление сортировки ("ASC" или "DESC") */
+	sortOrder: string,
+	/** Имя пользователя для фильтрации методов оплаты */
+	username?: string | undefined | null
+};
+	["Individual"]: {
+	__typename: "Individual",
+	/** Дата рождения */
+	birthdate: string,
+	/** Email */
+	email: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: GraphQLTypes["Passport"] | undefined | null,
+	/** Телефон */
+	phone: string,
+	/** Имя аккаунта */
+	username: string
+};
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]: "scalar" & { name: "JSON" };
 	["Mutation"]: {
 	__typename: "Mutation",
+	/** Добавить доверенное лицо кооперативного участка */
+	addTrustedAccount: GraphQLTypes["Branch"],
+	/** Добавить метод оплаты */
+	createBankAccount: GraphQLTypes["PaymentMethod"],
+	/** Создать кооперативный участок */
+	createBranch: GraphQLTypes["Branch"],
+	/** Удалить кооперативный участок */
+	deleteBranch: boolean,
+	/** Удалить метод оплаты */
+	deletePaymentMethod: boolean,
+	/** Удалить доверенное лицо кооперативного участка */
+	deleteTrustedAccount: GraphQLTypes["Branch"],
+	/** Изменить кооперативный участок */
+	editBranch: GraphQLTypes["Branch"],
 	/** Установить расширение */
 	installExtension: GraphQLTypes["Extension"],
 	/** Удалить расширение */
 	uninstallExtension: boolean,
+	/** Обновить банковский счёт */
+	updateBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Обновить расширение */
 	updateExtension: GraphQLTypes["Extension"]
 };
+	["OrganizationDetails"]: {
+	__typename: "OrganizationDetails",
+	/** ИНН */
+	inn: string,
+	/** КПП */
+	kpp: string,
+	/** ОГРН */
+	ogrn: string
+};
+	["PaginationResult"]: {
+	__typename: "PaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["PaymentMethod"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["Passport"]: {
+	__typename: "Passport",
+	/** Код подразделения */
+	code: string,
+	/** Дата выдачи */
+	issued_at: string,
+	/** Кем выдан */
+	issued_by: string,
+	/** Номер паспорта */
+	number: number,
+	/** Серия паспорта */
+	series: number
+};
+	["PaymentMethod"]: {
+	__typename: "PaymentMethod",
+	/** Дата создания */
+	created_at: GraphQLTypes["DateTime"],
+	/** Данные метода оплаты */
+	data: GraphQLTypes["PaymentMethodData"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Идентификатор метода оплаты */
+	method_id: string,
+	/** Тип метода оплаты (например, sbp, bank_transfer) */
+	method_type: string,
+	/** Дата обновления */
+	updated_at: GraphQLTypes["DateTime"],
+	/** Имя пользователя, к которому привязан метод оплаты */
+	username: string
+};
+	["PaymentMethodData"]:{
+        	__typename:"BankAccount" | "SbpAccount"
+        	['...on BankAccount']: '__union' & GraphQLTypes["BankAccount"];
+	['...on SbpAccount']: '__union' & GraphQLTypes["SbpAccount"];
+};
 	["Query"]: {
 	__typename: "Query",
+	/** Получить список кооперативных участков */
+	getBranches: Array<GraphQLTypes["Branch"]>,
 	/** Получить список расширений */
-	getExtensions: Array<GraphQLTypes["Extension"]>
+	getExtensions: Array<GraphQLTypes["Extension"]>,
+	/** Получить список методов оплаты */
+	getPaymentMethods: GraphQLTypes["PaginationResult"]
+};
+	["RepresentedBy"]: {
+	__typename: "RepresentedBy",
+	/** На основании чего действует */
+	based_on: string,
+	/** Имя */
+	first_name: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Должность */
+	position: string
+};
+	["SbpAccount"]: {
+	__typename: "SbpAccount",
+	/** Мобильный телефон получателя */
+	phone: string
 };
 	["UninstallExtensionInput"]: {
 		/** Фильтр по имени */
 	name: string
+};
+	["UpdateBankAccountInput"]: {
+		/** Данные банковского счёта */
+	data: GraphQLTypes["BankAccountInput"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Идентификатор платежного метода */
+	method_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
 }
     }
 
 
 type ZEUS_VARIABLES = {
+	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
+	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
+	["BankAccountInput"]: ValueTypes["BankAccountInput"];
+	["CreateBankAccountInput"]: ValueTypes["CreateBankAccountInput"];
+	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
 	["DateTime"]: ValueTypes["DateTime"];
+	["DeleteBankAccountInput"]: ValueTypes["DeleteBankAccountInput"];
+	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
+	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
+	["EditBranchInput"]: ValueTypes["EditBranchInput"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
+	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
+	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
 	["JSON"]: ValueTypes["JSON"];
 	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
+	["UpdateBankAccountInput"]: ValueTypes["UpdateBankAccountInput"];
 }

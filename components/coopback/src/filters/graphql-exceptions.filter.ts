@@ -1,4 +1,4 @@
-import { Catch, HttpStatus } from '@nestjs/common';
+import { Catch, HttpException, HttpStatus } from '@nestjs/common';
 import { GqlExceptionFilter } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
 import mongoose from 'mongoose';
@@ -11,8 +11,21 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal Server Error';
 
+    // Обработка ValidationPipe ошибок
+    if (exception instanceof HttpException) {
+      const response = exception.getResponse();
+
+      if (typeof response === 'object' && response['message']) {
+        message = Array.isArray(response['message']) ? response['message'].join(', ') : response['message'];
+      } else {
+        message = exception.message;
+      }
+
+      statusCode = exception.getStatus();
+    }
+
     // Обработка конкретных типов исключений
-    if (exception instanceof RpcError) {
+    else if (exception instanceof RpcError) {
       message = exception.json.error.details[0].message.replace('assertion failure with message: ', '');
       statusCode = exception.json.code;
     } else if (exception instanceof mongoose.Error) {
@@ -28,6 +41,8 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
       statusCode,
       stack: exception.stack,
     });
+
+    console.log('on FILTER!');
 
     // Возвращение ошибки в формате GraphQL
     return new GraphQLError(message, {

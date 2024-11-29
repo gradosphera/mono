@@ -18,7 +18,7 @@ export interface IUser {
   message: string;
   is_registered: boolean;
   has_account: boolean;
-  type: 'individual' | 'entrepreneur' | 'organization' | 'service';
+  type: 'individual' | 'entrepreneur' | 'organization';
   public_key: string;
   referer: string;
   email: string;

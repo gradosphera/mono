@@ -21,21 +21,12 @@ import logger from '~/config/logger';
           : false,
       path: '/v1/graphql', // здесь можно задать другой путь, когда потребуется,
       transformSchema: (schema) => authDirectiveTransformer(schema, 'auth'),
-      // formatError: (error) => {
-      // const graphQLFormattedError = {
-      //   message: error.message || 'Internal server error',
-      //   extensions: {
-      //     code: error.extensions?.code || HttpStatus.INTERNAL_SERVER_ERROR,
-      //     ...(process.env.NODE_ENV === 'development' && { stacktrace: error.extensions }),
-      //   },
-      // };
+      formatError: (error) => {
+        // Логирование ошибки
+        // logger.warn('GraphQL Error:', error);
 
-      // // Логирование ошибки
-      // logger.warn('GraphQL Error:', graphQLFormattedError);
-      // console.log(error);
-      // return error;
-      // return graphQLFormattedError;
-      // },
+        return error;
+      },
     }),
   ],
   providers: [],

@@ -1,33 +1,13 @@
-import { UserIdentityPage } from 'src/pages/User/IdentityPage';
-// import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
-import { UserWalletPage } from 'src/pages/User/WalletPage';
 import { ListOfOrdersPage } from 'src/pages/Cooperative/ListOfOrders';
-
 import { ListOfQuestionsWidget } from 'src/widgets/Cooperative/Agenda/ListOfQuestions';
-
 import { markRaw } from 'vue';
-// import { Commutator } from 'src/widgets/Commutator';
-
-// import { MainMarketplacePage } from 'src/pages/Marketplace/MainPage';
-// import { ModerationPage } from 'src/pages/Marketplace/Moderation';
-// import { CreateParentOfferPage } from 'src/pages/Marketplace/CreateParentOffer';
-// import { ShowcasePage } from 'src/pages/Marketplace/Showcase';
-// import { UserParentOffersPage } from 'src/pages/Marketplace/UserParentOffers';
-// import { SuppliesListPage } from 'src/pages/Marketplace/SuppliesList';
-// import { UserSuppliesListPage } from 'src/pages/Marketplace/UserSuppliesList';
 import { ContactsPage } from 'src/pages/Cooperative/Contacts';
-// import { CooperativeDetails } from 'src/widgets/Cooperative/Details';
-import { CooperativeMembers } from 'src/widgets/Cooperative/Members';
-// import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
-// import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
-import { UserSettingsPage } from 'src/pages/User/SettingsPage';
 import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants';
 import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import { ConnectionPage } from 'src/pages/Union/Connection';
 import { ListOfDocumentsPage } from 'src/pages/Documentor/ListOfDocuments';
 import { CoopCardPage } from 'src/pages/User/CardPage';
-import { SupportPage } from 'src/pages/Support';
 
 export const manifest = {
   'name': 'UserDesktop',

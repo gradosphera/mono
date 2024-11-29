@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, Ref } from 'vue'
 import { api } from '../api'
-import type { IGetExtensions } from '@coopenomics/coopjs/queries/getExtensions'
-import type { IExtension, IGetExtensionsInput } from './types';
+import type { IExtension } from './types';
+import type { ModelTypes } from '@coopenomics/coopjs/index';
 
 const namespace = 'extensionStore';
 
 interface IExtensionStore {
   extensions: Ref<IExtension[]>
-  loadExtensions: (data?: IGetExtensionsInput) => void;
+  loadExtensions: (data?: ModelTypes['GetExtensionsInput']) => void;
 }
 
 const parseDescriptionsRecursively = (obj: any): any => {
@@ -40,15 +40,14 @@ const parseDescriptionsRecursively = (obj: any): any => {
 export const useExtensionStore = defineStore(namespace, (): IExtensionStore => {
   const extensions = ref<IExtension[]>([])
 
-  const loadExtensions = async (data?: IGetExtensionsInput) => {
+  const loadExtensions = async (data?: ModelTypes['GetExtensionsInput']) => {
     const loadedData = await api.loadExtensions(data);
 
     const transformedData = loadedData.map((value) => {
-      const typedValue = value as IGetExtensions['getExtensions'][number];
-      const schema = typedValue.schema as IExtension['schema'] | undefined; // schema может быть undefined
+      const schema = value.schema as IExtension['schema'] | undefined; // schema может быть undefined
 
       return {
-        ...typedValue,
+        ...value,
         schema: schema
           ? {
               ...schema,
@@ -60,7 +59,6 @@ export const useExtensionStore = defineStore(namespace, (): IExtensionStore => {
       };
     });
 
-    console.log('transformedData: ', transformedData);
     extensions.value = transformedData; // сохраняем преобразованные данные
   };
 

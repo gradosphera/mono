@@ -2,6 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddTrustedAccountInput {
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """
+  Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий
+  """
+  trusted: String!
+}
+
 type BankAccount {
   """Номер банковского счета"""
   account_number: String!
@@ -30,6 +43,34 @@ type BankAccountDetails {
   kpp: String!
 }
 
+input BankAccountDetailsInput {
+  """БИК банка"""
+  bik: String!
+
+  """Корреспондентский счет"""
+  corr: String!
+
+  """КПП банка"""
+  kpp: String!
+}
+
+input BankAccountInput {
+  """Номер банковского счета"""
+  account_number: String!
+
+  """Название банка"""
+  bank_name: String!
+
+  """Номер карты"""
+  card_number: String
+
+  """Валюта счета"""
+  currency: String!
+
+  """Детали счета"""
+  details: BankAccountDetailsInput!
+}
+
 type Branch {
   """Банковский счет"""
   bank_account: BankAccount!
@@ -40,11 +81,14 @@ type Branch {
   """Город"""
   city: String!
 
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
   """Страна"""
   country: String!
 
   """Детали организации"""
-  details: Details!
+  details: OrganizationDetails!
 
   """Email"""
   email: String!
@@ -68,13 +112,55 @@ type Branch {
   short_name: String!
 
   """Доверенные аккаунты"""
-  trusted: [String!]!
+  trusted: [Individual!]!
 
-  """Аккаунт уполномоченного"""
-  trustee: String!
+  """Председатель кооперативного участка"""
+  trustee: Individual!
 
   """Тип организации"""
   type: String!
+}
+
+input CreateBankAccountInput {
+  """Данные для банковского перевода"""
+  data: BankAccountInput!
+
+  """Флаг основного метода платежа, который отображается в документах"""
+  is_default: Boolean!
+
+  """Имя аккаунта пользователя"""
+  username: String!
+}
+
+input CreateBranchInput {
+  """
+  Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..)
+  """
+  based_on: String!
+
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Электронная почта"""
+  email: String!
+
+  """Фактический адрес"""
+  fact_address: String!
+
+  """Полное имя организации кооперативного участка"""
+  full_name: String!
+
+  """Телефон"""
+  phone: String!
+
+  """Краткое имя организации кооперативного участка"""
+  short_name: String!
+
+  """Имя аккаунта уполномоченного (председателя) кооперативного участка"""
+  trustee: String!
 }
 
 """
@@ -82,15 +168,64 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type Details {
-  """ИНН"""
-  inn: String!
+input DeleteBankAccountInput {
+  """Идентификатор метода оплаты"""
+  method_id: String!
 
-  """КПП"""
-  kpp: String!
+  """Имя пользователя, чей метод оплаты нужно удалить"""
+  username: String!
+}
 
-  """ОГРН"""
-  ogrn: String!
+input DeleteBranchInput {
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+}
+
+input DeleteTrustedAccountInput {
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """
+  Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка
+  """
+  trusted: String!
+}
+
+input EditBranchInput {
+  """
+  Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..)
+  """
+  based_on: String!
+
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Электронная почта"""
+  email: String!
+
+  """Фактический адрес"""
+  fact_address: String!
+
+  """Полное имя организации кооперативного участка"""
+  full_name: String!
+
+  """Телефон"""
+  phone: String!
+
+  """Краткое имя организации кооперативного участка"""
+  short_name: String!
+
+  """Имя аккаунта уполномоченного (председателя) кооперативного участка"""
+  trustee: String!
 }
 
 type Extension {
@@ -173,21 +308,158 @@ input GetExtensionsInput {
   name: String
 }
 
+input GetPaymentMethodsInput {
+  """Количество элементов на странице"""
+  limit: Int! = 10
+
+  """Номер страницы"""
+  page: Int! = 1
+
+  """Ключ сортировки (например, "name")"""
+  sortBy: String
+
+  """Направление сортировки ("ASC" или "DESC")"""
+  sortOrder: String! = "ASC"
+
+  """Имя пользователя для фильтрации методов оплаты"""
+  username: String
+}
+
+type Individual {
+  """Дата рождения"""
+  birthdate: String!
+
+  """Email"""
+  email: String!
+
+  """Имя"""
+  first_name: String!
+
+  """Полный адрес"""
+  full_address: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String!
+
+  """Данные паспорта"""
+  passport: Passport
+
+  """Телефон"""
+  phone: String!
+
+  """Имя аккаунта"""
+  username: String!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
 
 type Mutation {
+  """Добавить доверенное лицо кооперативного участка"""
+  addTrustedAccount(data: AddTrustedAccountInput!): Branch!
+
+  """Добавить метод оплаты"""
+  createBankAccount(data: CreateBankAccountInput!): PaymentMethod!
+
+  """Создать кооперативный участок"""
+  createBranch(data: CreateBranchInput!): Branch!
+
+  """Удалить кооперативный участок"""
+  deleteBranch(data: DeleteBranchInput!): Boolean!
+
+  """Удалить метод оплаты"""
+  deletePaymentMethod(data: DeleteBankAccountInput!): Boolean!
+
+  """Удалить доверенное лицо кооперативного участка"""
+  deleteTrustedAccount(data: DeleteTrustedAccountInput!): Branch!
+
+  """Изменить кооперативный участок"""
+  editBranch(data: EditBranchInput!): Branch!
+
   """Установить расширение"""
   installExtension(data: ExtensionInput!): Extension!
 
   """Удалить расширение"""
   uninstallExtension(data: UninstallExtensionInput!): Boolean!
 
+  """Обновить банковский счёт"""
+  updateBankAccount(data: UpdateBankAccountInput!): PaymentMethod!
+
   """Обновить расширение"""
   updateExtension(data: ExtensionInput!): Extension!
 }
+
+type OrganizationDetails {
+  """ИНН"""
+  inn: String!
+
+  """КПП"""
+  kpp: String!
+
+  """ОГРН"""
+  ogrn: String!
+}
+
+type PaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [PaymentMethod!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type Passport {
+  """Код подразделения"""
+  code: String!
+
+  """Дата выдачи"""
+  issued_at: String!
+
+  """Кем выдан"""
+  issued_by: String!
+
+  """Номер паспорта"""
+  number: Int!
+
+  """Серия паспорта"""
+  series: Int!
+}
+
+type PaymentMethod {
+  """Дата создания"""
+  created_at: DateTime!
+
+  """Данные метода оплаты"""
+  data: PaymentMethodData!
+
+  """Флаг основного метода платежа, который отображается в документах"""
+  is_default: Boolean!
+
+  """Идентификатор метода оплаты"""
+  method_id: String!
+
+  """Тип метода оплаты (например, sbp, bank_transfer)"""
+  method_type: String!
+
+  """Дата обновления"""
+  updated_at: DateTime!
+
+  """Имя пользователя, к которому привязан метод оплаты"""
+  username: String!
+}
+
+union PaymentMethodData = BankAccount | SbpAccount
 
 type Query {
   """Получить список кооперативных участков"""
@@ -195,6 +467,9 @@ type Query {
 
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!
+
+  """Получить список методов оплаты"""
+  getPaymentMethods(data: GetPaymentMethodsInput): PaginationResult!
 }
 
 type RepresentedBy {
@@ -214,7 +489,26 @@ type RepresentedBy {
   position: String!
 }
 
+type SbpAccount {
+  """Мобильный телефон получателя"""
+  phone: String!
+}
+
 input UninstallExtensionInput {
   """Фильтр по имени"""
   name: String!
+}
+
+input UpdateBankAccountInput {
+  """Данные банковского счёта"""
+  data: BankAccountInput!
+
+  """Флаг основного метода платежа, который отображается в документах"""
+  is_default: Boolean!
+
+  """Идентификатор платежного метода"""
+  method_id: String!
+
+  """Имя аккаунта пользователя"""
+  username: String!
 }

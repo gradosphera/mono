@@ -61,7 +61,6 @@ export const IEntrepreneurData = Joi.object({
   country: Joi.string().valid('Russia', 'Other').required(),
   city: Joi.string().required(),
   full_address: Joi.string().required(),
-  fact_address: Joi.string().required(),
   details: Joi.object({
     inn: Joi.string().required(),
     ogrn: Joi.string().required(),

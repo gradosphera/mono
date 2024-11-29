@@ -11,7 +11,7 @@ export interface BlockchainPort {
     tableName: string,
     primaryKey: string | number,
     indexPosition?: IndexPosition
-  ): Promise<any>;
+  ): Promise<any | null>;
   query(
     code: string,
     scope: string,

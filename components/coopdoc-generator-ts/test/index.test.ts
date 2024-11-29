@@ -705,7 +705,6 @@ describe('тест генератора документов', async () => {
       phone: '+1234567890',
       email: 'john.doe@example.com',
       full_address: 'переулок правды д. 1',
-      fact_address: 'переулок правды д. 1',
       country: 'Russia',
       city: 'Moscow',
       details: {

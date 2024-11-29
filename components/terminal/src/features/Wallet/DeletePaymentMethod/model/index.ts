@@ -5,7 +5,7 @@ import { COOPNAME } from 'src/shared/config'
 
 export interface IDeletePaymentMethod {
   username: string;
-  method_id: number;
+  method_id: string;
 }
 
 export function useDeletePaymentMethod() {

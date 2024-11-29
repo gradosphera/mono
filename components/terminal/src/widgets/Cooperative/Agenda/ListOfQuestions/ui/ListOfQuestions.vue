@@ -221,7 +221,7 @@ const voteFor = async (decision_id: number) => {
   try {
     const { voteForDecision } = useVoteForDecision()
 
-    const result = await voteForDecision(
+    await voteForDecision(
       decision_id
     )
 

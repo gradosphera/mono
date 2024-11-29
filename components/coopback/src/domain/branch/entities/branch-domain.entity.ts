@@ -2,11 +2,13 @@ import type { BranchDomainInterface } from '../interfaces/branch-domain.interfac
 import type { BankAccountDomainInterface } from '~/domain/common/interfaces/bank-account-domain.interface';
 import type { SovietContract } from 'cooptypes';
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
+import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
 
 export class BranchDomainEntity implements BranchDomainInterface {
+  public readonly coopname: string;
   public readonly braname: string;
-  public readonly trustee: string;
-  public readonly trusted: string[];
+  public readonly trustee: IndividualDomainInterface;
+  public readonly trusted: IndividualDomainInterface[];
 
   public readonly type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
   public readonly short_name: string;
@@ -31,25 +33,33 @@ export class BranchDomainEntity implements BranchDomainInterface {
   };
   public bank_account: BankAccountDomainInterface;
 
-  constructor(blockchainData: SovietContract.Tables.Branches.IBranch, databaseData: OrganizationDomainInterface) {
-    if (blockchainData.braname != databaseData.username)
+  constructor(
+    coopname: string,
+    branchBlockchainData: SovietContract.Tables.Branches.IBranch,
+    organizationDatabaseData: OrganizationDomainInterface,
+    trusteeData: IndividualDomainInterface,
+    trustedData: IndividualDomainInterface[]
+  ) {
+    if (branchBlockchainData.braname != organizationDatabaseData.username)
       throw new Error(`Неверные данные для агрегата: username и braname кооперативного участка должны совпадать`);
 
-    this.braname = blockchainData.braname;
-    this.trustee = blockchainData.trustee;
-    this.trusted = blockchainData.trusted;
+    this.coopname = coopname;
 
-    this.type = databaseData.type;
-    this.short_name = databaseData.short_name;
-    this.full_name = databaseData.full_name;
-    this.represented_by = databaseData.represented_by;
-    this.country = databaseData.country;
-    this.city = databaseData.city;
-    this.full_address = databaseData.full_address;
-    this.fact_address = databaseData.fact_address;
-    this.phone = databaseData.phone;
-    this.email = databaseData.email;
-    this.details = databaseData.details;
-    this.bank_account = databaseData.bank_account;
+    this.braname = branchBlockchainData.braname;
+    this.trustee = trusteeData;
+    this.trusted = trustedData;
+
+    this.type = organizationDatabaseData.type;
+    this.short_name = organizationDatabaseData.short_name;
+    this.full_name = organizationDatabaseData.full_name;
+    this.represented_by = organizationDatabaseData.represented_by;
+    this.country = organizationDatabaseData.country;
+    this.city = organizationDatabaseData.city;
+    this.full_address = organizationDatabaseData.full_address;
+    this.fact_address = organizationDatabaseData.fact_address;
+    this.phone = organizationDatabaseData.phone;
+    this.email = organizationDatabaseData.email;
+    this.details = organizationDatabaseData.details;
+    this.bank_account = organizationDatabaseData.bank_account;
   }
 }

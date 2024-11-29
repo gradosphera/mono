@@ -1,20 +1,19 @@
 import { client } from 'src/shared/api/client';
-import { updateExtension as updateExtensionSelector, IUpdateExtensionInput } from '@coopenomics/coopjs/mutations/updateExtension'
-import type { IExtension } from '@coopenomics/coopjs/queries/getExtensions';
 import { useExtensionStore } from 'src/entities/Extension/model';
+import { Mutations, type ModelTypes } from '@coopenomics/coopjs';
 
 export function useUpdateExtension() {
   async function updateExtension(
     name: string, enabled: boolean, config: any
-  ): Promise<IExtension> {
+  ): Promise<ModelTypes['Extension']> {
 
-    const data: IUpdateExtensionInput = {
+    const data: Partial<ModelTypes['Extension']> = {
       name: name,
       config,
       enabled,
     }
-    console.log('data: ', data)
-    const {updateExtension: result} = await client.Mutation(updateExtensionSelector, {variables: {
+
+    const {updateExtension: result} = await client.Mutation(Mutations.updateExtension, {variables: {
       data
     }})
 

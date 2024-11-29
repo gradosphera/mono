@@ -17,7 +17,7 @@ div
 
 </template>
 <script lang="ts" setup>
-  import { defineProps, defineEmits, reactive, watch, ref, computed } from 'vue';
+  import { defineProps, defineEmits, reactive, watch } from 'vue';
   import { QInput, QCheckbox, QSelect, QCard } from 'quasar';
   import type { IExtensionConfigSchema, ISchemaProperty } from 'src/entities/Extension/model';
 

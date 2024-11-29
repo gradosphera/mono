@@ -24,7 +24,7 @@ div
   </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import type { IUserData } from 'src/shared/lib/types/user/IUserData';
 import { IndividualDataForm } from '../IndividualDataForm';
 import { OrganizationDataForm } from '../OrganizationDataForm';
@@ -36,16 +36,6 @@ const userData = ref<IUserData>(props.userData)
 
 if (!userData.value.type)
   userData.value.type = 'individual'
-
-watch(() => userData.value?.organization_data?.type, (newValue) => {
-  if (userData.value.organization_data) {
-    if (newValue === 'coop') {
-      userData.value.organization_data.is_cooperative = true;
-    } else {
-      userData.value.organization_data.is_cooperative = false;
-    }
-  }
-});
 
 const localUserDataForm = ref(null)
 

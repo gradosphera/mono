@@ -6,8 +6,8 @@ import Tracker from '@openreplay/tracker';
 import trackerAssist from '@openreplay/tracker-assist'
 import { useSessionStore } from 'src/entities/Session';
 export default boot(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ({ app, router }: { app: App<Element>; router: Router }) => {
-    console.log('on senstry loader!')
     if ((NODE_ENV as string) === 'production') {
       const session = useSessionStore()
 

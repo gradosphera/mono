@@ -51,7 +51,6 @@ div(v-if="currentUser?.username" flat bordered).q-pa-md
   </template>
 
 <script lang="ts" setup>
-import { UserQR } from '.';
 import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
 import { useCurrentUserStore } from 'src/entities/User'
 import type { IEntrepreneurData, IIndividualData, IOrganizationData } from 'src/shared/lib/types/user/IUserData';

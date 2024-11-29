@@ -66,7 +66,7 @@ div
         indicator-color="secondary"
         style="height: 50px !important; overflow-x: auto;"
       )
-
+        q-route-tab(name="Кооперативные участки" label="Кооперативные участки" :to="{name: 'branches'}" )
         q-route-tab(name="Фонды накопления" label="Фонды накопления" :to="{name: 'accumulation-funds'}" )
         q-route-tab(name="Фонды списания" label="Фонды списания" :to="{name: 'expense-funds'}" )
         q-route-tab(name="Взносы" label="Взносы" :to="{name: 'initial-contributions'}" )

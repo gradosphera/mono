@@ -15,6 +15,7 @@ import { LoggerModule } from './modules/logger/logger-app.module';
 import { GraphqlModule } from './infrastructure/graphql/graphql.module';
 import { BlockchainModule } from './infrastructure/blockchain/blockchain.module';
 import { BranchDomainModule } from './domain/branch/branch-domain.module';
+import { PaymentMethodDomainModule } from './domain/payment-method/payment-method-domain.module';
 
 // Функция для динамического импорта модулей
 function dynamicImportModules(): any[] {
@@ -36,6 +37,7 @@ function dynamicImportModules(): any[] {
     ConfigModule.forRoot({
       isGlobal: true, // Чтобы .env был доступен глобально
     }),
+    PaymentMethodDomainModule,
     ...dynamicImportModules(), // Динамически импортируем все найденные модули
     RedisAppModule,
     PaymentModule,

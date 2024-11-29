@@ -15,7 +15,7 @@ q-btn(@click="showDialog = true" size="sm" color="primary").border-radius-button
 </template>
 <script setup lang="ts">
 
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { CURRENCY } from 'src/shared/config';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
@@ -29,16 +29,6 @@ const clear = (): void => {
   isSubmitting.value = false
   quantity.value = 1000
 }
-
-const feePercent = ref(0.7)
-
-const toRecieve = computed(() => {
-  // Процент комиссии
-  if (quantity.value > 0)
-    return (quantity.value - quantity.value * feePercent.value / 100).toFixed(2);
-  else return 0
-})
-
 
 const handlerSubmit = async (): Promise<void> => {
   isSubmitting.value = true

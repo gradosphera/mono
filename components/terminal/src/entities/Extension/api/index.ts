@@ -1,9 +1,9 @@
 import { client } from 'src/shared/api/client';
-import { getExtensions, IGetExtensions, type IGetExtensionsInput } from '@coopenomics/coopjs/queries/getExtensions';
+import { Queries, type ModelTypes } from '@coopenomics/coopjs';
 
-async function loadExtensions(data?: IGetExtensionsInput): Promise<IGetExtensions['getExtensions']> {
+async function loadExtensions(data?: ModelTypes['GetExtensionsInput']): Promise<ModelTypes['Extension'][]> {
   const { getExtensions: output } = await client.Query(
-    getExtensions,
+    Queries.getExtensions,
     {
       variables: {
         data

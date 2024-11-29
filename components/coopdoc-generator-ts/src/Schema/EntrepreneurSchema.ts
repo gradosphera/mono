@@ -15,7 +15,6 @@ export const entrepreneurSchema: JSONSchemaType<ExternalEntrepreneurData> = {
     country: { type: 'string' },
     city: { type: 'string' },
     full_address: { type: 'string' },
-    fact_address: { type: 'string' },
     details: {
       type: 'object',
       required: ['inn', 'ogrn'],
@@ -33,6 +32,6 @@ export const entrepreneurSchema: JSONSchemaType<ExternalEntrepreneurData> = {
     deleted: { type: 'boolean', nullable: true },
     block_num: { type: 'number', nullable: true },
   },
-  required: ['username', 'email', 'first_name', 'last_name', 'birthdate', 'phone', 'country', 'city', 'full_address', 'fact_address', 'details', 'bank_account'],
+  required: ['username', 'email', 'first_name', 'last_name', 'birthdate', 'phone', 'country', 'city', 'full_address', 'details', 'bank_account'],
   additionalProperties: true,
 }

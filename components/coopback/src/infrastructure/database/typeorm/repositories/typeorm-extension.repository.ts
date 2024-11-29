@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, type FindOptionsWhere } from 'typeorm';
 import { ExtensionEntity } from '../entities/extension.entity';
-import { ExtensionDomainRepository } from '~/domain/extension/repositories/extension-domain.repository.interface';
+import { ExtensionDomainRepository } from '~/domain/extension/repositories/extension-domain.repository';
 import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 
 @Injectable()

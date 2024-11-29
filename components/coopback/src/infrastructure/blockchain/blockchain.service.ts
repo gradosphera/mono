@@ -43,7 +43,7 @@ export class BlockchainService implements BlockchainPort {
     });
   }
 
-  public async transact(actionOrActions: any | any[], broadcast = true): Promise<TransactResult | undefined> {
+  public async transact(actionOrActions: any | any[], broadcast = true): Promise<TransactResult> {
     if (Array.isArray(actionOrActions)) {
       return this.sendActions(actionOrActions, broadcast);
     } else {
@@ -94,8 +94,10 @@ export class BlockchainService implements BlockchainPort {
       from?: string | number;
       to?: string | number;
       maxRows?: number;
-    }
+    } = { indexPosition: 'primary' }
   ): Promise<T[]> {
+    const { indexPosition = 'primary', from, to, maxRows } = options;
+
     const { abi } = await this.apiClient.v1.chain.get_abi(code);
     if (!abi) throw new Error(`ABI контракта ${code} не найден`);
 
@@ -108,10 +110,10 @@ export class BlockchainService implements BlockchainPort {
 
     const rows = await table.query({
       scope,
-      index_position: options.indexPosition,
-      from: options.from,
-      to: options.to,
-      maxRows: options.maxRows,
+      index_position: indexPosition,
+      from,
+      to,
+      maxRows,
     });
 
     return JSON.parse(JSON.stringify(rows)) as T[];
@@ -122,8 +124,8 @@ export class BlockchainService implements BlockchainPort {
     scope: string,
     tableName: string,
     primaryKey: string | number,
-    indexPosition?: IndexPosition
-  ): Promise<T> {
+    indexPosition: IndexPosition = 'primary'
+  ): Promise<T | null> {
     const { abi } = await this.apiClient.v1.chain.get_abi(code);
     if (!abi) throw new Error(`ABI контракта ${code} не найден`);
 
@@ -134,11 +136,11 @@ export class BlockchainService implements BlockchainPort {
       client: this.apiClient,
     });
 
-    const rows = await table.get(String(primaryKey), {
+    const row = await table.get(String(primaryKey), {
       scope,
       index_position: indexPosition,
     });
 
-    return JSON.parse(JSON.stringify(rows)) as T;
+    return row ? (JSON.parse(JSON.stringify(row)) as T) : null;
   }
 }

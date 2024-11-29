@@ -6,13 +6,13 @@ import { BaseExtModule } from '../base.extension.module';
 import {
   EXTENSION_REPOSITORY,
   type ExtensionDomainRepository,
-} from '~/domain/extension/repositories/extension-domain.repository.interface';
+} from '~/domain/extension/repositories/extension-domain.repository';
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import {
   LOG_EXTENSION_REPOSITORY,
   LogExtensionDomainRepository,
-} from '~/domain/extension/repositories/log-extension-domain.repository.interface';
+} from '~/domain/extension/repositories/log-extension-domain.repository';
 import { z } from 'zod';
 import type { DeserializedDescriptionOfExtension } from '~/types/shared';
 

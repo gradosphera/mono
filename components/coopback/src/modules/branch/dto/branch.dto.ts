@@ -1,73 +1,95 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { RepresentedByGraphQLDTO } from '~/modules/common/dto/represented-by.dto';
-import { DetailsGraphQLDTO } from '~/modules/common/dto/details.dto';
-import { BankAccountGraphQLDTO } from '~/modules/common/dto/bank-account.dto';
+import { RepresentedByDTO } from '~/modules/common/dto/represented-by.dto';
+import { BankAccountDTO } from '~/modules/payment-method/dto/bank-account.dto';
 import type { BranchDomainInterface } from '~/domain/branch/interfaces/branch-domain.interface';
 import type { BankAccountDomainInterface } from '~/domain/common/interfaces/bank-account-domain.interface';
 import type { BranchDomainEntity } from '~/domain/branch/entities/branch-domain.entity';
+import { OrganizationDetailsDTO } from '~/modules/common/dto/organization-details.dto';
+import { IndividualDTO } from '~/modules/common/dto/individual.dto';
+import { IsArray, IsJSON, IsString } from 'class-validator';
 
 @ObjectType('Branch')
-export class BranchGraphQLDTO implements BranchDomainInterface {
+export class BranchDTO implements BranchDomainInterface {
+  @Field(() => String, { description: 'Имя аккаунта кооператива' })
+  @IsString()
+  public readonly coopname: string;
+
   @Field(() => String, { description: 'Уникальное имя кооперативного участка' })
+  @IsString()
   public readonly braname: string;
 
-  @Field(() => String, { description: 'Аккаунт уполномоченного' })
-  public readonly trustee: string;
+  @Field(() => IndividualDTO, { description: 'Председатель кооперативного участка' })
+  @IsString()
+  public readonly trustee: IndividualDTO;
 
-  @Field(() => [String], { description: 'Доверенные аккаунты' })
-  public readonly trusted: string[];
+  @Field(() => [IndividualDTO], { description: 'Доверенные аккаунты' })
+  @IsArray()
+  public readonly trusted: IndividualDTO[];
 
   @Field(() => String, { description: 'Тип организации' })
+  @IsString()
   public readonly type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
 
   @Field(() => String, { description: 'Краткое название организации' })
+  @IsString()
   public readonly short_name: string;
 
   @Field(() => String, { description: 'Полное название организации' })
+  @IsString()
   public readonly full_name: string;
 
-  @Field(() => RepresentedByGraphQLDTO, { description: 'Представитель организации' })
-  public readonly represented_by: RepresentedByGraphQLDTO;
+  @Field(() => RepresentedByDTO, { description: 'Представитель организации' })
+  @IsJSON()
+  public readonly represented_by: RepresentedByDTO;
 
   @Field(() => String, { description: 'Страна' })
+  @IsString()
   public readonly country: string;
 
   @Field(() => String, { description: 'Город' })
+  @IsString()
   public readonly city: string;
 
   @Field(() => String, { description: 'Полный адрес' })
+  @IsString()
   public readonly full_address: string;
 
   @Field(() => String, { description: 'Фактический адрес' })
+  @IsString()
   public readonly fact_address: string;
 
   @Field(() => String, { description: 'Телефон' })
+  @IsString()
   public readonly phone: string;
 
   @Field(() => String, { description: 'Email' })
+  @IsString()
   public readonly email: string;
 
-  @Field(() => DetailsGraphQLDTO, { description: 'Детали организации' })
-  public readonly details: DetailsGraphQLDTO;
+  @Field(() => OrganizationDetailsDTO, { description: 'Детали организации' })
+  @IsJSON()
+  public readonly details: OrganizationDetailsDTO;
 
-  @Field(() => BankAccountGraphQLDTO, { description: 'Банковский счет' })
+  @Field(() => BankAccountDTO, { description: 'Банковский счет' })
+  @IsJSON()
   public readonly bank_account: BankAccountDomainInterface;
 
   constructor(entity: BranchDomainEntity) {
+    this.coopname = entity.coopname;
     this.braname = entity.braname;
-    this.trustee = entity.trustee;
-    this.trusted = entity.trusted;
+    this.trustee = new IndividualDTO(entity.trustee);
+    this.trusted = entity.trusted.map((trustedEntity) => new IndividualDTO(trustedEntity));
     this.type = entity.type;
     this.short_name = entity.short_name;
     this.full_name = entity.full_name;
-    this.represented_by = new RepresentedByGraphQLDTO(entity.represented_by);
+    this.represented_by = new RepresentedByDTO(entity.represented_by);
     this.country = entity.country;
     this.city = entity.city;
     this.full_address = entity.full_address;
     this.fact_address = entity.fact_address;
     this.phone = entity.phone;
     this.email = entity.email;
-    this.details = new DetailsGraphQLDTO(entity.details);
-    this.bank_account = new BankAccountGraphQLDTO(entity.bank_account);
+    this.details = new OrganizationDetailsDTO(entity.details);
+    this.bank_account = new BankAccountDTO(entity.bank_account);
   }
 }

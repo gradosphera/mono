@@ -68,7 +68,6 @@ const {loadCooperatives} = useLoadCooperatives()
 import { useUnionStore } from 'src/entities/Union/model';
 import { computed, ref } from 'vue';
 import moment from 'moment-with-locales-es6'
-import { useDeleteCooperative } from 'src/features/Union/DeleteCooperative';
 import { useActivateCooperative } from 'src/features/Union/ActivateCooperative';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { useBlockCooperative } from 'src/features/Union/BlockCooperative';
@@ -94,19 +93,6 @@ const activate = async (coopname: string) => {
     await activateCooperative(coopname)
     loadCooperatives()
     SuccessAlert('Кооператив активирован')
-  } catch(e: any) {
-    FailAlert(e.message)
-  }
-}
-
-
-const deleteCoop = async (coopname: string) => {
-  const {deleteCooperative} = useDeleteCooperative()
-
-  try {
-    await deleteCooperative(coopname)
-    loadCooperatives()
-    SuccessAlert('Кооператив удален')
   } catch(e: any) {
     FailAlert(e.message)
   }

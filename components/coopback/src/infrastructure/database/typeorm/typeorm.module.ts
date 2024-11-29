@@ -3,11 +3,11 @@ import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule as NestTypeOrmModule } from '@nestjs/typeorm';
 import path from 'path';
 import config from '~/config/config';
-import { EXTENSION_REPOSITORY } from '~/domain/extension/repositories/extension-domain.repository.interface';
+import { EXTENSION_REPOSITORY } from '~/domain/extension/repositories/extension-domain.repository';
 import { TypeOrmExtensionDomainRepository } from './repositories/typeorm-extension.repository';
 import { ExtensionEntity } from './entities/extension.entity';
 import { LogExtensionEntity } from './entities/log-extension.entity';
-import { LOG_EXTENSION_REPOSITORY } from '~/domain/extension/repositories/log-extension-domain.repository.interface';
+import { LOG_EXTENSION_REPOSITORY } from '~/domain/extension/repositories/log-extension-domain.repository';
 import { TypeOrmLogExtensionDomainRepository } from './repositories/typeorm-log-extension.repository';
 
 @Global()

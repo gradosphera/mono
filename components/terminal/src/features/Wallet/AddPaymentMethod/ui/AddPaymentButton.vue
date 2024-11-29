@@ -148,7 +148,7 @@ const handlerSubmit = async (): Promise<void> => {
 
     await addPaymentMethod({
       username: username.value,
-      method_id: 0, //autogenerate
+      method_id: '1', //autogenerate
       method_type: methodType.value,
       data
     })

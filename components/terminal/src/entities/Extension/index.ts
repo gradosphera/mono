@@ -1,2 +1,2 @@
-export * as DesktopModel from './model/types'
+export * as ExtensionMode from './model'
 export * from './api'

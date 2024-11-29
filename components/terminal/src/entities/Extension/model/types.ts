@@ -1,6 +1,4 @@
-import type { DeserializedDescriptionOfExtension } from '@coopenomics/coopjs';
-import type { IExtension as IExtensionInternal } from '@coopenomics/coopjs/queries/getExtensions'
-export type { IGetExtensionsInput } from '@coopenomics/coopjs/queries/getExtensions'
+import type { DeserializedDescriptionOfExtension, ModelTypes } from '@coopenomics/coopjs';
 
 export type ISchemaType = 'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
 
@@ -23,6 +21,6 @@ export type IExtensionConfigSchema = {
 }
 
 
-export type IExtension = Omit<IExtensionInternal, 'schema'> & {
+export type IExtension = Omit<ModelTypes['Extension'], 'schema'> & {
   schema?: IExtensionConfigSchema;
 };

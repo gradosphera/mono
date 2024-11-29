@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
-import { ExtensionGraphQLDTO } from '../dto/extension-graphql.dto';
+import { ExtensionDTO } from '../dto/extension-graphql.dto';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { AppRegistry, type IRegistryExtension } from '~/extensions/extensions.registry';
 import { ExtensionGraphQLInput } from '../dto/extension-graphql-input.dto';
@@ -13,7 +13,7 @@ export class AppManagementService<TConfig = any> {
   constructor(private readonly extensionDomainInteractor: ExtensionDomainInteractor<TConfig>) {}
 
   // Метод для получения данных о конкретном приложении
-  async getCombinedApp(name: string): Promise<ExtensionGraphQLDTO<TConfig> | null> {
+  async getCombinedApp(name: string): Promise<ExtensionDTO<TConfig> | null> {
     const appRegistryData = await this.extractAppRegistryData();
     const registryData = appRegistryData[name];
 
@@ -40,7 +40,7 @@ export class AppManagementService<TConfig = any> {
     }
   }
 
-  async installApp(appData: ExtensionGraphQLInput): Promise<ExtensionGraphQLDTO<TConfig>> {
+  async installApp(appData: ExtensionGraphQLInput): Promise<ExtensionDTO<TConfig>> {
     this.validateConfig(appData.name, appData.config);
 
     await this.extensionDomainInteractor.installApp(appData);
@@ -58,7 +58,7 @@ export class AppManagementService<TConfig = any> {
     return this.extensionDomainInteractor.uninstallApp(appData);
   }
 
-  async updateApp(appData: ExtensionGraphQLInput): Promise<ExtensionGraphQLDTO<TConfig>> {
+  async updateApp(appData: ExtensionGraphQLInput): Promise<ExtensionDTO<TConfig>> {
     this.validateConfig(appData.name, appData.config);
 
     await this.extensionDomainInteractor.updateApp(appData);
@@ -99,7 +99,7 @@ export class AppManagementService<TConfig = any> {
     key: string,
     installedExtension: ExtensionDomainEntity<TConfig> | null,
     registryData: IRegistryExtension
-  ): Promise<ExtensionGraphQLDTO<TConfig>> {
+  ): Promise<ExtensionDTO<TConfig>> {
     const registrySchema = registryData.schema || null;
     const registryTitle = registryData.title || '';
     const registryDescription = registryData.description || '';
@@ -109,7 +109,7 @@ export class AppManagementService<TConfig = any> {
     const registryReadme = (await registryData.readme) || '';
     const registryInstructions = (await registryData.instructions) || '';
 
-    return new ExtensionGraphQLDTO(
+    return new ExtensionDTO(
       key,
       registryAvailable,
       !!installedExtension,
@@ -128,12 +128,12 @@ export class AppManagementService<TConfig = any> {
   }
 
   // Метод для объединения данных всех приложений из AppRegistry и данных из базы
-  async getCombinedAppList(filter?: GetExtensionsGraphQLInput): Promise<ExtensionGraphQLDTO<TConfig>[]> {
+  async getCombinedAppList(filter?: GetExtensionsGraphQLInput): Promise<ExtensionDTO<TConfig>[]> {
     const appRegistryData = await this.extractAppRegistryData();
     const installed = await this.getAppList();
 
     // Создаем карту, объединяя данные AppRegistry и установленных приложений
-    const combinedData = new Map<string, ExtensionGraphQLDTO<TConfig>>();
+    const combinedData = new Map<string, ExtensionDTO<TConfig>>();
 
     // Добавляем данные из AppRegistry
     for (const key of Object.keys(appRegistryData)) {

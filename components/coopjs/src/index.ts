@@ -1,25 +1,19 @@
 import type { ClientConnectionOptions } from './types'
 import WebSocket from 'isomorphic-ws'
-import { SystemContract } from './contracts'
-import { Chain, Gql, GraphQLError, HOST, Thunder, Subscription as ZeusSubscription, type GraphQLResponse } from './zeus'
+import { Thunder, Subscription as ZeusSubscription, type GraphQLResponse } from './zeus'
+import { Blockchain } from './blockchain'
 
-export * from './contracts'
 export * from './types'
+export * as Mutations from './mutations'
+export * as Queries from './queries'
+export * as Selectors from './selectors'
+export type { ModelTypes } from './zeus';
+
+
 
 if (typeof globalThis.WebSocket === 'undefined') {
   globalThis.WebSocket = WebSocket as any
 }
-
-// Класс Transactions для работы с контрактами
-class TransactionsClass {
-  systemContract: SystemContract
-
-  constructor() {
-    this.systemContract = new SystemContract()
-  }
-}
-
-export const Transactions = new TransactionsClass()
 
 // Текущие заголовки для запросов, которые можно обновлять
 let currentHeaders: Record<string, string> = {}
@@ -35,7 +29,7 @@ function createThunder(baseUrl: string) {
         ...currentHeaders, // Используем текущие заголовки, включая Authorization
       },
     });
-    console.log("variables: ", variables)
+    
     if (!response.ok) {
       return new Promise((resolve, reject) => {
         response
@@ -75,6 +69,6 @@ export function createClient(options: ClientConnectionOptions) {
     Query: thunder('query'),
     Mutation: thunder('mutation'),
     Subscription: ZeusSubscription(options.baseUrl.replace(/^http/, 'ws')),
-    Transactions,
+    Blockchain: new Blockchain(options)
   }
 }

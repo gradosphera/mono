@@ -34,7 +34,7 @@ export class PaymentMethod {
     this.paymentMethod.deleted = false
     this.paymentMethod.block_num = await getCurrentBlock()
 
-    return await this.data_service.save(this.paymentMethod as PaymentData)
+    return await this.data_service.save(this.paymentMethod)
   }
 
   async getOne(filter: Filter<PaymentData>): Promise<PaymentData | null> {

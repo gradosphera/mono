@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LogExtensionEntity } from '../entities/log-extension.entity';
-import { LogExtensionDomainRepository } from '~/domain/extension/repositories/log-extension-domain.repository.interface';
+import { LogExtensionDomainRepository } from '~/domain/extension/repositories/log-extension-domain.repository';
 import { LogExtensionDomainEntity } from '~/domain/extension/entities/log-extension-domain.entity';
 
 @Injectable()

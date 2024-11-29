@@ -6,8 +6,7 @@ export const paymentMethodSchema: JSONSchemaType<IPaymentData> = {
   type: 'object',
   properties: {
     username: { type: 'string' },
-    method_id: { type: 'number' },
-    user_type: { type: 'string', enum: ['individual', 'entrepreneur', 'organization'] },
+    method_id: { type: 'string' },
     method_type: { type: 'string', enum: ['sbp', 'bank_transfer'] },
     is_default: { type: 'boolean' },
     data: {
@@ -31,6 +30,6 @@ export const paymentMethodSchema: JSONSchemaType<IPaymentData> = {
     deleted: { type: 'boolean', nullable: true },
     block_num: { type: 'number', nullable: true },
   },
-  required: ['username', 'method_id', 'user_type', 'method_type', 'is_default', 'data'],
+  required: ['username', 'method_id', 'method_type', 'is_default', 'data'],
   additionalProperties: true,
 }

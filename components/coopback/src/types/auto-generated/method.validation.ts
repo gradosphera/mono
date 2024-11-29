@@ -20,19 +20,21 @@ export interface IDeletePaymentMethod {
 }
 
 export interface ISavePaymentMethod {
-  data: {
-      phone: string;
-    } | {
-      account_number: string;
-      bank_name: string;
-      card_number?: string;
-      currency: string;
-      details: {
-        bik: string;
-        corr: string;
-        kpp: string;
+  data:
+    | {
+        phone: string;
+      }
+    | {
+        account_number: string;
+        bank_name: string;
+        card_number?: string;
+        currency: string;
+        details: {
+          bik: string;
+          corr: string;
+          kpp: string;
+        };
       };
-    };
   method_id: number;
   method_type: 'sbp' | 'bank_transfer';
   username: string;
@@ -59,19 +61,21 @@ export interface RGetListPaymentMethods {
 
 export interface RSavePaymentMethod {
   body: {
-    data: {
-        phone: string;
-      } | {
-        account_number: string;
-        bank_name: string;
-        card_number?: string;
-        currency: string;
-        details: {
-          bik: string;
-          corr: string;
-          kpp: string;
+    data:
+      | {
+          phone: string;
+        }
+      | {
+          account_number: string;
+          bank_name: string;
+          card_number?: string;
+          currency: string;
+          details: {
+            bik: string;
+            corr: string;
+            kpp: string;
+          };
         };
-      };
     method_id: number;
     method_type: 'sbp' | 'bank_transfer';
     username: string;
