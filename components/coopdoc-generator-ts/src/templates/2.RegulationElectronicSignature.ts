@@ -1,6 +1,6 @@
 import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
-import type { IGenerate, IMetaDocument, ITemplate } from '../Interfaces'
+import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { CooperativeSchema, VarsSchema } from '../Schema'
 

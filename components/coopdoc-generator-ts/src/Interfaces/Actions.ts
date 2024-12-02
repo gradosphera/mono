@@ -1,4 +1,5 @@
 import type { Cooperative } from 'cooptypes'
+import type { IGenerate } from './Documents'
 
 export type IGenerateJoinCoopDecision = Cooperative.Document.IGenerateJoinCoopDecision
 
@@ -10,4 +11,4 @@ export interface IGenerateJoinCoop extends IGenerate {
   skip_save: boolean
 }
 
-export type IGenerateAgreement = Cooperative.Document.IGenerateAgreement
+export type IGenerateAgreement = Cooperative.Document.IGenerateWalletAgreement

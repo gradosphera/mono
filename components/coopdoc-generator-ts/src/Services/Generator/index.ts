@@ -1,7 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { exec } from 'node:child_process'
-import puppeteer from 'puppeteer'
 import { PDFDocument } from 'pdf-lib'
 import moment from 'moment-timezone'
 import { v4 as uuidv4 } from 'uuid'

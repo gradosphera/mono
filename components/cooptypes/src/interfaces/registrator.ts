@@ -6,7 +6,6 @@ export type IChecksum256 = string
 export type IPublicKey = string
 export type ISignature = string
 export type ITimePointSec = string
-export type IUint64 = number | string
 
 export interface IAccount {
   username: IName
@@ -33,20 +32,16 @@ export interface IAdduser {
   meta: string
 }
 
-export interface IBalances extends IBalancesBase {
-}
-
-export interface IBalancesBase {
-  id: IUint64
-  contract: IName
-  quantity: IAsset
-}
-
 export interface IChangekey {
   coopname: IName
   changer: IName
   username: IName
   public_key: IPublicKey
+}
+
+export interface IConfirmreg {
+  coopname: IName
+  username: IName
 }
 
 export interface ICooperative {
@@ -69,8 +64,17 @@ export interface ICooperative {
   document: IDocument
 }
 
+export interface ICreatebranch {
+  coopname: IName
+  braname: IName
+}
+
 export interface IDelcoop {
   registrator: IName
+  coopname: IName
+}
+
+export interface IDisbranches {
   coopname: IName
 }
 
@@ -79,6 +83,10 @@ export interface IDocument {
   public_key: IPublicKey
   signature: ISignature
   meta: string
+}
+
+export interface IEnabranches {
+  coopname: IName
 }
 
 export interface IInit {

@@ -27,14 +27,13 @@ async function init() {
         last_name: 'Иванов',
         middle_name: 'Иванович',
         birthdate: '2000-01-01',
-        phone: '+1234567890',
+        phone: '+72234567890',
         email: 'ivanov.ivan@example.com',
         full_address: 'Переулок Иванов д. 1',
       },
     });
 
     const user = await userService.getUserByUsername('ant');
-    user.status = 'active';
     user.is_registered = true;
     await user.save();
 
@@ -45,7 +44,6 @@ async function init() {
       role: 'user',
       type: 'organization',
       organization_data: {
-        is_cooperative: true,
         type: 'coop',
         short_name: '"ПК ТЕСТ-Восход"',
         full_name: 'Потребительский Кооператив "ТЕСТ-ВОСХОД"',
@@ -62,13 +60,14 @@ async function init() {
         email: 'chairman.voskhod@gmail.com',
         phone: '+77077770707',
         details: {
-          inn: '1234567890',
-          ogrn: '1234567890123',
+          kpp: '123456789',
+          inn: '71234567890',
+          ogrn: '71234567890123',
         },
         bank_account: {
           account_number: '40817810099910004312',
           currency: 'RUB',
-          card_number: '1234567890123456',
+          card_number: '71234567890123456',
           bank_name: 'Sberbank',
           details: {
             bik: '123456789',

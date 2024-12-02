@@ -8,6 +8,7 @@ import type {
   BankTransferDataDomainInterface,
   SBPDataDomainInterface,
 } from '~/domain/payment-method/interfaces/payment-methods-domain.interface';
+import type { PaymentMethodDomainInterface } from '~/domain/payment-method/interfaces/payment-method-domain.interface';
 
 /**
  * Общий Union Type для данных метода оплаты
@@ -30,7 +31,7 @@ export const PaymentMethodDataUnion = createUnionType({
  * Общий DTO для PaymentMethod
  */
 @ObjectType('PaymentMethod')
-export class PaymentMethodDTO {
+export class PaymentMethodDTO implements PaymentMethodDomainInterface {
   @Field(() => String, { description: 'Имя пользователя, к которому привязан метод оплаты' })
   @IsNotEmpty({ message: 'Имя пользователя обязательно' })
   @IsString()

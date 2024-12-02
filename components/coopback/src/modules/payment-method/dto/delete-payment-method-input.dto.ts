@@ -1,8 +1,8 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 
-@InputType('DeleteBankAccountInput')
-export class DeleteBankAccountDTO {
+@InputType('DeletePaymentMethodInput')
+export class DeletePaymentMethodDTO {
   @Field(() => String, { description: 'Имя пользователя, чей метод оплаты нужно удалить' })
   @IsNotEmpty()
   @IsString()

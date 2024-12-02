@@ -1,7 +1,9 @@
-import { SovietContract } from 'cooptypes';
+import { SovietContract, type RegistratorContract } from 'cooptypes';
 import type { TransactResult } from '@wharfkit/session';
 
 export interface BranchBlockchainPort {
+  enableBranchedMode(data: RegistratorContract.Actions.EnableBranches.IEnableBranches): Promise<TransactResult>;
+  disableBranchedMode(data: RegistratorContract.Actions.DisableBranches.IDisableBranches): Promise<TransactResult>;
   createBranch(data: SovietContract.Actions.Branches.CreateBranch.ICreateBranch): Promise<TransactResult>;
   editBranch(data: SovietContract.Actions.Branches.EditBranch.IEditBranch): Promise<TransactResult>;
   getBranches(coopname: string): Promise<SovietContract.Tables.Branches.IBranch[]>;

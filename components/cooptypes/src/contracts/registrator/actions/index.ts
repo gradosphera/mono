@@ -61,3 +61,15 @@ export * as SetCoopStatus from './setCoopStatus'
  * @private
  */
 export * as DeleteCooperative from './deleteCooperative'
+
+/**
+ * Включение режима кооперативных участков
+ * @private
+ */
+export * as EnableBranches from './enableBranches'
+
+/**
+ * Отключение режима кооперативных участков
+ * @private
+ */
+export * as DisableBranches from './disableBranches'

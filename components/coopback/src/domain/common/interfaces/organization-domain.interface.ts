@@ -15,5 +15,4 @@ export type OrganizationDomainInterface = {
   phone: string;
   email: string;
   details: OrganizationDetailsDomainInterface;
-  bank_account: BankAccountDomainInterface;
 };

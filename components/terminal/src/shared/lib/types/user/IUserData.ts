@@ -6,9 +6,9 @@ export type IOrganizationData = Cooperative.Users.IOrganizationData;
 
 export interface IUserData {
   type: 'individual' | 'entrepreneur' | 'organization';
-  entrepreneur_data?: IEntrepreneurData;
+  entrepreneur_data?: IEntrepreneurData & {bank_account: Cooperative.Payments.IBankAccount};
   individual_data?: IIndividualData;
-  organization_data?: IOrganizationData;
+  organization_data?: IOrganizationData & {bank_account: Cooperative.Payments.IBankAccount};
 }
 
 
@@ -20,7 +20,7 @@ export type ICreateOrganizationData = OmitUsername<Cooperative.Users.IOrganizati
 
 export interface ICreateUserData {
   type: 'individual' | 'entrepreneur' | 'organization';
-  entrepreneur_data?: ICreateEntrepreneurData;
+  entrepreneur_data?: ICreateEntrepreneurData & {bank_account: Cooperative.Payments.IBankAccount};
   individual_data?: ICreateIndividualData;
-  organization_data?: ICreateOrganizationData;
+  organization_data?: ICreateOrganizationData & {bank_account: Cooperative.Payments.IBankAccount};
 }

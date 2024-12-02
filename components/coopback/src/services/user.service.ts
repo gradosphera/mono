@@ -5,6 +5,8 @@ import { generator } from './document.service';
 import { ICreateUser } from '../types/auto-generated/user.validation';
 import { PublicKey, Signature } from '@wharfkit/antelope';
 import faker from 'faker';
+import type { Cooperative } from 'cooptypes';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 export const createServiceUser = async (username: string) => {
   return User.create({
@@ -42,11 +44,35 @@ export const createUser = async (userBody: ICreateUser) => {
   if (userBody.type === 'individual' && userBody.individual_data)
     await generator.save('individual', { username: userBody.username, ...userBody.individual_data });
 
-  if (userBody.type === 'organization' && userBody.organization_data)
-    await generator.save('organization', { username: userBody.username, ...userBody.organization_data });
+  if (userBody.type === 'organization' && userBody.organization_data) {
+    const { bank_account, ...userData } = userBody.organization_data || {};
 
-  if (userBody.type === 'entrepreneur' && userBody.entrepreneur_data)
-    await generator.save('entrepreneur', { username: userBody.username, ...userBody.entrepreneur_data });
+    const paymentMethod: Cooperative.Payments.IPaymentData = {
+      username: userBody.username,
+      method_id: new UUID().toString(),
+      method_type: 'bank_transfer',
+      is_default: true,
+      data: bank_account,
+    };
+
+    await generator.save('organization', { username: userBody.username, ...userData });
+    await generator.save('paymentMethod', paymentMethod);
+  }
+
+  if (userBody.type === 'entrepreneur' && userBody.entrepreneur_data) {
+    const { bank_account, ...userData } = userBody.entrepreneur_data || {};
+
+    const paymentMethod: Cooperative.Payments.IPaymentData = {
+      username: userBody.username,
+      method_id: new UUID().toString(),
+      method_type: 'bank_transfer',
+      is_default: true,
+      data: bank_account,
+    };
+
+    await generator.save('entrepreneur', { username: userBody.username, ...userData });
+    await generator.save('paymentMethod', paymentMethod);
+  }
 
   if (exist) {
     Object.assign(exist, userBody);

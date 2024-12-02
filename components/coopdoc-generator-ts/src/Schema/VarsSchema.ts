@@ -1,9 +1,5 @@
 import type { JSONSchemaType } from 'ajv'
-import type { Cooperative } from 'cooptypes'
-import type { IMetaDocument } from '../Interfaces'
-import { PrivacyPolicy, RegulationElectronicSignature, UserAgreement, WalletAgreement } from '../templates'
-import type { CooperativeData, IVars } from '../Models'
-import { CooperativeSchema } from './CooperativeSchema'
+import type { IVars } from '../Models'
 
 export const VarsSchema: JSONSchemaType<IVars> = {
   type: 'object',

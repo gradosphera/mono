@@ -11,6 +11,8 @@ import { EditBranchGraphQLInput } from '../dto/edit-branch-input.dto';
 import { DeleteBranchGraphQLInput } from '../dto/delete-branch-input.dto';
 import { AddTrustedAccountGraphQLInput } from '../dto/add-trusted-account-input.dto';
 import { DeleteTrustedAccountGraphQLInput } from '../dto/delete-trusted-account-input.dto';
+import { EnableBranchedModeInputDTO } from '../dto/enable-branched-mode-input.dto';
+import { DisableBranchedModeInputDTO } from '../dto/disable-branched-mode-input.dto';
 
 @Resolver(() => BranchDTO)
 export class BranchResolver {
@@ -73,5 +75,23 @@ export class BranchResolver {
     @Args('data', { type: () => DeleteTrustedAccountGraphQLInput }) data: DeleteTrustedAccountGraphQLInput
   ): Promise<BranchDTO> {
     return this.branchService.deleteTrustedAccount(data);
+  }
+
+  @Mutation(() => Boolean, { name: 'enableBranchedMode', description: 'Включить режим кооперативных участков' })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async enableBranchedMode(
+    @Args('data', { type: () => EnableBranchedModeInputDTO }) data: EnableBranchedModeInputDTO
+  ): Promise<boolean> {
+    return this.branchService.enableBranchedMode(data);
+  }
+
+  @Mutation(() => Boolean, { name: 'disableBranchedMode', description: 'Отключить режим кооперативных участков' })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async disableBranchedMode(
+    @Args('data', { type: () => DisableBranchedModeInputDTO }) data: DisableBranchedModeInputDTO
+  ): Promise<boolean> {
+    return this.branchService.disableBranchedMode(data);
   }
 }

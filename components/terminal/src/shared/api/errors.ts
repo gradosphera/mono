@@ -1,6 +1,5 @@
 import { IBaseReadBlockchainErrors } from '../lib/types/errors';
 import { FailAlert } from '../api/alerts';
-import type { GraphQLErrorDetail } from '../lib/types/graphql';
 
 export function createBaseReadBlockchainErrors(
   name: string
@@ -23,6 +22,19 @@ export function handleException(e: unknown): void {
 }
 
 export function extractGraphQLErrorMessages(error: unknown): string {
-  const errors = error as GraphQLErrorDetail[];
-  return errors.map((err) => err.message).join('; ');
+  if (!error || typeof error !== 'object') return 'Unknown error';
+
+  // Проверяем, если ошибка уже является массивом
+  if (Array.isArray(error)) {
+    return error.map((err: any) => err.message || 'Unknown error').join('; ');
+  }
+
+  // Обрабатываем, если это объект с полем `errors` (например, Apollo Client)
+  const errors = (error as any).errors;
+  if (Array.isArray(errors)) {
+    return errors.map((err: any) => err.message || 'Unknown error').join('; ');
+  }
+
+  // Обработка в случае, если ошибка — одиночная
+  return (error as any).message || 'Unknown error';
 }

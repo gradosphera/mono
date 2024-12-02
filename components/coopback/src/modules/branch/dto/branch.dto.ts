@@ -1,12 +1,11 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { RepresentedByDTO } from '~/modules/common/dto/represented-by.dto';
-import { BankAccountDTO } from '~/modules/payment-method/dto/bank-account.dto';
 import type { BranchDomainInterface } from '~/domain/branch/interfaces/branch-domain.interface';
-import type { BankAccountDomainInterface } from '~/domain/common/interfaces/bank-account-domain.interface';
 import type { BranchDomainEntity } from '~/domain/branch/entities/branch-domain.entity';
 import { OrganizationDetailsDTO } from '~/modules/common/dto/organization-details.dto';
 import { IndividualDTO } from '~/modules/common/dto/individual.dto';
 import { IsArray, IsJSON, IsString } from 'class-validator';
+import { BankPaymentMethodDTO } from '~/modules/payment-method/dto/bank-payment-method.dto';
 
 @ObjectType('Branch')
 export class BranchDTO implements BranchDomainInterface {
@@ -66,13 +65,13 @@ export class BranchDTO implements BranchDomainInterface {
   @IsString()
   public readonly email: string;
 
+  @Field(() => BankPaymentMethodDTO, { description: 'Банковский счёт' })
+  @IsJSON()
+  public readonly bank_account: BankPaymentMethodDTO;
+
   @Field(() => OrganizationDetailsDTO, { description: 'Детали организации' })
   @IsJSON()
   public readonly details: OrganizationDetailsDTO;
-
-  @Field(() => BankAccountDTO, { description: 'Банковский счет' })
-  @IsJSON()
-  public readonly bank_account: BankAccountDomainInterface;
 
   constructor(entity: BranchDomainEntity) {
     this.coopname = entity.coopname;
@@ -90,6 +89,6 @@ export class BranchDTO implements BranchDomainInterface {
     this.phone = entity.phone;
     this.email = entity.email;
     this.details = new OrganizationDetailsDTO(entity.details);
-    this.bank_account = new BankAccountDTO(entity.bank_account);
+    this.bank_account = new BankPaymentMethodDTO(entity.bank_account);
   }
 }

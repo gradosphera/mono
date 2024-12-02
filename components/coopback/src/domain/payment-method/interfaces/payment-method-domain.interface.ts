@@ -3,8 +3,7 @@ import type { BankTransferDataDomainInterface, SBPDataDomainInterface } from './
 
 export interface PaymentMethodDomainInterface<TData = SBPDataDomainInterface | BankTransferDataDomainInterface> {
   username: string;
-  method_id: number;
-  user_type: 'individual' | 'organization' | 'entrepreneur';
+  method_id: string;
   method_type: 'sbp' | 'bank_transfer';
   data: TData;
   is_default: boolean;

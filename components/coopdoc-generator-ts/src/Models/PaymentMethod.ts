@@ -38,7 +38,10 @@ export class PaymentMethod {
   }
 
   async getOne(filter: Filter<PaymentData>): Promise<PaymentData | null> {
-    return this.data_service.getOne(filter)
+    const result = await this.data_service.getOne(filter)
+    console.log('on get Payment method: ', filter, result)
+
+    return result
   }
 
   async getMany(filter: Filter<PaymentData>): Promise<Cooperative.Document.IGetResponse<PaymentData>> {

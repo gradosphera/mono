@@ -1,8 +1,8 @@
 import type { BranchDomainInterface } from '../interfaces/branch-domain.interface';
-import type { BankAccountDomainInterface } from '~/domain/common/interfaces/bank-account-domain.interface';
 import type { SovietContract } from 'cooptypes';
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
 import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
+import type { BankPaymentMethodDomainInterface } from '~/domain/payment-method/interfaces/bank-payment-method-domain.interface';
 
 export class BranchDomainEntity implements BranchDomainInterface {
   public readonly coopname: string;
@@ -26,19 +26,21 @@ export class BranchDomainEntity implements BranchDomainInterface {
   public readonly fact_address: string;
   public readonly phone: string;
   public readonly email: string;
+
+  public readonly bank_account: BankPaymentMethodDomainInterface;
   public readonly details: {
     inn: string;
     ogrn: string;
     kpp: string;
   };
-  public bank_account: BankAccountDomainInterface;
 
   constructor(
     coopname: string,
     branchBlockchainData: SovietContract.Tables.Branches.IBranch,
     organizationDatabaseData: OrganizationDomainInterface,
     trusteeData: IndividualDomainInterface,
-    trustedData: IndividualDomainInterface[]
+    trustedData: IndividualDomainInterface[],
+    bankAccount: BankPaymentMethodDomainInterface
   ) {
     if (branchBlockchainData.braname != organizationDatabaseData.username)
       throw new Error(`Неверные данные для агрегата: username и braname кооперативного участка должны совпадать`);
@@ -48,6 +50,7 @@ export class BranchDomainEntity implements BranchDomainInterface {
     this.braname = branchBlockchainData.braname;
     this.trustee = trusteeData;
     this.trusted = trustedData;
+    this.bank_account = bankAccount;
 
     this.type = organizationDatabaseData.type;
     this.short_name = organizationDatabaseData.short_name;
@@ -60,6 +63,5 @@ export class BranchDomainEntity implements BranchDomainInterface {
     this.phone = organizationDatabaseData.phone;
     this.email = organizationDatabaseData.email;
     this.details = organizationDatabaseData.details;
-    this.bank_account = organizationDatabaseData.bank_account;
   }
 }

@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PaymentMethodDomainInteractor } from '~/domain/payment-method/interactors/method.interactor';
 import type { GetPaymentMethodsInputDTO } from '../dto/get-payment-methods-input.dto';
 import type { UpdateBankAccountInputDTO } from '../dto/update-bank-account-input.dto';
-import type { DeleteBankAccountDTO } from '../dto/delete-payment-method-input.dto';
+import type { DeletePaymentMethodDTO } from '../dto/delete-payment-method-input.dto';
 import type { CreateBankAccountInputDTO } from '../dto/create-bank-account-input.dto';
 import type { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
@@ -27,7 +27,7 @@ export class PaymentMethodService {
     return new PaymentMethodDTO(await this.paymentMethodDomainInteractor.updateBankAccount(data));
   }
 
-  async deletePaymentMethod(data: DeleteBankAccountDTO): Promise<void> {
+  async deletePaymentMethod(data: DeletePaymentMethodDTO): Promise<void> {
     await this.paymentMethodDomainInteractor.deletePaymentMethod(data.username, data.method_id);
   }
 }

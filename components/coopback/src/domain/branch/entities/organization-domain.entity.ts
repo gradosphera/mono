@@ -1,5 +1,4 @@
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
-import type { BankAccountDomainInterface } from '~/domain/common/interfaces/bank-account-domain.interface';
 
 export class OrganizationDomainEntity implements OrganizationDomainInterface {
   public readonly username: string;
@@ -24,7 +23,6 @@ export class OrganizationDomainEntity implements OrganizationDomainInterface {
     ogrn: string;
     kpp: string;
   };
-  public bank_account: BankAccountDomainInterface;
 
   constructor(data: OrganizationDomainInterface) {
     this.username = data.username;
@@ -39,11 +37,6 @@ export class OrganizationDomainEntity implements OrganizationDomainInterface {
     this.phone = data.phone;
     this.email = data.email;
     this.details = data.details;
-    this.bank_account = data.bank_account;
-  }
-
-  updateBankAccount(bankAccount: BankAccountDomainInterface): void {
-    this.bank_account = { ...this.bank_account, ...bankAccount };
   }
 
   validateDetails(): boolean {

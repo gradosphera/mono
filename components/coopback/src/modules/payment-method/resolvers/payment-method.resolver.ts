@@ -5,7 +5,7 @@ import { GqlJwtAuthGuard } from '~/modules/auth/guards/graphql-jwt-auth.guard';
 import { GetPaymentMethodsInputDTO } from '../dto/get-payment-methods-input.dto';
 import { PaymentMethodService } from '../services/payment-method.service';
 import { UpdateBankAccountInputDTO } from '../dto/update-bank-account-input.dto';
-import { DeleteBankAccountDTO } from '../dto/delete-payment-method-input.dto';
+import { DeletePaymentMethodDTO } from '../dto/delete-payment-method-input.dto';
 import { CreateBankAccountInputDTO } from '../dto/create-bank-account-input.dto';
 import { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
 import { PaymentMethodDTO } from '../dto/payment-method.dto';
@@ -51,7 +51,7 @@ export class PaymentMethodResolver {
   @Mutation(() => Boolean, { name: 'deletePaymentMethod', description: 'Удалить метод оплаты' })
   @UseGuards(GqlJwtAuthGuard)
   async deletePaymentMethod(
-    @Args('data', { type: () => DeleteBankAccountDTO }) data: DeleteBankAccountDTO
+    @Args('data', { type: () => DeletePaymentMethodDTO }) data: DeletePaymentMethodDTO
   ): Promise<boolean> {
     await this.paymentMethodService.deletePaymentMethod(data);
     return true;

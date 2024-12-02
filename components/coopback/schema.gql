@@ -71,9 +71,32 @@ input BankAccountInput {
   details: BankAccountDetailsInput!
 }
 
+type BankPaymentMethod {
+  """Дата создания"""
+  created_at: DateTime!
+
+  """Данные метода оплаты"""
+  data: BankAccount!
+
+  """Флаг основного метода платежа, который отображается в документах"""
+  is_default: Boolean!
+
+  """Идентификатор метода оплаты"""
+  method_id: String!
+
+  """Тип метода оплаты"""
+  method_type: String!
+
+  """Дата обновления"""
+  updated_at: DateTime!
+
+  """Имя пользователя, к которому привязан метод оплаты"""
+  username: String!
+}
+
 type Branch {
-  """Банковский счет"""
-  bank_account: BankAccount!
+  """Банковский счёт"""
+  bank_account: BankPaymentMethod!
 
   """Уникальное имя кооперативного участка"""
   braname: String!
@@ -168,20 +191,20 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-input DeleteBankAccountInput {
-  """Идентификатор метода оплаты"""
-  method_id: String!
-
-  """Имя пользователя, чей метод оплаты нужно удалить"""
-  username: String!
-}
-
 input DeleteBranchInput {
   """Имя аккаунта кооперативного участка"""
   braname: String!
 
   """Имя аккаунта кооператива"""
   coopname: String!
+}
+
+input DeletePaymentMethodInput {
+  """Идентификатор метода оплаты"""
+  method_id: String!
+
+  """Имя пользователя, чей метод оплаты нужно удалить"""
+  username: String!
 }
 
 input DeleteTrustedAccountInput {
@@ -195,6 +218,11 @@ input DeleteTrustedAccountInput {
   Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка
   """
   trusted: String!
+}
+
+input DisableBranchedModeInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
 }
 
 input EditBranchInput {
@@ -226,6 +254,11 @@ input EditBranchInput {
 
   """Имя аккаунта уполномоченного (председателя) кооперативного участка"""
   trustee: String!
+}
+
+input EnableBranchedModeInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
 }
 
 type Extension {
@@ -373,13 +406,19 @@ type Mutation {
   deleteBranch(data: DeleteBranchInput!): Boolean!
 
   """Удалить метод оплаты"""
-  deletePaymentMethod(data: DeleteBankAccountInput!): Boolean!
+  deletePaymentMethod(data: DeletePaymentMethodInput!): Boolean!
 
   """Удалить доверенное лицо кооперативного участка"""
   deleteTrustedAccount(data: DeleteTrustedAccountInput!): Branch!
 
+  """Отключить режим кооперативных участков"""
+  disableBranchedMode(data: DisableBranchedModeInput!): Boolean!
+
   """Изменить кооперативный участок"""
   editBranch(data: EditBranchInput!): Branch!
+
+  """Включить режим кооперативных участков"""
+  enableBranchedMode(data: EnableBranchedModeInput!): Boolean!
 
   """Установить расширение"""
   installExtension(data: ExtensionInput!): Extension!

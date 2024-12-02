@@ -9,10 +9,10 @@ div
     q-input(type="textarea" autogrow readonly label="Телефон" v-model="details.phone")
     q-input(type="textarea" autogrow readonly label="Электронная почта" v-model="details.email")
     q-input(type="textarea" autogrow readonly label="Председатель" v-model="chairman")
-    q-input(type="textarea" autogrow readonly label="Наименование банка" v-model="details.bank_account.bank_name")
-    q-input(type="textarea" autogrow readonly label="БИК" v-model="details.bank_account.details.bik")
-    q-input(type="textarea" autogrow readonly label="Корреспондентский счёт" v-model="details.bank_account.details.corr")
-    q-input(type="textarea" autogrow readonly label="Номер счета" v-model="details.bank_account.account_number")
+    //- q-input(type="textarea" autogrow readonly label="Наименование банка" v-model="details.bank_account.bank_name")
+    //- q-input(type="textarea" autogrow readonly label="БИК" v-model="details.bank_account.details.bik")
+    //- q-input(type="textarea" autogrow readonly label="Корреспондентский счёт" v-model="details.bank_account.details.corr")
+    //- q-input(type="textarea" autogrow readonly label="Номер счета" v-model="details.bank_account.account_number")
 
 
 </template>

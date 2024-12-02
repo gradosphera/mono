@@ -41,7 +41,7 @@ export interface IOrganizationData {
   phone: string
   email: string
   details: { inn: string, ogrn: string, kpp: string }
-  bank_account: IBankAccount
+  // bank_account: IBankAccount
   block_num?: number
   deleted?: boolean
 }
@@ -58,7 +58,7 @@ export interface IEntrepreneurData {
   city: string
   full_address: string
   details: { inn: string, ogrn: string }
-  bank_account: IBankAccount
+  // bank_account: IBankAccount
   block_num?: number
   deleted?: boolean
 }

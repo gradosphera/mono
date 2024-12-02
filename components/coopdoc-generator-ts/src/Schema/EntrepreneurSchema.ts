@@ -24,14 +24,14 @@ export const entrepreneurSchema: JSONSchemaType<ExternalEntrepreneurData> = {
       },
       additionalProperties: true,
     },
-    bank_account: {
-      type: 'object',
-      required: BankAccountSchema.required,
-      properties: BankAccountSchema.properties,
-    },
+    // bank_account: {
+    //   type: 'object',
+    //   required: BankAccountSchema.required,
+    //   properties: BankAccountSchema.properties,
+    // },
     deleted: { type: 'boolean', nullable: true },
     block_num: { type: 'number', nullable: true },
   },
-  required: ['username', 'email', 'first_name', 'last_name', 'birthdate', 'phone', 'country', 'city', 'full_address', 'details', 'bank_account'],
+  required: ['username', 'email', 'first_name', 'last_name', 'birthdate', 'phone', 'country', 'city', 'full_address', 'details'],
   additionalProperties: true,
 }

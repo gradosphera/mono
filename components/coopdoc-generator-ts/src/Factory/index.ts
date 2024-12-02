@@ -2,9 +2,9 @@ import type { JSONSchemaType } from 'ajv'
 import moment from 'moment-timezone'
 import type { Cooperative as TCooperative } from 'cooptypes'
 import { DraftContract, SovietContract } from 'cooptypes'
-import type { ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, ITemplate, ITranslations, externalDataTypes } from '../Interfaces'
+import type { IBankAccount, ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, IPaymentData, ITemplate, ITranslations, externalDataTypes } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
-import { type IVars, Individual, Organization, Vars } from '../Models'
+import { type IVars, Individual, Organization, PaymentMethod, Vars } from '../Models'
 import type { IGenerate, IGenerationOptions } from '../Interfaces/Documents'
 import { PDFService } from '../Services/Generator'
 import packageJson from '../../package.json'
@@ -40,6 +40,17 @@ export abstract class DocFactory<T extends IGenerate> {
       throw new Error('Организация не найдена')
 
     return organization
+  }
+
+  async getBankAccount(username: string, block_num?: number): Promise<IBankAccount> {
+    const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
+
+    const method = (await new PaymentMethod(this.storage).getOne({ username, ...block_filter, method_type: 'bank_transfer', is_default: true }))?.data as IBankAccount
+
+    if (!method)
+      throw new Error('Банковский счёт не найден')
+
+    return method
   }
 
   async getUser(username: string, block_num?: number): Promise<{ type: string, data: externalDataTypes }> {

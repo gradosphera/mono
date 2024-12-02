@@ -1,6 +1,5 @@
 import type { Cooperative } from 'cooptypes'
 import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
-import type { IMetaDocument } from '../Interfaces'
 import DataService from '../Services/Databazor/DataService'
 import { type ValidateResult, Validator } from '../Services/Validator'
 import { VarsSchema } from '../Schema'

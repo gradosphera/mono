@@ -17,7 +17,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	DateTime: `scalar.DateTime` as const,
-	DeleteBankAccountInput:{
+	DeletePaymentMethodInput:{
 
 	},
 	DeleteBranchInput:{
@@ -58,7 +58,7 @@ export const AllTypesProps: Record<string,any> = {
 			data:"DeleteBranchInput"
 		},
 		deletePaymentMethod:{
-			data:"DeleteBankAccountInput"
+			data:"DeletePaymentMethodInput"
 		},
 		deleteTrustedAccount:{
 			data:"DeleteTrustedAccountInput"
@@ -111,8 +111,17 @@ export const ReturnTypes: Record<string,any> = {
 		corr:"String",
 		kpp:"String"
 	},
+	BankPaymentMethod:{
+		created_at:"DateTime",
+		data:"BankAccount",
+		is_default:"Boolean",
+		method_id:"String",
+		method_type:"String",
+		updated_at:"DateTime",
+		username:"String"
+	},
 	Branch:{
-		bank_account:"BankAccount",
+		bank_account:"BankPaymentMethod",
 		braname:"String",
 		city:"String",
 		coopname:"String",

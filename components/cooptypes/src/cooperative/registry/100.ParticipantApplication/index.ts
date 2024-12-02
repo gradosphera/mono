@@ -1,5 +1,6 @@
 import type { IGenerate, IMetaDocument } from '../../document'
 import type { ICooperativeData, IVars } from '../../model'
+import type { IBankAccount } from '../../payments'
 import type { IEntrepreneurData, IIndividualData, IOrganizationData } from '../../users'
 
 export const registry_id = 100
@@ -16,7 +17,7 @@ export interface Action extends IGenerate {
 export interface Model {
   type: string
   individual?: IIndividualData
-  organization?: IOrganizationData
+  organization?: IOrganizationData & { bank_account: IBankAccount }
   entrepreneur?: IEntrepreneurData
   coop: ICooperativeData
   meta: IMetaDocument

@@ -963,9 +963,26 @@ export type ValueTypes = {
 	/** Детали счета */
 	details: ValueTypes["BankAccountDetailsInput"] | Variable<any, string>
 };
+	["BankPaymentMethod"]: AliasType<{
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Данные метода оплаты */
+	data?:ValueTypes["BankAccount"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default?:boolean | `@${string}`,
+	/** Идентификатор метода оплаты */
+	method_id?:boolean | `@${string}`,
+	/** Тип метода оплаты */
+	method_type?:boolean | `@${string}`,
+	/** Дата обновления */
+	updated_at?:boolean | `@${string}`,
+	/** Имя пользователя, к которому привязан метод оплаты */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Branch"]: AliasType<{
-	/** Банковский счет */
-	bank_account?:ValueTypes["BankAccount"],
+	/** Банковский счёт */
+	bank_account?:ValueTypes["BankPaymentMethod"],
 	/** Уникальное имя кооперативного участка */
 	braname?:boolean | `@${string}`,
 	/** Город */
@@ -1028,7 +1045,7 @@ export type ValueTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
-	["DeleteBankAccountInput"]: {
+	["DeletePaymentMethodInput"]: {
 	/** Идентификатор метода оплаты */
 	method_id: string | Variable<any, string>,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
@@ -1165,7 +1182,7 @@ addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
-deletePaymentMethod?: [{	data: ValueTypes["DeleteBankAccountInput"] | Variable<any, string>},boolean | `@${string}`],
+deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ValueTypes["DeleteTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 editBranch?: [{	data: ValueTypes["EditBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
 installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
@@ -1319,9 +1336,26 @@ export type ResolverInputTypes = {
 	/** Детали счета */
 	details: ResolverInputTypes["BankAccountDetailsInput"]
 };
+	["BankPaymentMethod"]: AliasType<{
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Данные метода оплаты */
+	data?:ResolverInputTypes["BankAccount"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default?:boolean | `@${string}`,
+	/** Идентификатор метода оплаты */
+	method_id?:boolean | `@${string}`,
+	/** Тип метода оплаты */
+	method_type?:boolean | `@${string}`,
+	/** Дата обновления */
+	updated_at?:boolean | `@${string}`,
+	/** Имя пользователя, к которому привязан метод оплаты */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Branch"]: AliasType<{
-	/** Банковский счет */
-	bank_account?:ResolverInputTypes["BankAccount"],
+	/** Банковский счёт */
+	bank_account?:ResolverInputTypes["BankPaymentMethod"],
 	/** Уникальное имя кооперативного участка */
 	braname?:boolean | `@${string}`,
 	/** Город */
@@ -1384,7 +1418,7 @@ export type ResolverInputTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
-	["DeleteBankAccountInput"]: {
+	["DeletePaymentMethodInput"]: {
 	/** Идентификатор метода оплаты */
 	method_id: string,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
@@ -1521,7 +1555,7 @@ addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},Resol
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
-deletePaymentMethod?: [{	data: ResolverInputTypes["DeleteBankAccountInput"]},boolean | `@${string}`],
+deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ResolverInputTypes["DeleteTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 editBranch?: [{	data: ResolverInputTypes["EditBranchInput"]},ResolverInputTypes["Branch"]],
 installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
@@ -1679,9 +1713,25 @@ export type ModelTypes = {
 	/** Детали счета */
 	details: ModelTypes["BankAccountDetailsInput"]
 };
+	["BankPaymentMethod"]: {
+		/** Дата создания */
+	created_at: ModelTypes["DateTime"],
+	/** Данные метода оплаты */
+	data: ModelTypes["BankAccount"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Идентификатор метода оплаты */
+	method_id: string,
+	/** Тип метода оплаты */
+	method_type: string,
+	/** Дата обновления */
+	updated_at: ModelTypes["DateTime"],
+	/** Имя пользователя, к которому привязан метод оплаты */
+	username: string
+};
 	["Branch"]: {
-		/** Банковский счет */
-	bank_account: ModelTypes["BankAccount"],
+		/** Банковский счёт */
+	bank_account: ModelTypes["BankPaymentMethod"],
 	/** Уникальное имя кооперативного участка */
 	braname: string,
 	/** Город */
@@ -1743,7 +1793,7 @@ export type ModelTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
-	["DeleteBankAccountInput"]: {
+	["DeletePaymentMethodInput"]: {
 	/** Идентификатор метода оплаты */
 	method_id: string,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
@@ -2042,10 +2092,27 @@ export type GraphQLTypes = {
 	/** Детали счета */
 	details: GraphQLTypes["BankAccountDetailsInput"]
 };
+	["BankPaymentMethod"]: {
+	__typename: "BankPaymentMethod",
+	/** Дата создания */
+	created_at: GraphQLTypes["DateTime"],
+	/** Данные метода оплаты */
+	data: GraphQLTypes["BankAccount"],
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Идентификатор метода оплаты */
+	method_id: string,
+	/** Тип метода оплаты */
+	method_type: string,
+	/** Дата обновления */
+	updated_at: GraphQLTypes["DateTime"],
+	/** Имя пользователя, к которому привязан метод оплаты */
+	username: string
+};
 	["Branch"]: {
 	__typename: "Branch",
-	/** Банковский счет */
-	bank_account: GraphQLTypes["BankAccount"],
+	/** Банковский счёт */
+	bank_account: GraphQLTypes["BankPaymentMethod"],
 	/** Уникальное имя кооперативного участка */
 	braname: string,
 	/** Город */
@@ -2107,7 +2174,7 @@ export type GraphQLTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]: "scalar" & { name: "DateTime" };
-	["DeleteBankAccountInput"]: {
+	["DeletePaymentMethodInput"]: {
 		/** Идентификатор метода оплаты */
 	method_id: string,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
@@ -2370,7 +2437,7 @@ type ZEUS_VARIABLES = {
 	["CreateBankAccountInput"]: ValueTypes["CreateBankAccountInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
 	["DateTime"]: ValueTypes["DateTime"];
-	["DeleteBankAccountInput"]: ValueTypes["DeleteBankAccountInput"];
+	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];

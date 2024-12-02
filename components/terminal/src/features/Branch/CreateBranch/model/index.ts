@@ -19,13 +19,7 @@ export function useCreateBranch() {
     short_name: '',
     full_name: '',
     phone: '',
-    represented_by: {
-      based_on: '',
-      first_name: '',
-      last_name: '',
-      middle_name: '',
-      position: ''
-    },
+    based_on: '',
     trustee: ''
   })
 

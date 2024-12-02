@@ -1,8 +1,8 @@
 import { paymentMethodSelector } from '../../selectors/paymentMethods/paymentMethodSelector';
 import { $, Selector, type ModelTypes } from '../../zeus';
 
-export const updateBankAccount = Selector('Mutation')({
-  updateBankAccount: [{data: $('data', 'UpdateBankAccountInput!')}, paymentMethodSelector]
+export const deletePaymentMethod = Selector('Mutation')({
+  deletePaymentMethod: [{data: $('data', 'DeletePaymentMethodInput!')}, true]
 });
 
-export type IUpdateBankAccountInput = ModelTypes['UpdateBankAccountInput']
+export type IDeleteBankAccountInput = ModelTypes['DeletePaymentMethodInput']

@@ -18,7 +18,6 @@ import { Cooperative, type CooperativeData } from './Models/Cooperative'
 import type { DocFactory } from './Factory'
 import type { PaymentData } from './Models/PaymentMethod'
 import { PaymentMethod } from './Models/PaymentMethod'
-import { Registry } from './templates'
 
 export type dataTypes = 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'vars'
 

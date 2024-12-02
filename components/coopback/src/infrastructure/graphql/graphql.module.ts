@@ -5,6 +5,7 @@ import config from '~/config/config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { authDirectiveTransformer } from './directives/auth.directive';
 import logger from '~/config/logger';
+import { GraphQLError, GraphQLFormattedError } from 'graphql';
 
 @Global()
 @Module({
@@ -21,11 +22,40 @@ import logger from '~/config/logger';
           : false,
       path: '/v1/graphql', // здесь можно задать другой путь, когда потребуется,
       transformSchema: (schema) => authDirectiveTransformer(schema, 'auth'),
-      formatError: (error) => {
-        // Логирование ошибки
-        // logger.warn('GraphQL Error:', error);
+      formatError: (formattedError: GraphQLFormattedError, error: unknown): GraphQLFormattedError => {
+        let extensions = formattedError.extensions || {};
+        let message = formattedError.message;
 
-        return error;
+        if (error instanceof GraphQLError) {
+          // Если есть оригинальная ошибка, извлекаем информацию
+          if (error.originalError instanceof Error) {
+            message = error.originalError.message;
+            extensions = {
+              ...extensions,
+              code: extensions.code || 'INTERNAL_SERVER_ERROR',
+              stacktrace: process.env.NODE_ENV === 'development' ? error.originalError.stack : undefined,
+            };
+          }
+        } else if (error instanceof Error) {
+          // Для ошибок, которые не являются GraphQLError
+          message = error.message;
+          extensions = {
+            ...extensions,
+            code: 'INTERNAL_SERVER_ERROR',
+            stacktrace: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+          };
+        }
+
+        // Логирование
+        logger.error({
+          message: `GraphQL Error: ${message}`,
+          extensions,
+        });
+
+        return {
+          message,
+          extensions,
+        };
       },
     }),
   ],

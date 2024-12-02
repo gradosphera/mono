@@ -2,9 +2,10 @@ import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
 import { Selector, type ValueTypes } from "../../zeus";
 import { rawBankAccountSelector } from "../common/bankAccountSelector";
 import { rawIndividualSelector } from "../common/individualSelector";
+import { rawPaymentMethodSelector } from "../paymentMethods/paymentMethodSelector";
+import { rawbankPaymentMethodSelector } from "../paymentMethods/rawBankPaymentMethodSelector";
 
 const rawBranchSelector = {
-  bank_account: rawBankAccountSelector, // Передаём "сырой" объект
   coopname: true,
   braname: true,
   city: true,
@@ -29,6 +30,7 @@ const rawBranchSelector = {
   short_name: true,
   trusted: rawIndividualSelector, // Передаём "сырой" объект
   trustee: rawIndividualSelector, // Передаём "сырой" объект
+  bank_account: rawbankPaymentMethodSelector,
   type: true,
 };
 

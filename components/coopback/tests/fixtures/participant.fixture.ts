@@ -16,7 +16,7 @@ export const participantOne: ICreateUser = {
     last_name: faker.name.lastName(),
     middle_name: '',
     birthdate: '2023-04-01',
-    phone: '+1234567890',
+    phone: '+77123467890',
     email: email1,
     full_address: 'Russia, Moscow, Tverskaya street, 1',
   },

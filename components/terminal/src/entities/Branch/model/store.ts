@@ -16,7 +16,7 @@ export const useBranchStore = defineStore(namespace, (): IBranchStore => {
 
   const loadBranches = async (data: IGetBranchesInput) => {
     const loadedData = await api.loadBranches(data);
-
+    console.log('loadedData: ', loadedData)
     branches.value = loadedData; // сохраняем преобразованные данные
   };
 

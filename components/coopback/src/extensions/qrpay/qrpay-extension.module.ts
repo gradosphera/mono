@@ -14,6 +14,8 @@ import { TypeOrmExtensionDomainRepository } from '~/infrastructure/database/type
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { z } from 'zod';
+import config from '~/config/config';
+import type { Cooperative } from 'cooptypes';
 
 export const Schema = z.object({});
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -62,18 +64,24 @@ export class QrPayPlugin extends PaymentProvider {
     secret: string
   ): Promise<PaymentDetails> {
     // eslint-disable-next-line prettier/prettier
-    const cooperative = await generator.constructCooperative(process.env.COOPNAME as string);
+    const cooperative = await generator.constructCooperative(config.coopname);
     const amount_plus_fee = getAmountPlusFee(parseFloat(amount), this.fee_percent).toFixed(2);
     const fee_amount = (parseFloat(amount_plus_fee) - parseFloat(amount)).toFixed(2);
     const fact_fee_percent = Math.round((parseFloat(fee_amount) / parseFloat(amount)) * 100 * 100) / 100;
 
-    const invoice = `ST00012|Name=${cooperative?.full_name}|PersonalAcc=${
-      cooperative?.bank_account.account_number
-    }|BankName=${cooperative?.bank_account.bank_name}|BIC=${cooperative?.bank_account.details.bik}|CorrespAcc=${
-      cooperative?.bank_account.details.corr
-    }|Sum=${parseInt(amount)}00|Purpose=${description}. Без НДС.|PayeeINN=${cooperative?.details.inn}|KPP=${
-      cooperative?.details.kpp
-    }`;
+    const paymentMethod = (await generator.get('paymentMethod', {
+      username: config.coopname,
+      method_type: 'bank_transfer',
+      is_default: true,
+    })) as Cooperative.Payments.IPaymentData;
+
+    const bankAccount = paymentMethod.data as Cooperative.Payments.IBankAccount;
+
+    const invoice = `ST00012|Name=${cooperative?.full_name}|PersonalAcc=${bankAccount.account_number}|BankName=${
+      bankAccount.bank_name
+    }|BIC=${bankAccount.details.bik}|CorrespAcc=${bankAccount.details.corr}|Sum=${parseInt(
+      amount
+    )}00|Purpose=${description}. Без НДС.|PayeeINN=${cooperative?.details.inn}|KPP=${cooperative?.details.kpp}`;
 
     const result: PaymentDetails = {
       data: invoice,

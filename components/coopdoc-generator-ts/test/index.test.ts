@@ -209,7 +209,7 @@ describe('тест генератора документов', async () => {
       last_name: 'Фамилия',
       middle_name: 'Отчество',
       birthdate: '2023-04-01',
-      phone: '+1234567890',
+      phone: '+71234567890',
       email: 'john.doe@example.com',
       full_address: 'Переулок Правды д. 1',
       passport: {
@@ -236,8 +236,7 @@ describe('тест генератора документов', async () => {
   it('сохранение, извлечение и удаление банковских реквизитов пользователя', async () => {
     const paymentData: PaymentData = {
       username: 'ant',
-      method_id: 1,
-      user_type: 'individual',
+      method_id: '1',
       method_type: 'sbp',
       is_default: true,
       data: {
@@ -290,24 +289,12 @@ describe('тест генератора документов', async () => {
       full_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
       fact_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
       email: 'copenomics@yandex.ru',
-      phone: '+71234567890',
+      phone: '+771234567890',
       details: {
         inn: '9728130611',
         ogrn: '1247700283346',
         kpp: '772801001',
       },
-      bank_account: {
-        account_number: '40703810038000110117',
-        currency: 'RUB',
-        card_number: '',
-        bank_name: 'ПАО Сбербанк',
-        details: {
-          bik: '044525225',
-          corr: '30101810400000000225',
-          kpp: '773643001',
-        },
-      },
-
     }
 
     const saved = await generator.save('organization', organizationData)
@@ -319,6 +306,27 @@ describe('тест генератора документов', async () => {
     })
 
     expect(organization._id).toEqual(saved.insertedId)
+
+    const paymentData: PaymentData = {
+      username: 'voskhod',
+      method_id: '1',
+      method_type: 'bank_transfer',
+      is_default: true,
+      data: {
+        account_number: '40703810038000110117',
+        currency: 'RUB',
+        card_number: '',
+        bank_name: 'ПАО Сбербанк',
+        details: {
+          bik: '044525225',
+          corr: '30101810400000000225',
+          kpp: '773643001',
+        },
+      },
+      deleted: false,
+    }
+
+    await generator.save('paymentMethod', paymentData)
   })
 
   it('сохранение и извлечение переменных кооператива', async () => {
@@ -619,22 +627,11 @@ describe('тест генератора документов', async () => {
       full_address: 'г. Москва, ул. Арбат д. 22, офис 306',
       fact_address: 'г. Москва, ул. Арбат д. 22, офис 306',
       email: 'contact@exampleorg.com',
-      phone: '+71234567890',
+      phone: '+771234567890',
       details: {
         kpp: '123456789',
         inn: '0987654321',
         ogrn: '0987654321098',
-      },
-      bank_account: {
-        account_number: '40817810099910004312',
-        currency: 'RUB',
-        card_number: '0987654321098765',
-        bank_name: 'ПАО СБЕРБАНК',
-        details: {
-          bik: '098765432',
-          corr: '30101810400000000225',
-          kpp: '098765432',
-        },
       },
     }
 
@@ -647,6 +644,27 @@ describe('тест генератора документов', async () => {
     Object.keys(organizationData).forEach((field) => {
       expect(organization[field]).toBeDefined()
     })
+
+    const paymentData: PaymentData = {
+      username: 'exampleorg',
+      method_id: '1',
+      method_type: 'bank_transfer',
+      is_default: true,
+      data: {
+        account_number: '40817810099910004312',
+        currency: 'RUB',
+        card_number: '0987654321098765',
+        bank_name: 'ПАО СБЕРБАНК',
+        details: {
+          bik: '098765432',
+          corr: '30101810400000000225',
+          kpp: '098765432',
+        },
+      },
+      deleted: false,
+    }
+
+    await generator.save('paymentMethod', paymentData)
   })
 
   it('генерируем заявление на вступление юридического лица', async () => {
@@ -702,7 +720,7 @@ describe('тест генератора документов', async () => {
       last_name: 'Doe',
       middle_name: 'Middle',
       birthdate: '2023-04-01',
-      phone: '+1234567890',
+      phone: '+71234567890',
       email: 'john.doe@example.com',
       full_address: 'переулок правды д. 1',
       country: 'Russia',
@@ -711,7 +729,17 @@ describe('тест генератора документов', async () => {
         inn: '0987654321',
         ogrn: '0987654321098',
       },
-      bank_account: {
+    }
+
+    const saved = await generator.save('entrepreneur', entrepreneurData)
+    console.log(saved)
+
+    const paymentData: PaymentData = {
+      username: 'entrepreneur',
+      method_id: '1',
+      method_type: 'bank_transfer',
+      is_default: true,
+      data: {
         account_number: '40817810099910004312',
         currency: 'RUB',
         card_number: '0987654321098765',
@@ -722,10 +750,11 @@ describe('тест генератора документов', async () => {
           kpp: '098765432',
         },
       },
+      deleted: false,
     }
 
-    const saved = await generator.save('entrepreneur', entrepreneurData)
-    console.log(saved)
+    await generator.save('paymentMethod', paymentData)
+
     const entrepreneur = await generator.get('entrepreneur', { username: entrepreneurData.username }) as any
     console.log(entrepreneur)
     expect(entrepreneur._id).toEqual(saved.insertedId)
@@ -799,24 +828,12 @@ describe('тест генератора документов', async () => {
       full_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
       fact_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
       email: 'copenomics@yandex.ru',
-      phone: '+71234567890',
+      phone: '+771234567890',
       details: {
         inn: '9728130611',
         ogrn: '1247700283346',
         kpp: '772801001',
       },
-      bank_account: {
-        account_number: '40703810038000110117',
-        currency: 'RUB',
-        card_number: '',
-        bank_name: 'ПАО Сбербанк',
-        details: {
-          bik: '044525225',
-          corr: '30101810400000000225',
-          kpp: '773643001',
-        },
-      },
-
     }
 
     await generator.save('organization', voskhodData)
@@ -861,6 +878,27 @@ describe('тест генератора документов', async () => {
 
     await generator.save('vars', vars)
 
+    const paymentData: PaymentData = {
+      username: 'voskhod',
+      method_id: '1',
+      method_type: 'bank_transfer',
+      is_default: true,
+      data: {
+        account_number: '40703810038000110117',
+        currency: 'RUB',
+        card_number: '',
+        bank_name: 'ПАО Сбербанк',
+        details: {
+          bik: '044525225',
+          corr: '30101810400000000225',
+          kpp: '773643001',
+        },
+      },
+      deleted: false,
+    }
+
+    await generator.save('paymentMethod', paymentData)
+
     const coopname = 'test'
 
     const organizationData: ExternalOrganizationData = {
@@ -880,13 +918,22 @@ describe('тест генератора документов', async () => {
       full_address: 'г. Москва, ул. Арбат д. 22, офис 306',
       fact_address: 'г. Москва, ул. Арбат д. 22, офис 306',
       email: 'contact@exampleorg.com',
-      phone: '+71234567890',
+      phone: '+771234567890',
       details: {
         kpp: '123456789',
         inn: '0987654321',
         ogrn: '0987654321098',
       },
-      bank_account: {
+    }
+
+    await generator.save('organization', organizationData)
+
+    const paymentData2: PaymentData = {
+      username: coopname,
+      method_id: '1',
+      method_type: 'bank_transfer',
+      is_default: true,
+      data: {
         account_number: '40817810099910004312',
         currency: 'RUB',
         card_number: '0987654321098765',
@@ -897,9 +944,10 @@ describe('тест генератора документов', async () => {
           kpp: '098765432',
         },
       },
+      deleted: false,
     }
 
-    await generator.save('organization', organizationData)
+    await generator.save('paymentMethod', paymentData2)
 
     const act: CoopenomicsAgreement.Action = {
       registry_id: 50,

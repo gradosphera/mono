@@ -1,15 +1,13 @@
 import type { JSONSchemaType } from 'ajv'
 
 import { Cooperative } from 'cooptypes'
-import type { IGenerate, IMetaDocument, ITemplate } from '../Interfaces'
+import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { individualSchema } from '../Schema/IndividualSchema'
 import { organizationSchema } from '../Schema'
-import { type CooperativeData } from '../Models/Cooperative'
 import { CooperativeSchema } from '../Schema/CooperativeSchema'
 import { entrepreneurSchema } from '../Schema/EntrepreneurSchema'
 import { decisionSchema } from '../Schema/DecisionSchema'
-import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData } from '../Models'
 
 export const registry_id = Cooperative.Registry.DecisionOfParticipantApplication.registry_id
 

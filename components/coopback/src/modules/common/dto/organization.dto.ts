@@ -1,5 +1,4 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { BankAccountDTO } from '../../payment-method/dto/bank-account.dto';
 import { RepresentedByDTO } from './represented-by.dto';
 import type { OrganizationDomainInterface } from '../../../domain/common/interfaces/organization-domain.interface';
 import { OrganizationDetailsDTO } from './organization-details.dto';
@@ -42,9 +41,6 @@ export class OrganizationDTO implements OrganizationDomainInterface {
   @Field(() => OrganizationDetailsDTO, { description: 'Детали организации' })
   details: OrganizationDetailsDTO;
 
-  @Field(() => BankAccountDTO, { description: 'Банковский счет' })
-  bank_account: BankAccountDTO;
-
   constructor(data: OrganizationDomainInterface) {
     this.username = data.username;
     this.type = data.type;
@@ -58,6 +54,5 @@ export class OrganizationDTO implements OrganizationDomainInterface {
     this.phone = data.phone;
     this.email = data.email;
     this.details = new OrganizationDetailsDTO(data.details);
-    this.bank_account = new BankAccountDTO(data.bank_account);
   }
 }

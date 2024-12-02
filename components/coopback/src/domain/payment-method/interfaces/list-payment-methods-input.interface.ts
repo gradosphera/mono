@@ -1,5 +1,5 @@
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 
-export interface GetPaymentMethodsDomainInterface extends PaginationInputDomainInterface {
+export interface ListPaymentMethodsDomainInterface extends PaginationInputDomainInterface {
   username?: string;
 }

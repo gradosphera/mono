@@ -39,7 +39,7 @@ describe('Auth routes', () => {
           last_name: faker.name.lastName(),
           middle_name: '',
           birthdate: '2023-04-01',
-          phone: '+1234567890',
+          phone: '+71234567890',
           email: email,
           full_address: 'Russia, Moscow, Tverskaya street, 10',
         },

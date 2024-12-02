@@ -1,4 +1,3 @@
-import type { BankAccountDomainInterface } from './bank-account-domain.interface';
 import type { EntrepreneurDetailsDomainInterface } from './entrepreneur-details-domain.interface';
 
 export interface EntrepreneurDomainInterface {
@@ -13,5 +12,4 @@ export interface EntrepreneurDomainInterface {
   city: string;
   full_address: string;
   details: EntrepreneurDetailsDomainInterface;
-  bank_account: BankAccountDomainInterface;
 }

@@ -13,10 +13,17 @@ import type { DeleteTrustedAccountDomainInterface } from '../interfaces/delete-t
 import { INDIVIDUAL_REPOSITORY, IndividualRepository } from '~/domain/common/repositories/individual.repository';
 import { IndividualDomainEntity } from '../entities/individual-domain.entity';
 import { OrganizationDomainEntity } from '../entities/organization-domain.entity';
+import { PAYMENT_METHOD_REPOSITORY, PaymentMethodRepository } from '~/domain/common/repositories/payment-method.repository';
+import { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
+import { randomUUID } from 'crypto';
+import { BankPaymentMethodDTO } from '~/modules/payment-method/dto/bank-payment-method.dto';
+import type { EnableBranchedModeDomainInput } from '../interfaces/enable-branched-mode-input.interface';
+import type { DisableBranchedModeDomainInput } from '../interfaces/disable-branched-mode-input.interface';
 
 @Injectable()
 export class BranchDomainInteractor {
   constructor(
+    @Inject(PAYMENT_METHOD_REPOSITORY) private readonly paymentMethodRepository: PaymentMethodRepository,
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
     @Inject(INDIVIDUAL_REPOSITORY) private readonly individualRepository: IndividualRepository,
     @Inject(BRANCH_BLOCKCHAIN_PORT) private readonly branchBlockchainPort: BranchBlockchainPort
@@ -38,7 +45,15 @@ export class BranchDomainInteractor {
       trustedData.push(tr);
     }
 
-    return new BranchDomainEntity(coopname, branch, databaseData, trusteeData, trustedData);
+    const bankAccount = new BankPaymentMethodDTO(
+      await this.paymentMethodRepository.get({
+        username: braname,
+        method_type: 'bank_transfer',
+        is_default: true,
+      })
+    );
+
+    return new BranchDomainEntity(coopname, branch, databaseData, trusteeData, trustedData, bankAccount);
   }
 
   async getBranches(data: GetBranchesDomainInput): Promise<BranchDomainEntity[]> {
@@ -66,7 +81,6 @@ export class BranchDomainInteractor {
     console.log('data: ', data);
     // извлекаем информацию о кооперативе
     const cooperative = await this.organizationRepository.findByUsername(data.coopname);
-    const organizationEntity = new OrganizationDomainEntity(cooperative);
 
     //извлекаем информацию о председателе
     const trustee = new IndividualDomainEntity(await this.individualRepository.findByUsername(data.trustee));
@@ -75,7 +89,7 @@ export class BranchDomainInteractor {
 
     // комбинируем с входящими данными о КУ
     const combinedData = new OrganizationDomainEntity({
-      ...organizationEntity,
+      ...cooperative,
       ...data,
       represented_by: {
         first_name: trustee.first_name,
@@ -89,6 +103,22 @@ export class BranchDomainInteractor {
 
     // Сохраняем в базе данных
     await this.organizationRepository.create(combinedData);
+
+    const cooperativeBank = await this.paymentMethodRepository.get({
+      username: data.coopname,
+      method_type: 'bank_transfer',
+      is_default: true,
+    });
+
+    const paymentMethod = new PaymentMethodDomainEntity({
+      username: data.braname,
+      method_id: randomUUID().toString(),
+      method_type: 'bank_transfer',
+      data: cooperativeBank.data,
+      is_default: true,
+    });
+
+    await this.paymentMethodRepository.save(paymentMethod);
 
     // Уведомляем блокчейн через порт
     await this.branchBlockchainPort.createBranch({
@@ -202,5 +232,19 @@ export class BranchDomainInteractor {
     });
 
     return await this.getBranch(data.coopname, data.braname);
+  }
+
+  async enableBranchedMode(data: EnableBranchedModeDomainInput): Promise<boolean> {
+    // Уведомляем блокчейн через порт
+    await this.branchBlockchainPort.enableBranchedMode(data);
+
+    return true;
+  }
+
+  async disableBranchedMode(data: DisableBranchedModeDomainInput): Promise<boolean> {
+    // Уведомляем блокчейн через порт
+    await this.branchBlockchainPort.disableBranchedMode(data);
+
+    return true;
   }
 }

@@ -64,12 +64,12 @@ export const useDesktopStore = defineStore(namespace, (): IDesktopStore => {
         }
       } else {
         online.value = false
-        setTimeout(healthCheck, 5000)
+        setTimeout(healthCheck, 10000)
       }
 
     } catch (e) {
       online.value = false
-      setTimeout(healthCheck, 5000)
+      setTimeout(healthCheck, 10000)
     }
   }
 

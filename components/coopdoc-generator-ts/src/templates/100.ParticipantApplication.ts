@@ -1,13 +1,11 @@
 import type { JSONSchemaType } from 'ajv'
 
 import { Cooperative } from 'cooptypes'
-import type { IGenerate, IMetaDocument, ITemplate } from '../Interfaces'
+import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { individualSchema } from '../Schema/IndividualSchema'
-import type { ExternalIndividualData, ExternalOrganizationData } from '../Models'
-import { VarsSchema, organizationSchema } from '../Schema'
+import { BankAccountSchema, VarsSchema, organizationSchema } from '../Schema'
 import { CooperativeSchema } from '../Schema/CooperativeSchema'
-import type { ExternalEntrepreneurData } from '../Models/Entrepreneur'
 import { entrepreneurSchema } from '../Schema/EntrepreneurSchema'
 
 export const registry_id = Cooperative.Registry.ParticipantApplication.registry_id
@@ -41,8 +39,13 @@ export const Schema: JSONSchemaType<Model> = {
       type: 'object',
       properties: {
         ...organizationSchema.properties,
+        bank_account: {
+          type: 'object',
+          required: BankAccountSchema.required,
+          properties: BankAccountSchema.properties,
+        },
       },
-      required: [...organizationSchema.required],
+      required: [...organizationSchema.required, 'bank_account'],
       additionalProperties: true,
       nullable: true,
     },

@@ -26,8 +26,16 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
 
     const user = await super.getUser(data.username, data.block_num)
 
+    let bank_account = {} as any
+
+    if (user.type === 'organization' || user.type === 'entrepreneur')
+      bank_account = await super.getBankAccount(data.username, data.block_num)
+
     const userData = {
-      [user.type]: user.data,
+      [user.type]: {
+        ...user.data,
+        bank_account,
+      },
     }
 
     const coop = await super.getCooperative(data.coopname, data.block_num)

@@ -1,5 +1,4 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { BankAccountDTO } from '../../payment-method/dto/bank-account.dto';
 import type { EntrepreneurDomainInterface } from '../../../domain/common/interfaces/entrepreneur-domain.interface';
 import { EntrepreneurDetailsDTO } from './entrepreneur-details.dto';
 
@@ -38,9 +37,6 @@ export class EntrepreneurDTO implements EntrepreneurDomainInterface {
   @Field(() => EntrepreneurDetailsDTO, { description: 'Детали ИП (ИНН, ОГРН)' })
   details: EntrepreneurDetailsDTO;
 
-  @Field(() => BankAccountDTO, { description: 'Банковский счет' })
-  bank_account: BankAccountDTO;
-
   constructor(data: EntrepreneurDomainInterface) {
     this.username = data.username;
     this.first_name = data.first_name;
@@ -53,6 +49,5 @@ export class EntrepreneurDTO implements EntrepreneurDomainInterface {
     this.city = data.city;
     this.full_address = data.full_address;
     this.details = new EntrepreneurDetailsDTO(data.details);
-    this.bank_account = new BankAccountDTO(data.bank_account);
   }
 }
