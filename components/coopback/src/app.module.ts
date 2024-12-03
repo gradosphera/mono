@@ -28,7 +28,7 @@ function dynamicImportModules(): any[] {
     const moduleName = Object.keys(module)[0]; // Получаем имя экспортируемого модуля
     modules.push(module[moduleName]);
   });
-  console.log('modules: ', modules);
+
   return modules;
 }
 

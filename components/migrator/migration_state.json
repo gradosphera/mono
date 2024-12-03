@@ -1,5 +1,5 @@
 {
   "local": "010_edit_all_drafts.ts",
-  "test": "010_edit_all_drafts.ts",
-  "prod": "010_edit_all_drafts.ts"
+  "test": "011.one_draft.ts",
+  "prod": "011.one_draft.ts"
 }
