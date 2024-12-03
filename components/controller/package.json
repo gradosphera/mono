@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/controller-next",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "",
   "author": "",
   "private": true,
@@ -39,7 +39,7 @@
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "axios": "^1.2.1",
     "bull": "^4.16.3",
-    "cooptypes": "^2.1.2",
+    "cooptypes": "workspace:*",
     "docxtemplater": "^3.51.1",
     "dotenv": "^16.4.5",
     "faker": "^5.1.0",

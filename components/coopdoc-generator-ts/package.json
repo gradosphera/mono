@@ -1,7 +1,7 @@
 {
   "name": "coopdoc-generator-ts",
   "type": "module",
-  "version": "2.1.5",
+  "version": "2.1.7",
   "private": false,
   "packageManager": "pnpm@9.0.6",
   "description": "",
