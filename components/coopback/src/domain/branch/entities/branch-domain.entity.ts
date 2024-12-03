@@ -1,5 +1,5 @@
 import type { BranchDomainInterface } from '../interfaces/branch-domain.interface';
-import type { SovietContract } from 'cooptypes';
+import type { BranchContract } from 'cooptypes';
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
 import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
 import type { BankPaymentMethodDomainInterface } from '~/domain/payment-method/interfaces/bank-payment-method-domain.interface';
@@ -36,7 +36,7 @@ export class BranchDomainEntity implements BranchDomainInterface {
 
   constructor(
     coopname: string,
-    branchBlockchainData: SovietContract.Tables.Branches.IBranch,
+    branchBlockchainData: BranchContract.Tables.Branches.IBranch,
     organizationDatabaseData: OrganizationDomainInterface,
     trusteeData: IndividualDomainInterface,
     trustedData: IndividualDomainInterface[],

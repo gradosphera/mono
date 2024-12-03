@@ -39,8 +39,6 @@ export function useAddPaymentMethod() {
     })
 
 
-    params.method_id = '1'
-
     await sendPOST(`/v1/methods/${params.username}/add`, params)
 
     await store.loadUserWalet({

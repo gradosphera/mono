@@ -1,11 +1,7 @@
 <template lang="pug">
 div
-  q-card
-    q-btn() Включить кооперативные участки
-    p Включая режим кооперативных участков, кооператив будет принимать пайщиков на них.
-
   q-table(
-    v-if="branches && branches.length > 0"
+    v-if="branches"
     flat
     :rows="branches"
     :columns="columns"

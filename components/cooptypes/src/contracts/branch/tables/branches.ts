@@ -1,5 +1,5 @@
-import type * as Soviet from '../../../interfaces/soviet'
-import { Actors } from '../../../common'
+import * as Actors from '../../../common/actors'
+import type * as Branch from '../../../interfaces/branch'
 
 /**
  * Имя таблицы
@@ -13,6 +13,6 @@ export const scope = Actors._coopname
 
 /**
  * @interface
- * Таблица хранит информацию о советах кооператива.
+ * Таблица содержит переводы черновиков документов.
  */
-export type IBranch = Soviet.IBranch
+export type IBranch = Branch.ICoobranch

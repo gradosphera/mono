@@ -8,4 +8,4 @@ import { ProcessPaymentInteractor } from './process-payment.interactor';
   providers: [ProcessPaymentInteractor],
   exports: [ProcessPaymentInteractor], // Экспортируем, если потребуется в других модулях
 })
-export class PaymentModule {}
+export class PaymentDomainModule {}

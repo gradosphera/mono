@@ -4,6 +4,11 @@
 export * as DraftContract from './draft'
 
 /**
+ * Смарт-контракт создания и управления кооперативными участками.
+ */
+export * as BranchContract from './branch'
+
+/**
  * Смарт-контракт управления фондами кооператива.
  */
 export * as FundContract from './fund'

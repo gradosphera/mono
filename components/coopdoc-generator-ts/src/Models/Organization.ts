@@ -38,20 +38,6 @@ export class Organization {
     const { ...organization_for_save } = this.organization
     const currentBlock = await getCurrentBlock()
 
-    // const bankData: PaymentData = {
-    //   username: this.organization.username,
-    //   method_id: new UUID().toString(),
-    //   method_type: 'bank_transfer',
-    //   is_default: true,
-    //   data: bank_account,
-    //   deleted: false,
-    //   block_num: currentBlock,
-    // }
-
-    // const paymentMethod = await new PaymentMethod(this.db, bankData)
-    // await paymentMethod.validate()
-    // await paymentMethod.save()
-
     const orgForSave: InternalOrganizationData = {
       ...organization_for_save,
       deleted: false,
@@ -63,11 +49,6 @@ export class Organization {
 
   async getOne(filter: Filter<InternalOrganizationData>): Promise<ExternalOrganizationData | null> {
     const org = await this.data_service.getOne(filter)
-    // const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
-
-    // if (org) {
-    //   org.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: org.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
-    // }
 
     return org as ExternalOrganizationData
   }
@@ -75,11 +56,6 @@ export class Organization {
   async getMany(filter: Filter<InternalOrganizationData>): Promise<Cooperative.Document.IGetResponse<ExternalOrganizationData>> {
     const response = (await this.data_service.getMany({ deleted: false, ...filter }, 'username'))
     const orgs = response.results
-    // const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
-
-    // for (const org of orgs) {
-    //   org.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: org.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
-    // }
 
     const result: Cooperative.Document.IGetResponse<ExternalOrganizationData> = {
       results: orgs as ExternalOrganizationData[],
@@ -94,11 +70,7 @@ export class Organization {
 
   async getHistory(filter: Filter<InternalOrganizationData>): Promise<ExternalOrganizationData[]> {
     const orgs = await this.data_service.getHistory(filter)
-    // const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
 
-    // for (const org of orgs) {
-    //   org.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: org.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
-    // }
     return orgs as ExternalOrganizationData[]
   }
 

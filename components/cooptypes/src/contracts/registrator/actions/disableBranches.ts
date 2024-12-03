@@ -11,5 +11,6 @@ export const actionName = 'disbranches'
 
 /**
  * @interface
+ * @private
  */
 export type IDisableBranches = Registrator.IDisbranches

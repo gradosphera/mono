@@ -9,4 +9,4 @@ import { ProviderInteractor } from './provider.interactor';
   providers: [ProviderService, ProviderInteractor],
   exports: [ProviderInteractor], // Экспортируем для использования в других модулях
 })
-export class ProviderModule {}
+export class ProviderDomainModule {}

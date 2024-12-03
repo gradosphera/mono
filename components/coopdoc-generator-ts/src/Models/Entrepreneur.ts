@@ -41,20 +41,6 @@ export class Entrepreneur {
 
     const currentBlock = await getCurrentBlock()
 
-    // const bankData: PaymentData = {
-    //   username: this.entrepreneur.username,
-    //   method_id: new UUID().toString(),
-    //   method_type: 'bank_transfer',
-    //   is_default: true,
-    //   data: bank_account as Cooperative.Payments.IBankAccount,
-    //   deleted: false,
-    //   block_num: currentBlock,
-    // }
-
-    // const paymentMethod = await new PaymentMethod(this.db, bankData)
-    // await paymentMethod.validate()
-    // await paymentMethod.save()
-
     const entrForSave: InternalEntrepreneurData = {
       ...entr_for_save,
       deleted: false,
@@ -66,21 +52,12 @@ export class Entrepreneur {
 
   async getOne(filter: Filter<InternalEntrepreneurData>): Promise<ExternalEntrepreneurData | null> {
     const entr = await this.data_service.getOne(filter)
-    // const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
-
-    // if (entr)
-    //   entr.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: entr.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
     return entr as ExternalEntrepreneurData
   }
 
   async getMany(filter: Filter<InternalEntrepreneurData>): Promise<Cooperative.Document.IGetResponse<ExternalEntrepreneurData>> {
     const response = await this.data_service.getMany({ deleted: false, ...filter }, 'username')
     const entrepreneurs = response.results
-    // const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
-
-    // for (const entr of entrepreneurs) {
-    //   entr.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: entr.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
-    // }
 
     const result: Cooperative.Document.IGetResponse<ExternalEntrepreneurData> = {
       results: entrepreneurs as ExternalEntrepreneurData[],
@@ -95,11 +72,6 @@ export class Entrepreneur {
 
   async getHistory(filter: Filter<InternalEntrepreneurData>): Promise<ExternalEntrepreneurData[]> {
     const history = await this.data_service.getHistory(filter)
-    // const blockFilter = filter.block_num ? { block_num: filter.block_num } : {}
-
-    // for (const entr of history) {
-    //   entr.bank_account = (await (new PaymentMethod(this.db).getOne({ ...blockFilter, username: entr.username, method_type: 'bank_transfer', is_default: true })))?.data as IBankAccount
-    // }
 
     return history as ExternalEntrepreneurData[]
   }

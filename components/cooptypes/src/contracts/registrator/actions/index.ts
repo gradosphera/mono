@@ -63,13 +63,13 @@ export * as SetCoopStatus from './setCoopStatus'
 export * as DeleteCooperative from './deleteCooperative'
 
 /**
- * Включение режима кооперативных участков
+ * Включение режима кооперативных участков. Вызывается каскадом из контракта branch.
  * @private
  */
 export * as EnableBranches from './enableBranches'
 
 /**
- * Отключение режима кооперативных участков
+ * Отключение режима кооперативных участков. Вызывается каскадом из контракта branch.
  * @private
  */
 export * as DisableBranches from './disableBranches'

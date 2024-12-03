@@ -55,12 +55,6 @@ export interface IAddstaff {
   position_title: string
 }
 
-export interface IAddtrusted {
-  coopname: IName
-  braname: IName
-  trusted: IName
-}
-
 export interface IAdduser {
   coopname: IName
   username: IName
@@ -144,12 +138,6 @@ export interface IBoards {
   last_update: ITimePointSec
 }
 
-export interface IBranch {
-  braname: IName
-  trustee: IName
-  trusted: IName[]
-}
-
 export interface ICancelreg {
   coopname: IName
   username: IName
@@ -217,12 +205,6 @@ export interface ICreateboard {
   description: string
 }
 
-export interface ICreatebranch {
-  coopname: IName
-  braname: IName
-  trustee: IName
-}
-
 export interface ICreateprog {
   coopname: IName
   username: IName
@@ -269,17 +251,6 @@ export interface IDeladdress {
   address_id: IUint64
 }
 
-export interface IDeletebranch {
-  coopname: IName
-  braname: IName
-}
-
-export interface IDeltrusted {
-  coopname: IName
-  braname: IName
-  trusted: IName
-}
-
 export interface IDisableprog {
   coopname: IName
   program_id: IUint64
@@ -305,12 +276,6 @@ export interface IEditaddress {
   braname: IName
   address_id: IUint64
   data: IAddressData
-}
-
-export interface IEditbranch {
-  coopname: IName
-  braname: IName
-  trustee: IName
 }
 
 export interface IEditprog {

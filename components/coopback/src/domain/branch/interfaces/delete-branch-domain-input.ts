@@ -1,3 +1,3 @@
-import { SovietContract } from 'cooptypes';
+import { BranchContract } from 'cooptypes';
 
-export type DeleteBranchDomainInput = SovietContract.Actions.Branches.DeleteBranch.IDeleteBranch;
+export type DeleteBranchDomainInput = BranchContract.Actions.DeleteBranch.IDeleteBranch;

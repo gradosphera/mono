@@ -1,4 +1,3 @@
-import type { SovietContract } from 'cooptypes';
 import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
 

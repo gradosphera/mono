@@ -3,10 +3,9 @@ import { User } from '../models';
 import ApiError from '../utils/ApiError';
 import { generator } from './document.service';
 import { ICreateUser } from '../types/auto-generated/user.validation';
-import { PublicKey, Signature } from '@wharfkit/antelope';
-import faker from 'faker';
 import type { Cooperative } from 'cooptypes';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import { randomUUID } from 'crypto';
 
 export const createServiceUser = async (username: string) => {
   return User.create({
@@ -49,7 +48,7 @@ export const createUser = async (userBody: ICreateUser) => {
 
     const paymentMethod: Cooperative.Payments.IPaymentData = {
       username: userBody.username,
-      method_id: new UUID().toString(),
+      method_id: randomUUID(),
       method_type: 'bank_transfer',
       is_default: true,
       data: bank_account,
@@ -64,7 +63,7 @@ export const createUser = async (userBody: ICreateUser) => {
 
     const paymentMethod: Cooperative.Payments.IPaymentData = {
       username: userBody.username,
-      method_id: new UUID().toString(),
+      method_id: randomUUID(),
       method_type: 'bank_transfer',
       is_default: true,
       data: bank_account,

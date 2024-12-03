@@ -17,8 +17,6 @@ import { PAYMENT_METHOD_REPOSITORY, PaymentMethodRepository } from '~/domain/com
 import { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
 import { randomUUID } from 'crypto';
 import { BankPaymentMethodDTO } from '~/modules/payment-method/dto/bank-payment-method.dto';
-import type { EnableBranchedModeDomainInput } from '../interfaces/enable-branched-mode-input.interface';
-import type { DisableBranchedModeDomainInput } from '../interfaces/disable-branched-mode-input.interface';
 
 @Injectable()
 export class BranchDomainInteractor {
@@ -232,19 +230,5 @@ export class BranchDomainInteractor {
     });
 
     return await this.getBranch(data.coopname, data.braname);
-  }
-
-  async enableBranchedMode(data: EnableBranchedModeDomainInput): Promise<boolean> {
-    // Уведомляем блокчейн через порт
-    await this.branchBlockchainPort.enableBranchedMode(data);
-
-    return true;
-  }
-
-  async disableBranchedMode(data: DisableBranchedModeDomainInput): Promise<boolean> {
-    // Уведомляем блокчейн через порт
-    await this.branchBlockchainPort.disableBranchedMode(data);
-
-    return true;
   }
 }

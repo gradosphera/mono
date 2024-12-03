@@ -1,3 +1,3 @@
-import { SovietContract } from 'cooptypes';
+import { BranchContract } from 'cooptypes';
 
-export type DeleteTrustedAccountDomainInterface = SovietContract.Actions.Branches.DeleteTrusted.IDeleteTrusted;
+export type DeleteTrustedAccountDomainInterface = BranchContract.Actions.DeleteTrusted.IDeleteTrusted;

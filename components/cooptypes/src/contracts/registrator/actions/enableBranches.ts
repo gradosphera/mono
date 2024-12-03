@@ -11,5 +11,6 @@ export const actionName = 'enabranches'
 
 /**
  * @interface
+ * @private
  */
 export type IEnableBranches = Registrator.IEnabranches

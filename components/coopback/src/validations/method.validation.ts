@@ -41,7 +41,7 @@ export const RSavePaymentMethod = Joi.object({
 });
 
 export const IDeletePaymentMethod = Joi.object({
-  method_id: Joi.number().required(),
+  method_id: Joi.string().required(),
 });
 
 export const RDeletePaymentMethod = Joi.object({

@@ -47,3 +47,8 @@ export const _wrap = {
   production: 'eosio.wrap',
   testnet: 'eosio.wrap',
 } as const
+
+export const _branch = {
+  production: 'branch',
+  testnet: 'branch',
+} as const
