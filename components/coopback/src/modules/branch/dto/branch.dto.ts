@@ -6,6 +6,10 @@ import { OrganizationDetailsDTO } from '~/modules/common/dto/organization-detail
 import { IndividualDTO } from '~/modules/common/dto/individual.dto';
 import { IsArray, IsJSON, IsString } from 'class-validator';
 import { BankPaymentMethodDTO } from '~/modules/payment-method/dto/bank-payment-method.dto';
+import { AuthRoles } from '~/modules/auth/decorators/auth.decorator';
+import { UseGuards } from '@nestjs/common';
+import { GqlJwtAuthGuard } from '~/modules/auth/guards/graphql-jwt-auth.guard';
+import { RolesGuard } from '~/modules/auth/guards/roles.guard';
 
 @ObjectType('Branch')
 export class BranchDTO implements BranchDomainInterface {
@@ -18,10 +22,12 @@ export class BranchDTO implements BranchDomainInterface {
   public readonly braname: string;
 
   @Field(() => IndividualDTO, { description: 'Председатель кооперативного участка' })
+  @AuthRoles(['chairman', 'member'])
   @IsString()
   public readonly trustee: IndividualDTO;
 
   @Field(() => [IndividualDTO], { description: 'Доверенные аккаунты' })
+  @AuthRoles(['chairman', 'member'])
   @IsArray()
   public readonly trusted: IndividualDTO[];
 

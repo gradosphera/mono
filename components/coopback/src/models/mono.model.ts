@@ -1,10 +1,10 @@
 import mongoose, { Schema } from 'mongoose';
 import { paginate, toJSON } from './plugins';
-import { IHealthStatus } from '../types';
+import { SystemStatusInterface } from '../types';
 
 export interface IMono {
   coopname: string;
-  status: IHealthStatus;
+  status: SystemStatusInterface;
 }
 
 const Status = {

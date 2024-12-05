@@ -2,6 +2,23 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AccountResourceInfo {
+  """Доступные ресурсы"""
+  available: String!
+
+  """Текущее использование ресурсов"""
+  current_used: String
+
+  """Время последнего обновления использования ресурсов"""
+  last_usage_update_time: String
+
+  """Максимальное количество ресурсов"""
+  max: String!
+
+  """Использовано ресурсов"""
+  used: String!
+}
+
 input AddTrustedAccountInput {
   """Имя аккаунта кооперативного участка"""
   braname: String!
@@ -13,6 +30,20 @@ input AddTrustedAccountInput {
   Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий
   """
   trusted: String!
+}
+
+type Authority {
+  """Уровни разрешений"""
+  accounts: [PermissionLevelWeight!]!
+
+  """Ключи"""
+  keys: [KeyWeight!]!
+
+  """Порог"""
+  threshold: Int!
+
+  """Вес ожидания"""
+  waits: [WaitWeight!]!
 }
 
 type BankAccount {
@@ -94,6 +125,20 @@ type BankPaymentMethod {
   username: String!
 }
 
+type BlockchainDocument {
+  """Хеш документа"""
+  hash: String!
+
+  """Метаинформация документа"""
+  meta: String!
+
+  """Публичный ключ документа"""
+  public_key: String!
+
+  """Подпись документа"""
+  signature: String!
+}
+
 """Информация о состоянии блокчейна"""
 type BlockchainInfoDTO {
   """Лимит CPU для блока"""
@@ -104,9 +149,6 @@ type BlockchainInfoDTO {
 
   """Идентификатор цепочки (chain ID)"""
   chain_id: String!
-
-  """Номер первого блока"""
-  first_block_num: Int
 
   """Идентификатор головного блока в форк базе данных"""
   fork_db_head_block_id: String
@@ -134,9 +176,6 @@ type BlockchainInfoDTO {
 
   """Время последнего необратимого блока"""
   last_irreversible_block_time: String
-
-  """Полная версия сервера в строковом виде"""
-  server_full_version_string: String
 
   """Версия сервера"""
   server_version: String!
@@ -199,6 +238,80 @@ type Branch {
 
   """Тип организации"""
   type: String!
+}
+
+type CooperativeOperatorAccount {
+  """Объявление кооператива"""
+  announce: String!
+
+  """Тип кооператива"""
+  coop_type: String!
+
+  """Дата создания"""
+  created_at: String!
+
+  """Описание кооператива"""
+  description: String!
+
+  """Документ кооператива"""
+  document: BlockchainDocument!
+
+  """Начальный взнос"""
+  initial: String!
+
+  """Разветвленный ли кооператив"""
+  is_branched: Boolean!
+
+  """Является ли это кооперативом"""
+  is_cooperative: Boolean!
+
+  """Включен ли кооператив"""
+  is_enrolled: Boolean!
+
+  """Метаинформация"""
+  meta: String!
+
+  """Минимальный взнос"""
+  minimum: String!
+
+  """Начальный взнос организации"""
+  org_initial: String!
+
+  """Минимальный взнос организации"""
+  org_minimum: String!
+
+  """Регистрационный взнос организации"""
+  org_registration: String!
+
+  """Родительское имя аккаунта кооператива"""
+  parent_username: String!
+
+  """Реферал кооператива"""
+  referer: String!
+
+  """Дата регистрации"""
+  registered_at: String!
+
+  """Регистрационный взнос"""
+  registration: String!
+
+  """Регистратор кооператива"""
+  registrator: String!
+
+  """Статус кооператива"""
+  status: String!
+
+  """Список хранилищ"""
+  storages: [String!]!
+
+  """Тип учетной записи"""
+  type: String!
+
+  """Имя аккаунта кооператива"""
+  username: String!
+
+  """Дата регистрации"""
+  verifications: [Verification!]!
 }
 
 input CreateBankAccountInput {
@@ -439,6 +552,14 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+type KeyWeight {
+  """Ключ"""
+  key: String!
+
+  """Вес"""
+  weight: Int!
+}
+
 type Mutation {
   """Добавить доверенное лицо кооперативного участка"""
   addTrustedAccount(data: AddTrustedAccountInput!): Branch!
@@ -541,6 +662,33 @@ type PaymentMethod {
 
 union PaymentMethodData = BankAccount | SbpAccount
 
+type Permission {
+  """Родительское разрешение"""
+  parent: String!
+
+  """Имя разрешения"""
+  perm_name: String!
+
+  """Требуемые разрешения"""
+  required_auth: Authority!
+}
+
+type PermissionLevel {
+  """Актор"""
+  actor: String!
+
+  """Разрешение"""
+  permission: String!
+}
+
+type PermissionLevelWeight {
+  """Уровень разрешения"""
+  permission: PermissionLevel!
+
+  """Вес"""
+  weight: Int!
+}
+
 type Query {
   """Получить список кооперативных участков"""
   getBranches(data: GetBranchesInput!): [Branch!]!
@@ -553,6 +701,20 @@ type Query {
 
   """Получить список методов оплаты"""
   getPaymentMethods(data: GetPaymentMethodsInput): PaginationResult!
+}
+
+type RefundRequest {
+  """Сумма CPU"""
+  cpu_amount: String!
+
+  """Сумма сети"""
+  net_amount: String!
+
+  """Владелец"""
+  owner: String!
+
+  """Время запроса"""
+  request_time: String!
 }
 
 type RepresentedBy {
@@ -572,17 +734,120 @@ type RepresentedBy {
   position: String!
 }
 
+type ResourceDelegationDTO {
+  """Вес CPU"""
+  cpu_weight: String!
+
+  """Отправитель"""
+  from: String!
+
+  """Вес сети"""
+  net_weight: String!
+
+  """Получатель"""
+  to: String!
+}
+
+type ResourceOverview {
+  """Вес CPU"""
+  cpu_weight: String!
+
+  """Вес сети"""
+  net_weight: String!
+
+  """Владелец"""
+  owner: String!
+
+  """Используемая RAM"""
+  ram_bytes: Int!
+}
+
 type SbpAccount {
   """Мобильный телефон получателя"""
   phone: String!
 }
 
+type SystemAccount {
+  """Имя аккаунта"""
+  account_name: String!
+
+  """Баланс"""
+  core_liquid_balance: String
+
+  """Ограничения CPU"""
+  cpu_limit: AccountResourceInfo!
+
+  """Вес CPU"""
+  cpu_weight: String!
+
+  """Дата создания"""
+  created: String!
+
+  """Номер последнего блока"""
+  head_block_num: Int!
+
+  """Время последнего блока"""
+  head_block_time: String!
+
+  """Время последнего обновления кода"""
+  last_code_update: String!
+
+  """Ограничения сети"""
+  net_limit: AccountResourceInfo!
+
+  """Вес сети"""
+  net_weight: String!
+
+  """Разрешения"""
+  permissions: [Permission!]!
+
+  """Флаг привилегий"""
+  privileged: Boolean!
+
+  """Квота RAM"""
+  ram_quota: Int!
+
+  """Использование RAM"""
+  ram_usage: Int!
+
+  """Запрос на возврат"""
+  refund_request: RefundRequest
+
+  """Информация о REX"""
+  rex_info: String
+
+  """Делегированные ресурсы"""
+  self_delegated_bandwidth: ResourceDelegationDTO
+
+  """Общий обзор ресурсов"""
+  total_resources: ResourceOverview
+
+  """Информация о голосовании"""
+  voter_info: String
+}
+
 type SystemInfo {
   """Набор данных с информацией о состоянии блокчейна"""
-  blockchain: BlockchainInfoDTO!
+  blockchain_info: BlockchainInfoDTO!
+
+  """Объект аккаунта кооператива у оператора"""
+  cooperator_account: CooperativeOperatorAccount!
 
   """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Объект системного аккаунта кооператива в блокчейне"""
+  system_account: SystemAccount!
+
+  """Статус контроллера кооператива"""
+  system_status: SystemStatus!
+}
+
+"""Состояние контроллера кооператива"""
+enum SystemStatus {
+  active
+  install
+  maintenance
 }
 
 input UninstallExtensionInput {
@@ -602,4 +867,32 @@ input UpdateBankAccountInput {
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+type Verification {
+  """Дата создания верификации"""
+  created_at: String!
+
+  """Флаг верификации"""
+  is_verified: Boolean!
+
+  """Дата последнего обновления верификации"""
+  last_update: String!
+
+  """Заметка верификации"""
+  notice: String!
+
+  """Процедура верификации"""
+  procedure: String!
+
+  """Имя верификатора"""
+  verificator: String!
+}
+
+type WaitWeight {
+  """Время ожидания в секундах"""
+  wait_sec: Int!
+
+  """Вес"""
+  weight: Int!
 }

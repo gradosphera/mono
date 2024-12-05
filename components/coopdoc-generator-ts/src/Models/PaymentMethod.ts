@@ -39,7 +39,6 @@ export class PaymentMethod {
 
   async getOne(filter: Filter<PaymentData>): Promise<PaymentData | null> {
     const result = await this.data_service.getOne(filter)
-    console.log('on get Payment method: ', filter, result)
 
     return result
   }

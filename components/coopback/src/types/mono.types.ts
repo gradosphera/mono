@@ -1,8 +1,8 @@
 import type { GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 
-export type IHealthStatus = 'install' | 'active' | 'maintenance';
+export type SystemStatusInterface = 'install' | 'active' | 'maintenance';
 
 export interface IHealthResponse {
-  status: IHealthStatus;
+  status: SystemStatusInterface;
   blockchain: GetInfoResult;
 }

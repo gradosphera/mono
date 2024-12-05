@@ -3,7 +3,7 @@ import { Mono } from '../models';
 import ApiError from '../utils/ApiError';
 import config from '../config/config';
 import logger from '../config/logger';
-import { IAddUser, ICreateUser, IHealthStatus, IInstall } from '../types';
+import { IAddUser, ICreateUser, SystemStatusInterface, IInstall } from '../types';
 import { generateUsername } from '../../tests/utils/generateUsername';
 import { generator } from './document.service';
 import { blockchainService, emailService, tokenService, userService } from '.';
@@ -148,7 +148,7 @@ export const init = async (data: IInit): Promise<void> => {
   logger.info('Система инициализирована');
 };
 
-export const getMonoStatus = async (): Promise<IHealthStatus> => {
+export const getMonoStatus = async (): Promise<SystemStatusInterface> => {
   const mono = await Mono.findOne({ coopname: config.coopname });
 
   if (!mono) return 'maintenance';

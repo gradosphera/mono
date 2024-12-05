@@ -7,7 +7,8 @@ import { WalletPluginPrivateKey } from '@wharfkit/wallet-plugin-privatekey';
 import config from '~/config/config';
 import { BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
-import type { BlockchainInfoInterface } from '~/types/shared';
+import type { GetInfoResult } from '~/types/shared/blockchain.types';
+import type { SystemAccountInterface } from '~/types/shared';
 
 export type IndexPosition =
   | 'primary'
@@ -44,8 +45,14 @@ export class BlockchainService implements BlockchainPort {
     });
   }
 
-  public async getInfo(): Promise<BlockchainInfoInterface> {
+  public async getInfo(): Promise<GetInfoResult> {
     return (await this.apiClient.v1.chain.get_info()).toJSON();
+  }
+
+  public async getAccount(name: string): Promise<SystemAccountInterface> {
+    const result = (await this.apiClient.v1.chain.get_account(name)).toJSON();
+
+    return result;
   }
 
   public async transact(actionOrActions: any | any[], broadcast = true): Promise<TransactResult> {

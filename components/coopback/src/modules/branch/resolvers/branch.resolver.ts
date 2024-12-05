@@ -20,6 +20,8 @@ export class BranchResolver {
     name: 'getBranches',
     description: 'Получить список кооперативных участков',
   })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  // @AuthRoles(['chairman'])
   async getBranches(
     @Args('data', { type: () => GetBranchesGraphQLInput }) data: GetBranchesGraphQLInput
   ): Promise<BranchDTO[]> {

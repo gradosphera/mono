@@ -19,7 +19,7 @@ function hasUsernameField(inputType: GraphQLInputObjectType): boolean {
   });
 }
 
-export function authDirectiveTransformer(schema: GraphQLSchema, directiveName: string) {
+export function docDirectiveTransformer(schema: GraphQLSchema, directiveName: string) {
   return mapSchema(schema, {
     [MapperKind.OBJECT_FIELD]: (fieldConfig) => {
       const directive = getDirective(schema, fieldConfig, directiveName)?.[0];

@@ -17,10 +17,10 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	DateTime: `scalar.DateTime` as const,
-	DeletePaymentMethodInput:{
+	DeleteBranchInput:{
 
 	},
-	DeleteBranchInput:{
+	DeletePaymentMethodInput:{
 
 	},
 	DeleteTrustedAccountInput:{
@@ -90,6 +90,7 @@ export const AllTypesProps: Record<string,any> = {
 			data:"GetPaymentMethodsInput"
 		}
 	},
+	SystemStatus: "enum" as const,
 	UninstallExtensionInput:{
 
 	},
@@ -99,6 +100,19 @@ export const AllTypesProps: Record<string,any> = {
 }
 
 export const ReturnTypes: Record<string,any> = {
+	AccountResourceInfoDTO:{
+		available:"String",
+		current_used:"String",
+		last_usage_update_time:"String",
+		max:"String",
+		used:"String"
+	},
+	AuthorityDTO:{
+		accounts:"PermissionLevelWeightDTO",
+		keys:"KeyWeightDTO",
+		threshold:"Int",
+		waits:"WaitWeightDTO"
+	},
 	BankAccount:{
 		account_number:"String",
 		bank_name:"String",
@@ -120,6 +134,30 @@ export const ReturnTypes: Record<string,any> = {
 		updated_at:"DateTime",
 		username:"String"
 	},
+	BlockchainDocument:{
+		hash:"String",
+		meta:"String",
+		public_key:"String",
+		signature:"String"
+	},
+	BlockchainInfoDTO:{
+		block_cpu_limit:"Int",
+		block_net_limit:"Int",
+		chain_id:"String",
+		fork_db_head_block_id:"String",
+		fork_db_head_block_num:"Int",
+		head_block_id:"String",
+		head_block_num:"Int",
+		head_block_producer:"String",
+		head_block_time:"String",
+		last_irreversible_block_id:"String",
+		last_irreversible_block_num:"Int",
+		last_irreversible_block_time:"String",
+		server_version:"String",
+		server_version_string:"String",
+		virtual_block_cpu_limit:"Int",
+		virtual_block_net_limit:"Int"
+	},
 	Branch:{
 		bank_account:"BankPaymentMethod",
 		braname:"String",
@@ -137,6 +175,32 @@ export const ReturnTypes: Record<string,any> = {
 		trusted:"Individual",
 		trustee:"Individual",
 		type:"String"
+	},
+	CooperativeOperatorAccount:{
+		announce:"String",
+		coop_type:"String",
+		created_at:"String",
+		description:"String",
+		document:"BlockchainDocument",
+		initial:"String",
+		is_branched:"Boolean",
+		is_cooperative:"Boolean",
+		is_enrolled:"Boolean",
+		meta:"String",
+		minimum:"String",
+		org_initial:"String",
+		org_minimum:"String",
+		org_registration:"String",
+		parent_username:"String",
+		referer:"String",
+		registered_at:"String",
+		registration:"String",
+		registrator:"String",
+		status:"String",
+		storages:"String",
+		type:"String",
+		username:"String",
+		verifications:"Verification"
 	},
 	DateTime: `scalar.DateTime` as const,
 	Extension:{
@@ -167,6 +231,10 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	JSON: `scalar.JSON` as const,
+	KeyWeightDTO:{
+		key:"String",
+		weight:"Int"
+	},
 	Mutation:{
 		addTrustedAccount:"Branch",
 		createBankAccount:"PaymentMethod",
@@ -211,10 +279,30 @@ export const ReturnTypes: Record<string,any> = {
 		"...on BankAccount":"BankAccount",
 		"...on SbpAccount":"SbpAccount"
 	},
+	PermissionDTO:{
+		parent:"String",
+		perm_name:"String",
+		required_auth:"AuthorityDTO"
+	},
+	PermissionLevelDTO:{
+		actor:"String",
+		permission:"String"
+	},
+	PermissionLevelWeightDTO:{
+		permission:"PermissionLevelDTO",
+		weight:"Int"
+	},
 	Query:{
 		getBranches:"Branch",
 		getExtensions:"Extension",
+		getInfo:"SystemInfo",
 		getPaymentMethods:"PaginationResult"
+	},
+	RefundRequestDTO:{
+		cpu_amount:"String",
+		net_amount:"String",
+		owner:"String",
+		request_time:"String"
 	},
 	RepresentedBy:{
 		based_on:"String",
@@ -223,8 +311,60 @@ export const ReturnTypes: Record<string,any> = {
 		middle_name:"String",
 		position:"String"
 	},
+	ResourceDelegationDTO:{
+		cpu_weight:"String",
+		from:"String",
+		net_weight:"String",
+		to:"String"
+	},
+	ResourceOverviewDTO:{
+		cpu_weight:"String",
+		net_weight:"String",
+		owner:"String",
+		ram_bytes:"Int"
+	},
 	SbpAccount:{
 		phone:"String"
+	},
+	SystemAccountDTO:{
+		account_name:"String",
+		core_liquid_balance:"String",
+		cpu_limit:"AccountResourceInfoDTO",
+		cpu_weight:"String",
+		created:"String",
+		head_block_num:"Int",
+		head_block_time:"String",
+		last_code_update:"String",
+		net_limit:"AccountResourceInfoDTO",
+		net_weight:"String",
+		permissions:"PermissionDTO",
+		privileged:"Boolean",
+		ram_quota:"Int",
+		ram_usage:"Int",
+		refund_request:"RefundRequestDTO",
+		rex_info:"String",
+		self_delegated_bandwidth:"ResourceDelegationDTO",
+		total_resources:"ResourceOverviewDTO",
+		voter_info:"String"
+	},
+	SystemInfo:{
+		blockchain_info:"BlockchainInfoDTO",
+		cooperator_account:"CooperativeOperatorAccount",
+		coopname:"String",
+		system_account:"SystemAccountDTO",
+		system_status:"SystemStatus"
+	},
+	Verification:{
+		created_at:"String",
+		is_verified:"Boolean",
+		last_update:"String",
+		notice:"String",
+		procedure:"String",
+		verificator:"String"
+	},
+	WaitWeightDTO:{
+		wait_sec:"Int",
+		weight:"Int"
 	}
 }
 

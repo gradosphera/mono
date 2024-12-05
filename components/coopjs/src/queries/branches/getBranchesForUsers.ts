@@ -5,8 +5,8 @@ import { extensionSelector } from '../../selectors/extensions/extensionSelector'
 import { branchSelector } from '../../selectors';
 
 /**
- * Извлекает подробную информацию о кооперативных участках
+ * Извлекает информацию о кооперативных участках для пользователя с ролью user
  */
-export const getBranches = Selector("Query")({
+export const getBranchesForUsers = Selector("Query")({
   getBranches: [{data: $('data', 'GetBranchesInput!')}, branchSelector]
 });

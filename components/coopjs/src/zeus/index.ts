@@ -913,7 +913,20 @@ export type ScalarCoders = {
 type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"]
 
 export type ValueTypes = {
-    ["AddTrustedAccountInput"]: {
+    ["AccountResourceInfoDTO"]: AliasType<{
+	/** Доступные ресурсы */
+	available?:boolean | `@${string}`,
+	/** Текущее использование ресурсов */
+	current_used?:boolean | `@${string}`,
+	/** Время последнего обновления использования ресурсов */
+	last_usage_update_time?:boolean | `@${string}`,
+	/** Максимальное количество ресурсов */
+	max?:boolean | `@${string}`,
+	/** Использовано ресурсов */
+	used?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AddTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
@@ -921,6 +934,17 @@ export type ValueTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string | Variable<any, string>
 };
+	["AuthorityDTO"]: AliasType<{
+	/** Уровни разрешений */
+	accounts?:ValueTypes["PermissionLevelWeightDTO"],
+	/** Ключи */
+	keys?:ValueTypes["KeyWeightDTO"],
+	/** Порог */
+	threshold?:boolean | `@${string}`,
+	/** Вес ожидания */
+	waits?:ValueTypes["WaitWeightDTO"],
+		__typename?: boolean | `@${string}`
+}>;
 	["BankAccount"]: AliasType<{
 	/** Номер банковского счета */
 	account_number?:boolean | `@${string}`,
@@ -980,6 +1004,53 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["BlockchainDocument"]: AliasType<{
+	/** Хеш документа */
+	hash?:boolean | `@${string}`,
+	/** Метаинформация документа */
+	meta?:boolean | `@${string}`,
+	/** Публичный ключ документа */
+	public_key?:boolean | `@${string}`,
+	/** Подпись документа */
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Информация о состоянии блокчейна */
+["BlockchainInfoDTO"]: AliasType<{
+	/** Лимит CPU для блока */
+	block_cpu_limit?:boolean | `@${string}`,
+	/** Лимит сети для блока */
+	block_net_limit?:boolean | `@${string}`,
+	/** Идентификатор цепочки (chain ID) */
+	chain_id?:boolean | `@${string}`,
+	/** Идентификатор головного блока в форк базе данных */
+	fork_db_head_block_id?:boolean | `@${string}`,
+	/** Номер головного блока в форк базе данных */
+	fork_db_head_block_num?:boolean | `@${string}`,
+	/** Идентификатор головного блока */
+	head_block_id?:boolean | `@${string}`,
+	/** Номер головного блока */
+	head_block_num?:boolean | `@${string}`,
+	/** Прозводитель головного блока */
+	head_block_producer?:boolean | `@${string}`,
+	/** Время головного блока */
+	head_block_time?:boolean | `@${string}`,
+	/** Идентификатор последнего необратимого блока */
+	last_irreversible_block_id?:boolean | `@${string}`,
+	/** Номер последнего необратимого блока */
+	last_irreversible_block_num?:boolean | `@${string}`,
+	/** Время последнего необратимого блока */
+	last_irreversible_block_time?:boolean | `@${string}`,
+	/** Версия сервера */
+	server_version?:boolean | `@${string}`,
+	/** Строковое представление версии сервера */
+	server_version_string?:boolean | `@${string}`,
+	/** Виртуальный лимит CPU для блока */
+	virtual_block_cpu_limit?:boolean | `@${string}`,
+	/** Виртуальный лимит сети для блока */
+	virtual_block_net_limit?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Branch"]: AliasType<{
 	/** Банковский счёт */
 	bank_account?:ValueTypes["BankPaymentMethod"],
@@ -1015,6 +1086,57 @@ export type ValueTypes = {
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CooperativeOperatorAccount"]: AliasType<{
+	/** Объявление кооператива */
+	announce?:boolean | `@${string}`,
+	/** Тип кооператива */
+	coop_type?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Описание кооператива */
+	description?:boolean | `@${string}`,
+	/** Документ кооператива */
+	document?:ValueTypes["BlockchainDocument"],
+	/** Начальный взнос */
+	initial?:boolean | `@${string}`,
+	/** Разветвленный ли кооператив */
+	is_branched?:boolean | `@${string}`,
+	/** Является ли это кооперативом */
+	is_cooperative?:boolean | `@${string}`,
+	/** Включен ли кооператив */
+	is_enrolled?:boolean | `@${string}`,
+	/** Метаинформация */
+	meta?:boolean | `@${string}`,
+	/** Минимальный взнос */
+	minimum?:boolean | `@${string}`,
+	/** Начальный взнос организации */
+	org_initial?:boolean | `@${string}`,
+	/** Минимальный взнос организации */
+	org_minimum?:boolean | `@${string}`,
+	/** Регистрационный взнос организации */
+	org_registration?:boolean | `@${string}`,
+	/** Родительское имя аккаунта кооператива */
+	parent_username?:boolean | `@${string}`,
+	/** Реферал кооператива */
+	referer?:boolean | `@${string}`,
+	/** Дата регистрации */
+	registered_at?:boolean | `@${string}`,
+	/** Регистрационный взнос */
+	registration?:boolean | `@${string}`,
+	/** Регистратор кооператива */
+	registrator?:boolean | `@${string}`,
+	/** Статус кооператива */
+	status?:boolean | `@${string}`,
+	/** Список хранилищ */
+	storages?:boolean | `@${string}`,
+	/** Тип учетной записи */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	username?:boolean | `@${string}`,
+	/** Дата регистрации */
+	verifications?:ValueTypes["Verification"],
+		__typename?: boolean | `@${string}`
+}>;
 	["CreateBankAccountInput"]: {
 	/** Данные для банковского перевода */
 	data: ValueTypes["BankAccountInput"] | Variable<any, string>,
@@ -1045,17 +1167,17 @@ export type ValueTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
-	["DeletePaymentMethodInput"]: {
-	/** Идентификатор метода оплаты */
-	method_id: string | Variable<any, string>,
-	/** Имя пользователя, чей метод оплаты нужно удалить */
-	username: string | Variable<any, string>
-};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>
+};
+	["DeletePaymentMethodInput"]: {
+	/** Идентификатор метода оплаты */
+	method_id: string | Variable<any, string>,
+	/** Имя пользователя, чей метод оплаты нужно удалить */
+	username: string | Variable<any, string>
 };
 	["DeleteTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -1177,6 +1299,13 @@ export type ValueTypes = {
 }>;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
+	["KeyWeightDTO"]: AliasType<{
+	/** Ключ */
+	key?:boolean | `@${string}`,
+	/** Вес */
+	weight?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Mutation"]: AliasType<{
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
@@ -1245,10 +1374,46 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 		["...on SbpAccount"]?: ValueTypes["SbpAccount"]
 		__typename?: boolean | `@${string}`
 }>;
+	["PermissionDTO"]: AliasType<{
+	/** Родитель разрешения */
+	parent?:boolean | `@${string}`,
+	/** Имя разрешения */
+	perm_name?:boolean | `@${string}`,
+	/** Требуемые разрешения */
+	required_auth?:ValueTypes["AuthorityDTO"],
+		__typename?: boolean | `@${string}`
+}>;
+	["PermissionLevelDTO"]: AliasType<{
+	/** Актор */
+	actor?:boolean | `@${string}`,
+	/** Разрешение */
+	permission?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PermissionLevelWeightDTO"]: AliasType<{
+	/** Уровень разрешения */
+	permission?:ValueTypes["PermissionLevelDTO"],
+	/** Вес */
+	weight?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Query"]: AliasType<{
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
+	/** Получить сводную публичную информацию о системе */
+	getInfo?:ValueTypes["SystemInfo"],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginationResult"]],
+		__typename?: boolean | `@${string}`
+}>;
+	["RefundRequestDTO"]: AliasType<{
+	/** Сумма CPU */
+	cpu_amount?:boolean | `@${string}`,
+	/** Сумма сети */
+	net_amount?:boolean | `@${string}`,
+	/** Владелец */
+	owner?:boolean | `@${string}`,
+	/** Время запроса */
+	request_time?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["RepresentedBy"]: AliasType<{
@@ -1264,11 +1429,89 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	position?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ResourceDelegationDTO"]: AliasType<{
+	/** Вес CPU */
+	cpu_weight?:boolean | `@${string}`,
+	/** Отправитель */
+	from?:boolean | `@${string}`,
+	/** Вес сети */
+	net_weight?:boolean | `@${string}`,
+	/** Получатель */
+	to?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ResourceOverviewDTO"]: AliasType<{
+	/** Вес CPU */
+	cpu_weight?:boolean | `@${string}`,
+	/** Вес сети */
+	net_weight?:boolean | `@${string}`,
+	/** Владелец */
+	owner?:boolean | `@${string}`,
+	/** Используемая RAM */
+	ram_bytes?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SystemAccountDTO"]: AliasType<{
+	/** Имя аккаунта */
+	account_name?:boolean | `@${string}`,
+	/** Баланс */
+	core_liquid_balance?:boolean | `@${string}`,
+	/** Ограничения CPU */
+	cpu_limit?:ValueTypes["AccountResourceInfoDTO"],
+	/** Вес CPU */
+	cpu_weight?:boolean | `@${string}`,
+	/** Дата создания */
+	created?:boolean | `@${string}`,
+	/** Номер последнего блока */
+	head_block_num?:boolean | `@${string}`,
+	/** Время последнего блока */
+	head_block_time?:boolean | `@${string}`,
+	/** Время последнего обновления кода */
+	last_code_update?:boolean | `@${string}`,
+	/** Ограничения сети */
+	net_limit?:ValueTypes["AccountResourceInfoDTO"],
+	/** Вес сети */
+	net_weight?:boolean | `@${string}`,
+	/** Разрешения */
+	permissions?:ValueTypes["PermissionDTO"],
+	/** Флаг привилегий */
+	privileged?:boolean | `@${string}`,
+	/** Квота RAM */
+	ram_quota?:boolean | `@${string}`,
+	/** Использование RAM */
+	ram_usage?:boolean | `@${string}`,
+	/** Запрос на возврат */
+	refund_request?:ValueTypes["RefundRequestDTO"],
+	/** Информация о REX */
+	rex_info?:boolean | `@${string}`,
+	/** Делегированные ресурсы */
+	self_delegated_bandwidth?:ValueTypes["ResourceDelegationDTO"],
+	/** Общий обзор ресурсов */
+	total_resources?:ValueTypes["ResourceOverviewDTO"],
+	/** Информация о голосовании */
+	voter_info?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["SystemInfo"]: AliasType<{
+	/** Набор данных с информацией о состоянии блокчейна */
+	blockchain_info?:ValueTypes["BlockchainInfoDTO"],
+	/** Объект аккаунта кооператива у оператора */
+	cooperator_account?:ValueTypes["CooperativeOperatorAccount"],
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Объект системного аккаунта кооператива в блокчейне */
+	system_account?:ValueTypes["SystemAccountDTO"],
+	/** Статус контроллера кооператива */
+	system_status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Состояние контроллера кооператива */
+["SystemStatus"]:SystemStatus;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string | Variable<any, string>
@@ -1282,11 +1525,46 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	method_id: string | Variable<any, string>,
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
-}
+};
+	["Verification"]: AliasType<{
+	/** Дата создания верификации */
+	created_at?:boolean | `@${string}`,
+	/** Флаг верификации */
+	is_verified?:boolean | `@${string}`,
+	/** Дата последнего обновления верификации */
+	last_update?:boolean | `@${string}`,
+	/** Заметка верификации */
+	notice?:boolean | `@${string}`,
+	/** Процедура верификации */
+	procedure?:boolean | `@${string}`,
+	/** Имя верификатора */
+	verificator?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["WaitWeightDTO"]: AliasType<{
+	/** Время ожидания в секундах */
+	wait_sec?:boolean | `@${string}`,
+	/** Вес */
+	weight?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>
   }
 
 export type ResolverInputTypes = {
-    ["AddTrustedAccountInput"]: {
+    ["AccountResourceInfoDTO"]: AliasType<{
+	/** Доступные ресурсы */
+	available?:boolean | `@${string}`,
+	/** Текущее использование ресурсов */
+	current_used?:boolean | `@${string}`,
+	/** Время последнего обновления использования ресурсов */
+	last_usage_update_time?:boolean | `@${string}`,
+	/** Максимальное количество ресурсов */
+	max?:boolean | `@${string}`,
+	/** Использовано ресурсов */
+	used?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AddTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
 	/** Имя аккаунта кооператива */
@@ -1294,6 +1572,17 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
+	["AuthorityDTO"]: AliasType<{
+	/** Уровни разрешений */
+	accounts?:ResolverInputTypes["PermissionLevelWeightDTO"],
+	/** Ключи */
+	keys?:ResolverInputTypes["KeyWeightDTO"],
+	/** Порог */
+	threshold?:boolean | `@${string}`,
+	/** Вес ожидания */
+	waits?:ResolverInputTypes["WaitWeightDTO"],
+		__typename?: boolean | `@${string}`
+}>;
 	["BankAccount"]: AliasType<{
 	/** Номер банковского счета */
 	account_number?:boolean | `@${string}`,
@@ -1353,6 +1642,53 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["BlockchainDocument"]: AliasType<{
+	/** Хеш документа */
+	hash?:boolean | `@${string}`,
+	/** Метаинформация документа */
+	meta?:boolean | `@${string}`,
+	/** Публичный ключ документа */
+	public_key?:boolean | `@${string}`,
+	/** Подпись документа */
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Информация о состоянии блокчейна */
+["BlockchainInfoDTO"]: AliasType<{
+	/** Лимит CPU для блока */
+	block_cpu_limit?:boolean | `@${string}`,
+	/** Лимит сети для блока */
+	block_net_limit?:boolean | `@${string}`,
+	/** Идентификатор цепочки (chain ID) */
+	chain_id?:boolean | `@${string}`,
+	/** Идентификатор головного блока в форк базе данных */
+	fork_db_head_block_id?:boolean | `@${string}`,
+	/** Номер головного блока в форк базе данных */
+	fork_db_head_block_num?:boolean | `@${string}`,
+	/** Идентификатор головного блока */
+	head_block_id?:boolean | `@${string}`,
+	/** Номер головного блока */
+	head_block_num?:boolean | `@${string}`,
+	/** Прозводитель головного блока */
+	head_block_producer?:boolean | `@${string}`,
+	/** Время головного блока */
+	head_block_time?:boolean | `@${string}`,
+	/** Идентификатор последнего необратимого блока */
+	last_irreversible_block_id?:boolean | `@${string}`,
+	/** Номер последнего необратимого блока */
+	last_irreversible_block_num?:boolean | `@${string}`,
+	/** Время последнего необратимого блока */
+	last_irreversible_block_time?:boolean | `@${string}`,
+	/** Версия сервера */
+	server_version?:boolean | `@${string}`,
+	/** Строковое представление версии сервера */
+	server_version_string?:boolean | `@${string}`,
+	/** Виртуальный лимит CPU для блока */
+	virtual_block_cpu_limit?:boolean | `@${string}`,
+	/** Виртуальный лимит сети для блока */
+	virtual_block_net_limit?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Branch"]: AliasType<{
 	/** Банковский счёт */
 	bank_account?:ResolverInputTypes["BankPaymentMethod"],
@@ -1388,6 +1724,57 @@ export type ResolverInputTypes = {
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CooperativeOperatorAccount"]: AliasType<{
+	/** Объявление кооператива */
+	announce?:boolean | `@${string}`,
+	/** Тип кооператива */
+	coop_type?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Описание кооператива */
+	description?:boolean | `@${string}`,
+	/** Документ кооператива */
+	document?:ResolverInputTypes["BlockchainDocument"],
+	/** Начальный взнос */
+	initial?:boolean | `@${string}`,
+	/** Разветвленный ли кооператив */
+	is_branched?:boolean | `@${string}`,
+	/** Является ли это кооперативом */
+	is_cooperative?:boolean | `@${string}`,
+	/** Включен ли кооператив */
+	is_enrolled?:boolean | `@${string}`,
+	/** Метаинформация */
+	meta?:boolean | `@${string}`,
+	/** Минимальный взнос */
+	minimum?:boolean | `@${string}`,
+	/** Начальный взнос организации */
+	org_initial?:boolean | `@${string}`,
+	/** Минимальный взнос организации */
+	org_minimum?:boolean | `@${string}`,
+	/** Регистрационный взнос организации */
+	org_registration?:boolean | `@${string}`,
+	/** Родительское имя аккаунта кооператива */
+	parent_username?:boolean | `@${string}`,
+	/** Реферал кооператива */
+	referer?:boolean | `@${string}`,
+	/** Дата регистрации */
+	registered_at?:boolean | `@${string}`,
+	/** Регистрационный взнос */
+	registration?:boolean | `@${string}`,
+	/** Регистратор кооператива */
+	registrator?:boolean | `@${string}`,
+	/** Статус кооператива */
+	status?:boolean | `@${string}`,
+	/** Список хранилищ */
+	storages?:boolean | `@${string}`,
+	/** Тип учетной записи */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	username?:boolean | `@${string}`,
+	/** Дата регистрации */
+	verifications?:ResolverInputTypes["Verification"],
+		__typename?: boolean | `@${string}`
+}>;
 	["CreateBankAccountInput"]: {
 	/** Данные для банковского перевода */
 	data: ResolverInputTypes["BankAccountInput"],
@@ -1418,17 +1805,17 @@ export type ResolverInputTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
-	["DeletePaymentMethodInput"]: {
-	/** Идентификатор метода оплаты */
-	method_id: string,
-	/** Имя пользователя, чей метод оплаты нужно удалить */
-	username: string
-};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
 	/** Имя аккаунта кооператива */
 	coopname: string
+};
+	["DeletePaymentMethodInput"]: {
+	/** Идентификатор метода оплаты */
+	method_id: string,
+	/** Имя пользователя, чей метод оплаты нужно удалить */
+	username: string
 };
 	["DeleteTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -1550,6 +1937,13 @@ export type ResolverInputTypes = {
 }>;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
+	["KeyWeightDTO"]: AliasType<{
+	/** Ключ */
+	key?:boolean | `@${string}`,
+	/** Вес */
+	weight?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Mutation"]: AliasType<{
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
@@ -1619,10 +2013,46 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 	SbpAccount?:ResolverInputTypes["SbpAccount"],
 		__typename?: boolean | `@${string}`
 }>;
+	["PermissionDTO"]: AliasType<{
+	/** Родитель разрешения */
+	parent?:boolean | `@${string}`,
+	/** Имя разрешения */
+	perm_name?:boolean | `@${string}`,
+	/** Требуемые разрешения */
+	required_auth?:ResolverInputTypes["AuthorityDTO"],
+		__typename?: boolean | `@${string}`
+}>;
+	["PermissionLevelDTO"]: AliasType<{
+	/** Актор */
+	actor?:boolean | `@${string}`,
+	/** Разрешение */
+	permission?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PermissionLevelWeightDTO"]: AliasType<{
+	/** Уровень разрешения */
+	permission?:ResolverInputTypes["PermissionLevelDTO"],
+	/** Вес */
+	weight?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Query"]: AliasType<{
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
+	/** Получить сводную публичную информацию о системе */
+	getInfo?:ResolverInputTypes["SystemInfo"],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaginationResult"]],
+		__typename?: boolean | `@${string}`
+}>;
+	["RefundRequestDTO"]: AliasType<{
+	/** Сумма CPU */
+	cpu_amount?:boolean | `@${string}`,
+	/** Сумма сети */
+	net_amount?:boolean | `@${string}`,
+	/** Владелец */
+	owner?:boolean | `@${string}`,
+	/** Время запроса */
+	request_time?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["RepresentedBy"]: AliasType<{
@@ -1638,11 +2068,89 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	position?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ResourceDelegationDTO"]: AliasType<{
+	/** Вес CPU */
+	cpu_weight?:boolean | `@${string}`,
+	/** Отправитель */
+	from?:boolean | `@${string}`,
+	/** Вес сети */
+	net_weight?:boolean | `@${string}`,
+	/** Получатель */
+	to?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ResourceOverviewDTO"]: AliasType<{
+	/** Вес CPU */
+	cpu_weight?:boolean | `@${string}`,
+	/** Вес сети */
+	net_weight?:boolean | `@${string}`,
+	/** Владелец */
+	owner?:boolean | `@${string}`,
+	/** Используемая RAM */
+	ram_bytes?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SystemAccountDTO"]: AliasType<{
+	/** Имя аккаунта */
+	account_name?:boolean | `@${string}`,
+	/** Баланс */
+	core_liquid_balance?:boolean | `@${string}`,
+	/** Ограничения CPU */
+	cpu_limit?:ResolverInputTypes["AccountResourceInfoDTO"],
+	/** Вес CPU */
+	cpu_weight?:boolean | `@${string}`,
+	/** Дата создания */
+	created?:boolean | `@${string}`,
+	/** Номер последнего блока */
+	head_block_num?:boolean | `@${string}`,
+	/** Время последнего блока */
+	head_block_time?:boolean | `@${string}`,
+	/** Время последнего обновления кода */
+	last_code_update?:boolean | `@${string}`,
+	/** Ограничения сети */
+	net_limit?:ResolverInputTypes["AccountResourceInfoDTO"],
+	/** Вес сети */
+	net_weight?:boolean | `@${string}`,
+	/** Разрешения */
+	permissions?:ResolverInputTypes["PermissionDTO"],
+	/** Флаг привилегий */
+	privileged?:boolean | `@${string}`,
+	/** Квота RAM */
+	ram_quota?:boolean | `@${string}`,
+	/** Использование RAM */
+	ram_usage?:boolean | `@${string}`,
+	/** Запрос на возврат */
+	refund_request?:ResolverInputTypes["RefundRequestDTO"],
+	/** Информация о REX */
+	rex_info?:boolean | `@${string}`,
+	/** Делегированные ресурсы */
+	self_delegated_bandwidth?:ResolverInputTypes["ResourceDelegationDTO"],
+	/** Общий обзор ресурсов */
+	total_resources?:ResolverInputTypes["ResourceOverviewDTO"],
+	/** Информация о голосовании */
+	voter_info?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["SystemInfo"]: AliasType<{
+	/** Набор данных с информацией о состоянии блокчейна */
+	blockchain_info?:ResolverInputTypes["BlockchainInfoDTO"],
+	/** Объект аккаунта кооператива у оператора */
+	cooperator_account?:ResolverInputTypes["CooperativeOperatorAccount"],
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Объект системного аккаунта кооператива в блокчейне */
+	system_account?:ResolverInputTypes["SystemAccountDTO"],
+	/** Статус контроллера кооператива */
+	system_status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Состояние контроллера кооператива */
+["SystemStatus"]:SystemStatus;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
@@ -1657,6 +2165,28 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Verification"]: AliasType<{
+	/** Дата создания верификации */
+	created_at?:boolean | `@${string}`,
+	/** Флаг верификации */
+	is_verified?:boolean | `@${string}`,
+	/** Дата последнего обновления верификации */
+	last_update?:boolean | `@${string}`,
+	/** Заметка верификации */
+	notice?:boolean | `@${string}`,
+	/** Процедура верификации */
+	procedure?:boolean | `@${string}`,
+	/** Имя верификатора */
+	verificator?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["WaitWeightDTO"]: AliasType<{
+	/** Время ожидания в секундах */
+	wait_sec?:boolean | `@${string}`,
+	/** Вес */
+	weight?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["schema"]: AliasType<{
 	query?:ResolverInputTypes["Query"],
 	mutation?:ResolverInputTypes["Mutation"],
@@ -1665,13 +2195,35 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
   }
 
 export type ModelTypes = {
-    ["AddTrustedAccountInput"]: {
+    ["AccountResourceInfoDTO"]: {
+		/** Доступные ресурсы */
+	available: string,
+	/** Текущее использование ресурсов */
+	current_used?: string | undefined | null,
+	/** Время последнего обновления использования ресурсов */
+	last_usage_update_time?: string | undefined | null,
+	/** Максимальное количество ресурсов */
+	max: string,
+	/** Использовано ресурсов */
+	used: string
+};
+	["AddTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
+};
+	["AuthorityDTO"]: {
+		/** Уровни разрешений */
+	accounts: Array<ModelTypes["PermissionLevelWeightDTO"]>,
+	/** Ключи */
+	keys: Array<ModelTypes["KeyWeightDTO"]>,
+	/** Порог */
+	threshold: number,
+	/** Вес ожидания */
+	waits: Array<ModelTypes["WaitWeightDTO"]>
 };
 	["BankAccount"]: {
 		/** Номер банковского счета */
@@ -1729,6 +2281,51 @@ export type ModelTypes = {
 	/** Имя пользователя, к которому привязан метод оплаты */
 	username: string
 };
+	["BlockchainDocument"]: {
+		/** Хеш документа */
+	hash: string,
+	/** Метаинформация документа */
+	meta: string,
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	/** Информация о состоянии блокчейна */
+["BlockchainInfoDTO"]: {
+		/** Лимит CPU для блока */
+	block_cpu_limit: number,
+	/** Лимит сети для блока */
+	block_net_limit: number,
+	/** Идентификатор цепочки (chain ID) */
+	chain_id: string,
+	/** Идентификатор головного блока в форк базе данных */
+	fork_db_head_block_id?: string | undefined | null,
+	/** Номер головного блока в форк базе данных */
+	fork_db_head_block_num?: number | undefined | null,
+	/** Идентификатор головного блока */
+	head_block_id: string,
+	/** Номер головного блока */
+	head_block_num: number,
+	/** Прозводитель головного блока */
+	head_block_producer: string,
+	/** Время головного блока */
+	head_block_time: string,
+	/** Идентификатор последнего необратимого блока */
+	last_irreversible_block_id: string,
+	/** Номер последнего необратимого блока */
+	last_irreversible_block_num: number,
+	/** Время последнего необратимого блока */
+	last_irreversible_block_time?: string | undefined | null,
+	/** Версия сервера */
+	server_version: string,
+	/** Строковое представление версии сервера */
+	server_version_string?: string | undefined | null,
+	/** Виртуальный лимит CPU для блока */
+	virtual_block_cpu_limit: number,
+	/** Виртуальный лимит сети для блока */
+	virtual_block_net_limit: number
+};
 	["Branch"]: {
 		/** Банковский счёт */
 	bank_account: ModelTypes["BankPaymentMethod"],
@@ -1763,6 +2360,56 @@ export type ModelTypes = {
 	/** Тип организации */
 	type: string
 };
+	["CooperativeOperatorAccount"]: {
+		/** Объявление кооператива */
+	announce: string,
+	/** Тип кооператива */
+	coop_type: string,
+	/** Дата создания */
+	created_at: string,
+	/** Описание кооператива */
+	description: string,
+	/** Документ кооператива */
+	document: ModelTypes["BlockchainDocument"],
+	/** Начальный взнос */
+	initial: string,
+	/** Разветвленный ли кооператив */
+	is_branched: boolean,
+	/** Является ли это кооперативом */
+	is_cooperative: boolean,
+	/** Включен ли кооператив */
+	is_enrolled: boolean,
+	/** Метаинформация */
+	meta: string,
+	/** Минимальный взнос */
+	minimum: string,
+	/** Начальный взнос организации */
+	org_initial: string,
+	/** Минимальный взнос организации */
+	org_minimum: string,
+	/** Регистрационный взнос организации */
+	org_registration: string,
+	/** Родительское имя аккаунта кооператива */
+	parent_username: string,
+	/** Реферал кооператива */
+	referer: string,
+	/** Дата регистрации */
+	registered_at: string,
+	/** Регистрационный взнос */
+	registration: string,
+	/** Регистратор кооператива */
+	registrator: string,
+	/** Статус кооператива */
+	status: string,
+	/** Список хранилищ */
+	storages: Array<string>,
+	/** Тип учетной записи */
+	type: string,
+	/** Имя аккаунта кооператива */
+	username: string,
+	/** Дата регистрации */
+	verifications: Array<ModelTypes["Verification"]>
+};
 	["CreateBankAccountInput"]: {
 	/** Данные для банковского перевода */
 	data: ModelTypes["BankAccountInput"],
@@ -1793,17 +2440,17 @@ export type ModelTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
-	["DeletePaymentMethodInput"]: {
-	/** Идентификатор метода оплаты */
-	method_id: string,
-	/** Имя пользователя, чей метод оплаты нужно удалить */
-	username: string
-};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
 	/** Имя аккаунта кооператива */
 	coopname: string
+};
+	["DeletePaymentMethodInput"]: {
+	/** Идентификатор метода оплаты */
+	method_id: string,
+	/** Имя пользователя, чей метод оплаты нужно удалить */
+	username: string
 };
 	["DeleteTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -1923,6 +2570,12 @@ export type ModelTypes = {
 };
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:any;
+	["KeyWeightDTO"]: {
+		/** Ключ */
+	key: string,
+	/** Вес */
+	weight: number
+};
 	["Mutation"]: {
 		/** Добавить доверенное лицо кооперативного участка */
 	addTrustedAccount: ModelTypes["Branch"],
@@ -1994,13 +2647,45 @@ export type ModelTypes = {
 	username: string
 };
 	["PaymentMethodData"]:ModelTypes["BankAccount"] | ModelTypes["SbpAccount"];
+	["PermissionDTO"]: {
+		/** Родитель разрешения */
+	parent: string,
+	/** Имя разрешения */
+	perm_name: string,
+	/** Требуемые разрешения */
+	required_auth: ModelTypes["AuthorityDTO"]
+};
+	["PermissionLevelDTO"]: {
+		/** Актор */
+	actor: string,
+	/** Разрешение */
+	permission: string
+};
+	["PermissionLevelWeightDTO"]: {
+		/** Уровень разрешения */
+	permission: ModelTypes["PermissionLevelDTO"],
+	/** Вес */
+	weight: number
+};
 	["Query"]: {
 		/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
 	/** Получить список расширений */
 	getExtensions: Array<ModelTypes["Extension"]>,
+	/** Получить сводную публичную информацию о системе */
+	getInfo: ModelTypes["SystemInfo"],
 	/** Получить список методов оплаты */
 	getPaymentMethods: ModelTypes["PaginationResult"]
+};
+	["RefundRequestDTO"]: {
+		/** Сумма CPU */
+	cpu_amount: string,
+	/** Сумма сети */
+	net_amount: string,
+	/** Владелец */
+	owner: string,
+	/** Время запроса */
+	request_time: string
 };
 	["RepresentedBy"]: {
 		/** На основании чего действует */
@@ -2014,10 +2699,83 @@ export type ModelTypes = {
 	/** Должность */
 	position: string
 };
+	["ResourceDelegationDTO"]: {
+		/** Вес CPU */
+	cpu_weight: string,
+	/** Отправитель */
+	from: string,
+	/** Вес сети */
+	net_weight: string,
+	/** Получатель */
+	to: string
+};
+	["ResourceOverviewDTO"]: {
+		/** Вес CPU */
+	cpu_weight: string,
+	/** Вес сети */
+	net_weight: string,
+	/** Владелец */
+	owner: string,
+	/** Используемая RAM */
+	ram_bytes: number
+};
 	["SbpAccount"]: {
 		/** Мобильный телефон получателя */
 	phone: string
 };
+	["SystemAccountDTO"]: {
+		/** Имя аккаунта */
+	account_name: string,
+	/** Баланс */
+	core_liquid_balance?: string | undefined | null,
+	/** Ограничения CPU */
+	cpu_limit: ModelTypes["AccountResourceInfoDTO"],
+	/** Вес CPU */
+	cpu_weight: string,
+	/** Дата создания */
+	created: string,
+	/** Номер последнего блока */
+	head_block_num: number,
+	/** Время последнего блока */
+	head_block_time: string,
+	/** Время последнего обновления кода */
+	last_code_update: string,
+	/** Ограничения сети */
+	net_limit: ModelTypes["AccountResourceInfoDTO"],
+	/** Вес сети */
+	net_weight: string,
+	/** Разрешения */
+	permissions: Array<ModelTypes["PermissionDTO"]>,
+	/** Флаг привилегий */
+	privileged: boolean,
+	/** Квота RAM */
+	ram_quota: number,
+	/** Использование RAM */
+	ram_usage: number,
+	/** Запрос на возврат */
+	refund_request?: ModelTypes["RefundRequestDTO"] | undefined | null,
+	/** Информация о REX */
+	rex_info?: string | undefined | null,
+	/** Делегированные ресурсы */
+	self_delegated_bandwidth?: ModelTypes["ResourceDelegationDTO"] | undefined | null,
+	/** Общий обзор ресурсов */
+	total_resources?: ModelTypes["ResourceOverviewDTO"] | undefined | null,
+	/** Информация о голосовании */
+	voter_info?: string | undefined | null
+};
+	["SystemInfo"]: {
+		/** Набор данных с информацией о состоянии блокчейна */
+	blockchain_info: ModelTypes["BlockchainInfoDTO"],
+	/** Объект аккаунта кооператива у оператора */
+	cooperator_account: ModelTypes["CooperativeOperatorAccount"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Объект системного аккаунта кооператива в блокчейне */
+	system_account: ModelTypes["SystemAccountDTO"],
+	/** Статус контроллера кооператива */
+	system_status: ModelTypes["SystemStatus"]
+};
+	["SystemStatus"]:SystemStatus;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
@@ -2032,6 +2790,26 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Verification"]: {
+		/** Дата создания верификации */
+	created_at: string,
+	/** Флаг верификации */
+	is_verified: boolean,
+	/** Дата последнего обновления верификации */
+	last_update: string,
+	/** Заметка верификации */
+	notice: string,
+	/** Процедура верификации */
+	procedure: string,
+	/** Имя верификатора */
+	verificator: string
+};
+	["WaitWeightDTO"]: {
+		/** Время ожидания в секундах */
+	wait_sec: number,
+	/** Вес */
+	weight: number
+};
 	["schema"]: {
 	query?: ModelTypes["Query"] | undefined | null,
 	mutation?: ModelTypes["Mutation"] | undefined | null
@@ -2042,6 +2820,19 @@ export type GraphQLTypes = {
     // ------------------------------------------------------;
 	// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY);
 	// ------------------------------------------------------;
+	["AccountResourceInfoDTO"]: {
+	__typename: "AccountResourceInfoDTO",
+	/** Доступные ресурсы */
+	available: string,
+	/** Текущее использование ресурсов */
+	current_used?: string | undefined | null,
+	/** Время последнего обновления использования ресурсов */
+	last_usage_update_time?: string | undefined | null,
+	/** Максимальное количество ресурсов */
+	max: string,
+	/** Использовано ресурсов */
+	used: string
+};
 	["AddTrustedAccountInput"]: {
 		/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -2049,6 +2840,17 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
+};
+	["AuthorityDTO"]: {
+	__typename: "AuthorityDTO",
+	/** Уровни разрешений */
+	accounts: Array<GraphQLTypes["PermissionLevelWeightDTO"]>,
+	/** Ключи */
+	keys: Array<GraphQLTypes["KeyWeightDTO"]>,
+	/** Порог */
+	threshold: number,
+	/** Вес ожидания */
+	waits: Array<GraphQLTypes["WaitWeightDTO"]>
 };
 	["BankAccount"]: {
 	__typename: "BankAccount",
@@ -2109,6 +2911,53 @@ export type GraphQLTypes = {
 	/** Имя пользователя, к которому привязан метод оплаты */
 	username: string
 };
+	["BlockchainDocument"]: {
+	__typename: "BlockchainDocument",
+	/** Хеш документа */
+	hash: string,
+	/** Метаинформация документа */
+	meta: string,
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	/** Информация о состоянии блокчейна */
+["BlockchainInfoDTO"]: {
+	__typename: "BlockchainInfoDTO",
+	/** Лимит CPU для блока */
+	block_cpu_limit: number,
+	/** Лимит сети для блока */
+	block_net_limit: number,
+	/** Идентификатор цепочки (chain ID) */
+	chain_id: string,
+	/** Идентификатор головного блока в форк базе данных */
+	fork_db_head_block_id?: string | undefined | null,
+	/** Номер головного блока в форк базе данных */
+	fork_db_head_block_num?: number | undefined | null,
+	/** Идентификатор головного блока */
+	head_block_id: string,
+	/** Номер головного блока */
+	head_block_num: number,
+	/** Прозводитель головного блока */
+	head_block_producer: string,
+	/** Время головного блока */
+	head_block_time: string,
+	/** Идентификатор последнего необратимого блока */
+	last_irreversible_block_id: string,
+	/** Номер последнего необратимого блока */
+	last_irreversible_block_num: number,
+	/** Время последнего необратимого блока */
+	last_irreversible_block_time?: string | undefined | null,
+	/** Версия сервера */
+	server_version: string,
+	/** Строковое представление версии сервера */
+	server_version_string?: string | undefined | null,
+	/** Виртуальный лимит CPU для блока */
+	virtual_block_cpu_limit: number,
+	/** Виртуальный лимит сети для блока */
+	virtual_block_net_limit: number
+};
 	["Branch"]: {
 	__typename: "Branch",
 	/** Банковский счёт */
@@ -2144,6 +2993,57 @@ export type GraphQLTypes = {
 	/** Тип организации */
 	type: string
 };
+	["CooperativeOperatorAccount"]: {
+	__typename: "CooperativeOperatorAccount",
+	/** Объявление кооператива */
+	announce: string,
+	/** Тип кооператива */
+	coop_type: string,
+	/** Дата создания */
+	created_at: string,
+	/** Описание кооператива */
+	description: string,
+	/** Документ кооператива */
+	document: GraphQLTypes["BlockchainDocument"],
+	/** Начальный взнос */
+	initial: string,
+	/** Разветвленный ли кооператив */
+	is_branched: boolean,
+	/** Является ли это кооперативом */
+	is_cooperative: boolean,
+	/** Включен ли кооператив */
+	is_enrolled: boolean,
+	/** Метаинформация */
+	meta: string,
+	/** Минимальный взнос */
+	minimum: string,
+	/** Начальный взнос организации */
+	org_initial: string,
+	/** Минимальный взнос организации */
+	org_minimum: string,
+	/** Регистрационный взнос организации */
+	org_registration: string,
+	/** Родительское имя аккаунта кооператива */
+	parent_username: string,
+	/** Реферал кооператива */
+	referer: string,
+	/** Дата регистрации */
+	registered_at: string,
+	/** Регистрационный взнос */
+	registration: string,
+	/** Регистратор кооператива */
+	registrator: string,
+	/** Статус кооператива */
+	status: string,
+	/** Список хранилищ */
+	storages: Array<string>,
+	/** Тип учетной записи */
+	type: string,
+	/** Имя аккаунта кооператива */
+	username: string,
+	/** Дата регистрации */
+	verifications: Array<GraphQLTypes["Verification"]>
+};
 	["CreateBankAccountInput"]: {
 		/** Данные для банковского перевода */
 	data: GraphQLTypes["BankAccountInput"],
@@ -2174,17 +3074,17 @@ export type GraphQLTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]: "scalar" & { name: "DateTime" };
-	["DeletePaymentMethodInput"]: {
-		/** Идентификатор метода оплаты */
-	method_id: string,
-	/** Имя пользователя, чей метод оплаты нужно удалить */
-	username: string
-};
 	["DeleteBranchInput"]: {
 		/** Имя аккаунта кооперативного участка */
 	braname: string,
 	/** Имя аккаунта кооператива */
 	coopname: string
+};
+	["DeletePaymentMethodInput"]: {
+		/** Идентификатор метода оплаты */
+	method_id: string,
+	/** Имя пользователя, чей метод оплаты нужно удалить */
+	username: string
 };
 	["DeleteTrustedAccountInput"]: {
 		/** Имя аккаунта кооперативного участка */
@@ -2306,6 +3206,13 @@ export type GraphQLTypes = {
 };
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]: "scalar" & { name: "JSON" };
+	["KeyWeightDTO"]: {
+	__typename: "KeyWeightDTO",
+	/** Ключ */
+	key: string,
+	/** Вес */
+	weight: number
+};
 	["Mutation"]: {
 	__typename: "Mutation",
 	/** Добавить доверенное лицо кооперативного участка */
@@ -2386,14 +3293,50 @@ export type GraphQLTypes = {
         	['...on BankAccount']: '__union' & GraphQLTypes["BankAccount"];
 	['...on SbpAccount']: '__union' & GraphQLTypes["SbpAccount"];
 };
+	["PermissionDTO"]: {
+	__typename: "PermissionDTO",
+	/** Родитель разрешения */
+	parent: string,
+	/** Имя разрешения */
+	perm_name: string,
+	/** Требуемые разрешения */
+	required_auth: GraphQLTypes["AuthorityDTO"]
+};
+	["PermissionLevelDTO"]: {
+	__typename: "PermissionLevelDTO",
+	/** Актор */
+	actor: string,
+	/** Разрешение */
+	permission: string
+};
+	["PermissionLevelWeightDTO"]: {
+	__typename: "PermissionLevelWeightDTO",
+	/** Уровень разрешения */
+	permission: GraphQLTypes["PermissionLevelDTO"],
+	/** Вес */
+	weight: number
+};
 	["Query"]: {
 	__typename: "Query",
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
 	/** Получить список расширений */
 	getExtensions: Array<GraphQLTypes["Extension"]>,
+	/** Получить сводную публичную информацию о системе */
+	getInfo: GraphQLTypes["SystemInfo"],
 	/** Получить список методов оплаты */
 	getPaymentMethods: GraphQLTypes["PaginationResult"]
+};
+	["RefundRequestDTO"]: {
+	__typename: "RefundRequestDTO",
+	/** Сумма CPU */
+	cpu_amount: string,
+	/** Сумма сети */
+	net_amount: string,
+	/** Владелец */
+	owner: string,
+	/** Время запроса */
+	request_time: string
 };
 	["RepresentedBy"]: {
 	__typename: "RepresentedBy",
@@ -2408,11 +3351,89 @@ export type GraphQLTypes = {
 	/** Должность */
 	position: string
 };
+	["ResourceDelegationDTO"]: {
+	__typename: "ResourceDelegationDTO",
+	/** Вес CPU */
+	cpu_weight: string,
+	/** Отправитель */
+	from: string,
+	/** Вес сети */
+	net_weight: string,
+	/** Получатель */
+	to: string
+};
+	["ResourceOverviewDTO"]: {
+	__typename: "ResourceOverviewDTO",
+	/** Вес CPU */
+	cpu_weight: string,
+	/** Вес сети */
+	net_weight: string,
+	/** Владелец */
+	owner: string,
+	/** Используемая RAM */
+	ram_bytes: number
+};
 	["SbpAccount"]: {
 	__typename: "SbpAccount",
 	/** Мобильный телефон получателя */
 	phone: string
 };
+	["SystemAccountDTO"]: {
+	__typename: "SystemAccountDTO",
+	/** Имя аккаунта */
+	account_name: string,
+	/** Баланс */
+	core_liquid_balance?: string | undefined | null,
+	/** Ограничения CPU */
+	cpu_limit: GraphQLTypes["AccountResourceInfoDTO"],
+	/** Вес CPU */
+	cpu_weight: string,
+	/** Дата создания */
+	created: string,
+	/** Номер последнего блока */
+	head_block_num: number,
+	/** Время последнего блока */
+	head_block_time: string,
+	/** Время последнего обновления кода */
+	last_code_update: string,
+	/** Ограничения сети */
+	net_limit: GraphQLTypes["AccountResourceInfoDTO"],
+	/** Вес сети */
+	net_weight: string,
+	/** Разрешения */
+	permissions: Array<GraphQLTypes["PermissionDTO"]>,
+	/** Флаг привилегий */
+	privileged: boolean,
+	/** Квота RAM */
+	ram_quota: number,
+	/** Использование RAM */
+	ram_usage: number,
+	/** Запрос на возврат */
+	refund_request?: GraphQLTypes["RefundRequestDTO"] | undefined | null,
+	/** Информация о REX */
+	rex_info?: string | undefined | null,
+	/** Делегированные ресурсы */
+	self_delegated_bandwidth?: GraphQLTypes["ResourceDelegationDTO"] | undefined | null,
+	/** Общий обзор ресурсов */
+	total_resources?: GraphQLTypes["ResourceOverviewDTO"] | undefined | null,
+	/** Информация о голосовании */
+	voter_info?: string | undefined | null
+};
+	["SystemInfo"]: {
+	__typename: "SystemInfo",
+	/** Набор данных с информацией о состоянии блокчейна */
+	blockchain_info: GraphQLTypes["BlockchainInfoDTO"],
+	/** Объект аккаунта кооператива у оператора */
+	cooperator_account: GraphQLTypes["CooperativeOperatorAccount"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Объект системного аккаунта кооператива в блокчейне */
+	system_account: GraphQLTypes["SystemAccountDTO"],
+	/** Статус контроллера кооператива */
+	system_status: GraphQLTypes["SystemStatus"]
+};
+	/** Состояние контроллера кооператива */
+["SystemStatus"]: SystemStatus;
 	["UninstallExtensionInput"]: {
 		/** Фильтр по имени */
 	name: string
@@ -2426,9 +3447,36 @@ export type GraphQLTypes = {
 	method_id: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["Verification"]: {
+	__typename: "Verification",
+	/** Дата создания верификации */
+	created_at: string,
+	/** Флаг верификации */
+	is_verified: boolean,
+	/** Дата последнего обновления верификации */
+	last_update: string,
+	/** Заметка верификации */
+	notice: string,
+	/** Процедура верификации */
+	procedure: string,
+	/** Имя верификатора */
+	verificator: string
+};
+	["WaitWeightDTO"]: {
+	__typename: "WaitWeightDTO",
+	/** Время ожидания в секундах */
+	wait_sec: number,
+	/** Вес */
+	weight: number
 }
     }
-
+/** Состояние контроллера кооператива */
+export enum SystemStatus {
+	active = "active",
+	install = "install",
+	maintenance = "maintenance"
+}
 
 type ZEUS_VARIABLES = {
 	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
@@ -2437,8 +3485,8 @@ type ZEUS_VARIABLES = {
 	["CreateBankAccountInput"]: ValueTypes["CreateBankAccountInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
 	["DateTime"]: ValueTypes["DateTime"];
-	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
+	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
 	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
@@ -2446,6 +3494,7 @@ type ZEUS_VARIABLES = {
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
 	["JSON"]: ValueTypes["JSON"];
+	["SystemStatus"]: ValueTypes["SystemStatus"];
 	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
 	["UpdateBankAccountInput"]: ValueTypes["UpdateBankAccountInput"];
 }

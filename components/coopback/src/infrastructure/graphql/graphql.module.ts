@@ -3,9 +3,10 @@ import { Global, HttpStatus, Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import config from '~/config/config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { authDirectiveTransformer } from './directives/auth.directive';
+import { docDirectiveTransformer } from './directives/doc.directive';
 import logger from '~/config/logger';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
+import { fieldAuthDirectiveTransformer } from './directives/fieldAuth.directive';
 
 @Global()
 @Module({
@@ -16,16 +17,22 @@ import { GraphQLError, GraphQLFormattedError } from 'graphql';
       autoSchemaFile: 'schema.gql',
       sortSchema: true,
       debug: config.env !== 'production',
+      // context: ({ req }) => req,
       playground:
         config.env !== 'production'
           ? { endpoint: '/v1/graphql', settings: { 'request.credentials': 'same-origin' } }
           : false,
       path: '/v1/graphql', // здесь можно задать другой путь, когда потребуется,
-      transformSchema: (schema) => authDirectiveTransformer(schema, 'auth'),
+      transformSchema: (schema) => {
+        schema = docDirectiveTransformer(schema, 'auth');
+        schema = fieldAuthDirectiveTransformer(schema, 'auth');
+        return schema;
+      },
+      // transformSchema: (schema) => docDirectiveTransformer(schema, 'auth'),
       formatError: (formattedError: GraphQLFormattedError, error: unknown): GraphQLFormattedError => {
         let extensions = formattedError.extensions || {};
         let message = formattedError.message;
-
+        console.log(formattedError);
         if (error instanceof GraphQLError) {
           // Если есть оригинальная ошибка, извлекаем информацию
           if (error.originalError instanceof Error) {
