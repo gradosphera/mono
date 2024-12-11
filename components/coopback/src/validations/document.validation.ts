@@ -4,6 +4,7 @@ export const IGenerate = Joi.object({
   data: Joi.object({
     registry_id: Joi.number().required(),
     coopname: Joi.string().required(),
+    braname: Joi.string().allow('').optional(),
     username: Joi.string().required(),
     generator: Joi.string().optional(),
     version: Joi.string().optional(),

@@ -95,6 +95,7 @@ export interface IInit {
 export interface IJoincoop {
   registrator: IName
   coopname: IName
+  braname: IName
   username: IName
   document: IDocument
 }

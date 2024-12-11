@@ -14,7 +14,6 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
 
   async generateDocument(data: ParticipantApplication.Action, _options?: IGenerationOptions): Promise<IGeneratedDocument> {
     // TODO надо использовать skip_save из options вместо skip_save из data, для этого на фронте внести соответствующие правки
-
     let template: ITemplate<ParticipantApplication.Model>
 
     if (process.env.SOURCE === 'local') {
@@ -39,6 +38,16 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
     }
 
     const coop = await super.getCooperative(data.coopname, data.block_num)
+
+    if (coop.is_branched && !data.braname)
+      throw new Error('Кооперативный участок должен быть указан')
+
+    let branch
+
+    if (data.braname)
+      branch = await super.getOrganization(data.braname, data.block_num)
+
+    console.log(branch)
 
     let { signature, ...modifieddata } = data
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...modifieddata }) // Генерируем мета-данные
@@ -74,7 +83,7 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
 
     const vars = await super.getVars(data.coopname, data.block_num)
 
-    const combinedData: ParticipantApplication.Model = { ...userData, meta, coop, type: user.type, vars, signature }
+    const combinedData: ParticipantApplication.Model = { ...userData, meta, coop, branch, type: user.type, vars, signature }
 
     // валидируем скомбинированные данные
     await super.validate(combinedData, template.model)

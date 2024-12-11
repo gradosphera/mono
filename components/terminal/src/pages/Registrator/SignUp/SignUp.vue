@@ -1,25 +1,27 @@
 <template lang='pug'>
-div
+.row.justify-center.q-pa-sm
+  .col-md-6.col-sm-8.col-xs-12
+    q-card.q-pa-md.signup(flat).q-pt-lg
+      p.text-h6.text-center.q-mb-md ВСТУПИТЬ В ПАЙЩИКИ
+      q-stepper(v-model='store.step', vertical, animated, flat, done-color='primary')
+        EmailInput
 
-  q-card.q-pa-md.signup(flat)
-    p.text-h6.text-center.q-mb-md ВСТУПИТЬ В ПАЙЩИКИ
-    q-stepper(v-model='store.step', vertical, animated, flat, done-color='primary')
-      EmailInput
+        SetUserData
 
-      SetUserData
+        GenerateAccount
 
-      GenerateAccount
+        SelectBranch(v-if="isBranched")
 
-      ReadStatement
+        ReadStatement
 
-      SignStatement
+        SignStatement
 
-      PayInitial(v-model:step='store.step')
+        PayInitial
 
-      WaitingRegistration(v-model:step='store.step')
+        WaitingRegistration
 
-      Welcome(v-model:step='store.step')
-  q-btn(@click="out" dense size="sm" flat) начать с начала
+        Welcome
+    q-btn(@click="out" dense size="sm" flat) начать с начала
 
 
 </template>
@@ -34,10 +36,10 @@ import ReadStatement from './ReadStatement.vue'
 import PayInitial from './PayInitial.vue'
 import WaitingRegistration from './WaitingRegistration.vue'
 import Welcome from './Welcome.vue'
+import SelectBranch from './SelectBranch.vue'
 
 import { COOPNAME } from 'src/shared/config'
 import { useCurrentUserStore } from 'src/entities/User'
-const currentUser = useCurrentUserStore()
 
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { useLogoutUser } from 'src/features/Registrator/Logout'
@@ -45,7 +47,12 @@ import { useSessionStore } from 'src/entities/Session'
 import { useAgreementStore } from 'src/entities/Agreement'
 import { useWalletStore } from 'src/entities/Wallet'
 
-const { state, clearUserData } = useRegistratorStore()
+import { useRouter } from 'vue-router';
+import { useSystemStore } from 'src/entities/System/model'
+
+const currentUser = useCurrentUserStore()
+const router = useRouter()
+const { state, clearUserData, steps } = useRegistratorStore()
 const session = useSessionStore()
 const store = state
 const username = computed(() => session.username)
@@ -57,11 +64,10 @@ onMounted(() => {
   if (!currentUser.isRegistrationComplete) {
 
     if (currentUser.userAccount?.status === 'registered' || currentUser.userAccount?.status === 'active' || currentUser.userAccount?.status === 'blocked') {
-      store.step = 7
+      store.step = steps.WaitingRegistration
       return
     }
   }
-
 })
 
 
@@ -69,36 +75,45 @@ const out = async () => {
   const { logout } = await useLogoutUser()
   await logout()
 
-  clearLocalStorage()
+  clearUserData()
 
   window.location.reload()
 }
 
-const clearLocalStorage = () => {
-  clearUserData()
-}
-
 onBeforeUnmount(() => {
-  if (store.step == 8) {
-    clearLocalStorage()
+  if (store.step == steps.Welcome) {
+    clearUserData()
   }
 })
 
 watch(() => currentUser.participantAccount, (newValue) => {
   if (newValue) {
-    clearLocalStorage()
-    store.step = 8
+    clearUserData()
+    store.step = steps.Welcome
   }
 })
 
 watch(
   () => [store.step, store.email, store.account, store.userData],
   () => {
-    if (store.step >= 4 && store.step < 8) {
+    if (store.step >= steps.GenerateAccount && store.step < steps.WaitingRegistration) {
       currentUser.loadProfile(username.value, COOPNAME)
       wallet.loadUserWalet({coopname: COOPNAME, username: username.value})
     }
   }
 )
+
+const registeredAndloggedIn = computed(() => {
+  return currentUser.isRegistrationComplete && useSessionStore().isAuth && store.step == steps.EmailInput
+})
+
+watch(() => registeredAndloggedIn, (newValue) => {
+  if (newValue.value === true)
+    router.push({name: 'index'})
+})
+
+const system = useSystemStore()
+const isBranched = computed(() => system.info?.cooperator_account.is_branched)
+
 </script>
 <style></style>

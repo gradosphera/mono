@@ -1,6 +1,6 @@
 <template lang='pug'>
 div
-  q-step(:name='5', title='Подпишите заявление на вступление', :done='step > 5')
+  q-step(:name='store.steps.SignStatement', title='Подпишите заявление на вступление', :done='store.isStepDone("SignStatement")')
     div(v-if='onSign')
       Loader(:text='loadingText')
     div(v-else)
@@ -15,30 +15,27 @@ div
           @mouseup='endDrawing'
         )
       p.text-center.full-width Оставьте собственноручную подпись в рамке
-
       .q-mt-lg.q-mb-lg
-        q-btn.col-md-4.col-xs-12(flat, @click='store.step--')
+        q-btn.col-md-4.col-xs-12(flat, @click='store.prev()')
           i.fa.fa-arrow-left
           span.q-ml-md назад
         q-btn.col-md-4.col-xs-12(flat, @click='clearCanvas')
           span.q-ml-md очистить
-
         q-btn.col-md-4.col-xs-12(color='primary', label='Продолжить', @click='setSignature')
+
 </template>
 <script lang="ts" setup>
-import { ref, computed, watch, onBeforeMount, nextTick, onMounted } from 'vue'
+import { ref, watch, onBeforeMount, nextTick, onMounted } from 'vue'
 import { useCreateUser } from 'src/features/Registrator/CreateUser'
 import { Notify } from 'quasar'
 import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
 
 import { useRegistratorStore } from 'src/entities/Registrator'
-const store = useRegistratorStore().state
-
+const store = useRegistratorStore()
 
 const createUser = useCreateUser()
 
-const step = computed(() => store.step)
 const around = ref()
 const onSign = ref(false)
 const loadingText = ref('')
@@ -73,7 +70,7 @@ const setSignature = async (): Promise<void> => {
 
   try {
     onSign.value = true
-    store.signature = sign
+    store.state.signature = sign
 
     loadingText.value = 'Подписываем положение о ЦПП "Цифровой Кошелёк"'
 
@@ -100,7 +97,7 @@ const setSignature = async (): Promise<void> => {
     loadingText.value = ''
 
     onSign.value = false
-    store.step++
+    store.next()
   } catch (e: any) {
     onSign.value = false
     FailAlert(e.message)
@@ -113,8 +110,8 @@ const init = (): void => {
   prepareCanvas()
 }
 
-watch(step, (newStep) => {
-  if (newStep == 5) {
+watch(() => store.state.step, (newStep) => {
+  if (newStep == store.steps.SignStatement) {
     init()
   }
 })

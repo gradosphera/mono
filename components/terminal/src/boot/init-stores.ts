@@ -3,15 +3,21 @@ import { boot } from 'quasar/wrappers';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useCardStore } from 'src/app/providers/card/store';
 import type { RouteRecordRaw } from 'vue-router';
+import { useSystemStore } from 'src/entities/System/model';
 
 export default boot(async ({ router }) => {
   const desktops = useDesktopStore();
   const cardStore = useCardStore();
+  const system = useSystemStore();
+
+  //Инициализация системного стора
+  await system.loadSystemInfo();
+  console.log('systemInfo: ', system.info)
 
   // Инициализация стора desktops
   await desktops.healthCheck();
   await desktops.loadDesktops();
-  await desktops.setActiveDesktop(desktops.defaultDesktopHash);
+  desktops.setActiveDesktop(desktops.defaultDesktopHash);
 
   // Инициализация кошелька
   await cardStore.initWallet();

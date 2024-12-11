@@ -72,8 +72,6 @@ branchStore.loadBranches({
   coopname: COOPNAME
 })
 
-const isBranched = ref(false);
-
 const onLoading = ref(false);
 
 const branches = computed(() => branchStore.branches)

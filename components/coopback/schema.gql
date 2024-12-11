@@ -696,11 +696,11 @@ type Query {
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!
 
-  """Получить сводную публичную информацию о системе"""
-  getInfo: SystemInfo!
-
   """Получить список методов оплаты"""
   getPaymentMethods(data: GetPaymentMethodsInput): PaginationResult!
+
+  """Получить сводную публичную информацию о системе"""
+  getSystemInfo: SystemInfo!
 }
 
 type RefundRequest {

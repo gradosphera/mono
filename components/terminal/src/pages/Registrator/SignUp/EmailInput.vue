@@ -1,6 +1,6 @@
 <template lang='pug'>
 div
-  q-step(:name='1', title='Введите электронную почту', :done='step > 1')
+  q-step(:name="store.steps.EmailInput", title='Введите электронную почту', :done="store.isStepDone('EmailInput')")
     p Добро пожаловать в {{ COOP_SHORT_NAME }}! Для начала регистрации, пожалуйста, введите вашу электронную почту:
 
     q-input.q-mt-lg(
@@ -29,15 +29,13 @@ import { useCreateUser } from 'src/features/Registrator/CreateUser'
 import { debounce } from 'quasar'
 import { COOP_SHORT_NAME } from 'src/shared/config'
 import { useRegistratorStore } from 'src/entities/Registrator'
-const store = useRegistratorStore().state
-
+const store = useRegistratorStore()
 
 const api = useCreateUser()
 
-watch(() => store.email, () => email.value = store.email)
+watch(() => store.state.email, () => email.value = store.state.email)
 
-const email = ref(store.email)
-const step = computed(() => store.step)
+const email = ref(store.state.email)
 
 const inLoading = ref(false)
 const isEmailExist = ref(false)
@@ -62,15 +60,15 @@ watch(email, checkEmailExists)
 
 const setEmail = () => {
   if (isValidEmail.value && !isEmailExist.value) {
-    store.email = email.value
-    if (store.userData.individual_data)
-      store.userData.individual_data.email = email.value
-    if (store.userData.organization_data)
-      store.userData.organization_data.email = email.value
-    if (store.userData.entrepreneur_data)
-      store.userData.entrepreneur_data.email = email.value
+    store.state.email = email.value
+    if (store.state.userData.individual_data)
+      store.state.userData.individual_data.email = email.value
+    if (store.state.userData.organization_data)
+      store.state.userData.organization_data.email = email.value
+    if (store.state.userData.entrepreneur_data)
+      store.state.userData.entrepreneur_data.email = email.value
 
-    store.step = step.value + 1
+    store.next();
   }
 }
 </script>

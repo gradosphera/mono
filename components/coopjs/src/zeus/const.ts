@@ -100,18 +100,18 @@ export const AllTypesProps: Record<string,any> = {
 }
 
 export const ReturnTypes: Record<string,any> = {
-	AccountResourceInfoDTO:{
+	AccountResourceInfo:{
 		available:"String",
 		current_used:"String",
 		last_usage_update_time:"String",
 		max:"String",
 		used:"String"
 	},
-	AuthorityDTO:{
-		accounts:"PermissionLevelWeightDTO",
-		keys:"KeyWeightDTO",
+	Authority:{
+		accounts:"PermissionLevelWeight",
+		keys:"KeyWeight",
 		threshold:"Int",
-		waits:"WaitWeightDTO"
+		waits:"WaitWeight"
 	},
 	BankAccount:{
 		account_number:"String",
@@ -231,7 +231,7 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	JSON: `scalar.JSON` as const,
-	KeyWeightDTO:{
+	KeyWeight:{
 		key:"String",
 		weight:"Int"
 	},
@@ -279,26 +279,26 @@ export const ReturnTypes: Record<string,any> = {
 		"...on BankAccount":"BankAccount",
 		"...on SbpAccount":"SbpAccount"
 	},
-	PermissionDTO:{
+	Permission:{
 		parent:"String",
 		perm_name:"String",
-		required_auth:"AuthorityDTO"
+		required_auth:"Authority"
 	},
-	PermissionLevelDTO:{
+	PermissionLevel:{
 		actor:"String",
 		permission:"String"
 	},
-	PermissionLevelWeightDTO:{
-		permission:"PermissionLevelDTO",
+	PermissionLevelWeight:{
+		permission:"PermissionLevel",
 		weight:"Int"
 	},
 	Query:{
 		getBranches:"Branch",
 		getExtensions:"Extension",
-		getInfo:"SystemInfo",
-		getPaymentMethods:"PaginationResult"
+		getPaymentMethods:"PaginationResult",
+		getSystemInfo:"SystemInfo"
 	},
-	RefundRequestDTO:{
+	RefundRequest:{
 		cpu_amount:"String",
 		net_amount:"String",
 		owner:"String",
@@ -317,7 +317,7 @@ export const ReturnTypes: Record<string,any> = {
 		net_weight:"String",
 		to:"String"
 	},
-	ResourceOverviewDTO:{
+	ResourceOverview:{
 		cpu_weight:"String",
 		net_weight:"String",
 		owner:"String",
@@ -326,32 +326,32 @@ export const ReturnTypes: Record<string,any> = {
 	SbpAccount:{
 		phone:"String"
 	},
-	SystemAccountDTO:{
+	SystemAccount:{
 		account_name:"String",
 		core_liquid_balance:"String",
-		cpu_limit:"AccountResourceInfoDTO",
+		cpu_limit:"AccountResourceInfo",
 		cpu_weight:"String",
 		created:"String",
 		head_block_num:"Int",
 		head_block_time:"String",
 		last_code_update:"String",
-		net_limit:"AccountResourceInfoDTO",
+		net_limit:"AccountResourceInfo",
 		net_weight:"String",
-		permissions:"PermissionDTO",
+		permissions:"Permission",
 		privileged:"Boolean",
 		ram_quota:"Int",
 		ram_usage:"Int",
-		refund_request:"RefundRequestDTO",
+		refund_request:"RefundRequest",
 		rex_info:"String",
 		self_delegated_bandwidth:"ResourceDelegationDTO",
-		total_resources:"ResourceOverviewDTO",
+		total_resources:"ResourceOverview",
 		voter_info:"String"
 	},
 	SystemInfo:{
 		blockchain_info:"BlockchainInfoDTO",
 		cooperator_account:"CooperativeOperatorAccount",
 		coopname:"String",
-		system_account:"SystemAccountDTO",
+		system_account:"SystemAccount",
 		system_status:"SystemStatus"
 	},
 	Verification:{
@@ -362,7 +362,7 @@ export const ReturnTypes: Record<string,any> = {
 		procedure:"String",
 		verificator:"String"
 	},
-	WaitWeightDTO:{
+	WaitWeight:{
 		wait_sec:"Int",
 		weight:"Int"
 	}

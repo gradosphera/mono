@@ -310,6 +310,7 @@ export interface IInit {
 
 export interface IJoincoop {
   coopname: IName
+  braname: IName
   username: IName
   document: IDocument
 }
@@ -319,6 +320,7 @@ export interface IJoincoops {
   username: IName
   is_paid: boolean
   notice: string
+  braname: IName
 }
 
 export interface IMakecoagreem {
@@ -394,6 +396,7 @@ export interface IParticipant {
   is_minimum: boolean
   has_vote: boolean
   type: IName
+  braname: IName
 }
 
 export interface IProgram {
@@ -443,6 +446,13 @@ export interface IRmstaff {
   coopname: IName
   chairman: IName
   username: IName
+}
+
+export interface ISelectbranch {
+  coopname: IName
+  username: IName
+  braname: IName
+  document: IDocument
 }
 
 export interface ISetrights {

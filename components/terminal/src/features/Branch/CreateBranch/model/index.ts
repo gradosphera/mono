@@ -30,9 +30,11 @@ export function useCreateBranch() {
   // Универсальная функция для сброса объекта к начальному состоянию
   function resetInput(input: Ref<ICreateBranchInput>, initial: ICreateBranchInput) {
     Object.assign(input.value, initial);
+    input.value.braname = generateUsername()
   }
 
   async function createBranch(data: ICreateBranchInput): Promise<IBranch> {
+    data.full_name = `Кооперативный Участок "${data.short_name}"`
     const branch = await api.createBranch(data);
 
     await store.loadBranches({ coopname: COOPNAME });

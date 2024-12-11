@@ -3,7 +3,7 @@ import { Selector, type ValueTypes } from "../../zeus";
 import { rawBankAccountSelector } from "../common/bankAccountSelector";
 import { rawIndividualSelector } from "../common/individualSelector";
 import { rawPaymentMethodSelector } from "../paymentMethods/paymentMethodSelector";
-import { rawbankPaymentMethodSelector } from "../paymentMethods/rawBankPaymentMethodSelector";
+import { rawBankPaymentMethodSelector } from "../paymentMethods/rawBankPaymentMethodSelector";
 
 const rawBranchSelector = {
   coopname: true,
@@ -30,14 +30,15 @@ const rawBranchSelector = {
   short_name: true,
   trusted: rawIndividualSelector, // Передаём "сырой" объект
   trustee: rawIndividualSelector, // Передаём "сырой" объект
-  bank_account: rawbankPaymentMethodSelector,
+  bank_account: rawBankPaymentMethodSelector,
   type: true,
 };
 
-
 // Проверяем валидность
-const validateBranchSelector = (selector: typeof rawBranchSelector): MakeAllFieldsRequired<ValueTypes['Branch']> => selector;
+const validateBranchSelector = (
+  selector: typeof rawBranchSelector,
+): MakeAllFieldsRequired<ValueTypes["Branch"]> => selector;
 validateBranchSelector(rawBranchSelector);
 
-export const branchSelector = Selector('Branch')(rawBranchSelector);
+export const branchSelector = Selector("Branch")(rawBranchSelector);
 export { rawBranchSelector };

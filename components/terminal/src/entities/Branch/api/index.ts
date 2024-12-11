@@ -14,6 +14,21 @@ async function loadBranches(data: IGetBranchesInput): Promise<IBranch[]> {
   return output;
 }
 
+async function loadPublicBranches(data: IGetBranchesInput): Promise<Queries.IPublicBranch[]> {
+  const { getBranches: output } = await client.Query(
+    Queries.getPublicBranches,
+    {
+      variables: {
+        data
+      }
+    }
+  );
+  console.log('output', output)
+  return output;
+}
+
+
 export const api ={
-  loadBranches
+  loadBranches,
+  loadPublicBranches
 }

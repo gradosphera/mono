@@ -23,7 +23,7 @@ interface IDesktopStore {
   defaultDesktopHash: Ref<string | undefined>
   healthCheck: () => Promise<void>;
   setActiveDesktop: (hash: string | undefined) => void;
-  loadDesktops: () => void;
+  loadDesktops: () => Promise<void>;
   getSecondLevel: (currentRoute: RouteLocationNormalized) => RouteRecordRaw[]
   firstLevel: ComputedRef<IRoute[]>;
 }

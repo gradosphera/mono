@@ -3,7 +3,7 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';
 import fetch from 'isomorphic-fetch';
 import EosApi from 'eosjs-api';
 import getInternalAction from '../utils/getInternalAction';
-import { GatewayContract, RegistratorContract, SovietContract, type SystemContract } from 'cooptypes';
+import { GatewayContract, RegistratorContract, SovietContract, type Cooperative, type SystemContract } from 'cooptypes';
 import { IUser } from '../types/user.types';
 import { GetAccountResult, GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 import config from '../config/config';
@@ -171,9 +171,12 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
   const statement = await TempDocument.findOne({ username: user.username, type: tempdocType.JoinStatement });
   if (!statement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено заявление на вступление');
 
+  const participantApplicationMeta = statement.document.meta as Cooperative.Registry.ParticipantApplication.Action;
+
   const joinCooperativeData: RegistratorContract.Actions.JoinCooperative.IJoinCooperative = {
     coopname: process.env.COOPNAME as string,
     registrator: process.env.COOPNAME as string,
+    braname: participantApplicationMeta.braname ? participantApplicationMeta.braname : '',
     username: user.username,
     document: { ...statement.document, meta: JSON.stringify(statement.document.meta) },
   };
