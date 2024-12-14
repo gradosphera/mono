@@ -4,7 +4,7 @@
   "editor.formatOnSave": true,
   "editor.tabCompletion": "onlySnippets",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  // "editor.codeActionsOnSave": ["source.fixAll.eslint"],
+  "editor.codeActionsOnSave": ["source.fixAll.eslint"],
   "eslint.validate": ["javascript", "typescript", "vue"],
   "typescript.tsdk": "node_modules/typescript/lib",
   "i18n-ally.localesPaths": ["src/i18n"],

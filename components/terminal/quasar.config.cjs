@@ -37,6 +37,7 @@ module.exports = configure(function (/* ctx */) {
       'init-stores',
       'navigation-guards',
       'i18n', 'axios', 'sentry',
+      'branch-selector',
       ...extensionBootFiles
     ],
 

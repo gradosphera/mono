@@ -8,6 +8,8 @@ import { EntrepreneurRepositoryImplementation } from './repositories/entrepreneu
 import { IndividualRepositoryImplementation } from './repositories/individual-generator.repository';
 import { PAYMENT_METHOD_REPOSITORY } from '~/domain/common/repositories/payment-method.repository';
 import { PaymentMethodRepositoryImplementation } from './repositories/payment-method-generator.repository';
+import { DOCUMENT_REPOSITORY } from '~/domain/document/repository/document.repository';
+import { DocumentRepositoryImplementation } from './repositories/document-generator.repository';
 @Global()
 @Module({
   providers: [
@@ -27,7 +29,17 @@ import { PaymentMethodRepositoryImplementation } from './repositories/payment-me
       provide: PAYMENT_METHOD_REPOSITORY,
       useClass: PaymentMethodRepositoryImplementation,
     },
+    {
+      provide: DOCUMENT_REPOSITORY,
+      useClass: DocumentRepositoryImplementation,
+    },
   ],
-  exports: [ORGANIZATION_REPOSITORY, INDIVIDUAL_REPOSITORY, ENTREPRENEUR_REPOSITORY, PAYMENT_METHOD_REPOSITORY],
+  exports: [
+    ORGANIZATION_REPOSITORY,
+    INDIVIDUAL_REPOSITORY,
+    ENTREPRENEUR_REPOSITORY,
+    PAYMENT_METHOD_REPOSITORY,
+    DOCUMENT_REPOSITORY,
+  ],
 })
 export class GeneratorRepositoriesModule {}

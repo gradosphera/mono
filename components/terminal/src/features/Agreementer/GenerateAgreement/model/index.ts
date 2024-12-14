@@ -1,5 +1,5 @@
 import { useAgreementStore } from 'src/entities/Agreement'
-import { DigitalDocument } from 'src/entities/Document'
+import { DigitalDocument } from 'src/shared/lib/document'
 
 export const useGenerateAgreement = () => {
 

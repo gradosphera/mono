@@ -4,23 +4,30 @@ import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useCardStore } from 'src/app/providers/card/store';
 import type { RouteRecordRaw } from 'vue-router';
 import { useSystemStore } from 'src/entities/System/model';
+import { useAccountStore } from 'src/entities/Account/model';
+import { useSessionStore } from 'src/entities/Session';
 
 export default boot(async ({ router }) => {
   const desktops = useDesktopStore();
   const cardStore = useCardStore();
   const system = useSystemStore();
+  const account = useAccountStore();
+  const session = useSessionStore();
 
   //Инициализация системного стора
   await system.loadSystemInfo();
-  console.log('systemInfo: ', system.info)
 
   // Инициализация стора desktops
   await desktops.healthCheck();
   await desktops.loadDesktops();
   desktops.setActiveDesktop(desktops.defaultDesktopHash);
 
-  // Инициализация кошелька
+  // Инициализация сессии
   await cardStore.initWallet();
+
+  // Загрузка аккаунта
+  if (session.isAuth && session.username)
+    await account.getAccount(session.username)
 
   // Добавление динамических маршрутов как дочерних к 'base'
   const baseRoute = router.getRoutes().find(route => route.name === 'base');

@@ -29,6 +29,13 @@ export interface IMetaDocument {
   links: string[]
 }
 
+export interface ISignedDocument {
+  hash: string
+  public_key: string
+  signature: string
+  meta: IMetaDocument
+}
+
 export interface IGeneratedDocument {
   full_title?: string
   html: string

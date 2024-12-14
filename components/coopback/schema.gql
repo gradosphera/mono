@@ -2,6 +2,23 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Account {
+  """Объект системного аккаунта кооператива в блокчейне"""
+  blockchain_account: BlockchainAccount
+
+  """Объект аккаунта в системе учёта провайдера"""
+  mono_account: MonoAccount
+
+  """Объект пайщика кооператива"""
+  participant_account: ParticipantAccount
+
+  """Объект пользовательского аккаунта кооперативной экономики"""
+  user_account: UserAccount
+
+  """Имя аккаунта кооператива"""
+  username: String!
+}
+
 type AccountResourceInfo {
   """Доступные ресурсы"""
   available: String!
@@ -125,18 +142,63 @@ type BankPaymentMethod {
   username: String!
 }
 
-type BlockchainDocument {
-  """Хеш документа"""
-  hash: String!
+type BlockchainAccount {
+  """Имя аккаунта"""
+  account_name: String!
 
-  """Метаинформация документа"""
-  meta: String!
+  """Баланс"""
+  core_liquid_balance: String
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Ограничения CPU"""
+  cpu_limit: AccountResourceInfo!
 
-  """Подпись документа"""
-  signature: String!
+  """Вес CPU"""
+  cpu_weight: String!
+
+  """Дата создания"""
+  created: String!
+
+  """Номер последнего блока"""
+  head_block_num: Int!
+
+  """Время последнего блока"""
+  head_block_time: String!
+
+  """Время последнего обновления кода"""
+  last_code_update: String!
+
+  """Ограничения сети"""
+  net_limit: AccountResourceInfo!
+
+  """Вес сети"""
+  net_weight: String!
+
+  """Разрешения"""
+  permissions: [Permission!]!
+
+  """Флаг привилегий"""
+  privileged: Boolean!
+
+  """Квота RAM"""
+  ram_quota: Int!
+
+  """Использование RAM"""
+  ram_usage: Int!
+
+  """Запрос на возврат"""
+  refund_request: RefundRequest
+
+  """Информация о REX"""
+  rex_info: String
+
+  """Делегированные ресурсы"""
+  self_delegated_bandwidth: ResourceDelegationDTO
+
+  """Общий обзор ресурсов"""
+  total_resources: ResourceOverview
+
+  """Информация о голосовании"""
+  voter_info: String
 }
 
 """Информация о состоянии блокчейна"""
@@ -254,7 +316,7 @@ type CooperativeOperatorAccount {
   description: String!
 
   """Документ кооператива"""
-  document: BlockchainDocument!
+  document: SignedBlockchainDocument!
 
   """Начальный взнос"""
   initial: String!
@@ -482,6 +544,11 @@ input ExtensionInput {
   updated_at: DateTime
 }
 
+input GetAccountInput {
+  """Имя аккаунта пользователя"""
+  username: String!
+}
+
 input GetBranchesInput {
   """Фильтр по имени аккаунта кооперативного участка"""
   braname: String
@@ -560,6 +627,44 @@ type KeyWeight {
   weight: Int!
 }
 
+type MonoAccount {
+  """Электронная почта пользователя"""
+  email: String!
+
+  """Есть ли у пользователя аккаунт"""
+  has_account: Boolean!
+
+  """ID начального заказа"""
+  initial_order: String
+
+  """Подтверждена ли электронная почта"""
+  is_email_verified: Boolean!
+
+  """Зарегистрирован ли пользователь"""
+  is_registered: Boolean!
+
+  """Сообщение"""
+  message: String
+
+  """Публичный ключ пользователя"""
+  public_key: String!
+
+  """Реферер пользователя"""
+  referer: String!
+
+  """Роль пользователя"""
+  role: String!
+
+  """Статус пользователя"""
+  status: UserStatus!
+
+  """Тип пользователя"""
+  type: String!
+
+  """Имя пользователя"""
+  username: String!
+}
+
 type Mutation {
   """Добавить доверенное лицо кооперативного участка"""
   addTrustedAccount(data: AddTrustedAccountInput!): Branch!
@@ -584,6 +689,9 @@ type Mutation {
 
   """Установить расширение"""
   installExtension(data: ExtensionInput!): Extension!
+
+  """Выбрать кооперативный участок"""
+  selectBranch(data: SelectBranchInput!): Boolean!
 
   """Удалить расширение"""
   uninstallExtension(data: UninstallExtensionInput!): Boolean!
@@ -618,6 +726,38 @@ type PaginationResult {
 
   """Общее количество страниц"""
   totalPages: Int!
+}
+
+type ParticipantAccount {
+  """Имя кооперативного участка"""
+  braname: String
+
+  """Время создания записи о члене"""
+  created_at: DateTime!
+
+  """LEGACY Флаг, имеет ли член право голоса"""
+  has_vote: Boolean!
+
+  """LEGACY Флаг, внесен ли регистрационный взнос"""
+  is_initial: Boolean!
+
+  """LEGACY Флаг, внесен ли минимальный паевый взнос"""
+  is_minimum: Boolean!
+
+  """Время последнего минимального платежа"""
+  last_min_pay: DateTime!
+
+  """Время последнего обновления информации о члене"""
+  last_update: DateTime!
+
+  """Статус члена кооператива (accepted | blocked)"""
+  status: String!
+
+  """Тип участника (individual | entrepreneur | organization)"""
+  type: String
+
+  """Уникальное имя члена кооператива"""
+  username: String!
 }
 
 type Passport {
@@ -690,6 +830,9 @@ type PermissionLevelWeight {
 }
 
 type Query {
+  """Получить сводную информацию о аккаунте"""
+  getAccount(data: GetAccountInput!): Account!
+
   """Получить список кооперативных участков"""
   getBranches(data: GetBranchesInput!): [Branch!]!
 
@@ -767,66 +910,90 @@ type SbpAccount {
   phone: String!
 }
 
-type SystemAccount {
-  """Имя аккаунта"""
-  account_name: String!
+input SelectBranchDocumentInput {
+  """Хэш документа"""
+  hash: String!
 
-  """Баланс"""
-  core_liquid_balance: String
+  """Метаинформация для создания кооперативного участка"""
+  meta: SelectBranchMetaDocumentInput!
 
-  """Ограничения CPU"""
-  cpu_limit: AccountResourceInfo!
+  """Публичный ключ документа"""
+  public_key: String!
 
-  """Вес CPU"""
-  cpu_weight: String!
+  """Подпись документа"""
+  signature: String!
+}
 
-  """Дата создания"""
-  created: String!
+input SelectBranchInput {
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
 
-  """Номер последнего блока"""
-  head_block_num: Int!
+  """Имя аккаунта кооператива"""
+  coopname: String!
 
-  """Время последнего блока"""
-  head_block_time: String!
+  """Подписанный электронный документ (registry_id == 101)"""
+  document: SelectBranchDocumentInput!
 
-  """Время последнего обновления кода"""
-  last_code_update: String!
+  """Имя аккаунта пользователя"""
+  username: String!
+}
 
-  """Ограничения сети"""
-  net_limit: AccountResourceInfo!
+input SelectBranchMetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
 
-  """Вес сети"""
-  net_weight: String!
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
 
-  """Разрешения"""
-  permissions: [Permission!]!
+  """Название кооператива, связанное с документом"""
+  coopname: String!
 
-  """Флаг привилегий"""
-  privileged: Boolean!
+  """Дата и время создания документа"""
+  created_at: String!
 
-  """Квота RAM"""
-  ram_quota: Int!
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
 
-  """Использование RAM"""
-  ram_usage: Int!
+  """Язык документа"""
+  lang: String!
 
-  """Запрос на возврат"""
-  refund_request: RefundRequest
+  """Ссылки, связанные с документом"""
+  links: [String!]!
 
-  """Информация о REX"""
-  rex_info: String
+  """ID в реестре, связанный с документом"""
+  registry_id: Int!
 
-  """Делегированные ресурсы"""
-  self_delegated_bandwidth: ResourceDelegationDTO
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
 
-  """Общий обзор ресурсов"""
-  total_resources: ResourceOverview
+  """Название документа"""
+  title: String!
 
-  """Информация о голосовании"""
-  voter_info: String
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
+type SignedBlockchainDocument {
+  """Хеш документа"""
+  hash: String!
+
+  """Метаинформация документа"""
+  meta: String!
+
+  """Публичный ключ документа"""
+  public_key: String!
+
+  """Подпись документа"""
+  signature: String!
 }
 
 type SystemInfo {
+  """Объект системного аккаунта кооператива в блокчейне"""
+  blockchain_account: BlockchainAccount!
+
   """Набор данных с информацией о состоянии блокчейна"""
   blockchain_info: BlockchainInfoDTO!
 
@@ -835,9 +1002,6 @@ type SystemInfo {
 
   """Имя аккаунта кооператива"""
   coopname: String!
-
-  """Объект системного аккаунта кооператива в блокчейне"""
-  system_account: SystemAccount!
 
   """Статус контроллера кооператива"""
   system_status: SystemStatus!
@@ -867,6 +1031,47 @@ input UpdateBankAccountInput {
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+type UserAccount {
+  """Метаинформация"""
+  meta: String!
+
+  """Реферал"""
+  referer: String!
+
+  """Дата регистрации"""
+  registered_at: String!
+
+  """Регистратор"""
+  registrator: String!
+
+  """Статус аккаунта"""
+  status: String!
+
+  """Список хранилищ"""
+  storages: [String!]!
+
+  """Тип учетной записи"""
+  type: String!
+
+  """Имя аккаунта"""
+  username: String!
+
+  """Дата регистрации"""
+  verifications: [Verification!]!
+}
+
+"""Статус пользователя"""
+enum UserStatus {
+  Active
+  Blocked
+  Created
+  Failed
+  Joined
+  Payed
+  Refunded
+  Registered
 }
 
 type Verification {

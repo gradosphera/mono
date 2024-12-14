@@ -7,6 +7,7 @@ import type { CreateBranchGraphQLInput } from '../dto/create-branch-input.dto';
 import type { DeleteBranchGraphQLInput } from '../dto/delete-branch-input.dto';
 import type { AddTrustedAccountGraphQLInput } from '../dto/add-trusted-account-input.dto';
 import type { DeleteTrustedAccountGraphQLInput } from '../dto/delete-trusted-account-input.dto';
+import type { SelectBranchInputDTO } from '../dto/select-branch-input.dto';
 
 @Injectable()
 export class BranchService {
@@ -50,5 +51,10 @@ export class BranchService {
   public async deleteTrustedAccount(data: DeleteTrustedAccountGraphQLInput): Promise<BranchDTO> {
     const branch = await this.branchDomainInteractor.deleteTrustedAccount(data);
     return new BranchDTO(branch);
+  }
+
+  public async selectBranch(data: SelectBranchInputDTO): Promise<boolean> {
+    const selected = await this.branchDomainInteractor.selectBranch(data);
+    return selected;
   }
 }

@@ -6,12 +6,12 @@ import { ModelTypes } from '@coopenomics/coopjs';
 const namespace = 'systemStore';
 
 interface ISystemStore {
-  info: Ref<ModelTypes['SystemInfo'] | undefined>
+  info: Ref<ModelTypes['SystemInfo']>
   loadSystemInfo: () => Promise<void>;
 }
 
 export const useSystemStore = defineStore(namespace, (): ISystemStore => {
-  const info = ref<ModelTypes['SystemInfo']>()
+  const info = ref<ModelTypes['SystemInfo']>({} as ModelTypes['SystemInfo'])
 
   const loadSystemInfo = async () => {
     info.value = await api.loadSystemInfo();

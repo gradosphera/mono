@@ -2,8 +2,8 @@
 div(v-if="isLoaded").breable-text
   router-view
   RequireAgreements
+  SelectBranchOverlay
 </template>
-
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { FailAlert } from 'src/shared/api/alerts'
@@ -13,8 +13,8 @@ import 'src/app/styles/quasar-variables.sass'
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { Cookies, LocalStorage, QSpinnerGears, useQuasar } from 'quasar';
 import { COOPNAME } from 'src/shared/config';
-
 import { RequireAgreements } from 'src/widgets/Agreementer/RequireAgreements/ui';
+import { SelectBranchOverlay } from 'src/features/Branch/SelectBranch';
 
 const $q = useQuasar()
 

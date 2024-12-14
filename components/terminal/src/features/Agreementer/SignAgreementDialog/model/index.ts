@@ -1,4 +1,4 @@
-import { DigitalDocument, type IGeneratedDocument } from 'src/entities/Document';
+import { DigitalDocument, type IGeneratedDocument } from 'src/shared/lib/document';
 import { api } from '../api';
 import { COOPNAME } from 'src/shared/config';
 

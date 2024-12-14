@@ -5,29 +5,10 @@ div(v-if="store")
     title="Выберите ближайший кооперативный участок"
     :done="store.isStepDone('SelectBranch')"
   )
-
-    q-select(
-      label="Кооперативный участок"
-      v-model="store.state.selectedBranch"
-      :options="branches"
-      option-value="braname"
-      option-label="full_name"
-      emit-value
-      standout="bg-teal text-white"
-      map-options
+    BranchSelector(
+      v-model:selectedBranch="store.state.selectedBranch"
+      :branches="branches"
     )
-
-      template(v-slot:option="scope")
-        q-item(v-bind="scope.itemProps")
-          q-item-section
-            q-item-label(style="font-weight: bold;") {{ scope.opt.full_name }}
-            q-item-label(caption) {{ scope.opt.full_address }}
-
-      template(v-slot:selected-item="scope")
-        q-avatar(text-color="black" icon="home" size="md")
-        q-item-section.q-mt-sm
-          q-item-label(style="font-weight: bold;") {{ scope.opt.full_name }}
-          q-item-label() {{ scope.opt.full_address }}
     div.q-mt-lg
       q-btn.col-md-6.col-xs-12(flat, @click='store.prev()')
         i.fa.fa-arrow-left
@@ -43,6 +24,7 @@ import { useRegistratorStore } from 'src/entities/Registrator'
 import { failAlert } from 'src/shared/api';
 import { COOPNAME } from 'src/shared/config'
 import { computed, onMounted, watch } from 'vue'
+import { BranchSelector } from 'src/shared/ui/BranchSelector';
 
 const store = useRegistratorStore()
 const branchStore = useBranchStore()

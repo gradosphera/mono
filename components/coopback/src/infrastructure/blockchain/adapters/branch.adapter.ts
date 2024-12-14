@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BranchBlockchainPort } from '~/domain/branch/interfaces/branch-blockchain.port';
 import { BlockchainService } from '../blockchain.service';
-import { BranchContract } from 'cooptypes';
+import { BranchContract, SovietContract } from 'cooptypes';
 import { TransactResult } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
@@ -95,6 +95,20 @@ export class BranchBlockchainAdapter implements BranchBlockchainPort {
     return this.blockchainService.transact({
       account: BranchContract.contractName.production,
       name: BranchContract.Actions.DeleteTrusted.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  async selectBranch(data: SovietContract.Actions.Branches.SelectBranch.ISelectBranch): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return this.blockchainService.transact({
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Branches.SelectBranch.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     });

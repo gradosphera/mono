@@ -47,25 +47,3 @@ export const useCurrentUserStore = defineStore(
     };
   }
 );
-
-const namespaceAnyUser = 'anyUser';
-export const useAnyUserStore = defineStore(namespaceAnyUser, (): IUserStore => {
-  const userEntity = new UserEntity();
-
-  return {
-    username: userEntity.username,
-    clearAccount: () => userEntity.clearAccount(),
-    loadProfile: (username: string, coopname: string) =>
-      userEntity.loadProfile(username, coopname),
-    blockchainAccount: userEntity.blockchainAccount,
-    copenomicsAccount: userEntity.copenomicsAccount,
-    userAccount: userEntity.userAccount,
-    participantAccount: userEntity.participantAccount,
-    isRegistrationComplete: computed(
-      () =>
-        (userEntity.userAccount.value || false) &&
-        userEntity.participantAccount.value != null
-    ),
-    isChairman: computed(() => userEntity.userAccount.value?.role === 'chairman')
-  };
-});

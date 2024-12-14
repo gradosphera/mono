@@ -7,7 +7,7 @@ import { IGeneratedAccount, ISendStatement } from 'src/shared/lib/types/user';
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
 import { COOPNAME } from 'src/shared/config';
-import { DigitalDocument } from 'src/entities/Document';
+import { DigitalDocument } from 'src/shared/lib/document';
 import { IObjectedDocument } from 'src/shared/lib/types/document';
 import {
   ICreatedPayment,

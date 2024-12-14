@@ -34,6 +34,9 @@ export const AllTypesProps: Record<string,any> = {
 		created_at:"DateTime",
 		updated_at:"DateTime"
 	},
+	GetAccountInput:{
+
+	},
 	GetBranchesInput:{
 
 	},
@@ -69,6 +72,9 @@ export const AllTypesProps: Record<string,any> = {
 		installExtension:{
 			data:"ExtensionInput"
 		},
+		selectBranch:{
+			data:"SelectBranchInput"
+		},
 		uninstallExtension:{
 			data:"UninstallExtensionInput"
 		},
@@ -80,6 +86,9 @@ export const AllTypesProps: Record<string,any> = {
 		}
 	},
 	Query:{
+		getAccount:{
+			data:"GetAccountInput"
+		},
 		getBranches:{
 			data:"GetBranchesInput"
 		},
@@ -90,16 +99,33 @@ export const AllTypesProps: Record<string,any> = {
 			data:"GetPaymentMethodsInput"
 		}
 	},
+	SelectBranchDocumentInput:{
+		meta:"SelectBranchMetaDocumentInput"
+	},
+	SelectBranchInput:{
+		document:"SelectBranchDocumentInput"
+	},
+	SelectBranchMetaDocumentInput:{
+
+	},
 	SystemStatus: "enum" as const,
 	UninstallExtensionInput:{
 
 	},
 	UpdateBankAccountInput:{
 		data:"BankAccountInput"
-	}
+	},
+	UserStatus: "enum" as const
 }
 
 export const ReturnTypes: Record<string,any> = {
+	Account:{
+		blockchain_account:"BlockchainAccount",
+		mono_account:"MonoAccount",
+		participant_account:"ParticipantAccount",
+		user_account:"UserAccount",
+		username:"String"
+	},
 	AccountResourceInfo:{
 		available:"String",
 		current_used:"String",
@@ -134,11 +160,26 @@ export const ReturnTypes: Record<string,any> = {
 		updated_at:"DateTime",
 		username:"String"
 	},
-	BlockchainDocument:{
-		hash:"String",
-		meta:"String",
-		public_key:"String",
-		signature:"String"
+	BlockchainAccount:{
+		account_name:"String",
+		core_liquid_balance:"String",
+		cpu_limit:"AccountResourceInfo",
+		cpu_weight:"String",
+		created:"String",
+		head_block_num:"Int",
+		head_block_time:"String",
+		last_code_update:"String",
+		net_limit:"AccountResourceInfo",
+		net_weight:"String",
+		permissions:"Permission",
+		privileged:"Boolean",
+		ram_quota:"Int",
+		ram_usage:"Int",
+		refund_request:"RefundRequest",
+		rex_info:"String",
+		self_delegated_bandwidth:"ResourceDelegationDTO",
+		total_resources:"ResourceOverview",
+		voter_info:"String"
 	},
 	BlockchainInfoDTO:{
 		block_cpu_limit:"Int",
@@ -181,7 +222,7 @@ export const ReturnTypes: Record<string,any> = {
 		coop_type:"String",
 		created_at:"String",
 		description:"String",
-		document:"BlockchainDocument",
+		document:"SignedBlockchainDocument",
 		initial:"String",
 		is_branched:"Boolean",
 		is_cooperative:"Boolean",
@@ -235,6 +276,20 @@ export const ReturnTypes: Record<string,any> = {
 		key:"String",
 		weight:"Int"
 	},
+	MonoAccount:{
+		email:"String",
+		has_account:"Boolean",
+		initial_order:"String",
+		is_email_verified:"Boolean",
+		is_registered:"Boolean",
+		message:"String",
+		public_key:"String",
+		referer:"String",
+		role:"String",
+		status:"UserStatus",
+		type:"String",
+		username:"String"
+	},
 	Mutation:{
 		addTrustedAccount:"Branch",
 		createBankAccount:"PaymentMethod",
@@ -244,6 +299,7 @@ export const ReturnTypes: Record<string,any> = {
 		deleteTrustedAccount:"Branch",
 		editBranch:"Branch",
 		installExtension:"Extension",
+		selectBranch:"Boolean",
 		uninstallExtension:"Boolean",
 		updateBankAccount:"PaymentMethod",
 		updateExtension:"Extension"
@@ -258,6 +314,18 @@ export const ReturnTypes: Record<string,any> = {
 		items:"PaymentMethod",
 		totalCount:"Int",
 		totalPages:"Int"
+	},
+	ParticipantAccount:{
+		braname:"String",
+		created_at:"DateTime",
+		has_vote:"Boolean",
+		is_initial:"Boolean",
+		is_minimum:"Boolean",
+		last_min_pay:"DateTime",
+		last_update:"DateTime",
+		status:"String",
+		type:"String",
+		username:"String"
 	},
 	Passport:{
 		code:"String",
@@ -293,6 +361,7 @@ export const ReturnTypes: Record<string,any> = {
 		weight:"Int"
 	},
 	Query:{
+		getAccount:"Account",
 		getBranches:"Branch",
 		getExtensions:"Extension",
 		getPaymentMethods:"PaginationResult",
@@ -326,33 +395,29 @@ export const ReturnTypes: Record<string,any> = {
 	SbpAccount:{
 		phone:"String"
 	},
-	SystemAccount:{
-		account_name:"String",
-		core_liquid_balance:"String",
-		cpu_limit:"AccountResourceInfo",
-		cpu_weight:"String",
-		created:"String",
-		head_block_num:"Int",
-		head_block_time:"String",
-		last_code_update:"String",
-		net_limit:"AccountResourceInfo",
-		net_weight:"String",
-		permissions:"Permission",
-		privileged:"Boolean",
-		ram_quota:"Int",
-		ram_usage:"Int",
-		refund_request:"RefundRequest",
-		rex_info:"String",
-		self_delegated_bandwidth:"ResourceDelegationDTO",
-		total_resources:"ResourceOverview",
-		voter_info:"String"
+	SignedBlockchainDocument:{
+		hash:"String",
+		meta:"String",
+		public_key:"String",
+		signature:"String"
 	},
 	SystemInfo:{
+		blockchain_account:"BlockchainAccount",
 		blockchain_info:"BlockchainInfoDTO",
 		cooperator_account:"CooperativeOperatorAccount",
 		coopname:"String",
-		system_account:"SystemAccount",
 		system_status:"SystemStatus"
+	},
+	UserAccount:{
+		meta:"String",
+		referer:"String",
+		registered_at:"String",
+		registrator:"String",
+		status:"String",
+		storages:"String",
+		type:"String",
+		username:"String",
+		verifications:"Verification"
 	},
 	Verification:{
 		created_at:"String",

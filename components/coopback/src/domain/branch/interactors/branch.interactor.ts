@@ -2,7 +2,7 @@ import { BRANCH_BLOCKCHAIN_PORT, BranchBlockchainPort } from '../interfaces/bran
 import type { GetBranchesDomainInput } from '../interfaces/get-branches-domain-input.interface';
 import { BranchDomainEntity } from '../entities/branch-domain.entity';
 import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import type { CreateBranchDomainInput } from '../interfaces/create-branch-domain-input.interface';
 import { HttpApiError } from '~/errors/http-api-error';
 import httpStatus from 'http-status';
@@ -17,6 +17,10 @@ import { PAYMENT_METHOD_REPOSITORY, PaymentMethodRepository } from '~/domain/com
 import { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
 import { randomUUID } from 'crypto';
 import { BankPaymentMethodDTO } from '~/modules/payment-method/dto/bank-payment-method.dto';
+import type { SelectBranchInputDomainInterface } from '../interfaces/select-branch-domain-input.interface';
+import config from '~/config/config';
+import { Cooperative } from 'cooptypes';
+import { DOCUMENT_REPOSITORY, DocumentRepository } from '~/domain/document/repository/document.repository';
 
 @Injectable()
 export class BranchDomainInteractor {
@@ -24,6 +28,7 @@ export class BranchDomainInteractor {
     @Inject(PAYMENT_METHOD_REPOSITORY) private readonly paymentMethodRepository: PaymentMethodRepository,
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
     @Inject(INDIVIDUAL_REPOSITORY) private readonly individualRepository: IndividualRepository,
+    @Inject(DOCUMENT_REPOSITORY) private readonly documentRepository: DocumentRepository,
     @Inject(BRANCH_BLOCKCHAIN_PORT) private readonly branchBlockchainPort: BranchBlockchainPort
   ) {}
 
@@ -230,5 +235,26 @@ export class BranchDomainInteractor {
     });
 
     return await this.getBranch(data.coopname, data.braname);
+  }
+
+  async selectBranch(data: SelectBranchInputDomainInterface): Promise<boolean> {
+    // TODO move it to separate document domain service for validate too
+    const document = await this.documentRepository.findByHash(data.document.hash);
+    if (!document) throw new BadRequestException('Документ не найден');
+
+    if (data.document.meta.registry_id != Cooperative.Registry.SelectBranchStatement.registry_id)
+      throw new BadRequestException('Неверный registry_id в переданном документе, ожидается registry_id == 101');
+
+    if (data.coopname != config.coopname)
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Указанное аккаунта кооперативного участка не обслуживается здесь');
+
+    await this.branchBlockchainPort.selectBranch({
+      coopname: data.coopname,
+      username: data.username,
+      braname: data.braname,
+      document: { ...data.document, meta: JSON.stringify(data.document.meta) },
+    });
+
+    return true;
   }
 }

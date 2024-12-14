@@ -913,7 +913,20 @@ export type ScalarCoders = {
 type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"]
 
 export type ValueTypes = {
-    ["AccountResourceInfo"]: AliasType<{
+    ["Account"]: AliasType<{
+	/** Объект системного аккаунта кооператива в блокчейне */
+	blockchain_account?:ValueTypes["BlockchainAccount"],
+	/** Объект аккаунта в системе учёта провайдера */
+	mono_account?:ValueTypes["MonoAccount"],
+	/** Объект пайщика кооператива */
+	participant_account?:ValueTypes["ParticipantAccount"],
+	/** Объект пользовательского аккаунта кооперативной экономики */
+	user_account?:ValueTypes["UserAccount"],
+	/** Имя аккаунта кооператива */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AccountResourceInfo"]: AliasType<{
 	/** Доступные ресурсы */
 	available?:boolean | `@${string}`,
 	/** Текущее использование ресурсов */
@@ -1004,15 +1017,45 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["BlockchainDocument"]: AliasType<{
-	/** Хеш документа */
-	hash?:boolean | `@${string}`,
-	/** Метаинформация документа */
-	meta?:boolean | `@${string}`,
-	/** Публичный ключ документа */
-	public_key?:boolean | `@${string}`,
-	/** Подпись документа */
-	signature?:boolean | `@${string}`,
+	["BlockchainAccount"]: AliasType<{
+	/** Имя аккаунта */
+	account_name?:boolean | `@${string}`,
+	/** Баланс */
+	core_liquid_balance?:boolean | `@${string}`,
+	/** Ограничения CPU */
+	cpu_limit?:ValueTypes["AccountResourceInfo"],
+	/** Вес CPU */
+	cpu_weight?:boolean | `@${string}`,
+	/** Дата создания */
+	created?:boolean | `@${string}`,
+	/** Номер последнего блока */
+	head_block_num?:boolean | `@${string}`,
+	/** Время последнего блока */
+	head_block_time?:boolean | `@${string}`,
+	/** Время последнего обновления кода */
+	last_code_update?:boolean | `@${string}`,
+	/** Ограничения сети */
+	net_limit?:ValueTypes["AccountResourceInfo"],
+	/** Вес сети */
+	net_weight?:boolean | `@${string}`,
+	/** Разрешения */
+	permissions?:ValueTypes["Permission"],
+	/** Флаг привилегий */
+	privileged?:boolean | `@${string}`,
+	/** Квота RAM */
+	ram_quota?:boolean | `@${string}`,
+	/** Использование RAM */
+	ram_usage?:boolean | `@${string}`,
+	/** Запрос на возврат */
+	refund_request?:ValueTypes["RefundRequest"],
+	/** Информация о REX */
+	rex_info?:boolean | `@${string}`,
+	/** Делегированные ресурсы */
+	self_delegated_bandwidth?:ValueTypes["ResourceDelegationDTO"],
+	/** Общий обзор ресурсов */
+	total_resources?:ValueTypes["ResourceOverview"],
+	/** Информация о голосовании */
+	voter_info?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Информация о состоянии блокчейна */
@@ -1096,7 +1139,7 @@ export type ValueTypes = {
 	/** Описание кооператива */
 	description?:boolean | `@${string}`,
 	/** Документ кооператива */
-	document?:ValueTypes["BlockchainDocument"],
+	document?:ValueTypes["SignedBlockchainDocument"],
 	/** Начальный взнос */
 	initial?:boolean | `@${string}`,
 	/** Разветвленный ли кооператив */
@@ -1250,6 +1293,10 @@ export type ValueTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>
 };
+	["GetAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["GetBranchesInput"]: {
 	/** Фильтр по имени аккаунта кооперативного участка */
 	braname?: string | undefined | null | Variable<any, string>,
@@ -1306,6 +1353,33 @@ export type ValueTypes = {
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["MonoAccount"]: AliasType<{
+	/** Электронная почта пользователя */
+	email?:boolean | `@${string}`,
+	/** Есть ли у пользователя аккаунт */
+	has_account?:boolean | `@${string}`,
+	/** ID начального заказа */
+	initial_order?:boolean | `@${string}`,
+	/** Подтверждена ли электронная почта */
+	is_email_verified?:boolean | `@${string}`,
+	/** Зарегистрирован ли пользователь */
+	is_registered?:boolean | `@${string}`,
+	/** Сообщение */
+	message?:boolean | `@${string}`,
+	/** Публичный ключ пользователя */
+	public_key?:boolean | `@${string}`,
+	/** Реферер пользователя */
+	referer?:boolean | `@${string}`,
+	/** Роль пользователя */
+	role?:boolean | `@${string}`,
+	/** Статус пользователя */
+	status?:boolean | `@${string}`,
+	/** Тип пользователя */
+	type?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Mutation"]: AliasType<{
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
@@ -1315,6 +1389,7 @@ deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable
 deleteTrustedAccount?: [{	data: ValueTypes["DeleteTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 editBranch?: [{	data: ValueTypes["EditBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
 installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
+selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
 updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
@@ -1338,6 +1413,29 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
 	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ParticipantAccount"]: AliasType<{
+	/** Имя кооперативного участка */
+	braname?:boolean | `@${string}`,
+	/** Время создания записи о члене */
+	created_at?:boolean | `@${string}`,
+	/** LEGACY Флаг, имеет ли член право голоса */
+	has_vote?:boolean | `@${string}`,
+	/** LEGACY Флаг, внесен ли регистрационный взнос */
+	is_initial?:boolean | `@${string}`,
+	/** LEGACY Флаг, внесен ли минимальный паевый взнос */
+	is_minimum?:boolean | `@${string}`,
+	/** Время последнего минимального платежа */
+	last_min_pay?:boolean | `@${string}`,
+	/** Время последнего обновления информации о члене */
+	last_update?:boolean | `@${string}`,
+	/** Статус члена кооператива (accepted | blocked) */
+	status?:boolean | `@${string}`,
+	/** Тип участника (individual | entrepreneur | organization) */
+	type?:boolean | `@${string}`,
+	/** Уникальное имя члена кооператива */
+	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["Passport"]: AliasType<{
@@ -1398,6 +1496,7 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 		__typename?: boolean | `@${string}`
 }>;
 	["Query"]: AliasType<{
+getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginationResult"]],
@@ -1456,56 +1555,72 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["SystemAccount"]: AliasType<{
-	/** Имя аккаунта */
-	account_name?:boolean | `@${string}`,
-	/** Баланс */
-	core_liquid_balance?:boolean | `@${string}`,
-	/** Ограничения CPU */
-	cpu_limit?:ValueTypes["AccountResourceInfo"],
-	/** Вес CPU */
-	cpu_weight?:boolean | `@${string}`,
-	/** Дата создания */
-	created?:boolean | `@${string}`,
-	/** Номер последнего блока */
-	head_block_num?:boolean | `@${string}`,
-	/** Время последнего блока */
-	head_block_time?:boolean | `@${string}`,
-	/** Время последнего обновления кода */
-	last_code_update?:boolean | `@${string}`,
-	/** Ограничения сети */
-	net_limit?:ValueTypes["AccountResourceInfo"],
-	/** Вес сети */
-	net_weight?:boolean | `@${string}`,
-	/** Разрешения */
-	permissions?:ValueTypes["Permission"],
-	/** Флаг привилегий */
-	privileged?:boolean | `@${string}`,
-	/** Квота RAM */
-	ram_quota?:boolean | `@${string}`,
-	/** Использование RAM */
-	ram_usage?:boolean | `@${string}`,
-	/** Запрос на возврат */
-	refund_request?:ValueTypes["RefundRequest"],
-	/** Информация о REX */
-	rex_info?:boolean | `@${string}`,
-	/** Делегированные ресурсы */
-	self_delegated_bandwidth?:ValueTypes["ResourceDelegationDTO"],
-	/** Общий обзор ресурсов */
-	total_resources?:ValueTypes["ResourceOverview"],
-	/** Информация о голосовании */
-	voter_info?:boolean | `@${string}`,
+	["SelectBranchDocumentInput"]: {
+	/** Хэш документа */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для создания кооперативного участка */
+	meta: ValueTypes["SelectBranchMetaDocumentInput"] | Variable<any, string>,
+	/** Публичный ключ документа */
+	public_key: string | Variable<any, string>,
+	/** Подпись документа */
+	signature: string | Variable<any, string>
+};
+	["SelectBranchInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанный электронный документ (registry_id == 101) */
+	document: ValueTypes["SelectBranchDocumentInput"] | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
+	["SelectBranchMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Имя аккаунта кооперативного участка */
+	braname: string | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID в реестре, связанный с документом */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
+	["SignedBlockchainDocument"]: AliasType<{
+	/** Хеш документа */
+	hash?:boolean | `@${string}`,
+	/** Метаинформация документа */
+	meta?:boolean | `@${string}`,
+	/** Публичный ключ документа */
+	public_key?:boolean | `@${string}`,
+	/** Подпись документа */
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["SystemInfo"]: AliasType<{
+	/** Объект системного аккаунта кооператива в блокчейне */
+	blockchain_account?:ValueTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info?:ValueTypes["BlockchainInfoDTO"],
 	/** Объект аккаунта кооператива у оператора */
 	cooperator_account?:ValueTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
-	/** Объект системного аккаунта кооператива в блокчейне */
-	system_account?:ValueTypes["SystemAccount"],
 	/** Статус контроллера кооператива */
 	system_status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -1526,6 +1641,29 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["UserAccount"]: AliasType<{
+	/** Метаинформация */
+	meta?:boolean | `@${string}`,
+	/** Реферал */
+	referer?:boolean | `@${string}`,
+	/** Дата регистрации */
+	registered_at?:boolean | `@${string}`,
+	/** Регистратор */
+	registrator?:boolean | `@${string}`,
+	/** Статус аккаунта */
+	status?:boolean | `@${string}`,
+	/** Список хранилищ */
+	storages?:boolean | `@${string}`,
+	/** Тип учетной записи */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта */
+	username?:boolean | `@${string}`,
+	/** Дата регистрации */
+	verifications?:ValueTypes["Verification"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Статус пользователя */
+["UserStatus"]:UserStatus;
 	["Verification"]: AliasType<{
 	/** Дата создания верификации */
 	created_at?:boolean | `@${string}`,
@@ -1551,7 +1689,20 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
   }
 
 export type ResolverInputTypes = {
-    ["AccountResourceInfo"]: AliasType<{
+    ["Account"]: AliasType<{
+	/** Объект системного аккаунта кооператива в блокчейне */
+	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
+	/** Объект аккаунта в системе учёта провайдера */
+	mono_account?:ResolverInputTypes["MonoAccount"],
+	/** Объект пайщика кооператива */
+	participant_account?:ResolverInputTypes["ParticipantAccount"],
+	/** Объект пользовательского аккаунта кооперативной экономики */
+	user_account?:ResolverInputTypes["UserAccount"],
+	/** Имя аккаунта кооператива */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AccountResourceInfo"]: AliasType<{
 	/** Доступные ресурсы */
 	available?:boolean | `@${string}`,
 	/** Текущее использование ресурсов */
@@ -1642,15 +1793,45 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["BlockchainDocument"]: AliasType<{
-	/** Хеш документа */
-	hash?:boolean | `@${string}`,
-	/** Метаинформация документа */
-	meta?:boolean | `@${string}`,
-	/** Публичный ключ документа */
-	public_key?:boolean | `@${string}`,
-	/** Подпись документа */
-	signature?:boolean | `@${string}`,
+	["BlockchainAccount"]: AliasType<{
+	/** Имя аккаунта */
+	account_name?:boolean | `@${string}`,
+	/** Баланс */
+	core_liquid_balance?:boolean | `@${string}`,
+	/** Ограничения CPU */
+	cpu_limit?:ResolverInputTypes["AccountResourceInfo"],
+	/** Вес CPU */
+	cpu_weight?:boolean | `@${string}`,
+	/** Дата создания */
+	created?:boolean | `@${string}`,
+	/** Номер последнего блока */
+	head_block_num?:boolean | `@${string}`,
+	/** Время последнего блока */
+	head_block_time?:boolean | `@${string}`,
+	/** Время последнего обновления кода */
+	last_code_update?:boolean | `@${string}`,
+	/** Ограничения сети */
+	net_limit?:ResolverInputTypes["AccountResourceInfo"],
+	/** Вес сети */
+	net_weight?:boolean | `@${string}`,
+	/** Разрешения */
+	permissions?:ResolverInputTypes["Permission"],
+	/** Флаг привилегий */
+	privileged?:boolean | `@${string}`,
+	/** Квота RAM */
+	ram_quota?:boolean | `@${string}`,
+	/** Использование RAM */
+	ram_usage?:boolean | `@${string}`,
+	/** Запрос на возврат */
+	refund_request?:ResolverInputTypes["RefundRequest"],
+	/** Информация о REX */
+	rex_info?:boolean | `@${string}`,
+	/** Делегированные ресурсы */
+	self_delegated_bandwidth?:ResolverInputTypes["ResourceDelegationDTO"],
+	/** Общий обзор ресурсов */
+	total_resources?:ResolverInputTypes["ResourceOverview"],
+	/** Информация о голосовании */
+	voter_info?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Информация о состоянии блокчейна */
@@ -1734,7 +1915,7 @@ export type ResolverInputTypes = {
 	/** Описание кооператива */
 	description?:boolean | `@${string}`,
 	/** Документ кооператива */
-	document?:ResolverInputTypes["BlockchainDocument"],
+	document?:ResolverInputTypes["SignedBlockchainDocument"],
 	/** Начальный взнос */
 	initial?:boolean | `@${string}`,
 	/** Разветвленный ли кооператив */
@@ -1888,6 +2069,10 @@ export type ResolverInputTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ResolverInputTypes["DateTime"] | undefined | null
 };
+	["GetAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["GetBranchesInput"]: {
 	/** Фильтр по имени аккаунта кооперативного участка */
 	braname?: string | undefined | null,
@@ -1944,6 +2129,33 @@ export type ResolverInputTypes = {
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["MonoAccount"]: AliasType<{
+	/** Электронная почта пользователя */
+	email?:boolean | `@${string}`,
+	/** Есть ли у пользователя аккаунт */
+	has_account?:boolean | `@${string}`,
+	/** ID начального заказа */
+	initial_order?:boolean | `@${string}`,
+	/** Подтверждена ли электронная почта */
+	is_email_verified?:boolean | `@${string}`,
+	/** Зарегистрирован ли пользователь */
+	is_registered?:boolean | `@${string}`,
+	/** Сообщение */
+	message?:boolean | `@${string}`,
+	/** Публичный ключ пользователя */
+	public_key?:boolean | `@${string}`,
+	/** Реферер пользователя */
+	referer?:boolean | `@${string}`,
+	/** Роль пользователя */
+	role?:boolean | `@${string}`,
+	/** Статус пользователя */
+	status?:boolean | `@${string}`,
+	/** Тип пользователя */
+	type?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Mutation"]: AliasType<{
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
@@ -1953,6 +2165,7 @@ deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},b
 deleteTrustedAccount?: [{	data: ResolverInputTypes["DeleteTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 editBranch?: [{	data: ResolverInputTypes["EditBranchInput"]},ResolverInputTypes["Branch"]],
 installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
+selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
 updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
@@ -1976,6 +2189,29 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
 	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ParticipantAccount"]: AliasType<{
+	/** Имя кооперативного участка */
+	braname?:boolean | `@${string}`,
+	/** Время создания записи о члене */
+	created_at?:boolean | `@${string}`,
+	/** LEGACY Флаг, имеет ли член право голоса */
+	has_vote?:boolean | `@${string}`,
+	/** LEGACY Флаг, внесен ли регистрационный взнос */
+	is_initial?:boolean | `@${string}`,
+	/** LEGACY Флаг, внесен ли минимальный паевый взнос */
+	is_minimum?:boolean | `@${string}`,
+	/** Время последнего минимального платежа */
+	last_min_pay?:boolean | `@${string}`,
+	/** Время последнего обновления информации о члене */
+	last_update?:boolean | `@${string}`,
+	/** Статус члена кооператива (accepted | blocked) */
+	status?:boolean | `@${string}`,
+	/** Тип участника (individual | entrepreneur | organization) */
+	type?:boolean | `@${string}`,
+	/** Уникальное имя члена кооператива */
+	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["Passport"]: AliasType<{
@@ -2037,6 +2273,7 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 		__typename?: boolean | `@${string}`
 }>;
 	["Query"]: AliasType<{
+getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaginationResult"]],
@@ -2095,56 +2332,72 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["SystemAccount"]: AliasType<{
-	/** Имя аккаунта */
-	account_name?:boolean | `@${string}`,
-	/** Баланс */
-	core_liquid_balance?:boolean | `@${string}`,
-	/** Ограничения CPU */
-	cpu_limit?:ResolverInputTypes["AccountResourceInfo"],
-	/** Вес CPU */
-	cpu_weight?:boolean | `@${string}`,
-	/** Дата создания */
-	created?:boolean | `@${string}`,
-	/** Номер последнего блока */
-	head_block_num?:boolean | `@${string}`,
-	/** Время последнего блока */
-	head_block_time?:boolean | `@${string}`,
-	/** Время последнего обновления кода */
-	last_code_update?:boolean | `@${string}`,
-	/** Ограничения сети */
-	net_limit?:ResolverInputTypes["AccountResourceInfo"],
-	/** Вес сети */
-	net_weight?:boolean | `@${string}`,
-	/** Разрешения */
-	permissions?:ResolverInputTypes["Permission"],
-	/** Флаг привилегий */
-	privileged?:boolean | `@${string}`,
-	/** Квота RAM */
-	ram_quota?:boolean | `@${string}`,
-	/** Использование RAM */
-	ram_usage?:boolean | `@${string}`,
-	/** Запрос на возврат */
-	refund_request?:ResolverInputTypes["RefundRequest"],
-	/** Информация о REX */
-	rex_info?:boolean | `@${string}`,
-	/** Делегированные ресурсы */
-	self_delegated_bandwidth?:ResolverInputTypes["ResourceDelegationDTO"],
-	/** Общий обзор ресурсов */
-	total_resources?:ResolverInputTypes["ResourceOverview"],
-	/** Информация о голосовании */
-	voter_info?:boolean | `@${string}`,
+	["SelectBranchDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания кооперативного участка */
+	meta: ResolverInputTypes["SelectBranchMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["SelectBranchInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный электронный документ (registry_id == 101) */
+	document: ResolverInputTypes["SelectBranchDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["SelectBranchMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID в реестре, связанный с документом */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["SignedBlockchainDocument"]: AliasType<{
+	/** Хеш документа */
+	hash?:boolean | `@${string}`,
+	/** Метаинформация документа */
+	meta?:boolean | `@${string}`,
+	/** Публичный ключ документа */
+	public_key?:boolean | `@${string}`,
+	/** Подпись документа */
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["SystemInfo"]: AliasType<{
+	/** Объект системного аккаунта кооператива в блокчейне */
+	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info?:ResolverInputTypes["BlockchainInfoDTO"],
 	/** Объект аккаунта кооператива у оператора */
 	cooperator_account?:ResolverInputTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
-	/** Объект системного аккаунта кооператива в блокчейне */
-	system_account?:ResolverInputTypes["SystemAccount"],
 	/** Статус контроллера кооператива */
 	system_status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -2165,6 +2418,29 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["UserAccount"]: AliasType<{
+	/** Метаинформация */
+	meta?:boolean | `@${string}`,
+	/** Реферал */
+	referer?:boolean | `@${string}`,
+	/** Дата регистрации */
+	registered_at?:boolean | `@${string}`,
+	/** Регистратор */
+	registrator?:boolean | `@${string}`,
+	/** Статус аккаунта */
+	status?:boolean | `@${string}`,
+	/** Список хранилищ */
+	storages?:boolean | `@${string}`,
+	/** Тип учетной записи */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта */
+	username?:boolean | `@${string}`,
+	/** Дата регистрации */
+	verifications?:ResolverInputTypes["Verification"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Статус пользователя */
+["UserStatus"]:UserStatus;
 	["Verification"]: AliasType<{
 	/** Дата создания верификации */
 	created_at?:boolean | `@${string}`,
@@ -2195,7 +2471,19 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
   }
 
 export type ModelTypes = {
-    ["AccountResourceInfo"]: {
+    ["Account"]: {
+		/** Объект системного аккаунта кооператива в блокчейне */
+	blockchain_account?: ModelTypes["BlockchainAccount"] | undefined | null,
+	/** Объект аккаунта в системе учёта провайдера */
+	mono_account?: ModelTypes["MonoAccount"] | undefined | null,
+	/** Объект пайщика кооператива */
+	participant_account?: ModelTypes["ParticipantAccount"] | undefined | null,
+	/** Объект пользовательского аккаунта кооперативной экономики */
+	user_account?: ModelTypes["UserAccount"] | undefined | null,
+	/** Имя аккаунта кооператива */
+	username: string
+};
+	["AccountResourceInfo"]: {
 		/** Доступные ресурсы */
 	available: string,
 	/** Текущее использование ресурсов */
@@ -2281,15 +2569,45 @@ export type ModelTypes = {
 	/** Имя пользователя, к которому привязан метод оплаты */
 	username: string
 };
-	["BlockchainDocument"]: {
-		/** Хеш документа */
-	hash: string,
-	/** Метаинформация документа */
-	meta: string,
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	["BlockchainAccount"]: {
+		/** Имя аккаунта */
+	account_name: string,
+	/** Баланс */
+	core_liquid_balance?: string | undefined | null,
+	/** Ограничения CPU */
+	cpu_limit: ModelTypes["AccountResourceInfo"],
+	/** Вес CPU */
+	cpu_weight: string,
+	/** Дата создания */
+	created: string,
+	/** Номер последнего блока */
+	head_block_num: number,
+	/** Время последнего блока */
+	head_block_time: string,
+	/** Время последнего обновления кода */
+	last_code_update: string,
+	/** Ограничения сети */
+	net_limit: ModelTypes["AccountResourceInfo"],
+	/** Вес сети */
+	net_weight: string,
+	/** Разрешения */
+	permissions: Array<ModelTypes["Permission"]>,
+	/** Флаг привилегий */
+	privileged: boolean,
+	/** Квота RAM */
+	ram_quota: number,
+	/** Использование RAM */
+	ram_usage: number,
+	/** Запрос на возврат */
+	refund_request?: ModelTypes["RefundRequest"] | undefined | null,
+	/** Информация о REX */
+	rex_info?: string | undefined | null,
+	/** Делегированные ресурсы */
+	self_delegated_bandwidth?: ModelTypes["ResourceDelegationDTO"] | undefined | null,
+	/** Общий обзор ресурсов */
+	total_resources?: ModelTypes["ResourceOverview"] | undefined | null,
+	/** Информация о голосовании */
+	voter_info?: string | undefined | null
 };
 	/** Информация о состоянии блокчейна */
 ["BlockchainInfoDTO"]: {
@@ -2370,7 +2688,7 @@ export type ModelTypes = {
 	/** Описание кооператива */
 	description: string,
 	/** Документ кооператива */
-	document: ModelTypes["BlockchainDocument"],
+	document: ModelTypes["SignedBlockchainDocument"],
 	/** Начальный взнос */
 	initial: string,
 	/** Разветвленный ли кооператив */
@@ -2522,6 +2840,10 @@ export type ModelTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ModelTypes["DateTime"] | undefined | null
 };
+	["GetAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["GetBranchesInput"]: {
 	/** Фильтр по имени аккаунта кооперативного участка */
 	braname?: string | undefined | null,
@@ -2576,6 +2898,32 @@ export type ModelTypes = {
 	/** Вес */
 	weight: number
 };
+	["MonoAccount"]: {
+		/** Электронная почта пользователя */
+	email: string,
+	/** Есть ли у пользователя аккаунт */
+	has_account: boolean,
+	/** ID начального заказа */
+	initial_order?: string | undefined | null,
+	/** Подтверждена ли электронная почта */
+	is_email_verified: boolean,
+	/** Зарегистрирован ли пользователь */
+	is_registered: boolean,
+	/** Сообщение */
+	message?: string | undefined | null,
+	/** Публичный ключ пользователя */
+	public_key: string,
+	/** Реферер пользователя */
+	referer: string,
+	/** Роль пользователя */
+	role: string,
+	/** Статус пользователя */
+	status: ModelTypes["UserStatus"],
+	/** Тип пользователя */
+	type: string,
+	/** Имя пользователя */
+	username: string
+};
 	["Mutation"]: {
 		/** Добавить доверенное лицо кооперативного участка */
 	addTrustedAccount: ModelTypes["Branch"],
@@ -2593,6 +2941,8 @@ export type ModelTypes = {
 	editBranch: ModelTypes["Branch"],
 	/** Установить расширение */
 	installExtension: ModelTypes["Extension"],
+	/** Выбрать кооперативный участок */
+	selectBranch: boolean,
 	/** Удалить расширение */
 	uninstallExtension: boolean,
 	/** Обновить банковский счёт */
@@ -2617,6 +2967,28 @@ export type ModelTypes = {
 	totalCount: number,
 	/** Общее количество страниц */
 	totalPages: number
+};
+	["ParticipantAccount"]: {
+		/** Имя кооперативного участка */
+	braname?: string | undefined | null,
+	/** Время создания записи о члене */
+	created_at: ModelTypes["DateTime"],
+	/** LEGACY Флаг, имеет ли член право голоса */
+	has_vote: boolean,
+	/** LEGACY Флаг, внесен ли регистрационный взнос */
+	is_initial: boolean,
+	/** LEGACY Флаг, внесен ли минимальный паевый взнос */
+	is_minimum: boolean,
+	/** Время последнего минимального платежа */
+	last_min_pay: ModelTypes["DateTime"],
+	/** Время последнего обновления информации о члене */
+	last_update: ModelTypes["DateTime"],
+	/** Статус члена кооператива (accepted | blocked) */
+	status: string,
+	/** Тип участника (individual | entrepreneur | organization) */
+	type?: string | undefined | null,
+	/** Уникальное имя члена кооператива */
+	username: string
 };
 	["Passport"]: {
 		/** Код подразделения */
@@ -2668,7 +3040,9 @@ export type ModelTypes = {
 	weight: number
 };
 	["Query"]: {
-		/** Получить список кооперативных участков */
+		/** Получить сводную информацию о аккаунте */
+	getAccount: ModelTypes["Account"],
+	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
 	/** Получить список расширений */
 	getExtensions: Array<ModelTypes["Extension"]>,
@@ -2723,55 +3097,71 @@ export type ModelTypes = {
 		/** Мобильный телефон получателя */
 	phone: string
 };
-	["SystemAccount"]: {
-		/** Имя аккаунта */
-	account_name: string,
-	/** Баланс */
-	core_liquid_balance?: string | undefined | null,
-	/** Ограничения CPU */
-	cpu_limit: ModelTypes["AccountResourceInfo"],
-	/** Вес CPU */
-	cpu_weight: string,
-	/** Дата создания */
-	created: string,
-	/** Номер последнего блока */
-	head_block_num: number,
-	/** Время последнего блока */
-	head_block_time: string,
-	/** Время последнего обновления кода */
-	last_code_update: string,
-	/** Ограничения сети */
-	net_limit: ModelTypes["AccountResourceInfo"],
-	/** Вес сети */
-	net_weight: string,
-	/** Разрешения */
-	permissions: Array<ModelTypes["Permission"]>,
-	/** Флаг привилегий */
-	privileged: boolean,
-	/** Квота RAM */
-	ram_quota: number,
-	/** Использование RAM */
-	ram_usage: number,
-	/** Запрос на возврат */
-	refund_request?: ModelTypes["RefundRequest"] | undefined | null,
-	/** Информация о REX */
-	rex_info?: string | undefined | null,
-	/** Делегированные ресурсы */
-	self_delegated_bandwidth?: ModelTypes["ResourceDelegationDTO"] | undefined | null,
-	/** Общий обзор ресурсов */
-	total_resources?: ModelTypes["ResourceOverview"] | undefined | null,
-	/** Информация о голосовании */
-	voter_info?: string | undefined | null
+	["SelectBranchDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания кооперативного участка */
+	meta: ModelTypes["SelectBranchMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["SelectBranchInput"]: {
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный электронный документ (registry_id == 101) */
+	document: ModelTypes["SelectBranchDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["SelectBranchMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID в реестре, связанный с документом */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["SignedBlockchainDocument"]: {
+		/** Хеш документа */
+	hash: string,
+	/** Метаинформация документа */
+	meta: string,
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
 };
 	["SystemInfo"]: {
-		/** Набор данных с информацией о состоянии блокчейна */
+		/** Объект системного аккаунта кооператива в блокчейне */
+	blockchain_account: ModelTypes["BlockchainAccount"],
+	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info: ModelTypes["BlockchainInfoDTO"],
 	/** Объект аккаунта кооператива у оператора */
 	cooperator_account: ModelTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Объект системного аккаунта кооператива в блокчейне */
-	system_account: ModelTypes["SystemAccount"],
 	/** Статус контроллера кооператива */
 	system_status: ModelTypes["SystemStatus"]
 };
@@ -2790,6 +3180,27 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["UserAccount"]: {
+		/** Метаинформация */
+	meta: string,
+	/** Реферал */
+	referer: string,
+	/** Дата регистрации */
+	registered_at: string,
+	/** Регистратор */
+	registrator: string,
+	/** Статус аккаунта */
+	status: string,
+	/** Список хранилищ */
+	storages: Array<string>,
+	/** Тип учетной записи */
+	type: string,
+	/** Имя аккаунта */
+	username: string,
+	/** Дата регистрации */
+	verifications: Array<ModelTypes["Verification"]>
+};
+	["UserStatus"]:UserStatus;
 	["Verification"]: {
 		/** Дата создания верификации */
 	created_at: string,
@@ -2820,6 +3231,19 @@ export type GraphQLTypes = {
     // ------------------------------------------------------;
 	// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY);
 	// ------------------------------------------------------;
+	["Account"]: {
+	__typename: "Account",
+	/** Объект системного аккаунта кооператива в блокчейне */
+	blockchain_account?: GraphQLTypes["BlockchainAccount"] | undefined | null,
+	/** Объект аккаунта в системе учёта провайдера */
+	mono_account?: GraphQLTypes["MonoAccount"] | undefined | null,
+	/** Объект пайщика кооператива */
+	participant_account?: GraphQLTypes["ParticipantAccount"] | undefined | null,
+	/** Объект пользовательского аккаунта кооперативной экономики */
+	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
+	/** Имя аккаунта кооператива */
+	username: string
+};
 	["AccountResourceInfo"]: {
 	__typename: "AccountResourceInfo",
 	/** Доступные ресурсы */
@@ -2911,16 +3335,46 @@ export type GraphQLTypes = {
 	/** Имя пользователя, к которому привязан метод оплаты */
 	username: string
 };
-	["BlockchainDocument"]: {
-	__typename: "BlockchainDocument",
-	/** Хеш документа */
-	hash: string,
-	/** Метаинформация документа */
-	meta: string,
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	["BlockchainAccount"]: {
+	__typename: "BlockchainAccount",
+	/** Имя аккаунта */
+	account_name: string,
+	/** Баланс */
+	core_liquid_balance?: string | undefined | null,
+	/** Ограничения CPU */
+	cpu_limit: GraphQLTypes["AccountResourceInfo"],
+	/** Вес CPU */
+	cpu_weight: string,
+	/** Дата создания */
+	created: string,
+	/** Номер последнего блока */
+	head_block_num: number,
+	/** Время последнего блока */
+	head_block_time: string,
+	/** Время последнего обновления кода */
+	last_code_update: string,
+	/** Ограничения сети */
+	net_limit: GraphQLTypes["AccountResourceInfo"],
+	/** Вес сети */
+	net_weight: string,
+	/** Разрешения */
+	permissions: Array<GraphQLTypes["Permission"]>,
+	/** Флаг привилегий */
+	privileged: boolean,
+	/** Квота RAM */
+	ram_quota: number,
+	/** Использование RAM */
+	ram_usage: number,
+	/** Запрос на возврат */
+	refund_request?: GraphQLTypes["RefundRequest"] | undefined | null,
+	/** Информация о REX */
+	rex_info?: string | undefined | null,
+	/** Делегированные ресурсы */
+	self_delegated_bandwidth?: GraphQLTypes["ResourceDelegationDTO"] | undefined | null,
+	/** Общий обзор ресурсов */
+	total_resources?: GraphQLTypes["ResourceOverview"] | undefined | null,
+	/** Информация о голосовании */
+	voter_info?: string | undefined | null
 };
 	/** Информация о состоянии блокчейна */
 ["BlockchainInfoDTO"]: {
@@ -3004,7 +3458,7 @@ export type GraphQLTypes = {
 	/** Описание кооператива */
 	description: string,
 	/** Документ кооператива */
-	document: GraphQLTypes["BlockchainDocument"],
+	document: GraphQLTypes["SignedBlockchainDocument"],
 	/** Начальный взнос */
 	initial: string,
 	/** Разветвленный ли кооператив */
@@ -3157,6 +3611,10 @@ export type GraphQLTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: GraphQLTypes["DateTime"] | undefined | null
 };
+	["GetAccountInput"]: {
+		/** Имя аккаунта пользователя */
+	username: string
+};
 	["GetBranchesInput"]: {
 		/** Фильтр по имени аккаунта кооперативного участка */
 	braname?: string | undefined | null,
@@ -3213,6 +3671,33 @@ export type GraphQLTypes = {
 	/** Вес */
 	weight: number
 };
+	["MonoAccount"]: {
+	__typename: "MonoAccount",
+	/** Электронная почта пользователя */
+	email: string,
+	/** Есть ли у пользователя аккаунт */
+	has_account: boolean,
+	/** ID начального заказа */
+	initial_order?: string | undefined | null,
+	/** Подтверждена ли электронная почта */
+	is_email_verified: boolean,
+	/** Зарегистрирован ли пользователь */
+	is_registered: boolean,
+	/** Сообщение */
+	message?: string | undefined | null,
+	/** Публичный ключ пользователя */
+	public_key: string,
+	/** Реферер пользователя */
+	referer: string,
+	/** Роль пользователя */
+	role: string,
+	/** Статус пользователя */
+	status: GraphQLTypes["UserStatus"],
+	/** Тип пользователя */
+	type: string,
+	/** Имя пользователя */
+	username: string
+};
 	["Mutation"]: {
 	__typename: "Mutation",
 	/** Добавить доверенное лицо кооперативного участка */
@@ -3231,6 +3716,8 @@ export type GraphQLTypes = {
 	editBranch: GraphQLTypes["Branch"],
 	/** Установить расширение */
 	installExtension: GraphQLTypes["Extension"],
+	/** Выбрать кооперативный участок */
+	selectBranch: boolean,
 	/** Удалить расширение */
 	uninstallExtension: boolean,
 	/** Обновить банковский счёт */
@@ -3257,6 +3744,29 @@ export type GraphQLTypes = {
 	totalCount: number,
 	/** Общее количество страниц */
 	totalPages: number
+};
+	["ParticipantAccount"]: {
+	__typename: "ParticipantAccount",
+	/** Имя кооперативного участка */
+	braname?: string | undefined | null,
+	/** Время создания записи о члене */
+	created_at: GraphQLTypes["DateTime"],
+	/** LEGACY Флаг, имеет ли член право голоса */
+	has_vote: boolean,
+	/** LEGACY Флаг, внесен ли регистрационный взнос */
+	is_initial: boolean,
+	/** LEGACY Флаг, внесен ли минимальный паевый взнос */
+	is_minimum: boolean,
+	/** Время последнего минимального платежа */
+	last_min_pay: GraphQLTypes["DateTime"],
+	/** Время последнего обновления информации о члене */
+	last_update: GraphQLTypes["DateTime"],
+	/** Статус члена кооператива (accepted | blocked) */
+	status: string,
+	/** Тип участника (individual | entrepreneur | organization) */
+	type?: string | undefined | null,
+	/** Уникальное имя члена кооператива */
+	username: string
 };
 	["Passport"]: {
 	__typename: "Passport",
@@ -3318,6 +3828,8 @@ export type GraphQLTypes = {
 };
 	["Query"]: {
 	__typename: "Query",
+	/** Получить сводную информацию о аккаунте */
+	getAccount: GraphQLTypes["Account"],
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
 	/** Получить список расширений */
@@ -3378,57 +3890,73 @@ export type GraphQLTypes = {
 	/** Мобильный телефон получателя */
 	phone: string
 };
-	["SystemAccount"]: {
-	__typename: "SystemAccount",
-	/** Имя аккаунта */
-	account_name: string,
-	/** Баланс */
-	core_liquid_balance?: string | undefined | null,
-	/** Ограничения CPU */
-	cpu_limit: GraphQLTypes["AccountResourceInfo"],
-	/** Вес CPU */
-	cpu_weight: string,
-	/** Дата создания */
-	created: string,
-	/** Номер последнего блока */
-	head_block_num: number,
-	/** Время последнего блока */
-	head_block_time: string,
-	/** Время последнего обновления кода */
-	last_code_update: string,
-	/** Ограничения сети */
-	net_limit: GraphQLTypes["AccountResourceInfo"],
-	/** Вес сети */
-	net_weight: string,
-	/** Разрешения */
-	permissions: Array<GraphQLTypes["Permission"]>,
-	/** Флаг привилегий */
-	privileged: boolean,
-	/** Квота RAM */
-	ram_quota: number,
-	/** Использование RAM */
-	ram_usage: number,
-	/** Запрос на возврат */
-	refund_request?: GraphQLTypes["RefundRequest"] | undefined | null,
-	/** Информация о REX */
-	rex_info?: string | undefined | null,
-	/** Делегированные ресурсы */
-	self_delegated_bandwidth?: GraphQLTypes["ResourceDelegationDTO"] | undefined | null,
-	/** Общий обзор ресурсов */
-	total_resources?: GraphQLTypes["ResourceOverview"] | undefined | null,
-	/** Информация о голосовании */
-	voter_info?: string | undefined | null
+	["SelectBranchDocumentInput"]: {
+		/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания кооперативного участка */
+	meta: GraphQLTypes["SelectBranchMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["SelectBranchInput"]: {
+		/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный электронный документ (registry_id == 101) */
+	document: GraphQLTypes["SelectBranchDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["SelectBranchMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID в реестре, связанный с документом */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["SignedBlockchainDocument"]: {
+	__typename: "SignedBlockchainDocument",
+	/** Хеш документа */
+	hash: string,
+	/** Метаинформация документа */
+	meta: string,
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
 };
 	["SystemInfo"]: {
 	__typename: "SystemInfo",
+	/** Объект системного аккаунта кооператива в блокчейне */
+	blockchain_account: GraphQLTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info: GraphQLTypes["BlockchainInfoDTO"],
 	/** Объект аккаунта кооператива у оператора */
 	cooperator_account: GraphQLTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Объект системного аккаунта кооператива в блокчейне */
-	system_account: GraphQLTypes["SystemAccount"],
 	/** Статус контроллера кооператива */
 	system_status: GraphQLTypes["SystemStatus"]
 };
@@ -3448,6 +3976,29 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["UserAccount"]: {
+	__typename: "UserAccount",
+	/** Метаинформация */
+	meta: string,
+	/** Реферал */
+	referer: string,
+	/** Дата регистрации */
+	registered_at: string,
+	/** Регистратор */
+	registrator: string,
+	/** Статус аккаунта */
+	status: string,
+	/** Список хранилищ */
+	storages: Array<string>,
+	/** Тип учетной записи */
+	type: string,
+	/** Имя аккаунта */
+	username: string,
+	/** Дата регистрации */
+	verifications: Array<GraphQLTypes["Verification"]>
+};
+	/** Статус пользователя */
+["UserStatus"]: UserStatus;
 	["Verification"]: {
 	__typename: "Verification",
 	/** Дата создания верификации */
@@ -3477,6 +4028,17 @@ export enum SystemStatus {
 	install = "install",
 	maintenance = "maintenance"
 }
+/** Статус пользователя */
+export enum UserStatus {
+	Active = "Active",
+	Blocked = "Blocked",
+	Created = "Created",
+	Failed = "Failed",
+	Joined = "Joined",
+	Payed = "Payed",
+	Refunded = "Refunded",
+	Registered = "Registered"
+}
 
 type ZEUS_VARIABLES = {
 	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
@@ -3490,11 +4052,16 @@ type ZEUS_VARIABLES = {
 	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
+	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
 	["JSON"]: ValueTypes["JSON"];
+	["SelectBranchDocumentInput"]: ValueTypes["SelectBranchDocumentInput"];
+	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];
+	["SelectBranchMetaDocumentInput"]: ValueTypes["SelectBranchMetaDocumentInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];
 	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
 	["UpdateBankAccountInput"]: ValueTypes["UpdateBankAccountInput"];
+	["UserStatus"]: ValueTypes["UserStatus"];
 }

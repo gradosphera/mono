@@ -43,7 +43,7 @@ import { Cooperative, SovietContract } from 'cooptypes'
 import { Signature, PublicKey } from '@wharfkit/antelope';
 import { useGlobalStore } from 'src/shared/store';
 import DOMPurify from 'dompurify';
-import { DigitalDocument } from 'src/entities/Document';
+import { DigitalDocument } from 'src/shared/lib/document';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 
 const props = defineProps({

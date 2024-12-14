@@ -3,6 +3,6 @@ export * as RegulationElectronicSignature from './2.RegulationElectronicSignatur
 export * as PrivacyPolicy from './3.PrivacyPolicy'
 export * as UserAgreement from './4.UserAgreement'
 export * as CoopenomicsAgreement from './50.CoopenomicsAgreement'
-
+export * as SelectBranchStatement from './101.SelectBranchStatement'
 export * as ParticipantApplication from './100.ParticipantApplication'
 export * as DecisionOfParticipantApplication from './501.DecisionOfParticipantApplication'

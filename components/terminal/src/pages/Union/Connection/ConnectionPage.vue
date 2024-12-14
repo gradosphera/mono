@@ -37,7 +37,7 @@ div.row.justify-center.q-pa-md
 
 </template>
 <script setup lang="ts">
-import { DigitalDocument } from 'src/entities/Document';
+import { DigitalDocument } from 'src/shared/lib/document';
 import { useSessionStore } from 'src/entities/Session';
 import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader';
 import { computed, ref } from 'vue';

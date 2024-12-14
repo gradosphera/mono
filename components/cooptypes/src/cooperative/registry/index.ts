@@ -6,3 +6,5 @@ export * as CoopenomicsAgreement from './50.CoopenomicsAgreement'
 
 export * as ParticipantApplication from './100.ParticipantApplication'
 export * as DecisionOfParticipantApplication from './501.DecisionOfParticipantApplication'
+
+export * as SelectBranchStatement from './101.SelectBranchStatement'
