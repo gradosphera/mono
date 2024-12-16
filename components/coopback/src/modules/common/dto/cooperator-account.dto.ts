@@ -1,6 +1,6 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { IsString, IsBoolean, IsArray } from 'class-validator';
-import { SignedBlockchainDocumentDTO } from './signed-blockchain-document.dto';
+import { SignedBlockchainDocumentDTO } from '../../document/dto/signed-blockchain-document.dto';
 import type { RegistratorContract } from 'cooptypes';
 import { VerificationDTO } from './verification.dto';
 

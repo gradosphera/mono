@@ -59,6 +59,7 @@ export class BlockchainService implements BlockchainPort {
   }
 
   public async transact(actionOrActions: any | any[], broadcast = true): Promise<TransactResult> {
+    console.log('actionOrActions', actionOrActions);
     if (Array.isArray(actionOrActions)) {
       return this.sendActions(actionOrActions, broadcast);
     } else {
@@ -73,7 +74,7 @@ export class BlockchainService implements BlockchainPort {
 
   private async sendAction(action: any, broadcast = true): Promise<TransactResult> {
     const formedAction = await this.formActionFromAbi(action);
-    return this.session.transact({ action: formedAction }, { broadcast });
+    return await this.session.transact({ action: formedAction }, { broadcast });
   }
 
   private async sendActions(actions: any[], broadcast = true): Promise<TransactResult> {
@@ -82,7 +83,7 @@ export class BlockchainService implements BlockchainPort {
       const formedAction = await this.formActionFromAbi(action);
       data.push(formedAction);
     }
-    return this.session.transact({ actions: data }, { broadcast });
+    return await this.session.transact({ actions: data }, { broadcast });
   }
 
   public async getAllRows<T = any>(code: string, scope: string, tableName: string): Promise<any[]> {

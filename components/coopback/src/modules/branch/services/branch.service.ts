@@ -7,7 +7,10 @@ import type { CreateBranchGraphQLInput } from '../dto/create-branch-input.dto';
 import type { DeleteBranchGraphQLInput } from '../dto/delete-branch-input.dto';
 import type { AddTrustedAccountGraphQLInput } from '../dto/add-trusted-account-input.dto';
 import type { DeleteTrustedAccountGraphQLInput } from '../dto/delete-trusted-account-input.dto';
-import type { SelectBranchInputDTO } from '../dto/select-branch-input.dto';
+import type { SelectBranchInputDTO } from '../dto/documents/selectBranch/input/select-branch-input.dto';
+import type { GenerateSelectBranchDocumentInputDTO } from '../dto/documents/selectBranch/input/generate-select-branch-document-input.dto';
+import { GeneratedSelectBranchDocumentDTO } from '../dto/documents/selectBranch/output/generated-select-branch-document.dto';
+import type { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 
 @Injectable()
 export class BranchService {
@@ -56,5 +59,14 @@ export class BranchService {
   public async selectBranch(data: SelectBranchInputDTO): Promise<boolean> {
     const selected = await this.branchDomainInteractor.selectBranch(data);
     return selected;
+  }
+
+  public async generateSelectBranchDocument(
+    data: GenerateSelectBranchDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedSelectBranchDocumentDTO> {
+    const document = await this.branchDomainInteractor.generateSelectBranchDocument(data, options);
+    //TODO чтобы избавиться от unknown здесь необходимо строго типизировать ответ фабрики документов
+    return document as unknown as GeneratedSelectBranchDocumentDTO;
   }
 }

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsArray, IsDateString, IsInt, IsEnum } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsInt, IsEnum } from 'class-validator';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { LangType } from './lang-type.enum';
 import type { Cooperative } from 'cooptypes';
@@ -9,7 +9,7 @@ export class MetaDocumentDTO implements Cooperative.Document.IMetaDocument {
   @IsString()
   title!: string;
 
-  @Field(() => Int, { description: 'ID в реестре, связанный с документом' })
+  @Field(() => Int, { description: 'ID документа в реестре' })
   @IsNumber()
   registry_id!: number;
 
@@ -34,7 +34,7 @@ export class MetaDocumentDTO implements Cooperative.Document.IMetaDocument {
   username!: string;
 
   @Field({ description: 'Дата и время создания документа' })
-  @IsDateString()
+  @IsString()
   created_at!: string;
 
   @Field(() => Int, { description: 'Номер блока, на котором был создан документ' })

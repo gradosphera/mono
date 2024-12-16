@@ -1,9 +1,9 @@
 // infrastructure/generator/generator.module.ts
 import { Module } from '@nestjs/common';
-import { GeneratorService } from './generator.service';
+import { GeneratorInfrastructureService } from './generator.service';
 
 @Module({
-  providers: [GeneratorService],
-  exports: [GeneratorService],
+  providers: [GeneratorInfrastructureService],
+  exports: [GeneratorInfrastructureService],
 })
-export class GeneratorModule {}
+export class GeneratorInfrastructureModule {}

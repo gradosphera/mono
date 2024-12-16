@@ -7,6 +7,7 @@ import { PaymentMethodDomainModule } from './payment-method/payment-method-domai
 import { ProviderDomainModule } from './provider/provider.module';
 import { SystemDomainModule } from './system/system-domain.module';
 import { BranchDomainModule } from './branch/branch-domain.module';
+import { DocumentDomainModule } from './document/document.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { BranchDomainModule } from './branch/branch-domain.module';
     ProviderDomainModule,
     SystemDomainModule,
     BranchDomainModule,
+    DocumentDomainModule,
   ],
   exports: [
     AccountDomainModule,
@@ -26,6 +28,7 @@ import { BranchDomainModule } from './branch/branch-domain.module';
     ProviderDomainModule,
     SystemDomainModule,
     BranchDomainModule,
+    DocumentDomainModule,
   ],
 })
 export class DomainModule {}

@@ -8,18 +8,16 @@ import { GraphqlModule } from './infrastructure/graphql/graphql.module';
 import { BlockchainModule } from './infrastructure/blockchain/blockchain.module';
 import { DomainModule } from './domain/domain.module';
 import { ApplicationModule } from './modules/application.module';
+import { InfrastructureModule } from './infrastructure/infrastructure.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // Чтобы .env был доступен глобально
     }),
-    MongooseModule.forRoot(config.mongoose.url),
     DomainModule,
     ApplicationModule,
-    DatabaseModule,
-    GraphqlModule,
-    BlockchainModule,
+    InfrastructureModule,
   ],
   providers: [],
   exports: [],

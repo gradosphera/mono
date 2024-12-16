@@ -20,7 +20,7 @@ export class SelectBranchInputDTO implements SelectBranchInputDomainInterface {
   username!: string;
 
   @Field(() => SelectBranchSignedDigitalDocumentInputDTO, {
-    description: 'Подписанный электронный документ (registry_id == 101)',
+    description: 'Подписанный электронный документ (generateSelectBranchDocument)',
   })
   @ValidateNested()
   document!: SelectBranchSignedDigitalDocumentInputDTO;

@@ -11,7 +11,11 @@ import { EditBranchGraphQLInput } from '../dto/edit-branch-input.dto';
 import { DeleteBranchGraphQLInput } from '../dto/delete-branch-input.dto';
 import { AddTrustedAccountGraphQLInput } from '../dto/add-trusted-account-input.dto';
 import { DeleteTrustedAccountGraphQLInput } from '../dto/delete-trusted-account-input.dto';
-import { SelectBranchInputDTO } from '../dto/select-branch-input.dto';
+import { SelectBranchInputDTO } from '../dto/documents/selectBranch/input/select-branch-input.dto';
+import { GenerateSelectBranchDocumentInputDTO } from '../dto/documents/selectBranch/input/generate-select-branch-document-input.dto';
+import { GeneratedSelectBranchDocumentDTO } from '../dto/documents/selectBranch/output/generated-select-branch-document.dto';
+import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Resolver(() => BranchDTO)
 export class BranchResolver {
@@ -82,5 +86,22 @@ export class BranchResolver {
   @AuthRoles(['chairman', 'member', 'user'])
   async selectBranch(@Args('data', { type: () => SelectBranchInputDTO }) data: SelectBranchInputDTO): Promise<boolean> {
     return this.branchService.selectBranch(data);
+  }
+
+  @Mutation(() => GeneratedSelectBranchDocumentDTO, {
+    name: 'generateSelectBranchDocument',
+    description: 'Сгенерировать документ, подтверждающий выбор кооперативного участка',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async generateSelectBranchDocument(
+    @Args('data', { type: () => GenerateSelectBranchDocumentInputDTO }) rawData: GenerateSelectBranchDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedSelectBranchDocumentDTO> {
+    // Преобразование входящих данных в DTO
+    const data = plainToInstance(GenerateSelectBranchDocumentInputDTO, rawData);
+    console.log(' on generate ', data);
+    return this.branchService.generateSelectBranchDocument(data, options);
   }
 }

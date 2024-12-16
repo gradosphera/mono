@@ -1590,7 +1590,7 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	lang: string | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links: Array<string> | Variable<any, string>,
-	/** ID в реестре, связанный с документом */
+	/** ID документа в реестре */
 	registry_id: number | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone: string | Variable<any, string>,
@@ -2367,7 +2367,7 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
-	/** ID в реестре, связанный с документом */
+	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
 	timezone: string,
@@ -3132,7 +3132,7 @@ export type ModelTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
-	/** ID в реестре, связанный с документом */
+	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
 	timezone: string,
@@ -3925,7 +3925,7 @@ export type GraphQLTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
-	/** ID в реестре, связанный с документом */
+	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
 	timezone: string,

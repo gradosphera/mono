@@ -544,6 +544,63 @@ input ExtensionInput {
   updated_at: DateTime
 }
 
+input GenerateDocumentOptionsInput {
+  """Пропустить сохранение"""
+  skip_save: Boolean
+}
+
+input GenerateSelectBranchDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+type GeneratedSelectBranchDocument {
+  """Бинарное содержимое документа (base64)"""
+  binary: String!
+
+  """Полное название документа"""
+  full_title: String
+
+  """Хэш документа"""
+  hash: String!
+
+  """HTML содержимое документа"""
+  html: String!
+
+  """Метаинформация для создания кооперативного участка"""
+  meta: SelectBranchMetaDocument!
+}
+
 input GetAccountInput {
   """Имя аккаунта пользователя"""
   username: String!
@@ -627,6 +684,46 @@ type KeyWeight {
   weight: Int!
 }
 
+"""Язык документа"""
+enum LangType {
+  ru
+}
+
+type MetaDocument {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: LangType!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
 type MonoAccount {
   """Электронная почта пользователя"""
   email: String!
@@ -686,6 +783,9 @@ type Mutation {
 
   """Изменить кооперативный участок"""
   editBranch(data: EditBranchInput!): Branch!
+
+  """Сгенерировать документ, подтверждающий выбор кооперативного участка"""
+  generateSelectBranchDocument(data: GenerateSelectBranchDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedSelectBranchDocument!
 
   """Установить расширение"""
   installExtension(data: ExtensionInput!): Extension!
@@ -910,20 +1010,6 @@ type SbpAccount {
   phone: String!
 }
 
-input SelectBranchDocumentInput {
-  """Хэш документа"""
-  hash: String!
-
-  """Метаинформация для создания кооперативного участка"""
-  meta: SelectBranchMetaDocumentInput!
-
-  """Публичный ключ документа"""
-  public_key: String!
-
-  """Подпись документа"""
-  signature: String!
-}
-
 input SelectBranchInput {
   """Имя аккаунта кооперативного участка"""
   braname: String!
@@ -931,11 +1017,49 @@ input SelectBranchInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
-  """Подписанный электронный документ (registry_id == 101)"""
-  document: SelectBranchDocumentInput!
+  """Подписанный электронный документ (generateSelectBranchDocument)"""
+  document: SelectBranchSignedDigitalDocumentInput!
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+type SelectBranchMetaDocument {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: LangType!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
 }
 
 input SelectBranchMetaDocumentInput {
@@ -960,7 +1084,7 @@ input SelectBranchMetaDocumentInput {
   """Ссылки, связанные с документом"""
   links: [String!]!
 
-  """ID в реестре, связанный с документом"""
+  """ID документа в реестре"""
   registry_id: Int!
 
   """Часовой пояс, в котором был создан документ"""
@@ -974,6 +1098,20 @@ input SelectBranchMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
+}
+
+input SelectBranchSignedDigitalDocumentInput {
+  """Хэш документа"""
+  hash: String!
+
+  """Метаинформация для создания кооперативного участка"""
+  meta: SelectBranchMetaDocumentInput!
+
+  """Публичный ключ документа"""
+  public_key: String!
+
+  """Подпись документа"""
+  signature: String!
 }
 
 type SignedBlockchainDocument {

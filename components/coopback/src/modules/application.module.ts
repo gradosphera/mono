@@ -9,6 +9,7 @@ import { RedisModule } from '~/infrastructure/redis/redis.module';
 import { SystemModule } from './system/system.module';
 import { AppStoreModule } from './appstore/appstore-app.module';
 import { QueueModule } from './queue/queue-app.module';
+import { DocumentModule } from './document/document.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { QueueModule } from './queue/queue-app.module';
     QueueModule,
     RedisModule,
     SystemModule,
+    DocumentModule,
   ],
   exports: [
     AccountModule,
@@ -32,6 +34,7 @@ import { QueueModule } from './queue/queue-app.module';
     QueueModule,
     RedisModule,
     SystemModule,
+    DocumentModule,
   ],
 })
 export class ApplicationModule {}

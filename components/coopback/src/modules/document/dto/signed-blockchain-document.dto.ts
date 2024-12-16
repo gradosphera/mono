@@ -1,8 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { IsString } from 'class-validator';
+import type { Cooperative } from 'cooptypes';
 
 @ObjectType('SignedBlockchainDocument')
-export class SignedBlockchainDocumentDTO {
+export class SignedBlockchainDocumentDTO implements Cooperative.Document.IChainDocument {
   @Field(() => String, { description: 'Хеш документа' })
   @IsString()
   public readonly hash!: string;

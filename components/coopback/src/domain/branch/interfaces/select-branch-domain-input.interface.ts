@@ -4,5 +4,5 @@ export interface SelectBranchInputDomainInterface {
   coopname: string;
   braname: string;
   username: string;
-  document: Cooperative.Document.ISignedDocument;
+  document: Cooperative.Document.ISignedDocument<Cooperative.Registry.SelectBranchStatement.Action>;
 }

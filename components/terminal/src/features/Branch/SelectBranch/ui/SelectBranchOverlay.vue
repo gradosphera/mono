@@ -26,11 +26,11 @@ div
 <script lang="ts" setup>
   import { ModalBase } from 'src/shared/ui/ModalBase';
   import { Form } from 'src/shared/ui/Form';
-  import { FailAlert, SuccessAlert } from 'src/shared/api';
+  import { failAlert, SuccessAlert } from 'src/shared/api';
   import { Loader } from 'src/shared/ui/Loader';
   import { useSelectBranch } from '../model';
   import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader';
-  import { computed, onMounted, ref } from 'vue';
+  import { computed, ref } from 'vue';
   import { DigitalDocument } from 'src/shared/lib/document';
   import { useSystemStore } from 'src/entities/System/model';
   import { useSessionStore } from 'src/entities/Session';
@@ -63,11 +63,6 @@ div
 
   branchStore.loadPublicBranches({ coopname: system.info.coopname })
 
-  onMounted(() => {
-
-    // generate()
-  })
-
   const generate = async () => {
     isLoading.value = true
     document.value = await digitalDocument.generate<Cooperative.Registry.SelectBranchStatement.Action>({
@@ -78,7 +73,6 @@ div
     })
 
     isLoading.value = false
-    console.log('document: ', document)
   }
 
   const sign = async () => {
@@ -101,7 +95,7 @@ div
     } catch(e: any){
       isSubmitting.value = false
       console.error(e)
-      FailAlert(`Ошибка подписи документа: ${e.message}`)
+      failAlert(`Ошибка подписи документа: ${e.message}`)
     }
 
   }

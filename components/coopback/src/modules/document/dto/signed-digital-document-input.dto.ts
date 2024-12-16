@@ -4,7 +4,7 @@ import type { Cooperative } from 'cooptypes';
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 
 @InputType('SignedDigitalDocumentInput')
-export class SignedDigitalDocumentInputDTO<TMeta> implements Cooperative.Document.ISignedDocument {
+export class SignedDigitalDocumentInputDTO implements Cooperative.Document.ISignedDocument {
   @Field(() => String, { description: 'Хэш документа' })
   @IsString()
   public readonly hash!: string;
@@ -21,7 +21,7 @@ export class SignedDigitalDocumentInputDTO<TMeta> implements Cooperative.Documen
   @IsJSON()
   public readonly meta!: MetaDocumentInputDTO;
 
-  constructor(data: SignedDigitalDocumentInputDTO<TMeta>) {
+  constructor(data: SignedDigitalDocumentInputDTO) {
     Object.assign(this, data);
   }
 }

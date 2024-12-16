@@ -29,18 +29,18 @@ export interface IMetaDocument {
   links: string[]
 }
 
-export interface ISignedDocument {
+export interface ISignedDocument<T = any> {
   hash: string
   public_key: string
   signature: string
-  meta: IMetaDocument
+  meta: IMetaDocument & T
 }
 
-export interface IGeneratedDocument {
+export interface IGeneratedDocument<T = any> {
   full_title?: string
   html: string
   hash: string
-  meta: IMetaDocument
+  meta: IMetaDocument & T
   binary: Uint8Array
 }
 
