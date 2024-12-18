@@ -6,6 +6,8 @@ import * as CoopenomicsAgreement from './50.CoopenomicsAgreement'
 import * as ParticipantApplication from './100.ParticipantApplication'
 import * as DecisionOfParticipantApplication from './501.DecisionOfParticipantApplication'
 import * as SelectBranchStatement from './101.SelectBranchStatement'
+import * as ProjectFreeDecision from './599.ProjectFreeDecision'
+import * as FreeDecision from './600.FreeDecision'
 
 export const Registry = {
   1: WalletAgreement,
@@ -16,4 +18,6 @@ export const Registry = {
   100: ParticipantApplication,
   101: SelectBranchStatement,
   501: DecisionOfParticipantApplication,
+  599: ProjectFreeDecision,
+  600: FreeDecision,
 }

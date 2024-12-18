@@ -1,8 +1,9 @@
 import path from 'node:path'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { RegistratorContract, SovietContract } from 'cooptypes'
+import { v4 as uuidv4 } from 'uuid'
 import { Generator } from '../src'
-import type { IGeneratedDocument } from '../src/Interfaces/Documents'
+import type { IGenerate, IGeneratedDocument } from '../src/Interfaces/Documents'
 import { saveBufferToDisk } from '../src/Utils/saveBufferToDisk'
 import { loadBufferFromDisk } from '../src/Utils/loadBufferFromDisk'
 import { calculateSha256 } from '../src/Utils/calculateSHA'
@@ -11,7 +12,7 @@ import { MongoDBConnector } from '../src/Services/Databazor'
 const mongoUri = 'mongodb://127.0.0.1:27017/cooperative-test'
 const coopname = 'voskhod'
 
-import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData, IVars } from '../src/Models'
+import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData, ExternalProjectData, IVars } from '../src/Models'
 import type { PaymentData } from '../src/Models/PaymentMethod'
 import type { CoopenomicsAgreement } from '../src/templates'
 import { PrivacyPolicy, Registry, RegulationElectronicSignature, UserAgreement, WalletAgreement } from '../src/templates'
@@ -44,6 +45,37 @@ async function deleteAllFiles(folderPath: string) {
 const generator = new Generator()
 generator.connect(mongoUri)
 
+async function testDocumentGeneration(
+  params: IGenerate, // Динамический объект с любыми параметрами
+) {
+  const document: IGeneratedDocument = await generator.generate(params)
+
+  const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
+  await saveBufferToDisk(document.binary, filename1)
+
+  const regenerated_document: IGeneratedDocument = await generator.generate({
+    ...document.meta,
+  })
+
+  const filename2 = `${document.meta.title}-${document.meta.username}-regenerated.pdf`
+  await saveBufferToDisk(regenerated_document.binary, filename2)
+
+  expect(document.meta).toEqual(regenerated_document.meta)
+  expect(document.hash).toEqual(regenerated_document.hash)
+
+  const document_from_disk1 = await loadBufferFromDisk(filename1)
+  const document_from_disk2 = await loadBufferFromDisk(filename2)
+
+  const hash1 = calculateSha256(document_from_disk1)
+  const hash2 = calculateSha256(document_from_disk2)
+
+  const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
+
+  expect(getted_document).toBeDefined()
+  expect(getted_document.hash).toEqual(document.hash)
+
+  expect(hash1).toEqual(hash2)
+}
 beforeAll(async () => {
   await deleteAllFiles('./documents')
 })
@@ -116,18 +148,6 @@ describe('тест генератора документов', async () => {
         data: {
           coopname: 'voskhod',
           member: 'ant',
-          decision_id: '1',
-        } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
-      })
-
-      await actions.insertOne({
-        block_num: 0,
-        account: 'soviet',
-        name: 'votefor',
-        receiver: 'soviet',
-        data: {
-          coopname: 'voskhod',
-          member: 'ant',
           decision_id: '2',
         } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
       })
@@ -141,6 +161,30 @@ describe('тест генератора документов', async () => {
           coopname: 'voskhod',
           member: 'ant',
           decision_id: '3',
+        } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
+      })
+
+      await actions.insertOne({
+        block_num: 0,
+        account: 'soviet',
+        name: 'votefor',
+        receiver: 'soviet',
+        data: {
+          coopname: 'voskhod',
+          member: 'ant',
+          decision_id: '4',
+        } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
+      })
+
+      await actions.insertOne({
+        block_num: 0,
+        account: 'soviet',
+        name: 'votefor',
+        receiver: 'soviet',
+        data: {
+          coopname: 'voskhod',
+          member: 'ant',
+          decision_id: '5',
         } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
       })
 
@@ -387,6 +431,64 @@ describe('тест генератора документов', async () => {
     }
   })
 
+  it('сохранение и извлечение данных проекта решения', async () => {
+    const projectData: ExternalProjectData = {
+      id: '123',
+      header: 'Проект решения ни о чём',
+      question: 'Предлагается решить то да сё и вот это ещё. ',
+      decision: 'Решили! Делаем вот то и еще вот это.',
+    }
+
+    const saved = await generator.save('project', projectData)
+
+    const retrivedData = await generator.get('project', { id: projectData.id }) as any
+
+    Object.keys(projectData).forEach((field) => {
+      expect(retrivedData[field]).toBeDefined()
+    })
+
+    expect(retrivedData._id).toEqual(saved.insertedId)
+  })
+
+  it('генерируем проект свободного решения', async () => {
+    await testDocumentGeneration({
+      registry_id: 599,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      project_id: '123',
+    })
+  })
+
+  it('генерируем свободное решение', async () => {
+    await testDocumentGeneration({
+      registry_id: 600,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      project_id: '123',
+      decision_id: 5,
+    })
+  })
+
+  it('генерируем заявление на вступление физического лица', async () => {
+    await testDocumentGeneration({
+      registry_id: 100,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      signature: signatureExample,
+    })
+
+    await testDocumentGeneration({
+      registry_id: 501,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      decision_id: 2,
+    })
+  })
+
   it('генерируем заявление на присоединение к ЦПП "Цифровой Кошелёк"', async () => {
     const params: WalletAgreement.Action = {
       coopname: 'voskhod',
@@ -396,38 +498,7 @@ describe('тест генератора документов', async () => {
       protocol_number: '01-01-2024',
       protocol_day_month_year: '1 января 2024 г.',
     }
-
-    const document: IGeneratedDocument = await generator.generate(params)
-
-    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(document.binary, filename1)
-
-    const regenerated_document: IGeneratedDocument = await generator.generate({
-      ...document.meta,
-    })
-
-    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(regenerated_document.binary, filename2)
-
-    expect(document.meta).toEqual(regenerated_document.meta)
-    expect(document.hash).toEqual(regenerated_document.hash)
-
-    const document_from_disk1 = await loadBufferFromDisk(filename1)
-    const document_from_disk2 = await loadBufferFromDisk(filename2)
-
-    const hash1 = calculateSha256(document_from_disk1)
-    const hash2 = calculateSha256(document_from_disk2)
-
-    const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
-
-    expect(getted_document).toBeDefined()
-    expect(getted_document.hash).toEqual(document.hash)
-
-    console.log('hash1: ', hash1)
-    console.log('hash2: ', hash2)
-    console.log(document.meta)
-
-    expect(hash1).toEqual(hash2)
+    await testDocumentGeneration(params)
   })
 
   it('генерируем согласие с правилами ЭЦП', async () => {
@@ -439,38 +510,7 @@ describe('тест генератора документов', async () => {
       protocol_number: '01-01-2024',
       protocol_day_month_year: '1 января 2024 г.',
     }
-
-    const document: IGeneratedDocument = await generator.generate(params)
-
-    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(document.binary, filename1)
-
-    const regenerated_document: IGeneratedDocument = await generator.generate({
-      ...document.meta,
-    })
-
-    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(regenerated_document.binary, filename2)
-
-    expect(document.meta).toEqual(regenerated_document.meta)
-    expect(document.hash).toEqual(regenerated_document.hash)
-
-    const document_from_disk1 = await loadBufferFromDisk(filename1)
-    const document_from_disk2 = await loadBufferFromDisk(filename2)
-
-    const hash1 = calculateSha256(document_from_disk1)
-    const hash2 = calculateSha256(document_from_disk2)
-
-    const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
-
-    expect(getted_document).toBeDefined()
-    expect(getted_document.hash).toEqual(document.hash)
-
-    console.log('hash1: ', hash1)
-    console.log('hash2: ', hash2)
-    console.log(document.meta)
-
-    expect(hash1).toEqual(hash2)
+    await testDocumentGeneration(params)
   })
 
   it('генерируем согласие с политикой конфиденциальности', async () => {
@@ -482,38 +522,7 @@ describe('тест генератора документов', async () => {
       protocol_number: '01-01-2024',
       protocol_day_month_year: '1 января 2024 г.',
     }
-
-    const document: IGeneratedDocument = await generator.generate(params)
-
-    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(document.binary, filename1)
-
-    const regenerated_document: IGeneratedDocument = await generator.generate({
-      ...document.meta,
-    })
-
-    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(regenerated_document.binary, filename2)
-
-    expect(document.meta).toEqual(regenerated_document.meta)
-    expect(document.hash).toEqual(regenerated_document.hash)
-
-    const document_from_disk1 = await loadBufferFromDisk(filename1)
-    const document_from_disk2 = await loadBufferFromDisk(filename2)
-
-    const hash1 = calculateSha256(document_from_disk1)
-    const hash2 = calculateSha256(document_from_disk2)
-
-    const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
-
-    expect(getted_document).toBeDefined()
-    expect(getted_document.hash).toEqual(document.hash)
-
-    console.log('hash1: ', hash1)
-    console.log('hash2: ', hash2)
-    console.log(document.meta)
-
-    expect(hash1).toEqual(hash2)
+    await testDocumentGeneration(params)
   })
 
   it('генерируем согласие с пользовательским соглашением', async () => {
@@ -525,88 +534,7 @@ describe('тест генератора документов', async () => {
       protocol_number: '01-01-2024',
       protocol_day_month_year: '1 января 2024 г.',
     }
-
-    const document: IGeneratedDocument = await generator.generate(params)
-
-    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(document.binary, filename1)
-
-    const regenerated_document: IGeneratedDocument = await generator.generate({
-      ...document.meta,
-    })
-
-    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(regenerated_document.binary, filename2)
-
-    expect(document.meta).toEqual(regenerated_document.meta)
-    expect(document.hash).toEqual(regenerated_document.hash)
-
-    const document_from_disk1 = await loadBufferFromDisk(filename1)
-    const document_from_disk2 = await loadBufferFromDisk(filename2)
-
-    const hash1 = calculateSha256(document_from_disk1)
-    const hash2 = calculateSha256(document_from_disk2)
-
-    const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
-
-    expect(getted_document).toBeDefined()
-    expect(getted_document.hash).toEqual(document.hash)
-
-    console.log('hash1: ', hash1)
-    console.log('hash2: ', hash2)
-    console.log(document.meta)
-
-    expect(hash1).toEqual(hash2)
-  })
-
-  it('генерируем заявление на вступление физического лица', async () => {
-    const document: IGeneratedDocument = await generator.generate({
-      registry_id: 100,
-      coopname: 'voskhod',
-      username: 'ant',
-      lang: 'ru',
-      signature: signatureExample,
-    })
-
-    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(document.binary, filename1)
-
-    const regenerated_document: IGeneratedDocument = await generator.generate({
-      ...document.meta,
-    })
-    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(regenerated_document.binary, filename2)
-
-    expect(document.meta).toEqual(regenerated_document.meta)
-    expect(document.hash).toEqual(regenerated_document.hash)
-
-    const document_from_disk1 = await loadBufferFromDisk(filename1)
-    const document_from_disk2 = await loadBufferFromDisk(filename2)
-
-    const hash1 = calculateSha256(document_from_disk1)
-    const hash2 = calculateSha256(document_from_disk2)
-
-    const getted_document = await generator.getDocument({ hash: regenerated_document.hash })
-
-    expect(getted_document).toBeDefined()
-    expect(getted_document.hash).toEqual(document.hash)
-
-    // console.log('hash1: ', hash1)
-    // console.log('hash2: ', hash2)
-    // console.log(document)
-
-    expect(hash1).toEqual(hash2)
-
-    const decision_document: IGeneratedDocument = await generator.generate({
-      registry_id: 501,
-      coopname: 'voskhod',
-      username: 'ant',
-      lang: 'ru',
-      decision_id: 1,
-    })
-
-    const filename3 = `${decision_document.meta.title}-${decision_document.meta.username}.pdf`
-    await saveBufferToDisk(decision_document.binary, filename3)
+    await testDocumentGeneration(params)
   })
 
   it('сохранение данных организации', async () => {
@@ -668,7 +596,7 @@ describe('тест генератора документов', async () => {
   })
 
   it('генерируем заявление на вступление юридического лица', async () => {
-    const document: IGeneratedDocument = await generator.generate({
+    await testDocumentGeneration({
       registry_id: 100,
       coopname: 'voskhod',
       username: 'exampleorg',
@@ -676,41 +604,13 @@ describe('тест генератора документов', async () => {
       signature: signatureExample,
     })
 
-    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(document.binary, filename1)
-
-    const regenerated_document: IGeneratedDocument = await generator.generate({
-      ...document.meta,
-    })
-
-    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(regenerated_document.binary, filename2)
-
-    expect(document.meta).toEqual(regenerated_document.meta)
-    expect(document.hash).toEqual(regenerated_document.hash)
-
-    const document_from_disk1 = await loadBufferFromDisk(filename1)
-    const document_from_disk2 = await loadBufferFromDisk(filename2)
-
-    const hash1 = calculateSha256(document_from_disk1)
-    const hash2 = calculateSha256(document_from_disk2)
-
-    // console.log('hash1: ', hash1)
-    // console.log('hash2: ', hash2)
-    // console.log(document)
-
-    expect(hash1).toEqual(hash2)
-
-    const decision_document: IGeneratedDocument = await generator.generate({
+    await testDocumentGeneration({
       registry_id: 501,
       coopname: 'voskhod',
       username: 'exampleorg',
       lang: 'ru',
-      decision_id: 2,
+      decision_id: 3,
     })
-
-    const filename3 = `${decision_document.meta.title}-${decision_document.meta.username}.pdf`
-    await saveBufferToDisk(decision_document.binary, filename3)
   })
 
   it('сохранение данных индивидуального предпринимателя', async () => {
@@ -765,7 +665,7 @@ describe('тест генератора документов', async () => {
   })
 
   it('генерируем заявление на вступление индивидуального предпринимателя', async () => {
-    const document: IGeneratedDocument = await generator.generate({
+    await testDocumentGeneration({
       registry_id: 100,
       coopname: 'voskhod',
       username: 'entrepreneur',
@@ -773,44 +673,16 @@ describe('тест генератора документов', async () => {
       signature: signatureExample,
     })
 
-    const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(document.binary, filename1)
-
-    const regenerated_document: IGeneratedDocument = await generator.generate({
-      ...document.meta,
-    })
-
-    const filename2 = `regenerated-${document.meta.title}-${document.meta.username}.pdf`
-    await saveBufferToDisk(regenerated_document.binary, filename2)
-
-    expect(document.meta).toEqual(regenerated_document.meta)
-    expect(document.hash).toEqual(regenerated_document.hash)
-
-    const document_from_disk1 = await loadBufferFromDisk(filename1)
-    const document_from_disk2 = await loadBufferFromDisk(filename2)
-
-    const hash1 = calculateSha256(document_from_disk1)
-    const hash2 = calculateSha256(document_from_disk2)
-
-    // console.log('hash1: ', hash1)
-    // console.log('hash2: ', hash2)
-    // console.log(document)
-
-    expect(hash1).toEqual(hash2)
-
-    const decision_document: IGeneratedDocument = await generator.generate({
+    await testDocumentGeneration({
       registry_id: 501,
       coopname: 'voskhod',
       username: 'entrepreneur',
       lang: 'ru',
-      decision_id: 3,
+      decision_id: 4,
     })
-
-    const filename3 = `${decision_document.meta.title}-${decision_document.meta.username}.pdf`
-    await saveBufferToDisk(decision_document.binary, filename3)
   })
 
-  it('#1', async () => {
+  it('генерируем соглашение на подключение', async () => {
     const voskhodData: ExternalOrganizationData = {
       username: 'voskhod',
       type: 'coop',
@@ -956,9 +828,6 @@ describe('тест генератора документов', async () => {
       lang: 'ru',
     }
 
-    const document: IGeneratedDocument = await generator.generate(act)
-
-    const filename1 = `Соглашение_о_подключении_${coopname}.pdf`
-    await saveBufferToDisk(document.binary, filename1)
+    await testDocumentGeneration(act)
   })
 })

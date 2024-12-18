@@ -5,11 +5,11 @@ import { AuthModule } from './auth/auth.module';
 import { BranchModule } from './branch/branch.module';
 import { LoggerModule } from './logger/logger-app.module';
 import { PaymentMethodModule } from './payment-method/payment-method.module';
-import { RedisModule } from '~/infrastructure/redis/redis.module';
 import { SystemModule } from './system/system.module';
 import { AppStoreModule } from './appstore/appstore-app.module';
 import { QueueModule } from './queue/queue-app.module';
 import { DocumentModule } from './document/document.module';
+import { RedisAppModule } from './redis/redis-app.module';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { DocumentModule } from './document/document.module';
     LoggerModule,
     PaymentMethodModule,
     QueueModule,
-    RedisModule,
+    RedisAppModule,
     SystemModule,
     DocumentModule,
   ],
@@ -32,7 +32,7 @@ import { DocumentModule } from './document/document.module';
     LoggerModule,
     PaymentMethodModule,
     QueueModule,
-    RedisModule,
+    RedisAppModule,
     SystemModule,
     DocumentModule,
   ],

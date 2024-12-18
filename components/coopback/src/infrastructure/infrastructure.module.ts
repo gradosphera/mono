@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import config from '~/config/config';
 import { BlockchainModule } from './blockchain/blockchain.module';
 import { GeneratorInfrastructureModule } from './generator/generator.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { GeneratorInfrastructureModule } from './generator/generator.module';
     GraphqlModule,
     BlockchainModule,
     GeneratorInfrastructureModule,
+    RedisModule,
   ],
   exports: [
     MongooseModule.forRoot(config.mongoose.url),
@@ -21,6 +23,7 @@ import { GeneratorInfrastructureModule } from './generator/generator.module';
     GraphqlModule,
     BlockchainModule,
     GeneratorInfrastructureModule,
+    RedisModule,
   ],
 })
 export class InfrastructureModule {}

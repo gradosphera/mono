@@ -4,7 +4,7 @@ import type { Cooperative as TCooperative } from 'cooptypes'
 import { DraftContract, SovietContract } from 'cooptypes'
 import type { IBankAccount, ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, IPaymentData, ITemplate, ITranslations, externalDataTypes } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
-import { type IVars, Individual, Organization, PaymentMethod, Vars } from '../Models'
+import { type IVars, Individual, type InternalProjectData, Organization, PaymentMethod, Project, Vars } from '../Models'
 import type { IGenerate, IGenerationOptions } from '../Interfaces/Documents'
 import { PDFService } from '../Services/Generator'
 import packageJson from '../../package.json'
@@ -100,6 +100,16 @@ export abstract class DocFactory<T extends IGenerate> {
     return coop
   }
 
+  async getProject(id: string, block_num?: number): Promise<InternalProjectData> {
+    const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
+
+    const project = await new Project(this.storage).getOne({ id, ...block_filter })
+
+    if (!project)
+      throw new Error('Проект решения не найден')
+    return project
+  }
+
   async getVars(coopname: string, block_num?: number): Promise<IVars> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
@@ -111,6 +121,26 @@ export abstract class DocFactory<T extends IGenerate> {
   }
 
   async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<TCooperative.Document.IDecisionData> {
+    /**
+     * Мы здесь извлекаем голоса из действий, а не из дельт таблиц т.к. в случае использования дельт возможна исключительная ситуация,
+     * когда за решение принимаются голоса и происходит утверждение из дальнейшим удалением объекта из памяти в одном блоке, то
+     * промежуточные дельты не фиксируются, а мы сможем увидеть только результат - удаление, т.е. пустой объект.
+     * Позже перепроверить еще раз.
+     */
+    // const decision = (await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
+    //   filter: JSON.stringify({
+    //     code: SovietContract.contractName.production,
+    //     scope: coopname,
+    //     table: SovietContract.Tables.Decisions.tableName,
+    //     primary_key: String(decision_id),
+    //     present: true,
+    //   }),
+    //   limit: String(1),
+    // })))?.results[0]
+
+    // if (!decision)
+    //   throw new Error('Объект решения не найден')
+
     const votes_for_actions = (await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-actions`, new URLSearchParams({
       filter: JSON.stringify({
         'account': SovietContract.contractName.production,
@@ -153,6 +183,7 @@ export abstract class DocFactory<T extends IGenerate> {
       votes_against,
       votes_abstained,
       voters_percent,
+      // decision,
     }
   }
 
@@ -222,7 +253,7 @@ export abstract class DocFactory<T extends IGenerate> {
   }
 
   async generatePDF(
-    data: externalDataTypes | null,
+    data: externalDataTypes | string,
     context: string,
     vars: ICombinedData,
     translation: ITranslations,
@@ -241,14 +272,19 @@ export abstract class DocFactory<T extends IGenerate> {
     return document
   }
 
-  getFullName(data: externalDataTypes | null): string {
-    if (data) {
-      if ('first_name' in data)
-        return `${data.last_name} ${data.first_name} ${data.middle_name}`
-
-      if ('represented_by' in data)
-        return `${data.represented_by.last_name} ${data.represented_by.first_name} ${data.represented_by.middle_name}`
+  getFullName(data: externalDataTypes | string): string {
+    if (typeof data === 'string') {
+      return data // Если data — строка, вернуть как есть
     }
+
+    if ('first_name' in data) {
+      return `${data.last_name} ${data.first_name} ${data.middle_name}`
+    }
+
+    if ('represented_by' in data) {
+      return `${data.represented_by.last_name} ${data.represented_by.first_name} ${data.represented_by.middle_name}`
+    }
+
     return ''
   }
 

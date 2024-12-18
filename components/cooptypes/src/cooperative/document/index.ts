@@ -131,4 +131,12 @@ export interface IDecisionData {
   votes_against: number
   votes_abstained: number
   voters_percent: number
+  // decision: SovietContract.Tables.Decisions.IDecision
+}
+
+export interface IProjectData {
+  id: string
+  header: string
+  question: string
+  decision: string
 }
