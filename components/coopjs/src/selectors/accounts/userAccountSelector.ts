@@ -21,12 +21,8 @@ export const rawUserAccountSelector = {
 };
 
 
-// Валидация селекторов
-const validate = (
-  selector: typeof rawUserAccountSelector,
-): MakeAllFieldsRequired<ValueTypes["UserAccount"]> => selector;
-
-validate(rawUserAccountSelector);
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes["UserAccount"]> = rawUserAccountSelector;
 
 export const userAccountSelector = Selector("UserAccount")(
   rawUserAccountSelector,

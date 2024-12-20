@@ -32,12 +32,10 @@ const rawBranchSelectorForUsers = {
   type: true,
 };
 
-// Проверяем валидность при исключении параметров trustee и trusted, которые недоступны публично без специальной авторизации
-const validateBranchSelector = (
-  selector: typeof rawBranchSelectorForUsers,
-): MakeAllFieldsRequired<Omit<ValueTypes["Branch"], "trustee" | "trusted">> =>
-  selector;
-validateBranchSelector(rawBranchSelectorForUsers);
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<
+  Omit<ValueTypes["Branch"], "trustee" | "trusted">
+> = rawBranchSelectorForUsers;
 
 export const branchSelectorForUsers = Selector("Branch")(
   rawBranchSelectorForUsers,

@@ -16,6 +16,9 @@ export const AllTypesProps: Record<string,any> = {
 	CreateBranchInput:{
 
 	},
+	CreateProjectFreeDecision:{
+		document:"ProjectFreeDecisionSignedDocumentInput"
+	},
 	DateTime: `scalar.DateTime` as const,
 	DeleteBranchInput:{
 
@@ -34,6 +37,9 @@ export const AllTypesProps: Record<string,any> = {
 		created_at:"DateTime",
 		updated_at:"DateTime"
 	},
+	GenerateDocumentOptionsInput:{
+
+	},
 	GetAccountInput:{
 
 	},
@@ -47,6 +53,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	JSON: `scalar.JSON` as const,
+	LangType: "enum" as const,
 	Mutation:{
 		addTrustedAccount:{
 			data:"AddTrustedAccountInput"
@@ -69,8 +76,19 @@ export const AllTypesProps: Record<string,any> = {
 		editBranch:{
 			data:"EditBranchInput"
 		},
+		generateProjectOfFreeDecision:{
+			data:"ProjectFreeDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateSelectBranchDocument:{
+			data:"SelectBranchGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
 		installExtension:{
 			data:"ExtensionInput"
+		},
+		publishProjectOfFreeDecision:{
+			data:"CreateProjectFreeDecision"
 		},
 		selectBranch:{
 			data:"SelectBranchInput"
@@ -84,6 +102,15 @@ export const AllTypesProps: Record<string,any> = {
 		updateExtension:{
 			data:"ExtensionInput"
 		}
+	},
+	ProjectFreeDecisionGenerateDocumentInput:{
+
+	},
+	ProjectFreeDecisionSignedDocumentInput:{
+		meta:"ProjectFreeDecisionSignedMetaDocumentInput"
+	},
+	ProjectFreeDecisionSignedMetaDocumentInput:{
+
 	},
 	Query:{
 		getAccount:{
@@ -99,13 +126,16 @@ export const AllTypesProps: Record<string,any> = {
 			data:"GetPaymentMethodsInput"
 		}
 	},
-	SelectBranchDocumentInput:{
-		meta:"SelectBranchMetaDocumentInput"
+	SelectBranchGenerateDocumentInput:{
+
 	},
 	SelectBranchInput:{
-		document:"SelectBranchDocumentInput"
+		document:"SelectBranchSignedDocumentInput"
 	},
-	SelectBranchMetaDocumentInput:{
+	SelectBranchSignedDocumentInput:{
+		meta:"SelectBranchSignedMetaDocumentInput"
+	},
+	SelectBranchSignedMetaDocumentInput:{
 
 	},
 	SystemStatus: "enum" as const,
@@ -276,6 +306,19 @@ export const ReturnTypes: Record<string,any> = {
 		key:"String",
 		weight:"Int"
 	},
+	MetaDocument:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"LangType",
+		links:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
 	MonoAccount:{
 		email:"String",
 		has_account:"Boolean",
@@ -298,7 +341,10 @@ export const ReturnTypes: Record<string,any> = {
 		deletePaymentMethod:"Boolean",
 		deleteTrustedAccount:"Branch",
 		editBranch:"Branch",
+		generateProjectOfFreeDecision:"ProjectFreeDecisionDocument",
+		generateSelectBranchDocument:"SelectBranchDocument",
 		installExtension:"Extension",
+		publishProjectOfFreeDecision:"Boolean",
 		selectBranch:"Boolean",
 		uninstallExtension:"Boolean",
 		updateBankAccount:"PaymentMethod",
@@ -360,6 +406,27 @@ export const ReturnTypes: Record<string,any> = {
 		permission:"PermissionLevel",
 		weight:"Int"
 	},
+	ProjectFreeDecisionDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"ProjectFreeDecisionMetaDocumentOutput"
+	},
+	ProjectFreeDecisionMetaDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"LangType",
+		links:"String",
+		project_id:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
 	Query:{
 		getAccount:"Account",
 		getBranches:"Branch",
@@ -394,6 +461,27 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	SbpAccount:{
 		phone:"String"
+	},
+	SelectBranchDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"SelectBranchMetaDocumentOutput"
+	},
+	SelectBranchMetaDocumentOutput:{
+		block_num:"Int",
+		braname:"String",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"LangType",
+		links:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
 	},
 	SignedBlockchainDocument:{
 		hash:"String",

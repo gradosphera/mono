@@ -13,9 +13,9 @@ const rawBankAccountSelector = {
   currency: true,
 };
 
-// Проверяем валидность
-const validateBankAccountSelector = (selector: typeof rawBankAccountSelector): MakeAllFieldsRequired<ValueTypes['BankAccount']> => selector;
-validateBankAccountSelector(rawBankAccountSelector);
+
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes["BankAccount"]> = rawBankAccountSelector;
 
 export const bankAccountSelector = Selector('BankAccount')(rawBankAccountSelector);
 export { rawBankAccountSelector };

@@ -18,9 +18,8 @@ const rawExtensionSelector = {
   installed: true,
 };
 
-// Проверяем валидность
-const validateExtensionSelector = (selector: typeof rawExtensionSelector): MakeAllFieldsRequired<ValueTypes['Extension']> => selector;
-validateExtensionSelector(rawExtensionSelector);
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes['Extension']> = rawExtensionSelector;
 
 export const extensionSelector = Selector('Extension')(rawExtensionSelector);
 export { rawExtensionSelector };

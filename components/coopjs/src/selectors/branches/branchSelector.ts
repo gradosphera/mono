@@ -34,11 +34,8 @@ const rawBranchSelector = {
   type: true,
 };
 
-// Проверяем валидность
-const validateBranchSelector = (
-  selector: typeof rawBranchSelector,
-): MakeAllFieldsRequired<ValueTypes["Branch"]> => selector;
-validateBranchSelector(rawBranchSelector);
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes["Branch"]> = rawBranchSelector;
 
 export const branchSelector = Selector("Branch")(rawBranchSelector);
 export { rawBranchSelector };

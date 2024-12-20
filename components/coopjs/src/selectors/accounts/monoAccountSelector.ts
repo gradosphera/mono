@@ -16,13 +16,9 @@ export const rawMonoAccountSelector = {
   username: true,
 };
 
-// Валидация селекторов
-const validateSystemAccountSelector = (
-  selector: typeof rawMonoAccountSelector,
-): MakeAllFieldsRequired<ValueTypes["MonoAccount"]> => selector;
-validateSystemAccountSelector(rawMonoAccountSelector);
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes["MonoAccount"]> = rawMonoAccountSelector;
 
 export const monoAccountSelector = Selector("MonoAccount")(
   rawMonoAccountSelector,
 );
-

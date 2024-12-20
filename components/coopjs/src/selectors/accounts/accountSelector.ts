@@ -13,9 +13,8 @@ const rawAccountSelector = {
   user_account: rawUserAccountSelector,  
 };
 
-const validate = (
-  selector: typeof rawAccountSelector,
-): MakeAllFieldsRequired<ValueTypes["Account"]> => selector;
-validate(rawAccountSelector);
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes["Account"]> = rawAccountSelector;
 
 export const accountSelector = Selector("Account")(rawAccountSelector);
+export { rawAccountSelector };

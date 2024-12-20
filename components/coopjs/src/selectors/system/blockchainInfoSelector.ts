@@ -21,10 +21,9 @@ export const rawBlockchainInfoSelector = {
   virtual_block_net_limit: true,
 };
 
-const validateBlockchainInfoSelector = (
-  selector: typeof rawBlockchainInfoSelector,
-): MakeAllFieldsRequired<ValueTypes["BlockchainInfoDTO"]> => selector;
-validateBlockchainInfoSelector(rawBlockchainInfoSelector);
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes['BlockchainInfoDTO']> = rawBlockchainInfoSelector;
+
 
 export const blockchainInfoSelector = Selector("BlockchainInfoDTO")(
   rawBlockchainInfoSelector,

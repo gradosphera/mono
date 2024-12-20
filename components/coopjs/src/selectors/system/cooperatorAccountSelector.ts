@@ -41,10 +41,8 @@ export const rawCooperatorAccountSelector = {
   },
 };
 
-const validateCooperatorAccountSelector = (
-  selector: typeof rawCooperatorAccountSelector,
-): MakeAllFieldsRequired<ValueTypes["CooperativeOperatorAccount"]> => selector;
-validateCooperatorAccountSelector(rawCooperatorAccountSelector);
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes['CooperativeOperatorAccount']> = rawCooperatorAccountSelector;
 
 export const cooperatorAccountSelector = Selector("CooperativeOperatorAccount")(
   rawCooperatorAccountSelector,

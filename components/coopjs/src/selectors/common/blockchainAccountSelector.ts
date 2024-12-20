@@ -71,11 +71,9 @@ export const rawBlockchainAccountSelector = {
   },
   voter_info: true,
 };
-// Валидация селекторов
-const validateSystemAccountSelector = (
-  selector: typeof rawBlockchainAccountSelector,
-): MakeAllFieldsRequired<ValueTypes["BlockchainAccount"]> => selector;
-validateSystemAccountSelector(rawBlockchainAccountSelector);
+
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes["BlockchainAccount"]> = rawBlockchainAccountSelector;
 
 export const systemAccountSelector = Selector("BlockchainAccount")(
   rawBlockchainAccountSelector,

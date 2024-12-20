@@ -1208,6 +1208,16 @@ export type ValueTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string | Variable<any, string>
 };
+	["CreateProjectFreeDecision"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
+	document: ValueTypes["ProjectFreeDecisionSignedDocumentInput"] | Variable<any, string>,
+	/** Строка мета-информации */
+	meta: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
 	["DeleteBranchInput"]: {
@@ -1293,6 +1303,10 @@ export type ValueTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>
 };
+	["GenerateDocumentOptionsInput"]: {
+	/** Пропустить сохранение */
+	skip_save?: boolean | undefined | null | Variable<any, string>
+};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
@@ -1353,6 +1367,33 @@ export type ValueTypes = {
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Язык документа */
+["LangType"]:LangType;
+	["MetaDocument"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["MonoAccount"]: AliasType<{
 	/** Электронная почта пользователя */
 	email?:boolean | `@${string}`,
@@ -1388,7 +1429,10 @@ deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>}
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ValueTypes["DeleteTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 editBranch?: [{	data: ValueTypes["EditBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
+generateProjectOfFreeDecision?: [{	data: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["ProjectFreeDecisionDocument"]],
+generateSelectBranchDocument?: [{	data: ValueTypes["SelectBranchGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["SelectBranchDocument"]],
 installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
+publishProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecision"] | Variable<any, string>},boolean | `@${string}`],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
 updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
@@ -1495,6 +1539,106 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ProjectFreeDecisionDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["ProjectFreeDecisionMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["ProjectFreeDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Идентификатор проекта решения */
+	project_id: string | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["ProjectFreeDecisionMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** Идентификатор проекта решения */
+	project_id?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProjectFreeDecisionSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ValueTypes["ProjectFreeDecisionSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Публичный ключ документа */
+	public_key: string | Variable<any, string>,
+	/** Подпись документа */
+	signature: string | Variable<any, string>
+};
+	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** Идентификатор проекта решения */
+	project_id: string | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
 	["Query"]: AliasType<{
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
@@ -1555,30 +1699,94 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["SelectBranchDocumentInput"]: {
+	["SelectBranchDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
 	/** Хэш документа */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для создания кооперативного участка */
-	meta: ValueTypes["SelectBranchMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta?:ValueTypes["SelectBranchMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["SelectBranchGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Идентификатор имени аккаунта кооперативного участка */
+	braname: string | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
 };
 	["SelectBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Подписанный электронный документ (registry_id == 101) */
-	document: ValueTypes["SelectBranchDocumentInput"] | Variable<any, string>,
+	/** Подписанный электронный документ (generateSelectBranchDocument) */
+	document: ValueTypes["SelectBranchSignedDocumentInput"] | Variable<any, string>,
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
-	["SelectBranchMetaDocumentInput"]: {
+	["SelectBranchMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Идентификатор имени аккаунта кооперативного участка */
+	braname?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["SelectBranchSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta: ValueTypes["SelectBranchSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Публичный ключ документа */
+	public_key: string | Variable<any, string>,
+	/** Подпись документа */
+	signature: string | Variable<any, string>
+};
+	["SelectBranchSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num: number | Variable<any, string>,
-	/** Имя аккаунта кооперативного участка */
+	/** Идентификатор имени аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
 	/** Название кооператива, связанное с документом */
 	coopname: string | Variable<any, string>,
@@ -1984,6 +2192,16 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateProjectFreeDecision"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
+	document: ResolverInputTypes["ProjectFreeDecisionSignedDocumentInput"],
+	/** Строка мета-информации */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
 	["DeleteBranchInput"]: {
@@ -2069,6 +2287,10 @@ export type ResolverInputTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ResolverInputTypes["DateTime"] | undefined | null
 };
+	["GenerateDocumentOptionsInput"]: {
+	/** Пропустить сохранение */
+	skip_save?: boolean | undefined | null
+};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
@@ -2129,6 +2351,33 @@ export type ResolverInputTypes = {
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Язык документа */
+["LangType"]:LangType;
+	["MetaDocument"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["MonoAccount"]: AliasType<{
 	/** Электронная почта пользователя */
 	email?:boolean | `@${string}`,
@@ -2164,7 +2413,10 @@ deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${s
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ResolverInputTypes["DeleteTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 editBranch?: [{	data: ResolverInputTypes["EditBranchInput"]},ResolverInputTypes["Branch"]],
+generateProjectOfFreeDecision?: [{	data: ResolverInputTypes["ProjectFreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["ProjectFreeDecisionDocument"]],
+generateSelectBranchDocument?: [{	data: ResolverInputTypes["SelectBranchGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["SelectBranchDocument"]],
 installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
+publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecision"]},boolean | `@${string}`],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
 updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
@@ -2272,6 +2524,106 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ProjectFreeDecisionDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["ProjectFreeDecisionMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["ProjectFreeDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор проекта решения */
+	project_id: string,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ProjectFreeDecisionMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** Идентификатор проекта решения */
+	project_id?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProjectFreeDecisionSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ResolverInputTypes["ProjectFreeDecisionSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Идентификатор проекта решения */
+	project_id: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["Query"]: AliasType<{
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
@@ -2332,30 +2684,94 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["SelectBranchDocumentInput"]: {
+	["SelectBranchDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
 	/** Хэш документа */
-	hash: string,
-	/** Метаинформация для создания кооперативного участка */
-	meta: ResolverInputTypes["SelectBranchMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta?:ResolverInputTypes["SelectBranchMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["SelectBranchGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Идентификатор имени аккаунта кооперативного участка */
+	braname: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
 };
 	["SelectBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Подписанный электронный документ (registry_id == 101) */
-	document: ResolverInputTypes["SelectBranchDocumentInput"],
+	/** Подписанный электронный документ (generateSelectBranchDocument) */
+	document: ResolverInputTypes["SelectBranchSignedDocumentInput"],
 	/** Имя аккаунта пользователя */
 	username: string
 };
-	["SelectBranchMetaDocumentInput"]: {
+	["SelectBranchMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Идентификатор имени аккаунта кооперативного участка */
+	braname?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["SelectBranchSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta: ResolverInputTypes["SelectBranchSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["SelectBranchSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num: number,
-	/** Имя аккаунта кооперативного участка */
+	/** Идентификатор имени аккаунта кооперативного участка */
 	braname: string,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
@@ -2756,6 +3172,16 @@ export type ModelTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateProjectFreeDecision"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
+	document: ModelTypes["ProjectFreeDecisionSignedDocumentInput"],
+	/** Строка мета-информации */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
 	["DeleteBranchInput"]: {
@@ -2840,6 +3266,10 @@ export type ModelTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ModelTypes["DateTime"] | undefined | null
 };
+	["GenerateDocumentOptionsInput"]: {
+	/** Пропустить сохранение */
+	skip_save?: boolean | undefined | null
+};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
@@ -2898,6 +3328,31 @@ export type ModelTypes = {
 	/** Вес */
 	weight: number
 };
+	["LangType"]:LangType;
+	["MetaDocument"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: ModelTypes["LangType"],
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["MonoAccount"]: {
 		/** Электронная почта пользователя */
 	email: string,
@@ -2939,8 +3394,14 @@ export type ModelTypes = {
 	deleteTrustedAccount: ModelTypes["Branch"],
 	/** Изменить кооперативный участок */
 	editBranch: ModelTypes["Branch"],
+	/** Сгенерировать проект свободного решения */
+	generateProjectOfFreeDecision: ModelTypes["ProjectFreeDecisionDocument"],
+	/** Сгенерировать документ, подтверждающий выбор кооперативного участка */
+	generateSelectBranchDocument: ModelTypes["SelectBranchDocument"],
 	/** Установить расширение */
 	installExtension: ModelTypes["Extension"],
+	/** Опубликовать проект свободного решения для дальнейшего голосования совета по нему */
+	publishProjectOfFreeDecision: boolean,
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
 	/** Удалить расширение */
@@ -3039,6 +3500,104 @@ export type ModelTypes = {
 	/** Вес */
 	weight: number
 };
+	["ProjectFreeDecisionDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title?: string | undefined | null,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ProjectFreeDecisionMetaDocumentOutput"]
+};
+	["ProjectFreeDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор проекта решения */
+	project_id: string,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ProjectFreeDecisionMetaDocumentOutput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: ModelTypes["LangType"],
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Идентификатор проекта решения */
+	project_id: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ProjectFreeDecisionSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ProjectFreeDecisionSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Идентификатор проекта решения */
+	project_id: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["Query"]: {
 		/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
@@ -3097,30 +3656,92 @@ export type ModelTypes = {
 		/** Мобильный телефон получателя */
 	phone: string
 };
-	["SelectBranchDocumentInput"]: {
+	["SelectBranchDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title?: string | undefined | null,
 	/** Хэш документа */
 	hash: string,
-	/** Метаинформация для создания кооперативного участка */
-	meta: ModelTypes["SelectBranchMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta: ModelTypes["SelectBranchMetaDocumentOutput"]
+};
+	["SelectBranchGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Идентификатор имени аккаунта кооперативного участка */
+	braname: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
 };
 	["SelectBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Подписанный электронный документ (registry_id == 101) */
-	document: ModelTypes["SelectBranchDocumentInput"],
+	/** Подписанный электронный документ (generateSelectBranchDocument) */
+	document: ModelTypes["SelectBranchSignedDocumentInput"],
 	/** Имя аккаунта пользователя */
 	username: string
 };
-	["SelectBranchMetaDocumentInput"]: {
+	["SelectBranchMetaDocumentOutput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Идентификатор имени аккаунта кооперативного участка */
+	braname: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: ModelTypes["LangType"],
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["SelectBranchSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta: ModelTypes["SelectBranchSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["SelectBranchSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num: number,
-	/** Имя аккаунта кооперативного участка */
+	/** Идентификатор имени аккаунта кооперативного участка */
 	braname: string,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
@@ -3526,6 +4147,16 @@ export type GraphQLTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateProjectFreeDecision"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
+	document: GraphQLTypes["ProjectFreeDecisionSignedDocumentInput"],
+	/** Строка мета-информации */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]: "scalar" & { name: "DateTime" };
 	["DeleteBranchInput"]: {
@@ -3611,6 +4242,10 @@ export type GraphQLTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: GraphQLTypes["DateTime"] | undefined | null
 };
+	["GenerateDocumentOptionsInput"]: {
+		/** Пропустить сохранение */
+	skip_save?: boolean | undefined | null
+};
 	["GetAccountInput"]: {
 		/** Имя аккаунта пользователя */
 	username: string
@@ -3671,6 +4306,33 @@ export type GraphQLTypes = {
 	/** Вес */
 	weight: number
 };
+	/** Язык документа */
+["LangType"]: LangType;
+	["MetaDocument"]: {
+	__typename: "MetaDocument",
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: GraphQLTypes["LangType"],
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["MonoAccount"]: {
 	__typename: "MonoAccount",
 	/** Электронная почта пользователя */
@@ -3714,8 +4376,14 @@ export type GraphQLTypes = {
 	deleteTrustedAccount: GraphQLTypes["Branch"],
 	/** Изменить кооперативный участок */
 	editBranch: GraphQLTypes["Branch"],
+	/** Сгенерировать проект свободного решения */
+	generateProjectOfFreeDecision: GraphQLTypes["ProjectFreeDecisionDocument"],
+	/** Сгенерировать документ, подтверждающий выбор кооперативного участка */
+	generateSelectBranchDocument: GraphQLTypes["SelectBranchDocument"],
 	/** Установить расширение */
 	installExtension: GraphQLTypes["Extension"],
+	/** Опубликовать проект свободного решения для дальнейшего голосования совета по нему */
+	publishProjectOfFreeDecision: boolean,
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
 	/** Удалить расширение */
@@ -3826,6 +4494,106 @@ export type GraphQLTypes = {
 	/** Вес */
 	weight: number
 };
+	["ProjectFreeDecisionDocument"]: {
+	__typename: "ProjectFreeDecisionDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title?: string | undefined | null,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ProjectFreeDecisionMetaDocumentOutput"]
+};
+	["ProjectFreeDecisionGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор проекта решения */
+	project_id: string,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ProjectFreeDecisionMetaDocumentOutput"]: {
+	__typename: "ProjectFreeDecisionMetaDocumentOutput",
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: GraphQLTypes["LangType"],
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Идентификатор проекта решения */
+	project_id: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ProjectFreeDecisionSignedDocumentInput"]: {
+		/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ProjectFreeDecisionSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Идентификатор проекта решения */
+	project_id: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["Query"]: {
 	__typename: "Query",
 	/** Получить сводную информацию о аккаунте */
@@ -3890,30 +4658,94 @@ export type GraphQLTypes = {
 	/** Мобильный телефон получателя */
 	phone: string
 };
-	["SelectBranchDocumentInput"]: {
-		/** Хэш документа */
+	["SelectBranchDocument"]: {
+	__typename: "SelectBranchDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title?: string | undefined | null,
+	/** Хэш документа */
 	hash: string,
-	/** Метаинформация для создания кооперативного участка */
-	meta: GraphQLTypes["SelectBranchMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta: GraphQLTypes["SelectBranchMetaDocumentOutput"]
+};
+	["SelectBranchGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Идентификатор имени аккаунта кооперативного участка */
+	braname: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
 };
 	["SelectBranchInput"]: {
 		/** Имя аккаунта кооперативного участка */
 	braname: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Подписанный электронный документ (registry_id == 101) */
-	document: GraphQLTypes["SelectBranchDocumentInput"],
+	/** Подписанный электронный документ (generateSelectBranchDocument) */
+	document: GraphQLTypes["SelectBranchSignedDocumentInput"],
 	/** Имя аккаунта пользователя */
 	username: string
 };
-	["SelectBranchMetaDocumentInput"]: {
+	["SelectBranchMetaDocumentOutput"]: {
+	__typename: "SelectBranchMetaDocumentOutput",
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Идентификатор имени аккаунта кооперативного участка */
+	braname: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: GraphQLTypes["LangType"],
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["SelectBranchSignedDocumentInput"]: {
+		/** Хэш документа */
+	hash: string,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta: GraphQLTypes["SelectBranchSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["SelectBranchSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num: number,
-	/** Имя аккаунта кооперативного участка */
+	/** Идентификатор имени аккаунта кооперативного участка */
 	braname: string,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
@@ -4022,6 +4854,10 @@ export type GraphQLTypes = {
 	weight: number
 }
     }
+/** Язык документа */
+export enum LangType {
+	ru = "ru"
+}
 /** Состояние контроллера кооператива */
 export enum SystemStatus {
 	active = "active",
@@ -4046,20 +4882,27 @@ type ZEUS_VARIABLES = {
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["CreateBankAccountInput"]: ValueTypes["CreateBankAccountInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
+	["CreateProjectFreeDecision"]: ValueTypes["CreateProjectFreeDecision"];
 	["DateTime"]: ValueTypes["DateTime"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
 	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
+	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
 	["JSON"]: ValueTypes["JSON"];
-	["SelectBranchDocumentInput"]: ValueTypes["SelectBranchDocumentInput"];
+	["LangType"]: ValueTypes["LangType"];
+	["ProjectFreeDecisionGenerateDocumentInput"]: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"];
+	["ProjectFreeDecisionSignedDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedDocumentInput"];
+	["ProjectFreeDecisionSignedMetaDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedMetaDocumentInput"];
+	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];
 	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];
-	["SelectBranchMetaDocumentInput"]: ValueTypes["SelectBranchMetaDocumentInput"];
+	["SelectBranchSignedDocumentInput"]: ValueTypes["SelectBranchSignedDocumentInput"];
+	["SelectBranchSignedMetaDocumentInput"]: ValueTypes["SelectBranchSignedMetaDocumentInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];
 	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
 	["UpdateBankAccountInput"]: ValueTypes["UpdateBankAccountInput"];

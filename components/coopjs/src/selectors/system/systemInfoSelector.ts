@@ -12,9 +12,7 @@ const rawSystemInfoSelector = {
   system_status: true,
 };
 
-const validateGetInfoSelector = (
-  selector: typeof rawSystemInfoSelector,
-): MakeAllFieldsRequired<ValueTypes["SystemInfo"]> => selector;
-validateGetInfoSelector(rawSystemInfoSelector);
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes['SystemInfo']> = rawSystemInfoSelector;
 
 export const systemInfoSelector = Selector("SystemInfo")(rawSystemInfoSelector);
