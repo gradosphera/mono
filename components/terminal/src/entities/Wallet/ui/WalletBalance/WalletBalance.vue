@@ -7,6 +7,11 @@ const walletStore = useWalletStore()
 q-list(flat).q-gutter-sm
   q-item
     q-item-section
+      q-item-label(caption) Имя аккаунта
+      q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.username }}
+
+  q-item
+    q-item-section
       q-item-label(caption) Паевый счёт
       q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.available }}
 

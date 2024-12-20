@@ -1,5 +1,5 @@
 <template lang="pug">
-q-btn(@click="showDialog = true" size="sm" color="primary").border-radius-buttons
+q-btn(@click="showDialog = true" size="sm" color="primary")
   q-icon(name="fa-solid fa-chevron-down").q-mr-sm
   span получить возврат
 
@@ -49,11 +49,6 @@ const handlerSubmit = async (): Promise<void> => {
 </script>
 
 <style scoped>
-.border-radius-buttons {
-  border-top-right-radius: 20px;
-  border-top-left-radius: 0px !important;
-  border-bottom-right-radius: 0px !important;
-  border-bottom-left-radius: 0px !important;
-}
+
 </style>
 

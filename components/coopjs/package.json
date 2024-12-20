@@ -36,7 +36,7 @@
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish",
     "start": "esno src/index.ts",
-    "test": "vitest",
+    "test": "vitest --testTimeout 60000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

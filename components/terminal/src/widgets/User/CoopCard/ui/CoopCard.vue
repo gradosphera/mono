@@ -1,23 +1,23 @@
 <template lang="pug">
 div.q-pa-md
-  div.row.q-pt-md
-    div.col-md-6.col-xs-12
-      q-card(bordered flat round class="cooperative-card" style="border-radius: 20px;")
+  div.row
+    div.col-md-12.col-xs-12
+      q-card(flat round class="cooperative-card" style="border-radius: 20px;")
+        div.q-pa-sm.row.items-center.q-pa-md
+          div.col-12.col-md-3.flex.justify-center
+            AutoAvatar(style="width: 60px; border-radius: 50%;" :username="currentUser.username")
+          div.col-12.col-md-9.q-mt-sm.q-mt-md-0
+            q-badge(color="primary" style="font-size: 12px; margin-bottom: 4px;") Председатель совета
+            div.text-h6 {{displayName}}
         div.row
-          DepositButton.col-6
-          WithdrawButton.col-6
-        div.flex.justify-between
-          AutoAvatar(style="width: 60px;" :username="currentUser.username").q-pa-sm.q-pt-lg
-          div.text-right.q-pa-sm
-            div(style="letter-spacing: 3px;").text-grey VIRTUAL
-            div.text-overline
-              span 01/2106
-        div.q-pa-sm
-          q-badge(style="font-size: 10px") {{formattedUsername.toUpperCase()}}
-          div.text-subtitle2 {{displayName}}
+          DepositButton.col-6.border-left-radius-buttons
+          WithdrawButton.col-6.border-right-radius-buttons
 
-    div.col-md-6.col-xs-12.q-mt-lg
-      WalletBalance
+      WalletBalance.q-mt-lg
+
+
+    //- div.col-md-6.col-xs-12.q-mt-lg
+
 
 </template>
 
@@ -87,5 +87,19 @@ const displayName = computed(() => {
 .cooperative-card {
   max-width: 400px;
   width: 100%;
+}
+
+.border-left-radius-buttons {
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  border-bottom-left-radius: 20px !important;
+}
+
+.border-right-radius-buttons {
+  border-top-right-radius: 0px !important;
+  border-top-left-radius: 0px !important;
+  border-bottom-right-radius: 20px !important;
+  border-bottom-left-radius: 0px !important;
 }
 </style>
