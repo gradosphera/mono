@@ -14,9 +14,6 @@ type ExcludeCommonProps<T> = Omit<T, 'coopname' | 'username' | 'registry_id'>;
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.SelectBranchStatement.Action;
 
-// идентификатор шаблона в реестре документов
-const registry_id = Cooperative.Registry.SelectBranchStatement.registry_id;
-
 @InputType(`BaseSelectBranchMetaDocumentInput`)
 class BaseSelectBranchMetaDocumentInputDTO implements ExcludeCommonProps<action> {
   @Field({ description: 'Идентификатор имени аккаунта кооперативного участка' })

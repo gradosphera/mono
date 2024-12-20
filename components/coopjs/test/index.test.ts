@@ -52,7 +52,18 @@ describe("should", () => {
     const { getSystemInfo: systemInfo } = await client.Query(
       Queries.getSystemInfo,
     );
-
     console.log("systemInfo: ", systemInfo);
+    
+    const data: Mutations.IGenerateProjeftOfFreeDecisionDocumentInput = {
+      coopname: "voskhod",
+      project_id: "123",
+      username: "ant"
+    }
+    
+    const {generateProjectOfFreeDecision: document} = await client.Mutation(Mutations.generateProjectOfFreeDecisionDocument, {variables: {
+      data
+    }})
+    
+    console.log('document: ', document)
   });
 });

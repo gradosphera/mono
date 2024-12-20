@@ -1,5 +1,5 @@
 <template lang="pug">
-q-btn(@click="showDialog=true" color="primary" size="sm").border-radius-buttons
+q-btn(@click="showDialog=true" color="primary" size="sm")
   q-icon(name="fa-solid fa-chevron-up").q-mr-sm
   span Совершить взнос
   q-dialog(v-model="showDialog" @hide="clear")
@@ -75,10 +75,5 @@ const paymentSuccess = (): void => {
 }
 </script>
 <style scoped>
-.border-radius-buttons {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 0px !important;
-  border-bottom-right-radius: 0px !important;
-  border-bottom-left-radius: 0px !important;
-}
+
 </style>
