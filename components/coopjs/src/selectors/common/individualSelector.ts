@@ -20,9 +20,10 @@ const rawIndividualSelector = {
   username: true,
 };
 
-// Проверяем валидность
-const validateIndividualSelector = (selector: typeof rawIndividualSelector): MakeAllFieldsRequired<ValueTypes['Branch']['trusted']> => selector;
-validateIndividualSelector(rawIndividualSelector);
+
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes['Branch']['trusted']> = rawIndividualSelector;
+
 
 export const individualSelector = rawIndividualSelector; // Используем "сырой" объект напрямую
 export { rawIndividualSelector };

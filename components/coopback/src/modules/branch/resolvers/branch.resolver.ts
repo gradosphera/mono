@@ -11,6 +11,10 @@ import { EditBranchGraphQLInput } from '../dto/edit-branch-input.dto';
 import { DeleteBranchGraphQLInput } from '../dto/delete-branch-input.dto';
 import { AddTrustedAccountGraphQLInput } from '../dto/add-trusted-account-input.dto';
 import { DeleteTrustedAccountGraphQLInput } from '../dto/delete-trusted-account-input.dto';
+import { SelectBranchInputDTO } from '../dto/select-branch-input.dto';
+import { SelectBranchDocumentDTO, SelectBranchGenerateDocumentInputDTO } from '../dto/select-branch-document.dto';
+import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
+import { Cooperative } from 'cooptypes';
 
 @Resolver(() => BranchDTO)
 export class BranchResolver {
@@ -21,7 +25,6 @@ export class BranchResolver {
     description: 'Получить список кооперативных участков',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  // @AuthRoles(['chairman'])
   async getBranches(
     @Args('data', { type: () => GetBranchesGraphQLInput }) data: GetBranchesGraphQLInput
   ): Promise<BranchDTO[]> {
@@ -75,5 +78,26 @@ export class BranchResolver {
     @Args('data', { type: () => DeleteTrustedAccountGraphQLInput }) data: DeleteTrustedAccountGraphQLInput
   ): Promise<BranchDTO> {
     return this.branchService.deleteTrustedAccount(data);
+  }
+
+  @Mutation(() => Boolean, { name: 'selectBranch', description: 'Выбрать кооперативный участок' })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async selectBranch(@Args('data', { type: () => SelectBranchInputDTO }) data: SelectBranchInputDTO): Promise<boolean> {
+    return this.branchService.selectBranch(data);
+  }
+
+  @Mutation(() => SelectBranchDocumentDTO, {
+    name: 'generateSelectBranchDocument',
+    description: 'Сгенерировать документ, подтверждающий выбор кооперативного участка',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async generateSelectBranchDocument(
+    @Args('data', { type: () => SelectBranchGenerateDocumentInputDTO }) data: SelectBranchGenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<SelectBranchDocumentDTO> {
+    return this.branchService.generateSelectBranchDocument(data, options);
   }
 }

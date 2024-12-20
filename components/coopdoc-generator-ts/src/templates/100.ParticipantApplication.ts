@@ -66,6 +66,15 @@ export const Schema: JSONSchemaType<Model> = {
       required: [...CooperativeSchema.required],
       additionalProperties: true,
     },
+    branch: {
+      type: 'object',
+      properties: {
+        ...organizationSchema.properties,
+      },
+      required: [...organizationSchema.required],
+      additionalProperties: true,
+      nullable: true,
+    },
     signature: {
       type: 'string',
     },

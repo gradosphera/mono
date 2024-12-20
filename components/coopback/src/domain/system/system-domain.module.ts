@@ -1,10 +1,10 @@
-// domain/appstore/appstore-domain.module.ts
-
+// domain/system/system-domain.module.ts
 import { Module } from '@nestjs/common';
 import { SystemDomainInteractor } from './interactors/system.interactor';
+import { AccountDomainModule } from '../account/account-domain.module';
 
 @Module({
-  imports: [],
+  imports: [AccountDomainModule],
   providers: [SystemDomainInteractor],
   exports: [SystemDomainInteractor],
 })

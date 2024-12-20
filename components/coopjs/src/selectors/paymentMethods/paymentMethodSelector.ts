@@ -18,9 +18,8 @@ const rawPaymentMethodSelector = {
   username: true,
 };
 
-// Проверяем валидность
-const validateSelector = (selector: typeof rawPaymentMethodSelector): MakeAllFieldsRequired<ValueTypes['PaymentMethod']> => selector;
-validateSelector(rawPaymentMethodSelector);
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes['PaymentMethod']> = rawPaymentMethodSelector;
 
 export const paymentMethodSelector = Selector('PaymentMethod')(rawPaymentMethodSelector);
 export { rawPaymentMethodSelector };

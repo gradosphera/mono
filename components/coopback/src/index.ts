@@ -43,7 +43,14 @@ async function bootstrap() {
 
   // Глобальный фильтр для перехвата всех исключений внутри NestJS
   nestApp.useGlobalFilters(new GraphQLExceptionFilter());
-  nestApp.useGlobalPipes(new ValidationPipe({ errorHttpStatusCode: 422 }));
+  nestApp.useGlobalPipes(
+    new ValidationPipe({
+      errorHttpStatusCode: 422,
+      // whitelist: true, // Удаляет неописанные поля
+      // forbidNonWhitelisted: true, // Вызывает ошибку, если переданы лишние поля
+      // forbidUnknownValues: true, // Ошибка, если объект отсутствует
+    })
+  );
 
   // Запуск сервера
   await nestApp.listen(config.port, () => {

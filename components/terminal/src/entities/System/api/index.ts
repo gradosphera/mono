@@ -1,15 +1,8 @@
 import { client } from 'src/shared/api/client';
 import { Queries, type ModelTypes } from '@coopenomics/coopjs';
 
-async function loadSystemInfo(data?: ModelTypes['GetExtensionsInput']): Promise<ModelTypes['Extension'][]> {
-  const { getExtensions: output } = await client.Query(
-    Queries.getExtensions,
-    {
-      variables: {
-        data
-      }
-    }
-  );
+async function loadSystemInfo(): Promise<ModelTypes['SystemInfo']> {
+  const { getSystemInfo: output } = await client.Query(Queries.getSystemInfo);
   return output;
 }
 

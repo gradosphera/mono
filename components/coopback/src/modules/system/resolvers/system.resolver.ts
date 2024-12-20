@@ -7,10 +7,10 @@ export class SystemResolver {
   constructor(private readonly systemService: SystemService) {}
 
   @Query(() => SystemInfoDTO, {
-    name: 'getInfo',
+    name: 'getSystemInfo',
     description: 'Получить сводную публичную информацию о системе',
   })
-  async getInfo(): Promise<SystemInfoDTO> {
+  async getSystemInfo(): Promise<SystemInfoDTO> {
     return this.systemService.getInfo();
   }
 }

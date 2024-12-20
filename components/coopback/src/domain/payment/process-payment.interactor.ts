@@ -13,7 +13,6 @@ export class ProcessPaymentInteractor {
 
   async execute(id: string, status: string) {
     const order = await Order.findById(id);
-
     if (!order) {
       logger.error(`Order with id ${id} not found`);
       return;

@@ -95,7 +95,7 @@ div
   </template>
 
   <script setup lang="ts">
-  import { computed, watch } from 'vue'
+  import { computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import { useQuasar } from 'quasar'
   import { COOP_SHORT_NAME } from 'src/shared/config'
@@ -171,17 +171,11 @@ div
 
 
   const matched = (what: string) => {
-    console.log('what: ', what, route.matched.find(el => el.name === what))
-
     return route.matched.find(el => el.name === what)
   }
 
 
-
-  watch(route, () => console.log('route: ', route))
-
-
-  </script>
+</script>
 
   <style lang="scss">
   .btn-title {

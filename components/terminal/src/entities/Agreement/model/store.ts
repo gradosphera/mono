@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { api } from '../api'
 import { Ref, ref } from 'vue';
 import type { DraftContract, SovietContract } from 'cooptypes';
-import type { IGeneratedDocument } from 'src/entities/Document';
+import type { IGeneratedDocument } from 'src/shared/lib/document';
 
 const namespace = 'agreementer';
 

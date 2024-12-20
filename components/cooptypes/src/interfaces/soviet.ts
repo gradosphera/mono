@@ -235,6 +235,8 @@ export interface IDecision {
   authorized_by: IName
   authorization: IDocument
   created_at: ITimePointSec
+  expired_at: ITimePointSec
+  meta: string
 }
 
 export interface IDeclineagree {
@@ -297,6 +299,13 @@ export interface IExec {
   decision_id: IUint64
 }
 
+export interface IFreedecision {
+  coopname: IName
+  username: IName
+  document: IDocument
+  meta: string
+}
+
 export interface IFundwithdraw {
   coopname: IName
   username: IName
@@ -310,6 +319,7 @@ export interface IInit {
 
 export interface IJoincoop {
   coopname: IName
+  braname: IName
   username: IName
   document: IDocument
 }
@@ -319,6 +329,7 @@ export interface IJoincoops {
   username: IName
   is_paid: boolean
   notice: string
+  braname: IName
 }
 
 export interface IMakecoagreem {
@@ -394,6 +405,7 @@ export interface IParticipant {
   is_minimum: boolean
   has_vote: boolean
   type: IName
+  braname: IName
 }
 
 export interface IProgram {
@@ -443,6 +455,13 @@ export interface IRmstaff {
   coopname: IName
   chairman: IName
   username: IName
+}
+
+export interface ISelectbranch {
+  coopname: IName
+  username: IName
+  braname: IName
+  document: IDocument
 }
 
 export interface ISetrights {

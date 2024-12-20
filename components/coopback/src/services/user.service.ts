@@ -6,6 +6,7 @@ import { ICreateUser } from '../types/auto-generated/user.validation';
 import type { Cooperative } from 'cooptypes';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { randomUUID } from 'crypto';
+import type { IUser } from '~/types';
 
 export const createServiceUser = async (username: string) => {
   return User.create({
@@ -183,5 +184,10 @@ export const deleteUserByUsername = async (username) => {
     throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
   }
   await user.deleteOne();
+  return user;
+};
+
+export const findUser = async (username): Promise<IUser | null> => {
+  const user = await User.findOne({ username });
   return user;
 };

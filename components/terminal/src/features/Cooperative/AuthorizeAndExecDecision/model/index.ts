@@ -1,6 +1,6 @@
 import { TransactResult } from '@wharfkit/session';
 import { Cooperative, SovietContract } from 'cooptypes';
-import { DigitalDocument } from 'src/entities/Document';
+import { DigitalDocument } from 'src/shared/lib/document';
 import { useSessionStore } from 'src/entities/Session';
 import { COOPNAME } from 'src/shared/config';
 import { useGlobalStore } from 'src/shared/store';

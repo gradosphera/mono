@@ -1,5 +1,5 @@
 {
-  "local": "010_edit_all_drafts.ts",
-  "test": "011.one_draft.ts",
-  "prod": "011.one_draft.ts"
+  "local": "018_edit_branch_draft.ts",
+  "test": "020_create_free_decision_drafts.ts",
+  "prod": "020_create_free_decision_drafts.ts"
 }

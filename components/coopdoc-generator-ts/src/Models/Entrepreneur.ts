@@ -1,14 +1,11 @@
-import { type Filter, type InsertOneResult, UUID, type UpdateResult } from 'mongodb'
+import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
 import type { Cooperative } from 'cooptypes'
 import type { ValidateResult } from '../Services/Validator'
 import { Validator } from '../Services/Validator'
 import type { MongoDBConnector } from '../Services/Databazor'
 import DataService from '../Services/Databazor/DataService'
 import { entrepreneurSchema } from '../Schema/EntrepreneurSchema'
-import type { IBankAccount } from '../Interfaces'
 import { getCurrentBlock } from '../Utils/getCurrentBlock'
-import type { PaymentData } from './PaymentMethod'
-import { PaymentMethod } from './PaymentMethod'
 
 export type ExternalEntrepreneurData = Cooperative.Users.IEntrepreneurData
 

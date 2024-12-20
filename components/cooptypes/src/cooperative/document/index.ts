@@ -29,11 +29,18 @@ export interface IMetaDocument {
   links: string[]
 }
 
-export interface IGeneratedDocument {
+export interface ISignedDocument<T = any> {
+  hash: string
+  public_key: string
+  signature: string
+  meta: IMetaDocument & T
+}
+
+export interface IGeneratedDocument<T = any> {
   full_title?: string
   html: string
   hash: string
-  meta: IMetaDocument
+  meta: IMetaDocument & T
   binary: Uint8Array
 }
 
@@ -124,4 +131,12 @@ export interface IDecisionData {
   votes_against: number
   votes_abstained: number
   voters_percent: number
+  // decision: SovietContract.Tables.Decisions.IDecision
+}
+
+export interface IProjectData {
+  id: string
+  header: string
+  question: string
+  decision: string
 }

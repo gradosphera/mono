@@ -1,4 +1,4 @@
-import { BranchContract } from 'cooptypes';
+import { BranchContract, SovietContract } from 'cooptypes';
 import type { TransactResult } from '@wharfkit/session';
 
 export interface BranchBlockchainPort {
@@ -9,6 +9,7 @@ export interface BranchBlockchainPort {
   deleteBranch(data: BranchContract.Actions.DeleteBranch.IDeleteBranch): Promise<TransactResult>;
   addTrustedAccount(data: BranchContract.Actions.AddTrusted.IAddTrusted): Promise<TransactResult>;
   deleteTrustedAccount(data: BranchContract.Actions.DeleteTrusted.IDeleteTrusted): Promise<TransactResult>;
+  selectBranch(data: SovietContract.Actions.Branches.SelectBranch.ISelectBranch): Promise<TransactResult>;
 }
 
 export const BRANCH_BLOCKCHAIN_PORT = Symbol('BranchBlockchainPort');

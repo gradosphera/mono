@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
-import { reactive } from 'vue';
+import { computed, reactive } from 'vue';
 import { IGeneratedAccount } from 'src/shared/lib/types/user';
 import { type ICreateUserData } from 'src/shared/lib/types/user/IUserData';
 import type { Cooperative } from 'cooptypes';
+import { useSystemStore } from 'src/entities/System/model';
 
 const namespace = 'registrator';
 
@@ -112,7 +113,6 @@ const initialAgreementsState = {
   user: false,
   self_paid: false,
 };
-
 export const useRegistratorStore = defineStore(
   namespace,
   () => {
@@ -120,37 +120,90 @@ export const useRegistratorStore = defineStore(
       step: 1,
       role: 'user',
       email: '',
+      selectedBranch: '',
       account: structuredClone(initialAccountState),
       userData: structuredClone(initialUserDataState),
       signature: '',
       inLoading: false,
       agreements: structuredClone(initialAgreementsState),
       statement: structuredClone(initialDocumentState),
-
       walletAgreement: structuredClone(initialDocumentState),
       privacyAgreement: structuredClone(initialDocumentState),
       signatureAgreement: structuredClone(initialDocumentState),
       userAgreement: structuredClone(initialDocumentState),
-
       payment: structuredClone(initialPaymentState),
       is_paid: false,
     });
 
-    // Функция для очистки состояния addUserState
+    const stepNames = [
+      'EmailInput',
+      'SetUserData',
+      'GenerateAccount',
+      'SelectBranch',
+      'ReadStatement',
+      'SignStatement',
+      'PayInitial',
+      'WaitingRegistration',
+      'Welcome',
+    ] as const;
+
+    type StepName = (typeof stepNames)[number];
+
+    const steps = stepNames.reduce((acc, step, index) => {
+      acc[step] = index + 1; // Индексы начинаются с 1
+      return acc;
+    }, {} as Record<StepName, number>);
+
+    const system = useSystemStore();
+    const isBranched = computed(() => system.info?.cooperator_account.is_branched);
+
+    const filteredSteps = computed(() =>
+      stepNames.filter(step => step !== 'SelectBranch' || isBranched.value)
+    );
+
+    const isStepDone = (stepName: StepName) => {
+      const stepIndex = steps[stepName];
+      return stepIndex < state.step;
+    };
+
+    const isStep = (stepName: StepName) => {
+      const stepIndex = steps[stepName];
+      return stepIndex === state.step;
+    };
+
+    const next = () => {
+      if (state.step < filteredSteps.value.length) {
+        state.step += 1;
+      }
+    };
+
+    const prev = () => {
+      if (state.step > 1) {
+        state.step -= 1;
+      }
+    };
+
+    const goTo = (targetStep: StepName) => {
+      const targetIndex = steps[targetStep];
+      if (targetIndex > 0) {
+        state.step = targetIndex;
+      }
+    };
+
     const clearAddUserState = () => reactive({
       spread_initial: false,
       created_at: '',
       initial: 0,
       minimum: 0,
       org_initial: 0,
-      org_minimum: 0
+      org_minimum: 0,
     });
 
     const addUserState = clearAddUserState();
 
-    // Функция для сброса данных пользователя
     const clearUserData = () => {
       state.step = 1;
+      state.selectedBranch = ''
       state.email = '';
       state.account = structuredClone(initialAccountState);
       state.agreements = structuredClone(initialAgreementsState);
@@ -166,9 +219,16 @@ export const useRegistratorStore = defineStore(
 
     return {
       state,
-      addUserState,
+      steps,
+      filteredSteps,
+      next,
+      prev,
+      goTo,
+      isStepDone,
+      isStep,
       clearUserData,
-      clearAddUserState,
+      addUserState,
+      isBranched,
     };
   },
   {

@@ -5,19 +5,16 @@ div
     ModalBase(style="width: 500px; max-width: 100% !important;" :title="'Создать кооперативный участок'" :show_close="true")
       Form(:handler-submit="create" :is-submitting="isSubmitting" :showSubmit="!isLoading" :showCancel="true" :button-submit-txt="'Создать'" @cancel="clear" ).q-pa-md
         div().q-mb-lg
-          //- q-input(dense v-model="createBranchInput.braname" standout="bg-teal text-white" placeholder="" label="Имя аккаунта участка" :rules="[val => notEmpty(val)]" autocomplete="off")
-
           q-input(dense v-model="createBranchInput.trustee" standout="bg-teal text-white" placeholder="" label="Имя аккаунта председателя участка" :rules="[val => notEmpty(val)]" autocomplete="off")
 
-          q-input(dense v-model="createBranchInput.short_name" standout="bg-teal text-white" placeholder="ПК Ромашка" label="Краткое наименование участка" :rules="[val => notEmpty(val)]" autocomplete="off")
-          q-input(dense v-model="createBranchInput.full_name" standout="bg-teal text-white" placeholder="Потребительский Кооператив 'Ромашка'" label="Полное наименование участка" :rules="[val => notEmpty(val)]" autocomplete="off")
+          q-input(dense v-model="createBranchInput.short_name" standout="bg-teal text-white" placeholder="РОМАШКА" label="Наименование участка" :rules="[val => notEmpty(val)]" autocomplete="off")
           q-input(dense v-model="createBranchInput.phone" standout="bg-teal text-white" label="Номер телефона участка"  mask="+7 (###) ###-##-##" fill-mask  placeholder="" :rules="[val => notEmpty(val), val => notEmptyPhone(val)]" autocomplete="off")
           q-input(dense v-model="createBranchInput.fact_address" standout="bg-teal text-white" placeholder="" label="Фактический адрес участка" :rules="[val => notEmpty(val)]" autocomplete="off")
           q-input(
             dense v-model='createBranchInput.email',
             standout="bg-teal text-white",
             type='email',
-            label='Email участка',
+            label='Email-адрес участка',
             color='primary',
             :rules='[validEmail, notEmpty]'
           )

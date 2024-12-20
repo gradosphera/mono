@@ -1,5 +1,5 @@
 import type { IndexPosition } from '~/infrastructure/blockchain/blockchain.service';
-import type { SystemAccountInterface } from '~/types/shared';
+import type { BlockchainAccountInterface } from '~/types/shared';
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
 
 // domain/common/ports/blockchain.port.ts
@@ -7,7 +7,7 @@ export interface BlockchainPort {
   initialize(username: string, wif: string): void;
   transact(actionOrActions: any | any[], broadcast?: boolean): Promise<any>;
   getInfo(): Promise<GetInfoResult>;
-  getAccount(name: string): Promise<SystemAccountInterface>;
+  getAccount(name: string): Promise<BlockchainAccountInterface | null>;
   getAllRows(code: string, scope: string, tableName: string): Promise<any[]>;
   getSingleRow(
     code: string,

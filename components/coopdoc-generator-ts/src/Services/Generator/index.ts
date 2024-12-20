@@ -96,7 +96,7 @@ export class PDFService implements IPDFService {
     })
   }
 
-  private static async updateMetadata(pdfBuffer: ArrayBuffer, meta: IMetaDocument): Promise<Uint8Array> {
+  private static async updateMetadata(pdfBuffer: Uint8Array<ArrayBufferLike>, meta: IMetaDocument): Promise<Uint8Array> {
     const dateWithTimezone = moment.tz(meta.created_at, 'DD.MM.YYYY HH:mm', meta.timezone).toDate()
 
     const pdfDoc = await PDFDocument.load(pdfBuffer)

@@ -40,7 +40,7 @@ export class Factory extends DocFactory<UserAgreement.Action> {
 
     const translation = template.translations[meta.lang]
 
-    const document: IGeneratedDocument = await super.generatePDF(null, template.context, combinedData, translation, meta, options?.skip_save)
+    const document: IGeneratedDocument = await super.generatePDF(user.data, template.context, combinedData, translation, meta, options?.skip_save)
 
     return document
   }

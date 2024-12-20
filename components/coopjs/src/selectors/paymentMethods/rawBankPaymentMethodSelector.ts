@@ -1,6 +1,7 @@
+import { Selector } from "../../zeus";
 import { rawBankAccountSelector } from "../common/bankAccountSelector";
 
-export const rawbankPaymentMethodSelector = {
+export const rawBankPaymentMethodSelector = {
   data: rawBankAccountSelector,
   is_default: true,
   created_at: true,

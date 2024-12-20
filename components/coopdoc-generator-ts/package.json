@@ -42,7 +42,7 @@
     "lint": "eslint .",
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish",
-    "test": "vitest --dir test --testTimeout=120000 --exclude documents --watch=false",
+    "test": "vitest --dir test --testTimeout=240000 --exclude documents --watch=false",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

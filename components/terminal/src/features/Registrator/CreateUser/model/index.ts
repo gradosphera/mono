@@ -7,7 +7,7 @@ import { IGeneratedAccount, ISendStatement } from 'src/shared/lib/types/user';
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
 import { COOPNAME } from 'src/shared/config';
-import { DigitalDocument } from 'src/entities/Document';
+import { DigitalDocument } from 'src/shared/lib/document';
 import { IObjectedDocument } from 'src/shared/lib/types/document';
 import {
   ICreatedPayment,
@@ -56,12 +56,13 @@ export function useCreateUser() {
 
 
   async function signStatement(): Promise<IObjectedDocument> {
-    const data = {
+    const data: Cooperative.Registry.ParticipantApplication.Action = {
       registry_id: Cooperative.Registry.ParticipantApplication.registry_id,
       signature: store.signature,
       skip_save: false,
       coopname: COOPNAME,
       username: store.account.username,
+      braname: store.selectedBranch,
       links: [store.walletAgreement.hash, store.privacyAgreement.hash, store.signatureAgreement.hash, store.userAgreement.hash]
     }
 
@@ -150,13 +151,14 @@ export function useCreateUser() {
   }
 
 
-  async function generateStatementWithoutSignature(username: string) {
+  async function generateStatementWithoutSignature() {
 
     const document = await new DigitalDocument().generate<Cooperative.Registry.ParticipantApplication.Action>({
       signature: '',
       skip_save: true,
       coopname: COOPNAME,
-      username,
+      username: store.account.username,
+      braname: store.selectedBranch,
       registry_id: Cooperative.Registry.ParticipantApplication.registry_id
   });
 

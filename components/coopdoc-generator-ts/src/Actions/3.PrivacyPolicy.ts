@@ -24,6 +24,7 @@ export class Factory extends DocFactory<PrivacyPolicy.Action> {
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data })
     const coop = await super.getCooperative(data.coopname, data.block_num)
     const vars = await super.getVars(data.coopname, data.block_num)
+    const user = await super.getUser(data.username, data.block_num)
 
     const combinedData: PrivacyPolicy.Model = {
       meta,
@@ -35,7 +36,7 @@ export class Factory extends DocFactory<PrivacyPolicy.Action> {
 
     const translation = template.translations[meta.lang]
 
-    const document: IGeneratedDocument = await super.generatePDF(null, template.context, combinedData, translation, meta, options?.skip_save)
+    const document: IGeneratedDocument = await super.generatePDF(user.data, template.context, combinedData, translation, meta, options?.skip_save)
 
     return document
   }

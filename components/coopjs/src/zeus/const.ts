@@ -16,6 +16,9 @@ export const AllTypesProps: Record<string,any> = {
 	CreateBranchInput:{
 
 	},
+	CreateProjectFreeDecision:{
+		document:"ProjectFreeDecisionSignedDocumentInput"
+	},
 	DateTime: `scalar.DateTime` as const,
 	DeleteBranchInput:{
 
@@ -34,6 +37,12 @@ export const AllTypesProps: Record<string,any> = {
 		created_at:"DateTime",
 		updated_at:"DateTime"
 	},
+	GenerateDocumentOptionsInput:{
+
+	},
+	GetAccountInput:{
+
+	},
 	GetBranchesInput:{
 
 	},
@@ -44,6 +53,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	JSON: `scalar.JSON` as const,
+	LangType: "enum" as const,
 	Mutation:{
 		addTrustedAccount:{
 			data:"AddTrustedAccountInput"
@@ -66,8 +76,22 @@ export const AllTypesProps: Record<string,any> = {
 		editBranch:{
 			data:"EditBranchInput"
 		},
+		generateProjectOfFreeDecision:{
+			data:"ProjectFreeDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateSelectBranchDocument:{
+			data:"SelectBranchGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
 		installExtension:{
 			data:"ExtensionInput"
+		},
+		publishProjectOfFreeDecision:{
+			data:"CreateProjectFreeDecision"
+		},
+		selectBranch:{
+			data:"SelectBranchInput"
 		},
 		uninstallExtension:{
 			data:"UninstallExtensionInput"
@@ -79,7 +103,19 @@ export const AllTypesProps: Record<string,any> = {
 			data:"ExtensionInput"
 		}
 	},
+	ProjectFreeDecisionGenerateDocumentInput:{
+
+	},
+	ProjectFreeDecisionSignedDocumentInput:{
+		meta:"ProjectFreeDecisionSignedMetaDocumentInput"
+	},
+	ProjectFreeDecisionSignedMetaDocumentInput:{
+
+	},
 	Query:{
+		getAccount:{
+			data:"GetAccountInput"
+		},
 		getBranches:{
 			data:"GetBranchesInput"
 		},
@@ -90,28 +126,48 @@ export const AllTypesProps: Record<string,any> = {
 			data:"GetPaymentMethodsInput"
 		}
 	},
+	SelectBranchGenerateDocumentInput:{
+
+	},
+	SelectBranchInput:{
+		document:"SelectBranchSignedDocumentInput"
+	},
+	SelectBranchSignedDocumentInput:{
+		meta:"SelectBranchSignedMetaDocumentInput"
+	},
+	SelectBranchSignedMetaDocumentInput:{
+
+	},
 	SystemStatus: "enum" as const,
 	UninstallExtensionInput:{
 
 	},
 	UpdateBankAccountInput:{
 		data:"BankAccountInput"
-	}
+	},
+	UserStatus: "enum" as const
 }
 
 export const ReturnTypes: Record<string,any> = {
-	AccountResourceInfoDTO:{
+	Account:{
+		blockchain_account:"BlockchainAccount",
+		mono_account:"MonoAccount",
+		participant_account:"ParticipantAccount",
+		user_account:"UserAccount",
+		username:"String"
+	},
+	AccountResourceInfo:{
 		available:"String",
 		current_used:"String",
 		last_usage_update_time:"String",
 		max:"String",
 		used:"String"
 	},
-	AuthorityDTO:{
-		accounts:"PermissionLevelWeightDTO",
-		keys:"KeyWeightDTO",
+	Authority:{
+		accounts:"PermissionLevelWeight",
+		keys:"KeyWeight",
 		threshold:"Int",
-		waits:"WaitWeightDTO"
+		waits:"WaitWeight"
 	},
 	BankAccount:{
 		account_number:"String",
@@ -134,11 +190,26 @@ export const ReturnTypes: Record<string,any> = {
 		updated_at:"DateTime",
 		username:"String"
 	},
-	BlockchainDocument:{
-		hash:"String",
-		meta:"String",
-		public_key:"String",
-		signature:"String"
+	BlockchainAccount:{
+		account_name:"String",
+		core_liquid_balance:"String",
+		cpu_limit:"AccountResourceInfo",
+		cpu_weight:"String",
+		created:"String",
+		head_block_num:"Int",
+		head_block_time:"String",
+		last_code_update:"String",
+		net_limit:"AccountResourceInfo",
+		net_weight:"String",
+		permissions:"Permission",
+		privileged:"Boolean",
+		ram_quota:"Int",
+		ram_usage:"Int",
+		refund_request:"RefundRequest",
+		rex_info:"String",
+		self_delegated_bandwidth:"ResourceDelegationDTO",
+		total_resources:"ResourceOverview",
+		voter_info:"String"
 	},
 	BlockchainInfoDTO:{
 		block_cpu_limit:"Int",
@@ -181,7 +252,7 @@ export const ReturnTypes: Record<string,any> = {
 		coop_type:"String",
 		created_at:"String",
 		description:"String",
-		document:"BlockchainDocument",
+		document:"SignedBlockchainDocument",
 		initial:"String",
 		is_branched:"Boolean",
 		is_cooperative:"Boolean",
@@ -231,9 +302,36 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	JSON: `scalar.JSON` as const,
-	KeyWeightDTO:{
+	KeyWeight:{
 		key:"String",
 		weight:"Int"
+	},
+	MetaDocument:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"LangType",
+		links:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
+	MonoAccount:{
+		email:"String",
+		has_account:"Boolean",
+		initial_order:"String",
+		is_email_verified:"Boolean",
+		is_registered:"Boolean",
+		message:"String",
+		public_key:"String",
+		referer:"String",
+		role:"String",
+		status:"UserStatus",
+		type:"String",
+		username:"String"
 	},
 	Mutation:{
 		addTrustedAccount:"Branch",
@@ -243,7 +341,11 @@ export const ReturnTypes: Record<string,any> = {
 		deletePaymentMethod:"Boolean",
 		deleteTrustedAccount:"Branch",
 		editBranch:"Branch",
+		generateProjectOfFreeDecision:"ProjectFreeDecisionDocument",
+		generateSelectBranchDocument:"SelectBranchDocument",
 		installExtension:"Extension",
+		publishProjectOfFreeDecision:"Boolean",
+		selectBranch:"Boolean",
 		uninstallExtension:"Boolean",
 		updateBankAccount:"PaymentMethod",
 		updateExtension:"Extension"
@@ -258,6 +360,18 @@ export const ReturnTypes: Record<string,any> = {
 		items:"PaymentMethod",
 		totalCount:"Int",
 		totalPages:"Int"
+	},
+	ParticipantAccount:{
+		braname:"String",
+		created_at:"DateTime",
+		has_vote:"Boolean",
+		is_initial:"Boolean",
+		is_minimum:"Boolean",
+		last_min_pay:"DateTime",
+		last_update:"DateTime",
+		status:"String",
+		type:"String",
+		username:"String"
 	},
 	Passport:{
 		code:"String",
@@ -279,26 +393,48 @@ export const ReturnTypes: Record<string,any> = {
 		"...on BankAccount":"BankAccount",
 		"...on SbpAccount":"SbpAccount"
 	},
-	PermissionDTO:{
+	Permission:{
 		parent:"String",
 		perm_name:"String",
-		required_auth:"AuthorityDTO"
+		required_auth:"Authority"
 	},
-	PermissionLevelDTO:{
+	PermissionLevel:{
 		actor:"String",
 		permission:"String"
 	},
-	PermissionLevelWeightDTO:{
-		permission:"PermissionLevelDTO",
+	PermissionLevelWeight:{
+		permission:"PermissionLevel",
 		weight:"Int"
 	},
+	ProjectFreeDecisionDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"ProjectFreeDecisionMetaDocumentOutput"
+	},
+	ProjectFreeDecisionMetaDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"LangType",
+		links:"String",
+		project_id:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
 	Query:{
+		getAccount:"Account",
 		getBranches:"Branch",
 		getExtensions:"Extension",
-		getInfo:"SystemInfo",
-		getPaymentMethods:"PaginationResult"
+		getPaymentMethods:"PaginationResult",
+		getSystemInfo:"SystemInfo"
 	},
-	RefundRequestDTO:{
+	RefundRequest:{
 		cpu_amount:"String",
 		net_amount:"String",
 		owner:"String",
@@ -317,7 +453,7 @@ export const ReturnTypes: Record<string,any> = {
 		net_weight:"String",
 		to:"String"
 	},
-	ResourceOverviewDTO:{
+	ResourceOverview:{
 		cpu_weight:"String",
 		net_weight:"String",
 		owner:"String",
@@ -326,33 +462,50 @@ export const ReturnTypes: Record<string,any> = {
 	SbpAccount:{
 		phone:"String"
 	},
-	SystemAccountDTO:{
-		account_name:"String",
-		core_liquid_balance:"String",
-		cpu_limit:"AccountResourceInfoDTO",
-		cpu_weight:"String",
-		created:"String",
-		head_block_num:"Int",
-		head_block_time:"String",
-		last_code_update:"String",
-		net_limit:"AccountResourceInfoDTO",
-		net_weight:"String",
-		permissions:"PermissionDTO",
-		privileged:"Boolean",
-		ram_quota:"Int",
-		ram_usage:"Int",
-		refund_request:"RefundRequestDTO",
-		rex_info:"String",
-		self_delegated_bandwidth:"ResourceDelegationDTO",
-		total_resources:"ResourceOverviewDTO",
-		voter_info:"String"
+	SelectBranchDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"SelectBranchMetaDocumentOutput"
+	},
+	SelectBranchMetaDocumentOutput:{
+		block_num:"Int",
+		braname:"String",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"LangType",
+		links:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
+	SignedBlockchainDocument:{
+		hash:"String",
+		meta:"String",
+		public_key:"String",
+		signature:"String"
 	},
 	SystemInfo:{
+		blockchain_account:"BlockchainAccount",
 		blockchain_info:"BlockchainInfoDTO",
 		cooperator_account:"CooperativeOperatorAccount",
 		coopname:"String",
-		system_account:"SystemAccountDTO",
 		system_status:"SystemStatus"
+	},
+	UserAccount:{
+		meta:"String",
+		referer:"String",
+		registered_at:"String",
+		registrator:"String",
+		status:"String",
+		storages:"String",
+		type:"String",
+		username:"String",
+		verifications:"Verification"
 	},
 	Verification:{
 		created_at:"String",
@@ -362,7 +515,7 @@ export const ReturnTypes: Record<string,any> = {
 		procedure:"String",
 		verificator:"String"
 	},
-	WaitWeightDTO:{
+	WaitWeight:{
 		wait_sec:"Int",
 		weight:"Int"
 	}

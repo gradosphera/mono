@@ -1,21 +1,20 @@
 import { defineStore } from 'pinia'
 import { ref, Ref } from 'vue'
 import { api } from '../api'
-import type { ISystemInfo } from './types';
-import type { ModelTypes } from '@coopenomics/coopjs/index';
+import { ModelTypes } from '@coopenomics/coopjs';
 
 const namespace = 'systemStore';
 
 interface ISystemStore {
-  info: Ref<ISystemInfo[]>
-  loadSystemInfo: (data?: ModelTypes['GetExtensionsInput']) => void;
+  info: Ref<ModelTypes['SystemInfo']>
+  loadSystemInfo: () => Promise<void>;
 }
 
 export const useSystemStore = defineStore(namespace, (): ISystemStore => {
-  const info = ref<ISystemInfo[]>([])
+  const info = ref<ModelTypes['SystemInfo']>({} as ModelTypes['SystemInfo'])
 
-  const loadSystemInfo = async (data?: ModelTypes['GetExtensionsInput']) => {
-    info.value = await api.loadSystemInfo(data);
+  const loadSystemInfo = async () => {
+    info.value = await api.loadSystemInfo();
   };
 
   return {

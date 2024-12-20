@@ -42,8 +42,6 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
       stack: exception.stack,
     });
 
-    console.log('on FILTER!');
-
     // Возвращение ошибки в формате GraphQL
     return new GraphQLError(message, {
       extensions: {

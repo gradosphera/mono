@@ -20,7 +20,6 @@ export class PaymentMethodRepositoryImplementation implements PaymentMethodRepos
 
   async get(data: GetPaymentMethodDomainInterface): Promise<PaymentMethodDomainEntity> {
     const result = (await generator.get('paymentMethod', data)) as Cooperative.Payments.IPaymentData;
-    console.log('data: ', data, result);
     return new PaymentMethodDomainEntity(result);
   }
 
