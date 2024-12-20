@@ -235,6 +235,8 @@ export interface IDecision {
   authorized_by: IName
   authorization: IDocument
   created_at: ITimePointSec
+  expired_at: ITimePointSec
+  meta: string
 }
 
 export interface IDeclineagree {
@@ -295,6 +297,13 @@ export interface IExec {
   executer: IName
   coopname: IName
   decision_id: IUint64
+}
+
+export interface IFreedecision {
+  coopname: IName
+  username: IName
+  document: IDocument
+  meta: string
 }
 
 export interface IFundwithdraw {

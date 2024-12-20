@@ -1,9 +1,9 @@
 import { Cooperative, DraftContract, SovietContract } from 'cooptypes';
 import { Registry } from 'coopdoc-generator-ts';
-import type { Migration } from '../src/migration_interface';
-import { api } from '../src/eos';
-import { editDraft } from '../src/utils/editDraft';
-import { editTranslation } from '../src/utils/editTranslation';
+import type { Migration } from '../../src/migration_interface';
+import { api } from '../../src/eos';
+import { editDraft } from '../../src/utils/editDraft';
+import { editTranslation } from '../../src/utils/editTranslation';
 
 export class InitialMigration implements Migration {
   async run(): Promise<void> {

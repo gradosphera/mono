@@ -1,8 +1,8 @@
-import type { Cooperative } from 'cooptypes';
+import type { Cooperative, SovietContract } from 'cooptypes';
 
-export interface SelectBranchInputDomainInterface {
-  coopname: string;
-  braname: string;
-  username: string;
+export type SelectBranchInputDomainInterface = Omit<
+  SovietContract.Actions.Branches.SelectBranch.ISelectBranch,
+  'document'
+> & {
   document: Cooperative.Document.ISignedDocument<Cooperative.Registry.SelectBranchStatement.Action>;
-}
+};

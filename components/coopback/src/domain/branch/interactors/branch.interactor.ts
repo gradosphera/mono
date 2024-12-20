@@ -241,7 +241,7 @@ export class BranchDomainInteractor {
   }
 
   async selectBranch(data: SelectBranchInputDomainInterface): Promise<boolean> {
-    // TODO move it to separate document domain service for validate too
+    // TODO move it to separate document domain service for validate
     const document = await this.documentRepository.findByHash(data.document.hash);
     if (!document) throw new BadRequestException('Документ не найден');
 
@@ -249,7 +249,7 @@ export class BranchDomainInteractor {
       throw new BadRequestException('Неверный registry_id в переданном документе, ожидается registry_id == 101');
 
     if (data.coopname != config.coopname)
-      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Указанное аккаунта кооперативного участка не обслуживается здесь');
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Указанное имя аккаунта кооператива не обслуживается здесь');
 
     await this.branchBlockchainPort.selectBranch({
       coopname: data.coopname,
@@ -265,6 +265,7 @@ export class BranchDomainInteractor {
     data: Cooperative.Registry.SelectBranchStatement.Action,
     options: Cooperative.Document.IGenerationOptions
   ): Promise<DocumentDomainEntity> {
+    data.registry_id = Cooperative.Registry.SelectBranchStatement.registry_id;
     return await this.documentDomainService.generateDocument({ data, options });
   }
 }

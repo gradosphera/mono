@@ -96,8 +96,8 @@ importers:
         specifier: ^4.16.3
         version: 4.16.3
       cooptypes:
-        specifier: ^2.1.2
-        version: 2.1.4(eslint@9.13.0(jiti@2.3.3))(typescript@5.6.3)
+        specifier: workspace:*
+        version: link:../cooptypes
       docxtemplater:
         specifier: ^3.51.1
         version: 3.51.2
@@ -361,6 +361,9 @@ importers:
       '@nestjs/platform-express':
         specifier: ^10.0.0
         version: 10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.4.6)
+      '@nestjs/throttler':
+        specifier: ^6.3.0
+        version: 6.3.0(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.1))(reflect-metadata@0.1.14)
       '@nestjs/typeorm':
         specifier: ^10.0.2
         version: 10.0.2(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.1))(reflect-metadata@0.1.14)(rxjs@7.8.1)(typeorm@0.3.20(ioredis@5.4.1)(pg@8.13.1)(ts-node@10.9.2(@types/node@20.17.3)(typescript@5.6.3)))
@@ -3698,6 +3701,13 @@ packages:
       '@nestjs/platform-express':
         optional: true
 
+  '@nestjs/throttler@6.3.0':
+    resolution: {integrity: sha512-IqTMbl5Iyxjts7NwbVriDND0Cnr8rwNqAPpF5HJE+UV+2VrVUBwCfDXKEiXu47vzzaQLlWPYegBsGO9OXxa+oQ==}
+    peerDependencies:
+      '@nestjs/common': ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
+      '@nestjs/core': ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
+      reflect-metadata: ^0.1.13 || ^0.2.0
+
   '@nestjs/typeorm@10.0.2':
     resolution: {integrity: sha512-H738bJyydK4SQkRCTeh1aFBxoO1E9xdL/HaLGThwrqN95os5mEyAtK7BLADOS+vldP4jDZ2VQPLj4epWwRqCeQ==}
     peerDependencies:
@@ -6610,9 +6620,6 @@ packages:
 
   cookiejar@2.1.4:
     resolution: {integrity: sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==}
-
-  cooptypes@2.1.4:
-    resolution: {integrity: sha512-bi8DDFvv4GHHQ+EB7+n842jnE+MqUzC3Mil9KQTCEusX8NKdsnem0czwSPEr8h4LhRh75cnPvhUXX8UN3tkjWQ==}
 
   core-js-compat@3.38.1:
     resolution: {integrity: sha512-JRH6gfXxGmrzF3tZ57lFx97YARxCXPaMzPo6jELZhv88pBH5VXpQ+y0znKGlFnzuaihqhLbefxSJxWJMPtfDzw==}
@@ -18046,6 +18053,12 @@ snapshots:
     optionalDependencies:
       '@nestjs/platform-express': 10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.4.6)
 
+  '@nestjs/throttler@6.3.0(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.1))(reflect-metadata@0.1.14)':
+    dependencies:
+      '@nestjs/common': 10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@nestjs/core': 10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      reflect-metadata: 0.1.14
+
   '@nestjs/typeorm@10.0.2(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.1))(reflect-metadata@0.1.14)(rxjs@7.8.1)(typeorm@0.3.20(ioredis@5.4.1)(pg@8.13.1)(ts-node@10.9.1(@types/node@16.18.116)(typescript@5.6.3)))':
     dependencies:
       '@nestjs/common': 10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1)
@@ -22095,14 +22108,6 @@ snapshots:
   cookie@0.7.2: {}
 
   cookiejar@2.1.4: {}
-
-  cooptypes@2.1.4(eslint@9.13.0(jiti@2.3.3))(typescript@5.6.3):
-    dependencies:
-      '@typescript-eslint/parser': 7.18.0(eslint@9.13.0(jiti@2.3.3))(typescript@5.6.3)
-    transitivePeerDependencies:
-      - eslint
-      - supports-color
-      - typescript
 
   core-js-compat@3.38.1:
     dependencies:

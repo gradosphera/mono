@@ -71,3 +71,8 @@ export * as Automate from './automate'
  * Отключает автоматизацию принятия решений по указанным типам вопросов на повестке для члена совета.
  */
 export * as Disautomate from './disautomate'
+
+/**
+ * Создаёт проект свободного решения и выносит его на голосование
+ */
+export * as CreateFreeDecision from './freeDecision'

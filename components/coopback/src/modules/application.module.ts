@@ -10,6 +10,7 @@ import { AppStoreModule } from './appstore/appstore-app.module';
 import { QueueModule } from './queue/queue-app.module';
 import { DocumentModule } from './document/document.module';
 import { RedisAppModule } from './redis/redis-app.module';
+import { DecisionModule } from './decision/decision.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { RedisAppModule } from './redis/redis-app.module';
     RedisAppModule,
     SystemModule,
     DocumentModule,
+    DecisionModule,
   ],
   exports: [
     AccountModule,
@@ -35,6 +37,7 @@ import { RedisAppModule } from './redis/redis-app.module';
     RedisAppModule,
     SystemModule,
     DocumentModule,
+    DecisionModule,
   ],
 })
 export class ApplicationModule {}

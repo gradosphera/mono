@@ -7,6 +7,8 @@ import { SystemBlockchainAdapter } from './adapters/system.adapter';
 import { SYSTEM_BLOCKCHAIN_PORT } from '~/domain/system/interfaces/system-blockchain.port';
 import { ACCOUNT_BLOCKCHAIN_PORT } from '~/domain/account/interfaces/account-blockchain.port';
 import { AccountBlockchainAdapter } from './adapters/account.adapter';
+import { DECISION_BLOCKCHAIN_PORT } from '~/domain/decision/interfaces/decision-blockchain.port';
+import { DecisionBlockchainAdapter } from './adapters/decision-blockchain.adapter';
 
 @Global()
 @Module({
@@ -28,7 +30,17 @@ import { AccountBlockchainAdapter } from './adapters/account.adapter';
       provide: ACCOUNT_BLOCKCHAIN_PORT,
       useClass: AccountBlockchainAdapter,
     },
+    {
+      provide: DECISION_BLOCKCHAIN_PORT,
+      useClass: DecisionBlockchainAdapter,
+    },
   ],
-  exports: [BLOCKCHAIN_PORT, BRANCH_BLOCKCHAIN_PORT, SYSTEM_BLOCKCHAIN_PORT, ACCOUNT_BLOCKCHAIN_PORT],
+  exports: [
+    BLOCKCHAIN_PORT,
+    BRANCH_BLOCKCHAIN_PORT,
+    SYSTEM_BLOCKCHAIN_PORT,
+    ACCOUNT_BLOCKCHAIN_PORT,
+    DECISION_BLOCKCHAIN_PORT,
+  ],
 })
 export class BlockchainModule {}

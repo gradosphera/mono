@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import type { SelectBranchInputDomainInterface } from '~/domain/branch/interfaces/select-branch-domain-input.interface';
-import { SelectBranchSignedDigitalDocumentInputDTO } from './select-branch-document-input.dto';
+import { SelectBranchSignedDocumentInputDTO } from './select-branch-document.dto';
 
 @InputType('SelectBranchInput')
 export class SelectBranchInputDTO implements SelectBranchInputDomainInterface {
@@ -19,9 +19,9 @@ export class SelectBranchInputDTO implements SelectBranchInputDomainInterface {
   @IsNotEmpty({ message: 'Имя аккаунта пользователя не должно быть пустым' })
   username!: string;
 
-  @Field(() => SelectBranchSignedDigitalDocumentInputDTO, {
+  @Field(() => SelectBranchSignedDocumentInputDTO, {
     description: 'Подписанный электронный документ (generateSelectBranchDocument)',
   })
   @ValidateNested()
-  document!: SelectBranchSignedDigitalDocumentInputDTO;
+  document!: SelectBranchSignedDocumentInputDTO;
 }

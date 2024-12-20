@@ -8,6 +8,7 @@ import { ProviderDomainModule } from './provider/provider.module';
 import { SystemDomainModule } from './system/system-domain.module';
 import { BranchDomainModule } from './branch/branch-domain.module';
 import { DocumentDomainModule } from './document/document.module';
+import { DecisionDomainModule } from './decision/decision.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { DocumentDomainModule } from './document/document.module';
     SystemDomainModule,
     BranchDomainModule,
     DocumentDomainModule,
+    DecisionDomainModule,
   ],
   exports: [
     AccountDomainModule,
@@ -29,6 +31,7 @@ import { DocumentDomainModule } from './document/document.module';
     SystemDomainModule,
     BranchDomainModule,
     DocumentDomainModule,
+    DecisionDomainModule,
   ],
 })
 export class DomainModule {}
