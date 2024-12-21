@@ -29,9 +29,11 @@ div
 
             q-th(auto-width)
 
-
         template(#body="props")
           q-tr(:key="`m_${props.row.username}`" :props="props")
+            q-td
+              q-badge(v-if="props.row.position === 'chairman'") Председатель совета
+              q-badge(v-if="props.row.position === 'member'") Член совета
 
             q-td {{ props.row.username }}
             q-td {{ props.row.last_name }}
@@ -202,11 +204,12 @@ const updateBoard = async (new_members: any) => {
 
 
 const columns = [
+  { name: 'position', align: 'left', label: 'Позиция', field: 'position', sortable: true },
   { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
   { name: 'last_name', align: 'left', label: 'Фамилия', field: 'last_name', sortable: true },
   { name: 'first_name', align: 'left', label: 'Имя', field: 'first_name', sortable: true },
   { name: 'middle_name', align: 'left', label: 'Отчество', field: 'middle_name', sortable: true },
-
+  // { name: 'middle_name', align: 'left', label: 'Отчество', field: 'middle_name', sortable: true },
   { name: 'phone', align: 'left', label: 'Телефон', field: 'phone', sortable: false },
   { name: 'email', align: 'left', label: 'Е-почта', field: 'email', sortable: false },
 ] as any

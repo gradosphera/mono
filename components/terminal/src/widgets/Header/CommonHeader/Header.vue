@@ -66,12 +66,12 @@ div
         indicator-color="secondary"
         style="height: 50px !important; overflow-x: auto;"
       )
+        q-route-tab(name="Совет" label="Совет" :to="{name: 'members'}" )
         q-route-tab(name="Кооперативные участки" label="Кооперативные участки" :to="{name: 'branches'}" )
         q-route-tab(name="Фонды накопления" label="Фонды накопления" :to="{name: 'accumulation-funds'}" )
         q-route-tab(name="Фонды списания" label="Фонды списания" :to="{name: 'expense-funds'}" )
         q-route-tab(name="Взносы" label="Взносы" :to="{name: 'initial-contributions'}" )
         q-route-tab(name="Контакты" label="Контакты" :to="{name: 'change-contacts'}" )
-        q-route-tab(name="Совет" label="Совет" :to="{name: 'members'}" )
 
   q-header(bordered v-if="matched('extstore')").bg-gradient-dark
     q-toolbar

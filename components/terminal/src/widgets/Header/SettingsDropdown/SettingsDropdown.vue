@@ -9,7 +9,7 @@ q-btn-dropdown(flat :size="isMobile ? 'sm' : 'md'" :dense="isMobile" stretch ico
           q-icon(name="fa-solid fa-wrench").q-mr-sm
           span.font10px НАСТРОЙКИ ПАЙЩИКА
 
-    q-item(v-if="loggedIn && isChairman" flat clickable v-close-popup @click="open('accumulation-funds')")
+    q-item(v-if="loggedIn && isChairman" flat clickable v-close-popup @click="open('members')")
       q-item-section
         q-item-label
           q-icon(name="fa-solid fa-hammer").q-mr-sm

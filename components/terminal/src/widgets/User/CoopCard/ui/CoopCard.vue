@@ -7,7 +7,7 @@ div.q-pa-md
           div.col-12.col-md-3.flex.justify-center
             AutoAvatar(style="width: 60px; border-radius: 50%;" :username="currentUser.username")
           div.col-12.col-md-9.q-mt-sm.q-mt-md-0
-            q-badge(color="primary" style="font-size: 12px; margin-bottom: 4px;") Председатель совета
+            q-badge(color="primary" style="font-size: 12px; margin-bottom: 4px;") {{role}}
             div.text-h6 {{displayName}}
         div.row
           DepositButton.col-6.border-left-radius-buttons
@@ -34,8 +34,14 @@ const currentUser = useCurrentUserStore()
 
 const userType = computed(() => currentUser.userAccount?.type)
 
-const formattedUsername = computed(() => {
-  return currentUser.username.replace(/(.{3})/g, '$1 ').trim();
+const role = computed(() => {
+  if (currentUser.userAccount?.role === 'user')
+    return 'Пайщик'
+  else if (currentUser.userAccount?.role === 'member')
+    return 'Член совета'
+  else if (currentUser.userAccount?.role === 'chairman')
+    return 'Председатель совета'
+  else return ''
 });
 
 const individualProfile = computed(() => {
