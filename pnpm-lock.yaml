@@ -577,6 +577,9 @@ importers:
       typeorm:
         specifier: 0.3.20
         version: 0.3.20(ioredis@5.4.1)(pg@8.13.1)(ts-node@10.9.2(@types/node@20.17.3)(typescript@5.6.3))
+      uuid:
+        specifier: ^11.0.0
+        version: 11.0.2
       validator:
         specifier: ^13.0.0
         version: 13.12.0
@@ -850,6 +853,12 @@ importers:
       simple-git-hooks:
         specifier: ^2.11.1
         version: 2.11.1
+      typedoc:
+        specifier: ^0.25.13
+        version: 0.25.13(typescript@5.6.3)
+      typedoc-plugin-expand-object-like-types:
+        specifier: ^0.1.2
+        version: 0.1.2(typedoc@0.25.13(typescript@5.6.3))
       typescript:
         specifier: ^5.5.4
         version: 5.6.3
@@ -13946,6 +13955,11 @@ packages:
 
   typedarray@0.0.6:
     resolution: {integrity: sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==}
+
+  typedoc-plugin-expand-object-like-types@0.1.2:
+    resolution: {integrity: sha512-RRMOCWMElQHBOVraWMWrh/0tDqCdS5oxYwaWMZBB3KlUUUUCxKllpvJPsRH/uFLO1nOuy28CbJxGVU1umv7LOQ==}
+    peerDependencies:
+      typedoc: 0.22.x || 0.23.x
 
   typedoc-plugin-inline-sources@1.1.0:
     resolution: {integrity: sha512-mtWjx80XLRe8Qj/Jg5a/WjXTpJWMAJflxTnujK7p30zxE+12e+ISTF9v5Epk/ZwjBB4KwE9fAQpLrrC7KqbKXw==}
@@ -31598,6 +31612,10 @@ snapshots:
       possible-typed-array-names: 1.0.0
 
   typedarray@0.0.6: {}
+
+  typedoc-plugin-expand-object-like-types@0.1.2(typedoc@0.25.13(typescript@5.6.3)):
+    dependencies:
+      typedoc: 0.25.13(typescript@5.6.3)
 
   typedoc-plugin-inline-sources@1.1.0(typedoc@0.25.13(typescript@5.6.3)):
     dependencies:

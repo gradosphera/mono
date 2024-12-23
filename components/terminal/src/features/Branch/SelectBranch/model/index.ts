@@ -1,12 +1,13 @@
 import type { Mutations } from '@coopenomics/coopjs';
 import { ref } from 'vue';
 import { api } from '../api';
-export type ISelectBranchInput = Mutations.ISelectBranchInput
+
+export type ISelectBranchInput = Mutations.Branches.SelectBranch.IInput
 
 const isVisible = ref(false);
 
 export function useSelectBranch() {
-  const selectBranch = async (data: ISelectBranchInput): Promise<boolean> => {
+  const selectBranch = async (data: ISelectBranchInput): Promise<Mutations.Branches.SelectBranch.IOutput[typeof Mutations.Branches.SelectBranch.name]> => {
     return await api.selectBranch(data)
   }
 

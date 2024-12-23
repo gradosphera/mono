@@ -31,7 +31,7 @@ q-btn-dropdown(flat :size="isMobile ? 'sm' : 'md'" :dense="isMobile" stretch ico
 
 </template>
 <script lang="ts" setup>
-import { useLogoutUser } from 'src/features/Registrator/Logout';
+import { useLogoutUser } from 'src/features/User/Logout';
 import { FailAlert } from 'src/shared/api';
 import { useRouter } from 'vue-router';
 import { ToogleDarkLight } from '../../../shared/ui/ToogleDarkLight';

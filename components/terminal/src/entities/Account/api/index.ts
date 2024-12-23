@@ -1,8 +1,9 @@
 import { client } from 'src/shared/api/client';
-import { Queries, type ModelTypes } from '@coopenomics/coopjs';
+import { Queries } from '@coopenomics/coopjs';
+import type { IAccount } from '../types';
 
-async function getAccount(username: string): Promise<ModelTypes['Account'] | undefined> {
-  const { getAccount: output } = await client.Query(Queries.getAccount, {
+async function getAccount(username: string): Promise<IAccount | undefined> {
+  const { [Queries.Accounts.GetAccount.name]: output } = await client.Query(Queries.Accounts.GetAccount.query, {
     variables: {
       data: {username}
     }

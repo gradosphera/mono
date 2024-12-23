@@ -37,7 +37,8 @@
     "release": "bumpp && npm publish",
     "start": "esno src/index.ts",
     "test": "vitest --testTimeout 60000",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "docs": "typedoc"
   },
   "dependencies": {
     "@wharfkit/antelope": "^1.0.13",
@@ -64,6 +65,8 @@
     "lint-staged": "^15.2.10",
     "pnpm": "^9.9.0",
     "simple-git-hooks": "^2.11.1",
+    "typedoc": "^0.25.13",
+    "typedoc-plugin-expand-object-like-types": "^0.1.2",
     "typescript": "^5.5.4",
     "unbuild": "^2.0.0",
     "vite": "^5.4.3",

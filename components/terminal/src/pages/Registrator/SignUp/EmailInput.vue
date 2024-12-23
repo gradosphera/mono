@@ -25,7 +25,7 @@ div
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
-import { useCreateUser } from 'src/features/Registrator/CreateUser'
+import { useCreateUser } from 'src/features/User/CreateUser'
 import { debounce } from 'quasar'
 import { COOP_SHORT_NAME } from 'src/shared/config'
 import { useRegistratorStore } from 'src/entities/Registrator'

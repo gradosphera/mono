@@ -148,6 +148,7 @@
     "tsoa": "^6.4.0",
     "typedoc": "^0.25.13",
     "typeorm": "0.3.20",
+    "uuid": "^11.0.0",
     "validator": "^13.0.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^5.0.0",

@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus";
+import { Selector, type ModelTypes, type ValueTypes } from "../../zeus";
 import { rawBankAccountSelector } from "../common/bankAccountSelector";
 
 const rawPaymentMethodSelector = {
@@ -21,5 +21,6 @@ const rawPaymentMethodSelector = {
 // Проверка валидности
 const _validate: MakeAllFieldsRequired<ValueTypes['PaymentMethod']> = rawPaymentMethodSelector;
 
+export type paymentMethodModel = ModelTypes['PaymentMethod']
 export const paymentMethodSelector = Selector('PaymentMethod')(rawPaymentMethodSelector);
 export { rawPaymentMethodSelector };

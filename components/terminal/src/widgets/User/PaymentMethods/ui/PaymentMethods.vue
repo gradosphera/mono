@@ -87,9 +87,9 @@ div(flat bordered).q-pa-md
 import { useWalletStore } from 'src/entities/Wallet';
 import { COOPNAME } from 'src/shared/config';
 import { computed } from 'vue';
-import { AddPaymentMethodButton } from 'src/features/Wallet/AddPaymentMethod';
-import type { IBankTransferData, ISBPData } from 'src/features/Wallet/AddPaymentMethod/model';
-import { DeletePaymentButton } from 'src/features/Wallet/DeletePaymentMethod/ui';
+import { AddPaymentMethodButton } from 'src/features/PaymentMethod/AddPaymentMethod';
+import type { IBankTransferData, ISBPData } from 'src/features/PaymentMethod/AddPaymentMethod/model';
+import { DeletePaymentButton } from 'src/features/PaymentMethod/DeletePaymentMethod/ui';
 
 const props = defineProps({
   username: {

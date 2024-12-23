@@ -1,5 +1,5 @@
-export * from "./extensions";
-export * from "./branches";
-export * from "./paymentMethods";
-export * from "./system";
-export * from './accounts';
+export * as Extensions from "./extensions";
+export * as PaymentMethods from "./paymentMethods";
+export * as System from "./system";
+export * as Accounts from './accounts';
+export * as Branches from "./branches";

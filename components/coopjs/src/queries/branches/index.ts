@@ -1,2 +1,2 @@
-export * from './getBranches'
-export * from './getPublicBranches'
+export * as GetBranches from './getBranches'
+export * as GetPublicBranches from './getPublicBranches'

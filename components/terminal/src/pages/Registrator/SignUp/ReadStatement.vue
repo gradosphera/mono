@@ -42,7 +42,7 @@ div
 </template>
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useCreateUser } from 'src/features/Registrator/CreateUser'
+import { useCreateUser } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
 import { ReadAgreementDialog } from 'src/features/Agreementer/ReadAgreementDialog';

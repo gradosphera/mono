@@ -1,3 +1,3 @@
-export * from './createBankAccount'
-export * from './deletePaymentMethod'
-export * from './updateBankAccount'
+export * as CreateBankAccount from './createBankAccount'
+export * as DeletePaymentMethod from './deletePaymentMethod'
+export * as UpdateBankAccount from './updateBankAccount'

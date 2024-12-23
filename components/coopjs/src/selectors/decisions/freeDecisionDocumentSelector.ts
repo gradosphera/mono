@@ -16,4 +16,4 @@ const _validate: MakeAllFieldsRequired<ValueTypes['ProjectFreeDecisionDocument']
 rawFreeDecisionDocumentSelector;
 
   // Передаём raw в селектор
-export const generateProjectOfFreeDecisionSelector = Selector("ProjectFreeDecisionDocument")(rawFreeDecisionDocumentSelector);
+export const projectFreeDecisionDocumentSelector = Selector("ProjectFreeDecisionDocument")(rawFreeDecisionDocumentSelector);

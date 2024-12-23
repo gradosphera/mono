@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useSessionStore } from 'src/entities/Session';
-import { useCreateFund } from 'src/features/Cooperative/CreateFund';
+import { useCreateFund } from 'src/features/Fund/CreateFund';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { COOPNAME } from 'src/shared/config';
 import { ref, watch } from 'vue';

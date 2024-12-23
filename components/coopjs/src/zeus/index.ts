@@ -1208,16 +1208,25 @@ export type ValueTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string | Variable<any, string>
 };
-	["CreateProjectFreeDecision"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
-	document: ValueTypes["ProjectFreeDecisionSignedDocumentInput"] | Variable<any, string>,
-	/** Строка мета-информации */
-	meta: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
+	["CreateProjectFreeDecisionInput"]: {
+	/** Проект решения, которое предлагается принять */
+	decision: string | Variable<any, string>,
+	/** Заголовок проекта свободного решения */
+	header: string | Variable<any, string>,
+	/** Вопрос, который выносится на повестку */
+	question: string | Variable<any, string>
 };
+	["CreatedProjectFreeDecision"]: AliasType<{
+	/** Проект решения, которое предлагается принять */
+	decision?:boolean | `@${string}`,
+	/** Заголовок проекта свободного решения */
+	header?:boolean | `@${string}`,
+	/** Идентификатор проекта свободного решения */
+	id?:boolean | `@${string}`,
+	/** Вопрос, который выносится на повестку */
+	question?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
 	["DeleteBranchInput"]: {
@@ -1425,6 +1434,7 @@ export type ValueTypes = {
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
+createProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["CreatedProjectFreeDecision"]],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ValueTypes["DeleteTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
@@ -1432,7 +1442,7 @@ editBranch?: [{	data: ValueTypes["EditBranchInput"] | Variable<any, string>},Val
 generateProjectOfFreeDecision?: [{	data: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["ProjectFreeDecisionDocument"]],
 generateSelectBranchDocument?: [{	data: ValueTypes["SelectBranchGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["SelectBranchDocument"]],
 installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
-publishProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecision"] | Variable<any, string>},boolean | `@${string}`],
+publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},boolean | `@${string}`],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
 updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
@@ -1638,6 +1648,16 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 	username: string | Variable<any, string>,
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
+};
+	["PublishProjectFreeDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
+	document: ValueTypes["ProjectFreeDecisionSignedDocumentInput"] | Variable<any, string>,
+	/** Строка мета-информации */
+	meta: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
 };
 	["Query"]: AliasType<{
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
@@ -2192,16 +2212,25 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
-	["CreateProjectFreeDecision"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
-	document: ResolverInputTypes["ProjectFreeDecisionSignedDocumentInput"],
-	/** Строка мета-информации */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
+	["CreateProjectFreeDecisionInput"]: {
+	/** Проект решения, которое предлагается принять */
+	decision: string,
+	/** Заголовок проекта свободного решения */
+	header: string,
+	/** Вопрос, который выносится на повестку */
+	question: string
 };
+	["CreatedProjectFreeDecision"]: AliasType<{
+	/** Проект решения, которое предлагается принять */
+	decision?:boolean | `@${string}`,
+	/** Заголовок проекта свободного решения */
+	header?:boolean | `@${string}`,
+	/** Идентификатор проекта свободного решения */
+	id?:boolean | `@${string}`,
+	/** Вопрос, который выносится на повестку */
+	question?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
 	["DeleteBranchInput"]: {
@@ -2409,6 +2438,7 @@ export type ResolverInputTypes = {
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
+createProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecisionInput"]},ResolverInputTypes["CreatedProjectFreeDecision"]],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ResolverInputTypes["DeleteTrustedAccountInput"]},ResolverInputTypes["Branch"]],
@@ -2416,7 +2446,7 @@ editBranch?: [{	data: ResolverInputTypes["EditBranchInput"]},ResolverInputTypes[
 generateProjectOfFreeDecision?: [{	data: ResolverInputTypes["ProjectFreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["ProjectFreeDecisionDocument"]],
 generateSelectBranchDocument?: [{	data: ResolverInputTypes["SelectBranchGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["SelectBranchDocument"]],
 installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
-publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecision"]},boolean | `@${string}`],
+publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},boolean | `@${string}`],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
 updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
@@ -2623,6 +2653,16 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["PublishProjectFreeDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
+	document: ResolverInputTypes["ProjectFreeDecisionSignedDocumentInput"],
+	/** Строка мета-информации */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["Query"]: AliasType<{
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
@@ -3172,15 +3212,23 @@ export type ModelTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
-	["CreateProjectFreeDecision"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
-	document: ModelTypes["ProjectFreeDecisionSignedDocumentInput"],
-	/** Строка мета-информации */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
+	["CreateProjectFreeDecisionInput"]: {
+	/** Проект решения, которое предлагается принять */
+	decision: string,
+	/** Заголовок проекта свободного решения */
+	header: string,
+	/** Вопрос, который выносится на повестку */
+	question: string
+};
+	["CreatedProjectFreeDecision"]: {
+		/** Проект решения, которое предлагается принять */
+	decision: string,
+	/** Заголовок проекта свободного решения */
+	header: string,
+	/** Идентификатор проекта свободного решения */
+	id: string,
+	/** Вопрос, который выносится на повестку */
+	question: string
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
@@ -3386,6 +3434,8 @@ export type ModelTypes = {
 	createBankAccount: ModelTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
 	createBranch: ModelTypes["Branch"],
+	/** Создать проект свободного решения и сохранить в хранилище для дальнейшей генерации документа проекта и его публикации */
+	createProjectOfFreeDecision: ModelTypes["CreatedProjectFreeDecision"],
 	/** Удалить кооперативный участок */
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
@@ -3394,7 +3444,7 @@ export type ModelTypes = {
 	deleteTrustedAccount: ModelTypes["Branch"],
 	/** Изменить кооперативный участок */
 	editBranch: ModelTypes["Branch"],
-	/** Сгенерировать проект свободного решения */
+	/** Сгенерировать документ проекта свободного решения */
 	generateProjectOfFreeDecision: ModelTypes["ProjectFreeDecisionDocument"],
 	/** Сгенерировать документ, подтверждающий выбор кооперативного участка */
 	generateSelectBranchDocument: ModelTypes["SelectBranchDocument"],
@@ -3597,6 +3647,16 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["PublishProjectFreeDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
+	document: ModelTypes["ProjectFreeDecisionSignedDocumentInput"],
+	/** Строка мета-информации */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["Query"]: {
 		/** Получить сводную информацию о аккаунте */
@@ -4147,15 +4207,24 @@ export type GraphQLTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
-	["CreateProjectFreeDecision"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
-	document: GraphQLTypes["ProjectFreeDecisionSignedDocumentInput"],
-	/** Строка мета-информации */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
+	["CreateProjectFreeDecisionInput"]: {
+		/** Проект решения, которое предлагается принять */
+	decision: string,
+	/** Заголовок проекта свободного решения */
+	header: string,
+	/** Вопрос, который выносится на повестку */
+	question: string
+};
+	["CreatedProjectFreeDecision"]: {
+	__typename: "CreatedProjectFreeDecision",
+	/** Проект решения, которое предлагается принять */
+	decision: string,
+	/** Заголовок проекта свободного решения */
+	header: string,
+	/** Идентификатор проекта свободного решения */
+	id: string,
+	/** Вопрос, который выносится на повестку */
+	question: string
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]: "scalar" & { name: "DateTime" };
@@ -4368,6 +4437,8 @@ export type GraphQLTypes = {
 	createBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
 	createBranch: GraphQLTypes["Branch"],
+	/** Создать проект свободного решения и сохранить в хранилище для дальнейшей генерации документа проекта и его публикации */
+	createProjectOfFreeDecision: GraphQLTypes["CreatedProjectFreeDecision"],
 	/** Удалить кооперативный участок */
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
@@ -4376,7 +4447,7 @@ export type GraphQLTypes = {
 	deleteTrustedAccount: GraphQLTypes["Branch"],
 	/** Изменить кооперативный участок */
 	editBranch: GraphQLTypes["Branch"],
-	/** Сгенерировать проект свободного решения */
+	/** Сгенерировать документ проекта свободного решения */
 	generateProjectOfFreeDecision: GraphQLTypes["ProjectFreeDecisionDocument"],
 	/** Сгенерировать документ, подтверждающий выбор кооперативного участка */
 	generateSelectBranchDocument: GraphQLTypes["SelectBranchDocument"],
@@ -4593,6 +4664,16 @@ export type GraphQLTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["PublishProjectFreeDecisionInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
+	document: GraphQLTypes["ProjectFreeDecisionSignedDocumentInput"],
+	/** Строка мета-информации */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["Query"]: {
 	__typename: "Query",
@@ -4882,7 +4963,7 @@ type ZEUS_VARIABLES = {
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["CreateBankAccountInput"]: ValueTypes["CreateBankAccountInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
-	["CreateProjectFreeDecision"]: ValueTypes["CreateProjectFreeDecision"];
+	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
 	["DateTime"]: ValueTypes["DateTime"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
@@ -4899,6 +4980,7 @@ type ZEUS_VARIABLES = {
 	["ProjectFreeDecisionGenerateDocumentInput"]: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"];
 	["ProjectFreeDecisionSignedDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedDocumentInput"];
 	["ProjectFreeDecisionSignedMetaDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedMetaDocumentInput"];
+	["PublishProjectFreeDecisionInput"]: ValueTypes["PublishProjectFreeDecisionInput"];
 	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];
 	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];
 	["SelectBranchSignedDocumentInput"]: ValueTypes["SelectBranchSignedDocumentInput"];

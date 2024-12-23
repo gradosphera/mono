@@ -70,8 +70,8 @@
   import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
   import { formatToHumanDate } from 'src/shared/lib/utils/dates/formatToHumanDate';
   import { useOrderStore } from 'src/entities/Order';
-  import { SetOrderPaidStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderPaidStatusButton';
-  import { SetOrderRefundedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderRefundedStatusButton';
+  import { SetOrderPaidStatusButton } from 'src/features/Order/SetStatus/ui/SetOrderPaidStatusButton';
+  import { SetOrderRefundedStatusButton } from 'src/features/Order/SetStatus/ui/SetOrderRefundedStatusButton';
   // import { SetOrderCompletedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderCompletedStatusButton';
 
   const orderStore = useOrderStore()

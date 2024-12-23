@@ -12,7 +12,7 @@ div(v-if="store?.state?.payment?.details?.amount_without_fee")
 
 <script lang="ts" setup>
 import { computed, watch, onMounted } from 'vue'
-import { useCreateUser } from 'src/features/Registrator/CreateUser'
+import { useCreateUser } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
 import { COOPNAME } from 'src/shared/config';
 import { useCooperativeStore } from 'src/entities/Cooperative';

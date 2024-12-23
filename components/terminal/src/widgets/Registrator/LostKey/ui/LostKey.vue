@@ -25,8 +25,8 @@ div
 
 </template>
 <script lang="ts" setup>
-import { useCreateUser } from 'src/features/Registrator/CreateUser';
-import { useLostKey } from 'src/features/Registrator/LostKey/model';
+import { useCreateUser } from 'src/features/User/CreateUser';
+import { useLostKey } from 'src/features/User/LostKey/model';
 
 import { FailAlert } from 'src/shared/api';
 import { computed, ref } from 'vue';

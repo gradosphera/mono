@@ -1,1 +1,1 @@
-export * from './features/Wallet/AddPaymentMethod'
+export * from './features/PaymentMethod/AddPaymentMethod'

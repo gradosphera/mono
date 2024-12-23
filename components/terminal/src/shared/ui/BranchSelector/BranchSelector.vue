@@ -25,12 +25,12 @@ div
   </template>
 
   <script lang="ts" setup>
-  import { Queries } from '@coopenomics/coopjs';
+  import { type IPublicBranch } from 'src/entities/Branch/model';
   import { ref, defineProps, watch } from 'vue'
 
   const props = defineProps({
     branches: {
-      type: Object as () => Queries.IPublicBranch[],
+      type: Object as () => IPublicBranch[],
       required: true,
     },
     modelValue: {

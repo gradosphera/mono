@@ -74,7 +74,7 @@ import { useEditableData } from 'src/shared/lib/composables/useEditableData';
 import type { ModelTypes } from '@coopenomics/coopjs';
 import { EditableActions } from 'src/shared/ui/EditableActions';
 import { notEmpty } from 'src/shared/lib/utils';
-import { useUpdateBranchBankAccount } from 'src/features/Branch/UpdateBankAccount/model';
+import { useUpdateBranchBankAccount } from 'src/features/PaymentMethod/UpdateBankAccount/model';
 import { failAlert } from 'src/shared/api';
 
 const props = defineProps({

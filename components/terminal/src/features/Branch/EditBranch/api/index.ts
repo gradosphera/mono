@@ -4,7 +4,7 @@ import { client } from 'src/shared/api/client'
 import { Mutations } from '@coopenomics/coopjs'
 
 async function editBranch(data: IEditBranchInput): Promise<IBranch>{
-  const {editBranch: result} = await client.Mutation(Mutations.editBranch, {variables: {
+  const {[Mutations.Branches.EditBranch.name]: result} = await client.Mutation(Mutations.Branches.EditBranch.mutation, {variables: {
     data
   }})
 

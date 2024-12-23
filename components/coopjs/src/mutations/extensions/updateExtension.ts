@@ -1,9 +1,13 @@
-import { extensionSelector } from '../../selectors/extensions/extensionSelector';
-import type { ValueTypes } from '../../types'
-import { $, Selector, type ModelTypes } from '../../zeus';
+import { extensionSelector, type extensionModel } from '../../selectors/extensions/extensionSelector';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
 
-export const updateExtension = Selector('Mutation')({
-  updateExtension: [{data: $('data', 'ExtensionInput!')}, extensionSelector]
+type inputModel = ModelTypes['ExtensionInput']
+export const name = 'updateExtension'
+
+export const mutation = Selector('Mutation')({
+  [name]: [{data: $('data', 'ExtensionInput!')}, extensionSelector]
 });
 
-export type IUpdateExtensionInput = ModelTypes['ExtensionInput']
+
+export interface IInput extends inputModel {}
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;

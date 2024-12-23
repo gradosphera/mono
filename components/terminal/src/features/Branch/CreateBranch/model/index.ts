@@ -1,5 +1,5 @@
 import { ref, type Ref } from 'vue';
-import type { ModelTypes } from '@coopenomics/coopjs/index';
+import type { ModelTypes } from '@coopenomics/coopjs';
 import { api } from '../api';
 import { useBranchStore, type IBranch } from 'src/entities/Branch/model';
 import { COOPNAME } from 'src/shared/config';

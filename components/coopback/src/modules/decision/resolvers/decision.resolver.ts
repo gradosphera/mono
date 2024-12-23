@@ -10,7 +10,9 @@ import {
 } from '../dto/project-free-decision-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 import { Throttle } from '@nestjs/throttler';
-import { CreateProjectFreeDecisionDTO } from '../dto/create-project-free-decision-input.dto';
+import { PublishProjectFreeDecisionInputDTO } from '../dto/publish-project-free-decision-input.dto';
+import { CreatedProjectFreeDecisionDTO } from '../dto/created-project-free-decision.dto';
+import { CreateProjectFreeDecisionInputDTO } from '../dto/create-project-free-decision.dto';
 
 @Resolver()
 export class DecisionResolver {
@@ -18,7 +20,7 @@ export class DecisionResolver {
 
   @Mutation(() => ProjectFreeDecisionDocumentDTO, {
     name: 'generateProjectOfFreeDecision',
-    description: 'Сгенерировать проект свободного решения',
+    description: 'Сгенерировать документ проекта свободного решения',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -39,9 +41,23 @@ export class DecisionResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
   async publishProjectOfFreeDecision(
-    @Args('data', { type: () => CreateProjectFreeDecisionDTO })
-    data: CreateProjectFreeDecisionDTO
+    @Args('data', { type: () => PublishProjectFreeDecisionInputDTO })
+    data: PublishProjectFreeDecisionInputDTO
   ): Promise<boolean> {
     return this.decisionService.publishProjectOfFreeDecision(data);
+  }
+
+  @Mutation(() => CreatedProjectFreeDecisionDTO, {
+    name: 'createProjectOfFreeDecision',
+    description:
+      'Создать проект свободного решения и сохранить в хранилище для дальнейшей генерации документа проекта и его публикации',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async createProjectOfFreeDecision(
+    @Args('data', { type: () => CreateProjectFreeDecisionInputDTO })
+    data: CreateProjectFreeDecisionInputDTO
+  ): Promise<CreatedProjectFreeDecisionDTO> {
+    return this.decisionService.createProjectOfFreeDecision(data);
   }
 }

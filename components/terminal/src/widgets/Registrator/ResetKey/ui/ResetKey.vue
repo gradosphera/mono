@@ -31,8 +31,8 @@ div
 </template>
 <script lang="ts" setup>
 import { copyToClipboard } from 'quasar';
-import { useCreateUser } from 'src/features/Registrator/CreateUser';
-import { useResetKey } from 'src/features/Registrator/ResetKey/model';
+import { useCreateUser } from 'src/features/User/CreateUser';
+import { useResetKey } from 'src/features/User/ResetKey/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { type IGeneratedAccount } from 'src/shared/lib/types/user';
 import { ref } from 'vue';

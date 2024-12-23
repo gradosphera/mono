@@ -1,1 +1,1 @@
-export * from './getAccount'
+export * as GetAccount from './getAccount'

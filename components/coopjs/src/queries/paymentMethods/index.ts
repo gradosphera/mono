@@ -1,1 +1,1 @@
-export * from './getPaymentMethods'
+export * as GetPaymentMethods from './getPaymentMethods'

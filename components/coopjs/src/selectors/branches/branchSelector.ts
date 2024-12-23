@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus";
+import { Selector, type ModelTypes, type ValueTypes } from "../../zeus";
 import { rawBankAccountSelector } from "../common/bankAccountSelector";
 import { rawIndividualSelector } from "../common/individualSelector";
 import { rawPaymentMethodSelector } from "../paymentMethods/paymentMethodSelector";
@@ -36,6 +36,8 @@ const rawBranchSelector = {
 
 // Проверка валидности
 const _validate: MakeAllFieldsRequired<ValueTypes["Branch"]> = rawBranchSelector;
+
+export type branchModel = ModelTypes['Branch']
 
 export const branchSelector = Selector("Branch")(rawBranchSelector);
 export { rawBranchSelector };

@@ -16,8 +16,8 @@ export const AllTypesProps: Record<string,any> = {
 	CreateBranchInput:{
 
 	},
-	CreateProjectFreeDecision:{
-		document:"ProjectFreeDecisionSignedDocumentInput"
+	CreateProjectFreeDecisionInput:{
+
 	},
 	DateTime: `scalar.DateTime` as const,
 	DeleteBranchInput:{
@@ -64,6 +64,9 @@ export const AllTypesProps: Record<string,any> = {
 		createBranch:{
 			data:"CreateBranchInput"
 		},
+		createProjectOfFreeDecision:{
+			data:"CreateProjectFreeDecisionInput"
+		},
 		deleteBranch:{
 			data:"DeleteBranchInput"
 		},
@@ -88,7 +91,7 @@ export const AllTypesProps: Record<string,any> = {
 			data:"ExtensionInput"
 		},
 		publishProjectOfFreeDecision:{
-			data:"CreateProjectFreeDecision"
+			data:"PublishProjectFreeDecisionInput"
 		},
 		selectBranch:{
 			data:"SelectBranchInput"
@@ -111,6 +114,9 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	ProjectFreeDecisionSignedMetaDocumentInput:{
 
+	},
+	PublishProjectFreeDecisionInput:{
+		document:"ProjectFreeDecisionSignedDocumentInput"
 	},
 	Query:{
 		getAccount:{
@@ -273,6 +279,12 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String",
 		verifications:"Verification"
 	},
+	CreatedProjectFreeDecision:{
+		decision:"String",
+		header:"String",
+		id:"String",
+		question:"String"
+	},
 	DateTime: `scalar.DateTime` as const,
 	Extension:{
 		available:"Boolean",
@@ -337,6 +349,7 @@ export const ReturnTypes: Record<string,any> = {
 		addTrustedAccount:"Branch",
 		createBankAccount:"PaymentMethod",
 		createBranch:"Branch",
+		createProjectOfFreeDecision:"CreatedProjectFreeDecision",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
 		deleteTrustedAccount:"Branch",

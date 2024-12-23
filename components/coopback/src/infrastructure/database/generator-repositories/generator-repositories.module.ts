@@ -10,6 +10,8 @@ import { PAYMENT_METHOD_REPOSITORY } from '~/domain/common/repositories/payment-
 import { PaymentMethodRepositoryImplementation } from './repositories/payment-method-generator.repository';
 import { DOCUMENT_REPOSITORY } from '~/domain/document/repository/document.repository';
 import { DocumentRepositoryImplementation } from './repositories/document-generator.repository';
+import { PROJECT_FREE_DECISION_REPOSITORY } from '~/domain/common/repositories/project-free-decision.repository';
+import { ProjectFreeDecisionRepositoryImplementation } from './repositories/project-free-decision-generator.repository';
 @Global()
 @Module({
   providers: [
@@ -33,6 +35,10 @@ import { DocumentRepositoryImplementation } from './repositories/document-genera
       provide: DOCUMENT_REPOSITORY,
       useClass: DocumentRepositoryImplementation,
     },
+    {
+      provide: PROJECT_FREE_DECISION_REPOSITORY,
+      useClass: ProjectFreeDecisionRepositoryImplementation,
+    },
   ],
   exports: [
     ORGANIZATION_REPOSITORY,
@@ -40,6 +46,7 @@ import { DocumentRepositoryImplementation } from './repositories/document-genera
     ENTREPRENEUR_REPOSITORY,
     PAYMENT_METHOD_REPOSITORY,
     DOCUMENT_REPOSITORY,
+    PROJECT_FREE_DECISION_REPOSITORY,
   ],
 })
 export class GeneratorRepositoriesModule {}

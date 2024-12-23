@@ -3,13 +3,11 @@ import WebSocket from 'isomorphic-ws'
 import { Thunder, Subscription as ZeusSubscription, type GraphQLResponse } from './zeus'
 import { Blockchain } from './blockchain'
 
-export * from './types'
+export * as Types from './types'
 export * as Mutations from './mutations'
 export * as Queries from './queries'
-export * as Selectors from './selectors'
+
 export type { ModelTypes } from './zeus';
-
-
 
 if (typeof globalThis.WebSocket === 'undefined') {
   globalThis.WebSocket = WebSocket as any
@@ -56,6 +54,39 @@ function createThunder(baseUrl: string) {
   });
 }
 
+/**
+ * Создаёт клиент для взаимодействия с API, поддерживающий выполнение запросов, мутаций, подписок,
+ * а также операций с блокчейном. Позволяет динамически изменять заголовок авторизации.
+ *
+ * @param options - Опции для настройки подключения клиента.
+ * @param options.baseUrl - Базовый URL API, с которым будет происходить взаимодействие.
+ * @param options.headers - Необязательные заголовки, которые будут добавляться ко всем запросам. По умолчанию — пустой объект.
+ * @param options.blockchainUrl - URL узла блокчейна.
+ * @param options.chainId - Уникальный идентификатор цепочки блокчейна.
+ *
+ * @returns Объект, содержащий методы для работы с API:
+ * - `setToken`: Устанавливает заголовок Authorization с переданным токеном.
+ * - `Query`: Метод для выполнения GraphQL-запросов.
+ * - `Mutation`: Метод для выполнения GraphQL-мутаций.
+ * - `Subscription`: Метод для подписки на события через WebSocket с использованием протокола GraphQL Subscriptions.
+ * - `Blockchain`: Экземпляр класса Blockchain для взаимодействия с функциями блокчейна.
+ *
+ * @example
+ * ```typescript
+ * const client = createClient({
+ *   baseUrl: 'https://api.example.com',
+ *   headers: { 'Custom-Header': 'значение' },
+ *   blockchainUrl: 'https://blockchain.example.com',
+ *   chainId: '12345'
+ * });
+ *
+ * client.setToken('ваш-токен');
+ *
+ * const data = await client.Query({
+ *   someField: true,
+ * });
+ * ```
+ */
 export function createClient(options: ClientConnectionOptions) {
   // Инициализируем заголовки при создании клиента
   currentHeaders = options.headers || {}

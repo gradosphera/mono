@@ -1,10 +1,14 @@
-import { generateProjectOfFreeDecisionSelector } from '../../selectors/decisions/freeDecisionDocumentSelector';
-import { $, Selector, type ModelTypes } from '../../zeus';
+import { projectFreeDecisionDocumentSelector } from '../../selectors/decisions/freeDecisionDocumentSelector';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
 
-export const generateProjectOfFreeDecisionDocument = Selector('Mutation')({
-  generateProjectOfFreeDecision: [{data: $('data', 'ProjectFreeDecisionGenerateDocumentInput!')}, generateProjectOfFreeDecisionSelector]
+type inputModel = ModelTypes['ProjectFreeDecisionGenerateDocumentInput'];
+
+export const name = 'generateProjectOfFreeDecision'
+
+export const mutation = Selector('Mutation')({
+  [name]: [{data: $('data', 'ProjectFreeDecisionGenerateDocumentInput!')}, projectFreeDecisionDocumentSelector]
 });
 
-export type IProjectFreeDecisionDocument = ModelTypes['ProjectFreeDecisionDocument']
+export interface IInput extends inputModel {}
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
 
-export type IGenerateProjeftOfFreeDecisionDocumentInput = ModelTypes['ProjectFreeDecisionGenerateDocumentInput']

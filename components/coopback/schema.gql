@@ -418,18 +418,29 @@ input CreateBranchInput {
   trustee: String!
 }
 
-input CreateProjectFreeDecision {
-  """Имя аккаунта кооператива"""
-  coopname: String!
+input CreateProjectFreeDecisionInput {
+  """Проект решения, которое предлагается принять"""
+  decision: String!
 
-  """Подписанный электронный документ (generateProjectOfFreeDecision)"""
-  document: ProjectFreeDecisionSignedDocumentInput!
+  """Заголовок проекта свободного решения"""
+  header: String!
 
-  """Строка мета-информации"""
-  meta: String!
+  """Вопрос, который выносится на повестку"""
+  question: String!
+}
 
-  """Имя аккаунта пользователя"""
-  username: String!
+type CreatedProjectFreeDecision {
+  """Проект решения, которое предлагается принять"""
+  decision: String!
+
+  """Заголовок проекта свободного решения"""
+  header: String!
+
+  """Идентификатор проекта свободного решения"""
+  id: String!
+
+  """Вопрос, который выносится на повестку"""
+  question: String!
 }
 
 """
@@ -734,6 +745,11 @@ type Mutation {
   """Создать кооперативный участок"""
   createBranch(data: CreateBranchInput!): Branch!
 
+  """
+  Создать проект свободного решения и сохранить в хранилище для дальнейшей генерации документа проекта и его публикации
+  """
+  createProjectOfFreeDecision(data: CreateProjectFreeDecisionInput!): CreatedProjectFreeDecision!
+
   """Удалить кооперативный участок"""
   deleteBranch(data: DeleteBranchInput!): Boolean!
 
@@ -746,7 +762,7 @@ type Mutation {
   """Изменить кооперативный участок"""
   editBranch(data: EditBranchInput!): Branch!
 
-  """Сгенерировать проект свободного решения"""
+  """Сгенерировать документ проекта свободного решения"""
   generateProjectOfFreeDecision(data: ProjectFreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ProjectFreeDecisionDocument!
 
   """Сгенерировать документ, подтверждающий выбор кооперативного участка"""
@@ -758,7 +774,7 @@ type Mutation {
   """
   Опубликовать проект свободного решения для дальнейшего голосования совета по нему
   """
-  publishProjectOfFreeDecision(data: CreateProjectFreeDecision!): Boolean!
+  publishProjectOfFreeDecision(data: PublishProjectFreeDecisionInput!): Boolean!
 
   """Выбрать кооперативный участок"""
   selectBranch(data: SelectBranchInput!): Boolean!
@@ -1039,6 +1055,20 @@ input ProjectFreeDecisionSignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
+}
+
+input PublishProjectFreeDecisionInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Подписанный электронный документ (generateProjectOfFreeDecision)"""
+  document: ProjectFreeDecisionSignedDocumentInput!
+
+  """Строка мета-информации"""
+  meta: String!
+
+  """Имя аккаунта пользователя"""
+  username: String!
 }
 
 type Query {

@@ -1,10 +1,10 @@
 import { client } from 'src/shared/api/client';
 import { Queries } from '@coopenomics/coopjs';
-import type { IBranch, IGetBranchesInput } from '../model';
+import type { IBranch, IGetBranchesInput, IPublicBranch } from '../model';
 
 async function loadBranches(data: IGetBranchesInput): Promise<IBranch[]> {
-  const { getBranches: output } = await client.Query(
-    Queries.getBranches,
+  const { [Queries.Branches.GetBranches.name]: output } = await client.Query(
+    Queries.Branches.GetBranches.query,
     {
       variables: {
         data
@@ -14,16 +14,16 @@ async function loadBranches(data: IGetBranchesInput): Promise<IBranch[]> {
   return output;
 }
 
-async function loadPublicBranches(data: IGetBranchesInput): Promise<Queries.IPublicBranch[]> {
-  const { getBranches: output } = await client.Query(
-    Queries.getPublicBranches,
+async function loadPublicBranches(data: IGetBranchesInput): Promise<IPublicBranch[]> {
+  const { [Queries.Branches.GetPublicBranches.name]: output } = await client.Query(
+    Queries.Branches.GetPublicBranches.query,
     {
       variables: {
         data
       }
     }
   );
-  console.log('output', output)
+
   return output;
 }
 

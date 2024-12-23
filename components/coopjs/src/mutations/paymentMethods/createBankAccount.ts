@@ -1,8 +1,13 @@
-import { paymentMethodSelector } from '../../selectors/paymentMethods/paymentMethodSelector';
-import { $, Selector, type ModelTypes } from '../../zeus';
+import { paymentMethodSelector, type paymentMethodModel } from '../../selectors/paymentMethods/paymentMethodSelector';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
 
-export const createBankAccount = Selector('Mutation')({
-  createBankAccount: [{data: $('data', 'CreateBankAccountInput!')}, paymentMethodSelector]
+type inputModel = ModelTypes['CreateBankAccountInput']
+
+export const name = 'createBankAccount'
+
+export const mutation = Selector('Mutation')({
+  [name]: [{data: $('data', 'CreateBankAccountInput!')}, paymentMethodSelector]
 });
 
-export type ICreateBankAccountInput = ModelTypes['CreateBankAccountInput']
+export interface IInput extends inputModel {}
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;

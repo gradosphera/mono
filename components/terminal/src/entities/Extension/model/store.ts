@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, Ref } from 'vue'
 import { api } from '../api'
 import type { IExtension } from './types';
-import type { ModelTypes } from '@coopenomics/coopjs/index';
+import type { ModelTypes } from '@coopenomics/coopjs';
 
 const namespace = 'extensionStore';
 

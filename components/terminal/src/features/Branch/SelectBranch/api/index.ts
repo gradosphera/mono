@@ -3,7 +3,7 @@ import { Mutations } from '@coopenomics/coopjs'
 import type { ISelectBranchInput } from '../model'
 
 async function selectBranch(data: ISelectBranchInput): Promise<boolean>{
-  const {selectBranch: result} = await client.Mutation(Mutations.selectBranch, {variables: {
+  const {[Mutations.Branches.SelectBranch.name]: result} = await client.Mutation(Mutations.Branches.SelectBranch.mutation, {variables: {
     data
   }})
 

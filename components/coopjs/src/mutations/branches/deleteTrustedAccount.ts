@@ -1,9 +1,14 @@
-import { branchSelector } from '../../selectors';
-import type { ValueTypes } from '../../types'
-import { $, Selector } from '../../zeus';
+import { branchSelector, type branchModel } from '../../selectors';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
 
-export const deleteTrustedAccount = Selector('Mutation')({
-  deleteTrustedAccount: [{data: $('data', 'DeleteTrustedAccountInput!')}, branchSelector]
+type inputModel = ModelTypes['DeleteTrustedAccountInput']
+
+export const name = 'deleteTrustedAccount'
+
+export const mutation = Selector('Mutation')({
+  [name]: [{data: $('data', 'DeleteTrustedAccountInput!')}, branchSelector]
 });
 
-export type IDeleteTrustedAccountInput = ValueTypes['DeleteTrustedAccountInput']
+export interface IInput extends inputModel {}
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
+

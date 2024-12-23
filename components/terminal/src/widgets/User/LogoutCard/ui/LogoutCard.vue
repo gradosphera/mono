@@ -11,7 +11,7 @@ q-card(flat).q-pa-md
 </template>
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
-import { useLogoutUser } from 'src/features/Registrator/Logout/model'
+import { useLogoutUser } from 'src/features/User/Logout/model'
 import { FailAlert } from 'src/shared/api';
 
 const router = useRouter()

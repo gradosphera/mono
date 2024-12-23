@@ -12,7 +12,7 @@ export interface ISettingsModel extends Model<ISettings> {
 const settingsSchema = new Schema<ISettings>(
   {
     provider: {
-      name: { type: String, required: true, default: 'sberpoll' },
+      name: { type: String, required: true, default: 'qrpay' },
       client: { type: String, default: '' },
       secret: { type: String, default: '' },
     },

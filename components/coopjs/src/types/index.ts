@@ -1,6 +1,3 @@
-import type { AliasType } from '../zeus';
-
-export { type ValueTypes } from '../zeus'
 export * from './controller'
 
 export interface ClientConnectionOptions {

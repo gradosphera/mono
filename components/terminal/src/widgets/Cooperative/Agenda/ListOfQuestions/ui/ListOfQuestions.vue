@@ -15,6 +15,8 @@ q-card(flat)
     :no-data-label="'У совета нет голосований на повестке'"
   ).full-width
 
+    template(#top)
+      q-btn
     template(#header="props")
       q-tr(:props="props")
         q-th(auto-width)
@@ -80,9 +82,9 @@ import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
 import { sendGET } from 'src/shared/api';
 import { useSessionStore } from 'src/entities/Session';
 import { Cooperative, SovietContract } from 'cooptypes'
-import { useVoteForDecision } from 'src/features/Cooperative/VoteForDecision';
-import { useAuthorizeAndExecDecision } from 'src/features/Cooperative/AuthorizeAndExecDecision';
-import { useVoteAgainstDecision } from 'src/features/Cooperative/VoteAgainstDecision';
+import { useVoteForDecision } from 'src/features/Decision/VoteForDecision';
+import { useAuthorizeAndExecDecision } from 'src/features/Decision/AuthorizeAndExecDecision';
+import { useVoteAgainstDecision } from 'src/features/Decision/VoteAgainstDecision';
 import { COOPNAME } from 'src/shared/config';
 import { useCooperativeStore } from 'src/entities/Cooperative/model/stores';
 import { useCurrentUserStore } from 'src/entities/User';

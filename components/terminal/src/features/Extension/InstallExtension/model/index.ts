@@ -1,19 +1,19 @@
 import { client } from 'src/shared/api/client';
 import { useExtensionStore } from 'src/entities/Extension/model';
-import { Mutations, type ModelTypes } from '@coopenomics/coopjs'
+import { Mutations } from '@coopenomics/coopjs'
 
 export function useInstallExtension() {
   async function installExtension(
     name: string, enabled: boolean, config: any
-  ): Promise<ModelTypes['Extension']> {
+  ): Promise<Mutations.Extensions.InstallExtension.IOutput[typeof Mutations.Extensions.InstallExtension.name]> {
 
-    const data: Mutations.IInstallExtensionInput = {
+    const data: Mutations.Extensions.InstallExtension.IInput = {
       name,
       enabled,
       config
     }
 
-    const {installExtension: result} = await client.Mutation(Mutations.installExtension, {variables: {
+    const {installExtension: result} = await client.Mutation(Mutations.Extensions.InstallExtension.mutation, {variables: {
       data
     }})
 

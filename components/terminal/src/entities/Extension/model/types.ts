@@ -1,10 +1,12 @@
-import type { DeserializedDescriptionOfExtension, ModelTypes } from '@coopenomics/coopjs';
+import type { Types, Queries, ModelTypes } from '@coopenomics/coopjs';
+
+export type ZExtension = Queries.Extensions.GetExtensions.IOutput[typeof Queries.Extensions.GetExtensions.name][number]
 
 export type ISchemaType = 'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
 
 export type ISchemaProperty = {
   type?: ISchemaType;
-  description?: DeserializedDescriptionOfExtension
+  description?: Types.DeserializedDescriptionOfExtension
   default?: any;
   required?: string[];
   properties?: ISchemaProperty;

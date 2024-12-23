@@ -1,1 +1,1 @@
-export * from "./getSystemInfo";
+export * as GetSystemInfo from "./getSystemInfo";

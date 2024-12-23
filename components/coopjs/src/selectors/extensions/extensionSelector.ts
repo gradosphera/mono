@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus";
+import { Selector, type ModelTypes, type ValueTypes } from "../../zeus";
 
 const rawExtensionSelector = {
   name: true,
@@ -20,6 +20,7 @@ const rawExtensionSelector = {
 
 // Проверка валидности
 const _validate: MakeAllFieldsRequired<ValueTypes['Extension']> = rawExtensionSelector;
+export type extensionModel = ModelTypes['Extension']
 
 export const extensionSelector = Selector('Extension')(rawExtensionSelector);
 export { rawExtensionSelector };

@@ -1,10 +1,14 @@
 import { generateSelectBranchDocumentSelector } from '../../selectors/branches/selectBranchDocumentSelector';
-import { $, Selector, type ModelTypes } from '../../zeus';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
 
-export const generateSelectBranchDocument = Selector('Mutation')({
-  generateSelectBranchDocument: [{data: $('data', 'SelectBranchGenerateDocumentInput!')}, generateSelectBranchDocumentSelector]
+type inputModel = ModelTypes['SelectBranchDocument']
+
+export const name = 'generateSelectBranchDocument'
+
+export const mutation = Selector('Mutation')({
+  [name]: [{data: $('data', 'SelectBranchGenerateDocumentInput!')}, generateSelectBranchDocumentSelector]
 });
 
-export type ISelectBranchDocument = ModelTypes['SelectBranchDocument']
 
-export type IGenerateSelectBranchDocumentInput = ModelTypes['SelectBranchGenerateDocumentInput']
+export interface IInput extends inputModel {}
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;

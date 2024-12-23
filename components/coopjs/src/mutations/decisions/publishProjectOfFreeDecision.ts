@@ -1,7 +1,12 @@
-import { $, Selector, type ModelTypes } from '../../zeus';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
 
-export const publishProjectOfFreeDecision = Selector('Mutation')({
-  publishProjectOfFreeDecision: [{data: $('data', 'CreateProjectFreeDecision!')}, true]
+type inputModel = ModelTypes['PublishProjectFreeDecisionInput']
+
+export const name = 'publishProjectOfFreeDecision'
+
+export const mutation = Selector('Mutation')({
+  [name]: [{data: $('data', 'PublishProjectFreeDecisionInput!')}, true]
 });
 
-export type IPublishProjectOfFreeDecision = ModelTypes['CreateProjectFreeDecision']
+export interface IInput extends inputModel {}
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;

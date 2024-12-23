@@ -8,5 +8,5 @@ div
 
 </template>
 <script lang="ts" setup>
-import { LoginForm } from 'src/features/Registrator/LoginUser/ui/LoginForm';
+import { LoginForm } from 'src/features/User/LoginUser/ui/LoginForm';
 </script>

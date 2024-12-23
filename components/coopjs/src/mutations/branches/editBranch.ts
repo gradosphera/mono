@@ -1,9 +1,13 @@
-import { branchSelector } from '../../selectors';
-import type { ValueTypes } from '../../types'
-import { $, Selector } from '../../zeus';
+import { branchSelector, type branchModel } from '../../selectors';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
 
-export const editBranch = Selector('Mutation')({
-  editBranch: [{data: $('data', 'EditBranchInput!')}, branchSelector]
+type inputModel = ModelTypes['EditBranchInput']
+
+export const name = 'editBranch'
+
+export const mutation = Selector('Mutation')({
+  [name]: [{data: $('data', 'EditBranchInput!')}, branchSelector]
 });
 
-export type IEditBranchInput = ValueTypes['EditBranchInput']
+export interface IInput extends inputModel {}
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;

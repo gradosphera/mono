@@ -1,9 +1,9 @@
-import type { ModelTypes } from '@coopenomics/coopjs/index';
+import type { Mutations } from '@coopenomics/coopjs';
 import { api } from '../api';
 import { useBranchStore, type IBranch } from 'src/entities/Branch/model';
 import { COOPNAME } from 'src/shared/config';
 
-export type IEditBranchInput = ModelTypes['EditBranchInput']
+export type IEditBranchInput = Mutations.Branches.EditBranch.IInput
 
 export function useEditBranch() {
   const store = useBranchStore()

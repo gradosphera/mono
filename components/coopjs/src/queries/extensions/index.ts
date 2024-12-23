@@ -1,1 +1,1 @@
-export * from './getExtensions'
+export * as GetExtensions from './getExtensions'

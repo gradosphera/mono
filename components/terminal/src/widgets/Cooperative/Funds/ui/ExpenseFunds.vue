@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { FundContract } from 'cooptypes';
-import { useEditFund } from 'src/features/Cooperative/EditFund';
+import { useEditFund } from 'src/features/Fund/EditFund';
 import { COOPNAME } from 'src/shared/config';
 import { useSessionStore } from 'src/entities/Session';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import AddExpenseFund from './AddExpenseFund.vue'
-import { useDeleteFund } from 'src/features/Cooperative/DeleteFund';
+import { useDeleteFund } from 'src/features/Fund/DeleteFund';
 
 const coop = useCooperativeStore()
 

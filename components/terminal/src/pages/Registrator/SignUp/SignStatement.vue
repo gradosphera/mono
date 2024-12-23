@@ -26,7 +26,7 @@ div
 </template>
 <script lang="ts" setup>
 import { ref, watch, onBeforeMount, nextTick, onMounted } from 'vue'
-import { useCreateUser } from 'src/features/Registrator/CreateUser'
+import { useCreateUser } from 'src/features/User/CreateUser'
 import { Notify } from 'quasar'
 import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';

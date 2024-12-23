@@ -31,7 +31,7 @@ div
 </template>
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import { useCreateUser } from 'src/features/Registrator/CreateUser'
+import { useCreateUser } from 'src/features/User/CreateUser'
 import { Notify, copyToClipboard } from 'quasar'
 import { useRegistratorStore } from 'src/entities/Registrator'
 const store = useRegistratorStore()

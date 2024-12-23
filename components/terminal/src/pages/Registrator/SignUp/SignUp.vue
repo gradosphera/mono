@@ -42,7 +42,7 @@ import { COOPNAME } from 'src/shared/config'
 import { useCurrentUserStore } from 'src/entities/User'
 
 import { useRegistratorStore } from 'src/entities/Registrator'
-import { useLogoutUser } from 'src/features/Registrator/Logout'
+import { useLogoutUser } from 'src/features/User/Logout'
 import { useSessionStore } from 'src/entities/Session'
 import { useAgreementStore } from 'src/entities/Agreement'
 import { useWalletStore } from 'src/entities/Wallet'

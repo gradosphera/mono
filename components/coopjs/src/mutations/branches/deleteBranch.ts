@@ -1,7 +1,12 @@
-import { $, Selector, type ModelTypes } from '../../zeus';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
 
-export const deleteBranch = Selector('Mutation')({
-  deleteBranch: [{data: $('data', 'DeleteBranchInput!')}, true]
+type inputModel = ModelTypes['DeleteBranchInput']
+
+export const name = 'deleteBranch'
+
+export const mutation = Selector('Mutation')({
+  [name]: [{data: $('data', 'DeleteBranchInput!')}, true]
 });
 
-export type IDeleteBranchInput = ModelTypes['DeleteBranchInput']
+export interface IInput extends inputModel {}
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;

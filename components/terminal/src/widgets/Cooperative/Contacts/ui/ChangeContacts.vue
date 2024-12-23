@@ -14,7 +14,7 @@ div.q-pa-md
 <script lang="ts" setup>
 import { Cooperative } from 'cooptypes';
 import { useCooperativeStore } from 'src/entities/Cooperative';
-import { useUpdateMeta } from 'src/features/Registrator/UpdateMeta';
+import { useUpdateMeta } from 'src/features/User/UpdateMeta';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { COOPNAME } from 'src/shared/config';
 import { ref, watch } from 'vue';
