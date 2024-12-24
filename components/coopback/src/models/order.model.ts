@@ -96,7 +96,7 @@ orderSchema.post('find', async function (docs) {
     }
 
     // Проверяем поле expired_at и обновляем статус
-    if (doc.status != orderStatus.expired && doc.expired_at && new Date() > doc.expired_at) {
+    if (doc.status == orderStatus.pending && doc.expired_at && new Date() > doc.expired_at) {
       doc.status = orderStatus.expired;
       await doc.save(); // Сохраняем изменения в документе
     }

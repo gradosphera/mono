@@ -27,5 +27,5 @@ export const editDraft = async(params: DraftContract.Actions.EditDraft.IEditDraf
     }
   )
 
-  console.log("Шаблон отредактирован: ", params)
+  console.log("Шаблон отредактирован: ", params.registry_id)
 }

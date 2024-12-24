@@ -6,8 +6,6 @@
       div.text-right
         q-btn(flat size="sm" dense @click="router.push({name: 'lostkey'})") потеряли ключ?
         q-btn(flat size="sm" dense @click="router.push({name: 'signup'})") нет аккаунта?
-
-
     AlreadyRegistered(v-else).q-mt-lg
 </template>
 <script lang="ts" setup>

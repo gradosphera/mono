@@ -1,6 +1,6 @@
 <template lang="pug">
 
-q-card(style="word-break: break-all !important; white-space: normal !important;").q-pa-md
+q-card(style="word-break: break-all !important; white-space: normal !important;").q-pa-md.dynamic-padding
   div(v-if="loading").full-width.text-center
     div(style="margin:auto;").flex.q-pa-sm.full-width.text-center
       q-spinner
@@ -192,4 +192,14 @@ async function download() {
   font-size: 10px !important;
 }
 
+@media (min-width: 700px) {
+  .dynamic-padding {
+    padding: 50px !important;
+  }
+}
+@media (max-width: 700px) {
+  .dynamic-padding {
+    padding: 20px !important;
+  }
+}
 </style>

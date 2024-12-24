@@ -1211,16 +1211,12 @@ export type ValueTypes = {
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string | Variable<any, string>,
-	/** Заголовок проекта свободного решения */
-	header: string | Variable<any, string>,
 	/** Вопрос, который выносится на повестку */
 	question: string | Variable<any, string>
 };
 	["CreatedProjectFreeDecision"]: AliasType<{
 	/** Проект решения, которое предлагается принять */
 	decision?:boolean | `@${string}`,
-	/** Заголовок проекта свободного решения */
-	header?:boolean | `@${string}`,
 	/** Идентификатор проекта свободного решения */
 	id?:boolean | `@${string}`,
 	/** Вопрос, который выносится на повестку */
@@ -2215,16 +2211,12 @@ export type ResolverInputTypes = {
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string,
-	/** Заголовок проекта свободного решения */
-	header: string,
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
 	["CreatedProjectFreeDecision"]: AliasType<{
 	/** Проект решения, которое предлагается принять */
 	decision?:boolean | `@${string}`,
-	/** Заголовок проекта свободного решения */
-	header?:boolean | `@${string}`,
 	/** Идентификатор проекта свободного решения */
 	id?:boolean | `@${string}`,
 	/** Вопрос, который выносится на повестку */
@@ -3215,16 +3207,12 @@ export type ModelTypes = {
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string,
-	/** Заголовок проекта свободного решения */
-	header: string,
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
 	["CreatedProjectFreeDecision"]: {
 		/** Проект решения, которое предлагается принять */
 	decision: string,
-	/** Заголовок проекта свободного решения */
-	header: string,
 	/** Идентификатор проекта свободного решения */
 	id: string,
 	/** Вопрос, который выносится на повестку */
@@ -3554,7 +3542,7 @@ export type ModelTypes = {
 		/** Бинарное содержимое документа (base64) */
 	binary: string,
 	/** Полное название документа */
-	full_title?: string | undefined | null,
+	full_title: string,
 	/** Хэш документа */
 	hash: string,
 	/** HTML содержимое документа */
@@ -3720,7 +3708,7 @@ export type ModelTypes = {
 		/** Бинарное содержимое документа (base64) */
 	binary: string,
 	/** Полное название документа */
-	full_title?: string | undefined | null,
+	full_title: string,
 	/** Хэш документа */
 	hash: string,
 	/** HTML содержимое документа */
@@ -4210,8 +4198,6 @@ export type GraphQLTypes = {
 	["CreateProjectFreeDecisionInput"]: {
 		/** Проект решения, которое предлагается принять */
 	decision: string,
-	/** Заголовок проекта свободного решения */
-	header: string,
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
@@ -4219,8 +4205,6 @@ export type GraphQLTypes = {
 	__typename: "CreatedProjectFreeDecision",
 	/** Проект решения, которое предлагается принять */
 	decision: string,
-	/** Заголовок проекта свободного решения */
-	header: string,
 	/** Идентификатор проекта свободного решения */
 	id: string,
 	/** Вопрос, который выносится на повестку */
@@ -4570,7 +4554,7 @@ export type GraphQLTypes = {
 	/** Бинарное содержимое документа (base64) */
 	binary: string,
 	/** Полное название документа */
-	full_title?: string | undefined | null,
+	full_title: string,
 	/** Хэш документа */
 	hash: string,
 	/** HTML содержимое документа */
@@ -4744,7 +4728,7 @@ export type GraphQLTypes = {
 	/** Бинарное содержимое документа (base64) */
 	binary: string,
 	/** Полное название документа */
-	full_title?: string | undefined | null,
+	full_title: string,
 	/** Хэш документа */
 	hash: string,
 	/** HTML содержимое документа */

@@ -281,7 +281,6 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	CreatedProjectFreeDecision:{
 		decision:"String",
-		header:"String",
 		id:"String",
 		question:"String"
 	},

@@ -47,11 +47,10 @@ export const Schema: JSONSchemaType<Model> = {
       type: 'object',
       properties: {
         id: { type: 'string' },
-        header: { type: 'string' },
         question: { type: 'string' },
         decision: { type: 'string' },
       },
-      required: ['id', 'header', 'question', 'decision'],
+      required: ['id', 'question', 'decision'],
       additionalProperties: true,
     },
   },

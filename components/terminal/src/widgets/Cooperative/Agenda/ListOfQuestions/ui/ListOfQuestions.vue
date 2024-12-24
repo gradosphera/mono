@@ -12,11 +12,12 @@ q-card(flat)
     :virtual-scroll-item-size="48"
     :rows-per-page-options="[10]"
     :loading="onLoading"
-    :no-data-label="'У совета нет голосований на повестке'"
+    :no-data-label="'У совета нет вопросов на повестке для голосования. Вопросы на повестку добавляются автоматически при участии пайщиков в цифровых целевых потребительских программах кооператива. Также, вопрос на повестку можно добавить вручную, нажав на кнопку `ПРЕДЛОЖИТЬ ПОВЕСТКУ`.'"
   ).full-width
 
     template(#top)
-      q-btn
+      CreateProjectFreeDecisionButton
+
     template(#header="props")
       q-tr(:props="props")
         q-th(auto-width)
@@ -35,11 +36,11 @@ q-card(flat)
         q-td {{ props.row.table.id }}
         q-td {{ props.row.table.username }}
         q-td
-          q-badge {{ getTitle(props.row.table.type, props.row.documents.statement.action.user) }}
+          q-badge {{getTitle(props.row.documents.statement.document.meta.title, props.row.documents.statement.action.user)}}
 
         //- q-td
         //-   q-checkbox(@click="updateValidation(props.row.id)" :model-value="props.row.validated")
-
+        q-td {{formatToFromNow(props.row.table.expired_at)}}
         q-td
           //- p Проголосовало {{  props.row.table.votes_for.length + props.row.table.votes_against.length}} из {{totalMembers}}
 
@@ -61,13 +62,12 @@ q-card(flat)
           q-btn(v-if="isVotedFor(props.row.table)" disabled dense flat ).text-green
             span.q-pr-xs {{props.row.table.votes_for.length}}
             q-icon(name="fas fa-thumbs-up" style="transform: scaleX(-1)")
-
         q-td
-          q-btn(size="sm" color="teal" v-if="currentUser.isChairman" :loading="isProcess(props.row.table.id)" @click="updateAuthorized(props.row.table.username, props.row.table.id)") утвердить
+          q-btn(size="sm" color="teal" v-if="currentUser.isChairman" :loading="isProcess(props.row.table.id)" @click="updateAuthorized(props.row)") утвердить
 
       q-tr(v-if="expanded.get(props.row.table.id)" :key="`e_${props.row.table.id}`" :props="props" class="q-virtual-scroll--with-prev")
         q-td(colspan="100%")
-          ComplexDocument(v-if="props.row.table.type == 'joincoop'" :documents="props.row.documents")
+          ComplexDocument(:documents="props.row.documents")
 
 
 
@@ -88,6 +88,9 @@ import { useVoteAgainstDecision } from 'src/features/Decision/VoteAgainstDecisio
 import { COOPNAME } from 'src/shared/config';
 import { useCooperativeStore } from 'src/entities/Cooperative/model/stores';
 import { useCurrentUserStore } from 'src/entities/User';
+import { CreateProjectFreeDecisionButton } from 'src/features/Decision/CreateProject';
+import { formatToFromNow } from 'src/shared/lib/utils/dates/formatToFromNow';
+
 const session = useSessionStore()
 const onLoading = ref(false)
 const currentUser = useCurrentUserStore()
@@ -95,8 +98,8 @@ const currentUser = useCurrentUserStore()
 const columns = [
   { name: 'id', align: 'left', label: '№', field: 'id', sortable: true },
   { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
-
   { name: 'caption', align: 'left', label: 'Пункт', field: 'caption', sortable: true },
+  { name: 'expired_at', align: 'left', label: 'Истекает', field: 'expired_at', sortable: false },
   // { name: 'validated', align: 'left', label: 'Проверено', field: 'validated', sortable: true },
   { name: 'approved', align: 'left', label: 'Голосование', field: 'approved', sortable: true },
   { name: 'authorized', align: 'left', label: '', field: 'authorized', sortable: true },
@@ -114,7 +117,7 @@ const toggleExpand = (id: any) => {
 
 // const totalMembers = computed(() => coop.privateCooperativeData?.totalMembers)
 
-const decisions = ref([] as Cooperative.Document.IAgenda[])
+const decisions = ref([] as Cooperative.Document.IComplexAgenda[])
 
 const loadAgenda = async (hidden?: boolean) => {
   try {
@@ -122,6 +125,7 @@ const loadAgenda = async (hidden?: boolean) => {
     decisions.value = (await sendGET('/v1/coop/agenda', {
       coopname: route.params.coopname,
     }) as Cooperative.Document.IComplexAgenda[])
+
     onLoading.value = false
   } catch (e: any) {
     onLoading.value = false
@@ -138,42 +142,16 @@ const interval = setInterval(() => loadAgenda(true), 10000)
 
 onBeforeUnmount(() => clearInterval(interval))
 
-const getTitle = (action: string, user: any) => {
-  const actions: any = {
-    joincoop: 'Заявление на вступление',
-    change: 'Обмен на маркете',
-  }
-  let title = actions[action]
+const getTitle = (title: string, user: any) => {
+  let result ='Вопрос на голосование'
 
   if (user.first_name)
-    title += ` ${user.last_name} ${user.first_name} ${user.middle_name}`
-  else title += ` ${user.short_name}`
+    result = `${title} от ${user.last_name} ${user.first_name} ${user.middle_name}`
+  else result = `${title} от ${user.short_name}`
 
-  return title
+  return result
 }
 
-// const updateValidation = async (decisionId: number) => {
-//   try {
-//     await useValidateDecision().validateDecision({
-//       coopname: COOPNAME,
-//       username: session.username,
-//       decision_id: decisionId,
-//     })
-
-
-//     Notify.create({
-//       message: 'Решение проверено',
-//       type: 'positive',
-//     })
-
-//     await loadAgenda()
-//   } catch (e) {
-//     Notify.create({
-//       message: e.message,
-//       type: 'negative',
-//     })
-//   }
-// }
 
 const authorizeLoading = ref<any>({})
 
@@ -181,13 +159,31 @@ const isProcess = (decisionId: number) => {
   return authorizeLoading.value[decisionId] ? true : false
 }
 
-const updateAuthorized = async (username: string, decision_id: number) => {
+const updateAuthorized = async (row: Cooperative.Document.IComplexAgenda) => {
+  const decision_id = Number(row.table.id)
   try {
+    const username = row.table.username
+    const type = row.table.type
+    const meta = {} as any
+    let parsedDocumentMeta = JSON.parse(row.table.statement.meta)
+
+    const registryMap = {
+      'freedecision': Cooperative.Registry.FreeDecision.registry_id,
+      'joincoop': Cooperative.Registry.DecisionOfParticipantApplication.registry_id,
+    }
+
+    const registry_id = registryMap[type]
+
+    if (registry_id === Cooperative.Registry.FreeDecision.registry_id){
+      const m = parsedDocumentMeta as Cooperative.Registry.FreeDecision.Action
+      meta.project_id = m.project_id
+    }
+
 
     authorizeLoading.value[decision_id] = true
     const { authorizeAndExecDecision } = useAuthorizeAndExecDecision()
 
-    await authorizeAndExecDecision(username, decision_id)
+    await authorizeAndExecDecision(username, registry_id, decision_id, meta)
 
     Notify.create({
       message: 'Решение принято и исполнено',

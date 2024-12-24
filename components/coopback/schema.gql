@@ -422,9 +422,6 @@ input CreateProjectFreeDecisionInput {
   """Проект решения, которое предлагается принять"""
   decision: String!
 
-  """Заголовок проекта свободного решения"""
-  header: String!
-
   """Вопрос, который выносится на повестку"""
   question: String!
 }
@@ -432,9 +429,6 @@ input CreateProjectFreeDecisionInput {
 type CreatedProjectFreeDecision {
   """Проект решения, которое предлагается принять"""
   decision: String!
-
-  """Заголовок проекта свободного решения"""
-  header: String!
 
   """Идентификатор проекта свободного решения"""
   id: String!
@@ -920,7 +914,7 @@ type ProjectFreeDecisionDocument {
   binary: String!
 
   """Полное название документа"""
-  full_title: String
+  full_title: String!
 
   """Хэш документа"""
   hash: String!
@@ -1157,7 +1151,7 @@ type SelectBranchDocument {
   binary: String!
 
   """Полное название документа"""
-  full_title: String
+  full_title: String!
 
   """Хэш документа"""
   hash: String!

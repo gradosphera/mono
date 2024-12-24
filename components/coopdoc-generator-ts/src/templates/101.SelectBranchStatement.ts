@@ -26,9 +26,6 @@ export const Schema: JSONSchemaType<Model> = {
       type: 'string',
       enum: ['individual', 'entrepreneur', 'organization'],
     },
-    participant_name: {
-      type: 'string',
-    },
     individual: {
       type: 'object',
       properties: {
@@ -74,7 +71,7 @@ export const Schema: JSONSchemaType<Model> = {
       additionalProperties: true,
     },
   },
-  required: ['meta', 'type', 'participant_name', 'branch', 'vars'],
+  required: ['meta', 'type', 'branch', 'vars'],
   additionalProperties: true,
 }
 

@@ -21,7 +21,7 @@ export const loginUserWithSignature = async (email, now, signature) => {
   const bytes = Bytes.fromString(now, 'utf8');
   const checksum = Checksum256.hash(bytes);
   const wharf_signature = Signature.from(signature);
-  const publicKey = wharf_signature.recoverDigest(checksum).toLegacyString();
+  const publicKey = wharf_signature.recoverDigest(checksum);
 
   const info = await getBlockchainInfo();
   const blockchainDate = new Date(info.head_block_time).getTime();
@@ -33,16 +33,18 @@ export const loginUserWithSignature = async (email, now, signature) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Время подписи и время блокчейна превышает допустимое расхождение');
   }
 
-  if (config.env !== 'test') {
+  if (user.is_registered) {
     try {
       const blockchainAccount = await getBlockchainAccount(user.username);
 
-      const hasKey = hasActiveKey(blockchainAccount, publicKey);
+      const hasKey = hasActiveKey(blockchainAccount, publicKey.toLegacyString());
 
       if (!hasKey) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
     } catch (e) {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
     }
+  } else {
+    if (user.public_key != publicKey.toString()) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
   }
 
   return user;

@@ -431,10 +431,67 @@ describe('тест генератора документов', async () => {
     }
   })
 
+  it('сохранение и извлечение данных кооперативного участка', async () => {
+    const organizationData: ExternalOrganizationData = {
+      username: 'branch',
+      type: 'coop',
+      short_name: '"КУ ПЕТРУШКА"',
+      full_name: 'Кооперативный Участок "ПЕТРУШКА"',
+      represented_by: {
+        first_name: 'Иван',
+        last_name: 'Иванов',
+        middle_name: 'Иванович',
+        position: 'Председатель кооперативного участка',
+        based_on: 'Решение собрания совета №101',
+      },
+      country: 'Russia',
+      city: 'Москва',
+      full_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
+      fact_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
+      email: 'copenomics@yandex.ru',
+      phone: '+771234567890',
+      details: {
+        inn: '9728130611',
+        ogrn: '1247700283346',
+        kpp: '772801001',
+      },
+    }
+
+    const saved = await generator.save('organization', organizationData)
+
+    const organization = await generator.get('organization', { username: organizationData.username }) as any
+
+    Object.keys(organizationData).forEach((field) => {
+      expect(organization[field]).toBeDefined()
+    })
+
+    expect(organization._id).toEqual(saved.insertedId)
+
+    const paymentData: PaymentData = {
+      username: 'branch',
+      method_id: '1',
+      method_type: 'bank_transfer',
+      is_default: true,
+      data: {
+        account_number: '40703810038000110117',
+        currency: 'RUB',
+        card_number: '',
+        bank_name: 'ПАО Сбербанк',
+        details: {
+          bik: '044525225',
+          corr: '30101810400000000225',
+          kpp: '773643001',
+        },
+      },
+      deleted: false,
+    }
+
+    await generator.save('paymentMethod', paymentData)
+  })
+
   it('сохранение и извлечение данных проекта решения', async () => {
     const projectData: ExternalProjectData = {
       id: '123',
-      header: 'Проект решения ни о чём',
       question: 'Предлагается решить то да сё и вот это ещё. ',
       decision: 'Решили! Делаем вот то и еще вот это.',
     }
@@ -829,5 +886,32 @@ describe('тест генератора документов', async () => {
     }
 
     await testDocumentGeneration(act)
+  })
+
+  it('генерируем заявление на выбор кооперативного участка физлицом', async () => {
+    await testDocumentGeneration({
+      registry_id: 101,
+      coopname: 'voskhod',
+      username: 'ant',
+      braname: 'branch',
+    })
+  })
+
+  it('генерируем заявление на выбор кооперативного участка юрлицом', async () => {
+    await testDocumentGeneration({
+      registry_id: 101,
+      coopname: 'voskhod',
+      username: 'exampleorg',
+      braname: 'branch',
+    })
+  })
+
+  it('генерируем заявление на выбор кооперативного участка предпринимателем', async () => {
+    await testDocumentGeneration({
+      registry_id: 101,
+      coopname: 'voskhod',
+      username: 'entrepreneur',
+      braname: 'branch',
+    })
   })
 })

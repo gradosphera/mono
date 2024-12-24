@@ -1,15 +1,14 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
-import { IsOptional, IsString, ValidateNested, IsObject } from 'class-validator';
+import { IsString, ValidateNested, IsObject } from 'class-validator';
 import { MetaDocumentDTO } from './meta-document.dto';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 
 @ObjectType('GeneratedDocument')
 export class GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {
-  @Field({ nullable: true, description: 'Полное название документа' })
-  @IsOptional()
+  @Field({ description: 'Полное название документа' })
   @IsString()
-  full_title?: string;
+  full_title!: string;
 
   @Field({ description: 'HTML содержимое документа' })
   @IsString()

@@ -41,9 +41,7 @@ export class Factory extends DocFactory<SelectBranchStatement.Action> {
 
     const vars = await super.getVars(data.coopname, data.block_num)
 
-    const participant_name = super.getFullName(user.data)
-
-    const combinedData: SelectBranchStatement.Model = { ...userData, meta, branch, type: user.type, participant_name, vars }
+    const combinedData: SelectBranchStatement.Model = { ...userData, meta, branch, type: user.type, vars }
 
     // валидируем скомбинированные данные
     await super.validate(combinedData, template.model)

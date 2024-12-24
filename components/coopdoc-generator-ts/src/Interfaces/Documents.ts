@@ -8,7 +8,7 @@ import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganiza
 export type IMetaDocument = Cooperative.Document.IMetaDocument
 
 export interface IGeneratedDocument {
-  full_title?: string
+  full_title: string
   html: string
   hash: string
   meta: IMetaDocument

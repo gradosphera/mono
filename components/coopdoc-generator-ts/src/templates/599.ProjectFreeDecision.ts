@@ -5,6 +5,7 @@ import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { CooperativeSchema } from '../Schema/CooperativeSchema'
 import { decisionSchema } from '../Schema/DecisionSchema'
+import { VarsSchema } from '../Schema'
 
 export const registry_id = Cooperative.Registry.ProjectFreeDecision.registry_id
 
@@ -39,16 +40,16 @@ export const Schema: JSONSchemaType<Model> = {
       type: 'object',
       properties: {
         id: { type: 'string' },
-        header: { type: 'string' },
         question: { type: 'string' },
         decision: { type: 'string' },
       },
-      required: ['id', 'header', 'question', 'decision'],
+      required: ['id', 'question', 'decision'],
       additionalProperties: true,
     },
     suggester_name: { type: 'string' },
+    vars: VarsSchema,
   },
-  required: ['meta', 'coop', 'project', 'suggester_name'],
+  required: ['meta', 'coop', 'project', 'suggester_name', 'vars'],
   additionalProperties: true,
 }
 

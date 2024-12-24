@@ -2,7 +2,7 @@
 q-item(clickable flat size="sm" @click="showDialog=true").full-width
   div.q-pa-sm
     q-icon(name="cancel").q-mr-xs
-    span отменен
+    span отметить отмененным
 
   q-dialog(v-model="showDialog" @hide="close")
     ModalBase(title='отметить отменённым')

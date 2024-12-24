@@ -1,1 +1,1 @@
-export {default as CreateProjeftFreeDecision} from './PublishProjectFreeDecisionInput.vue'
+export {default as CreateProjectFreeDecisionButton} from './CreateProjectFreeDecisionButton.vue'

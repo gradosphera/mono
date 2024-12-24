@@ -8,16 +8,21 @@ import { useGlobalStore } from 'src/shared/store';
 export function useAuthorizeAndExecDecision() {
   async function authorizeAndExecDecision(
     username: string,
-    decision_id: number
+    registry_id: number,
+    decision_id: number,
+    meta?: object,
   ): Promise<TransactResult | undefined> {
     const session = useSessionStore();
 
+    console.log('registri: ', registry_id)
+
     const document = await new DigitalDocument().generate<Cooperative.Registry.DecisionOfParticipantApplication.Action>({
-      registry_id: Cooperative.Registry.DecisionOfParticipantApplication.registry_id,
+      registry_id: registry_id,
       coopname: COOPNAME,
       username,
       lang: 'ru',
       decision_id,
+      ...meta,
     });
 
     if (!document) {

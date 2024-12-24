@@ -6,7 +6,6 @@ import { rawDocumentMetaSelector, rawDocumentSelector } from "../common/rawDocum
 // Определяем объект вручную, чтобы избежать потери типов
 const rawFreeProjectSelector = {
   decision: true,
-  header: true,
   id: true,
   question: true,
 };

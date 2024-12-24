@@ -2,7 +2,7 @@ import type { Cooperative } from 'cooptypes';
 import type { GeneratedDocumentDomainInterface } from '../interfaces/generated-document-domain.interface';
 
 export class DocumentDomainEntity implements GeneratedDocumentDomainInterface {
-  full_title?: string;
+  full_title: string;
   html: string;
   hash: string;
   meta: Cooperative.Document.IMetaDocument & { [key: string]: any };

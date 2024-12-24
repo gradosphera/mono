@@ -44,9 +44,11 @@ export class Factory extends DocFactory<ProjectFreeDecision.Action> {
     }) // Генерируем мета-данные
 
     const project: Cooperative.Document.IProjectData = await this.getProject(data.project_id, data.block_num)
+    const vars = await super.getVars(data.coopname, data.block_num)
 
     const combinedData: ProjectFreeDecision.Model = {
       ...userData,
+      vars,
       meta,
       coop,
       project,
@@ -61,7 +63,7 @@ export class Factory extends DocFactory<ProjectFreeDecision.Action> {
 
     // генерируем документ
     const document: IGeneratedDocument = await this.generatePDF(
-      project.header,
+      '',
       template.context,
       combinedData,
       translation,

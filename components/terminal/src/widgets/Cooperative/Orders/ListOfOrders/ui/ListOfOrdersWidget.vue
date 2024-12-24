@@ -19,7 +19,6 @@
         :rows-per-page-options="[0]"
         :pagination="pagination"
       )
-
         template(#header="props")
           q-tr(:props="props")
             q-th(auto-width)
@@ -35,24 +34,22 @@
             q-td(auto-width)
               q-btn(size="sm" color="primary" round dense :icon="expanded.get(props.row.order_num) ? 'remove' : 'add'" @click="toggleExpand(props.row.order_num)")
             q-td {{props.row.order_num}}
-            q-td {{getNameFromUserData(props.row.user?.private_data)}}
-            q-td {{props.row.user?.username}}
+            q-td {{ props.row.quantity }}
             q-td
               q-badge(v-if="props.row.type ==='registration'") регистрационный
               q-badge(v-if="props.row.type ==='deposit'") паевый
 
-            q-td {{ props.row.quantity }}
-            q-td {{ formatToHumanDate(props.row.createdAt) }}
-            //- q-td {{ formatToHumanDate(props.row.updatedAt) }}
-            //- q-td {{ formatToFromNow(props.row.expired_at) }}
+            q-td {{getNameFromUserData(props.row.user?.private_data)}}
+
             q-td
               q-badge(v-if="props.row.status ==='completed'" color="teal") обработан
               q-badge(v-if="props.row.status ==='pending'" color="orange") ожидание оплаты
               q-badge(v-if="props.row.status ==='failed'" color="red") ошибка
               q-badge(v-if="props.row.status ==='paid'" color="orange") оплачен
               q-badge(v-if="props.row.status ==='refunded'" color="grey") отменён
+              q-badge(v-if="props.row.status ==='expired'" color="grey") истёк
             q-td
-              q-btn-dropdown(size="sm" label="действия" flat dense v-model="dropdowns[props.row.order_num]")
+              q-btn-dropdown(size="sm" label="действия" color="primary" v-model="dropdowns[props.row.order_num]")
                 q-list(dense)
                   SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
                   SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
@@ -68,7 +65,7 @@
   import { onMounted, ref, computed, reactive, nextTick } from 'vue'
   import { Notify } from 'quasar'
   import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
-  import { formatToHumanDate } from 'src/shared/lib/utils/dates/formatToHumanDate';
+  // import { formatToHumanDate } from 'src/shared/lib/utils/dates/formatToHumanDate';
   import { useOrderStore } from 'src/entities/Order';
   import { SetOrderPaidStatusButton } from 'src/features/Order/SetStatus/ui/SetOrderPaidStatusButton';
   import { SetOrderRefundedStatusButton } from 'src/features/Order/SetStatus/ui/SetOrderRefundedStatusButton';
@@ -76,6 +73,7 @@
 
   const orderStore = useOrderStore()
   const orders = computed(() => orderStore.orders)
+  console.log('orders: ', orders.value)
   const onLoading = ref(false)
   const nextPage = ref(1)
   const lastPage = ref(1);
@@ -162,22 +160,17 @@
   }
 
   onMounted(() => {
+    orderStore.clear()
     loadOrders()
   })
 
 
   const columns = [
     { name: 'order_num', align: 'left', label: '№', field: 'order_num', sortable: true },
-    { name: 'name', align: 'left', label: 'ФИО | Наименование', field: '', sortable: false },
-    { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
-    { name: 'type', align: 'left', label: 'Тип платежа', field: 'type', sortable: true },
     { name: 'quantity', align: 'left', label: 'Сумма', field: '', sortable: false },
-    { name: 'createdAt', align: 'left', label: 'Создан', field: 'createdAt', sortable: true },
-    // { name: 'updatedAt', align: 'left', label: 'Обновлён', field: 'updatedAt', sortable: true },
-    // { name: 'expiredAt', align: 'left', label: 'Истекает', field: 'expired_at', sortable: true },
+    { name: 'type', align: 'left', label: 'Тип платежа', field: 'type', sortable: true },
+    { name: 'name', align: 'left', label: 'От кого', field: '', sortable: false },
     { name: 'status', align: 'left', label: 'Статус', field: '', sortable: true },
-    { name: 'action', align: 'left', label: '', field: 'action', sortable: false },
-
   ] as any
 
   const expanded = reactive(new Map()) // Используем Map для отслеживания состояния развертывания каждой записи

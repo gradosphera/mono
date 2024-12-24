@@ -50,8 +50,11 @@ export class Factory extends DocFactory<FreeDecision.Action> {
       data.decision_id,
       meta.created_at,
     )
+    if (!data.project_id)
+      throw new Error('Идентификатор проекта не установлен')
 
     const project: Cooperative.Document.IProjectData = await this.getProject(data.project_id, data.block_num)
+    console.log('project: ', project, data)
 
     const combinedData: FreeDecision.Model = {
       ...userData,
@@ -69,7 +72,7 @@ export class Factory extends DocFactory<FreeDecision.Action> {
 
     // генерируем документ
     const document: IGeneratedDocument = await this.generatePDF(
-      project.header,
+      '',
       template.context,
       combinedData,
       translation,

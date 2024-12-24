@@ -37,11 +37,19 @@ export interface ISignedDocument<T = any> {
 }
 
 export interface IGeneratedDocument<T = any> {
-  full_title?: string
+  full_title: string
   html: string
   hash: string
   meta: IMetaDocument & T
   binary: Uint8Array
+}
+
+export interface ZGeneratedDocument<T = any> {
+  full_title: string
+  html: string
+  hash: string
+  meta: IMetaDocument & T
+  binary: string
 }
 
 export interface IComplexStatement {
@@ -136,7 +144,6 @@ export interface IDecisionData {
 
 export interface IProjectData {
   id: string
-  header: string
   question: string
   decision: string
 }

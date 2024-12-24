@@ -2,7 +2,6 @@ import type { ProjectFreeDecisionDomainInterface } from '~/domain/common/interfa
 
 export class ProjectFreeDecisionDomainEntity implements ProjectFreeDecisionDomainInterface {
   public readonly id!: string;
-  public readonly header!: string;
   public readonly question!: string;
   public readonly decision!: string;
 

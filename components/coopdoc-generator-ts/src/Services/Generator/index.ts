@@ -41,7 +41,7 @@ export class PDFService implements IPDFService {
     // Вычисляем SHA-256 хэш буфера
     const hash = calculateSha256(binary)
 
-    return { html, hash, binary, meta }
+    return { full_title: '', html, hash, binary, meta }
   }
 
   private static async generatePDFBuffer(htmlContent: string): Promise<Uint8Array> {

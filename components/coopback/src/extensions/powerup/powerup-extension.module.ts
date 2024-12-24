@@ -152,7 +152,6 @@ export class PowerupPlugin extends BaseExtModule {
 
     // Регистрация cron-задачи для проверки ресурсов каждую минуту
     cron.schedule('* * * * *', () => {
-      this.logger.info('Запуск задачи проверки ресурсов');
       this.runTask();
     });
   }
@@ -201,8 +200,6 @@ export class PowerupPlugin extends BaseExtModule {
 
   // Задача проверки и пополнения ресурсов
   private async runTask() {
-    this.logger.info(`Задача плагина ${this.name} выполняется...`);
-
     try {
       // Получаем имя пользователя из окружения или другой конфигурации
       const username = coopConfig.coopname;
@@ -252,7 +249,7 @@ export class PowerupPlugin extends BaseExtModule {
           },
         });
       } else {
-        this.logger.info('Квоты ресурсов в норме, пополнение не требуется.');
+        //ничего не делаем
       }
     } catch (error) {
       console.error('Ошибка при проверке и пополнении ресурсов:', error);

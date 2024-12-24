@@ -37,8 +37,6 @@ export const useOrderStore = defineStore(namespace, (): IOrderStore => {
   const updateCoopOrders = async(params: IGetCoopOrders): Promise<void> => {
     const newOrdersResponse = await api.loadCoopOrders(params);
 
-    console.log('newOrdersResponse: ', newOrdersResponse)
-
     if (orders.value)
       orders.value.results = mergeOrders(orders.value.results, newOrdersResponse.results) // Мерджим старые и новые результаты
     else orders.value = newOrdersResponse
