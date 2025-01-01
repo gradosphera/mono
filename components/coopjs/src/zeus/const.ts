@@ -37,6 +37,12 @@ export const AllTypesProps: Record<string,any> = {
 		created_at:"DateTime",
 		updated_at:"DateTime"
 	},
+	FreeDecisionGenerateDocumentInput:{
+
+	},
+	GenerateDocumentInput:{
+
+	},
 	GenerateDocumentOptionsInput:{
 
 	},
@@ -79,12 +85,40 @@ export const AllTypesProps: Record<string,any> = {
 		editBranch:{
 			data:"EditBranchInput"
 		},
+		generateFreeDecision:{
+			data:"FreeDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateParticipantApplication:{
+			data:"ParticipantApplicationGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateParticipantApplicationDecision:{
+			data:"ParticipantApplicationDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generatePrivacyAgreement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
 		generateProjectOfFreeDecision:{
 			data:"ProjectFreeDecisionGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		generateSelectBranchDocument:{
 			data:"SelectBranchGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateSignatureAgreement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateUserAgreement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateWalletAgreement:{
+			data:"GenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		installExtension:{
@@ -105,6 +139,12 @@ export const AllTypesProps: Record<string,any> = {
 		updateExtension:{
 			data:"ExtensionInput"
 		}
+	},
+	ParticipantApplicationDecisionGenerateDocumentInput:{
+
+	},
+	ParticipantApplicationGenerateDocumentInput:{
+
 	},
 	ProjectFreeDecisionGenerateDocumentInput:{
 
@@ -157,7 +197,7 @@ export const AllTypesProps: Record<string,any> = {
 export const ReturnTypes: Record<string,any> = {
 	Account:{
 		blockchain_account:"BlockchainAccount",
-		mono_account:"MonoAccount",
+		provider_account:"MonoAccount",
 		participant_account:"ParticipantAccount",
 		user_account:"UserAccount",
 		username:"String"
@@ -301,6 +341,28 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String",
 		updated_at:"DateTime"
 	},
+	FreeDecisionMetaDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		decision_id:"Float",
+		generator:"String",
+		lang:"LangType",
+		links:"String",
+		project_id:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
+	GeneratedDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"MetaDocument"
+	},
 	Individual:{
 		birthdate:"String",
 		email:"String",
@@ -353,8 +415,15 @@ export const ReturnTypes: Record<string,any> = {
 		deletePaymentMethod:"Boolean",
 		deleteTrustedAccount:"Branch",
 		editBranch:"Branch",
+		generateFreeDecision:"ProjectFreeDecisionDocument",
+		generateParticipantApplication:"ParticipantApplicationDocument",
+		generateParticipantApplicationDecision:"ParticipantApplicationDecisionDocument",
+		generatePrivacyAgreement:"GeneratedDocument",
 		generateProjectOfFreeDecision:"ProjectFreeDecisionDocument",
 		generateSelectBranchDocument:"SelectBranchDocument",
+		generateSignatureAgreement:"GeneratedDocument",
+		generateUserAgreement:"GeneratedDocument",
+		generateWalletAgreement:"GeneratedDocument",
 		installExtension:"Extension",
 		publishProjectOfFreeDecision:"Boolean",
 		selectBranch:"Boolean",
@@ -384,6 +453,47 @@ export const ReturnTypes: Record<string,any> = {
 		status:"String",
 		type:"String",
 		username:"String"
+	},
+	ParticipantApplicationDecisionDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"ParticipantApplicationDecisionMetaDocumentOutput"
+	},
+	ParticipantApplicationDecisionMetaDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		decision_id:"Float",
+		generator:"String",
+		lang:"LangType",
+		links:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
+	ParticipantApplicationDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"ParticipantApplicationMetaDocumentOutput"
+	},
+	ParticipantApplicationMetaDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"LangType",
+		links:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
 	},
 	Passport:{
 		code:"String",

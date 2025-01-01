@@ -58,7 +58,7 @@ export const IEntrepreneurData = Joi.object({
   birthdate: Joi.string().required(),
   phone: Joi.string().required(),
   email: Joi.string().email().required(),
-  country: Joi.string().valid('Russia', 'Other').required(),
+  country: Joi.string().required(),
   city: Joi.string().required(),
   full_address: Joi.string().required(),
   details: Joi.object({

@@ -1,9 +1,7 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import httpStatus from 'http-status';
 import config from '~/config/config';
-import ApiError from '~/utils/ApiError';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -15,7 +13,7 @@ export class RolesGuard implements CanActivate {
    * 2. Если роли не заданы через декоратор `@AuthRoles`, доступ открыт.
    * 3. Если пользователь обращается к своим ресурсам (поле `username` внутри объекта `data` в запросе совпадает с `user.username`), доступ разрешён.
    * 4. Если пользователь имеет хотя бы одну из разрешённых ролей, доступ разрешён.
-   * 5. В иных случаях доступ запрещён, выбрасывается ошибка с кодом 403.
+   * 5. В иных случаях доступ запрещён, выбрасывается ошибка с кодом 401.
    *
    * @param {Reflector} reflector - Сервис для извлечения метаданных, таких как роли, установленные в декораторе `@AuthRoles`.
    */
@@ -57,6 +55,6 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    throw new ApiError(httpStatus.FORBIDDEN, 'Недостаточно прав доступа');
+    throw new UnauthorizedException(`Недостаточно прав доступа`);
   }
 }

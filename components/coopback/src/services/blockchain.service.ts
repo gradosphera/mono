@@ -482,7 +482,7 @@ async function failOrder(data) {
 
 export async function addUser(data: RegistratorContract.Actions.AddUser.IAddUser) {
   const eos = await getInstance(config.coopname);
-  console.log('data:', data);
+
   const actions = [
     {
       account: RegistratorContract.contractName.production,

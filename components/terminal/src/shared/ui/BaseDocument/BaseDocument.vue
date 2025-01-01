@@ -1,14 +1,11 @@
 <template lang="pug">
-
 q-card(style="word-break: break-all !important; white-space: normal !important;").q-pa-md.dynamic-padding
   div(v-if="loading").full-width.text-center
     div(style="margin:auto;").flex.q-pa-sm.full-width.text-center
       q-spinner
       span.q-ml-sm.text-grey подговка {{doc.meta.title}}
   div(v-if="!loading")
-
     div(v-html="safeHtml").description.q-pa-xs
-
     div.row.q-mt-lg.q-pa-sm.justify-center
       q-card(style="word-break: break-all !important; text-wrap: pretty;" flat).col-md-8.col-xs-12.q-pa-sm.verify-card
         div.q-mr-lg.q-mt-md

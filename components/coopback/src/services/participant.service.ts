@@ -1,5 +1,5 @@
 import { PublicKey, Signature } from '@wharfkit/antelope';
-import type { IDocument, IJoinCooperative } from '../types';
+import type { IAddUser, IDocument, IJoinCooperative } from '../types';
 import ApiError from '../utils/ApiError';
 import { getUserByUsername } from './user.service';
 import http from 'http-status';

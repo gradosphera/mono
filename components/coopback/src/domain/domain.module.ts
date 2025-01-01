@@ -8,11 +8,18 @@ import { ProviderDomainModule } from './provider/provider.module';
 import { SystemDomainModule } from './system/system-domain.module';
 import { BranchDomainModule } from './branch/branch-domain.module';
 import { DocumentDomainModule } from './document/document.module';
-import { DecisionDomainModule } from './decision/decision.module';
+import { FreeDecisionDomainModule } from './free-decision/free-decision.module';
+import { AgreementDomainModule } from './agreement/agreement-domain.module';
+import { ParticipantDomainModule } from './participant/participant-domain.module';
+import { AuthDomainModule } from './auth/auth.module';
+import { AgendaDomainModule } from './agenda/agenda-domain.module';
 
 @Module({
   imports: [
+    AuthDomainModule,
+    AgendaDomainModule,
     AccountDomainModule,
+    AgreementDomainModule,
     ExtensionDomainModule,
     PaymentDomainModule,
     PaymentMethodDomainModule,
@@ -20,10 +27,14 @@ import { DecisionDomainModule } from './decision/decision.module';
     SystemDomainModule,
     BranchDomainModule,
     DocumentDomainModule,
-    DecisionDomainModule,
+    FreeDecisionDomainModule,
+    ParticipantDomainModule,
   ],
   exports: [
+    AuthDomainModule,
+    AgendaDomainModule,
     AccountDomainModule,
+    AgreementDomainModule,
     ExtensionDomainModule,
     PaymentDomainModule,
     PaymentMethodDomainModule,
@@ -31,7 +42,8 @@ import { DecisionDomainModule } from './decision/decision.module';
     SystemDomainModule,
     BranchDomainModule,
     DocumentDomainModule,
-    DecisionDomainModule,
+    FreeDecisionDomainModule,
+    ParticipantDomainModule,
   ],
 })
 export class DomainModule {}

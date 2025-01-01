@@ -1,13 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { BadGatewayException, Injectable } from '@nestjs/common';
 import { BlockchainService } from '../blockchain.service';
 import { RegistratorContract, SovietContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
 import type { AccountBlockchainPort } from '~/domain/account/interfaces/account-blockchain.port';
+import Vault from '~/models/vault.model';
 
 @Injectable()
 export class AccountBlockchainAdapter implements AccountBlockchainPort {
   constructor(private readonly blockchainService: BlockchainService) {}
 
+  async addParticipantAccount(data: RegistratorContract.Actions.AddUser.IAddUser): Promise<void> {
+    const wif = await Vault.getWif(data.coopname);
+
+    if (!wif) throw new BadGatewayException('Не найден приватный ключ для совершения операции');
+
+    await this.blockchainService.initialize(data.coopname, wif);
+
+    await this.blockchainService.transact({
+      account: RegistratorContract.contractName.production,
+      name: RegistratorContract.Actions.AddUser.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
   getBlockchainAccount(username: string): Promise<BlockchainAccountInterface | null> {
     return this.blockchainService.getAccount(username);
   }

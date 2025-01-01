@@ -44,6 +44,7 @@ export const loginUserWithSignature = async (email, now, signature) => {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
     }
   } else {
+    //если пользователь еще не зарегистрирован в блокчейне, то проверяем временный ключ, который установлен в объекте его аккаунта
     if (user.public_key != publicKey.toString()) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
   }
 
@@ -90,7 +91,7 @@ export const refreshAuth = async (data: IRefreshTokens) => {
  */
 export const resetKey = async (resetKeyToken, publicKey) => {
   try {
-    const resetKeyTokenDoc = await tokenService.verifyToken(resetKeyToken, [tokenTypes.RESET_PASSWORD, tokenTypes.INVITE]);
+    const resetKeyTokenDoc = await tokenService.verifyToken(resetKeyToken, [tokenTypes.RESET_KEY, tokenTypes.INVITE]);
 
     const user = await userService.getUserById(resetKeyTokenDoc.user);
     if (!user) {
@@ -107,7 +108,7 @@ export const resetKey = async (resetKeyToken, publicKey) => {
 
     await userService.updateUserById(user._id, { public_key: publicKey });
 
-    await Token.deleteMany({ user: user._id, type: tokenTypes.RESET_PASSWORD });
+    await Token.deleteMany({ user: user._id, type: tokenTypes.RESET_KEY });
   } catch (error) {
     console.log(error);
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Token reset failed');

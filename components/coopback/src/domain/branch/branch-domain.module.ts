@@ -1,5 +1,3 @@
-// domain/appstore/appstore-domain.module.ts
-
 import { Module } from '@nestjs/common';
 import { BranchDomainInteractor } from './interactors/branch.interactor';
 import { DocumentDomainModule } from '../document/document.module';

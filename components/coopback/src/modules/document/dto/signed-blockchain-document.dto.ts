@@ -20,7 +20,9 @@ export class SignedBlockchainDocumentDTO implements Cooperative.Document.IChainD
   @IsString()
   public readonly meta!: string;
 
-  constructor(data: SignedBlockchainDocumentDTO) {
+  constructor(data?: SignedBlockchainDocumentDTO) {
+    if (!data) return;
+
     Object.assign(this, data);
   }
 }

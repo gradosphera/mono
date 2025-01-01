@@ -4,7 +4,7 @@ import ApiError from '../utils/ApiError';
 import config from '../config/config';
 import logger from '../config/logger';
 import { IAddUser, ICreateUser, SystemStatusInterface, IInstall } from '../types';
-import { generateUsername } from '../../tests/utils/generateUsername';
+import { generateUsername } from '../utils/generate-username';
 import { generator } from './document.service';
 import { blockchainService, emailService, tokenService, userService } from '.';
 import { IUser, userStatus } from '../types/user.types';

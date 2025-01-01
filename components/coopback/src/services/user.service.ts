@@ -4,42 +4,34 @@ import ApiError from '../utils/ApiError';
 import { generator } from './document.service';
 import { ICreateUser } from '../types/auto-generated/user.validation';
 import type { Cooperative } from 'cooptypes';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { randomUUID } from 'crypto';
 import type { IUser } from '~/types';
 
-export const createServiceUser = async (username: string) => {
-  return User.create({
-    username,
-    type: 'service',
-    role: 'service',
-  });
-};
-
-/**
- * Create a user
- * @param {Object} userBody
- * @returns {Promise<User>}
- */
 export const createUser = async (userBody: ICreateUser) => {
   //TODO проверяем на существование пользователя
   //допускаем обновление личных данных, если пользователь находится в статусе 'created'
 
   const exist = await User.findOne({ email: userBody.email });
 
-  if (userBody.type === 'individual' && !userBody.individual_data)
-    throw new ApiError(http.BAD_REQUEST, 'Individual data is required');
-
-  if (userBody.type === 'organization' && !userBody.organization_data)
-    throw new ApiError(http.BAD_REQUEST, 'Organization data is required');
-
-  if (userBody.type === 'entrepreneur' && !userBody.entrepreneur_data)
-    throw new ApiError(http.BAD_REQUEST, 'Entrepreneur data is required');
-
   if (exist && exist.status !== 'created')
     if (await User.isEmailTaken(userBody.email)) {
       throw new ApiError(http.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
     }
+
+  if (userBody.type === 'individual') {
+    if (!userBody.individual_data) throw new ApiError(http.BAD_REQUEST, 'Individual data is required');
+    else userBody.individual_data.email = userBody.email;
+  }
+
+  if (userBody.type === 'organization') {
+    if (!userBody.organization_data) throw new ApiError(http.BAD_REQUEST, 'Organization data is required');
+    else userBody.organization_data.email = userBody.email;
+  }
+
+  if (userBody.type === 'entrepreneur') {
+    if (!userBody.entrepreneur_data) throw new ApiError(http.BAD_REQUEST, 'Entrepreneur data is required');
+    else userBody.entrepreneur_data.email = userBody.email;
+  }
 
   if (userBody.type === 'individual' && userBody.individual_data)
     await generator.save('individual', { username: userBody.username, ...userBody.individual_data });

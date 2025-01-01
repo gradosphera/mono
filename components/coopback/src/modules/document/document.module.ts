@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { DomainModule } from '~/domain/domain.module';
+import { DocumentResolver } from './resolvers/document.resolver';
+import { DocumentService } from './services/document.service';
 @Module({
   imports: [DomainModule],
-  controllers: [],
-  providers: [],
+  providers: [DocumentResolver, DocumentService],
   exports: [],
 })
 export class DocumentModule {}

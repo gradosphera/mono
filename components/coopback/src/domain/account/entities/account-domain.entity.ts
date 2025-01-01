@@ -6,7 +6,7 @@ export class AccountDomainEntity {
   public readonly username!: string;
   public blockchain_account!: BlockchainAccountInterface | null;
   public user_account!: RegistratorContract.Tables.Accounts.IAccount | null;
-  public mono_account!: MonoAccountDomainInterface | null;
+  public provider_account!: MonoAccountDomainInterface | null;
   public participant_account!: SovietContract.Tables.Participants.IParticipants | null;
   // public cardcoop_account!: ?
 

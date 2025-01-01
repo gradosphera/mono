@@ -3,7 +3,7 @@ import request from 'supertest';
 import httpStatus from 'http-status';
 import { setupTestDB } from '../utils/setupTestDB';
 import faker from 'faker';
-import { generateUsername } from '../utils/generateUsername';
+import { generateUsername } from '../../src/utils/generate-username';
 import { User } from '../../src/models';
 import { IGenerateJoinCoop, IGeneratedDocument, IIndividualData } from 'coopdoc-generator-ts';
 import { IDocument, IJoinCooperative } from '../../src/types';

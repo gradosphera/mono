@@ -6,7 +6,7 @@ import { User } from '../../src/models';
 import { userOne, userTwo, admin, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken, adminAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
 import request from 'supertest';
-import { generateUsername } from '../utils/generateUsername';
+import { generateUsername } from '../../src/utils/generate-username';
 import { IIndividualData } from '../../src/types';
 
 setupTestDB();

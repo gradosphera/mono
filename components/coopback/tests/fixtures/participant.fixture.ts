@@ -1,5 +1,5 @@
 import faker from 'faker';
-import { generateUsername } from '../utils/generateUsername';
+import { generateUsername } from '../../src/utils/generate-username';
 import { ICreateUser } from '../../src/types';
 
 const email1 = faker.internet.email().toLowerCase();

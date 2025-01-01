@@ -105,7 +105,7 @@ export interface ICreateUser {
     };
     birthdate: string;
     city: string;
-    country: 'Russia' | 'Other';
+    country: string;
     details: {
       inn: string;
       ogrn: string;

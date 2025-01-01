@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import faker from 'faker';
 import User from '../../src/models/user.model';
-import { generateUsername } from '../utils/generateUsername';
+import { generateUsername } from '../../src/utils/generate-username';
 import { Cooperative } from 'cooptypes';
 import { ICreateUser, type IUser } from '../../src/types';
 import { ObjectId } from 'mongodb';

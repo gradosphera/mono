@@ -25,7 +25,7 @@ const tokenSchema = new Schema<IToken>(
     },
     type: {
       type: String,
-      enum: [tokenTypes.REFRESH, tokenTypes.RESET_PASSWORD, tokenTypes.VERIFY_EMAIL, tokenTypes.INVITE],
+      enum: [tokenTypes.REFRESH, tokenTypes.RESET_KEY, tokenTypes.VERIFY_EMAIL, tokenTypes.INVITE],
       required: true,
     },
     expires: {

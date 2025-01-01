@@ -8,7 +8,7 @@ import { rawUserAccountSelector } from "./userAccountSelector";
 const rawAccountSelector = {
   username: true,
   blockchain_account: rawBlockchainAccountSelector,
-  mono_account: rawMonoAccountSelector,
+  provider_account: rawMonoAccountSelector,
   participant_account: rawParticipantAccountSelector,
   user_account: rawUserAccountSelector,  
 };

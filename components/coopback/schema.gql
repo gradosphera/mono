@@ -6,17 +6,22 @@ type Account {
   """Объект системного аккаунта кооператива в блокчейне"""
   blockchain_account: BlockchainAccount
 
-  """Объект аккаунта в системе учёта провайдера"""
-  mono_account: MonoAccount
-
   """Объект пайщика кооператива"""
   participant_account: ParticipantAccount
+
+  """Объект аккаунта в системе учёта провайдера"""
+  provider_account: MonoAccount
 
   """Объект пользовательского аккаунта кооперативной экономики"""
   user_account: UserAccount
 
   """Имя аккаунта кооператива"""
   username: String!
+}
+
+type AccountRamDelta {
+  account: String!
+  delta: Int!
 }
 
 type AccountResourceInfo {
@@ -36,6 +41,83 @@ type AccountResourceInfo {
   used: String!
 }
 
+"""Тип аккаунта пользователя в системе"""
+enum AccountType {
+  Entrepreneur
+  Individual
+  Organization
+}
+
+type AccountsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [Account!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type ActDetail {
+  action: ExtendedBlockchainAction
+  document: GeneratedDocument
+}
+
+type ActionAuthorization {
+  actor: String!
+  permission: String!
+}
+
+type ActionReceipt {
+  abi_sequence: Int!
+  act_digest: String!
+  auth_sequence: [AuthSequence!]!
+  code_sequence: Int!
+  global_sequence: String!
+  receiver: String!
+  recv_sequence: String!
+}
+
+input AddParticipantInput {
+  """
+  Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500)
+  """
+  created_at: String!
+
+  """Электронная почта"""
+  email: String!
+
+  """Данные индивидуального предпринимателя"""
+  entrepreneur_data: CreateEntrepreneurDataInput
+
+  """Данные физического лица"""
+  individual_data: CreateIndividualDataInput
+
+  """Вступительный взнос, который был внесён пайщиком"""
+  initial: String!
+
+  """Минимальный паевый взнос, который был внесён пайщиком"""
+  minimum: String!
+
+  """Данные организации"""
+  organization_data: CreateOrganizationDataInput
+
+  """Имя аккаунта реферера"""
+  referer: String
+
+  """
+  Флаг распределения вступительного взноса в невозвратный фонд вступительных взносов кооператива
+  """
+  spread_initial: Boolean!
+
+  """Тип аккаунта"""
+  type: AccountType!
+}
+
 input AddTrustedAccountInput {
   """Имя аккаунта кооперативного участка"""
   braname: String!
@@ -47,6 +129,22 @@ input AddTrustedAccountInput {
   Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий
   """
   trusted: String!
+}
+
+type AgendaWithDocuments {
+  """Действие, которое привело к появлению вопроса на голосовании"""
+  action: BlockchainAction!
+
+  """Пакет документов, включающий разные подсекции"""
+  documents: DocumentPackage!
+
+  """Запись в таблице блокчейна о вопросе на голосовании"""
+  table: BlockchainDecision!
+}
+
+type AuthSequence {
+  account: String!
+  sequence: String!
 }
 
 type Authority {
@@ -199,6 +297,51 @@ type BlockchainAccount {
 
   """Информация о голосовании"""
   voter_info: String
+}
+
+"""Объект действия в блокчейне"""
+type BlockchainAction {
+  account: String!
+  account_ram_deltas: [AccountRamDelta!]!
+  action_ordinal: Int!
+  authorization: [ActionAuthorization!]!
+  block_id: String!
+  block_num: Int!
+  chain_id: String!
+  console: String!
+  context_free: Boolean!
+  creator_action_ordinal: Int!
+
+  """Произвольные данные действия в формате JSON"""
+  data: JSON!
+  elapsed: Int!
+  global_sequence: String!
+  name: String!
+  receipt: ActionReceipt!
+  receiver: String!
+  transaction_id: String!
+}
+
+"""
+Запись в таблице блокчейна о процессе принятия решения советом кооператива
+"""
+type BlockchainDecision {
+  approved: Boolean!
+  authorization: SignedBlockchainDocument!
+  authorized: Boolean!
+  authorized_by: String!
+  batch_id: Float!
+  coopname: String!
+  created_at: String!
+  expired_at: String!
+  id: Float!
+  meta: String!
+  statement: SignedBlockchainDocument!
+  type: String!
+  username: String!
+  validated: Boolean!
+  votes_against: [String!]!
+  votes_for: [String!]!
 }
 
 """Информация о состоянии блокчейна"""
@@ -376,6 +519,11 @@ type CooperativeOperatorAccount {
   verifications: [Verification!]!
 }
 
+"""Страна регистрации пользователя"""
+enum Country {
+  Russia
+}
+
 input CreateBankAccountInput {
   """Данные для банковского перевода"""
   data: BankAccountInput!
@@ -418,6 +566,96 @@ input CreateBranchInput {
   trustee: String!
 }
 
+input CreateEntrepreneurDataInput {
+  """Банковский счет"""
+  bank_account: BankAccountInput!
+
+  """Дата рождения"""
+  birthdate: String!
+
+  """Город"""
+  city: String!
+
+  """Страна"""
+  country: Country!
+
+  """Детали индивидуального предпринимателя"""
+  details: EntrepreneurDetailsInput!
+
+  """Имя"""
+  first_name: String!
+
+  """Полный адрес"""
+  full_address: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String!
+
+  """Телефон"""
+  phone: String!
+}
+
+input CreateIndividualDataInput {
+  """Дата рождения"""
+  birthdate: String!
+
+  """Имя"""
+  first_name: String!
+
+  """Полный адрес"""
+  full_address: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String!
+
+  """Данные паспорта"""
+  passport: PassportInput
+
+  """Телефон"""
+  phone: String!
+}
+
+input CreateOrganizationDataInput {
+  """Банковский счет организации"""
+  bank_account: BankAccountInput!
+
+  """Город"""
+  city: String!
+
+  """Страна"""
+  country: String!
+
+  """Детали организации"""
+  details: OrganizationDetailsInput!
+
+  """Фактический адрес"""
+  fact_address: String!
+
+  """Полный адрес"""
+  full_address: String!
+
+  """Полное наименование организации"""
+  full_name: String!
+
+  """Телефон"""
+  phone: String!
+
+  """Представитель организации"""
+  represented_by: RepresentedByInput!
+
+  """Краткое наименование организации"""
+  short_name: String!
+
+  """Тип организации"""
+  type: OrganizationType!
+}
+
 input CreateProjectFreeDecisionInput {
   """Проект решения, которое предлагается принять"""
   decision: String!
@@ -441,6 +679,21 @@ type CreatedProjectFreeDecision {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+"""
+Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета
+"""
+type DecisionDetail {
+  action: ExtendedBlockchainAction!
+  document: GeneratedDocument!
+  votes_against: [ExtendedBlockchainAction!]!
+  votes_for: [ExtendedBlockchainAction!]!
+}
+
+input DeleteAccountInput {
+  """Имя аккаунта пользователя"""
+  username_for_delete: String!
+}
 
 input DeleteBranchInput {
   """Имя аккаунта кооперативного участка"""
@@ -469,6 +722,37 @@ input DeleteTrustedAccountInput {
   Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка
   """
   trusted: String!
+}
+
+"""
+Комплексный объект папки цифрового документа, который включает в себя заявление, решение, акты и связанные документы
+"""
+type DocumentPackage {
+  """Массив объект(ов) актов, относящихся к заявлению"""
+  acts: [ActDetail!]!
+
+  """Объект цифрового документа решения"""
+  decision: DecisionDetail!
+
+  """Массив связанных документов, извлечённых из мета-данных"""
+  links: [GeneratedDocument!]!
+
+  """Объект цифрового документа заявления"""
+  statement: StatementDetail!
+}
+
+type DocumentsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [DocumentPackage!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
 }
 
 input EditBranchInput {
@@ -500,6 +784,50 @@ input EditBranchInput {
 
   """Имя аккаунта уполномоченного (председателя) кооперативного участка"""
   trustee: String!
+}
+
+type EntrepreneurDetails {
+  """ИНН"""
+  inn: String!
+
+  """ОГРН"""
+  ogrn: String!
+}
+
+input EntrepreneurDetailsInput {
+  """ИНН"""
+  inn: String!
+
+  """ОГРН"""
+  ogrn: String!
+}
+
+"""
+Расширенное действие блокчейна с персональными данными пользователя, совершившего его.
+"""
+type ExtendedBlockchainAction {
+  account: String!
+  account_ram_deltas: [AccountRamDelta!]!
+  action_ordinal: Int!
+  authorization: [ActionAuthorization!]!
+  block_id: String!
+  block_num: Int!
+  chain_id: String!
+  console: String!
+  context_free: Boolean!
+  creator_action_ordinal: Int!
+
+  """Произвольные данные действия в формате JSON"""
+  data: JSON!
+  elapsed: Int!
+  global_sequence: String!
+  name: String!
+  receipt: ActionReceipt!
+  receiver: String!
+  transaction_id: String!
+
+  """Доп. данные о пользователе (физ/ИП/организация)"""
+  user: [Individual!]
 }
 
 type Extension {
@@ -563,14 +891,147 @@ input ExtensionInput {
   updated_at: DateTime
 }
 
+input FreeDecisionGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Идентификатор протокола решения собрания совета"""
+  decision_id: Float!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Идентификатор проекта решения"""
+  project_id: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+type FreeDecisionMetaDocumentOutput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Идентификатор повестки дня"""
+  decision_id: Float!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: LangType!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """Идентификатор протокола решения собрания совета"""
+  project_id: String!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
+input GenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
 input GenerateDocumentOptionsInput {
   """Пропустить сохранение"""
   skip_save: Boolean
 }
 
+type GeneratedDocument {
+  """Бинарное содержимое документа (base64)"""
+  binary: String!
+
+  """Полное название документа"""
+  full_title: String!
+
+  """Хэш документа"""
+  hash: String!
+
+  """HTML содержимое документа"""
+  html: String!
+
+  """Метаданные документа"""
+  meta: MetaDocument!
+}
+
 input GetAccountInput {
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+input GetAccountsInput {
+  role: String
+  username: String
 }
 
 input GetBranchesInput {
@@ -579,6 +1040,18 @@ input GetBranchesInput {
 
   """Имя аккаунта кооператива"""
   coopname: String!
+}
+
+input GetDocumentsFilterInput {
+  additionalFilters: JSON
+  receiver: String!
+}
+
+input GetDocumentsInput {
+  filter: GetDocumentsFilterInput!
+  limit: Int
+  page: Int
+  type: String
 }
 
 input GetExtensionsInput {
@@ -656,6 +1129,25 @@ enum LangType {
   ru
 }
 
+input LoginInput {
+  """Электронная почта"""
+  email: String!
+
+  """Метка времени в строковом формате ISO"""
+  now: String!
+
+  """Цифровая подпись метки времени"""
+  signature: String!
+}
+
+input LogoutInput {
+  """Токен обновления"""
+  access_token: String!
+
+  """Токен доступа"""
+  refresh_token: String!
+}
+
 type MetaDocument {
   """Номер блока, на котором был создан документ"""
   block_num: Int!
@@ -671,6 +1163,41 @@ type MetaDocument {
 
   """Язык документа"""
   lang: LangType!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
+input MetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
 
   """Ссылки, связанные с документом"""
   links: [String!]!
@@ -730,6 +1257,11 @@ type MonoAccount {
 }
 
 type Mutation {
+  """
+  Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета)
+  """
+  addParticipant(data: AddParticipantInput!): Account!
+
   """Добавить доверенное лицо кооперативного участка"""
   addTrustedAccount(data: AddTrustedAccountInput!): Branch!
 
@@ -740,9 +1272,12 @@ type Mutation {
   createBranch(data: CreateBranchInput!): Branch!
 
   """
-  Создать проект свободного решения и сохранить в хранилище для дальнейшей генерации документа проекта и его публикации
+  Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации
   """
   createProjectOfFreeDecision(data: CreateProjectFreeDecisionInput!): CreatedProjectFreeDecision!
+
+  """Удалить аккаунт из системы учёта провайдера"""
+  deleteAccount(data: DeleteAccountInput!): Boolean!
 
   """Удалить кооперативный участок"""
   deleteBranch(data: DeleteBranchInput!): Boolean!
@@ -756,25 +1291,82 @@ type Mutation {
   """Изменить кооперативный участок"""
   editBranch(data: EditBranchInput!): Branch!
 
+  """Сгенерировать протокол решения по предложенной повестке"""
+  generateFreeDecision(data: FreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ProjectFreeDecisionDocument!
+
+  """
+  Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк"
+  """
+  generateParticipantApplication(data: ParticipantApplicationGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ParticipantApplicationDocument!
+
+  """Сгенерировать документ соглашения с политикой конфиденциальности"""
+  generateParticipantApplicationDecision(data: ParticipantApplicationDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ParticipantApplicationDecisionDocument!
+
+  """Сгенерировать документ соглашения с политикой конфиденциальности"""
+  generatePrivacyAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
   """Сгенерировать документ проекта свободного решения"""
   generateProjectOfFreeDecision(data: ProjectFreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ProjectFreeDecisionDocument!
 
   """Сгенерировать документ, подтверждающий выбор кооперативного участка"""
   generateSelectBranchDocument(data: SelectBranchGenerateDocumentInput!, options: GenerateDocumentOptionsInput): SelectBranchDocument!
 
+  """
+  Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк"
+  """
+  generateSignatureAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать документ пользовательского соглашения"""
+  generateUserAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """
+  Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк"
+  """
+  generateWalletAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
   """Установить расширение"""
   installExtension(data: ExtensionInput!): Extension!
 
   """
-  Опубликовать проект свободного решения для дальнейшего голосования совета по нему
+  Войти в систему с помощью цифровой подписи и получить JWT-токены доступа
+  """
+  login(data: LoginInput!): RegisteredAccount!
+
+  """Выйти из системы и заблокировать JWT-токены"""
+  logout(data: LogoutInput!): Boolean!
+
+  """
+  Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему
   """
   publishProjectOfFreeDecision(data: PublishProjectFreeDecisionInput!): Boolean!
+
+  """Обновить токен доступа аккаунта"""
+  refresh(data: RefreshInput!): RegisteredAccount!
+
+  """Зарегистрировать аккаунт пользователя в системе"""
+  registerAccount(data: RegisterAccountInput!): RegisteredAccount!
+
+  """
+  Зарегистрировать заявление и подписанные положения, подготовив пакет документов к отправке в совет на голосование после поступления оплаты.
+  """
+  registerParticipant(data: RegisterParticipantInput!): Account!
+
+  """Заменить приватный ключ аккаунта"""
+  resetKey(data: ResetKeyInput!): Boolean!
 
   """Выбрать кооперативный участок"""
   selectBranch(data: SelectBranchInput!): Boolean!
 
+  """
+  Выслать токен для замены приватного ключа аккаунта на электронную почту
+  """
+  startResetKey(data: StartResetKeyInput!): Boolean!
+
   """Удалить расширение"""
   uninstallExtension(data: UninstallExtensionInput!): Boolean!
+
+  """Обновить аккаунт в системе провайдера"""
+  updateAccount(data: UpdateAccountInput!): Account!
 
   """Обновить банковский счёт"""
   updateBankAccount(data: UpdateBankAccountInput!): PaymentMethod!
@@ -794,18 +1386,34 @@ type OrganizationDetails {
   ogrn: String!
 }
 
-type PaginationResult {
-  """Текущая страница"""
-  currentPage: Int!
+input OrganizationDetailsInput {
+  inn: String!
+  kpp: String!
+  ogrn: String!
+}
 
-  """Элементы текущей страницы"""
-  items: [PaymentMethod!]!
+"""Тип юридического лица"""
+enum OrganizationType {
+  AO
+  COOP
+  OAO
+  OOO
+  PAO
+  ZAO
+}
 
-  """Общее количество элементов"""
-  totalCount: Int!
+input PaginationInput {
+  """Количество элементов на странице"""
+  limit: Int! = 10
 
-  """Общее количество страниц"""
-  totalPages: Int!
+  """Номер страницы"""
+  page: Int! = 1
+
+  """Ключ сортировки (например, "name")"""
+  sortBy: String
+
+  """Направление сортировки ("ASC" или "DESC")"""
+  sortOrder: String! = "ASC"
 }
 
 type ParticipantAccount {
@@ -840,6 +1448,245 @@ type ParticipantAccount {
   username: String!
 }
 
+type ParticipantApplicationDecisionDocument {
+  """Бинарное содержимое документа (base64)"""
+  binary: String!
+
+  """Полное название документа"""
+  full_title: String!
+
+  """Хэш документа"""
+  hash: String!
+
+  """HTML содержимое документа"""
+  html: String!
+
+  """Метаинформация для создания проекта свободного решения"""
+  meta: ParticipantApplicationDecisionMetaDocumentOutput!
+}
+
+input ParticipantApplicationDecisionGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Идентификатор протокола решения собрания совета"""
+  decision_id: Float!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+type ParticipantApplicationDecisionMetaDocumentOutput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Идентификатор протокола решения собрания совета"""
+  decision_id: Float!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: LangType!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
+type ParticipantApplicationDocument {
+  """Бинарное содержимое документа (base64)"""
+  binary: String!
+
+  """Полное название документа"""
+  full_title: String!
+
+  """Хэш документа"""
+  hash: String!
+
+  """HTML содержимое документа"""
+  html: String!
+
+  """Метаинформация для создания проекта свободного решения"""
+  meta: ParticipantApplicationMetaDocumentOutput!
+}
+
+input ParticipantApplicationGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Изображение собственноручной подписи (base-64)"""
+  signature: String!
+
+  """
+  Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю)
+  """
+  skip_save: Boolean!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+type ParticipantApplicationMetaDocumentOutput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: LangType!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
+input ParticipantApplicationSignedDocumentInput {
+  """Хэш документа"""
+  hash: String!
+
+  """Метаинформация для создания проекта свободного решения"""
+  meta: ParticipantApplicationSignedMetaDocumentInput!
+
+  """Публичный ключ документа"""
+  public_key: String!
+
+  """Подпись документа"""
+  signature: String!
+}
+
+input ParticipantApplicationSignedMetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Изображение собственноручной подписи (base-64)"""
+  signature: String!
+
+  """
+  Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю)
+  """
+  skip_save: Boolean!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
 type Passport {
   """Код подразделения"""
   code: String!
@@ -855,6 +1702,14 @@ type Passport {
 
   """Серия паспорта"""
   series: Int!
+}
+
+input PassportInput {
+  code: String!
+  issued_at: String!
+  issued_by: String!
+  number: Float!
+  series: Float!
 }
 
 type PaymentMethod {
@@ -881,6 +1736,20 @@ type PaymentMethod {
 }
 
 union PaymentMethodData = BankAccount | SbpAccount
+
+type PaymentMethodPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [PaymentMethod!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
 
 type Permission {
   """Родительское разрешение"""
@@ -1069,17 +1938,32 @@ type Query {
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!
 
+  """Получить сводную информацию о аккаунтах системы"""
+  getAccounts(data: GetAccountsInput, options: PaginationInput): AccountsPaginationResult!
+
+  """Получить список вопросов совета кооператива для голосования"""
+  getAgenda: [AgendaWithDocuments!]!
+
   """Получить список кооперативных участков"""
   getBranches(data: GetBranchesInput!): [Branch!]!
+  getDocuments(data: GetDocumentsInput!): DocumentsPaginationResult!
 
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!
 
   """Получить список методов оплаты"""
-  getPaymentMethods(data: GetPaymentMethodsInput): PaginationResult!
+  getPaymentMethods(data: GetPaymentMethodsInput): PaymentMethodPaginationResult!
 
   """Получить сводную публичную информацию о системе"""
   getSystemInfo: SystemInfo!
+}
+
+input RefreshInput {
+  """Токен доступа"""
+  access_token: String!
+
+  """Токен обновления"""
+  refresh_token: String!
 }
 
 type RefundRequest {
@@ -1094,6 +1978,70 @@ type RefundRequest {
 
   """Время запроса"""
   request_time: String!
+}
+
+input RegisterAccountInput {
+  """Электронная почта"""
+  email: String!
+
+  """Данные индивидуального предпринимателя"""
+  entrepreneur_data: CreateEntrepreneurDataInput
+
+  """Данные физического лица"""
+  individual_data: CreateIndividualDataInput
+
+  """Данные организации"""
+  organization_data: CreateOrganizationDataInput
+
+  """Публичный ключ"""
+  public_key: String
+
+  """Имя аккаунта реферера"""
+  referer: String
+
+  """Роль пользователя"""
+  role: RegisterRole!
+
+  """Тип аккаунта"""
+  type: AccountType!
+
+  """Имя пользователя"""
+  username: String!
+}
+
+input RegisterParticipantInput {
+  """Подписанный документ политики конфиденциальности от пайщика"""
+  privacy_agreement: SignedDigitalDocumentInput!
+
+  """Подписанный документ положения о цифровой подписи от пайщика"""
+  signature_agreement: SignedDigitalDocumentInput!
+
+  """Подписанный документ заявления на вступление в кооператив от пайщика"""
+  statement: ParticipantApplicationSignedDocumentInput!
+
+  """Подписанный документ пользовательского соглашения от пайщика"""
+  user_agreement: SignedDigitalDocumentInput!
+
+  """Имя аккаунта пайщика"""
+  username: String!
+
+  """
+  Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика
+  """
+  wallet_agreement: SignedDigitalDocumentInput!
+}
+
+"""Роль пользователя при регистрации"""
+enum RegisterRole {
+  User
+}
+
+type RegisteredAccount {
+  """Информация об зарегистрированном аккаунте"""
+  account: Account!
+
+  """Токены доступа и обновления"""
+  tokens: Tokens!
 }
 
 type RepresentedBy {
@@ -1111,6 +2059,22 @@ type RepresentedBy {
 
   """Должность"""
   position: String!
+}
+
+input RepresentedByInput {
+  based_on: String!
+  first_name: String!
+  last_name: String!
+  middle_name: String!
+  position: String!
+}
+
+input ResetKeyInput {
+  """Публичный ключ для замены"""
+  public_key: String!
+
+  """Токен авторизации для замены ключа, полученный по email"""
+  token: String!
 }
 
 type ResourceDelegationDTO {
@@ -1316,6 +2280,33 @@ type SignedBlockchainDocument {
   signature: String!
 }
 
+input SignedDigitalDocumentInput {
+  """Хэш документа"""
+  hash: String!
+
+  """Метаинформация документа"""
+  meta: MetaDocumentInput!
+
+  """Публичный ключ документа"""
+  public_key: String!
+
+  """Подпись документа"""
+  signature: String!
+}
+
+input StartResetKeyInput {
+  """Электронная почта"""
+  email: String!
+}
+
+"""
+Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета)
+"""
+type StatementDetail {
+  action: ExtendedBlockchainAction!
+  document: GeneratedDocument!
+}
+
 type SystemInfo {
   """Объект системного аккаунта кооператива в блокчейне"""
   blockchain_account: BlockchainAccount!
@@ -1340,9 +2331,54 @@ enum SystemStatus {
   maintenance
 }
 
+type Token {
+  """Дата истечения токена доступа"""
+  expires: DateTime!
+
+  """Токен доступа"""
+  token: String!
+}
+
+type Tokens {
+  """Токен доступа"""
+  access: Token!
+
+  """Токен обновления"""
+  refresh: Token!
+}
+
 input UninstallExtensionInput {
   """Фильтр по имени"""
   name: String!
+}
+
+input UpdateAccountInput {
+  """Электронная почта"""
+  email: String!
+
+  """Данные индивидуального предпринимателя"""
+  entrepreneur_data: UpdateEntrepreneurDataInput
+
+  """Данные физического лица"""
+  individual_data: UpdateIndividualDataInput
+
+  """Данные организации"""
+  organization_data: UpdateOrganizationDataInput
+
+  """Публичный ключ"""
+  public_key: String
+
+  """Имя аккаунта реферера"""
+  referer: String
+
+  """Роль пользователя"""
+  role: RegisterRole!
+
+  """Тип аккаунта"""
+  type: AccountType!
+
+  """Имя пользователя"""
+  username: String!
 }
 
 input UpdateBankAccountInput {
@@ -1357,6 +2393,90 @@ input UpdateBankAccountInput {
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+input UpdateEntrepreneurDataInput {
+  """Дата рождения"""
+  birthdate: String!
+
+  """Город"""
+  city: String!
+
+  """Страна"""
+  country: Country!
+
+  """Детали индивидуального предпринимателя"""
+  details: EntrepreneurDetailsInput!
+
+  """Имя"""
+  first_name: String!
+
+  """Полный адрес"""
+  full_address: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String!
+
+  """Телефон"""
+  phone: String!
+}
+
+input UpdateIndividualDataInput {
+  """Дата рождения"""
+  birthdate: String!
+
+  """Имя"""
+  first_name: String!
+
+  """Полный адрес"""
+  full_address: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String!
+
+  """Данные паспорта"""
+  passport: PassportInput
+
+  """Телефон"""
+  phone: String!
+}
+
+input UpdateOrganizationDataInput {
+  """Город"""
+  city: String!
+
+  """Страна"""
+  country: String!
+
+  """Детали организации"""
+  details: OrganizationDetailsInput!
+
+  """Фактический адрес"""
+  fact_address: String!
+
+  """Полный адрес"""
+  full_address: String!
+
+  """Полное наименование организации"""
+  full_name: String!
+
+  """Телефон"""
+  phone: String!
+
+  """Представитель организации"""
+  represented_by: RepresentedByInput!
+
+  """Краткое наименование организации"""
+  short_name: String!
+
+  """Тип организации"""
+  type: OrganizationType!
 }
 
 type UserAccount {

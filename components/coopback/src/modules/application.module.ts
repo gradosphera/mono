@@ -10,11 +10,16 @@ import { AppStoreModule } from './appstore/appstore-app.module';
 import { QueueModule } from './queue/queue-app.module';
 import { DocumentModule } from './document/document.module';
 import { RedisAppModule } from './redis/redis-app.module';
-import { DecisionModule } from './decision/decision.module';
+import { DecisionModule } from './free-decision/decision.module';
+import { AgreementModule } from './agreement/agreement.module';
+import { ParticipantModule } from './participant/participant.module';
+import { AgendaModule } from './agenda/agenda.module';
 
 @Module({
   imports: [
     AccountModule,
+    AgreementModule,
+    AgendaModule,
     AppStoreModule,
     AuthModule,
     BranchModule,
@@ -25,9 +30,12 @@ import { DecisionModule } from './decision/decision.module';
     SystemModule,
     DocumentModule,
     DecisionModule,
+    ParticipantModule,
   ],
   exports: [
     AccountModule,
+    AgendaModule,
+    AgreementModule,
     AppStoreModule,
     AuthModule,
     BranchModule,
@@ -38,6 +46,7 @@ import { DecisionModule } from './decision/decision.module';
     SystemModule,
     DocumentModule,
     DecisionModule,
+    ParticipantModule,
   ],
 })
 export class ApplicationModule {}

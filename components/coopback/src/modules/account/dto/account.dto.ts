@@ -29,7 +29,7 @@ export class AccountDTO {
   @Field(() => MonoAccountDTO, { description: 'Объект аккаунта в системе учёта провайдера', nullable: true })
   @ValidateNested()
   @Type(() => MonoAccountDTO)
-  public readonly mono_account!: MonoAccountDTO | null;
+  public readonly provider_account!: MonoAccountDTO | null;
 
   @Field(() => ParticipantAccountDTO, { description: 'Объект пайщика кооператива', nullable: true })
   @ValidateNested()
@@ -39,7 +39,7 @@ export class AccountDTO {
   constructor(entity: AccountDomainEntity) {
     this.username = entity.username;
     this.blockchain_account = entity.blockchain_account || null;
-    this.mono_account = entity.mono_account ? new MonoAccountDTO(entity.mono_account) : null;
+    this.provider_account = entity.provider_account ? new MonoAccountDTO(entity.provider_account) : null;
     this.user_account = entity.user_account ? new UserAccountDTO(entity.user_account) : null;
     this.participant_account = entity.participant_account ? new ParticipantAccountDTO(entity.participant_account) : null;
     //TODO cardcoop_account

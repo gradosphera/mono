@@ -15,7 +15,7 @@ import { roleRights } from '../../src/config/roles';
 import { tokenTypes } from '../../src/config/tokens';
 import { userOne, admin, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken, adminAccessToken } from '../fixtures/token.fixture';
-import { generateUsername } from '../utils/generateUsername';
+import { generateUsername } from '../../src/utils/generate-username';
 import { getBlockchainInfo } from '../../src/services/blockchain.service';
 import { Bytes, Checksum256, PrivateKey } from '@wharfkit/session';
 
@@ -305,8 +305,8 @@ describe('Auth routes', () => {
     test('should return 204 and reset the key', async () => {
       await insertUsers([userOne]);
       const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-      const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_PASSWORD);
-      await tokenService.saveToken(resetKeyToken, userOne._id, expires, tokenTypes.RESET_PASSWORD);
+      const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_KEY);
+      await tokenService.saveToken(resetKeyToken, userOne._id, expires, tokenTypes.RESET_KEY);
 
       const res = await request(app)
         .post('/v1/auth/reset-key')
@@ -320,7 +320,7 @@ describe('Auth routes', () => {
       if (dbUser) {
         const dbResetPasswordTokenCount = await Token.countDocuments({
           user: userOne._id.toString(),
-          type: tokenTypes.RESET_PASSWORD,
+          type: tokenTypes.RESET_KEY,
         });
         expect(dbResetPasswordTokenCount).toBe(0);
       }
@@ -338,8 +338,8 @@ describe('Auth routes', () => {
     test('should return 401 if reset key token is blacklisted', async () => {
       await insertUsers([userOne]);
       const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-      const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_PASSWORD);
-      await tokenService.saveToken(resetKeyToken, userOne._id, expires, tokenTypes.RESET_PASSWORD, true);
+      const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_KEY);
+      await tokenService.saveToken(resetKeyToken, userOne._id, expires, tokenTypes.RESET_KEY, true);
 
       await request(app)
         .post('/v1/auth/reset-key')
@@ -350,8 +350,8 @@ describe('Auth routes', () => {
     test('should return 401 if reset key token is expired', async () => {
       await insertUsers([userOne]);
       const expires = moment().subtract(1, 'minutes');
-      const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_PASSWORD);
-      await tokenService.saveToken(resetKeyToken, userOne._id, expires, tokenTypes.RESET_PASSWORD);
+      const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_KEY);
+      await tokenService.saveToken(resetKeyToken, userOne._id, expires, tokenTypes.RESET_KEY);
 
       await request(app)
         .post('/v1/auth/reset-key')
@@ -361,8 +361,8 @@ describe('Auth routes', () => {
 
     test('should return 401 if user is not found', async () => {
       const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-      const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_PASSWORD);
-      await tokenService.saveToken(resetKeyToken, userOne._id, expires, tokenTypes.RESET_PASSWORD);
+      const resetKeyToken = tokenService.generateToken(userOne._id, expires, tokenTypes.RESET_KEY);
+      await tokenService.saveToken(resetKeyToken, userOne._id, expires, tokenTypes.RESET_KEY);
 
       await request(app)
         .post('/v1/auth/reset-key')

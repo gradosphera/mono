@@ -8,7 +8,7 @@ import pick from '../utils/pick';
 // import { IGetResponse } from '../types/common';
 import { IUser, userStatus } from '../types';
 import { Request, Response } from 'express';
-import { generateUsername } from '../../tests/utils/generateUsername';
+import { generateUsername } from '../utils/generate-username';
 import config from '../config/config';
 import logger from '../config/logger';
 // import { Body, Controller, Get, Path, Post, Query, Route, SuccessResponse } from 'tsoa';
@@ -87,6 +87,22 @@ export const addUser = catchAsync(async (req: Request, res: Response) => {
   res.status(httpStatus.CREATED).send({ user });
 });
 
+export const updateUser = catchAsync(async (req, res) => {
+  if (req.user.role !== 'member' && req.user.role !== 'chairman')
+    throw new ApiError(httpStatus.FORBIDDEN, 'Только председатель или член совета может обновить данные пользователя');
+
+  const user = await userService.updateUserByUsername(req.params.username, req.body);
+  res.send(user);
+});
+
+export const deleteUser = catchAsync(async (req, res) => {
+  if (req.user.role !== 'member' && req.user.role !== 'chairman')
+    throw new ApiError(httpStatus.FORBIDDEN, 'Только председатель или член совета может обновить данные пользователя');
+
+  await userService.deleteUserByUsername(req.params.username);
+  res.status(http.NO_CONTENT).send();
+});
+
 export const getUsers = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['username', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -99,17 +115,4 @@ export const getUser = catchAsync(async (req, res) => {
   const user = await userService.getUserByUsername(req.params.username);
 
   res.send(user);
-});
-
-export const updateUser = catchAsync(async (req, res) => {
-  if (req.user.role !== 'member' && req.user.role !== 'chairman')
-    throw new ApiError(httpStatus.FORBIDDEN, 'Только председатель или член совета может обновить данные пользователя');
-
-  const user = await userService.updateUserByUsername(req.params.username, req.body);
-  res.send(user);
-});
-
-export const deleteUser = catchAsync(async (req, res) => {
-  await userService.deleteUserByUsername(req.params.username);
-  res.status(http.NO_CONTENT).send();
 });

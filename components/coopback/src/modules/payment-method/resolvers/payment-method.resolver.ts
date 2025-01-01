@@ -14,7 +14,7 @@ import { AuthRoles } from '~/modules/auth/decorators/auth.decorator';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import { createPaginationResult } from '~/modules/common/dto/pagination.dto';
 
-const PaymentMethodPaginationResult = createPaginationResult(PaymentMethodDTO);
+const PaymentMethodPaginationResult = createPaginationResult(PaymentMethodDTO, 'PaymentMethod');
 
 @Resolver('PaymentMethod')
 export class PaymentMethodResolver {

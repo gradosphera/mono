@@ -1,4 +1,4 @@
-import { generateUsername } from '../../utils/generateUsername';
+import { generateUsername } from '../../../src/utils/generate-username';
 
 const faker = require('faker');
 const { User } = require('../../../src/models');

@@ -1,4 +1,5 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils';
+import { UnauthorizedException } from '@nestjs/common';
 import { GraphQLSchema, defaultFieldResolver } from 'graphql';
 import config from '~/config/config';
 
@@ -33,11 +34,10 @@ export function fieldAuthDirectiveTransformer(schema: GraphQLSchema, directiveNa
 
           // Проверка соответствия ролей
           const hasAccess = requiredRoles.includes(user.role);
-          if (!hasAccess) {
-            throw new Error(
+          if (!hasAccess)
+            throw new UnauthorizedException(
               `Недостаточно прав доступа к полю "${info.fieldName}". Требуемые роли: ${requiredRoles.join(', ')}.`
             );
-          }
 
           return resolve(source, args, context, info);
         };
