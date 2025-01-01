@@ -14,6 +14,7 @@ import { DecisionModule } from './free-decision/decision.module';
 import { AgreementModule } from './agreement/agreement.module';
 import { ParticipantModule } from './participant/participant.module';
 import { AgendaModule } from './agenda/agenda.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AgendaModule } from './agenda/agenda.module';
     PaymentMethodModule,
     QueueModule,
     RedisAppModule,
+    PaymentModule,
     SystemModule,
     DocumentModule,
     DecisionModule,
@@ -41,6 +43,7 @@ import { AgendaModule } from './agenda/agenda.module';
     BranchModule,
     LoggerModule,
     PaymentMethodModule,
+    PaymentModule,
     QueueModule,
     RedisAppModule,
     SystemModule,

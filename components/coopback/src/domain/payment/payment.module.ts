@@ -1,11 +1,12 @@
 // domain/payment/payment.module.ts
 
 import { Module } from '@nestjs/common';
-import { ProcessPaymentInteractor } from './process-payment.interactor';
+import { PaymentInteractor } from './interactors/payment.interactor';
+import { PaymentDomainService } from './services/payment-domain.service';
 
 @Module({
   imports: [],
-  providers: [ProcessPaymentInteractor],
-  exports: [ProcessPaymentInteractor], // Экспортируем, если потребуется в других модулях
+  providers: [PaymentInteractor, PaymentDomainService],
+  exports: [PaymentInteractor, PaymentDomainService],
 })
 export class PaymentDomainModule {}

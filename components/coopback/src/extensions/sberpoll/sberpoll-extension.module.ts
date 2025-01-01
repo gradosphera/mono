@@ -221,7 +221,8 @@ export class SberpollPlugin extends PollingProvider {
 
           this.logger.info(`Обработка транзакции ${transaction.id} с номером заказа ${orderNumber}`);
 
-          const order = await Order.findOne({ order_num: orderNumber });
+          //TODO здесь нужно искать по ЧАСТИ _id а не по всему. Т.к. полного соответствия не будет.
+          const order = await Order.findOne({ _id: orderNumber });
 
           if (!order) {
             this.logger.warn(`Не найден заказ с номером ${orderNumber} по транзакции ${transaction.id}`);

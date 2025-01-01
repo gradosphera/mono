@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class ProviderService {
+export class ProviderDomainService {
   private providers: Record<string, any> = {};
 
   registerProvider(name: string, providerInstance: any) {

@@ -566,6 +566,14 @@ input CreateBranchInput {
   trustee: String!
 }
 
+input CreateDepositPaymentInputDTO {
+  """Сумма взноса"""
+  quantity: String!
+
+  """Имя аккаунта пользователя"""
+  username: String!
+}
+
 input CreateEntrepreneurDataInput {
   """Банковский счет"""
   bank_account: BankAccountInput!
@@ -619,6 +627,11 @@ input CreateIndividualDataInput {
 
   """Телефон"""
   phone: String!
+}
+
+input CreateInitialPaymentInput {
+  """Имя аккаунта пользователя"""
+  username: String!
 }
 
 input CreateOrganizationDataInput {
@@ -1082,6 +1095,20 @@ input GetPaymentMethodsInput {
   username: String
 }
 
+input GetPaymentsInput {
+  """Идентификатор платежа в блокчейне"""
+  blockchain_id: String
+
+  """Идентификатор платежа во внутренней системе"""
+  id: String
+
+  """Статус платежа"""
+  status: PaymentStatus
+
+  """Имя пользователя для фильтрации платежей"""
+  username: String
+}
+
 type Individual {
   """Дата рождения"""
   birthdate: String!
@@ -1271,6 +1298,12 @@ type Mutation {
   """Создать кооперативный участок"""
   createBranch(data: CreateBranchInput!): Branch!
 
+  """Создать объект платежа вступительного взноса"""
+  createDeposit(data: CreateDepositPaymentInputDTO!): Payment!
+
+  """Создать объект платежа вступительного взноса"""
+  createInitialPayment(data: CreateInitialPaymentInput!): Payment!
+
   """
   Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации
   """
@@ -1356,6 +1389,9 @@ type Mutation {
 
   """Выбрать кооперативный участок"""
   selectBranch(data: SelectBranchInput!): Boolean!
+
+  """Создать объект платежа вступительного взноса"""
+  setPaymentStatus(data: SetPaymentStatusInput!): Payment!
 
   """
   Выслать токен для замены приватного ключа аккаунта на электронную почту
@@ -1712,6 +1748,71 @@ input PassportInput {
   series: Float!
 }
 
+type Payment {
+  """Сумма платежа"""
+  amount: Float!
+
+  """Идентификационный номер платежа в блокчейне"""
+  blockchain_id: Float!
+
+  """Дата создания платежа"""
+  created_at: DateTime!
+
+  """Детали платежа"""
+  details: PaymentDetails!
+
+  """Дата истечения срока давности платежа"""
+  expired_at: DateTime!
+
+  """Идентификатор платежа во внутренней системе учёта"""
+  id: String!
+
+  """Содержит сервисное сообщение провайдера об ошибке обработки платежа"""
+  message: String!
+
+  """
+  Идентификатор наименования провайдера платежа, ответственного за обработку
+  """
+  provider: String!
+
+  """
+  Идентификатор номера платежа, который отображается пользователю в платежных документах
+  """
+  status: PaymentStatus!
+
+  """Символ тикера валюты платежа"""
+  symbol: String!
+
+  """Дата обновления платежа"""
+  updated_at: DateTime!
+
+  """Имя аккаунта пользователя, совершающего платеж"""
+  username: String!
+}
+
+type PaymentDetails {
+  """Сумма платежа с учетом комиссии"""
+  amount_plus_fee: String!
+
+  """Сумма платежа без учета комиссии"""
+  amount_without_fee: String!
+
+  """Строка с данными платежа"""
+  data: String!
+
+  """Фактический процент комиссии"""
+  fact_fee_percent: Float!
+
+  """Размер комиссии в абсолютных значениях"""
+  fee_amount: String!
+
+  """Процент комиссии"""
+  fee_percent: Float!
+
+  """Допустимый процент отклонения"""
+  tolerance_percent: Float!
+}
+
 type PaymentMethod {
   """Дата создания"""
   created_at: DateTime!
@@ -1749,6 +1850,30 @@ type PaymentMethodPaginationResult {
 
   """Общее количество страниц"""
   totalPages: Int!
+}
+
+type PaymentPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [Payment!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+"""Статус платежа"""
+enum PaymentStatus {
+  COMPLETED
+  EXPIRED
+  FAILED
+  PAID
+  PENDING
+  REFUNDED
 }
 
 type Permission {
@@ -1953,6 +2078,9 @@ type Query {
 
   """Получить список методов оплаты"""
   getPaymentMethods(data: GetPaymentMethodsInput): PaymentMethodPaginationResult!
+
+  """Получить список платежей"""
+  getPayments(data: GetPaymentsInput, options: PaginationInput): PaymentPaginationResult!
 
   """Получить сводную публичную информацию о системе"""
   getSystemInfo: SystemInfo!
@@ -2264,6 +2392,14 @@ input SelectBranchSignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
+}
+
+input SetPaymentStatusInput {
+  """Идентификатор платежа, для которого устанавливается статус"""
+  id: String!
+
+  """Новый статус платежа"""
+  status: PaymentStatus!
 }
 
 type SignedBlockchainDocument {

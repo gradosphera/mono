@@ -1,9 +1,9 @@
-import mongoose, { Schema, Document, model, type Model } from 'mongoose';
+import mongoose, { Schema, model, type Model } from 'mongoose';
 import { toJSON, paginate } from './plugins/index';
 import AutoIncrementFactory from 'mongoose-sequence';
 import { generateOrderSecret } from '../services/order.service';
 import { type IOrder, orderStatus } from '../types/order.types';
-
+import { v4 as uuidv4 } from 'uuid';
 const AutoIncrement = AutoIncrementFactory(mongoose);
 
 interface IOrderModel extends Model<IOrder> {
@@ -13,6 +13,10 @@ interface IOrderModel extends Model<IOrder> {
 
 const orderSchema = new Schema<IOrder, IOrderModel>(
   {
+    // _id: {
+    //   type: String,
+    //   default: () => uuidv4(), // Использование UUID для _id
+    // },
     order_num: {
       type: Number,
       required: false,
@@ -26,7 +30,7 @@ const orderSchema = new Schema<IOrder, IOrderModel>(
       type: String,
       required: true,
       private: true,
-      default: () => generateOrderSecret(16), // Генерация секрета по умолчанию
+      default: () => generateOrderSecret(48), // Генерация секрета по умолчанию
     },
     status: {
       type: String,

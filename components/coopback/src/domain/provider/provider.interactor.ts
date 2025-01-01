@@ -1,11 +1,11 @@
 // domain/provider/RegisterProviderInteractor.ts
 
 import { Injectable } from '@nestjs/common';
-import { ProviderService } from './provider.service';
+import { ProviderDomainService } from './provider-domain.service';
 
 @Injectable()
 export class ProviderInteractor {
-  constructor(private readonly providerService: ProviderService) {}
+  constructor(private readonly providerService: ProviderDomainService) {}
 
   registerProvider(name: string, providerInstance: any) {
     this.providerService.registerProvider(name, providerInstance);
