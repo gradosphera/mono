@@ -1,8 +1,6 @@
 import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
 import { branchSelector } from '../../selectors';
 
-type inputModel = ModelTypes['GetBranchesInput']
-
 export const name = 'getBranches'
 
 /**
@@ -12,6 +10,14 @@ export const query = Selector("Query")({
   [name]: [{data: $('data', 'GetBranchesInput!')}, branchSelector]
 });
 
-export interface IInput extends inputModel {}
+export interface IInput {
+  /**
+   * @private
+   */
+  [key: string]: unknown;
+
+  data: ModelTypes['GetBranchesInput'],
+}
+
 export type IOutput = InputType<GraphQLTypes['Query'], typeof query>;
 

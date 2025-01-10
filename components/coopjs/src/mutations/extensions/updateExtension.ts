@@ -9,5 +9,13 @@ export const mutation = Selector('Mutation')({
 });
 
 
-export interface IInput extends inputModel {}
+export interface IInput {
+  /**
+   * @private
+   */
+  [key: string]: unknown;
+
+  data: ModelTypes['ExtensionInput'],
+}
+
 export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;

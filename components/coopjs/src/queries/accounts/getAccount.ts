@@ -1,8 +1,6 @@
 import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from "../../zeus";
-import { systemInfoSelector } from "../../selectors/system/systemInfoSelector";
-import { accountSelector, type accountModel } from "../../selectors/accounts";
+import { accountSelector} from "../../selectors/accounts";
 
-type inputModel = ModelTypes['GetAccountInput']
 export const name = 'getAccount'
 
 /**
@@ -12,5 +10,13 @@ export const query = Selector("Query")({
   [name]: [{data: $('data', 'GetAccountInput!')}, accountSelector]
 });
 
-export interface IInput extends inputModel {}
+export interface IInput {
+  /**
+   * @private
+   */
+  [key: string]: unknown;
+
+  data: ModelTypes['GetAccountInput'],
+}
+
 export type IOutput = InputType<GraphQLTypes['Query'], typeof query>;

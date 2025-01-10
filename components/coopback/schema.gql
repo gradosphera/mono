@@ -142,6 +142,16 @@ type AgendaWithDocuments {
   table: BlockchainDecision!
 }
 
+input AgreementInput {
+  protocol_day_month_year: String!
+  protocol_number: String!
+}
+
+type AgreementVar {
+  protocol_day_month_year: String!
+  protocol_number: String!
+}
+
 type AuthSequence {
   account: String!
   sequence: String!
@@ -312,7 +322,7 @@ type BlockchainAction {
   context_free: Boolean!
   creator_action_ordinal: Int!
 
-  """Произвольные данные действия в формате JSON"""
+  """Данные действия в формате JSON"""
   data: JSON!
   elapsed: Int!
   global_sequence: String!
@@ -445,6 +455,15 @@ type Branch {
   type: String!
 }
 
+type ContactsDTO {
+  chairman: PublicChairman!
+  details: OrganizationDetails!
+  email: String!
+  full_address: String!
+  full_name: String!
+  phone: String!
+}
+
 type CooperativeOperatorAccount {
   """Объявление кооператива"""
   announce: String!
@@ -566,7 +585,7 @@ input CreateBranchInput {
   trustee: String!
 }
 
-input CreateDepositPaymentInputDTO {
+input CreateDepositPaymentInput {
   """Сумма взноса"""
   quantity: String!
 
@@ -694,14 +713,17 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 """
-Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета
+Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения.
 """
 type DecisionDetail {
   action: ExtendedBlockchainAction!
-  document: GeneratedDocument!
+  document: DecisionDocumentUnion!
   votes_against: [ExtendedBlockchainAction!]!
   votes_for: [ExtendedBlockchainAction!]!
 }
+
+"""Объединение типов документов протоколов решения совета"""
+union DecisionDocumentUnion = FreeDecisionDocument | ParticipantApplicationDecisionDocument
 
 input DeleteAccountInput {
   """Имя аккаунта пользователя"""
@@ -799,6 +821,41 @@ input EditBranchInput {
   trustee: String!
 }
 
+type Entrepreneur {
+  """Дата рождения"""
+  birthdate: String!
+
+  """Город"""
+  city: String!
+
+  """Страна"""
+  country: String!
+
+  """Детали ИП (ИНН, ОГРН)"""
+  details: EntrepreneurDetails!
+
+  """Email"""
+  email: String!
+
+  """Имя"""
+  first_name: String!
+
+  """Юридический адрес"""
+  full_address: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String!
+
+  """Телефон"""
+  phone: String!
+
+  """Имя аккаунта"""
+  username: String!
+}
+
 type EntrepreneurDetails {
   """ИНН"""
   inn: String!
@@ -830,7 +887,7 @@ type ExtendedBlockchainAction {
   context_free: Boolean!
   creator_action_ordinal: Int!
 
-  """Произвольные данные действия в формате JSON"""
+  """Данные действия в формате JSON"""
   data: JSON!
   elapsed: Int!
   global_sequence: String!
@@ -840,7 +897,7 @@ type ExtendedBlockchainAction {
   transaction_id: String!
 
   """Доп. данные о пользователе (физ/ИП/организация)"""
-  user: [Individual!]
+  user: UserDataUnion
 }
 
 type Extension {
@@ -902,6 +959,23 @@ input ExtensionInput {
 
   """Timestamp of the last update to the extension"""
   updated_at: DateTime
+}
+
+type FreeDecisionDocument {
+  """Бинарное содержимое документа (base64)"""
+  binary: String!
+
+  """Полное название документа"""
+  full_title: String!
+
+  """Хэш документа"""
+  hash: String!
+
+  """HTML содержимое документа"""
+  html: String!
+
+  """Метаинформация для создания проекта свободного решения"""
+  meta: FreeDecisionMetaDocumentOutput!
 }
 
 input FreeDecisionGenerateDocumentInput {
@@ -1138,6 +1212,23 @@ type Individual {
   username: String!
 }
 
+input Init {
+  """
+  Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO
+  """
+  organization_data: CreateOrganizationDataInput!
+
+  """
+  Переменные кооператива, используемые для заполнения шаблонов документов
+  """
+  vars: VarsInput!
+}
+
+input Install {
+  soviet: [SovietMemberInput!]!
+  wif: String!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -1299,7 +1390,7 @@ type Mutation {
   createBranch(data: CreateBranchInput!): Branch!
 
   """Создать объект платежа вступительного взноса"""
-  createDeposit(data: CreateDepositPaymentInputDTO!): Payment!
+  createDeposit(data: CreateDepositPaymentInput!): Payment!
 
   """Создать объект платежа вступительного взноса"""
   createInitialPayment(data: CreateInitialPaymentInput!): Payment!
@@ -1357,8 +1448,16 @@ type Mutation {
   """
   generateWalletAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
+  """
+  Произвести инициализацию программного обеспечения перед установкой совета методом install
+  """
+  initSystem(data: Init!): SystemInfo!
+
   """Установить расширение"""
   installExtension(data: ExtensionInput!): Extension!
+
+  """Произвести установку членов совета перед началом работы"""
+  installSystem(data: Install!): SystemInfo!
 
   """
   Войти в систему с помощью цифровой подписи и получить JWT-токены доступа
@@ -1393,6 +1492,9 @@ type Mutation {
   """Создать объект платежа вступительного взноса"""
   setPaymentStatus(data: SetPaymentStatusInput!): Payment!
 
+  """Сохранить приватный ключ в зашифрованном серверном хранилище"""
+  setWif(data: SetWifInput!): Boolean!
+
   """
   Выслать токен для замены приватного ключа аккаунта на электронную почту
   """
@@ -1409,6 +1511,47 @@ type Mutation {
 
   """Обновить расширение"""
   updateExtension(data: ExtensionInput!): Extension!
+
+  """Обновить параметры системы"""
+  updateSystem(data: Update!): SystemInfo!
+}
+
+type Organization {
+  """Город"""
+  city: String!
+
+  """Страна"""
+  country: String!
+
+  """Детали организации"""
+  details: OrganizationDetails!
+
+  """Email"""
+  email: String!
+
+  """Фактический адрес"""
+  fact_address: String!
+
+  """Юридический адрес"""
+  full_address: String!
+
+  """Полное название"""
+  full_name: String!
+
+  """Телефон"""
+  phone: String!
+
+  """Представитель организации"""
+  represented_by: RepresentedBy!
+
+  """Краткое название"""
+  short_name: String!
+
+  """Тип организации"""
+  type: String!
+
+  """Имя аккаунта организации"""
+  username: String!
 }
 
 type OrganizationDetails {
@@ -2045,6 +2188,12 @@ input ProjectFreeDecisionSignedMetaDocumentInput {
   version: String!
 }
 
+type PublicChairman {
+  first_name: String!
+  last_name: String!
+  middle_name: String!
+}
+
 input PublishProjectFreeDecisionInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -2402,6 +2551,17 @@ input SetPaymentStatusInput {
   status: PaymentStatus!
 }
 
+input SetWifInput {
+  """Тип разрешения ключа"""
+  permission: String! = "active"
+
+  """Имя пользователя, чей ключ"""
+  username: String!
+
+  """Приватный ключ"""
+  wif: String!
+}
+
 type SignedBlockchainDocument {
   """Хеш документа"""
   hash: String!
@@ -2430,6 +2590,11 @@ input SignedDigitalDocumentInput {
   signature: String!
 }
 
+input SovietMemberInput {
+  individual_data: CreateIndividualDataInput!
+  role: String!
+}
+
 input StartResetKeyInput {
   """Электронная почта"""
   email: String!
@@ -2440,8 +2605,13 @@ input StartResetKeyInput {
 """
 type StatementDetail {
   action: ExtendedBlockchainAction!
-  document: GeneratedDocument!
+  document: StatementDocumentUnion!
 }
+
+"""
+Объединение типов документов заявлений, или других документов, за которыми следует появление протокола решения совета
+"""
+union StatementDocumentUnion = ParticipantApplicationDocument | ProjectFreeDecisionDocument
 
 type SystemInfo {
   """Объект системного аккаунта кооператива в блокчейне"""
@@ -2449,6 +2619,9 @@ type SystemInfo {
 
   """Набор данных с информацией о состоянии блокчейна"""
   blockchain_info: BlockchainInfoDTO!
+
+  """Контакты кооператива"""
+  contacts: ContactsDTO
 
   """Объект аккаунта кооператива у оператора"""
   cooperator_account: CooperativeOperatorAccount!
@@ -2458,6 +2631,9 @@ type SystemInfo {
 
   """Статус контроллера кооператива"""
   system_status: SystemStatus!
+
+  """Переменные кооператива"""
+  vars: Vars
 }
 
 """Состояние контроллера кооператива"""
@@ -2486,6 +2662,16 @@ type Tokens {
 input UninstallExtensionInput {
   """Фильтр по имени"""
   name: String!
+}
+
+input Update {
+  """Собственные данные кооператива, обслуживающего экземпляр платформы"""
+  organization_data: UpdateOrganizationDataInput
+
+  """
+  Переменные кооператива, используемые для заполнения шаблонов документов
+  """
+  vars: VarsInput
 }
 
 input UpdateAccountInput {
@@ -2644,6 +2830,9 @@ type UserAccount {
   verifications: [Verification!]!
 }
 
+"""Объединение информации о пользователях"""
+union UserDataUnion = Entrepreneur | Individual | Organization
+
 """Статус пользователя"""
 enum UserStatus {
   Active
@@ -2654,6 +2843,46 @@ enum UserStatus {
   Payed
   Refunded
   Registered
+}
+
+type Vars {
+  confidential_email: String!
+  confidential_link: String!
+  contact_email: String!
+  coopenomics_agreement: AgreementVar
+  coopname: String!
+  full_abbr: String!
+  full_abbr_dative: String!
+  full_abbr_genitive: String!
+  name: String!
+  participant_application: AgreementVar!
+  passport_request: String!
+  privacy_agreement: AgreementVar!
+  short_abbr: String!
+  signature_agreement: AgreementVar!
+  user_agreement: AgreementVar!
+  wallet_agreement: AgreementVar!
+  website: String!
+}
+
+input VarsInput {
+  confidential_email: String!
+  confidential_link: String!
+  contact_email: String!
+  coopenomics_agreement: AgreementInput
+  coopname: String!
+  full_abbr: String!
+  full_abbr_dative: String!
+  full_abbr_genitive: String!
+  name: String!
+  participant_application: AgreementInput!
+  passport_request: String!
+  privacy_agreement: AgreementInput!
+  short_abbr: String!
+  signature_agreement: AgreementInput!
+  user_agreement: AgreementInput!
+  wallet_agreement: AgreementInput!
+  website: String!
 }
 
 type Verification {

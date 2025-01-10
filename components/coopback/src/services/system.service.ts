@@ -3,21 +3,20 @@ import { Mono } from '../models';
 import ApiError from '../utils/ApiError';
 import config from '../config/config';
 import logger from '../config/logger';
-import { IAddUser, ICreateUser, SystemStatusInterface, IInstall } from '../types';
+import { ICreateUser, SystemStatusInterface, IInstall } from '../types';
 import { generateUsername } from '../utils/generate-username';
 import { generator } from './document.service';
 import { blockchainService, emailService, tokenService, userService } from '.';
 import { IUser, userStatus } from '../types/user.types';
-import axios from 'axios';
 import { getBlockchainAccount, getBlockchainInfo, hasActiveKey } from './blockchain.service';
 import { RegistratorContract, type Cooperative } from 'cooptypes';
 import type { IInit, ISetVars, ISetWif } from '../types/auto-generated/system.validation';
 import { VarsSchema } from 'coopdoc-generator-ts';
-import Vault, { type wifPermissions } from '../models/vault.model';
+import Vault, { wifPermissions } from '../models/vault.model';
 import { PrivateKey } from '@wharfkit/antelope';
-import { createUser } from './user.service';
+import type { SetWifInputDomainInterface } from '~/domain/system/interfaces/set-wif-input-domain.interface';
 
-export const setWif = async (params: ISetWif): Promise<void> => {
+export const setWif = async (params: SetWifInputDomainInterface): Promise<void> => {
   //check auth
   const blockchainAccount = await getBlockchainAccount(params.username);
 
@@ -27,7 +26,11 @@ export const setWif = async (params: ISetWif): Promise<void> => {
 
   if (!hasKey) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
 
-  await Vault.setWif(params.username, params.wif, params.permission as wifPermissions);
+  await Vault.setWif(
+    params.username,
+    params.wif,
+    params.permission ? (params.permission as wifPermissions) : wifPermissions.Active
+  );
 };
 
 export const install = async (data: IInstall): Promise<void> => {

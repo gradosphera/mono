@@ -6,7 +6,7 @@ export * as GenerateProjectOfFreeDecisionDocument from './generateProjectOfFreeD
 /**
  * Сгенерировать документ протокола решения собрания совета на основе ранее созданного проекта и проведенного голосования
  */
-export * as GenerateFreeDecisionDocument from './generateProjectOfFreeDecisionDocument'
+export * as GenerateFreeDecisionDocument from './generateFreeDecision'
 
 
 /**

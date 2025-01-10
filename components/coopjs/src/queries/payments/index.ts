@@ -1,0 +1,1 @@
+export * as GetPayments from './getPayments'

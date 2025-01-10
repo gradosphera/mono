@@ -1,4 +1,3 @@
-import type { BankAccountDomainInterface } from './bank-account-domain.interface';
 import type { OrganizationDetailsDomainInterface } from './organization-details-domain.interface';
 import type { RepresentedByDomainInterface } from './represented-by.interface';
 

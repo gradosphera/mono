@@ -1,13 +1,14 @@
 {
   "entryPoints": ["src/index.ts"], 
-  // "exclude": ["src/zeus/**"],
-  "out": "docs",
+  "out": "../docs/sdk",
+  "json": "../docs/sdk/typedoc.json",
   "tsconfig": "./tsconfig.json",
   "excludePrivate": true,
   "excludeProtected": true,
   "excludeInternal": true,
   "hideGenerator": true,
   "theme": "default",
+  "readme": "README.md",
   "plugin": [
     "typedoc-plugin-expand-object-like-types",
   ],

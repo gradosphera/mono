@@ -1,17 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { createClient } from "../src";
-import { Queries, Mutations } from "../src";
-import { ModelTypes } from "../dist";
-import { Selector } from "../src/zeus";
+import { createClient, Mutations } from "../src";
+import { Queries } from "../src";
 
 describe("should", () => {
   const client = createClient({
-    baseUrl: "http://127.0.0.1:2998/v1/graphql",
+    base_url: "http://127.0.0.1:2998/v1/graphql",
     headers: {
       "server-secret": "SECRET",
     },
-    blockchainUrl: "http://127.0.0.1:8888",
-    chainId:
+    chain_url: "http://127.0.0.1:8888",
+    chain_id:
       "f50256680336ee6daaeee93915b945c1166b5dfc98977adcb717403ae225c559",
   });
 
@@ -29,14 +27,15 @@ describe("should", () => {
   });
 
   it("should fetch branches", async () => {
-    const filter: ModelTypes["GetBranchesInput"] = {
-      coopname: "voskhod",
-    };
+    const filter: Queries.Branches.GetBranches.IInput = {
+      data: {
+        coopname: 'voskhod'
+      }
+    }
+    
 
     const { [Queries.Branches.GetBranches.name]: branches } = await client.Query(Queries.Branches.GetBranches.query, {
-      variables: {
-        data: filter,
-      },
+      variables: filter,
     });
     expect(branches).toBeDefined();
     expect(Array.isArray(branches)).toBe(true);
@@ -69,58 +68,82 @@ describe("should", () => {
   });
 
   it("should create a project of free decision", async () => {
-    const dataDecision: Mutations.Decisions.CreateProjectOfFreeDecision.IInput = {
-      header: "Срочное решение! 1",
-      question: "Решим?",
-      decision: "Решение такое и сякое",
-    };
+    
+    const dataDecision: Mutations.FreeDecisions.CreateProjectOfFreeDecision.IInput = {
+      data: {
+        question: "Решим?",
+        decision: "Решение такое и сякое",
+      }
+    } 
 
     const { createProjectOfFreeDecision: project } = await client.Mutation(
-      Mutations.Decisions.CreateProjectOfFreeDecision.mutation,
+      Mutations.FreeDecisions.CreateProjectOfFreeDecision.mutation,
       {
-        variables: {
-          data: dataDecision,
-        },
+        variables: dataDecision,
       }
     );
     expect(project).toBeDefined();
     expect(project).toHaveProperty("id");
-    expect(project.header).toBe("Срочное решение! 1");
   });
 
   it("should generate a project of free decision document", async () => {
-    const dataDecision: Mutations.Decisions.CreateProjectOfFreeDecision.IInput = {
-      header: "Срочное решение! 1",
-      question: "Решим?",
-      decision: "Решение такое и сякое",
+    
+    const dataDecision: Mutations.FreeDecisions.CreateProjectOfFreeDecision.IInput = {
+      data: {
+        question: "Решим?",
+        decision: "Решение такое и сякое",
+      }
     };
 
     const { createProjectOfFreeDecision: project } = await client.Mutation(
-      Mutations.Decisions.CreateProjectOfFreeDecision.mutation,
+      Mutations.FreeDecisions.CreateProjectOfFreeDecision.mutation,
       {
-        variables: {
-          data: dataDecision,
-        },
+        variables: dataDecision,
       }
     );
 
-    const dataDecisionDocument: Mutations.Decisions.GenerateProjectOfFreeDecisionDocument.IInput = {
-      coopname: "voskhod",
-      project_id: project.id,
-      username: "ant",
+    const dataDecisionDocument: Mutations.FreeDecisions.GenerateProjectOfFreeDecisionDocument.IInput = {
+      data: {
+        coopname: "voskhod",
+        project_id: project.id,
+        username: "ant",
+      },
+      options: {
+        skip_save: true
+      }
     };
 
     const { generateProjectOfFreeDecision: document } = await client.Mutation(
-      Mutations.Decisions.GenerateProjectOfFreeDecisionDocument.mutation,
+      Mutations.FreeDecisions.GenerateProjectOfFreeDecisionDocument.mutation,
       {
-        variables: {
-          data: dataDecisionDocument,
-        },
+        variables: dataDecisionDocument,
       }
     );
     expect(document).toBeDefined();
-    expect(document.full_title).toContain("Срочное решение! 1");
     expect(document.meta).toHaveProperty("username", "ant");
     expect(document.meta).toHaveProperty("project_id", project.id);
   });
+  
+  
+  
+  // it("test", async () => {
+    // const variables: Mutations.Participants.RegisterParticipant.IInput = {
+    //   data: {
+    //     username: username,
+    //     privacy_agreement: signedPrivacyAgreement,
+    //     signature_agreement: signedSignatureAgreement,
+    //     statement: signedParticipantApplication,
+    //     user_agreement: signedUserAgreement,
+    //     wallet_agreement: signedWalletAgreement,
+    //   }
+    // }
+    
+  //   const { [Mutations.Account.RegisterAccount.name]: result } = await client.Mutation(
+  //     Mutations.Account.RegisterAccount.mutation,
+  //     {
+  //       variables,
+  //     }
+  //   );
+    
+  // })
 });

@@ -1,6 +1,6 @@
 export interface ClientConnectionOptions {
-  baseUrl: string
+  base_url: string
   headers?: Record<string, string>
-  blockchainUrl: string
-  chainId: string
+  chain_url: string
+  chain_id: string
 }

@@ -20,11 +20,13 @@ export class DocumentPackageDTO implements DocumentPackageDomainInterface {
   })
   decision!: DecisionDetailDTO;
 
+  // Здесь будет объединение документов актов, когда они появятся.
   @Field(() => [ActDetailDTO], {
     description: 'Массив объект(ов) актов, относящихся к заявлению',
   })
   acts!: ActDetailDTO[];
 
+  // Здесь может быть объединение документов, если когда-либо потом в ссылках мы будем использовать не базовый интерфейсы генерации (IGenerate)
   @Field(() => [GeneratedDocumentDTO], {
     description: 'Массив связанных документов, извлечённых из мета-данных',
   })

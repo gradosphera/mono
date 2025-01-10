@@ -88,7 +88,6 @@ export class PaymentDomainService {
         logger.info('Order created', { providerName, type, username, amount, source: 'createDeposit' });
 
         result = db_order;
-        console.log(result);
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {

@@ -18,10 +18,7 @@ import { fieldAuthDirectiveTransformer } from './directives/fieldAuth.directive'
       sortSchema: true,
       debug: config.env !== 'production',
       // context: ({ req }) => req,
-      playground:
-        config.env !== 'production'
-          ? { endpoint: '/v1/graphql', settings: { 'request.credentials': 'same-origin' } }
-          : false,
+      playground: { endpoint: '/v1/graphql', settings: { 'request.credentials': 'same-origin' } },
       path: '/v1/graphql', // здесь можно задать другой путь, когда потребуется,
       transformSchema: (schema) => {
         schema = docDirectiveTransformer(schema, 'auth');

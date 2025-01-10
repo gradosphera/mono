@@ -81,11 +81,11 @@ export const loadContacts = async (coopname: string) => {
 
   if (!coopAccount) throw new ApiError(httpStatus.NOT_FOUND, 'Аккаунт не найден');
 
-  let announce: Cooperative.Users.IAccountMeta = { phone: cooperative?.phone, email: cooperative?.email };
+  let meta: Cooperative.Users.IAccountMeta = { phone: cooperative?.phone, email: cooperative?.email };
 
   if (coopAccount.meta) {
     try {
-      announce = JSON.parse(coopAccount.meta);
+      meta = JSON.parse(coopAccount.meta);
     } catch (e: any) {
       logger.warn(`Ошибка при получении контактов: ${e.message}`);
     }
@@ -95,8 +95,8 @@ export const loadContacts = async (coopname: string) => {
     full_name: cooperative?.full_name,
     full_address: cooperative?.full_address,
     details: cooperative?.details,
-    phone: announce.phone,
-    email: announce.email,
+    phone: meta.phone,
+    email: meta.email,
     description: cooperative?.description,
     chairman: {
       first_name: cooperative?.chairman.first_name,

@@ -83,8 +83,8 @@ export class BlockchainActionDTO {
   @Field(() => [ActionAuthorizationDTO])
   authorization!: ActionAuthorizationDTO[];
 
-  @Field(() => GraphQLJSON, { description: 'Произвольные данные действия в формате JSON' })
-  data!: any; // Теперь это явно JSON
+  @Field(() => GraphQLJSON, { description: 'Данные действия в формате JSON' })
+  data!: any; // Можно строго типизировать, но потом и если будет нужно.
 
   @Field(() => Int)
   action_ordinal!: number;

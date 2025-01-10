@@ -12,6 +12,8 @@ import { DOCUMENT_REPOSITORY } from '~/domain/document/repository/document.repos
 import { DocumentRepositoryImplementation } from './repositories/document-generator.repository';
 import { PROJECT_FREE_DECISION_REPOSITORY } from '~/domain/common/repositories/project-free-decision.repository';
 import { ProjectFreeDecisionRepositoryImplementation } from './repositories/project-free-decision-generator.repository';
+import { VARS_REPOSITORY } from '~/domain/common/repositories/vars.repository';
+import { VarsRepositoryImplementation } from './repositories/vars-generator.repository';
 @Global()
 @Module({
   providers: [
@@ -39,6 +41,10 @@ import { ProjectFreeDecisionRepositoryImplementation } from './repositories/proj
       provide: PROJECT_FREE_DECISION_REPOSITORY,
       useClass: ProjectFreeDecisionRepositoryImplementation,
     },
+    {
+      provide: VARS_REPOSITORY,
+      useClass: VarsRepositoryImplementation,
+    },
   ],
   exports: [
     ORGANIZATION_REPOSITORY,
@@ -47,6 +53,7 @@ import { ProjectFreeDecisionRepositoryImplementation } from './repositories/proj
     PAYMENT_METHOD_REPOSITORY,
     DOCUMENT_REPOSITORY,
     PROJECT_FREE_DECISION_REPOSITORY,
+    VARS_REPOSITORY,
   ],
 })
 export class GeneratorRepositoriesModule {}

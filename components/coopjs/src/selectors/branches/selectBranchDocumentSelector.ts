@@ -1,6 +1,6 @@
 import { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
 import { Selector, type GraphQLTypes, type InputType, type ValueTypes } from "../../zeus";
-import { rawDocumentMetaSelector, rawDocumentSelector } from "../common/rawDocumentSelector";
+import { rawDocumentMetaSelector, rawDocumentSelector } from "../common/documentSelector";
 
 // Определяем объект вручную, чтобы избежать потери типов
 const rawSelectBranchDocumentSelector = {

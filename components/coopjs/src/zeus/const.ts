@@ -1,7 +1,17 @@
 /* eslint-disable */
 
 export const AllTypesProps: Record<string,any> = {
+	AccountType: "enum" as const,
+	AddParticipantInput:{
+		entrepreneur_data:"CreateEntrepreneurDataInput",
+		individual_data:"CreateIndividualDataInput",
+		organization_data:"CreateOrganizationDataInput",
+		type:"AccountType"
+	},
 	AddTrustedAccountInput:{
+
+	},
+	AgreementInput:{
 
 	},
 	BankAccountDetailsInput:{
@@ -10,16 +20,40 @@ export const AllTypesProps: Record<string,any> = {
 	BankAccountInput:{
 		details:"BankAccountDetailsInput"
 	},
+	Country: "enum" as const,
 	CreateBankAccountInput:{
 		data:"BankAccountInput"
 	},
 	CreateBranchInput:{
 
 	},
+	CreateDepositPaymentInput:{
+
+	},
+	CreateEntrepreneurDataInput:{
+		bank_account:"BankAccountInput",
+		country:"Country",
+		details:"EntrepreneurDetailsInput"
+	},
+	CreateIndividualDataInput:{
+		passport:"PassportInput"
+	},
+	CreateInitialPaymentInput:{
+
+	},
+	CreateOrganizationDataInput:{
+		bank_account:"BankAccountInput",
+		details:"OrganizationDetailsInput",
+		represented_by:"RepresentedByInput",
+		type:"OrganizationType"
+	},
 	CreateProjectFreeDecisionInput:{
 
 	},
 	DateTime: `scalar.DateTime` as const,
+	DeleteAccountInput:{
+
+	},
 	DeleteBranchInput:{
 
 	},
@@ -30,6 +64,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	EditBranchInput:{
+
+	},
+	EntrepreneurDetailsInput:{
 
 	},
 	ExtensionInput:{
@@ -49,8 +86,17 @@ export const AllTypesProps: Record<string,any> = {
 	GetAccountInput:{
 
 	},
+	GetAccountsInput:{
+
+	},
 	GetBranchesInput:{
 
+	},
+	GetDocumentsFilterInput:{
+		additionalFilters:"JSON"
+	},
+	GetDocumentsInput:{
+		filter:"GetDocumentsFilterInput"
 	},
 	GetExtensionsInput:{
 
@@ -58,9 +104,31 @@ export const AllTypesProps: Record<string,any> = {
 	GetPaymentMethodsInput:{
 
 	},
+	GetPaymentsInput:{
+		status:"PaymentStatus"
+	},
+	Init:{
+		organization_data:"CreateOrganizationDataInput",
+		vars:"VarsInput"
+	},
+	Install:{
+		soviet:"SovietMemberInput"
+	},
 	JSON: `scalar.JSON` as const,
 	LangType: "enum" as const,
+	LoginInput:{
+
+	},
+	LogoutInput:{
+
+	},
+	MetaDocumentInput:{
+
+	},
 	Mutation:{
+		addParticipant:{
+			data:"AddParticipantInput"
+		},
 		addTrustedAccount:{
 			data:"AddTrustedAccountInput"
 		},
@@ -70,8 +138,17 @@ export const AllTypesProps: Record<string,any> = {
 		createBranch:{
 			data:"CreateBranchInput"
 		},
+		createDeposit:{
+			data:"CreateDepositPaymentInput"
+		},
+		createInitialPayment:{
+			data:"CreateInitialPaymentInput"
+		},
 		createProjectOfFreeDecision:{
 			data:"CreateProjectFreeDecisionInput"
+		},
+		deleteAccount:{
+			data:"DeleteAccountInput"
 		},
 		deleteBranch:{
 			data:"DeleteBranchInput"
@@ -121,24 +198,70 @@ export const AllTypesProps: Record<string,any> = {
 			data:"GenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
+		initSystem:{
+			data:"Init"
+		},
 		installExtension:{
 			data:"ExtensionInput"
+		},
+		installSystem:{
+			data:"Install"
+		},
+		login:{
+			data:"LoginInput"
+		},
+		logout:{
+			data:"LogoutInput"
 		},
 		publishProjectOfFreeDecision:{
 			data:"PublishProjectFreeDecisionInput"
 		},
+		refresh:{
+			data:"RefreshInput"
+		},
+		registerAccount:{
+			data:"RegisterAccountInput"
+		},
+		registerParticipant:{
+			data:"RegisterParticipantInput"
+		},
+		resetKey:{
+			data:"ResetKeyInput"
+		},
 		selectBranch:{
 			data:"SelectBranchInput"
 		},
+		setPaymentStatus:{
+			data:"SetPaymentStatusInput"
+		},
+		setWif:{
+			data:"SetWifInput"
+		},
+		startResetKey:{
+			data:"StartResetKeyInput"
+		},
 		uninstallExtension:{
 			data:"UninstallExtensionInput"
+		},
+		updateAccount:{
+			data:"UpdateAccountInput"
 		},
 		updateBankAccount:{
 			data:"UpdateBankAccountInput"
 		},
 		updateExtension:{
 			data:"ExtensionInput"
+		},
+		updateSystem:{
+			data:"Update"
 		}
+	},
+	OrganizationDetailsInput:{
+
+	},
+	OrganizationType: "enum" as const,
+	PaginationInput:{
+
 	},
 	ParticipantApplicationDecisionGenerateDocumentInput:{
 
@@ -146,6 +269,16 @@ export const AllTypesProps: Record<string,any> = {
 	ParticipantApplicationGenerateDocumentInput:{
 
 	},
+	ParticipantApplicationSignedDocumentInput:{
+		meta:"ParticipantApplicationSignedMetaDocumentInput"
+	},
+	ParticipantApplicationSignedMetaDocumentInput:{
+
+	},
+	PassportInput:{
+
+	},
+	PaymentStatus: "enum" as const,
 	ProjectFreeDecisionGenerateDocumentInput:{
 
 	},
@@ -162,15 +295,50 @@ export const AllTypesProps: Record<string,any> = {
 		getAccount:{
 			data:"GetAccountInput"
 		},
+		getAccounts:{
+			data:"GetAccountsInput",
+			options:"PaginationInput"
+		},
 		getBranches:{
 			data:"GetBranchesInput"
+		},
+		getDocuments:{
+			data:"GetDocumentsInput"
 		},
 		getExtensions:{
 			data:"GetExtensionsInput"
 		},
 		getPaymentMethods:{
 			data:"GetPaymentMethodsInput"
+		},
+		getPayments:{
+			data:"GetPaymentsInput",
+			options:"PaginationInput"
 		}
+	},
+	RefreshInput:{
+
+	},
+	RegisterAccountInput:{
+		entrepreneur_data:"CreateEntrepreneurDataInput",
+		individual_data:"CreateIndividualDataInput",
+		organization_data:"CreateOrganizationDataInput",
+		role:"RegisterRole",
+		type:"AccountType"
+	},
+	RegisterParticipantInput:{
+		privacy_agreement:"SignedDigitalDocumentInput",
+		signature_agreement:"SignedDigitalDocumentInput",
+		statement:"ParticipantApplicationSignedDocumentInput",
+		user_agreement:"SignedDigitalDocumentInput",
+		wallet_agreement:"SignedDigitalDocumentInput"
+	},
+	RegisterRole: "enum" as const,
+	RepresentedByInput:{
+
+	},
+	ResetKeyInput:{
+
 	},
 	SelectBranchGenerateDocumentInput:{
 
@@ -184,23 +352,73 @@ export const AllTypesProps: Record<string,any> = {
 	SelectBranchSignedMetaDocumentInput:{
 
 	},
+	SetPaymentStatusInput:{
+		status:"PaymentStatus"
+	},
+	SetWifInput:{
+
+	},
+	SignedDigitalDocumentInput:{
+		meta:"MetaDocumentInput"
+	},
+	SovietMemberInput:{
+		individual_data:"CreateIndividualDataInput"
+	},
+	StartResetKeyInput:{
+
+	},
 	SystemStatus: "enum" as const,
 	UninstallExtensionInput:{
 
 	},
+	Update:{
+		organization_data:"UpdateOrganizationDataInput",
+		vars:"VarsInput"
+	},
+	UpdateAccountInput:{
+		entrepreneur_data:"UpdateEntrepreneurDataInput",
+		individual_data:"UpdateIndividualDataInput",
+		organization_data:"UpdateOrganizationDataInput",
+		role:"RegisterRole",
+		type:"AccountType"
+	},
 	UpdateBankAccountInput:{
 		data:"BankAccountInput"
 	},
-	UserStatus: "enum" as const
+	UpdateEntrepreneurDataInput:{
+		country:"Country",
+		details:"EntrepreneurDetailsInput"
+	},
+	UpdateIndividualDataInput:{
+		passport:"PassportInput"
+	},
+	UpdateOrganizationDataInput:{
+		details:"OrganizationDetailsInput",
+		represented_by:"RepresentedByInput",
+		type:"OrganizationType"
+	},
+	UserStatus: "enum" as const,
+	VarsInput:{
+		coopenomics_agreement:"AgreementInput",
+		participant_application:"AgreementInput",
+		privacy_agreement:"AgreementInput",
+		signature_agreement:"AgreementInput",
+		user_agreement:"AgreementInput",
+		wallet_agreement:"AgreementInput"
+	}
 }
 
 export const ReturnTypes: Record<string,any> = {
 	Account:{
 		blockchain_account:"BlockchainAccount",
-		provider_account:"MonoAccount",
 		participant_account:"ParticipantAccount",
+		provider_account:"MonoAccount",
 		user_account:"UserAccount",
 		username:"String"
+	},
+	AccountRamDelta:{
+		account:"String",
+		delta:"Int"
 	},
 	AccountResourceInfo:{
 		available:"String",
@@ -208,6 +426,42 @@ export const ReturnTypes: Record<string,any> = {
 		last_usage_update_time:"String",
 		max:"String",
 		used:"String"
+	},
+	AccountsPaginationResult:{
+		currentPage:"Int",
+		items:"Account",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	ActDetail:{
+		action:"ExtendedBlockchainAction",
+		document:"GeneratedDocument"
+	},
+	ActionAuthorization:{
+		actor:"String",
+		permission:"String"
+	},
+	ActionReceipt:{
+		abi_sequence:"Int",
+		act_digest:"String",
+		auth_sequence:"AuthSequence",
+		code_sequence:"Int",
+		global_sequence:"String",
+		receiver:"String",
+		recv_sequence:"String"
+	},
+	AgendaWithDocuments:{
+		action:"BlockchainAction",
+		documents:"DocumentPackage",
+		table:"BlockchainDecision"
+	},
+	AgreementVar:{
+		protocol_day_month_year:"String",
+		protocol_number:"String"
+	},
+	AuthSequence:{
+		account:"String",
+		sequence:"String"
 	},
 	Authority:{
 		accounts:"PermissionLevelWeight",
@@ -257,6 +511,43 @@ export const ReturnTypes: Record<string,any> = {
 		total_resources:"ResourceOverview",
 		voter_info:"String"
 	},
+	BlockchainAction:{
+		account:"String",
+		account_ram_deltas:"AccountRamDelta",
+		action_ordinal:"Int",
+		authorization:"ActionAuthorization",
+		block_id:"String",
+		block_num:"Int",
+		chain_id:"String",
+		console:"String",
+		context_free:"Boolean",
+		creator_action_ordinal:"Int",
+		data:"JSON",
+		elapsed:"Int",
+		global_sequence:"String",
+		name:"String",
+		receipt:"ActionReceipt",
+		receiver:"String",
+		transaction_id:"String"
+	},
+	BlockchainDecision:{
+		approved:"Boolean",
+		authorization:"SignedBlockchainDocument",
+		authorized:"Boolean",
+		authorized_by:"String",
+		batch_id:"Float",
+		coopname:"String",
+		created_at:"String",
+		expired_at:"String",
+		id:"Float",
+		meta:"String",
+		statement:"SignedBlockchainDocument",
+		type:"String",
+		username:"String",
+		validated:"Boolean",
+		votes_against:"String",
+		votes_for:"String"
+	},
 	BlockchainInfoDTO:{
 		block_cpu_limit:"Int",
 		block_net_limit:"Int",
@@ -293,6 +584,14 @@ export const ReturnTypes: Record<string,any> = {
 		trustee:"Individual",
 		type:"String"
 	},
+	ContactsDTO:{
+		chairman:"PublicChairman",
+		details:"OrganizationDetails",
+		email:"String",
+		full_address:"String",
+		full_name:"String",
+		phone:"String"
+	},
 	CooperativeOperatorAccount:{
 		announce:"String",
 		coop_type:"String",
@@ -325,6 +624,65 @@ export const ReturnTypes: Record<string,any> = {
 		question:"String"
 	},
 	DateTime: `scalar.DateTime` as const,
+	DecisionDetail:{
+		action:"ExtendedBlockchainAction",
+		document:"DecisionDocumentUnion",
+		votes_against:"ExtendedBlockchainAction",
+		votes_for:"ExtendedBlockchainAction"
+	},
+	DecisionDocumentUnion:{
+		"...on FreeDecisionDocument":"FreeDecisionDocument",
+		"...on ParticipantApplicationDecisionDocument":"ParticipantApplicationDecisionDocument"
+	},
+	DocumentPackage:{
+		acts:"ActDetail",
+		decision:"DecisionDetail",
+		links:"GeneratedDocument",
+		statement:"StatementDetail"
+	},
+	DocumentsPaginationResult:{
+		currentPage:"Int",
+		items:"DocumentPackage",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	Entrepreneur:{
+		birthdate:"String",
+		city:"String",
+		country:"String",
+		details:"EntrepreneurDetails",
+		email:"String",
+		first_name:"String",
+		full_address:"String",
+		last_name:"String",
+		middle_name:"String",
+		phone:"String",
+		username:"String"
+	},
+	EntrepreneurDetails:{
+		inn:"String",
+		ogrn:"String"
+	},
+	ExtendedBlockchainAction:{
+		account:"String",
+		account_ram_deltas:"AccountRamDelta",
+		action_ordinal:"Int",
+		authorization:"ActionAuthorization",
+		block_id:"String",
+		block_num:"Int",
+		chain_id:"String",
+		console:"String",
+		context_free:"Boolean",
+		creator_action_ordinal:"Int",
+		data:"JSON",
+		elapsed:"Int",
+		global_sequence:"String",
+		name:"String",
+		receipt:"ActionReceipt",
+		receiver:"String",
+		transaction_id:"String",
+		user:"UserDataUnion"
+	},
 	Extension:{
 		available:"Boolean",
 		config:"JSON",
@@ -340,6 +698,13 @@ export const ReturnTypes: Record<string,any> = {
 		tags:"String",
 		title:"String",
 		updated_at:"DateTime"
+	},
+	FreeDecisionDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"FreeDecisionMetaDocumentOutput"
 	},
 	FreeDecisionMetaDocumentOutput:{
 		block_num:"Int",
@@ -407,10 +772,14 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	Mutation:{
+		addParticipant:"Account",
 		addTrustedAccount:"Branch",
 		createBankAccount:"PaymentMethod",
 		createBranch:"Branch",
+		createDeposit:"Payment",
+		createInitialPayment:"Payment",
 		createProjectOfFreeDecision:"CreatedProjectFreeDecision",
+		deleteAccount:"Boolean",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
 		deleteTrustedAccount:"Branch",
@@ -424,23 +793,44 @@ export const ReturnTypes: Record<string,any> = {
 		generateSignatureAgreement:"GeneratedDocument",
 		generateUserAgreement:"GeneratedDocument",
 		generateWalletAgreement:"GeneratedDocument",
+		initSystem:"SystemInfo",
 		installExtension:"Extension",
+		installSystem:"SystemInfo",
+		login:"RegisteredAccount",
+		logout:"Boolean",
 		publishProjectOfFreeDecision:"Boolean",
+		refresh:"RegisteredAccount",
+		registerAccount:"RegisteredAccount",
+		registerParticipant:"Account",
+		resetKey:"Boolean",
 		selectBranch:"Boolean",
+		setPaymentStatus:"Payment",
+		setWif:"Boolean",
+		startResetKey:"Boolean",
 		uninstallExtension:"Boolean",
+		updateAccount:"Account",
 		updateBankAccount:"PaymentMethod",
-		updateExtension:"Extension"
+		updateExtension:"Extension",
+		updateSystem:"SystemInfo"
+	},
+	Organization:{
+		city:"String",
+		country:"String",
+		details:"OrganizationDetails",
+		email:"String",
+		fact_address:"String",
+		full_address:"String",
+		full_name:"String",
+		phone:"String",
+		represented_by:"RepresentedBy",
+		short_name:"String",
+		type:"String",
+		username:"String"
 	},
 	OrganizationDetails:{
 		inn:"String",
 		kpp:"String",
 		ogrn:"String"
-	},
-	PaginationResult:{
-		currentPage:"Int",
-		items:"PaymentMethod",
-		totalCount:"Int",
-		totalPages:"Int"
 	},
 	ParticipantAccount:{
 		braname:"String",
@@ -502,6 +892,29 @@ export const ReturnTypes: Record<string,any> = {
 		number:"Int",
 		series:"Int"
 	},
+	Payment:{
+		amount:"Float",
+		blockchain_id:"Float",
+		created_at:"DateTime",
+		details:"PaymentDetails",
+		expired_at:"DateTime",
+		id:"String",
+		message:"String",
+		provider:"String",
+		status:"PaymentStatus",
+		symbol:"String",
+		updated_at:"DateTime",
+		username:"String"
+	},
+	PaymentDetails:{
+		amount_plus_fee:"String",
+		amount_without_fee:"String",
+		data:"String",
+		fact_fee_percent:"Float",
+		fee_amount:"String",
+		fee_percent:"Float",
+		tolerance_percent:"Float"
+	},
 	PaymentMethod:{
 		created_at:"DateTime",
 		data:"PaymentMethodData",
@@ -514,6 +927,18 @@ export const ReturnTypes: Record<string,any> = {
 	PaymentMethodData:{
 		"...on BankAccount":"BankAccount",
 		"...on SbpAccount":"SbpAccount"
+	},
+	PaymentMethodPaginationResult:{
+		currentPage:"Int",
+		items:"PaymentMethod",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaymentPaginationResult:{
+		currentPage:"Int",
+		items:"Payment",
+		totalCount:"Int",
+		totalPages:"Int"
 	},
 	Permission:{
 		parent:"String",
@@ -549,11 +974,20 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String",
 		version:"String"
 	},
+	PublicChairman:{
+		first_name:"String",
+		last_name:"String",
+		middle_name:"String"
+	},
 	Query:{
 		getAccount:"Account",
+		getAccounts:"AccountsPaginationResult",
+		getAgenda:"AgendaWithDocuments",
 		getBranches:"Branch",
+		getDocuments:"DocumentsPaginationResult",
 		getExtensions:"Extension",
-		getPaymentMethods:"PaginationResult",
+		getPaymentMethods:"PaymentMethodPaginationResult",
+		getPayments:"PaymentPaginationResult",
 		getSystemInfo:"SystemInfo"
 	},
 	RefundRequest:{
@@ -561,6 +995,10 @@ export const ReturnTypes: Record<string,any> = {
 		net_amount:"String",
 		owner:"String",
 		request_time:"String"
+	},
+	RegisteredAccount:{
+		account:"Account",
+		tokens:"Tokens"
 	},
 	RepresentedBy:{
 		based_on:"String",
@@ -611,12 +1049,30 @@ export const ReturnTypes: Record<string,any> = {
 		public_key:"String",
 		signature:"String"
 	},
+	StatementDetail:{
+		action:"ExtendedBlockchainAction",
+		document:"StatementDocumentUnion"
+	},
+	StatementDocumentUnion:{
+		"...on ParticipantApplicationDocument":"ParticipantApplicationDocument",
+		"...on ProjectFreeDecisionDocument":"ProjectFreeDecisionDocument"
+	},
 	SystemInfo:{
 		blockchain_account:"BlockchainAccount",
 		blockchain_info:"BlockchainInfoDTO",
+		contacts:"ContactsDTO",
 		cooperator_account:"CooperativeOperatorAccount",
 		coopname:"String",
-		system_status:"SystemStatus"
+		system_status:"SystemStatus",
+		vars:"Vars"
+	},
+	Token:{
+		expires:"DateTime",
+		token:"String"
+	},
+	Tokens:{
+		access:"Token",
+		refresh:"Token"
 	},
 	UserAccount:{
 		meta:"String",
@@ -628,6 +1084,30 @@ export const ReturnTypes: Record<string,any> = {
 		type:"String",
 		username:"String",
 		verifications:"Verification"
+	},
+	UserDataUnion:{
+		"...on Entrepreneur":"Entrepreneur",
+		"...on Individual":"Individual",
+		"...on Organization":"Organization"
+	},
+	Vars:{
+		confidential_email:"String",
+		confidential_link:"String",
+		contact_email:"String",
+		coopenomics_agreement:"AgreementVar",
+		coopname:"String",
+		full_abbr:"String",
+		full_abbr_dative:"String",
+		full_abbr_genitive:"String",
+		name:"String",
+		participant_application:"AgreementVar",
+		passport_request:"String",
+		privacy_agreement:"AgreementVar",
+		short_abbr:"String",
+		signature_agreement:"AgreementVar",
+		user_agreement:"AgreementVar",
+		wallet_agreement:"AgreementVar",
+		website:"String"
 	},
 	Verification:{
 		created_at:"String",

@@ -910,20 +910,25 @@ export type ScalarCoders = {
 	DateTime?: ScalarResolver;
 	JSON?: ScalarResolver;
 }
-type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"]
+type ZEUS_UNIONS = GraphQLTypes["DecisionDocumentUnion"] | GraphQLTypes["PaymentMethodData"] | GraphQLTypes["StatementDocumentUnion"] | GraphQLTypes["UserDataUnion"]
 
 export type ValueTypes = {
     ["Account"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ValueTypes["BlockchainAccount"],
-	/** Объект аккаунта в системе учёта провайдера */
-	provider_account?:ValueTypes["MonoAccount"],
 	/** Объект пайщика кооператива */
 	participant_account?:ValueTypes["ParticipantAccount"],
+	/** Объект аккаунта в системе учёта провайдера */
+	provider_account?:ValueTypes["MonoAccount"],
 	/** Объект пользовательского аккаунта кооперативной экономики */
 	user_account?:ValueTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
 	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AccountRamDelta"]: AliasType<{
+	account?:boolean | `@${string}`,
+	delta?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["AccountResourceInfo"]: AliasType<{
@@ -939,6 +944,61 @@ export type ValueTypes = {
 	used?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Тип аккаунта пользователя в системе */
+["AccountType"]:AccountType;
+	["AccountsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["Account"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ActDetail"]: AliasType<{
+	action?:ValueTypes["ExtendedBlockchainAction"],
+	document?:ValueTypes["GeneratedDocument"],
+		__typename?: boolean | `@${string}`
+}>;
+	["ActionAuthorization"]: AliasType<{
+	actor?:boolean | `@${string}`,
+	permission?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ActionReceipt"]: AliasType<{
+	abi_sequence?:boolean | `@${string}`,
+	act_digest?:boolean | `@${string}`,
+	auth_sequence?:ValueTypes["AuthSequence"],
+	code_sequence?:boolean | `@${string}`,
+	global_sequence?:boolean | `@${string}`,
+	receiver?:boolean | `@${string}`,
+	recv_sequence?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AddParticipantInput"]: {
+	/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
+	created_at: string | Variable<any, string>,
+	/** Электронная почта */
+	email: string | Variable<any, string>,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: ValueTypes["CreateEntrepreneurDataInput"] | undefined | null | Variable<any, string>,
+	/** Данные физического лица */
+	individual_data?: ValueTypes["CreateIndividualDataInput"] | undefined | null | Variable<any, string>,
+	/** Вступительный взнос, который был внесён пайщиком */
+	initial: string | Variable<any, string>,
+	/** Минимальный паевый взнос, который был внесён пайщиком */
+	minimum: string | Variable<any, string>,
+	/** Данные организации */
+	organization_data?: ValueTypes["CreateOrganizationDataInput"] | undefined | null | Variable<any, string>,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null | Variable<any, string>,
+	/** Флаг распределения вступительного взноса в невозвратный фонд вступительных взносов кооператива */
+	spread_initial: boolean | Variable<any, string>,
+	/** Тип аккаунта */
+	type: ValueTypes["AccountType"] | Variable<any, string>
+};
 	["AddTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
@@ -947,6 +1007,29 @@ export type ValueTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string | Variable<any, string>
 };
+	["AgendaWithDocuments"]: AliasType<{
+	/** Действие, которое привело к появлению вопроса на голосовании */
+	action?:ValueTypes["BlockchainAction"],
+	/** Пакет документов, включающий разные подсекции */
+	documents?:ValueTypes["DocumentPackage"],
+	/** Запись в таблице блокчейна о вопросе на голосовании */
+	table?:ValueTypes["BlockchainDecision"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AgreementInput"]: {
+	protocol_day_month_year: string | Variable<any, string>,
+	protocol_number: string | Variable<any, string>
+};
+	["AgreementVar"]: AliasType<{
+	protocol_day_month_year?:boolean | `@${string}`,
+	protocol_number?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AuthSequence"]: AliasType<{
+	account?:boolean | `@${string}`,
+	sequence?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Authority"]: AliasType<{
 	/** Уровни разрешений */
 	accounts?:ValueTypes["PermissionLevelWeight"],
@@ -1058,6 +1141,48 @@ export type ValueTypes = {
 	voter_info?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Объект действия в блокчейне */
+["BlockchainAction"]: AliasType<{
+	account?:boolean | `@${string}`,
+	account_ram_deltas?:ValueTypes["AccountRamDelta"],
+	action_ordinal?:boolean | `@${string}`,
+	authorization?:ValueTypes["ActionAuthorization"],
+	block_id?:boolean | `@${string}`,
+	block_num?:boolean | `@${string}`,
+	chain_id?:boolean | `@${string}`,
+	console?:boolean | `@${string}`,
+	context_free?:boolean | `@${string}`,
+	creator_action_ordinal?:boolean | `@${string}`,
+	/** Данные действия в формате JSON */
+	data?:boolean | `@${string}`,
+	elapsed?:boolean | `@${string}`,
+	global_sequence?:boolean | `@${string}`,
+	name?:boolean | `@${string}`,
+	receipt?:ValueTypes["ActionReceipt"],
+	receiver?:boolean | `@${string}`,
+	transaction_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Запись в таблице блокчейна о процессе принятия решения советом кооператива */
+["BlockchainDecision"]: AliasType<{
+	approved?:boolean | `@${string}`,
+	authorization?:ValueTypes["SignedBlockchainDocument"],
+	authorized?:boolean | `@${string}`,
+	authorized_by?:boolean | `@${string}`,
+	batch_id?:boolean | `@${string}`,
+	coopname?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	expired_at?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	meta?:boolean | `@${string}`,
+	statement?:ValueTypes["SignedBlockchainDocument"],
+	type?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+	validated?:boolean | `@${string}`,
+	votes_against?:boolean | `@${string}`,
+	votes_for?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Информация о состоянии блокчейна */
 ["BlockchainInfoDTO"]: AliasType<{
 	/** Лимит CPU для блока */
@@ -1129,6 +1254,15 @@ export type ValueTypes = {
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ContactsDTO"]: AliasType<{
+	chairman?:ValueTypes["PublicChairman"],
+	details?:ValueTypes["OrganizationDetails"],
+	email?:boolean | `@${string}`,
+	full_address?:boolean | `@${string}`,
+	full_name?:boolean | `@${string}`,
+	phone?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CooperativeOperatorAccount"]: AliasType<{
 	/** Объявление кооператива */
 	announce?:boolean | `@${string}`,
@@ -1180,6 +1314,8 @@ export type ValueTypes = {
 	verifications?:ValueTypes["Verification"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Страна регистрации пользователя */
+["Country"]:Country;
 	["CreateBankAccountInput"]: {
 	/** Данные для банковского перевода */
 	data: ValueTypes["BankAccountInput"] | Variable<any, string>,
@@ -1208,6 +1344,78 @@ export type ValueTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string | Variable<any, string>
 };
+	["CreateDepositPaymentInput"]: {
+	/** Сумма взноса */
+	quantity: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
+	["CreateEntrepreneurDataInput"]: {
+	/** Банковский счет */
+	bank_account: ValueTypes["BankAccountInput"] | Variable<any, string>,
+	/** Дата рождения */
+	birthdate: string | Variable<any, string>,
+	/** Город */
+	city: string | Variable<any, string>,
+	/** Страна */
+	country: ValueTypes["Country"] | Variable<any, string>,
+	/** Детали индивидуального предпринимателя */
+	details: ValueTypes["EntrepreneurDetailsInput"] | Variable<any, string>,
+	/** Имя */
+	first_name: string | Variable<any, string>,
+	/** Полный адрес */
+	full_address: string | Variable<any, string>,
+	/** Фамилия */
+	last_name: string | Variable<any, string>,
+	/** Отчество */
+	middle_name: string | Variable<any, string>,
+	/** Телефон */
+	phone: string | Variable<any, string>
+};
+	["CreateIndividualDataInput"]: {
+	/** Дата рождения */
+	birthdate: string | Variable<any, string>,
+	/** Имя */
+	first_name: string | Variable<any, string>,
+	/** Полный адрес */
+	full_address: string | Variable<any, string>,
+	/** Фамилия */
+	last_name: string | Variable<any, string>,
+	/** Отчество */
+	middle_name: string | Variable<any, string>,
+	/** Данные паспорта */
+	passport?: ValueTypes["PassportInput"] | undefined | null | Variable<any, string>,
+	/** Телефон */
+	phone: string | Variable<any, string>
+};
+	["CreateInitialPaymentInput"]: {
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
+	["CreateOrganizationDataInput"]: {
+	/** Банковский счет организации */
+	bank_account: ValueTypes["BankAccountInput"] | Variable<any, string>,
+	/** Город */
+	city: string | Variable<any, string>,
+	/** Страна */
+	country: string | Variable<any, string>,
+	/** Детали организации */
+	details: ValueTypes["OrganizationDetailsInput"] | Variable<any, string>,
+	/** Фактический адрес */
+	fact_address: string | Variable<any, string>,
+	/** Полный адрес */
+	full_address: string | Variable<any, string>,
+	/** Полное наименование организации */
+	full_name: string | Variable<any, string>,
+	/** Телефон */
+	phone: string | Variable<any, string>,
+	/** Представитель организации */
+	represented_by: ValueTypes["RepresentedByInput"] | Variable<any, string>,
+	/** Краткое наименование организации */
+	short_name: string | Variable<any, string>,
+	/** Тип организации */
+	type: ValueTypes["OrganizationType"] | Variable<any, string>
+};
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string | Variable<any, string>,
@@ -1225,6 +1433,23 @@ export type ValueTypes = {
 }>;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
+	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
+["DecisionDetail"]: AliasType<{
+	action?:ValueTypes["ExtendedBlockchainAction"],
+	document?:ValueTypes["DecisionDocumentUnion"],
+	votes_against?:ValueTypes["ExtendedBlockchainAction"],
+	votes_for?:ValueTypes["ExtendedBlockchainAction"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Объединение типов документов протоколов решения совета */
+["DecisionDocumentUnion"]: AliasType<{		["...on FreeDecisionDocument"]?: ValueTypes["FreeDecisionDocument"],
+		["...on ParticipantApplicationDecisionDocument"]?: ValueTypes["ParticipantApplicationDecisionDocument"]
+		__typename?: boolean | `@${string}`
+}>;
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string | Variable<any, string>
+};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
@@ -1245,6 +1470,29 @@ export type ValueTypes = {
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string | Variable<any, string>
 };
+	/** Комплексный объект папки цифрового документа, который включает в себя заявление, решение, акты и связанные документы */
+["DocumentPackage"]: AliasType<{
+	/** Массив объект(ов) актов, относящихся к заявлению */
+	acts?:ValueTypes["ActDetail"],
+	/** Объект цифрового документа решения */
+	decision?:ValueTypes["DecisionDetail"],
+	/** Массив связанных документов, извлечённых из мета-данных */
+	links?:ValueTypes["GeneratedDocument"],
+	/** Объект цифрового документа заявления */
+	statement?:ValueTypes["StatementDetail"],
+		__typename?: boolean | `@${string}`
+}>;
+	["DocumentsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["DocumentPackage"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["EditBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string | Variable<any, string>,
@@ -1265,6 +1513,68 @@ export type ValueTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string | Variable<any, string>
 };
+	["Entrepreneur"]: AliasType<{
+	/** Дата рождения */
+	birthdate?:boolean | `@${string}`,
+	/** Город */
+	city?:boolean | `@${string}`,
+	/** Страна */
+	country?:boolean | `@${string}`,
+	/** Детали ИП (ИНН, ОГРН) */
+	details?:ValueTypes["EntrepreneurDetails"],
+	/** Email */
+	email?:boolean | `@${string}`,
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Юридический адрес */
+	full_address?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Телефон */
+	phone?:boolean | `@${string}`,
+	/** Имя аккаунта */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["EntrepreneurDetails"]: AliasType<{
+	/** ИНН */
+	inn?:boolean | `@${string}`,
+	/** ОГРН */
+	ogrn?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["EntrepreneurDetailsInput"]: {
+	/** ИНН */
+	inn: string | Variable<any, string>,
+	/** ОГРН */
+	ogrn: string | Variable<any, string>
+};
+	/** Расширенное действие блокчейна с персональными данными пользователя, совершившего его. */
+["ExtendedBlockchainAction"]: AliasType<{
+	account?:boolean | `@${string}`,
+	account_ram_deltas?:ValueTypes["AccountRamDelta"],
+	action_ordinal?:boolean | `@${string}`,
+	authorization?:ValueTypes["ActionAuthorization"],
+	block_id?:boolean | `@${string}`,
+	block_num?:boolean | `@${string}`,
+	chain_id?:boolean | `@${string}`,
+	console?:boolean | `@${string}`,
+	context_free?:boolean | `@${string}`,
+	creator_action_ordinal?:boolean | `@${string}`,
+	/** Данные действия в формате JSON */
+	data?:boolean | `@${string}`,
+	elapsed?:boolean | `@${string}`,
+	global_sequence?:boolean | `@${string}`,
+	name?:boolean | `@${string}`,
+	receipt?:ValueTypes["ActionReceipt"],
+	receiver?:boolean | `@${string}`,
+	transaction_id?:boolean | `@${string}`,
+	/** Доп. данные о пользователе (физ/ИП/организация) */
+	user?:ValueTypes["UserDataUnion"],
+		__typename?: boolean | `@${string}`
+}>;
 	["Extension"]: AliasType<{
 	/** Показывает, доступно ли расширение */
 	available?:boolean | `@${string}`,
@@ -1308,6 +1618,19 @@ export type ValueTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>
 };
+	["FreeDecisionDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["FreeDecisionMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -1406,11 +1729,25 @@ export type ValueTypes = {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["GetAccountsInput"]: {
+	role?: string | undefined | null | Variable<any, string>,
+	username?: string | undefined | null | Variable<any, string>
+};
 	["GetBranchesInput"]: {
 	/** Фильтр по имени аккаунта кооперативного участка */
 	braname?: string | undefined | null | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>
+};
+	["GetDocumentsFilterInput"]: {
+	additionalFilters?: ValueTypes["JSON"] | undefined | null | Variable<any, string>,
+	receiver: string | Variable<any, string>
+};
+	["GetDocumentsInput"]: {
+	filter: ValueTypes["GetDocumentsFilterInput"] | Variable<any, string>,
+	limit?: number | undefined | null | Variable<any, string>,
+	page?: number | undefined | null | Variable<any, string>,
+	type?: string | undefined | null | Variable<any, string>
 };
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
@@ -1430,6 +1767,16 @@ export type ValueTypes = {
 	/** Направление сортировки ("ASC" или "DESC") */
 	sortOrder: string | Variable<any, string>,
 	/** Имя пользователя для фильтрации методов оплаты */
+	username?: string | undefined | null | Variable<any, string>
+};
+	["GetPaymentsInput"]: {
+	/** Идентификатор платежа в блокчейне */
+	blockchain_id?: string | undefined | null | Variable<any, string>,
+	/** Идентификатор платежа во внутренней системе */
+	id?: string | undefined | null | Variable<any, string>,
+	/** Статус платежа */
+	status?: ValueTypes["PaymentStatus"] | undefined | null | Variable<any, string>,
+	/** Имя пользователя для фильтрации платежей */
 	username?: string | undefined | null | Variable<any, string>
 };
 	["Individual"]: AliasType<{
@@ -1453,6 +1800,16 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["Init"]: {
+	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
+	organization_data: ValueTypes["CreateOrganizationDataInput"] | Variable<any, string>,
+	/** Переменные кооператива, используемые для заполнения шаблонов документов */
+	vars: ValueTypes["VarsInput"] | Variable<any, string>
+};
+	["Install"]: {
+	soviet: Array<ValueTypes["SovietMemberInput"]> | Variable<any, string>,
+	wif: string | Variable<any, string>
+};
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
 	["KeyWeight"]: AliasType<{
@@ -1464,6 +1821,20 @@ export type ValueTypes = {
 }>;
 	/** Язык документа */
 ["LangType"]:LangType;
+	["LoginInput"]: {
+	/** Электронная почта */
+	email: string | Variable<any, string>,
+	/** Метка времени в строковом формате ISO */
+	now: string | Variable<any, string>,
+	/** Цифровая подпись метки времени */
+	signature: string | Variable<any, string>
+};
+	["LogoutInput"]: {
+	/** Токен обновления */
+	access_token: string | Variable<any, string>,
+	/** Токен доступа */
+	refresh_token: string | Variable<any, string>
+};
 	["MetaDocument"]: AliasType<{
 	/** Номер блока, на котором был создан документ */
 	block_num?:boolean | `@${string}`,
@@ -1489,6 +1860,30 @@ export type ValueTypes = {
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["MetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
 	["MonoAccount"]: AliasType<{
 	/** Электронная почта пользователя */
 	email?:boolean | `@${string}`,
@@ -1517,10 +1912,14 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["Mutation"]: AliasType<{
+addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
+createDeposit?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
+createInitialPayment?: [{	data: ValueTypes["CreateInitialPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
 createProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["CreatedProjectFreeDecision"]],
+deleteAccount?: [{	data: ValueTypes["DeleteAccountInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ValueTypes["DeleteTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
@@ -1534,12 +1933,52 @@ generateSelectBranchDocument?: [{	data: ValueTypes["SelectBranchGenerateDocument
 generateSignatureAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateUserAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateWalletAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+initSystem?: [{	data: ValueTypes["Init"] | Variable<any, string>},ValueTypes["SystemInfo"]],
 installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
+installSystem?: [{	data: ValueTypes["Install"] | Variable<any, string>},ValueTypes["SystemInfo"]],
+login?: [{	data: ValueTypes["LoginInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
+logout?: [{	data: ValueTypes["LogoutInput"] | Variable<any, string>},boolean | `@${string}`],
 publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},boolean | `@${string}`],
+refresh?: [{	data: ValueTypes["RefreshInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
+registerAccount?: [{	data: ValueTypes["RegisterAccountInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
+registerParticipant?: [{	data: ValueTypes["RegisterParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
+resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
+setPaymentStatus?: [{	data: ValueTypes["SetPaymentStatusInput"] | Variable<any, string>},ValueTypes["Payment"]],
+setWif?: [{	data: ValueTypes["SetWifInput"] | Variable<any, string>},boolean | `@${string}`],
+startResetKey?: [{	data: ValueTypes["StartResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
+updateAccount?: [{	data: ValueTypes["UpdateAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
+updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes["SystemInfo"]],
+		__typename?: boolean | `@${string}`
+}>;
+	["Organization"]: AliasType<{
+	/** Город */
+	city?:boolean | `@${string}`,
+	/** Страна */
+	country?:boolean | `@${string}`,
+	/** Детали организации */
+	details?:ValueTypes["OrganizationDetails"],
+	/** Email */
+	email?:boolean | `@${string}`,
+	/** Фактический адрес */
+	fact_address?:boolean | `@${string}`,
+	/** Юридический адрес */
+	full_address?:boolean | `@${string}`,
+	/** Полное название */
+	full_name?:boolean | `@${string}`,
+	/** Телефон */
+	phone?:boolean | `@${string}`,
+	/** Представитель организации */
+	represented_by?:ValueTypes["RepresentedBy"],
+	/** Краткое название */
+	short_name?:boolean | `@${string}`,
+	/** Тип организации */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта организации */
+	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["OrganizationDetails"]: AliasType<{
@@ -1551,17 +1990,23 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 	ogrn?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["PaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["PaymentMethod"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
+	["OrganizationDetailsInput"]: {
+	inn: string | Variable<any, string>,
+	kpp: string | Variable<any, string>,
+	ogrn: string | Variable<any, string>
+};
+	/** Тип юридического лица */
+["OrganizationType"]:OrganizationType;
+	["PaginationInput"]: {
+	/** Количество элементов на странице */
+	limit: number | Variable<any, string>,
+	/** Номер страницы */
+	page: number | Variable<any, string>,
+	/** Ключ сортировки (например, "name") */
+	sortBy?: string | undefined | null | Variable<any, string>,
+	/** Направление сортировки ("ASC" или "DESC") */
+	sortOrder: string | Variable<any, string>
+};
 	["ParticipantAccount"]: AliasType<{
 	/** Имя кооперативного участка */
 	braname?:boolean | `@${string}`,
@@ -1713,6 +2158,44 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ParticipantApplicationSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ValueTypes["ParticipantApplicationSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Публичный ключ документа */
+	public_key: string | Variable<any, string>,
+	/** Подпись документа */
+	signature: string | Variable<any, string>
+};
+	["ParticipantApplicationSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Изображение собственноручной подписи (base-64) */
+	signature: string | Variable<any, string>,
+	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
+	skip_save: boolean | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
 	["Passport"]: AliasType<{
 	/** Код подразделения */
 	code?:boolean | `@${string}`,
@@ -1724,6 +2207,57 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 	number?:boolean | `@${string}`,
 	/** Серия паспорта */
 	series?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PassportInput"]: {
+	code: string | Variable<any, string>,
+	issued_at: string | Variable<any, string>,
+	issued_by: string | Variable<any, string>,
+	number: number | Variable<any, string>,
+	series: number | Variable<any, string>
+};
+	["Payment"]: AliasType<{
+	/** Сумма платежа */
+	amount?:boolean | `@${string}`,
+	/** Идентификационный номер платежа в блокчейне */
+	blockchain_id?:boolean | `@${string}`,
+	/** Дата создания платежа */
+	created_at?:boolean | `@${string}`,
+	/** Детали платежа */
+	details?:ValueTypes["PaymentDetails"],
+	/** Дата истечения срока давности платежа */
+	expired_at?:boolean | `@${string}`,
+	/** Идентификатор платежа во внутренней системе учёта */
+	id?:boolean | `@${string}`,
+	/** Содержит сервисное сообщение провайдера об ошибке обработки платежа */
+	message?:boolean | `@${string}`,
+	/** Идентификатор наименования провайдера платежа, ответственного за обработку */
+	provider?:boolean | `@${string}`,
+	/** Идентификатор номера платежа, который отображается пользователю в платежных документах */
+	status?:boolean | `@${string}`,
+	/** Символ тикера валюты платежа */
+	symbol?:boolean | `@${string}`,
+	/** Дата обновления платежа */
+	updated_at?:boolean | `@${string}`,
+	/** Имя аккаунта пользователя, совершающего платеж */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaymentDetails"]: AliasType<{
+	/** Сумма платежа с учетом комиссии */
+	amount_plus_fee?:boolean | `@${string}`,
+	/** Сумма платежа без учета комиссии */
+	amount_without_fee?:boolean | `@${string}`,
+	/** Строка с данными платежа */
+	data?:boolean | `@${string}`,
+	/** Фактический процент комиссии */
+	fact_fee_percent?:boolean | `@${string}`,
+	/** Размер комиссии в абсолютных значениях */
+	fee_amount?:boolean | `@${string}`,
+	/** Процент комиссии */
+	fee_percent?:boolean | `@${string}`,
+	/** Допустимый процент отклонения */
+	tolerance_percent?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["PaymentMethod"]: AliasType<{
@@ -1747,6 +2281,30 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 		["...on SbpAccount"]?: ValueTypes["SbpAccount"]
 		__typename?: boolean | `@${string}`
 }>;
+	["PaymentMethodPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["PaymentMethod"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaymentPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["Payment"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Статус платежа */
+["PaymentStatus"]:PaymentStatus;
 	["Permission"]: AliasType<{
 	/** Родительское разрешение */
 	parent?:boolean | `@${string}`,
@@ -1870,6 +2428,12 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
+	["PublicChairman"]: AliasType<{
+	first_name?:boolean | `@${string}`,
+	last_name?:boolean | `@${string}`,
+	middle_name?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PublishProjectFreeDecisionInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -1882,13 +2446,24 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 };
 	["Query"]: AliasType<{
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
+getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
+	/** Получить список вопросов совета кооператива для голосования */
+	getAgenda?:ValueTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
+getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>},ValueTypes["DocumentsPaginationResult"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
-getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginationResult"]],
+getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentMethodPaginationResult"]],
+getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentPaginationResult"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
 		__typename?: boolean | `@${string}`
 }>;
+	["RefreshInput"]: {
+	/** Токен доступа */
+	access_token: string | Variable<any, string>,
+	/** Токен обновления */
+	refresh_token: string | Variable<any, string>
+};
 	["RefundRequest"]: AliasType<{
 	/** Сумма CPU */
 	cpu_amount?:boolean | `@${string}`,
@@ -1898,6 +2473,49 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	owner?:boolean | `@${string}`,
 	/** Время запроса */
 	request_time?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["RegisterAccountInput"]: {
+	/** Электронная почта */
+	email: string | Variable<any, string>,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: ValueTypes["CreateEntrepreneurDataInput"] | undefined | null | Variable<any, string>,
+	/** Данные физического лица */
+	individual_data?: ValueTypes["CreateIndividualDataInput"] | undefined | null | Variable<any, string>,
+	/** Данные организации */
+	organization_data?: ValueTypes["CreateOrganizationDataInput"] | undefined | null | Variable<any, string>,
+	/** Публичный ключ */
+	public_key?: string | undefined | null | Variable<any, string>,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null | Variable<any, string>,
+	/** Роль пользователя */
+	role: ValueTypes["RegisterRole"] | Variable<any, string>,
+	/** Тип аккаунта */
+	type: ValueTypes["AccountType"] | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
+	["RegisterParticipantInput"]: {
+	/** Подписанный документ политики конфиденциальности от пайщика */
+	privacy_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	/** Подписанный документ положения о цифровой подписи от пайщика */
+	signature_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	/** Подписанный документ заявления на вступление в кооператив от пайщика */
+	statement: ValueTypes["ParticipantApplicationSignedDocumentInput"] | Variable<any, string>,
+	/** Подписанный документ пользовательского соглашения от пайщика */
+	user_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	/** Имя аккаунта пайщика */
+	username: string | Variable<any, string>,
+	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
+	wallet_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
+};
+	/** Роль пользователя при регистрации */
+["RegisterRole"]:RegisterRole;
+	["RegisteredAccount"]: AliasType<{
+	/** Информация об зарегистрированном аккаунте */
+	account?:ValueTypes["Account"],
+	/** Токены доступа и обновления */
+	tokens?:ValueTypes["Tokens"],
 		__typename?: boolean | `@${string}`
 }>;
 	["RepresentedBy"]: AliasType<{
@@ -1913,6 +2531,19 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	position?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["RepresentedByInput"]: {
+	based_on: string | Variable<any, string>,
+	first_name: string | Variable<any, string>,
+	last_name: string | Variable<any, string>,
+	middle_name: string | Variable<any, string>,
+	position: string | Variable<any, string>
+};
+	["ResetKeyInput"]: {
+	/** Публичный ключ для замены */
+	public_key: string | Variable<any, string>,
+	/** Токен авторизации для замены ключа, полученный по email */
+	token: string | Variable<any, string>
+};
 	["ResourceDelegationDTO"]: AliasType<{
 	/** Вес CPU */
 	cpu_weight?:boolean | `@${string}`,
@@ -2050,6 +2681,20 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
+	["SetPaymentStatusInput"]: {
+	/** Идентификатор платежа, для которого устанавливается статус */
+	id: string | Variable<any, string>,
+	/** Новый статус платежа */
+	status: ValueTypes["PaymentStatus"] | Variable<any, string>
+};
+	["SetWifInput"]: {
+	/** Тип разрешения ключа */
+	permission: string | Variable<any, string>,
+	/** Имя пользователя, чей ключ */
+	username: string | Variable<any, string>,
+	/** Приватный ключ */
+	wif: string | Variable<any, string>
+};
 	["SignedBlockchainDocument"]: AliasType<{
 	/** Хеш документа */
 	hash?:boolean | `@${string}`,
@@ -2061,24 +2706,97 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SignedDigitalDocumentInput"]: {
+	/** Хэш документа */
+	hash: string | Variable<any, string>,
+	/** Метаинформация документа */
+	meta: ValueTypes["MetaDocumentInput"] | Variable<any, string>,
+	/** Публичный ключ документа */
+	public_key: string | Variable<any, string>,
+	/** Подпись документа */
+	signature: string | Variable<any, string>
+};
+	["SovietMemberInput"]: {
+	individual_data: ValueTypes["CreateIndividualDataInput"] | Variable<any, string>,
+	role: string | Variable<any, string>
+};
+	["StartResetKeyInput"]: {
+	/** Электронная почта */
+	email: string | Variable<any, string>
+};
+	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) */
+["StatementDetail"]: AliasType<{
+	action?:ValueTypes["ExtendedBlockchainAction"],
+	document?:ValueTypes["StatementDocumentUnion"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Объединение типов документов заявлений, или других документов, за которыми следует появление протокола решения совета */
+["StatementDocumentUnion"]: AliasType<{		["...on ParticipantApplicationDocument"]?: ValueTypes["ParticipantApplicationDocument"],
+		["...on ProjectFreeDecisionDocument"]?: ValueTypes["ProjectFreeDecisionDocument"]
+		__typename?: boolean | `@${string}`
+}>;
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ValueTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info?:ValueTypes["BlockchainInfoDTO"],
+	/** Контакты кооператива */
+	contacts?:ValueTypes["ContactsDTO"],
 	/** Объект аккаунта кооператива у оператора */
 	cooperator_account?:ValueTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Статус контроллера кооператива */
 	system_status?:boolean | `@${string}`,
+	/** Переменные кооператива */
+	vars?:ValueTypes["Vars"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Состояние контроллера кооператива */
 ["SystemStatus"]:SystemStatus;
+	["Token"]: AliasType<{
+	/** Дата истечения токена доступа */
+	expires?:boolean | `@${string}`,
+	/** Токен доступа */
+	token?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["Tokens"]: AliasType<{
+	/** Токен доступа */
+	access?:ValueTypes["Token"],
+	/** Токен обновления */
+	refresh?:ValueTypes["Token"],
+		__typename?: boolean | `@${string}`
+}>;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string | Variable<any, string>
+};
+	["Update"]: {
+	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
+	organization_data?: ValueTypes["UpdateOrganizationDataInput"] | undefined | null | Variable<any, string>,
+	/** Переменные кооператива, используемые для заполнения шаблонов документов */
+	vars?: ValueTypes["VarsInput"] | undefined | null | Variable<any, string>
+};
+	["UpdateAccountInput"]: {
+	/** Электронная почта */
+	email: string | Variable<any, string>,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: ValueTypes["UpdateEntrepreneurDataInput"] | undefined | null | Variable<any, string>,
+	/** Данные физического лица */
+	individual_data?: ValueTypes["UpdateIndividualDataInput"] | undefined | null | Variable<any, string>,
+	/** Данные организации */
+	organization_data?: ValueTypes["UpdateOrganizationDataInput"] | undefined | null | Variable<any, string>,
+	/** Публичный ключ */
+	public_key?: string | undefined | null | Variable<any, string>,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null | Variable<any, string>,
+	/** Роль пользователя */
+	role: ValueTypes["RegisterRole"] | Variable<any, string>,
+	/** Тип аккаунта */
+	type: ValueTypes["AccountType"] | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
 };
 	["UpdateBankAccountInput"]: {
 	/** Данные банковского счёта */
@@ -2089,6 +2807,64 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	method_id: string | Variable<any, string>,
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
+};
+	["UpdateEntrepreneurDataInput"]: {
+	/** Дата рождения */
+	birthdate: string | Variable<any, string>,
+	/** Город */
+	city: string | Variable<any, string>,
+	/** Страна */
+	country: ValueTypes["Country"] | Variable<any, string>,
+	/** Детали индивидуального предпринимателя */
+	details: ValueTypes["EntrepreneurDetailsInput"] | Variable<any, string>,
+	/** Имя */
+	first_name: string | Variable<any, string>,
+	/** Полный адрес */
+	full_address: string | Variable<any, string>,
+	/** Фамилия */
+	last_name: string | Variable<any, string>,
+	/** Отчество */
+	middle_name: string | Variable<any, string>,
+	/** Телефон */
+	phone: string | Variable<any, string>
+};
+	["UpdateIndividualDataInput"]: {
+	/** Дата рождения */
+	birthdate: string | Variable<any, string>,
+	/** Имя */
+	first_name: string | Variable<any, string>,
+	/** Полный адрес */
+	full_address: string | Variable<any, string>,
+	/** Фамилия */
+	last_name: string | Variable<any, string>,
+	/** Отчество */
+	middle_name: string | Variable<any, string>,
+	/** Данные паспорта */
+	passport?: ValueTypes["PassportInput"] | undefined | null | Variable<any, string>,
+	/** Телефон */
+	phone: string | Variable<any, string>
+};
+	["UpdateOrganizationDataInput"]: {
+	/** Город */
+	city: string | Variable<any, string>,
+	/** Страна */
+	country: string | Variable<any, string>,
+	/** Детали организации */
+	details: ValueTypes["OrganizationDetailsInput"] | Variable<any, string>,
+	/** Фактический адрес */
+	fact_address: string | Variable<any, string>,
+	/** Полный адрес */
+	full_address: string | Variable<any, string>,
+	/** Полное наименование организации */
+	full_name: string | Variable<any, string>,
+	/** Телефон */
+	phone: string | Variable<any, string>,
+	/** Представитель организации */
+	represented_by: ValueTypes["RepresentedByInput"] | Variable<any, string>,
+	/** Краткое наименование организации */
+	short_name: string | Variable<any, string>,
+	/** Тип организации */
+	type: ValueTypes["OrganizationType"] | Variable<any, string>
 };
 	["UserAccount"]: AliasType<{
 	/** Метаинформация */
@@ -2111,8 +2887,53 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 	verifications?:ValueTypes["Verification"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Объединение информации о пользователях */
+["UserDataUnion"]: AliasType<{		["...on Entrepreneur"]?: ValueTypes["Entrepreneur"],
+		["...on Individual"]?: ValueTypes["Individual"],
+		["...on Organization"]?: ValueTypes["Organization"]
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статус пользователя */
 ["UserStatus"]:UserStatus;
+	["Vars"]: AliasType<{
+	confidential_email?:boolean | `@${string}`,
+	confidential_link?:boolean | `@${string}`,
+	contact_email?:boolean | `@${string}`,
+	coopenomics_agreement?:ValueTypes["AgreementVar"],
+	coopname?:boolean | `@${string}`,
+	full_abbr?:boolean | `@${string}`,
+	full_abbr_dative?:boolean | `@${string}`,
+	full_abbr_genitive?:boolean | `@${string}`,
+	name?:boolean | `@${string}`,
+	participant_application?:ValueTypes["AgreementVar"],
+	passport_request?:boolean | `@${string}`,
+	privacy_agreement?:ValueTypes["AgreementVar"],
+	short_abbr?:boolean | `@${string}`,
+	signature_agreement?:ValueTypes["AgreementVar"],
+	user_agreement?:ValueTypes["AgreementVar"],
+	wallet_agreement?:ValueTypes["AgreementVar"],
+	website?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["VarsInput"]: {
+	confidential_email: string | Variable<any, string>,
+	confidential_link: string | Variable<any, string>,
+	contact_email: string | Variable<any, string>,
+	coopenomics_agreement?: ValueTypes["AgreementInput"] | undefined | null | Variable<any, string>,
+	coopname: string | Variable<any, string>,
+	full_abbr: string | Variable<any, string>,
+	full_abbr_dative: string | Variable<any, string>,
+	full_abbr_genitive: string | Variable<any, string>,
+	name: string | Variable<any, string>,
+	participant_application: ValueTypes["AgreementInput"] | Variable<any, string>,
+	passport_request: string | Variable<any, string>,
+	privacy_agreement: ValueTypes["AgreementInput"] | Variable<any, string>,
+	short_abbr: string | Variable<any, string>,
+	signature_agreement: ValueTypes["AgreementInput"] | Variable<any, string>,
+	user_agreement: ValueTypes["AgreementInput"] | Variable<any, string>,
+	wallet_agreement: ValueTypes["AgreementInput"] | Variable<any, string>,
+	website: string | Variable<any, string>
+};
 	["Verification"]: AliasType<{
 	/** Дата создания верификации */
 	created_at?:boolean | `@${string}`,
@@ -2141,14 +2962,19 @@ export type ResolverInputTypes = {
     ["Account"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
-	/** Объект аккаунта в системе учёта провайдера */
-	provider_account?:ResolverInputTypes["MonoAccount"],
 	/** Объект пайщика кооператива */
 	participant_account?:ResolverInputTypes["ParticipantAccount"],
+	/** Объект аккаунта в системе учёта провайдера */
+	provider_account?:ResolverInputTypes["MonoAccount"],
 	/** Объект пользовательского аккаунта кооперативной экономики */
 	user_account?:ResolverInputTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
 	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AccountRamDelta"]: AliasType<{
+	account?:boolean | `@${string}`,
+	delta?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["AccountResourceInfo"]: AliasType<{
@@ -2164,6 +2990,61 @@ export type ResolverInputTypes = {
 	used?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Тип аккаунта пользователя в системе */
+["AccountType"]:AccountType;
+	["AccountsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["Account"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ActDetail"]: AliasType<{
+	action?:ResolverInputTypes["ExtendedBlockchainAction"],
+	document?:ResolverInputTypes["GeneratedDocument"],
+		__typename?: boolean | `@${string}`
+}>;
+	["ActionAuthorization"]: AliasType<{
+	actor?:boolean | `@${string}`,
+	permission?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ActionReceipt"]: AliasType<{
+	abi_sequence?:boolean | `@${string}`,
+	act_digest?:boolean | `@${string}`,
+	auth_sequence?:ResolverInputTypes["AuthSequence"],
+	code_sequence?:boolean | `@${string}`,
+	global_sequence?:boolean | `@${string}`,
+	receiver?:boolean | `@${string}`,
+	recv_sequence?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AddParticipantInput"]: {
+	/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
+	created_at: string,
+	/** Электронная почта */
+	email: string,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: ResolverInputTypes["CreateEntrepreneurDataInput"] | undefined | null,
+	/** Данные физического лица */
+	individual_data?: ResolverInputTypes["CreateIndividualDataInput"] | undefined | null,
+	/** Вступительный взнос, который был внесён пайщиком */
+	initial: string,
+	/** Минимальный паевый взнос, который был внесён пайщиком */
+	minimum: string,
+	/** Данные организации */
+	organization_data?: ResolverInputTypes["CreateOrganizationDataInput"] | undefined | null,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null,
+	/** Флаг распределения вступительного взноса в невозвратный фонд вступительных взносов кооператива */
+	spread_initial: boolean,
+	/** Тип аккаунта */
+	type: ResolverInputTypes["AccountType"]
+};
 	["AddTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -2172,6 +3053,29 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
+	["AgendaWithDocuments"]: AliasType<{
+	/** Действие, которое привело к появлению вопроса на голосовании */
+	action?:ResolverInputTypes["BlockchainAction"],
+	/** Пакет документов, включающий разные подсекции */
+	documents?:ResolverInputTypes["DocumentPackage"],
+	/** Запись в таблице блокчейна о вопросе на голосовании */
+	table?:ResolverInputTypes["BlockchainDecision"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AgreementInput"]: {
+	protocol_day_month_year: string,
+	protocol_number: string
+};
+	["AgreementVar"]: AliasType<{
+	protocol_day_month_year?:boolean | `@${string}`,
+	protocol_number?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AuthSequence"]: AliasType<{
+	account?:boolean | `@${string}`,
+	sequence?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Authority"]: AliasType<{
 	/** Уровни разрешений */
 	accounts?:ResolverInputTypes["PermissionLevelWeight"],
@@ -2283,6 +3187,48 @@ export type ResolverInputTypes = {
 	voter_info?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Объект действия в блокчейне */
+["BlockchainAction"]: AliasType<{
+	account?:boolean | `@${string}`,
+	account_ram_deltas?:ResolverInputTypes["AccountRamDelta"],
+	action_ordinal?:boolean | `@${string}`,
+	authorization?:ResolverInputTypes["ActionAuthorization"],
+	block_id?:boolean | `@${string}`,
+	block_num?:boolean | `@${string}`,
+	chain_id?:boolean | `@${string}`,
+	console?:boolean | `@${string}`,
+	context_free?:boolean | `@${string}`,
+	creator_action_ordinal?:boolean | `@${string}`,
+	/** Данные действия в формате JSON */
+	data?:boolean | `@${string}`,
+	elapsed?:boolean | `@${string}`,
+	global_sequence?:boolean | `@${string}`,
+	name?:boolean | `@${string}`,
+	receipt?:ResolverInputTypes["ActionReceipt"],
+	receiver?:boolean | `@${string}`,
+	transaction_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Запись в таблице блокчейна о процессе принятия решения советом кооператива */
+["BlockchainDecision"]: AliasType<{
+	approved?:boolean | `@${string}`,
+	authorization?:ResolverInputTypes["SignedBlockchainDocument"],
+	authorized?:boolean | `@${string}`,
+	authorized_by?:boolean | `@${string}`,
+	batch_id?:boolean | `@${string}`,
+	coopname?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	expired_at?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	meta?:boolean | `@${string}`,
+	statement?:ResolverInputTypes["SignedBlockchainDocument"],
+	type?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+	validated?:boolean | `@${string}`,
+	votes_against?:boolean | `@${string}`,
+	votes_for?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Информация о состоянии блокчейна */
 ["BlockchainInfoDTO"]: AliasType<{
 	/** Лимит CPU для блока */
@@ -2354,6 +3300,15 @@ export type ResolverInputTypes = {
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ContactsDTO"]: AliasType<{
+	chairman?:ResolverInputTypes["PublicChairman"],
+	details?:ResolverInputTypes["OrganizationDetails"],
+	email?:boolean | `@${string}`,
+	full_address?:boolean | `@${string}`,
+	full_name?:boolean | `@${string}`,
+	phone?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CooperativeOperatorAccount"]: AliasType<{
 	/** Объявление кооператива */
 	announce?:boolean | `@${string}`,
@@ -2405,6 +3360,8 @@ export type ResolverInputTypes = {
 	verifications?:ResolverInputTypes["Verification"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Страна регистрации пользователя */
+["Country"]:Country;
 	["CreateBankAccountInput"]: {
 	/** Данные для банковского перевода */
 	data: ResolverInputTypes["BankAccountInput"],
@@ -2433,6 +3390,78 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateDepositPaymentInput"]: {
+	/** Сумма взноса */
+	quantity: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CreateEntrepreneurDataInput"]: {
+	/** Банковский счет */
+	bank_account: ResolverInputTypes["BankAccountInput"],
+	/** Дата рождения */
+	birthdate: string,
+	/** Город */
+	city: string,
+	/** Страна */
+	country: ResolverInputTypes["Country"],
+	/** Детали индивидуального предпринимателя */
+	details: ResolverInputTypes["EntrepreneurDetailsInput"],
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Телефон */
+	phone: string
+};
+	["CreateIndividualDataInput"]: {
+	/** Дата рождения */
+	birthdate: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: ResolverInputTypes["PassportInput"] | undefined | null,
+	/** Телефон */
+	phone: string
+};
+	["CreateInitialPaymentInput"]: {
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CreateOrganizationDataInput"]: {
+	/** Банковский счет организации */
+	bank_account: ResolverInputTypes["BankAccountInput"],
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: ResolverInputTypes["OrganizationDetailsInput"],
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное наименование организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: ResolverInputTypes["RepresentedByInput"],
+	/** Краткое наименование организации */
+	short_name: string,
+	/** Тип организации */
+	type: ResolverInputTypes["OrganizationType"]
+};
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string,
@@ -2450,6 +3479,24 @@ export type ResolverInputTypes = {
 }>;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
+	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
+["DecisionDetail"]: AliasType<{
+	action?:ResolverInputTypes["ExtendedBlockchainAction"],
+	document?:ResolverInputTypes["DecisionDocumentUnion"],
+	votes_against?:ResolverInputTypes["ExtendedBlockchainAction"],
+	votes_for?:ResolverInputTypes["ExtendedBlockchainAction"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Объединение типов документов протоколов решения совета */
+["DecisionDocumentUnion"]: AliasType<{
+	FreeDecisionDocument?:ResolverInputTypes["FreeDecisionDocument"],
+	ParticipantApplicationDecisionDocument?:ResolverInputTypes["ParticipantApplicationDecisionDocument"],
+		__typename?: boolean | `@${string}`
+}>;
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string
+};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -2470,6 +3517,29 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string
 };
+	/** Комплексный объект папки цифрового документа, который включает в себя заявление, решение, акты и связанные документы */
+["DocumentPackage"]: AliasType<{
+	/** Массив объект(ов) актов, относящихся к заявлению */
+	acts?:ResolverInputTypes["ActDetail"],
+	/** Объект цифрового документа решения */
+	decision?:ResolverInputTypes["DecisionDetail"],
+	/** Массив связанных документов, извлечённых из мета-данных */
+	links?:ResolverInputTypes["GeneratedDocument"],
+	/** Объект цифрового документа заявления */
+	statement?:ResolverInputTypes["StatementDetail"],
+		__typename?: boolean | `@${string}`
+}>;
+	["DocumentsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["DocumentPackage"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["EditBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string,
@@ -2490,6 +3560,68 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["Entrepreneur"]: AliasType<{
+	/** Дата рождения */
+	birthdate?:boolean | `@${string}`,
+	/** Город */
+	city?:boolean | `@${string}`,
+	/** Страна */
+	country?:boolean | `@${string}`,
+	/** Детали ИП (ИНН, ОГРН) */
+	details?:ResolverInputTypes["EntrepreneurDetails"],
+	/** Email */
+	email?:boolean | `@${string}`,
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Юридический адрес */
+	full_address?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Телефон */
+	phone?:boolean | `@${string}`,
+	/** Имя аккаунта */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["EntrepreneurDetails"]: AliasType<{
+	/** ИНН */
+	inn?:boolean | `@${string}`,
+	/** ОГРН */
+	ogrn?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["EntrepreneurDetailsInput"]: {
+	/** ИНН */
+	inn: string,
+	/** ОГРН */
+	ogrn: string
+};
+	/** Расширенное действие блокчейна с персональными данными пользователя, совершившего его. */
+["ExtendedBlockchainAction"]: AliasType<{
+	account?:boolean | `@${string}`,
+	account_ram_deltas?:ResolverInputTypes["AccountRamDelta"],
+	action_ordinal?:boolean | `@${string}`,
+	authorization?:ResolverInputTypes["ActionAuthorization"],
+	block_id?:boolean | `@${string}`,
+	block_num?:boolean | `@${string}`,
+	chain_id?:boolean | `@${string}`,
+	console?:boolean | `@${string}`,
+	context_free?:boolean | `@${string}`,
+	creator_action_ordinal?:boolean | `@${string}`,
+	/** Данные действия в формате JSON */
+	data?:boolean | `@${string}`,
+	elapsed?:boolean | `@${string}`,
+	global_sequence?:boolean | `@${string}`,
+	name?:boolean | `@${string}`,
+	receipt?:ResolverInputTypes["ActionReceipt"],
+	receiver?:boolean | `@${string}`,
+	transaction_id?:boolean | `@${string}`,
+	/** Доп. данные о пользователе (физ/ИП/организация) */
+	user?:ResolverInputTypes["UserDataUnion"],
+		__typename?: boolean | `@${string}`
+}>;
 	["Extension"]: AliasType<{
 	/** Показывает, доступно ли расширение */
 	available?:boolean | `@${string}`,
@@ -2533,6 +3665,19 @@ export type ResolverInputTypes = {
 	/** Timestamp of the last update to the extension */
 	updated_at?: ResolverInputTypes["DateTime"] | undefined | null
 };
+	["FreeDecisionDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["FreeDecisionMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -2631,11 +3776,25 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["GetAccountsInput"]: {
+	role?: string | undefined | null,
+	username?: string | undefined | null
+};
 	["GetBranchesInput"]: {
 	/** Фильтр по имени аккаунта кооперативного участка */
 	braname?: string | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string
+};
+	["GetDocumentsFilterInput"]: {
+	additionalFilters?: ResolverInputTypes["JSON"] | undefined | null,
+	receiver: string
+};
+	["GetDocumentsInput"]: {
+	filter: ResolverInputTypes["GetDocumentsFilterInput"],
+	limit?: number | undefined | null,
+	page?: number | undefined | null,
+	type?: string | undefined | null
 };
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
@@ -2655,6 +3814,16 @@ export type ResolverInputTypes = {
 	/** Направление сортировки ("ASC" или "DESC") */
 	sortOrder: string,
 	/** Имя пользователя для фильтрации методов оплаты */
+	username?: string | undefined | null
+};
+	["GetPaymentsInput"]: {
+	/** Идентификатор платежа в блокчейне */
+	blockchain_id?: string | undefined | null,
+	/** Идентификатор платежа во внутренней системе */
+	id?: string | undefined | null,
+	/** Статус платежа */
+	status?: ResolverInputTypes["PaymentStatus"] | undefined | null,
+	/** Имя пользователя для фильтрации платежей */
 	username?: string | undefined | null
 };
 	["Individual"]: AliasType<{
@@ -2678,6 +3847,16 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["Init"]: {
+	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
+	organization_data: ResolverInputTypes["CreateOrganizationDataInput"],
+	/** Переменные кооператива, используемые для заполнения шаблонов документов */
+	vars: ResolverInputTypes["VarsInput"]
+};
+	["Install"]: {
+	soviet: Array<ResolverInputTypes["SovietMemberInput"]>,
+	wif: string
+};
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
 	["KeyWeight"]: AliasType<{
@@ -2689,6 +3868,20 @@ export type ResolverInputTypes = {
 }>;
 	/** Язык документа */
 ["LangType"]:LangType;
+	["LoginInput"]: {
+	/** Электронная почта */
+	email: string,
+	/** Метка времени в строковом формате ISO */
+	now: string,
+	/** Цифровая подпись метки времени */
+	signature: string
+};
+	["LogoutInput"]: {
+	/** Токен обновления */
+	access_token: string,
+	/** Токен доступа */
+	refresh_token: string
+};
 	["MetaDocument"]: AliasType<{
 	/** Номер блока, на котором был создан документ */
 	block_num?:boolean | `@${string}`,
@@ -2714,6 +3907,30 @@ export type ResolverInputTypes = {
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["MetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["MonoAccount"]: AliasType<{
 	/** Электронная почта пользователя */
 	email?:boolean | `@${string}`,
@@ -2742,10 +3959,14 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["Mutation"]: AliasType<{
+addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInputTypes["Account"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
+createDeposit?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]},ResolverInputTypes["Payment"]],
+createInitialPayment?: [{	data: ResolverInputTypes["CreateInitialPaymentInput"]},ResolverInputTypes["Payment"]],
 createProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecisionInput"]},ResolverInputTypes["CreatedProjectFreeDecision"]],
+deleteAccount?: [{	data: ResolverInputTypes["DeleteAccountInput"]},boolean | `@${string}`],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ResolverInputTypes["DeleteTrustedAccountInput"]},ResolverInputTypes["Branch"]],
@@ -2759,12 +3980,52 @@ generateSelectBranchDocument?: [{	data: ResolverInputTypes["SelectBranchGenerate
 generateSignatureAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateUserAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateWalletAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+initSystem?: [{	data: ResolverInputTypes["Init"]},ResolverInputTypes["SystemInfo"]],
 installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
+installSystem?: [{	data: ResolverInputTypes["Install"]},ResolverInputTypes["SystemInfo"]],
+login?: [{	data: ResolverInputTypes["LoginInput"]},ResolverInputTypes["RegisteredAccount"]],
+logout?: [{	data: ResolverInputTypes["LogoutInput"]},boolean | `@${string}`],
 publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},boolean | `@${string}`],
+refresh?: [{	data: ResolverInputTypes["RefreshInput"]},ResolverInputTypes["RegisteredAccount"]],
+registerAccount?: [{	data: ResolverInputTypes["RegisterAccountInput"]},ResolverInputTypes["RegisteredAccount"]],
+registerParticipant?: [{	data: ResolverInputTypes["RegisterParticipantInput"]},ResolverInputTypes["Account"]],
+resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
+setPaymentStatus?: [{	data: ResolverInputTypes["SetPaymentStatusInput"]},ResolverInputTypes["Payment"]],
+setWif?: [{	data: ResolverInputTypes["SetWifInput"]},boolean | `@${string}`],
+startResetKey?: [{	data: ResolverInputTypes["StartResetKeyInput"]},boolean | `@${string}`],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
+updateAccount?: [{	data: ResolverInputTypes["UpdateAccountInput"]},ResolverInputTypes["Account"]],
 updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
+updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["SystemInfo"]],
+		__typename?: boolean | `@${string}`
+}>;
+	["Organization"]: AliasType<{
+	/** Город */
+	city?:boolean | `@${string}`,
+	/** Страна */
+	country?:boolean | `@${string}`,
+	/** Детали организации */
+	details?:ResolverInputTypes["OrganizationDetails"],
+	/** Email */
+	email?:boolean | `@${string}`,
+	/** Фактический адрес */
+	fact_address?:boolean | `@${string}`,
+	/** Юридический адрес */
+	full_address?:boolean | `@${string}`,
+	/** Полное название */
+	full_name?:boolean | `@${string}`,
+	/** Телефон */
+	phone?:boolean | `@${string}`,
+	/** Представитель организации */
+	represented_by?:ResolverInputTypes["RepresentedBy"],
+	/** Краткое название */
+	short_name?:boolean | `@${string}`,
+	/** Тип организации */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта организации */
+	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["OrganizationDetails"]: AliasType<{
@@ -2776,17 +4037,23 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 	ogrn?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["PaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["PaymentMethod"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
+	["OrganizationDetailsInput"]: {
+	inn: string,
+	kpp: string,
+	ogrn: string
+};
+	/** Тип юридического лица */
+["OrganizationType"]:OrganizationType;
+	["PaginationInput"]: {
+	/** Количество элементов на странице */
+	limit: number,
+	/** Номер страницы */
+	page: number,
+	/** Ключ сортировки (например, "name") */
+	sortBy?: string | undefined | null,
+	/** Направление сортировки ("ASC" или "DESC") */
+	sortOrder: string
+};
 	["ParticipantAccount"]: AliasType<{
 	/** Имя кооперативного участка */
 	braname?:boolean | `@${string}`,
@@ -2938,6 +4205,44 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ParticipantApplicationSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ResolverInputTypes["ParticipantApplicationSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ParticipantApplicationSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Изображение собственноручной подписи (base-64) */
+	signature: string,
+	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
+	skip_save: boolean,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["Passport"]: AliasType<{
 	/** Код подразделения */
 	code?:boolean | `@${string}`,
@@ -2949,6 +4254,57 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 	number?:boolean | `@${string}`,
 	/** Серия паспорта */
 	series?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PassportInput"]: {
+	code: string,
+	issued_at: string,
+	issued_by: string,
+	number: number,
+	series: number
+};
+	["Payment"]: AliasType<{
+	/** Сумма платежа */
+	amount?:boolean | `@${string}`,
+	/** Идентификационный номер платежа в блокчейне */
+	blockchain_id?:boolean | `@${string}`,
+	/** Дата создания платежа */
+	created_at?:boolean | `@${string}`,
+	/** Детали платежа */
+	details?:ResolverInputTypes["PaymentDetails"],
+	/** Дата истечения срока давности платежа */
+	expired_at?:boolean | `@${string}`,
+	/** Идентификатор платежа во внутренней системе учёта */
+	id?:boolean | `@${string}`,
+	/** Содержит сервисное сообщение провайдера об ошибке обработки платежа */
+	message?:boolean | `@${string}`,
+	/** Идентификатор наименования провайдера платежа, ответственного за обработку */
+	provider?:boolean | `@${string}`,
+	/** Идентификатор номера платежа, который отображается пользователю в платежных документах */
+	status?:boolean | `@${string}`,
+	/** Символ тикера валюты платежа */
+	symbol?:boolean | `@${string}`,
+	/** Дата обновления платежа */
+	updated_at?:boolean | `@${string}`,
+	/** Имя аккаунта пользователя, совершающего платеж */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaymentDetails"]: AliasType<{
+	/** Сумма платежа с учетом комиссии */
+	amount_plus_fee?:boolean | `@${string}`,
+	/** Сумма платежа без учета комиссии */
+	amount_without_fee?:boolean | `@${string}`,
+	/** Строка с данными платежа */
+	data?:boolean | `@${string}`,
+	/** Фактический процент комиссии */
+	fact_fee_percent?:boolean | `@${string}`,
+	/** Размер комиссии в абсолютных значениях */
+	fee_amount?:boolean | `@${string}`,
+	/** Процент комиссии */
+	fee_percent?:boolean | `@${string}`,
+	/** Допустимый процент отклонения */
+	tolerance_percent?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["PaymentMethod"]: AliasType<{
@@ -2973,6 +4329,30 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 	SbpAccount?:ResolverInputTypes["SbpAccount"],
 		__typename?: boolean | `@${string}`
 }>;
+	["PaymentMethodPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["PaymentMethod"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaymentPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["Payment"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Статус платежа */
+["PaymentStatus"]:PaymentStatus;
 	["Permission"]: AliasType<{
 	/** Родительское разрешение */
 	parent?:boolean | `@${string}`,
@@ -3096,6 +4476,12 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["PublicChairman"]: AliasType<{
+	first_name?:boolean | `@${string}`,
+	last_name?:boolean | `@${string}`,
+	middle_name?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PublishProjectFreeDecisionInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -3108,13 +4494,24 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 };
 	["Query"]: AliasType<{
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
+getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
+	/** Получить список вопросов совета кооператива для голосования */
+	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
+getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTypes["DocumentsPaginationResult"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
-getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaginationResult"]],
+getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaymentMethodPaginationResult"]],
+getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaymentPaginationResult"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
 		__typename?: boolean | `@${string}`
 }>;
+	["RefreshInput"]: {
+	/** Токен доступа */
+	access_token: string,
+	/** Токен обновления */
+	refresh_token: string
+};
 	["RefundRequest"]: AliasType<{
 	/** Сумма CPU */
 	cpu_amount?:boolean | `@${string}`,
@@ -3124,6 +4521,49 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	owner?:boolean | `@${string}`,
 	/** Время запроса */
 	request_time?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["RegisterAccountInput"]: {
+	/** Электронная почта */
+	email: string,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: ResolverInputTypes["CreateEntrepreneurDataInput"] | undefined | null,
+	/** Данные физического лица */
+	individual_data?: ResolverInputTypes["CreateIndividualDataInput"] | undefined | null,
+	/** Данные организации */
+	organization_data?: ResolverInputTypes["CreateOrganizationDataInput"] | undefined | null,
+	/** Публичный ключ */
+	public_key?: string | undefined | null,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null,
+	/** Роль пользователя */
+	role: ResolverInputTypes["RegisterRole"],
+	/** Тип аккаунта */
+	type: ResolverInputTypes["AccountType"],
+	/** Имя пользователя */
+	username: string
+};
+	["RegisterParticipantInput"]: {
+	/** Подписанный документ политики конфиденциальности от пайщика */
+	privacy_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
+	/** Подписанный документ положения о цифровой подписи от пайщика */
+	signature_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
+	/** Подписанный документ заявления на вступление в кооператив от пайщика */
+	statement: ResolverInputTypes["ParticipantApplicationSignedDocumentInput"],
+	/** Подписанный документ пользовательского соглашения от пайщика */
+	user_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта пайщика */
+	username: string,
+	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
+	wallet_agreement: ResolverInputTypes["SignedDigitalDocumentInput"]
+};
+	/** Роль пользователя при регистрации */
+["RegisterRole"]:RegisterRole;
+	["RegisteredAccount"]: AliasType<{
+	/** Информация об зарегистрированном аккаунте */
+	account?:ResolverInputTypes["Account"],
+	/** Токены доступа и обновления */
+	tokens?:ResolverInputTypes["Tokens"],
 		__typename?: boolean | `@${string}`
 }>;
 	["RepresentedBy"]: AliasType<{
@@ -3139,6 +4579,19 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	position?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["RepresentedByInput"]: {
+	based_on: string,
+	first_name: string,
+	last_name: string,
+	middle_name: string,
+	position: string
+};
+	["ResetKeyInput"]: {
+	/** Публичный ключ для замены */
+	public_key: string,
+	/** Токен авторизации для замены ключа, полученный по email */
+	token: string
+};
 	["ResourceDelegationDTO"]: AliasType<{
 	/** Вес CPU */
 	cpu_weight?:boolean | `@${string}`,
@@ -3276,6 +4729,20 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["SetPaymentStatusInput"]: {
+	/** Идентификатор платежа, для которого устанавливается статус */
+	id: string,
+	/** Новый статус платежа */
+	status: ResolverInputTypes["PaymentStatus"]
+};
+	["SetWifInput"]: {
+	/** Тип разрешения ключа */
+	permission: string,
+	/** Имя пользователя, чей ключ */
+	username: string,
+	/** Приватный ключ */
+	wif: string
+};
 	["SignedBlockchainDocument"]: AliasType<{
 	/** Хеш документа */
 	hash?:boolean | `@${string}`,
@@ -3287,24 +4754,98 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SignedDigitalDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация документа */
+	meta: ResolverInputTypes["MetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["SovietMemberInput"]: {
+	individual_data: ResolverInputTypes["CreateIndividualDataInput"],
+	role: string
+};
+	["StartResetKeyInput"]: {
+	/** Электронная почта */
+	email: string
+};
+	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) */
+["StatementDetail"]: AliasType<{
+	action?:ResolverInputTypes["ExtendedBlockchainAction"],
+	document?:ResolverInputTypes["StatementDocumentUnion"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Объединение типов документов заявлений, или других документов, за которыми следует появление протокола решения совета */
+["StatementDocumentUnion"]: AliasType<{
+	ParticipantApplicationDocument?:ResolverInputTypes["ParticipantApplicationDocument"],
+	ProjectFreeDecisionDocument?:ResolverInputTypes["ProjectFreeDecisionDocument"],
+		__typename?: boolean | `@${string}`
+}>;
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info?:ResolverInputTypes["BlockchainInfoDTO"],
+	/** Контакты кооператива */
+	contacts?:ResolverInputTypes["ContactsDTO"],
 	/** Объект аккаунта кооператива у оператора */
 	cooperator_account?:ResolverInputTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Статус контроллера кооператива */
 	system_status?:boolean | `@${string}`,
+	/** Переменные кооператива */
+	vars?:ResolverInputTypes["Vars"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Состояние контроллера кооператива */
 ["SystemStatus"]:SystemStatus;
+	["Token"]: AliasType<{
+	/** Дата истечения токена доступа */
+	expires?:boolean | `@${string}`,
+	/** Токен доступа */
+	token?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["Tokens"]: AliasType<{
+	/** Токен доступа */
+	access?:ResolverInputTypes["Token"],
+	/** Токен обновления */
+	refresh?:ResolverInputTypes["Token"],
+		__typename?: boolean | `@${string}`
+}>;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
+};
+	["Update"]: {
+	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
+	organization_data?: ResolverInputTypes["UpdateOrganizationDataInput"] | undefined | null,
+	/** Переменные кооператива, используемые для заполнения шаблонов документов */
+	vars?: ResolverInputTypes["VarsInput"] | undefined | null
+};
+	["UpdateAccountInput"]: {
+	/** Электронная почта */
+	email: string,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: ResolverInputTypes["UpdateEntrepreneurDataInput"] | undefined | null,
+	/** Данные физического лица */
+	individual_data?: ResolverInputTypes["UpdateIndividualDataInput"] | undefined | null,
+	/** Данные организации */
+	organization_data?: ResolverInputTypes["UpdateOrganizationDataInput"] | undefined | null,
+	/** Публичный ключ */
+	public_key?: string | undefined | null,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null,
+	/** Роль пользователя */
+	role: ResolverInputTypes["RegisterRole"],
+	/** Тип аккаунта */
+	type: ResolverInputTypes["AccountType"],
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateBankAccountInput"]: {
 	/** Данные банковского счёта */
@@ -3315,6 +4856,64 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	method_id: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UpdateEntrepreneurDataInput"]: {
+	/** Дата рождения */
+	birthdate: string,
+	/** Город */
+	city: string,
+	/** Страна */
+	country: ResolverInputTypes["Country"],
+	/** Детали индивидуального предпринимателя */
+	details: ResolverInputTypes["EntrepreneurDetailsInput"],
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Телефон */
+	phone: string
+};
+	["UpdateIndividualDataInput"]: {
+	/** Дата рождения */
+	birthdate: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: ResolverInputTypes["PassportInput"] | undefined | null,
+	/** Телефон */
+	phone: string
+};
+	["UpdateOrganizationDataInput"]: {
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: ResolverInputTypes["OrganizationDetailsInput"],
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное наименование организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: ResolverInputTypes["RepresentedByInput"],
+	/** Краткое наименование организации */
+	short_name: string,
+	/** Тип организации */
+	type: ResolverInputTypes["OrganizationType"]
 };
 	["UserAccount"]: AliasType<{
 	/** Метаинформация */
@@ -3337,8 +4936,54 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 	verifications?:ResolverInputTypes["Verification"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Объединение информации о пользователях */
+["UserDataUnion"]: AliasType<{
+	Entrepreneur?:ResolverInputTypes["Entrepreneur"],
+	Individual?:ResolverInputTypes["Individual"],
+	Organization?:ResolverInputTypes["Organization"],
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статус пользователя */
 ["UserStatus"]:UserStatus;
+	["Vars"]: AliasType<{
+	confidential_email?:boolean | `@${string}`,
+	confidential_link?:boolean | `@${string}`,
+	contact_email?:boolean | `@${string}`,
+	coopenomics_agreement?:ResolverInputTypes["AgreementVar"],
+	coopname?:boolean | `@${string}`,
+	full_abbr?:boolean | `@${string}`,
+	full_abbr_dative?:boolean | `@${string}`,
+	full_abbr_genitive?:boolean | `@${string}`,
+	name?:boolean | `@${string}`,
+	participant_application?:ResolverInputTypes["AgreementVar"],
+	passport_request?:boolean | `@${string}`,
+	privacy_agreement?:ResolverInputTypes["AgreementVar"],
+	short_abbr?:boolean | `@${string}`,
+	signature_agreement?:ResolverInputTypes["AgreementVar"],
+	user_agreement?:ResolverInputTypes["AgreementVar"],
+	wallet_agreement?:ResolverInputTypes["AgreementVar"],
+	website?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["VarsInput"]: {
+	confidential_email: string,
+	confidential_link: string,
+	contact_email: string,
+	coopenomics_agreement?: ResolverInputTypes["AgreementInput"] | undefined | null,
+	coopname: string,
+	full_abbr: string,
+	full_abbr_dative: string,
+	full_abbr_genitive: string,
+	name: string,
+	participant_application: ResolverInputTypes["AgreementInput"],
+	passport_request: string,
+	privacy_agreement: ResolverInputTypes["AgreementInput"],
+	short_abbr: string,
+	signature_agreement: ResolverInputTypes["AgreementInput"],
+	user_agreement: ResolverInputTypes["AgreementInput"],
+	wallet_agreement: ResolverInputTypes["AgreementInput"],
+	website: string
+};
 	["Verification"]: AliasType<{
 	/** Дата создания верификации */
 	created_at?:boolean | `@${string}`,
@@ -3372,14 +5017,18 @@ export type ModelTypes = {
     ["Account"]: {
 		/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?: ModelTypes["BlockchainAccount"] | undefined | null,
-	/** Объект аккаунта в системе учёта провайдера */
-	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
 	/** Объект пайщика кооператива */
 	participant_account?: ModelTypes["ParticipantAccount"] | undefined | null,
+	/** Объект аккаунта в системе учёта провайдера */
+	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
 	/** Объект пользовательского аккаунта кооперативной экономики */
 	user_account?: ModelTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
 	username: string
+};
+	["AccountRamDelta"]: {
+		account: string,
+	delta: number
 };
 	["AccountResourceInfo"]: {
 		/** Доступные ресурсы */
@@ -3393,6 +5042,56 @@ export type ModelTypes = {
 	/** Использовано ресурсов */
 	used: string
 };
+	["AccountType"]:AccountType;
+	["AccountsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["Account"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["ActDetail"]: {
+		action?: ModelTypes["ExtendedBlockchainAction"] | undefined | null,
+	document?: ModelTypes["GeneratedDocument"] | undefined | null
+};
+	["ActionAuthorization"]: {
+		actor: string,
+	permission: string
+};
+	["ActionReceipt"]: {
+		abi_sequence: number,
+	act_digest: string,
+	auth_sequence: Array<ModelTypes["AuthSequence"]>,
+	code_sequence: number,
+	global_sequence: string,
+	receiver: string,
+	recv_sequence: string
+};
+	["AddParticipantInput"]: {
+	/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
+	created_at: string,
+	/** Электронная почта */
+	email: string,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: ModelTypes["CreateEntrepreneurDataInput"] | undefined | null,
+	/** Данные физического лица */
+	individual_data?: ModelTypes["CreateIndividualDataInput"] | undefined | null,
+	/** Вступительный взнос, который был внесён пайщиком */
+	initial: string,
+	/** Минимальный паевый взнос, который был внесён пайщиком */
+	minimum: string,
+	/** Данные организации */
+	organization_data?: ModelTypes["CreateOrganizationDataInput"] | undefined | null,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null,
+	/** Флаг распределения вступительного взноса в невозвратный фонд вступительных взносов кооператива */
+	spread_initial: boolean,
+	/** Тип аккаунта */
+	type: ModelTypes["AccountType"]
+};
 	["AddTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -3400,6 +5099,26 @@ export type ModelTypes = {
 	coopname: string,
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
+};
+	["AgendaWithDocuments"]: {
+		/** Действие, которое привело к появлению вопроса на голосовании */
+	action: ModelTypes["BlockchainAction"],
+	/** Пакет документов, включающий разные подсекции */
+	documents: ModelTypes["DocumentPackage"],
+	/** Запись в таблице блокчейна о вопросе на голосовании */
+	table: ModelTypes["BlockchainDecision"]
+};
+	["AgreementInput"]: {
+	protocol_day_month_year: string,
+	protocol_number: string
+};
+	["AgreementVar"]: {
+		protocol_day_month_year: string,
+	protocol_number: string
+};
+	["AuthSequence"]: {
+		account: string,
+	sequence: string
 };
 	["Authority"]: {
 		/** Уровни разрешений */
@@ -3507,6 +5226,46 @@ export type ModelTypes = {
 	/** Информация о голосовании */
 	voter_info?: string | undefined | null
 };
+	/** Объект действия в блокчейне */
+["BlockchainAction"]: {
+		account: string,
+	account_ram_deltas: Array<ModelTypes["AccountRamDelta"]>,
+	action_ordinal: number,
+	authorization: Array<ModelTypes["ActionAuthorization"]>,
+	block_id: string,
+	block_num: number,
+	chain_id: string,
+	console: string,
+	context_free: boolean,
+	creator_action_ordinal: number,
+	/** Данные действия в формате JSON */
+	data: ModelTypes["JSON"],
+	elapsed: number,
+	global_sequence: string,
+	name: string,
+	receipt: ModelTypes["ActionReceipt"],
+	receiver: string,
+	transaction_id: string
+};
+	/** Запись в таблице блокчейна о процессе принятия решения советом кооператива */
+["BlockchainDecision"]: {
+		approved: boolean,
+	authorization: ModelTypes["SignedBlockchainDocument"],
+	authorized: boolean,
+	authorized_by: string,
+	batch_id: number,
+	coopname: string,
+	created_at: string,
+	expired_at: string,
+	id: number,
+	meta: string,
+	statement: ModelTypes["SignedBlockchainDocument"],
+	type: string,
+	username: string,
+	validated: boolean,
+	votes_against: Array<string>,
+	votes_for: Array<string>
+};
 	/** Информация о состоянии блокчейна */
 ["BlockchainInfoDTO"]: {
 		/** Лимит CPU для блока */
@@ -3576,6 +5335,14 @@ export type ModelTypes = {
 	/** Тип организации */
 	type: string
 };
+	["ContactsDTO"]: {
+		chairman: ModelTypes["PublicChairman"],
+	details: ModelTypes["OrganizationDetails"],
+	email: string,
+	full_address: string,
+	full_name: string,
+	phone: string
+};
 	["CooperativeOperatorAccount"]: {
 		/** Объявление кооператива */
 	announce: string,
@@ -3626,6 +5393,7 @@ export type ModelTypes = {
 	/** Дата регистрации */
 	verifications: Array<ModelTypes["Verification"]>
 };
+	["Country"]:Country;
 	["CreateBankAccountInput"]: {
 	/** Данные для банковского перевода */
 	data: ModelTypes["BankAccountInput"],
@@ -3654,6 +5422,78 @@ export type ModelTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateDepositPaymentInput"]: {
+	/** Сумма взноса */
+	quantity: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CreateEntrepreneurDataInput"]: {
+	/** Банковский счет */
+	bank_account: ModelTypes["BankAccountInput"],
+	/** Дата рождения */
+	birthdate: string,
+	/** Город */
+	city: string,
+	/** Страна */
+	country: ModelTypes["Country"],
+	/** Детали индивидуального предпринимателя */
+	details: ModelTypes["EntrepreneurDetailsInput"],
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Телефон */
+	phone: string
+};
+	["CreateIndividualDataInput"]: {
+	/** Дата рождения */
+	birthdate: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: ModelTypes["PassportInput"] | undefined | null,
+	/** Телефон */
+	phone: string
+};
+	["CreateInitialPaymentInput"]: {
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CreateOrganizationDataInput"]: {
+	/** Банковский счет организации */
+	bank_account: ModelTypes["BankAccountInput"],
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: ModelTypes["OrganizationDetailsInput"],
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное наименование организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: ModelTypes["RepresentedByInput"],
+	/** Краткое наименование организации */
+	short_name: string,
+	/** Тип организации */
+	type: ModelTypes["OrganizationType"]
+};
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string,
@@ -3670,6 +5510,19 @@ export type ModelTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
+	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
+["DecisionDetail"]: {
+		action: ModelTypes["ExtendedBlockchainAction"],
+	document: ModelTypes["DecisionDocumentUnion"],
+	votes_against: Array<ModelTypes["ExtendedBlockchainAction"]>,
+	votes_for: Array<ModelTypes["ExtendedBlockchainAction"]>
+};
+	/** Объединение типов документов протоколов решения совета */
+["DecisionDocumentUnion"]:ModelTypes["FreeDecisionDocument"] | ModelTypes["ParticipantApplicationDecisionDocument"];
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string
+};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -3690,6 +5543,27 @@ export type ModelTypes = {
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string
 };
+	/** Комплексный объект папки цифрового документа, который включает в себя заявление, решение, акты и связанные документы */
+["DocumentPackage"]: {
+		/** Массив объект(ов) актов, относящихся к заявлению */
+	acts: Array<ModelTypes["ActDetail"]>,
+	/** Объект цифрового документа решения */
+	decision: ModelTypes["DecisionDetail"],
+	/** Массив связанных документов, извлечённых из мета-данных */
+	links: Array<ModelTypes["GeneratedDocument"]>,
+	/** Объект цифрового документа заявления */
+	statement: ModelTypes["StatementDetail"]
+};
+	["DocumentsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["DocumentPackage"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["EditBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string,
@@ -3709,6 +5583,65 @@ export type ModelTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
+};
+	["Entrepreneur"]: {
+		/** Дата рождения */
+	birthdate: string,
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали ИП (ИНН, ОГРН) */
+	details: ModelTypes["EntrepreneurDetails"],
+	/** Email */
+	email: string,
+	/** Имя */
+	first_name: string,
+	/** Юридический адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Телефон */
+	phone: string,
+	/** Имя аккаунта */
+	username: string
+};
+	["EntrepreneurDetails"]: {
+		/** ИНН */
+	inn: string,
+	/** ОГРН */
+	ogrn: string
+};
+	["EntrepreneurDetailsInput"]: {
+	/** ИНН */
+	inn: string,
+	/** ОГРН */
+	ogrn: string
+};
+	/** Расширенное действие блокчейна с персональными данными пользователя, совершившего его. */
+["ExtendedBlockchainAction"]: {
+		account: string,
+	account_ram_deltas: Array<ModelTypes["AccountRamDelta"]>,
+	action_ordinal: number,
+	authorization: Array<ModelTypes["ActionAuthorization"]>,
+	block_id: string,
+	block_num: number,
+	chain_id: string,
+	console: string,
+	context_free: boolean,
+	creator_action_ordinal: number,
+	/** Данные действия в формате JSON */
+	data: ModelTypes["JSON"],
+	elapsed: number,
+	global_sequence: string,
+	name: string,
+	receipt: ModelTypes["ActionReceipt"],
+	receiver: string,
+	transaction_id: string,
+	/** Доп. данные о пользователе (физ/ИП/организация) */
+	user?: ModelTypes["UserDataUnion"] | undefined | null
 };
 	["Extension"]: {
 		/** Показывает, доступно ли расширение */
@@ -3751,6 +5684,18 @@ export type ModelTypes = {
 	name: string,
 	/** Timestamp of the last update to the extension */
 	updated_at?: ModelTypes["DateTime"] | undefined | null
+};
+	["FreeDecisionDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["FreeDecisionMetaDocumentOutput"]
 };
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -3848,11 +5793,25 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["GetAccountsInput"]: {
+	role?: string | undefined | null,
+	username?: string | undefined | null
+};
 	["GetBranchesInput"]: {
 	/** Фильтр по имени аккаунта кооперативного участка */
 	braname?: string | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string
+};
+	["GetDocumentsFilterInput"]: {
+	additionalFilters?: ModelTypes["JSON"] | undefined | null,
+	receiver: string
+};
+	["GetDocumentsInput"]: {
+	filter: ModelTypes["GetDocumentsFilterInput"],
+	limit?: number | undefined | null,
+	page?: number | undefined | null,
+	type?: string | undefined | null
 };
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
@@ -3872,6 +5831,16 @@ export type ModelTypes = {
 	/** Направление сортировки ("ASC" или "DESC") */
 	sortOrder: string,
 	/** Имя пользователя для фильтрации методов оплаты */
+	username?: string | undefined | null
+};
+	["GetPaymentsInput"]: {
+	/** Идентификатор платежа в блокчейне */
+	blockchain_id?: string | undefined | null,
+	/** Идентификатор платежа во внутренней системе */
+	id?: string | undefined | null,
+	/** Статус платежа */
+	status?: ModelTypes["PaymentStatus"] | undefined | null,
+	/** Имя пользователя для фильтрации платежей */
 	username?: string | undefined | null
 };
 	["Individual"]: {
@@ -3894,6 +5863,16 @@ export type ModelTypes = {
 	/** Имя аккаунта */
 	username: string
 };
+	["Init"]: {
+	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
+	organization_data: ModelTypes["CreateOrganizationDataInput"],
+	/** Переменные кооператива, используемые для заполнения шаблонов документов */
+	vars: ModelTypes["VarsInput"]
+};
+	["Install"]: {
+	soviet: Array<ModelTypes["SovietMemberInput"]>,
+	wif: string
+};
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:any;
 	["KeyWeight"]: {
@@ -3903,6 +5882,20 @@ export type ModelTypes = {
 	weight: number
 };
 	["LangType"]:LangType;
+	["LoginInput"]: {
+	/** Электронная почта */
+	email: string,
+	/** Метка времени в строковом формате ISO */
+	now: string,
+	/** Цифровая подпись метки времени */
+	signature: string
+};
+	["LogoutInput"]: {
+	/** Токен обновления */
+	access_token: string,
+	/** Токен доступа */
+	refresh_token: string
+};
 	["MetaDocument"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num: number,
@@ -3914,6 +5907,30 @@ export type ModelTypes = {
 	generator: string,
 	/** Язык документа */
 	lang: ModelTypes["LangType"],
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["MetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** ID документа в реестре */
@@ -3954,14 +5971,22 @@ export type ModelTypes = {
 	username: string
 };
 	["Mutation"]: {
-		/** Добавить доверенное лицо кооперативного участка */
+		/** Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета) */
+	addParticipant: ModelTypes["Account"],
+	/** Добавить доверенное лицо кооперативного участка */
 	addTrustedAccount: ModelTypes["Branch"],
 	/** Добавить метод оплаты */
 	createBankAccount: ModelTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
 	createBranch: ModelTypes["Branch"],
+	/** Создать объект платежа вступительного взноса */
+	createDeposit: ModelTypes["Payment"],
+	/** Создать объект платежа вступительного взноса */
+	createInitialPayment: ModelTypes["Payment"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 	createProjectOfFreeDecision: ModelTypes["CreatedProjectFreeDecision"],
+	/** Удалить аккаунт из системы учёта провайдера */
+	deleteAccount: boolean,
 	/** Удалить кооперативный участок */
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
@@ -3988,18 +6013,70 @@ export type ModelTypes = {
 	generateUserAgreement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
 	generateWalletAgreement: ModelTypes["GeneratedDocument"],
+	/** Произвести инициализацию программного обеспечения перед установкой совета методом install */
+	initSystem: ModelTypes["SystemInfo"],
 	/** Установить расширение */
 	installExtension: ModelTypes["Extension"],
+	/** Произвести установку членов совета перед началом работы */
+	installSystem: ModelTypes["SystemInfo"],
+	/** Войти в систему с помощью цифровой подписи и получить JWT-токены доступа */
+	login: ModelTypes["RegisteredAccount"],
+	/** Выйти из системы и заблокировать JWT-токены */
+	logout: boolean,
 	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему */
 	publishProjectOfFreeDecision: boolean,
+	/** Обновить токен доступа аккаунта */
+	refresh: ModelTypes["RegisteredAccount"],
+	/** Зарегистрировать аккаунт пользователя в системе */
+	registerAccount: ModelTypes["RegisteredAccount"],
+	/** Зарегистрировать заявление и подписанные положения, подготовив пакет документов к отправке в совет на голосование после поступления оплаты. */
+	registerParticipant: ModelTypes["Account"],
+	/** Заменить приватный ключ аккаунта */
+	resetKey: boolean,
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
+	/** Создать объект платежа вступительного взноса */
+	setPaymentStatus: ModelTypes["Payment"],
+	/** Сохранить приватный ключ в зашифрованном серверном хранилище */
+	setWif: boolean,
+	/** Выслать токен для замены приватного ключа аккаунта на электронную почту */
+	startResetKey: boolean,
 	/** Удалить расширение */
 	uninstallExtension: boolean,
+	/** Обновить аккаунт в системе провайдера */
+	updateAccount: ModelTypes["Account"],
 	/** Обновить банковский счёт */
 	updateBankAccount: ModelTypes["PaymentMethod"],
 	/** Обновить расширение */
-	updateExtension: ModelTypes["Extension"]
+	updateExtension: ModelTypes["Extension"],
+	/** Обновить параметры системы */
+	updateSystem: ModelTypes["SystemInfo"]
+};
+	["Organization"]: {
+		/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: ModelTypes["OrganizationDetails"],
+	/** Email */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Юридический адрес */
+	full_address: string,
+	/** Полное название */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: ModelTypes["RepresentedBy"],
+	/** Краткое название */
+	short_name: string,
+	/** Тип организации */
+	type: string,
+	/** Имя аккаунта организации */
+	username: string
 };
 	["OrganizationDetails"]: {
 		/** ИНН */
@@ -4009,15 +6086,21 @@ export type ModelTypes = {
 	/** ОГРН */
 	ogrn: string
 };
-	["PaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["PaymentMethod"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
+	["OrganizationDetailsInput"]: {
+	inn: string,
+	kpp: string,
+	ogrn: string
+};
+	["OrganizationType"]:OrganizationType;
+	["PaginationInput"]: {
+	/** Количество элементов на странице */
+	limit: number,
+	/** Номер страницы */
+	page: number,
+	/** Ключ сортировки (например, "name") */
+	sortBy?: string | undefined | null,
+	/** Направление сортировки ("ASC" или "DESC") */
+	sortOrder: string
 };
 	["ParticipantAccount"]: {
 		/** Имя кооперативного участка */
@@ -4165,6 +6248,44 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ParticipantApplicationSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ParticipantApplicationSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ParticipantApplicationSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Изображение собственноручной подписи (base-64) */
+	signature: string,
+	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
+	skip_save: boolean,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["Passport"]: {
 		/** Код подразделения */
 	code: string,
@@ -4176,6 +6297,55 @@ export type ModelTypes = {
 	number: number,
 	/** Серия паспорта */
 	series: number
+};
+	["PassportInput"]: {
+	code: string,
+	issued_at: string,
+	issued_by: string,
+	number: number,
+	series: number
+};
+	["Payment"]: {
+		/** Сумма платежа */
+	amount: number,
+	/** Идентификационный номер платежа в блокчейне */
+	blockchain_id: number,
+	/** Дата создания платежа */
+	created_at: ModelTypes["DateTime"],
+	/** Детали платежа */
+	details: ModelTypes["PaymentDetails"],
+	/** Дата истечения срока давности платежа */
+	expired_at: ModelTypes["DateTime"],
+	/** Идентификатор платежа во внутренней системе учёта */
+	id: string,
+	/** Содержит сервисное сообщение провайдера об ошибке обработки платежа */
+	message: string,
+	/** Идентификатор наименования провайдера платежа, ответственного за обработку */
+	provider: string,
+	/** Идентификатор номера платежа, который отображается пользователю в платежных документах */
+	status: ModelTypes["PaymentStatus"],
+	/** Символ тикера валюты платежа */
+	symbol: string,
+	/** Дата обновления платежа */
+	updated_at: ModelTypes["DateTime"],
+	/** Имя аккаунта пользователя, совершающего платеж */
+	username: string
+};
+	["PaymentDetails"]: {
+		/** Сумма платежа с учетом комиссии */
+	amount_plus_fee: string,
+	/** Сумма платежа без учета комиссии */
+	amount_without_fee: string,
+	/** Строка с данными платежа */
+	data: string,
+	/** Фактический процент комиссии */
+	fact_fee_percent: number,
+	/** Размер комиссии в абсолютных значениях */
+	fee_amount: string,
+	/** Процент комиссии */
+	fee_percent: number,
+	/** Допустимый процент отклонения */
+	tolerance_percent: number
 };
 	["PaymentMethod"]: {
 		/** Дата создания */
@@ -4194,6 +6364,27 @@ export type ModelTypes = {
 	username: string
 };
 	["PaymentMethodData"]:ModelTypes["BankAccount"] | ModelTypes["SbpAccount"];
+	["PaymentMethodPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["PaymentMethod"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaymentPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["Payment"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaymentStatus"]:PaymentStatus;
 	["Permission"]: {
 		/** Родительское разрешение */
 	parent: string,
@@ -4312,6 +6503,11 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["PublicChairman"]: {
+		first_name: string,
+	last_name: string,
+	middle_name: string
+};
 	["PublishProjectFreeDecisionInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -4325,14 +6521,27 @@ export type ModelTypes = {
 	["Query"]: {
 		/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
+	/** Получить сводную информацию о аккаунтах системы */
+	getAccounts: ModelTypes["AccountsPaginationResult"],
+	/** Получить список вопросов совета кооператива для голосования */
+	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
+	getDocuments: ModelTypes["DocumentsPaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<ModelTypes["Extension"]>,
 	/** Получить список методов оплаты */
-	getPaymentMethods: ModelTypes["PaginationResult"],
+	getPaymentMethods: ModelTypes["PaymentMethodPaginationResult"],
+	/** Получить список платежей */
+	getPayments: ModelTypes["PaymentPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"]
+};
+	["RefreshInput"]: {
+	/** Токен доступа */
+	access_token: string,
+	/** Токен обновления */
+	refresh_token: string
 };
 	["RefundRequest"]: {
 		/** Сумма CPU */
@@ -4343,6 +6552,47 @@ export type ModelTypes = {
 	owner: string,
 	/** Время запроса */
 	request_time: string
+};
+	["RegisterAccountInput"]: {
+	/** Электронная почта */
+	email: string,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: ModelTypes["CreateEntrepreneurDataInput"] | undefined | null,
+	/** Данные физического лица */
+	individual_data?: ModelTypes["CreateIndividualDataInput"] | undefined | null,
+	/** Данные организации */
+	organization_data?: ModelTypes["CreateOrganizationDataInput"] | undefined | null,
+	/** Публичный ключ */
+	public_key?: string | undefined | null,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null,
+	/** Роль пользователя */
+	role: ModelTypes["RegisterRole"],
+	/** Тип аккаунта */
+	type: ModelTypes["AccountType"],
+	/** Имя пользователя */
+	username: string
+};
+	["RegisterParticipantInput"]: {
+	/** Подписанный документ политики конфиденциальности от пайщика */
+	privacy_agreement: ModelTypes["SignedDigitalDocumentInput"],
+	/** Подписанный документ положения о цифровой подписи от пайщика */
+	signature_agreement: ModelTypes["SignedDigitalDocumentInput"],
+	/** Подписанный документ заявления на вступление в кооператив от пайщика */
+	statement: ModelTypes["ParticipantApplicationSignedDocumentInput"],
+	/** Подписанный документ пользовательского соглашения от пайщика */
+	user_agreement: ModelTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта пайщика */
+	username: string,
+	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
+	wallet_agreement: ModelTypes["SignedDigitalDocumentInput"]
+};
+	["RegisterRole"]:RegisterRole;
+	["RegisteredAccount"]: {
+		/** Информация об зарегистрированном аккаунте */
+	account: ModelTypes["Account"],
+	/** Токены доступа и обновления */
+	tokens: ModelTypes["Tokens"]
 };
 	["RepresentedBy"]: {
 		/** На основании чего действует */
@@ -4355,6 +6605,19 @@ export type ModelTypes = {
 	middle_name: string,
 	/** Должность */
 	position: string
+};
+	["RepresentedByInput"]: {
+	based_on: string,
+	first_name: string,
+	last_name: string,
+	middle_name: string,
+	position: string
+};
+	["ResetKeyInput"]: {
+	/** Публичный ключ для замены */
+	public_key: string,
+	/** Токен авторизации для замены ключа, полученный по email */
+	token: string
 };
 	["ResourceDelegationDTO"]: {
 		/** Вес CPU */
@@ -4488,6 +6751,20 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["SetPaymentStatusInput"]: {
+	/** Идентификатор платежа, для которого устанавливается статус */
+	id: string,
+	/** Новый статус платежа */
+	status: ModelTypes["PaymentStatus"]
+};
+	["SetWifInput"]: {
+	/** Тип разрешения ключа */
+	permission: string,
+	/** Имя пользователя, чей ключ */
+	username: string,
+	/** Приватный ключ */
+	wif: string
+};
 	["SignedBlockchainDocument"]: {
 		/** Хеш документа */
 	hash: string,
@@ -4498,22 +6775,89 @@ export type ModelTypes = {
 	/** Подпись документа */
 	signature: string
 };
+	["SignedDigitalDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация документа */
+	meta: ModelTypes["MetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["SovietMemberInput"]: {
+	individual_data: ModelTypes["CreateIndividualDataInput"],
+	role: string
+};
+	["StartResetKeyInput"]: {
+	/** Электронная почта */
+	email: string
+};
+	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) */
+["StatementDetail"]: {
+		action: ModelTypes["ExtendedBlockchainAction"],
+	document: ModelTypes["StatementDocumentUnion"]
+};
+	/** Объединение типов документов заявлений, или других документов, за которыми следует появление протокола решения совета */
+["StatementDocumentUnion"]:ModelTypes["ParticipantApplicationDocument"] | ModelTypes["ProjectFreeDecisionDocument"];
 	["SystemInfo"]: {
 		/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account: ModelTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info: ModelTypes["BlockchainInfoDTO"],
+	/** Контакты кооператива */
+	contacts?: ModelTypes["ContactsDTO"] | undefined | null,
 	/** Объект аккаунта кооператива у оператора */
 	cooperator_account: ModelTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Статус контроллера кооператива */
-	system_status: ModelTypes["SystemStatus"]
+	system_status: ModelTypes["SystemStatus"],
+	/** Переменные кооператива */
+	vars?: ModelTypes["Vars"] | undefined | null
 };
 	["SystemStatus"]:SystemStatus;
+	["Token"]: {
+		/** Дата истечения токена доступа */
+	expires: ModelTypes["DateTime"],
+	/** Токен доступа */
+	token: string
+};
+	["Tokens"]: {
+		/** Токен доступа */
+	access: ModelTypes["Token"],
+	/** Токен обновления */
+	refresh: ModelTypes["Token"]
+};
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
+};
+	["Update"]: {
+	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
+	organization_data?: ModelTypes["UpdateOrganizationDataInput"] | undefined | null,
+	/** Переменные кооператива, используемые для заполнения шаблонов документов */
+	vars?: ModelTypes["VarsInput"] | undefined | null
+};
+	["UpdateAccountInput"]: {
+	/** Электронная почта */
+	email: string,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: ModelTypes["UpdateEntrepreneurDataInput"] | undefined | null,
+	/** Данные физического лица */
+	individual_data?: ModelTypes["UpdateIndividualDataInput"] | undefined | null,
+	/** Данные организации */
+	organization_data?: ModelTypes["UpdateOrganizationDataInput"] | undefined | null,
+	/** Публичный ключ */
+	public_key?: string | undefined | null,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null,
+	/** Роль пользователя */
+	role: ModelTypes["RegisterRole"],
+	/** Тип аккаунта */
+	type: ModelTypes["AccountType"],
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateBankAccountInput"]: {
 	/** Данные банковского счёта */
@@ -4524,6 +6868,64 @@ export type ModelTypes = {
 	method_id: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UpdateEntrepreneurDataInput"]: {
+	/** Дата рождения */
+	birthdate: string,
+	/** Город */
+	city: string,
+	/** Страна */
+	country: ModelTypes["Country"],
+	/** Детали индивидуального предпринимателя */
+	details: ModelTypes["EntrepreneurDetailsInput"],
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Телефон */
+	phone: string
+};
+	["UpdateIndividualDataInput"]: {
+	/** Дата рождения */
+	birthdate: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: ModelTypes["PassportInput"] | undefined | null,
+	/** Телефон */
+	phone: string
+};
+	["UpdateOrganizationDataInput"]: {
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: ModelTypes["OrganizationDetailsInput"],
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное наименование организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: ModelTypes["RepresentedByInput"],
+	/** Краткое наименование организации */
+	short_name: string,
+	/** Тип организации */
+	type: ModelTypes["OrganizationType"]
 };
 	["UserAccount"]: {
 		/** Метаинформация */
@@ -4545,7 +6947,47 @@ export type ModelTypes = {
 	/** Дата регистрации */
 	verifications: Array<ModelTypes["Verification"]>
 };
+	/** Объединение информации о пользователях */
+["UserDataUnion"]:ModelTypes["Entrepreneur"] | ModelTypes["Individual"] | ModelTypes["Organization"];
 	["UserStatus"]:UserStatus;
+	["Vars"]: {
+		confidential_email: string,
+	confidential_link: string,
+	contact_email: string,
+	coopenomics_agreement?: ModelTypes["AgreementVar"] | undefined | null,
+	coopname: string,
+	full_abbr: string,
+	full_abbr_dative: string,
+	full_abbr_genitive: string,
+	name: string,
+	participant_application: ModelTypes["AgreementVar"],
+	passport_request: string,
+	privacy_agreement: ModelTypes["AgreementVar"],
+	short_abbr: string,
+	signature_agreement: ModelTypes["AgreementVar"],
+	user_agreement: ModelTypes["AgreementVar"],
+	wallet_agreement: ModelTypes["AgreementVar"],
+	website: string
+};
+	["VarsInput"]: {
+	confidential_email: string,
+	confidential_link: string,
+	contact_email: string,
+	coopenomics_agreement?: ModelTypes["AgreementInput"] | undefined | null,
+	coopname: string,
+	full_abbr: string,
+	full_abbr_dative: string,
+	full_abbr_genitive: string,
+	name: string,
+	participant_application: ModelTypes["AgreementInput"],
+	passport_request: string,
+	privacy_agreement: ModelTypes["AgreementInput"],
+	short_abbr: string,
+	signature_agreement: ModelTypes["AgreementInput"],
+	user_agreement: ModelTypes["AgreementInput"],
+	wallet_agreement: ModelTypes["AgreementInput"],
+	website: string
+};
 	["Verification"]: {
 		/** Дата создания верификации */
 	created_at: string,
@@ -4580,14 +7022,19 @@ export type GraphQLTypes = {
 	__typename: "Account",
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?: GraphQLTypes["BlockchainAccount"] | undefined | null,
-	/** Объект аккаунта в системе учёта провайдера */
-	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
 	/** Объект пайщика кооператива */
 	participant_account?: GraphQLTypes["ParticipantAccount"] | undefined | null,
+	/** Объект аккаунта в системе учёта провайдера */
+	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
 	/** Объект пользовательского аккаунта кооперативной экономики */
 	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
 	username: string
+};
+	["AccountRamDelta"]: {
+	__typename: "AccountRamDelta",
+	account: string,
+	delta: number
 };
 	["AccountResourceInfo"]: {
 	__typename: "AccountResourceInfo",
@@ -4602,6 +7049,61 @@ export type GraphQLTypes = {
 	/** Использовано ресурсов */
 	used: string
 };
+	/** Тип аккаунта пользователя в системе */
+["AccountType"]: AccountType;
+	["AccountsPaginationResult"]: {
+	__typename: "AccountsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["Account"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["ActDetail"]: {
+	__typename: "ActDetail",
+	action?: GraphQLTypes["ExtendedBlockchainAction"] | undefined | null,
+	document?: GraphQLTypes["GeneratedDocument"] | undefined | null
+};
+	["ActionAuthorization"]: {
+	__typename: "ActionAuthorization",
+	actor: string,
+	permission: string
+};
+	["ActionReceipt"]: {
+	__typename: "ActionReceipt",
+	abi_sequence: number,
+	act_digest: string,
+	auth_sequence: Array<GraphQLTypes["AuthSequence"]>,
+	code_sequence: number,
+	global_sequence: string,
+	receiver: string,
+	recv_sequence: string
+};
+	["AddParticipantInput"]: {
+		/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
+	created_at: string,
+	/** Электронная почта */
+	email: string,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: GraphQLTypes["CreateEntrepreneurDataInput"] | undefined | null,
+	/** Данные физического лица */
+	individual_data?: GraphQLTypes["CreateIndividualDataInput"] | undefined | null,
+	/** Вступительный взнос, который был внесён пайщиком */
+	initial: string,
+	/** Минимальный паевый взнос, который был внесён пайщиком */
+	minimum: string,
+	/** Данные организации */
+	organization_data?: GraphQLTypes["CreateOrganizationDataInput"] | undefined | null,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null,
+	/** Флаг распределения вступительного взноса в невозвратный фонд вступительных взносов кооператива */
+	spread_initial: boolean,
+	/** Тип аккаунта */
+	type: GraphQLTypes["AccountType"]
+};
 	["AddTrustedAccountInput"]: {
 		/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -4609,6 +7111,29 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
+};
+	["AgendaWithDocuments"]: {
+	__typename: "AgendaWithDocuments",
+	/** Действие, которое привело к появлению вопроса на голосовании */
+	action: GraphQLTypes["BlockchainAction"],
+	/** Пакет документов, включающий разные подсекции */
+	documents: GraphQLTypes["DocumentPackage"],
+	/** Запись в таблице блокчейна о вопросе на голосовании */
+	table: GraphQLTypes["BlockchainDecision"]
+};
+	["AgreementInput"]: {
+		protocol_day_month_year: string,
+	protocol_number: string
+};
+	["AgreementVar"]: {
+	__typename: "AgreementVar",
+	protocol_day_month_year: string,
+	protocol_number: string
+};
+	["AuthSequence"]: {
+	__typename: "AuthSequence",
+	account: string,
+	sequence: string
 };
 	["Authority"]: {
 	__typename: "Authority",
@@ -4721,6 +7246,48 @@ export type GraphQLTypes = {
 	/** Информация о голосовании */
 	voter_info?: string | undefined | null
 };
+	/** Объект действия в блокчейне */
+["BlockchainAction"]: {
+	__typename: "BlockchainAction",
+	account: string,
+	account_ram_deltas: Array<GraphQLTypes["AccountRamDelta"]>,
+	action_ordinal: number,
+	authorization: Array<GraphQLTypes["ActionAuthorization"]>,
+	block_id: string,
+	block_num: number,
+	chain_id: string,
+	console: string,
+	context_free: boolean,
+	creator_action_ordinal: number,
+	/** Данные действия в формате JSON */
+	data: GraphQLTypes["JSON"],
+	elapsed: number,
+	global_sequence: string,
+	name: string,
+	receipt: GraphQLTypes["ActionReceipt"],
+	receiver: string,
+	transaction_id: string
+};
+	/** Запись в таблице блокчейна о процессе принятия решения советом кооператива */
+["BlockchainDecision"]: {
+	__typename: "BlockchainDecision",
+	approved: boolean,
+	authorization: GraphQLTypes["SignedBlockchainDocument"],
+	authorized: boolean,
+	authorized_by: string,
+	batch_id: number,
+	coopname: string,
+	created_at: string,
+	expired_at: string,
+	id: number,
+	meta: string,
+	statement: GraphQLTypes["SignedBlockchainDocument"],
+	type: string,
+	username: string,
+	validated: boolean,
+	votes_against: Array<string>,
+	votes_for: Array<string>
+};
 	/** Информация о состоянии блокчейна */
 ["BlockchainInfoDTO"]: {
 	__typename: "BlockchainInfoDTO",
@@ -4792,6 +7359,15 @@ export type GraphQLTypes = {
 	/** Тип организации */
 	type: string
 };
+	["ContactsDTO"]: {
+	__typename: "ContactsDTO",
+	chairman: GraphQLTypes["PublicChairman"],
+	details: GraphQLTypes["OrganizationDetails"],
+	email: string,
+	full_address: string,
+	full_name: string,
+	phone: string
+};
 	["CooperativeOperatorAccount"]: {
 	__typename: "CooperativeOperatorAccount",
 	/** Объявление кооператива */
@@ -4843,6 +7419,8 @@ export type GraphQLTypes = {
 	/** Дата регистрации */
 	verifications: Array<GraphQLTypes["Verification"]>
 };
+	/** Страна регистрации пользователя */
+["Country"]: Country;
 	["CreateBankAccountInput"]: {
 		/** Данные для банковского перевода */
 	data: GraphQLTypes["BankAccountInput"],
@@ -4871,6 +7449,78 @@ export type GraphQLTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateDepositPaymentInput"]: {
+		/** Сумма взноса */
+	quantity: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CreateEntrepreneurDataInput"]: {
+		/** Банковский счет */
+	bank_account: GraphQLTypes["BankAccountInput"],
+	/** Дата рождения */
+	birthdate: string,
+	/** Город */
+	city: string,
+	/** Страна */
+	country: GraphQLTypes["Country"],
+	/** Детали индивидуального предпринимателя */
+	details: GraphQLTypes["EntrepreneurDetailsInput"],
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Телефон */
+	phone: string
+};
+	["CreateIndividualDataInput"]: {
+		/** Дата рождения */
+	birthdate: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: GraphQLTypes["PassportInput"] | undefined | null,
+	/** Телефон */
+	phone: string
+};
+	["CreateInitialPaymentInput"]: {
+		/** Имя аккаунта пользователя */
+	username: string
+};
+	["CreateOrganizationDataInput"]: {
+		/** Банковский счет организации */
+	bank_account: GraphQLTypes["BankAccountInput"],
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: GraphQLTypes["OrganizationDetailsInput"],
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное наименование организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: GraphQLTypes["RepresentedByInput"],
+	/** Краткое наименование организации */
+	short_name: string,
+	/** Тип организации */
+	type: GraphQLTypes["OrganizationType"]
+};
 	["CreateProjectFreeDecisionInput"]: {
 		/** Проект решения, которое предлагается принять */
 	decision: string,
@@ -4888,6 +7538,24 @@ export type GraphQLTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]: "scalar" & { name: "DateTime" };
+	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
+["DecisionDetail"]: {
+	__typename: "DecisionDetail",
+	action: GraphQLTypes["ExtendedBlockchainAction"],
+	document: GraphQLTypes["DecisionDocumentUnion"],
+	votes_against: Array<GraphQLTypes["ExtendedBlockchainAction"]>,
+	votes_for: Array<GraphQLTypes["ExtendedBlockchainAction"]>
+};
+	/** Объединение типов документов протоколов решения совета */
+["DecisionDocumentUnion"]:{
+        	__typename:"FreeDecisionDocument" | "ParticipantApplicationDecisionDocument"
+        	['...on FreeDecisionDocument']: '__union' & GraphQLTypes["FreeDecisionDocument"];
+	['...on ParticipantApplicationDecisionDocument']: '__union' & GraphQLTypes["ParticipantApplicationDecisionDocument"];
+};
+	["DeleteAccountInput"]: {
+		/** Имя аккаунта пользователя */
+	username_for_delete: string
+};
 	["DeleteBranchInput"]: {
 		/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -4908,6 +7576,29 @@ export type GraphQLTypes = {
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string
 };
+	/** Комплексный объект папки цифрового документа, который включает в себя заявление, решение, акты и связанные документы */
+["DocumentPackage"]: {
+	__typename: "DocumentPackage",
+	/** Массив объект(ов) актов, относящихся к заявлению */
+	acts: Array<GraphQLTypes["ActDetail"]>,
+	/** Объект цифрового документа решения */
+	decision: GraphQLTypes["DecisionDetail"],
+	/** Массив связанных документов, извлечённых из мета-данных */
+	links: Array<GraphQLTypes["GeneratedDocument"]>,
+	/** Объект цифрового документа заявления */
+	statement: GraphQLTypes["StatementDetail"]
+};
+	["DocumentsPaginationResult"]: {
+	__typename: "DocumentsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["DocumentPackage"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["EditBranchInput"]: {
 		/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string,
@@ -4927,6 +7618,68 @@ export type GraphQLTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
+};
+	["Entrepreneur"]: {
+	__typename: "Entrepreneur",
+	/** Дата рождения */
+	birthdate: string,
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали ИП (ИНН, ОГРН) */
+	details: GraphQLTypes["EntrepreneurDetails"],
+	/** Email */
+	email: string,
+	/** Имя */
+	first_name: string,
+	/** Юридический адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Телефон */
+	phone: string,
+	/** Имя аккаунта */
+	username: string
+};
+	["EntrepreneurDetails"]: {
+	__typename: "EntrepreneurDetails",
+	/** ИНН */
+	inn: string,
+	/** ОГРН */
+	ogrn: string
+};
+	["EntrepreneurDetailsInput"]: {
+		/** ИНН */
+	inn: string,
+	/** ОГРН */
+	ogrn: string
+};
+	/** Расширенное действие блокчейна с персональными данными пользователя, совершившего его. */
+["ExtendedBlockchainAction"]: {
+	__typename: "ExtendedBlockchainAction",
+	account: string,
+	account_ram_deltas: Array<GraphQLTypes["AccountRamDelta"]>,
+	action_ordinal: number,
+	authorization: Array<GraphQLTypes["ActionAuthorization"]>,
+	block_id: string,
+	block_num: number,
+	chain_id: string,
+	console: string,
+	context_free: boolean,
+	creator_action_ordinal: number,
+	/** Данные действия в формате JSON */
+	data: GraphQLTypes["JSON"],
+	elapsed: number,
+	global_sequence: string,
+	name: string,
+	receipt: GraphQLTypes["ActionReceipt"],
+	receiver: string,
+	transaction_id: string,
+	/** Доп. данные о пользователе (физ/ИП/организация) */
+	user?: GraphQLTypes["UserDataUnion"] | undefined | null
 };
 	["Extension"]: {
 	__typename: "Extension",
@@ -4970,6 +7723,19 @@ export type GraphQLTypes = {
 	name: string,
 	/** Timestamp of the last update to the extension */
 	updated_at?: GraphQLTypes["DateTime"] | undefined | null
+};
+	["FreeDecisionDocument"]: {
+	__typename: "FreeDecisionDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["FreeDecisionMetaDocumentOutput"]
 };
 	["FreeDecisionGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -5069,11 +7835,25 @@ export type GraphQLTypes = {
 		/** Имя аккаунта пользователя */
 	username: string
 };
+	["GetAccountsInput"]: {
+		role?: string | undefined | null,
+	username?: string | undefined | null
+};
 	["GetBranchesInput"]: {
 		/** Фильтр по имени аккаунта кооперативного участка */
 	braname?: string | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string
+};
+	["GetDocumentsFilterInput"]: {
+		additionalFilters?: GraphQLTypes["JSON"] | undefined | null,
+	receiver: string
+};
+	["GetDocumentsInput"]: {
+		filter: GraphQLTypes["GetDocumentsFilterInput"],
+	limit?: number | undefined | null,
+	page?: number | undefined | null,
+	type?: string | undefined | null
 };
 	["GetExtensionsInput"]: {
 		/** Фильтр включенных расширений */
@@ -5093,6 +7873,16 @@ export type GraphQLTypes = {
 	/** Направление сортировки ("ASC" или "DESC") */
 	sortOrder: string,
 	/** Имя пользователя для фильтрации методов оплаты */
+	username?: string | undefined | null
+};
+	["GetPaymentsInput"]: {
+		/** Идентификатор платежа в блокчейне */
+	blockchain_id?: string | undefined | null,
+	/** Идентификатор платежа во внутренней системе */
+	id?: string | undefined | null,
+	/** Статус платежа */
+	status?: GraphQLTypes["PaymentStatus"] | undefined | null,
+	/** Имя пользователя для фильтрации платежей */
 	username?: string | undefined | null
 };
 	["Individual"]: {
@@ -5116,6 +7906,16 @@ export type GraphQLTypes = {
 	/** Имя аккаунта */
 	username: string
 };
+	["Init"]: {
+		/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
+	organization_data: GraphQLTypes["CreateOrganizationDataInput"],
+	/** Переменные кооператива, используемые для заполнения шаблонов документов */
+	vars: GraphQLTypes["VarsInput"]
+};
+	["Install"]: {
+		soviet: Array<GraphQLTypes["SovietMemberInput"]>,
+	wif: string
+};
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]: "scalar" & { name: "JSON" };
 	["KeyWeight"]: {
@@ -5127,6 +7927,20 @@ export type GraphQLTypes = {
 };
 	/** Язык документа */
 ["LangType"]: LangType;
+	["LoginInput"]: {
+		/** Электронная почта */
+	email: string,
+	/** Метка времени в строковом формате ISO */
+	now: string,
+	/** Цифровая подпись метки времени */
+	signature: string
+};
+	["LogoutInput"]: {
+		/** Токен обновления */
+	access_token: string,
+	/** Токен доступа */
+	refresh_token: string
+};
 	["MetaDocument"]: {
 	__typename: "MetaDocument",
 	/** Номер блока, на котором был создан документ */
@@ -5139,6 +7953,30 @@ export type GraphQLTypes = {
 	generator: string,
 	/** Язык документа */
 	lang: GraphQLTypes["LangType"],
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["MetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** ID документа в реестре */
@@ -5181,14 +8019,22 @@ export type GraphQLTypes = {
 };
 	["Mutation"]: {
 	__typename: "Mutation",
+	/** Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета) */
+	addParticipant: GraphQLTypes["Account"],
 	/** Добавить доверенное лицо кооперативного участка */
 	addTrustedAccount: GraphQLTypes["Branch"],
 	/** Добавить метод оплаты */
 	createBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
 	createBranch: GraphQLTypes["Branch"],
+	/** Создать объект платежа вступительного взноса */
+	createDeposit: GraphQLTypes["Payment"],
+	/** Создать объект платежа вступительного взноса */
+	createInitialPayment: GraphQLTypes["Payment"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 	createProjectOfFreeDecision: GraphQLTypes["CreatedProjectFreeDecision"],
+	/** Удалить аккаунт из системы учёта провайдера */
+	deleteAccount: boolean,
 	/** Удалить кооперативный участок */
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
@@ -5215,18 +8061,71 @@ export type GraphQLTypes = {
 	generateUserAgreement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
 	generateWalletAgreement: GraphQLTypes["GeneratedDocument"],
+	/** Произвести инициализацию программного обеспечения перед установкой совета методом install */
+	initSystem: GraphQLTypes["SystemInfo"],
 	/** Установить расширение */
 	installExtension: GraphQLTypes["Extension"],
+	/** Произвести установку членов совета перед началом работы */
+	installSystem: GraphQLTypes["SystemInfo"],
+	/** Войти в систему с помощью цифровой подписи и получить JWT-токены доступа */
+	login: GraphQLTypes["RegisteredAccount"],
+	/** Выйти из системы и заблокировать JWT-токены */
+	logout: boolean,
 	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему */
 	publishProjectOfFreeDecision: boolean,
+	/** Обновить токен доступа аккаунта */
+	refresh: GraphQLTypes["RegisteredAccount"],
+	/** Зарегистрировать аккаунт пользователя в системе */
+	registerAccount: GraphQLTypes["RegisteredAccount"],
+	/** Зарегистрировать заявление и подписанные положения, подготовив пакет документов к отправке в совет на голосование после поступления оплаты. */
+	registerParticipant: GraphQLTypes["Account"],
+	/** Заменить приватный ключ аккаунта */
+	resetKey: boolean,
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
+	/** Создать объект платежа вступительного взноса */
+	setPaymentStatus: GraphQLTypes["Payment"],
+	/** Сохранить приватный ключ в зашифрованном серверном хранилище */
+	setWif: boolean,
+	/** Выслать токен для замены приватного ключа аккаунта на электронную почту */
+	startResetKey: boolean,
 	/** Удалить расширение */
 	uninstallExtension: boolean,
+	/** Обновить аккаунт в системе провайдера */
+	updateAccount: GraphQLTypes["Account"],
 	/** Обновить банковский счёт */
 	updateBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Обновить расширение */
-	updateExtension: GraphQLTypes["Extension"]
+	updateExtension: GraphQLTypes["Extension"],
+	/** Обновить параметры системы */
+	updateSystem: GraphQLTypes["SystemInfo"]
+};
+	["Organization"]: {
+	__typename: "Organization",
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: GraphQLTypes["OrganizationDetails"],
+	/** Email */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Юридический адрес */
+	full_address: string,
+	/** Полное название */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: GraphQLTypes["RepresentedBy"],
+	/** Краткое название */
+	short_name: string,
+	/** Тип организации */
+	type: string,
+	/** Имя аккаунта организации */
+	username: string
 };
 	["OrganizationDetails"]: {
 	__typename: "OrganizationDetails",
@@ -5237,16 +8136,22 @@ export type GraphQLTypes = {
 	/** ОГРН */
 	ogrn: string
 };
-	["PaginationResult"]: {
-	__typename: "PaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["PaymentMethod"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
+	["OrganizationDetailsInput"]: {
+		inn: string,
+	kpp: string,
+	ogrn: string
+};
+	/** Тип юридического лица */
+["OrganizationType"]: OrganizationType;
+	["PaginationInput"]: {
+		/** Количество элементов на странице */
+	limit: number,
+	/** Номер страницы */
+	page: number,
+	/** Ключ сортировки (например, "name") */
+	sortBy?: string | undefined | null,
+	/** Направление сортировки ("ASC" или "DESC") */
+	sortOrder: string
 };
 	["ParticipantAccount"]: {
 	__typename: "ParticipantAccount",
@@ -5399,6 +8304,44 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ParticipantApplicationSignedDocumentInput"]: {
+		/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ParticipantApplicationSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ParticipantApplicationSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Изображение собственноручной подписи (base-64) */
+	signature: string,
+	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
+	skip_save: boolean,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["Passport"]: {
 	__typename: "Passport",
 	/** Код подразделения */
@@ -5411,6 +8354,57 @@ export type GraphQLTypes = {
 	number: number,
 	/** Серия паспорта */
 	series: number
+};
+	["PassportInput"]: {
+		code: string,
+	issued_at: string,
+	issued_by: string,
+	number: number,
+	series: number
+};
+	["Payment"]: {
+	__typename: "Payment",
+	/** Сумма платежа */
+	amount: number,
+	/** Идентификационный номер платежа в блокчейне */
+	blockchain_id: number,
+	/** Дата создания платежа */
+	created_at: GraphQLTypes["DateTime"],
+	/** Детали платежа */
+	details: GraphQLTypes["PaymentDetails"],
+	/** Дата истечения срока давности платежа */
+	expired_at: GraphQLTypes["DateTime"],
+	/** Идентификатор платежа во внутренней системе учёта */
+	id: string,
+	/** Содержит сервисное сообщение провайдера об ошибке обработки платежа */
+	message: string,
+	/** Идентификатор наименования провайдера платежа, ответственного за обработку */
+	provider: string,
+	/** Идентификатор номера платежа, который отображается пользователю в платежных документах */
+	status: GraphQLTypes["PaymentStatus"],
+	/** Символ тикера валюты платежа */
+	symbol: string,
+	/** Дата обновления платежа */
+	updated_at: GraphQLTypes["DateTime"],
+	/** Имя аккаунта пользователя, совершающего платеж */
+	username: string
+};
+	["PaymentDetails"]: {
+	__typename: "PaymentDetails",
+	/** Сумма платежа с учетом комиссии */
+	amount_plus_fee: string,
+	/** Сумма платежа без учета комиссии */
+	amount_without_fee: string,
+	/** Строка с данными платежа */
+	data: string,
+	/** Фактический процент комиссии */
+	fact_fee_percent: number,
+	/** Размер комиссии в абсолютных значениях */
+	fee_amount: string,
+	/** Процент комиссии */
+	fee_percent: number,
+	/** Допустимый процент отклонения */
+	tolerance_percent: number
 };
 	["PaymentMethod"]: {
 	__typename: "PaymentMethod",
@@ -5434,6 +8428,30 @@ export type GraphQLTypes = {
         	['...on BankAccount']: '__union' & GraphQLTypes["BankAccount"];
 	['...on SbpAccount']: '__union' & GraphQLTypes["SbpAccount"];
 };
+	["PaymentMethodPaginationResult"]: {
+	__typename: "PaymentMethodPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["PaymentMethod"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaymentPaginationResult"]: {
+	__typename: "PaymentPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["Payment"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	/** Статус платежа */
+["PaymentStatus"]: PaymentStatus;
 	["Permission"]: {
 	__typename: "Permission",
 	/** Родительское разрешение */
@@ -5557,6 +8575,12 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["PublicChairman"]: {
+	__typename: "PublicChairman",
+	first_name: string,
+	last_name: string,
+	middle_name: string
+};
 	["PublishProjectFreeDecisionInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -5571,14 +8595,27 @@ export type GraphQLTypes = {
 	__typename: "Query",
 	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
+	/** Получить сводную информацию о аккаунтах системы */
+	getAccounts: GraphQLTypes["AccountsPaginationResult"],
+	/** Получить список вопросов совета кооператива для голосования */
+	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
+	getDocuments: GraphQLTypes["DocumentsPaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<GraphQLTypes["Extension"]>,
 	/** Получить список методов оплаты */
-	getPaymentMethods: GraphQLTypes["PaginationResult"],
+	getPaymentMethods: GraphQLTypes["PaymentMethodPaginationResult"],
+	/** Получить список платежей */
+	getPayments: GraphQLTypes["PaymentPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"]
+};
+	["RefreshInput"]: {
+		/** Токен доступа */
+	access_token: string,
+	/** Токен обновления */
+	refresh_token: string
 };
 	["RefundRequest"]: {
 	__typename: "RefundRequest",
@@ -5590,6 +8627,49 @@ export type GraphQLTypes = {
 	owner: string,
 	/** Время запроса */
 	request_time: string
+};
+	["RegisterAccountInput"]: {
+		/** Электронная почта */
+	email: string,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: GraphQLTypes["CreateEntrepreneurDataInput"] | undefined | null,
+	/** Данные физического лица */
+	individual_data?: GraphQLTypes["CreateIndividualDataInput"] | undefined | null,
+	/** Данные организации */
+	organization_data?: GraphQLTypes["CreateOrganizationDataInput"] | undefined | null,
+	/** Публичный ключ */
+	public_key?: string | undefined | null,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null,
+	/** Роль пользователя */
+	role: GraphQLTypes["RegisterRole"],
+	/** Тип аккаунта */
+	type: GraphQLTypes["AccountType"],
+	/** Имя пользователя */
+	username: string
+};
+	["RegisterParticipantInput"]: {
+		/** Подписанный документ политики конфиденциальности от пайщика */
+	privacy_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
+	/** Подписанный документ положения о цифровой подписи от пайщика */
+	signature_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
+	/** Подписанный документ заявления на вступление в кооператив от пайщика */
+	statement: GraphQLTypes["ParticipantApplicationSignedDocumentInput"],
+	/** Подписанный документ пользовательского соглашения от пайщика */
+	user_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта пайщика */
+	username: string,
+	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
+	wallet_agreement: GraphQLTypes["SignedDigitalDocumentInput"]
+};
+	/** Роль пользователя при регистрации */
+["RegisterRole"]: RegisterRole;
+	["RegisteredAccount"]: {
+	__typename: "RegisteredAccount",
+	/** Информация об зарегистрированном аккаунте */
+	account: GraphQLTypes["Account"],
+	/** Токены доступа и обновления */
+	tokens: GraphQLTypes["Tokens"]
 };
 	["RepresentedBy"]: {
 	__typename: "RepresentedBy",
@@ -5603,6 +8683,19 @@ export type GraphQLTypes = {
 	middle_name: string,
 	/** Должность */
 	position: string
+};
+	["RepresentedByInput"]: {
+		based_on: string,
+	first_name: string,
+	last_name: string,
+	middle_name: string,
+	position: string
+};
+	["ResetKeyInput"]: {
+		/** Публичный ключ для замены */
+	public_key: string,
+	/** Токен авторизации для замены ключа, полученный по email */
+	token: string
 };
 	["ResourceDelegationDTO"]: {
 	__typename: "ResourceDelegationDTO",
@@ -5741,6 +8834,20 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["SetPaymentStatusInput"]: {
+		/** Идентификатор платежа, для которого устанавливается статус */
+	id: string,
+	/** Новый статус платежа */
+	status: GraphQLTypes["PaymentStatus"]
+};
+	["SetWifInput"]: {
+		/** Тип разрешения ключа */
+	permission: string,
+	/** Имя пользователя, чей ключ */
+	username: string,
+	/** Приватный ключ */
+	wif: string
+};
 	["SignedBlockchainDocument"]: {
 	__typename: "SignedBlockchainDocument",
 	/** Хеш документа */
@@ -5752,24 +8859,98 @@ export type GraphQLTypes = {
 	/** Подпись документа */
 	signature: string
 };
+	["SignedDigitalDocumentInput"]: {
+		/** Хэш документа */
+	hash: string,
+	/** Метаинформация документа */
+	meta: GraphQLTypes["MetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["SovietMemberInput"]: {
+		individual_data: GraphQLTypes["CreateIndividualDataInput"],
+	role: string
+};
+	["StartResetKeyInput"]: {
+		/** Электронная почта */
+	email: string
+};
+	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) */
+["StatementDetail"]: {
+	__typename: "StatementDetail",
+	action: GraphQLTypes["ExtendedBlockchainAction"],
+	document: GraphQLTypes["StatementDocumentUnion"]
+};
+	/** Объединение типов документов заявлений, или других документов, за которыми следует появление протокола решения совета */
+["StatementDocumentUnion"]:{
+        	__typename:"ParticipantApplicationDocument" | "ProjectFreeDecisionDocument"
+        	['...on ParticipantApplicationDocument']: '__union' & GraphQLTypes["ParticipantApplicationDocument"];
+	['...on ProjectFreeDecisionDocument']: '__union' & GraphQLTypes["ProjectFreeDecisionDocument"];
+};
 	["SystemInfo"]: {
 	__typename: "SystemInfo",
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account: GraphQLTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info: GraphQLTypes["BlockchainInfoDTO"],
+	/** Контакты кооператива */
+	contacts?: GraphQLTypes["ContactsDTO"] | undefined | null,
 	/** Объект аккаунта кооператива у оператора */
 	cooperator_account: GraphQLTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Статус контроллера кооператива */
-	system_status: GraphQLTypes["SystemStatus"]
+	system_status: GraphQLTypes["SystemStatus"],
+	/** Переменные кооператива */
+	vars?: GraphQLTypes["Vars"] | undefined | null
 };
 	/** Состояние контроллера кооператива */
 ["SystemStatus"]: SystemStatus;
+	["Token"]: {
+	__typename: "Token",
+	/** Дата истечения токена доступа */
+	expires: GraphQLTypes["DateTime"],
+	/** Токен доступа */
+	token: string
+};
+	["Tokens"]: {
+	__typename: "Tokens",
+	/** Токен доступа */
+	access: GraphQLTypes["Token"],
+	/** Токен обновления */
+	refresh: GraphQLTypes["Token"]
+};
 	["UninstallExtensionInput"]: {
 		/** Фильтр по имени */
 	name: string
+};
+	["Update"]: {
+		/** Собственные данные кооператива, обслуживающего экземпляр платформы */
+	organization_data?: GraphQLTypes["UpdateOrganizationDataInput"] | undefined | null,
+	/** Переменные кооператива, используемые для заполнения шаблонов документов */
+	vars?: GraphQLTypes["VarsInput"] | undefined | null
+};
+	["UpdateAccountInput"]: {
+		/** Электронная почта */
+	email: string,
+	/** Данные индивидуального предпринимателя */
+	entrepreneur_data?: GraphQLTypes["UpdateEntrepreneurDataInput"] | undefined | null,
+	/** Данные физического лица */
+	individual_data?: GraphQLTypes["UpdateIndividualDataInput"] | undefined | null,
+	/** Данные организации */
+	organization_data?: GraphQLTypes["UpdateOrganizationDataInput"] | undefined | null,
+	/** Публичный ключ */
+	public_key?: string | undefined | null,
+	/** Имя аккаунта реферера */
+	referer?: string | undefined | null,
+	/** Роль пользователя */
+	role: GraphQLTypes["RegisterRole"],
+	/** Тип аккаунта */
+	type: GraphQLTypes["AccountType"],
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateBankAccountInput"]: {
 		/** Данные банковского счёта */
@@ -5780,6 +8961,64 @@ export type GraphQLTypes = {
 	method_id: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UpdateEntrepreneurDataInput"]: {
+		/** Дата рождения */
+	birthdate: string,
+	/** Город */
+	city: string,
+	/** Страна */
+	country: GraphQLTypes["Country"],
+	/** Детали индивидуального предпринимателя */
+	details: GraphQLTypes["EntrepreneurDetailsInput"],
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Телефон */
+	phone: string
+};
+	["UpdateIndividualDataInput"]: {
+		/** Дата рождения */
+	birthdate: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: GraphQLTypes["PassportInput"] | undefined | null,
+	/** Телефон */
+	phone: string
+};
+	["UpdateOrganizationDataInput"]: {
+		/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: GraphQLTypes["OrganizationDetailsInput"],
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное наименование организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: GraphQLTypes["RepresentedByInput"],
+	/** Краткое наименование организации */
+	short_name: string,
+	/** Тип организации */
+	type: GraphQLTypes["OrganizationType"]
 };
 	["UserAccount"]: {
 	__typename: "UserAccount",
@@ -5802,8 +9041,54 @@ export type GraphQLTypes = {
 	/** Дата регистрации */
 	verifications: Array<GraphQLTypes["Verification"]>
 };
+	/** Объединение информации о пользователях */
+["UserDataUnion"]:{
+        	__typename:"Entrepreneur" | "Individual" | "Organization"
+        	['...on Entrepreneur']: '__union' & GraphQLTypes["Entrepreneur"];
+	['...on Individual']: '__union' & GraphQLTypes["Individual"];
+	['...on Organization']: '__union' & GraphQLTypes["Organization"];
+};
 	/** Статус пользователя */
 ["UserStatus"]: UserStatus;
+	["Vars"]: {
+	__typename: "Vars",
+	confidential_email: string,
+	confidential_link: string,
+	contact_email: string,
+	coopenomics_agreement?: GraphQLTypes["AgreementVar"] | undefined | null,
+	coopname: string,
+	full_abbr: string,
+	full_abbr_dative: string,
+	full_abbr_genitive: string,
+	name: string,
+	participant_application: GraphQLTypes["AgreementVar"],
+	passport_request: string,
+	privacy_agreement: GraphQLTypes["AgreementVar"],
+	short_abbr: string,
+	signature_agreement: GraphQLTypes["AgreementVar"],
+	user_agreement: GraphQLTypes["AgreementVar"],
+	wallet_agreement: GraphQLTypes["AgreementVar"],
+	website: string
+};
+	["VarsInput"]: {
+		confidential_email: string,
+	confidential_link: string,
+	contact_email: string,
+	coopenomics_agreement?: GraphQLTypes["AgreementInput"] | undefined | null,
+	coopname: string,
+	full_abbr: string,
+	full_abbr_dative: string,
+	full_abbr_genitive: string,
+	name: string,
+	participant_application: GraphQLTypes["AgreementInput"],
+	passport_request: string,
+	privacy_agreement: GraphQLTypes["AgreementInput"],
+	short_abbr: string,
+	signature_agreement: GraphQLTypes["AgreementInput"],
+	user_agreement: GraphQLTypes["AgreementInput"],
+	wallet_agreement: GraphQLTypes["AgreementInput"],
+	website: string
+};
 	["Verification"]: {
 	__typename: "Verification",
 	/** Дата создания верификации */
@@ -5827,9 +9112,41 @@ export type GraphQLTypes = {
 	weight: number
 }
     }
+/** Тип аккаунта пользователя в системе */
+export enum AccountType {
+	Entrepreneur = "Entrepreneur",
+	Individual = "Individual",
+	Organization = "Organization"
+}
+/** Страна регистрации пользователя */
+export enum Country {
+	Russia = "Russia"
+}
 /** Язык документа */
 export enum LangType {
 	ru = "ru"
+}
+/** Тип юридического лица */
+export enum OrganizationType {
+	AO = "AO",
+	COOP = "COOP",
+	OAO = "OAO",
+	OOO = "OOO",
+	PAO = "PAO",
+	ZAO = "ZAO"
+}
+/** Статус платежа */
+export enum PaymentStatus {
+	COMPLETED = "COMPLETED",
+	EXPIRED = "EXPIRED",
+	FAILED = "FAILED",
+	PAID = "PAID",
+	PENDING = "PENDING",
+	REFUNDED = "REFUNDED"
+}
+/** Роль пользователя при регистрации */
+export enum RegisterRole {
+	User = "User"
 }
 /** Состояние контроллера кооператива */
 export enum SystemStatus {
@@ -5850,39 +9167,83 @@ export enum UserStatus {
 }
 
 type ZEUS_VARIABLES = {
+	["AccountType"]: ValueTypes["AccountType"];
+	["AddParticipantInput"]: ValueTypes["AddParticipantInput"];
 	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
+	["AgreementInput"]: ValueTypes["AgreementInput"];
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
+	["Country"]: ValueTypes["Country"];
 	["CreateBankAccountInput"]: ValueTypes["CreateBankAccountInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
+	["CreateDepositPaymentInput"]: ValueTypes["CreateDepositPaymentInput"];
+	["CreateEntrepreneurDataInput"]: ValueTypes["CreateEntrepreneurDataInput"];
+	["CreateIndividualDataInput"]: ValueTypes["CreateIndividualDataInput"];
+	["CreateInitialPaymentInput"]: ValueTypes["CreateInitialPaymentInput"];
+	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
 	["DateTime"]: ValueTypes["DateTime"];
+	["DeleteAccountInput"]: ValueTypes["DeleteAccountInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
 	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
+	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
 	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
+	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
+	["GetDocumentsFilterInput"]: ValueTypes["GetDocumentsFilterInput"];
+	["GetDocumentsInput"]: ValueTypes["GetDocumentsInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
+	["GetPaymentsInput"]: ValueTypes["GetPaymentsInput"];
+	["Init"]: ValueTypes["Init"];
+	["Install"]: ValueTypes["Install"];
 	["JSON"]: ValueTypes["JSON"];
 	["LangType"]: ValueTypes["LangType"];
+	["LoginInput"]: ValueTypes["LoginInput"];
+	["LogoutInput"]: ValueTypes["LogoutInput"];
+	["MetaDocumentInput"]: ValueTypes["MetaDocumentInput"];
+	["OrganizationDetailsInput"]: ValueTypes["OrganizationDetailsInput"];
+	["OrganizationType"]: ValueTypes["OrganizationType"];
+	["PaginationInput"]: ValueTypes["PaginationInput"];
 	["ParticipantApplicationDecisionGenerateDocumentInput"]: ValueTypes["ParticipantApplicationDecisionGenerateDocumentInput"];
 	["ParticipantApplicationGenerateDocumentInput"]: ValueTypes["ParticipantApplicationGenerateDocumentInput"];
+	["ParticipantApplicationSignedDocumentInput"]: ValueTypes["ParticipantApplicationSignedDocumentInput"];
+	["ParticipantApplicationSignedMetaDocumentInput"]: ValueTypes["ParticipantApplicationSignedMetaDocumentInput"];
+	["PassportInput"]: ValueTypes["PassportInput"];
+	["PaymentStatus"]: ValueTypes["PaymentStatus"];
 	["ProjectFreeDecisionGenerateDocumentInput"]: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"];
 	["ProjectFreeDecisionSignedDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedDocumentInput"];
 	["ProjectFreeDecisionSignedMetaDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedMetaDocumentInput"];
 	["PublishProjectFreeDecisionInput"]: ValueTypes["PublishProjectFreeDecisionInput"];
+	["RefreshInput"]: ValueTypes["RefreshInput"];
+	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];
+	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
+	["RegisterRole"]: ValueTypes["RegisterRole"];
+	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
+	["ResetKeyInput"]: ValueTypes["ResetKeyInput"];
 	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];
 	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];
 	["SelectBranchSignedDocumentInput"]: ValueTypes["SelectBranchSignedDocumentInput"];
 	["SelectBranchSignedMetaDocumentInput"]: ValueTypes["SelectBranchSignedMetaDocumentInput"];
+	["SetPaymentStatusInput"]: ValueTypes["SetPaymentStatusInput"];
+	["SetWifInput"]: ValueTypes["SetWifInput"];
+	["SignedDigitalDocumentInput"]: ValueTypes["SignedDigitalDocumentInput"];
+	["SovietMemberInput"]: ValueTypes["SovietMemberInput"];
+	["StartResetKeyInput"]: ValueTypes["StartResetKeyInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];
 	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
+	["Update"]: ValueTypes["Update"];
+	["UpdateAccountInput"]: ValueTypes["UpdateAccountInput"];
 	["UpdateBankAccountInput"]: ValueTypes["UpdateBankAccountInput"];
+	["UpdateEntrepreneurDataInput"]: ValueTypes["UpdateEntrepreneurDataInput"];
+	["UpdateIndividualDataInput"]: ValueTypes["UpdateIndividualDataInput"];
+	["UpdateOrganizationDataInput"]: ValueTypes["UpdateOrganizationDataInput"];
 	["UserStatus"]: ValueTypes["UserStatus"];
+	["VarsInput"]: ValueTypes["VarsInput"];
 }

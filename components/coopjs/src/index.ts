@@ -1,13 +1,16 @@
 import type { ClientConnectionOptions } from './types'
 import WebSocket from 'isomorphic-ws'
 import { Thunder, Subscription as ZeusSubscription, type GraphQLResponse } from './zeus'
-import { Blockchain } from './blockchain'
+import { Wallet } from './wallet'
 
-export * as Types from './types'
 export * as Mutations from './mutations'
 export * as Queries from './queries'
+export * as Methods from './methods'
 
-export type { ModelTypes } from './zeus';
+
+export * from './wallet'
+export * as Zeus from './zeus'
+export * as Types from './types'
 
 if (typeof globalThis.WebSocket === 'undefined') {
   globalThis.WebSocket = WebSocket as any
@@ -91,7 +94,7 @@ export function createClient(options: ClientConnectionOptions) {
   // Инициализируем заголовки при создании клиента
   currentHeaders = options.headers || {}
 
-  const thunder = createThunder(options.baseUrl)
+  const thunder = createThunder(options.base_url)
 
   return {
     setToken: (token: string) => {
@@ -99,7 +102,7 @@ export function createClient(options: ClientConnectionOptions) {
     },
     Query: thunder('query'),
     Mutation: thunder('mutation'),
-    Subscription: ZeusSubscription(options.baseUrl.replace(/^http/, 'ws')),
-    Blockchain: new Blockchain(options)
+    Subscription: ZeusSubscription(options.base_url.replace(/^http/, 'ws')),
+    Wallet: new Wallet(options)
   }
 }

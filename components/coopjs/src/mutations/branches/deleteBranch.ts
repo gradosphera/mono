@@ -8,5 +8,13 @@ export const mutation = Selector('Mutation')({
   [name]: [{data: $('data', 'DeleteBranchInput!')}, true]
 });
 
-export interface IInput extends inputModel {}
+export interface IInput {
+  /**
+   * @private
+   */
+  [key: string]: unknown;
+
+  data: ModelTypes['DeleteBranchInput'],
+}
+
 export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;

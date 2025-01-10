@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsString } from 'class-validator';
 
-@InputType()
+@InputType('CreateDepositPaymentInput')
 export class CreateDepositPaymentInputDTO {
   @Field(() => String, { description: 'Имя аккаунта пользователя' })
   @IsString({ message: 'Поле "username" должно быть строкой' })

@@ -1,9 +1,9 @@
 import { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
 import { Selector, type ValueTypes } from "../../zeus";
-import { rawDocumentMetaSelector, rawDocumentSelector } from "../common/rawDocumentSelector";
+import { rawDocumentMetaSelector, rawDocumentSelector } from "../common/documentSelector";
 
 // Определяем объект вручную, чтобы избежать потери типов
-const rawParticipantApplicationDecisionDocumentSelector = {
+export const rawParticipantApplicationDecisionDocumentSelector = {
   ...rawDocumentSelector,
   meta: {
     ...rawDocumentMetaSelector, // Общая часть meta

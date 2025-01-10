@@ -10,5 +10,11 @@ export const query = Selector("Query")({
   [name]: systemInfoSelector,
 });
 
+export interface IInput {
+  /**
+   * @private
+   */
+  [key: string]: unknown;
+}
 
 export type IOutput = InputType<GraphQLTypes['Query'], typeof query>;

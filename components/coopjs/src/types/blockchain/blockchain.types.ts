@@ -11,6 +11,6 @@ export type IndexPosition = 'primary' |
   'denary';
 
 export interface BlockchainConfig {
-  blockchainUrl: string;
-  chainId: string;
+  chain_url: string;
+  chain_id: string;
 }
