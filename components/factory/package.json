@@ -1,7 +1,7 @@
 {
   "name": "@coopenomics/factory",
   "type": "module",
-  "version": "2.1.9",
+  "version": "2.2.0",
   "private": false,
   "packageManager": "pnpm@9.0.6",
   "description": "",
