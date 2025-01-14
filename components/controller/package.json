@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/controller",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "",
   "private": false,
   "bin": "bin/createNodejsApp.js",
@@ -63,7 +63,7 @@
   ],
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
-    "@coopenomics/factory": "2.2.0",
+    "@coopenomics/factory": "^2.2.1",
     "@graphql-codegen/typescript-graphql-request": "^6.2.0",
     "@graphql-codegen/typescript-resolvers": "^4.4.0",
     "@graphql-tools/schema": "^10.0.7",
@@ -91,7 +91,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "compression": "^1.7.4",
-    "cooptypes": "2.2.0",
+    "cooptypes": "^2.2.1",
     "cors": "^2.8.5",
     "cross-env": "^7.0.0",
     "crypto": "^1.0.1",
