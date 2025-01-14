@@ -1,5 +1,5 @@
 // infrastructure/graphql/graphql.module.ts
-import { Global, HttpStatus, Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import config from '~/config/config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';

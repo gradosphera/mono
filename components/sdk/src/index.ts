@@ -1,17 +1,20 @@
 import type { ClientConnectionOptions } from './types'
+import { Bytes, Checksum256, PrivateKey } from '@wharfkit/session'
 import WebSocket from 'isomorphic-ws'
-import { Thunder, Subscription as ZeusSubscription, type GraphQLResponse } from './zeus'
-import * as Classes from './classes'
 
+import * as Classes from './classes'
+import * as Mutations from './mutations'
+import { type GraphQLResponse, Thunder, Subscription as ZeusSubscription } from './zeus'
+
+export * as Classes from './classes'
 export * as Mutations from './mutations'
 export * as Queries from './queries'
-export * as Classes from './classes'
-export * as Zeus from './zeus'
-
 /**
  * @private
  */
 export * as Types from './types'
+
+export * as Zeus from './zeus'
 
 if (typeof globalThis.WebSocket === 'undefined') {
   globalThis.WebSocket = WebSocket as any
@@ -30,32 +33,34 @@ function createThunder(baseUrl: string) {
         'Content-Type': 'application/json',
         ...currentHeaders, // Используем текущие заголовки, включая Authorization
       },
-    });
-    
+    })
+
     if (!response.ok) {
       return new Promise((resolve, reject) => {
         response
           .text()
           .then((text) => {
             try {
-              reject(JSON.parse(text));
-            } catch (err) {
-              reject(text);
+              reject(JSON.parse(text))
+            }
+            // eslint-disable-next-line unused-imports/no-unused-vars
+            catch (err) {
+              reject(text)
             }
           })
-          .catch(reject);
-      });
+          .catch(reject)
+      })
     }
 
-    const json = await response.json() as GraphQLResponse;
+    const json = await response.json() as GraphQLResponse
 
     if (json.errors) {
-      console.log("json.errors", json.errors)
-      throw json.errors;  // Возвращаем массив ошибок, обработанных в NestJS
+      console.log('json.errors', json.errors)
+      throw json.errors // Возвращаем массив ошибок, обработанных в NestJS
     }
 
-    return json.data;
-  });
+    return json.data
+  })
 }
 
 /**
@@ -63,10 +68,10 @@ function createThunder(baseUrl: string) {
  * а также операций с блокчейном. Позволяет динамически изменять заголовок авторизации.
  *
  * @param options - Опции для настройки подключения клиента.
- * @param options.baseUrl - Базовый URL API, с которым будет происходить взаимодействие.
+ * @param options.api_url - Базовый URL API, с которым будет происходить взаимодействие.
  * @param options.headers - Необязательные заголовки, которые будут добавляться ко всем запросам. По умолчанию — пустой объект.
- * @param options.blockchainUrl - URL узла блокчейна.
- * @param options.chainId - Уникальный идентификатор цепочки блокчейна.
+ * @param options.chain_url - URL узла блокчейна.
+ * @param options.chain_id - Уникальный идентификатор цепочки блокчейна.
  *
  * @returns Объект, содержащий методы для работы с API:
  * - `setToken`: Устанавливает заголовок Authorization с переданным токеном.
@@ -97,13 +102,42 @@ export function createClient(options: ClientConnectionOptions) {
 
   const thunder = createThunder(options.api_url)
   const wallet = new Classes.Wallet(options)
-  
-  if (options.wif && options.username)
+
+  async function login(email: string, wif: string): Promise<Mutations.Auth.Login.IOutput['login']> {
+    const now = (await wallet.getInfo()).head_block_time.toString()
+
+    const privateKey = PrivateKey.fromString(wif)
+    const bytes = Bytes.fromString(now, 'utf8')
+    const checksum = Checksum256.hash(bytes)
+    const signature = privateKey.signDigest(checksum).toString()
+
+    const variables: Mutations.Auth.Login.IInput = {
+      data: {
+        email,
+        now,
+        signature,
+      },
+    }
+
+    const { [Mutations.Auth.Login.name]: result } = await thunder('mutation')(
+      Mutations.Auth.Login.mutation,
+      {
+        variables,
+      },
+    )
+
+    currentHeaders.Authorization = `Bearer ${result.tokens.access.token}`
+
+    return result
+  }
+
+  if (options.wif && options.username) {
     wallet.setWif(options.username, options.wif)
-  else if (options.wif && !options.username || !options.wif && options.username) {
+  }
+  else if ((options.wif && !options.username) || (!options.wif && options.username)) {
     throw new Error('wif и username должны быть указаны одновременно')
   }
-      
+
   return {
     setToken: (token: string) => {
       currentHeaders.Authorization = `Bearer ${token}`
@@ -111,6 +145,7 @@ export function createClient(options: ClientConnectionOptions) {
     Query: thunder('query'),
     Mutation: thunder('mutation'),
     Subscription: ZeusSubscription(options.api_url.replace(/^http/, 'ws')),
-    Wallet: wallet
+    Wallet: wallet,
+    login,
   }
 }
