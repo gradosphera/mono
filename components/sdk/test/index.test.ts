@@ -13,8 +13,7 @@ describe('should', () => {
   })
 
   it('should login', async () => {
-    const result = await client.login('dacom.dark.sun@gmail.com', '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3')
-    console.log('result', result)
+    await client.login('dacom.dark.sun@gmail.com', '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3')
   })
 
   it('should fetch extensions', async () => {
