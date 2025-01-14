@@ -7,7 +7,7 @@ export function useUninstallExtension() {
     name: string
   ): Promise<boolean> {
 
-    const data: Mutations.Extensions.UninstallExtension.IInput = {
+    const data: Mutations.Extensions.UninstallExtension.IInput['data'] = {
       name,
     }
 

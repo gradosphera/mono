@@ -1,55 +1,9 @@
 
-/**
- * Создание объекта регистрационного платежа производится мутацией CreateInitial. 
- * Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. 
- *  
-```typescript 
-  
-  import { Mutations } from '@coopenomics/sdk'
-  
-  const variables: Mutations.Payments.CreateInitial.IInput = {
-    data: {
-      username: <имя пользователя>,
-      provider: <идентификатор платежного провайдера>
-    }
-  
-  const { [Mutations.Payments.CreateInitial.name]: result } = await client.Mutation(
-    Mutations.Payments.CreateInitial.mutation,
-    {
-      variables,
-    }
-  );
-```
- */
-export * as CreateInitial from './createInitial'
+/** Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
+export * as CreateInitialPayment from './createInitial'
 
-/**
- * Создание объекта паевого платежа производится мутацией CreateDeposit. 
- * Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. 
- *  
-```typescript 
-  
-  import { Mutations } from '@coopenomics/sdk'
-  
-  const variables: Mutations.Payments.CreateDeposit.IInput = {
-    data: {
-      username: <имя пользователя>,
-      provider: <идентификатор платежного провайдера>
-    }
-  
-  const { [Mutations.Payments.CreateDeposit.name]: result } = await client.Mutation(
-    Mutations.Payments.CreateDeposit.mutation,
-    {
-      variables,
-    }
-  );
-```
- */
-export * as CreateDeposit from './createDeposit'
+/** Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
+export * as CreateDepositPayment from './createDeposit'
 
-
-/**
- * Изменение состояния платежа производится мутацией SetPaymentStatus.
- * Выполнение мутации изменяет статус платежа. 
- */
+/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
 export * as SetPaymentStatus from './setPaymentStatus'

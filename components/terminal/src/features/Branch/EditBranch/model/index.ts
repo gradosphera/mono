@@ -3,7 +3,7 @@ import { api } from '../api';
 import { useBranchStore, type IBranch } from 'src/entities/Branch/model';
 import { COOPNAME } from 'src/shared/config';
 
-export type IEditBranchInput = Mutations.Branches.EditBranch.IInput
+export type IEditBranchInput = Mutations.Branches.EditBranch.IInput['data']
 
 export function useEditBranch() {
   const store = useBranchStore()
@@ -26,7 +26,7 @@ export function useEditBranch() {
 
     const result = await api.editBranch(data)
 
-    await store.loadBranches({coopname: COOPNAME})
+    await store.loadBranches({ coopname: COOPNAME })
 
     return result
   }

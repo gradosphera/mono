@@ -1,4 +1,4 @@
-import type { Types, Queries, ModelTypes } from '@coopenomics/coopjs';
+import type { Types, Queries, Zeus } from '@coopenomics/coopjs';
 
 export type ZExtension = Queries.Extensions.GetExtensions.IOutput[typeof Queries.Extensions.GetExtensions.name][number]
 
@@ -23,6 +23,6 @@ export type IExtensionConfigSchema = {
 }
 
 
-export type IExtension = Omit<ModelTypes['Extension'], 'schema'> & {
+export type IExtension = Omit<Zeus.ModelTypes['Extension'], 'schema'> & {
   schema?: IExtensionConfigSchema;
 };

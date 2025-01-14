@@ -914,13 +914,13 @@ type ZEUS_UNIONS = GraphQLTypes["DecisionDocumentUnion"] | GraphQLTypes["Payment
 
 export type ValueTypes = {
     ["Account"]: AliasType<{
-	/** Объект системного аккаунта кооператива в блокчейне */
+	/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
 	blockchain_account?:ValueTypes["BlockchainAccount"],
-	/** Объект пайщика кооператива */
+	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
 	participant_account?:ValueTypes["ParticipantAccount"],
-	/** Объект аккаунта в системе учёта провайдера */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ValueTypes["MonoAccount"],
-	/** Объект пользовательского аккаунта кооперативной экономики */
+	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ValueTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
 	username?:boolean | `@${string}`,
@@ -1916,7 +1916,7 @@ addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, stri
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
-createDeposit?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
+createDepositPayment?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
 createInitialPayment?: [{	data: ValueTypes["CreateInitialPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
 createProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["CreatedProjectFreeDecision"]],
 deleteAccount?: [{	data: ValueTypes["DeleteAccountInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -2960,13 +2960,13 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 
 export type ResolverInputTypes = {
     ["Account"]: AliasType<{
-	/** Объект системного аккаунта кооператива в блокчейне */
+	/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
-	/** Объект пайщика кооператива */
+	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
 	participant_account?:ResolverInputTypes["ParticipantAccount"],
-	/** Объект аккаунта в системе учёта провайдера */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ResolverInputTypes["MonoAccount"],
-	/** Объект пользовательского аккаунта кооперативной экономики */
+	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ResolverInputTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
 	username?:boolean | `@${string}`,
@@ -3963,7 +3963,7 @@ addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInp
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
-createDeposit?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]},ResolverInputTypes["Payment"]],
+createDepositPayment?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]},ResolverInputTypes["Payment"]],
 createInitialPayment?: [{	data: ResolverInputTypes["CreateInitialPaymentInput"]},ResolverInputTypes["Payment"]],
 createProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecisionInput"]},ResolverInputTypes["CreatedProjectFreeDecision"]],
 deleteAccount?: [{	data: ResolverInputTypes["DeleteAccountInput"]},boolean | `@${string}`],
@@ -5015,13 +5015,13 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 
 export type ModelTypes = {
     ["Account"]: {
-		/** Объект системного аккаунта кооператива в блокчейне */
+		/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
 	blockchain_account?: ModelTypes["BlockchainAccount"] | undefined | null,
-	/** Объект пайщика кооператива */
+	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
 	participant_account?: ModelTypes["ParticipantAccount"] | undefined | null,
-	/** Объект аккаунта в системе учёта провайдера */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
-	/** Объект пользовательского аккаунта кооперативной экономики */
+	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: ModelTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
 	username: string
@@ -5979,9 +5979,9 @@ export type ModelTypes = {
 	createBankAccount: ModelTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
 	createBranch: ModelTypes["Branch"],
-	/** Создать объект платежа вступительного взноса */
-	createDeposit: ModelTypes["Payment"],
-	/** Создать объект платежа вступительного взноса */
+	/** Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
+	createDepositPayment: ModelTypes["Payment"],
+	/** Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
 	createInitialPayment: ModelTypes["Payment"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 	createProjectOfFreeDecision: ModelTypes["CreatedProjectFreeDecision"],
@@ -5997,19 +5997,19 @@ export type ModelTypes = {
 	editBranch: ModelTypes["Branch"],
 	/** Сгенерировать протокол решения по предложенной повестке */
 	generateFreeDecision: ModelTypes["ProjectFreeDecisionDocument"],
-	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
+	/** Сгенерировать документ заявления о вступлении в кооператив. */
 	generateParticipantApplication: ModelTypes["ParticipantApplicationDocument"],
-	/** Сгенерировать документ соглашения с политикой конфиденциальности */
+	/** Сгенерировать документ протокол решения собрания совета */
 	generateParticipantApplicationDecision: ModelTypes["ParticipantApplicationDecisionDocument"],
-	/** Сгенерировать документ соглашения с политикой конфиденциальности */
+	/** Сгенерировать документ согласия с политикой конфиденциальности. */
 	generatePrivacyAgreement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ проекта свободного решения */
 	generateProjectOfFreeDecision: ModelTypes["ProjectFreeDecisionDocument"],
 	/** Сгенерировать документ, подтверждающий выбор кооперативного участка */
 	generateSelectBranchDocument: ModelTypes["SelectBranchDocument"],
-	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
+	/** Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи. */
 	generateSignatureAgreement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ пользовательского соглашения */
+	/** Сгенерировать документ пользовательского соглашения. */
 	generateUserAgreement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
 	generateWalletAgreement: ModelTypes["GeneratedDocument"],
@@ -6035,7 +6035,7 @@ export type ModelTypes = {
 	resetKey: boolean,
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
-	/** Создать объект платежа вступительного взноса */
+	/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
 	setPaymentStatus: ModelTypes["Payment"],
 	/** Сохранить приватный ключ в зашифрованном серверном хранилище */
 	setWif: boolean,
@@ -6043,7 +6043,7 @@ export type ModelTypes = {
 	startResetKey: boolean,
 	/** Удалить расширение */
 	uninstallExtension: boolean,
-	/** Обновить аккаунт в системе провайдера */
+	/** Обновить аккаунт в системе провайдера. Обновление аккаунта пользователя производится по username. Мутация позволяет изменить приватные данные пользователя, а также, адрес электронной почты в MONO. Использовать мутацию может только председатель совета. */
 	updateAccount: ModelTypes["Account"],
 	/** Обновить банковский счёт */
 	updateBankAccount: ModelTypes["PaymentMethod"],
@@ -7020,13 +7020,13 @@ export type GraphQLTypes = {
 	// ------------------------------------------------------;
 	["Account"]: {
 	__typename: "Account",
-	/** Объект системного аккаунта кооператива в блокчейне */
+	/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
 	blockchain_account?: GraphQLTypes["BlockchainAccount"] | undefined | null,
-	/** Объект пайщика кооператива */
+	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
 	participant_account?: GraphQLTypes["ParticipantAccount"] | undefined | null,
-	/** Объект аккаунта в системе учёта провайдера */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
-	/** Объект пользовательского аккаунта кооперативной экономики */
+	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
 	username: string
@@ -8027,9 +8027,9 @@ export type GraphQLTypes = {
 	createBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
 	createBranch: GraphQLTypes["Branch"],
-	/** Создать объект платежа вступительного взноса */
-	createDeposit: GraphQLTypes["Payment"],
-	/** Создать объект платежа вступительного взноса */
+	/** Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
+	createDepositPayment: GraphQLTypes["Payment"],
+	/** Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
 	createInitialPayment: GraphQLTypes["Payment"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 	createProjectOfFreeDecision: GraphQLTypes["CreatedProjectFreeDecision"],
@@ -8045,19 +8045,19 @@ export type GraphQLTypes = {
 	editBranch: GraphQLTypes["Branch"],
 	/** Сгенерировать протокол решения по предложенной повестке */
 	generateFreeDecision: GraphQLTypes["ProjectFreeDecisionDocument"],
-	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
+	/** Сгенерировать документ заявления о вступлении в кооператив. */
 	generateParticipantApplication: GraphQLTypes["ParticipantApplicationDocument"],
-	/** Сгенерировать документ соглашения с политикой конфиденциальности */
+	/** Сгенерировать документ протокол решения собрания совета */
 	generateParticipantApplicationDecision: GraphQLTypes["ParticipantApplicationDecisionDocument"],
-	/** Сгенерировать документ соглашения с политикой конфиденциальности */
+	/** Сгенерировать документ согласия с политикой конфиденциальности. */
 	generatePrivacyAgreement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ проекта свободного решения */
 	generateProjectOfFreeDecision: GraphQLTypes["ProjectFreeDecisionDocument"],
 	/** Сгенерировать документ, подтверждающий выбор кооперативного участка */
 	generateSelectBranchDocument: GraphQLTypes["SelectBranchDocument"],
-	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
+	/** Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи. */
 	generateSignatureAgreement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ пользовательского соглашения */
+	/** Сгенерировать документ пользовательского соглашения. */
 	generateUserAgreement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
 	generateWalletAgreement: GraphQLTypes["GeneratedDocument"],
@@ -8083,7 +8083,7 @@ export type GraphQLTypes = {
 	resetKey: boolean,
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
-	/** Создать объект платежа вступительного взноса */
+	/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
 	setPaymentStatus: GraphQLTypes["Payment"],
 	/** Сохранить приватный ключ в зашифрованном серверном хранилище */
 	setWif: boolean,
@@ -8091,7 +8091,7 @@ export type GraphQLTypes = {
 	startResetKey: boolean,
 	/** Удалить расширение */
 	uninstallExtension: boolean,
-	/** Обновить аккаунт в системе провайдера */
+	/** Обновить аккаунт в системе провайдера. Обновление аккаунта пользователя производится по username. Мутация позволяет изменить приватные данные пользователя, а также, адрес электронной почты в MONO. Использовать мутацию может только председатель совета. */
 	updateAccount: GraphQLTypes["Account"],
 	/** Обновить банковский счёт */
 	updateBankAccount: GraphQLTypes["PaymentMethod"],

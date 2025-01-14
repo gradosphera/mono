@@ -33,7 +33,8 @@ export class PaymentResolver {
 
   @Mutation(() => PaymentDTO, {
     name: 'createInitialPayment',
-    description: 'Создать объект платежа вступительного взноса',
+    description:
+      'Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member', 'user'])
@@ -44,8 +45,9 @@ export class PaymentResolver {
   }
 
   @Mutation(() => PaymentDTO, {
-    name: 'createDeposit',
-    description: 'Создать объект платежа вступительного взноса',
+    name: 'createDepositPayment',
+    description:
+      'Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member', 'user'])
@@ -57,7 +59,8 @@ export class PaymentResolver {
 
   @Mutation(() => PaymentDTO, {
     name: 'setPaymentStatus',
-    description: 'Создать объект платежа вступительного взноса',
+    description:
+      'Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне.',
   })
   @UseGuards(GqlJwtAuthGuard)
   @AuthRoles(['chairman', 'member'])

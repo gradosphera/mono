@@ -11,8 +11,8 @@ registerEnumType(MonoAccountStatusDomainInterface, {
   description: 'Статус пользователя',
 });
 
-@ObjectType('ProviderAccount')
-export class ProviderAccountDTO {
+@ObjectType('MonoAccount')
+export class MonoAccountDTO {
   @Field(() => String, { description: 'Имя пользователя' })
   @IsString()
   public readonly username: string;

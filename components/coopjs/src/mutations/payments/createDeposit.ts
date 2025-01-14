@@ -1,7 +1,7 @@
 import { paymentSelector } from '../../selectors/payments';
 import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
 
-export const name = 'createDeposit'
+export const name = 'createDepositPayment'
 
 export const mutation = Selector('Mutation')({
   [name]: [{data: $('data', 'CreateDepositPaymentInput!')}, paymentSelector]

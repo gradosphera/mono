@@ -3,7 +3,7 @@ import { IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BlockchainAccountDTO } from '~/modules/account/dto/blockchain-account.dto';
 import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
-import { ProviderAccountDTO } from './mono-account.dto';
+import { MonoAccountDTO } from './mono-account.dto';
 import { UserAccountDTO } from '~/modules/account/dto/base-user-account.dto';
 import { ParticipantAccountDTO } from './participant-account.dto';
 
@@ -31,14 +31,14 @@ export class AccountDTO {
   @Type(() => UserAccountDTO)
   public readonly user_account!: UserAccountDTO | null;
 
-  @Field(() => ProviderAccountDTO, {
+  @Field(() => MonoAccountDTO, {
     description:
       'объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. ',
     nullable: true,
   })
   @ValidateNested()
-  @Type(() => ProviderAccountDTO)
-  public readonly provider_account!: ProviderAccountDTO | null;
+  @Type(() => MonoAccountDTO)
+  public readonly provider_account!: MonoAccountDTO | null;
 
   @Field(() => ParticipantAccountDTO, {
     description:
@@ -52,7 +52,7 @@ export class AccountDTO {
   constructor(entity: AccountDomainEntity) {
     this.username = entity.username;
     this.blockchain_account = entity.blockchain_account || null;
-    this.provider_account = entity.provider_account ? new ProviderAccountDTO(entity.provider_account) : null;
+    this.provider_account = entity.provider_account ? new MonoAccountDTO(entity.provider_account) : null;
     this.user_account = entity.user_account ? new UserAccountDTO(entity.user_account) : null;
     this.participant_account = entity.participant_account ? new ParticipantAccountDTO(entity.participant_account) : null;
     //TODO cardcoop_account

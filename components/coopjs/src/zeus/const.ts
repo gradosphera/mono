@@ -138,7 +138,7 @@ export const AllTypesProps: Record<string,any> = {
 		createBranch:{
 			data:"CreateBranchInput"
 		},
-		createDeposit:{
+		createDepositPayment:{
 			data:"CreateDepositPaymentInput"
 		},
 		createInitialPayment:{
@@ -776,7 +776,7 @@ export const ReturnTypes: Record<string,any> = {
 		addTrustedAccount:"Branch",
 		createBankAccount:"PaymentMethod",
 		createBranch:"Branch",
-		createDeposit:"Payment",
+		createDepositPayment:"Payment",
 		createInitialPayment:"Payment",
 		createProjectOfFreeDecision:"CreatedProjectFreeDecision",
 		deleteAccount:"Boolean",

@@ -4,7 +4,7 @@ import { client } from 'src/shared/api/client';
 import { useSignDocument } from 'src/shared/lib/document';
 import { ref, type Ref } from 'vue';
 
-export type ICreateProjectDecisionData = Mutations.Decisions.CreateProjectOfFreeDecision.IInput
+export type ICreateProjectDecisionData = Mutations.FreeDecisions.CreateProjectOfFreeDecision.IInput['data']
 
 export function useCreateProjectOfFreeDecision() {
 
@@ -35,8 +35,8 @@ export function useCreateProjectOfFreeDecision() {
   }
 
   async function createProjectOfFreeDecision(): Promise<ICreatedProjectDecisionData> {
-    const { [Mutations.Decisions.CreateProjectOfFreeDecision.name]: project } = await client.Mutation(
-      Mutations.Decisions.CreateProjectOfFreeDecision.mutation,
+    const { [Mutations.FreeDecisions.CreateProjectOfFreeDecision.name]: project } = await client.Mutation(
+      Mutations.FreeDecisions.CreateProjectOfFreeDecision.mutation,
       {
         variables: {
           data: createProjectInput.value,
@@ -47,9 +47,9 @@ export function useCreateProjectOfFreeDecision() {
     return project
   }
 
-  async function generateProjectDocumentOfFreeDecision(data: Mutations.Decisions.GenerateProjectOfFreeDecisionDocument.IInput): Promise<IGeneratedProjectDecisionDocument> {
-    const { [Mutations.Decisions.GenerateProjectOfFreeDecisionDocument.name]: document } = await client.Mutation(
-      Mutations.Decisions.GenerateProjectOfFreeDecisionDocument.mutation,
+  async function generateProjectDocumentOfFreeDecision(data: Mutations.FreeDecisions.GenerateProjectOfFreeDecision.IInput['data']): Promise<IGeneratedProjectDecisionDocument> {
+    const { [Mutations.FreeDecisions.GenerateProjectOfFreeDecision.name]: document } = await client.Mutation(
+      Mutations.FreeDecisions.GenerateProjectOfFreeDecision.mutation,
       {
         variables: {
           data,
@@ -61,9 +61,9 @@ export function useCreateProjectOfFreeDecision() {
   }
 
 
-  async function publishProjectOfFreeDecision(data: Mutations.Decisions.PublishProjectOfFreeDecision.IInput): Promise<Mutations.Decisions.PublishProjectOfFreeDecision.IOutput[typeof Mutations.Decisions.PublishProjectOfFreeDecision.name]> {
-    const { [Mutations.Decisions.PublishProjectOfFreeDecision.name]: result } = await client.Mutation(
-      Mutations.Decisions.PublishProjectOfFreeDecision.mutation,
+  async function publishProjectOfFreeDecision(data: Mutations.FreeDecisions.PublishProjectOfFreeDecision.IInput['data']): Promise<Mutations.FreeDecisions.PublishProjectOfFreeDecision.IOutput[typeof Mutations.FreeDecisions.PublishProjectOfFreeDecision.name]> {
+    const { [Mutations.FreeDecisions.PublishProjectOfFreeDecision.name]: result } = await client.Mutation(
+      Mutations.FreeDecisions.PublishProjectOfFreeDecision.mutation,
       {
         variables: {
           data,

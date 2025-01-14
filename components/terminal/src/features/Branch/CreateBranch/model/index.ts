@@ -1,11 +1,11 @@
 import { ref, type Ref } from 'vue';
-import type { ModelTypes } from '@coopenomics/coopjs';
+import type { Mutations } from '@coopenomics/coopjs';
 import { api } from '../api';
 import { useBranchStore, type IBranch } from 'src/entities/Branch/model';
 import { COOPNAME } from 'src/shared/config';
 import { generateUsername } from 'src/shared/lib/utils/generateUsername';
 
-export type ICreateBranchInput = ModelTypes['CreateBranchInput']
+export type ICreateBranchInput = Mutations.Branches.CreateBranch.IInput['data']
 
 export function useCreateBranch() {
   const store = useBranchStore();

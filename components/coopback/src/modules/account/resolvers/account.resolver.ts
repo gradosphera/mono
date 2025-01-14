@@ -71,9 +71,11 @@ export class AccountResolver {
 
   @Mutation(() => AccountDTO, {
     name: 'updateAccount',
-    description: 'Обновить аккаунт в системе провайдера',
+    description:
+      'Обновить аккаунт в системе провайдера. Обновление аккаунта пользователя производится по username. Мутация позволяет изменить приватные данные пользователя, а также, адрес электронной почты в MONO. Использовать мутацию может только председатель совета.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
   async updateAccount(
     @Args('data', { type: () => UpdateAccountInputDTO })
     data: UpdateAccountInputDTO

@@ -31,7 +31,7 @@ export class AgreementResolver {
 
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'generatePrivacyAgreement',
-    description: 'Сгенерировать документ соглашения с политикой конфиденциальности',
+    description: 'Сгенерировать документ согласия с политикой конфиденциальности.',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -47,7 +47,7 @@ export class AgreementResolver {
 
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateSignatureAgreement',
-    description: 'Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк"',
+    description: 'Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи.',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -63,7 +63,7 @@ export class AgreementResolver {
 
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateUserAgreement',
-    description: 'Сгенерировать документ пользовательского соглашения',
+    description: 'Сгенерировать документ пользовательского соглашения.',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

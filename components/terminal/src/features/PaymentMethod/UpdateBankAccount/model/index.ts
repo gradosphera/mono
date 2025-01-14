@@ -1,5 +1,6 @@
 import { api } from '../api';
-import type { ModelTypes } from '@coopenomics/coopjs';
+import { Mutations } from '@coopenomics/coopjs'
+
 export interface IBankTransferData {
   account_number: string;
   bank_name: string;
@@ -22,15 +23,8 @@ export interface IUpdateBranchBankAccount {
 
 export function useUpdateBranchBankAccount() {
 
-  async function updateBankAccount(method: ModelTypes['BankPaymentMethod']) {
-
-    const data: ModelTypes['UpdateBankAccountInput'] = {
-      username: method.username,
-      method_id: method.method_id,
-      data: method.data,
-      is_default: true,
-    }
-
+  async function updateBankAccount(data: Mutations.PaymentMethods.UpdateBankAccount.IInput['data']) {
+    data.is_default = true
     return await api.updateBankAccount(data)
   }
 

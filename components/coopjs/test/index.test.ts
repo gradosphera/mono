@@ -4,7 +4,7 @@ import { Queries } from "../src";
 
 describe("should", () => {
   const client = createClient({
-    base_url: "http://127.0.0.1:2998/v1/graphql",
+    api_url: "http://127.0.0.1:2998/v1/graphql",
     headers: {
       "server-secret": "SECRET",
     },
@@ -102,7 +102,7 @@ describe("should", () => {
       }
     );
 
-    const dataDecisionDocument: Mutations.FreeDecisions.GenerateProjectOfFreeDecisionDocument.IInput = {
+    const dataDecisionDocument: Mutations.FreeDecisions.GenerateProjectOfFreeDecision.IInput = {
       data: {
         coopname: "voskhod",
         project_id: project.id,
@@ -114,7 +114,7 @@ describe("should", () => {
     };
 
     const { generateProjectOfFreeDecision: document } = await client.Mutation(
-      Mutations.FreeDecisions.GenerateProjectOfFreeDecisionDocument.mutation,
+      Mutations.FreeDecisions.GenerateProjectOfFreeDecision.mutation,
       {
         variables: dataDecisionDocument,
       }
@@ -127,14 +127,14 @@ describe("should", () => {
   
   
   // it("test", async () => {
-    // const variables: Mutations.Participants.RegisterParticipant.IInput = {
+    // const variables: Mutations.Participants.AddParticipant.IInput = {
     //   data: {
-    //     username: username,
-    //     privacy_agreement: signedPrivacyAgreement,
-    //     signature_agreement: signedSignatureAgreement,
-    //     statement: signedParticipantApplication,
-    //     user_agreement: signedUserAgreement,
-    //     wallet_agreement: signedWalletAgreement,
+    //     created_at: "",
+    //     email: "",
+    //     initial: "",
+    //     minimum: "",
+    //     spread_initial: false,
+    //     type: AccountType.Entrepreneur
     //   }
     // }
     

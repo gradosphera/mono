@@ -1,20 +1,11 @@
-/**
- * Сгенерировать документ для публикации свободного решения на основе ранее созданного проекта
- */
-export * as GenerateProjectOfFreeDecisionDocument from './generateProjectOfFreeDecisionDocument'
+/** Сгенерировать документ проекта свободного решения */
+export * as GenerateProjectOfFreeDecision from './generateProjectOfFreeDecisionDocument'
 
-/**
- * Сгенерировать документ протокола решения собрания совета на основе ранее созданного проекта и проведенного голосования
- */
-export * as GenerateFreeDecisionDocument from './generateFreeDecision'
+/** Сгенерировать протокол решения по предложенной повестке */
+export * as GenerateFreeDecision from './generateFreeDecision'
 
-
-/**
- * Опубликовать проект свободного решения
- */
+/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему */
 export * as PublishProjectOfFreeDecision from './publishProjectOfFreeDecision'
 
-/**
- * Создать проект свободного решения
- */
+/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 export * as CreateProjectOfFreeDecision from './createProjectOfFreeDecision'

@@ -3,9 +3,9 @@ import { client } from 'src/shared/api/client';
 
 export function useGenerateProjectDocumentOfFreeDecision() {
 
-  async function generateProjectDocumentOfFreeDecision(data: Mutations.Decisions.GenerateProjectOfFreeDecisionDocument.IInput): Promise<Mutations.Decisions.GenerateProjectOfFreeDecisionDocument.IOutput[typeof Mutations.Decisions.GenerateProjectOfFreeDecisionDocument.name]> {
-    const { [Mutations.Decisions.GenerateProjectOfFreeDecisionDocument.name]: document } = await client.Mutation(
-      Mutations.Decisions.GenerateProjectOfFreeDecisionDocument.mutation,
+  async function generateProjectDocumentOfFreeDecision(data: Mutations.FreeDecisions.GenerateProjectOfFreeDecision.IInput['data']): Promise<Mutations.FreeDecisions.GenerateProjectOfFreeDecision.IOutput[typeof Mutations.FreeDecisions.GenerateProjectOfFreeDecision.name]> {
+    const { [Mutations.FreeDecisions.GenerateProjectOfFreeDecision.name]: document } = await client.Mutation(
+      Mutations.FreeDecisions.GenerateProjectOfFreeDecision.mutation,
       {
         variables: {
           data,

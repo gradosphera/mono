@@ -7,7 +7,7 @@ export function useInstallExtension() {
     name: string, enabled: boolean, config: any
   ): Promise<Mutations.Extensions.InstallExtension.IOutput[typeof Mutations.Extensions.InstallExtension.name]> {
 
-    const data: Mutations.Extensions.InstallExtension.IInput = {
+    const data: Mutations.Extensions.InstallExtension.IInput['data'] = {
       name,
       enabled,
       config

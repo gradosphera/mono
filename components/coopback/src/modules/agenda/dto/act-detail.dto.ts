@@ -3,7 +3,9 @@ import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.
 import type { ActDetailDomainInterface } from '~/domain/agenda/interfaces/act-detail-domain.interface';
 import { ExtendedBlockchainActionDTO } from './extended-action.dto';
 
-@ObjectType('ActDetail')
+@ObjectType('ActDetail', {
+  description: 'Массив комплексных актов, содержащих полную информацию о сгенерированном и опубликованном документах',
+})
 export class ActDetailDTO implements ActDetailDomainInterface {
   @Field(() => ExtendedBlockchainActionDTO, { nullable: true })
   action?: ExtendedBlockchainActionDTO;

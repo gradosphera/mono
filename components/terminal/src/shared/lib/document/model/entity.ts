@@ -3,7 +3,6 @@ import { api } from '../api';
 import { useGlobalStore } from 'src/shared/store';
 import type { IObjectedDocument } from 'src/shared/lib/types/document';
 import type { Cooperative } from 'cooptypes';
-import type { Types } from '@coopenomics/coopjs';
 
 export type ZGeneratedDocument = Cooperative.Document.ZGeneratedDocument
 
@@ -16,7 +15,7 @@ export const useSignDocument = () => {
 
     const digital_signature = await globalStore.signDigest(document.hash);
 
-    const doc: Types.ZSignedDocument = {
+    const doc = {
       hash: document.hash,
       meta: document.meta,
       public_key: digital_signature.public_key,

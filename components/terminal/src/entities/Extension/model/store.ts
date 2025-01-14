@@ -2,13 +2,15 @@ import { defineStore } from 'pinia'
 import { ref, Ref } from 'vue'
 import { api } from '../api'
 import type { IExtension } from './types';
-import type { ModelTypes } from '@coopenomics/coopjs';
+import { Queries } from '@coopenomics/coopjs';
 
 const namespace = 'extensionStore';
 
+export type ILoadExtensions = Queries.Extensions.GetExtensions.IInput['data'];
+
 interface IExtensionStore {
   extensions: Ref<IExtension[]>
-  loadExtensions: (data?: ModelTypes['GetExtensionsInput']) => void;
+  loadExtensions: (data?: ILoadExtensions) => void;
 }
 
 const parseDescriptionsRecursively = (obj: any): any => {
@@ -40,7 +42,7 @@ const parseDescriptionsRecursively = (obj: any): any => {
 export const useExtensionStore = defineStore(namespace, (): IExtensionStore => {
   const extensions = ref<IExtension[]>([])
 
-  const loadExtensions = async (data?: ModelTypes['GetExtensionsInput']) => {
+  const loadExtensions = async (data?: ILoadExtensions) => {
     const loadedData = await api.loadExtensions(data);
 
     const transformedData = loadedData.map((value) => {

@@ -85,10 +85,12 @@ div
       const {selectBranch} = useSelectBranch()
 
       await selectBranch({
-        braname: selectedBranch.value,
-        coopname: system.info.coopname,
-        document,
-        username: session.username,
+        data: {
+          braname: selectedBranch.value,
+          coopname: system.info.coopname,
+          document,
+          username: session.username,
+        }
       })
       isVisible.value = false
       SuccessAlert('Кооперативный участок выбран')

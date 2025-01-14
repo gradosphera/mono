@@ -71,7 +71,7 @@ q-form(ref="form")
   <script lang="ts" setup>
 import { ref } from 'vue';
 import { useEditableData } from 'src/shared/lib/composables/useEditableData';
-import type { ModelTypes } from '@coopenomics/coopjs';
+import type { Zeus } from '@coopenomics/coopjs';
 import { EditableActions } from 'src/shared/ui/EditableActions';
 import { notEmpty } from 'src/shared/lib/utils';
 import { useUpdateBranchBankAccount } from 'src/features/PaymentMethod/UpdateBankAccount/model';
@@ -79,7 +79,7 @@ import { failAlert } from 'src/shared/api';
 
 const props = defineProps({
   bankDetails: {
-    type: Object as () => ModelTypes['BankPaymentMethod'],
+    type: Object as () => Zeus.ModelTypes['BankPaymentMethod'],
     required: true
   }
 });
@@ -88,7 +88,7 @@ const props = defineProps({
 const form = ref();
 
 // Обработка сохранения
-const handleSave = async (data: ModelTypes['BankPaymentMethod']) => {
+const handleSave = async (data: Zeus.ModelTypes['BankPaymentMethod']) => {
   try {
     const { updateBankAccount } = useUpdateBranchBankAccount();
     await updateBankAccount(data);

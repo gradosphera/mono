@@ -1,15 +1,16 @@
 import type { ClientConnectionOptions } from './types'
 import WebSocket from 'isomorphic-ws'
 import { Thunder, Subscription as ZeusSubscription, type GraphQLResponse } from './zeus'
-import { Wallet } from './wallet'
+import * as Classes from './classes'
 
 export * as Mutations from './mutations'
 export * as Queries from './queries'
-export * as Methods from './methods'
-
-
-export * from './wallet'
+export * as Classes from './classes'
 export * as Zeus from './zeus'
+
+/**
+ * @private
+ */
 export * as Types from './types'
 
 if (typeof globalThis.WebSocket === 'undefined') {
@@ -94,15 +95,22 @@ export function createClient(options: ClientConnectionOptions) {
   // Инициализируем заголовки при создании клиента
   currentHeaders = options.headers || {}
 
-  const thunder = createThunder(options.base_url)
-
+  const thunder = createThunder(options.api_url)
+  const wallet = new Classes.Wallet(options)
+  
+  if (options.wif && options.username)
+    wallet.setWif(options.username, options.wif)
+  else if (options.wif && !options.username || !options.wif && options.username) {
+    throw new Error('wif и username должны быть указаны одновременно')
+  }
+      
   return {
     setToken: (token: string) => {
       currentHeaders.Authorization = `Bearer ${token}`
     },
     Query: thunder('query'),
     Mutation: thunder('mutation'),
-    Subscription: ZeusSubscription(options.base_url.replace(/^http/, 'ws')),
-    Wallet: new Wallet(options)
+    Subscription: ZeusSubscription(options.api_url.replace(/^http/, 'ws')),
+    Wallet: wallet
   }
 }

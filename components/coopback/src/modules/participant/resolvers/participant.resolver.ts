@@ -25,7 +25,7 @@ export class ParticipantResolver {
 
   @Mutation(() => ParticipantApplicationDocumentDTO, {
     name: 'generateParticipantApplication',
-    description: 'Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк"',
+    description: 'Сгенерировать документ заявления о вступлении в кооператив.',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -41,7 +41,7 @@ export class ParticipantResolver {
 
   @Mutation(() => ParticipantApplicationDecisionDocumentDTO, {
     name: 'generateParticipantApplicationDecision',
-    description: 'Сгенерировать документ соглашения с политикой конфиденциальности',
+    description: 'Сгенерировать документ протокол решения собрания совета',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

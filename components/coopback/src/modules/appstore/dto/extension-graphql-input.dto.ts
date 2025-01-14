@@ -5,18 +5,18 @@ import { GraphQLJSON } from 'graphql-type-json';
 
 @InputType('ExtensionInput')
 export class ExtensionGraphQLInput<TConfig = any> implements ExtensionDomainInterface {
-  @Field(() => String, { description: 'Unique name of the extension' })
+  @Field(() => String, { description: 'Уникальное имя расширения (является идентификатором)' })
   name!: string;
 
-  @Field(() => Boolean, { description: 'Indicates whether the extension is enabled' })
+  @Field(() => Boolean, { description: 'Флаг того, включено ли расширение сейчас' })
   enabled!: boolean;
 
-  @Field(() => GraphQLJSON, { description: 'Configuration settings for the extension' })
+  @Field(() => GraphQLJSON, { description: 'Объект конфигурации расширения' })
   config!: TConfig;
 
-  @Field(() => Date, { nullable: true, description: 'Timestamp of when the extension was created' })
+  @Field(() => Date, { nullable: true, description: 'Дата установки расширения' })
   created_at?: Date;
 
-  @Field(() => Date, { nullable: true, description: 'Timestamp of the last update to the extension' })
+  @Field(() => Date, { nullable: true, description: 'Дата обновления расширения' })
   updated_at?: Date;
 }

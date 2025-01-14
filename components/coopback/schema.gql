@@ -3,16 +3,24 @@
 # ------------------------------------------------------
 
 type Account {
-  """Объект системного аккаунта кооператива в блокчейне"""
+  """
+  объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне.
+  """
   blockchain_account: BlockchainAccount
 
-  """Объект пайщика кооператива"""
+  """
+  объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне.
+  """
   participant_account: ParticipantAccount
 
-  """Объект аккаунта в системе учёта провайдера"""
+  """
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
+  """
   provider_account: MonoAccount
 
-  """Объект пользовательского аккаунта кооперативной экономики"""
+  """
+  объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно.
+  """
   user_account: UserAccount
 
   """Имя аккаунта кооператива"""
@@ -62,6 +70,9 @@ type AccountsPaginationResult {
   totalPages: Int!
 }
 
+"""
+Массив комплексных актов, содержащих полную информацию о сгенерированном и опубликованном документах
+"""
 type ActDetail {
   action: ExtendedBlockchainAction
   document: GeneratedDocument
@@ -945,19 +956,19 @@ type Extension {
 }
 
 input ExtensionInput {
-  """Configuration settings for the extension"""
+  """Объект конфигурации расширения"""
   config: JSON!
 
-  """Timestamp of when the extension was created"""
+  """Дата установки расширения"""
   created_at: DateTime
 
-  """Indicates whether the extension is enabled"""
+  """Флаг того, включено ли расширение сейчас"""
   enabled: Boolean!
 
-  """Unique name of the extension"""
+  """Уникальное имя расширения (является идентификатором)"""
   name: String!
 
-  """Timestamp of the last update to the extension"""
+  """Дата обновления расширения"""
   updated_at: DateTime
 }
 
@@ -1389,10 +1400,14 @@ type Mutation {
   """Создать кооперативный участок"""
   createBranch(data: CreateBranchInput!): Branch!
 
-  """Создать объект платежа вступительного взноса"""
-  createDeposit(data: CreateDepositPaymentInput!): Payment!
+  """
+  Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
+  """
+  createDepositPayment(data: CreateDepositPaymentInput!): Payment!
 
-  """Создать объект платежа вступительного взноса"""
+  """
+  Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
+  """
   createInitialPayment(data: CreateInitialPaymentInput!): Payment!
 
   """
@@ -1418,15 +1433,13 @@ type Mutation {
   """Сгенерировать протокол решения по предложенной повестке"""
   generateFreeDecision(data: FreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ProjectFreeDecisionDocument!
 
-  """
-  Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк"
-  """
+  """Сгенерировать документ заявления о вступлении в кооператив."""
   generateParticipantApplication(data: ParticipantApplicationGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ParticipantApplicationDocument!
 
-  """Сгенерировать документ соглашения с политикой конфиденциальности"""
+  """Сгенерировать документ протокол решения собрания совета"""
   generateParticipantApplicationDecision(data: ParticipantApplicationDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ParticipantApplicationDecisionDocument!
 
-  """Сгенерировать документ соглашения с политикой конфиденциальности"""
+  """Сгенерировать документ согласия с политикой конфиденциальности."""
   generatePrivacyAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ проекта свободного решения"""
@@ -1436,11 +1449,11 @@ type Mutation {
   generateSelectBranchDocument(data: SelectBranchGenerateDocumentInput!, options: GenerateDocumentOptionsInput): SelectBranchDocument!
 
   """
-  Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк"
+  Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи.
   """
   generateSignatureAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
-  """Сгенерировать документ пользовательского соглашения"""
+  """Сгенерировать документ пользовательского соглашения."""
   generateUserAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """
@@ -1489,7 +1502,9 @@ type Mutation {
   """Выбрать кооперативный участок"""
   selectBranch(data: SelectBranchInput!): Boolean!
 
-  """Создать объект платежа вступительного взноса"""
+  """
+  Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне.
+  """
   setPaymentStatus(data: SetPaymentStatusInput!): Payment!
 
   """Сохранить приватный ключ в зашифрованном серверном хранилище"""
@@ -1503,7 +1518,9 @@ type Mutation {
   """Удалить расширение"""
   uninstallExtension(data: UninstallExtensionInput!): Boolean!
 
-  """Обновить аккаунт в системе провайдера"""
+  """
+  Обновить аккаунт в системе провайдера. Обновление аккаунта пользователя производится по username. Мутация позволяет изменить приватные данные пользователя, а также, адрес электронной почты в MONO. Использовать мутацию может только председатель совета.
+  """
   updateAccount(data: UpdateAccountInput!): Account!
 
   """Обновить банковский счёт"""
