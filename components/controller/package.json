@@ -63,7 +63,7 @@
   ],
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
-    "@coopenomics/factory": "workspace:*",
+    "@coopenomics/factory": "2.2.0",
     "@graphql-codegen/typescript-graphql-request": "^6.2.0",
     "@graphql-codegen/typescript-resolvers": "^4.4.0",
     "@graphql-tools/schema": "^10.0.7",
@@ -91,7 +91,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "compression": "^1.7.4",
-    "cooptypes": "workspace:*",
+    "cooptypes": "2.2.0",
     "cors": "^2.8.5",
     "cross-env": "^7.0.0",
     "crypto": "^1.0.1",
@@ -185,5 +185,6 @@
     "supertest": "^6.0.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.4.2"
-  }
+  },
+  "gitHead": "b05c17bee481d90c4cd82aa2a34ac428f8263a5f"
 }

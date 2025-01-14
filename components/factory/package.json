@@ -2,7 +2,6 @@
   "name": "@coopenomics/factory",
   "type": "module",
   "version": "2.2.0",
-  "private": false,
   "packageManager": "pnpm@9.0.6",
   "description": "",
   "author": "Alex Ant <chairman.voskhod@gmail.com>",
@@ -50,7 +49,7 @@
     "ajv-formats": "^3.0.1",
     "ajv-i18n": "^4.2.0",
     "axios": "^1.7.2",
-    "cooptypes": "workspace:*",
+    "cooptypes": "2.2.0",
     "dotenv": "^16.4.5",
     "eosjs-ecc": "^4.0.7",
     "handlebars": "^4.7.8",
@@ -92,5 +91,5 @@
       "vite@>=5.1.0 <=5.1.6": ">=5.1.7"
     }
   },
-  "gitHead": "7b59ea4b96991ed06abdc92e6d7835632845e3a5"
+  "gitHead": "b05c17bee481d90c4cd82aa2a34ac428f8263a5f"
 }

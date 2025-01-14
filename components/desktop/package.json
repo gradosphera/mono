@@ -20,8 +20,8 @@
     "prepublishOnly": "npm run build:lib"
   },
   "dependencies": {
-    "@coopenomics/controller": "workspace:*",
-    "@coopenomics/sdk": "workspace:*",
+    "@coopenomics/controller": "2.2.0",
+    "@coopenomics/sdk": "2.2.0",
     "@dicebear/collection": "^9.0.1",
     "@dicebear/core": "^9.0.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
@@ -45,7 +45,7 @@
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "axios": "^1.2.1",
     "compression": "^1.7.4",
-    "cooptypes": "workspace:*",
+    "cooptypes": "2.2.0",
     "dompurify": "^3.1.7",
     "dotenv": "^16.4.5",
     "email-regex": "^5.0.0",
@@ -94,5 +94,5 @@
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   },
-  "gitHead": "0686c6ab00447d41b529fc0a2ad7637ff50448a0"
+  "gitHead": "b05c17bee481d90c4cd82aa2a34ac428f8263a5f"
 }

@@ -1,6 +1,5 @@
 {
   "name": "monocoop",
-  "private": true,
   "dependencies": {
     "commitgpt": "^2.0.0",
     "coop-notificator": "workspace:*",
