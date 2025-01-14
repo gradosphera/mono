@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/desktop",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "A Desktop Project",
   "productName": "Desktop App",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
@@ -20,8 +20,8 @@
     "prepublishOnly": "npm run build:lib"
   },
   "dependencies": {
-    "@coopenomics/controller": "^2.2.1",
-    "@coopenomics/sdk": "^2.2.1",
+    "@coopenomics/controller": "workspace:*",
+    "@coopenomics/sdk": "workspace:*",
     "@dicebear/collection": "^9.0.1",
     "@dicebear/core": "^9.0.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
@@ -45,7 +45,7 @@
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "axios": "^1.2.1",
     "compression": "^1.7.4",
-    "cooptypes": "^2.2.1",
+    "cooptypes": "^2.2.2",
     "dompurify": "^3.1.7",
     "dotenv": "^16.4.5",
     "email-regex": "^5.0.0",
