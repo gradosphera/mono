@@ -1,5 +1,5 @@
 import { Cooperative, DraftContract, SovietContract } from 'cooptypes';
-import { Registry } from 'coopdoc-generator-ts';
+import { Registry } from '@coopenomics/factory';
 import type { Migration } from '../../src/migration_interface';
 import { api } from '../../src/eos';
 import { createDraft } from '../../src/utils/createDraft';

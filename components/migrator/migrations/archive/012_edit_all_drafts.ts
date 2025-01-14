@@ -1,7 +1,7 @@
 import { Migration } from '../src/migration_interface';
 import { api } from '../src/eos';
 import { Cooperative, DraftContract, SovietContract } from 'cooptypes';
-import { Registry } from 'coopdoc-generator-ts';
+import { Registry } from '@coopenomics/factory';
 
 export class InitialMigration implements Migration {
   async run(): Promise<void> {

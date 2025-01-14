@@ -3,7 +3,7 @@
   "version": "2.1.8",
   "packages": [
     "components/*",
-    "components/coopback/src/plugins/*"
+    "components/controller/src/plugins/*"
   ],
   "npmClient": "pnpm",
   "command": {

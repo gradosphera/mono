@@ -1,8 +1,18 @@
-.idea/
-.vscode/
-node_modules/
-build/
-tmp/
-temp/
-dist/
-.env
+# Dependencies
+node_modules
+
+# yarn error logs
+yarn-error.log
+
+# Environment varibales
+.env*
+!.env*.example
+
+# Code coverage
+coverage
+
+.env-mixed
+.env-local
+
+logs
+logs/*

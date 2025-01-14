@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "coopdoc-generator-ts": "workspace:*",
+    "@coopenomics/factory": "workspace:*",
     "cooptypes": "workspace:*",
     "dotenv": "^16.4.5",
     "eosjs": "^22.1.0",

@@ -1,17 +1,21 @@
 {
   "compilerOptions": {
+    "target": "ES2015",
     "module": "commonjs",
-    "target": "es2020", // Более новый target для Node.js
-    "lib": ["es2020"],
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "outDir": "./dist",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "skipLibCheck": true,
+    "lib": ["ESNext"],
+    "outDir": "dist",
+    "baseUrl": "./src",
     "strict": true,
-    "strictPropertyInitialization": false // Опция для инъекции зависимостей
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "allowJs": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "paths": {
+      "~/*": ["*"]
+    }
   },
-  "exclude": ["dist", "build"]
+  "include": ["src/**/*.ts", "scripts/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
