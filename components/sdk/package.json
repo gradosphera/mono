@@ -2,7 +2,7 @@
   "name": "@coopenomics/sdk",
   "type": "module",
   "version": "2.1.8",
-  "private": true,
+  "private": false,
   "packageManager": "pnpm@9.9.0",
   "description": "",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
