@@ -16,7 +16,7 @@ class DataService<T extends IDocument> {
   }
 
   async getOne(filter: Filter<T>): Promise<T | null> {
-    const document = await this.collection.findOne({ ...filter }, { sort: { _created_at: -1 } })
+    const document = await this.collection.findOne({ ...filter }, { sort: { block_num: -1 } })
     return document as T | null
   }
 
@@ -31,7 +31,7 @@ class DataService<T extends IDocument> {
 
     const aggregateOptions = [
       { $match: filter },
-      { $sort: { _created_at: -1 } },
+      { $sort: { block_num: -1 } },
       {
         $group: {
           _id: groupId,
@@ -67,7 +67,7 @@ class DataService<T extends IDocument> {
   }
 
   async getHistory(filter: Filter<T>): Promise<T[]> {
-    const documents = await this.collection.find(filter).sort({ _created_at: -1 }).toArray()
+    const documents = await this.collection.find(filter).sort({ block_num: -1 }).toArray()
     return documents as unknown as T[]
   }
 

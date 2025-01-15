@@ -76,7 +76,7 @@ export class PaymentDomainService {
           symbol,
           type === 'deposit'
             ? `Паевый взнос №${db_order._id.toString().slice(0, 8)}`
-            : `Вступительный и минимальный паевый взносы №${db_order.toString().slice(0, 8)}`,
+            : `Вступительный и минимальный паевый взносы №${db_order._id.toString().slice(0, 8)}`,
           db_order.order_num as number,
           secret
         );
