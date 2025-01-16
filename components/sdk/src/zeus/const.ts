@@ -50,6 +50,7 @@ export const AllTypesProps: Record<string,any> = {
 	CreateProjectFreeDecisionInput:{
 
 	},
+	Date: `scalar.Date` as const,
 	DateTime: `scalar.DateTime` as const,
 	DeleteAccountInput:{
 
@@ -623,6 +624,7 @@ export const ReturnTypes: Record<string,any> = {
 		id:"String",
 		question:"String"
 	},
+	Date: `scalar.Date` as const,
 	DateTime: `scalar.DateTime` as const,
 	DecisionDetail:{
 		action:"ExtendedBlockchainAction",
@@ -1067,7 +1069,7 @@ export const ReturnTypes: Record<string,any> = {
 		vars:"Vars"
 	},
 	Token:{
-		expires:"DateTime",
+		expires:"Date",
 		token:"String"
 	},
 	Tokens:{

@@ -304,21 +304,30 @@ export const Gql = Chain(HOST, {
 
 export const ZeusScalars = ZeusSelect<ScalarCoders>();
 
+type BaseSymbol = number | string | undefined | boolean | null;
+
 type ScalarsSelector<T> = {
   [X in Required<{
-    [P in keyof T]: T[P] extends number | string | undefined | boolean ? P : never;
+    [P in keyof T]: T[P] extends BaseSymbol | Array<BaseSymbol> ? P : never;
   }>[keyof T]]: true;
 };
 
 export const fields = <T extends keyof ModelTypes>(k: T) => {
   const t = ReturnTypes[k];
+  const fnType = k in AllTypesProps ? AllTypesProps[k as keyof typeof AllTypesProps] : undefined;
+  const hasFnTypes = typeof fnType === 'object' ? fnType : undefined;
   const o = Object.fromEntries(
     Object.entries(t)
-      .filter(([, value]) => {
+      .filter(([k, value]) => {
+        const isFunctionType = hasFnTypes && k in hasFnTypes && !!hasFnTypes[k as keyof typeof hasFnTypes];
+        if (isFunctionType) return false;
         const isReturnType = ReturnTypes[value as string];
-        if (!isReturnType || (typeof isReturnType === 'string' && isReturnType.startsWith('scalar.'))) {
+        if (!isReturnType) return true;
+        if (typeof isReturnType !== 'string') return false;
+        if (isReturnType.startsWith('scalar.')) {
           return true;
         }
+        return false;
       })
       .map(([key]) => [key, true as const]),
   );
@@ -907,6 +916,7 @@ export const $ = <Type extends GraphQLVariableType, Name extends string>(name: N
 };
 type ZEUS_INTERFACES = never
 export type ScalarCoders = {
+	Date?: ScalarResolver;
 	DateTime?: ScalarResolver;
 	JSON?: ScalarResolver;
 }
@@ -957,7 +967,8 @@ export type ValueTypes = {
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ActDetail"]: AliasType<{
+	/** Массив комплексных актов, содержащих полную информацию о сгенерированном и опубликованном документах */
+["ActDetail"]: AliasType<{
 	action?:ValueTypes["ExtendedBlockchainAction"],
 	document?:ValueTypes["GeneratedDocument"],
 		__typename?: boolean | `@${string}`
@@ -1431,8 +1442,10 @@ export type ValueTypes = {
 	question?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+["Date"]: Date;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
-["DateTime"]:unknown;
+["DateTime"]:Date;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
 ["DecisionDetail"]: AliasType<{
 	action?:ValueTypes["ExtendedBlockchainAction"],
@@ -1607,15 +1620,15 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["ExtensionInput"]: {
-	/** Configuration settings for the extension */
+	/** Объект конфигурации расширения */
 	config: ValueTypes["JSON"] | Variable<any, string>,
-	/** Timestamp of when the extension was created */
+	/** Дата установки расширения */
 	created_at?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
-	/** Indicates whether the extension is enabled */
+	/** Флаг того, включено ли расширение сейчас */
 	enabled: boolean | Variable<any, string>,
-	/** Unique name of the extension */
+	/** Уникальное имя расширения (является идентификатором) */
 	name: string | Variable<any, string>,
-	/** Timestamp of the last update to the extension */
+	/** Дата обновления расширения */
 	updated_at?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>
 };
 	["FreeDecisionDocument"]: AliasType<{
@@ -3003,7 +3016,8 @@ export type ResolverInputTypes = {
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ActDetail"]: AliasType<{
+	/** Массив комплексных актов, содержащих полную информацию о сгенерированном и опубликованном документах */
+["ActDetail"]: AliasType<{
 	action?:ResolverInputTypes["ExtendedBlockchainAction"],
 	document?:ResolverInputTypes["GeneratedDocument"],
 		__typename?: boolean | `@${string}`
@@ -3477,8 +3491,10 @@ export type ResolverInputTypes = {
 	question?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+["Date"]:Date;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
-["DateTime"]:unknown;
+["DateTime"]:Date;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
 ["DecisionDetail"]: AliasType<{
 	action?:ResolverInputTypes["ExtendedBlockchainAction"],
@@ -3654,15 +3670,15 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["ExtensionInput"]: {
-	/** Configuration settings for the extension */
+	/** Объект конфигурации расширения */
 	config: ResolverInputTypes["JSON"],
-	/** Timestamp of when the extension was created */
+	/** Дата установки расширения */
 	created_at?: ResolverInputTypes["DateTime"] | undefined | null,
-	/** Indicates whether the extension is enabled */
+	/** Флаг того, включено ли расширение сейчас */
 	enabled: boolean,
-	/** Unique name of the extension */
+	/** Уникальное имя расширения (является идентификатором) */
 	name: string,
-	/** Timestamp of the last update to the extension */
+	/** Дата обновления расширения */
 	updated_at?: ResolverInputTypes["DateTime"] | undefined | null
 };
 	["FreeDecisionDocument"]: AliasType<{
@@ -5053,7 +5069,8 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
-	["ActDetail"]: {
+	/** Массив комплексных актов, содержащих полную информацию о сгенерированном и опубликованном документах */
+["ActDetail"]: {
 		action?: ModelTypes["ExtendedBlockchainAction"] | undefined | null,
 	document?: ModelTypes["GeneratedDocument"] | undefined | null
 };
@@ -5508,8 +5525,10 @@ export type ModelTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+["Date"]:Date;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
-["DateTime"]:any;
+["DateTime"]:Date;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
 ["DecisionDetail"]: {
 		action: ModelTypes["ExtendedBlockchainAction"],
@@ -5674,15 +5693,15 @@ export type ModelTypes = {
 	updated_at: ModelTypes["DateTime"]
 };
 	["ExtensionInput"]: {
-	/** Configuration settings for the extension */
+	/** Объект конфигурации расширения */
 	config: ModelTypes["JSON"],
-	/** Timestamp of when the extension was created */
+	/** Дата установки расширения */
 	created_at?: ModelTypes["DateTime"] | undefined | null,
-	/** Indicates whether the extension is enabled */
+	/** Флаг того, включено ли расширение сейчас */
 	enabled: boolean,
-	/** Unique name of the extension */
+	/** Уникальное имя расширения (является идентификатором) */
 	name: string,
-	/** Timestamp of the last update to the extension */
+	/** Дата обновления расширения */
 	updated_at?: ModelTypes["DateTime"] | undefined | null
 };
 	["FreeDecisionDocument"]: {
@@ -6819,7 +6838,7 @@ export type ModelTypes = {
 	["SystemStatus"]:SystemStatus;
 	["Token"]: {
 		/** Дата истечения токена доступа */
-	expires: ModelTypes["DateTime"],
+	expires: ModelTypes["Date"],
 	/** Токен доступа */
 	token: string
 };
@@ -7062,7 +7081,8 @@ export type GraphQLTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
-	["ActDetail"]: {
+	/** Массив комплексных актов, содержащих полную информацию о сгенерированном и опубликованном документах */
+["ActDetail"]: {
 	__typename: "ActDetail",
 	action?: GraphQLTypes["ExtendedBlockchainAction"] | undefined | null,
 	document?: GraphQLTypes["GeneratedDocument"] | undefined | null
@@ -7536,6 +7556,8 @@ export type GraphQLTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+["Date"]: "scalar" & { name: "Date" };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]: "scalar" & { name: "DateTime" };
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
@@ -7713,15 +7735,15 @@ export type GraphQLTypes = {
 	updated_at: GraphQLTypes["DateTime"]
 };
 	["ExtensionInput"]: {
-		/** Configuration settings for the extension */
+		/** Объект конфигурации расширения */
 	config: GraphQLTypes["JSON"],
-	/** Timestamp of when the extension was created */
+	/** Дата установки расширения */
 	created_at?: GraphQLTypes["DateTime"] | undefined | null,
-	/** Indicates whether the extension is enabled */
+	/** Флаг того, включено ли расширение сейчас */
 	enabled: boolean,
-	/** Unique name of the extension */
+	/** Уникальное имя расширения (является идентификатором) */
 	name: string,
-	/** Timestamp of the last update to the extension */
+	/** Дата обновления расширения */
 	updated_at?: GraphQLTypes["DateTime"] | undefined | null
 };
 	["FreeDecisionDocument"]: {
@@ -8911,7 +8933,7 @@ export type GraphQLTypes = {
 	["Token"]: {
 	__typename: "Token",
 	/** Дата истечения токена доступа */
-	expires: GraphQLTypes["DateTime"],
+	expires: GraphQLTypes["Date"],
 	/** Токен доступа */
 	token: string
 };
@@ -9182,6 +9204,7 @@ type ZEUS_VARIABLES = {
 	["CreateInitialPaymentInput"]: ValueTypes["CreateInitialPaymentInput"];
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
+	["Date"]: ValueTypes["Date"];
 	["DateTime"]: ValueTypes["DateTime"];
 	["DeleteAccountInput"]: ValueTypes["DeleteAccountInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];

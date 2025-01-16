@@ -6,6 +6,8 @@ import * as Classes from './classes'
 import * as Mutations from './mutations'
 import { type GraphQLResponse, Thunder, Subscription as ZeusSubscription } from './zeus'
 
+import { Chain, ZeusScalars } from './zeus'
+
 export * as Classes from './classes'
 export * as Mutations from './mutations'
 export * as Queries from './queries'
@@ -22,6 +24,17 @@ if (typeof globalThis.WebSocket === 'undefined') {
 
 // Текущие заголовки для запросов, которые можно обновлять
 let currentHeaders: Record<string, string> = {}
+
+const scalars = ZeusScalars({
+  Date: {
+    decode: (e: unknown) => new Date(e as string), // Преобразует строку в объект Date
+    encode: (e: unknown) => (e as Date).toISOString(), // Преобразует Date в ISO-строку
+  },
+  DateTime: {
+    decode: (e: unknown) => new Date(e as string), // Преобразует строку в объект Date
+    encode: (e: unknown) => (e as Date).toISOString(), // Преобразует Date в ISO-строку
+  },
+})
 
 // Функция для создания thunder клиента с использованием baseUrl из options
 function createThunder(baseUrl: string) {
@@ -60,7 +73,7 @@ function createThunder(baseUrl: string) {
     }
 
     return json.data
-  })
+  }, { scalars })
 }
 
 /**

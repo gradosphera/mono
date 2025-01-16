@@ -1,0 +1,2497 @@
+{
+    "inputs": {
+        "AddParticipantInput": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "email",
+                "initial",
+                "minimum",
+                "spread_initial",
+                "type"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "entrepreneur_data": {
+                    "$ref": "#/inputs/CreateEntrepreneurDataInput"
+                },
+                "individual_data": {
+                    "$ref": "#/inputs/CreateIndividualDataInput"
+                },
+                "initial": {
+                    "type": "string"
+                },
+                "minimum": {
+                    "type": "string"
+                },
+                "organization_data": {
+                    "$ref": "#/inputs/CreateOrganizationDataInput"
+                },
+                "referer": {
+                    "type": "string"
+                },
+                "spread_initial": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "Entrepreneur",
+                        "Individual",
+                        "Organization"
+                    ]
+                }
+            }
+        },
+        "AddTrustedAccountInput": {
+            "type": "object",
+            "required": [
+                "braname",
+                "coopname",
+                "trusted"
+            ],
+            "properties": {
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "trusted": {
+                    "type": "string"
+                }
+            }
+        },
+        "AgreementInput": {
+            "type": "object",
+            "required": [
+                "protocol_day_month_year",
+                "protocol_number"
+            ],
+            "properties": {
+                "protocol_day_month_year": {
+                    "type": "string"
+                },
+                "protocol_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "BankAccountDetailsInput": {
+            "type": "object",
+            "required": [
+                "bik",
+                "corr",
+                "kpp"
+            ],
+            "properties": {
+                "bik": {
+                    "type": "string"
+                },
+                "corr": {
+                    "type": "string"
+                },
+                "kpp": {
+                    "type": "string"
+                }
+            }
+        },
+        "BankAccountInput": {
+            "type": "object",
+            "required": [
+                "account_number",
+                "bank_name",
+                "currency",
+                "details"
+            ],
+            "properties": {
+                "account_number": {
+                    "type": "string"
+                },
+                "bank_name": {
+                    "type": "string"
+                },
+                "card_number": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "details": {
+                    "$ref": "#/inputs/BankAccountDetailsInput"
+                }
+            }
+        },
+        "CreateBankAccountInput": {
+            "type": "object",
+            "required": [
+                "data",
+                "is_default",
+                "username"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/inputs/BankAccountInput"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateBranchInput": {
+            "type": "object",
+            "required": [
+                "based_on",
+                "braname",
+                "coopname",
+                "email",
+                "fact_address",
+                "full_name",
+                "phone",
+                "short_name",
+                "trustee"
+            ],
+            "properties": {
+                "based_on": {
+                    "type": "string"
+                },
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "fact_address": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "short_name": {
+                    "type": "string"
+                },
+                "trustee": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateDepositPaymentInput": {
+            "type": "object",
+            "required": [
+                "quantity",
+                "username"
+            ],
+            "properties": {
+                "quantity": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateEntrepreneurDataInput": {
+            "type": "object",
+            "required": [
+                "bank_account",
+                "birthdate",
+                "city",
+                "country",
+                "details",
+                "first_name",
+                "full_address",
+                "last_name",
+                "middle_name",
+                "phone"
+            ],
+            "properties": {
+                "bank_account": {
+                    "$ref": "#/inputs/BankAccountInput"
+                },
+                "birthdate": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string",
+                    "enum": [
+                        "Russia"
+                    ]
+                },
+                "details": {
+                    "$ref": "#/inputs/EntrepreneurDetailsInput"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "full_address": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "middle_name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateIndividualDataInput": {
+            "type": "object",
+            "required": [
+                "birthdate",
+                "first_name",
+                "full_address",
+                "last_name",
+                "middle_name",
+                "phone"
+            ],
+            "properties": {
+                "birthdate": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "full_address": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "middle_name": {
+                    "type": "string"
+                },
+                "passport": {
+                    "$ref": "#/inputs/PassportInput"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateInitialPaymentInput": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateOrganizationDataInput": {
+            "type": "object",
+            "required": [
+                "bank_account",
+                "city",
+                "country",
+                "details",
+                "fact_address",
+                "full_address",
+                "full_name",
+                "phone",
+                "represented_by",
+                "short_name",
+                "type"
+            ],
+            "properties": {
+                "bank_account": {
+                    "$ref": "#/inputs/BankAccountInput"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "details": {
+                    "$ref": "#/inputs/OrganizationDetailsInput"
+                },
+                "fact_address": {
+                    "type": "string"
+                },
+                "full_address": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "represented_by": {
+                    "$ref": "#/inputs/RepresentedByInput"
+                },
+                "short_name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "AO",
+                        "COOP",
+                        "OAO",
+                        "OOO",
+                        "PAO",
+                        "ZAO"
+                    ]
+                }
+            }
+        },
+        "CreateProjectFreeDecisionInput": {
+            "type": "object",
+            "required": [
+                "decision",
+                "question"
+            ],
+            "properties": {
+                "decision": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "DeleteAccountInput": {
+            "type": "object",
+            "required": [
+                "username_for_delete"
+            ],
+            "properties": {
+                "username_for_delete": {
+                    "type": "string"
+                }
+            }
+        },
+        "DeleteBranchInput": {
+            "type": "object",
+            "required": [
+                "braname",
+                "coopname"
+            ],
+            "properties": {
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                }
+            }
+        },
+        "DeletePaymentMethodInput": {
+            "type": "object",
+            "required": [
+                "method_id",
+                "username"
+            ],
+            "properties": {
+                "method_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "DeleteTrustedAccountInput": {
+            "type": "object",
+            "required": [
+                "braname",
+                "coopname",
+                "trusted"
+            ],
+            "properties": {
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "trusted": {
+                    "type": "string"
+                }
+            }
+        },
+        "EditBranchInput": {
+            "type": "object",
+            "required": [
+                "based_on",
+                "braname",
+                "coopname",
+                "email",
+                "fact_address",
+                "full_name",
+                "phone",
+                "short_name",
+                "trustee"
+            ],
+            "properties": {
+                "based_on": {
+                    "type": "string"
+                },
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "fact_address": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "short_name": {
+                    "type": "string"
+                },
+                "trustee": {
+                    "type": "string"
+                }
+            }
+        },
+        "EntrepreneurDetailsInput": {
+            "type": "object",
+            "required": [
+                "inn",
+                "ogrn"
+            ],
+            "properties": {
+                "inn": {
+                    "type": "string"
+                },
+                "ogrn": {
+                    "type": "string"
+                }
+            }
+        },
+        "ExtensionInput": {
+            "type": "object",
+            "required": [
+                "config",
+                "enabled",
+                "name"
+            ],
+            "properties": {
+                "config": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "FreeDecisionGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "decision_id",
+                "project_id",
+                "username"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "decision_id": {
+                    "type": "number"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "GenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "username"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "GenerateDocumentOptionsInput": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "skip_save": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "GetAccountInput": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetAccountsInput": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "role": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetBranchesInput": {
+            "type": "object",
+            "required": [
+                "coopname"
+            ],
+            "properties": {
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetDocumentsFilterInput": {
+            "type": "object",
+            "required": [
+                "receiver"
+            ],
+            "properties": {
+                "additionalFilters": {
+                    "type": "string"
+                },
+                "receiver": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetDocumentsInput": {
+            "type": "object",
+            "required": [
+                "filter"
+            ],
+            "properties": {
+                "filter": {
+                    "$ref": "#/inputs/GetDocumentsFilterInput"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetExtensionsInput": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "installed": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetPaymentMethodsInput": {
+            "type": "object",
+            "required": [
+                "limit",
+                "page",
+                "sortOrder"
+            ],
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "sortBy": {
+                    "type": "string"
+                },
+                "sortOrder": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetPaymentsInput": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "blockchain_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "COMPLETED",
+                        "EXPIRED",
+                        "FAILED",
+                        "PAID",
+                        "PENDING",
+                        "REFUNDED"
+                    ]
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "Init": {
+            "type": "object",
+            "required": [
+                "organization_data",
+                "vars"
+            ],
+            "properties": {
+                "organization_data": {
+                    "$ref": "#/inputs/CreateOrganizationDataInput"
+                },
+                "vars": {
+                    "$ref": "#/inputs/VarsInput"
+                }
+            }
+        },
+        "Install": {
+            "type": "object",
+            "required": [
+                "soviet",
+                "wif"
+            ],
+            "properties": {
+                "soviet": {
+                    "$ref": "#/inputs/SovietMemberInput"
+                },
+                "wif": {
+                    "type": "string"
+                }
+            }
+        },
+        "LoginInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "now",
+                "signature"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "now": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            }
+        },
+        "LogoutInput": {
+            "type": "object",
+            "required": [
+                "access_token",
+                "refresh_token"
+            ],
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "MetaDocumentInput": {
+            "type": "object",
+            "required": [
+                "block_num",
+                "coopname",
+                "created_at",
+                "generator",
+                "lang",
+                "links",
+                "registry_id",
+                "timezone",
+                "title",
+                "username",
+                "version"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "string"
+                },
+                "registry_id": {
+                    "type": "integer"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "OrganizationDetailsInput": {
+            "type": "object",
+            "required": [
+                "inn",
+                "kpp",
+                "ogrn"
+            ],
+            "properties": {
+                "inn": {
+                    "type": "string"
+                },
+                "kpp": {
+                    "type": "string"
+                },
+                "ogrn": {
+                    "type": "string"
+                }
+            }
+        },
+        "PaginationInput": {
+            "type": "object",
+            "required": [
+                "limit",
+                "page",
+                "sortOrder"
+            ],
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "sortBy": {
+                    "type": "string"
+                },
+                "sortOrder": {
+                    "type": "string"
+                }
+            }
+        },
+        "ParticipantApplicationDecisionGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "decision_id",
+                "username"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "decision_id": {
+                    "type": "number"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ParticipantApplicationGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "signature",
+                "skip_save",
+                "username"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "signature": {
+                    "type": "string"
+                },
+                "skip_save": {
+                    "type": "boolean"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ParticipantApplicationSignedDocumentInput": {
+            "type": "object",
+            "required": [
+                "hash",
+                "meta",
+                "public_key",
+                "signature"
+            ],
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/inputs/ParticipantApplicationSignedMetaDocumentInput"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            }
+        },
+        "ParticipantApplicationSignedMetaDocumentInput": {
+            "type": "object",
+            "required": [
+                "block_num",
+                "coopname",
+                "created_at",
+                "generator",
+                "lang",
+                "links",
+                "registry_id",
+                "signature",
+                "skip_save",
+                "timezone",
+                "title",
+                "username",
+                "version"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "string"
+                },
+                "registry_id": {
+                    "type": "integer"
+                },
+                "signature": {
+                    "type": "string"
+                },
+                "skip_save": {
+                    "type": "boolean"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "PassportInput": {
+            "type": "object",
+            "required": [
+                "code",
+                "issued_at",
+                "issued_by",
+                "number",
+                "series"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "issued_at": {
+                    "type": "string"
+                },
+                "issued_by": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "number"
+                },
+                "series": {
+                    "type": "number"
+                }
+            }
+        },
+        "ProjectFreeDecisionGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "project_id",
+                "username"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectFreeDecisionSignedDocumentInput": {
+            "type": "object",
+            "required": [
+                "hash",
+                "meta",
+                "public_key",
+                "signature"
+            ],
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/inputs/ProjectFreeDecisionSignedMetaDocumentInput"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProjectFreeDecisionSignedMetaDocumentInput": {
+            "type": "object",
+            "required": [
+                "block_num",
+                "coopname",
+                "created_at",
+                "generator",
+                "lang",
+                "links",
+                "project_id",
+                "registry_id",
+                "timezone",
+                "title",
+                "username",
+                "version"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "string"
+                },
+                "registry_id": {
+                    "type": "integer"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "PublishProjectFreeDecisionInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "document",
+                "meta",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "document": {
+                    "$ref": "#/inputs/ProjectFreeDecisionSignedDocumentInput"
+                },
+                "meta": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "RefreshInput": {
+            "type": "object",
+            "required": [
+                "access_token",
+                "refresh_token"
+            ],
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "RegisterAccountInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "role",
+                "type",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "entrepreneur_data": {
+                    "$ref": "#/inputs/CreateEntrepreneurDataInput"
+                },
+                "individual_data": {
+                    "$ref": "#/inputs/CreateIndividualDataInput"
+                },
+                "organization_data": {
+                    "$ref": "#/inputs/CreateOrganizationDataInput"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "referer": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "User"
+                    ]
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "Entrepreneur",
+                        "Individual",
+                        "Organization"
+                    ]
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "RegisterParticipantInput": {
+            "type": "object",
+            "required": [
+                "privacy_agreement",
+                "signature_agreement",
+                "statement",
+                "user_agreement",
+                "username",
+                "wallet_agreement"
+            ],
+            "properties": {
+                "privacy_agreement": {
+                    "$ref": "#/inputs/SignedDigitalDocumentInput"
+                },
+                "signature_agreement": {
+                    "$ref": "#/inputs/SignedDigitalDocumentInput"
+                },
+                "statement": {
+                    "$ref": "#/inputs/ParticipantApplicationSignedDocumentInput"
+                },
+                "user_agreement": {
+                    "$ref": "#/inputs/SignedDigitalDocumentInput"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "wallet_agreement": {
+                    "$ref": "#/inputs/SignedDigitalDocumentInput"
+                }
+            }
+        },
+        "RepresentedByInput": {
+            "type": "object",
+            "required": [
+                "based_on",
+                "first_name",
+                "last_name",
+                "middle_name",
+                "position"
+            ],
+            "properties": {
+                "based_on": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "middle_name": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                }
+            }
+        },
+        "ResetKeyInput": {
+            "type": "object",
+            "required": [
+                "public_key",
+                "token"
+            ],
+            "properties": {
+                "public_key": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "SelectBranchGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "braname",
+                "coopname",
+                "username"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "SelectBranchInput": {
+            "type": "object",
+            "required": [
+                "braname",
+                "coopname",
+                "document",
+                "username"
+            ],
+            "properties": {
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "document": {
+                    "$ref": "#/inputs/SelectBranchSignedDocumentInput"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "SelectBranchSignedDocumentInput": {
+            "type": "object",
+            "required": [
+                "hash",
+                "meta",
+                "public_key",
+                "signature"
+            ],
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/inputs/SelectBranchSignedMetaDocumentInput"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            }
+        },
+        "SelectBranchSignedMetaDocumentInput": {
+            "type": "object",
+            "required": [
+                "block_num",
+                "braname",
+                "coopname",
+                "created_at",
+                "generator",
+                "lang",
+                "links",
+                "registry_id",
+                "timezone",
+                "title",
+                "username",
+                "version"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "string"
+                },
+                "registry_id": {
+                    "type": "integer"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "SetPaymentStatusInput": {
+            "type": "object",
+            "required": [
+                "id",
+                "status"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "COMPLETED",
+                        "EXPIRED",
+                        "FAILED",
+                        "PAID",
+                        "PENDING",
+                        "REFUNDED"
+                    ]
+                }
+            }
+        },
+        "SetWifInput": {
+            "type": "object",
+            "required": [
+                "permission",
+                "username",
+                "wif"
+            ],
+            "properties": {
+                "permission": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "wif": {
+                    "type": "string"
+                }
+            }
+        },
+        "SignedDigitalDocumentInput": {
+            "type": "object",
+            "required": [
+                "hash",
+                "meta",
+                "public_key",
+                "signature"
+            ],
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/inputs/MetaDocumentInput"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            }
+        },
+        "SovietMemberInput": {
+            "type": "object",
+            "required": [
+                "individual_data",
+                "role"
+            ],
+            "properties": {
+                "individual_data": {
+                    "$ref": "#/inputs/CreateIndividualDataInput"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "StartResetKeyInput": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "UninstallExtensionInput": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Update": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "organization_data": {
+                    "$ref": "#/inputs/UpdateOrganizationDataInput"
+                },
+                "vars": {
+                    "$ref": "#/inputs/VarsInput"
+                }
+            }
+        },
+        "UpdateAccountInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "role",
+                "type",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "entrepreneur_data": {
+                    "$ref": "#/inputs/UpdateEntrepreneurDataInput"
+                },
+                "individual_data": {
+                    "$ref": "#/inputs/UpdateIndividualDataInput"
+                },
+                "organization_data": {
+                    "$ref": "#/inputs/UpdateOrganizationDataInput"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "referer": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "User"
+                    ]
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "Entrepreneur",
+                        "Individual",
+                        "Organization"
+                    ]
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateBankAccountInput": {
+            "type": "object",
+            "required": [
+                "data",
+                "is_default",
+                "method_id",
+                "username"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/inputs/BankAccountInput"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "method_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateEntrepreneurDataInput": {
+            "type": "object",
+            "required": [
+                "birthdate",
+                "city",
+                "country",
+                "details",
+                "first_name",
+                "full_address",
+                "last_name",
+                "middle_name",
+                "phone"
+            ],
+            "properties": {
+                "birthdate": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string",
+                    "enum": [
+                        "Russia"
+                    ]
+                },
+                "details": {
+                    "$ref": "#/inputs/EntrepreneurDetailsInput"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "full_address": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "middle_name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateIndividualDataInput": {
+            "type": "object",
+            "required": [
+                "birthdate",
+                "first_name",
+                "full_address",
+                "last_name",
+                "middle_name",
+                "phone"
+            ],
+            "properties": {
+                "birthdate": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "full_address": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "middle_name": {
+                    "type": "string"
+                },
+                "passport": {
+                    "$ref": "#/inputs/PassportInput"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateOrganizationDataInput": {
+            "type": "object",
+            "required": [
+                "city",
+                "country",
+                "details",
+                "fact_address",
+                "full_address",
+                "full_name",
+                "phone",
+                "represented_by",
+                "short_name",
+                "type"
+            ],
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "details": {
+                    "$ref": "#/inputs/OrganizationDetailsInput"
+                },
+                "fact_address": {
+                    "type": "string"
+                },
+                "full_address": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "represented_by": {
+                    "$ref": "#/inputs/RepresentedByInput"
+                },
+                "short_name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "AO",
+                        "COOP",
+                        "OAO",
+                        "OOO",
+                        "PAO",
+                        "ZAO"
+                    ]
+                }
+            }
+        },
+        "VarsInput": {
+            "type": "object",
+            "required": [
+                "confidential_email",
+                "confidential_link",
+                "contact_email",
+                "coopname",
+                "full_abbr",
+                "full_abbr_dative",
+                "full_abbr_genitive",
+                "name",
+                "participant_application",
+                "passport_request",
+                "privacy_agreement",
+                "short_abbr",
+                "signature_agreement",
+                "user_agreement",
+                "wallet_agreement",
+                "website"
+            ],
+            "properties": {
+                "confidential_email": {
+                    "type": "string"
+                },
+                "confidential_link": {
+                    "type": "string"
+                },
+                "contact_email": {
+                    "type": "string"
+                },
+                "coopenomics_agreement": {
+                    "$ref": "#/inputs/AgreementInput"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "full_abbr": {
+                    "type": "string"
+                },
+                "full_abbr_dative": {
+                    "type": "string"
+                },
+                "full_abbr_genitive": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "participant_application": {
+                    "$ref": "#/inputs/AgreementInput"
+                },
+                "passport_request": {
+                    "type": "string"
+                },
+                "privacy_agreement": {
+                    "$ref": "#/inputs/AgreementInput"
+                },
+                "short_abbr": {
+                    "type": "string"
+                },
+                "signature_agreement": {
+                    "$ref": "#/inputs/AgreementInput"
+                },
+                "user_agreement": {
+                    "$ref": "#/inputs/AgreementInput"
+                },
+                "wallet_agreement": {
+                    "$ref": "#/inputs/AgreementInput"
+                },
+                "website": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "types": {
+        "Mutation": {
+            "addParticipant": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/AddParticipantInput"
+                    }
+                }
+            },
+            "addTrustedAccount": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/AddTrustedAccountInput"
+                    }
+                }
+            },
+            "createBankAccount": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/CreateBankAccountInput"
+                    }
+                }
+            },
+            "createBranch": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/CreateBranchInput"
+                    }
+                }
+            },
+            "createDepositPayment": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/CreateDepositPaymentInput"
+                    }
+                }
+            },
+            "createInitialPayment": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/CreateInitialPaymentInput"
+                    }
+                }
+            },
+            "createProjectOfFreeDecision": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/CreateProjectFreeDecisionInput"
+                    }
+                }
+            },
+            "deleteAccount": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/DeleteAccountInput"
+                    }
+                }
+            },
+            "deleteBranch": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/DeleteBranchInput"
+                    }
+                }
+            },
+            "deletePaymentMethod": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/DeletePaymentMethodInput"
+                    }
+                }
+            },
+            "deleteTrustedAccount": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/DeleteTrustedAccountInput"
+                    }
+                }
+            },
+            "editBranch": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/EditBranchInput"
+                    }
+                }
+            },
+            "generateFreeDecision": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/FreeDecisionGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateParticipantApplication": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ParticipantApplicationGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateParticipantApplicationDecision": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ParticipantApplicationDecisionGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generatePrivacyAgreement": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateProjectOfFreeDecision": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ProjectFreeDecisionGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateSelectBranchDocument": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/SelectBranchGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateSignatureAgreement": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateUserAgreement": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateWalletAgreement": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "initSystem": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/Init"
+                    }
+                }
+            },
+            "installExtension": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ExtensionInput"
+                    }
+                }
+            },
+            "installSystem": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/Install"
+                    }
+                }
+            },
+            "login": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/LoginInput"
+                    }
+                }
+            },
+            "logout": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/LogoutInput"
+                    }
+                }
+            },
+            "publishProjectOfFreeDecision": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/PublishProjectFreeDecisionInput"
+                    }
+                }
+            },
+            "refresh": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/RefreshInput"
+                    }
+                }
+            },
+            "registerAccount": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/RegisterAccountInput"
+                    }
+                }
+            },
+            "registerParticipant": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/RegisterParticipantInput"
+                    }
+                }
+            },
+            "resetKey": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ResetKeyInput"
+                    }
+                }
+            },
+            "selectBranch": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/SelectBranchInput"
+                    }
+                }
+            },
+            "setPaymentStatus": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/SetPaymentStatusInput"
+                    }
+                }
+            },
+            "setWif": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/SetWifInput"
+                    }
+                }
+            },
+            "startResetKey": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/StartResetKeyInput"
+                    }
+                }
+            },
+            "uninstallExtension": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/UninstallExtensionInput"
+                    }
+                }
+            },
+            "updateAccount": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/UpdateAccountInput"
+                    }
+                }
+            },
+            "updateBankAccount": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/UpdateBankAccountInput"
+                    }
+                }
+            },
+            "updateExtension": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ExtensionInput"
+                    }
+                }
+            },
+            "updateSystem": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/Update"
+                    }
+                }
+            }
+        },
+        "Query": {
+            "getAccount": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GetAccountInput"
+                    }
+                }
+            },
+            "getAccounts": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GetAccountsInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/PaginationInput"
+                    }
+                }
+            },
+            "getAgenda": {
+                "type": "object",
+                "required": [],
+                "properties": {}
+            },
+            "getBranches": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GetBranchesInput"
+                    }
+                }
+            },
+            "getDocuments": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GetDocumentsInput"
+                    }
+                }
+            },
+            "getExtensions": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GetExtensionsInput"
+                    }
+                }
+            },
+            "getPaymentMethods": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GetPaymentMethodsInput"
+                    }
+                }
+            },
+            "getPayments": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/GetPaymentsInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/PaginationInput"
+                    }
+                }
+            },
+            "getSystemInfo": {
+                "type": "object",
+                "required": [],
+                "properties": {}
+            }
+        }
+    }
+}

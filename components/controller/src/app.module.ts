@@ -5,6 +5,7 @@ import { DomainModule } from './domain/domain.module';
 import { ApplicationModule } from './modules/application.module';
 import { InfrastructureModule } from './infrastructure/infrastructure.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { GraphQLDateTime } from 'graphql-scalars';
 
 @Module({
   imports: [
@@ -21,7 +22,12 @@ import { ThrottlerModule } from '@nestjs/throttler';
     ApplicationModule,
     InfrastructureModule,
   ],
-  providers: [],
+  providers: [
+    {
+      provide: 'DateTime',
+      useValue: GraphQLDateTime,
+    },
+  ],
   exports: [],
 })
 export class AppModule {}

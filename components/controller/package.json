@@ -38,7 +38,7 @@
     "docs-watch": "swagger-ui-watcher ./src/docs/swagger.json",
     "docs": "spectaql spectaql-config.yml",
     "docs2": "ts-node scripts/swagger.ts && redoc-cli bundle ./src/docs/swagger.json -o ./docs/index.html",
-    "generate-client": "zeus ./schema.gql ../coopjs/src --subscriptions graphql-ws && cp -r ./src/types/shared/* ../coopjs/src/types/controller"
+    "generate-client": "zeus ./schema.gql ../sdk/src --subscriptions graphql-ws && cp -r ./src/types/shared/* ../sdk/src/types/controller"
   },
   "keywords": [
     "node",
@@ -111,7 +111,6 @@
     "graphql-tools": "^9.0.2",
     "graphql-type-json": "^0.3.2",
     "graphql-ws": "^5.16.0",
-    "graphql-zeus": "^7.0.1",
     "helmet": "^4.1.0",
     "html-pdf-node": "^1.0.8",
     "http-proxy-middleware": "^3.0.3",
@@ -155,6 +154,7 @@
     "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.18.0",
     "xss-clean": "^0.1.1",
+    "zeus": "^3.3.2",
     "zod": "^3.23.8",
     "zod-to-json-schema": "^3.23.5"
   },
@@ -179,6 +179,7 @@
     "eslint-plugin-jest": "^24.0.1",
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-security": "^1.4.0",
+    "graphql-zeus": "^7.0.1",
     "node-mocks-http": "^1.8.0",
     "nodemon": "^2.0.0",
     "prettier": "^2.0.5",

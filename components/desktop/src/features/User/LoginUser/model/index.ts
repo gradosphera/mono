@@ -5,6 +5,7 @@ import {client} from 'src/shared/api/client'
 import { useCurrentUserStore } from 'src/entities/User'
 import { useSystemStore } from 'src/entities/System/model'
 import { useRegistratorStore } from 'src/entities/Registrator'
+import type { ITokens } from 'src/shared/lib/types/user'
 
 export function useLoginUser() {
   const globalStore = useGlobalStore()
@@ -12,10 +13,23 @@ export function useLoginUser() {
   const system = useSystemStore()
 
   async function login(email: string, wif: string): Promise<void> {
-    const auth = await api.loginUser(email, wif)
+    const auth = await api.loginUser(email, wif);
+    const { tokens, account } = await client.login(email, wif);
 
-    await globalStore.setWif(auth.user.username, wif)
-    await globalStore.setTokens(auth.tokens)
+    // Создаём объект tokens с правильными типами
+    const adaptedTokens: ITokens = {
+      access: {
+        token: tokens.access.token,
+        expires: new Date(tokens.access.expires as string),
+      },
+      refresh: {
+        token: tokens.refresh.token,
+        expires: new Date(tokens.refresh.expires as string),
+      },
+    };
+
+    await globalStore.setWif(account.username, wif);
+    await globalStore.setTokens(adaptedTokens);
 
     const session = useSessionStore()
     await session.init()
