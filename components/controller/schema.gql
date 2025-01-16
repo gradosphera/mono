@@ -719,11 +719,6 @@ type CreatedProjectFreeDecision {
 }
 
 """
-A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
-"""
-scalar Date
-
-"""
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
@@ -2667,7 +2662,7 @@ enum SystemStatus {
 
 type Token {
   """Дата истечения токена доступа"""
-  expires: Date!
+  expires: DateTime!
 
   """Токен доступа"""
   token: String!

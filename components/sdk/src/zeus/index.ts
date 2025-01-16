@@ -916,7 +916,6 @@ export const $ = <Type extends GraphQLVariableType, Name extends string>(name: N
 };
 type ZEUS_INTERFACES = never
 export type ScalarCoders = {
-	Date?: ScalarResolver;
 	DateTime?: ScalarResolver;
 	JSON?: ScalarResolver;
 }
@@ -1442,8 +1441,6 @@ export type ValueTypes = {
 	question?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-["Date"]:unknown;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
@@ -3491,8 +3488,6 @@ export type ResolverInputTypes = {
 	question?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-["Date"]:unknown;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
@@ -5525,8 +5520,6 @@ export type ModelTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
-	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-["Date"]:any;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
@@ -6838,7 +6831,7 @@ export type ModelTypes = {
 	["SystemStatus"]:SystemStatus;
 	["Token"]: {
 		/** Дата истечения токена доступа */
-	expires: ModelTypes["Date"],
+	expires: ModelTypes["DateTime"],
 	/** Токен доступа */
 	token: string
 };
@@ -7556,8 +7549,6 @@ export type GraphQLTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
-	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-["Date"]: "scalar" & { name: "Date" };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]: "scalar" & { name: "DateTime" };
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
@@ -8933,7 +8924,7 @@ export type GraphQLTypes = {
 	["Token"]: {
 	__typename: "Token",
 	/** Дата истечения токена доступа */
-	expires: GraphQLTypes["Date"],
+	expires: GraphQLTypes["DateTime"],
 	/** Токен доступа */
 	token: string
 };
@@ -9204,7 +9195,6 @@ type ZEUS_VARIABLES = {
 	["CreateInitialPaymentInput"]: ValueTypes["CreateInitialPaymentInput"];
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
-	["Date"]: ValueTypes["Date"];
 	["DateTime"]: ValueTypes["DateTime"];
 	["DeleteAccountInput"]: ValueTypes["DeleteAccountInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
