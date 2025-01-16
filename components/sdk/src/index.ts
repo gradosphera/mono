@@ -26,10 +26,6 @@ if (typeof globalThis.WebSocket === 'undefined') {
 let currentHeaders: Record<string, string> = {}
 
 const scalars = ZeusScalars({
-  Date: {
-    decode: (e: unknown) => new Date(e as string), // Преобразует строку в объект Date
-    encode: (e: unknown) => (e as Date).toISOString(), // Преобразует Date в ISO-строку
-  },
   DateTime: {
     decode: (e: unknown) => new Date(e as string), // Преобразует строку в объект Date
     encode: (e: unknown) => (e as Date).toISOString(), // Преобразует Date в ISO-строку
