@@ -45,7 +45,7 @@
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "axios": "^1.2.1",
     "compression": "^1.7.4",
-    "cooptypes": "^2.2.3",
+    "cooptypes": "workspace:*",
     "dompurify": "^3.1.7",
     "dotenv": "^16.4.5",
     "email-regex": "^5.0.0",
