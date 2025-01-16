@@ -1443,9 +1443,9 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-["Date"]: Date;
+["Date"]:unknown;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
-["DateTime"]:Date;
+["DateTime"]:unknown;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
 ["DecisionDetail"]: AliasType<{
 	action?:ValueTypes["ExtendedBlockchainAction"],
@@ -3492,9 +3492,9 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-["Date"]:Date;
+["Date"]:unknown;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
-["DateTime"]:Date;
+["DateTime"]:unknown;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
 ["DecisionDetail"]: AliasType<{
 	action?:ResolverInputTypes["ExtendedBlockchainAction"],
@@ -5526,9 +5526,9 @@ export type ModelTypes = {
 	question: string
 };
 	/** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-["Date"]:Date;
+["Date"]:any;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
-["DateTime"]:Date;
+["DateTime"]:any;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения. */
 ["DecisionDetail"]: {
 		action: ModelTypes["ExtendedBlockchainAction"],
