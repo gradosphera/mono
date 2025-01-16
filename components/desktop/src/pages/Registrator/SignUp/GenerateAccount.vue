@@ -34,6 +34,8 @@ import { ref, computed } from 'vue'
 import { useCreateUser } from 'src/features/User/CreateUser'
 import { Notify, copyToClipboard } from 'quasar'
 import { useRegistratorStore } from 'src/entities/Registrator'
+import { Classes } from '@coopenomics/sdk'
+
 const store = useRegistratorStore()
 
 import { FailAlert } from 'src/shared/api'
@@ -43,7 +45,7 @@ const i_save = ref(false)
 const account = ref(store.state.account)
 
 if (!account.value.private_key || !account.value.public_key || !account.value.username)
-  account.value = api.generateAccount()
+  account.value = new Classes.Account()
 
 const email = computed(() => store.state.email)
 const userData = computed(() => store.state.userData)
