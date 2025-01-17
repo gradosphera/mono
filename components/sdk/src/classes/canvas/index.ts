@@ -1,125 +1,135 @@
-/**
- * Класс `Canvas` инкапсулирует работу с HTML5 `<canvas>`:
- * - создание и инициализация canvas внутри переданного контейнера;
- * - очистка canvas;
- * - управление процессом рисования (начало, рисование, завершение);
- * - получение содержимого (подписи) в формате base64.
- *
- * @remarks
- * Все методы и состояние рисования (координаты, флаг `drawing`) хранятся внутри класса.
- *
- * @example
- * ```ts
- * const container = document.getElementById('canvas-container') as HTMLElement
- * const myCanvas = new Canvas(container, 500, 300)
- *
- * // События мыши
- * myCanvas.canvas.addEventListener('mousedown', (e) => myCanvas.startDrawing(e))
- * myCanvas.canvas.addEventListener('mousemove', (e) => myCanvas.draw(e))
- * myCanvas.canvas.addEventListener('mouseup', () => myCanvas.endDrawing())
- *
- * // Очистка холста
- * document.getElementById('clear-btn')?.addEventListener('click', () => {
- *   myCanvas.clearCanvas()
- * })
- *
- * // Получение подписи (base64)
- * document.getElementById('get-sign-btn')?.addEventListener('click', () => {
- *   const signature = myCanvas.getSignature()
- *   console.log('Подпись (base64):', signature)
- * })
- * ```
- */
 export class Canvas {
   public canvas: HTMLCanvasElement
   public ctx: CanvasRenderingContext2D
 
-  private state: {
-    drawing: boolean
-    lastX: number
-    lastY: number
-  } = {
-      drawing: false,
-      lastX: 0,
-      lastY: 0,
-    }
+  private drawing = false
+  private lastX = 0
+  private lastY = 0
 
-  /**
-   * Создаёт элемент `<canvas>` внутри указанного контейнера.
-   * @param container - HTML-элемент, внутри которого создаётся canvas.
-   * @param width - Ширина canvas (по умолчанию 300).
-   * @param height - Высота canvas (по умолчанию 150).
-   */
-  constructor(container: HTMLElement, width = 300, height = 150) {
+  constructor(
+    private container: HTMLElement,
+    private opts: {
+      lineWidth?: number
+      strokeStyle?: string
+    } = {},
+  ) {
+    // Создаём <canvas> и добавляем в контейнер
     this.canvas = document.createElement('canvas')
-    this.canvas.width = width
-    this.canvas.height = height
-    container.appendChild(this.canvas)
-    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
+    this.canvas.width = container.offsetWidth
+    this.canvas.height = container.offsetHeight
 
-    this.ctx.lineWidth = 5
+    // Отключаем скролл при тачах
+    this.canvas.style.touchAction = 'none'
+
+    container.appendChild(this.canvas)
+
+    // Получаем 2D-контекст
+    const ctx = this.canvas.getContext('2d')
+    if (!ctx) {
+      throw new Error('Canvas not supported')
+    }
+    this.ctx = ctx
+
+    // Настройки рисования
+    this.ctx.lineWidth = this.opts.lineWidth ?? 5
     this.ctx.lineJoin = 'round'
     this.ctx.lineCap = 'round'
-    this.ctx.strokeStyle = '#000'
+    this.ctx.strokeStyle = this.opts.strokeStyle ?? '#000'
+
+    // Навешиваем события мыши и тач
+    this.initEvents()
   }
 
   /**
-   * Полностью очищает canvas.
+   * Очистка холста.
    */
   public clearCanvas(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
   /**
-   * Запускает процесс рисования (фиксирует начальные координаты).
-   * @param e - Событие мыши или касания.
+   * Получение подписи в формате base64.
    */
-  public startDrawing(e: MouseEvent | TouchEvent): void {
-    e.preventDefault()
-    this.state.drawing = true
-    const rect = this.canvas.getBoundingClientRect()
-    const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX
-    const clientY = e instanceof MouseEvent ? e.clientY : e.touches[0].clientY
-    this.state.lastX = clientX - rect.left
-    this.state.lastY = clientY - rect.top
+  public getSignature(): string {
+    return this.canvas.toDataURL('image/png')
   }
 
   /**
-   * Выполняет рисование линии от предыдущей точки к текущей.
-   * @param e - Событие мыши или касания.
+   * Снятие всех слушателей.
    */
-  public draw(e: MouseEvent | TouchEvent): void {
-    if (!this.state.drawing)
+  public destroy(): void {
+    this.canvas.removeEventListener('mousedown', this.onMouseDown)
+    this.canvas.removeEventListener('mousemove', this.onMouseMove)
+    this.canvas.removeEventListener('mouseup', this.onMouseUp)
+
+    this.canvas.removeEventListener('touchstart', this.onTouchStart)
+    this.canvas.removeEventListener('touchmove', this.onTouchMove)
+    this.canvas.removeEventListener('touchend', this.onTouchEnd)
+  }
+
+  // Внутренние методы
+
+  private initEvents() {
+    this.canvas.addEventListener('mousedown', this.onMouseDown)
+    this.canvas.addEventListener('mousemove', this.onMouseMove)
+    this.canvas.addEventListener('mouseup', this.onMouseUp)
+
+    this.canvas.addEventListener('touchstart', this.onTouchStart, { passive: false })
+    this.canvas.addEventListener('touchmove', this.onTouchMove, { passive: false })
+    this.canvas.addEventListener('touchend', this.onTouchEnd, { passive: false })
+  }
+
+  private onMouseDown = (e: MouseEvent) => {
+    e.preventDefault()
+    this.drawing = true
+    const rect = this.canvas.getBoundingClientRect()
+    this.lastX = e.clientX - rect.left
+    this.lastY = e.clientY - rect.top
+  }
+
+  private onMouseMove = (e: MouseEvent) => {
+    if (!this.drawing)
       return
     e.preventDefault()
+    this.drawLine(e.clientX, e.clientY)
+  }
 
+  private onMouseUp = () => {
+    this.drawing = false
+  }
+
+  private onTouchStart = (e: TouchEvent) => {
+    e.preventDefault()
+    this.drawing = true
+    const rect = this.canvas.getBoundingClientRect()
+    this.lastX = e.touches[0].clientX - rect.left
+    this.lastY = e.touches[0].clientY - rect.top
+  }
+
+  private onTouchMove = (e: TouchEvent) => {
+    if (!this.drawing)
+      return
+    e.preventDefault()
+    const t = e.touches[0]
+    this.drawLine(t.clientX, t.clientY)
+  }
+
+  private onTouchEnd = () => {
+    this.drawing = false
+  }
+
+  private drawLine(clientX: number, clientY: number) {
     this.ctx.beginPath()
-    this.ctx.moveTo(this.state.lastX, this.state.lastY)
+    this.ctx.moveTo(this.lastX, this.lastY)
 
     const rect = this.canvas.getBoundingClientRect()
-    const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX
-    const clientY = e instanceof MouseEvent ? e.clientY : e.touches[0].clientY
     const x = clientX - rect.left
     const y = clientY - rect.top
 
     this.ctx.lineTo(x, y)
     this.ctx.stroke()
 
-    this.state.lastX = x
-    this.state.lastY = y
-  }
-
-  /**
-   * Завершает процесс рисования (drawing = false).
-   */
-  public endDrawing(): void {
-    this.state.drawing = false
-  }
-
-  /**
-   * Возвращает текущее содержимое canvas в формате base64 (PNG).
-   */
-  public getSignature(): string {
-    return this.canvas.toDataURL('image/png')
+    this.lastX = x
+    this.lastY = y
   }
 }
