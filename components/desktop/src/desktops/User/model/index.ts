@@ -26,6 +26,17 @@ export const manifest = {
       children: [
         {
           meta: {
+            title: 'Подключение',
+            icon: 'fas fa-link',
+            roles: ['user'],
+            conditions: 'isCoop === true',
+          },
+          path: '/:coopname/connect',
+          name: 'connect',
+          component: markRaw(ConnectionPage),
+        },
+        {
+          meta: {
             title: 'Карта пайщика',
             icon: '',
             roles: [],
@@ -141,17 +152,7 @@ export const manifest = {
           component: markRaw(UnionPageListOfCooperatives),
 
         },
-        {
-          // meta: {
-            // title: 'Подключения',
-            // icon: 'fas fa-link',
-            // roles: ['chairman', 'member'],
-          // },
-          path: '/:coopname/connect',
-          name: 'connect',
-          component: markRaw(ConnectionPage),
 
-        },
         {
           path: '/:coopname/contacts',
           name: 'contacts',

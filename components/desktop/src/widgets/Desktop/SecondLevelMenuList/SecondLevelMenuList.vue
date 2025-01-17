@@ -25,7 +25,7 @@ q-list(
   import { useRoute, useRouter } from 'vue-router';
   import { useDesktopStore } from 'src/entities/Desktop/model';
   import { type IRoute } from 'src/entities/Desktop/model/types';
-import { COOPNAME } from 'src/shared/config';
+  import { COOPNAME } from 'src/shared/config';
 
   const desktop = useDesktopStore()
   const routes = ref<IRoute[]>([])
@@ -33,11 +33,40 @@ import { COOPNAME } from 'src/shared/config';
   const router = useRouter()
   const user = useCurrentUserStore()
 
+  const evaluateCondition = (condition: string, context: Record<string, any>): boolean => {
+    try {
+      const func = new Function(...Object.keys(context), `return ${condition};`);
+      return func(...Object.values(context));
+    } catch (error) {
+      console.error('Error evaluating condition:', error);
+      return false;
+    }
+  };
+
   const init = () => {
+    const isCoop = user.userAccount?.type === 'organization' &&
+      user.userAccount?.private_data &&
+      'type' in user.userAccount.private_data &&
+      user.userAccount.private_data.type === 'coop';
+
     const userRole = user.userAccount?.role || 'user';
+
+    const context = {
+      isCoop,
+      userRole,
+      userAccount: user.userAccount,
+      // любые другие свойства, которые нужно использовать в условиях
+    };
+
     routes.value = (desktop.getSecondLevel(route) as unknown as IRoute[]).filter(
-      (route) => route.meta?.roles?.includes(userRole) || route.meta?.roles?.length === 0
-    );
+    (route) => {
+      const rolesMatch = route.meta?.roles?.includes(userRole) || route.meta?.roles?.length === 0;
+      const conditionMatch = route.meta?.conditions
+        ? evaluateCondition(route.meta.conditions, context)
+        : true; // Если условия нет, пропускаем проверку
+      return rolesMatch && conditionMatch;
+    }
+  );
   }
 
   // Функция проверки активного маршрута

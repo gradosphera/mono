@@ -16,6 +16,7 @@ interface RouteMeta {
   title: string;
   icon: string;
   roles: string[];
+  conditions: string;
 }
 
 export interface IRoute {
