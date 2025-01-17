@@ -1,7 +1,7 @@
 {
   "name": "@coopenomics/parser",
   "type": "module",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "private": false,
   "packageManager": "pnpm@9.0.6",
   "description": "",

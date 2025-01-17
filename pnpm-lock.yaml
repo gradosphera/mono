@@ -566,8 +566,8 @@ importers:
         specifier: ^1.7.4
         version: 1.7.4
       cooptypes:
-        specifier: ^2.2.2
-        version: 2.2.2(eslint@8.57.1)(typescript@4.9.5)
+        specifier: workspace:*
+        version: link:../cooptypes
       dompurify:
         specifier: ^3.1.7
         version: 3.1.7
@@ -6242,9 +6242,6 @@ packages:
 
   cookiejar@2.1.4:
     resolution: {integrity: sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==}
-
-  cooptypes@2.2.2:
-    resolution: {integrity: sha512-M6+Ychol9si8m6O6zn3u/5jRS/Kol+1JEWHvWU/9ZP/87u++HD6ir5zCAtG5XoV09la2MuSsHNJFGNbBuadtLQ==}
 
   core-js-compat@3.38.1:
     resolution: {integrity: sha512-JRH6gfXxGmrzF3tZ57lFx97YARxCXPaMzPo6jELZhv88pBH5VXpQ+y0znKGlFnzuaihqhLbefxSJxWJMPtfDzw==}
@@ -18784,19 +18781,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@4.9.5)':
-    dependencies:
-      '@typescript-eslint/scope-manager': 7.18.0
-      '@typescript-eslint/types': 7.18.0
-      '@typescript-eslint/typescript-estree': 7.18.0(typescript@4.9.5)
-      '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.3.7(supports-color@5.5.0)
-      eslint: 8.57.1
-    optionalDependencies:
-      typescript: 4.9.5
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/parser@7.18.0(eslint@9.13.0(jiti@2.3.3))(typescript@5.6.3)':
     dependencies:
       '@typescript-eslint/scope-manager': 7.18.0
@@ -18976,21 +18960,6 @@ snapshots:
       tsutils: 3.21.0(typescript@5.6.3)
     optionalDependencies:
       typescript: 5.6.3
-    transitivePeerDependencies:
-      - supports-color
-
-  '@typescript-eslint/typescript-estree@7.18.0(typescript@4.9.5)':
-    dependencies:
-      '@typescript-eslint/types': 7.18.0
-      '@typescript-eslint/visitor-keys': 7.18.0
-      debug: 4.3.7(supports-color@5.5.0)
-      globby: 11.1.0
-      is-glob: 4.0.3
-      minimatch: 9.0.5
-      semver: 7.6.3
-      ts-api-utils: 1.3.0(typescript@4.9.5)
-    optionalDependencies:
-      typescript: 4.9.5
     transitivePeerDependencies:
       - supports-color
 
@@ -21086,14 +21055,6 @@ snapshots:
   cookie@0.7.2: {}
 
   cookiejar@2.1.4: {}
-
-  cooptypes@2.2.2(eslint@8.57.1)(typescript@4.9.5):
-    dependencies:
-      '@typescript-eslint/parser': 7.18.0(eslint@8.57.1)(typescript@4.9.5)
-    transitivePeerDependencies:
-      - eslint
-      - supports-color
-      - typescript
 
   core-js-compat@3.38.1:
     dependencies:
@@ -29930,10 +29891,6 @@ snapshots:
       escape-string-regexp: 1.0.5
 
   triple-beam@1.4.1: {}
-
-  ts-api-utils@1.3.0(typescript@4.9.5):
-    dependencies:
-      typescript: 4.9.5
 
   ts-api-utils@1.3.0(typescript@5.6.3):
     dependencies:
