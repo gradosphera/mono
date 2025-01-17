@@ -55,6 +55,7 @@ q-list(
       isCoop,
       userRole,
       userAccount: user.userAccount,
+      coopname: COOPNAME,
       // любые другие свойства, которые нужно использовать в условиях
     };
 

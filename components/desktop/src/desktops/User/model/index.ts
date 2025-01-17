@@ -29,7 +29,7 @@ export const manifest = {
             title: 'Подключение',
             icon: 'fas fa-link',
             roles: ['user'],
-            conditions: 'isCoop === true',
+            conditions: 'isCoop === true && coopname === "voskhod"',
           },
           path: '/:coopname/connect',
           name: 'connect',
