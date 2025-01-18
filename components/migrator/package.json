@@ -1,6 +1,6 @@
 {
   "name": "migrator",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "",
   "private": true,
   "type": "module",
