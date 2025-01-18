@@ -7,7 +7,6 @@ import { IGeneratedAccount, ISendStatement } from 'src/shared/lib/types/user';
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
 import { COOPNAME } from 'src/shared/config';
-import { DigitalDocument } from 'src/shared/lib/document';
 import { IObjectedDocument } from 'src/shared/lib/types/document';
 import {
   ICreatedPayment,
@@ -17,7 +16,8 @@ import {
 } from 'src/entities/User';
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { IEntrepreneurData, IIndividualData, IOrganizationData, IUserData } from 'src/shared/lib/types/user/IUserData';
-import { Cooperative } from 'cooptypes';
+import { client } from 'src/shared/api/client';
+import { Mutations } from '@coopenomics/sdk';
 
 export interface ICreateUser {
   email: string;
@@ -56,113 +56,124 @@ export function useCreateUser() {
 
 
   async function signStatement(): Promise<IObjectedDocument> {
-    const data: Cooperative.Registry.ParticipantApplication.Action = {
-      registry_id: Cooperative.Registry.ParticipantApplication.registry_id,
-      signature: store.signature,
-      skip_save: false,
-      coopname: COOPNAME,
-      username: store.account.username,
-      braname: store.selectedBranch,
-      links: [store.walletAgreement.hash, store.privacyAgreement.hash, store.signatureAgreement.hash, store.userAgreement.hash]
+    const variables: Mutations.Participants.GenerateParticipantApplication.IInput = {
+      data: {
+        signature: store.signature,
+        skip_save: false,
+        coopname: COOPNAME,
+        username: store.account.username,
+        braname: store.selectedBranch,
+        links: [store.walletAgreement.hash, store.privacyAgreement.hash, store.signatureAgreement.hash, store.userAgreement.hash]
+      }
     }
 
-    const document = await new DigitalDocument().generate<Cooperative.Registry.ParticipantApplication.Action>(data);
-    const globalStore = useGlobalStore();
-    const digital_signature = await globalStore.signDigest(document.hash);
+    const { [Mutations.Participants.GenerateParticipantApplication.name]: result } = await client.Mutation(
+      Mutations.Participants.GenerateParticipantApplication.mutation,
+      { variables }
+    );
 
-    store.statement = {
-      hash: document.hash,
-      meta: document.meta,
-      public_key: digital_signature.public_key,
-      signature: digital_signature.signature,
-    } as IObjectedDocument;
+    store.statement = await client.Document.signDocument(result)
 
     return store.statement;
   }
 
   async function signPrivacyAgreement(): Promise<IObjectedDocument> {
-    const data: Cooperative.Registry.PrivacyPolicy.Action= {
-      registry_id: Cooperative.Registry.PrivacyPolicy.registry_id,
-      coopname: COOPNAME,
-      username: store.account.username,
-    };
+    const variables: Mutations.Agreements.GeneratePrivacyAgreement.IInput = {
+      data: {
+        coopname: COOPNAME,
+        username: store.account.username,
+      }
+    }
 
-    const document = new DigitalDocument();
-    await document.generate(data);
-    await document.sign();
+    const { [Mutations.Agreements.GeneratePrivacyAgreement.name]: result } = await client.Mutation(
+      Mutations.Agreements.GeneratePrivacyAgreement.mutation,
+      { variables }
+    );
 
-    store.privacyAgreement = document.signedDocument as IObjectedDocument;
+    store.privacyAgreement = await client.Document.signDocument(result)
 
     return store.privacyAgreement;
   }
 
   async function signSignatureAgreement(): Promise<IObjectedDocument> {
-    const data: Cooperative.Registry.RegulationElectronicSignature.Action= {
-      registry_id: Cooperative.Registry.RegulationElectronicSignature.registry_id,
-      coopname: COOPNAME,
-      username: store.account.username,
-    };
+    const variables: Mutations.Agreements.GenerateSignatureAgreement.IInput = {
+      data: {
+        coopname: COOPNAME,
+        username: store.account.username,
+      }
+    }
 
-    const document = new DigitalDocument();
-    await document.generate(data);
-    await document.sign();
+    const { [Mutations.Agreements.GenerateSignatureAgreement.name]: result } = await client.Mutation(
+      Mutations.Agreements.GenerateSignatureAgreement.mutation,
+      { variables }
+    );
 
-    store.signatureAgreement = document.signedDocument as IObjectedDocument;
+    store.signatureAgreement = await client.Document.signDocument(result)
 
     return store.signatureAgreement;
+
   }
 
 
   async function signUserAgreement(): Promise<IObjectedDocument> {
-    const data: Cooperative.Registry.UserAgreement.Action= {
-      registry_id: Cooperative.Registry.UserAgreement.registry_id,
-      coopname: COOPNAME,
-      username: store.account.username,
-    };
+    const variables: Mutations.Agreements.GenerateUserAgreement.IInput = {
+      data: {
+        coopname: COOPNAME,
+        username: store.account.username,
+      }
+    }
 
-    const document = new DigitalDocument();
-    await document.generate(data);
-    await document.sign();
+    const { [Mutations.Agreements.GenerateUserAgreement.name]: result } = await client.Mutation(
+      Mutations.Agreements.GenerateUserAgreement.mutation,
+      { variables }
+    );
 
-    store.userAgreement = document.signedDocument as IObjectedDocument;
+    store.userAgreement = await client.Document.signDocument(result)
 
     return store.userAgreement;
+
   }
 
 
 
 
   async function signWalletAgreement(): Promise<IObjectedDocument> {
-    const data: Cooperative.Registry.WalletAgreement.Action= {
-      registry_id: Cooperative.Registry.WalletAgreement.registry_id,
-      coopname: COOPNAME,
-      username: store.account.username,
-    };
+    const variables: Mutations.Agreements.GenerateWalletAgreement.IInput = {
+      data: {
+        coopname: COOPNAME,
+        username: store.account.username,
+      }
+    }
 
-    const document = new DigitalDocument();
-    await document.generate(data);
-    await document.sign();
+    const { [Mutations.Agreements.GenerateWalletAgreement.name]: result } = await client.Mutation(
+      Mutations.Agreements.GenerateWalletAgreement.mutation,
+      { variables }
+    );
 
-    store.walletAgreement = document.signedDocument as IObjectedDocument;
-
-    console.log('walletAgreement: ', store.walletAgreement)
+    store.walletAgreement = await client.Document.signDocument(result)
 
     return store.walletAgreement;
   }
 
 
   async function generateStatementWithoutSignature() {
+    const variables: Mutations.Participants.GenerateParticipantApplication.IInput = {
+      data: {
+        signature: '',
+        skip_save: true,
+        coopname: COOPNAME,
+        username: store.account.username,
+        braname: store.selectedBranch,
+      }
+    }
 
-    const document = await new DigitalDocument().generate<Cooperative.Registry.ParticipantApplication.Action>({
-      signature: '',
-      skip_save: true,
-      coopname: COOPNAME,
-      username: store.account.username,
-      braname: store.selectedBranch,
-      registry_id: Cooperative.Registry.ParticipantApplication.registry_id
-  });
+    const { [Mutations.Participants.GenerateParticipantApplication.name]: result } = await client.Mutation(
+      Mutations.Participants.GenerateParticipantApplication.mutation,
+      { variables }
+    );
 
-    return document;
+    return result;
+
   }
 
   async function createUser(

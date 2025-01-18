@@ -18,7 +18,7 @@ export interface IChainDocument {
 export interface IMetaDocument {
   title: string
   registry_id: number
-  lang: LangType
+  lang: string
   generator: string
   version: string
   coopname: string

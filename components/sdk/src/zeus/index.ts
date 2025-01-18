@@ -1829,8 +1829,6 @@ export type ValueTypes = {
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Язык документа */
-["LangType"]:LangType;
 	["LoginInput"]: {
 	/** Электронная почта */
 	email: string | Variable<any, string>,
@@ -2120,6 +2118,8 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	["ParticipantApplicationGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
+	/** Имя аккаунта кооперативного участка */
+	braname: string | Variable<any, string>,
 	/** Название кооператива, связанное с документом */
 	coopname: string | Variable<any, string>,
 	/** Дата и время создания документа */
@@ -2181,6 +2181,8 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	["ParticipantApplicationSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num: number | Variable<any, string>,
+	/** Имя аккаунта кооперативного участка */
+	braname: string | Variable<any, string>,
 	/** Название кооператива, связанное с документом */
 	coopname: string | Variable<any, string>,
 	/** Дата и время создания документа */
@@ -3877,8 +3879,6 @@ export type ResolverInputTypes = {
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Язык документа */
-["LangType"]:LangType;
 	["LoginInput"]: {
 	/** Электронная почта */
 	email: string,
@@ -4168,6 +4168,8 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	["ParticipantApplicationGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -4229,6 +4231,8 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	["ParticipantApplicationSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -5747,7 +5751,7 @@ export type ModelTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: ModelTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** Идентификатор протокола решения собрания совета */
@@ -5893,7 +5897,6 @@ export type ModelTypes = {
 	/** Вес */
 	weight: number
 };
-	["LangType"]:LangType;
 	["LoginInput"]: {
 	/** Электронная почта */
 	email: string,
@@ -5918,7 +5921,7 @@ export type ModelTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: ModelTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** ID документа в реестре */
@@ -6184,7 +6187,7 @@ export type ModelTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: ModelTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** ID документа в реестре */
@@ -6213,6 +6216,8 @@ export type ModelTypes = {
 	["ParticipantApplicationGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -6246,7 +6251,7 @@ export type ModelTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: ModelTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** ID документа в реестре */
@@ -6273,6 +6278,8 @@ export type ModelTypes = {
 	["ParticipantApplicationSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -6463,7 +6470,7 @@ export type ModelTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: ModelTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** Идентификатор проекта решения */
@@ -6713,7 +6720,7 @@ export type ModelTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: ModelTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** ID документа в реестре */
@@ -7789,7 +7796,7 @@ export type GraphQLTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: GraphQLTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** Идентификатор протокола решения собрания совета */
@@ -7938,8 +7945,6 @@ export type GraphQLTypes = {
 	/** Вес */
 	weight: number
 };
-	/** Язык документа */
-["LangType"]: LangType;
 	["LoginInput"]: {
 		/** Электронная почта */
 	email: string,
@@ -7965,7 +7970,7 @@ export type GraphQLTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: GraphQLTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** ID документа в реестре */
@@ -8239,7 +8244,7 @@ export type GraphQLTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: GraphQLTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** ID документа в реестре */
@@ -8269,6 +8274,8 @@ export type GraphQLTypes = {
 	["ParticipantApplicationGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -8303,7 +8310,7 @@ export type GraphQLTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: GraphQLTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** ID документа в реестре */
@@ -8330,6 +8337,8 @@ export type GraphQLTypes = {
 	["ParticipantApplicationSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname: string,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -8536,7 +8545,7 @@ export type GraphQLTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: GraphQLTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** Идентификатор проекта решения */
@@ -8797,7 +8806,7 @@ export type GraphQLTypes = {
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
 	/** Язык документа */
-	lang: GraphQLTypes["LangType"],
+	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
 	/** ID документа в реестре */
@@ -9135,10 +9144,6 @@ export enum AccountType {
 export enum Country {
 	Russia = "Russia"
 }
-/** Язык документа */
-export enum LangType {
-	ru = "ru"
-}
 /** Тип юридического лица */
 export enum OrganizationType {
 	AO = "AO",
@@ -9217,7 +9222,6 @@ type ZEUS_VARIABLES = {
 	["Init"]: ValueTypes["Init"];
 	["Install"]: ValueTypes["Install"];
 	["JSON"]: ValueTypes["JSON"];
-	["LangType"]: ValueTypes["LangType"];
 	["LoginInput"]: ValueTypes["LoginInput"];
 	["LogoutInput"]: ValueTypes["LogoutInput"];
 	["MetaDocumentInput"]: ValueTypes["MetaDocumentInput"];

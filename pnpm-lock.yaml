@@ -338,7 +338,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^2.24.1
-        version: 2.27.3(@typescript-eslint/utils@8.12.2(eslint@7.32.0)(typescript@5.6.3))(@vue/compiler-sfc@3.5.12)(eslint@7.32.0)(typescript@5.6.3)(vitest@2.1.4(@types/node@20.17.3))
+        version: 2.27.3(@typescript-eslint/utils@8.12.2(eslint@7.32.0)(typescript@5.6.3))(@vue/compiler-sfc@3.5.12)(eslint@7.32.0)(typescript@5.6.3)(vitest@2.1.4(@types/node@20.17.3)(jsdom@11.12.0)(sass@1.80.5)(terser@5.36.0))
       '@graphql-codegen/cli':
         specifier: ^5.0.3
         version: 5.0.3(@parcel/watcher@2.4.1)(@types/node@20.17.3)(encoding@0.1.13)(enquirer@2.4.1)(graphql@16.9.0)(typescript@5.6.3)
@@ -1039,6 +1039,9 @@ importers:
       bumpp:
         specifier: ^9.5.2
         version: 9.8.0
+      cooptypes:
+        specifier: workspace:*
+        version: link:../cooptypes
       eslint:
         specifier: ^9.9.1
         version: 9.13.0(jiti@2.3.3)
@@ -14398,7 +14401,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@antfu/eslint-config@2.27.3(@typescript-eslint/utils@8.12.2(eslint@7.32.0)(typescript@5.6.3))(@vue/compiler-sfc@3.5.12)(eslint@7.32.0)(typescript@5.6.3)(vitest@2.1.4(@types/node@20.17.3))':
+  '@antfu/eslint-config@2.27.3(@typescript-eslint/utils@8.12.2(eslint@7.32.0)(typescript@5.6.3))(@vue/compiler-sfc@3.5.12)(eslint@7.32.0)(typescript@5.6.3)(vitest@2.1.4(@types/node@20.17.3)(jsdom@11.12.0)(sass@1.80.5)(terser@5.36.0))':
     dependencies:
       '@antfu/install-pkg': 0.4.1
       '@clack/prompts': 0.7.0
@@ -14406,7 +14409,7 @@ snapshots:
       '@stylistic/eslint-plugin': 2.9.0(eslint@7.32.0)(typescript@5.6.3)
       '@typescript-eslint/eslint-plugin': 8.12.2(@typescript-eslint/parser@8.12.2(eslint@7.32.0)(typescript@5.6.3))(eslint@7.32.0)(typescript@5.6.3)
       '@typescript-eslint/parser': 8.12.2(eslint@7.32.0)(typescript@5.6.3)
-      '@vitest/eslint-plugin': 1.1.7(@typescript-eslint/utils@8.12.2(eslint@7.32.0)(typescript@5.6.3))(eslint@7.32.0)(typescript@5.6.3)(vitest@2.1.4(@types/node@20.17.3))
+      '@vitest/eslint-plugin': 1.1.7(@typescript-eslint/utils@8.12.2(eslint@7.32.0)(typescript@5.6.3))(eslint@7.32.0)(typescript@5.6.3)(vitest@2.1.4(@types/node@20.17.3)(jsdom@11.12.0)(sass@1.80.5)(terser@5.36.0))
       eslint: 7.32.0
       eslint-config-flat-gitignore: 0.1.8
       eslint-flat-config-utils: 0.3.1
@@ -19083,13 +19086,13 @@ snapshots:
       vite: 2.9.16(sass@1.80.5)
       vue: 3.5.12(typescript@4.9.5)
 
-  '@vitest/eslint-plugin@1.1.7(@typescript-eslint/utils@8.12.2(eslint@7.32.0)(typescript@5.6.3))(eslint@7.32.0)(typescript@5.6.3)(vitest@2.1.4(@types/node@20.17.3))':
+  '@vitest/eslint-plugin@1.1.7(@typescript-eslint/utils@8.12.2(eslint@7.32.0)(typescript@5.6.3))(eslint@7.32.0)(typescript@5.6.3)(vitest@2.1.4(@types/node@20.17.3)(jsdom@11.12.0)(sass@1.80.5)(terser@5.36.0))':
     dependencies:
       '@typescript-eslint/utils': 8.12.2(eslint@7.32.0)(typescript@5.6.3)
       eslint: 7.32.0
     optionalDependencies:
       typescript: 5.6.3
-      vitest: 2.1.4(@types/node@20.17.3)
+      vitest: 2.1.4(@types/node@20.17.3)(jsdom@11.12.0)(sass@1.80.5)(terser@5.36.0)
 
   '@vitest/eslint-plugin@1.1.7(@typescript-eslint/utils@8.12.2(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1)(typescript@5.6.3)(vitest@1.6.0(@types/node@20.17.3)(jsdom@11.12.0)(sass@1.80.5)(terser@5.36.0))':
     dependencies:
@@ -19128,7 +19131,7 @@ snapshots:
       chai: 5.1.2
       tinyrainbow: 1.2.0
 
-  '@vitest/mocker@2.1.4(vite@5.4.10(@types/node@20.17.3))':
+  '@vitest/mocker@2.1.4(vite@5.4.10(@types/node@20.17.3)(sass@1.80.5)(terser@5.36.0))':
     dependencies:
       '@vitest/spy': 2.1.4
       estree-walker: 3.0.3
@@ -30451,7 +30454,7 @@ snapshots:
       - supports-color
       - terser
 
-  vite-node@2.1.4(@types/node@20.17.3):
+  vite-node@2.1.4(@types/node@20.17.3)(sass@1.80.5)(terser@5.36.0):
     dependencies:
       cac: 6.7.14
       debug: 4.3.7(supports-color@5.5.0)
@@ -30578,10 +30581,10 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@2.1.4(@types/node@20.17.3):
+  vitest@2.1.4(@types/node@20.17.3)(jsdom@11.12.0)(sass@1.80.5)(terser@5.36.0):
     dependencies:
       '@vitest/expect': 2.1.4
-      '@vitest/mocker': 2.1.4(vite@5.4.10(@types/node@20.17.3))
+      '@vitest/mocker': 2.1.4(vite@5.4.10(@types/node@20.17.3)(sass@1.80.5)(terser@5.36.0))
       '@vitest/pretty-format': 2.1.4
       '@vitest/runner': 2.1.4
       '@vitest/snapshot': 2.1.4
@@ -30598,10 +30601,11 @@ snapshots:
       tinypool: 1.0.1
       tinyrainbow: 1.2.0
       vite: 5.4.10(@types/node@20.17.3)(sass@1.80.5)(terser@5.36.0)
-      vite-node: 2.1.4(@types/node@20.17.3)
+      vite-node: 2.1.4(@types/node@20.17.3)(sass@1.80.5)(terser@5.36.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.17.3
+      jsdom: 11.12.0
     transitivePeerDependencies:
       - less
       - lightningcss

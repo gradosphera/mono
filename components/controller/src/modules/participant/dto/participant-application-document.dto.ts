@@ -1,5 +1,5 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { IsString, ValidateNested } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Cooperative } from 'cooptypes';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
@@ -18,11 +18,15 @@ class BaseParticipantApplicationMetaDocumentInputDTO implements ExcludeCommonPro
   @IsString()
   signature!: string;
 
+  @Field({ description: 'Имя аккаунта кооперативного участка' })
+  @IsOptional()
+  braname?: string;
+
   @Field({
     description:
       'Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю)',
   })
-  @IsString()
+  @IsBoolean()
   skip_save!: boolean;
 }
 

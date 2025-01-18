@@ -1,6 +1,5 @@
-import { IsString, IsNumber, IsArray, IsInt, IsEnum } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsInt } from 'class-validator';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { LangType } from './lang-type.enum';
 import type { Cooperative } from 'cooptypes';
 
 @ObjectType('MetaDocument')
@@ -13,9 +12,9 @@ export class MetaDocumentDTO implements Cooperative.Document.IMetaDocument {
   @IsNumber()
   registry_id!: number;
 
-  @Field(() => LangType, { description: 'Язык документа' })
-  @IsEnum(LangType)
-  lang!: LangType;
+  @Field(() => String, { description: 'Язык документа' })
+  @IsString()
+  lang!: string;
 
   @Field({ description: 'Имя генератора, использованного для создания документа' })
   @IsString()

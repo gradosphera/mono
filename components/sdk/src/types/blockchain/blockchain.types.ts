@@ -1,4 +1,3 @@
-
 export type IndexPosition = 'primary' |
   'secondary' |
   'tertiary' |
@@ -8,9 +7,9 @@ export type IndexPosition = 'primary' |
   'septenary' |
   'octonary' |
   'nonary' |
-  'denary';
+  'denary'
 
 export interface BlockchainConfig {
-  chain_url: string;
-  chain_id: string;
+  chain_url: string
+  chain_id: string
 }

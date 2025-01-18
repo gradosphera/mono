@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { createClient, Mutations, Queries } from '../src'
+import { Client, Mutations, Queries } from '../src'
 
 describe('should', () => {
-  const client = createClient({
+  const client = Client.create({
     api_url: 'http://127.0.0.1:2998/v1/graphql',
     headers: {
       'server-secret': 'SECRET',

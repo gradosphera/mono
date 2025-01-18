@@ -6,7 +6,7 @@ export type ISchemaType = 'string' | 'number' | 'integer' | 'boolean' | 'object'
 
 export type ISchemaProperty = {
   type?: ISchemaType;
-  description?: Types.DeserializedDescriptionOfExtension
+  description?: Types.Controller.DeserializedDescriptionOfExtension
   default?: any;
   required?: string[];
   properties?: ISchemaProperty;

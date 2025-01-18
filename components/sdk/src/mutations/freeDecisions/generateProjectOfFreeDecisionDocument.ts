@@ -4,7 +4,7 @@ import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from 
 export const name = 'generateProjectOfFreeDecision'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{data: $('data', 'ProjectFreeDecisionGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput!')}, projectFreeDecisionDocumentSelector]
+  [name]: [{data: $('data', 'ProjectFreeDecisionGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput')}, projectFreeDecisionDocumentSelector]
 });
 
 export interface IInput {

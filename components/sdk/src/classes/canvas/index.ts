@@ -1,3 +1,42 @@
+/**
+ * Класс `Canvas` предоставляет инструмент для создания и управления HTML5 `<canvas>` с целью извлечения
+ * собственноручной подписи пользователя. Основное предназначение класса — упрощение работы с холстом
+ * для сбора подписи, её валидации и экспорта в формате base64.
+ *
+ * @remarks
+ * - Автоматически создаёт элемент `<canvas>` внутри указанного контейнера и подстраивает его размеры.
+ * - Обеспечивает корректную работу с мышью и тач-устройствами для рисования подписи.
+ * - Включает утилиты для очистки холста и извлечения подписи.
+ * - Сохраняет содержимое при изменении размеров контейнера.
+ * - Отключает прокрутку при касаниях через `touchAction: none`.
+ *
+ * @example
+ * Пример использования для извлечения подписи пайщика:
+ * ```ts
+ * import { Classes } from '@coopenomics/sdk'
+ *
+ * // Указываем контейнер, где будет размещён холст
+ * const container = document.getElementById('signature-container') as HTMLElement
+ *
+ * // Создаём экземпляр Canvas для работы с подписью
+ * const signatureCanvas = new Classes.Canvas(container, {
+ *   lineWidth: 5,
+ *   strokeStyle: '#000',
+ * })
+ *
+ * // Очистка холста при необходимости
+ * signatureCanvas.clearCanvas()
+ *
+ * // Извлечение подписи в формате base64
+ * const signature = signatureCanvas.getSignature()
+ * console.log('Подпись в формате base64:', signature)
+ *
+ * // Освобождение ресурсов, если холст больше не нужен
+ * signatureCanvas.destroy()
+ * ```
+ *
+ * @public
+ */
 export class Canvas {
   public canvas: HTMLCanvasElement
   public ctx: CanvasRenderingContext2D
@@ -6,6 +45,14 @@ export class Canvas {
   private lastX = 0
   private lastY = 0
 
+  /**
+   * Создаёт экземпляр класса `Canvas` и подготавливает холст для рисования подписи.
+   *
+   * @param container - HTML-элемент, внутри которого создаётся `<canvas>`.
+   * @param opts - Настройки:
+   *   - `lineWidth` - Толщина линии для рисования (по умолчанию 5).
+   *   - `strokeStyle` - Цвет линии для рисования (по умолчанию чёрный, `#000`).
+   */
   constructor(
     private container: HTMLElement,
     private opts: {
@@ -13,49 +60,51 @@ export class Canvas {
       strokeStyle?: string
     } = {},
   ) {
-    // Создаём <canvas> и добавляем в контейнер
+    // Создаём и добавляем <canvas> в контейнер
     this.canvas = document.createElement('canvas')
     this.canvas.width = container.offsetWidth
     this.canvas.height = container.offsetHeight
 
-    // Отключаем скролл при тачах
+    // Отключаем скроллинг при касаниях
     this.canvas.style.touchAction = 'none'
 
     container.appendChild(this.canvas)
 
-    // Получаем 2D-контекст
+    // Инициализируем контекст рисования
     const ctx = this.canvas.getContext('2d')
     if (!ctx) {
-      throw new Error('Canvas not supported')
+      throw new Error('Canvas не поддерживается')
     }
     this.ctx = ctx
 
-    // Настройки рисования
+    // Устанавливаем параметры рисования
     this.ctx.lineWidth = this.opts.lineWidth ?? 5
     this.ctx.lineJoin = 'round'
     this.ctx.lineCap = 'round'
     this.ctx.strokeStyle = this.opts.strokeStyle ?? '#000'
 
-    // Навешиваем события мыши и тач
+    // Навешиваем обработчики событий для рисования
     this.initEvents()
   }
 
   /**
-   * Очистка холста.
+   * Очищает холст.
    */
   public clearCanvas(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
   /**
-   * Получение подписи в формате base64.
+   * Возвращает содержимое холста (подпись) в формате base64 (PNG).
+   *
+   * @returns Подпись в формате base64.
    */
   public getSignature(): string {
     return this.canvas.toDataURL('image/png')
   }
 
   /**
-   * Снятие всех слушателей.
+   * Снимает все обработчики событий и очищает ресурсы.
    */
   public destroy(): void {
     this.canvas.removeEventListener('mousedown', this.onMouseDown)
@@ -69,6 +118,9 @@ export class Canvas {
 
   // Внутренние методы
 
+  /**
+   * Навешивает обработчики событий мыши и тач-устройств.
+   */
   private initEvents() {
     this.canvas.addEventListener('mousedown', this.onMouseDown)
     this.canvas.addEventListener('mousemove', this.onMouseMove)
@@ -102,8 +154,9 @@ export class Canvas {
     e.preventDefault()
     this.drawing = true
     const rect = this.canvas.getBoundingClientRect()
-    this.lastX = e.touches[0].clientX - rect.left
-    this.lastY = e.touches[0].clientY - rect.top
+    const t = e.touches[0]
+    this.lastX = t.clientX - rect.left
+    this.lastY = t.clientY - rect.top
   }
 
   private onTouchMove = (e: TouchEvent) => {

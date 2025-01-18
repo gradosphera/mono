@@ -1044,7 +1044,7 @@ type FreeDecisionMetaDocumentOutput {
   generator: String!
 
   """Язык документа"""
-  lang: LangType!
+  lang: String!
 
   """Ссылки, связанные с документом"""
   links: [String!]!
@@ -1253,11 +1253,6 @@ type KeyWeight {
   weight: Int!
 }
 
-"""Язык документа"""
-enum LangType {
-  ru
-}
-
 input LoginInput {
   """Электронная почта"""
   email: String!
@@ -1291,7 +1286,7 @@ type MetaDocument {
   generator: String!
 
   """Язык документа"""
-  lang: LangType!
+  lang: String!
 
   """Ссылки, связанные с документом"""
   links: [String!]!
@@ -1713,7 +1708,7 @@ type ParticipantApplicationDecisionMetaDocumentOutput {
   generator: String!
 
   """Язык документа"""
-  lang: LangType!
+  lang: String!
 
   """Ссылки, связанные с документом"""
   links: [String!]!
@@ -1754,6 +1749,9 @@ type ParticipantApplicationDocument {
 input ParticipantApplicationGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
+
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
 
   """Название кооператива, связанное с документом"""
   coopname: String!
@@ -1805,7 +1803,7 @@ type ParticipantApplicationMetaDocumentOutput {
   generator: String!
 
   """Язык документа"""
-  lang: LangType!
+  lang: String!
 
   """Ссылки, связанные с документом"""
   links: [String!]!
@@ -1843,6 +1841,9 @@ input ParticipantApplicationSignedDocumentInput {
 input ParticipantApplicationSignedMetaDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int!
+
+  """Имя аккаунта кооперативного участка"""
+  braname: String!
 
   """Название кооператива, связанное с документом"""
   coopname: String!
@@ -2129,7 +2130,7 @@ type ProjectFreeDecisionMetaDocumentOutput {
   generator: String!
 
   """Язык документа"""
-  lang: LangType!
+  lang: String!
 
   """Ссылки, связанные с документом"""
   links: [String!]!
@@ -2487,7 +2488,7 @@ type SelectBranchMetaDocumentOutput {
   generator: String!
 
   """Язык документа"""
-  lang: LangType!
+  lang: String!
 
   """Ссылки, связанные с документом"""
   links: [String!]!

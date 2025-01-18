@@ -61,6 +61,7 @@
     "@types/node": "^22.5.4",
     "@types/ws": "^8.5.13",
     "bumpp": "^9.5.2",
+    "cooptypes": "workspace:*",
     "eslint": "^9.9.1",
     "esno": "^4.7.0",
     "glob": "^11.0.0",

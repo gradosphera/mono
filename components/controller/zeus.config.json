@@ -959,6 +959,7 @@
         "ParticipantApplicationGenerateDocumentInput": {
             "type": "object",
             "required": [
+                "braname",
                 "coopname",
                 "signature",
                 "skip_save",
@@ -967,6 +968,9 @@
             "properties": {
                 "block_num": {
                     "type": "integer"
+                },
+                "braname": {
+                    "type": "string"
                 },
                 "coopname": {
                     "type": "string"
@@ -1033,6 +1037,7 @@
             "type": "object",
             "required": [
                 "block_num",
+                "braname",
                 "coopname",
                 "created_at",
                 "generator",
@@ -1049,6 +1054,9 @@
             "properties": {
                 "block_num": {
                     "type": "integer"
+                },
+                "braname": {
+                    "type": "string"
                 },
                 "coopname": {
                     "type": "string"

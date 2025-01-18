@@ -28,13 +28,14 @@
   <script lang="ts" setup>
   import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
   import { Notify } from 'quasar'
-  import { FailAlert } from 'src/shared/api'
+  import { failAlert, FailAlert } from 'src/shared/api'
   import { Loader } from 'src/shared/ui/Loader'
   import { useRegistratorStore } from 'src/entities/Registrator'
   import { useCreateUser } from 'src/features/User/CreateUser'
 
   // Импортируем класс
   import { Classes } from '@coopenomics/sdk'
+import { client } from 'src/shared/api/client'
 
   const store = useRegistratorStore()
   const createUser = useCreateUser()
@@ -124,6 +125,9 @@
       onSign.value = true
       store.state.signature = sign
 
+      // устанавливаем ключ для подписи документов
+      client.Document.setWif(store.state.account.private_key)
+
       loadingText.value = 'Подписываем положение о ЦПП "Цифровой Кошелёк"'
       await createUser.signWalletAgreement()
 
@@ -147,7 +151,7 @@
       store.next()
     } catch (err: any) {
       onSign.value = false
-      FailAlert(err.message)
+      failAlert(err)
     }
   }
   </script>

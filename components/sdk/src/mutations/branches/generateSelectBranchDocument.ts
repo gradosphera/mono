@@ -4,7 +4,7 @@ import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from 
 export const name = 'generateSelectBranchDocument'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{data: $('data', 'SelectBranchGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput!')}, generateSelectBranchDocumentSelector]
+  [name]: [{data: $('data', 'SelectBranchGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput')}, generateSelectBranchDocumentSelector]
 });
 
 export interface IInput {

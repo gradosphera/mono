@@ -1,4 +1,4 @@
-import type { ClientConnectionOptions } from './types'
+import type { ClientConnectionOptions } from './types/client'
 import { Bytes, Checksum256, PrivateKey } from '@wharfkit/session'
 import WebSocket from 'isomorphic-ws'
 
@@ -6,14 +6,12 @@ import * as Classes from './classes'
 import * as Mutations from './mutations'
 import { type GraphQLResponse, Thunder, Subscription as ZeusSubscription } from './zeus'
 
-import { Chain, ZeusScalars } from './zeus'
+import { ZeusScalars } from './zeus'
 
 export * as Classes from './classes'
 export * as Mutations from './mutations'
 export * as Queries from './queries'
-/**
- * @private
- */
+
 export * as Types from './types'
 
 export * as Zeus from './zeus'
@@ -22,98 +20,64 @@ if (typeof globalThis.WebSocket === 'undefined') {
   globalThis.WebSocket = WebSocket as any
 }
 
-// Текущие заголовки для запросов, которые можно обновлять
-let currentHeaders: Record<string, string> = {}
+export class Client {
+  private static instance: Client | null = null
+  private currentHeaders: Record<string, string> = {}
+  private blockchain: Classes.Blockchain
+  private document: Classes.Document
+  private thunder: ReturnType<typeof Thunder>
+  private static scalars = ZeusScalars({
+    DateTime: {
+      decode: (e: unknown) => new Date(e as string), // Преобразует строку в объект Date
+      encode: (e: unknown) => (e as Date).toISOString(), // Преобразует Date в ISO-строку
+    },
+  })
 
-const scalars = ZeusScalars({
-  DateTime: {
-    decode: (e: unknown) => new Date(e as string), // Преобразует строку в объект Date
-    encode: (e: unknown) => (e as Date).toISOString(), // Преобразует Date в ISO-строку
-  },
-})
+  private constructor(private readonly options: ClientConnectionOptions) {
+    this.currentHeaders = options.headers || {}
+    this.thunder = Client.createThunder(options.api_url)
+    this.blockchain = new Classes.Blockchain(options)
+    this.document = new Classes.Document(options.wif)
 
-// Функция для создания thunder клиента с использованием baseUrl из options
-function createThunder(baseUrl: string) {
-  return Thunder(async (query, variables) => {
-    const response = await fetch(baseUrl, {
-      body: JSON.stringify({ query, variables }),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...currentHeaders, // Используем текущие заголовки, включая Authorization
-      },
-    })
+    if (options.wif && options.username) {
+      this.blockchain.setWif(options.username, options.wif)
+      this.document.setWif(options.wif)
+    }
+    else if ((options.wif && !options.username) || (!options.wif && options.username)) {
+      throw new Error('wif и username должны быть указаны одновременно')
+    }
+  }
 
-    if (!response.ok) {
-      return new Promise((resolve, reject) => {
-        response
-          .text()
-          .then((text) => {
-            try {
-              reject(JSON.parse(text))
-            }
-            // eslint-disable-next-line unused-imports/no-unused-vars
-            catch (err) {
-              reject(text)
-            }
-          })
-          .catch(reject)
-      })
+  /**
+   * Инициализация клиента с заданными опциями.
+   * @param options Параметры соединения.
+   */
+  public static create(options: ClientConnectionOptions): Client {
+    if (!this.instance) {
+      this.instance = new Client(options)
     }
 
-    const json = await response.json() as GraphQLResponse
+    return this.getInstance()
+  }
 
-    if (json.errors) {
-      console.log('json.errors', json.errors)
-      throw json.errors // Возвращаем массив ошибок, обработанных в NestJS
+  /**
+   * Возвращает текущий экземпляр клиента.
+   */
+  public static getInstance(): Client {
+    if (!this.instance) {
+      throw new Error('Клиент не инициализирован. Вызовите Client.create() перед использованием.')
     }
+    return this.instance
+  }
 
-    return json.data
-  }, { scalars })
-}
-
-/**
- * Создаёт клиент для взаимодействия с API, поддерживающий выполнение запросов, мутаций, подписок,
- * а также операций с блокчейном. Позволяет динамически изменять заголовок авторизации.
- *
- * @param options - Опции для настройки подключения клиента.
- * @param options.api_url - Базовый URL API, с которым будет происходить взаимодействие.
- * @param options.headers - Необязательные заголовки, которые будут добавляться ко всем запросам. По умолчанию — пустой объект.
- * @param options.chain_url - URL узла блокчейна.
- * @param options.chain_id - Уникальный идентификатор цепочки блокчейна.
- *
- * @returns Объект, содержащий методы для работы с API:
- * - `setToken`: Устанавливает заголовок Authorization с переданным токеном.
- * - `Query`: Метод для выполнения GraphQL-запросов.
- * - `Mutation`: Метод для выполнения GraphQL-мутаций.
- * - `Subscription`: Метод для подписки на события через WebSocket с использованием протокола GraphQL Subscriptions.
- * - `Blockchain`: Экземпляр класса Blockchain для взаимодействия с функциями блокчейна.
- *
- * @example
- * ```typescript
- * const client = createClient({
- *   baseUrl: 'https://api.example.com',
- *   headers: { 'Custom-Header': 'значение' },
- *   blockchainUrl: 'https://blockchain.example.com',
- *   chainId: '12345'
- * });
- *
- * client.setToken('ваш-токен');
- *
- * const data = await client.Query({
- *   someField: true,
- * });
- * ```
- */
-export function createClient(options: ClientConnectionOptions) {
-  // Инициализируем заголовки при создании клиента
-  currentHeaders = options.headers || {}
-
-  const thunder = createThunder(options.api_url)
-  const wallet = new Classes.Wallet(options)
-
-  async function login(email: string, wif: string): Promise<Mutations.Auth.Login.IOutput['login']> {
-    const now = (await wallet.getInfo()).head_block_time.toString()
+  /**
+   * Логин пользователя с использованием email и WIF.
+   * @param email Email пользователя.
+   * @param wif Приватный ключ в формате WIF.
+   * @returns Результат логина.
+   */
+  public async login(email: string, wif: string): Promise<Mutations.Auth.Login.IOutput['login']> {
+    const now = (await this.blockchain.getInfo()).head_block_time.toString()
 
     const privateKey = PrivateKey.fromString(wif)
     const bytes = Bytes.fromString(now, 'utf8')
@@ -128,33 +92,107 @@ export function createClient(options: ClientConnectionOptions) {
       },
     }
 
-    const { [Mutations.Auth.Login.name]: result } = await thunder('mutation')(
+    const { [Mutations.Auth.Login.name]: result } = await this.thunder('mutation')(
       Mutations.Auth.Login.mutation,
       {
         variables,
       },
     )
 
-    currentHeaders.Authorization = `Bearer ${result.tokens.access.token}`
+    // Устанавливаем WIF в Blockchain и Document
+    const username = result.account.username
+
+    this.blockchain.setWif(username, wif)
+    this.document.setWif(wif)
+
+    this.currentHeaders.Authorization = `Bearer ${result.tokens.access.token}`
 
     return result
   }
 
-  if (options.wif && options.username) {
-    wallet.setWif(options.username, options.wif)
-  }
-  else if ((options.wif && !options.username) || (!options.wif && options.username)) {
-    throw new Error('wif и username должны быть указаны одновременно')
+  /**
+   * Установка токена авторизации.
+   * @param token Токен для заголовков Authorization.
+   */
+  public setToken(token: string): void {
+    this.currentHeaders.Authorization = `Bearer ${token}`
   }
 
-  return {
-    setToken: (token: string) => {
-      currentHeaders.Authorization = `Bearer ${token}`
-    },
-    Query: thunder('query'),
-    Mutation: thunder('mutation'),
-    Subscription: ZeusSubscription(options.api_url.replace(/^http/, 'ws')),
-    Wallet: wallet,
-    login,
+  /**
+   * Доступ к Blockchain.
+   */
+  public get Blockchain(): Classes.Blockchain {
+    return this.blockchain
+  }
+
+  /**
+   * Доступ к Document.
+   */
+  public get Document(): Classes.Document {
+    return this.document
+  }
+
+  /**
+   * Доступ к GraphQL-запросам.
+   */
+  public get Query() {
+    return this.thunder('query') // Сохраняет строгую типизацию Zeus
+  }
+
+  /**
+   * Доступ к GraphQL-мутациям.
+   */
+  public get Mutation() {
+    return this.thunder('mutation') // Сохраняет строгую типизацию Zeus
+  }
+
+  /**
+   * Подписка на GraphQL-события.
+   */
+  public get Subscription() {
+    return ZeusSubscription(this.options.api_url.replace(/^http/, 'ws'))
+  }
+
+  /**
+   * Создает функцию Thunder для выполнения GraphQL-запросов.
+   * @param baseUrl URL GraphQL API.
+   * @returns Функция Thunder.
+   */
+  private static createThunder(baseUrl: string) {
+    return Thunder(async (query, variables) => {
+      const response = await fetch(baseUrl, {
+        body: JSON.stringify({ query, variables }),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...Client.getInstance().currentHeaders,
+        },
+      })
+
+      if (!response.ok) {
+        return new Promise((resolve, reject) => {
+          response
+            .text()
+            .then((text) => {
+              try {
+                reject(JSON.parse(text))
+              }
+              catch {
+                reject(text)
+              }
+            })
+            .catch(reject)
+        })
+      }
+
+      const json = (await response.json()) as GraphQLResponse
+
+      if (json.errors) {
+        console.log('json.errors', json.errors)
+        throw json.errors
+      }
+
+      return json.data
+    }, { scalars: Client.scalars })
   }
 }
