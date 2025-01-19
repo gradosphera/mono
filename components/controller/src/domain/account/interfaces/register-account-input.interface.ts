@@ -10,7 +10,6 @@ export interface RegisterAccountDomainInterface {
   organization_data?: CreateOrganizationDataInputDomainInterface;
   public_key?: string;
   referer?: string;
-  role: 'user';
   type: 'individual' | 'entrepreneur' | 'organization';
   username: string;
 }

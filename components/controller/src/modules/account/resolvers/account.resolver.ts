@@ -12,7 +12,6 @@ import type { PaginationResultDomainInterface } from '~/domain/common/interfaces
 import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 import { RegisterAccountInputDTO } from '../dto/register-account-input.dto';
 import { RegisteredAccountDTO } from '../dto/registered-account.dto';
-import { DeleteAccountInputDTO } from '../dto/delete-account-input.dto';
 import { UpdateAccountInputDTO } from '../dto/update-account-input.dto';
 
 export const AccountsPaginationResult = createPaginationResult(AccountDTO, 'Accounts');

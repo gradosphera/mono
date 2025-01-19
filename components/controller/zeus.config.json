@@ -1275,7 +1275,6 @@
             "type": "object",
             "required": [
                 "email",
-                "role",
                 "type",
                 "username"
             ],
@@ -1297,12 +1296,6 @@
                 },
                 "referer": {
                     "type": "string"
-                },
-                "role": {
-                    "type": "string",
-                    "enum": [
-                        "User"
-                    ]
                 },
                 "type": {
                     "type": "string",

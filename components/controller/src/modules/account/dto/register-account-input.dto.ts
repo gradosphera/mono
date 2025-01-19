@@ -1,6 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { AccountType } from '../enum/account-type.enum';
-import { RegisterRole } from '../enum/account-role-on-register.enum';
 import { CreateEntrepreneurDataInputDTO } from './create-entrepreneur-data-input.dto';
 import { CreateIndividualDataInputDTO } from './create-individual-data-input.dto';
 import { CreateOrganizationDataInputDTO } from './create-organization-data-input.dto';
@@ -16,10 +15,6 @@ export class RegisterAccountInputDTO {
   @Field({ nullable: true, description: 'Имя аккаунта реферера' })
   @IsOptional()
   referer?: string;
-
-  @Field(() => RegisterRole, { description: 'Роль пользователя' })
-  @IsNotEmpty({ message: 'Поле "role" обязательно для заполнения.' })
-  role!: RegisterRole;
 
   @Field(() => AccountType, { description: 'Тип аккаунта' })
   @IsNotEmpty({ message: 'Поле "type" обязательно для заполнения.' })

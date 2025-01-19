@@ -2494,8 +2494,6 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	public_key?: string | undefined | null | Variable<any, string>,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null | Variable<any, string>,
-	/** Роль пользователя */
-	role: ValueTypes["RegisterRole"] | Variable<any, string>,
 	/** Тип аккаунта */
 	type: ValueTypes["AccountType"] | Variable<any, string>,
 	/** Имя пользователя */
@@ -4539,8 +4537,6 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	public_key?: string | undefined | null,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null,
-	/** Роль пользователя */
-	role: ResolverInputTypes["RegisterRole"],
 	/** Тип аккаунта */
 	type: ResolverInputTypes["AccountType"],
 	/** Имя пользователя */
@@ -6566,8 +6562,6 @@ export type ModelTypes = {
 	public_key?: string | undefined | null,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null,
-	/** Роль пользователя */
-	role: ModelTypes["RegisterRole"],
 	/** Тип аккаунта */
 	type: ModelTypes["AccountType"],
 	/** Имя пользователя */
@@ -8637,8 +8631,6 @@ export type GraphQLTypes = {
 	public_key?: string | undefined | null,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null,
-	/** Роль пользователя */
-	role: GraphQLTypes["RegisterRole"],
 	/** Тип аккаунта */
 	type: GraphQLTypes["AccountType"],
 	/** Имя пользователя */

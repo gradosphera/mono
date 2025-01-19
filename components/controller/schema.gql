@@ -2285,9 +2285,6 @@ input RegisterAccountInput {
   """Имя аккаунта реферера"""
   referer: String
 
-  """Роль пользователя"""
-  role: RegisterRole!
-
   """Тип аккаунта"""
   type: AccountType!
 

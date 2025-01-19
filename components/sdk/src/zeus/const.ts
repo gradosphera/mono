@@ -316,7 +316,6 @@ export const AllTypesProps: Record<string,any> = {
 		entrepreneur_data:"CreateEntrepreneurDataInput",
 		individual_data:"CreateIndividualDataInput",
 		organization_data:"CreateOrganizationDataInput",
-		role:"RegisterRole",
 		type:"AccountType"
 	},
 	RegisterParticipantInput:{

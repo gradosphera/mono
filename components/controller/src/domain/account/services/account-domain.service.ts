@@ -5,7 +5,7 @@ import type { RegistratorContract, SovietContract } from 'cooptypes';
 import config from '~/config/config';
 import { AccountDomainEntity } from '../entities/account-domain.entity';
 import type { MonoAccountDomainInterface } from '../interfaces/mono-account-domain.interface';
-import { blockchainService, userService } from '~/services';
+import { userService } from '~/services';
 import type { RegisterAccountDomainInterface } from '../interfaces/register-account-input.interface';
 import { userStatus } from '~/types';
 
@@ -15,7 +15,7 @@ export class AccountDomainService {
 
   async addProviderAccount(data: RegisterAccountDomainInterface): Promise<MonoAccountDomainInterface> {
     //TODO refactor it after migrate from mongo
-    const user = await userService.createUser(data);
+    const user = await userService.createUser({ ...data, role: 'user' });
     user.status = userStatus['4_Registered'];
     user.is_registered = true;
     user.has_account = true;

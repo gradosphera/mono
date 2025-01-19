@@ -65,7 +65,7 @@ export class AccountDomainInteractor {
 
   async registerAccount(data: RegisterAccountDomainInterface): Promise<RegisteredAccountDomainInterface> {
     //TODO refactor after migrate from mongo
-    const user = await userService.createUser(data);
+    const user = await userService.createUser({ ...data, role: 'user' });
     const tokens = await tokenService.generateAuthTokens(user);
 
     const account = await this.getAccount(data.username);
