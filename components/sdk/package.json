@@ -1,7 +1,7 @@
 {
   "name": "@coopenomics/sdk",
   "type": "module",
-  "version": "2.2.5",
+  "version": "2.2.6-alpha.0",
   "private": false,
   "packageManager": "pnpm@9.9.0",
   "description": "",
