@@ -736,11 +736,6 @@ type DecisionDetail {
 """Объединение типов документов протоколов решения совета"""
 union DecisionDocumentUnion = FreeDecisionDocument | ParticipantApplicationDecisionDocument
 
-input DeleteAccountInput {
-  """Имя аккаунта пользователя"""
-  username_for_delete: String!
-}
-
 input DeleteBranchInput {
   """Имя аккаунта кооперативного участка"""
   braname: String!
@@ -1129,7 +1124,6 @@ input GetAccountInput {
 
 input GetAccountsInput {
   role: String
-  username: String
 }
 
 input GetBranchesInput {
@@ -1409,9 +1403,6 @@ type Mutation {
   Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации
   """
   createProjectOfFreeDecision(data: CreateProjectFreeDecisionInput!): CreatedProjectFreeDecision!
-
-  """Удалить аккаунт из системы учёта провайдера"""
-  deleteAccount(data: DeleteAccountInput!): Boolean!
 
   """Удалить кооперативный участок"""
   deleteBranch(data: DeleteBranchInput!): Boolean!

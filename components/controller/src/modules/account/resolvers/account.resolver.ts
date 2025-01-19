@@ -54,20 +54,20 @@ export class AccountResolver {
     return this.accountService.registerAccount(data);
   }
 
-  @Mutation(() => Boolean, {
-    name: 'deleteAccount',
-    description: 'Удалить аккаунт из системы учёта провайдера',
-  })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member'])
-  async deleteAccount(
-    @Args('data', { type: () => DeleteAccountInputDTO })
-    data: DeleteAccountInputDTO
-  ): Promise<boolean> {
-    await this.accountService.deleteAccount(data);
+  // @Mutation(() => Boolean, {
+  //   name: 'deleteAccount',
+  //   description: 'Удалить аккаунт из системы учёта провайдера',
+  // })
+  // @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  // @AuthRoles(['chairman', 'member'])
+  // async deleteAccount(
+  //   @Args('data', { type: () => DeleteAccountInputDTO })
+  //   data: DeleteAccountInputDTO
+  // ): Promise<boolean> {
+  //   await this.accountService.deleteAccount(data);
 
-    return true;
-  }
+  //   return true;
+  // }
 
   @Mutation(() => AccountDTO, {
     name: 'updateAccount',

@@ -51,9 +51,6 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	DateTime: `scalar.DateTime` as const,
-	DeleteAccountInput:{
-
-	},
 	DeleteBranchInput:{
 
 	},
@@ -145,9 +142,6 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		createProjectOfFreeDecision:{
 			data:"CreateProjectFreeDecisionInput"
-		},
-		deleteAccount:{
-			data:"DeleteAccountInput"
 		},
 		deleteBranch:{
 			data:"DeleteBranchInput"
@@ -778,7 +772,6 @@ export const ReturnTypes: Record<string,any> = {
 		createDepositPayment:"Payment",
 		createInitialPayment:"Payment",
 		createProjectOfFreeDecision:"CreatedProjectFreeDecision",
-		deleteAccount:"Boolean",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
 		deleteTrustedAccount:"Branch",

@@ -373,17 +373,6 @@
                 }
             }
         },
-        "DeleteAccountInput": {
-            "type": "object",
-            "required": [
-                "username_for_delete"
-            ],
-            "properties": {
-                "username_for_delete": {
-                    "type": "string"
-                }
-            }
-        },
         "DeleteBranchInput": {
             "type": "object",
             "required": [
@@ -633,9 +622,6 @@
             "required": [],
             "properties": {
                 "role": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }
@@ -2020,17 +2006,6 @@
                 "properties": {
                     "data": {
                         "$ref": "#/inputs/CreateProjectFreeDecisionInput"
-                    }
-                }
-            },
-            "deleteAccount": {
-                "type": "object",
-                "required": [
-                    "data"
-                ],
-                "properties": {
-                    "data": {
-                        "$ref": "#/inputs/DeleteAccountInput"
                     }
                 }
             },

@@ -1456,10 +1456,6 @@ export type ValueTypes = {
 		["...on ParticipantApplicationDecisionDocument"]?: ValueTypes["ParticipantApplicationDecisionDocument"]
 		__typename?: boolean | `@${string}`
 }>;
-	["DeleteAccountInput"]: {
-	/** Имя аккаунта пользователя */
-	username_for_delete: string | Variable<any, string>
-};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
@@ -1740,8 +1736,7 @@ export type ValueTypes = {
 	username: string | Variable<any, string>
 };
 	["GetAccountsInput"]: {
-	role?: string | undefined | null | Variable<any, string>,
-	username?: string | undefined | null | Variable<any, string>
+	role?: string | undefined | null | Variable<any, string>
 };
 	["GetBranchesInput"]: {
 	/** Фильтр по имени аккаунта кооперативного участка */
@@ -1927,7 +1922,6 @@ createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>}
 createDepositPayment?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
 createInitialPayment?: [{	data: ValueTypes["CreateInitialPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
 createProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["CreatedProjectFreeDecision"]],
-deleteAccount?: [{	data: ValueTypes["DeleteAccountInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ValueTypes["DeleteTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
@@ -3506,10 +3500,6 @@ export type ResolverInputTypes = {
 	ParticipantApplicationDecisionDocument?:ResolverInputTypes["ParticipantApplicationDecisionDocument"],
 		__typename?: boolean | `@${string}`
 }>;
-	["DeleteAccountInput"]: {
-	/** Имя аккаунта пользователя */
-	username_for_delete: string
-};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -3790,8 +3780,7 @@ export type ResolverInputTypes = {
 	username: string
 };
 	["GetAccountsInput"]: {
-	role?: string | undefined | null,
-	username?: string | undefined | null
+	role?: string | undefined | null
 };
 	["GetBranchesInput"]: {
 	/** Фильтр по имени аккаунта кооперативного участка */
@@ -3977,7 +3966,6 @@ createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTy
 createDepositPayment?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]},ResolverInputTypes["Payment"]],
 createInitialPayment?: [{	data: ResolverInputTypes["CreateInitialPaymentInput"]},ResolverInputTypes["Payment"]],
 createProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecisionInput"]},ResolverInputTypes["CreatedProjectFreeDecision"]],
-deleteAccount?: [{	data: ResolverInputTypes["DeleteAccountInput"]},boolean | `@${string}`],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ResolverInputTypes["DeleteTrustedAccountInput"]},ResolverInputTypes["Branch"]],
@@ -5535,10 +5523,6 @@ export type ModelTypes = {
 };
 	/** Объединение типов документов протоколов решения совета */
 ["DecisionDocumentUnion"]:ModelTypes["FreeDecisionDocument"] | ModelTypes["ParticipantApplicationDecisionDocument"];
-	["DeleteAccountInput"]: {
-	/** Имя аккаунта пользователя */
-	username_for_delete: string
-};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -5810,8 +5794,7 @@ export type ModelTypes = {
 	username: string
 };
 	["GetAccountsInput"]: {
-	role?: string | undefined | null,
-	username?: string | undefined | null
+	role?: string | undefined | null
 };
 	["GetBranchesInput"]: {
 	/** Фильтр по имени аккаунта кооперативного участка */
@@ -6000,8 +5983,6 @@ export type ModelTypes = {
 	createInitialPayment: ModelTypes["Payment"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 	createProjectOfFreeDecision: ModelTypes["CreatedProjectFreeDecision"],
-	/** Удалить аккаунт из системы учёта провайдера */
-	deleteAccount: boolean,
 	/** Удалить кооперативный участок */
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
@@ -7572,10 +7553,6 @@ export type GraphQLTypes = {
         	['...on FreeDecisionDocument']: '__union' & GraphQLTypes["FreeDecisionDocument"];
 	['...on ParticipantApplicationDecisionDocument']: '__union' & GraphQLTypes["ParticipantApplicationDecisionDocument"];
 };
-	["DeleteAccountInput"]: {
-		/** Имя аккаунта пользователя */
-	username_for_delete: string
-};
 	["DeleteBranchInput"]: {
 		/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -7856,8 +7833,7 @@ export type GraphQLTypes = {
 	username: string
 };
 	["GetAccountsInput"]: {
-		role?: string | undefined | null,
-	username?: string | undefined | null
+		role?: string | undefined | null
 };
 	["GetBranchesInput"]: {
 		/** Фильтр по имени аккаунта кооперативного участка */
@@ -8051,8 +8027,6 @@ export type GraphQLTypes = {
 	createInitialPayment: GraphQLTypes["Payment"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 	createProjectOfFreeDecision: GraphQLTypes["CreatedProjectFreeDecision"],
-	/** Удалить аккаунт из системы учёта провайдера */
-	deleteAccount: boolean,
 	/** Удалить кооперативный участок */
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
@@ -9201,7 +9175,6 @@ type ZEUS_VARIABLES = {
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
 	["DateTime"]: ValueTypes["DateTime"];
-	["DeleteAccountInput"]: ValueTypes["DeleteAccountInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
 	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
