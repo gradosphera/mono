@@ -69,6 +69,8 @@ export class Generator implements IGenerator {
       [Actions.DecisionOfParticipantApplication.Template.registry_id]: new Actions.DecisionOfParticipantApplication.Factory(this.storage), // 501
       [Actions.ProjectFreeDecision.Template.registry_id]: new Actions.ProjectFreeDecision.Factory(this.storage), // 599
       [Actions.FreeDecision.Template.registry_id]: new Actions.FreeDecision.Factory(this.storage), // 600
+      [Actions.AssetContributionStatement.Template.registry_id]: new Actions.AssetContributionStatement.Factory(this.storage), // 700
+      [Actions.ReturnByAssetStatement.Template.registry_id]: new Actions.ReturnByAssetStatement.Factory(this.storage), // 800
     }
     await this.storage.connect()
   }

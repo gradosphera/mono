@@ -8,4 +8,7 @@ export * as DecisionOfParticipantApplication from './501.DecisionOfParticipantAp
 export * as SelectBranchStatement from './101.SelectBranchStatement'
 export * as ProjectFreeDecision from './599.ProjectFreeDecision'
 export * as FreeDecision from './600.FreeDecision'
+export * as AssetContributionStatement from './700.assetContributionStatement'
+export * as ReturnByAssetStatement from './800.returnByAssetStatement'
+
 export * from './registry'

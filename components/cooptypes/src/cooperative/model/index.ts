@@ -70,3 +70,21 @@ export interface IVars {
     protocol_day_month_year: string
   }
 }
+
+/**
+ * Используется для генераций документов в кооплейсе
+ */
+export interface IMiddlewareRequest {
+  hash: string
+  title: string
+  unit_of_measurement: string
+  units: number
+  unit_cost: number
+  total_cost: number
+  currency: string
+  type: string
+}
+
+export interface IMiddlewareUser {
+  full_name: string
+}

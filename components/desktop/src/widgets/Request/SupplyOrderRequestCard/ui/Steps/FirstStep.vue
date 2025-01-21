@@ -24,10 +24,10 @@ div
       span Пожалуйста, подтвердите свою готовность совершить поставку.
 
       q-stepper-navigation.q-gutter-sm
-        DeclineButton(v-if="iAmSupplier && isActive" :request-id=Number("request.id") :coopname="request.coopname" :username="username")
+        DeclineButton(v-if="iAmSupplier && isActive" :request-id="Number(request.id)" :coopname="request.coopname" :username="username")
         //- q-btn(v-if="iAmSupplier && isActive" @click="decline") Отклонить
-        AcceptButton(v-if="iAmSupplier && isActive" :request-id=Number("request.id") :coopname="request.coopname" :username="username")
-
+        AcceptButton(v-if="iAmSupplier && isActive" :request-id="Number(request.id)" :coopname="request.coopname" :username="username")
+        p {{request}}
   template(v-else)
     q-step(
       :name="1"

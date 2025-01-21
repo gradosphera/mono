@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FailAlert, SuccessAlert } from 'src/shared/api'
+import { failAlert, SuccessAlert } from 'src/shared/api'
 import { api } from '../../api'
 import type { ICreateOffer, IFormData } from 'src/features/Request/CreateParentOffer/model'
 import { computed, ref } from 'vue'
@@ -7,6 +7,7 @@ import { Form } from 'src/shared/ui/Form'
 import { useCooperativeStore } from 'src/entities/Cooperative'
 import { ImageUploaderWithPreview } from '../ImageUploaderWithPreview'
 import { CURRENCY } from 'src/shared/config'
+
 
 const props = defineProps({
   username: {
@@ -58,10 +59,12 @@ const handlerSubmit = async () => {
         images: formData.value.images,
       },
     })
+    console.log(offerData)
     await api.createParentOffer(offerData.value)
     SuccessAlert('Объявление успешно создано')
   } catch (e: any) {
-    FailAlert(e.message)
+    console.log(e)
+    failAlert(e.message)
   }
 }
 </script>

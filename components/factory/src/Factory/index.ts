@@ -288,6 +288,17 @@ export abstract class DocFactory<T extends IGenerate> {
     return ''
   }
 
+  getFullParticipantName(data: externalDataTypes): string {
+    if ('first_name' in data) {
+      return `${data.last_name} ${data.first_name} ${data.middle_name}`
+    }
+    else if ('short_name' in data) {
+      return data.short_name
+    }
+
+    return ''
+  }
+
   async saveDraft(document: IGeneratedDocument): Promise<void> {
     await this.storage.saveDraft(document)
   }

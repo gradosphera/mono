@@ -1,9 +1,8 @@
+import { MarketContract } from 'cooptypes';
 import { fetchTable } from '../../../shared/api';
 import {
-  ContractsList,
   LimitsList,
   SecondaryIndexesNumbers,
-  TablesList,
 } from '../../../shared/config';
 import { ILoadAllRequests, IUpdateOneRequest } from '../model';
 import type {
@@ -27,9 +26,9 @@ async function loadAllRequests(
   params: ILoadAllRequests
 ): Promise<IRequestData[]> {
   const requests = (await fetchTable(
-    ContractsList.Marketplace,
+    MarketContract.contractName.production,
     params.coopname,
-    TablesList.CoopMarketRequests
+    MarketContract.Tables.Requests.tableName,
   )) as any[];
 
   requests.map((el) => (el.data = parseRequestObjectData(el.data)));
@@ -42,9 +41,9 @@ async function loadOneRequest(
 ): Promise<IRequestData> {
   const request = (
     await fetchTable(
-      ContractsList.Marketplace,
+      MarketContract.contractName.production,
       params.coopname,
-      TablesList.CoopMarketRequests,
+      MarketContract.Tables.Requests.tableName,
       params.request_id,
       params.request_id,
       1
@@ -55,9 +54,9 @@ async function loadOneRequest(
   if (request.parent_id !== 0) {
     const parent_request = (
       (await fetchTable(
-        ContractsList.Marketplace,
+        MarketContract.contractName.production,
         params.coopname,
-        TablesList.CoopMarketRequests,
+        MarketContract.Tables.Requests.tableName,
         request.parent_id,
         request.parent_id,
         1
@@ -74,16 +73,17 @@ async function loadOneRequest(
 async function loadAllParentOffers(
   params: ILoadAllParentOffers
 ): Promise<IRequestData[]> {
+  console.log(params)
   const requests = (await fetchTable(
-    ContractsList.Marketplace,
+    MarketContract.contractName.production,
     params.coopname,
-    TablesList.CoopMarketRequests,
+    MarketContract.Tables.Requests.tableName,
     0,
     0,
     LimitsList.None,
     SecondaryIndexesNumbers.Six
   )) as any[];
-
+  console.log('loaded:', requests)
   requests.map((el) => (el.data = parseRequestObjectData(el.data)));
 
   return requests as IRequestData[];
@@ -94,9 +94,9 @@ async function loadAllChildOrders(
 ): Promise<IRequestData[]> {
   const child_requests = (
     (await fetchTable(
-      ContractsList.Marketplace,
+      MarketContract.contractName.production,
       params.coopname,
-      TablesList.CoopMarketRequests,
+      MarketContract.Tables.Requests.tableName,
       1,
       -1,
       LimitsList.None,
@@ -119,9 +119,9 @@ async function loadUserParentOffers(
 ): Promise<IRequestData[]> {
   const requests = (
     (await fetchTable(
-      ContractsList.Marketplace,
+      MarketContract.contractName.production,
       params.coopname,
-      TablesList.CoopMarketRequests,
+      MarketContract.Tables.Requests.tableName,
       params.username,
       params.username,
       LimitsList.None,
@@ -142,9 +142,9 @@ async function loadUserChildOrders(
   //  получаем встречные заявки, в которых пользователь - родитель
   const user_incoming_requests = (
     (await fetchTable(
-      ContractsList.Marketplace,
+      MarketContract.contractName.production,
       params.coopname,
-      TablesList.CoopMarketRequests,
+      MarketContract.Tables.Requests.tableName,
       params.username,
       params.username,
       LimitsList.None,
@@ -158,9 +158,9 @@ async function loadUserChildOrders(
   //получаем исходящие заявки пользователя
   const user_outcoming_requests = (
     (await fetchTable(
-      ContractsList.Marketplace,
+      MarketContract.contractName.production,
       params.coopname,
-      TablesList.CoopMarketRequests,
+      MarketContract.Tables.Requests.tableName,
       params.username,
       params.username,
       LimitsList.None,

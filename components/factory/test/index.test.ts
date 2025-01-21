@@ -1,6 +1,7 @@
 import path from 'node:path'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { RegistratorContract, SovietContract } from 'cooptypes'
+import { Cooperative } from 'cooptypes'
 import { v4 as uuidv4 } from 'uuid'
 import { Generator } from '../src'
 import type { IGenerate, IGeneratedDocument } from '../src/Interfaces/Documents'
@@ -45,8 +46,8 @@ async function deleteAllFiles(folderPath: string) {
 const generator = new Generator()
 generator.connect(mongoUri)
 
-async function testDocumentGeneration(
-  params: IGenerate, // Динамический объект с любыми параметрами
+async function testDocumentGeneration<T extends IGenerate = IGenerate>(
+  params: T, // Динамический объект с любыми параметрами
 ) {
   const document: IGeneratedDocument = await generator.generate(params)
 
@@ -78,6 +79,22 @@ async function testDocumentGeneration(
 }
 beforeAll(async () => {
   await deleteAllFiles('./documents')
+
+  const storage = new MongoDBConnector(mongoUri)
+  await storage.connect()
+
+  const collectionsToClear = [
+    'vars',
+    'paymentMethods',
+    'individuals',
+    'organizations',
+    'entrepreneurs',
+  ]
+
+  for (const collectionName of collectionsToClear) {
+    const collection = storage.getCollection(collectionName)
+    await collection.deleteMany({})
+  }
 })
 
 beforeEach(async () => {
@@ -907,11 +924,56 @@ describe('тест генератора документов', async () => {
   })
 
   it('генерируем заявление на выбор кооперативного участка предпринимателем', async () => {
-    await testDocumentGeneration({
-      registry_id: 101,
+    await testDocumentGeneration<Cooperative.Registry.AssetContributionStatement.Action>({
+      registry_id: Cooperative.Registry.AssetContributionStatement.registry_id,
       coopname: 'voskhod',
       username: 'entrepreneur',
       braname: 'branch',
+      request: {
+        hash: 'fe864ece966f946b4f89a98fa20aa87d6a65655da555da894a8d1e3385b4aaa2',
+        title: 'Молоко "Бурёнка"',
+        unit_of_measurement: 'Литр',
+        units: 10,
+        unit_cost: 100,
+        total_cost: 1000,
+        currency: 'RUB',
+        type: 'Материальный',
+      },
+    })
+  })
+
+  it('генерируем заявление на паевый взнос имуществом', async () => {
+    await testDocumentGeneration<Cooperative.Registry.AssetContributionStatement.Action>({
+      registry_id: Cooperative.Registry.AssetContributionStatement.registry_id,
+      coopname: 'voskhod',
+      username: 'entrepreneur',
+      request: {
+        hash: '917f7443a115d495574dbe73405b7b6be3fed929526ba736228f3ff234ad7fce',
+        title: 'Молоко "Бурёнка"',
+        unit_of_measurement: 'Литр',
+        units: 10,
+        unit_cost: 100,
+        total_cost: 1000,
+        currency: 'RUB',
+        type: 'Материальный',
+      },
+    })
+  })
+  it('генерируем заявление на возврат паевого взноса имуществом', async () => {
+    await testDocumentGeneration<Cooperative.Registry.ReturnByAssetStatement.Action>({
+      registry_id: Cooperative.Registry.ReturnByAssetStatement.registry_id,
+      coopname: 'voskhod',
+      username: 'entrepreneur',
+      request: {
+        hash: '917f7443a115d495574dbe73405b7b6be3fed929526ba736228f3ff234ad7fce',
+        title: 'Молоко "Бурёнка"',
+        unit_of_measurement: 'Литр',
+        units: 10,
+        unit_cost: 100,
+        total_cost: 1000,
+        currency: 'RUB',
+        type: 'Материальный',
+      },
     })
   })
 })

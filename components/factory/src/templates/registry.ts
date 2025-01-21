@@ -8,6 +8,8 @@ import * as DecisionOfParticipantApplication from './501.DecisionOfParticipantAp
 import * as SelectBranchStatement from './101.SelectBranchStatement'
 import * as ProjectFreeDecision from './599.ProjectFreeDecision'
 import * as FreeDecision from './600.FreeDecision'
+import * as AssetContributionStatement from './700.assetContributionStatement'
+import * as ReturnByAssetStatement from './800.returnByAssetStatement'
 
 export const Registry = {
   1: WalletAgreement,
@@ -20,4 +22,6 @@ export const Registry = {
   501: DecisionOfParticipantApplication,
   599: ProjectFreeDecision,
   600: FreeDecision,
+  700: AssetContributionStatement,
+  800: ReturnByAssetStatement,
 }

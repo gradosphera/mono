@@ -10,8 +10,6 @@ async function updateRequestData(
   params: IUpdateRequestData
 ): Promise<TransactResult | undefined> {
   const result = await transact({
-    actions: [
-      {
         account: ContractsList.Marketplace,
         name: MarketContract.Actions.UpdateRequests.actionName,
         authorization: [
@@ -29,8 +27,6 @@ async function updateRequestData(
           data: JSON.stringify(params.data),
           meta: '',
         } as MarketContract.Actions.UpdateRequests.IUpdateRequest,
-      },
-    ],
   });
 
   const requestsStore = useRequestStore();

@@ -10,23 +10,19 @@ async function deliverOnRequest(
   params: IDeliverOnRequest
 ): Promise<TransactResult | undefined> {
   const result = await transact({
-    actions: [
-      {
-        account: ContractsList.Marketplace,
-        name: MarketContract.Actions.DeliverOnRequest.actionName,
-        authorization: [
-          {
-            actor: params.username,
-            permission: 'active',
-          },
-        ],
-        data: {
-          username: params.username,
-          coopname: params.coopname,
-          exchange_id: params.request_id,
-        } as MarketContract.Actions.DeliverOnRequest.IDeliverOnRequest,
-      },
-    ],
+      account: ContractsList.Marketplace,
+      name: MarketContract.Actions.DeliverOnRequest.actionName,
+      authorization: [
+        {
+          actor: params.username,
+          permission: 'active',
+        },
+      ],
+      data: {
+        username: params.username,
+        coopname: params.coopname,
+        exchange_id: params.request_id,
+      } as MarketContract.Actions.DeliverOnRequest.IDeliverOnRequest,
   });
 
   const requestsStore = useRequestStore();

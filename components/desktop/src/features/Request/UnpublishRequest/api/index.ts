@@ -10,23 +10,20 @@ async function unpublishRequest(
   params: IUnpublishRequest
 ): Promise<TransactResult | undefined> {
   const result = await transact({
-    actions: [
-      {
-        account: ContractsList.Marketplace,
-        name: MarketContract.Actions.UnpublishRequest.actionName,
-        authorization: [
-          {
-            actor: params.username,
-            permission: 'active',
-          },
-        ],
-        data: {
-          username: params.username,
-          coopname: params.coopname,
-          exchange_id: params.request_id,
-        } as MarketContract.Actions.UnpublishRequest.IUnpublishRequest,
-      },
-    ],
+      account: ContractsList.Marketplace,
+      name: MarketContract.Actions.UnpublishRequest.actionName,
+      authorization: [
+        {
+          actor: params.username,
+          permission: 'active',
+        },
+      ],
+      data: {
+        username: params.username,
+        coopname: params.coopname,
+        exchange_id: params.request_id,
+      } as MarketContract.Actions.UnpublishRequest.IUnpublishRequest,
+
   });
 
   const requestsStore = useRequestStore();

@@ -81,6 +81,7 @@ export const useRequestStore = defineStore(namespace, (): IRequestsStore => {
     allParentOffers.value = (await api.loadAllParentOffers(params)).sort(
       (a, b) => Number(b.id) - Number(a.id)
     )
+    console.log('on load', params, allParentOffers.value)
   }
 
   const loadAllChildOrders = async (params: ILoadAllChildOrders): Promise<void> => {

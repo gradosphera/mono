@@ -30,7 +30,7 @@ div
 
 </template>
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { ImageCarousel } from 'src/shared/ui/ImageCarousel'
 
 import { useRouter } from 'vue-router'
@@ -40,13 +40,15 @@ import { UnpublishRequestButton } from 'src/features/Request/UnpublishRequest'
 import { ModerateRequestButton } from 'src/features/Request/ModerateRequest'
 import { ProhibitRequestButton } from 'src/features/Request/ProhibitRequest'
 import { useSessionStore } from 'src/entities/Session'
-import { COOPNAME } from 'src/shared/config'
+
+import { useSystemStore } from 'src/entities/System/model'
 const session = useSessionStore()
 const username = computed(() => session.username)
+const { info } = useSystemStore()
 
 const router = useRouter()
 
-const coopname = computed(() => COOPNAME)
+const coopname = computed(() => info.coopname)
 const requstsStore = useRequestStore()
 
 const objects = computed(() => requstsStore.allParentOffers)
@@ -56,4 +58,6 @@ const currentObjectId = computed(() => router.currentRoute.value.params.id)
 const currentObject = computed(() =>
   objects.value.find((obj) => obj.id == Number(currentObjectId.value))
 )
+
+onMounted(() => requstsStore.loadAllParentOffers({coopname: coopname.value}))
 </script>

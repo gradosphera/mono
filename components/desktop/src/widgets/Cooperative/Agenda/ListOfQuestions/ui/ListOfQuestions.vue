@@ -160,12 +160,18 @@ const isProcess = (decisionId: number) => {
 }
 
 const updateAuthorized = async (row: Cooperative.Document.IComplexAgenda) => {
+
   const decision_id = Number(row.table.id)
+  console.log('decision_id', decision_id)
   try {
     const username = row.table.username
     const type = row.table.type
     const meta = {} as any
-    let parsedDocumentMeta = JSON.parse(row.table.statement.meta)
+    console.log('here', row.table.statement.meta)
+
+    //TODO убрать проверку позже (нужно было для теста)
+    const unparsedDocumentMeta = row.table.statement.meta == '' ? '{}' : row.table.statement.meta
+    let parsedDocumentMeta = JSON.parse(unparsedDocumentMeta)
 
     const registryMap = {
       'freedecision': Cooperative.Registry.FreeDecision.registry_id,

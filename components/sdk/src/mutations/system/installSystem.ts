@@ -1,19 +1,19 @@
-import { systemInfoSelector } from '../../selectors';
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
+import { systemInfoSelector } from '../../selectors'
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus'
 
 export const name = 'installSystem'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{data: $('data', 'Install!')}, systemInfoSelector]
-});
+  [name]: [{ data: $('data', 'Install!') }, systemInfoSelector],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
   data: ModelTypes['Install']
 }
 
-export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

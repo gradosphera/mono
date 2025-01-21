@@ -4,22 +4,14 @@ import { transact } from 'src/shared/api';
 import { ContractsList } from 'src/shared/config';
 import { useRequestStore } from 'src/entities/Request/model/stores';
 import { ILoadUserParentOffers } from 'src/entities/Request';
-import { IDocument } from 'src/shared/lib/types/document';
 import { MarketContract } from 'cooptypes';
 
 async function createParentOffer(
   params: ICreateOffer
 ): Promise<TransactResult | undefined> {
-  //TODO здесь передаём пустой документ
-  const document = {
-    hash: '',
-    public_key: '',
-    signature: '',
-    meta: '',
-  } as IDocument;
 
-  const result = await transact({
-    actions: [
+  // здесь мы не передаём документ
+  const result = await transact(
       {
         account: ContractsList.Marketplace,
         name: MarketContract.Actions.CreateOffer.actionName,
@@ -38,14 +30,12 @@ async function createParentOffer(
             pieces: params.pieces,
             unit_cost: params.unit_cost,
             product_lifecycle_secs: params.product_lifecycle_secs,
-            document,
+            // document,
             data: JSON.stringify(params.data),
             meta: '',
           },
         } as MarketContract.Actions.CreateOffer.ICreateOffer,
-      },
-    ],
-  });
+      });
 
   const requestsStore = useRequestStore();
   requestsStore.loadUserParentOffers({

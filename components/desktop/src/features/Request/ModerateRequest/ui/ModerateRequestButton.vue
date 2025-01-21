@@ -1,9 +1,9 @@
 <template lang="pug">
-q-btn(color="red" @click="moderate") подтвердить модерацию  
+q-btn(color="red" @click="moderate") подтвердить модерацию
 </template>
 
 <script setup lang="ts">
-  import { SuccessAlert } from 'src/shared/api'
+  import { failAlert, SuccessAlert } from 'src/shared/api'
   import { ref } from 'vue'
   import { api } from '../api'
 
@@ -34,7 +34,8 @@ q-btn(color="red" @click="moderate") подтвердить модерацию
       })
       SuccessAlert('Модерация заявки подтверждена')
     } catch (e: any) {
-      SuccessAlert(e.message)
+      failAlert(e)
     }
   }
+
 </script>
