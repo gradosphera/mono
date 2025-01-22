@@ -14,7 +14,6 @@ import { DeleteTrustedAccountGraphQLInput } from '../dto/delete-trusted-account-
 import { SelectBranchInputDTO } from '../dto/select-branch-input.dto';
 import { SelectBranchDocumentDTO, SelectBranchGenerateDocumentInputDTO } from '../dto/select-branch-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
-import { Cooperative } from 'cooptypes';
 
 @Resolver(() => BranchDTO)
 export class BranchResolver {

@@ -15,6 +15,8 @@ import { VarsSchema } from '@coopenomics/factory';
 import Vault, { wifPermissions } from '../models/vault.model';
 import { PrivateKey } from '@wharfkit/antelope';
 import type { SetWifInputDomainInterface } from '~/domain/system/interfaces/set-wif-input-domain.interface';
+import { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
+import { randomUUID } from 'crypto';
 
 export const setWif = async (params: SetWifInputDomainInterface): Promise<void> => {
   //check auth
@@ -139,6 +141,18 @@ export const init = async (data: IInit): Promise<void> => {
 
   if (mono) throw new ApiError(httpStatus.BAD_REQUEST, 'MONO уже инициализирован');
 
+  const { bank_account, ...organization } = data.organization_data;
+
+  const paymentMethod = new PaymentMethodDomainEntity({
+    username: config.coopname,
+    method_id: randomUUID().toString(),
+    method_type: 'bank_transfer',
+    data: bank_account,
+    is_default: true,
+  });
+
+  await generator.save('paymentMethod', paymentMethod);
+
   await Mono.create({
     coopname: config.coopname,
     status: 'install',
@@ -146,7 +160,7 @@ export const init = async (data: IInit): Promise<void> => {
 
   await setVars(data.vars);
 
-  await generator.save('organization', { username: config.coopname, ...data.organization_data });
+  await generator.save('organization', { username: config.coopname, ...organization });
 
   logger.info('Система инициализирована');
 };
