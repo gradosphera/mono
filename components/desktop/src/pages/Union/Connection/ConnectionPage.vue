@@ -53,7 +53,7 @@ const document = ref(new DigitalDocument())
 const {loadOneCooperative} = useLoadCooperatives()
 
 const coop = ref()
-const instruction = computed(() => `Создайте A-запись домена ${coop.value?.announce} на IP-адрес: 95.174.93.156`)
+const instruction = computed(() => `Создайте A-запись домена ${coop.value?.announce} на IP-адрес: 51.250.114.13`)
 
 const html = computed(() => document.value?.data?.html)
 const signedDocument = computed(() => document.value?.signedDocument)
