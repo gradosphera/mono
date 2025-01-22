@@ -1,6 +1,6 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import type { SystemInfoDomainEntity } from '~/domain/system/entities/systeminfo-domain.entity';
-import { IsBoolean, IsString, ValidateNested } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { BlockchainInfoDTO } from './blockchain-info.dto';
 import { CooperativeOperatorAccountDTO } from '../../common/dto/cooperator-account.dto';
 import { SystemStatus } from './system-status.dto';
@@ -17,6 +17,7 @@ export class SystemInfoDTO {
 
   @Field(() => ContactsDTO, { description: 'Контакты кооператива', nullable: true })
   @ValidateNested()
+  @IsOptional()
   public readonly contacts?: ContactsDTO;
 
   @Field(() => VarsDTO, { description: 'Переменные кооператива', nullable: true })

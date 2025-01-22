@@ -12,7 +12,7 @@ export class SystemInfoDomainEntity {
   public readonly user_account!: RegistratorContract.Tables.Accounts.IAccount;
   public readonly blockchain_account!: BlockchainAccountInterface;
   public readonly system_status!: SystemStatusInterface;
-  public readonly contacts!: CooperativeContactsDomainInterface;
+  public readonly contacts?: CooperativeContactsDomainInterface;
   public readonly vars!: VarsDomainInterface | null;
 
   constructor(data: SystemInfoDomainEntity) {

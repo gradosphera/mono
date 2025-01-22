@@ -63,7 +63,12 @@ export class SystemDomainInteractor {
 
     const system_status = await systemService.getMonoStatus();
 
-    const contacts = await this.systemDomainService.loadContacts();
+    let contacts;
+
+    try {
+      contacts = await this.systemDomainService.loadContacts();
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
 
     const vars = await this.varsRepository.get();
 
