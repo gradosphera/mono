@@ -2,16 +2,17 @@ import { ref, type Ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
 import { useBranchStore, type IBranch } from 'src/entities/Branch/model';
-import { COOPNAME } from 'src/shared/config';
 import { generateUsername } from 'src/shared/lib/utils/generateUsername';
+import { useSystemStore } from 'src/entities/System/model';
 
 export type ICreateBranchInput = Mutations.Branches.CreateBranch.IInput['data']
 
 export function useCreateBranch() {
   const store = useBranchStore();
+  const { info } = useSystemStore()
 
   const initialCreateBranchInput: ICreateBranchInput = {
-    coopname: COOPNAME,
+    coopname: info.coopname,
     braname: '',
     email: '',
     fact_address: '',
@@ -37,7 +38,7 @@ export function useCreateBranch() {
     data.full_name = `Кооперативный Участок "${data.short_name}"`
     const branch = await api.createBranch(data);
 
-    await store.loadBranches({ coopname: COOPNAME });
+    await store.loadBranches({ coopname: info.coopname });
 
     // Сбрасываем createBranchInput после выполнения createBranch
     resetInput(createBranchInput, initialCreateBranchInput);

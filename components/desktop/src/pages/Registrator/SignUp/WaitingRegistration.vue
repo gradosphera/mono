@@ -17,7 +17,9 @@ div
 <script lang="ts" setup>
 import { ref, computed, watch, onBeforeUnmount, onMounted } from 'vue'
 import { useCurrentUserStore } from 'src/entities/User';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { Loader } from 'src/shared/ui/Loader';
 import { useRegistratorStore } from 'src/entities/Registrator'
 const store = useRegistratorStore()
@@ -52,7 +54,7 @@ onBeforeUnmount(() => {
 const update = async () => {
   if (store.state.account.username && !participantAccount.value) {
     try {
-      await currentUser.loadProfile(store.state.account.username, COOPNAME)
+      await currentUser.loadProfile(store.state.account.username, info.coopname)
     } catch(e: any){
       console.log('error: ', e.message)
     }

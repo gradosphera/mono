@@ -16,7 +16,9 @@ import { Cooperative } from 'cooptypes';
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useUpdateMeta } from 'src/features/User/UpdateMeta';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { ref, watch } from 'vue';
 
 const coop = useCooperativeStore()
@@ -31,7 +33,7 @@ watch(() => coop.contacts, (newValue: Cooperative.Model.IContacts | undefined) =
   }
 })
 
-coop.loadPublicCooperativeData(COOPNAME)
+coop.loadPublicCooperativeData(info.coopname)
 coop.loadContacts()
 
 const update = async () => {
@@ -40,7 +42,7 @@ const update = async () => {
 
   try {
     await updateMeta(
-      COOPNAME,
+      info.coopname,
       {
         phone: phone.value,
         email: email.value

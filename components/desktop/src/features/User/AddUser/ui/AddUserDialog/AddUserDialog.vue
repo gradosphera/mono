@@ -95,7 +95,9 @@ import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useCreateUser } from 'src/features/User/CreateUser';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { notEmpty } from 'src/shared/lib/utils';
 
 const { state, addUserState, clearUserData } = useRegistratorStore()
@@ -122,7 +124,7 @@ const coop = useCooperativeStore()
 
 onMounted(async () => {
 
-  await coop.loadPublicCooperativeData(COOPNAME)
+  await coop.loadPublicCooperativeData(info.coopname)
 
   if (coop.publicCooperativeData) {
 

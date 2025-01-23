@@ -12,9 +12,11 @@ import { useRoute } from 'vue-router'
 import 'src/app/styles/quasar-variables.sass'
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { Cookies, LocalStorage, QSpinnerGears, useQuasar } from 'quasar';
-import { COOPNAME } from 'src/shared/config';
+
 import { RequireAgreements } from 'src/widgets/Agreementer/RequireAgreements/ui';
 import { SelectBranchOverlay } from 'src/features/Branch/SelectBranch';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
 
 const $q = useQuasar()
 
@@ -56,7 +58,7 @@ onMounted(async () => {
     const ref = Cookies.get('referer') || String(route.query.r || '')
 
     if (ref) {
-      LocalStorage.setItem(`${COOPNAME}:referer`, ref)
+      LocalStorage.setItem(`${info.coopname}:referer`, ref)
     }
   } catch (e: unknown) {
 

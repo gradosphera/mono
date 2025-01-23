@@ -19,7 +19,7 @@ q-tabs(
     :name="route.meta.title"
     :label="route.meta.title"
     :to="{ name: route.name }"
-    :params="{coopname: COOPNAME}"
+    :params="{coopname: info.coopname}"
   )
 
 
@@ -30,7 +30,9 @@ import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { type IRoute } from 'src/entities/Desktop/model/types';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 const desktop = useDesktopStore()
 const routes = ref<IRoute[]>([])
 const route = useRoute()

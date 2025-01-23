@@ -38,7 +38,9 @@ import WaitingRegistration from './WaitingRegistration.vue'
 import Welcome from './Welcome.vue'
 import SelectBranch from './SelectBranch.vue'
 
-import { COOPNAME } from 'src/shared/config'
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { useCurrentUserStore } from 'src/entities/User'
 
 import { useRegistratorStore } from 'src/entities/Registrator'
@@ -48,7 +50,6 @@ import { useAgreementStore } from 'src/entities/Agreement'
 import { useWalletStore } from 'src/entities/Wallet'
 
 import { useRouter } from 'vue-router';
-import { useSystemStore } from 'src/entities/System/model'
 
 const currentUser = useCurrentUserStore()
 const router = useRouter()
@@ -60,7 +61,7 @@ const agreementer = useAgreementStore()
 const wallet = useWalletStore()
 
 onMounted(() => {
-  agreementer.loadCooperativeAgreements(COOPNAME)
+  agreementer.loadCooperativeAgreements(info.coopname)
   if (!currentUser.isRegistrationComplete) {
 
     if (currentUser.userAccount?.status === 'registered' || currentUser.userAccount?.status === 'active' || currentUser.userAccount?.status === 'blocked') {
@@ -97,8 +98,8 @@ watch(
   () => [store.step, store.email, store.account, store.userData],
   () => {
     if (store.step >= steps.GenerateAccount && store.step < steps.WaitingRegistration) {
-      currentUser.loadProfile(username.value, COOPNAME)
-      wallet.loadUserWalet({coopname: COOPNAME, username: username.value})
+      currentUser.loadProfile(username.value, info.coopname)
+      wallet.loadUserWalet({coopname: info.coopname, username: username.value})
     }
   }
 )
@@ -112,8 +113,7 @@ watch(() => registeredAndloggedIn, (newValue) => {
     router.push({name: 'index'})
 })
 
-const system = useSystemStore()
-const isBranched = computed(() => system.info?.cooperator_account.is_branched)
+const isBranched = computed(() => info.cooperator_account.is_branched)
 
 </script>
 <style></style>

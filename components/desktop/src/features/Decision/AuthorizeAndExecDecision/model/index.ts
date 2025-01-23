@@ -2,10 +2,12 @@ import { TransactResult } from '@wharfkit/session';
 import { Cooperative, SovietContract } from 'cooptypes';
 import { DigitalDocument } from 'src/shared/lib/document';
 import { useSessionStore } from 'src/entities/Session';
-import { COOPNAME } from 'src/shared/config';
 import { useGlobalStore } from 'src/shared/store';
+import { useSystemStore } from 'src/entities/System/model';
 
 export function useAuthorizeAndExecDecision() {
+  const { info } = useSystemStore()
+
   async function authorizeAndExecDecision(
     username: string,
     registry_id: number,
@@ -14,11 +16,9 @@ export function useAuthorizeAndExecDecision() {
   ): Promise<TransactResult | undefined> {
     const session = useSessionStore();
 
-    console.log('registri: ', registry_id)
-
     const document = await new DigitalDocument().generate<Cooperative.Registry.DecisionOfParticipantApplication.Action>({
       registry_id: registry_id,
-      coopname: COOPNAME,
+      coopname: info.coopname,
       username,
       lang: 'ru',
       decision_id,
@@ -40,7 +40,7 @@ export function useAuthorizeAndExecDecision() {
 
     const authorizeData: SovietContract.Actions.Decisions.Authorize.IAuthorize =
       {
-        coopname: COOPNAME,
+        coopname: info.coopname,
         chairman: session.username,
         decision_id,
         document: chainDocument,
@@ -48,7 +48,7 @@ export function useAuthorizeAndExecDecision() {
 
     const execData: SovietContract.Actions.Decisions.Exec.IExec = {
       executer: session.username,
-      coopname: COOPNAME,
+      coopname: info.coopname,
       decision_id: decision_id,
     };
 

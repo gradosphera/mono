@@ -13,5 +13,5 @@ export default boot(({ app, router }: { app: App<Element>; router: Router }) => 
   //   component: () => import('./MyExtensionPage.vue')
   // })
 
-  console.log('Расширение загружено успешно')
+  console.log('Расширение powerup загружено успешно')
 })

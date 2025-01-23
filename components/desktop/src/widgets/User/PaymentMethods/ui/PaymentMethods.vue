@@ -85,7 +85,9 @@ div(flat bordered).q-pa-md
 
 <script lang="ts" setup>
 import { useWalletStore } from 'src/entities/Wallet';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { computed } from 'vue';
 import { AddPaymentMethodButton } from 'src/features/PaymentMethod/AddPaymentMethod';
 import type { IBankTransferData, ISBPData } from 'src/features/PaymentMethod/AddPaymentMethod/model';
@@ -102,7 +104,7 @@ const wallet = useWalletStore()
 
 const username = computed(() => props.username)
 
-wallet.loadUserWalet({ coopname: COOPNAME, username: username.value })
+wallet.loadUserWalet({ coopname: info.coopname, username: username.value })
 
 function isSBPData(data: ISBPData | IBankTransferData): data is ISBPData {
   return (data as ISBPData).phone !== undefined;

@@ -63,7 +63,6 @@ export const loadInfo = async (coopname: string) => {
 
 export const loadContacts = async (coopname: string) => {
   const cooperative: Cooperative.Model.ICooperativeData | null = await generator.constructCooperative(coopname);
-
   if (!cooperative) throw new ApiError(httpStatus.NOT_FOUND, 'Кооператив не найден');
 
   const api = await blockchainService.getApi();

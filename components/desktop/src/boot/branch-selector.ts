@@ -20,9 +20,7 @@ export default async () => {
       account.account.participant_account.braname === ''//у пользователя нет установленного кооперативного участка
     ) {
       isVisible.value = true;
-      console.log('on select branch', isVisible);
     } else {
-      console.log('not need select branch');
       isVisible.value = false;
     }
   };

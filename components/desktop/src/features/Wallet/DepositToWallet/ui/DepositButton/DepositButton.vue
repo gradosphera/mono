@@ -27,11 +27,13 @@ import { ModalBase } from 'src/shared/ui/ModalBase'
 import { useWalletStore } from 'src/entities/Wallet'
 import type { ILoadUserWallet } from 'src/entities/Wallet/model'
 import { PayWithProvider } from 'src/shared/ui/PayWithProvider'
-import { COOPNAME, CURRENCY } from 'src/shared/config'
+import { CURRENCY } from 'src/shared/config'
 import { SuccessAlert, FailAlert } from 'src/shared/api'
 import { useSessionStore } from 'src/entities/Session'
 import type { IPaymentOrder } from 'src/shared/lib/types/payments'
 import { formatAssetToReadable } from 'src/shared/lib/utils/formatAssetToReadable'
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
 
 const { createDeposit, loadUserWalet } = useWalletStore()
 
@@ -69,7 +71,7 @@ const paymentFail = (): void => {
 }
 
 const paymentSuccess = (): void => {
-  loadUserWalet({ coopname: COOPNAME, username: session.username as string } as ILoadUserWallet)
+  loadUserWalet({ coopname: info.coopname, username: session.username as string } as ILoadUserWallet)
   clear()
   SuccessAlert('Платеж успешно принят')
 }

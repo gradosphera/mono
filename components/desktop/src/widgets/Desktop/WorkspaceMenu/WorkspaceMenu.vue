@@ -20,7 +20,9 @@ div
   import { computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import { useQuasar } from 'quasar'
-  import { COOPNAME } from 'src/shared/config'
+  import { useSystemStore } from 'src/entities/System/model';
+  const { info } = useSystemStore()
+
   import { useCurrentUserStore } from 'src/entities/User'
   import { type IRoute } from 'src/entities/Desktop/model/types'
   import { useDesktopStore } from 'src/entities/Desktop/model'
@@ -46,8 +48,8 @@ div
 
   const open = (route: IRoute) => {
     if (route.children)
-      router.push({ name: route.children[0].name, params: { coopname: COOPNAME } })
-    else router.push({ name: route.name, params: { coopname: COOPNAME } })
+      router.push({ name: route.children[0].name, params: { coopname: info.coopname } })
+    else router.push({ name: route.name, params: { coopname: info.coopname } })
 
   }
 

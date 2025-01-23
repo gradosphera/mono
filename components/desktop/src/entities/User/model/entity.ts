@@ -32,6 +32,7 @@ export class UserEntity {
       username,
       coopname
     );
+
   }
 
   async loadPrivateProfile(username: string): Promise<void> {

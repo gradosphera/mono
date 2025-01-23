@@ -26,7 +26,9 @@ form(@submit.prevent="submit").full-width
   import { useInstallCooperativeStore } from 'src/entities/Installer/model';
   import { FailAlert, isValidWif } from 'src/shared/api';
   import { ref } from 'vue';
-  import { COOPNAME } from 'src/shared/config';
+  import { useSystemStore } from 'src/entities/System/model';
+  const { info } = useSystemStore()
+
 
   const privateKey = ref('')
   const loading = ref(false)
@@ -36,7 +38,7 @@ form(@submit.prevent="submit").full-width
   const submit = async () => {
     loading.value = true
     try {
-      const isValid = await isValidWif(COOPNAME, privateKey.value, 'active')
+      const isValid = await isValidWif(info.coopname, privateKey.value, 'active')
 
       if (!isValid) {
         loading.value = false

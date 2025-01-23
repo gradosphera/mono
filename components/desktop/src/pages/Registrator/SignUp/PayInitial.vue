@@ -14,7 +14,9 @@ div(v-if="store?.state?.payment?.details?.amount_without_fee")
 import { computed, watch, onMounted } from 'vue'
 import { useCreateUser } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { PayWithProvider } from 'src/shared/ui/PayWithProvider';
@@ -29,7 +31,7 @@ const coop = useCooperativeStore()
 const currentStep = store.steps.PayInitial
 
 onMounted(async () => {
-  await coop.loadPublicCooperativeData(COOPNAME)
+  await coop.loadPublicCooperativeData(info.coopname)
 
   if (step.value === currentStep)
     createInitialPayment()

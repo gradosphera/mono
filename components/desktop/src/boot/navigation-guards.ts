@@ -1,9 +1,9 @@
 // src/boot/navigation-guards.js
 import { boot } from 'quasar/wrappers';
-import { COOPNAME } from 'src/shared/config';
 import { useSessionStore } from 'src/entities/Session';
 import { useCurrentUserStore } from 'src/entities/User';
 import { useDesktopStore } from 'src/entities/Desktop/model';
+import { useSystemStore } from 'src/entities/System/model';
 
 // Function to handle access logic
 function hasAccess(to, userAccount) {
@@ -17,13 +17,13 @@ export default boot(async ({ router }) => {
   const desktops = useDesktopStore();
   const session = useSessionStore();
   const currentUser = useCurrentUserStore();
+  const { info } = useSystemStore()
 
   router.beforeEach(async (to, from, next) => {
     await desktops.healthCheck();
-    console.log('to', to)
+
     if (desktops.health?.status === 'install' && to.name !== 'install') {
-      console.log(1)
-      next({ name: 'install', params: { coopname: COOPNAME } });
+      next({ name: 'install', params: { coopname: info.coopname } });
       return;
     }
 
@@ -33,9 +33,7 @@ export default boot(async ({ router }) => {
           ? desktops.currentDesktop?.authorizedHome
           : desktops.currentDesktop?.nonAuthorizedHome;
 
-      console.log('homePage: ', homePage)
-      // next();
-      next({ name: homePage, params: { coopname: COOPNAME } });
+      next({ name: homePage, params: { coopname: info.coopname } });
       return;
     }
 

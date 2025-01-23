@@ -4,7 +4,9 @@ div(v-if="agreement")
 </template>
 
 <script setup lang="ts">
-  import { COOPNAME } from 'src/shared/config';
+  import { useSystemStore } from 'src/entities/System/model';
+  const { info } = useSystemStore()
+
   import { useGenerateAgreement } from '../model';
   import { useSessionStore } from 'src/entities/Session';
   import { computed, onMounted } from 'vue';
@@ -28,7 +30,7 @@ div(v-if="agreement")
 
   onMounted(async () => {
     try {
-      await generateAgreement(COOPNAME, session.username, Number(props.agreement.draft_id));
+      await generateAgreement(info.coopname, session.username, Number(props.agreement.draft_id));
     } catch(e: any){
       FailAlert(`Возникла ошибка при генерации соглашения, пожалуйста, обратитесь в поддержку с сообщением: ${e.message}`);
     }

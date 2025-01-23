@@ -1,7 +1,7 @@
 import { useSessionStore } from 'src/entities/Session'
 import { useWalletStore } from 'src/entities/Wallet'
 import { sendPOST } from 'src/shared/api';
-import { COOPNAME } from 'src/shared/config'
+import { useSystemStore } from 'src/entities/System/model';
 
 export interface ISBPData {
   phone: string;
@@ -30,11 +30,12 @@ export interface IAddPaymentMethod {
 export function useAddPaymentMethod() {
   const store = useWalletStore()
   const session = useSessionStore()
+  const { info } = useSystemStore()
 
   async function addPaymentMethod(params: IAddPaymentMethod) {
 
     await store.loadUserWalet({
-      coopname: COOPNAME,
+      coopname: info.coopname,
       username: params.username,
     })
 
@@ -42,10 +43,7 @@ export function useAddPaymentMethod() {
     await sendPOST(`/v1/methods/${params.username}/add`, params)
 
     await store.loadUserWalet({
-      coopname: COOPNAME,
-
-
-
+      coopname: info.coopname,
       username: session.username
     })
   }

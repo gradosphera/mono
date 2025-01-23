@@ -4,12 +4,14 @@ import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useSessionStore } from 'src/entities/Session';
 import { useUpdateCoop } from 'src/features/Cooperative/UpdateCoop';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { COOPNAME, CURRENCY } from 'src/shared/config';
+import { CURRENCY } from 'src/shared/config';
 import { formatToAsset } from 'src/shared/lib/utils/formatToAsset';
 import { ref, watch } from 'vue';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
 
 const coop = useCooperativeStore()
-coop.loadPublicCooperativeData(COOPNAME)
+coop.loadPublicCooperativeData(info.coopname)
 coop.loadPrivateCooperativeData()
 
 const localCoop = ref({
@@ -25,7 +27,7 @@ const save = async () => {
   if (coop.publicCooperativeData)
     try {
       await updateCoop({
-        coopname: COOPNAME,
+        coopname: info.coopname,
         username: session.username,
         initial: formatToAsset(localCoop.value.initial, CURRENCY),
         minimum: formatToAsset(localCoop.value.minimum, CURRENCY),
@@ -34,7 +36,7 @@ const save = async () => {
         announce: coop.publicCooperativeData?.announce,
         description: coop.publicCooperativeData?.description
       })
-      await coop.loadPublicCooperativeData(COOPNAME)
+      await coop.loadPublicCooperativeData(info.coopname)
 
       SuccessAlert('Размеры взносов успешно обновлены')
     } catch (e: any) {

@@ -17,7 +17,9 @@ import { SovietContract } from 'cooptypes';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSignAgreement } from '../model';
 import { useWalletStore } from 'src/entities/Wallet';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { useSessionStore } from 'src/entities/Session';
 import { Loader } from 'src/shared/ui/Loader';
 
@@ -54,7 +56,7 @@ const sign = async () => {
   try {
     isSubmitting.value = true
     await signAgreement(session.username, props.agreement.type, agreementOnSign.value)
-    await useWalletStore().loadUserWalet({coopname: COOPNAME, username: session.username})
+    await useWalletStore().loadUserWalet({coopname: info.coopname, username: session.username})
     isSubmitting.value = false
     show.value = false
     SuccessAlert('Документ принят')

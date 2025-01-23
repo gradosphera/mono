@@ -70,7 +70,9 @@ import { UnpublishRequestButton } from 'src/features/Request/UnpublishRequest'
 import { UpdateRequestButton } from 'src/features/Request/UpdateRequest'
 import { useRequestStore } from 'src/entities/Request/model/stores'
 import { useSessionStore } from 'src/entities/Session'
-import { COOPNAME } from 'src/shared/config'
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import type { IRequestData } from 'src/entities/Request'
 const session = useSessionStore()
 const username = computed(() => session.username)
@@ -95,7 +97,7 @@ watch(
   { deep: true }
 )
 const iAmOwner = computed(() => localRequest.value.username == username.value)
-const coopname = computed(() => COOPNAME)
+const coopname = computed(() => info.coopname)
 
 let [temp_price, temp_symbol] = localRequest.value.unit_cost.split(' ')
 temp_price = parseFloat(temp_price).toFixed(0)

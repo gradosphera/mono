@@ -28,7 +28,9 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useMenuStore } from 'src/entities/Menu'
 import type { IMenu } from 'src/entities/Menu'
-import { COOPNAME } from 'src/shared/config'
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { useCurrentUserStore } from 'src/entities/User'
 const emit = defineEmits(['toogleMore'])
 const $q = useQuasar()
@@ -47,7 +49,7 @@ const headerClass = (route: IMenu) => {
 }
 
 const open = (route: IMenu) => {
-  router.push({ name: route.name, params: { coopname: COOPNAME } })
+  router.push({ name: route.name, params: { coopname: info.coopname } })
 }
 </script>
 

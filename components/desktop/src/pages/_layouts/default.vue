@@ -25,13 +25,14 @@
   import { LeftDrawerMenu } from 'src/widgets/Desktop/LeftDrawerMenu'
   import { ContactsFooter } from 'src/shared/ui/Footer'
   import { useRoute } from 'vue-router'
-  import { COOPNAME } from 'src/shared/config'
+  import { useSystemStore } from 'src/entities/System/model';
+  const { info } = useSystemStore()
 
   const session = useSessionStore()
   const cooperativeStore = useCooperativeStore()
   cooperativeStore.loadContacts()
   const route = useRoute()
-  const showDrawer = computed(() => route.params.coopname === COOPNAME)
+  const showDrawer = computed(() => route.params.coopname === info.coopname)
 
   const $q = useQuasar()
   const { width } = useWindowSize()

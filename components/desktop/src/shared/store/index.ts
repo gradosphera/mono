@@ -3,7 +3,6 @@ import { Action, PrivateKey } from '@wharfkit/antelope';
 import { defineStore } from 'pinia';
 import { ref, Ref } from 'vue';
 import { decrypt, encrypt, hashSHA256 } from '../api/crypto';
-import { COOPNAME } from '../config';
 import { IMessageSignature } from '../lib/types/crypto';
 import { useSessionStore } from 'src/entities/Session';
 import { TransactResult } from '@wharfkit/session';
@@ -11,6 +10,7 @@ import { readBlockchain } from '../api';
 import { ITokens } from '../lib/types/user';
 import { getFromIndexedDB, setToIndexedDB } from '../api/indexDB';
 import { client } from '../api/client';
+import { useSystemStore } from 'src/entities/System/model';
 
 interface IGlobalStore {
   hasCreditials: Ref<boolean>;
@@ -37,23 +37,25 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
 
   const password = ''; // это временное намеренное решение. Позже заменим на пользовательский пин-код.
 
+  const { info } = useSystemStore()
+
   // Инициализация
   const init = async () => {
 
     try {
       // Получите зашифрованный ключ и токены из хранилища
       const encryptedKey = await getFromIndexedDB(
-        COOPNAME,
+        info.coopname,
         'store',
         'encryptedKey'
       );
       const encryptedTokens = await getFromIndexedDB(
-        COOPNAME,
+        info.coopname,
         'store',
         'encryptedTokens'
       );
       const encryptedUsername = await getFromIndexedDB(
-        COOPNAME,
+        info.coopname,
         'store',
         'encryptedUsername'
       );
@@ -73,22 +75,18 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
       tokens.value = JSON.parse(decryptedTokens);
       username.value = decryptedUsername;
 
-      // if (NODE_ENV === 'development')
-      //   console.log('tokens: ', tokens)
-
       // Установите hasCreditials в true
       hasCreditials.value = true;
-      console.log('on init', tokens.value?.access.token)
+
       if (tokens.value?.access.token){
-        console.log('on set tokens')
         client.setToken(tokens.value.access.token)
       }
 
 
     } catch (error: any) {
-      await setToIndexedDB(COOPNAME, 'store', 'encryptedKey', '');
-      await setToIndexedDB(COOPNAME, 'store', 'encryptedUsername', '');
-      await setToIndexedDB(COOPNAME, 'store', 'encryptedTokens', '');
+      await setToIndexedDB(info.coopname, 'store', 'encryptedKey', '');
+      await setToIndexedDB(info.coopname, 'store', 'encryptedUsername', '');
+      await setToIndexedDB(info.coopname, 'store', 'encryptedTokens', '');
       throw new Error('Ошибка авторизации. Войдите повторно.');
     }
   };
@@ -97,9 +95,9 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
     const encryptedKey = await encrypt(key, password);
     const encryptedUsername = await encrypt(newUsername, password);
 
-    await setToIndexedDB(COOPNAME, 'store', 'encryptedKey', encryptedKey);
+    await setToIndexedDB(info.coopname, 'store', 'encryptedKey', encryptedKey);
     await setToIndexedDB(
-      COOPNAME,
+      info.coopname,
       'store',
       'encryptedUsername',
       encryptedUsername
@@ -111,7 +109,7 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
 
   const setTokens = async (newTokens: ITokens) => {
     const encryptedTokens = await encrypt(JSON.stringify(newTokens), password);
-    await setToIndexedDB(COOPNAME, 'store', 'encryptedTokens', encryptedTokens);
+    await setToIndexedDB(info.coopname, 'store', 'encryptedTokens', encryptedTokens);
     tokens.value = newTokens;
   };
 
@@ -120,9 +118,9 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
     wif.value = undefined;
     hasCreditials.value = false;
     tokens.value = undefined;
-    await setToIndexedDB(COOPNAME, 'store', 'encryptedKey', '');
-    await setToIndexedDB(COOPNAME, 'store', 'encryptedUsername', '');
-    await setToIndexedDB(COOPNAME, 'store', 'encryptedTokens', '');
+    await setToIndexedDB(info.coopname, 'store', 'encryptedKey', '');
+    await setToIndexedDB(info.coopname, 'store', 'encryptedUsername', '');
+    await setToIndexedDB(info.coopname, 'store', 'encryptedTokens', '');
   };
 
   const signDigest = (digest: string): IMessageSignature => {

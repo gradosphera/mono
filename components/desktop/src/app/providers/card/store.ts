@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 import { useSessionStore } from 'src/entities/Session';
 import { useCurrentUserStore } from 'src/entities/User';
 import { useWalletStore } from 'src/entities/Wallet';
-import { COOPNAME } from 'src/shared/config';
+
+import { useSystemStore } from 'src/entities/System/model';
 
 const namespace = 'cardstore'
 
@@ -18,12 +19,14 @@ export const useCardStore = defineStore(namespace, (): ICardStore => {
   const session = useSessionStore();
 
   async function initWallet(): Promise<void> {
+      const { info } = useSystemStore()
+
     // if (!session.isAuth && !currentUser.userAccount){
       await session.init()
       if (session.isAuth)
         try{
-          await currentUser.loadProfile(session.username, COOPNAME)
-          await userWallet.loadUserWalet({coopname: COOPNAME, username: session.username})
+          await currentUser.loadProfile(session.username, info.coopname)
+          await userWallet.loadUserWalet({coopname: info.coopname, username: session.username})
           session.loadComplete = true
 
         } catch(e: any){

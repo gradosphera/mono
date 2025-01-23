@@ -7,7 +7,9 @@ div
 <script lang="ts" setup>
 import { SignAgreementDialog } from 'src/features/Agreementer/SignAgreementDialog';
 import { useAgreementStore } from 'src/entities/Agreement';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { AgreementReader } from 'src/features/Agreementer/GenerateAgreement';
@@ -56,8 +58,8 @@ const required_agreements = computed(() => {
 });
 
 const init = async () => {
-  agreementer.loadCooperativeAgreements(COOPNAME)
-  agreementer.loadAgreementTemplates(COOPNAME)
+  agreementer.loadCooperativeAgreements(info.coopname)
+  agreementer.loadAgreementTemplates(info.coopname)
 }
 const session = useSessionStore()
 

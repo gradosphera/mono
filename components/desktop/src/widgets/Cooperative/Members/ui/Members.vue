@@ -76,7 +76,9 @@ import { Notify } from 'quasar';
 import { readBlockchain } from 'src/shared/api'
 import { useSessionStore } from 'src/entities/Session';
 import { useUpdateBoard } from 'src/features/Cooperative/UpdateBoard';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import { sleep } from 'src/shared/api/sleep';
 
@@ -173,7 +175,7 @@ const updateBoard = async (new_members: any) => {
     const coop = useUpdateBoard()
 
     await coop.updateBoard({
-      coopname: COOPNAME,
+      coopname: info.coopname,
       username: useSessionStore().username,
       board_id: 0,
       members: new_members,

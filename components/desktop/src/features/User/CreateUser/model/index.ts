@@ -6,7 +6,8 @@ import { IGeneratedAccount, ISendStatement } from 'src/shared/lib/types/user';
 
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+
 import { IObjectedDocument } from 'src/shared/lib/types/document';
 import {
   ICreatedPayment,
@@ -33,6 +34,7 @@ export interface ICreateUser {
 
 export function useCreateUser() {
   const store = useRegistratorStore().state
+  const { info } = useSystemStore()
 
   async function createInitialPayment(): Promise<ICreatedPayment> {
     const result = await api.createInitialPaymentOrder();
@@ -60,7 +62,7 @@ export function useCreateUser() {
       data: {
         signature: store.signature,
         skip_save: false,
-        coopname: COOPNAME,
+        coopname: info.coopname,
         username: store.account.username,
         braname: store.selectedBranch,
         links: [store.walletAgreement.hash, store.privacyAgreement.hash, store.signatureAgreement.hash, store.userAgreement.hash]
@@ -80,7 +82,7 @@ export function useCreateUser() {
   async function signPrivacyAgreement(): Promise<IObjectedDocument> {
     const variables: Mutations.Agreements.GeneratePrivacyAgreement.IInput = {
       data: {
-        coopname: COOPNAME,
+        coopname: info.coopname,
         username: store.account.username,
       }
     }
@@ -98,7 +100,7 @@ export function useCreateUser() {
   async function signSignatureAgreement(): Promise<IObjectedDocument> {
     const variables: Mutations.Agreements.GenerateSignatureAgreement.IInput = {
       data: {
-        coopname: COOPNAME,
+        coopname: info.coopname,
         username: store.account.username,
       }
     }
@@ -118,7 +120,7 @@ export function useCreateUser() {
   async function signUserAgreement(): Promise<IObjectedDocument> {
     const variables: Mutations.Agreements.GenerateUserAgreement.IInput = {
       data: {
-        coopname: COOPNAME,
+        coopname: info.coopname,
         username: store.account.username,
       }
     }
@@ -140,7 +142,7 @@ export function useCreateUser() {
   async function signWalletAgreement(): Promise<IObjectedDocument> {
     const variables: Mutations.Agreements.GenerateWalletAgreement.IInput = {
       data: {
-        coopname: COOPNAME,
+        coopname: info.coopname,
         username: store.account.username,
       }
     }
@@ -161,7 +163,7 @@ export function useCreateUser() {
       data: {
         signature: '',
         skip_save: true,
-        coopname: COOPNAME,
+        coopname: info.coopname,
         username: store.account.username,
         braname: store.selectedBranch,
       }
@@ -210,7 +212,7 @@ export function useCreateUser() {
     await sessionStore.init();
 
     const currentUser = useCurrentUserStore();
-    await currentUser.loadProfile(user.username, COOPNAME);
+    await currentUser.loadProfile(user.username, info.coopname);
   }
 
   function emailIsValid(email: string): boolean {

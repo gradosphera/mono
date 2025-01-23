@@ -3,7 +3,9 @@ import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useSessionStore } from 'src/entities/Session';
 import { useCreateFund } from 'src/features/Fund/CreateFund';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { ref, watch } from 'vue';
 
 const props = defineProps({
@@ -26,7 +28,7 @@ const description = ref('')
 const addFund = async() => {
   try{
     await createFund({
-      coopname: COOPNAME,
+      coopname: info.coopname,
       username: session.username,
       type: 'expend',
       contract: '',
@@ -35,7 +37,7 @@ const addFund = async() => {
       percent: 0
     })
 
-    await coop.loadFunds(COOPNAME)
+    await coop.loadFunds(info.coopname)
     localShowAdd.value = false
     name.value = ''
     description.value = ''

@@ -2,18 +2,19 @@
 import { computed, ref } from 'vue';
 import { FundContract } from 'cooptypes';
 import { useEditFund } from 'src/features/Fund/EditFund';
-import { COOPNAME } from 'src/shared/config';
 import { useSessionStore } from 'src/entities/Session';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import AddExpenseFund from './AddExpenseFund.vue'
 import { useDeleteFund } from 'src/features/Fund/DeleteFund';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
 
 const coop = useCooperativeStore()
 
 const loadFunds = async () => {
   try {
-    await coop.loadFunds(COOPNAME)
+    await coop.loadFunds(info.coopname)
   } catch(e: any){
     FailAlert(e.message)
   }
@@ -31,13 +32,13 @@ const delFund = async(fund: FundContract.Tables.AccumulatedFunds.IAccumulatedFun
   const { deleteFund } = useDeleteFund()
   try {
     await deleteFund({
-      coopname: COOPNAME,
+      coopname: info.coopname,
       username: session.username,
       type: 'expend',
       fund_id: fund.id
     })
 
-    await coop.loadFunds(COOPNAME)
+    await coop.loadFunds(info.coopname)
     SuccessAlert('Фонд успешно удалён')
 
   } catch (e: any){
@@ -52,7 +53,7 @@ const saveFund = async (fund: FundContract.Tables.AccumulatedFunds.IAccumulatedF
     try {
 
       await editFund({
-        coopname: COOPNAME,
+        coopname: info.coopname,
         username: session.username,
         type: 'expend',
         fund_id: fund.id,
@@ -62,12 +63,12 @@ const saveFund = async (fund: FundContract.Tables.AccumulatedFunds.IAccumulatedF
         percent: 0
       })
 
-      await coop.loadFunds(COOPNAME)
+      await coop.loadFunds(info.coopname)
 
       SuccessAlert('Фонд успешно обновлён')
     } catch(e: any){
       FailAlert(e.message)
-      await coop.loadFunds(COOPNAME)
+      await coop.loadFunds(info.coopname)
     }
 
 };

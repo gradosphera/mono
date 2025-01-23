@@ -1,12 +1,13 @@
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
 import { useBranchStore, type IBranch } from 'src/entities/Branch/model';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
 
 export type IEditBranchInput = Mutations.Branches.EditBranch.IInput['data']
 
 export function useEditBranch() {
   const store = useBranchStore()
+  const { info } = useSystemStore()
 
   async function editBranch(
     branch: IBranch
@@ -26,7 +27,7 @@ export function useEditBranch() {
 
     const result = await api.editBranch(data)
 
-    await store.loadBranches({ coopname: COOPNAME })
+    await store.loadBranches({ coopname: info.coopname })
 
     return result
   }

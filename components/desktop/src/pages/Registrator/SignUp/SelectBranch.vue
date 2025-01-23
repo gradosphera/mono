@@ -22,7 +22,9 @@ div(v-if="store")
 import { useBranchStore } from 'src/entities/Branch/model'
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { failAlert } from 'src/shared/api';
-import { COOPNAME } from 'src/shared/config'
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { computed, onMounted, watch } from 'vue'
 import { BranchSelector } from 'src/shared/ui/BranchSelector';
 
@@ -32,7 +34,7 @@ const branchStore = useBranchStore()
 const load = async () => {
   if (store.isStep('SelectBranch'))
     try{
-      await branchStore.loadPublicBranches({ coopname: COOPNAME })
+      await branchStore.loadPublicBranches({ coopname: info.coopname })
     } catch(e: any){
       failAlert(e)
     }

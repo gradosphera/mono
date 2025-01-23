@@ -106,7 +106,9 @@ const username = computed(() => session.username)
 const showAdd = ref(false);
 import moment from 'moment-with-locales-es6'
 import { useAddAdmin } from 'src/features/Cooperative/AddAdmin';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useSetRights } from 'src/features/Cooperative/SetRights';
 const cooperativeStore = useCooperativeStore()
@@ -115,7 +117,7 @@ const staff = computed(() => cooperativeStore.admins)
 const loadStaff = async () => {
 
   try {
-    await cooperativeStore.loadAdmins(COOPNAME)
+    await cooperativeStore.loadAdmins(info.coopname)
   } catch (e: any) {
 
     Notify.create({
@@ -157,14 +159,14 @@ const rmRight = (rightIndex: number, username: string) => {
 const addStaff = async () => {
   try {
     useAddAdmin().addAdmin({
-      coopname: COOPNAME,
+      coopname: info.coopname,
       chairman: username.value,
       username: newPersona.value.username,
       rights: [],
       position_title: newPersona.value.position_title,
     })
 
-    cooperativeStore.loadAdmins(COOPNAME)
+    cooperativeStore.loadAdmins(info.coopname)
 
     newPersona.value = {
       username: '',
@@ -193,12 +195,12 @@ const addStaff = async () => {
 // const rmStaff = async (username) => {
 //   try {
       // await useDeleteAdmin().deleteAdmin({
-      //   coopname: COOPNAME,
+      //   coopname: info.coopname,
       //   chairman: session.username,
       //   username
       // })
 
-    // cooperativeStore.loadAdmins(COOPNAME)
+    // cooperativeStore.loadAdmins(info.coopname)
 
 //     Notify.create({
 //       message: 'Администратор уволен',
@@ -227,7 +229,7 @@ const setRights = async (newUsername: string) => {
     const user = staff.value.find(u => u.username === newUsername);
 
     await useSetRights().setRights({
-      coopname: COOPNAME,
+      coopname: info.coopname,
       chairman: username.value,
       username: newUsername,
       rights: user?.rights as { contract: string; action_name: string; }[]

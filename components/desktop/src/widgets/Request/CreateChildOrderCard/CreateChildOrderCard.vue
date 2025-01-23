@@ -4,11 +4,13 @@ import { Map } from 'src/shared/ui/Map'
 import { CreateChildOrderButton } from 'src/features/Request/CreateChildOrder'
 import type { IRequestData } from 'src/entities/Request'
 import { useCooperativeStore, type IAddressesData } from 'src/entities/Cooperative'
-import { COOPNAME } from 'src/shared/config'
+
 import { useSessionStore } from 'src/entities/Session'
 const session = useSessionStore()
 const username = computed(() => session.username)
 const cooperativeStore = useCooperativeStore()
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
 
 let units = ref(1)
 const selectedAddress = ref<IAddressesData>()
@@ -27,7 +29,7 @@ cooperativeStore.addresses.map((el: any) => {
 )
 
 onMounted(async () => {
-  await cooperativeStore.loadAddresses({ coopname: COOPNAME })
+  await cooperativeStore.loadAddresses({ coopname: info.coopname })
   selectedAddress.value = addresses.value[0]
 })
 
@@ -53,5 +55,5 @@ div.q-pl-md.q-pr-md
 
   q-input(v-model="units" label="Введите количество единиц")
 
-  CreateChildOrderButton(:coopname="COOPNAME" :username="username" :offer="offer" :units="units")
+  CreateChildOrderButton(:coopname="info.coopname" :username="username" :offer="offer" :units="units")
 </template>

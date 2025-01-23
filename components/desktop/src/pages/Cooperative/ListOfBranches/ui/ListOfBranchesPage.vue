@@ -69,12 +69,14 @@ import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
 import { BranchCard } from 'src/widgets/BranchCard';
 import { IndividualCard } from 'src/widgets/IndividualCard';
 import { BankDetailsCard } from 'src/widgets/BankDetailsCard';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 
 const branchStore = useBranchStore();
 
 branchStore.loadBranches({
-  coopname: COOPNAME
+  coopname: info.coopname
 })
 
 const onLoading = ref(false);

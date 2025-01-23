@@ -85,7 +85,9 @@ import { Cooperative, SovietContract } from 'cooptypes'
 import { useVoteForDecision } from 'src/features/Decision/VoteForDecision';
 import { useAuthorizeAndExecDecision } from 'src/features/Decision/AuthorizeAndExecDecision';
 import { useVoteAgainstDecision } from 'src/features/Decision/VoteAgainstDecision';
-import { COOPNAME } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
+const { info } = useSystemStore()
+
 import { useCooperativeStore } from 'src/entities/Cooperative/model/stores';
 import { useCurrentUserStore } from 'src/entities/User';
 import { CreateProjectFreeDecisionButton } from 'src/features/Decision/CreateProject';
@@ -247,7 +249,7 @@ const voteFor = async (decision_id: number) => {
 const voteAgainst = async (decision_id: number) => {
   try {
     await useVoteAgainstDecision().voteAgainstDecision({
-      coopname: COOPNAME,
+      coopname: info.coopname,
       member: session.username,
       decision_id,
     })
