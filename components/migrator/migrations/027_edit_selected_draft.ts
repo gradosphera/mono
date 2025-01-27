@@ -7,7 +7,7 @@ import { editTranslation } from '../src/utils/editTranslation';
 
 export class InitialMigration implements Migration {
   async run(): Promise<void> {
-    const ids = [1, 2, 3, 4, 50, 100, 101]; 
+    const ids = [1, 2, 3, 4, 50, 100, 101, 501]; 
 
     for (const id of ids) {
       try {

@@ -145,7 +145,7 @@ div
   div.full-width.text-center
     canvas#qr
   div.full-width.text-center
-    q-btn(@click="copyAll" flat icon="fas fa-copy" size="sm") скопировать
+    q-btn(@click="copyAll" flat icon="fas fa-copy" size="sm") скопировать реквизиты
     q-btn(@click="downloadQR" flat icon="download" size="sm") скачать QR
 </template>
 
