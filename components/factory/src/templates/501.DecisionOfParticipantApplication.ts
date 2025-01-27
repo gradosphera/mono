@@ -4,7 +4,7 @@ import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { individualSchema } from '../Schema/IndividualSchema'
-import { organizationSchema } from '../Schema'
+import { VarsSchema, organizationSchema } from '../Schema'
 import { CooperativeSchema } from '../Schema/CooperativeSchema'
 import { entrepreneurSchema } from '../Schema/EntrepreneurSchema'
 import { decisionSchema } from '../Schema/DecisionSchema'
@@ -77,8 +77,9 @@ export const Schema: JSONSchemaType<Model> = {
       required: [...IMetaJSONSchema.required],
       additionalProperties: true,
     },
+    vars: VarsSchema,
   },
-  required: ['meta', 'coop', 'type', 'decision'],
+  required: ['meta', 'coop', 'type', 'decision'], // vars не добавляем в обязательные параметры для обратной совместимости (начиная с 2.26)
   additionalProperties: true,
 }
 

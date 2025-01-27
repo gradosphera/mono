@@ -5,6 +5,7 @@ import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { CooperativeSchema } from '../Schema/CooperativeSchema'
 import { decisionSchema } from '../Schema/DecisionSchema'
+import { VarsSchema } from '../Schema'
 
 export const registry_id = Cooperative.Registry.FreeDecision.registry_id
 
@@ -53,8 +54,9 @@ export const Schema: JSONSchemaType<Model> = {
       required: ['id', 'question', 'decision'],
       additionalProperties: true,
     },
+    vars: VarsSchema,
   },
-  required: ['meta', 'coop', 'decision', 'project'],
+  required: ['meta', 'coop', 'decision', 'project'], // vars не вносим для обратной совместимости начиная с версии 2.25
   additionalProperties: true,
 }
 

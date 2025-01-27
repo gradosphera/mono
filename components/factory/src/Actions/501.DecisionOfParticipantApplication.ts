@@ -37,6 +37,7 @@ export class Factory extends DocFactory<DecisionOfParticipantApplication.Action>
     }
 
     const coop = await super.getCooperative(data.coopname, data.block_num)
+    const vars = await super.getVars(data.coopname, data.block_num)
 
     // TODO необходимо строго типизировать мета-данные документов друг под друга!
     const meta: IMetaDocument = await super.getMeta({
@@ -53,6 +54,7 @@ export class Factory extends DocFactory<DecisionOfParticipantApplication.Action>
 
     const combinedData: DecisionOfParticipantApplication.Model = {
       ...userData,
+      vars,
       meta,
       coop,
       type: user.type,

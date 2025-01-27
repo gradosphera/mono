@@ -3,6 +3,7 @@ import type { IPaymentOrder } from 'src/shared/lib/types/payments';
 import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
 import QRCode from 'qrcode';
 import { useCooperativeStore } from 'src/entities/Cooperative';
+import { copyToClipboard, Notify } from 'quasar';
 
 // Определяем интерфейс для orderData
 interface IOrderData {
@@ -14,6 +15,7 @@ interface IOrderData {
   correspacc?: string;
   personalacc?: string;
   purpose?: string;
+  payeeinn?: string;
 }
 
 const props = defineProps<{
@@ -68,6 +70,28 @@ const generateQRCode = () => {
   }
 };
 
+const copyAll = () => {
+  const data = `
+ИНН Получателя: ${orderData.value.payeeinn}
+Получатель: ${orderData.value.name}
+БИК: ${orderData.value.bic}
+Банк получателя: ${orderData.value.bankname}
+КПП: ${orderData.value.kpp}
+Корреспондентский счёт: ${orderData.value.correspacc}
+Номер счёта: ${orderData.value.personalacc}
+Сумма платежа: ${amount.value}
+Назначение платежа: ${orderData.value.purpose}
+  `.trim();
+
+  copy(data);
+};
+
+const copy = (data: any) => {
+  copyToClipboard(data)
+    .then(() => Notify.create({ message: 'Реквизиты скопированы в буфер обмена', type: 'positive' }))
+    .catch(console.log)
+}
+
 const downloadQR = () => {
   if (qrElement.value) {
     const link = document.createElement('a');
@@ -82,19 +106,47 @@ const downloadQR = () => {
 
 <template lang="pug">
 div
+  q-input(label="ИНН получателя" v-model="orderData.payeeinn" readonly)
+    template(v-slot:append)
+      q-btn(icon="fas fa-copy" @click="copy(orderData.payeeinn)" size="xs" flat)
+
   q-input(label="Получатель" v-model="orderData.name" readonly)
-  q-input(label="Банк получателя" v-model="orderData.bankname" readonly)
+    template(v-slot:append)
+      q-btn(icon="fas fa-copy" @click="copy(orderData.name)" size="xs" flat)
+
   q-input(label="БИК" v-model="orderData.bic" readonly)
+    template(v-slot:append)
+      q-btn(icon="fas fa-copy" @click="copy(orderData.bic)" size="xs" flat)
+
+  q-input(label="Банк получателя" v-model="orderData.bankname" readonly)
+    template(v-slot:append)
+      q-btn(icon="fas fa-copy" @click="copy(orderData.bankname)" size="xs" flat)
+
   q-input(label="КПП" v-model="orderData.kpp" readonly)
+    template(v-slot:append)
+      q-btn(icon="fas fa-copy" @click="copy(orderData.kpp)" size="xs" flat)
+
   q-input(label="Корреспондентский счёт" v-model="orderData.correspacc" readonly)
+    template(v-slot:append)
+      q-btn(icon="fas fa-copy" @click="copy(orderData.correspacc)" size="xs" flat)
+
   q-input(label="Номер счёта" v-model="orderData.personalacc" readonly)
+    template(v-slot:append)
+      q-btn(icon="fas fa-copy" @click="copy(orderData.personalacc)" size="xs" flat)
+
   q-input(label="Cумма платежа" v-model="amount" readonly)
+    template(v-slot:append)
+      q-btn(icon="fas fa-copy" @click="copy(amount)" size="xs" flat)
+
   q-input(label="Назначение платежа" v-model="orderData.purpose" readonly)
+    template(v-slot:append)
+      q-btn(icon="fas fa-copy" @click="copy(orderData.purpose)" size="xs" flat)
 
   div.full-width.text-center
     canvas#qr
   div.full-width.text-center
-    q-btn(@click="downloadQR" flat icon="download") скачать QR
+    q-btn(@click="copyAll" flat icon="fas fa-copy" size="sm") скопировать
+    q-btn(@click="downloadQR" flat icon="download" size="sm") скачать QR
 </template>
 
 <style>

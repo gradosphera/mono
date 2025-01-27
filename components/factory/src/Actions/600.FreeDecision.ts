@@ -54,7 +54,7 @@ export class Factory extends DocFactory<FreeDecision.Action> {
       throw new Error('Идентификатор проекта не установлен')
 
     const project: Cooperative.Document.IProjectData = await this.getProject(data.project_id, data.block_num)
-    console.log('project: ', project, data)
+    const vars = await super.getVars(data.coopname, data.block_num)
 
     const combinedData: FreeDecision.Model = {
       ...userData,
@@ -62,6 +62,7 @@ export class Factory extends DocFactory<FreeDecision.Action> {
       coop,
       decision,
       project,
+      vars,
     }
 
     // валидируем скомбинированные данные

@@ -23,8 +23,9 @@ export const Schema: JSONSchemaType<Model> = {
     vars: VarsSchema,
     request: MiddlewareRequestSchema,
     user: IMiddlewareUserSchema,
+    currency: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'request', 'user'],
+  required: ['meta', 'coop', 'vars', 'request', 'user', 'currency'],
   additionalProperties: true,
 }
 

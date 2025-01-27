@@ -88,3 +88,9 @@ export interface IMiddlewareRequest {
 export interface IMiddlewareUser {
   full_name: string
 }
+
+export interface IFirstLastMiddleName {
+  first_name: string
+  last_name: string
+  middle_name: string
+}

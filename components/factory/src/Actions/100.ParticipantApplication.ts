@@ -38,6 +38,10 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
     }
 
     const coop = await super.getCooperative(data.coopname, data.block_num)
+    const coop_bank_account = await super.getBankAccount(data.coopname, data.block_num)
+
+    // добавлено для обратной совместимости с осенними версия 2024
+    const extended_coop = { ...coop, bank_account: coop_bank_account }
 
     if (coop.is_branched && !data.braname)
       throw new Error('Кооперативный участок должен быть указан')
@@ -83,7 +87,7 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
 
     const vars = await super.getVars(data.coopname, data.block_num)
 
-    const combinedData: ParticipantApplication.Model = { ...userData, meta, coop, branch, type: user.type, vars, signature }
+    const combinedData: ParticipantApplication.Model = { ...userData, meta, coop: extended_coop, branch, type: user.type, vars, signature }
 
     // валидируем скомбинированные данные
     await super.validate(combinedData, template.model)

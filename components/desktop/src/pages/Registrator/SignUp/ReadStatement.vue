@@ -34,7 +34,7 @@ div
         a(@click.stop='(event) => event.stopPropagation()' href='/documents/ustav.pdf' target='_blank').q-ml-xs Устав кооператива
 
     div(v-if="!isLoading").q-mt-lg
-      q-btn.col-md-6.col-xs-12(flat, @click='store.prev()')
+      q-btn.col-md-6.col-xs-12(flat @click='back')
         i.fa.fa-arrow-left
         span.q-ml-md назад
 
@@ -73,7 +73,13 @@ const loadStatement = async (): Promise<void> => {
     failAlert(e.message)
   }
 }
+const back = () => {
+  if (store.isBranched)
+      store.goTo('SelectBranch')
+    else
+      store.goTo('GenerateAccount')
 
+}
 onMounted(() => {
   if (store.state.step === store.steps.ReadStatement) {
     loadStatement()
