@@ -160,9 +160,7 @@ async function download() {
 </script>
 <style>
 .description table {
-  width: 100%;
-  /* или другая фиксированная ширина */
-  table-layout: fixed;
+
 }
 
 .description td {
