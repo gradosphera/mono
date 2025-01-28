@@ -36,7 +36,7 @@ export interface IInit {
       position: string;
     };
     short_name: string;
-    type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+    type: string;
   };
   vars: {
     /**
@@ -78,7 +78,7 @@ export interface IInit {
 }
 
 export interface IInstall {
-  soviet: ({
+  soviet: {
     individual_data: {
       birthdate: string;
       email: string;
@@ -96,7 +96,7 @@ export interface IInstall {
       phone: string;
     };
     role: 'chairman' | 'member';
-  })[];
+  }[];
   wif: string;
 }
 
@@ -178,7 +178,7 @@ export interface RInit {
         position: string;
       };
       short_name: string;
-      type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+      type: string;
     };
     vars: {
       /**
@@ -222,7 +222,7 @@ export interface RInit {
 
 export interface RInstall {
   body: {
-    soviet: ({
+    soviet: {
       individual_data: {
         birthdate: string;
         email: string;
@@ -240,7 +240,7 @@ export interface RInstall {
         phone: string;
       };
       role: 'chairman' | 'member';
-    })[];
+    }[];
     wif: string;
   };
 }

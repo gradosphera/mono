@@ -33,7 +33,7 @@ export class BranchDTO implements BranchDomainInterface {
 
   @Field(() => String, { description: 'Тип организации' })
   @IsString()
-  public readonly type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+  public readonly type: string;
 
   @Field(() => String, { description: 'Краткое название организации' })
   @IsString()

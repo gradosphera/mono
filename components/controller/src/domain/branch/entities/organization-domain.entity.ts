@@ -2,7 +2,7 @@ import type { OrganizationDomainInterface } from '~/domain/common/interfaces/org
 
 export class OrganizationDomainEntity implements OrganizationDomainInterface {
   public readonly username: string;
-  public readonly type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+  public readonly type: string;
   public readonly short_name: string;
   public readonly full_name: string;
   public readonly represented_by: {

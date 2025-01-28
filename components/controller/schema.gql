@@ -1581,6 +1581,7 @@ enum OrganizationType {
   OAO
   OOO
   PAO
+  PRODCOOP
   ZAO
 }
 

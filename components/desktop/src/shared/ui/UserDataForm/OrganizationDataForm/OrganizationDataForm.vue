@@ -4,7 +4,7 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
     v-model="userData.organization_data.type"
     label="Выберите тип организации"
     standout="bg-teal text-white"
-    :options="[{ label: 'Потребительский Кооператив', value: 'coop' }, { label: 'ООО', value: 'ooo' }]"
+    :options="[{ label: 'Потребительский Кооператив', value: 'coop' }, { label: 'Производственный Кооператив', value: 'prodcoop' }, { label: 'ООО', value: 'ooo' }]"
     emit-value
     map-options).q-mb-md
   q-input(v-model="userData.organization_data.short_name" standout="bg-teal text-white" hint="ПК Ромашка" label="Краткое наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")

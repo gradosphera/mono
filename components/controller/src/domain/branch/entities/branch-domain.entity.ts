@@ -10,7 +10,7 @@ export class BranchDomainEntity implements BranchDomainInterface {
   public readonly trustee: IndividualDomainInterface;
   public readonly trusted: IndividualDomainInterface[];
 
-  public readonly type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+  public readonly type: string;
   public readonly short_name: string;
   public readonly full_name: string;
   public readonly represented_by: {

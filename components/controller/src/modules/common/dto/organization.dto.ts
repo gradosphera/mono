@@ -9,7 +9,7 @@ export class OrganizationDTO implements OrganizationDomainInterface {
   username: string;
 
   @Field(() => String, { description: 'Тип организации' })
-  type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+  type: string;
 
   @Field(() => String, { description: 'Краткое название' })
   short_name: string;

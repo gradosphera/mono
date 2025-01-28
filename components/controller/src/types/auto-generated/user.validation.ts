@@ -82,7 +82,7 @@ export interface IAddUser {
       position: string;
     };
     short_name: string;
-    type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+    type: string;
   };
   referer?: string;
   spread_initial: boolean;
@@ -165,7 +165,7 @@ export interface ICreateUser {
       position: string;
     };
     short_name: string;
-    type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+    type: string;
   };
   public_key?: string;
   referer?: string;
@@ -250,7 +250,7 @@ export interface IOrganizationData {
     position: string;
   };
   short_name: string;
-  type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+  type: string;
 }
 
 export interface RAddUser {
@@ -333,7 +333,7 @@ export interface RAddUser {
         position: string;
       };
       short_name: string;
-      type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+      type: string;
     };
     referer?: string;
     spread_initial: boolean;
@@ -418,7 +418,7 @@ export interface RCreateUser {
         position: string;
       };
       short_name: string;
-      type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+      type: string;
     };
     public_key?: string;
     referer?: string;

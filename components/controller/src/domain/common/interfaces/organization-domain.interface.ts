@@ -3,7 +3,7 @@ import type { RepresentedByDomainInterface } from './represented-by.interface';
 
 export type OrganizationDomainInterface = {
   username: string;
-  type: 'coop' | 'ooo' | 'oao' | 'zao' | 'pao' | 'ao';
+  type: string;
   short_name: string;
   full_name: string;
   represented_by: RepresentedByDomainInterface;

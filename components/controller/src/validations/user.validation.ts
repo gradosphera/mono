@@ -33,7 +33,7 @@ const RussiaDetailsSchema = Joi.object({
 });
 
 export const IOrganizationData = Joi.object({
-  type: Joi.string().valid('coop', 'ooo', 'oao', 'zao', 'pao', 'ao').required(),
+  type: Joi.string().valid('coop', 'ooo', 'oao', 'zao', 'pao', 'ao', 'prodcoop').required(),
   short_name: Joi.string().required(),
   full_name: Joi.string().required(),
   represented_by: RepresentedBySchema.required(),

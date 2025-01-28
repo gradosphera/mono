@@ -6,7 +6,7 @@ export const organizationSchema: JSONSchemaType<ExternalOrganizationData> = {
   type: 'object',
   properties: {
     username: { type: 'string' },
-    type: { type: 'string', enum: ['coop', 'ooo', 'oao', 'zao', 'pao', 'ao'] },
+    type: { type: 'string', enum: ['coop', 'prodcoop', 'ooo', 'oao', 'zao', 'pao', 'ao'] },
     short_name: { type: 'string' },
     full_name: { type: 'string' },
     represented_by: {
