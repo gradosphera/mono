@@ -8,7 +8,9 @@ div.q-pa-md
             AutoAvatar(style="width: 60px; border-radius: 50%;" :username="currentUser.username")
           div.col-12.col-md-9.q-mt-sm.q-mt-md-0
             q-badge(color="primary" style="font-size: 12px; margin-bottom: 4px;") {{role}}
-            div.text-h6 {{displayName}}
+            div.text-h6
+              span(v-if="isIP").q-mr-sm ИП
+              | {{displayName}}
         div.row
           DepositButton.col-6.border-left-radius-buttons
           WithdrawButton.col-6.border-right-radius-buttons
@@ -33,6 +35,8 @@ import { computed } from 'vue';
 const currentUser = useCurrentUserStore()
 
 const userType = computed(() => currentUser.userAccount?.type)
+
+const isIP = computed(() => currentUser.userAccount?.type === 'entrepreneur')
 
 const role = computed(() => {
   if (currentUser.userAccount?.role === 'user')

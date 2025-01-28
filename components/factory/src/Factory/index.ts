@@ -120,6 +120,26 @@ export abstract class DocFactory<T extends IGenerate> {
     return vars
   }
 
+  async getRequest(_request_id: number, _block_num?: number): Promise<TCooperative.Model.ICommonRequest> {
+    return {
+      hash: '1234567890',
+      title: 'Молоко Бурёнка',
+      unit_of_measurement: 'литры',
+      units: 100,
+      unit_cost: 1000,
+      total_cost: 100000,
+      currency: 'RUB',
+      type: 'receive',
+      program_id: 1,
+    }
+  }
+
+  async getProgram(_program_id: number): Promise<TCooperative.Model.ICommonProgram> {
+    return {
+      name: 'СОСЕДИ',
+    }
+  }
+
   async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<TCooperative.Document.IDecisionData> {
     /**
      * Мы здесь извлекаем голоса из действий, а не из дельт таблиц т.к. в случае использования дельт возможна исключительная ситуация,
@@ -297,6 +317,21 @@ export abstract class DocFactory<T extends IGenerate> {
     }
 
     return ''
+  }
+
+  getFirstLastMiddleName(data: externalDataTypes): TCooperative.Model.IFirstLastMiddleName {
+    return {
+      first_name: 'first_name' in data ? data.first_name : '',
+      last_name: 'last_name' in data ? data.last_name : '',
+      middle_name: 'middle_name' in data ? data.middle_name : '',
+    }
+  }
+
+  getCommonUser(data: externalDataTypes): TCooperative.Model.ICommonUser {
+    return {
+      full_name_or_short_name: this.getFullParticipantName(data), // or_short_name
+      birthdate_or_ogrn: 'birthdate' in data ? data.birthdate : 'details' in data ? data.details.ogrn : '',
+    }
   }
 
   async saveDraft(document: IGeneratedDocument): Promise<void> {

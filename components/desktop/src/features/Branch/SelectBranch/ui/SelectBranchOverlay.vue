@@ -85,19 +85,17 @@ div
       const {selectBranch} = useSelectBranch()
 
       await selectBranch({
-        data: {
-          braname: selectedBranch.value,
-          coopname: system.info.coopname,
-          document,
-          username: session.username,
-        }
+        braname: selectedBranch.value,
+        coopname: system.info.coopname,
+        document,
+        username: session.username,
       })
       isVisible.value = false
       SuccessAlert('Кооперативный участок выбран')
     } catch(e: any){
       isSubmitting.value = false
       console.error(e)
-      failAlert(`Ошибка подписи документа: ${e.message}`)
+      failAlert(e)
     }
 
   }

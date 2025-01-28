@@ -2,7 +2,7 @@
 div(v-if="store")
   q-step(
     :name="store.steps.SelectBranch"
-    title="Выберите ближайший кооперативный участок"
+    title="Выберите кооперативный участок"
     :done="store.isStepDone('SelectBranch')"
   )
     BranchSelector(

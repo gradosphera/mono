@@ -28,21 +28,19 @@ export class Factory extends DocFactory<ReturnByAssetStatement.Action> {
 
     const request = data.request
 
-    const full_name = await this.getFullParticipantName(user.data)
+    const commonUser = this.getCommonUser(user.data)
 
     const combinedData: ReturnByAssetStatement.Model = {
       meta,
       coop,
       vars,
-      user: {
-        full_name,
-      },
+      user: commonUser,
       request,
     }
 
     await this.validate(combinedData, template.model)
     const translation = template.translations[meta.lang]
-    const document: IGeneratedDocument = await super.generatePDF(full_name, template.context, combinedData, translation, meta, options?.skip_save)
+    const document: IGeneratedDocument = await super.generatePDF(commonUser.full_name_or_short_name, template.context, combinedData, translation, meta, options?.skip_save)
 
     return document
   }

@@ -1,5 +1,5 @@
 import type { IDecisionData, IGenerate, IMetaDocument } from '../../document'
-import type { ICooperativeData, IFirstLastMiddleName, IMiddlewareRequest, IMiddlewareUser, IVars } from '../../model'
+import type { ICommonProgram, ICommonRequest, ICommonUser, ICooperativeData, IFirstLastMiddleName, IVars } from '../../model'
 import type { IOrganizationData } from '../../users'
 
 export const registry_id = 702
@@ -11,6 +11,7 @@ export interface Action extends IGenerate {
   decision_id: number
   act_id: string
   receiver: string
+  braname?: string
 }
 
 // Модель данных документа
@@ -18,21 +19,18 @@ export interface Model {
   meta: IMetaDocument
   coop: ICooperativeData
   vars: IVars
-  user: IMiddlewareUser
-  request: IMiddlewareRequest
-  desision: IDecisionData
-  currency: string
+  user: ICommonUser
+  request: ICommonRequest
+  decision: IDecisionData
   act_id: string
   receiver: IFirstLastMiddleName
-  program: {
-    name: string
-  }
-  branch: IOrganizationData
+  program: ICommonProgram
+  branch?: IOrganizationData
 }
 
 export const title = 'Акт приёма-передачи имущества'
 export const description = 'Форма акта приёма-передачи имущества'
-export const context = '<style> \nh1 {\nmargin: 0px; \ntext-align:center;\n}\nh3{\nmargin: 0px;\npadding-top: 15px;\n}\n.about {\npadding: 20px;\n}\n.about p{\nmargin: 0px;\n}\n.signature {\npadding-top: 20px;\n}\n.digital-document {\npadding: 20px;\nwhite-space: pre-wrap;\n}\n.subheader {\npadding-bottom: 20px; \n}\ntable {\n  width: 100%;\n  border-collapse: collapse;\n}\nth, td {\n  border: 1px solid #ccc;\n  padding: 8px;\n  text-align: left;\n  word-wrap: break-word; \n  overflow-wrap: break-word; \n}\nth {\n  background-color: #f4f4f4;\n  width: 30%;\n}\n</style>\n\n<div class="digital-document"><h1 class="header">{% trans \'act_number\', act_id %}</h1>\n<p style="text-align:center" class="subheader">{% trans \'act_name\', program.name %}</p>\n<p style="text-align: right"> {{ meta.created_at }}, {{ coop.city }}</p>\n\n{% if coop.is_branched %}<p>{% trans \'branched_contribution_act\', branch.short_name, vars.full_abbr_genitive, vars.name, user.full_name, program.name, decision_id %}</p>{% else %}<p>{% trans \'contribution_act\', vars.full_abbr, vars.name, user.full_name, program.name, decision_id %}</p>{% endif %}\n\n<table>\n<tbody>\n<tr>\n  <th>№</th>\n  <td>1</td>\n</tr>\n  <th>{% trans \'article\' %}</th>\n  <td>{{request.hash}}</td>\n</tr>\n<tr>\n  <th>{% trans \'asset_title\' %}</th>\n  <td>{{request.title}}</td>\n</tr>\n<tr>\n  <th>{% trans \'form_of_asset\' %}</th>\n  <td>{% trans \'form_of_asset_type\' %}</td>\n</tr>\n<tr>\n  <th>{% trans \'unit_of_measurement\' %}</th>\n  <td>{{ request.unit_of_measurement}}</td>\n</tr>\n<tr>\n  <th>{% trans \'units\' %} </th>\n  <td>{{ request.units }}</td>\n</tr>\n<tr>\n  <th>{% trans \'unit_cost\', currency %}</th>\n  <td>{{ request.unit_cost }}</td>\n</tr>\n<tr>\n  <th>{% trans \'total_cost\', currency %}</th>\n  <td>{{ request.total_cost }}</td>\n</tr>\n</tbody>\n</table>\n\n<p>{% trans \'no_claims\' %}</p>\n<table>\n      <tbody>\n       <tr>\n          <th></th>\n          <td>{% trans \'participant_full_name\' %}</td>\n          <td>{% trans \'signature\' %}</td>\n        </tr>\n         <tr>\n          <th>{% trans \'received_order\' %}</th>\n          <td>{{ user.full_name }}</td>\n          <td>{% trans \'signature_placeholder\' %}</td>\n        </tr>\n        <tr>\n          <th>{% trans \'transferred_order\' %}</th>\n          <td>{{ receiver.last_name }} {{ receiver.first_name }} {{ receiver.middle_name }}</td>\n          <td>{% trans \'signature_placeholder\' %}</td>\n        </tr>\n      </tbody>\n    </table>\n</div>'
+export const context = '<style> \nh1 {\nmargin: 0px; \ntext-align:center;\n}\nh3{\nmargin: 0px;\npadding-top: 15px;\n}\n.about {\npadding: 20px;\n}\n.about p{\nmargin: 0px;\n}\n.signature {\npadding-top: 20px;\n}\n.digital-document {\npadding: 20px;\nwhite-space: pre-wrap;\n}\n.subheader {\npadding-bottom: 20px; \n}\ntable {\n  width: 100%;\n  border-collapse: collapse;\n}\nth, td {\n  border: 1px solid #ccc;\n  padding: 8px;\n  text-align: left;\n  word-wrap: break-word; \n  overflow-wrap: break-word; \n}\nth {\n  background-color: #f4f4f4;\n  width: 30%;\n}\n</style>\n\n<div class="digital-document"><h1 class="header">{% trans \'act_number\', act_id %}</h1>\n<p style="text-align:center" class="subheader">{% trans \'act_name\', program.name %}</p>\n<p style="text-align: right"> {{ meta.created_at }}, {{ coop.city }}</p>\n\n{% if coop.is_branched %}<p>{% trans \'branched_contribution_act\', branch.short_name, vars.full_abbr_genitive, vars.name, user.full_name_or_short_name, program.name, decision.id %}</p>{% else %}<p>{% trans \'contribution_act\', vars.full_abbr, vars.name, user.full_name_or_short_name, program.name, decision.id %}</p>{% endif %}\n\n<table>\n<tbody>\n<tr>\n  <th>№</th>\n  <td>1</td>\n</tr>\n  <th>{% trans \'article\' %}</th>\n  <td>{{request.hash}}</td>\n</tr>\n<tr>\n  <th>{% trans \'asset_title\' %}</th>\n  <td>{{request.title}}</td>\n</tr>\n<tr>\n  <th>{% trans \'form_of_asset\' %}</th>\n  <td>{% trans \'form_of_asset_type\' %}</td>\n</tr>\n<tr>\n  <th>{% trans \'unit_of_measurement\' %}</th>\n  <td>{{ request.unit_of_measurement}}</td>\n</tr>\n<tr>\n  <th>{% trans \'units\' %} </th>\n  <td>{{ request.units }}</td>\n</tr>\n<tr>\n  <th>{% trans \'unit_cost\', request.currency %}</th>\n  <td>{{ request.unit_cost }}</td>\n</tr>\n<tr>\n  <th>{% trans \'total_cost\', request.currency %}</th>\n  <td>{{ request.total_cost }}</td>\n</tr>\n</tbody>\n</table>\n\n<p>{% trans \'no_claims\' %}</p>\n<table>\n      <tbody>\n       <tr>\n          <th></th>\n          <td>{% trans \'participant_full_name\' %}</td>\n          <td>{% trans \'signature\' %}</td>\n        </tr>\n         <tr>\n          <th>{% trans \'received_order\' %}</th>\n          <td>{{ user.full_name_or_short_name }}</td>\n          <td>{% trans \'signature_placeholder\' %}</td>\n        </tr>\n        <tr>\n          <th>{% trans \'transferred_order\' %}</th>\n          <td>{{ receiver.last_name }} {{ receiver.first_name }} {{ receiver.middle_name }}</td>\n          <td>{% trans \'signature_placeholder\' %}</td>\n        </tr>\n      </tbody>\n    </table>\n</div>'
 
 export const translations = {
   ru: {

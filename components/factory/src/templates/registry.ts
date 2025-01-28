@@ -10,6 +10,11 @@ import * as ProjectFreeDecision from './599.ProjectFreeDecision'
 import * as FreeDecision from './600.FreeDecision'
 import * as AssetContributionStatement from './700.assetContributionStatement'
 import * as ReturnByAssetStatement from './800.returnByAssetStatement'
+import * as AssetContributionDecision from './701.assetContributionDecision'
+import * as ReturnByAssetDecision from './801.returnByAssetDecision'
+
+import * as AssetContributionAct from './702.assetContributionAct'
+import * as ReturnByAssetAct from './802.returnByAssetAct'
 
 export const Registry = {
   1: WalletAgreement,
@@ -23,5 +28,9 @@ export const Registry = {
   599: ProjectFreeDecision,
   600: FreeDecision,
   700: AssetContributionStatement,
+  701: AssetContributionDecision,
+  702: AssetContributionAct,
   800: ReturnByAssetStatement,
+  801: ReturnByAssetDecision,
+  802: ReturnByAssetAct,
 }

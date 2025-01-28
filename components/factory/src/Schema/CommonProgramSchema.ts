@@ -1,11 +1,11 @@
 import type { JSONSchemaType } from 'ajv'
 import type { Cooperative } from 'cooptypes'
 
-export const IMiddlewareUserSchema: JSONSchemaType<Cooperative.Model.IMiddlewareUser> = {
+export const CommonProgramSchema: JSONSchemaType<Cooperative.Model.ICommonProgram> = {
   type: 'object',
   properties: {
-    full_name: { type: 'string' },
+    name: { type: 'string' },
   },
-  required: ['full_name'],
+  required: ['name'],
   additionalProperties: true,
 }

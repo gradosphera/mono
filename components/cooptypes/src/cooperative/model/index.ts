@@ -74,7 +74,7 @@ export interface IVars {
 /**
  * Используется для генераций документов в кооплейсе
  */
-export interface IMiddlewareRequest {
+export interface ICommonRequest {
   hash: string
   title: string
   unit_of_measurement: string
@@ -83,14 +83,20 @@ export interface IMiddlewareRequest {
   total_cost: number
   currency: string
   type: string
+  program_id: number
 }
 
-export interface IMiddlewareUser {
-  full_name: string
+export interface ICommonUser {
+  full_name_or_short_name: string
+  birthdate_or_ogrn: string
 }
 
 export interface IFirstLastMiddleName {
   first_name: string
   last_name: string
   middle_name: string
+}
+
+export interface ICommonProgram {
+  name: string
 }

@@ -1,7 +1,7 @@
 import type { JSONSchemaType } from 'ajv'
 import type { Cooperative } from 'cooptypes'
 
-export const MiddlewareRequestSchema: JSONSchemaType<Cooperative.Model.IMiddlewareRequest> = {
+export const CommonRequestSchema: JSONSchemaType<Cooperative.Model.ICommonRequest> = {
   type: 'object',
   properties: {
     hash: { type: 'string' },
@@ -12,6 +12,7 @@ export const MiddlewareRequestSchema: JSONSchemaType<Cooperative.Model.IMiddlewa
     total_cost: { type: 'number' },
     currency: { type: 'string' },
     type: { type: 'string' },
+    program_id: { type: 'number' },
   },
   required: [
     'hash',
@@ -22,6 +23,7 @@ export const MiddlewareRequestSchema: JSONSchemaType<Cooperative.Model.IMiddlewa
     'total_cost',
     'currency',
     'type',
+    'program_id',
   ],
   additionalProperties: true,
 }

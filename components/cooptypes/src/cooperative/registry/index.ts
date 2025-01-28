@@ -12,4 +12,9 @@ export * as ProjectFreeDecision from './599.ProjectFreeDecision'
 export * as FreeDecision from './600.FreeDecision'
 
 export * as AssetContributionStatement from './700.AssetContributionStatement'
+export * as AssetContributionDecision from './701.AssetContributionDecision'
+export * as AssetContributionAct from './702.AssetContributionAct'
+
 export * as ReturnByAssetStatement from './800.ReturnByAssetStatement'
+export * as ReturnByAssetDecision from './801.ReturnByAssetDecision'
+export * as ReturnByAssetAct from './802.ReturnByAssetAct'

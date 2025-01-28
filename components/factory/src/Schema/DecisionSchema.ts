@@ -13,5 +13,5 @@ export const decisionSchema: JSONSchemaType<Cooperative.Document.IDecisionData> 
     voters_percent: { type: 'number' },
   },
   required: ['id', 'date', 'time', 'votes_for', 'votes_against', 'votes_abstained', 'voters_percent'],
-  additionalProperties: false,
+  additionalProperties: true,
 }

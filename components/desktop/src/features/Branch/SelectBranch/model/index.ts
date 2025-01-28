@@ -2,7 +2,7 @@ import type { Mutations } from '@coopenomics/sdk';
 import { ref } from 'vue';
 import { api } from '../api';
 
-export type ISelectBranchInput = Mutations.Branches.SelectBranch.IInput
+export type ISelectBranchInput = Mutations.Branches.SelectBranch.IInput['data']
 
 const isVisible = ref(false);
 

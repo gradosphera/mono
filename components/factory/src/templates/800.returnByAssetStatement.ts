@@ -3,8 +3,8 @@ import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { CooperativeSchema, VarsSchema } from '../Schema'
-import { IMiddlewareUserSchema } from '../Schema/MiddlewareUserSchema'
-import { MiddlewareRequestSchema } from '../Schema/MiddlewareRequestSchema'
+import { CommonUserSchema } from '../Schema/CommonUserSchema'
+import { CommonRequestSchema } from '../Schema/CommonRequestSchema'
 
 export const registry_id = Cooperative.Registry.ReturnByAssetStatement.registry_id
 
@@ -21,8 +21,8 @@ export const Schema: JSONSchemaType<Model> = {
     meta: IMetaJSONSchema,
     coop: CooperativeSchema,
     vars: VarsSchema,
-    request: MiddlewareRequestSchema,
-    user: IMiddlewareUserSchema,
+    request: CommonRequestSchema,
+    user: CommonUserSchema,
   },
   required: ['meta', 'coop', 'vars', 'request', 'user'],
   additionalProperties: true,
