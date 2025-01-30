@@ -104,7 +104,6 @@ export class BranchBlockchainAdapter implements BranchBlockchainPort {
     const wif = await Vault.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
-    console.log('data: ', data);
     this.blockchainService.initialize(data.coopname, wif);
 
     return await this.blockchainService.transact({

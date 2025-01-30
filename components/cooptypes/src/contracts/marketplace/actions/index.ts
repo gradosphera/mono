@@ -22,7 +22,7 @@ export * as CompleteRequest from './completeRequest'
 /**
  * Действие для подтверждения председателем получения поставки с подписью на акте приёма-передачи.
  */
-export * as ConfirmRecieve from './confirmRecieve'
+export * as ConfirmReceive from './confirmReceive'
 
 /**
  * Действие для подтверждения председателем совершения поставки с подписью на акте приёма-передачи.
@@ -77,7 +77,7 @@ export * as PublishRequest from './publishRequest'
 /**
  * Действие для подтверждения получения имущества пользователем из кооператива с подписью акта приёма-передачи.
  */
-export * as RecieveOnRequest from './recieveOnRequest'
+export * as ReceiveOnRequest from './receiveOnRequest'
 
 /**
  * Действие для подтверждения поставки имущества пользователем в кооператив с подписью акта приёма-передачи.
@@ -92,4 +92,4 @@ export * as UnpublishRequest from './unpublishRequest'
 /**
  * Действие для обновления заявки на поставку.
  */
-export * as UpdateRequests from './updateRequest'
+export * as UpdateRequest from './updateRequest'

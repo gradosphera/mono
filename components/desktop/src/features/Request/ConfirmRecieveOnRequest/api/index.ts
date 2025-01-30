@@ -20,7 +20,7 @@ async function confirmRecieve(
 
   const result = await transact({
       account: ContractsList.Marketplace,
-      name: MarketContract.Actions.ConfirmRecieve.actionName,
+      name: MarketContract.Actions.ConfirmReceive.actionName,
       authorization: [
         {
           actor: params.username,
@@ -32,7 +32,7 @@ async function confirmRecieve(
         coopname: params.coopname,
         exchange_id: params.request_id,
         document,
-      } as MarketContract.Actions.ConfirmRecieve.IConfirmRecieve,
+      } as MarketContract.Actions.ConfirmReceive.IConfirmReceive,
   });
 
   const requestsStore = useRequestStore();

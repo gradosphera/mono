@@ -9,6 +9,8 @@ import { ACCOUNT_BLOCKCHAIN_PORT } from '~/domain/account/interfaces/account-blo
 import { AccountBlockchainAdapter } from './adapters/account.adapter';
 import { DecisionBlockchainAdapter } from './adapters/free-decision-blockchain.adapter';
 import { FREE_DECISION_BLOCKCHAIN_PORT } from '~/domain/free-decision/interfaces/free-decision-blockchain.port';
+import { COOPLACE_BLOCKCHAIN_PORT } from '~/domain/cooplace/interfaces/cooplace-blockchain.port';
+import { CooplaceBlockchainAdapter } from './adapters/cooplace-blockchain.adapter';
 
 @Global()
 @Module({
@@ -34,6 +36,10 @@ import { FREE_DECISION_BLOCKCHAIN_PORT } from '~/domain/free-decision/interfaces
       provide: FREE_DECISION_BLOCKCHAIN_PORT,
       useClass: DecisionBlockchainAdapter,
     },
+    {
+      provide: COOPLACE_BLOCKCHAIN_PORT,
+      useClass: CooplaceBlockchainAdapter,
+    },
   ],
   exports: [
     BLOCKCHAIN_PORT,
@@ -41,6 +47,7 @@ import { FREE_DECISION_BLOCKCHAIN_PORT } from '~/domain/free-decision/interfaces
     SYSTEM_BLOCKCHAIN_PORT,
     ACCOUNT_BLOCKCHAIN_PORT,
     FREE_DECISION_BLOCKCHAIN_PORT,
+    COOPLACE_BLOCKCHAIN_PORT,
   ],
 })
 export class BlockchainModule {}
