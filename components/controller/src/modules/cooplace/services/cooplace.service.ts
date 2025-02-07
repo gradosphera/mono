@@ -22,14 +22,14 @@ import type {
   ReturnByAssetStatementDocumentDTO,
 } from '../dto/return-by-asset-statement.dto';
 import { CooplaceDomainInteractor } from '~/domain/cooplace/interactors/cooplace.interactor';
-import type { AcceptChildOrderInputDTO } from '../dto/accept-request-input.dto';
+import type { AcceptChildOrderInputDTO } from '../dto/accept-child-order-input.dto';
 import type { CancelRequestInputDTO } from '../dto/cancel-request-input.dto';
-import type { CompleteRequestInputDTO } from '../dto/complete-receive-on-request.dto';
+import type { CompleteRequestInputDTO } from '../dto/complete-request-input.dto';
 import type { ConfirmReceiveOnRequestInputDTO } from '../dto/confirm-receive-on-request.dto';
 import type { ConfirmSupplyOnRequestInputDTO } from '../dto/confirm-supply-on-request.dto';
 import type { CreateChildOrderInputDTO } from '../dto/create-child-order-input.dto';
 import type { DeliverOnRequestInputDTO } from '../dto/deliver-on-request-input.dto';
-import type { CreateParentOrderInputDTO } from '../dto/create-parent-order-input.dto';
+import type { CreateParentOfferInputDTO } from '../dto/create-parent-offer-input.dto';
 import type { DeclineRequestInputDTO } from '../dto/decline-request-input.dto';
 import type { DisputeOnRequestInputDTO } from '../dto/dispute-on-request-input.dto';
 import type { PublishRequestInputDTO } from '../dto/publish-request-input.dto';
@@ -119,12 +119,12 @@ export class CooplaceService {
   }
 
   public async createChildOrder(data: CreateChildOrderInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.createChildOrder(data);
+    const result = await this.cooplaceDomainInteractor.createChildOrder({ params: data });
     return result;
   }
 
-  public async createParentOrder(data: CreateParentOrderInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.createParentOrder(data);
+  public async createParentOffer(data: CreateParentOfferInputDTO): Promise<TransactionDTO> {
+    const result = await this.cooplaceDomainInteractor.createParentOffer({ params: data });
     return result;
   }
 

@@ -1,23 +1,25 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsNumberString, ValidateNested } from 'class-validator';
+import { IsString, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-
+import { AssetContributionActSignedDocumentInputDTO } from './asset-contribution-act.dto';
 @InputType('SupplyOnRequestInput')
 export class SupplyOnRequestInputDTO {
-  @Field(() => String, { description: 'Имя аккаунта кооператива' })
+  @Field({ description: 'Имя аккаунта кооператива' })
   @IsString()
-  coopname: string;
+  coopname!: string;
 
   @Field(() => String, { description: 'Имя аккаунта пользователя' })
   @IsString()
   username!: string;
 
-  @Field(() => String, { description: 'Идентификатор обмена' })
-  @IsNumberString()
-  exchange_id!: string;
+  @Field(() => Number, { description: 'Идентификатор обмена' })
+  @IsNumber()
+  exchange_id!: number;
 
-  @Field(() => Object, { description: 'Документ подтверждения поставки' })
+  @Field(() => AssetContributionActSignedDocumentInputDTO, {
+    description: 'Подписанный Поставщиком акт приёма-передачи имущества в кооператив',
+  })
   @ValidateNested()
-  @Type(() => Object)
-  document!: any;
+  @Type(() => AssetContributionActSignedDocumentInputDTO)
+  document!: AssetContributionActSignedDocumentInputDTO;
 }

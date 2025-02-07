@@ -1,5 +1,28 @@
 {
     "inputs": {
+        "AcceptChildOrderInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "document",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "document": {
+                    "$ref": "#/inputs/AssetContributionStatementSignedDocumentInput"
+                },
+                "exchange_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "AddParticipantInput": {
             "type": "object",
             "required": [
@@ -82,6 +105,334 @@
                 }
             }
         },
+        "AssetContributionActGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "act_id",
+                "coopname",
+                "decision_id",
+                "receiver",
+                "request_id",
+                "username"
+            ],
+            "properties": {
+                "act_id": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer"
+                },
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "decision_id": {
+                    "type": "number"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "receiver": {
+                    "type": "string"
+                },
+                "request_id": {
+                    "type": "number"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "AssetContributionActSignedDocumentInput": {
+            "type": "object",
+            "required": [
+                "hash",
+                "meta",
+                "public_key",
+                "signature"
+            ],
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/inputs/AssetContributionActSignedMetaDocumentInput"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            }
+        },
+        "AssetContributionActSignedMetaDocumentInput": {
+            "type": "object",
+            "required": [
+                "act_id",
+                "block_num",
+                "coopname",
+                "created_at",
+                "decision_id",
+                "generator",
+                "lang",
+                "links",
+                "receiver",
+                "registry_id",
+                "request_id",
+                "timezone",
+                "title",
+                "username",
+                "version"
+            ],
+            "properties": {
+                "act_id": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer"
+                },
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "decision_id": {
+                    "type": "number"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "string"
+                },
+                "receiver": {
+                    "type": "string"
+                },
+                "registry_id": {
+                    "type": "integer"
+                },
+                "request_id": {
+                    "type": "number"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "AssetContributionDecisionGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "decision_id",
+                "request_id",
+                "username"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "decision_id": {
+                    "type": "number"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "request_id": {
+                    "type": "number"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "AssetContributionStatementGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "request",
+                "username"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "request": {
+                    "$ref": "#/inputs/CommonRequestInput"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "AssetContributionStatementSignedDocumentInput": {
+            "type": "object",
+            "required": [
+                "hash",
+                "meta",
+                "public_key",
+                "signature"
+            ],
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/inputs/AssetContributionStatementSignedMetaDocumentInput"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            }
+        },
+        "AssetContributionStatementSignedMetaDocumentInput": {
+            "type": "object",
+            "required": [
+                "block_num",
+                "coopname",
+                "created_at",
+                "generator",
+                "lang",
+                "links",
+                "registry_id",
+                "request",
+                "timezone",
+                "title",
+                "username",
+                "version"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "string"
+                },
+                "registry_id": {
+                    "type": "integer"
+                },
+                "request": {
+                    "$ref": "#/inputs/CommonRequestInput"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "BankAccountDetailsInput": {
             "type": "object",
             "required": [
@@ -124,6 +475,133 @@
                 },
                 "details": {
                     "$ref": "#/inputs/BankAccountDetailsInput"
+                }
+            }
+        },
+        "CancelRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "exchange_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "CommonRequestInput": {
+            "type": "object",
+            "required": [
+                "currency",
+                "hash",
+                "program_id",
+                "title",
+                "total_cost",
+                "type",
+                "unit_cost",
+                "unit_of_measurement",
+                "units"
+            ],
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "hash": {
+                    "type": "string"
+                },
+                "program_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "total_cost": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "unit_cost": {
+                    "type": "string"
+                },
+                "unit_of_measurement": {
+                    "type": "string"
+                },
+                "units": {
+                    "type": "integer"
+                }
+            }
+        },
+        "CompleteRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "exchange_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "ConfirmReceiveOnRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "document",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "document": {
+                    "$ref": "#/inputs/ReturnByAssetActSignedDocumentInput"
+                },
+                "exchange_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "ConfirmSupplyOnRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "document",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "document": {
+                    "$ref": "#/inputs/AssetContributionActSignedDocumentInput"
+                },
+                "exchange_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
@@ -185,6 +663,53 @@
                     "type": "string"
                 },
                 "trustee": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateChildOrderInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "data",
+                "document",
+                "meta",
+                "parent_id",
+                "product_lifecycle_secs",
+                "program_id",
+                "unit_cost",
+                "units",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "document": {
+                    "$ref": "#/inputs/ReturnByAssetStatementSignedDocumentInput"
+                },
+                "meta": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "number"
+                },
+                "product_lifecycle_secs": {
+                    "type": "number"
+                },
+                "program_id": {
+                    "type": "number"
+                },
+                "unit_cost": {
+                    "type": "string"
+                },
+                "units": {
+                    "type": "number"
+                },
+                "username": {
                     "type": "string"
                 }
             }
@@ -353,8 +878,52 @@
                         "OAO",
                         "OOO",
                         "PAO",
+                        "PRODCOOP",
                         "ZAO"
                     ]
+                }
+            }
+        },
+        "CreateParentOfferInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "data",
+                "meta",
+                "parent_id",
+                "product_lifecycle_secs",
+                "program_id",
+                "unit_cost",
+                "units",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "meta": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "number"
+                },
+                "product_lifecycle_secs": {
+                    "type": "number"
+                },
+                "program_id": {
+                    "type": "number"
+                },
+                "unit_cost": {
+                    "type": "string"
+                },
+                "units": {
+                    "type": "number"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
@@ -369,6 +938,29 @@
                     "type": "string"
                 },
                 "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "DeclineRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "exchange_id",
+                "meta",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "exchange_id": {
+                    "type": "number"
+                },
+                "meta": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }
@@ -418,6 +1010,48 @@
                     "type": "string"
                 },
                 "trusted": {
+                    "type": "string"
+                }
+            }
+        },
+        "DeliverOnRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "exchange_id": {
+                    "type": "number"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "DisputeOnRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "document",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "document": {
+                    "type": "string"
+                },
+                "exchange_id": {
+                    "type": "number"
+                },
+                "username": {
                     "type": "string"
                 }
             }
@@ -855,6 +1489,29 @@
                 }
             }
         },
+        "ModerateRequestInput": {
+            "type": "object",
+            "required": [
+                "cancellation_fee",
+                "coopname",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "cancellation_fee": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "exchange_id": {
+                    "type": "number"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "OrganizationDetailsInput": {
             "type": "object",
             "required": [
@@ -1109,6 +1766,29 @@
                 }
             }
         },
+        "ProhibitRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "exchange_id",
+                "meta",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "exchange_id": {
+                    "type": "number"
+                },
+                "meta": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "ProjectFreeDecisionGenerateDocumentInput": {
             "type": "object",
             "required": [
@@ -1256,6 +1936,48 @@
                 }
             }
         },
+        "PublishRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "exchange_id": {
+                    "type": "number"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReceiveOnRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "document",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "document": {
+                    "$ref": "#/inputs/ReturnByAssetActSignedDocumentInput"
+                },
+                "exchange_id": {
+                    "type": "number"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "RefreshInput": {
             "type": "object",
             "required": [
@@ -1379,6 +2101,334 @@
                     "type": "string"
                 },
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReturnByAssetActGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "act_id",
+                "coopname",
+                "decision_id",
+                "request_id",
+                "transmitter",
+                "username"
+            ],
+            "properties": {
+                "act_id": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer"
+                },
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "decision_id": {
+                    "type": "number"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "request_id": {
+                    "type": "number"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "transmitter": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReturnByAssetActSignedDocumentInput": {
+            "type": "object",
+            "required": [
+                "hash",
+                "meta",
+                "public_key",
+                "signature"
+            ],
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/inputs/ReturnByAssetActSignedMetaDocumentInput"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReturnByAssetActSignedMetaDocumentInput": {
+            "type": "object",
+            "required": [
+                "act_id",
+                "block_num",
+                "coopname",
+                "created_at",
+                "decision_id",
+                "generator",
+                "lang",
+                "links",
+                "registry_id",
+                "request_id",
+                "timezone",
+                "title",
+                "transmitter",
+                "username",
+                "version"
+            ],
+            "properties": {
+                "act_id": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer"
+                },
+                "braname": {
+                    "type": "string"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "decision_id": {
+                    "type": "number"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "string"
+                },
+                "registry_id": {
+                    "type": "integer"
+                },
+                "request_id": {
+                    "type": "number"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "transmitter": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReturnByAssetDecisionGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "decision_id",
+                "request_id",
+                "username"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "decision_id": {
+                    "type": "number"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "request_id": {
+                    "type": "number"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReturnByAssetStatementGenerateDocumentInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "request",
+                "username"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "request": {
+                    "$ref": "#/inputs/CommonRequestInput"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReturnByAssetStatementSignedDocumentInput": {
+            "type": "object",
+            "required": [
+                "hash",
+                "meta",
+                "public_key",
+                "signature"
+            ],
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/inputs/ReturnByAssetStatementSignedMetaDocumentInput"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            }
+        },
+        "ReturnByAssetStatementSignedMetaDocumentInput": {
+            "type": "object",
+            "required": [
+                "block_num",
+                "coopname",
+                "created_at",
+                "generator",
+                "lang",
+                "links",
+                "registry_id",
+                "request",
+                "timezone",
+                "title",
+                "username",
+                "version"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "coopname": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "generator": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "links": {
+                    "type": "string"
+                },
+                "registry_id": {
+                    "type": "integer"
+                },
+                "request": {
+                    "$ref": "#/inputs/CommonRequestInput"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }
@@ -1621,6 +2671,29 @@
                 }
             }
         },
+        "SupplyOnRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "document",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "document": {
+                    "$ref": "#/inputs/AssetContributionActSignedDocumentInput"
+                },
+                "exchange_id": {
+                    "type": "number"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "UninstallExtensionInput": {
             "type": "object",
             "required": [
@@ -1628,6 +2701,25 @@
             ],
             "properties": {
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "UnpublishRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "exchange_id",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "exchange_id": {
+                    "type": "number"
+                },
+                "username": {
                     "type": "string"
                 }
             }
@@ -1843,8 +2935,44 @@
                         "OAO",
                         "OOO",
                         "PAO",
+                        "PRODCOOP",
                         "ZAO"
                     ]
+                }
+            }
+        },
+        "UpdateRequestInput": {
+            "type": "object",
+            "required": [
+                "coopname",
+                "data",
+                "exchange_id",
+                "meta",
+                "remain_units",
+                "unit_cost",
+                "username"
+            ],
+            "properties": {
+                "coopname": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "exchange_id": {
+                    "type": "number"
+                },
+                "meta": {
+                    "type": "string"
+                },
+                "remain_units": {
+                    "type": "string"
+                },
+                "unit_cost": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
@@ -1925,6 +3053,17 @@
     },
     "types": {
         "Mutation": {
+            "acceptChildOrder": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/AcceptChildOrderInput"
+                    }
+                }
+            },
             "addParticipant": {
                 "type": "object",
                 "required": [
@@ -1944,6 +3083,50 @@
                 "properties": {
                     "data": {
                         "$ref": "#/inputs/AddTrustedAccountInput"
+                    }
+                }
+            },
+            "cancelRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/CancelRequestInput"
+                    }
+                }
+            },
+            "completeRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/CompleteRequestInput"
+                    }
+                }
+            },
+            "confirmReceiveOnRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ConfirmReceiveOnRequestInput"
+                    }
+                }
+            },
+            "confirmSupplyOnRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ConfirmSupplyOnRequestInput"
                     }
                 }
             },
@@ -1969,6 +3152,17 @@
                     }
                 }
             },
+            "createChildOrder": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/CreateChildOrderInput"
+                    }
+                }
+            },
             "createDepositPayment": {
                 "type": "object",
                 "required": [
@@ -1991,6 +3185,17 @@
                     }
                 }
             },
+            "createParentOffer": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/CreateParentOfferInput"
+                    }
+                }
+            },
             "createProjectOfFreeDecision": {
                 "type": "object",
                 "required": [
@@ -1999,6 +3204,17 @@
                 "properties": {
                     "data": {
                         "$ref": "#/inputs/CreateProjectFreeDecisionInput"
+                    }
+                }
+            },
+            "declineRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/DeclineRequestInput"
                     }
                 }
             },
@@ -2035,6 +3251,28 @@
                     }
                 }
             },
+            "deliverOnRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/DeliverOnRequestInput"
+                    }
+                }
+            },
+            "disputeOnRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/DisputeOnRequestInput"
+                    }
+                }
+            },
             "editBranch": {
                 "type": "object",
                 "required": [
@@ -2043,6 +3281,48 @@
                 "properties": {
                     "data": {
                         "$ref": "#/inputs/EditBranchInput"
+                    }
+                }
+            },
+            "generateAssetContributionAct": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/AssetContributionActGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateAssetContributionDecision": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/AssetContributionDecisionGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateAssetContributionStatement": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/AssetContributionStatementGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
                     }
                 }
             },
@@ -2110,6 +3390,48 @@
                 "properties": {
                     "data": {
                         "$ref": "#/inputs/ProjectFreeDecisionGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateReturnByAssetAct": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ReturnByAssetActGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateReturnByAssetDecision": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ReturnByAssetDecisionGenerateDocumentInput"
+                    },
+                    "options": {
+                        "$ref": "#/inputs/GenerateDocumentOptionsInput"
+                    }
+                }
+            },
+            "generateReturnByAssetStatement": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ReturnByAssetStatementGenerateDocumentInput"
                     },
                     "options": {
                         "$ref": "#/inputs/GenerateDocumentOptionsInput"
@@ -2227,6 +3549,28 @@
                     }
                 }
             },
+            "moderateRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ModerateRequestInput"
+                    }
+                }
+            },
+            "prohibitRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ProhibitRequestInput"
+                    }
+                }
+            },
             "publishProjectOfFreeDecision": {
                 "type": "object",
                 "required": [
@@ -2235,6 +3579,28 @@
                 "properties": {
                     "data": {
                         "$ref": "#/inputs/PublishProjectFreeDecisionInput"
+                    }
+                }
+            },
+            "publishRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/PublishRequestInput"
+                    }
+                }
+            },
+            "receiveOnRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/ReceiveOnRequestInput"
                     }
                 }
             },
@@ -2326,6 +3692,17 @@
                     }
                 }
             },
+            "supplyOnRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/SupplyOnRequestInput"
+                    }
+                }
+            },
             "uninstallExtension": {
                 "type": "object",
                 "required": [
@@ -2334,6 +3711,17 @@
                 "properties": {
                     "data": {
                         "$ref": "#/inputs/UninstallExtensionInput"
+                    }
+                }
+            },
+            "unpublishRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/UnpublishRequestInput"
                     }
                 }
             },
@@ -2367,6 +3755,17 @@
                 "properties": {
                     "data": {
                         "$ref": "#/inputs/ExtensionInput"
+                    }
+                }
+            },
+            "updateRequest": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/inputs/UpdateRequestInput"
                     }
                 }
             },

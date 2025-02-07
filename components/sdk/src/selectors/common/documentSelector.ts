@@ -1,5 +1,5 @@
-import { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { Selector, type ValueTypes } from '../../zeus'
 
 export const rawDocumentMetaSelector = {
   block_num: true,
@@ -13,7 +13,7 @@ export const rawDocumentMetaSelector = {
   title: true,
   username: true,
   version: true,
-};
+}
 
 export const rawDocumentSelector = {
   binary: true,
@@ -21,12 +21,11 @@ export const rawDocumentSelector = {
   hash: true,
   html: true,
   meta: rawDocumentMetaSelector, // Общая часть meta
-};
-
+}
 
 // Проверяем raw на соответствие типу
-const _validate: MakeAllFieldsRequired<ValueTypes['GeneratedDocument']> =
-rawDocumentSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['GeneratedDocument']>
+= rawDocumentSelector
 
-  // Передаём raw в селектор
-export const documentSelector = Selector('GeneratedDocument')(rawDocumentSelector);
+// Передаём raw в селектор
+export const documentSelector = Selector('GeneratedDocument')(rawDocumentSelector)

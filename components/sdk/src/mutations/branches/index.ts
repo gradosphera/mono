@@ -8,7 +8,7 @@ export * as DeleteBranch from './deleteBranch'
 export * as DeleteTrustedAccount from './deleteTrustedAccount'
 /** Изменить кооперативный участок */
 export * as EditBranch from './editBranch'
-/** Выбрать кооперативный участок */
-export * as SelectBranch from './selectBranch'
 /** Сгенерировать документ, подтверждающий выбор кооперативного участка */
 export * as GenerateSelectBranchDocument from './generateSelectBranchDocument'
+/** Выбрать кооперативный участок */
+export * as SelectBranch from './selectBranch'

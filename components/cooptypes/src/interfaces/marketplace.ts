@@ -15,11 +15,11 @@ export interface IAccept {
   document: IDocument
 }
 
-export interface IAddpieces {
+export interface IAddunits {
   coopname: IName
   username: IName
   exchange_id: IUint64
-  new_pieces: IUint64
+  units: IUint64
 }
 
 export interface IAuthorize {
@@ -93,7 +93,7 @@ export interface IExchangeParams {
   parent_id: IUint64
   program_id: IUint64
   coopname: IName
-  pieces: IUint64
+  units: IUint64
   unit_cost: IAsset
   product_lifecycle_secs: IUint64
   document?: IDocument

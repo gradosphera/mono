@@ -8,14 +8,16 @@ import { useAccountStore } from 'src/entities/Account/model';
 import { useSessionStore } from 'src/entities/Session';
 
 export default boot(async ({ router }) => {
+  const system = useSystemStore();
+  //Инициализация системного стора
+  await system.loadSystemInfo();
+
+  // инициализация всего остального
   const desktops = useDesktopStore();
   const cardStore = useCardStore();
-  const system = useSystemStore();
   const account = useAccountStore();
   const session = useSessionStore();
 
-  //Инициализация системного стора
-  await system.loadSystemInfo();
 
   // Инициализация стора desktops
   await desktops.healthCheck();

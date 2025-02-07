@@ -5,6 +5,11 @@ import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.e
 import { Inject, Injectable } from '@nestjs/common';
 import type { TransactResult } from '@wharfkit/session';
 import type { AcceptChildOrderInputDomainInterface } from '../interfaces/accept-child-order-input.interface';
+import type { ConfirmReceiveOnRequestInputDomainInterface } from '../interfaces/confirm-receive-on-request-input.interface';
+import type { ConfirmSupplyOnRequestInputDomainInterface } from '../interfaces/confirm-supply-on-request-input.interface';
+import type { CreateChildOrderInputDomainInterface } from '../interfaces/create-child-order-input.interface';
+import type { ReceiveOnRequestInputDomainInterface } from '../interfaces/receive-on-request-input.interface';
+import type { SupplyOnRequestInputDomainInterface } from '../interfaces/supply-on-request-input.interface';
 
 @Injectable()
 export class CooplaceDomainInteractor {
@@ -79,24 +84,33 @@ export class CooplaceDomainInteractor {
     return result;
   }
 
-  public async confirmReceiveOnRequest(
-    data: MarketContract.Actions.ConfirmReceive.IConfirmReceive
-  ): Promise<TransactResult> {
-    const result = await this.cooplaceBlockchainPort.confirmOnReceive(data);
+  public async confirmReceiveOnRequest(data: ConfirmReceiveOnRequestInputDomainInterface): Promise<TransactResult> {
+    const result = await this.cooplaceBlockchainPort.confirmOnReceive({
+      ...data,
+      document: { ...data.document, meta: JSON.stringify(data.document.meta) },
+    });
     return result;
   }
 
-  public async confirmSupplyOnRequest(data: MarketContract.Actions.ConfirmSupply.IConfirmSupply): Promise<TransactResult> {
-    const result = await this.cooplaceBlockchainPort.confirmOnSupply(data);
+  public async confirmSupplyOnRequest(data: ConfirmSupplyOnRequestInputDomainInterface): Promise<TransactResult> {
+    const result = await this.cooplaceBlockchainPort.confirmOnSupply({
+      ...data,
+      document: { ...data.document, meta: JSON.stringify(data.document.meta) },
+    });
     return result;
   }
 
-  public async createChildOrder(data: MarketContract.Actions.CreateOrder.ICreateOrder): Promise<TransactResult> {
-    const result = await this.cooplaceBlockchainPort.createChildOrder(data);
+  public async createChildOrder(data: CreateChildOrderInputDomainInterface): Promise<TransactResult> {
+    const result = await this.cooplaceBlockchainPort.createChildOrder({
+      params: {
+        ...data.params,
+        document: { ...data.params.document, meta: JSON.stringify(data.params.document.meta) },
+      },
+    });
     return result;
   }
 
-  public async createParentOrder(data: MarketContract.Actions.CreateOffer.ICreateOffer): Promise<TransactResult> {
+  public async createParentOffer(data: MarketContract.Actions.CreateOffer.ICreateOffer): Promise<TransactResult> {
     const result = await this.cooplaceBlockchainPort.createParentOffer(data);
     return result;
   }
@@ -131,13 +145,19 @@ export class CooplaceDomainInteractor {
     return result;
   }
 
-  public async receiveOnRequest(data: MarketContract.Actions.ReceiveOnRequest.IRecieveOnRequest): Promise<TransactResult> {
-    const result = await this.cooplaceBlockchainPort.receiveOnRequest(data);
+  public async receiveOnRequest(data: ReceiveOnRequestInputDomainInterface): Promise<TransactResult> {
+    const result = await this.cooplaceBlockchainPort.receiveOnRequest({
+      ...data,
+      document: { ...data.document, meta: JSON.stringify(data.document.meta) },
+    });
     return result;
   }
 
-  public async supplyOnRequest(data: MarketContract.Actions.SupplyOnRequest.ISupplyOnRequest): Promise<TransactResult> {
-    const result = await this.cooplaceBlockchainPort.supplyOnRequest(data);
+  public async supplyOnRequest(data: SupplyOnRequestInputDomainInterface): Promise<TransactResult> {
+    const result = await this.cooplaceBlockchainPort.supplyOnRequest({
+      ...data,
+      document: { ...data.document, meta: JSON.stringify(data.document.meta) },
+    });
     return result;
   }
 

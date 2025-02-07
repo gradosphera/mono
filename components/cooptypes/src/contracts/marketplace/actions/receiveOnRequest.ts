@@ -16,4 +16,4 @@ export const actionName = 'recieve'
 /**
  * @interface
  */
-export type IRecieveOnRequest = Marketplace.IRecieve
+export type IReceiveOnRequest = Marketplace.IRecieve

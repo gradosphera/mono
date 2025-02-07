@@ -1,8 +1,11 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsString, IsNumberString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+import { AssetContributionActSignedDocumentInputDTO } from './asset-contribution-act.dto';
 
-@InputType('ConfirmSupplyOnRequestInput')
+@InputType('ConfirmSupplyOnRequestInput', {
+  description: 'Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи',
+})
 export class ConfirmSupplyOnRequestInputDTO {
   @Field(() => String, { description: 'Имя аккаунта кооператива' })
   @IsString()
@@ -16,8 +19,10 @@ export class ConfirmSupplyOnRequestInputDTO {
   @IsNumberString()
   exchange_id!: string;
 
-  @Field(() => Object, { description: 'Документ подтверждения поставки' })
+  @Field(() => AssetContributionActSignedDocumentInputDTO, {
+    description: 'Подписанный акт приёма-передачи имущества от Поставщика в Кооператив',
+  })
   @ValidateNested()
-  @Type(() => Object)
-  document!: any;
+  @Type(() => AssetContributionActSignedDocumentInputDTO)
+  document!: AssetContributionActSignedDocumentInputDTO;
 }

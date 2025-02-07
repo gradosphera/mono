@@ -154,7 +154,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.CreateOffer.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.params.username,
           permission: 'active',
         },
       ],
@@ -276,7 +276,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
     });
   }
 
-  async receiveOnRequest(data: MarketContract.Actions.ReceiveOnRequest.IRecieveOnRequest): Promise<TransactResult> {
+  async receiveOnRequest(data: MarketContract.Actions.ReceiveOnRequest.IReceiveOnRequest): Promise<TransactResult> {
     const wif = await Vault.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 

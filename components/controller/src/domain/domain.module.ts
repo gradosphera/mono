@@ -13,6 +13,7 @@ import { AgreementDomainModule } from './agreement/agreement-domain.module';
 import { ParticipantDomainModule } from './participant/participant-domain.module';
 import { AuthDomainModule } from './auth/auth.module';
 import { AgendaDomainModule } from './agenda/agenda-domain.module';
+import { CooplaceDomainModule } from './cooplace/cooplace.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AgendaDomainModule } from './agenda/agenda-domain.module';
     DocumentDomainModule,
     FreeDecisionDomainModule,
     ParticipantDomainModule,
+    CooplaceDomainModule,
   ],
   exports: [
     AuthDomainModule,
@@ -44,6 +46,7 @@ import { AgendaDomainModule } from './agenda/agenda-domain.module';
     DocumentDomainModule,
     FreeDecisionDomainModule,
     ParticipantDomainModule,
+    CooplaceDomainModule,
   ],
 })
 export class DomainModule {}

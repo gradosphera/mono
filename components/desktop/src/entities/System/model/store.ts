@@ -12,7 +12,7 @@ interface ISystemStore {
 
 export const useSystemStore = defineStore(namespace, (): ISystemStore => {
   const info = ref<ISystemInfo>({} as ISystemInfo)
-
+  console.log('system: ', info)
   const loadSystemInfo = async () => {
     info.value = await api.loadSystemInfo();
   };

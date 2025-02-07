@@ -1,6 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { AssetContributionStatementSignedDocumentInputDTO } from './asset-contribution-statement.dto';
-import { IsNumberString, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 @InputType('AcceptChildOrderInput')
 export class AcceptChildOrderInputDTO {
@@ -13,11 +13,11 @@ export class AcceptChildOrderInputDTO {
   username!: string;
 
   @Field(() => String, { description: 'Идентификатор заявки' })
-  @IsNumberString()
-  exchange_id!: string;
+  @IsNumber()
+  exchange_id!: number;
 
   @Field(() => AssetContributionStatementSignedDocumentInputDTO, {
-    description: 'Подписанный документ заявления на имущественный паевый взнос',
+    description: 'Подписанное заявление на имущественный паевый взнос',
   })
   document!: AssetContributionStatementSignedDocumentInputDTO;
 }

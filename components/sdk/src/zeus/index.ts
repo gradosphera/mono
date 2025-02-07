@@ -918,11 +918,22 @@ type ZEUS_INTERFACES = never
 export type ScalarCoders = {
 	DateTime?: ScalarResolver;
 	JSON?: ScalarResolver;
+	JSONObject?: ScalarResolver;
 }
 type ZEUS_UNIONS = GraphQLTypes["DecisionDocumentUnion"] | GraphQLTypes["PaymentMethodData"] | GraphQLTypes["StatementDocumentUnion"] | GraphQLTypes["UserDataUnion"]
 
 export type ValueTypes = {
-    ["Account"]: AliasType<{
+    ["AcceptChildOrderInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанное заявление на имущественный паевый взнос */
+	document: ValueTypes["AssetContributionStatementSignedDocumentInput"] | Variable<any, string>,
+	/** Идентификатор заявки */
+	exchange_id: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
+	["Account"]: AliasType<{
 	/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
 	blockchain_account?:ValueTypes["BlockchainAccount"],
 	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
@@ -1035,6 +1046,298 @@ export type ValueTypes = {
 	protocol_number?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["AssetContributionActDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["AssetContributionActMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionActGenerateDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string | Variable<any, string>,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver: string | Variable<any, string>,
+	/** Идентификатор заявки */
+	request_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["AssetContributionActMetaDocumentOutput"]: AliasType<{
+	/** Идентификатор акта */
+	act_id?:boolean | `@${string}`,
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Имя аккаунта кооперативного участка */
+	braname?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Идентификатор решения */
+	decision_id?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Идентификатор заявки */
+	request_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionActSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ValueTypes["AssetContributionActSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Публичный ключ документа */
+	public_key: string | Variable<any, string>,
+	/** Подпись документа */
+	signature: string | Variable<any, string>
+};
+	["AssetContributionActSignedMetaDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string | Variable<any, string>,
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver: string | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Идентификатор заявки */
+	request_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
+	["AssetContributionDecisionDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["AssetContributionDecisionMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Идентификатор заявки */
+	request_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["AssetContributionDecisionMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Идентификатор решения */
+	decision_id?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Идентификатор заявки */
+	request_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionStatementDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["AssetContributionStatementMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionStatementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ValueTypes["CommonRequestInput"] | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["AssetContributionStatementMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Запрос на внесение имущественного паевого взноса */
+	request?:ValueTypes["CommonRequestResponse"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionStatementSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Публичный ключ документа */
+	public_key: string | Variable<any, string>,
+	/** Подпись документа */
+	signature: string | Variable<any, string>
+};
+	["AssetContributionStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ValueTypes["CommonRequestInput"] | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
 	["AuthSequence"]: AliasType<{
 	account?:boolean | `@${string}`,
 	sequence?:boolean | `@${string}`,
@@ -1264,6 +1567,67 @@ export type ValueTypes = {
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CancelRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор заявки */
+	exchange_id: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
+	["CommonRequestInput"]: {
+	currency: string | Variable<any, string>,
+	hash: string | Variable<any, string>,
+	program_id: number | Variable<any, string>,
+	title: string | Variable<any, string>,
+	total_cost: string | Variable<any, string>,
+	type: string | Variable<any, string>,
+	unit_cost: string | Variable<any, string>,
+	unit_of_measurement: string | Variable<any, string>,
+	units: number | Variable<any, string>
+};
+	["CommonRequestResponse"]: AliasType<{
+	currency?:boolean | `@${string}`,
+	hash?:boolean | `@${string}`,
+	program_id?:boolean | `@${string}`,
+	title?:boolean | `@${string}`,
+	total_cost?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
+	unit_cost?:boolean | `@${string}`,
+	unit_of_measurement?:boolean | `@${string}`,
+	units?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CompleteRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
+	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
+["ConfirmReceiveOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанный акт приёмки-передачи имущества Уполномоченным лицом из Кооператива при возврате Заказчику по новации */
+	document: ValueTypes["ReturnByAssetActSignedDocumentInput"] | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
+	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
+["ConfirmSupplyOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанный акт приёма-передачи имущества от Поставщика в Кооператив */
+	document: ValueTypes["AssetContributionActSignedDocumentInput"] | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["ContactsDTO"]: AliasType<{
 	chairman?:ValueTypes["PublicChairman"],
 	details?:ValueTypes["OrganizationDetails"],
@@ -1354,6 +1718,28 @@ export type ValueTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string | Variable<any, string>
 };
+	["CreateChildOrderInput"]: {
+	/** Имя кооператива */
+	coopname: string | Variable<any, string>,
+	/** Дополнительные данные, специфичные для заявки */
+	data: string | Variable<any, string>,
+	/** Подписанное заявление на возврат паевого взноса имуществом от Заказчика */
+	document: ValueTypes["ReturnByAssetStatementSignedDocumentInput"] | Variable<any, string>,
+	/** Метаданные о заявке */
+	meta: string | Variable<any, string>,
+	/** Идентификатор родительской заявки */
+	parent_id: number | Variable<any, string>,
+	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
+	product_lifecycle_secs: number | Variable<any, string>,
+	/** Идентификатор программы */
+	program_id: number | Variable<any, string>,
+	/** Цена за единицу (штуку) товара или результата услуги в формате "10.0000 RUB" */
+	unit_cost: string | Variable<any, string>,
+	/** Количество частей (штук) товара или услуги */
+	units: number | Variable<any, string>,
+	/** Имя пользователя, инициирующего или обновляющего заявку */
+	username: string | Variable<any, string>
+};
 	["CreateDepositPaymentInput"]: {
 	/** Сумма взноса */
 	quantity: string | Variable<any, string>,
@@ -1426,6 +1812,26 @@ export type ValueTypes = {
 	/** Тип организации */
 	type: ValueTypes["OrganizationType"] | Variable<any, string>
 };
+	["CreateParentOfferInput"]: {
+	/** Имя кооператива */
+	coopname: string | Variable<any, string>,
+	/** Дополнительные данные, специфичные для заявки */
+	data: string | Variable<any, string>,
+	/** Метаданные о заявке */
+	meta: string | Variable<any, string>,
+	/** Идентификатор родительской заявки */
+	parent_id: number | Variable<any, string>,
+	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
+	product_lifecycle_secs: number | Variable<any, string>,
+	/** Идентификатор программы */
+	program_id: number | Variable<any, string>,
+	/** Цена за единицу (штуку) товара или услуги в формате "10.0000 RUB" */
+	unit_cost: string | Variable<any, string>,
+	/** Количество частей (штук) товара или услуги */
+	units: number | Variable<any, string>,
+	/** Имя пользователя, инициирующего или обновляющего заявку */
+	username: string | Variable<any, string>
+};
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string | Variable<any, string>,
@@ -1456,6 +1862,16 @@ export type ValueTypes = {
 		["...on ParticipantApplicationDecisionDocument"]?: ValueTypes["ParticipantApplicationDecisionDocument"]
 		__typename?: boolean | `@${string}`
 }>;
+	["DeclineRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: number | Variable<any, string>,
+	/** Причина отказа */
+	meta: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
@@ -1475,6 +1891,24 @@ export type ValueTypes = {
 	coopname: string | Variable<any, string>,
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string | Variable<any, string>
+};
+	["DeliverOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: number | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
+	["DisputeOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Документ с аргументами спора */
+	document: ValueTypes["JSONObject"] | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: number | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
 };
 	/** Комплексный объект папки цифрового документа, который включает в себя заявление, решение, акты и связанные документы */
 ["DocumentPackage"]: AliasType<{
@@ -1817,6 +2251,8 @@ export type ValueTypes = {
 };
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
+	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+["JSONObject"]:unknown;
 	["KeyWeight"]: AliasType<{
 	/** Ключ */
 	key?:boolean | `@${string}`,
@@ -1887,6 +2323,16 @@ export type ValueTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
+	["ModerateRequestInput"]: {
+	/** Размер комиссии за отмену в формате "10.0000 RUB" */
+	cancellation_fee: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: number | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["MonoAccount"]: AliasType<{
 	/** Электронная почта пользователя */
 	email?:boolean | `@${string}`,
@@ -1915,22 +2361,38 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["Mutation"]: AliasType<{
+acceptChildOrder?: [{	data: ValueTypes["AcceptChildOrderInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
+cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+confirmSupplyOnRequest?: [{	data: ValueTypes["ConfirmSupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
+createChildOrder?: [{	data: ValueTypes["CreateChildOrderInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createDepositPayment?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
 createInitialPayment?: [{	data: ValueTypes["CreateInitialPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
+createParentOffer?: [{	data: ValueTypes["CreateParentOfferInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["CreatedProjectFreeDecision"]],
+declineRequest?: [{	data: ValueTypes["DeclineRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ValueTypes["DeleteTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
+deliverOnRequest?: [{	data: ValueTypes["DeliverOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+disputeOnRequest?: [{	data: ValueTypes["DisputeOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 editBranch?: [{	data: ValueTypes["EditBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
+generateAssetContributionAct?: [{	data: ValueTypes["AssetContributionActGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["AssetContributionActDocument"]],
+generateAssetContributionDecision?: [{	data: ValueTypes["AssetContributionDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["AssetContributionDecisionDocument"]],
+generateAssetContributionStatement?: [{	data: ValueTypes["AssetContributionStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["AssetContributionStatementDocument"]],
 generateFreeDecision?: [{	data: ValueTypes["FreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["ProjectFreeDecisionDocument"]],
 generateParticipantApplication?: [{	data: ValueTypes["ParticipantApplicationGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["ParticipantApplicationDocument"]],
 generateParticipantApplicationDecision?: [{	data: ValueTypes["ParticipantApplicationDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["ParticipantApplicationDecisionDocument"]],
 generatePrivacyAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateProjectOfFreeDecision?: [{	data: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["ProjectFreeDecisionDocument"]],
+generateReturnByAssetAct?: [{	data: ValueTypes["ReturnByAssetActGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["ReturnByAssetActDocument"]],
+generateReturnByAssetDecision?: [{	data: ValueTypes["ReturnByAssetDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["ReturnByAssetDecisionDocument"]],
+generateReturnByAssetStatement?: [{	data: ValueTypes["ReturnByAssetStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["ReturnByAssetStatementDocument"]],
 generateSelectBranchDocument?: [{	data: ValueTypes["SelectBranchGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["SelectBranchDocument"]],
 generateSignatureAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateUserAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -1940,7 +2402,11 @@ installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>
 installSystem?: [{	data: ValueTypes["Install"] | Variable<any, string>},ValueTypes["SystemInfo"]],
 login?: [{	data: ValueTypes["LoginInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 logout?: [{	data: ValueTypes["LogoutInput"] | Variable<any, string>},boolean | `@${string}`],
+moderateRequest?: [{	data: ValueTypes["ModerateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+prohibitRequest?: [{	data: ValueTypes["ProhibitRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},boolean | `@${string}`],
+publishRequest?: [{	data: ValueTypes["PublishRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+receiveOnRequest?: [{	data: ValueTypes["ReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 refresh?: [{	data: ValueTypes["RefreshInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 registerAccount?: [{	data: ValueTypes["RegisterAccountInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 registerParticipant?: [{	data: ValueTypes["RegisterParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
@@ -1949,10 +2415,13 @@ selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>}
 setPaymentStatus?: [{	data: ValueTypes["SetPaymentStatusInput"] | Variable<any, string>},ValueTypes["Payment"]],
 setWif?: [{	data: ValueTypes["SetWifInput"] | Variable<any, string>},boolean | `@${string}`],
 startResetKey?: [{	data: ValueTypes["StartResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
+supplyOnRequest?: [{	data: ValueTypes["SupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
+unpublishRequest?: [{	data: ValueTypes["UnpublishRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateAccount?: [{	data: ValueTypes["UpdateAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
+updateRequest?: [{	data: ValueTypes["UpdateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes["SystemInfo"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -2334,6 +2803,16 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ProhibitRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: number | Variable<any, string>,
+	/** Дополнительная информация о отклоненной модерации */
+	meta: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["ProjectFreeDecisionDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -2450,6 +2929,14 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["PublishRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор заявки */
+	exchange_id: number | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["Query"]: AliasType<{
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
@@ -2464,6 +2951,16 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	getSystemInfo?:ValueTypes["SystemInfo"],
 		__typename?: boolean | `@${string}`
 }>;
+	["ReceiveOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанный Заказчиком акт приёмки-передачи имущества из Кооператива по новации */
+	document: ValueTypes["ReturnByAssetActSignedDocumentInput"] | Variable<any, string>,
+	/** Идентификатор заявки */
+	exchange_id: number | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["RefreshInput"]: {
 	/** Токен доступа */
 	access_token: string | Variable<any, string>,
@@ -2570,6 +3067,298 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	ram_bytes?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ReturnByAssetActDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["ReturnByAssetActMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetActGenerateDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string | Variable<any, string>,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Идентификатор заявки */
+	request_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["ReturnByAssetActMetaDocumentOutput"]: AliasType<{
+	/** Идентификатор акта */
+	act_id?:boolean | `@${string}`,
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Имя аккаунта кооперативного участка */
+	braname?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Идентификатор решения */
+	decision_id?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Идентификатор заявки */
+	request_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetActSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ValueTypes["ReturnByAssetActSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Публичный ключ документа */
+	public_key: string | Variable<any, string>,
+	/** Подпись документа */
+	signature: string | Variable<any, string>
+};
+	["ReturnByAssetActSignedMetaDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string | Variable<any, string>,
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Идентификатор заявки */
+	request_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
+	["ReturnByAssetDecisionDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["ReturnByAssetDecisionMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Идентификатор заявки */
+	request_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["ReturnByAssetDecisionMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Идентификатор решения */
+	decision_id?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Идентификатор заявки */
+	request_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetStatementDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["ReturnByAssetStatementMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetStatementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ValueTypes["CommonRequestInput"] | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["ReturnByAssetStatementMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Запрос на внесение имущественного паевого взноса */
+	request?:ValueTypes["CommonRequestResponse"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetStatementSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ValueTypes["ReturnByAssetStatementSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Публичный ключ документа */
+	public_key: string | Variable<any, string>,
+	/** Подпись документа */
+	signature: string | Variable<any, string>
+};
+	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ValueTypes["CommonRequestInput"] | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
 	phone?:boolean | `@${string}`,
@@ -2739,6 +3528,16 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 		["...on ProjectFreeDecisionDocument"]?: ValueTypes["ProjectFreeDecisionDocument"]
 		__typename?: boolean | `@${string}`
 }>;
+	["SupplyOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанный Поставщиком акт приёма-передачи имущества в кооператив */
+	document: ValueTypes["AssetContributionActSignedDocumentInput"] | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: number | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ValueTypes["BlockchainAccount"],
@@ -2772,9 +3571,38 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	refresh?:ValueTypes["Token"],
 		__typename?: boolean | `@${string}`
 }>;
+	["Transaction"]: AliasType<{
+	/** Блокчейн, который использовался */
+	chain?:boolean | `@${string}`,
+	/** Запрос на подписание транзакции */
+	request?:boolean | `@${string}`,
+	/** Разрешенный запрос на подписание транзакции */
+	resolved?:boolean | `@${string}`,
+	/** Ответ от API после отправки транзакции (если был выполнен бродкаст) */
+	response?:boolean | `@${string}`,
+	/** Возвращаемые значения после выполнения транзакции */
+	returns?:boolean | `@${string}`,
+	/** Ревизии транзакции, измененные плагинами в ESR формате */
+	revisions?:boolean | `@${string}`,
+	/** Подписи транзакции */
+	signatures?:boolean | `@${string}`,
+	/** Авторизованный подписант */
+	signer?:boolean | `@${string}`,
+	/** Итоговая транзакция */
+	transaction?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string | Variable<any, string>
+};
+	["UnpublishRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: number | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
 };
 	["Update"]: {
 	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
@@ -2870,6 +3698,22 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Тип организации */
 	type: ValueTypes["OrganizationType"] | Variable<any, string>
 };
+	["UpdateRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Дополнительные данные */
+	data: string | Variable<any, string>,
+	/** Идентификатор обмена */
+	exchange_id: number | Variable<any, string>,
+	/** Дополнительная информация */
+	meta: string | Variable<any, string>,
+	/** Оставшееся количество единиц */
+	remain_units: string | Variable<any, string>,
+	/** Стоимость за единицу в формате "10.0000 RUB" */
+	unit_cost: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["UserAccount"]: AliasType<{
 	/** Метаинформация */
 	meta?:boolean | `@${string}`,
@@ -2963,7 +3807,17 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
   }
 
 export type ResolverInputTypes = {
-    ["Account"]: AliasType<{
+    ["AcceptChildOrderInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанное заявление на имущественный паевый взнос */
+	document: ResolverInputTypes["AssetContributionStatementSignedDocumentInput"],
+	/** Идентификатор заявки */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["Account"]: AliasType<{
 	/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
 	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
@@ -3076,6 +3930,298 @@ export type ResolverInputTypes = {
 	protocol_number?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["AssetContributionActDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["AssetContributionActMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionActGenerateDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver: string,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AssetContributionActMetaDocumentOutput"]: AliasType<{
+	/** Идентификатор акта */
+	act_id?:boolean | `@${string}`,
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Имя аккаунта кооперативного участка */
+	braname?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Идентификатор решения */
+	decision_id?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Идентификатор заявки */
+	request_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionActSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ResolverInputTypes["AssetContributionActSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["AssetContributionActSignedMetaDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AssetContributionDecisionDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["AssetContributionDecisionMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AssetContributionDecisionMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Идентификатор решения */
+	decision_id?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Идентификатор заявки */
+	request_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionStatementDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["AssetContributionStatementMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionStatementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ResolverInputTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AssetContributionStatementMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Запрос на внесение имущественного паевого взноса */
+	request?:ResolverInputTypes["CommonRequestResponse"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionStatementSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ResolverInputTypes["AssetContributionStatementSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["AssetContributionStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ResolverInputTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["AuthSequence"]: AliasType<{
 	account?:boolean | `@${string}`,
 	sequence?:boolean | `@${string}`,
@@ -3305,6 +4451,67 @@ export type ResolverInputTypes = {
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CancelRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор заявки */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CommonRequestInput"]: {
+	currency: string,
+	hash: string,
+	program_id: number,
+	title: string,
+	total_cost: string,
+	type: string,
+	unit_cost: string,
+	unit_of_measurement: string,
+	units: number
+};
+	["CommonRequestResponse"]: AliasType<{
+	currency?:boolean | `@${string}`,
+	hash?:boolean | `@${string}`,
+	program_id?:boolean | `@${string}`,
+	title?:boolean | `@${string}`,
+	total_cost?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
+	unit_cost?:boolean | `@${string}`,
+	unit_of_measurement?:boolean | `@${string}`,
+	units?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CompleteRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
+["ConfirmReceiveOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный акт приёмки-передачи имущества Уполномоченным лицом из Кооператива при возврате Заказчику по новации */
+	document: ResolverInputTypes["ReturnByAssetActSignedDocumentInput"],
+	/** Идентификатор обмена */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
+["ConfirmSupplyOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный акт приёма-передачи имущества от Поставщика в Кооператив */
+	document: ResolverInputTypes["AssetContributionActSignedDocumentInput"],
+	/** Идентификатор обмена */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["ContactsDTO"]: AliasType<{
 	chairman?:ResolverInputTypes["PublicChairman"],
 	details?:ResolverInputTypes["OrganizationDetails"],
@@ -3395,6 +4602,28 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateChildOrderInput"]: {
+	/** Имя кооператива */
+	coopname: string,
+	/** Дополнительные данные, специфичные для заявки */
+	data: string,
+	/** Подписанное заявление на возврат паевого взноса имуществом от Заказчика */
+	document: ResolverInputTypes["ReturnByAssetStatementSignedDocumentInput"],
+	/** Метаданные о заявке */
+	meta: string,
+	/** Идентификатор родительской заявки */
+	parent_id: number,
+	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
+	product_lifecycle_secs: number,
+	/** Идентификатор программы */
+	program_id: number,
+	/** Цена за единицу (штуку) товара или результата услуги в формате "10.0000 RUB" */
+	unit_cost: string,
+	/** Количество частей (штук) товара или услуги */
+	units: number,
+	/** Имя пользователя, инициирующего или обновляющего заявку */
+	username: string
+};
 	["CreateDepositPaymentInput"]: {
 	/** Сумма взноса */
 	quantity: string,
@@ -3467,6 +4696,26 @@ export type ResolverInputTypes = {
 	/** Тип организации */
 	type: ResolverInputTypes["OrganizationType"]
 };
+	["CreateParentOfferInput"]: {
+	/** Имя кооператива */
+	coopname: string,
+	/** Дополнительные данные, специфичные для заявки */
+	data: string,
+	/** Метаданные о заявке */
+	meta: string,
+	/** Идентификатор родительской заявки */
+	parent_id: number,
+	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
+	product_lifecycle_secs: number,
+	/** Идентификатор программы */
+	program_id: number,
+	/** Цена за единицу (штуку) товара или услуги в формате "10.0000 RUB" */
+	unit_cost: string,
+	/** Количество частей (штук) товара или услуги */
+	units: number,
+	/** Имя пользователя, инициирующего или обновляющего заявку */
+	username: string
+};
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string,
@@ -3498,6 +4747,16 @@ export type ResolverInputTypes = {
 	ParticipantApplicationDecisionDocument?:ResolverInputTypes["ParticipantApplicationDecisionDocument"],
 		__typename?: boolean | `@${string}`
 }>;
+	["DeclineRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Причина отказа */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -3517,6 +4776,24 @@ export type ResolverInputTypes = {
 	coopname: string,
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string
+};
+	["DeliverOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["DisputeOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Документ с аргументами спора */
+	document: ResolverInputTypes["JSONObject"],
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Комплексный объект папки цифрового документа, который включает в себя заявление, решение, акты и связанные документы */
 ["DocumentPackage"]: AliasType<{
@@ -3859,6 +5136,8 @@ export type ResolverInputTypes = {
 };
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
+	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+["JSONObject"]:unknown;
 	["KeyWeight"]: AliasType<{
 	/** Ключ */
 	key?:boolean | `@${string}`,
@@ -3929,6 +5208,16 @@ export type ResolverInputTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ModerateRequestInput"]: {
+	/** Размер комиссии за отмену в формате "10.0000 RUB" */
+	cancellation_fee: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["MonoAccount"]: AliasType<{
 	/** Электронная почта пользователя */
 	email?:boolean | `@${string}`,
@@ -3957,22 +5246,38 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["Mutation"]: AliasType<{
+acceptChildOrder?: [{	data: ResolverInputTypes["AcceptChildOrderInput"]},ResolverInputTypes["Transaction"]],
 addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInputTypes["Account"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
+cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
+completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverInputTypes["Transaction"]],
+confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
+confirmSupplyOnRequest?: [{	data: ResolverInputTypes["ConfirmSupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
+createChildOrder?: [{	data: ResolverInputTypes["CreateChildOrderInput"]},ResolverInputTypes["Transaction"]],
 createDepositPayment?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]},ResolverInputTypes["Payment"]],
 createInitialPayment?: [{	data: ResolverInputTypes["CreateInitialPaymentInput"]},ResolverInputTypes["Payment"]],
+createParentOffer?: [{	data: ResolverInputTypes["CreateParentOfferInput"]},ResolverInputTypes["Transaction"]],
 createProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecisionInput"]},ResolverInputTypes["CreatedProjectFreeDecision"]],
+declineRequest?: [{	data: ResolverInputTypes["DeclineRequestInput"]},ResolverInputTypes["Transaction"]],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ResolverInputTypes["DeleteTrustedAccountInput"]},ResolverInputTypes["Branch"]],
+deliverOnRequest?: [{	data: ResolverInputTypes["DeliverOnRequestInput"]},ResolverInputTypes["Transaction"]],
+disputeOnRequest?: [{	data: ResolverInputTypes["DisputeOnRequestInput"]},ResolverInputTypes["Transaction"]],
 editBranch?: [{	data: ResolverInputTypes["EditBranchInput"]},ResolverInputTypes["Branch"]],
+generateAssetContributionAct?: [{	data: ResolverInputTypes["AssetContributionActGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["AssetContributionActDocument"]],
+generateAssetContributionDecision?: [{	data: ResolverInputTypes["AssetContributionDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["AssetContributionDecisionDocument"]],
+generateAssetContributionStatement?: [{	data: ResolverInputTypes["AssetContributionStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["AssetContributionStatementDocument"]],
 generateFreeDecision?: [{	data: ResolverInputTypes["FreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["ProjectFreeDecisionDocument"]],
 generateParticipantApplication?: [{	data: ResolverInputTypes["ParticipantApplicationGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["ParticipantApplicationDocument"]],
 generateParticipantApplicationDecision?: [{	data: ResolverInputTypes["ParticipantApplicationDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["ParticipantApplicationDecisionDocument"]],
 generatePrivacyAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateProjectOfFreeDecision?: [{	data: ResolverInputTypes["ProjectFreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["ProjectFreeDecisionDocument"]],
+generateReturnByAssetAct?: [{	data: ResolverInputTypes["ReturnByAssetActGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["ReturnByAssetActDocument"]],
+generateReturnByAssetDecision?: [{	data: ResolverInputTypes["ReturnByAssetDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["ReturnByAssetDecisionDocument"]],
+generateReturnByAssetStatement?: [{	data: ResolverInputTypes["ReturnByAssetStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["ReturnByAssetStatementDocument"]],
 generateSelectBranchDocument?: [{	data: ResolverInputTypes["SelectBranchGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["SelectBranchDocument"]],
 generateSignatureAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateUserAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -3982,7 +5287,11 @@ installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputT
 installSystem?: [{	data: ResolverInputTypes["Install"]},ResolverInputTypes["SystemInfo"]],
 login?: [{	data: ResolverInputTypes["LoginInput"]},ResolverInputTypes["RegisteredAccount"]],
 logout?: [{	data: ResolverInputTypes["LogoutInput"]},boolean | `@${string}`],
+moderateRequest?: [{	data: ResolverInputTypes["ModerateRequestInput"]},ResolverInputTypes["Transaction"]],
+prohibitRequest?: [{	data: ResolverInputTypes["ProhibitRequestInput"]},ResolverInputTypes["Transaction"]],
 publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},boolean | `@${string}`],
+publishRequest?: [{	data: ResolverInputTypes["PublishRequestInput"]},ResolverInputTypes["Transaction"]],
+receiveOnRequest?: [{	data: ResolverInputTypes["ReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 refresh?: [{	data: ResolverInputTypes["RefreshInput"]},ResolverInputTypes["RegisteredAccount"]],
 registerAccount?: [{	data: ResolverInputTypes["RegisterAccountInput"]},ResolverInputTypes["RegisteredAccount"]],
 registerParticipant?: [{	data: ResolverInputTypes["RegisterParticipantInput"]},ResolverInputTypes["Account"]],
@@ -3991,10 +5300,13 @@ selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${s
 setPaymentStatus?: [{	data: ResolverInputTypes["SetPaymentStatusInput"]},ResolverInputTypes["Payment"]],
 setWif?: [{	data: ResolverInputTypes["SetWifInput"]},boolean | `@${string}`],
 startResetKey?: [{	data: ResolverInputTypes["StartResetKeyInput"]},boolean | `@${string}`],
+supplyOnRequest?: [{	data: ResolverInputTypes["SupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
+unpublishRequest?: [{	data: ResolverInputTypes["UnpublishRequestInput"]},ResolverInputTypes["Transaction"]],
 updateAccount?: [{	data: ResolverInputTypes["UpdateAccountInput"]},ResolverInputTypes["Account"]],
 updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
+updateRequest?: [{	data: ResolverInputTypes["UpdateRequestInput"]},ResolverInputTypes["Transaction"]],
 updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["SystemInfo"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -4377,6 +5689,16 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ProhibitRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Дополнительная информация о отклоненной модерации */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["ProjectFreeDecisionDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -4493,6 +5815,14 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["PublishRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор заявки */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["Query"]: AliasType<{
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
@@ -4507,6 +5837,16 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
 		__typename?: boolean | `@${string}`
 }>;
+	["ReceiveOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный Заказчиком акт приёмки-передачи имущества из Кооператива по новации */
+	document: ResolverInputTypes["ReturnByAssetActSignedDocumentInput"],
+	/** Идентификатор заявки */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["RefreshInput"]: {
 	/** Токен доступа */
 	access_token: string,
@@ -4613,6 +5953,298 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	ram_bytes?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ReturnByAssetActDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["ReturnByAssetActMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetActGenerateDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ReturnByAssetActMetaDocumentOutput"]: AliasType<{
+	/** Идентификатор акта */
+	act_id?:boolean | `@${string}`,
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Имя аккаунта кооперативного участка */
+	braname?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Идентификатор решения */
+	decision_id?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Идентификатор заявки */
+	request_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetActSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ResolverInputTypes["ReturnByAssetActSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ReturnByAssetActSignedMetaDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ReturnByAssetDecisionDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["ReturnByAssetDecisionMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ReturnByAssetDecisionMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Идентификатор решения */
+	decision_id?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Идентификатор заявки */
+	request_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetStatementDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["ReturnByAssetStatementMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetStatementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ResolverInputTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ReturnByAssetStatementMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Запрос на внесение имущественного паевого взноса */
+	request?:ResolverInputTypes["CommonRequestResponse"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetStatementSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ResolverInputTypes["ReturnByAssetStatementSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ResolverInputTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
 	phone?:boolean | `@${string}`,
@@ -4783,6 +6415,16 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	ProjectFreeDecisionDocument?:ResolverInputTypes["ProjectFreeDecisionDocument"],
 		__typename?: boolean | `@${string}`
 }>;
+	["SupplyOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный Поставщиком акт приёма-передачи имущества в кооператив */
+	document: ResolverInputTypes["AssetContributionActSignedDocumentInput"],
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
@@ -4816,9 +6458,38 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	refresh?:ResolverInputTypes["Token"],
 		__typename?: boolean | `@${string}`
 }>;
+	["Transaction"]: AliasType<{
+	/** Блокчейн, который использовался */
+	chain?:boolean | `@${string}`,
+	/** Запрос на подписание транзакции */
+	request?:boolean | `@${string}`,
+	/** Разрешенный запрос на подписание транзакции */
+	resolved?:boolean | `@${string}`,
+	/** Ответ от API после отправки транзакции (если был выполнен бродкаст) */
+	response?:boolean | `@${string}`,
+	/** Возвращаемые значения после выполнения транзакции */
+	returns?:boolean | `@${string}`,
+	/** Ревизии транзакции, измененные плагинами в ESR формате */
+	revisions?:boolean | `@${string}`,
+	/** Подписи транзакции */
+	signatures?:boolean | `@${string}`,
+	/** Авторизованный подписант */
+	signer?:boolean | `@${string}`,
+	/** Итоговая транзакция */
+	transaction?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
+};
+	["UnpublishRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["Update"]: {
 	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
@@ -4913,6 +6584,22 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	short_name: string,
 	/** Тип организации */
 	type: ResolverInputTypes["OrganizationType"]
+};
+	["UpdateRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Дополнительные данные */
+	data: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Дополнительная информация */
+	meta: string,
+	/** Оставшееся количество единиц */
+	remain_units: string,
+	/** Стоимость за единицу в формате "10.0000 RUB" */
+	unit_cost: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["UserAccount"]: AliasType<{
 	/** Метаинформация */
@@ -5013,7 +6700,17 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
   }
 
 export type ModelTypes = {
-    ["Account"]: {
+    ["AcceptChildOrderInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанное заявление на имущественный паевый взнос */
+	document: ModelTypes["AssetContributionStatementSignedDocumentInput"],
+	/** Идентификатор заявки */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["Account"]: {
 		/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
 	blockchain_account?: ModelTypes["BlockchainAccount"] | undefined | null,
 	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
@@ -5115,6 +6812,292 @@ export type ModelTypes = {
 	["AgreementVar"]: {
 		protocol_day_month_year: string,
 	protocol_number: string
+};
+	["AssetContributionActDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["AssetContributionActMetaDocumentOutput"]
+};
+	["AssetContributionActGenerateDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver: string,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AssetContributionActMetaDocumentOutput"]: {
+		/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AssetContributionActSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["AssetContributionActSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["AssetContributionActSignedMetaDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AssetContributionDecisionDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["AssetContributionDecisionMetaDocumentOutput"]
+};
+	["AssetContributionDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AssetContributionDecisionMetaDocumentOutput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AssetContributionStatementDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["AssetContributionStatementMetaDocumentOutput"]
+};
+	["AssetContributionStatementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ModelTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AssetContributionStatementMetaDocumentOutput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ModelTypes["CommonRequestResponse"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AssetContributionStatementSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["AssetContributionStatementSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["AssetContributionStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ModelTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["AuthSequence"]: {
 		account: string,
@@ -5335,6 +7318,66 @@ export type ModelTypes = {
 	/** Тип организации */
 	type: string
 };
+	["CancelRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор заявки */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CommonRequestInput"]: {
+	currency: string,
+	hash: string,
+	program_id: number,
+	title: string,
+	total_cost: string,
+	type: string,
+	unit_cost: string,
+	unit_of_measurement: string,
+	units: number
+};
+	["CommonRequestResponse"]: {
+		currency: string,
+	hash: string,
+	program_id: number,
+	title: string,
+	total_cost: string,
+	type: string,
+	unit_cost: string,
+	unit_of_measurement: string,
+	units: number
+};
+	["CompleteRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
+["ConfirmReceiveOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный акт приёмки-передачи имущества Уполномоченным лицом из Кооператива при возврате Заказчику по новации */
+	document: ModelTypes["ReturnByAssetActSignedDocumentInput"],
+	/** Идентификатор обмена */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
+["ConfirmSupplyOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный акт приёма-передачи имущества от Поставщика в Кооператив */
+	document: ModelTypes["AssetContributionActSignedDocumentInput"],
+	/** Идентификатор обмена */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["ContactsDTO"]: {
 		chairman: ModelTypes["PublicChairman"],
 	details: ModelTypes["OrganizationDetails"],
@@ -5422,6 +7465,28 @@ export type ModelTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateChildOrderInput"]: {
+	/** Имя кооператива */
+	coopname: string,
+	/** Дополнительные данные, специфичные для заявки */
+	data: string,
+	/** Подписанное заявление на возврат паевого взноса имуществом от Заказчика */
+	document: ModelTypes["ReturnByAssetStatementSignedDocumentInput"],
+	/** Метаданные о заявке */
+	meta: string,
+	/** Идентификатор родительской заявки */
+	parent_id: number,
+	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
+	product_lifecycle_secs: number,
+	/** Идентификатор программы */
+	program_id: number,
+	/** Цена за единицу (штуку) товара или результата услуги в формате "10.0000 RUB" */
+	unit_cost: string,
+	/** Количество частей (штук) товара или услуги */
+	units: number,
+	/** Имя пользователя, инициирующего или обновляющего заявку */
+	username: string
+};
 	["CreateDepositPaymentInput"]: {
 	/** Сумма взноса */
 	quantity: string,
@@ -5494,6 +7559,26 @@ export type ModelTypes = {
 	/** Тип организации */
 	type: ModelTypes["OrganizationType"]
 };
+	["CreateParentOfferInput"]: {
+	/** Имя кооператива */
+	coopname: string,
+	/** Дополнительные данные, специфичные для заявки */
+	data: string,
+	/** Метаданные о заявке */
+	meta: string,
+	/** Идентификатор родительской заявки */
+	parent_id: number,
+	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
+	product_lifecycle_secs: number,
+	/** Идентификатор программы */
+	program_id: number,
+	/** Цена за единицу (штуку) товара или услуги в формате "10.0000 RUB" */
+	unit_cost: string,
+	/** Количество частей (штук) товара или услуги */
+	units: number,
+	/** Имя пользователя, инициирующего или обновляющего заявку */
+	username: string
+};
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string,
@@ -5519,6 +7604,16 @@ export type ModelTypes = {
 };
 	/** Объединение типов документов протоколов решения совета */
 ["DecisionDocumentUnion"]:ModelTypes["FreeDecisionDocument"] | ModelTypes["ParticipantApplicationDecisionDocument"];
+	["DeclineRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Причина отказа */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -5538,6 +7633,24 @@ export type ModelTypes = {
 	coopname: string,
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string
+};
+	["DeliverOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["DisputeOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Документ с аргументами спора */
+	document: ModelTypes["JSONObject"],
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Комплексный объект папки цифрового документа, который включает в себя заявление, решение, акты и связанные документы */
 ["DocumentPackage"]: {
@@ -5870,6 +7983,8 @@ export type ModelTypes = {
 };
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:any;
+	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+["JSONObject"]:any;
 	["KeyWeight"]: {
 		/** Ключ */
 	key: string,
@@ -5938,6 +8053,16 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ModerateRequestInput"]: {
+	/** Размер комиссии за отмену в формате "10.0000 RUB" */
+	cancellation_fee: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["MonoAccount"]: {
 		/** Электронная почта пользователя */
 	email: string,
@@ -5965,28 +8090,54 @@ export type ModelTypes = {
 	username: string
 };
 	["Mutation"]: {
-		/** Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета) */
+		/** Подтвердить поставку имущества на заявку */
+	acceptChildOrder: ModelTypes["Transaction"],
+	/** Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета) */
 	addParticipant: ModelTypes["Account"],
 	/** Добавить доверенное лицо кооперативного участка */
 	addTrustedAccount: ModelTypes["Branch"],
+	/** Отменить заявку */
+	cancelRequest: ModelTypes["Transaction"],
+	/** Завершить заявку по истечению гарантийного срока */
+	completeRequest: ModelTypes["Transaction"],
+	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
+	confirmReceiveOnRequest: ModelTypes["Transaction"],
+	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
+	confirmSupplyOnRequest: ModelTypes["Transaction"],
 	/** Добавить метод оплаты */
 	createBankAccount: ModelTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
 	createBranch: ModelTypes["Branch"],
+	/** Создать заявку на поставку имущества по предложению Поставщика */
+	createChildOrder: ModelTypes["Transaction"],
 	/** Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
 	createDepositPayment: ModelTypes["Payment"],
 	/** Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
 	createInitialPayment: ModelTypes["Payment"],
+	/** Создать предложение на поставку имущества */
+	createParentOffer: ModelTypes["Transaction"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 	createProjectOfFreeDecision: ModelTypes["CreatedProjectFreeDecision"],
+	/** Отклонить заявку */
+	declineRequest: ModelTypes["Transaction"],
 	/** Удалить кооперативный участок */
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
 	deletePaymentMethod: boolean,
 	/** Удалить доверенное лицо кооперативного участка */
 	deleteTrustedAccount: ModelTypes["Branch"],
+	/** Подтвердить доставку имущества Заказчику по заявке */
+	deliverOnRequest: ModelTypes["Transaction"],
+	/** Открыть спор по заявке */
+	disputeOnRequest: ModelTypes["Transaction"],
 	/** Изменить кооперативный участок */
 	editBranch: ModelTypes["Branch"],
+	/** Сгенерировать документ акта приема-передачи. */
+	generateAssetContributionAct: ModelTypes["AssetContributionActDocument"],
+	/** Сгенерировать документ решения о вступлении в кооператив. */
+	generateAssetContributionDecision: ModelTypes["AssetContributionDecisionDocument"],
+	/** Сгенерировать документ заявления о вступлении в кооператив. */
+	generateAssetContributionStatement: ModelTypes["AssetContributionStatementDocument"],
 	/** Сгенерировать протокол решения по предложенной повестке */
 	generateFreeDecision: ModelTypes["ProjectFreeDecisionDocument"],
 	/** Сгенерировать документ заявления о вступлении в кооператив. */
@@ -5997,6 +8148,12 @@ export type ModelTypes = {
 	generatePrivacyAgreement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ проекта свободного решения */
 	generateProjectOfFreeDecision: ModelTypes["ProjectFreeDecisionDocument"],
+	/** Сгенерировать документ акта возврата имущества. */
+	generateReturnByAssetAct: ModelTypes["ReturnByAssetActDocument"],
+	/** Сгенерировать документ решения о возврате имущества. */
+	generateReturnByAssetDecision: ModelTypes["ReturnByAssetDecisionDocument"],
+	/** Сгенерировать документ заявления о возврате имущества. */
+	generateReturnByAssetStatement: ModelTypes["ReturnByAssetStatementDocument"],
 	/** Сгенерировать документ, подтверждающий выбор кооперативного участка */
 	generateSelectBranchDocument: ModelTypes["SelectBranchDocument"],
 	/** Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи. */
@@ -6015,8 +8172,16 @@ export type ModelTypes = {
 	login: ModelTypes["RegisteredAccount"],
 	/** Выйти из системы и заблокировать JWT-токены */
 	logout: boolean,
+	/** Модерировать заявку */
+	moderateRequest: ModelTypes["Transaction"],
+	/** Отклонить модерацию по заявке */
+	prohibitRequest: ModelTypes["Transaction"],
 	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему */
 	publishProjectOfFreeDecision: boolean,
+	/** Опубликовать заявку */
+	publishRequest: ModelTypes["Transaction"],
+	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по акту приёмки-передачи */
+	receiveOnRequest: ModelTypes["Transaction"],
 	/** Обновить токен доступа аккаунта */
 	refresh: ModelTypes["RegisteredAccount"],
 	/** Зарегистрировать аккаунт пользователя в системе */
@@ -6033,14 +8198,20 @@ export type ModelTypes = {
 	setWif: boolean,
 	/** Выслать токен для замены приватного ключа аккаунта на электронную почту */
 	startResetKey: boolean,
+	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
+	supplyOnRequest: ModelTypes["Transaction"],
 	/** Удалить расширение */
 	uninstallExtension: boolean,
+	/** Снять с публикации заявку */
+	unpublishRequest: ModelTypes["Transaction"],
 	/** Обновить аккаунт в системе провайдера. Обновление аккаунта пользователя производится по username. Мутация позволяет изменить приватные данные пользователя, а также, адрес электронной почты в MONO. Использовать мутацию может только председатель совета. */
 	updateAccount: ModelTypes["Account"],
 	/** Обновить банковский счёт */
 	updateBankAccount: ModelTypes["PaymentMethod"],
 	/** Обновить расширение */
 	updateExtension: ModelTypes["Extension"],
+	/** Обновить заявку */
+	updateRequest: ModelTypes["Transaction"],
 	/** Обновить параметры системы */
 	updateSystem: ModelTypes["SystemInfo"]
 };
@@ -6401,6 +8572,16 @@ export type ModelTypes = {
 	/** Вес */
 	weight: number
 };
+	["ProhibitRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Дополнительная информация о отклоненной модерации */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["ProjectFreeDecisionDocument"]: {
 		/** Бинарное содержимое документа (base64) */
 	binary: string,
@@ -6514,6 +8695,14 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["PublishRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор заявки */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["Query"]: {
 		/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
@@ -6532,6 +8721,16 @@ export type ModelTypes = {
 	getPayments: ModelTypes["PaymentPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"]
+};
+	["ReceiveOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный Заказчиком акт приёмки-передачи имущества из Кооператива по новации */
+	document: ModelTypes["ReturnByAssetActSignedDocumentInput"],
+	/** Идентификатор заявки */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["RefreshInput"]: {
 	/** Токен доступа */
@@ -6632,6 +8831,292 @@ export type ModelTypes = {
 	owner: string,
 	/** Используемая RAM */
 	ram_bytes: number
+};
+	["ReturnByAssetActDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ReturnByAssetActMetaDocumentOutput"]
+};
+	["ReturnByAssetActGenerateDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ReturnByAssetActMetaDocumentOutput"]: {
+		/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ReturnByAssetActSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ReturnByAssetActSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ReturnByAssetActSignedMetaDocumentInput"]: {
+	/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ReturnByAssetDecisionDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ReturnByAssetDecisionMetaDocumentOutput"]
+};
+	["ReturnByAssetDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ReturnByAssetDecisionMetaDocumentOutput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ReturnByAssetStatementDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ReturnByAssetStatementMetaDocumentOutput"]
+};
+	["ReturnByAssetStatementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ModelTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ReturnByAssetStatementMetaDocumentOutput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ModelTypes["CommonRequestResponse"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ReturnByAssetStatementSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ReturnByAssetStatementSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: ModelTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["SbpAccount"]: {
 		/** Мобильный телефон получателя */
@@ -6794,6 +9279,16 @@ export type ModelTypes = {
 };
 	/** Объединение типов документов заявлений, или других документов, за которыми следует появление протокола решения совета */
 ["StatementDocumentUnion"]:ModelTypes["ParticipantApplicationDocument"] | ModelTypes["ProjectFreeDecisionDocument"];
+	["SupplyOnRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный Поставщиком акт приёма-передачи имущества в кооператив */
+	document: ModelTypes["AssetContributionActSignedDocumentInput"],
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["SystemInfo"]: {
 		/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account: ModelTypes["BlockchainAccount"],
@@ -6823,9 +9318,37 @@ export type ModelTypes = {
 	/** Токен обновления */
 	refresh: ModelTypes["Token"]
 };
+	["Transaction"]: {
+		/** Блокчейн, который использовался */
+	chain: ModelTypes["JSONObject"],
+	/** Запрос на подписание транзакции */
+	request: ModelTypes["JSONObject"],
+	/** Разрешенный запрос на подписание транзакции */
+	resolved?: ModelTypes["JSONObject"] | undefined | null,
+	/** Ответ от API после отправки транзакции (если был выполнен бродкаст) */
+	response?: ModelTypes["JSONObject"] | undefined | null,
+	/** Возвращаемые значения после выполнения транзакции */
+	returns: ModelTypes["JSONObject"],
+	/** Ревизии транзакции, измененные плагинами в ESR формате */
+	revisions: ModelTypes["JSONObject"],
+	/** Подписи транзакции */
+	signatures: ModelTypes["JSONObject"],
+	/** Авторизованный подписант */
+	signer: ModelTypes["JSONObject"],
+	/** Итоговая транзакция */
+	transaction?: ModelTypes["JSONObject"] | undefined | null
+};
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
+};
+	["UnpublishRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["Update"]: {
 	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
@@ -6921,6 +9444,22 @@ export type ModelTypes = {
 	/** Тип организации */
 	type: ModelTypes["OrganizationType"]
 };
+	["UpdateRequestInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Дополнительные данные */
+	data: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Дополнительная информация */
+	meta: string,
+	/** Оставшееся количество единиц */
+	remain_units: string,
+	/** Стоимость за единицу в формате "10.0000 RUB" */
+	unit_cost: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["UserAccount"]: {
 		/** Метаинформация */
 	meta: string,
@@ -7012,6 +9551,16 @@ export type GraphQLTypes = {
     // ------------------------------------------------------;
 	// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY);
 	// ------------------------------------------------------;
+	["AcceptChildOrderInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанное заявление на имущественный паевый взнос */
+	document: GraphQLTypes["AssetContributionStatementSignedDocumentInput"],
+	/** Идентификатор заявки */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["Account"]: {
 	__typename: "Account",
 	/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
@@ -7124,6 +9673,298 @@ export type GraphQLTypes = {
 	__typename: "AgreementVar",
 	protocol_day_month_year: string,
 	protocol_number: string
+};
+	["AssetContributionActDocument"]: {
+	__typename: "AssetContributionActDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["AssetContributionActMetaDocumentOutput"]
+};
+	["AssetContributionActGenerateDocumentInput"]: {
+		/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver: string,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AssetContributionActMetaDocumentOutput"]: {
+	__typename: "AssetContributionActMetaDocumentOutput",
+	/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AssetContributionActSignedDocumentInput"]: {
+		/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["AssetContributionActSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["AssetContributionActSignedMetaDocumentInput"]: {
+		/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Имя аккаунта получателя на кооперативном участке */
+	receiver: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AssetContributionDecisionDocument"]: {
+	__typename: "AssetContributionDecisionDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["AssetContributionDecisionMetaDocumentOutput"]
+};
+	["AssetContributionDecisionGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AssetContributionDecisionMetaDocumentOutput"]: {
+	__typename: "AssetContributionDecisionMetaDocumentOutput",
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AssetContributionStatementDocument"]: {
+	__typename: "AssetContributionStatementDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["AssetContributionStatementMetaDocumentOutput"]
+};
+	["AssetContributionStatementGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: GraphQLTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AssetContributionStatementMetaDocumentOutput"]: {
+	__typename: "AssetContributionStatementMetaDocumentOutput",
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: GraphQLTypes["CommonRequestResponse"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AssetContributionStatementSignedDocumentInput"]: {
+		/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["AssetContributionStatementSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["AssetContributionStatementSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: GraphQLTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["AuthSequence"]: {
 	__typename: "AuthSequence",
@@ -7354,6 +10195,67 @@ export type GraphQLTypes = {
 	/** Тип организации */
 	type: string
 };
+	["CancelRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор заявки */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["CommonRequestInput"]: {
+		currency: string,
+	hash: string,
+	program_id: number,
+	title: string,
+	total_cost: string,
+	type: string,
+	unit_cost: string,
+	unit_of_measurement: string,
+	units: number
+};
+	["CommonRequestResponse"]: {
+	__typename: "CommonRequestResponse",
+	currency: string,
+	hash: string,
+	program_id: number,
+	title: string,
+	total_cost: string,
+	type: string,
+	unit_cost: string,
+	unit_of_measurement: string,
+	units: number
+};
+	["CompleteRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
+["ConfirmReceiveOnRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный акт приёмки-передачи имущества Уполномоченным лицом из Кооператива при возврате Заказчику по новации */
+	document: GraphQLTypes["ReturnByAssetActSignedDocumentInput"],
+	/** Идентификатор обмена */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
+["ConfirmSupplyOnRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный акт приёма-передачи имущества от Поставщика в Кооператив */
+	document: GraphQLTypes["AssetContributionActSignedDocumentInput"],
+	/** Идентификатор обмена */
+	exchange_id: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["ContactsDTO"]: {
 	__typename: "ContactsDTO",
 	chairman: GraphQLTypes["PublicChairman"],
@@ -7444,6 +10346,28 @@ export type GraphQLTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateChildOrderInput"]: {
+		/** Имя кооператива */
+	coopname: string,
+	/** Дополнительные данные, специфичные для заявки */
+	data: string,
+	/** Подписанное заявление на возврат паевого взноса имуществом от Заказчика */
+	document: GraphQLTypes["ReturnByAssetStatementSignedDocumentInput"],
+	/** Метаданные о заявке */
+	meta: string,
+	/** Идентификатор родительской заявки */
+	parent_id: number,
+	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
+	product_lifecycle_secs: number,
+	/** Идентификатор программы */
+	program_id: number,
+	/** Цена за единицу (штуку) товара или результата услуги в формате "10.0000 RUB" */
+	unit_cost: string,
+	/** Количество частей (штук) товара или услуги */
+	units: number,
+	/** Имя пользователя, инициирующего или обновляющего заявку */
+	username: string
+};
 	["CreateDepositPaymentInput"]: {
 		/** Сумма взноса */
 	quantity: string,
@@ -7516,6 +10440,26 @@ export type GraphQLTypes = {
 	/** Тип организации */
 	type: GraphQLTypes["OrganizationType"]
 };
+	["CreateParentOfferInput"]: {
+		/** Имя кооператива */
+	coopname: string,
+	/** Дополнительные данные, специфичные для заявки */
+	data: string,
+	/** Метаданные о заявке */
+	meta: string,
+	/** Идентификатор родительской заявки */
+	parent_id: number,
+	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
+	product_lifecycle_secs: number,
+	/** Идентификатор программы */
+	program_id: number,
+	/** Цена за единицу (штуку) товара или услуги в формате "10.0000 RUB" */
+	unit_cost: string,
+	/** Количество частей (штук) товара или услуги */
+	units: number,
+	/** Имя пользователя, инициирующего или обновляющего заявку */
+	username: string
+};
 	["CreateProjectFreeDecisionInput"]: {
 		/** Проект решения, которое предлагается принять */
 	decision: string,
@@ -7547,6 +10491,16 @@ export type GraphQLTypes = {
         	['...on FreeDecisionDocument']: '__union' & GraphQLTypes["FreeDecisionDocument"];
 	['...on ParticipantApplicationDecisionDocument']: '__union' & GraphQLTypes["ParticipantApplicationDecisionDocument"];
 };
+	["DeclineRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Причина отказа */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["DeleteBranchInput"]: {
 		/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -7566,6 +10520,24 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string
+};
+	["DeliverOnRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
+	["DisputeOnRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Документ с аргументами спора */
+	document: GraphQLTypes["JSONObject"],
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Комплексный объект папки цифрового документа, который включает в себя заявление, решение, акты и связанные документы */
 ["DocumentPackage"]: {
@@ -7908,6 +10880,8 @@ export type GraphQLTypes = {
 };
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]: "scalar" & { name: "JSON" };
+	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+["JSONObject"]: "scalar" & { name: "JSONObject" };
 	["KeyWeight"]: {
 	__typename: "KeyWeight",
 	/** Ключ */
@@ -7978,6 +10952,16 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ModerateRequestInput"]: {
+		/** Размер комиссии за отмену в формате "10.0000 RUB" */
+	cancellation_fee: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["MonoAccount"]: {
 	__typename: "MonoAccount",
 	/** Электронная почта пользователя */
@@ -8007,28 +10991,54 @@ export type GraphQLTypes = {
 };
 	["Mutation"]: {
 	__typename: "Mutation",
+	/** Подтвердить поставку имущества на заявку */
+	acceptChildOrder: GraphQLTypes["Transaction"],
 	/** Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета) */
 	addParticipant: GraphQLTypes["Account"],
 	/** Добавить доверенное лицо кооперативного участка */
 	addTrustedAccount: GraphQLTypes["Branch"],
+	/** Отменить заявку */
+	cancelRequest: GraphQLTypes["Transaction"],
+	/** Завершить заявку по истечению гарантийного срока */
+	completeRequest: GraphQLTypes["Transaction"],
+	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
+	confirmReceiveOnRequest: GraphQLTypes["Transaction"],
+	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
+	confirmSupplyOnRequest: GraphQLTypes["Transaction"],
 	/** Добавить метод оплаты */
 	createBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
 	createBranch: GraphQLTypes["Branch"],
+	/** Создать заявку на поставку имущества по предложению Поставщика */
+	createChildOrder: GraphQLTypes["Transaction"],
 	/** Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
 	createDepositPayment: GraphQLTypes["Payment"],
 	/** Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
 	createInitialPayment: GraphQLTypes["Payment"],
+	/** Создать предложение на поставку имущества */
+	createParentOffer: GraphQLTypes["Transaction"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 	createProjectOfFreeDecision: GraphQLTypes["CreatedProjectFreeDecision"],
+	/** Отклонить заявку */
+	declineRequest: GraphQLTypes["Transaction"],
 	/** Удалить кооперативный участок */
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
 	deletePaymentMethod: boolean,
 	/** Удалить доверенное лицо кооперативного участка */
 	deleteTrustedAccount: GraphQLTypes["Branch"],
+	/** Подтвердить доставку имущества Заказчику по заявке */
+	deliverOnRequest: GraphQLTypes["Transaction"],
+	/** Открыть спор по заявке */
+	disputeOnRequest: GraphQLTypes["Transaction"],
 	/** Изменить кооперативный участок */
 	editBranch: GraphQLTypes["Branch"],
+	/** Сгенерировать документ акта приема-передачи. */
+	generateAssetContributionAct: GraphQLTypes["AssetContributionActDocument"],
+	/** Сгенерировать документ решения о вступлении в кооператив. */
+	generateAssetContributionDecision: GraphQLTypes["AssetContributionDecisionDocument"],
+	/** Сгенерировать документ заявления о вступлении в кооператив. */
+	generateAssetContributionStatement: GraphQLTypes["AssetContributionStatementDocument"],
 	/** Сгенерировать протокол решения по предложенной повестке */
 	generateFreeDecision: GraphQLTypes["ProjectFreeDecisionDocument"],
 	/** Сгенерировать документ заявления о вступлении в кооператив. */
@@ -8039,6 +11049,12 @@ export type GraphQLTypes = {
 	generatePrivacyAgreement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ проекта свободного решения */
 	generateProjectOfFreeDecision: GraphQLTypes["ProjectFreeDecisionDocument"],
+	/** Сгенерировать документ акта возврата имущества. */
+	generateReturnByAssetAct: GraphQLTypes["ReturnByAssetActDocument"],
+	/** Сгенерировать документ решения о возврате имущества. */
+	generateReturnByAssetDecision: GraphQLTypes["ReturnByAssetDecisionDocument"],
+	/** Сгенерировать документ заявления о возврате имущества. */
+	generateReturnByAssetStatement: GraphQLTypes["ReturnByAssetStatementDocument"],
 	/** Сгенерировать документ, подтверждающий выбор кооперативного участка */
 	generateSelectBranchDocument: GraphQLTypes["SelectBranchDocument"],
 	/** Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи. */
@@ -8057,8 +11073,16 @@ export type GraphQLTypes = {
 	login: GraphQLTypes["RegisteredAccount"],
 	/** Выйти из системы и заблокировать JWT-токены */
 	logout: boolean,
+	/** Модерировать заявку */
+	moderateRequest: GraphQLTypes["Transaction"],
+	/** Отклонить модерацию по заявке */
+	prohibitRequest: GraphQLTypes["Transaction"],
 	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему */
 	publishProjectOfFreeDecision: boolean,
+	/** Опубликовать заявку */
+	publishRequest: GraphQLTypes["Transaction"],
+	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по акту приёмки-передачи */
+	receiveOnRequest: GraphQLTypes["Transaction"],
 	/** Обновить токен доступа аккаунта */
 	refresh: GraphQLTypes["RegisteredAccount"],
 	/** Зарегистрировать аккаунт пользователя в системе */
@@ -8075,14 +11099,20 @@ export type GraphQLTypes = {
 	setWif: boolean,
 	/** Выслать токен для замены приватного ключа аккаунта на электронную почту */
 	startResetKey: boolean,
+	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
+	supplyOnRequest: GraphQLTypes["Transaction"],
 	/** Удалить расширение */
 	uninstallExtension: boolean,
+	/** Снять с публикации заявку */
+	unpublishRequest: GraphQLTypes["Transaction"],
 	/** Обновить аккаунт в системе провайдера. Обновление аккаунта пользователя производится по username. Мутация позволяет изменить приватные данные пользователя, а также, адрес электронной почты в MONO. Использовать мутацию может только председатель совета. */
 	updateAccount: GraphQLTypes["Account"],
 	/** Обновить банковский счёт */
 	updateBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Обновить расширение */
 	updateExtension: GraphQLTypes["Extension"],
+	/** Обновить заявку */
+	updateRequest: GraphQLTypes["Transaction"],
 	/** Обновить параметры системы */
 	updateSystem: GraphQLTypes["SystemInfo"]
 };
@@ -8465,6 +11495,16 @@ export type GraphQLTypes = {
 	/** Вес */
 	weight: number
 };
+	["ProhibitRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Дополнительная информация о отклоненной модерации */
+	meta: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["ProjectFreeDecisionDocument"]: {
 	__typename: "ProjectFreeDecisionDocument",
 	/** Бинарное содержимое документа (base64) */
@@ -8581,6 +11621,14 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["PublishRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор заявки */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["Query"]: {
 	__typename: "Query",
 	/** Получить сводную информацию о аккаунте */
@@ -8600,6 +11648,16 @@ export type GraphQLTypes = {
 	getPayments: GraphQLTypes["PaymentPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"]
+};
+	["ReceiveOnRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный Заказчиком акт приёмки-передачи имущества из Кооператива по новации */
+	document: GraphQLTypes["ReturnByAssetActSignedDocumentInput"],
+	/** Идентификатор заявки */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["RefreshInput"]: {
 		/** Токен доступа */
@@ -8706,6 +11764,298 @@ export type GraphQLTypes = {
 	owner: string,
 	/** Используемая RAM */
 	ram_bytes: number
+};
+	["ReturnByAssetActDocument"]: {
+	__typename: "ReturnByAssetActDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ReturnByAssetActMetaDocumentOutput"]
+};
+	["ReturnByAssetActGenerateDocumentInput"]: {
+		/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ReturnByAssetActMetaDocumentOutput"]: {
+	__typename: "ReturnByAssetActMetaDocumentOutput",
+	/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ReturnByAssetActSignedDocumentInput"]: {
+		/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ReturnByAssetActSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ReturnByAssetActSignedMetaDocumentInput"]: {
+		/** Идентификатор акта */
+	act_id: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Имя аккаунта кооперативного участка */
+	braname?: string | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя аккаунта получателя на кооперативном участке */
+	transmitter: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ReturnByAssetDecisionDocument"]: {
+	__typename: "ReturnByAssetDecisionDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ReturnByAssetDecisionMetaDocumentOutput"]
+};
+	["ReturnByAssetDecisionGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ReturnByAssetDecisionMetaDocumentOutput"]: {
+	__typename: "ReturnByAssetDecisionMetaDocumentOutput",
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Идентификатор заявки */
+	request_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ReturnByAssetStatementDocument"]: {
+	__typename: "ReturnByAssetStatementDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ReturnByAssetStatementMetaDocumentOutput"]
+};
+	["ReturnByAssetStatementGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: GraphQLTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ReturnByAssetStatementMetaDocumentOutput"]: {
+	__typename: "ReturnByAssetStatementMetaDocumentOutput",
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: GraphQLTypes["CommonRequestResponse"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ReturnByAssetStatementSignedDocumentInput"]: {
+		/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ReturnByAssetStatementSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Запрос на внесение имущественного паевого взноса */
+	request: GraphQLTypes["CommonRequestInput"],
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["SbpAccount"]: {
 	__typename: "SbpAccount",
@@ -8877,6 +12227,16 @@ export type GraphQLTypes = {
         	['...on ParticipantApplicationDocument']: '__union' & GraphQLTypes["ParticipantApplicationDocument"];
 	['...on ProjectFreeDecisionDocument']: '__union' & GraphQLTypes["ProjectFreeDecisionDocument"];
 };
+	["SupplyOnRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный Поставщиком акт приёма-передачи имущества в кооператив */
+	document: GraphQLTypes["AssetContributionActSignedDocumentInput"],
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["SystemInfo"]: {
 	__typename: "SystemInfo",
 	/** Объект системного аккаунта кооператива в блокчейне */
@@ -8910,9 +12270,38 @@ export type GraphQLTypes = {
 	/** Токен обновления */
 	refresh: GraphQLTypes["Token"]
 };
+	["Transaction"]: {
+	__typename: "Transaction",
+	/** Блокчейн, который использовался */
+	chain: GraphQLTypes["JSONObject"],
+	/** Запрос на подписание транзакции */
+	request: GraphQLTypes["JSONObject"],
+	/** Разрешенный запрос на подписание транзакции */
+	resolved?: GraphQLTypes["JSONObject"] | undefined | null,
+	/** Ответ от API после отправки транзакции (если был выполнен бродкаст) */
+	response?: GraphQLTypes["JSONObject"] | undefined | null,
+	/** Возвращаемые значения после выполнения транзакции */
+	returns: GraphQLTypes["JSONObject"],
+	/** Ревизии транзакции, измененные плагинами в ESR формате */
+	revisions: GraphQLTypes["JSONObject"],
+	/** Подписи транзакции */
+	signatures: GraphQLTypes["JSONObject"],
+	/** Авторизованный подписант */
+	signer: GraphQLTypes["JSONObject"],
+	/** Итоговая транзакция */
+	transaction?: GraphQLTypes["JSONObject"] | undefined | null
+};
 	["UninstallExtensionInput"]: {
 		/** Фильтр по имени */
 	name: string
+};
+	["UnpublishRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["Update"]: {
 		/** Собственные данные кооператива, обслуживающего экземпляр платформы */
@@ -9007,6 +12396,22 @@ export type GraphQLTypes = {
 	short_name: string,
 	/** Тип организации */
 	type: GraphQLTypes["OrganizationType"]
+};
+	["UpdateRequestInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Дополнительные данные */
+	data: string,
+	/** Идентификатор обмена */
+	exchange_id: number,
+	/** Дополнительная информация */
+	meta: string,
+	/** Оставшееся количество единиц */
+	remain_units: string,
+	/** Стоимость за единицу в формате "10.0000 RUB" */
+	unit_cost: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["UserAccount"]: {
 	__typename: "UserAccount",
@@ -9117,6 +12522,7 @@ export enum OrganizationType {
 	OAO = "OAO",
 	OOO = "OOO",
 	PAO = "PAO",
+	PRODCOOP = "PRODCOOP",
 	ZAO = "ZAO"
 }
 /** Статус платежа */
@@ -9151,25 +12557,43 @@ export enum UserStatus {
 }
 
 type ZEUS_VARIABLES = {
+	["AcceptChildOrderInput"]: ValueTypes["AcceptChildOrderInput"];
 	["AccountType"]: ValueTypes["AccountType"];
 	["AddParticipantInput"]: ValueTypes["AddParticipantInput"];
 	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
 	["AgreementInput"]: ValueTypes["AgreementInput"];
+	["AssetContributionActGenerateDocumentInput"]: ValueTypes["AssetContributionActGenerateDocumentInput"];
+	["AssetContributionActSignedDocumentInput"]: ValueTypes["AssetContributionActSignedDocumentInput"];
+	["AssetContributionActSignedMetaDocumentInput"]: ValueTypes["AssetContributionActSignedMetaDocumentInput"];
+	["AssetContributionDecisionGenerateDocumentInput"]: ValueTypes["AssetContributionDecisionGenerateDocumentInput"];
+	["AssetContributionStatementGenerateDocumentInput"]: ValueTypes["AssetContributionStatementGenerateDocumentInput"];
+	["AssetContributionStatementSignedDocumentInput"]: ValueTypes["AssetContributionStatementSignedDocumentInput"];
+	["AssetContributionStatementSignedMetaDocumentInput"]: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"];
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
+	["CancelRequestInput"]: ValueTypes["CancelRequestInput"];
+	["CommonRequestInput"]: ValueTypes["CommonRequestInput"];
+	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
+	["ConfirmReceiveOnRequestInput"]: ValueTypes["ConfirmReceiveOnRequestInput"];
+	["ConfirmSupplyOnRequestInput"]: ValueTypes["ConfirmSupplyOnRequestInput"];
 	["Country"]: ValueTypes["Country"];
 	["CreateBankAccountInput"]: ValueTypes["CreateBankAccountInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
+	["CreateChildOrderInput"]: ValueTypes["CreateChildOrderInput"];
 	["CreateDepositPaymentInput"]: ValueTypes["CreateDepositPaymentInput"];
 	["CreateEntrepreneurDataInput"]: ValueTypes["CreateEntrepreneurDataInput"];
 	["CreateIndividualDataInput"]: ValueTypes["CreateIndividualDataInput"];
 	["CreateInitialPaymentInput"]: ValueTypes["CreateInitialPaymentInput"];
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
+	["CreateParentOfferInput"]: ValueTypes["CreateParentOfferInput"];
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
 	["DateTime"]: ValueTypes["DateTime"];
+	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
 	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
+	["DeliverOnRequestInput"]: ValueTypes["DeliverOnRequestInput"];
+	["DisputeOnRequestInput"]: ValueTypes["DisputeOnRequestInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
 	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
@@ -9187,9 +12611,11 @@ type ZEUS_VARIABLES = {
 	["Init"]: ValueTypes["Init"];
 	["Install"]: ValueTypes["Install"];
 	["JSON"]: ValueTypes["JSON"];
+	["JSONObject"]: ValueTypes["JSONObject"];
 	["LoginInput"]: ValueTypes["LoginInput"];
 	["LogoutInput"]: ValueTypes["LogoutInput"];
 	["MetaDocumentInput"]: ValueTypes["MetaDocumentInput"];
+	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
 	["OrganizationDetailsInput"]: ValueTypes["OrganizationDetailsInput"];
 	["OrganizationType"]: ValueTypes["OrganizationType"];
 	["PaginationInput"]: ValueTypes["PaginationInput"];
@@ -9199,16 +12625,26 @@ type ZEUS_VARIABLES = {
 	["ParticipantApplicationSignedMetaDocumentInput"]: ValueTypes["ParticipantApplicationSignedMetaDocumentInput"];
 	["PassportInput"]: ValueTypes["PassportInput"];
 	["PaymentStatus"]: ValueTypes["PaymentStatus"];
+	["ProhibitRequestInput"]: ValueTypes["ProhibitRequestInput"];
 	["ProjectFreeDecisionGenerateDocumentInput"]: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"];
 	["ProjectFreeDecisionSignedDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedDocumentInput"];
 	["ProjectFreeDecisionSignedMetaDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedMetaDocumentInput"];
 	["PublishProjectFreeDecisionInput"]: ValueTypes["PublishProjectFreeDecisionInput"];
+	["PublishRequestInput"]: ValueTypes["PublishRequestInput"];
+	["ReceiveOnRequestInput"]: ValueTypes["ReceiveOnRequestInput"];
 	["RefreshInput"]: ValueTypes["RefreshInput"];
 	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];
 	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
 	["RegisterRole"]: ValueTypes["RegisterRole"];
 	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
 	["ResetKeyInput"]: ValueTypes["ResetKeyInput"];
+	["ReturnByAssetActGenerateDocumentInput"]: ValueTypes["ReturnByAssetActGenerateDocumentInput"];
+	["ReturnByAssetActSignedDocumentInput"]: ValueTypes["ReturnByAssetActSignedDocumentInput"];
+	["ReturnByAssetActSignedMetaDocumentInput"]: ValueTypes["ReturnByAssetActSignedMetaDocumentInput"];
+	["ReturnByAssetDecisionGenerateDocumentInput"]: ValueTypes["ReturnByAssetDecisionGenerateDocumentInput"];
+	["ReturnByAssetStatementGenerateDocumentInput"]: ValueTypes["ReturnByAssetStatementGenerateDocumentInput"];
+	["ReturnByAssetStatementSignedDocumentInput"]: ValueTypes["ReturnByAssetStatementSignedDocumentInput"];
+	["ReturnByAssetStatementSignedMetaDocumentInput"]: ValueTypes["ReturnByAssetStatementSignedMetaDocumentInput"];
 	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];
 	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];
 	["SelectBranchSignedDocumentInput"]: ValueTypes["SelectBranchSignedDocumentInput"];
@@ -9218,14 +12654,17 @@ type ZEUS_VARIABLES = {
 	["SignedDigitalDocumentInput"]: ValueTypes["SignedDigitalDocumentInput"];
 	["SovietMemberInput"]: ValueTypes["SovietMemberInput"];
 	["StartResetKeyInput"]: ValueTypes["StartResetKeyInput"];
+	["SupplyOnRequestInput"]: ValueTypes["SupplyOnRequestInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];
 	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
+	["UnpublishRequestInput"]: ValueTypes["UnpublishRequestInput"];
 	["Update"]: ValueTypes["Update"];
 	["UpdateAccountInput"]: ValueTypes["UpdateAccountInput"];
 	["UpdateBankAccountInput"]: ValueTypes["UpdateBankAccountInput"];
 	["UpdateEntrepreneurDataInput"]: ValueTypes["UpdateEntrepreneurDataInput"];
 	["UpdateIndividualDataInput"]: ValueTypes["UpdateIndividualDataInput"];
 	["UpdateOrganizationDataInput"]: ValueTypes["UpdateOrganizationDataInput"];
+	["UpdateRequestInput"]: ValueTypes["UpdateRequestInput"];
 	["UserStatus"]: ValueTypes["UserStatus"];
 	["VarsInput"]: ValueTypes["VarsInput"];
 }

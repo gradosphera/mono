@@ -19,3 +19,5 @@ export interface GetInfoResult {
   server_full_version_string?: string;
   first_block_num?: number;
 }
+
+export const ASSET_REGEX = /^\d+\.\d{4} [A-Z]{1,7}$/;

@@ -38,9 +38,10 @@ export const loginUserWithSignature = async (email, now, signature) => {
       const blockchainAccount = await getBlockchainAccount(user.username);
 
       const hasKey = hasActiveKey(blockchainAccount, publicKey.toLegacyString());
-
+      console.log('on has key', hasKey);
       if (!hasKey) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
     } catch (e) {
+      console.log('on error', e);
       throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
     }
   } else {

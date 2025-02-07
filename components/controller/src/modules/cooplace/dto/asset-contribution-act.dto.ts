@@ -1,5 +1,5 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { ValidateNested, IsNotEmpty, IsOptional } from 'class-validator';
+import { ValidateNested, IsNotEmpty, IsOptional, IsNumber, IsString } from 'class-validator';
 import { Cooperative } from 'cooptypes';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
@@ -16,27 +16,57 @@ type action = Cooperative.Registry.AssetContributionAct.Action;
 class BaseAssetContributionActMetaDocumentInputDTO implements ExcludeCommonProps<action> {
   @Field({ description: 'Идентификатор заявки' })
   @IsNotEmpty()
+  @IsNumber()
   request_id!: number;
 
   @Field({ description: 'Идентификатор решения' })
   @IsNotEmpty()
+  @IsNumber()
   decision_id!: number;
 
   @Field({ description: 'Идентификатор акта' })
   @IsNotEmpty()
+  @IsString()
   act_id!: string;
 
   @Field({ description: 'Имя аккаунта получателя на кооперативном участке' })
   @IsNotEmpty()
+  @IsString()
   receiver!: string;
 
   @Field({ description: 'Имя аккаунта кооперативного участка', nullable: true })
   @IsOptional()
+  @IsString()
   braname?: string;
 }
 
 @ObjectType(`BaseAssetContributionActMetaDocumentOutput`)
-class BaseAssetContributionActMetaDocumentOutputDTO {}
+class BaseAssetContributionActMetaDocumentOutputDTO {
+  @Field({ description: 'Идентификатор заявки' })
+  @IsNotEmpty()
+  @IsNumber()
+  request_id!: number;
+
+  @Field({ description: 'Идентификатор решения' })
+  @IsNotEmpty()
+  @IsNumber()
+  decision_id!: number;
+
+  @Field({ description: 'Идентификатор акта' })
+  @IsNotEmpty()
+  @IsString()
+  act_id!: string;
+
+  @Field({ description: 'Имя аккаунта получателя на кооперативном участке' })
+  @IsNotEmpty()
+  @IsString()
+  receiver!: string;
+
+  @Field({ description: 'Имя аккаунта кооперативного участка', nullable: true })
+  @IsOptional()
+  @IsString()
+  braname?: string;
+}
 
 @InputType(`AssetContributionActGenerateDocumentInput`)
 export class AssetContributionActGenerateDocumentInputDTO

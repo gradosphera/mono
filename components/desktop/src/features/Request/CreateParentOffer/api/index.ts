@@ -27,7 +27,7 @@ async function createParentOffer(
             coopname: params.coopname,
             parent_id: 0,
             program_id: params.program_id,
-            pieces: params.pieces,
+            units: params.units,
             unit_cost: params.unit_cost,
             product_lifecycle_secs: params.product_lifecycle_secs,
             // document,

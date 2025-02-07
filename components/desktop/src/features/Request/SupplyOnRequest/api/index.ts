@@ -10,7 +10,7 @@ import { TransactResult } from '@wharfkit/session';
 async function supplyOnRequest(
   params: ISupplyOnRequest
 ): Promise<TransactResult | undefined> {
-  //TODO получить подписанное заявление на имущественный взнос из кошелька
+  //TODO получить подписанный акт приёма-передачи имущества
   const document = {
     hash: '33CBC662E606F23F332B442BAB84F2D05BD498B66EF61BC918740606B05BD565',
     public_key: 'PUB_K1_8YWRWjCdUQubPoHzT5ndvfhGKDf1ZL7v7Ge9iHoLtNp7wnVfG1',

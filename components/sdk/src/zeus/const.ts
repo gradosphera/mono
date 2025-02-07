@@ -1,6 +1,9 @@
 /* eslint-disable */
 
 export const AllTypesProps: Record<string,any> = {
+	AcceptChildOrderInput:{
+		document:"AssetContributionStatementSignedDocumentInput"
+	},
 	AccountType: "enum" as const,
 	AddParticipantInput:{
 		entrepreneur_data:"CreateEntrepreneurDataInput",
@@ -14,11 +17,47 @@ export const AllTypesProps: Record<string,any> = {
 	AgreementInput:{
 
 	},
+	AssetContributionActGenerateDocumentInput:{
+
+	},
+	AssetContributionActSignedDocumentInput:{
+		meta:"AssetContributionActSignedMetaDocumentInput"
+	},
+	AssetContributionActSignedMetaDocumentInput:{
+
+	},
+	AssetContributionDecisionGenerateDocumentInput:{
+
+	},
+	AssetContributionStatementGenerateDocumentInput:{
+		request:"CommonRequestInput"
+	},
+	AssetContributionStatementSignedDocumentInput:{
+		meta:"AssetContributionStatementSignedMetaDocumentInput"
+	},
+	AssetContributionStatementSignedMetaDocumentInput:{
+		request:"CommonRequestInput"
+	},
 	BankAccountDetailsInput:{
 
 	},
 	BankAccountInput:{
 		details:"BankAccountDetailsInput"
+	},
+	CancelRequestInput:{
+
+	},
+	CommonRequestInput:{
+
+	},
+	CompleteRequestInput:{
+
+	},
+	ConfirmReceiveOnRequestInput:{
+		document:"ReturnByAssetActSignedDocumentInput"
+	},
+	ConfirmSupplyOnRequestInput:{
+		document:"AssetContributionActSignedDocumentInput"
 	},
 	Country: "enum" as const,
 	CreateBankAccountInput:{
@@ -26,6 +65,9 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	CreateBranchInput:{
 
+	},
+	CreateChildOrderInput:{
+		document:"ReturnByAssetStatementSignedDocumentInput"
 	},
 	CreateDepositPaymentInput:{
 
@@ -47,10 +89,16 @@ export const AllTypesProps: Record<string,any> = {
 		represented_by:"RepresentedByInput",
 		type:"OrganizationType"
 	},
+	CreateParentOfferInput:{
+
+	},
 	CreateProjectFreeDecisionInput:{
 
 	},
 	DateTime: `scalar.DateTime` as const,
+	DeclineRequestInput:{
+
+	},
 	DeleteBranchInput:{
 
 	},
@@ -59,6 +107,12 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	DeleteTrustedAccountInput:{
 
+	},
+	DeliverOnRequestInput:{
+
+	},
+	DisputeOnRequestInput:{
+		document:"JSONObject"
 	},
 	EditBranchInput:{
 
@@ -112,6 +166,7 @@ export const AllTypesProps: Record<string,any> = {
 		soviet:"SovietMemberInput"
 	},
 	JSON: `scalar.JSON` as const,
+	JSONObject: `scalar.JSONObject` as const,
 	LoginInput:{
 
 	},
@@ -121,12 +176,30 @@ export const AllTypesProps: Record<string,any> = {
 	MetaDocumentInput:{
 
 	},
+	ModerateRequestInput:{
+
+	},
 	Mutation:{
+		acceptChildOrder:{
+			data:"AcceptChildOrderInput"
+		},
 		addParticipant:{
 			data:"AddParticipantInput"
 		},
 		addTrustedAccount:{
 			data:"AddTrustedAccountInput"
+		},
+		cancelRequest:{
+			data:"CancelRequestInput"
+		},
+		completeRequest:{
+			data:"CompleteRequestInput"
+		},
+		confirmReceiveOnRequest:{
+			data:"ConfirmReceiveOnRequestInput"
+		},
+		confirmSupplyOnRequest:{
+			data:"ConfirmSupplyOnRequestInput"
 		},
 		createBankAccount:{
 			data:"CreateBankAccountInput"
@@ -134,14 +207,23 @@ export const AllTypesProps: Record<string,any> = {
 		createBranch:{
 			data:"CreateBranchInput"
 		},
+		createChildOrder:{
+			data:"CreateChildOrderInput"
+		},
 		createDepositPayment:{
 			data:"CreateDepositPaymentInput"
 		},
 		createInitialPayment:{
 			data:"CreateInitialPaymentInput"
 		},
+		createParentOffer:{
+			data:"CreateParentOfferInput"
+		},
 		createProjectOfFreeDecision:{
 			data:"CreateProjectFreeDecisionInput"
+		},
+		declineRequest:{
+			data:"DeclineRequestInput"
 		},
 		deleteBranch:{
 			data:"DeleteBranchInput"
@@ -152,8 +234,26 @@ export const AllTypesProps: Record<string,any> = {
 		deleteTrustedAccount:{
 			data:"DeleteTrustedAccountInput"
 		},
+		deliverOnRequest:{
+			data:"DeliverOnRequestInput"
+		},
+		disputeOnRequest:{
+			data:"DisputeOnRequestInput"
+		},
 		editBranch:{
 			data:"EditBranchInput"
+		},
+		generateAssetContributionAct:{
+			data:"AssetContributionActGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateAssetContributionDecision:{
+			data:"AssetContributionDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateAssetContributionStatement:{
+			data:"AssetContributionStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
 		},
 		generateFreeDecision:{
 			data:"FreeDecisionGenerateDocumentInput",
@@ -173,6 +273,18 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		generateProjectOfFreeDecision:{
 			data:"ProjectFreeDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateReturnByAssetAct:{
+			data:"ReturnByAssetActGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateReturnByAssetDecision:{
+			data:"ReturnByAssetDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateReturnByAssetStatement:{
+			data:"ReturnByAssetStatementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		generateSelectBranchDocument:{
@@ -206,8 +318,20 @@ export const AllTypesProps: Record<string,any> = {
 		logout:{
 			data:"LogoutInput"
 		},
+		moderateRequest:{
+			data:"ModerateRequestInput"
+		},
+		prohibitRequest:{
+			data:"ProhibitRequestInput"
+		},
 		publishProjectOfFreeDecision:{
 			data:"PublishProjectFreeDecisionInput"
+		},
+		publishRequest:{
+			data:"PublishRequestInput"
+		},
+		receiveOnRequest:{
+			data:"ReceiveOnRequestInput"
 		},
 		refresh:{
 			data:"RefreshInput"
@@ -233,8 +357,14 @@ export const AllTypesProps: Record<string,any> = {
 		startResetKey:{
 			data:"StartResetKeyInput"
 		},
+		supplyOnRequest:{
+			data:"SupplyOnRequestInput"
+		},
 		uninstallExtension:{
 			data:"UninstallExtensionInput"
+		},
+		unpublishRequest:{
+			data:"UnpublishRequestInput"
 		},
 		updateAccount:{
 			data:"UpdateAccountInput"
@@ -244,6 +374,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		updateExtension:{
 			data:"ExtensionInput"
+		},
+		updateRequest:{
+			data:"UpdateRequestInput"
 		},
 		updateSystem:{
 			data:"Update"
@@ -272,6 +405,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	PaymentStatus: "enum" as const,
+	ProhibitRequestInput:{
+
+	},
 	ProjectFreeDecisionGenerateDocumentInput:{
 
 	},
@@ -283,6 +419,9 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	PublishProjectFreeDecisionInput:{
 		document:"ProjectFreeDecisionSignedDocumentInput"
+	},
+	PublishRequestInput:{
+
 	},
 	Query:{
 		getAccount:{
@@ -309,6 +448,9 @@ export const AllTypesProps: Record<string,any> = {
 			options:"PaginationInput"
 		}
 	},
+	ReceiveOnRequestInput:{
+		document:"ReturnByAssetActSignedDocumentInput"
+	},
 	RefreshInput:{
 
 	},
@@ -331,6 +473,27 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	ResetKeyInput:{
 
+	},
+	ReturnByAssetActGenerateDocumentInput:{
+
+	},
+	ReturnByAssetActSignedDocumentInput:{
+		meta:"ReturnByAssetActSignedMetaDocumentInput"
+	},
+	ReturnByAssetActSignedMetaDocumentInput:{
+
+	},
+	ReturnByAssetDecisionGenerateDocumentInput:{
+
+	},
+	ReturnByAssetStatementGenerateDocumentInput:{
+		request:"CommonRequestInput"
+	},
+	ReturnByAssetStatementSignedDocumentInput:{
+		meta:"ReturnByAssetStatementSignedMetaDocumentInput"
+	},
+	ReturnByAssetStatementSignedMetaDocumentInput:{
+		request:"CommonRequestInput"
 	},
 	SelectBranchGenerateDocumentInput:{
 
@@ -359,8 +522,14 @@ export const AllTypesProps: Record<string,any> = {
 	StartResetKeyInput:{
 
 	},
+	SupplyOnRequestInput:{
+		document:"AssetContributionActSignedDocumentInput"
+	},
 	SystemStatus: "enum" as const,
 	UninstallExtensionInput:{
+
+	},
+	UnpublishRequestInput:{
 
 	},
 	Update:{
@@ -388,6 +557,9 @@ export const AllTypesProps: Record<string,any> = {
 		details:"OrganizationDetailsInput",
 		represented_by:"RepresentedByInput",
 		type:"OrganizationType"
+	},
+	UpdateRequestInput:{
+
 	},
 	UserStatus: "enum" as const,
 	VarsInput:{
@@ -450,6 +622,74 @@ export const ReturnTypes: Record<string,any> = {
 	AgreementVar:{
 		protocol_day_month_year:"String",
 		protocol_number:"String"
+	},
+	AssetContributionActDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"AssetContributionActMetaDocumentOutput"
+	},
+	AssetContributionActMetaDocumentOutput:{
+		act_id:"String",
+		block_num:"Int",
+		braname:"String",
+		coopname:"String",
+		created_at:"String",
+		decision_id:"Float",
+		generator:"String",
+		lang:"String",
+		links:"String",
+		receiver:"String",
+		registry_id:"Int",
+		request_id:"Float",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
+	AssetContributionDecisionDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"AssetContributionDecisionMetaDocumentOutput"
+	},
+	AssetContributionDecisionMetaDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		decision_id:"Float",
+		generator:"String",
+		lang:"String",
+		links:"String",
+		registry_id:"Int",
+		request_id:"Float",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
+	AssetContributionStatementDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"AssetContributionStatementMetaDocumentOutput"
+	},
+	AssetContributionStatementMetaDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"String",
+		links:"String",
+		registry_id:"Int",
+		request:"CommonRequestResponse",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
 	},
 	AuthSequence:{
 		account:"String",
@@ -575,6 +815,17 @@ export const ReturnTypes: Record<string,any> = {
 		trusted:"Individual",
 		trustee:"Individual",
 		type:"String"
+	},
+	CommonRequestResponse:{
+		currency:"String",
+		hash:"String",
+		program_id:"Int",
+		title:"String",
+		total_cost:"String",
+		type:"String",
+		unit_cost:"String",
+		unit_of_measurement:"String",
+		units:"Int"
 	},
 	ContactsDTO:{
 		chairman:"PublicChairman",
@@ -732,6 +983,7 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	JSON: `scalar.JSON` as const,
+	JSONObject: `scalar.JSONObject` as const,
 	KeyWeight:{
 		key:"String",
 		weight:"Int"
@@ -764,22 +1016,38 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	Mutation:{
+		acceptChildOrder:"Transaction",
 		addParticipant:"Account",
 		addTrustedAccount:"Branch",
+		cancelRequest:"Transaction",
+		completeRequest:"Transaction",
+		confirmReceiveOnRequest:"Transaction",
+		confirmSupplyOnRequest:"Transaction",
 		createBankAccount:"PaymentMethod",
 		createBranch:"Branch",
+		createChildOrder:"Transaction",
 		createDepositPayment:"Payment",
 		createInitialPayment:"Payment",
+		createParentOffer:"Transaction",
 		createProjectOfFreeDecision:"CreatedProjectFreeDecision",
+		declineRequest:"Transaction",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
 		deleteTrustedAccount:"Branch",
+		deliverOnRequest:"Transaction",
+		disputeOnRequest:"Transaction",
 		editBranch:"Branch",
+		generateAssetContributionAct:"AssetContributionActDocument",
+		generateAssetContributionDecision:"AssetContributionDecisionDocument",
+		generateAssetContributionStatement:"AssetContributionStatementDocument",
 		generateFreeDecision:"ProjectFreeDecisionDocument",
 		generateParticipantApplication:"ParticipantApplicationDocument",
 		generateParticipantApplicationDecision:"ParticipantApplicationDecisionDocument",
 		generatePrivacyAgreement:"GeneratedDocument",
 		generateProjectOfFreeDecision:"ProjectFreeDecisionDocument",
+		generateReturnByAssetAct:"ReturnByAssetActDocument",
+		generateReturnByAssetDecision:"ReturnByAssetDecisionDocument",
+		generateReturnByAssetStatement:"ReturnByAssetStatementDocument",
 		generateSelectBranchDocument:"SelectBranchDocument",
 		generateSignatureAgreement:"GeneratedDocument",
 		generateUserAgreement:"GeneratedDocument",
@@ -789,7 +1057,11 @@ export const ReturnTypes: Record<string,any> = {
 		installSystem:"SystemInfo",
 		login:"RegisteredAccount",
 		logout:"Boolean",
+		moderateRequest:"Transaction",
+		prohibitRequest:"Transaction",
 		publishProjectOfFreeDecision:"Boolean",
+		publishRequest:"Transaction",
+		receiveOnRequest:"Transaction",
 		refresh:"RegisteredAccount",
 		registerAccount:"RegisteredAccount",
 		registerParticipant:"Account",
@@ -798,10 +1070,13 @@ export const ReturnTypes: Record<string,any> = {
 		setPaymentStatus:"Payment",
 		setWif:"Boolean",
 		startResetKey:"Boolean",
+		supplyOnRequest:"Transaction",
 		uninstallExtension:"Boolean",
+		unpublishRequest:"Transaction",
 		updateAccount:"Account",
 		updateBankAccount:"PaymentMethod",
 		updateExtension:"Extension",
+		updateRequest:"Transaction",
 		updateSystem:"SystemInfo"
 	},
 	Organization:{
@@ -1010,6 +1285,74 @@ export const ReturnTypes: Record<string,any> = {
 		owner:"String",
 		ram_bytes:"Int"
 	},
+	ReturnByAssetActDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"ReturnByAssetActMetaDocumentOutput"
+	},
+	ReturnByAssetActMetaDocumentOutput:{
+		act_id:"String",
+		block_num:"Int",
+		braname:"String",
+		coopname:"String",
+		created_at:"String",
+		decision_id:"Float",
+		generator:"String",
+		lang:"String",
+		links:"String",
+		registry_id:"Int",
+		request_id:"Float",
+		timezone:"String",
+		title:"String",
+		transmitter:"String",
+		username:"String",
+		version:"String"
+	},
+	ReturnByAssetDecisionDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"ReturnByAssetDecisionMetaDocumentOutput"
+	},
+	ReturnByAssetDecisionMetaDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		decision_id:"Float",
+		generator:"String",
+		lang:"String",
+		links:"String",
+		registry_id:"Int",
+		request_id:"Float",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
+	ReturnByAssetStatementDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"ReturnByAssetStatementMetaDocumentOutput"
+	},
+	ReturnByAssetStatementMetaDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"String",
+		links:"String",
+		registry_id:"Int",
+		request:"CommonRequestResponse",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
 	SbpAccount:{
 		phone:"String"
 	},
@@ -1064,6 +1407,17 @@ export const ReturnTypes: Record<string,any> = {
 	Tokens:{
 		access:"Token",
 		refresh:"Token"
+	},
+	Transaction:{
+		chain:"JSONObject",
+		request:"JSONObject",
+		resolved:"JSONObject",
+		response:"JSONObject",
+		returns:"JSONObject",
+		revisions:"JSONObject",
+		signatures:"JSONObject",
+		signer:"JSONObject",
+		transaction:"JSONObject"
 	},
 	UserAccount:{
 		meta:"String",

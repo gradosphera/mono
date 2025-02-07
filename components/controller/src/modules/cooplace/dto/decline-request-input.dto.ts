@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsNumberString } from 'class-validator';
+import { IsString, IsNumber } from 'class-validator';
 
 @InputType('DeclineRequestInput')
 export class DeclineRequestInputDTO {
@@ -11,9 +11,9 @@ export class DeclineRequestInputDTO {
   @IsString()
   username!: string;
 
-  @Field(() => String, { description: 'Идентификатор обмена' })
-  @IsNumberString()
-  exchange_id!: string;
+  @Field(() => Number, { description: 'Идентификатор обмена' })
+  @IsNumber()
+  exchange_id!: number;
 
   @Field(() => String, { description: 'Причина отказа' })
   @IsString()

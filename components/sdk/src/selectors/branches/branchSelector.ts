@@ -1,9 +1,9 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ModelTypes, type ValueTypes } from "../../zeus";
-import { rawBankAccountSelector } from "../common/bankAccountSelector";
-import { rawIndividualSelector } from "../common/individualSelector";
-import { rawPaymentMethodSelector } from "../paymentMethods/paymentMethodSelector";
-import { rawBankPaymentMethodSelector } from "../paymentMethods/rawBankPaymentMethodSelector";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { type ModelTypes, Selector, type ValueTypes } from '../../zeus'
+import { rawBankAccountSelector } from '../common/bankAccountSelector'
+import { rawIndividualSelector } from '../common/individualSelector'
+import { rawPaymentMethodSelector } from '../paymentMethods/paymentMethodSelector'
+import { rawBankPaymentMethodSelector } from '../paymentMethods/rawBankPaymentMethodSelector'
 
 const rawBranchSelector = {
   coopname: true,
@@ -32,12 +32,12 @@ const rawBranchSelector = {
   trustee: rawIndividualSelector, // Передаём "сырой" объект
   bank_account: rawBankPaymentMethodSelector,
   type: true,
-};
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes["Branch"]> = rawBranchSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['Branch']> = rawBranchSelector
 
 export type branchModel = ModelTypes['Branch']
 
-export const branchSelector = Selector("Branch")(rawBranchSelector);
-export { rawBranchSelector };
+export const branchSelector = Selector('Branch')(rawBranchSelector)
+export { rawBranchSelector }

@@ -1,5 +1,5 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { ValidateNested, IsNotEmpty } from 'class-validator';
+import { ValidateNested, IsNotEmpty, IsNumber } from 'class-validator';
 import { Cooperative } from 'cooptypes';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
@@ -16,15 +16,27 @@ type action = Cooperative.Registry.ReturnByAssetDecision.Action;
 class BaseReturnByAssetDecisionMetaDocumentInputDTO implements ExcludeCommonProps<action> {
   @Field({ description: 'Идентификатор заявки' })
   @IsNotEmpty()
+  @IsNumber()
   request_id!: number;
 
   @Field({ description: 'Идентификатор решения' })
   @IsNotEmpty()
+  @IsNumber()
   decision_id!: number;
 }
 
 @ObjectType(`BaseReturnByAssetDecisionMetaDocumentOutput`)
-class BaseReturnByAssetDecisionMetaDocumentOutputDTO {}
+class BaseReturnByAssetDecisionMetaDocumentOutputDTO {
+  @Field({ description: 'Идентификатор заявки' })
+  @IsNotEmpty()
+  @IsNumber()
+  request_id!: number;
+
+  @Field({ description: 'Идентификатор решения' })
+  @IsNotEmpty()
+  @IsNumber()
+  decision_id!: number;
+}
 
 @InputType(`ReturnByAssetDecisionGenerateDocumentInput`)
 export class ReturnByAssetDecisionGenerateDocumentInputDTO

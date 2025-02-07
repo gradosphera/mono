@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsNumberString } from 'class-validator';
+import { IsString, IsNumber } from 'class-validator';
 
 @InputType('ProhibitRequestInput')
 export class ProhibitRequestInputDTO {
@@ -11,11 +11,11 @@ export class ProhibitRequestInputDTO {
   @IsString()
   username!: string;
 
-  @Field(() => String, { description: 'Идентификатор обмена' })
-  @IsNumberString()
-  exchange_id!: string;
+  @Field(() => Number, { description: 'Идентификатор обмена' })
+  @IsNumber()
+  exchange_id!: number;
 
-  @Field(() => String, { description: 'Дополнительная информация о запрете' })
+  @Field(() => String, { description: 'Дополнительная информация о отклоненной модерации' })
   @IsString()
   meta!: string;
 }

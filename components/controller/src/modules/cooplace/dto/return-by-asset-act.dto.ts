@@ -1,5 +1,5 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { ValidateNested, IsNotEmpty, IsOptional } from 'class-validator';
+import { ValidateNested, IsNotEmpty, IsOptional, IsNumber, IsString } from 'class-validator';
 import { Cooperative } from 'cooptypes';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
@@ -16,27 +16,57 @@ type action = Cooperative.Registry.ReturnByAssetAct.Action;
 class BaseReturnByAssetActMetaDocumentInputDTO implements ExcludeCommonProps<action> {
   @Field({ description: 'Идентификатор заявки' })
   @IsNotEmpty()
+  @IsNumber()
   request_id!: number;
 
   @Field({ description: 'Идентификатор решения' })
   @IsNotEmpty()
+  @IsNumber()
   decision_id!: number;
 
   @Field({ description: 'Идентификатор акта' })
   @IsNotEmpty()
+  @IsString()
   act_id!: string;
 
   @Field({ description: 'Имя аккаунта получателя на кооперативном участке' })
   @IsNotEmpty()
+  @IsString()
   transmitter!: string;
 
   @Field({ description: 'Имя аккаунта кооперативного участка', nullable: true })
   @IsOptional()
+  @IsString()
   braname?: string;
 }
 
 @ObjectType(`BaseReturnByAssetActMetaDocumentOutput`)
-class BaseReturnByAssetActMetaDocumentOutputDTO {}
+class BaseReturnByAssetActMetaDocumentOutputDTO {
+  @Field({ description: 'Идентификатор заявки' })
+  @IsNotEmpty()
+  @IsNumber()
+  request_id!: number;
+
+  @Field({ description: 'Идентификатор решения' })
+  @IsNotEmpty()
+  @IsNumber()
+  decision_id!: number;
+
+  @Field({ description: 'Идентификатор акта' })
+  @IsNotEmpty()
+  @IsString()
+  act_id!: string;
+
+  @Field({ description: 'Имя аккаунта получателя на кооперативном участке' })
+  @IsNotEmpty()
+  @IsString()
+  transmitter!: string;
+
+  @Field({ description: 'Имя аккаунта кооперативного участка', nullable: true })
+  @IsOptional()
+  @IsString()
+  braname?: string;
+}
 
 @InputType(`ReturnByAssetActGenerateDocumentInput`)
 export class ReturnByAssetActGenerateDocumentInputDTO

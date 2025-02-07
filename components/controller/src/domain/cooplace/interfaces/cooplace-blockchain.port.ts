@@ -15,7 +15,7 @@ export interface CooplaceBlockchainPort {
   moderateRequest(data: MarketContract.Actions.ModerateRequest.IModerateRequest): Promise<TransactResult>;
   prohibitRequest(data: MarketContract.Actions.ProhibitRequest.IProhibitRequest): Promise<TransactResult>;
   publishRequest(data: MarketContract.Actions.PublishRequest.IPublishRequest): Promise<TransactResult>;
-  receiveOnRequest(data: MarketContract.Actions.ReceiveOnRequest.IRecieveOnRequest): Promise<TransactResult>;
+  receiveOnRequest(data: MarketContract.Actions.ReceiveOnRequest.IReceiveOnRequest): Promise<TransactResult>;
   supplyOnRequest(data: MarketContract.Actions.SupplyOnRequest.ISupplyOnRequest): Promise<TransactResult>;
   unpublishRequest(data: MarketContract.Actions.UnpublishRequest.IUnpublishRequest): Promise<TransactResult>;
   updateRequest(data: MarketContract.Actions.UpdateRequest.IUpdateRequest): Promise<TransactResult>;

@@ -58,3 +58,8 @@ export * as WrapContract from './wrap'
  * для работы и поддержания блокчейн-сети.
  */
 export * as SystemContract from './system'
+
+/**
+ * Смарт-контракт управления интеллектуальной капитализацией кооператива.
+ */
+export * as CapitalContract from './capital'

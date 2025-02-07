@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsNumberString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsNumber, ValidateNested } from 'class-validator';
+import { GraphQLJSONObject } from 'graphql-type-json';
 
 @InputType('DisputeOnRequestInput')
 export class DisputeOnRequestInputDTO {
@@ -12,12 +12,11 @@ export class DisputeOnRequestInputDTO {
   @IsString()
   username!: string;
 
-  @Field(() => String, { description: 'Идентификатор обмена' })
-  @IsNumberString()
-  exchange_id!: string;
+  @Field(() => Number, { description: 'Идентификатор обмена' })
+  @IsNumber()
+  exchange_id!: number;
 
-  @Field(() => Object, { description: 'Документ с аргументами спора' })
+  @Field(() => GraphQLJSONObject, { description: 'Документ с аргументами спора' })
   @ValidateNested()
-  @Type(() => Object)
   document!: any;
 }

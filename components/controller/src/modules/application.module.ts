@@ -15,6 +15,7 @@ import { AgreementModule } from './agreement/agreement.module';
 import { ParticipantModule } from './participant/participant.module';
 import { AgendaModule } from './agenda/agenda.module';
 import { PaymentModule } from './payment/payment.module';
+import { CooplaceModule } from './cooplace/cooplace.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { PaymentModule } from './payment/payment.module';
     DocumentModule,
     DecisionModule,
     ParticipantModule,
+    CooplaceModule,
   ],
   exports: [
     AccountModule,
@@ -50,6 +52,7 @@ import { PaymentModule } from './payment/payment.module';
     DocumentModule,
     DecisionModule,
     ParticipantModule,
+    CooplaceModule,
   ],
 })
 export class ApplicationModule {}

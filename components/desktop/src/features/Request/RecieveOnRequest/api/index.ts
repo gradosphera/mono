@@ -20,7 +20,7 @@ async function recieve(
 
   const result = await transact({
       account: ContractsList.Marketplace,
-      name: MarketContract.Actions.RecieveOnRequest.actionName,
+      name: MarketContract.Actions.ReceiveOnRequest.actionName,
       authorization: [
         {
           actor: params.username,
@@ -32,7 +32,7 @@ async function recieve(
         coopname: params.coopname,
         exchange_id: params.request_id,
         document,
-      } as MarketContract.Actions.RecieveOnRequest.IRecieveOnRequest,
+      } as MarketContract.Actions.ReceiveOnRequest.IReceiveOnRequest,
   });
 
   const requestsStore = useRequestStore();

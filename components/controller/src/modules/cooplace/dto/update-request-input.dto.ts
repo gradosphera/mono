@@ -1,5 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsNumberString } from 'class-validator';
+import { IsString, IsNumberString, Matches, IsNumber } from 'class-validator';
+import { ASSET_REGEX } from '~/types/shared';
 
 @InputType('UpdateRequestInput')
 export class UpdateRequestInputDTO {
@@ -11,16 +12,19 @@ export class UpdateRequestInputDTO {
   @IsString()
   username!: string;
 
-  @Field(() => String, { description: 'Идентификатор обмена' })
-  @IsNumberString()
-  exchange_id!: string;
+  @Field(() => Number, { description: 'Идентификатор обмена' })
+  @IsNumber()
+  exchange_id!: number;
 
   @Field(() => String, { description: 'Оставшееся количество единиц' })
-  @IsNumberString()
-  remain_units!: string;
+  @IsNumber()
+  remain_units!: number;
 
-  @Field(() => String, { description: 'Стоимость за единицу' })
+  @Field(() => String, { description: 'Стоимость за единицу в формате "10.0000 RUB"' })
   @IsString()
+  @Matches(ASSET_REGEX, {
+    message: 'Формат должен быть "10.0000 RUB" (число с четырьмя десятичными знаками + символ валюты)',
+  })
   unit_cost!: string;
 
   @Field(() => String, { description: 'Дополнительные данные' })

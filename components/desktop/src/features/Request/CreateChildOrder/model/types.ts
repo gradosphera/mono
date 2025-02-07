@@ -5,7 +5,7 @@ export interface ICreateChildOrder {
   coopname: string;
   parent_id: string | number;
   program_id: string | number;
-  pieces: string | number;
+  units: string | number;
   unit_cost: string;
 }
 

@@ -79,8 +79,8 @@ export interface ICommonRequest {
   title: string
   unit_of_measurement: string
   units: number
-  unit_cost: number
-  total_cost: number
+  unit_cost: string
+  total_cost: string
   currency: string
   type: string
   program_id: number

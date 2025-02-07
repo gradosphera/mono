@@ -9,6 +9,7 @@ import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import type { ExcludeCommonProps } from '~/modules/document/types';
 import { CommonRequestInputDTO } from './common-request-input.dto';
+import { CommonRequestResponseDTO } from './common-request-response.dto';
 
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.AssetContributionStatement.Action;
@@ -17,11 +18,17 @@ type action = Cooperative.Registry.AssetContributionStatement.Action;
 class BaseAssetContributionStatementMetaDocumentInputDTO implements ExcludeCommonProps<action> {
   @Field(() => CommonRequestInputDTO, { description: 'Запрос на внесение имущественного паевого взноса' })
   @IsNotEmpty()
+  @ValidateNested()
   request!: CommonRequestInputDTO;
 }
 
 @ObjectType(`BaseAssetContributionStatementMetaDocumentOutput`)
-class BaseAssetContributionStatementMetaDocumentOutputDTO {}
+class BaseAssetContributionStatementMetaDocumentOutputDTO {
+  @Field(() => CommonRequestResponseDTO, { description: 'Запрос на внесение имущественного паевого взноса' })
+  @IsNotEmpty()
+  @ValidateNested()
+  request!: CommonRequestResponseDTO;
+}
 
 @InputType(`AssetContributionStatementGenerateDocumentInput`)
 export class AssetContributionStatementGenerateDocumentInputDTO

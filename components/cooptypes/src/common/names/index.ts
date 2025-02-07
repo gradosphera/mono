@@ -52,3 +52,8 @@ export const _branch = {
   production: 'branch',
   testnet: 'branch',
 } as const
+
+export const _capital = {
+  production: 'capital',
+  testnet: 'capital',
+} as const

@@ -1,21 +1,20 @@
-import { documentSelector } from '../../selectors';
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
+import { documentSelector } from '../../selectors'
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus'
 
 export const name = 'generatePrivacyAgreement'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{data: $('data', 'GenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput')}, documentSelector]
-});
+  [name]: [{ data: $('data', 'GenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput') }, documentSelector],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
-  data: ModelTypes['GenerateDocumentInput'],
+  data: ModelTypes['GenerateDocumentInput']
   options?: ModelTypes['GenerateDocumentOptionsInput']
 }
 
-export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
-
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

@@ -34,7 +34,7 @@ const updateImages = (previewImage: string, images: string[]) => {
 const formData = ref<IFormData>({
   title: '',
   description: '',
-  pieces: 1,
+  units: 1,
   unit_cost_number: 0,
   product_lifecycle_days: 3,
   program_id: 0,
@@ -49,7 +49,7 @@ const handlerSubmit = async () => {
       username: props.username,
       coopname: props.coopname,
       program_id: formData.value.program_id,
-      pieces: formData.value.pieces,
+      units: formData.value.units,
       unit_cost: parseFloat(unit_cost.toString()).toFixed(4) + ' ' + CURRENCY,
       product_lifecycle_secs: 86400 * formData.value.product_lifecycle_days,
       data: {
@@ -73,7 +73,7 @@ q-card(bordered flat)
   Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :show-cancel="false" :button-cancel-txt="'Отменить'" :button-submit-txt="'Создать объявление'").q-mt-lg
     q-input(v-model="formData.title" square standout="bg-teal text-white" label="Заголовок").q-ma-md
     q-input(v-model="formData.description" square standout="bg-teal text-white" label="Описание" type="textarea").q-ma-md
-    q-input(v-model="formData.pieces" square standout="bg-teal text-white" label="Количество единиц" type="number").q-ma-md
+    q-input(v-model="formData.units" square standout="bg-teal text-white" label="Количество единиц" type="number").q-ma-md
     q-input(v-model="formData.unit_cost_number" square standout="bg-teal text-white" type="number" controls-position="right" :precision="4" :step="1.0000" :min="0" label="Введите сумму:").q-ma-md
     q-input(v-model="formData.product_lifecycle_days" square standout="bg-teal text-white" label="Гарантийный срок в днях" ).q-pa-md
     q-select(v-model="formData.program_id" square standout="bg-teal text-white" :options="programs" map-options emit-value option-label="title" option-value="id" label="Целевая программа").q-ma-md

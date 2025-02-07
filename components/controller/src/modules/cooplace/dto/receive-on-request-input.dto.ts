@@ -1,6 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsNumberString, ValidateNested } from 'class-validator';
+import { IsString, IsNumber, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ReturnByAssetActSignedDocumentInputDTO } from './return-by-asset-act.dto';
 
 /**
  * DTO для получения по запросу.
@@ -9,18 +10,20 @@ import { Type } from 'class-transformer';
 export class ReceiveOnRequestInputDTO {
   @Field({ description: 'Имя аккаунта кооператива' })
   @IsString()
-  coopname: string;
+  coopname!: string;
 
   @Field({ description: 'Имя аккаунта пользователя' })
   @IsString()
-  username: string;
+  username!: string;
 
-  @Field({ description: 'Идентификатор обмена' })
-  @IsNumberString()
-  exchange_id: string;
+  @Field(() => Number, { description: 'Идентификатор заявки' })
+  @IsNumber()
+  exchange_id!: number;
 
-  @Field({ description: 'Документ подтверждения получения' })
+  @Field(() => ReturnByAssetActSignedDocumentInputDTO, {
+    description: 'Подписанный Заказчиком акт приёмки-передачи имущества из Кооператива по новации',
+  })
   @ValidateNested()
-  @Type(() => Object)
-  document: any;
+  @Type(() => ReturnByAssetActSignedDocumentInputDTO)
+  document!: ReturnByAssetActSignedDocumentInputDTO;
 }
