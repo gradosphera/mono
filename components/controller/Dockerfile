@@ -2,8 +2,9 @@
 FROM node:alpine AS base
 
 # Включение pnpm
-RUN corepack enable pnpm \
-    && corepack prepare pnpm@latest --activate
+# Устанавливаем pnpm без использования corepack
+RUN npm install -g pnpm@8.15.4
+
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
