@@ -69,7 +69,7 @@ export async function createOrder(
         amount,
         symbol,
         type === 'deposit'
-          ? `Паевый взнос №${db_order.order_num}`
+          ? `Паевой взнос по соглашению о ЦПП "Цифровой Кошелёк" №${db_order.order_num}`
           : `Вступительный и минимальный паевый взносы №${db_order._id.toString().slice(0, 8)}`,
         db_order.order_num as number,
         secret
