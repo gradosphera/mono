@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.8](https://github.com/compare/v2.2.7...v2.2.8) (2025-02-10)
+
+**Note:** Version bump only for package @coopenomics/factory
+
+
+
+
+
 ## [2.2.7](https://github.com/compare/v2.2.6...v2.2.7) (2025-02-07)
 
 **Note:** Version bump only for package @coopenomics/factory
