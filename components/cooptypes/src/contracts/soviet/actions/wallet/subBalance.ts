@@ -14,11 +14,11 @@ export const authorizations = [
 /**
  * Имя действия
  */
-export const actionName = 'subbalance'
+export const actionName = 'subbal'
 
 /**
  * @interface
  * @private
  * Действие списывает баланс токенов учёта паевого взноса из кошелька пользователя.
  */
-export type ISubBalance = Soviet.ISubbalance
+export type ISubBalance = Soviet.ISubbal

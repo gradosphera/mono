@@ -14,11 +14,11 @@ export const authorizations = [
 /**
  * Имя действия
  */
-export const actionName = 'addbalance'
+export const actionName = 'addbal'
 
 /**
  * @interface
  * Действие добавляет баланс токенов учёта паевого взноса в кошелёк пользователя.
  * @private
  */
-export type IAddBalance = Soviet.IAddbalance
+export type IAddBalance = Soviet.IAddbal

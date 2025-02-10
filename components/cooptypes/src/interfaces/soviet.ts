@@ -8,13 +8,14 @@ export type ISignature = string
 export type ITimePointSec = string
 export type IUint64 = number | string
 
-export interface IAddbalance {
+export interface IAddbal {
   coopname: IName
   username: IName
+  program_id: IUint64
   quantity: IAsset
 }
 
-export interface IAddprogbal {
+export interface IAddmemberfee {
   coopname: IName
   username: IName
   program_id: IUint64
@@ -118,6 +119,7 @@ export interface IBlock {
 export interface IBlockbal {
   coopname: IName
   username: IName
+  program_id: IUint64
   quantity: IAsset
 }
 
@@ -166,6 +168,14 @@ export interface IChanges {
   return_product_decision_id: IUint64
 }
 
+export interface IClaim {
+  coopname: IName
+  username: IName
+  result_id: IUint64
+  statement: IDocument
+  meta: string
+}
+
 export interface ICoagreement {
   type: IName
   coopname: IName
@@ -178,6 +188,14 @@ export interface IConfirmagree {
   administrator: IName
   username: IName
   agreement_id: IUint64
+}
+
+export interface IContribute {
+  coopname: IName
+  username: IName
+  claim_id: IUint64
+  statement: IDocument
+  meta: string
 }
 
 export interface ICounts extends ICountsBase {
@@ -217,6 +235,7 @@ export interface ICreateprog {
   calculation_type: IName
   fixed_membership_contribution: IAsset
   membership_percent_fee: IUint64
+  is_can_coop_spend_share_contributions: boolean
   meta: string
 }
 
@@ -247,10 +266,21 @@ export interface IDeclineagree {
   comment: string
 }
 
+export interface IDeclinedoc {
+  coopname: IName
+  username: IName
+  document: IDocument
+}
+
 export interface IDeladdress {
   coopname: IName
   chairman: IName
   address_id: IUint64
+}
+
+export interface IDeletebranch {
+  coopname: IName
+  braname: IName
 }
 
 export interface IDisableprog {
@@ -365,6 +395,12 @@ export interface INewdecision {
   document: IDocument
 }
 
+export interface INewdeclined {
+  coopname: IName
+  username: IName
+  document: IDocument
+}
+
 export interface INewprogram {
   coopname: IName
   program_id: IUint64
@@ -406,6 +442,8 @@ export interface IParticipant {
   has_vote: boolean
   type: IName
   braname: IName
+  initial_amount: IAsset
+  minimum_amount: IAsset
 }
 
 export interface IProgram {
@@ -425,6 +463,12 @@ export interface IProgram {
   fixed_membership_contribution: IAsset
   start_at: ITimePointSec
   expired_at: ITimePointSec
+  available: IAsset
+  spended: IAsset
+  blocked: IAsset
+  is_can_coop_spend_share_contributions: boolean
+  share_contributions: IAsset
+  membership_contributions: IAsset
 }
 
 export interface IProgwallet {
@@ -434,6 +478,8 @@ export interface IProgwallet {
   agreement_id: IUint64
   username: IName
   available: IAsset
+  blocked: IAsset
+  membership_contribution: IAsset
 }
 
 export interface IRecieved {
@@ -488,18 +534,12 @@ export interface IStaff {
   updated_at: ITimePointSec
 }
 
-export interface ISubbalance {
-  coopname: IName
-  username: IName
-  quantity: IAsset
-  skip_available_check: boolean
-}
-
-export interface ISubprogbal {
+export interface ISubbal {
   coopname: IName
   username: IName
   program_id: IUint64
   quantity: IAsset
+  skip_available_check: boolean
 }
 
 export interface IUnblock {
@@ -513,6 +553,7 @@ export interface IUnblock {
 export interface IUnblockbal {
   coopname: IName
   username: IName
+  program_id: IUint64
   quantity: IAsset
 }
 

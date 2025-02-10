@@ -23,15 +23,3 @@ export * as BlockBalance from './blockBalance'
  * @private
  */
 export * as UnblockBalance from './unblockBalance'
-
-/**
- * Действие добавляет баланс токенов учёта в целевую потребительскую программу кооператива.
- * @private
- */
-export * as AddProgramBalance from './addProgramBalance'
-
-/**
- * Действие списывает баланс токенов учёта из целевой потребительской программы кооператива.
- * @private
- */
-export * as SubProgramBalance from './subProgramBalance'

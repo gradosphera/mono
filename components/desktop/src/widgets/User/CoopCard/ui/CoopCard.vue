@@ -15,7 +15,38 @@ div.q-pa-md
           DepositButton.col-6.border-left-radius-buttons
           WithdrawButton.col-6.border-right-radius-buttons
 
-      WalletBalance.q-mt-lg
+          div.col-md-4.col-xs-12
+
+
+      q-list(flat).q-gutter-sm
+        q-item
+          q-item-section
+            q-item-label(caption) Имя аккаунта
+            q-item-label(style="font-size: 20px;").text-bold {{ currentUser.username }}
+
+        //- q-item
+        //-   q-item-section
+        //-     q-item-label(caption) Паевый счёт
+        //-     q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.available }}
+
+        q-item
+          q-item-section
+            q-item-label(caption) Минимальный паевый счёт
+            q-item-label(style="font-size: 20px;").text-bold {{ currentUser.participantAccount?.minimum_amount }}
+
+        //- q-item
+        //-   q-item-section
+        //-     q-item-label(caption) Заблокировано в целевых программах
+        //-     q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.blocked }}
+
+
+        q-item(v-for="program_wallet of walletStore.program_wallets" :key="program_wallet.id")
+          q-item-section
+            q-item-label(caption) {{ program_wallet.program_details.title }}
+
+            q-item-label(style="font-size: 20px;").text-bold {{program_wallet.available}}
+
+
 
 
     //- div.col-md-6.col-xs-12.q-mt-lg
@@ -24,10 +55,12 @@ div.q-pa-md
 </template>
 
 <script lang="ts" setup>
-import { WalletBalance } from 'src/entities/Wallet/ui'
+
 import { DepositButton } from 'src/features/Wallet/DepositToWallet'
 import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet'
 import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
+import { useWalletStore } from 'src/entities/Wallet';
+const walletStore = useWalletStore()
 
 import { useCurrentUserStore } from 'src/entities/User'
 import type { IEntrepreneurData, IIndividualData, IOrganizationData } from 'src/shared/lib/types/user/IUserData';
@@ -37,6 +70,7 @@ const currentUser = useCurrentUserStore()
 const userType = computed(() => currentUser.userAccount?.type)
 
 const isIP = computed(() => currentUser.userAccount?.type === 'entrepreneur')
+
 
 const role = computed(() => {
   if (currentUser.userAccount?.role === 'user')
