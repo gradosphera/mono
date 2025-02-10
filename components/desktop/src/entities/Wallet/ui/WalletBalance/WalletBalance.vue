@@ -10,20 +10,20 @@ q-list(flat).q-gutter-sm
       q-item-label(caption) Имя аккаунта
       q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.username }}
 
-  q-item
-    q-item-section
-      q-item-label(caption) Паевый счёт
-      q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.available }}
+  //- q-item
+  //-   q-item-section
+  //-     q-item-label(caption) Паевый счёт
+  //-     q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.available }}
 
   q-item
     q-item-section
       q-item-label(caption) Минимальный паевый счёт
       q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.minimum }}
 
-  q-item
-    q-item-section
-      q-item-label(caption) Заблокировано в целевых программах
-      q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.blocked }}
+  //- q-item
+  //-   q-item-section
+  //-     q-item-label(caption) Заблокировано в целевых программах
+  //-     q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.blocked }}
 
 
   q-item(v-for="program_wallet of walletStore.program_wallets" :key="program_wallet.id")
