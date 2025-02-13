@@ -1,5 +1,4 @@
 import { api } from '../api';
-import { Mutations } from '@coopenomics/sdk'
 
 export interface IBankTransferData {
   account_number: string;
@@ -18,14 +17,22 @@ export interface IUpdateBranchBankAccount {
   method_id: string;
   method_type: string;
   data: IBankTransferData;
+  is_default: boolean;
+  created_at: Date;
+  updated_at: Date;
 }
 
 
 export function useUpdateBranchBankAccount() {
 
-  async function updateBankAccount(data: Mutations.PaymentMethods.UpdateBankAccount.IInput['data']) {
+  async function updateBankAccount(data: IUpdateBranchBankAccount) {
     data.is_default = true
-    return await api.updateBankAccount(data)
+
+    // Убираем ненужные поля TODO: очевидно что так делать не надо
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { created_at, updated_at, method_type, ...rest } = data;
+
+    return await api.updateBankAccount(rest)
   }
 
   return {
