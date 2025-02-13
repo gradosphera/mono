@@ -3,7 +3,7 @@ import { api } from '../api';
 export interface IBankTransferData {
   account_number: string;
   bank_name: string;
-  card_number?: string;
+  card_number?: string | null;
   currency: string;
   details: {
     bik: string;
