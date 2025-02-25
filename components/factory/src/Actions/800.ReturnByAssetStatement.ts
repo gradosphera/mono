@@ -28,7 +28,7 @@ export class Factory extends DocFactory<ReturnByAssetStatement.Action> {
 
     const request = data.request
 
-    const commonUser = this.getCommonUser(user.data)
+    const commonUser = this.getCommonUser(user)
 
     const combinedData: ReturnByAssetStatement.Model = {
       meta,

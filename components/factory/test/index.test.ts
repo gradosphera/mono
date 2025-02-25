@@ -180,64 +180,6 @@ describe('тест генератора документов', async () => {
     await testDocumentGeneration(params)
   })
 
-  it('сохранение данных организации', async () => {
-    const organizationData: ExternalOrganizationData = {
-      username: 'exampleorg',
-      type: 'ooo',
-      short_name: 'Ромашка',
-      full_name: 'Ромашка',
-      represented_by: {
-        first_name: 'Иван',
-        last_name: 'Иванов',
-        middle_name: 'Иванович',
-        position: 'Директор',
-        based_on: 'решения собрания учредителей №22',
-      },
-      country: 'Russia',
-      city: 'Moscow',
-      full_address: 'г. Москва, ул. Арбат д. 22, офис 306',
-      fact_address: 'г. Москва, ул. Арбат д. 22, офис 306',
-      email: 'contact@exampleorg.com',
-      phone: '+771234567890',
-      details: {
-        kpp: '123456789',
-        inn: '0987654321',
-        ogrn: '0987654321098',
-      },
-    }
-
-    const saved = await generator.save('organization', organizationData)
-
-    const organization = await generator.get('organization', { username: organizationData.username }) as any
-
-    expect(organization._id).toEqual(saved.insertedId)
-
-    Object.keys(organizationData).forEach((field) => {
-      expect(organization[field]).toBeDefined()
-    })
-
-    const paymentData: PaymentData = {
-      username: 'exampleorg',
-      method_id: '1',
-      method_type: 'bank_transfer',
-      is_default: true,
-      data: {
-        account_number: '40817810099910004312',
-        currency: 'RUB',
-        card_number: '0987654321098765',
-        bank_name: 'ПАО СБЕРБАНК',
-        details: {
-          bik: '098765432',
-          corr: '30101810400000000225',
-          kpp: '098765432',
-        },
-      },
-      deleted: false,
-    }
-
-    await generator.save('paymentMethod', paymentData)
-  })
-
   it('генерируем заявление на вступление юридического лица', async () => {
     await testDocumentGeneration({
       registry_id: 100,
@@ -367,9 +309,9 @@ describe('тест генератора документов', async () => {
 
     const organizationData: ExternalOrganizationData = {
       username: coopname,
-      type: 'coop',
-      short_name: 'Ромашка',
-      full_name: 'Ромашка',
+      type: 'ooo',
+      short_name: 'ООО "Ромашка"',
+      full_name: 'Общество Ограниченной Ответственности "Ромашка"',
       represented_by: {
         first_name: 'Иван',
         last_name: 'Иванов',

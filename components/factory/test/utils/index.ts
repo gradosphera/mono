@@ -210,12 +210,12 @@ export async function preLoading() {
 
   const vars: IVars = {
     coopname: 'voskhod',
-    full_abbr: 'потребительский кооператив',
-    full_abbr_genitive: 'потребительского кооператива',
-    full_abbr_dative: 'потребительскому кооперативу',
+    full_abbr: 'Потребительский Кооператив',
+    full_abbr_genitive: 'Потребительского Кооператива',
+    full_abbr_dative: 'Потребительскому Кооперативу',
     short_abbr: 'ПК',
     website: 'цифровой-кооператив.рф',
-    name: 'Восход',
+    name: 'ВОСХОД',
     confidential_link: 'coopenomics.world/privacy',
     confidential_email: 'privacy@coopenomics.world',
     contact_email: 'contact@coopenomics.world',
@@ -240,15 +240,27 @@ export async function preLoading() {
       protocol_number: '10-04-2024',
       protocol_day_month_year: '10 апреля 2024 г.',
     },
+    investment_agreement: {
+      protocol_number: '10-05-2024',
+      protocol_day_month_year: '10 мая 2024 г.',
+      terms: `- Денежные Средства - Рубли Российской Федерации;
+- Имущество – вещи, деньги, а также овеществленные (на бумажных и цифровых носителях) и выраженные в денежной оценке результаты интеллектуальной деятельности и работ Пайщика, а именно: полит-экономические, социологические и технологические изыскания и модели, методологические, юридические разработки, программное обеспечение, технологические решения, а также, выраженные в денежной оценке, документально подтвержденные материальные и ресурсные затраты Пайщика, деривативы денежных средств, акции и доли предприятий, предметы, имущественные права, цифровые имущественные права, цифровые финансовые и информационные активы, права на нематериальные активы, интеллектуальная собственность и прочее.
+- Членский взнос - невозвратный целевой взнос Пайщика в Общество денежными средствами или Имуществом, вносимый Пайщиком в Общество обособлено или формируемый из части его Паевого взноса, в размере и на условиях по согласованию с Обществом; 
+- Паевой взнос - безусловно возвратный имущественный взнос в паевой фонд Общества за вычетом Членского взноса Пайщика в Общество денежными средствами и/или Имуществом в соответствии с условиями настоящего Договора.
+- Фонды – Имущество Общества, утвержденное общим собранием пайщиков для целевого использования на содержание и уставной деятельности Общества.
+- Лицевой счет (ЛС) - баланс операций Пайщика по внесению и возврату Паевых взносов в Общество, а также Членских взносов, учитываемых Обществом.`,
+      subject: `2.1. Стороны осуществляют хозяйственную деятельность по проектированию, разработке, прототипированию и эксплуатации цифровых информационно-технологических решений и программного обеспечения, направленного на создание информационной экосистемы взаимодействия физических и юридических лиц, включая нерезидентов различных юрисдикций и организационно-правовых форм, на основе международных кооперативных принципов и законодательства Российской Федерации в отношении кооперативов и потребительских обществ (далее “Платформа”), с целью консолидации и интеграции в социально-экономическую среду Российской Федерации.
+2.2. Пайщик участвует в хозяйственной деятельности Общества путем внесения целевых паевых взносов в паевой фонд Общества Имуществом и Денежными Средствами, в рамках исполнения Предмета настоящего Договора в соответствии с п.2.1. и Приложениями к настоящему Договору, являющихся его неотъемлемыми частями.`,
+    },
   }
 
   await generator.save('vars', vars)
 
   const userData: ExternalIndividualData = {
     username: 'ant',
-    first_name: 'Имя',
-    last_name: 'Фамилия',
-    middle_name: 'Отчество',
+    first_name: 'Алексей',
+    last_name: 'Муравьев',
+    middle_name: 'Николаевич',
     birthdate: '2023-04-01',
     phone: '+71234567890',
     email: 'john.doe@example.com',
@@ -263,6 +275,26 @@ export async function preLoading() {
   }
 
   await generator.save('individual', userData)
+
+  const userData2: ExternalIndividualData = {
+    username: 'individual',
+    first_name: 'Фёдор',
+    last_name: 'Ушаков',
+    middle_name: 'Кондратьевич',
+    birthdate: '2023-04-02',
+    phone: '+71234567891',
+    email: 'ushakov@example.com',
+    full_address: 'Переулок Ломоносва д. 1',
+    passport: {
+      series: 7142,
+      number: 112333,
+      issued_by: 'отделом УФМС по г. Москва',
+      issued_at: '22.04.2011',
+      code: '111-233',
+    },
+  }
+
+  await generator.save('individual', userData2)
 
   const organizationData: ExternalOrganizationData = {
     username: 'voskhod',
@@ -316,9 +348,9 @@ export async function preLoading() {
 
   const entrepreneurData: ExternalEntrepreneurData = {
     username: 'entrepreneur',
-    first_name: 'John',
-    last_name: 'Doe',
-    middle_name: 'Middle',
+    first_name: 'Александр',
+    last_name: 'Пушкин',
+    middle_name: 'Сергеевич',
     birthdate: '2023-04-01',
     phone: '+71234567890',
     email: 'john.doe@example.com',
@@ -402,4 +434,55 @@ export async function preLoading() {
   }
 
   await generator.save('paymentMethod', paymentData3)
+
+  const exampleOrganizationData: ExternalOrganizationData = {
+    username: 'exampleorg',
+    type: 'ooo',
+    short_name: 'ООО "Ромашка"',
+    full_name: 'Общество Ограниченной Ответственности "Ромашка"',
+    represented_by: {
+      first_name: 'Иван',
+      last_name: 'Иванов',
+      middle_name: 'Иванович',
+      position: 'Директор',
+      based_on: 'решения собрания учредителей №22',
+    },
+    country: 'Russia',
+    city: 'Moscow',
+    full_address: 'г. Москва, ул. Арбат д. 22, офис 306',
+    fact_address: 'г. Москва, ул. Арбат д. 22, офис 306',
+    email: 'contact@exampleorg.com',
+    phone: '+771234567890',
+    details: {
+      kpp: '123456789',
+      inn: '0987654321',
+      ogrn: '0987654321098',
+    },
+  }
+
+  await generator.save('organization', exampleOrganizationData)
+
+  const paymentData4: PaymentData = {
+    username: 'exampleorg',
+    method_id: '1',
+    method_type: 'bank_transfer',
+    is_default: true,
+    data: {
+      account_number: '40817810099910004312',
+      currency: 'RUB',
+      card_number: '0987654321098765',
+      bank_name: 'ПАО СБЕРБАНК',
+      details: {
+        bik: '098765432',
+        corr: '30101810400000000225',
+        kpp: '098765432',
+      },
+    },
+    deleted: false,
+  }
+
+  await generator.save('paymentMethod', paymentData4)
+
+  await storage.disconnect()
+  await generator.disconnect()
 }

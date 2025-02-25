@@ -1,4 +1,4 @@
-import type { AssetContributionStatement, ReturnByAssetStatement } from '../templates'
+import type { AssetContributionStatement, InvestMembershipConvertation, InvestmentAgreement, ReturnByAssetStatement } from '../templates'
 
 export * as WalletAgreement from './1.WalletAgreement'
 export * as RegulationElectronicSignature from './2.RegulationElectronicSignature'
@@ -17,3 +17,9 @@ export * as AssetContributionDecision from './701.AssetContributionDecision'
 export * as AssetContributionAct from './702.AssetContributionAct'
 export * as ReturnByAssetDecision from './801.ReturnByAssetDecision'
 export * as ReturnByAssetAct from './802.ReturnByAssetAct'
+
+export * as InvestmentAgreement from './1000.InvestmentAgreement'
+export * as InvestByResultStatement from './1001.InvestByResultStatement'
+export * as InvestByResultAct from './1002.InvestByResultAct'
+export * as InvestByMoneyStatement from './1005.InvestByMoneyStatement'
+export * as InvestMembershipConvertation from './1010.InvestMembershipConvertation'

@@ -30,7 +30,7 @@ export class Factory extends DocFactory<AssetContributionAct.Action> {
     const request = await this.getRequest(data.request_id, data.block_num)
 
     const decision = await this.getDecision(coop, data.coopname, data.decision_id, meta.created_at)
-    const commonUser = this.getCommonUser(user.data)
+    const commonUser = this.getCommonUser(user)
     const receiver = await this.getUser(data.receiver, data.block_num)
 
     if (coop.is_branched && !data.braname)

@@ -1,23 +1,25 @@
 import type { JSONSchemaType } from 'ajv'
 import moment from 'moment-timezone'
-import type { Cooperative as TCooperative } from 'cooptypes'
+import type { Cooperative } from 'cooptypes'
 import { DraftContract, SovietContract } from 'cooptypes'
 import type { IBankAccount, ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, IPaymentData, ITemplate, ITranslations, externalDataTypes } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
-import { type IVars, Individual, type InternalProjectData, Organization, PaymentMethod, Project, Vars } from '../Models'
+import { type ExternalEntrepreneurData, type ExternalIndividualData, type ExternalOrganizationData, type IVars, Individual, type InternalProjectData, Organization, PaymentMethod, Project, Vars } from '../Models'
 import type { IGenerate, IGenerationOptions } from '../Interfaces/Documents'
 import { PDFService } from '../Services/Generator'
 import packageJson from '../../package.json'
 import { Validator } from '../Services/Validator'
 import type { CooperativeData } from '../Models/Cooperative'
-import { Cooperative } from '../Models/Cooperative'
+import { Cooperative as CooperativeModel } from '../Models/Cooperative'
 import { Entrepreneur } from '../Models/Entrepreneur'
 import { getFetch } from '../Utils/getFetch'
 import { getEnvVar } from '../config'
 import { getCurrentBlock } from '../Utils/getCurrentBlock'
-import type { IOrganizationData } from '..'
+import type { IEntrepreneurData, IIndividualData, IOrganizationData } from '..'
 
 const packageVersion = packageJson.version
+
+export interface InternalGetUserResult { type: string, data: externalDataTypes }
 
 export abstract class DocFactory<T extends IGenerate> {
   abstract generateDocument(data: T, options?: IGenerationOptions): Promise<IGeneratedDocument>
@@ -53,7 +55,7 @@ export abstract class DocFactory<T extends IGenerate> {
     return method
   }
 
-  async getUser(username: string, block_num?: number): Promise<{ type: string, data: externalDataTypes }> {
+  async getUser(username: string, block_num?: number): Promise<InternalGetUserResult> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
     const individual = await new Individual(this.storage).getOne({ username, ...block_filter })
@@ -93,7 +95,7 @@ export abstract class DocFactory<T extends IGenerate> {
   }
 
   async getCooperative(username: string, block_num?: number): Promise<CooperativeData> {
-    const coop = await new Cooperative(this.storage).getOne(username, block_num)
+    const coop = await new CooperativeModel(this.storage).getOne(username, block_num)
 
     if (!coop)
       throw new Error('Кооператив не найден')
@@ -120,7 +122,7 @@ export abstract class DocFactory<T extends IGenerate> {
     return vars
   }
 
-  async getRequest(_request_id: number, _block_num?: number): Promise<TCooperative.Model.ICommonRequest> {
+  async getRequest(_request_id: number, _block_num?: number): Promise<Cooperative.Model.ICommonRequest> {
     return {
       hash: '1234567890',
       title: 'Молоко Бурёнка',
@@ -134,13 +136,13 @@ export abstract class DocFactory<T extends IGenerate> {
     }
   }
 
-  async getProgram(_program_id: number): Promise<TCooperative.Model.ICommonProgram> {
+  async getProgram(_program_id: number): Promise<Cooperative.Model.ICommonProgram> {
     return {
       name: 'СОСЕДИ',
     }
   }
 
-  async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<TCooperative.Document.IDecisionData> {
+  async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<Cooperative.Document.IDecisionData> {
     /**
      * Мы здесь извлекаем голоса из действий, а не из дельт таблиц т.к. в случае использования дельт возможна исключительная ситуация,
      * когда за решение принимаются голоса и происходит утверждение из дальнейшим удалением объекта из памяти в одном блоке, то
@@ -319,7 +321,7 @@ export abstract class DocFactory<T extends IGenerate> {
     return ''
   }
 
-  getFirstLastMiddleName(data: externalDataTypes): TCooperative.Model.IFirstLastMiddleName {
+  getFirstLastMiddleName(data: externalDataTypes): Cooperative.Model.IFirstLastMiddleName {
     return {
       first_name: 'first_name' in data ? data.first_name : '',
       last_name: 'last_name' in data ? data.last_name : '',
@@ -327,10 +329,70 @@ export abstract class DocFactory<T extends IGenerate> {
     }
   }
 
-  getCommonUser(data: externalDataTypes): TCooperative.Model.ICommonUser {
+  extractOrganizationName(input: ExternalOrganizationData): string {
+    // Регулярное выражение для извлечения названия организации
+    // eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/no-obscure-range
+    const regex = /^\s*(?:[А-ЯЁA-Za-z]{2,4}\s+)?["'«»“”]?([А-ЯЁа-яёA-Za-z0-9\- ]+(?:\s[А-ЯЁа-яёA-Za-z0-9\- ]+)*)["'«»“”]?\s*$/
+
+    const match = input.short_name.match(regex)
+
+    if (!match) {
+      throw new Error(`Не удалось извлечь имя организации из: "${input.short_name}"`)
+    }
+
+    return match[1].toUpperCase()
+  }
+
+  extractPersonalAbbreviatedName(input: ExternalIndividualData | ExternalEntrepreneurData): string {
+    return `${input.first_name[0]}${input.middle_name[0]}${input.last_name[0]}`.toUpperCase()
+  }
+
+  parseDateForAgreements(created_at: string, timezone: string): { day: string, month: string, year: string } {
+    const dateWithTimezone = created_at
+      ? moment.tz(created_at, 'DD.MM.YYYY HH:mm', timezone)
+      : moment.tz(timezone)
+
     return {
-      full_name_or_short_name: this.getFullParticipantName(data), // or_short_name
-      birthdate_or_ogrn: 'birthdate' in data ? data.birthdate : 'details' in data ? data.details.ogrn : '',
+      day: dateWithTimezone.format('DD'),
+      month: dateWithTimezone.format('MM'),
+      year: dateWithTimezone.format('YY'),
+    }
+  }
+  
+  constructUHDContract(created_at: string): Cooperative.Document.IUHDContract {
+    const date = created_at
+      ? moment(created_at, 'DD.MM.YYYY HH:mm')
+      : moment();
+  
+    return {
+      number: `УХД-${date.format('DD')}-${date.format('MM')}-${date.format('YY')}`,
+      date: date.format('DD.MM.YYYY'),
+    };
+  }
+
+  getCommonUser(input: InternalGetUserResult): Cooperative.Model.ICommonUser {
+    switch (input.type) {
+      case 'individual':
+      case 'entrepreneur': {
+        const data = input.data as ExternalEntrepreneurData | ExternalIndividualData
+        return {
+          abbr_full_name: this.extractPersonalAbbreviatedName(data),
+          full_name_or_short_name: this.getFullParticipantName(data),
+          birthdate_or_ogrn: data.birthdate,
+        }
+      }
+
+      case 'organization': {
+        const data = input.data as ExternalOrganizationData
+        return {
+          abbr_full_name: this.extractOrganizationName(data),
+          full_name_or_short_name: this.getFullParticipantName(data),
+          birthdate_or_ogrn: data.details.ogrn,
+        }
+      }
+
+      default:
+        throw new Error(`cant extract common user data`)
     }
   }
 

@@ -69,6 +69,12 @@ export interface IVars {
     protocol_number: string
     protocol_day_month_year: string
   }
+  investment_agreement?: {
+    protocol_number: string
+    protocol_day_month_year: string
+    subject: string
+    terms: string
+  }
 }
 
 /**
@@ -89,6 +95,7 @@ export interface ICommonRequest {
 export interface ICommonUser {
   full_name_or_short_name: string
   birthdate_or_ogrn: string
+  abbr_full_name: string
 }
 
 export interface IFirstLastMiddleName {

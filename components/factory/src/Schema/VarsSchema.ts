@@ -72,6 +72,18 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       additionalProperties: true,
       nullable: true,
     },
+    investment_agreement: {
+      type: 'object',
+      properties: {
+        protocol_number: { type: 'string' },
+        protocol_day_month_year: { type: 'string' },
+        subject: {type: 'string'},
+        terms: {type: 'string'}
+      },
+      required: ['protocol_day_month_year', 'protocol_number'],
+      additionalProperties: true,
+      nullable: true,
+    },
   },
   required: [ // соблюдать порядок следования!
     // 'deleted', //not_required

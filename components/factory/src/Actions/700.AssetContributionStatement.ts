@@ -28,7 +28,7 @@ export class Factory extends DocFactory<AssetContributionStatement.Action> {
 
     const request = data.request
 
-    const commonUser = this.getCommonUser(user.data)
+    const commonUser = this.getCommonUser(user)
 
     const combinedData: AssetContributionStatement.Model = {
       meta,

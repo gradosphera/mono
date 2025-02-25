@@ -75,6 +75,14 @@ export class Generator implements IGenerator {
       [Actions.ReturnByAssetAct.Template.registry_id]: new Actions.ReturnByAssetAct.Factory(this.storage), // 802
       [Actions.AssetContributionDecision.Template.registry_id]: new Actions.AssetContributionDecision.Factory(this.storage), // 701
       [Actions.AssetContributionAct.Template.registry_id]: new Actions.AssetContributionAct.Factory(this.storage), // 702
+      [Actions.InvestmentAgreement.Template.registry_id]: new Actions.InvestmentAgreement.Factory(this.storage), // 1000
+
+      [Actions.InvestByResultStatement.Template.registry_id]: new Actions.InvestByResultStatement.Factory(this.storage), // 1001
+      [Actions.InvestByResultAct.Template.registry_id]: new Actions.InvestByResultAct.Factory(this.storage), // 1002
+
+      [Actions.InvestByMoneyStatement.Template.registry_id]: new Actions.InvestByMoneyStatement.Factory(this.storage), // 1005
+      [Actions.InvestMembershipConvertation.Template.registry_id]: new Actions.InvestMembershipConvertation.Factory(this.storage), // 1010
+
     }
     await this.storage.connect()
   }

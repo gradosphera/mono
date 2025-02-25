@@ -15,6 +15,11 @@ import * as ReturnByAssetDecision from './801.returnByAssetDecision'
 
 import * as AssetContributionAct from './702.assetContributionAct'
 import * as ReturnByAssetAct from './802.returnByAssetAct'
+import * as InvestmentAgreement from './1000.InvestmentAgreement'
+import * as InvestByResultStatement from './1001.InvestByResultStatement'
+import * as InvestByResultAct from './1002.InvestByResultAct'
+import * as InvestByMoneyStatement from './1005.InvestByMoneyStatement'
+import * as InvestMembershipConvertation from './1010.InvestMembershipConvertation'
 
 export const Registry = {
   1: WalletAgreement,
@@ -33,4 +38,9 @@ export const Registry = {
   800: ReturnByAssetStatement,
   801: ReturnByAssetDecision,
   802: ReturnByAssetAct,
+  1000: InvestmentAgreement,
+  1001: InvestByResultStatement,
+  1002: InvestByResultAct,
+  1005: InvestByMoneyStatement,
+  1010: InvestMembershipConvertation,
 }

@@ -5,6 +5,6 @@ export default async () => {
 
   await generator.connect(mongoUri)
   await preLoading()
-
+  await generator.disconnect()
   console.log('Global setup done.')
 }

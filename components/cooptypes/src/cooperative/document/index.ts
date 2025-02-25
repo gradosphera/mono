@@ -147,3 +147,23 @@ export interface IProjectData {
   question: string
   decision: string
 }
+
+export interface IIntellectualResult {
+  quantity: number
+  name: string
+  currency: string
+  unit_price: number
+  total_price: number
+  description: string
+}
+
+export interface IUHDContract {
+  number: string
+  date: string
+}
+
+export interface IContributionAmount {
+  amount: number
+  currency: string
+  words: string
+}
