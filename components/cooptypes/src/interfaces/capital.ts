@@ -16,38 +16,92 @@ export interface IAccumulate {
 
 export interface IAddauthor {
   coopname: IName
-  administrator: IName
-  idea_hash: IChecksum256
+  application: IName
+  project_hash: IChecksum256
   author: IName
   shares: IUint64
 }
 
-export interface IAddcreator {
+export interface IAllocate {
   coopname: IName
-  administrator: IName
+  application: IName
+  project_hash: IChecksum256
   result_hash: IChecksum256
-  creator: IName
-  used: IAsset
+  amount: IAsset
+}
+
+export interface IApprovecmmt {
+  coopname: IName
+  application: IName
+  approver: IName
+  commit_hash: IChecksum256
+  approved_specification: IDocument
+}
+
+export interface IApproveinvst {
+  coopname: IName
+  application: IName
+  approver: IName
+  invest_hash: IChecksum256
+  approved_statement: IDocument
+}
+
+export interface IApprovereg {
+  coopname: IName
+  application: IName
+  approver: IName
+  project_hash: IChecksum256
+  username: IName
+  approved_agreement: IDocument
 }
 
 export interface IAuthor {
   id: IUint64
-  idea_hash: IChecksum256
+  project_hash: IChecksum256
   username: IName
-  added_at: ITimePointSec
   shares: IUint64
 }
 
 export interface IAuthorize {
   coopname: IName
-  nft_id: IUint64
+  claim_id: IUint64
   decision: IDocument
+}
+
+export interface IAuthwithdraw {
+  coopname: IName
+  withdraw_hash: IChecksum256
+}
+
+export interface ICapauthinvst {
+  coopname: IName
+  invest_id: IUint64
+  authorization: IDocument
+}
+
+export interface ICapauthwthdc {
+  coopname: IName
+  withdraw_id: IUint64
+  authorization: IDocument
+}
+
+export interface ICapauthwthdr {
+  coopname: IName
+  withdraw_id: IUint64
+  authorization: IDocument
+}
+
+export interface ICapregcontr {
+  coopname: IName
+  contributor_id: IUint64
+  authorization: IDocument
 }
 
 export interface IClaim {
   id: IUint64
-  hash: IChecksum256
-  idea_hash: IChecksum256
+  claim_hash: IChecksum256
+  project_hash: IChecksum256
+  result_hash: IChecksum256
   coopname: IName
   owner: IName
   type: IName
@@ -60,55 +114,101 @@ export interface IClaim {
   act2: IDocument
 }
 
-export interface IContribute {
+export interface ICommit {
+  id: IUint64
   coopname: IName
-  administrator: IName
-  owner: IName
-  idea_hash: IChecksum256
-  nft_hash: IChecksum256
-  amount: IAsset
+  application: IName
+  username: IName
+  status: IName
+  project_hash: IChecksum256
+  result_hash: IChecksum256
+  commit_hash: IChecksum256
+  spended: IAsset
+  specification: IDocument
+  approved_specification: IDocument
+  authorization: IDocument
+  created_at: ITimePointSec
 }
 
 export interface IContributor {
   id: IUint64
-  account: IName
-  share_balance: IAsset
-  pending_rewards: IAsset
-  intellectual_contributions: IAsset
-  property_contributions: IAsset
-  total_contributions: IAsset
-  reward_per_share_last: IInt64
+  coopname: IName
+  username: IName
+  project_hash: IChecksum256
+  status: IName
+  created_at: ITimePointSec
+  agreement: IDocument
+  approved_agreement: IDocument
+  authorization: IDocument
+  invested: IAsset
+  spended: IAsset
+  available: IAsset
   withdrawed: IAsset
-  queued_withdrawal: IAsset
+  converted: IAsset
 }
 
-export interface ICreateidea {
-  hash: IChecksum256
+export interface ICreateclaim {
   coopname: IName
-  administrator: IName
+  application: IName
+  owner: IName
+  result_hash: IChecksum256
+  claim_hash: IChecksum256
+}
+
+export interface ICreatecmmt {
+  coopname: IName
+  application: IName
+  creator: IName
+  result_hash: IChecksum256
+  commit_hash: IChecksum256
+  spended: IAsset
+  specification: IDocument
+}
+
+export interface ICreateinvest {
+  coopname: IName
+  application: IName
+  username: IName
+  project_hash: IChecksum256
+  invest_hash: IChecksum256
+  amount: IAsset
+  statement: IDocument
+}
+
+export interface ICreateproj {
+  project_hash: IChecksum256
+  coopname: IName
+  application: IName
   title: string
   description: string
+  terms: string
+  subject: string
 }
 
 export interface ICreateresult {
   coopname: IName
-  administrator: IName
-  idea_hash: IChecksum256
+  application: IName
+  project_hash: IChecksum256
   result_hash: IChecksum256
+}
+
+export interface ICreatewthd1 {
+  coopname: IName
+  application: IName
+  username: IName
+  result_hash: IChecksum256
+  withdraw_hash: IChecksum256
+  commit_hashes: IChecksum256[]
+  contribution_statement: IDocument
+  return_statement: IDocument
 }
 
 export interface ICreator {
   id: IUint64
+  project_hash: IChecksum256
   result_hash: IChecksum256
   username: IName
-  used: IAsset
-}
-
-export interface IDelcreator {
-  coopname: IName
-  administrator: IName
-  result_hash: IChecksum256
-  creator: IName
+  spended: IAsset
 }
 
 export interface IDocument {
@@ -131,27 +231,47 @@ export interface IGlobalState {
   cumulative_reward_per_share: IInt64
 }
 
-export interface IIdea {
-  id: IUint64
-  hash: IChecksum256
-  coopname: IName
-  administrator: IName
-  status: IName
-  title: string
-  description: string
-  authors_count: IUint64
-  authors_shares: IUint64
-  target: IAsset
-  contributed: IAsset
-  withdrawed: IAsset
-  available: IAsset
-  created_at: ITimePointSec
-}
-
 export interface IInit {
   coopname: IName
   initiator: IName
   program_id: IUint64
+}
+
+export interface IInvest {
+  id: IUint64
+  coopname: IName
+  application: IName
+  username: IName
+  invest_hash: IChecksum256
+  project_hash: IChecksum256
+  amount: IAsset
+  status: IName
+  invested_at: ITimePointSec
+  statement: IDocument
+  approved_statement: IDocument
+}
+
+export interface IProject {
+  id: IUint64
+  project_hash: IChecksum256
+  coopname: IName
+  application: IName
+  status: IName
+  title: string
+  description: string
+  terms: string
+  subject: string
+  authors_count: IUint64
+  authors_shares: IUint64
+  target: IAsset
+  invested: IAsset
+  available: IAsset
+  generated: IAsset
+  expenses: IAsset
+  aid_with_return: IAsset
+  aid_without_return: IAsset
+  total_spent: IAsset
+  created_at: ITimePointSec
 }
 
 export interface IRefresh {
@@ -159,52 +279,91 @@ export interface IRefresh {
   username: IName
 }
 
+export interface IRegcontrib {
+  coopname: IName
+  application: IName
+  username: IName
+  project_hash: IChecksum256
+  created_at: ITimePointSec
+  agreement: IDocument
+}
+
 export interface IResult {
   id: IUint64
-  hash: IChecksum256
-  idea_hash: IChecksum256
+  result_hash: IChecksum256
+  project_hash: IChecksum256
   status: IName
   coopname: IName
   created_at: ITimePointSec
   expired_at: ITimePointSec
+  authors_shares: IUint64
   authors_count: IUint64
-  creators_count: IUint64
+  commits_count: IUint64
+  allocated: IAsset
+  available: IAsset
+  spended: IAsset
   creators_amount: IAsset
   creators_bonus: IAsset
   authors_bonus: IAsset
   generated_amount: IAsset
   participants_bonus: IAsset
   total_amount: IAsset
+  participants_bonus_remain: IAsset
+}
+
+export interface IResultAuthor {
+  id: IUint64
+  project_hash: IChecksum256
+  result_hash: IChecksum256
+  username: IName
+  shares: IUint64
+}
+
+export interface ISetact1 {
+  coopname: IName
+  application: IName
+  owner: IName
+  claim_hash: IChecksum256
+  act: IDocument
+}
+
+export interface ISetact2 {
+  coopname: IName
+  application: IName
+  owner: IName
+  result_hash: IChecksum256
+  act: IDocument
 }
 
 export interface ISetstatement {
   coopname: IName
-  administrator: IName
-  nft_hash: IChecksum256
+  application: IName
+  owner: IName
+  result_hash: IChecksum256
   statement: IDocument
 }
 
-export interface IStart {
+export interface IStartdistrbn {
   coopname: IName
-  administrator: IName
+  application: IName
   result_hash: IChecksum256
 }
 
-export interface IWithdraw1 {
-  coopname: IName
-  username: IName
-  amount: IAsset
-}
-
-export interface IWithdraw2 {
-  coopname: IName
-  username: IName
-  amount: IAsset
-}
-
-export interface IWithdrawalClaim {
+export interface IWithdraw {
   id: IUint64
-  account: IName
+  coopname: IName
+  project_hash: IChecksum256
+  result_hash: IChecksum256
+  withdraw_hash: IChecksum256
+  username: IName
+  status: IName
+  commit_hashes: IChecksum256[]
   amount: IAsset
-  timestamp: IUint64
+  contribution_statement: IDocument
+  return_statement: IDocument
+  approved_contribution_statement: IDocument
+  approved_return_statement: IDocument
+  authorized_contribution_statement: IDocument
+  authorized_return_statement: IDocument
+  created_at: ITimePointSec
 }

@@ -7,9 +7,9 @@ export const authorizations = [{ permissions: [Permissions.active], actor: Actor
 /**
  * Имя действия
  */
-export const actionName = 'withdraw2'
+export const actionName = 'allocate'
 
 /**
  * @interface
  */
-export type IWithdraw2 = Capital.IWithdraw2
+export type IAllocate = Capital.IAllocate
