@@ -152,6 +152,38 @@ export interface ICancelvote {
   decision_id: IUint64
 }
 
+export interface ICapauthinvst {
+  coopname: IName
+  username: IName
+  invest_id: IUint64
+  statement: IDocument
+  meta: string
+}
+
+export interface ICapauthwthdc {
+  coopname: IName
+  username: IName
+  withdraw_id: IUint64
+  statement: IDocument
+  meta: string
+}
+
+export interface ICapauthwthdr {
+  coopname: IName
+  username: IName
+  withdraw_id: IUint64
+  statement: IDocument
+  meta: string
+}
+
+export interface ICapregcontr {
+  coopname: IName
+  username: IName
+  contributor_id: IUint64
+  statement: IDocument
+  meta: string
+}
+
 export interface IChange {
   coopname: IName
   parent_username: IName
@@ -190,14 +222,6 @@ export interface IConfirmagree {
   agreement_id: IUint64
 }
 
-export interface IContribute {
-  coopname: IName
-  username: IName
-  claim_id: IUint64
-  statement: IDocument
-  meta: string
-}
-
 export interface ICounts extends ICountsBase {
 }
 
@@ -226,7 +250,7 @@ export interface ICreateboard {
 export interface ICreateprog {
   coopname: IName
   username: IName
-  draft_id: IUint64
+  type: IName
   title: string
   announce: string
   description: string

@@ -234,7 +234,6 @@ export interface IGlobalState {
 export interface IInit {
   coopname: IName
   initiator: IName
-  program_id: IUint64
 }
 
 export interface IInvest {
