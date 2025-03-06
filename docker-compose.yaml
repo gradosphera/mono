@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    ports: 
+      - 127.0.0.1:27017:27017
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports: 
+      - 127.0.0.1:6379:6379
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: voskhod
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports: 
+      - 127.0.0.1:5432:5432
+volumes:
+  mongo_data:
+  postgres_data:
