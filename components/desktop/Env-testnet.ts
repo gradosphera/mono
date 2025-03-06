@@ -1,0 +1,12 @@
+export const BASE_URL = 'testnet.coopenomics.world';
+export const NODE_ENV = 'development';
+export const APP_NAME = 'COOPENOMICS';
+export const BACKEND_URL = 'https://testnet.coopenomics.world/backend';
+export const COOPNAME = 'voskhod';
+export const CURRENCY = 'RUB';
+export const STORAGE_URL = 'https://testnet.coopenomics.world/uploaded/';
+export const UPLOAD_URL = 'https://testnet.coopenomics.world/upload';
+export const CHAIN_URL = 'https://testnet.coopenomics.world/api';
+export const COOP_SHORT_NAME = 'Цифровой Кооператив';
+export const CHAIN_ID = 'f0364a3f9fd913081f1c0b05c6f8f50a59b2ba60bb928cb321ba3a9a36316624';
+export const SENTRY_DSN ='https://b8151ac0239b44339e0e8c65c9aa59c4@o245142.ingest.sentry.io/5739100';

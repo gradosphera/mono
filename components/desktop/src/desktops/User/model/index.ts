@@ -8,13 +8,13 @@ import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import { ConnectionPage } from 'src/pages/Union/Connection';
 import { ListOfDocumentsPage } from 'src/pages/Documentor/ListOfDocuments';
 import { CoopCardPage } from 'src/pages/User/CardPage';
-import { MainMarketplacePage } from 'src/pages/Marketplace/MainPage';
-import { ModerationPage } from 'src/pages/Marketplace/Moderation';
-import { CreateParentOfferPage } from 'src/pages/Marketplace/CreateParentOffer';
-import { ShowcasePage } from 'src/pages/Marketplace/Showcase';
-import { UserParentOffersPage } from 'src/pages/Marketplace/UserParentOffers';
-import { UserSuppliesListPage } from 'src/pages/Marketplace/UserSuppliesList';
-import { SuppliesListPage } from 'src/pages/Marketplace/SuppliesList';
+// import { MainMarketplacePage } from 'src/pages/Marketplace/MainPage';
+// import { ModerationPage } from 'src/pages/Marketplace/Moderation';
+// import { CreateParentOfferPage } from 'src/pages/Marketplace/CreateParentOffer';
+// import { ShowcasePage } from 'src/pages/Marketplace/Showcase';
+// import { UserParentOffersPage } from 'src/pages/Marketplace/UserParentOffers';
+// import { UserSuppliesListPage } from 'src/pages/Marketplace/UserSuppliesList';
+// import { SuppliesListPage } from 'src/pages/Marketplace/SuppliesList';
 
 export const manifest = {
   'name': 'UserDesktop',
@@ -170,87 +170,87 @@ export const manifest = {
             roles: [],
           },
         },
-        {
-          path: '/:coopname/marketplace',
-          name: 'marketplace',
-          component: markRaw(MainMarketplacePage),
-          children: [
-            {
-              path: 'moderation',
-              name: 'marketplace-moderation',
-              component: markRaw(ModerationPage),
-              meta: {
-                title: 'Модерация',
-                icon: '',
-                roles: ['member', 'chairman'],
-              },
-            },
-            {
-              path: 'create-offer',
-              name: 'marketplace-create-offer',
-              component: markRaw(CreateParentOfferPage),
-              meta: {
-                title: 'Создать объявление',
-                icon: '',
-                roles: [],
-              },
-            },
-            {
-              path: 'showcase',
-              name: 'marketplace-showcase',
-              component: markRaw(ShowcasePage),
-              children: [
-                {
-                  path: ':id',
-                  name: 'marketplace-showcase-id',
-                  component: markRaw(ShowcasePage),
-                },
-              ],
-              meta: {
-                title: 'Витрина',
-                icon: '',
-                roles: [],
-              },
-            },
-            {
-              path: 'user-offers',
-              name: 'marketplace-user-offers',
-              component: markRaw(UserParentOffersPage),
-              children: [
-                {
-                  path: ':id',
-                  name: 'marketplace-user-offer-id',
-                  component: markRaw(UserParentOffersPage),
-                },
-              ],
-              meta: {
-                title: 'Мои объявления',
-                icon: '',
-                roles: [],
-              },
-            },
-            {
-              path: 'supplies',
-              name: 'marketplace-supplies',
-              component: markRaw(SuppliesListPage),
-              meta: {
-                title: 'Все заказы',
-                icon: '',
-                roles: ['member', 'chairman'],
-              },
-            },
-            {
-              path: 'user-supplies',
-              name: 'marketplace-user-supplies',
-              component: markRaw(UserSuppliesListPage),
-              meta: {
-                title: 'Мои заказы',
-                icon: '',
-                roles: [],
-              },
-            },
-          ],
-        },
+        // {
+        //   path: '/:coopname/marketplace',
+        //   name: 'marketplace',
+        //   component: markRaw(MainMarketplacePage),
+        //   children: [
+        //     {
+        //       path: 'moderation',
+        //       name: 'marketplace-moderation',
+        //       component: markRaw(ModerationPage),
+        //       meta: {
+        //         title: 'Модерация',
+        //         icon: '',
+        //         roles: ['member', 'chairman'],
+        //       },
+        //     },
+        //     {
+        //       path: 'create-offer',
+        //       name: 'marketplace-create-offer',
+        //       component: markRaw(CreateParentOfferPage),
+        //       meta: {
+        //         title: 'Создать объявление',
+        //         icon: '',
+        //         roles: [],
+        //       },
+        //     },
+        //     {
+        //       path: 'showcase',
+        //       name: 'marketplace-showcase',
+        //       component: markRaw(ShowcasePage),
+        //       children: [
+        //         {
+        //           path: ':id',
+        //           name: 'marketplace-showcase-id',
+        //           component: markRaw(ShowcasePage),
+        //         },
+        //       ],
+        //       meta: {
+        //         title: 'Витрина',
+        //         icon: '',
+        //         roles: [],
+        //       },
+        //     },
+        //     {
+        //       path: 'user-offers',
+        //       name: 'marketplace-user-offers',
+        //       component: markRaw(UserParentOffersPage),
+        //       children: [
+        //         {
+        //           path: ':id',
+        //           name: 'marketplace-user-offer-id',
+        //           component: markRaw(UserParentOffersPage),
+        //         },
+        //       ],
+        //       meta: {
+        //         title: 'Мои объявления',
+        //         icon: '',
+        //         roles: [],
+        //       },
+        //     },
+        //     {
+        //       path: 'supplies',
+        //       name: 'marketplace-supplies',
+        //       component: markRaw(SuppliesListPage),
+        //       meta: {
+        //         title: 'Все заказы',
+        //         icon: '',
+        //         roles: ['member', 'chairman'],
+        //       },
+        //     },
+        //     {
+        //       path: 'user-supplies',
+        //       name: 'marketplace-user-supplies',
+        //       component: markRaw(UserSuppliesListPage),
+        //       meta: {
+        //         title: 'Мои заказы',
+        //         icon: '',
+        //         roles: [],
+        //       },
+        //     },
+        //   ],
+        // },
         // {
         //   meta: {
         //     title: 'Поддержка',
