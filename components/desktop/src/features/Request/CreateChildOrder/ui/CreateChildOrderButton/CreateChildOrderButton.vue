@@ -11,7 +11,7 @@
 
   const createOrder = async () => {
     try {
-
+      //TODO: запрос должен быть корректным на основе информации из бч
       const document = await api.generateReturnByAssetStatement({
         coopname: props.coopname,
         request: {

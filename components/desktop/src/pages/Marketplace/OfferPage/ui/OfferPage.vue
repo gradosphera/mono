@@ -15,11 +15,11 @@ div(v-if="localRequest").row.justify-around.q-pt-lg
       div.q-pa-md
         q-input(v-model="localRequest.remain_units" :readonly="!showEdit" standout="bg-teal text-white" label="Остаток" type="number")
           template(#append)
-            p единиц
+            span единиц
 
         q-input(v-model="price" :readonly="!showEdit" standout="bg-teal text-white" label="Цена" type="number" step="100" min="0")
           template(#append)
-            p {{ symbol }}
+            span {{ symbol }}
 
     div(v-if="isMy")
       div(v-if="loggedIn")

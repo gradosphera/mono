@@ -13,6 +13,7 @@ export * as FreeDecision from './600.FreeDecision'
 export * as AssetContributionStatement from './700.AssetContributionStatement'
 export * as ReturnByAssetStatement from './800.ReturnByAssetStatement'
 
+export * as SosediAgreement from './699.SosediAgreement'
 export * as AssetContributionDecision from './701.AssetContributionDecision'
 export * as AssetContributionAct from './702.AssetContributionAct'
 export * as ReturnByAssetDecision from './801.ReturnByAssetDecision'

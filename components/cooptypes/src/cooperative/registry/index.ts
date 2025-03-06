@@ -24,3 +24,5 @@ export * as InvestByResultStatement from './1001.InvestByResultStatement'
 export * as InvestByResultAct from './1002.InvestByResultAct'
 export * as InvestByMoneyStatement from './1005.InvestByMoneyStatement'
 export * as InvestMembershipConvertation from './1010.InvestMembershipConvertation'
+
+export * as SosediAgreement from './699.SosediAgreement'

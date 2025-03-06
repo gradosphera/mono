@@ -7,10 +7,10 @@ q-card(flat ).no-select
       span Осталось:
         q-badge(size="lg").q-ml-xs {{ request.remain_units }} единиц
     div
-      span Цена: 
+      span Цена:
         q-badge(size="lg").q-ml-xs {{ request.unit_cost }}
-  
-    
+
+
 </template>
 
 <script setup lang="ts">

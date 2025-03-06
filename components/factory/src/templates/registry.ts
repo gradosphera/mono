@@ -21,6 +21,8 @@ import * as InvestByResultAct from './1002.InvestByResultAct'
 import * as InvestByMoneyStatement from './1005.InvestByMoneyStatement'
 import * as InvestMembershipConvertation from './1010.InvestMembershipConvertation'
 
+import * as SosediAgreement from './699.SosediAgreement'
+
 export const Registry = {
   1: WalletAgreement,
   2: RegulationElectronicSignaturet,
@@ -32,6 +34,7 @@ export const Registry = {
   501: DecisionOfParticipantApplication,
   599: ProjectFreeDecision,
   600: FreeDecision,
+  699: SosediAgreement,
   700: AssetContributionStatement,
   701: AssetContributionDecision,
   702: AssetContributionAct,
