@@ -69,9 +69,10 @@ async function setupFrontendTestnet(): Promise<void> {
   await copyFile('../desktop/Env-testnet.ts', '../desktop/src/shared/config/Env.ts');
 
   console.log('\n🚀 Начинаем сборку компонентов...');
-  await runCommandWithSpinner('cd ../cooptypes && pnpm run build', 'Сборка cooptypes');
+  await runCommandWithSpinner('cd ../cooptypes && pnpm run build', 'Сборка библиотеки типов');
   await runCommandWithSpinner('cd ../factory && pnpm run build', 'Сборка фабрики документов');
-
+  await runCommandWithSpinner('cd ../sdk && pnpm run build', 'Сборка SDK');
+  
   console.log('\n✅ Фронтенд готов к запуску.');
   console.log('🔹 Для запуска выполните:');
   console.log('   💻 `pnpm run dev:desktop`');
@@ -93,6 +94,7 @@ async function setupLocalFull(): Promise<void> {
   console.log('\n🚀 Начинаем сборку компонентов...');
   await runCommandWithSpinner('cd ../cooptypes && pnpm run build', 'Сборка библиотеки типов');
   await runCommandWithSpinner('cd ../factory && pnpm run build', 'Сборка фабрики документов');
+  await runCommandWithSpinner('cd ../sdk && pnpm run build', 'Сборка SDK');
 
   console.log('\n✅ Подготовка завершена.');
   console.log('🔹 Для локального запуска системы последовательно выполните в соседних окнах терминала:');
