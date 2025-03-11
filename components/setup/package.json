@@ -1,0 +1,22 @@
+{
+  "name": "@coopenomics/setup",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "setup": "esno ./setup.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "esno": "^4.8.0",
+    "inquirer": "^12.4.3",
+    "ora": "^8.2.0",
+    "tsx": "^4.19.3"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7"
+  }
+}

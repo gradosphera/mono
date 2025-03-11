@@ -1,0 +1,25 @@
+{
+  "version": "6.0",
+  "nxVersion": "19.8.8",
+  "deps": {
+    "esno": "^4.8.0",
+    "inquirer": "^12.4.3",
+    "tsx": "^4.19.3",
+    "@types/inquirer": "^9.0.7"
+  },
+  "pathMappings": {},
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "projectFileMap": {},
+    "nonProjectFiles": [
+      {
+        "file": "cli.ts",
+        "hash": "17663076233727023957"
+      },
+      {
+        "file": "package.json",
+        "hash": "14758194518687749521"
+      }
+    ]
+  }
+}
