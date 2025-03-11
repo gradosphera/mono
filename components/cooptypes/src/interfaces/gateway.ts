@@ -35,6 +35,18 @@ export interface ICountsBase {
   value: IUint64
 }
 
+export interface ICreatewthdrw {
+  coopname: IName
+  application: IName
+  username: IName
+  withdraw_hash: IChecksum256
+  quantity: IAsset
+  document: IDocument
+  callback_contract: IName
+  callback_type: IName
+  memo: string
+}
+
 export interface IDeposit {
   coopname: IName
   username: IName
@@ -107,26 +119,18 @@ export interface IOnedeposit {
   expired_at: ITimePointSec
 }
 
-export interface IOnewithdraw {
+export interface IWithdraw {
   id: IUint64
   username: IName
   coopname: IName
-  bank_data_id: string
-  token_contract: IName
-  quantity: IAsset
+  withdraw_hash: IChecksum256
+  callback_contract: IName
+  callback_type: IName
   status: IName
+  quantity: IAsset
   document: IDocument
   memo: string
   created_at: ITimePointSec
-}
-
-export interface IWithdraw {
-  coopname: IName
-  username: IName
-  quantity: IAsset
-  document: IDocument
-  bank_data_id: string
-  memo: string
 }
 
 export interface IWithdrawauth {
@@ -136,14 +140,14 @@ export interface IWithdrawauth {
 
 export interface IWthdcomplete {
   coopname: IName
-  admin: IName
-  withdraw_id: IUint64
+  application: IName
+  withdraw_hash: IChecksum256
   memo: string
 }
 
 export interface IWthdfail {
   coopname: IName
-  admin: IName
+  application: IName
   withdraw_id: IUint64
   memo: string
 }

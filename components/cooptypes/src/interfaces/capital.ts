@@ -38,6 +38,14 @@ export interface IApprovecmmt {
   approved_specification: IDocument
 }
 
+export interface IApproveexpns {
+  coopname: IName
+  application: IName
+  approver: IName
+  expense_hash: IChecksum256
+  approved_statement: IDocument
+}
+
 export interface IApproveinvst {
   coopname: IName
   application: IName
@@ -53,6 +61,15 @@ export interface IApprovereg {
   project_hash: IChecksum256
   username: IName
   approved_agreement: IDocument
+}
+
+export interface IApprovewthd1 {
+  coopname: IName
+  application: IName
+  approver: IName
+  withdraw_hash: IChecksum256
+  approved_contribution_statement: IDocument
+  approved_return_statement: IDocument
 }
 
 export interface IAuthor {
@@ -71,6 +88,12 @@ export interface IAuthorize {
 export interface IAuthwithdraw {
   coopname: IName
   withdraw_hash: IChecksum256
+}
+
+export interface ICapauthexpns {
+  coopname: IName
+  expense_id: IUint64
+  authorization: IDocument
 }
 
 export interface ICapauthinvst {
@@ -123,11 +146,19 @@ export interface ICommit {
   project_hash: IChecksum256
   result_hash: IChecksum256
   commit_hash: IChecksum256
-  spended: IAsset
+  spend: IAsset
   specification: IDocument
   approved_specification: IDocument
   authorization: IDocument
   created_at: ITimePointSec
+}
+
+export interface IConfirmexpns {
+  coopname: IName
+  application: IName
+  username: IName
+  expense_hash: IChecksum256
+  confirmation: IDocument
 }
 
 export interface IContributor {
@@ -141,10 +172,15 @@ export interface IContributor {
   approved_agreement: IDocument
   authorization: IDocument
   invested: IAsset
-  spended: IAsset
+  contributed_hours: IUint64
+  rate_per_hour: IAsset
+  spend: IAsset
+  convert_percent: IUint64
+  for_convert: IAsset
   available: IAsset
   withdrawed: IAsset
   converted: IAsset
+  expensed: IAsset
 }
 
 export interface ICreateclaim {
@@ -161,8 +197,20 @@ export interface ICreatecmmt {
   creator: IName
   result_hash: IChecksum256
   commit_hash: IChecksum256
-  spended: IAsset
+  contributed_hours: IUint64
   specification: IDocument
+}
+
+export interface ICreateexpnse {
+  coopname: IName
+  application: IName
+  expense_hash: IChecksum256
+  result_hash: IChecksum256
+  creator: IName
+  fund_id: IUint64
+  amount: IAsset
+  description: string
+  statement: IDocument
 }
 
 export interface ICreateinvest {
@@ -208,7 +256,7 @@ export interface ICreator {
   project_hash: IChecksum256
   result_hash: IChecksum256
   username: IName
-  spended: IAsset
+  spend: IAsset
 }
 
 export interface IDocument {
@@ -216,6 +264,24 @@ export interface IDocument {
   public_key: IPublicKey
   signature: ISignature
   meta: string
+}
+
+export interface IExpense {
+  id: IUint64
+  coopname: IName
+  application: IName
+  username: IName
+  status: IName
+  project_hash: IChecksum256
+  result_hash: IChecksum256
+  expense_hash: IChecksum256
+  fund_id: IUint64
+  amount: IAsset
+  description: string
+  statement: IDocument
+  approved_statement: IDocument
+  authorization: IDocument
+  spend_at: ITimePointSec
 }
 
 export interface IGlobalState {
@@ -262,14 +328,13 @@ export interface IProject {
   subject: string
   authors_count: IUint64
   authors_shares: IUint64
+  expense_funds: IUint64[]
   target: IAsset
   invested: IAsset
   available: IAsset
   generated: IAsset
   expenses: IAsset
-  aid_with_return: IAsset
-  aid_without_return: IAsset
-  total_spent: IAsset
+  expensed: IAsset
   created_at: ITimePointSec
 }
 
@@ -283,6 +348,8 @@ export interface IRegcontrib {
   application: IName
   username: IName
   project_hash: IChecksum256
+  convert_percent: IUint64
+  rate_per_hour: IAsset
   created_at: ITimePointSec
   agreement: IDocument
 }
@@ -300,7 +367,8 @@ export interface IResult {
   commits_count: IUint64
   allocated: IAsset
   available: IAsset
-  spended: IAsset
+  spend: IAsset
+  expensed: IAsset
   creators_amount: IAsset
   creators_bonus: IAsset
   authors_bonus: IAsset

@@ -17,4 +17,4 @@ export const actionName = 'wthdcomplete'
  * @interface
  * Действие для подтверждения платежа по возврату паевого взноса пользователю.
  */
-export type IFailDeposit = Gateway.IWthdcomplete
+export type ICompleteWithdraw = Gateway.IWthdcomplete
