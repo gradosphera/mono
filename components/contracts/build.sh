@@ -7,7 +7,7 @@ fi
 
 contract="$1"
 
-docker run --rm -it --name cdt \
+docker run --rm --name cdt \
   --volume "$(pwd)/:/project" \
   -w /project/build \
   dicoop/blockchain_v5.1.1:dev \
