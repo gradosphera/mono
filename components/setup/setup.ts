@@ -15,7 +15,11 @@ console.log(`
 888 Y888P 888 888     888 888 Y88b888 888     888
 888  Y8P  888 888     888 888  Y88888 888     888
 888   "   888 Y88b. .d88P 888   Y8888 Y88b. .d88P
-888       888  "Y88888P"  888    Y888  "Y88888P"`);
+888       888  "Y88888P"  888    Y888  "Y88888P"
+
+   Cooperative Relationship Management System 
+   
+`);
 
 interface MenuAnswers extends Answers {
   choice: 'dev' | 'use';
