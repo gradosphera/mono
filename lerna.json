@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
-  "version": "2.2.8",
+  "version": "2.2.9",
   "packages": [
     "components/*",
     "components/controller/src/plugins/*"

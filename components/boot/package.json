@@ -1,7 +1,7 @@
 {
   "name": "@coopenomics/boot",
   "type": "module",
-  "version": "0.1.8",
+  "version": "2.2.9",
   "private": true,
   "packageManager": "pnpm@9.0.6",
   "description": "",
