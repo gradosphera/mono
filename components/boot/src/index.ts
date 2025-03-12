@@ -14,8 +14,8 @@ import { deployCommand } from './docker/deploy'
 
 config()
 
-const basePath = path.resolve(process.cwd(), '../blockchain-data')
-const keosdPath = path.resolve(process.cwd(), '../wallet-data/keosd.sock')
+const basePath = path.resolve(process.cwd(), './blockchain-data')
+const keosdPath = path.resolve(process.cwd(), './wallet-data/keosd.sock')
 
 if (!fs.existsSync(basePath)) {
   fs.mkdirSync(basePath, { recursive: true })
