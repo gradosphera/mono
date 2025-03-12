@@ -2,7 +2,7 @@
 q-table(
   ref="tableRef" v-model:expanded="expanded"
   flat
-  :rows="participants.results"
+  :rows="participants?.results"
   :columns="columns"
   :table-colspan="9"
   row-key="username"
@@ -20,6 +20,7 @@ q-table(
 
     q-tr(:props="props")
       q-th(auto-width)
+      q-th Тип
 
       q-th(
         v-for="col in props.cols"
@@ -32,6 +33,7 @@ q-table(
       q-td(auto-width)
         // q-toggle(v-model="props.expand" checked-icon="fas fa-chevron-circle-left" unchecked-icon="fas fa-chevron-circle-right" )
         q-btn(size="sm" color="primary" round dense :icon="props.expand ? 'remove' : 'add'" @click="props.expand = !props.expand")
+      q-td {{ props.row.type == 'individual' ? 'физ. лицо' : 'юр. лицо' }}
       q-td {{ props.row.username }}
       q-td {{ props.row.private_data?.last_name }}
       q-td {{ props.row.private_data?.first_name }}
@@ -43,9 +45,16 @@ q-table(
 
 
     q-tr(v-show="props.expand" :key="`e_${props.row.username}`" :props="props" class="q-virtual-scroll--with-prev")
-      q-td(colspan="100%")
-        slot(:expand="props.expand" :receiver="props.row.username")
-
+      q-tr(v-show="props.expand" :key="`e_${props.row.username}`" :props="props" class="q-virtual-scroll--with-prev")
+        q-td(colspan="100%")
+          q-tabs(v-model="currentTab" class="text-primary" align="left")
+            q-tab(name="document" label="Документы")
+            q-tab(name="info" label="Информация о пайщике")
+          q-tab-panels(v-model="currentTab" animated)
+            q-tab-panel(name="document")
+              slot(:expand="props.expand" :receiver="props.row.username")
+            q-tab-panel(name="info")
+              component(:is="useComponent(props.row.type)" :participantData="props.row")
 </template>
 
 <script setup lang="ts">
@@ -53,10 +62,27 @@ import { ref } from 'vue'
 import { Notify } from 'quasar'
 
 import { sendGET } from 'src/shared/api';
+import { EditableEntrepreneurCard } from 'src/shared/ui/EditableEntrepreneurCard';
+import { EditableIndividualCard } from 'src/shared/ui/EditableIndividualCard';
+import { EditableOrganizationCard } from 'src/shared/ui/EditableOrganizationCard';
+
 const participants = ref({ results: [] })
 const onLoading = ref(false)
+const currentTab = ref('document')
+//- const tabs = ref(['info', 'document'])
 
 import moment from 'moment-with-locales-es6'
+
+const useComponent = (type: string) => {
+  switch (type) {
+    case 'individual':
+      return EditableIndividualCard
+    case 'entrepreneur':
+      return EditableEntrepreneurCard
+    case 'organization':
+      return EditableOrganizationCard
+  }
+}
 
 const loadParticipants = async () => {
   try {
@@ -75,6 +101,16 @@ const loadParticipants = async () => {
     })
   }
 }
+
+// const showPopup = (user) => {
+//   alert('good')
+//   // Logic to show popup with user details
+//   Notify.create({
+//     message: `User details: ${user.username}`,
+//     color: 'info',
+//     position: 'top-right'
+//   });
+// };
 
 loadParticipants()
 
