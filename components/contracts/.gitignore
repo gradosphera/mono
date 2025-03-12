@@ -5,7 +5,6 @@ registrator/registrator.wasm
 networks.sh
 ano/ano.wasm
 ano/ano.abi
-lib/
 Testing/
 docs/html/*
 docs/xml/*
