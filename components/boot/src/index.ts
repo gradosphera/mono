@@ -126,7 +126,6 @@ program
   .action(async () => {
     try {
       await deleteFile(keosdPath)
-      await clearDirectory(basePath)
       await checkHealth()
       await boot()
       console.log(`

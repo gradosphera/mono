@@ -16,6 +16,7 @@ services:
     command: >
       /bin/bash -c "/usr/local/bin/nodeos -d /mnt/dev/data --config-dir /mnt/dev/config --genesis-json /mnt/dev/config/genesis.json"
     restart: unless-stopped
+
   mongo:
     image: mongo:latest
     container_name: mongo
