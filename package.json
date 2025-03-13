@@ -20,10 +20,11 @@
   },
   "scripts": {
     "setup": "lerna run setup --scope @coopenomics/setup",
-    "boot": "lerna run dev --scope @coopenomics/boot",
+    "boot": "lerna run boot --scope @coopenomics/boot",
+    "clear": "lerna run clear --scope @coopenomics/boot",
     "build:lib": "lerna run build --scope @coopenomics/factory --scope @coopenomics/cooptypes",
     "build:contracts:all": "lerna run build:all --scope @coopenomics/contracts",
-    "build:contract": "lerna run build --scope @coopenomics/contracts --",
+    "build:contract": "lerna run build:one --scope @coopenomics/contracts --",
     "dev:desktop": "lerna run dev --parallel --scope @coopenomics/desktop",
     "dev:backend": "lerna run dev --parallel --scope @coopenomics/parser --scope @coopenomics/controller --scope coop-notificator",
     "dev:lib": "lerna run dev --parallel --scope @coopenomics/factory --scope cooptypes",

@@ -1,6 +1,22 @@
 version: '3'
 
 services:
+  node:
+    image: dicoop/blockchain_v5.1.1:dev
+    container_name: node
+    ports:
+      - "8888:8888"
+      - "9876:9876"
+      - "8080:8080"
+    volumes:
+      - ./components/boot/blockchain-data:/mnt/dev/data
+      - ./components/boot/wallet-data:/root/eosio-wallet
+      - ./components/contracts/build/contracts:/contracts
+      - ./components/boot/src/configs:/mnt/dev/config
+    command: >
+      /bin/bash -c "/usr/local/bin/nodeos -d /mnt/dev/data --config-dir /mnt/dev/config --genesis-json /mnt/dev/config/genesis.json"
+    restart: unless-stopped
+
   mongo:
     image: mongo:latest
     container_name: mongo

@@ -145,22 +145,6 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.17.16)(jsdom@11.12.0)(sass@1.80.5)(terser@5.36.0)
 
-  components/configurator:
-    dependencies:
-      esno:
-        specifier: ^4.8.0
-        version: 4.8.0
-      inquirer:
-        specifier: ^12.4.3
-        version: 12.4.3(@types/node@22.8.4)
-      tsx:
-        specifier: ^4.19.3
-        version: 4.19.3
-    devDependencies:
-      '@types/inquirer':
-        specifier: ^9.0.7
-        version: 9.0.7
-
   components/contracts: {}
 
   components/controller:
@@ -5887,6 +5871,7 @@ packages:
   bson@6.9.0:
     resolution: {integrity: sha512-X9hJeyeM0//Fus+0pc5dSUMhhrrmWwQUtdavaQeF3Ta6m69matZkGWV/MrBcnwUeLC8W9kwwc2hfkZgUuCX3Ig==}
     engines: {node: '>=16.20.1'}
+    deprecated: a critical bug affecting only useBigInt64=true deserialization usage is fixed in bson@6.10.3
 
   btoa@1.2.1:
     resolution: {integrity: sha512-SB4/MIGlsiVkMcHmT+pSmIPoNDoHg+7cMzmt3Uxt628MTz2487DKSqK/fuhFBrkuqrYv5UCEnACpF4dTFNKc/g==}

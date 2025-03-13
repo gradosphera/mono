@@ -1,7 +1,7 @@
 {
   "name": "@coopenomics/boot",
   "type": "module",
-  "version": "0.1.8",
+  "version": "2.2.9",
   "private": true,
   "packageManager": "pnpm@9.0.6",
   "description": "",
@@ -10,9 +10,9 @@
   "keywords": [],
   "scripts": {
     "enter": "./scripts/enter.sh",
-    "boot": "esno src/docker/boot.ts",
     "cli": "esno src/index.ts",
-    "dev": "esno src/index.ts boot",
+    "boot": "esno src/index.ts boot",
+    "clear": "esno src/index.ts clear",
     "start": "./scripts/restart.sh",
     "stop": "./scripts/stop.sh"
   },

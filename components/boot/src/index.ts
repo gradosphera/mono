@@ -9,7 +9,7 @@ import { runContainer } from './docker/run'
 import { boot } from './init/booter'
 import { sleep } from './utils'
 import { checkHealth } from './docker/health'
-import { clearDirectory, deleteFile } from './docker/purge'
+import { clearDB, clearDirectory, deleteFile } from './docker/purge'
 import { deployCommand } from './docker/deploy'
 
 config()
@@ -126,9 +126,6 @@ program
   .action(async () => {
     try {
       await deleteFile(keosdPath)
-      await stopContainerByName('node')
-      await clearDirectory(basePath)
-      await sleep(5000)
       await runContainer()
       await checkHealth()
       await boot()
@@ -144,29 +141,33 @@ d88P  Y88b d88P" "Y88b 8888b   d8888 888   Y88b 888      888            888     
 Y88b  d88P Y88b. .d88P 888   "   888 888        888      888            888     888
  "Y8888P"   "Y88888P"  888       888 888        88888888 8888888888     888     8888888888
  
- Block Production:
  `)
+      process.exit(0)
     }
     catch (error) {
       console.error('Failed to boot:', error)
+      process.exit(1)
     }
   })
 
 // Команда для получения списка контейнеров
 program
-  .command('clean-launch')
+  .command('clear')
   .description('Purge blockchain data and boot a Protocol')
   .action(async () => {
     try {
-      await deleteFile(keosdPath)
       await stopContainerByName('node')
+      await deleteFile(keosdPath)
       await clearDirectory(basePath)
       await sleep(5000)
+      await clearDB()
       await runContainer()
-      await checkHealth()
+      console.log('Блокчейн очищен и перезапущен. Запустите загрузку: pnpm run boot')
+      process.exit(0)
     }
     catch (error) {
       console.error('Failed to boot:', error)
+      process.exit(1)
     }
   })
 
@@ -186,9 +187,8 @@ program
 program.parse(process.argv) // Пуск парсинга аргументов
 
 async function gracefulShutdown() {
-  console.log('Stopping container...')
-  await stopContainerByName('node')
-
+  // console.log('Stopping container...')
+  // await stopContainerByName('node')
   process.exit(0)
 }
 

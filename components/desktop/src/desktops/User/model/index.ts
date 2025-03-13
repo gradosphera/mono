@@ -160,16 +160,6 @@ export const manifest = {
 
         },
 
-        {
-          path: '/:coopname/contacts',
-          name: 'contacts',
-          component: markRaw(ContactsPage),
-          meta: {
-            title: 'Контакты',
-            icon: 'fa-solid fa-info',
-            roles: [],
-          },
-        },
         // {
         //   path: '/:coopname/marketplace',
         //   name: 'marketplace',
@@ -251,6 +241,17 @@ export const manifest = {
         //     },
         //   ],
         // },
+        {
+          path: '/:coopname/contacts',
+          name: 'contacts',
+          component: markRaw(ContactsPage),
+          meta: {
+            title: 'Контакты',
+            icon: 'fa-solid fa-info',
+            roles: [],
+          },
+        },
+
         // {
         //   meta: {
         //     title: 'Поддержка',
