@@ -8,13 +8,13 @@ import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import { ConnectionPage } from 'src/pages/Union/Connection';
 import { ListOfDocumentsPage } from 'src/pages/Documentor/ListOfDocuments';
 import { CoopCardPage } from 'src/pages/User/CardPage';
-import { MainMarketplacePage } from 'src/pages/Marketplace/MainPage';
-import { ModerationPage } from 'src/pages/Marketplace/Moderation';
-import { CreateParentOfferPage } from 'src/pages/Marketplace/CreateParentOffer';
-import { ShowcasePage } from 'src/pages/Marketplace/Showcase';
-import { UserParentOffersPage } from 'src/pages/Marketplace/UserParentOffers';
-import { UserSuppliesListPage } from 'src/pages/Marketplace/UserSuppliesList';
-import { SuppliesListPage } from 'src/pages/Marketplace/SuppliesList';
+// import { MainMarketplacePage } from 'src/pages/Marketplace/MainPage';
+// import { ModerationPage } from 'src/pages/Marketplace/Moderation';
+// import { CreateParentOfferPage } from 'src/pages/Marketplace/CreateParentOffer';
+// import { ShowcasePage } from 'src/pages/Marketplace/Showcase';
+// import { UserParentOffersPage } from 'src/pages/Marketplace/UserParentOffers';
+// import { UserSuppliesListPage } from 'src/pages/Marketplace/UserSuppliesList';
+// import { SuppliesListPage } from 'src/pages/Marketplace/SuppliesList';
 
 export const manifest = {
   'name': 'UserDesktop',

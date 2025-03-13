@@ -37,7 +37,7 @@
     "deploy-testnet": "git checkout testnet && git merge main && git push origin testnet && git checkout main",
     "deploy-production": "git checkout production && git merge testnet && git push origin production && git checkout main",
     "build": "unbuild",
-    "dev": "concurrently -n 'NOTIFICATOR' -c 'bgYellow.black' \"nodemon --watch src --ext ts,js,env  --exec 'esno src/index.ts'\"",
+    "dev": "concurrently -n 'NOTIFICATOR' -c 'bgYellow.black' \"esno src/index.ts\"",
     "lint": "eslint .",
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish",
