@@ -1,5 +1,35 @@
 import { promises as fs } from 'node:fs'
 import * as path from 'node:path'
+import mongoose from 'mongoose'
+
+export async function clearDB(): Promise<void> {
+  // eslint-disable-next-line node/prefer-global/process
+  await mongoose.connect(process.env.MONGO_URI as string)
+
+  try {
+    await mongoose.connection.collection('sync').deleteMany({})
+    console.log('Все документы удалены из коллекции sync')
+  }
+  catch (e) {
+    console.error('Ошибка при удалении:', e)
+  }
+
+  try {
+    await mongoose.connection.collection('actions').deleteMany({})
+    console.log('Все документы удалены из коллекции actions')
+  }
+  catch (e) {
+    console.error('Ошибка при удалении:', e)
+  }
+
+  try {
+    await mongoose.connection.collection('deltas').deleteMany({})
+    console.log('Все документы удалены из коллекции deltas')
+  }
+  catch (e) {
+    console.error('Ошибка при удалении:', e)
+  }
+}
 
 export async function clearDirectory(dirPath: string): Promise<void> {
   try {

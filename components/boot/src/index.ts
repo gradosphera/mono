@@ -9,7 +9,7 @@ import { runContainer } from './docker/run'
 import { boot } from './init/booter'
 import { sleep } from './utils'
 import { checkHealth } from './docker/health'
-import { clearDirectory, deleteFile } from './docker/purge'
+import { clearDB, clearDirectory, deleteFile } from './docker/purge'
 import { deployCommand } from './docker/deploy'
 
 config()
@@ -160,11 +160,14 @@ program
       await deleteFile(keosdPath)
       await clearDirectory(basePath)
       await sleep(5000)
+      await clearDB()
       await runContainer()
       console.log('Блокчейн очищен и перезапущен. Запустите загрузку: pnpm run boot')
+      process.exit(0)
     }
     catch (error) {
       console.error('Failed to boot:', error)
+      process.exit(1)
     }
   })
 

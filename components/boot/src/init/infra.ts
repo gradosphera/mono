@@ -257,6 +257,30 @@ export async function startInfra() {
   // eslint-disable-next-line node/prefer-global/process
   await mongoose.connect(process.env.MONGO_URI as string)
 
+  try {
+    await mongoose.connection.collection('sync').deleteMany({})
+    console.log('Все документы удалены из коллекции sync')
+  }
+  catch (e) {
+    console.error('Ошибка при удалении:', e)
+  }
+
+  try {
+    await mongoose.connection.collection('actions').deleteMany({})
+    console.log('Все документы удалены из коллекции actions')
+  }
+  catch (e) {
+    console.error('Ошибка при удалении:', e)
+  }
+
+  try {
+    await mongoose.connection.collection('deltas').deleteMany({})
+    console.log('Все документы удалены из коллекции deltas')
+  }
+  catch (e) {
+    console.error('Ошибка при удалении:', e)
+  }
+
   // добавляем пользователя для подключений
   try {
     await mongoose.connection.collection('users').insertOne({
