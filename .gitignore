@@ -1,3 +1,5 @@
 node_modules/
 lerna-debug.log
 components/controller/graph.png
+wallet-data/
+blockchain-data/

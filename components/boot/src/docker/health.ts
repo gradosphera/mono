@@ -13,9 +13,11 @@ export async function checkHealth() {
 
       console.log('Node is healthy. Continue.', result)
     }
-    // eslint-disable-next-line unused-imports/no-unused-vars
+
     catch (error: any) {
-      // console.error('Error:', error)
+      console.error(error)
+      console.log('Блокчейн не доступен с ошибкой. Он поднят? docker compose up -d')
+
       await sleep(1000)
 
       return check() // Повторный вызов функции
