@@ -156,9 +156,12 @@ program
   .description('Purge blockchain data and boot a Protocol')
   .action(async () => {
     try {
-      await deleteFile(keosdPath)
       await stopContainerByName('node')
+      await deleteFile(keosdPath)
       await clearDirectory(basePath)
+      await sleep(5000)
+      await runContainer()
+      console.log('Блокчейн очищен и перезапущен. Запустите загрузку: pnpm run boot')
     }
     catch (error) {
       console.error('Failed to boot:', error)
