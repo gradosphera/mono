@@ -5,9 +5,11 @@ div
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { useUpdateAccount } from '../model';
+import { type IUpdateAccountInput, useUpdateAccount } from '../model';
 import { extractGraphQLErrorMessages, FailAlert, SuccessAlert } from 'src/shared/api';
-import type { Zeus } from '@coopenomics/sdk';
+import { Zeus } from '@coopenomics/sdk';
+import type { IUserAccountData } from 'src/entities/User';
+import type { IIndividualData } from 'src/shared/lib/types/user/IUserData';
 
 const isSubmitting = ref(false)
 const { updateAccount } = useUpdateAccount()
@@ -18,28 +20,23 @@ const props = defineProps({
         default: false
     },
     accountData: {
-        type: Object as () => Zeus.ModelTypes['Individual'],
+        type: Object as () => IUserAccountData,
         required: true
-    }
+    },
 })
 
 const updateAccountHandler = async () => {
   try {
     isSubmitting.value = true
-    const data = props.accountData
-    // data.role = 'User'
-    // data.type = data.type.charAt(0).toUpperCase() + data.type.slice(1)
-    const individual_data = { 
-        birthdate: data.private_data.birthdate,
-        first_name: data.private_data.first_name,
-        full_address: data.private_data.full_address,
-        last_name: data.private_data.last_name,
-        middle_name: data.private_data.middle_name,
-        phone: data.private_data.phone
+
+    const individual_data: IUpdateAccountInput = {
+      email: props.accountData.email,
+      role: Zeus.RegisterRole.User,
+      type: Zeus.AccountType.Individual,
+      username: props.accountData.username,
+      individual_data: props.accountData.private_data as IIndividualData
     }
-    if (data.private_data?.passport) {
-        individual_data.passport = data.private_data.passport
-    }
+
     await updateAccount(individual_data)
     SuccessAlert('Данные аккаунта обновлены')
   } catch(e){

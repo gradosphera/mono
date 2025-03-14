@@ -1,9 +1,8 @@
-import type { IBranch } from 'src/entities/Branch/model'
-import type { ICreateBranchInput } from '../model'
 import { client } from 'src/shared/api/client'
 import { Mutations } from '@coopenomics/sdk'
 
-async function updateAccount(data: any): Promise<any>{
+async function updateAccount(data: Mutations.Accounts.UpdateAccount.IInput['data']): Promise<Mutations.Accounts.UpdateAccount.IOutput[[typeof Mutations.Accounts.UpdateAccount.name][number]]>{
+  console.log('on update', data)
   const {[Mutations.Accounts.UpdateAccount.name]: result} = await client.Mutation(Mutations.Accounts.UpdateAccount.mutation, {variables: {
     data
   }})
