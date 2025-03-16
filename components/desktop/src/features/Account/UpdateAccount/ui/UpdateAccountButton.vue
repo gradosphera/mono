@@ -9,7 +9,7 @@ import { type IUpdateAccountInput, useUpdateAccount } from '../model';
 import { extractGraphQLErrorMessages, FailAlert, SuccessAlert } from 'src/shared/api';
 import { Zeus } from '@coopenomics/sdk';
 import type { IUserAccountData } from 'src/entities/User';
-import type { IIndividualData } from 'src/shared/lib/types/user/IUserData';
+import type { IIndividualData, IOrganizationData, IEntrepreneurData } from 'src/shared/lib/types/user/IUserData';
 
 const isSubmitting = ref(false)
 const { updateAccount } = useUpdateAccount()
@@ -23,21 +23,31 @@ const props = defineProps({
         type: Object as () => IUserAccountData,
         required: true
     },
+    accountType: {
+        type: String as () => Zeus.AccountType,
+        required: true
+    }
 })
 
 const updateAccountHandler = async () => {
   try {
     isSubmitting.value = true
 
-    const individual_data: IUpdateAccountInput = {
+    const account_data: IUpdateAccountInput = {
       email: props.accountData.email,
       role: Zeus.RegisterRole.User,
-      type: Zeus.AccountType.Individual,
+      type: props.accountType,
       username: props.accountData.username,
       individual_data: props.accountData.private_data as IIndividualData
     }
 
-    await updateAccount(individual_data)
+    if(props.accountType === Zeus.AccountType.Organization) {
+      account_data.organization_data = props.accountData.private_data as IOrganizationData
+    } else if(props.accountType === Zeus.AccountType.Entrepreneur) {
+      account_data.entrepreneur_data = props.accountData.private_data as IEntrepreneurData
+    }
+
+    await updateAccount(account_data)
     SuccessAlert('Данные аккаунта обновлены')
   } catch(e){
     FailAlert(`Ошибка при сохранении: ${extractGraphQLErrorMessages(e)}`)

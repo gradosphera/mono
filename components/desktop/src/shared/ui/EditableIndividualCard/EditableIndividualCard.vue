@@ -64,7 +64,7 @@ q-form(ref="form")
     standout="bg-teal text-white"
     label="Телефон"
     placeholder="+7 (XXX) XXX-XX-XX"
-    :rules="[val => validatePhone(val)]"
+    :rules="[val => val => notEmpty(val)]"
     autocomplete="off"
   )
 
@@ -139,6 +139,7 @@ q-form(ref="form")
   UpdateAccountButton(
     :isDisabled="isDisabled"
     :accountData="localParticipantData"
+    :accountType="Zeus.AccountType.Individual"
   )
 </template>
 
@@ -150,6 +151,7 @@ q-form(ref="form")
   import { failAlert } from 'src/shared/api';
   import { UpdateAccountButton } from 'src/features/Account/UpdateAccount';
   import { type IUserAccountData } from 'src/entities/User';
+  import { Zeus } from '@coopenomics/sdk';
 
   const props = defineProps({
     participantData: {
@@ -159,7 +161,7 @@ q-form(ref="form")
   });
 
   // Локальная копия данных
-  const localParticipantData = ref(props.participantData);
+  const localParticipantData = ref<IUserAccountData>(props.participantData);
 
   // Ссылка на форму
   const form = ref();
