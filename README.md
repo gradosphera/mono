@@ -14,7 +14,7 @@
 pnpm install
 ```
 
-Также для работы потребуется установленная фабрика документов `weasyprint` для вашей операционной системы: https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#installation
+Также для работы потребуется установленная фабрика документов `weasyprint` для вашей операционной системы: <https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#installation>
 
 ## Конфигурация
 
@@ -78,23 +78,6 @@ pnpm run clear
 pnpm run boot
 pnpm run dev:backend
 pnpm run dev:desktop
-```
-
-## Throubleshooting
-
-### Command failed: SOURCE_DATE_EPOCH=0 weasyprint
-
-Эта ошибка возникает если в вашей системе не установлен python либо в самом python отсутствует установленный пакет weasyprint. Решается командой:
-
-```sh
-pip3 install weasyprint 
-# или pip install weasyprint - в зависимости от версии python
-```
-
-На Ubuntu 24.04 и выше этот пакет может быть необходимо установить через apt а не через pip, (иначе при запуске системный python его не увидит):
-
-```sh
-sudo apt install weasyprint
 ```
 
 ## Лицензия
