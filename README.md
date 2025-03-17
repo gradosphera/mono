@@ -14,6 +14,8 @@
 pnpm install
 ```
 
+Также для работы потребуется установленная фабрика документов `weasyprint` для вашей операционной системы: https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#installation
+
 ## Конфигурация
 
 Для конфигурации потребуетcя установленный `docker` и `docker-compose`. Выполните команду и следуйте инструкциям:
