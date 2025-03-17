@@ -3,7 +3,7 @@ q-form(ref="form")
   q-input(
     :readonly="readonly"
     dense
-    v-model="localParticipantData.email"
+    v-model="localParticipantData.private_data.email"
     standout="bg-teal text-white"
     label="Email"
     placeholder="example@domain.com"
@@ -136,22 +136,26 @@ q-form(ref="form")
     autocomplete="off"
   )
 
-  UpdateAccountButton(
+  EditableActions(
+    :isEditing="isEditing"
     :isDisabled="isDisabled"
-    :accountData="localParticipantData"
-    :accountType="Zeus.AccountType.Individual"
+    @save="saveChanges"
+    @cancel="cancelChanges"
   )
 </template>
 
   <script lang="ts" setup>
-  import { ref, computed } from 'vue';
+  import { ref, watch, reactive } from 'vue';
   import { useEditableData } from 'src/shared/lib/composables/useEditableData';
   import { validEmail } from 'src/shared/lib/utils/validEmailRule';
   import { validatePersonalName, notEmpty } from 'src/shared/lib/utils';
-  import { failAlert } from 'src/shared/api';
-  import { UpdateAccountButton } from 'src/features/Account/UpdateAccount';
+  import { extractGraphQLErrorMessages, failAlert, SuccessAlert } from 'src/shared/api';
   import { type IUserAccountData } from 'src/entities/User';
   import { Zeus } from '@coopenomics/sdk';
+  import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
+  import { EditableActions } from 'src/shared/ui/EditableActions';
+
+  const { updateAccount } = useUpdateAccount()
 
   const props = defineProps({
     participantData: {
@@ -161,7 +165,9 @@ q-form(ref="form")
   });
 
   // Локальная копия данных
-  const localParticipantData = ref<IUserAccountData>(props.participantData);
+//   const localParticipantData = ref<IUserAccountData>(props.participantData);
+
+  const localParticipantData = ref(props.participantData);
 
   // Ссылка на форму
   const form = ref();
@@ -169,7 +175,15 @@ q-form(ref="form")
   // Обработка сохранения
   const handleSave = async () => {
     try {
-      //TODO:
+        const account_data: IUpdateAccountInput = {
+          email: props.participantData.email,
+          role: Zeus.RegisterRole.User,
+          type: props.participantData.type,
+          username: props.participantData.username,
+          individual_data: props.participantData.private_data,
+        }
+        SuccessAlert('Данные аккаунта обновлены')
+        await updateAccount(account_data);
     } catch (e) {
       failAlert(e);
     }
@@ -177,7 +191,7 @@ q-form(ref="form")
 
   // Используем composable функцию
   const { editableData: data, isEditing, isDisabled, saveChanges, cancelChanges } = useEditableData(
-    localParticipantData,
+    localParticipantData.value,
     handleSave,
     form
   );

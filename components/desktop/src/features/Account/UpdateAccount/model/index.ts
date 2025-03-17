@@ -11,7 +11,6 @@ export function useUpdateAccount() {
   const { info } = useSystemStore()
 
   async function updateAccount(data: IUpdateAccountInput): Promise<IAccount> {
-    console.log('%cUPDATEA CCC', 'color: green')
     const account = await api.updateAccount(data);
 
     return account;

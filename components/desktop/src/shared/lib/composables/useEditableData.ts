@@ -21,7 +21,7 @@ export function useEditableData<T extends Record<string, any>>(
 
   // Автоматически отслеживаем изменения в editableData
   watch(
-    () => editableData,
+    editableData,
     (newData) => {
       isEditing.value = !isEqual(newData.value, originalData.value); // Глубокое сравнение объектов
       validateForm(); // Проверка валидности формы при изменении данных

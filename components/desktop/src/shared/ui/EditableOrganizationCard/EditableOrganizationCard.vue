@@ -72,10 +72,11 @@
       :rules="[val => val != null || 'Тип организации обязателен']"
     )
     
-    UpdateAccountButton(
+    EditableActions(
+      :isEditing="isEditing"
       :isDisabled="isDisabled"
-      :accountData="localOrganizationData"
-      :accountType="Zeus.AccountType.Organization"
+      @save="saveChanges"
+      @cancel="cancelChanges"
     )
   </template>
   
@@ -83,11 +84,14 @@
   import { ref } from 'vue';
   import { useEditableData } from 'src/shared/lib/composables/useEditableData';
   import { notEmpty } from 'src/shared/lib/utils';
-  import { failAlert } from 'src/shared/api';
-  import { UpdateAccountButton } from 'src/features/Account/UpdateAccount';
   import { type IUserAccountData } from 'src/entities/User';
   import { Zeus } from '@coopenomics/sdk';
+  import { EditableActions } from 'src/shared/ui/EditableActions';
+  import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
+  import { failAlert, SuccessAlert } from 'src/shared/api';
   
+  const { updateAccount } = useUpdateAccount()
+
   const props = defineProps({
     participantData: {
       type: Object as () => IUserAccountData,
@@ -104,7 +108,15 @@
   // Обработка сохранения
   const handleSave = async () => {
     try {
-      // TODO: Implement saving logic
+        const account_data: IUpdateAccountInput = {
+          email: props.participantData.email,
+          role: Zeus.RegisterRole.User,
+          type: props.participantData.type,
+          username: props.participantData.username,
+          organization_data: props.participantData.private_data,
+        }
+        SuccessAlert('Данные аккаунта обновлены')
+        await updateAccount(account_data);
     } catch (e) {
       failAlert(e);
     }
@@ -112,7 +124,7 @@
   
   // Используем composable функцию
   const { editableData: data, isEditing, isDisabled, saveChanges, cancelChanges } = useEditableData(
-    localOrganizationData,
+    localOrganizationData.value,
     handleSave,
     form
   );

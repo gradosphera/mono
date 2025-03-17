@@ -135,10 +135,11 @@
         autocomplete="off"
       )
     
-      UpdateAccountButton(
+      EditableActions(
+        :isEditing="isEditing"
         :isDisabled="isDisabled"
-        :accountData="localParticipantData"
-        :accountType="Zeus.AccountType.Entrepreneur"
+        @save="saveChanges"
+        @cancel="cancelChanges"
       )
     </template>
     
@@ -148,9 +149,12 @@
     import { validEmail } from 'src/shared/lib/utils/validEmailRule';
     import { validatePersonalName, notEmpty } from 'src/shared/lib/utils';
     import { failAlert } from 'src/shared/api';
-    import { UpdateAccountButton } from 'src/features/Account/UpdateAccount';
     import { type IUserAccountData } from 'src/entities/User';
     import { Zeus } from '@coopenomics/sdk';
+    import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
+    import { extractGraphQLErrorMessages, FailAlert, SuccessAlert } from 'src/shared/api';
+
+    const { updateAccount } = useUpdateAccount()
     
     const props = defineProps({
       participantData: {
@@ -164,7 +168,15 @@
     
     const handleSave = async () => {
       try {
-        // TODO: Implement save logic
+        const account_data: IUpdateAccountInput = {
+          email: props.participantData.email,
+          role: Zeus.RegisterRole.User,
+          type: props.participantData.type,
+          username: props.participantData.username,
+          entrepreneur_data: props.participantData.private_data,
+        }
+        SuccessAlert('Данные аккаунта обновлены')
+        await updateAccount(account_data);
       } catch (e) {
         failAlert(e);
       }
