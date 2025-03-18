@@ -180,6 +180,7 @@ describe('тест контракта CAPITAL', () => {
 
   it('создаём проект', async () => {
     const hash = generateRandomSHA256()
+    const parehtHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
     const data: CapitalContract.Actions.CreateProject.ICreateProject = {
       coopname: 'voskhod',
@@ -187,6 +188,8 @@ describe('тест контракта CAPITAL', () => {
       title: `Идея ${hash.slice(0, 10)}`,
       description: `Описание ${hash.slice(0, 10)}`,
       project_hash: hash,
+      parent_project_hash: parehtHash,
+      parent_distribution_ratio: 0,
       terms: '',
       subject: '',
     }

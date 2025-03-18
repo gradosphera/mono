@@ -125,8 +125,12 @@ program
   .description('Purge blockchain data and boot a Protocol')
   .action(async () => {
     try {
-      await deleteFile(keosdPath)
+      await stopContainerByName('node')
+      await clearDirectory(basePath)
+      await clearDB()
       await runContainer()
+
+      await sleep(5000)
       await checkHealth()
       await boot()
       console.log(`

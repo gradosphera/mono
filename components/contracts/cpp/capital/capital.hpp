@@ -31,9 +31,6 @@ public:
     void createresult(name coopname, name application, checksum256 project_hash, checksum256 result_hash);
 
     [[eosio::action]]
-    void refresh(name coopname, name username);
-
-    [[eosio::action]]
     void wthdrcallbck(eosio::name coopname, eosio::name callback_type, checksum256 withdraw_hash);
   
     [[eosio::action]]
@@ -41,8 +38,10 @@ public:
 
     [[eosio::action]]
     void capauthwthdc(eosio::name coopname, uint64_t withdraw_id, document authorization);
+    
     [[eosio::action]]
     void capauthwthdr(eosio::name coopname, uint64_t withdraw_id, document authorization);
+    
     [[eosio::action]]
     void authwithdraw(eosio::name coopname, checksum256 withdraw_hash);
 
@@ -52,6 +51,8 @@ public:
     [[eosio::action]]
     void createproj (
       checksum256 project_hash,
+      checksum256 parent_project_hash,
+      double parent_distribution_ratio,
       eosio::name coopname, 
       eosio::name application,
       std::string title, 
@@ -117,6 +118,10 @@ public:
     void approveexpns(name coopname, name application, name approver, checksum256 expense_hash, document approved_statement);
     [[eosio::action]]
     void capauthexpns(eosio::name coopname, uint64_t expense_id, document authorization);
+    
+    // Членские взносы
+    void fund(eosio::name coopname, checksum256 project_hash, asset amount, std::string memo);
+    void refresh(name coopname, name application, checksum256 project_hash, name username);
     
 private:
     

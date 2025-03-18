@@ -147,19 +147,12 @@ export interface ICommit {
   project_hash: IChecksum256
   result_hash: IChecksum256
   commit_hash: IChecksum256
+  contributed_hours: IUint64
   spend: IAsset
   specification: IDocument
   approved_specification: IDocument
   authorization: IDocument
   created_at: ITimePointSec
-}
-
-export interface IConfirmexpns {
-  coopname: IName
-  application: IName
-  username: IName
-  expense_hash: IChecksum256
-  confirmation: IDocument
 }
 
 export interface IContributor {
@@ -182,6 +175,9 @@ export interface IContributor {
   withdrawed: IAsset
   converted: IAsset
   expensed: IAsset
+  share_balance: IAsset
+  pending_rewards: IAsset
+  reward_per_share_last: IInt64
 }
 
 export interface ICreateclaim {
@@ -198,7 +194,7 @@ export interface ICreatecmmt {
   creator: IName
   result_hash: IChecksum256
   commit_hash: IChecksum256
-  spend_hours: IUint64
+  contributed_hours: IUint64
   specification: IDocument
 }
 
@@ -226,6 +222,8 @@ export interface ICreateinvest {
 
 export interface ICreateproj {
   project_hash: IChecksum256
+  parent_project_hash: IChecksum256
+  parent_distribution_ratio: IFloat64
   coopname: IName
   application: IName
   title: string
@@ -320,6 +318,7 @@ export interface IInvest {
 export interface IProject {
   id: IUint64
   project_hash: IChecksum256
+  parent_project_hash: IChecksum256
   coopname: IName
   application: IName
   status: IName
@@ -330,7 +329,6 @@ export interface IProject {
   authors_count: IUint64
   authors_shares: IUint64
   expense_funds: IUint64[]
-  global_distribution_ratio: IFloat64
   target: IAsset
   invested: IAsset
   available: IAsset
@@ -338,11 +336,19 @@ export interface IProject {
   expensed: IAsset
   spend: IAsset
   generated: IAsset
+  membership_parent_distribution_ratio: IFloat64
+  membership_cumulative_reward_per_share: IInt64
+  membership_total_shares: IAsset
+  membership_funded: IAsset
+  membership_available: IAsset
+  membership_distributed: IAsset
   created_at: ITimePointSec
 }
 
 export interface IRefresh {
   coopname: IName
+  application: IName
+  project_hash: IChecksum256
   username: IName
 }
 

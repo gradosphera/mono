@@ -73,8 +73,8 @@ void capital::approvecmmt(eosio::name coopname, eosio::name application, eosio::
   project_index projects(_capital, coopname.value);
   auto project = projects.find(exist_project->id);
   
-  projects.modify(project, _capital, [&](auto &p){
-    p.generated += generated;
+  projects.modify(project, _capital, [&](auto &p) {
+    p.generated += generated;    
   });
   
 };

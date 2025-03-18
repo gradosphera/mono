@@ -236,29 +236,6 @@ void contributor::refresh(name coopname, name username) {
     });
 }
 
-void contributor::process_property(const name& coopname, const name& username, const asset& amount) {
-    auto gs = get_global_state(coopname);
-
-    // Participants table
-    participants_table participants(_self, _self.value);
-    auto idx = participants.get_index<"byaccount"_n>();
-    auto participant_itr = idx.find(username.value);
-    check(participant_itr != idx.end(), "Participant not found");
-
-    // Update participant data
-    auto primary_itr = participants.find(participant_itr->primary_key());
-    participants.modify(primary_itr, same_payer, [&](auto& p) {
-        p.share_balance += amount;
-        p.property_contributions += amount;
-        p.total_contributions += amount;
-    });
-
-    // Update global state
-    gs.total_shares += amount;
-    gs.total_contributions += amount;
-    gs.total_property_contributions += amount;
-    update_global_state(gs);
-}
 
 void contributor::process_intellectual(const name & coopname, const name& username, const asset& amount) {
     auto gs = get_global_state(coopname);
@@ -304,3 +281,28 @@ void contributor::process_intellectual(const name & coopname, const name& userna
         p.reward_per_share_last = gs.cumulative_reward_per_share;
     });
 }
+
+void contributor::process_property(const name& coopname, const name& username, const asset& amount) {
+    auto gs = get_global_state(coopname);
+
+    // Participants table
+    participants_table participants(_self, _self.value);
+    auto idx = participants.get_index<"byaccount"_n>();
+    auto participant_itr = idx.find(username.value);
+    check(participant_itr != idx.end(), "Participant not found");
+
+    // Update participant data
+    auto primary_itr = participants.find(participant_itr->primary_key());
+    participants.modify(primary_itr, same_payer, [&](auto& p) {
+        p.share_balance += amount;
+        p.property_contributions += amount;
+        p.total_contributions += amount;
+    });
+
+    // Update global state
+    gs.total_shares += amount;
+    gs.total_contributions += amount;
+    gs.total_property_contributions += amount;
+    update_global_state(gs);
+}
+

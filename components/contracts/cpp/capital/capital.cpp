@@ -11,7 +11,6 @@
 #include "src/investment/capauthinvst.cpp"
 
 #include "src/managment/init.cpp"
-#include "src/refresh.cpp"
 
 #include "src/claim/setact1.cpp"
 #include "src/claim/setact2.cpp"
@@ -44,7 +43,54 @@
 #include "src/expense/createexpnse.cpp"
 #include "src/expense/expense_withdraw_callback.cpp"
 
+#include "src/fund/fund.cpp"
+#include "src/fund/refresh.cpp"
+
 #include <optional>
+
+// TODO: внедрить коррекцию долей при выходе пайщика из проекта / программы
+// void capital::reduce_shares(name coopname, checksum256 project_hash, name username, asset amount) {
+//     require_auth(_capital);
+
+//     auto exist_project = get_project(coopname, project_hash);
+//     eosio::check(exist_project.has_value(), "Проект не найден");
+
+//     project_index projects(_capital, coopname.value);
+//     auto project = projects.find(exist_project->id);
+
+//     contributor_index contributors(_capital, coopname.value);
+//     auto idx = contributors.get_index<"byusername"_n>();
+//     auto itr = idx.find(username.value);
+//     eosio::check(itr != idx.end(), "Contributor not found");
+
+//     eosio::check(itr->share_balance >= amount, "Недостаточно долей для уменьшения");
+
+//     int64_t prev_total_shares = project->membership_total_shares.amount;
+//     int64_t new_total_shares = prev_total_shares - amount.amount;
+
+//     eosio::check(new_total_shares >= 0, "Нельзя уменьшить total_shares ниже 0");
+
+//     // Пересчёт cumulative_reward_per_share для корректного распределения будущих выплат
+//     if (new_total_shares > 0) {
+//         projects.modify(project, coopname, [&](auto &p) {
+//             p.membership_cumulative_reward_per_share =
+//                 (p.membership_cumulative_reward_per_share * prev_total_shares) / new_total_shares;
+//             p.membership_total_shares -= amount;
+//         });
+//     } else {
+//         // Если все доли исчезли, просто обнуляем
+//         projects.modify(project, coopname, [&](auto &p) {
+//             p.membership_cumulative_reward_per_share = 0;
+//             p.membership_total_shares = asset(0, _root_govern_symbol);
+//         });
+//     }
+
+//     // Уменьшаем долю пользователя
+//     auto primary_itr = contributors.find(itr->id);
+//     contributors.modify(primary_itr, same_payer, [&](auto &c) {
+//         c.share_balance -= amount;
+//     });
+// }
 
 
 /**

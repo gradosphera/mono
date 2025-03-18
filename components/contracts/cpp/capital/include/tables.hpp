@@ -124,39 +124,40 @@ typedef eosio::multi_index<
 
 /**
   * @brief Структура участника, хранящая данные индивидуального участника.
-  * \ingroup public_tables
   */
 struct [[eosio::table, eosio::contract(CAPITAL)]] contributor {
-    uint64_t id;                                ///< Уникальный идентификатор участника.
-    name coopname;                              ///< Имя аккаунта кооператива.
-    name username;                              ///< Имя аккаунта участника.
-    checksum256 project_hash;                   ///< Идентификатор проекта.
-    name status;                                ///< created | approved | authorized | blocked
-    time_point_sec created_at;                  ///< Дата заключения договора УХД
-    document agreement;                         ///< Договор УХД с подписью пайщика
-    document approved_agreement;                ///< Договор УХД с подписью председателя
-    document authorization;                     ///< Протокол решения совета
+    uint64_t id;
+    name coopname;
+    name username;
+    checksum256 project_hash;
+    name status;
+    time_point_sec created_at;
+    document agreement;
+    document approved_agreement;
+    document authorization;
 
-    eosio::asset invested = asset(0, _root_govern_symbol);   ///< Сколько денег инвестировано
+    eosio::asset invested = asset(0, _root_govern_symbol);
     
-    uint64_t contributed_hours;                 ///< Количество вложенных часов в результаты проекта
-    eosio::asset rate_per_hour;                          ///< Текущая ставка в час
-    eosio::asset spend = asset(0, _root_govern_symbol);  ///< Сколько ресурсов потрачено по ставке
+    uint64_t contributed_hours;
+    eosio::asset rate_per_hour;
+    eosio::asset spend = asset(0, _root_govern_symbol);
         
-    uint64_t convert_percent;                   ///< Процент конвертации в программу (100 0000 MAX)
-    eosio::asset for_convert = asset(0, _root_govern_symbol); ///< Сколько ресурсов из spend конвертируем в ЦПП "Капитализация"
+    uint64_t convert_percent;
+    eosio::asset for_convert = asset(0, _root_govern_symbol);
     
-    eosio::asset available = asset(0, _root_govern_symbol); ///< Сколько средств от результатов доступно для быстрого возврата
-    eosio::asset withdrawed = asset(0, _root_govern_symbol);  ///< Сколько ресурсов было возвращено на баланс ЦПП "Цифровой Кошелёк"
-    eosio::asset converted = asset(0, _root_govern_symbol);        ///< Cколько средств сконвертировано в баланс ЦПП "Кпитализация"
-    
-    eosio::asset expensed = asset(0, _root_govern_symbol);        ///< Cколько средств использовано как расход (подписки, сервисы, и т.д.)
-    
-    uint64_t primary_key() const { return id; } ///< Основной ключ.
-    uint64_t by_username() const { return username.value; } ///< Индекс по имени аккаунта.
-    checksum256 by_project() const { return project_hash; } ///< Индекс по проекту.
-    uint128_t by_project_user() const { return combine_checksum_ids(project_hash, username); } ///< Комбинированный индекс.
-    
+    eosio::asset available = asset(0, _root_govern_symbol);
+    eosio::asset withdrawed = asset(0, _root_govern_symbol);
+    eosio::asset converted = asset(0, _root_govern_symbol);
+    eosio::asset expensed = asset(0, _root_govern_symbol);
+
+    eosio::asset share_balance = asset(0, _root_govern_symbol); ///< Баланс долей вкладчика
+    eosio::asset pending_rewards = asset(0, _root_govern_symbol); ///< Накопленные награды
+    int64_t reward_per_share_last = 0; ///< Последний зафиксированный cumulative_reward_per_share
+
+    uint64_t primary_key() const { return id; }
+    uint64_t by_username() const { return username.value; }
+    checksum256 by_project() const { return project_hash; }
+    uint128_t by_project_user() const { return combine_checksum_ids(project_hash, username); }
 };
 
 typedef eosio::multi_index<
@@ -164,16 +165,17 @@ typedef eosio::multi_index<
     indexed_by<"byusername"_n, const_mem_fun<contributor, uint64_t, &contributor::by_username>>,
     indexed_by<"byproject"_n, const_mem_fun<contributor, checksum256, &contributor::by_project>>,
     indexed_by<"byprojuser"_n, const_mem_fun<contributor, uint128_t, &contributor::by_project_user>>
-> contributor_index; ///< Таблица для хранения участников.
+> contributor_index;
 
 
 /**
-  * @brief Таблица идей
+  * @brief Таблица идей (проектов)
   * 
   */
 struct [[eosio::table, eosio::contract(CAPITAL)]] project {
     uint64_t id;
     checksum256 project_hash;
+    checksum256 parent_project_hash;
     name coopname;
     name application;
     eosio::name status = "created"_n; ///< created
@@ -186,17 +188,23 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
     uint64_t authors_count;
     uint64_t authors_shares;
     std::vector<uint64_t> expense_funds = {4}; 
-    double global_distribution_ratio = 1;     ///< Доля всех пайщиков кооператитива против доли локальных инвесторов проекта (1 - всё уходит всем, 0 - всё уходит локалам)
     
-    eosio::asset target = asset(0, _root_govern_symbol);     ///< Целевая сумма финансирования проекта
-    eosio::asset invested = asset(0, _root_govern_symbol);   ///< Сколько средств вошло (инвестиции)
-    eosio::asset available = asset(0, _root_govern_symbol);  ///< Сколько средств доступно для перевода в результаты
-    eosio::asset allocated = asset(0, _root_govern_symbol);  ///< Сколько средств аллоцировано в результаты
-    eosio::asset expensed = asset(0, _root_govern_symbol);   ///< Cколько средств использовано как расход (подписки, сервисы, и т.д.)
-    eosio::asset spend = asset(0, _root_govern_symbol);      ///< Сколько средств потрачено на возвраты создателям
-    eosio::asset generated = asset(0, _root_govern_symbol);  ///< Сколько результатов интеллектуальной деятельности сгенерировано
+    eosio::asset target = asset(0, _root_govern_symbol);
+    eosio::asset invested = asset(0, _root_govern_symbol);
+    eosio::asset available = asset(0, _root_govern_symbol);
+    eosio::asset allocated = asset(0, _root_govern_symbol);
+    eosio::asset expensed = asset(0, _root_govern_symbol);
+    eosio::asset spend = asset(0, _root_govern_symbol);
+    eosio::asset generated = asset(0, _root_govern_symbol);
 
+    double membership_parent_distribution_ratio = 1;  
+    int64_t membership_cumulative_reward_per_share = 0; 
     
+    eosio::asset membership_total_shares = asset(0, _root_govern_symbol); ///< Общее количество долей пайщиков в проекте
+    eosio::asset membership_funded = asset(0, _root_govern_symbol);       ///< Общее количество поступивших членских взносов 
+    eosio::asset membership_available = asset(0, _root_govern_symbol);    ///< Доступное количество членских взносов для участников проекта согласно долям
+    eosio::asset membership_distributed = asset(0, _root_govern_symbol); ///< Распределенное количество членских взносов на участников проекта
+        
     time_point_sec created_at = current_time_point();
     
     uint64_t primary_key() const { return id; }

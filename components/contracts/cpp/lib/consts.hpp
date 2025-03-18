@@ -110,6 +110,7 @@ static constexpr uint64_t _wallet_program_id = 1;
 static constexpr uint64_t _sosedi_program_id = 2;
 static constexpr uint64_t _capital_program_id = 3;
 
+static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный коэффициент для вознаграждений (1e8).
 
 #define HUNDR_PERCENTS 1000000
 #define ONE_PERCENT 10000

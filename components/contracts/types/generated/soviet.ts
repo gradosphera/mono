@@ -623,5 +623,6 @@ export interface IWithdraw {
   coopname: IName
   username: IName
   withdraw_id: IUint64
+  statement: IDocument
 }
 
