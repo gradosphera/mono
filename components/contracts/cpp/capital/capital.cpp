@@ -1,8 +1,6 @@
 // capital.cpp
 #include "capital.hpp"
 
-#include "src/managment/accumulate.cpp"
-
 #include "src/result/createresult.cpp"
 #include "src/result/startdistrbn.cpp"
 
@@ -18,7 +16,6 @@
 #include "src/claim/setstatement.cpp"
 #include "src/claim/authorize.cpp"
 
-// #include "src/withdraw.cpp"
 
 #include "src/registration/capregcontr.cpp"
 #include "src/registration/approvereg.cpp"
@@ -32,11 +29,15 @@
 #include "src/commit/createcmmt.cpp"
 #include "src/commit/approvecmmt.cpp"
 
-#include "src/withdraw/createwthd1.cpp"
-#include "src/withdraw/capauthwthdc.cpp"
-#include "src/withdraw/capauthwthdr.cpp"
-#include "src/withdraw/authwithdraw.cpp"
-#include "src/withdraw/approvewthd1.cpp"
+#include "src/withdraw_from_result/createwthd1.cpp"
+#include "src/withdraw_from_result/capauthwthdc.cpp"
+#include "src/withdraw_from_result/capauthwthdr.cpp"
+#include "src/withdraw_from_result/authwithdrw1.cpp"
+#include "src/withdraw_from_result/approvewthd1.cpp"
+
+#include "src/withdraw_from_project/createwthd2.cpp"
+#include "src/withdraw_from_project/capauthwthd2.cpp"
+#include "src/withdraw_from_project/approvewthd2.cpp"
 
 #include "src/expense/approveexpns.cpp"
 #include "src/expense/capauthexpns.cpp"
@@ -313,9 +314,9 @@ std::optional<invest> capital::get_invest(eosio::name coopname, const checksum25
 }
 
 
-std::optional<capital_tables::withdraw> capital::get_withdraw(eosio::name coopname, const checksum256 &hash) {
-    capital_tables::withdraws_index withdraws(_capital, coopname.value);
-    auto index = withdraws.get_index<"byhash"_n>();
+std::optional<capital_tables::result_withdraw> capital::get_result_withdraw(eosio::name coopname, const checksum256 &hash) {
+    capital_tables::result_withdraws_index result_withdraws(_capital, coopname.value);
+    auto index = result_withdraws.get_index<"byhash"_n>();
 
     auto itr = index.find(hash);
     
@@ -325,6 +326,21 @@ std::optional<capital_tables::withdraw> capital::get_withdraw(eosio::name coopna
 
     return *itr;
 }
+
+
+std::optional<capital_tables::project_withdraw> capital::get_project_withdraw(eosio::name coopname, const checksum256 &hash) {
+    capital_tables::project_withdraws_index project_withdraws(_capital, coopname.value);
+    auto index = project_withdraws.get_index<"byhash"_n>();
+
+    auto itr = index.find(hash);
+    
+    if (itr == index.end()) {
+        return std::nullopt;
+    }
+
+    return *itr;
+}
+
 
 std::optional<claim> capital::get_claim(eosio::name coopname, const checksum256 &claim_hash) {
     claim_index claims(_capital, coopname.value);

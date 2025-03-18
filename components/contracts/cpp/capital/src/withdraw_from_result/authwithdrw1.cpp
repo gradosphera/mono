@@ -1,12 +1,12 @@
 // действие авторизации возврата вызывается после получения авторизаций совета на взнос и возврат взноса
-void capital::authwithdraw(eosio::name coopname, checksum256 withdraw_hash) {
+void capital::authwithdrw1(eosio::name coopname, checksum256 withdraw_hash) {
   require_auth(_capital);
   
-  auto exist_withdraw = get_withdraw(coopname, withdraw_hash);
+  auto exist_withdraw = get_result_withdraw(coopname, withdraw_hash);
   eosio::check(exist_withdraw.has_value(), "Объект взноса-возврата не найден");
   
-  capital_tables::withdraws_index withdraws(_capital, coopname.value);
-  auto withdraw = withdraws.find(exist_withdraw -> id);
+  capital_tables::result_withdraws_index result_withdraws(_capital, coopname.value);
+  auto withdraw = result_withdraws.find(exist_withdraw -> id);
   
   //обновить сумму выводов по проекту
   auto exist_project = get_project(coopname, withdraw -> project_hash);
@@ -29,7 +29,9 @@ void capital::authwithdraw(eosio::name coopname, checksum256 withdraw_hash) {
   
   // списание с УХД
   Wallet::sub_blocked_funds(_capital, coopname, withdraw -> username, withdraw -> amount, _cofund_program);
+  
+  // добавление в кошелёк
   Wallet::add_available_funds(_capital, coopname, withdraw -> username, withdraw -> amount, _wallet_program);
   
-  withdraws.erase(withdraw);
+  result_withdraws.erase(withdraw);
 }

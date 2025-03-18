@@ -11,7 +11,7 @@
     d.id = decision_id;
     d.coopname = coopname;
     d.username = username;
-    d.type = _capital_withdraw_authorize_contribution_action;
+    d.type = _capital_withdraw_from_result_authorize_contribution_action;
     d.batch_id = withdraw_id;
     d.statement = statement;
     d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
@@ -23,7 +23,7 @@
     permission_level{ _soviet, "active"_n},
     _soviet,
     "newsubmitted"_n,
-    std::make_tuple(coopname, username, _capital_withdraw_authorize_contribution_action, decision_id, statement)
+    std::make_tuple(coopname, username, _capital_withdraw_from_result_authorize_contribution_action, decision_id, statement)
   ).send();
 }
 
@@ -36,7 +36,7 @@ void soviet::capital_contribute_on_withdraw_effect(eosio::name executer, eosio::
   action(
       permission_level{ _soviet, "active"_n},
       _capital,
-      _capital_withdraw_authorize_contribution_action,
+      _capital_withdraw_from_result_authorize_contribution_action,
       std::make_tuple(coopname, decision -> batch_id, decision -> authorization)
   ).send();
   

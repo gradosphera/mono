@@ -1,5 +1,5 @@
 void capital::createwthd1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 result_hash, checksum256 withdraw_hash, std::vector<checksum256> commit_hashes, document contribution_statement, document return_statement) {
-  check_auth_or_fail(_capital, coopname, application, "getaid"_n);
+  check_auth_or_fail(_capital, coopname, application, "createwthd1"_n);
   
   verify_document_or_fail(contribution_statement);
   verify_document_or_fail(return_statement);
@@ -11,7 +11,6 @@ void capital::createwthd1(eosio::name coopname, eosio::name application, eosio::
   eosio::check(exist_project.has_value(), "Проект с указанным хэшем не найден");
   
   auto exist_contributor = capital::get_active_contributor_or_fail(coopname, exist_result -> project_hash, username);
-  
   
   eosio::asset amount = asset(0, _root_govern_symbol);
   uint64_t count = 0;
@@ -31,14 +30,14 @@ void capital::createwthd1(eosio::name coopname, eosio::name application, eosio::
     c.available -= amount;
   });
   
-  auto exist_withdraw = get_withdraw(coopname, withdraw_hash);
+  auto exist_withdraw = get_result_withdraw(coopname, withdraw_hash);
   
   eosio::check(!exist_withdraw.has_value(), "Заявка на взнос-возврат с таким хэшем уже существует");
   
-  capital_tables::withdraws_index withdraws(_capital, coopname.value);
+  capital_tables::result_withdraws_index result_withdraws(_capital, coopname.value);
   
-  withdraws.emplace(coopname, [&](auto &w) {
-    w.id = get_global_id_in_scope(_capital, coopname, "withdraws"_n);
+  result_withdraws.emplace(coopname, [&](auto &w) {
+    w.id = get_global_id_in_scope(_capital, coopname, "withdraws1"_n);
     w.coopname = coopname;
     w.withdraw_hash = withdraw_hash;
     w.commit_hashes = commit_hashes;

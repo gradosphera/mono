@@ -32,7 +32,8 @@ public:
 
     [[eosio::action]]
     void wthdrcallbck(eosio::name coopname, eosio::name callback_type, checksum256 withdraw_hash);
-  
+    
+    //Возврат из результата  
     [[eosio::action]]
     void createwthd1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 result_hash, checksum256 withdraw_hash, std::vector<checksum256> commit_hashes, document contribution_statement, document return_statement);
 
@@ -43,10 +44,17 @@ public:
     void capauthwthdr(eosio::name coopname, uint64_t withdraw_id, document authorization);
     
     [[eosio::action]]
-    void authwithdraw(eosio::name coopname, checksum256 withdraw_hash);
-
+    void authwithdrw1(eosio::name coopname, checksum256 withdraw_hash);
+    
+    // Возврат из проекта    
     [[eosio::action]]
-    void accumulate(name coopname, asset amount); // Добавление входящих членских взносов
+    void createwthd2(name coopname, name application, name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document return_statement);
+    
+    [[eosio::action]]
+    void capauthwthd2(eosio::name coopname, uint64_t withdraw_id, document authorization);
+    
+    [[eosio::action]]
+    void approvewthd2(name coopname, name application, name approver, checksum256 withdraw_hash, document approved_return_statement);
 
     [[eosio::action]]
     void createproj (
@@ -160,8 +168,9 @@ private:
   std::optional<result_author> get_result_author(eosio::name coopname, eosio::name username, const checksum256 &result_hash);
   std::optional<commit> get_commit(eosio::name coopname, const checksum256 &hash);
   std::optional<invest> get_invest(eosio::name coopname, const checksum256 &invest_hash);
-  std::optional<capital_tables::withdraw> get_withdraw(eosio::name coopname, const checksum256 &hash);
-  
+  std::optional<capital_tables::result_withdraw> get_result_withdraw(eosio::name coopname, const checksum256 &hash);
+  std::optional<capital_tables::project_withdraw> get_project_withdraw(eosio::name coopname, const checksum256 &hash);
+
   std::optional<expense> get_expense(eosio::name coopname, const checksum256 &hash);
   
   program get_capital_program_or_fail(eosio::name coopname);
@@ -178,7 +187,7 @@ private:
   
   void expense_withdraw_callback(name coopname, checksum256 withdraw_hash);
   
-  void try_finalize_withdrawal(eosio::name coopname, const capital_tables::withdraws_index::const_iterator &withdraw) {
+  void try_finalize_withdrawal(eosio::name coopname, const capital_tables::result_withdraws_index::const_iterator &withdraw) {
     if (!is_document_empty(withdraw->authorized_return_statement) &&
         !is_document_empty(withdraw->authorized_contribution_statement)) {
       
@@ -187,7 +196,7 @@ private:
       action(
         permission_level{_capital, "active"_n},
         _capital,
-        "authwithdraw"_n,
+        "authwithdrw1"_n,
         std::make_tuple(coopname, withdraw->withdraw_hash)
       ).send();
     }

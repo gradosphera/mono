@@ -54,7 +54,6 @@ public:
 
   [[eosio::action]] void declinedoc(eosio::name coopname, eosio::name username, document document);
 
-
   //registrator.cpp
   [[eosio::action]] void cancelreg(eosio::name coopname, eosio::name username, std::string message);
 

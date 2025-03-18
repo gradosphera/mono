@@ -33,13 +33,15 @@ void capital::createclaim(name coopname, name application, name owner, checksum2
   auto contributor = get_active_contributor_or_fail(coopname, result -> project_hash, owner);
   
   if (result -> creators_amount.amount > 0) {
-     /**
-     * Тут получается, что 
-     */
+    /**
+    - for_convert - это то, что гарантированно готовится стать share_balance, 
+    - available - это то, что может быть выведено до момента claim. 
+    */
+    
     creator_amount = contributor -> available.amount + contributor -> for_convert.amount;
     double creator_bonus_share = double(creator_amount) / double(result -> creators_amount.amount);
     creator_bonus_amount = uint64_t(creator_bonus_share * double(result -> creators_bonus.amount));
-  }
+  };
   
   // считаем премию пайщика
   if (
@@ -85,28 +87,5 @@ void capital::createclaim(name coopname, name application, name owner, checksum2
   results.modify(result_for_modify, coopname, [&](auto &r){
     r.participants_bonus_remain -= asset(participant_amount, _root_govern_symbol);
   });
-  
-  /**
-   * TODO: здесь необходимо сконвертировать и добавить контрибьютору его share_balance,
-   поскольку именно это является балансом который принимает участие в распределении членских взносов.
-   - for_convert - это то, что гарантированно готовится стать share_balance, 
-   - available - это то, что может быть выведено до момента claim. 
-   */
-   
-  contributor_index contributors(_capital, coopname.value);
-  auto contributor_for_modify = contributors.find(contributor -> id);
-  asset convert_amount = asset(creator_amount, _root_govern_symbol);
-  
-  // Увеличиваем share_balance на сумму остатка создательского баланса
-  contributors.modify(contributor_for_modify, coopname, [&](auto &c) {
-    c.share_balance += convert_amount;
-  });
-  
-  project_index projects(_capital, coopname.value);
-  auto project_for_modify = projects.find(project -> id);
-  
-  // учитываем увеличение долей в проекте
-  projects.modify(project_for_modify, coopname, [&](auto &p){
-    p.membership_total_shares += convert_amount;
-  });
+
 }

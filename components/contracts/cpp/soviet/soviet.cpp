@@ -19,8 +19,8 @@
 #include "src/capital.cpp"
 #include "src/capital/capauthwthdc.cpp"
 #include "src/capital/capauthwthdr.cpp"
-#include "src/agenda.cpp"
 
+#include "src/agenda.cpp"
 
 using namespace eosio;
 
@@ -260,9 +260,9 @@ void soviet::exec(eosio::name executer, eosio::name coopname, uint64_t decision_
     soviet::subaccum_effect(executer, coopname, decision->id, decision->batch_id);
   } else if (decision -> type == _free_decision_action) {//операция свободного решения
     soviet::freedecision_effect(executer, coopname, decision->id);
-  } else if (decision -> type == _capital_withdraw_authorize_contribution_action) {//операция взноса в момент вывода по контракту капитализации
+  } else if (decision -> type == _capital_withdraw_from_result_authorize_contribution_action) {//операция взноса в момент вывода по контракту капитализации
     soviet::capital_contribute_on_withdraw_effect(executer, coopname, decision -> id);
-  } else if (decision -> type == _capital_withdraw_authorize_return_action) {//операция взноса в момент вывода по контракту капитализации
+  } else if (decision -> type == _capital_withdraw_from_result_authorize_return_action) {//операция взноса в момент вывода по контракту капитализации
     soviet::capital_return_on_withdraw_effect(executer, coopname, decision -> id);
   } else if (decision -> type == _capital_contributor_authorize_action) {//операция регистрации контрибьютора (заключение договора УХД)
     soviet::capital_register_contributor_authorize_action_effect(executer, coopname, decision -> id); 

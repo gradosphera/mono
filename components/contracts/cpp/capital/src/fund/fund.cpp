@@ -49,8 +49,8 @@ void capital::fund(eosio::name coopname, checksum256 project_hash, asset amount,
           p.membership_available += membership_parent_fund;
           
           if (p.membership_total_shares.amount > 0) {
-              int64_t delta = (membership_parent_fund.amount * REWARD_SCALE) / p.membership_total_shares.amount;
-              p.membership_cumulative_reward_per_share += delta;
+            int64_t delta = (membership_parent_fund.amount * REWARD_SCALE) / p.membership_total_shares.amount;
+            p.membership_cumulative_reward_per_share += delta;
           };
       });
     }
