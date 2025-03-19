@@ -219,11 +219,11 @@ program capital::get_cofund_program_or_fail(eosio::name coopname) {
 std::optional<progwallet> capital::get_capital_wallet(eosio::name coopname, eosio::name username) {
   auto state = get_global_state(coopname);
   
-  programs_index programs(_soviet, coopname.value);
-  auto program = programs.find(state.program_id);
-  eosio::check(program != programs.end(), "Программа капитализации не найдена");
+  auto program_id = get_program_id(_capital_program);
   
-  auto capital_wallet = get_program_wallet(coopname, username, state.program_id);
+  auto program = get_program_or_fail(coopname, program_id);
+  
+  auto capital_wallet = get_program_wallet(coopname, username, _capital_program);
   
   if (!capital_wallet.has_value()) {
     return std::nullopt;

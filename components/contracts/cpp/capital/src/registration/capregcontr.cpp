@@ -18,4 +18,23 @@ void capital::capregcontr(eosio::name coopname, uint64_t contributor_id, documen
     c.status = "authorized"_n;
     c.authorization = authorization;
   });
+  
+  auto program_wallet = get_program_wallet(coopname, contributor -> username, _cofund_program);
+  
+  if (!program_wallet.has_value()) {
+    auto program_id = get_program_id(_cofund_program);
+
+    progwallets_index progwallets(_soviet, coopname.value);
+
+    progwallets.emplace(_soviet, [&](auto &b) {
+      b.id = progwallets.available_primary_key();
+      b.program_id = program_id;
+      b.coopname = coopname;
+      b.username = contributor -> username;
+      b.agreement_id = 0;
+      b.available = asset(0, _root_govern_symbol);      
+      b.blocked = asset(0, _root_govern_symbol);
+      b.membership_contribution = asset(0, _root_govern_symbol);
+    });
+  } 
 };
