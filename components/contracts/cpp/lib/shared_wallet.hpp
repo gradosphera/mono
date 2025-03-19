@@ -1,4 +1,5 @@
 namespace Wallet {
+  
   inline void validate_asset(const eosio::asset& amount) {
     check(amount.symbol == _root_govern_symbol, "Invalid token symbol");
     check(amount.is_valid(), "Invalid asset");
