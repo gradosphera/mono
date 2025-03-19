@@ -46,21 +46,6 @@ typedef eosio::multi_index<
 > programs_index; /*!< Тип мультииндекса для таблицы целевых программ */
 
 
-std::optional<progwallet> get_program_wallet (eosio::name coopname, eosio::name username, uint64_t program_id) {
-  
-  progwallets_index progwallets(_soviet, coopname.value);
-
-  auto balances_by_username_and_program = progwallets.template get_index<"byuserprog"_n>();
-  auto username_and_program_index = combine_ids(username.value, program_id);
-  auto wallet = balances_by_username_and_program.find(username_and_program_index);
-  
-  if (wallet == balances_by_username_and_program.end()) {
-    return std::nullopt;
-  }
-
-  return *wallet;
-}
-
 program get_program_or_fail(eosio::name coopname, uint64_t program_id) {
   programs_index programs(_soviet, coopname.value);
   print("program_id: ", program_id);
@@ -157,4 +142,21 @@ inline uint64_t get_draft_id(const eosio::name& type) {
     auto it = program_map.find(type);
     eosio::check(it != program_map.end(), "Недопустимый тип программы");
     return it->second.draft_id;
+}
+
+
+std::optional<progwallet> get_program_wallet (eosio::name coopname, eosio::name username, name type) {
+  auto program_id = get_program_id(type);
+  
+  progwallets_index progwallets(_soviet, coopname.value);
+
+  auto balances_by_username_and_program = progwallets.template get_index<"byuserprog"_n>();
+  auto username_and_program_index = combine_ids(username.value, program_id);
+  auto wallet = balances_by_username_and_program.find(username_and_program_index);
+  
+  if (wallet == balances_by_username_and_program.end()) {
+    return std::nullopt;
+  }
+
+  return *wallet;
 }
