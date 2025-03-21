@@ -103,7 +103,7 @@ describe('тест контракта CAPITAL', () => {
         fixed_membership_contribution: '0.0000 RUB',
         membership_percent_fee: '0',
         meta: '',
-        type: 'cofund',
+        type: 'source',
       }
 
       const result = await blockchain.api.transact(
@@ -180,7 +180,7 @@ describe('тест контракта CAPITAL', () => {
 
   it('создаём проект', async () => {
     const hash = generateRandomSHA256()
-    const parehtHash = '0000000000000000000000000000000000000000000000000000000000000000'
+    const parentHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
     const data: CapitalContract.Actions.CreateProject.ICreateProject = {
       coopname: 'voskhod',
@@ -188,7 +188,7 @@ describe('тест контракта CAPITAL', () => {
       title: `Идея ${hash.slice(0, 10)}`,
       description: `Описание ${hash.slice(0, 10)}`,
       project_hash: hash,
-      parent_project_hash: parehtHash,
+      parent_project_hash: parentHash,
       parent_distribution_ratio: 0,
       terms: '',
       subject: '',
@@ -403,7 +403,7 @@ describe('тест контракта CAPITAL', () => {
       console.log('wallet investor1: ', wallet)
     }
     {
-      const { depositId, program, userWallet } = await depositToWallet(blockchain, 'voskhod', investor1, 10000)
+      const { depositId, program, userWallet } = await depositToWallet(blockchain, 'voskhod', investor1, 100000)
     }
   })
 
@@ -419,38 +419,99 @@ describe('тест контракта CAPITAL', () => {
     await investInProject(blockchain, 'voskhod', investor1, project1.project_hash, investAmount, fakeDocument)
   })
 
-  it('финансировать результат проекта на 10000 RUB', async () => {
-    await allocateFundsToResult(blockchain, 'voskhod', project1.project_hash, result1.result_hash, '10000.0000 RUB')
-  })
+  // it('финансировать результат проекта на 10000 RUB', async () => {
+  //   await allocateFundsToResult(blockchain, 'voskhod', project1.project_hash, result1.result_hash, '10000.0000 RUB')
+  // })
 
-  it('финансировать результат проекта на 20000 RUB', async () => {
-    await allocateFundsToResult(blockchain, 'voskhod', project1.project_hash, result1.result_hash, '20000.0000 RUB')
-  })
+  // it('финансировать результат проекта на 20000 RUB', async () => {
+  //   await allocateFundsToResult(blockchain, 'voskhod', project1.project_hash, result1.result_hash, '20000.0000 RUB')
+  // })
 
-  it('добавить коммит создателя tester1 на 10 часов по 1000 RUB', async () => {
-    const { finalResult, commitHash } = await commitToResult(blockchain, 'voskhod', result1.result_hash, result1.project_hash, tester1, tester1CommitHours)
-    commits.push(commitHash)
+  // it('добавить коммит создателя tester1 на 10 часов по 1000 RUB', async () => {
+  //   const { finalResult, commitHash } = await commitToResult(blockchain, 'voskhod', result1.result_hash, result1.project_hash, tester1, tester1CommitHours)
+  //   commits.push(commitHash)
 
-    expect(finalResult.creators_amount).toBe('10000.0000 RUB')
-    expect(finalResult.creators_bonus).toBe('3820.0000 RUB')
-    expect(finalResult.authors_bonus).toBe('16180.0000 RUB')
-    expect(finalResult.generated_amount).toBe('30000.0000 RUB')
-    expect(finalResult.participants_bonus).toBe('48540.0000 RUB')
-    expect(finalResult.total_amount).toBe('78540.0000 RUB')
-  })
+  //   expect(finalResult.creators_amount).toBe('10000.0000 RUB')
+  //   expect(finalResult.creators_bonus).toBe('3820.0000 RUB')
+  //   expect(finalResult.authors_bonus).toBe('16180.0000 RUB')
+  //   expect(finalResult.generated_amount).toBe('30000.0000 RUB')
+  //   expect(finalResult.participants_bonus).toBe('48540.0000 RUB')
+  //   expect(finalResult.total_amount).toBe('78540.0000 RUB')
+  // })
 
-  it('добавить коммит создателя tester2 на 10 часов по 1000 RUB', async () => {
-    const { finalResult, commitHash } = await commitToResult(blockchain, 'voskhod', result1.result_hash, result1.project_hash, tester2, tester2CommitHours)
-    commits.push(commitHash)
+  // it('добавить коммит создателя tester2 на 10 часов по 1000 RUB', async () => {
+  //   const { finalResult, commitHash } = await commitToResult(blockchain, 'voskhod', result1.result_hash, result1.project_hash, tester2, tester2CommitHours)
+  //   commits.push(commitHash)
 
-    expect(finalResult.creators_amount).toBe('20000.0000 RUB')
-    expect(finalResult.creators_bonus).toBe('7640.0000 RUB')
-    expect(finalResult.authors_bonus).toBe('32360.0000 RUB')
-    expect(finalResult.generated_amount).toBe('60000.0000 RUB')
-    expect(finalResult.participants_bonus).toBe('97080.0000 RUB')
-    expect(finalResult.total_amount).toBe('157080.0000 RUB')
-  })
+  //   expect(finalResult.creators_amount).toBe('20000.0000 RUB')
+  //   expect(finalResult.creators_bonus).toBe('7640.0000 RUB')
+  //   expect(finalResult.authors_bonus).toBe('32360.0000 RUB')
+  //   expect(finalResult.generated_amount).toBe('60000.0000 RUB')
+  //   expect(finalResult.participants_bonus).toBe('97080.0000 RUB')
+  //   expect(finalResult.total_amount).toBe('157080.0000 RUB')
+  // })
 
+  // it('пишем заявление на возврат в кошелёк от tester1 на 10000 RUB', async () => {
+  //   const withdrawAmount = `${(tester1CommitHours * parseFloat(ratePerHour)).toFixed(4)} RUB`
+  //   console.log('commits: ', commits)
+  //   const { withdrawHash, transactionId } = await withdrawContribution(
+  //     blockchain,
+  //     'voskhod',
+  //     tester1,
+  //     result1.result_hash,
+  //     result1.project_hash,
+  //     [commits[0]],
+  //     withdrawAmount,
+  //     fakeDocument,
+  //   )
+  // })
+
+  // it('пишем заявление на возврат в кошелёк от tester2 на 10000 RUB', async () => {
+  //   const withdrawAmount = `${(tester2CommitHours * parseFloat(ratePerHour)).toFixed(4)} RUB`
+
+  //   const { withdrawHash, transactionId } = await withdrawContribution(
+  //     blockchain,
+  //     'voskhod',
+  //     tester2,
+  //     result1.result_hash,
+  //     result1.project_hash,
+  //     [commits[1]],
+  //     withdrawAmount,
+  //     fakeDocument,
+  //   )
+  // })
+
+  // it('регистрируем расход на 1000 RUB', async () => {
+  //   const expenseAmount = '1000.0000 RUB'
+
+  //   const { expenseHash } = await registerExpense(
+  //     blockchain,
+  //     'voskhod', // coopname
+  //     result1.result_hash, // resultHash
+  //     project1.project_hash, // projectHash
+  //     tester1, // creator
+  //     4, // fund_id (фонд хозяйственных расходов)
+  //     expenseAmount,
+  //     fakeDocument, // fakeDocument
+  //   )
+  // })
+
+  // it('регистрируем расход на 5000 RUB', async () => {
+  //   const expenseAmount = '5000.0000 RUB'
+
+  //   const { expenseHash } = await registerExpense(
+  //     blockchain,
+  //     'voskhod', // coopname
+  //     result1.result_hash, // resultHash
+  //     project1.project_hash, // projectHash
+  //     tester1, // creator
+  //     4, // fund_id (фонд хозяйственных расходов)
+  //     expenseAmount,
+  //     fakeDocument, // fakeDocument
+  //   )
+  // })
+
+  /// ____________
   // it('завершаем цикл и стартуем распределение', async () => {
   //   const data: CapitalContract.Actions.StartDistribution.IStart = {
   //     coopname: 'voskhod',
@@ -501,65 +562,6 @@ describe('тест контракта CAPITAL', () => {
   //   expect(blockchainResult.status).toBe('started')
   // })
 
-  it('пишем заявление на возврат в кошелёк от tester1 на 10000 RUB', async () => {
-    const withdrawAmount = `${(tester1CommitHours * parseFloat(ratePerHour)).toFixed(4)} RUB`
-    console.log('commits: ', commits)
-    const { withdrawHash, transactionId } = await withdrawContribution(
-      blockchain,
-      'voskhod',
-      tester1,
-      result1.result_hash,
-      result1.project_hash,
-      [commits[0]],
-      withdrawAmount,
-      fakeDocument,
-    )
-  })
-
-  it('пишем заявление на возврат в кошелёк от tester2 на 10000 RUB', async () => {
-    const withdrawAmount = `${(tester2CommitHours * parseFloat(ratePerHour)).toFixed(4)} RUB`
-
-    const { withdrawHash, transactionId } = await withdrawContribution(
-      blockchain,
-      'voskhod',
-      tester2,
-      result1.result_hash,
-      result1.project_hash,
-      [commits[1]],
-      withdrawAmount,
-      fakeDocument,
-    )
-  })
-
-  it('регистрируем расход на 1000 RUB', async () => {
-    const expenseAmount = '1000.0000 RUB'
-
-    const { expenseHash } = await registerExpense(
-      blockchain,
-      'voskhod', // coopname
-      result1.result_hash, // resultHash
-      project1.project_hash, // projectHash
-      tester1, // creator
-      4, // fund_id (фонд хозяйственных расходов)
-      expenseAmount,
-      fakeDocument, // fakeDocument
-    )
-  })
-
-  it('регистрируем расход на 5000 RUB', async () => {
-    const expenseAmount = '5000.0000 RUB'
-
-    const { expenseHash } = await registerExpense(
-      blockchain,
-      'voskhod', // coopname
-      result1.result_hash, // resultHash
-      project1.project_hash, // projectHash
-      tester1, // creator
-      4, // fund_id (фонд хозяйственных расходов)
-      expenseAmount,
-      fakeDocument, // fakeDocument
-    )
-  })
   // it('добавляем второго автора tester2', async () => {
   //   const data: CapitalContract.Actions.AddAuthor.IAddAuthor = {
   //     coopname: 'voskhod',

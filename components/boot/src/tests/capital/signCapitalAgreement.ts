@@ -9,7 +9,7 @@ export async function signCapitalAgreement(
   username: string,
   fakeDocument: any,
 ) {
-  const txId = await signAgreement(blockchain, coopname, username, 'cofund', fakeDocument)
+  const txId = await signAgreement(blockchain, coopname, username, 'source', fakeDocument)
 
   const wallet = await getUserProgramWallet(blockchain, coopname, username, capitalProgramId)
 

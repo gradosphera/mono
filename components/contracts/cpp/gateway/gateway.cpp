@@ -56,16 +56,13 @@ void gateway::adduser(eosio::name coopname, eosio::name username, eosio::asset i
   ).send();
   
   if (spread_initial) {
-  
     action(
       permission_level{ _gateway, "active"_n},
       _fund,
       "addinitial"_n,
       std::make_tuple(coopname, initial)
     ).send();
-    
   }
-
 }
 
 /**
@@ -113,7 +110,9 @@ void gateway::createwthdrw(eosio::name coopname, eosio::name application, eosio:
     std::make_tuple(coopname, username, id, document)
   ).send();
   
-  Wallet::block_funds(_gateway, coopname, username, quantity, _wallet_program);
+  std::string memo_in = "Возврат части целевого паевого взноса по программе 'Цифровой Кошелёк' с ID: " + std::to_string(id);
+  
+  Wallet::block_funds(_gateway, coopname, username, quantity, _wallet_program, memo_in);
 };
 
 
@@ -244,7 +243,6 @@ void gateway::wthdfail(eosio::name coopname, eosio::name application, uint64_t w
     permission_level{ _gateway, "active"_n},
     _soviet,
     "unblockbal"_n,
-    std::make_tuple(coopname, withdraw -> username, _wallet_program_id, withdraw -> quantity)
+    std::make_tuple(coopname, withdraw -> username, _wallet_program_id, withdraw -> quantity, memo)
   ).send();
-
 }

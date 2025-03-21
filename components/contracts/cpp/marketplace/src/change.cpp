@@ -107,32 +107,8 @@ void marketplace::create_parent(eosio::name type, const exchange_params& params)
 
   auto program = get_program_or_fail(params.coopname, params.program_id);
 
-  //Специальные проверки
-  if (type == "offer"_n) {
-    //срок жизни продукта должен быть установлен
-    eosio::check(params.product_lifecycle_secs > 0, "Гарантийный срок возврата для имущества должен быть установлен");
-
-  } 
-
-  else if(type == "order"_n) {
-    
-    eosio::asset quantity = params.unit_cost * params.units;
-
-    action(
-      permission_level{ _marketplace, "active"_n},
-      _soviet,
-      "addbal"_n,
-      std::make_tuple(params.coopname, params.username, params.program_id, quantity)
-    ).send();
-
-    action(
-      permission_level{ _marketplace, "active"_n},
-      _soviet,
-      "blockbal"_n,
-      std::make_tuple(params.coopname, params.username, params.program_id, quantity)
-    ).send();
-
-  };
+  //срок гарантийного возврата должен быть установлен
+  eosio::check(params.product_lifecycle_secs > 0, "Гарантийный срок возврата для имущества должен быть установлен");
 
   exchange.emplace(_marketplace, [&](auto &i) {
     i.id = id;
@@ -229,12 +205,14 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
     //родительская заявка должна быть противоположного типа
     eosio::check(parent_change -> type == "offer"_n, "Неверный тип родительской заявки");
     
+    std::string memo = "Начало поставки по программе №" + std::to_string(params.program_id) + " с ID: " + std::to_string(id);
+
     //Для блокировки средств необходимо их иметь на ЦПП, т.е. предварительно необходимо сконвертировать их с ЦПП кошелька
     action(
       permission_level{ _marketplace, "active"_n},
       _soviet,
       "blockbal"_n,
-      std::make_tuple(params.coopname, params.username, params.program_id, total_cost)
+      std::make_tuple(params.coopname, params.username, params.program_id, total_cost, memo)
     ).send();
     
   }
@@ -402,19 +380,21 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
     ch.status = "supplied2"_n;
     ch.product_contribution_act = document;
   });
+  
+  std::string memo = "Приём имущественного паевого взноса по программе №" + std::to_string(change -> program_id) + " с ID: " + std::to_string(change -> id);
 
   action(
     permission_level{ _marketplace, "active"_n},
     _soviet,
     "addbal"_n,
-    std::make_tuple(coopname, change -> product_contributor, change -> program_id, change -> supplier_amount)
+    std::make_tuple(coopname, change -> product_contributor, change -> program_id, change -> supplier_amount, memo)
   ).send();
 
   action(
     permission_level{ _marketplace, "active"_n},
     _soviet,
     "blockbal"_n,
-    std::make_tuple(coopname, change -> product_contributor, change -> program_id, change -> supplier_amount)
+    std::make_tuple(coopname, change -> product_contributor, change -> program_id, change -> supplier_amount, memo)
   ).send();
 
   //увеличиваем паевой фонд
@@ -702,20 +682,22 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
   });
 
   auto program = get_program_or_fail(coopname, change -> program_id);
-  
+
+  std::string memo = "Успешное завершение поставки имущества по программе №" + std::to_string(change -> program_id) + " с ID: " + std::to_string(change -> id);
+
   //Заказчику разблокируем баланс ЦПП кооплекса и списываем его  
   action(
     permission_level{ _marketplace, "active"_n},
     _soviet,
     "unblockbal"_n,
-    std::make_tuple(coopname, change -> money_contributor, change -> program_id, change -> total_cost)
+    std::make_tuple(coopname, change -> money_contributor, change -> program_id, change -> total_cost, memo)
   ).send();
 
   action(
     permission_level{ _marketplace, "active"_n},
     _soviet,
     "subbal"_n,
-    std::make_tuple(coopname, change -> money_contributor, change -> program_id, change -> total_cost, false)
+    std::make_tuple(coopname, change -> money_contributor, change -> program_id, change -> total_cost, false, memo)
   ).send();
   
   
@@ -724,7 +706,7 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
     permission_level{ _marketplace, "active"_n},
     _soviet,
     "unblockbal"_n,
-    std::make_tuple(coopname, change -> product_contributor, change -> program_id, change -> supplier_amount)
+    std::make_tuple(coopname, change -> product_contributor, change -> program_id, change -> supplier_amount, memo)
   ).send();
 
 
@@ -742,7 +724,7 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
       permission_level{ _marketplace, "active"_n},
       _soviet,
       "addmemberfee"_n,
-      std::make_tuple(coopname, change -> money_contributor, change -> program_id, change -> membership_fee)
+      std::make_tuple(coopname, change -> money_contributor, change -> program_id, change -> membership_fee, memo)
     ).send();     
   }
 }
@@ -779,7 +761,6 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
   eosio::check(parent_change != exchange.end(), "Родительская заявка не найдена");
   eosio::check(change -> status == "published"_n, "Только заявка в статусе ожидания может быть отклонена");
 
-
   exchange.modify(change, _marketplace, [&](auto &o){
     o.status = "declined"_n;
     o.declined_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
@@ -787,12 +768,13 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
   });
 
   if (change -> type == "order"_n) {
+    std::string memo = "Отказ в поставке по программе №" + std::to_string(change -> program_id) + " с ID: " + std::to_string(change -> id);
 
     action(
       permission_level{ _marketplace, "active"_n},
       _soviet,
       "unblockbal"_n,
-      std::make_tuple(coopname, change -> money_contributor, change -> program_id, change -> total_cost)
+      std::make_tuple(coopname, change -> money_contributor, change -> program_id, change -> total_cost, memo)
     ).send();
 
   }; 
@@ -868,11 +850,13 @@ void marketplace::cancel_child(eosio::name coopname, eosio::name username, uint6
   
   // оповещаем совет об отмене и разблокируем средства
   if (change -> type == "order"_n) {
+    std::string memo = "Отмена поставки по программе №" + std::to_string(change -> program_id) + " с ID: " + std::to_string(change -> id);
+
     action(
       permission_level{ _marketplace, "active"_n},
       _soviet,
       "unblockbal"_n,
-      std::make_tuple(coopname, change -> money_contributor, change -> program_id, change -> total_cost)
+      std::make_tuple(coopname, change -> money_contributor, change -> program_id, change -> total_cost, memo)
     ).send();
 
   };  

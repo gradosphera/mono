@@ -54,14 +54,8 @@ program
   .action(async (cmd: string, options: any) => {
     try {
       const { target, network } = options
+      await deleteFile(keosdPath)
 
-      await execCommand([
-        'cleos',
-        'wallet',
-        'unlock',
-        '--password',
-        process.env.PASSWORD!,
-      ])
       await deployCommand(cmd, target, network)
     }
     catch (error) {

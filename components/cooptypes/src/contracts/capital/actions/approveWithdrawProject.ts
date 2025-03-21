@@ -2,14 +2,14 @@ import * as Permissions from '../../../common/permissions'
 import type * as Capital from '../../../interfaces/capital'
 import { Actors } from '../../../common'
 
-export const authorizations = [{ permissions: [Permissions.active], actor: Actors._contract }] as const
+export const authorizations = [{ permissions: [Permissions.active], actor: Actors._chairman }] as const
 
 /**
  * Имя действия
  */
-export const actionName = 'authorize'
+export const actionName = 'approvewthd2'
 
 /**
  * @interface
  */
-export type IAuthorize = Capital.IAuthorize
+export type IApproveWithdrawProject = Capital.IApprovewthd2

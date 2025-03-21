@@ -109,7 +109,7 @@ void gateway::dpcomplete(eosio::name coopname, eosio::name admin, uint64_t depos
       permission_level{ _gateway, "active"_n},
       _soviet,
       "addbal"_n,
-      std::make_tuple(coopname, deposit -> username, _wallet_program_id, deposit -> quantity)
+      std::make_tuple(coopname, deposit -> username, _wallet_program_id, deposit -> quantity, std::string("Паевой взнос в ЦПП 'Цифровой Кошелёк'"))
     ).send();
     
     action(
@@ -165,7 +165,7 @@ void gateway::dprefund(eosio::name coopname, eosio::name admin, uint64_t deposit
       permission_level{ _gateway, "active"_n},
       _soviet,
       "subbal"_n,
-      std::make_tuple(coopname, deposit -> username, _wallet_program_id, deposit -> quantity, true)
+      std::make_tuple(coopname, deposit -> username, _wallet_program_id, deposit -> quantity, true, "Отмена паевого взноса в ЦПП 'Цифровой Кошелёк'")
     ).send();
     
     action(

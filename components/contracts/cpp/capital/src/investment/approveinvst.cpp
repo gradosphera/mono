@@ -16,6 +16,6 @@ void capital::approveinvst(name coopname, name application, name approver, check
   
   //отправляем в совет
   action(permission_level{ _capital, "active"_n}, _soviet, _capital_invest_authorize_action,
-    std::make_tuple(coopname, invest -> username, invest -> id, invest -> statement, std::string("")))
+    std::make_tuple(coopname, invest -> username, invest -> id, invest -> invest_statement, std::string("")))
   .send();  
 };

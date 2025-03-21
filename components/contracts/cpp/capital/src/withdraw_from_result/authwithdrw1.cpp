@@ -26,12 +26,17 @@ void capital::authwithdrw1(eosio::name coopname, checksum256 withdraw_hash) {
     c.withdrawed += withdraw -> amount;
   });
   
-  
+  std::string memo_in = "Приём паевого взноса по договору УХД с ID: " + std::to_string(contributor -> id);
+
+  Wallet::add_blocked_funds(_capital, coopname, withdraw->username, withdraw->amount, _source_program, memo_in);
+      
   // списание с УХД
-  Wallet::sub_blocked_funds(_capital, coopname, withdraw -> username, withdraw -> amount, _cofund_program);
+  std::string memo_out = "Возврат части паевого взноса по договору УХД с ID: " + std::to_string(contributor -> id);
+
+  Wallet::sub_blocked_funds(_capital, coopname, withdraw -> username, withdraw -> amount, _source_program, memo_out);
   
   // добавление в кошелёк
-  Wallet::add_available_funds(_capital, coopname, withdraw -> username, withdraw -> amount, _wallet_program);
+  Wallet::add_available_funds(_capital, coopname, withdraw -> username, withdraw -> amount, _wallet_program, memo_out);
   
   result_withdraws.erase(withdraw);
 }

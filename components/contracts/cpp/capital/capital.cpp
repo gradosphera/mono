@@ -8,26 +8,28 @@
 #include "src/investment/approveinvst.cpp"
 #include "src/investment/capauthinvst.cpp"
 
-#include "src/managment/init.cpp"
-
-#include "src/claim/setact1.cpp"
-#include "src/claim/setact2.cpp"
-#include "src/claim/createclaim.cpp"
-#include "src/claim/setstatement.cpp"
-#include "src/claim/authorize.cpp"
-
+#include "src/claim/approveclaim.cpp"
+#include "src/claim/updatecapitl.cpp"
+#include "src/claim/claimnow.cpp"
+#include "src/claim/capauthclaim.cpp"
 
 #include "src/registration/capregcontr.cpp"
 #include "src/registration/approvereg.cpp"
 #include "src/registration/regcontrib.cpp"
 
+#include "src/managment/init.cpp"
 #include "src/managment/createproj.cpp"
 #include "src/managment/addauthor.cpp"
 #include "src/managment/allocate.cpp"
+#include "src/managment/diallocate.cpp"
 #include "src/managment/wthdrcallbck.cpp"
 
 #include "src/commit/createcmmt.cpp"
 #include "src/commit/approvecmmt.cpp"
+#include "src/commit/capauthcmmt.cpp"
+#include "src/commit/setact1.cpp"
+#include "src/commit/setact2.cpp"
+
 
 #include "src/withdraw_from_result/createwthd1.cpp"
 #include "src/withdraw_from_result/capauthwthdc.cpp"
@@ -39,13 +41,21 @@
 #include "src/withdraw_from_project/capauthwthd2.cpp"
 #include "src/withdraw_from_project/approvewthd2.cpp"
 
+#include "src/withdraw_from_program/createwthd3.cpp"
+#include "src/withdraw_from_program/capauthwthd3.cpp"
+#include "src/withdraw_from_program/approvewthd3.cpp"
+
+
 #include "src/expense/approveexpns.cpp"
 #include "src/expense/capauthexpns.cpp"
 #include "src/expense/createexpnse.cpp"
 #include "src/expense/expense_withdraw_callback.cpp"
 
-#include "src/fund/fund.cpp"
-#include "src/fund/refresh.cpp"
+#include "src/fundproj/fundproj.cpp"
+#include "src/fundproj/refreshproj.cpp"
+
+#include "src/fundprog/fundprog.cpp"
+#include "src/fundprog/refreshprog.cpp"
 
 #include <optional>
 
@@ -53,45 +63,31 @@
 // void capital::reduce_shares(name coopname, checksum256 project_hash, name username, asset amount) {
 //     require_auth(_capital);
 
-//     auto exist_project = get_project(coopname, project_hash);
-//     eosio::check(exist_project.has_value(), "Проект не найден");
-
-//     project_index projects(_capital, coopname.value);
-//     auto project = projects.find(exist_project->id);
 
 //     contributor_index contributors(_capital, coopname.value);
 //     auto idx = contributors.get_index<"byusername"_n>();
 //     auto itr = idx.find(username.value);
 //     eosio::check(itr != idx.end(), "Contributor not found");
 
-//     eosio::check(itr->share_balance >= amount, "Недостаточно долей для уменьшения");
-
-//     int64_t prev_total_shares = project->membership_total_shares.amount;
-//     int64_t new_total_shares = prev_total_shares - amount.amount;
-
-//     eosio::check(new_total_shares >= 0, "Нельзя уменьшить total_shares ниже 0");
-
-//     // Пересчёт cumulative_reward_per_share для корректного распределения будущих выплат
-//     if (new_total_shares > 0) {
-//         projects.modify(project, coopname, [&](auto &p) {
-//             p.membership_cumulative_reward_per_share =
-//                 (p.membership_cumulative_reward_per_share * prev_total_shares) / new_total_shares;
-//             p.membership_total_shares -= amount;
-//         });
-//     } else {
-//         // Если все доли исчезли, просто обнуляем
-//         projects.modify(project, coopname, [&](auto &p) {
-//             p.membership_cumulative_reward_per_share = 0;
-//             p.membership_total_shares = asset(0, _root_govern_symbol);
-//         });
-//     }
-
-//     // Уменьшаем долю пользователя
-//     auto primary_itr = contributors.find(itr->id);
-//     contributors.modify(primary_itr, same_payer, [&](auto &c) {
-//         c.share_balance -= amount;
-//     });
 // }
+
+
+void capital::validate_project_hierarchy_depth(eosio::name coopname, checksum256 project_hash) {
+    uint8_t level = 0;
+    project_index projects(_capital, coopname.value);
+    
+    auto current_project = get_project(coopname, project_hash);
+    eosio::check(current_project.has_value(), "Проект не найден");
+
+    while (current_project -> parent_project_hash != checksum256()) {
+        eosio::check(level < 12, "Превышено максимальное количество уровней родительских проектов (12)");
+
+        current_project = get_project(coopname, current_project->parent_project_hash);
+        eosio::check(current_project.has_value(), "Родительский проект не найден");
+
+        level++;
+    };
+};
 
 
 /**
@@ -201,6 +197,20 @@ std::optional<contributor> capital::get_active_contributor_or_fail(eosio::name c
     return contributor;
 }
 
+
+std::optional<capital_tables::participant> capital::get_participant(eosio::name coopname, eosio::name username) {
+    capital_tables::participant_index participants(_capital, coopname.value);
+    
+    auto itr = participants.find(username.value);
+    if (itr == participants.end()) {
+        return std::nullopt;
+    }
+
+    return *itr;
+}
+
+
+
 program capital::get_capital_program_or_fail(eosio::name coopname) {
   auto program_id = get_program_id(_capital_program);
 
@@ -209,11 +219,24 @@ program capital::get_capital_program_or_fail(eosio::name coopname) {
 }
 
 
-program capital::get_cofund_program_or_fail(eosio::name coopname) {
-  auto program_id = get_program_id(_cofund_program);
+program capital::get_source_program_or_fail(eosio::name coopname) {
+  auto program_id = get_program_id(_source_program);
 
   auto program = get_program_or_fail(coopname, program_id);
   return program;
+};
+
+int64_t capital::get_capital_program_share_balance(eosio::name coopname) {
+  auto capital_program = get_capital_program_or_fail(coopname);
+  
+  return capital_program.available -> amount + capital_program.blocked -> amount;
+};
+
+int64_t capital::get_capital_user_share_balance(eosio::name coopname, eosio::name username) {
+  auto wallet = get_capital_wallet(coopname, username);
+  eosio::check(wallet.has_value(), "Кошелёк пайщика в программе не найден");
+  
+  return wallet -> available.amount + wallet -> blocked -> amount;
 }
 
 std::optional<progwallet> capital::get_capital_wallet(eosio::name coopname, eosio::name username) {
@@ -288,6 +311,13 @@ std::optional<result> capital::get_result(eosio::name coopname, const checksum25
     return *result_itr;
 }
 
+result capital::get_result_or_fail(eosio::name coopname, const checksum256 &result_hash, const char* msg) {
+    auto maybe_result = get_result(coopname, result_hash);
+    eosio::check(maybe_result.has_value(), msg);
+    return *maybe_result;
+}
+
+
 std::optional<project> capital::get_project(eosio::name coopname, const checksum256 &project_hash) {
     project_index projects(_capital, coopname.value);
     auto project_hash_index = projects.get_index<"byhash"_n>();
@@ -328,6 +358,20 @@ std::optional<capital_tables::result_withdraw> capital::get_result_withdraw(eosi
 }
 
 
+std::optional<capital_tables::program_withdraw> capital::get_program_withdraw(eosio::name coopname, const checksum256 &hash) {
+    capital_tables::program_withdraws_index program_withdraws(_capital, coopname.value);
+    auto index = program_withdraws.get_index<"byhash"_n>();
+
+    auto itr = index.find(hash);
+    
+    if (itr == index.end()) {
+        return std::nullopt;
+    }
+
+    return *itr;
+}
+
+
 std::optional<capital_tables::project_withdraw> capital::get_project_withdraw(eosio::name coopname, const checksum256 &hash) {
     capital_tables::project_withdraws_index project_withdraws(_capital, coopname.value);
     auto index = project_withdraws.get_index<"byhash"_n>();
@@ -353,6 +397,31 @@ std::optional<claim> capital::get_claim(eosio::name coopname, const checksum256 
     }
 
     return *claim_itr;
+}
+
+claim capital::get_claim_or_fail(eosio::name coopname, const checksum256 &claim_hash, const char* msg) {
+    auto c = get_claim(coopname, claim_hash);
+    eosio::check(c.has_value(), msg);
+    return *c;
+}
+
+
+std::optional<resactor> capital::get_resactor(eosio::name coopname, const checksum256 &result_hash, eosio::name username) {
+    resactor_index ractors(_capital, coopname.value);
+    auto idx  = ractors.get_index<"byresuser"_n>();
+    auto rkey = combine_checksum_ids(result_hash, username);
+
+    auto it = idx.find(rkey);
+    if (it == idx.end()) {
+        return std::nullopt;
+    }
+    return *it;
+}
+
+resactor capital::get_resactor_or_fail(eosio::name coopname, const checksum256 &result_hash, eosio::name username, const char* msg) {
+    auto maybe_resactor = get_resactor(coopname, result_hash, username);
+    eosio::check(maybe_resactor.has_value(), msg);
+    return *maybe_resactor;
 }
 
 

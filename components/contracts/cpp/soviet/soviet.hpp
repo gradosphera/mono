@@ -82,7 +82,7 @@ public:
 
   [[eosio::action]] void regpaid(eosio::name coopname, eosio::name username);
   
-
+  [[eosio::action]] void openprogwall(name coopname, name username, name program_type, uint64_t agreement_id);
 
   //voting.cpp
   [[eosio::action]] void votefor(eosio::name coopname, eosio::name member, uint64_t decision_id);
@@ -118,11 +118,11 @@ public:
   // [[eosio::action]] void subprogbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity);
   void withdraw_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id, uint64_t batch_id);
   
-  [[eosio::action]] void addbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity);
-  [[eosio::action]] void subbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, bool skip_available_check);
-  [[eosio::action]] void blockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity);
-  [[eosio::action]] void unblockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity);
-  [[eosio::action]] void addmemberfee(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity);
+  [[eosio::action]] void addbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo);
+  [[eosio::action]] void subbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, bool skip_available_check, std::string memo);
+  [[eosio::action]] void blockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo);
+  [[eosio::action]] void unblockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo);
+  [[eosio::action]] void addmemberfee(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo);
   
 
   //addresses.cpp
@@ -150,7 +150,6 @@ public:
   [[eosio::action]] void deletebranch(eosio::name coopname, eosio::name braname);
   
   //capital.cpp
-  [[eosio::action]] void claim(eosio::name coopname, eosio::name username, uint64_t result_id, document statement, std::string meta);
   void capital_contribute_on_withdraw_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
   void capital_return_on_withdraw_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
   

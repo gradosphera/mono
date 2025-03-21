@@ -1,5 +1,5 @@
 void capital::createinvest(name coopname, name application, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document statement) {
-  check_auth_or_fail(_capital, coopname, application, "contribute"_n);
+  check_auth_or_fail(_capital, coopname, application, "createinvest"_n);
   
   verify_document_or_fail(statement);
   
@@ -28,8 +28,12 @@ void capital::createinvest(name coopname, name application, name username, check
     i.invest_hash = invest_hash;
     i.status = "created"_n;
     i.invested_at = current_time_point();
-    i.statement = statement;
+    i.invest_statement = statement;
     i.amount = amount;
   });
   
+  std::string memo = "Зачёт части целевого паевого взноса по программе 'Цифровой Кошелёк' в качестве паевого взноса по договору УХД с ID: " + std::to_string(contributor -> id);
+  
+  // блокируем средства в программе кошелька
+  Wallet::block_funds(_capital, coopname, contributor -> username, amount, _wallet_program, memo);
 }

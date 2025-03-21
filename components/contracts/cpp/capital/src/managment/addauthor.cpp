@@ -24,7 +24,7 @@ void capital::addauthor(name coopname, name application, checksum256 project_has
     project_index projects(_capital, coopname.value);
     auto project_for_modify = projects.find(project -> id);
     
-    // Обновляем shares и authors_count в идее
+    // Обновляем shares и authors_count в проекте
     projects.modify(project_for_modify, coopname, [&](auto& row) {
         row.authors_shares += shares;
         row.authors_count++;

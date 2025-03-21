@@ -23,6 +23,6 @@ void capital::approvewthd1(name coopname, name application, name approver, check
   
   action(permission_level{ _capital, "active"_n}, _soviet, _capital_withdraw_from_result_authorize_return_action,
     std::make_tuple(coopname, withdraw -> username, withdraw -> id, withdraw -> return_statement, std::string("")))
-  .send();  
+  .send();
     
 };
