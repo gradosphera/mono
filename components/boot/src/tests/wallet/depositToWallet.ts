@@ -83,6 +83,7 @@ export async function depositToWallet(blockchain: any, coopname: string, usernam
   const program = await getCoopProgramWallet(blockchain, coopname, 1)
 
   const userWallet = await getUserProgramWallet(blockchain, coopname, username, 1)
+  console.log('▶ Кошелёк пользователя после пополнения: ', userWallet)
 
   // Проверяем изменение балансов
   compareTokenAmounts(prevUserWalletAvailable, userWallet.available, amount)

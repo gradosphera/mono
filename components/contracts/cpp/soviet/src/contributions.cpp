@@ -14,7 +14,7 @@ inline void set_prog_available(program &prog, const eosio::asset &newval) {
   prog.available = newval;  // достаточно прямого присвоения
 }
 
-void soviet::addmemberfee(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity){
+void soviet::addmemberfee(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo){
   eosio::check(has_auth(_marketplace) || has_auth(_soviet), "Недостаточно прав доступа");
   auto cooperative = get_cooperative_or_fail(coopname);  
   
@@ -39,7 +39,7 @@ void soviet::addmemberfee(eosio::name coopname, eosio::name username, uint64_t p
 }
 
 
-void soviet::addbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity) {
+void soviet::addbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo) {
   eosio::check(has_auth(_marketplace) || has_auth(_soviet) || has_auth(_capital) || has_auth(_gateway), "Недостаточно прав доступа");
   
   programs_index programs(_soviet, coopname.value);
@@ -67,7 +67,7 @@ void soviet::addbal(eosio::name coopname, eosio::name username, uint64_t program
 }
 
 
-void soviet::subbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, bool skip_available_check) {
+void soviet::subbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, bool skip_available_check, std::string memo) {
   eosio::check(has_auth(_marketplace) || has_auth(_soviet) || has_auth(_capital) || has_auth(_gateway), "Недостаточно прав доступа");
   
   programs_index programs(_soviet, coopname.value);
@@ -103,7 +103,7 @@ void soviet::subbal(eosio::name coopname, eosio::name username, uint64_t program
 }
 
 
-void soviet::blockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity) {
+void soviet::blockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo) {
   eosio::check(has_auth(_marketplace) || has_auth(_gateway) || has_auth(_soviet) || has_auth(_capital), "Недостаточно прав доступа");
   
   auto cooperative = get_cooperative_or_fail(coopname);  
@@ -136,7 +136,7 @@ void soviet::blockbal(eosio::name coopname, eosio::name username, uint64_t progr
 }
 
 
-void soviet::unblockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity) {
+void soviet::unblockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo) {
   eosio::check(has_auth(_marketplace) || has_auth(_gateway) || has_auth(_soviet) || has_auth(_capital), "Недостаточно прав доступа");
   eosio::name payer = has_auth(_marketplace) ? _marketplace : _soviet;
 

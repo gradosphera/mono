@@ -47,6 +47,18 @@ export interface ICreatewthdrw {
   memo: string
 }
 
+export interface ICrtwthdrexps {
+  coopname: IName
+  application: IName
+  username: IName
+  withdraw_hash: IChecksum256
+  quantity: IAsset
+  document: IDocument
+  callback_contract: IName
+  callback_type: IName
+  memo: string
+}
+
 export interface IDeposit {
   coopname: IName
   username: IName
@@ -97,6 +109,7 @@ export interface INewwithdraw {
   coopname: IName
   username: IName
   withdraw_id: IUint64
+  withdraw_hash: IChecksum256
   type: IName
   amount: IAsset
 }

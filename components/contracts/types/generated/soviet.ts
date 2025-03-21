@@ -13,6 +13,7 @@ export interface IAddbal {
   username: IName
   program_id: IUint64
   quantity: IAsset
+  memo: string
 }
 
 export interface IAddmemberfee {
@@ -20,6 +21,7 @@ export interface IAddmemberfee {
   username: IName
   program_id: IUint64
   quantity: IAsset
+  memo: string
 }
 
 export interface IAddress {
@@ -121,6 +123,7 @@ export interface IBlockbal {
   username: IName
   program_id: IUint64
   quantity: IAsset
+  memo: string
 }
 
 export interface IBoardMember {
@@ -198,14 +201,6 @@ export interface IChanges {
   exchange_id: IUint64
   contribution_product_decision_id: IUint64
   return_product_decision_id: IUint64
-}
-
-export interface IClaim {
-  coopname: IName
-  username: IName
-  result_id: IUint64
-  statement: IDocument
-  meta: string
 }
 
 export interface ICoagreement {
@@ -575,6 +570,7 @@ export interface ISubbal {
   program_id: IUint64
   quantity: IAsset
   skip_available_check: boolean
+  memo: string
 }
 
 export interface IUnblock {
@@ -590,6 +586,7 @@ export interface IUnblockbal {
   username: IName
   program_id: IUint64
   quantity: IAsset
+  memo: string
 }
 
 export interface IUpdateboard {

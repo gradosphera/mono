@@ -56,6 +56,17 @@ public:
     [[eosio::action]]
     void approvewthd2(name coopname, name application, name approver, checksum256 withdraw_hash, document approved_return_statement);
 
+    // Возврат из программы
+    [[eosio::action]]
+    void createwthd3(name coopname, name application, name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document return_statement);
+    
+    [[eosio::action]]
+    void capauthwthd3(eosio::name coopname, uint64_t withdraw_id, document authorization);
+    
+    [[eosio::action]]
+    void approvewthd3(name coopname, name application, name approver, checksum256 withdraw_hash, document approved_return_statement);
+
+
     [[eosio::action]]
     void createproj (
       checksum256 project_hash,
@@ -69,33 +80,36 @@ public:
       std::string subject
     );
     
+    // claims
     [[eosio::action]]
-    void createclaim(name coopname, name application, name owner, checksum256 result_hash, checksum256 claim_hash);
+    void updatecapitl(name coopname, name application, name username, checksum256 result_hash, checksum256 claim_hash);
     
     [[eosio::action]]
-    void setstatement(name coopname, name application, name owner, checksum256 result_hash, document statement);
+    void claimnow(name coopname, name application, name username, checksum256 result_hash, document statement);
     
     [[eosio::action]]
-    void authorize(eosio::name coopname, uint64_t claim_id, document decision);
+    void capauthclaim(eosio::name coopname, uint64_t claim_id, document decision);
     
     [[eosio::action]]
-    void setact1(eosio::name coopname, eosio::name application, eosio::name owner, checksum256 claim_hash, document act);
-    
-    [[eosio::action]]
-    void setact2(eosio::name coopname, eosio::name application, eosio::name owner, checksum256 result_hash, document act);
-    
+    void approveclaim(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 claim_hash, document approved_statement);
     
     [[eosio::action]]
     void startdistrbn(name coopname, name application, checksum256 result_hash);
-    
+
     [[eosio::action]]
     void addauthor(name coopname, name application, checksum256 project_hash, name author, uint64_t shares);
     
     // Коммиты
     [[eosio::action]]
-    void approvecmmt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 commit_hash, document approved_specification);
+    void approvecmmt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 commit_hash, document approved_statement);
     [[eosio::action]]
-    void createcmmt(eosio::name coopname, eosio::name application, eosio::name creator, checksum256 result_hash, checksum256 commit_hash, uint64_t contributed_hours, document specification);
+    void createcmmt(eosio::name coopname, eosio::name application, eosio::name creator, checksum256 result_hash, checksum256 commit_hash, uint64_t contributed_hours, document contribution_statement);
+    [[eosio::action]]
+    void setact1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 claim_hash, document act);    
+    [[eosio::action]]
+    void setact2(eosio::name coopname, eosio::name application, eosio::name username, checksum256 result_hash, document act);
+    [[eosio::action]]
+    void capauthcmmt(eosio::name coopname, uint64_t commit_id, document authorization);
         
     // Регистрация
     [[eosio::action]]
@@ -108,8 +122,10 @@ public:
     // Инвестиции
     [[eosio::action]]
     void createinvest(name coopname, name application, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document statement);    
+    
     [[eosio::action]]
     void capauthinvst(eosio::name coopname, uint64_t invest_id, document authorization);    
+    
     [[eosio::action]]
     void approveinvst(name coopname, name application, name approver, checksum256 invest_hash, document approved_statement);
     
@@ -117,19 +133,26 @@ public:
     void allocate(eosio::name coopname, eosio::name application, checksum256 project_hash, checksum256 result_hash, eosio::asset amount);
     
     [[eosio::action]]
+    void diallocate(eosio::name coopname, eosio::name application, checksum256 project_hash, checksum256 result_hash, eosio::asset amount);
+    
+    [[eosio::action]]
     void approvewthd1(name coopname, name application, name approver, checksum256 withdraw_hash, document approved_contribution_statement, document approved_return_statement);
     
     // Расходы
     [[eosio::action]]
     void createexpnse(eosio::name coopname, eosio::name application, checksum256 expense_hash, checksum256 result_hash, name creator, uint64_t fund_id, asset amount, std::string description, document statement);
+    
     [[eosio::action]]
     void approveexpns(name coopname, name application, name approver, checksum256 expense_hash, document approved_statement);
+    
     [[eosio::action]]
     void capauthexpns(eosio::name coopname, uint64_t expense_id, document authorization);
     
     // Членские взносы
-    void fund(eosio::name coopname, checksum256 project_hash, asset amount, std::string memo);
-    void refresh(name coopname, name application, checksum256 project_hash, name username);
+    [[eosio::action]] void fundproj(eosio::name coopname, checksum256 project_hash, asset amount, std::string memo);
+    [[eosio::action]] void refreshproj(name coopname, name application, checksum256 project_hash, name username);
+    [[eosio::action]] void fundprog(eosio::name coopname, asset amount, std::string memo);
+    [[eosio::action]] void refreshprog(name coopname, name application, name username);
     
 private:
     
@@ -164,6 +187,13 @@ private:
   std::optional<creator> get_creator(eosio::name coopname, eosio::name username, const checksum256 &result_hash);
   std::optional<result> get_result(eosio::name coopname, const checksum256 &result_hash);
   std::optional<project> get_project(eosio::name coopname, const checksum256 &project_hash);
+  std::optional<project> get_master_project(eosio::name coopname);
+  void validate_project_hierarchy_depth(eosio::name coopname, checksum256 project_hash);
+  
+  void distribute_project_membership_funds(eosio::name coopname, uint64_t project_id, asset amount, uint8_t level);
+  
+  int64_t get_capital_user_share_balance(eosio::name coopname, eosio::name username);
+  
   std::optional<claim> get_claim(eosio::name coopname, const checksum256 &result_hash);
   std::optional<result_author> get_result_author(eosio::name coopname, eosio::name username, const checksum256 &result_hash);
   std::optional<commit> get_commit(eosio::name coopname, const checksum256 &hash);
@@ -174,12 +204,18 @@ private:
   std::optional<expense> get_expense(eosio::name coopname, const checksum256 &hash);
   
   program get_capital_program_or_fail(eosio::name coopname);
-  program get_cofund_program_or_fail(eosio::name coopname);
+  program get_source_program_or_fail(eosio::name coopname);
   std::optional<progwallet> get_capital_wallet(eosio::name coopname, eosio::name username);
   
   
   std::optional<contributor> get_contributor(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
   std::optional<contributor> get_active_contributor_or_fail(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
+  
+  std::optional<capital_tables::participant> get_participant(eosio::name coopname, eosio::name username);
+  
+  int64_t get_capital_program_share_balance(eosio::name coopname);
+  
+  std::optional<capital_tables::program_withdraw> get_program_withdraw(eosio::name coopname, const checksum256 &hash);
   
   uint64_t count_authors_by_project(eosio::name coopname, const checksum256 &project_hash);
   
@@ -187,11 +223,14 @@ private:
   
   void expense_withdraw_callback(name coopname, checksum256 withdraw_hash);
   
+  resactor get_resactor_or_fail(eosio::name coopname, const checksum256 &result_hash, eosio::name username, const char* msg);
+  std::optional<resactor> get_resactor(eosio::name coopname, const checksum256 &result_hash, eosio::name username);
+  claim get_claim_or_fail(eosio::name coopname, const checksum256 &claim_hash, const char* msg);
+  result get_result_or_fail(eosio::name coopname, const checksum256 &result_hash, const char* msg);
+  
   void try_finalize_withdrawal(eosio::name coopname, const capital_tables::result_withdraws_index::const_iterator &withdraw) {
     if (!is_document_empty(withdraw->authorized_return_statement) &&
         !is_document_empty(withdraw->authorized_contribution_statement)) {
-      
-      Wallet::add_blocked_funds(_capital, coopname, withdraw->username, withdraw->amount, _cofund_program);
       
       action(
         permission_level{_capital, "active"_n},

@@ -121,7 +121,7 @@ struct ProgramInfo {
 static const std::map<eosio::name, ProgramInfo> program_map = {
     {_wallet_program, {1, 1}},       // program_id = 1, draft_id = 1
     {_sosedi_program, {2, 699}},  // program_id = 2, draft_id = 699
-    {_cofund_program, {3, 0}},    // program_id = 3, draft_id = 0
+    {_source_program, {3, 0}},    // program_id = 3, draft_id = 0
     {_capital_program, {4, 1000}}    // program_id = 4, draft_id = 1000
 };
 

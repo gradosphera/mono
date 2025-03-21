@@ -31,9 +31,9 @@ void capital::createexpnse(eosio::name coopname, eosio::name application, checks
     i.fund_id = fund_id;
     i.status = "created"_n;
     i.spend_at = current_time_point();
-    i.statement = statement;
-    i.amount = amount;    
-    i.description = description;    
+    i.expense_statement = statement;
+    i.amount = amount;
+    i.description = description;
   });
   
 }

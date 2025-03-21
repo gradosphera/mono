@@ -7,9 +7,9 @@ export const authorizations = [{ permissions: [Permissions.active], actor: Actor
 /**
  * Имя действия
  */
-export const actionName = 'refresh'
+export const actionName = 'setact1'
 
 /**
  * @interface
  */
-export type IRefresh = Capital.IRefresh
+export type ISetAct1 = Capital.ISetact1

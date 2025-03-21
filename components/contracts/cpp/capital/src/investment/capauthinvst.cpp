@@ -1,5 +1,5 @@
 /**
- * @brief Принимаем решение совета и вносим средства на кошелек пайщика
+ * @brief Принимаем решение совета и вносим средства на кошелек пайщика при УХД
  * 
  */
 void capital::capauthinvst(eosio::name coopname, uint64_t invest_id, document authorization) {
@@ -26,31 +26,26 @@ void capital::capauthinvst(eosio::name coopname, uint64_t invest_id, document au
   
   project_index projects(_capital, coopname.value);
   auto project = projects.find(exist -> id);
-    
+  
   projects.modify(project, coopname, [&](auto &p) {
     p.invested += invest -> amount;
     p.available += invest -> amount;
     
     // добавляем новые доли в проект
     p.membership_total_shares += invest -> amount;
-
   });
   
-  // Если есть родительский проект — там тоже отмечается часть инвестиций
-  if (project -> parent_project_hash != checksum256()) {
-    auto exist_parent = get_project(coopname, project->parent_project_hash);
-    eosio::check(exist_parent.has_value(), "Родительский проект не найден");
-
-    auto parent_project = projects.find(exist_parent->id);
-    eosio::check(parent_project != projects.end(), "Ошибка при поиске родительского проекта");
-
-    projects.modify(parent_project, coopname, [&](auto &p) {
-        p.membership_total_shares += invest -> amount; // Родитель тоже получает доли
-    });
-  };
-
-  // пополняем кошелек и блокируем средства в нём
-  Wallet::add_blocked_funds(_capital, coopname, contributor -> username, invest -> amount, _cofund_program);
+  std::string memo = "Зачёт части целевого паевого взноса по программе 'Цифровой Кошелёк' в качестве паевого взноса по договору УХД с contributor_id:" + std::to_string(contributor -> id);
+  
+  // списываем заблокированные средства с кошелька
+  Wallet::sub_blocked_funds(_capital, coopname, contributor -> username, invest -> amount, _wallet_program, memo);
+  
+  // добавляем доступные средства в УХД
+  // TODO: ???
+  // списываем доступные средства с УХД
+  
+  // пополняем программу капитализации и блокируем средства в ней
+  Wallet::add_blocked_funds(_capital, coopname, contributor -> username, invest -> amount, _capital_program, memo);
   
   // Удаляем объект за ненадобностью
   invests.erase(invest);

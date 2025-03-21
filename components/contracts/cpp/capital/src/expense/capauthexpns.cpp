@@ -17,7 +17,7 @@ void capital::capauthexpns(eosio::name coopname, uint64_t expense_id, document a
   
   // создаём объект исходящего платежа в gateway с коллбэком после обработки
   action(permission_level{ _capital, "active"_n}, _gateway, _gateway_create_expense_withdraw_action,
-    std::make_tuple(coopname, ""_n, expense -> username, expense -> expense_hash, expense -> amount, expense -> statement, _capital, _gateway_to_capital_expense_callback_type, std::string("")))
+    std::make_tuple(coopname, ""_n, expense -> username, expense -> expense_hash, expense -> amount, expense -> expense_statement, _capital, _gateway_to_capital_expense_callback_type, std::string("")))
   .send();  
 
 }

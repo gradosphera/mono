@@ -19,7 +19,7 @@
 #include "src/capital.cpp"
 #include "src/capital/capauthwthdc.cpp"
 #include "src/capital/capauthwthdr.cpp"
-
+#include "src/openprogwall.cpp"
 #include "src/agenda.cpp"
 
 using namespace eosio;
@@ -103,17 +103,6 @@ void soviet::migrate() {
       m.initial_amount = _provider_initial;
       m.minimum_amount = _provider_minimum;
     });
-
-    // wallets_index wallets(_soviet, _provider.value);
-
-    // wallets.emplace(_system, [&](auto &w) {
-    //   w.username = _provider_chairman;
-    //   w.coopname = _provider;
-    //   w.available = asset(0, _root_govern_symbol);
-    //   w.blocked = asset(0, _root_govern_symbol);
-    //   w.minimum = _provider_minimum; 
-    // });
-
 
     board_member member {
         .username = _provider_chairman,

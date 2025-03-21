@@ -101,6 +101,9 @@ export interface IExchangeParams {
   meta: string
 }
 
+export interface IMigrate {
+}
+
 export interface IModerate {
   coopname: IName
   username: IName

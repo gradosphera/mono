@@ -83,7 +83,12 @@ static constexpr eosio::name _capital_withdraw_from_result_authorize_contributio
 static constexpr eosio::name _capital_withdraw_from_result_authorize_return_action = "capauthwthdr"_n;
 static constexpr eosio::name _capital_expense_authorize_action = "capauthexpns"_n;
 
+static constexpr eosio::name _capital_commit_authorize_action = "capauthcmmt"_n;
+static constexpr eosio::name _capital_claim_authorize_action = "capauthclaim"_n;
+
 static constexpr eosio::name _capital_withdraw_from_project_authorize_action = "capauthwthd2"_n;
+
+static constexpr eosio::name _capital_withdraw_from_program_authorize_action = "capauthwthd3"_n;
 
 
 static constexpr eosio::name _claim_action = "claim"_n;
@@ -104,7 +109,7 @@ static constexpr eosio::name _withdraw_callback_action = "wthdrcallbck"_n;
 //program_types
 static constexpr eosio::name _wallet_program = "wallet"_n;
 static constexpr eosio::name _sosedi_program = "cooplace"_n;
-static constexpr eosio::name _cofund_program = "cofund"_n;
+static constexpr eosio::name _source_program = "source"_n;
 static constexpr eosio::name _capital_program = "capital"_n;
 
 //program_ids
