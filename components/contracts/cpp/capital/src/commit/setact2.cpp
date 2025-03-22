@@ -9,65 +9,64 @@ void capital::setact2(
     verify_document_or_fail(act);
 
     // 1) Ищем коммит
-    auto maybe_commit = get_commit(coopname, commit_hash);
-    eosio::check(maybe_commit.has_value(), "Коммит не найден");
-    auto commit = *maybe_commit;
-
-    eosio::check(commit.username == username, "Неверно указано имя пользователя владельца результата");
-    eosio::check(commit.status == "act1"_n,   "Неверный статус для поставки акта");
+    auto exist_commit = get_commit(coopname, commit_hash);
+    eosio::check(exist_commit.has_value(), "Коммит не найден");
+    
+    eosio::check(exist_commit -> username == username, "Неверно указано имя пользователя владельца результата");
+    eosio::check(exist_commit -> status == "act1"_n,   "Неверный статус для поставки акта");
 
     // 2) Обновляем сам коммит
-    commit_index commits(coopname, coopname.value);
-    auto c_itr = commits.find(commit.id);
-    eosio::check(c_itr != commits.end(), "commit.id не найден в multi_index commits");
-    commits.modify(c_itr, coopname, [&](auto &c) {
+    commit_index commits(_capital, coopname.value);
+    auto commit = commits.find(exist_commit -> id);
+    
+    commits.modify(commit, coopname, [&](auto &c) {
         c.status = "act2"_n;
         c.act2   = act;
     });
 
     // 3) Ищем результат (или кидаем ошибку) и проект
-    auto result_obj  = get_result_or_fail(coopname, commit.result_hash, "Результат не найден");
-    auto project_obj = get_project(coopname, result_obj.project_hash);
-    eosio::check(project_obj.has_value(), "Проект не найден");
+    auto exist_result  = get_result_or_fail(coopname, commit->result_hash, "Результат не найден");
+    
+    auto exist_project = get_project(coopname, exist_result.project_hash);
+    eosio::check(exist_project.has_value(), "Проект не найден");
 
     // 4) Ищем вкладчика
-    auto exist_contributor = get_active_contributor_or_fail(coopname, result_obj.project_hash, commit.username);
+    auto exist_contributor = get_active_contributor_or_fail(coopname, exist_result.project_hash, commit->username);
     contributor_index contributors(_capital, coopname.value);
     auto contributor = contributors.find(exist_contributor->id);
 
     // Распределяем spend на available / for_convert
     double convert_ratio = double(contributor->convert_percent) / HUNDR_PERCENTS;
-    asset for_convert(static_cast<int64_t>(commit.spend.amount * convert_ratio), commit.spend.symbol);
-    asset available = commit.spend - for_convert;
+    asset for_convert(static_cast<int64_t>(commit->spend.amount * convert_ratio), commit->spend.symbol);
+    asset available = commit->spend - for_convert;
 
     // Обновляем поля вкладчика
     contributors.modify(contributor, coopname, [&](auto &c) {
         c.available         += available;
         c.for_convert       += for_convert;
-        c.contributed_hours  = commit.contributed_hours;
-        c.spend             += commit.spend;
+        c.contributed_hours  = commit->contributed_hours;
+        c.spend             += commit->spend;
     });
 
     // 5) Вычисляем bonus
-    auto br = capital::calculcate_capital_amounts(commit.spend.amount);
+    auto br = capital::calculcate_capital_amounts(commit->spend.amount);
 
-    eosio::asset creators_bonus(br.creators_bonus, commit.spend.symbol);
-    eosio::asset authors_bonus(br.authors_bonus,   commit.spend.symbol);
-    eosio::asset generated     (br.generated,      commit.spend.symbol);
-    eosio::asset participants_bonus(br.participants_bonus, commit.spend.symbol);
-    eosio::asset total         (br.total, commit.spend.symbol);
+    eosio::asset creators_bonus(br.creators_bonus, commit->spend.symbol);
+    eosio::asset authors_bonus(br.authors_bonus,   commit->spend.symbol);
+    eosio::asset generated     (br.generated,      commit->spend.symbol);
+    eosio::asset participants_bonus(br.participants_bonus, commit->spend.symbol);
+    eosio::asset total         (br.total, commit->spend.symbol);
 
     // 6) Обновляем result
     result_index results(_capital, coopname.value);
-    auto result_itr = results.find(result_obj.id);
-    eosio::check(result_itr != results.end(), "Результат не найден");
+    auto result = results.find(exist_result.id);
+    
+    eosio::check(result -> available >= commit->spend, "Недостаточно средств в результате для приёма действия");
 
-    eosio::check(result_itr->available >= commit.spend, "Недостаточно средств в результате для приёма действия");
-
-    results.modify(result_itr, coopname, [&](auto &row) {
-        row.available          -= commit.spend;
-        row.spend             += commit.spend;
-        row.creators_amount   += commit.spend;
+    results.modify(result, coopname, [&](auto &row) {
+        row.available         -= commit->spend;
+        row.spend             += commit->spend;
+        row.creators_amount   += commit->spend;
         row.creators_bonus    += creators_bonus;
         row.authors_bonus     += authors_bonus;
         row.generated_amount  += generated;
@@ -95,51 +94,44 @@ void capital::setact2(
     });
 
     // 7) Обновляем проект
+    
     project_index projects(_capital, coopname.value);
-    auto proj_itr = projects.find(project_obj->id);
-    eosio::check(proj_itr != projects.end(), "Project not found in multi_index");
-
-    projects.modify(proj_itr, _capital, [&](auto &p) {
-        p.generated += generated;
-    });
-
+    auto project = projects.find(exist_project->id);
+    
     // 8) Обновляем вкладчика и проект (аналог capauthcmmt)
     contributors.modify(contributor, coopname, [&](auto &c){
-        c.spend         += commit.spend;
-        c.share_balance += commit.spend;
+        c.spend         += commit->spend;
+        c.share_balance += commit->spend;
     });
 
-    projects.modify(proj_itr, coopname, [&](auto &p) {
-        p.spend                += commit.spend;
-        p.available            += commit.spend;
-        p.membership_total_shares += commit.spend;
+    projects.modify(project, coopname, [&](auto &p) {
+        p.generated            += generated;
+        p.spend                += commit->spend;
+        p.available            += commit->spend;
+        p.membership_total_shares += commit->spend;
     });
 
     // 9) Обновляем запись в resactors (создательские доли)
+    auto exist_resactor = get_resactor(coopname, commit->result_hash, commit->username);
     resactor_index ractors(_capital, coopname.value);
-    auto idx = ractors.get_index<"byresuser"_n>();
-    auto rkey = combine_checksum_ids(commit.result_hash, commit.username);
-    auto ract = idx.find(rkey);
-
-    if (ract == idx.end()) {
-        ractors.emplace(coopname, [&](auto &ra){
-            ra.id          = ractors.available_primary_key();
-            ra.result_hash = commit.result_hash;
-            ra.username    = commit.username;
-            ra.creators_shares = commit.spend.amount;
-        });
+      
+    if (!exist_resactor.has_value()) {
+      ractors.emplace(coopname, [&](auto &ra){
+          ra.id          = ractors.available_primary_key();
+          ra.result_hash = commit->result_hash;
+          ra.username    = commit->username;
+          ra.creators_shares = commit->spend.amount;
+      });
     } else {
-        auto ract_prim = ractors.find(ract->id);
-        ractors.modify(ract_prim, same_payer, [&](auto &ra){
-            ra.creators_shares += commit.spend.amount;
-        });
+      auto resactor = ractors.find(exist_resactor -> id);
+      ractors.modify(resactor, coopname, [&](auto &ra){
+          ra.creators_shares += commit->spend.amount;
+      });
     }
     
     std::string memo = "Приём паевого взноса по договору УХД с contributor_id: " + std::to_string(contributor -> id);
   
     // 10) Добавляем заблокированные средства
-    Wallet::add_blocked_funds(_capital, coopname, contributor->username, commit.spend, _source_program, memo);
+    Wallet::add_blocked_funds(_capital, coopname, contributor->username, commit->spend, _source_program, memo);
 
-    // 11) Удаляем коммит, если больше не нужен
-    commits.erase(c_itr);
 }

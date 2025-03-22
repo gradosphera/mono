@@ -4,7 +4,7 @@ import { getTotalRamUsage } from '../../utils/getTotalRamUsage'
 import { generateRandomSHA256 } from '../../utils/randomHash'
 import { getCoopProgramWallet, getUserProgramWallet } from '../wallet/walletUtils'
 import { processDecision } from '../soviet/processDecision'
-import { capitalProgramId } from './consts'
+import { capitalProgramId, sourceProgramId } from './consts'
 
 export async function investInProject(
   blockchain: any,

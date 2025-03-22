@@ -557,7 +557,7 @@ export interface ISetact1 {
   coopname: IName
   application: IName
   username: IName
-  claim_hash: IChecksum256
+  commit_hash: IChecksum256
   act: IDocument
 }
 
@@ -565,7 +565,7 @@ export interface ISetact2 {
   coopname: IName
   application: IName
   username: IName
-  result_hash: IChecksum256
+  commit_hash: IChecksum256
   act: IDocument
 }
 

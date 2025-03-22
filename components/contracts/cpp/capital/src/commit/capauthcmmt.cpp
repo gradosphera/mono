@@ -7,7 +7,8 @@ void capital::capauthcmmt(eosio::name coopname, uint64_t commit_id, document aut
   
   auto contributor = get_active_contributor_or_fail(coopname, commit->project_hash, commit->username);
   
-  commits.modify(commit, coopname, [&](auto &n) {
+  //TODO: change to coopname
+  commits.modify(commit, _soviet, [&](auto &n) {
     n.status = "authorized"_n;
     n.authorization = authorization;
   });

@@ -105,9 +105,9 @@ public:
     [[eosio::action]]
     void createcmmt(eosio::name coopname, eosio::name application, eosio::name creator, checksum256 result_hash, checksum256 commit_hash, uint64_t contributed_hours, document contribution_statement);
     [[eosio::action]]
-    void setact1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 claim_hash, document act);    
+    void setact1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 commit_hash, document act);    
     [[eosio::action]]
-    void setact2(eosio::name coopname, eosio::name application, eosio::name username, checksum256 result_hash, document act);
+    void setact2(eosio::name coopname, eosio::name application, eosio::name username, checksum256 commit_hash, document act);
     [[eosio::action]]
     void capauthcmmt(eosio::name coopname, uint64_t commit_id, document authorization);
         

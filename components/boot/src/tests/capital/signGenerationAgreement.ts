@@ -1,15 +1,15 @@
 import { expect } from 'vitest'
 import { signAgreement } from '../soviet/signAgreement'
 import { getCoopProgramWallet, getUserProgramWallet } from '../wallet/walletUtils'
-import { capitalProgramName, sourceProgramId } from './consts'
+import { sourceProgramId, sourceProgramName } from './consts'
 
-export async function signCapitalAgreement(
+export async function signGenerationAgreement(
   blockchain: any,
   coopname: string,
   username: string,
   fakeDocument: any,
 ) {
-  const txId = await signAgreement(blockchain, coopname, username, capitalProgramName, fakeDocument)
+  const txId = await signAgreement(blockchain, coopname, username, sourceProgramName, fakeDocument)
 
   const wallet = await getUserProgramWallet(blockchain, coopname, username, sourceProgramId)
 
