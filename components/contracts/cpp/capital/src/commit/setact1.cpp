@@ -15,7 +15,7 @@ void capital::setact1(eosio::name coopname, eosio::name application, eosio::name
   auto commit_for_modify = commits.find(commit -> id);
   
   // Проверяем статус. 
-  eosio::check(result -> status == "decision"_n, "Неверный статус для поставки акта приёма-передачи");
+  eosio::check(commit_for_modify -> status == "authorized"_n, "Неверный статус для поставки акта приёма-передачи");
   
   commits.modify(commit_for_modify, coopname, [&](auto &n){
     n.status = "act1"_n;

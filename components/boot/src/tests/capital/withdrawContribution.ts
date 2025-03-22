@@ -44,7 +44,7 @@ export async function withdrawContribution(
   console.log('▶ Проект:', prevProject)
 
   // Создание заявления на возврат
-  const createWithdrawData: CapitalContract.Actions.CreateWithdraw1.ICreateWithdraw = {
+  const createWithdrawData: CapitalContract.Actions.WithdrawResult.IWithdrawFromResult = {
     coopname,
     application: coopname,
     username,
@@ -61,7 +61,7 @@ export async function withdrawContribution(
       actions: [
         {
           account: CapitalContract.contractName.production,
-          name: CapitalContract.Actions.CreateWithdraw1.actionName,
+          name: CapitalContract.Actions.WithdrawResult.actionName,
           authorization: [{ actor: coopname, permission: 'active' }],
           data: createWithdrawData,
         },
@@ -93,7 +93,7 @@ export async function withdrawContribution(
   expect(blockchainWithdraw.amount).toBe(withdrawAmount)
 
   // Подтверждение возврата
-  const approveWithdrawData: CapitalContract.Actions.ApproveWithdraw.IApproveWithdraw = {
+  const approveWithdrawData: CapitalContract.Actions.ApproveWithdrawResult.IApproveWithdrawResult = {
     coopname,
     application: coopname,
     approver: 'ant',
@@ -108,7 +108,7 @@ export async function withdrawContribution(
       actions: [
         {
           account: CapitalContract.contractName.production,
-          name: CapitalContract.Actions.ApproveWithdraw.actionName,
+          name: CapitalContract.Actions.ApproveWithdrawResult.actionName,
           authorization: [{ actor: coopname, permission: 'active' }],
           data: approveWithdrawData,
         },

@@ -39,7 +39,6 @@ void capital::capauthinvst(eosio::name coopname, uint64_t invest_id, document au
   
   // списываем заблокированные средства с кошелька
   Wallet::sub_blocked_funds(_capital, coopname, contributor -> username, invest -> amount, _wallet_program, memo);
-  
   // добавляем доступные средства в УХД
   // TODO: ???
   // списываем доступные средства с УХД
