@@ -481,7 +481,7 @@ describe('тест контракта CAPITAL', () => {
     expect(finalResult.creators_bonus).toBe('3820.0000 RUB')
     expect(finalResult.authors_bonus).toBe('16180.0000 RUB')
     expect(finalResult.generated_amount).toBe('30000.0000 RUB')
-    expect(finalResult.participants_bonus).toBe('48540.0000 RUB')
+    expect(finalResult.capitalists_bonus).toBe('48540.0000 RUB')
     expect(finalResult.total_amount).toBe('78540.0000 RUB')
   })
 
@@ -493,7 +493,7 @@ describe('тест контракта CAPITAL', () => {
     expect(finalResult.creators_bonus).toBe('7640.0000 RUB')
     expect(finalResult.authors_bonus).toBe('32360.0000 RUB')
     expect(finalResult.generated_amount).toBe('60000.0000 RUB')
-    expect(finalResult.participants_bonus).toBe('97080.0000 RUB')
+    expect(finalResult.capitalists_bonus).toBe('97080.0000 RUB')
     expect(finalResult.total_amount).toBe('157080.0000 RUB')
   })
 
@@ -558,326 +558,272 @@ describe('тест контракта CAPITAL', () => {
   })
 
   /// ____________
-  // it('завершаем цикл и стартуем распределение', async () => {
-  //   const data: CapitalContract.Actions.StartDistribution.IStart = {
-  //     coopname: 'voskhod',
-  //     application: 'voskhod',
-  //     result_hash: result1.result_hash,
-  //   }
+  it('завершаем цикл и стартуем распределение', async () => {
+    const data: CapitalContract.Actions.StartDistribution.IStart = {
+      coopname: 'voskhod',
+      application: 'voskhod',
+      result_hash: result1.result_hash,
+    }
 
-  //   const result = await blockchain.api.transact(
-  //     {
-  //       actions: [
-  //         {
-  //           account: CapitalContract.contractName.production,
-  //           name: CapitalContract.Actions.StartDistribution.actionName,
-  //           authorization: [
-  //             {
-  //               actor: 'voskhod',
-  //               permission: 'active',
-  //             },
-  //           ],
-  //           data,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       blocksBehind: 3,
-  //       expireSeconds: 30,
-  //     },
-  //   )
+    const result = await blockchain.api.transact(
+      {
+        actions: [
+          {
+            account: CapitalContract.contractName.production,
+            name: CapitalContract.Actions.StartDistribution.actionName,
+            authorization: [
+              {
+                actor: 'voskhod',
+                permission: 'active',
+              },
+            ],
+            data,
+          },
+        ],
+      },
+      {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      },
+    )
 
-  //   getTotalRamUsage(result)
-  //   expect(result.transaction_id).toBeDefined()
+    getTotalRamUsage(result)
+    expect(result.transaction_id).toBeDefined()
 
-  //   const blockchainResult = (await blockchain.getTableRows(
-  //     CapitalContract.contractName.production,
-  //     'voskhod',
-  //     'results',
-  //     1,
-  //     result1.result_hash,
-  //     result1.result_hash,
-  //     2,
-  //     'sha256',
-  //   ))[0]
+    const blockchainResult = (await blockchain.getTableRows(
+      CapitalContract.contractName.production,
+      'voskhod',
+      'results',
+      1,
+      result1.result_hash,
+      result1.result_hash,
+      2,
+      'sha256',
+    ))[0]
 
-  //   expect(blockchainResult).toBeDefined()
-  //   expect(blockchainResult.result_hash).toBe(result1.result_hash)
-  //   expect(blockchainResult.project_hash).toBe(project1.project_hash)
-  //   expect(blockchainResult.coopname).toBe('voskhod')
-  //   expect(blockchainResult.status).toBe('started')
-  // })
+    expect(blockchainResult).toBeDefined()
+    expect(blockchainResult.result_hash).toBe(result1.result_hash)
+    expect(blockchainResult.project_hash).toBe(project1.project_hash)
+    expect(blockchainResult.coopname).toBe('voskhod')
+    expect(blockchainResult.status).toBe('opened')
+  })
 
-  // it('добавляем второго автора tester2', async () => {
-  //   const data: CapitalContract.Actions.AddAuthor.IAddAuthor = {
-  //     coopname: 'voskhod',
-  //     application: 'voskhod',
-  //     project_hash: project1.project_hash,
-  //     author: tester2,
-  //     shares: '100',
-  //   }
+  it('обновляем капитал первого создателя в результате', async () => {
+    const data: CapitalContract.Actions.CreateClaim.ICreateClaim = {
+      coopname: 'voskhod',
+      application: 'voskhod',
+      result_hash: result1.result_hash,
+      username: tester1,
+    }
 
-  //   const result = await blockchain.api.transact(
-  //     {
-  //       actions: [
-  //         {
-  //           account: CapitalContract.contractName.production,
-  //           name: CapitalContract.Actions.AddAuthor.actionName,
-  //           authorization: [
-  //             {
-  //               actor: 'voskhod',
-  //               permission: 'active',
-  //             },
-  //           ],
-  //           data,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       blocksBehind: 3,
-  //       expireSeconds: 30,
-  //     },
-  //   )
-  //   getTotalRamUsage(result)
-  //   expect(result.transaction_id).toBeDefined()
+    const result = await blockchain.api.transact(
+      {
+        actions: [
+          {
+            account: CapitalContract.contractName.production,
+            name: CapitalContract.Actions.CreateClaim.actionName,
+            authorization: [
+              {
+                actor: 'voskhod',
+                permission: 'active',
+              },
+            ],
+            data,
+          },
+        ],
+      },
+      {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      },
+    )
+    getTotalRamUsage(result)
+    expect(result.transaction_id).toBeDefined()
 
-  //   const project = (await blockchain.getTableRows(
-  //     CapitalContract.contractName.production,
-  //     'voskhod',
-  //     'projects',
-  //     1,
-  //     project1.project_hash,
-  //     project1.project_hash,
-  //     3,
-  //     'sha256',
-  //   ))[0]
+    const blockchainResult = (await blockchain.getTableRows(
+      CapitalContract.contractName.production,
+      'voskhod',
+      'results',
+      1,
+      result1.result_hash,
+      result1.result_hash,
+      2,
+      'sha256',
+    ))[0]
 
-  //   expect(project).toBeDefined()
-  //   expect(project.authors_count).toBe(2)
-  //   expect(project.authors_shares).toBe(200)
-  // })
+    expect(blockchainResult).toBeDefined()
+    console.log('blockchainResult: ', blockchainResult)
+  })
 
-  // it('добавляем коммиты создателей tester2 и tester3', async () => {
-  //   // Добавляем второго создателя
-  //   let data: CapitalContract.Actions.AddCreator.IAddCreator = {
-  //     coopname: 'voskhod',
-  //     application: 'voskhod',
-  //     result_hash: result1.result_hash,
-  //     creator: tester2,
-  //     used: '100.0000 RUB',
-  //   }
+  it('обновляем капитал второго создателя в результате', async () => {
+    const data: CapitalContract.Actions.CreateClaim.ICreateClaim = {
+      coopname: 'voskhod',
+      application: 'voskhod',
+      result_hash: result1.result_hash,
+      username: tester2,
+    }
 
-  //   let result = await blockchain.api.transact(
-  //     {
-  //       actions: [
-  //         {
-  //           account: CapitalContract.contractName.production,
-  //           name: CapitalContract.Actions.AddCreator.actionName,
-  //           authorization: [
-  //             {
-  //               actor: 'voskhod',
-  //               permission: 'active',
-  //             },
-  //           ],
-  //           data,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       blocksBehind: 3,
-  //       expireSeconds: 30,
-  //     },
-  //   )
-  //   getTotalRamUsage(result)
-  //   expect(result.transaction_id).toBeDefined()
+    const result = await blockchain.api.transact(
+      {
+        actions: [
+          {
+            account: CapitalContract.contractName.production,
+            name: CapitalContract.Actions.CreateClaim.actionName,
+            authorization: [
+              {
+                actor: 'voskhod',
+                permission: 'active',
+              },
+            ],
+            data,
+          },
+        ],
+      },
+      {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      },
+    )
+    getTotalRamUsage(result)
+    expect(result.transaction_id).toBeDefined()
 
-  //   // Добавляем третьего создателя
-  //   data = {
-  //     coopname: 'voskhod',
-  //     application: 'voskhod',
-  //     result_hash: result1.result_hash,
-  //     creator: tester3,
-  //     used: '100.0000 RUB',
-  //   }
+    const blockchainResult = (await blockchain.getTableRows(
+      CapitalContract.contractName.production,
+      'voskhod',
+      'results',
+      1,
+      result1.result_hash,
+      result1.result_hash,
+      2,
+      'sha256',
+    ))[0]
 
-  //   result = await blockchain.api.transact(
-  //     {
-  //       actions: [
-  //         {
-  //           account: CapitalContract.contractName.production,
-  //           name: CapitalContract.Actions.AddCreator.actionName,
-  //           authorization: [
-  //             {
-  //               actor: 'voskhod',
-  //               permission: 'active',
-  //             },
-  //           ],
-  //           data,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       blocksBehind: 3,
-  //       expireSeconds: 30,
-  //     },
-  //   )
-  //   getTotalRamUsage(result)
-  //   expect(result.transaction_id).toBeDefined()
+    expect(blockchainResult).toBeDefined()
+    console.log('blockchainResult: ', blockchainResult)
+  })
 
-  //   // Проверяем финальные значения
-  //   const blockchainResult = (await blockchain.getTableRows(
-  //     CapitalContract.contractName.production,
-  //     'voskhod',
-  //     'results',
-  //     1,
-  //     result1.result_hash,
-  //     result1.result_hash,
-  //     2,
-  //     'sha256',
-  //   ))[0]
+  it('повторно обновляем капитал второго создателя в результате и ожидаем ошибку', async () => {
+    const data: CapitalContract.Actions.CreateClaim.ICreateClaim = {
+      coopname: 'voskhod',
+      application: 'voskhod',
+      result_hash: result1.result_hash,
+      username: tester2,
+    }
 
-  //   expect(blockchainResult).toBeDefined()
-  //   expect(blockchainResult.creators_count).toBe(3)
-  //   expect(blockchainResult.creators_amount).toBe('300.0000 RUB')
-  //   // Ниже – пример ожидаемого роста, исходя из логики контракта
-  //   expect(blockchainResult.creators_bonus).toBe('114.6000 RUB')
-  //   expect(blockchainResult.authors_bonus).toBe('485.4000 RUB')
-  //   expect(blockchainResult.generated_amount).toBe('900.0000 RUB')
-  //   expect(blockchainResult.participants_bonus).toBe('1456.2000 RUB')
-  //   expect(blockchainResult.total_amount).toBe('2356.2000 RUB')
-  // })
+    try {
+      await sleep(1000)
+      await blockchain.api.transact(
+        {
+          actions: [
+            {
+              account: CapitalContract.contractName.production,
+              name: CapitalContract.Actions.CreateClaim.actionName,
+              authorization: [
+                {
+                  actor: 'voskhod',
+                  permission: 'active',
+                },
+              ],
+              data,
+            },
+          ],
+        },
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        },
+      )
+      throw new Error('Ожидалась ошибка, но транзакция прошла успешно')
+    }
+    catch (error: any) {
+      const message = error.json?.error?.details?.[0]?.message
+      expect(message).toMatch(/Клайм уже существует/i)
+    }
+  })
 
-  // it('удаляем создателя tester3', async () => {
-  //   const data: CapitalContract.Actions.DelCreator.IDelCreator = {
-  //     coopname: 'voskhod',
-  //     application: 'voskhod',
-  //     result_hash: result1.result_hash,
-  //     creator: tester3,
-  //   }
+  it('обновляем капитал инвестора в результате', async () => {
+    const data: CapitalContract.Actions.CreateClaim.ICreateClaim = {
+      coopname: 'voskhod',
+      application: 'voskhod',
+      result_hash: result1.result_hash,
+      username: investor1,
+    }
 
-  //   const result = await blockchain.api.transact(
-  //     {
-  //       actions: [
-  //         {
-  //           account: CapitalContract.contractName.production,
-  //           name: CapitalContract.Actions.DelCreator.actionName,
-  //           authorization: [
-  //             {
-  //               actor: 'voskhod',
-  //               permission: 'active',
-  //             },
-  //           ],
-  //           data,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       blocksBehind: 3,
-  //       expireSeconds: 30,
-  //     },
-  //   )
-  //   getTotalRamUsage(result)
-  //   expect(result.transaction_id).toBeDefined()
+    const result = await blockchain.api.transact(
+      {
+        actions: [
+          {
+            account: CapitalContract.contractName.production,
+            name: CapitalContract.Actions.CreateClaim.actionName,
+            authorization: [
+              {
+                actor: 'voskhod',
+                permission: 'active',
+              },
+            ],
+            data,
+          },
+        ],
+      },
+      {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      },
+    )
+    getTotalRamUsage(result)
+    expect(result.transaction_id).toBeDefined()
 
-  //   // Проверяем обновленные значения после удаления
-  //   const blockchainResult = (await blockchain.getTableRows(
-  //     CapitalContract.contractName.production,
-  //     'voskhod',
-  //     'results',
-  //     1,
-  //     result1.result_hash,
-  //     result1.result_hash,
-  //     2,
-  //     'sha256',
-  //   ))[0]
+    const blockchainResult = (await blockchain.getTableRows(
+      CapitalContract.contractName.production,
+      'voskhod',
+      'results',
+      1,
+      result1.result_hash,
+      result1.result_hash,
+      2,
+      'sha256',
+    ))[0]
 
-  //   expect(blockchainResult).toBeDefined()
-  //   expect(blockchainResult.creators_count).toBe(2)
-  //   expect(blockchainResult.creators_amount).toBe('200.0000 RUB')
-  //   // Уменьшаем все показатели ровно на величину последнего добавленного создателя
-  //   expect(blockchainResult.creators_bonus).toBe('76.4000 RUB') // 114.6000 - 38.2000
-  //   expect(blockchainResult.authors_bonus).toBe('323.6000 RUB') // 485.4000 - 161.8000
-  //   expect(blockchainResult.generated_amount).toBe('600.0000 RUB') // 900.0000 - 300.0000
-  //   expect(blockchainResult.participants_bonus).toBe('970.8000 RUB') // 1456.2000 - 485.4000
-  //   expect(blockchainResult.total_amount).toBe('1570.8000 RUB') // 2356.2000 - 785.4000
-  // })
+    expect(blockchainResult).toBeDefined()
+    console.log('investorResult: ', blockchainResult)
+  })
 
-  // it('стартуем распределение долей результата', async () => {
-  //   const data: CapitalContract.Actions.Start.IStart = {
-  //     coopname: 'voskhod',
-  //     application: 'voskhod',
-  //     result_hash: result1.result_hash,
-  //   }
+  it('повторно обновляем капитал инвестора в результате и ожидаем ошибку', async () => {
+    const data: CapitalContract.Actions.CreateClaim.ICreateClaim = {
+      coopname: 'voskhod',
+      application: 'voskhod',
+      result_hash: result1.result_hash,
+      username: investor1,
+    }
 
-  //   const result = await blockchain.api.transact(
-  //     {
-  //       actions: [
-  //         {
-  //           account: CapitalContract.contractName.production,
-  //           name: CapitalContract.Actions.Start.actionName,
-  //           authorization: [
-  //             {
-  //               actor: 'voskhod',
-  //               permission: 'active',
-  //             },
-  //           ],
-  //           data,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       blocksBehind: 3,
-  //       expireSeconds: 30,
-  //     },
-  //   )
-  //   getTotalRamUsage(result)
-  //   expect(result.transaction_id).toBeDefined()
-
-  //   const blockchainResult = (await blockchain.getTableRows(
-  //     CapitalContract.contractName.production,
-  //     'voskhod',
-  //     'results',
-  //     1,
-  //     result1.result_hash,
-  //     result1.result_hash,
-  //     2,
-  //     'sha256',
-  //   ))[0]
-
-  //   expect(blockchainResult).toBeDefined()
-  //   expect(blockchainResult.status).toBe('started')
-  // })
-
-  // it('пишем заявления и получаем NFT', async () => {
-  //   const data: CapitalContract.Actions.SetStatement.ISetStatement = {
-  //     coopname: 'voskhod',
-  //     application: 'voskhod',
-  //     statement: fakeDocument,
-  //     nft_hash: generateRandomSHA256(),
-  //   }
-
-  //   const result = await blockchain.api.transact(
-  //     {
-  //       actions: [
-  //         {
-  //           account: CapitalContract.contractName.production,
-  //           name: CapitalContract.Actions.SetStatement.actionName,
-  //           authorization: [
-  //             {
-  //               actor: 'voskhod',
-  //               permission: 'active',
-  //             },
-  //           ],
-  //           data,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       blocksBehind: 3,
-  //       expireSeconds: 30,
-  //     },
-  //   )
-  //   getTotalRamUsage(result)
-  //   expect(result.transaction_id).toBeDefined()
-  // })
+    try {
+      await sleep(1000)
+      await blockchain.api.transact(
+        {
+          actions: [
+            {
+              account: CapitalContract.contractName.production,
+              name: CapitalContract.Actions.CreateClaim.actionName,
+              authorization: [
+                {
+                  actor: 'voskhod',
+                  permission: 'active',
+                },
+              ],
+              data,
+            },
+          ],
+        },
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        },
+      )
+      throw new Error('Ожидалась ошибка, но транзакция прошла успешно')
+    }
+    catch (error: any) {
+      const message = error.json?.error?.details?.[0]?.message
+      expect(message).toMatch(/Клайм уже существует/i)
+    }
+  })
 })

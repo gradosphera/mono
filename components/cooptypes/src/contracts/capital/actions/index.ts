@@ -36,3 +36,7 @@ export * as StartDistribution from './startDistribution'
 export * as WithdrawResult from './withdrawResult'
 export * as WithdrawProject from './withdrawProject'
 export * as WithdrawProgram from './withdrawProgram'
+
+export * as CreateConvert from './createConvert'
+export * as CreateClaim from './createClaim'
+export * as ApproveConvert from './approveConvert'

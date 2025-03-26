@@ -27,8 +27,8 @@ void capital::distribute_project_membership_funds(eosio::name coopname, uint64_t
         p.membership_funded += amount;
         p.membership_available += membership_current_fund;
 
-        if (project -> membership_total_shares.amount > 0) {
-            int64_t delta = (membership_current_fund.amount * REWARD_SCALE) / project->membership_total_shares.amount;
+        if (project -> total_share_balance.amount > 0) {
+            int64_t delta = (membership_current_fund.amount * REWARD_SCALE) / project->total_share_balance.amount;
             p.membership_cumulative_reward_per_share += delta;
         };
     });

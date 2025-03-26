@@ -150,18 +150,12 @@ public:
   [[eosio::action]] void deletebranch(eosio::name coopname, eosio::name braname);
   
   //capital.cpp
-  void capital_contribute_on_withdraw_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
   void capital_return_on_withdraw_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
   
   [[eosio::action]] void capregcontr(eosio::name coopname, eosio::name username, uint64_t contributor_id, document statement, std::string meta);
   void capital_register_contributor_authorize_action_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
   void capital_invest_authorize_action_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
   [[eosio::action]] void capauthinvst(eosio::name coopname, eosio::name username, uint64_t invest_id, document statement, std::string meta);
-  
-  [[eosio::action]] void capauthwthdc(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document statement, std::string meta);
-  [[eosio::action]] void capauthwthdr(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document statement, std::string meta);
-  
-  
   
 };
   

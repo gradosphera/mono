@@ -120,6 +120,12 @@ program
   .action(async () => {
     try {
       await stopContainerByName('node')
+    }
+    catch (e) {
+      console.log('Нет контейнера для остановки. Стартуем новый..')
+    }
+
+    try {
       await clearDirectory(basePath)
       await clearDB()
       await runContainer()

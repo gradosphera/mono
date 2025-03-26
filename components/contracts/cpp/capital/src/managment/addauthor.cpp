@@ -26,7 +26,7 @@ void capital::addauthor(name coopname, name application, checksum256 project_has
     
     // Обновляем shares и authors_count в проекте
     projects.modify(project_for_modify, coopname, [&](auto& row) {
-        row.authors_shares += shares;
-        row.authors_count++;
+      row.authors_shares += shares;
+      row.authors_count++;
     });
 }

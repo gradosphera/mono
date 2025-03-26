@@ -24,23 +24,23 @@ void capital::createresult(name coopname, name application, checksum256 project_
     
     // Перебираем всех авторов с данным project_hash
     auto author_itr = authors_hash_index.lower_bound(project_hash);
-    
-    result_authors_index result_authors(_capital, coopname.value);
-    
+        
     uint64_t authors_count = 0;
+    
+    resactor_index ractors(_capital, coopname.value);
     
     // Копируем запись автора идеи в result_authors
     while(author_itr != authors_hash_index.end() && author_itr->project_hash == project_hash) {
-        result_authors.emplace(coopname, [&](auto &n){
-            n.id = get_global_id_in_scope(_capital, coopname, "resauthors"_n);
-            n.username = author_itr->username;
-            n.result_hash = result_hash;
-            n.project_hash = project_hash;
-            n.shares = author_itr -> shares;
+        ractors.emplace(coopname, [&](auto &ra){
+          ra.id          = ractors.available_primary_key();
+          ra.result_hash = result_hash;
+          ra.project_hash = project_hash;
+          ra.username    = author_itr->username;
+          ra.authors_shares = author_itr -> shares;
         });
         authors_count++;
         author_itr++;
     }
+    
     eosio::check(authors_count > 0, "Нельзя создать результат без установленных авторов в проекте");
-       
 }
