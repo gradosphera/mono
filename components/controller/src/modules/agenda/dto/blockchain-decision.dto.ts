@@ -53,4 +53,7 @@ export class BlockchainDecisionDTO implements SovietContract.Tables.Decisions.ID
 
   @Field()
   meta!: string;
+
+  @Field(() => String)
+  callback_contract!: string;
 }

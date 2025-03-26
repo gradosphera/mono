@@ -782,6 +782,7 @@ type BlockchainDecision {
   authorized: Boolean!
   authorized_by: String!
   batch_id: Float!
+  callback_contract: String!
   coopname: String!
   created_at: String!
   expired_at: String!
