@@ -50,9 +50,8 @@ export async function withdrawContribution(
     username,
     result_hash: resultHash,
     withdraw_hash: withdrawHash,
-    commit_hashes: commitHashes,
-    contribution_statement: fakeDocument,
     return_statement: fakeDocument,
+    amount: withdrawAmount,
   }
 
   console.log(`\n🚀 Отправка транзакции CreateWithdraw для ${username} на сумму ${withdrawAmount}`)
@@ -79,7 +78,7 @@ export async function withdrawContribution(
   let blockchainWithdraw = (await blockchain.getTableRows(
     CapitalContract.contractName.production,
     coopname,
-    'withdraws',
+    CapitalContract.Tables.ResultWithdraws.tableName,
     1,
     withdrawHash,
     withdrawHash,
@@ -98,7 +97,6 @@ export async function withdrawContribution(
     application: coopname,
     approver: 'ant',
     withdraw_hash: withdrawHash,
-    approved_contribution_statement: fakeDocument,
     approved_return_statement: fakeDocument,
   }
 
@@ -126,7 +124,7 @@ export async function withdrawContribution(
   blockchainWithdraw = (await blockchain.getTableRows(
     CapitalContract.contractName.production,
     coopname,
-    'withdraws',
+    CapitalContract.Tables.ResultWithdraws.tableName,
     1,
     withdrawHash,
     withdrawHash,
@@ -146,17 +144,15 @@ export async function withdrawContribution(
     1000,
   )
   const lastDecision = decisions[decisions.length - 1]
-  const prevLastDecision = decisions[decisions.length - 2]
 
-  console.log(`\n📜 Выполнение решений: ${prevLastDecision.id}, ${lastDecision.id}`)
+  console.log(`\n📜 Выполнение решения: ${lastDecision.id}`)
 
-  await processDecision(blockchain, prevLastDecision.id)
   await processDecision(blockchain, lastDecision.id)
 
   blockchainWithdraw = (await blockchain.getTableRows(
     CapitalContract.contractName.production,
     coopname,
-    'withdraws',
+    CapitalContract.Tables.ResultWithdraws.tableName,
     1,
     withdrawHash,
     withdrawHash,
@@ -203,7 +199,9 @@ export async function withdrawContribution(
   expect(parseFloat(programWallet.blocked)).toBe(parseFloat(prevProgramWallet.blocked))
 
   // Проверка изменения spend в проекте
-  expect(parseFloat(finalProject.spend)).toBe(parseFloat(prevProject.spend) + parseFloat(withdrawAmount))
+  expect(parseFloat(finalProject.withdrawed)).toBe(parseFloat(prevProject.withdrawed) + parseFloat(withdrawAmount))
+
+  expect(parseFloat(finalProject.spend)).toBe(parseFloat(prevProject.spend))
 
   console.log(`\n✅ Возврат на ${withdrawAmount} завершен успешно!`)
 

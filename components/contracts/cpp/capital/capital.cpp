@@ -9,7 +9,7 @@
 #include "src/investment/capauthinvst.cpp"
 
 #include "src/claim/approveclaim.cpp"
-#include "src/claim/updatecapitl.cpp"
+#include "src/claim/createclaim.cpp"
 #include "src/claim/claimnow.cpp"
 #include "src/claim/capauthclaim.cpp"
 
@@ -32,9 +32,7 @@
 
 
 #include "src/withdraw_from_result/createwthd1.cpp"
-#include "src/withdraw_from_result/capauthwthdc.cpp"
-#include "src/withdraw_from_result/capauthwthdr.cpp"
-#include "src/withdraw_from_result/authwithdrw1.cpp"
+#include "src/withdraw_from_result/capauthwthd1.cpp"
 #include "src/withdraw_from_result/approvewthd1.cpp"
 
 #include "src/withdraw_from_project/createwthd2.cpp"
@@ -45,6 +43,8 @@
 #include "src/withdraw_from_program/capauthwthd3.cpp"
 #include "src/withdraw_from_program/approvewthd3.cpp"
 
+#include "src/convert/approvecnvrt.cpp"
+#include "src/convert/createcnvrt.cpp"
 
 #include "src/expense/approveexpns.cpp"
 #include "src/expense/capauthexpns.cpp"
@@ -198,11 +198,11 @@ std::optional<contributor> capital::get_active_contributor_or_fail(eosio::name c
 }
 
 
-std::optional<capital_tables::participant> capital::get_participant(eosio::name coopname, eosio::name username) {
-    capital_tables::participant_index participants(_capital, coopname.value);
+std::optional<capital_tables::capitalist> capital::get_capitalist(eosio::name coopname, eosio::name username) {
+    capital_tables::capitalist_index capitalists(_capital, coopname.value);
     
-    auto itr = participants.find(username.value);
-    if (itr == participants.end()) {
+    auto itr = capitalists.find(username.value);
+    if (itr == capitalists.end()) {
         return std::nullopt;
     }
 
@@ -386,21 +386,34 @@ std::optional<capital_tables::project_withdraw> capital::get_project_withdraw(eo
 }
 
 
-std::optional<claim> capital::get_claim(eosio::name coopname, const checksum256 &claim_hash) {
+std::optional<claim> capital::get_claim(eosio::name coopname, const checksum256 &result_hash, eosio::name username) {
     claim_index claims(_capital, coopname.value);
-    auto claim_hash_index = claims.get_index<"byhash"_n>();
+    auto idx = claims.get_index<"byresuser"_n>();
+    auto rkey = combine_checksum_ids(result_hash, username);
 
-    auto claim_itr = claim_hash_index.find(claim_hash);
+    auto it = idx.find(rkey);
+    if (it == idx.end()) {
+        return std::nullopt;
+    }
+    return *it;
+}
 
-    if (claim_itr == claim_hash_index.end()) {
+std::optional<convert> capital::get_convert(eosio::name coopname, const checksum256 &hash) {
+    convert_index converts(_capital, coopname.value);
+    auto index = converts.get_index<"byhash"_n>();
+
+    auto itr = index.find(hash);
+    
+    if (itr == index.end()) {
         return std::nullopt;
     }
 
-    return *claim_itr;
+    return *itr;
 }
 
-claim capital::get_claim_or_fail(eosio::name coopname, const checksum256 &claim_hash, const char* msg) {
-    auto c = get_claim(coopname, claim_hash);
+
+claim capital::get_claim_or_fail(eosio::name coopname, const checksum256 &result_hash, eosio::name username, const char* msg) {
+    auto c = get_claim(coopname, result_hash, username);
     eosio::check(c.has_value(), msg);
     return *c;
 }
@@ -464,8 +477,8 @@ void capital::ensure_contributor(name coopname, name username) {
 //   - creators_bonus      = spend * 0.382
 //   - authors_bonus       = spend * 1.618
 //   - generated           = spend + creators_bonus + authors_bonus
-//   - participants_bonus  = generated * 1.618
-//   - total               = generated + participants_bonus
+//   - capitalists_bonus  = generated * 1.618
+//   - total               = generated + capitalists_bonus
 //----------------------------------------------------------------------------
 bonus_result capital::calculcate_capital_amounts(int64_t spend_amount) {
     bonus_result br{};
@@ -482,11 +495,11 @@ bonus_result capital::calculcate_capital_amounts(int64_t spend_amount) {
     // 3) generated = spend + creators_bonus + authors_bonus
     br.generated = int64_t(spend + br.creators_bonus + br.authors_bonus);
 
-    // 4) participants_bonus = generated * 1.618
-    br.participants_bonus = int64_t(double(br.generated) * 1.618);
+    // 4) capitalists_bonus = generated * 1.618
+    br.capitalists_bonus = int64_t(double(br.generated) * 1.618);
 
-    // 5) total = generated + participants_bonus
-    br.total = int64_t(br.generated + br.participants_bonus);
+    // 5) total = generated + capitalists_bonus
+    br.total = int64_t(br.generated + br.capitalists_bonus);
 
     return br;
 }

@@ -163,22 +163,6 @@ export interface ICapauthinvst {
   meta: string
 }
 
-export interface ICapauthwthdc {
-  coopname: IName
-  username: IName
-  withdraw_id: IUint64
-  statement: IDocument
-  meta: string
-}
-
-export interface ICapauthwthdr {
-  coopname: IName
-  username: IName
-  withdraw_id: IUint64
-  statement: IDocument
-  meta: string
-}
-
 export interface ICapregcontr {
   coopname: IName
   username: IName
@@ -459,6 +443,13 @@ export interface IOnewallet {
   blocked: IAsset
   minimum: IAsset
   initial: IAsset$
+}
+
+export interface IOpenprogwall {
+  coopname: IName
+  username: IName
+  program_type: IName
+  agreement_id: IUint64
 }
 
 export interface IParticipant {

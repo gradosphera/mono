@@ -32,7 +32,7 @@ void capital::capauthinvst(eosio::name coopname, uint64_t invest_id, document au
     p.available += invest -> amount;
     
     // добавляем новые доли в проект
-    p.membership_total_shares += invest -> amount;
+    p.total_share_balance += invest -> amount;
   });
   
   std::string memo = "Зачёт части целевого паевого взноса по программе 'Цифровой Кошелёк' в качестве паевого взноса по договору УХД с contributor_id:" + std::to_string(contributor -> id);

@@ -20,21 +20,20 @@ void capital::capauthclaim(eosio::name coopname, uint64_t claim_id, document dec
   auto contributor_for_modify = contributors.find(contributor -> id);
   
   contributors.modify(contributor_for_modify, coopname, [&](auto &c){
-    c.converted += claim -> amount;
+    c.claimed += claim -> total_amount;
+    c.share_balance += claim -> total_amount;
   });
   
   projects.modify(project, coopname, [&](auto &p) {
-    p.converted += claim -> amount;
+    p.claimed += claim -> total_amount;
+    p.total_share_balance += claim -> total_amount;
   });
-  
-  //Удаляем объект claim за ненадобностью
-  claims.erase(claim);
   
   std::string memo = "Зачёт части целевого паевого взноса по договору УХД с ID: " + std::to_string(contributor -> id) + " в качестве паевого взноса по программе 'Цифровой Кошелёк' с ID: " + std::to_string(claim_id);
   
-  //Списываем баланс средств с УХД
-  Wallet::add_blocked_funds(_capital, coopname, claim -> username, claim -> amount, _source_program, memo);
-  
   //Увеличиваем баланс средств в капитализации
-  Wallet::add_blocked_funds(_capital, coopname, claim -> username, claim -> amount, _capital_program, memo);
+  Wallet::add_blocked_funds(_capital, coopname, claim -> username, claim -> total_amount, _capital_program, memo);
+  
+  //Удаляем объект claim за ненадобностью
+  claims.erase(claim);
 };
