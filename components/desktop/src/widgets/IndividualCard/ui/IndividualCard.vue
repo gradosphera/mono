@@ -142,29 +142,29 @@ div
   )
 </template>
 
-  <script lang="ts" setup>
-  import { useEditableData } from 'src/shared/lib/composables/useEditableData';
-  import { notEmpty, notEmptyPhone } from 'src/shared/lib/utils';
-  import { validEmail } from 'src/shared/lib/utils/validEmailRule';
-  import { validatePersonalName } from 'src/shared/lib/utils';
-  import { EditableActions } from 'src/shared/ui/EditableActions';
-  import { Cooperative } from 'cooptypes';
+<script lang="ts" setup>
+import { useEditableData } from 'src/shared/lib/composables/useEditableData';
+import { notEmpty, notEmptyPhone } from 'src/shared/lib/utils';
+import { validEmail } from 'src/shared/lib/utils/validEmailRule';
+import { validatePersonalName } from 'src/shared/lib/utils';
+import { EditableActions } from 'src/shared/ui/EditableActions';
+import { Cooperative } from 'cooptypes';
 
-  const props = defineProps({
-    individual: {
-      type: Object as () => Cooperative.Users.IIndividualData,
-      required: true
-    },
-    readonly: {
-      type: Boolean,
-      required: false,
-      default: true
-    }
-  });
+const props = defineProps({
+  individual: {
+    type: Object as () => Cooperative.Users.IIndividualData,
+    required: true
+  },
+  readonly: {
+    type: Boolean,
+    required: false,
+    default: true
+  }
+});
 
-  const handleSave = (updatedIndividual: Cooperative.Users.IIndividualData) => {
-    console.log('Сохранено:', updatedIndividual);
-  };
+const handleSave = (updatedIndividual: Cooperative.Users.IIndividualData) => {
+  console.log('Сохранено:', updatedIndividual);
+};
 
-  const { editableData: data, isEditing, saveChanges, cancelChanges } = useEditableData(props.individual, handleSave);
-  </script>
+const { editableData: data, isEditing, saveChanges, cancelChanges } = useEditableData(props.individual, handleSave);
+</script>
