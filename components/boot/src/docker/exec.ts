@@ -3,19 +3,23 @@ import { promisify } from 'node:util'
 
 const execAsync = promisify(exec)
 
-export async function execCommand(command: string[]): Promise<string> {
-  const fullCmd = ['docker', 'compose', 'exec', '-T', 'node', ...command].join(' ')
+export async function execCommand(command: string[]): Promise<void> {
+  const fullCmd = ['docker', 'compose', 'exec', 'node', ...command].join(' ')
 
   try {
     // eslint-disable-next-line node/prefer-global/process
     const { stdout, stderr } = await execAsync(fullCmd, { env: process.env })
-    if (stderr) {
-      console.error(stderr)
-    }
-    return stdout.trim()
+    if (stdout)
+      console.log(stdout.trim())
+    if (stderr)
+      console.error(stderr.trim())
   }
-  catch (error: any) {
-    console.error('Command failed:', error.stderr || error)
-    throw error
+  catch (err: any) {
+    if (err.stdout)
+      console.log(err.stdout.trim())
+    if (err.stderr)
+      console.error(err.stderr.trim())
+    // опционально:
+    // console.error(`Command failed with code ${err.code}`)
   }
 }

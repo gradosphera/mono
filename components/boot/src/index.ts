@@ -31,17 +31,11 @@ program.version('0.1.0')
 
 // Команда для запуска команды в контейнере
 program
-  .command('cleos <cmd...>')
+  .command('cleos [cmd...]')
   .description('Execute a cleos command in a Node container')
   .allowUnknownOption()
-  .action(async (cmd: string[]) => {
-    try {
-      console.log(cmd)
-      await execCommand(['cleos', ...cmd])
-    }
-    catch (error) {
-      console.error('Command execution failed:', error)
-    }
+  .action(async (cmd: string[] = []) => {
+    await execCommand(['cleos', ...cmd])
   })
 
 // Команда для запуска команды в контейнере

@@ -22,6 +22,8 @@
     "setup": "lerna run setup --scope @coopenomics/setup",
     "boot": "lerna run boot --scope @coopenomics/boot",
     "clear": "lerna run clear --scope @coopenomics/boot",
+    "unlock": "lerna run unlock --scope @coopenomics/boot",
+    "cleos": "lerna run cleos --scope @coopenomics/boot",
     "build:lib": "lerna run build --scope @coopenomics/factory --scope @coopenomics/cooptypes",
     "build:contracts:all": "lerna run build:all --scope @coopenomics/contracts",
     "build:contract": "lerna run build:one --scope @coopenomics/contracts --",
