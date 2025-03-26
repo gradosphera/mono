@@ -11,6 +11,4 @@ node_modules
 temp
 .env
 blockchain-data/*
-wallet-data/keosd.sock=
-wallet-data/wallet.lock
-wallet-data/production.wallet
+wallet-data/*

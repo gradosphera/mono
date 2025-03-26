@@ -1,5 +1,10 @@
 version: '3'
 
+networks:
+  dicoop:
+    name: dicoop
+    driver: bridge
+
 services:
   node:
     image: dicoop/blockchain_v5.1.1:dev
@@ -16,7 +21,9 @@ services:
     command: >
       /bin/bash -c "/usr/local/bin/nodeos -d /mnt/dev/data --config-dir /mnt/dev/config --genesis-json /mnt/dev/config/genesis.json"
     restart: unless-stopped
-
+    networks:
+      - dicoop
+      
   mongo:
     image: mongo:latest
     container_name: mongo

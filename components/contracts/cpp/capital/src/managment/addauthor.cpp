@@ -15,10 +15,10 @@ void capital::addauthor(name coopname, name application, checksum256 project_has
     auto author_itr = project_author_index.find(combined_id);
     
     authors.emplace(coopname, [&](auto& row) {
-        row.id = get_global_id_in_scope(_capital, coopname, "authors"_n); 
-        row.project_hash = project_hash;
-        row.username = author;
-        row.shares = shares;
+      row.id = get_global_id_in_scope(_capital, coopname, "authors"_n); 
+      row.project_hash = project_hash;
+      row.username = author;
+      row.shares = shares;
     });
 
     project_index projects(_capital, coopname.value);
