@@ -117,13 +117,14 @@ pnpm run cleos
 ```
 
 ### Возможные проблемы
-В случае, если при запуске unlock.sh возникает проблема:
-`Unable to connect to keosd, if keosd is running please kill the process and try again` выполните команду:
+В случае, если при выполнении ./unlock.sh возникает проблема:
+`Unable to connect to keosd, if keosd is running please kill the process and try again`, то выполните команду:
 
 ```
 ./reset.sh
 ```
-Данная команда удалит созданный ранее сокет кошелька, после чего, ./unlock.sh пересоздаст его заново. 
+
+Данная команда удалит созданный ранее сокет кошелька, после чего, выполните ./unlock.sh повторно.
 
 ## Лицензия
 

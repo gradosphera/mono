@@ -57,8 +57,6 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
       await globalStore.init();
       isAuth.value = globalStore.hasCreditials;
 
-      //TODO добавить более детальную проверку авторизации
-
       getInfo();
 
       try {
@@ -80,7 +78,8 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
       } catch (e: any) {
         console.error(e);
         FailAlert(e.message);
-        //TODO logout
+        close()
+        globalStore.logout()
       }
     }
   };

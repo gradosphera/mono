@@ -28,8 +28,14 @@ export default boot(async ({ router }) => {
   await cardStore.initWallet();
 
   // Загрузка аккаунта
-  if (session.isAuth && session.username)
-    await account.getAccount(session.username)
+  if (session.isAuth && session.username){
+    try {
+      await account.getAccount(session.username)
+    } catch(e){
+      session.close()
+    }
+  }
+
 
   // Добавление динамических маршрутов как дочерних к 'base'
   const baseRoute = router.getRoutes().find(route => route.name === 'base');
