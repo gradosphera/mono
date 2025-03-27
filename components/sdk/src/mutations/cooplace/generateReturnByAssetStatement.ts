@@ -1,5 +1,5 @@
 import { returnByAssetStatementDocumentSelector } from '../../selectors/cooplace'
-import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus'
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'generateReturnByAssetStatement'
 

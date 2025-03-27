@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ModelTypes, type ValueTypes } from "../../zeus";
+import { Selector, type ModelTypes, type ValueTypes } from "../../zeus/index";
 import { rawBlockchainActionSelector } from "../common";
 import { rawBlockchainDecisionSelector } from "../decisions/blockchainDecisionSelector";
 import { rawDocumentPackageSelector } from "../documents/documentPackageSelector";

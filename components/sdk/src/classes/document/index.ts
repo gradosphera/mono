@@ -1,6 +1,6 @@
 import type { Cooperative } from 'cooptypes'
 import type { IGeneratedDocument, ISignedDocument } from '../../types/document'
-import type { ModelTypes } from '../../zeus'
+import type { ModelTypes } from '../../zeus/index'
 import { PrivateKey } from '@wharfkit/antelope'
 
 /**

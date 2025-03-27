@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus";
+import { Selector, type ValueTypes } from "../../zeus/index";
 import { rawBankAccountSelector } from "../common/bankAccountSelector";
 import { rawIndividualSelector } from "../common/individualSelector";
 import { rawPaymentMethodSelector } from "../paymentMethods/paymentMethodSelector";

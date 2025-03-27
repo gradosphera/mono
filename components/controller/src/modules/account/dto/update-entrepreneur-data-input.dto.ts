@@ -1,11 +1,14 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { BankAccountInputDTO } from '~/modules/payment-method/dto/bank-account-input.dto';
 import { Country } from '../enum/country.enum';
 import { EntrepreneurDetailsInputDTO } from './entrepreneur-details-input.dto';
 import { IsNotEmpty } from 'class-validator';
 
 @InputType('UpdateEntrepreneurDataInput')
 export class UpdateEntrepreneurDataInputDTO {
+  @Field({ description: 'Имя пользователя' })
+  @IsNotEmpty({ message: 'Поле "username" обязательно для заполнения.' })
+  username!: string;
+
   @Field({ description: 'Дата рождения' })
   @IsNotEmpty({ message: 'Поле "birthdate" обязательно для заполнения.' })
   birthdate!: string;
@@ -22,7 +25,8 @@ export class UpdateEntrepreneurDataInputDTO {
   @IsNotEmpty({ message: 'Поле "details" обязательно для заполнения.' })
   details!: EntrepreneurDetailsInputDTO;
 
-  //поле не принимаем - устанавливаем автоматически
+  @Field({ description: 'Электронная почта' })
+  @IsNotEmpty({ message: 'Поле "email" обязательно для заполнения.' })
   email!: string;
 
   @Field({ description: 'Имя' })

@@ -1,4 +1,4 @@
-import { Selector } from "../../zeus";
+import { Selector } from "../../zeus/index";
 import { rawBankAccountSelector } from "../common/bankAccountSelector";
 
 export const rawBankPaymentMethodSelector = {

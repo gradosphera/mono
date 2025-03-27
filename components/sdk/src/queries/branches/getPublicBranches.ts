@@ -1,5 +1,5 @@
-import type { GraphQLTypes, ModelTypes } from '../../zeus';
-import { $, InputType, Selector } from '../../zeus';
+import type { GraphQLTypes, ModelTypes } from '../../zeus/index';
+import { $, InputType, Selector } from '../../zeus/index';
 import { branchSelectorForUsers } from '../../selectors';
 
 export const name = 'getBranches'

@@ -8,10 +8,19 @@ import type { MonoAccountDomainInterface } from '../interfaces/mono-account-doma
 import { userService } from '~/services';
 import type { RegisterAccountDomainInterface } from '../interfaces/register-account-input.interface';
 import { userStatus } from '~/types';
-
+import { ENTREPRENEUR_REPOSITORY, EntrepreneurRepository } from '~/domain/common/repositories/entrepreneur.repository';
+import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
+import { INDIVIDUAL_REPOSITORY, IndividualRepository } from '~/domain/common/repositories/individual.repository';
+import type { PrivateAccountDomainInterface } from '../interfaces/private-account-domain.interface';
+import type { AccountType } from '~/modules/account/enum/account-type.enum';
 @Injectable()
 export class AccountDomainService {
-  constructor(@Inject(ACCOUNT_BLOCKCHAIN_PORT) private readonly accountBlockchainPort: AccountBlockchainPort) {}
+  constructor(
+    @Inject(ACCOUNT_BLOCKCHAIN_PORT) private readonly accountBlockchainPort: AccountBlockchainPort,
+    @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
+    @Inject(INDIVIDUAL_REPOSITORY) private readonly individualRepository: IndividualRepository,
+    @Inject(ENTREPRENEUR_REPOSITORY) private readonly entrepreneurRepository: EntrepreneurRepository
+  ) {}
 
   async addProviderAccount(data: RegisterAccountDomainInterface): Promise<MonoAccountDomainInterface> {
     //TODO refactor it after migrate from mongo
@@ -39,8 +48,23 @@ export class AccountDomainService {
     const blockchain_account = await this.getBlockchainAccount(username);
     const participant_account = await this.getParticipantAccount(config.coopname, username);
 
-    //TODO refactor after migrate from mongo
     const provider_account = (await userService.findUser(username)) as unknown as MonoAccountDomainInterface;
+    let individual_data, organization_data, entrepreneur_data;
+
+    if (provider_account.type == 'individual') {
+      individual_data = await this.individualRepository.findByUsername(username);
+    } else if (provider_account.type == 'organization') {
+      organization_data = await this.organizationRepository.findByUsername(username);
+    } else if (provider_account.type == 'entrepreneur') {
+      entrepreneur_data = await this.entrepreneurRepository.findByUsername(username);
+    }
+
+    const private_account: PrivateAccountDomainInterface = {
+      type: provider_account.type as AccountType,
+      individual_data,
+      organization_data,
+      entrepreneur_data,
+    };
 
     return new AccountDomainEntity({
       username,
@@ -48,6 +72,7 @@ export class AccountDomainService {
       blockchain_account,
       provider_account: provider_account,
       participant_account,
+      private_account,
     });
   }
 

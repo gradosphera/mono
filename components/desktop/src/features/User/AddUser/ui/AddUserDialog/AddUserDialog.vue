@@ -99,6 +99,7 @@ import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore()
 
 import { notEmpty } from 'src/shared/lib/utils';
+import { useAccountStore } from 'src/entities/Account/model';
 
 const { state, addUserState, clearUserData } = useRegistratorStore()
 const spread_minimum = ref(true) //TODO REPLACE IT!
@@ -204,6 +205,7 @@ const addUserNow = (userDataForm: any) => {
   userDataForm.validate().then(async (success: boolean) => {
     if (success) {
       try {
+        const accountStore = useAccountStore()
         loading.value = true
         await addUser()
         SuccessAlert('Пайщик добавлен в реестр, а приглашение отправлено на его email');
@@ -211,6 +213,7 @@ const addUserNow = (userDataForm: any) => {
         addUserState.created_at = ''
         clearUserData()
         loading.value = false
+        accountStore.getAccounts()
       } catch (e: any) {
         loading.value = false
         FailAlert(`Возникла ошибка: ${e.message}`)

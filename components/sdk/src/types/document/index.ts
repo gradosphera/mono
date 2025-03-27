@@ -1,4 +1,4 @@
-import type { ModelTypes } from '../../zeus'
+import type { ModelTypes } from '../../zeus/index'
 
 /**
  * Интерфейс для метаданных документа.

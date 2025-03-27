@@ -7,6 +7,14 @@ export async function clearDB(): Promise<void> {
   await mongoose.connect(process.env.MONGO_URI as string)
 
   try {
+    await mongoose.connection.collection('users').deleteMany({})
+    console.log('Все документы удалены из коллекции users')
+  }
+  catch (e) {
+    console.error('Ошибка при удалении:', e)
+  }
+
+  try {
     await mongoose.connection.collection('sync').deleteMany({})
     console.log('Все документы удалены из коллекции sync')
   }

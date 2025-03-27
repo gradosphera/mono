@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import type { ValueTypes } from "../../zeus";
+import type { ValueTypes } from "../../zeus/index";
 
 // "Сырой" объект
 export const rawEntrepreneurSelector = {

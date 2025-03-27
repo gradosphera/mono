@@ -1,4 +1,4 @@
-import { Selector, type GraphQLTypes, type InputType } from "../../zeus";
+import { Selector, type GraphQLTypes, type InputType } from "../../zeus/index";
 import { systemInfoSelector } from "../../selectors/system/systemInfoSelector";
 import { agendaSelector } from "../../selectors/agenda/agendaSelector";
 

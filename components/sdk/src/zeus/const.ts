@@ -576,6 +576,7 @@ export const ReturnTypes: Record<string,any> = {
 	Account:{
 		blockchain_account:"BlockchainAccount",
 		participant_account:"ParticipantAccount",
+		private_account:"PrivateAccount",
 		provider_account:"MonoAccount",
 		user_account:"UserAccount",
 		username:"String"
@@ -768,6 +769,7 @@ export const ReturnTypes: Record<string,any> = {
 		authorized:"Boolean",
 		authorized_by:"String",
 		batch_id:"Float",
+		callback_contract:"String",
 		coopname:"String",
 		created_at:"String",
 		expired_at:"String",
@@ -1218,6 +1220,12 @@ export const ReturnTypes: Record<string,any> = {
 	PermissionLevelWeight:{
 		permission:"PermissionLevel",
 		weight:"Int"
+	},
+	PrivateAccount:{
+		entrepreneur_data:"Entrepreneur",
+		individual_data:"Individual",
+		organization_data:"Organization",
+		type:"AccountType"
 	},
 	ProjectFreeDecisionDocument:{
 		binary:"String",

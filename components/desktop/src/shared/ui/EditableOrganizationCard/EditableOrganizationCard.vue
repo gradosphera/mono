@@ -1,132 +1,219 @@
 <template lang="pug">
-  q-form(ref="form")
-    q-input(
-      dense
-      v-model="localOrganizationData.private_data.full_name"
-      standout="bg-teal text-white"
-      label="Полное наименование"
-      placeholder="ООО 'Ромашка'"
-      :rules="[val => notEmpty(val)]"
-      autocomplete="off"
-    )
-    q-input(
-      dense
-      v-model="localOrganizationData.private_data.short_name"
-      standout="bg-teal text-white"
-      label="Краткое наименование"
-      placeholder="Ромашка"
-      :rules="[val => notEmpty(val)]"
-      autocomplete="off"
-    )
-    q-input(
-      dense
-      v-model="localOrganizationData.private_data.city"
-      standout="bg-teal text-white"
-      label="Город"
-      placeholder="Москва"
-      :rules="[val => notEmpty(val)]"
-      autocomplete="off"
-    )
-    q-input(
-      dense
-      v-model="localOrganizationData.private_data.country"
-      standout="bg-teal text-white"
-      label="Страна"
-      placeholder="Россия"
-      :rules="[val => notEmpty(val)]"
-      autocomplete="off"
-    )
-    q-input(
-      dense
-      v-model="localOrganizationData.private_data.fact_address"
-      standout="bg-teal text-white"
-      label="Фактический адрес"
-      placeholder="г. Москва, ул. Ленина, д.10"
-      :rules="[val => notEmpty(val)]"
-      autocomplete="off"
-    )
-    q-input(
-      dense
-      v-model="localOrganizationData.private_data.full_address"
-      standout="bg-teal text-white"
-      label="Адрес"
-      placeholder="г. Москва, ул. Арбат, д.5"
-      :rules="[val => notEmpty(val)]"
-      autocomplete="off"
-    )
-    q-input(
-      dense
-      v-model="localOrganizationData.private_data.phone"
-      standout="bg-teal text-white"
-      label="Телефон"
-      placeholder="+7 (XXX) XXX-XX-XX"
-      :rules="[val => notEmpty(val)]"
-      autocomplete="off"
-    )
-    q-select(
-      dense
-      v-model="localOrganizationData.private_data.type"
-      standout="bg-teal text-white"
-      label="Тип организации"
-      :options="organizationTypes"
-      :rules="[val => val != null || 'Тип организации обязателен']"
-    )
-    
-    EditableActions(
-      :isEditing="isEditing"
-      :isDisabled="isDisabled"
-      @save="saveChanges"
-      @cancel="cancelChanges"
-    )
-  </template>
+q-form(ref="form")
+  q-select(
+    dense
+    v-model="data.type"
+    standout="bg-teal text-white"
+    label="Тип организации"
+    :options="[{ label: 'Потребительский Кооператив', value: 'coop' }, { label: 'Производственный Кооператив', value: 'prodcoop' }, { label: 'ООО', value: 'ooo' }]"
+    emit-value
+    map-options
+    :rules="[val => notEmpty(val)]"
+    :readonly="readonly"
+  )
+
+  q-input(
+    dense
+    v-model="data.short_name"
+    standout="bg-teal text-white"
+    label="Краткое наименование"
+    :rules="[val => notEmpty(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+  q-input(
+    dense
+    v-model="data.full_name"
+    standout="bg-teal text-white"
+    label="Полное наименование"
+    :rules="[val => notEmpty(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+
+  q-input(
+    dense
+    v-model="data.represented_by.last_name"
+    standout="bg-teal text-white"
+    label="Фамилия представителя"
+    :rules="[val => notEmpty(val), val => validatePersonalName(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+  q-input(
+    dense
+    v-model="data.represented_by.first_name"
+    standout="bg-teal text-white"
+    label="Имя представителя"
+    :rules="[val => notEmpty(val), val => validatePersonalName(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+  q-input(
+    dense
+    v-model="data.represented_by.middle_name"
+    standout="bg-teal text-white"
+    label="Отчество представителя"
+    :rules="[val => validatePersonalName(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+  q-input(
+    dense
+    v-model="data.represented_by.based_on"
+    standout="bg-teal text-white"
+    label="На основании"
+    :rules="[val => notEmpty(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+  q-input(
+    dense
+    v-model="data.represented_by.position"
+    standout="bg-teal text-white"
+    label="Должность представителя"
+    :rules="[val => notEmpty(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+
+  q-input(
+    dense
+    v-model="data.phone"
+    standout="bg-teal text-white"
+    label="Телефон"
+    mask="+7 (###) ###-##-##"
+    fill-mask
+    :rules="[val => notEmpty(val), val => notEmptyPhone(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+
+  q-input(
+    dense
+    v-model="data.country"
+    standout="bg-teal text-white"
+    label="Страна"
+    :rules="[val => notEmpty(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+  q-input(
+    dense
+    v-model="data.city"
+    standout="bg-teal text-white"
+    label="Город"
+    :rules="[val => notEmpty(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+  q-input(
+    dense
+    v-model="data.full_address"
+    standout="bg-teal text-white"
+    label="Юридический адрес"
+    :rules="[val => notEmpty(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+  q-input(
+    dense
+    v-model="data.fact_address"
+    standout="bg-teal text-white"
+    label="Фактический адрес"
+    :rules="[val => notEmpty(val)]"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+
+  q-input(
+    dense
+    v-model="data.details.inn"
+    standout="bg-teal text-white"
+    mask="############"
+    label="ИНН"
+    :rules="[val => notEmpty(val), val => (val.length === 10 || val.length === 12) || 'ИНН должен содержать 10 или 12 цифр']"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+  q-input(
+    dense
+    v-model="data.details.ogrn"
+    standout="bg-teal text-white"
+    mask="###############"
+    label="ОГРН"
+    :rules="[val => notEmpty(val), val => (val.length === 13 || val.length === 15) || 'ОГРН должен содержать 13 или 15 цифр']"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+  q-input(
+    dense
+    v-model="data.details.kpp"
+    standout="bg-teal text-white"
+    mask="#########"
+    label="КПП"
+    :rules="[val => notEmpty(val), val => val.length === 9 || 'КПП должен содержать 9 цифр']"
+    :readonly="readonly"
+    autocomplete="off"
+  )
+
+  EditableActions(
+    v-if="!readonly"
+    :isEditing="isEditing"
+    :isDisabled="isDisabled"
+    @save="saveChanges"
+    @cancel="cancelChanges"
+  )
+</template>
   
   <script lang="ts" setup>
   import { ref } from 'vue';
   import { useEditableData } from 'src/shared/lib/composables/useEditableData';
-  import { notEmpty } from 'src/shared/lib/utils';
-  import { type IUserAccountData } from 'src/entities/User';
+  import { notEmpty, notEmptyPhone, validatePersonalName } from 'src/shared/lib/utils';
+  import { failAlert, SuccessAlert } from 'src/shared/api';
   import { Zeus } from '@coopenomics/sdk';
   import { EditableActions } from 'src/shared/ui/EditableActions';
   import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
-  import { failAlert, SuccessAlert } from 'src/shared/api';
+  import { AccountTypes, type IOrganizationData } from 'src/entities/Account/types';
   
-  const { updateAccount } = useUpdateAccount()
-
+  const emit = defineEmits(['update']);
+  const { updateAccount } = useUpdateAccount();
+  
   const props = defineProps({
     participantData: {
-      type: Object as () => IUserAccountData,
+      type: Object as () => IOrganizationData,
       required: true
+    },
+    readonly: {
+      type: Boolean,
+      default: false
     }
   });
   
-  // Локальная копия данных
   const localOrganizationData = ref(props.participantData);
-  
-  // Ссылка на форму
   const form = ref();
   
-  // Обработка сохранения
   const handleSave = async () => {
     try {
-        const account_data: IUpdateAccountInput = {
-          email: props.participantData.email,
-          role: Zeus.RegisterRole.User,
-          type: props.participantData.type,
-          username: props.participantData.username,
-          organization_data: props.participantData.private_data,
-        }
-        SuccessAlert('Данные аккаунта обновлены')
-        await updateAccount(account_data);
+      const account_data: IUpdateAccountInput = {
+        email: props.participantData.email,
+        role: Zeus.RegisterRole.User,
+        type: AccountTypes.Organization,
+        username: props.participantData.username,
+        organization_data: data.value,
+      };
+      await updateAccount(account_data);
+      emit('update', JSON.parse(JSON.stringify(data.value)));
+      SuccessAlert('Данные аккаунта обновлены');
     } catch (e) {
+      console.log(e);
       failAlert(e);
     }
   };
-  
-  // Используем composable функцию
   const { editableData: data, isEditing, isDisabled, saveChanges, cancelChanges } = useEditableData(
     localOrganizationData.value,
     handleSave,
     form
   );
-  </script>
+</script>
   

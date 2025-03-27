@@ -4,9 +4,9 @@ import WebSocket from 'isomorphic-ws'
 
 import * as Classes from './classes'
 import * as Mutations from './mutations'
-import { type GraphQLResponse, Thunder, Subscription as ZeusSubscription } from './zeus'
+import { type GraphQLResponse, Thunder, Subscription as ZeusSubscription } from './zeus/index'
 
-import { ZeusScalars } from './zeus'
+import { ZeusScalars } from './zeus/index'
 
 export * as Classes from './classes'
 export * as Mutations from './mutations'
@@ -14,7 +14,7 @@ export * as Queries from './queries'
 
 export * as Types from './types'
 
-export * as Zeus from './zeus'
+export * as Zeus from './zeus/index'
 
 if (typeof globalThis.WebSocket === 'undefined') {
   globalThis.WebSocket = WebSocket as any

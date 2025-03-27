@@ -4,11 +4,16 @@ import { PassportInputDTO } from './passport-input.dto';
 
 @InputType('UpdateIndividualDataInput')
 export class UpdateIndividualDataInputDTO {
+  @Field({ description: 'Имя пользователя' })
+  @IsNotEmpty({ message: 'Поле "username" обязательно для заполнения.' })
+  username!: string;
+
   @Field({ description: 'Дата рождения' })
   @IsNotEmpty({ message: 'Поле "birthdate" обязательно для заполнения.' })
   birthdate!: string;
 
-  //поле не принимаем - устанавливаем автоматически
+  @Field({ description: 'Электронная почта' })
+  @IsNotEmpty({ message: 'Поле "email" обязательно для заполнения.' })
   email!: string;
 
   @Field({ description: 'Имя' })

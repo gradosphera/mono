@@ -1,5 +1,5 @@
 import { extensionSelector, type extensionModel } from '../../selectors/extensions/extensionSelector';
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus/index';
 
 type inputModel = ModelTypes['ExtensionInput']
 export const name = 'updateExtension'

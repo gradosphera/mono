@@ -1,5 +1,5 @@
-import type {GraphQLTypes, InputType, ModelTypes } from '../../zeus';
-import { $, Selector } from '../../zeus';
+import type {GraphQLTypes, InputType, ModelTypes } from '../../zeus/index';
+import { $, Selector } from '../../zeus/index';
 import { paginationSelector } from '../../utils/paginationSelector';
 import { rawPaymentSelector } from '../../selectors/payments';
 

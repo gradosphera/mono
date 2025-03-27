@@ -1,5 +1,5 @@
 import { registeredAccountSelector } from '../../selectors/accounts/registeredAccountSelector';
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus/index';
 
 export const name = 'login'
 

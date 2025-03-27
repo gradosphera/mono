@@ -156,8 +156,8 @@ export const updateUserByUsername = async (username, updateBody) => {
   if (!user) {
     throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
   }
-  if (updateBody.email && (await User.isEmailTaken(updateBody.email))) {
-    throw new ApiError(http.BAD_REQUEST, 'Email already taken');
+  if (updateBody.email && (await User.isEmailTaken(updateBody.email, username))) {
+    throw new ApiError(http.BAD_REQUEST, 'Email уже занят');
   }
   Object.assign(user, updateBody);
 

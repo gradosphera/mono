@@ -304,30 +304,21 @@ export const Gql = Chain(HOST, {
 
 export const ZeusScalars = ZeusSelect<ScalarCoders>();
 
-type BaseSymbol = number | string | undefined | boolean | null;
-
 type ScalarsSelector<T> = {
   [X in Required<{
-    [P in keyof T]: T[P] extends BaseSymbol | Array<BaseSymbol> ? P : never;
+    [P in keyof T]: T[P] extends number | string | undefined | boolean ? P : never;
   }>[keyof T]]: true;
 };
 
 export const fields = <T extends keyof ModelTypes>(k: T) => {
   const t = ReturnTypes[k];
-  const fnType = k in AllTypesProps ? AllTypesProps[k as keyof typeof AllTypesProps] : undefined;
-  const hasFnTypes = typeof fnType === 'object' ? fnType : undefined;
   const o = Object.fromEntries(
     Object.entries(t)
-      .filter(([k, value]) => {
-        const isFunctionType = hasFnTypes && k in hasFnTypes && !!hasFnTypes[k as keyof typeof hasFnTypes];
-        if (isFunctionType) return false;
+      .filter(([, value]) => {
         const isReturnType = ReturnTypes[value as string];
-        if (!isReturnType) return true;
-        if (typeof isReturnType !== 'string') return false;
-        if (isReturnType.startsWith('scalar.')) {
+        if (!isReturnType || (typeof isReturnType === 'string' && isReturnType.startsWith('scalar.'))) {
           return true;
         }
-        return false;
       })
       .map(([key]) => [key, true as const]),
   );
@@ -938,6 +929,8 @@ export type ValueTypes = {
 	blockchain_account?:ValueTypes["BlockchainAccount"],
 	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
 	participant_account?:ValueTypes["ParticipantAccount"],
+	/** объект приватных данных пайщика кооператива. */
+	private_account?:ValueTypes["PrivateAccount"],
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ValueTypes["MonoAccount"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
@@ -1483,6 +1476,7 @@ export type ValueTypes = {
 	authorized?:boolean | `@${string}`,
 	authorized_by?:boolean | `@${string}`,
 	batch_id?:boolean | `@${string}`,
+	callback_contract?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
 	expired_at?:boolean | `@${string}`,
@@ -2803,6 +2797,14 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PrivateAccount"]: AliasType<{
+	entrepreneur_data?:ValueTypes["Entrepreneur"],
+	individual_data?:ValueTypes["Individual"],
+	organization_data?:ValueTypes["Organization"],
+	/** Тип аккаунта */
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -3822,6 +3824,8 @@ export type ResolverInputTypes = {
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
 	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
 	participant_account?:ResolverInputTypes["ParticipantAccount"],
+	/** объект приватных данных пайщика кооператива. */
+	private_account?:ResolverInputTypes["PrivateAccount"],
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ResolverInputTypes["MonoAccount"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
@@ -4367,6 +4371,7 @@ export type ResolverInputTypes = {
 	authorized?:boolean | `@${string}`,
 	authorized_by?:boolean | `@${string}`,
 	batch_id?:boolean | `@${string}`,
+	callback_contract?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
 	expired_at?:boolean | `@${string}`,
@@ -5689,6 +5694,14 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PrivateAccount"]: AliasType<{
+	entrepreneur_data?:ResolverInputTypes["Entrepreneur"],
+	individual_data?:ResolverInputTypes["Individual"],
+	organization_data?:ResolverInputTypes["Organization"],
+	/** Тип аккаунта */
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -6715,6 +6728,8 @@ export type ModelTypes = {
 	blockchain_account?: ModelTypes["BlockchainAccount"] | undefined | null,
 	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
 	participant_account?: ModelTypes["ParticipantAccount"] | undefined | null,
+	/** объект приватных данных пайщика кооператива. */
+	private_account?: ModelTypes["PrivateAccount"] | undefined | null,
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
@@ -7237,6 +7252,7 @@ export type ModelTypes = {
 	authorized: boolean,
 	authorized_by: string,
 	batch_id: number,
+	callback_contract: string,
 	coopname: string,
 	created_at: string,
 	expired_at: string,
@@ -8572,6 +8588,13 @@ export type ModelTypes = {
 	/** Вес */
 	weight: number
 };
+	["PrivateAccount"]: {
+		entrepreneur_data?: ModelTypes["Entrepreneur"] | undefined | null,
+	individual_data?: ModelTypes["Individual"] | undefined | null,
+	organization_data?: ModelTypes["Organization"] | undefined | null,
+	/** Тип аккаунта */
+	type: ModelTypes["AccountType"]
+};
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -9567,6 +9590,8 @@ export type GraphQLTypes = {
 	blockchain_account?: GraphQLTypes["BlockchainAccount"] | undefined | null,
 	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
 	participant_account?: GraphQLTypes["ParticipantAccount"] | undefined | null,
+	/** объект приватных данных пайщика кооператива. */
+	private_account?: GraphQLTypes["PrivateAccount"] | undefined | null,
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
@@ -10112,6 +10137,7 @@ export type GraphQLTypes = {
 	authorized: boolean,
 	authorized_by: string,
 	batch_id: number,
+	callback_contract: string,
 	coopname: string,
 	created_at: string,
 	expired_at: string,
@@ -11494,6 +11520,14 @@ export type GraphQLTypes = {
 	permission: GraphQLTypes["PermissionLevel"],
 	/** Вес */
 	weight: number
+};
+	["PrivateAccount"]: {
+	__typename: "PrivateAccount",
+	entrepreneur_data?: GraphQLTypes["Entrepreneur"] | undefined | null,
+	individual_data?: GraphQLTypes["Individual"] | undefined | null,
+	organization_data?: GraphQLTypes["Organization"] | undefined | null,
+	/** Тип аккаунта */
+	type: GraphQLTypes["AccountType"]
 };
 	["ProhibitRequestInput"]: {
 		/** Имя аккаунта кооператива */

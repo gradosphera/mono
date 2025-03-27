@@ -1,5 +1,5 @@
 import { projectFreeDecisionDocumentSelector } from '../../selectors/documents/projectFreeDecisionSelector';
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus';
+import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus/index';
 
 export const name = 'generateProjectOfFreeDecision'
 

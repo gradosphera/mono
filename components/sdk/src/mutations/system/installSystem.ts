@@ -1,5 +1,5 @@
 import { systemInfoSelector } from '../../selectors'
-import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus'
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'installSystem'
 

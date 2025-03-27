@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ModelTypes, type ValueTypes } from "../../zeus";
+import { Selector, type ModelTypes, type ValueTypes } from "../../zeus/index";
 
 const rawExtensionSelector = {
   name: true,

@@ -1,5 +1,5 @@
 import { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, ValueTypes } from "../../zeus";
+import { Selector, ValueTypes } from "../../zeus/index";
 
 // Селектор для payment details
 export const rawPaymentDetailsSelector = {
