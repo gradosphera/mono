@@ -3,7 +3,6 @@ import { AccountDTO } from '../dto/account.dto';
 import { AccountDomainInteractor } from '~/domain/account/interactors/account.interactor';
 import type { GetAccountsInputDTO } from '../dto/get-accounts-input.dto';
 import type { PaginationInputDTO } from '~/modules/common/dto/pagination.dto';
-import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { RegisterAccountInputDTO } from '../dto/register-account-input.dto';
 import { RegisteredAccountDTO } from '../dto/registered-account.dto';

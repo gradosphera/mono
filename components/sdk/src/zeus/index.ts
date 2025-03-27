@@ -2479,6 +2479,8 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	created_at?:boolean | `@${string}`,
 	/** LEGACY Флаг, имеет ли член право голоса */
 	has_vote?:boolean | `@${string}`,
+	/** Сумма вступительного взноса */
+	initial_amount?:boolean | `@${string}`,
 	/** LEGACY Флаг, внесен ли регистрационный взнос */
 	is_initial?:boolean | `@${string}`,
 	/** LEGACY Флаг, внесен ли минимальный паевый взнос */
@@ -2487,6 +2489,8 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	last_min_pay?:boolean | `@${string}`,
 	/** Время последнего обновления информации о члене */
 	last_update?:boolean | `@${string}`,
+	/** Сумма минимального паевого взноса */
+	minimum_amount?:boolean | `@${string}`,
 	/** Статус члена кооператива (accepted | blocked) */
 	status?:boolean | `@${string}`,
 	/** Тип участника (individual | entrepreneur | organization) */
@@ -3012,8 +3016,6 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
 	wallet_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
 };
-	/** Роль пользователя при регистрации */
-["RegisterRole"]:RegisterRole;
 	["RegisteredAccount"]: AliasType<{
 	/** Информация об зарегистрированном аккаунте */
 	account?:ValueTypes["Account"],
@@ -3613,8 +3615,6 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	vars?: ValueTypes["VarsInput"] | undefined | null | Variable<any, string>
 };
 	["UpdateAccountInput"]: {
-	/** Электронная почта */
-	email: string | Variable<any, string>,
 	/** Данные индивидуального предпринимателя */
 	entrepreneur_data?: ValueTypes["UpdateEntrepreneurDataInput"] | undefined | null | Variable<any, string>,
 	/** Данные физического лица */
@@ -3625,10 +3625,6 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	public_key?: string | undefined | null | Variable<any, string>,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null | Variable<any, string>,
-	/** Роль пользователя */
-	role: ValueTypes["RegisterRole"] | Variable<any, string>,
-	/** Тип аккаунта */
-	type: ValueTypes["AccountType"] | Variable<any, string>,
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
@@ -3651,6 +3647,8 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	country: ValueTypes["Country"] | Variable<any, string>,
 	/** Детали индивидуального предпринимателя */
 	details: ValueTypes["EntrepreneurDetailsInput"] | Variable<any, string>,
+	/** Электронная почта */
+	email: string | Variable<any, string>,
 	/** Имя */
 	first_name: string | Variable<any, string>,
 	/** Полный адрес */
@@ -3660,11 +3658,15 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Отчество */
 	middle_name: string | Variable<any, string>,
 	/** Телефон */
-	phone: string | Variable<any, string>
+	phone: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
 };
 	["UpdateIndividualDataInput"]: {
 	/** Дата рождения */
 	birthdate: string | Variable<any, string>,
+	/** Электронная почта */
+	email: string | Variable<any, string>,
 	/** Имя */
 	first_name: string | Variable<any, string>,
 	/** Полный адрес */
@@ -3676,7 +3678,9 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Данные паспорта */
 	passport?: ValueTypes["PassportInput"] | undefined | null | Variable<any, string>,
 	/** Телефон */
-	phone: string | Variable<any, string>
+	phone: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
 };
 	["UpdateOrganizationDataInput"]: {
 	/** Город */
@@ -3685,6 +3689,8 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	country: string | Variable<any, string>,
 	/** Детали организации */
 	details: ValueTypes["OrganizationDetailsInput"] | Variable<any, string>,
+	/** Электронная почта */
+	email: string | Variable<any, string>,
 	/** Фактический адрес */
 	fact_address: string | Variable<any, string>,
 	/** Полный адрес */
@@ -3698,7 +3704,9 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Краткое наименование организации */
 	short_name: string | Variable<any, string>,
 	/** Тип организации */
-	type: ValueTypes["OrganizationType"] | Variable<any, string>
+	type: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
 };
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -5375,6 +5383,8 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	created_at?:boolean | `@${string}`,
 	/** LEGACY Флаг, имеет ли член право голоса */
 	has_vote?:boolean | `@${string}`,
+	/** Сумма вступительного взноса */
+	initial_amount?:boolean | `@${string}`,
 	/** LEGACY Флаг, внесен ли регистрационный взнос */
 	is_initial?:boolean | `@${string}`,
 	/** LEGACY Флаг, внесен ли минимальный паевый взнос */
@@ -5383,6 +5393,8 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	last_min_pay?:boolean | `@${string}`,
 	/** Время последнего обновления информации о члене */
 	last_update?:boolean | `@${string}`,
+	/** Сумма минимального паевого взноса */
+	minimum_amount?:boolean | `@${string}`,
 	/** Статус члена кооператива (accepted | blocked) */
 	status?:boolean | `@${string}`,
 	/** Тип участника (individual | entrepreneur | organization) */
@@ -5909,8 +5921,6 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
 	wallet_agreement: ResolverInputTypes["SignedDigitalDocumentInput"]
 };
-	/** Роль пользователя при регистрации */
-["RegisterRole"]:RegisterRole;
 	["RegisteredAccount"]: AliasType<{
 	/** Информация об зарегистрированном аккаунте */
 	account?:ResolverInputTypes["Account"],
@@ -6511,8 +6521,6 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	vars?: ResolverInputTypes["VarsInput"] | undefined | null
 };
 	["UpdateAccountInput"]: {
-	/** Электронная почта */
-	email: string,
 	/** Данные индивидуального предпринимателя */
 	entrepreneur_data?: ResolverInputTypes["UpdateEntrepreneurDataInput"] | undefined | null,
 	/** Данные физического лица */
@@ -6523,10 +6531,6 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	public_key?: string | undefined | null,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null,
-	/** Роль пользователя */
-	role: ResolverInputTypes["RegisterRole"],
-	/** Тип аккаунта */
-	type: ResolverInputTypes["AccountType"],
 	/** Имя пользователя */
 	username: string
 };
@@ -6549,6 +6553,8 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	country: ResolverInputTypes["Country"],
 	/** Детали индивидуального предпринимателя */
 	details: ResolverInputTypes["EntrepreneurDetailsInput"],
+	/** Электронная почта */
+	email: string,
 	/** Имя */
 	first_name: string,
 	/** Полный адрес */
@@ -6558,11 +6564,15 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	/** Отчество */
 	middle_name: string,
 	/** Телефон */
-	phone: string
+	phone: string,
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateIndividualDataInput"]: {
 	/** Дата рождения */
 	birthdate: string,
+	/** Электронная почта */
+	email: string,
 	/** Имя */
 	first_name: string,
 	/** Полный адрес */
@@ -6574,7 +6584,9 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	/** Данные паспорта */
 	passport?: ResolverInputTypes["PassportInput"] | undefined | null,
 	/** Телефон */
-	phone: string
+	phone: string,
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateOrganizationDataInput"]: {
 	/** Город */
@@ -6583,6 +6595,8 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	country: string,
 	/** Детали организации */
 	details: ResolverInputTypes["OrganizationDetailsInput"],
+	/** Электронная почта */
+	email: string,
 	/** Фактический адрес */
 	fact_address: string,
 	/** Полный адрес */
@@ -6596,7 +6610,9 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	/** Краткое наименование организации */
 	short_name: string,
 	/** Тип организации */
-	type: ResolverInputTypes["OrganizationType"]
+	type: string,
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -8288,6 +8304,8 @@ export type ModelTypes = {
 	created_at: ModelTypes["DateTime"],
 	/** LEGACY Флаг, имеет ли член право голоса */
 	has_vote: boolean,
+	/** Сумма вступительного взноса */
+	initial_amount?: string | undefined | null,
 	/** LEGACY Флаг, внесен ли регистрационный взнос */
 	is_initial: boolean,
 	/** LEGACY Флаг, внесен ли минимальный паевый взнос */
@@ -8296,6 +8314,8 @@ export type ModelTypes = {
 	last_min_pay: ModelTypes["DateTime"],
 	/** Время последнего обновления информации о члене */
 	last_update: ModelTypes["DateTime"],
+	/** Сумма минимального паевого взноса */
+	minimum_amount?: string | undefined | null,
 	/** Статус члена кооператива (accepted | blocked) */
 	status: string,
 	/** Тип участника (individual | entrepreneur | organization) */
@@ -8803,7 +8823,6 @@ export type ModelTypes = {
 	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
 	wallet_agreement: ModelTypes["SignedDigitalDocumentInput"]
 };
-	["RegisterRole"]:RegisterRole;
 	["RegisteredAccount"]: {
 		/** Информация об зарегистрированном аккаунте */
 	account: ModelTypes["Account"],
@@ -9380,8 +9399,6 @@ export type ModelTypes = {
 	vars?: ModelTypes["VarsInput"] | undefined | null
 };
 	["UpdateAccountInput"]: {
-	/** Электронная почта */
-	email: string,
 	/** Данные индивидуального предпринимателя */
 	entrepreneur_data?: ModelTypes["UpdateEntrepreneurDataInput"] | undefined | null,
 	/** Данные физического лица */
@@ -9392,10 +9409,6 @@ export type ModelTypes = {
 	public_key?: string | undefined | null,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null,
-	/** Роль пользователя */
-	role: ModelTypes["RegisterRole"],
-	/** Тип аккаунта */
-	type: ModelTypes["AccountType"],
 	/** Имя пользователя */
 	username: string
 };
@@ -9418,6 +9431,8 @@ export type ModelTypes = {
 	country: ModelTypes["Country"],
 	/** Детали индивидуального предпринимателя */
 	details: ModelTypes["EntrepreneurDetailsInput"],
+	/** Электронная почта */
+	email: string,
 	/** Имя */
 	first_name: string,
 	/** Полный адрес */
@@ -9427,11 +9442,15 @@ export type ModelTypes = {
 	/** Отчество */
 	middle_name: string,
 	/** Телефон */
-	phone: string
+	phone: string,
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateIndividualDataInput"]: {
 	/** Дата рождения */
 	birthdate: string,
+	/** Электронная почта */
+	email: string,
 	/** Имя */
 	first_name: string,
 	/** Полный адрес */
@@ -9443,7 +9462,9 @@ export type ModelTypes = {
 	/** Данные паспорта */
 	passport?: ModelTypes["PassportInput"] | undefined | null,
 	/** Телефон */
-	phone: string
+	phone: string,
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateOrganizationDataInput"]: {
 	/** Город */
@@ -9452,6 +9473,8 @@ export type ModelTypes = {
 	country: string,
 	/** Детали организации */
 	details: ModelTypes["OrganizationDetailsInput"],
+	/** Электронная почта */
+	email: string,
 	/** Фактический адрес */
 	fact_address: string,
 	/** Полный адрес */
@@ -9465,7 +9488,9 @@ export type ModelTypes = {
 	/** Краткое наименование организации */
 	short_name: string,
 	/** Тип организации */
-	type: ModelTypes["OrganizationType"]
+	type: string,
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -11203,6 +11228,8 @@ export type GraphQLTypes = {
 	created_at: GraphQLTypes["DateTime"],
 	/** LEGACY Флаг, имеет ли член право голоса */
 	has_vote: boolean,
+	/** Сумма вступительного взноса */
+	initial_amount?: string | undefined | null,
 	/** LEGACY Флаг, внесен ли регистрационный взнос */
 	is_initial: boolean,
 	/** LEGACY Флаг, внесен ли минимальный паевый взнос */
@@ -11211,6 +11238,8 @@ export type GraphQLTypes = {
 	last_min_pay: GraphQLTypes["DateTime"],
 	/** Время последнего обновления информации о члене */
 	last_update: GraphQLTypes["DateTime"],
+	/** Сумма минимального паевого взноса */
+	minimum_amount?: string | undefined | null,
 	/** Статус члена кооператива (accepted | blocked) */
 	status: string,
 	/** Тип участника (individual | entrepreneur | organization) */
@@ -11742,8 +11771,6 @@ export type GraphQLTypes = {
 	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
 	wallet_agreement: GraphQLTypes["SignedDigitalDocumentInput"]
 };
-	/** Роль пользователя при регистрации */
-["RegisterRole"]: RegisterRole;
 	["RegisteredAccount"]: {
 	__typename: "RegisteredAccount",
 	/** Информация об зарегистрированном аккаунте */
@@ -12344,9 +12371,7 @@ export type GraphQLTypes = {
 	vars?: GraphQLTypes["VarsInput"] | undefined | null
 };
 	["UpdateAccountInput"]: {
-		/** Электронная почта */
-	email: string,
-	/** Данные индивидуального предпринимателя */
+		/** Данные индивидуального предпринимателя */
 	entrepreneur_data?: GraphQLTypes["UpdateEntrepreneurDataInput"] | undefined | null,
 	/** Данные физического лица */
 	individual_data?: GraphQLTypes["UpdateIndividualDataInput"] | undefined | null,
@@ -12356,10 +12381,6 @@ export type GraphQLTypes = {
 	public_key?: string | undefined | null,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null,
-	/** Роль пользователя */
-	role: GraphQLTypes["RegisterRole"],
-	/** Тип аккаунта */
-	type: GraphQLTypes["AccountType"],
 	/** Имя пользователя */
 	username: string
 };
@@ -12382,6 +12403,8 @@ export type GraphQLTypes = {
 	country: GraphQLTypes["Country"],
 	/** Детали индивидуального предпринимателя */
 	details: GraphQLTypes["EntrepreneurDetailsInput"],
+	/** Электронная почта */
+	email: string,
 	/** Имя */
 	first_name: string,
 	/** Полный адрес */
@@ -12391,11 +12414,15 @@ export type GraphQLTypes = {
 	/** Отчество */
 	middle_name: string,
 	/** Телефон */
-	phone: string
+	phone: string,
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateIndividualDataInput"]: {
 		/** Дата рождения */
 	birthdate: string,
+	/** Электронная почта */
+	email: string,
 	/** Имя */
 	first_name: string,
 	/** Полный адрес */
@@ -12407,7 +12434,9 @@ export type GraphQLTypes = {
 	/** Данные паспорта */
 	passport?: GraphQLTypes["PassportInput"] | undefined | null,
 	/** Телефон */
-	phone: string
+	phone: string,
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateOrganizationDataInput"]: {
 		/** Город */
@@ -12416,6 +12445,8 @@ export type GraphQLTypes = {
 	country: string,
 	/** Детали организации */
 	details: GraphQLTypes["OrganizationDetailsInput"],
+	/** Электронная почта */
+	email: string,
 	/** Фактический адрес */
 	fact_address: string,
 	/** Полный адрес */
@@ -12429,7 +12460,9 @@ export type GraphQLTypes = {
 	/** Краткое наименование организации */
 	short_name: string,
 	/** Тип организации */
-	type: GraphQLTypes["OrganizationType"]
+	type: string,
+	/** Имя пользователя */
+	username: string
 };
 	["UpdateRequestInput"]: {
 		/** Имя аккаунта кооператива */
@@ -12568,10 +12601,6 @@ export enum PaymentStatus {
 	PENDING = "PENDING",
 	REFUNDED = "REFUNDED"
 }
-/** Роль пользователя при регистрации */
-export enum RegisterRole {
-	User = "User"
-}
 /** Состояние контроллера кооператива */
 export enum SystemStatus {
 	active = "active",
@@ -12669,7 +12698,6 @@ type ZEUS_VARIABLES = {
 	["RefreshInput"]: ValueTypes["RefreshInput"];
 	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];
 	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
-	["RegisterRole"]: ValueTypes["RegisterRole"];
 	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
 	["ResetKeyInput"]: ValueTypes["ResetKeyInput"];
 	["ReturnByAssetActGenerateDocumentInput"]: ValueTypes["ReturnByAssetActGenerateDocumentInput"];

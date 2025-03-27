@@ -128,8 +128,7 @@ q-form(ref="form")
   import { failAlert, SuccessAlert } from 'src/shared/api';
   import { EditableActions } from 'src/shared/ui/EditableActions';
   import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
-  import { Zeus } from '@coopenomics/sdk';
-  import { AccountTypes, type IEntrepreneurData } from 'src/entities/Account/types';
+  import { type IEntrepreneurData } from 'src/entities/Account/types';
   
   const emit = defineEmits(['update']);
   const { updateAccount } = useUpdateAccount();
@@ -151,9 +150,6 @@ q-form(ref="form")
   const handleSave = async () => {
     try {
       const account_data: IUpdateAccountInput = {
-        email: props.participantData.email,
-        role: Zeus.RegisterRole.User,
-        type: AccountTypes.Entrepreneur,
         username: props.participantData.username,
         entrepreneur_data: data.value,
       };

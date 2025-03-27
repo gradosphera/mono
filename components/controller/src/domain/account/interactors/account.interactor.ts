@@ -31,29 +31,39 @@ export class AccountDomainInteractor {
   ) {}
 
   async updateAccount(data: UpdateAccountDomainInterface): Promise<AccountDomainEntity> {
-    await userService.updateUserByUsername(data.username, {
-      email: data.email,
-    });
+    const exist = await this.getAccount(data.username);
+
+    if (!exist.provider_account) throw new Error(`Аккаунт провайдера не найден для обновления`);
 
     // обновляем данные в хранилище
-    if (data.type === AccountType.Individual && data.individual_data) {
+    if (exist.provider_account?.type === 'individual' && data.individual_data) {
       //здесь и далее мы подставляем email и username т.к. они требуются в интерфесе генератора
-      const individual = new IndividualDomainEntity({ ...data.individual_data, username: data.username, email: data.email });
+      const individual = new IndividualDomainEntity({ ...data.individual_data, username: data.username });
       await this.individualRepository.create(individual);
-    } else if (data.type === AccountType.Organization && data.organization_data) {
+
+      await userService.updateUserByUsername(data.username, {
+        email: data.individual_data.email,
+      });
+    } else if (exist.provider_account?.type === 'organization' && data.organization_data) {
       const organization = new OrganizationDomainEntity({
         ...data.organization_data,
         username: data.username,
-        email: data.email,
       });
       await this.organizationRepository.create(organization);
-    } else if (data.type === AccountType.Entrepreneur && data.entrepreneur_data) {
+
+      await userService.updateUserByUsername(data.username, {
+        email: data.organization_data.email,
+      });
+    } else if (exist.provider_account?.type === 'entrepreneur' && data.entrepreneur_data) {
       const entrepreneur = new EntrepreneurDomainEntity({
         ...data.entrepreneur_data,
         username: data.username,
-        email: data.email,
       });
       await this.entrepreneurRepository.create(entrepreneur);
+
+      await userService.updateUserByUsername(data.username, {
+        email: data.entrepreneur_data.email,
+      });
     }
 
     return await this.getAccount(data.username);

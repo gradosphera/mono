@@ -1,5 +1,5 @@
 <template lang="pug">
-q-form(ref="form")
+q-form(ref="form" v-if="data")
   q-input(
     dense
     v-model="data.email"
@@ -159,7 +159,6 @@ q-form(ref="form")
   import { validEmail } from 'src/shared/lib/utils/validEmailRule';
   import { validatePersonalName, notEmpty } from 'src/shared/lib/utils';
   import { failAlert, SuccessAlert } from 'src/shared/api';
-  import { Zeus } from '@coopenomics/sdk';
   import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
   import { EditableActions } from 'src/shared/ui/EditableActions';
   import { type IIndividualData } from 'src/entities/Account/types';
@@ -184,9 +183,6 @@ q-form(ref="form")
   const handleSave = async () => {
     try {
       const account_data: IUpdateAccountInput = {
-        email: props.participantData.email,
-        role: Zeus.RegisterRole.User,
-        type: Zeus.AccountType.Individual,
         username: props.participantData.username,
         individual_data: data.value,
       }
