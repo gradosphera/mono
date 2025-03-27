@@ -1,12 +1,15 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { ValidateNested, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
-import { OrganizationType } from '../enum/organization-type.enum';
 import { OrganizationDetailsInputDTO } from './organization-details-input.dto';
 import { RepresentedByInputDTO } from './represented-by-input.dto';
 
 @InputType('UpdateOrganizationDataInput')
 export class UpdateOrganizationDataInputDTO {
+  @Field({ description: 'Имя пользователя' })
+  @IsNotEmpty({ message: 'Поле "username" обязательно для заполнения.' })
+  username!: string;
+
   @Field({ description: 'Город' })
   @IsNotEmpty({ message: 'Поле "city" обязательно для заполнения.' })
   city!: string;
@@ -21,7 +24,8 @@ export class UpdateOrganizationDataInputDTO {
   @IsNotEmpty({ message: 'Поле "details" обязательно для заполнения.' })
   details!: OrganizationDetailsInputDTO;
 
-  //поле не принимаем - устанавливаем автоматически
+  @Field({ description: 'Электронная почта' })
+  @IsNotEmpty({ message: 'Поле "email" обязательно для заполнения.' })
   email!: string;
 
   @Field({ description: 'Фактический адрес' })
@@ -50,7 +54,7 @@ export class UpdateOrganizationDataInputDTO {
   @IsNotEmpty({ message: 'Поле "short_name" обязательно для заполнения.' })
   short_name!: string;
 
-  @Field(() => OrganizationType, { description: 'Тип организации' })
+  @Field(() => String, { description: 'Тип организации' })
   @IsNotEmpty({ message: 'Поле "type" обязательно для заполнения.' })
-  type!: OrganizationType;
+  type!: string;
 }

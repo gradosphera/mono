@@ -157,7 +157,7 @@ export async function startInfra() {
       position: 'Председатель',
       based_on: 'Решение общего собрания №1',
     },
-    country: 'Russia',
+    country: 'Российская Федерация',
     city: 'Москва',
     fact_address: '117593 г. Москва, муниципальный округ Ясенево, проезд Соловьиный, дом 1, помещение 1/1',
     full_address:
@@ -202,7 +202,7 @@ export async function startInfra() {
     first_name: 'Иван',
     last_name: 'Иванов',
     middle_name: 'Иванович',
-    birthdate: '2023-04-01',
+    birthdate: '1990/04/01',
     phone: '+71234567890',
     email: 'ivanov@example.com',
     full_address: 'Переулок Правды д. 1',
@@ -210,7 +210,7 @@ export async function startInfra() {
       series: 7122,
       number: 112233,
       issued_by: 'отделом УФМС по г. Москва',
-      issued_at: '22.04.2010',
+      issued_at: '2010/05/10',
       code: '111-232',
     },
   }

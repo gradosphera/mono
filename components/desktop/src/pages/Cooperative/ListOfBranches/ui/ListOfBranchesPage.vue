@@ -53,11 +53,9 @@ div
               BankDetailsCard(:bankDetails="props.row.bank_account")
             div.col-md-4.col-xs-12.q-pa-sm
               p.text-center.text-overline карточка председателя
-              IndividualCard(:individual="props.row.trustee" :readonly="true").q-mt-sm
+              EditableIndividualCard(:participantData="props.row.trustee" :readonly="true").q-mt-sm
               div.text-wrap
                 p.text-grey для замены председателя участка - измените его имя аккаунта в карточке участка на аккаунт одного из пайщиков.
-
-
 </template>
 
 <script lang="ts" setup>
@@ -67,7 +65,7 @@ import { useEditableTableRows } from 'src/shared/lib/composables/useEditableTabl
 import { CreateBranchButton } from 'src/features/Branch/CreateBranch';
 import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
 import { BranchCard } from 'src/widgets/BranchCard';
-import { IndividualCard } from 'src/widgets/IndividualCard';
+import { EditableIndividualCard } from 'src/shared/ui/EditableIndividualCard';
 import { BankDetailsCard } from 'src/widgets/BankDetailsCard';
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore()

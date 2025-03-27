@@ -83,8 +83,8 @@ export class AccountDomainInteractor {
   }
 
   async getAccounts(
-    data: GetAccountsInputDomainInterface,
-    options: PaginationInputDomainInterface
+    data: GetAccountsInputDomainInterface = {},
+    options: PaginationInputDomainInterface = { page: 1, limit: 10, sortOrder: 'DESC' }
   ): Promise<PaginationResultDomainInterface<AccountDomainEntity>> {
     const provider_accounts = (await userService.queryUsers(data, options)) as QueryResultLegacy<MonoAccountDomainInterface>;
 
@@ -96,18 +96,7 @@ export class AccountDomainInteractor {
     };
 
     for (const account of provider_accounts.results) {
-      const user_account = await this.accountDomainService.getUserAccount(account.username);
-      const blockchain_account = await this.accountDomainService.getBlockchainAccount(account.username);
-      const participant_account = await this.accountDomainService.getParticipantAccount(config.coopname, account.username);
-
-      const item = new AccountDomainEntity({
-        username: account.username,
-        user_account,
-        blockchain_account,
-        provider_account: account,
-        participant_account,
-      });
-
+      const item = await this.accountDomainService.getAccount(account.username);
       result.items.push(item);
     }
 

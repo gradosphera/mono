@@ -1,6 +1,6 @@
 import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
 import { paginationSelector } from "../../utils/paginationSelector";
-import { Selector, type ModelTypes, type ValueTypes } from "../../zeus";
+import { Selector, type ModelTypes, type ValueTypes } from "../../zeus/index";
 import { rawPaymentMethodSelector } from "./paymentMethodSelector";
 
 export const rawPaymentMethodPaginationSelector = {...paginationSelector, items: rawPaymentMethodSelector};

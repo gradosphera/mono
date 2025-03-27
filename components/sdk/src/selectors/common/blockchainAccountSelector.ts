@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { type ValueTypes, Selector } from "../../zeus";
+import { type ValueTypes, Selector } from "../../zeus/index";
 
 // Селектор для blockchain_account
 export const rawBlockchainAccountSelector = {

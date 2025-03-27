@@ -1,4 +1,4 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, GraphQLISODateTime } from '@nestjs/graphql';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { SovietContract } from 'cooptypes';
@@ -9,15 +9,15 @@ export class ParticipantAccountDTO {
   @IsString()
   public readonly username: string;
 
-  @Field(() => Date, { description: 'Время создания записи о члене' })
+  @Field(() => GraphQLISODateTime, { description: 'Время создания записи о члене' })
   @Type(() => Date)
   public readonly created_at: Date;
 
-  @Field(() => Date, { description: 'Время последнего обновления информации о члене' })
+  @Field(() => GraphQLISODateTime, { description: 'Время последнего обновления информации о члене' })
   @Type(() => Date)
   public readonly last_update: Date;
 
-  @Field(() => Date, { description: 'Время последнего минимального платежа' })
+  @Field(() => GraphQLISODateTime, { description: 'Время последнего минимального платежа' })
   @Type(() => Date)
   public readonly last_min_pay: Date;
 
@@ -47,6 +47,16 @@ export class ParticipantAccountDTO {
   @IsOptional()
   public readonly braname?: string;
 
+  @Field(() => String, { description: 'Сумма вступительного взноса', nullable: true })
+  @IsString()
+  @IsOptional()
+  public readonly initial_amount: string;
+
+  @Field(() => String, { description: 'Сумма минимального паевого взноса', nullable: true })
+  @IsString()
+  @IsOptional()
+  public readonly minimum_amount: string;
+
   constructor(entity: SovietContract.Tables.Participants.IParticipants) {
     this.username = entity.username;
     this.created_at = new Date(entity.created_at);
@@ -58,5 +68,7 @@ export class ParticipantAccountDTO {
     this.has_vote = entity.has_vote;
     this.type = entity.type;
     this.braname = entity.braname;
+    this.initial_amount = entity.initial_amount;
+    this.minimum_amount = entity.minimum_amount;
   }
 }

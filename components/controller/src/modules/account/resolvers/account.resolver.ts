@@ -35,9 +35,9 @@ export class AccountResolver {
     description: 'Получить сводную информацию о аккаунтах системы',
   })
   async getAccounts(
-    @Args('data', { type: () => GetAccountsInputDTO, nullable: true }) data: GetAccountsInputDTO,
-    @Args('options', { type: () => PaginationInputDTO, nullable: true }) options: PaginationInputDTO
-  ): Promise<PaginationResultDomainInterface<AccountDomainEntity>> {
+    @Args('data', { type: () => GetAccountsInputDTO, nullable: true }) data?: GetAccountsInputDTO,
+    @Args('options', { type: () => PaginationInputDTO, nullable: true }) options?: PaginationInputDTO
+  ): Promise<PaginationResultDomainInterface<AccountDTO>> {
     return await this.accountService.getAccounts(data, options);
   }
 

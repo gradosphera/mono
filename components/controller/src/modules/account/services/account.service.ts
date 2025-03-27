@@ -30,10 +30,15 @@ export class AccountService {
   }
 
   public async getAccounts(
-    data: GetAccountsInputDTO,
-    options: PaginationInputDTO
-  ): Promise<PaginationResultDomainInterface<AccountDomainEntity>> {
-    return await this.accountDomainInteractor.getAccounts(data, options);
+    data?: GetAccountsInputDTO,
+    options?: PaginationInputDTO
+  ): Promise<PaginationResultDomainInterface<AccountDTO>> {
+    const result = await this.accountDomainInteractor.getAccounts(data, options);
+
+    return {
+      ...result,
+      items: result.items.map((account) => new AccountDTO(account)),
+    };
   }
 
   public async registerAccount(data: RegisterAccountInputDTO): Promise<RegisteredAccountDTO> {

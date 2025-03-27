@@ -6,6 +6,7 @@ import type { AccountDomainEntity } from '~/domain/account/entities/account-doma
 import { MonoAccountDTO } from './mono-account.dto';
 import { UserAccountDTO } from '~/modules/account/dto/base-user-account.dto';
 import { ParticipantAccountDTO } from './participant-account.dto';
+import { PrivateAccountDTO } from './private-account.dto';
 
 @ObjectType('Account')
 export class AccountDTO {
@@ -49,12 +50,20 @@ export class AccountDTO {
   @Type(() => ParticipantAccountDTO)
   public readonly participant_account!: ParticipantAccountDTO | null;
 
+  @Field(() => PrivateAccountDTO, {
+    description: 'объект приватных данных пайщика кооператива.',
+    nullable: true,
+  })
+  @ValidateNested()
+  @Type(() => PrivateAccountDTO)
+  public readonly private_account!: PrivateAccountDTO | null;
+
   constructor(entity: AccountDomainEntity) {
     this.username = entity.username;
     this.blockchain_account = entity.blockchain_account || null;
     this.provider_account = entity.provider_account ? new MonoAccountDTO(entity.provider_account) : null;
     this.user_account = entity.user_account ? new UserAccountDTO(entity.user_account) : null;
     this.participant_account = entity.participant_account ? new ParticipantAccountDTO(entity.participant_account) : null;
-    //TODO cardcoop_account
+    this.private_account = entity.private_account ? new PrivateAccountDTO(entity.private_account) : null;
   }
 }

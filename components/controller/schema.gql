@@ -27,6 +27,9 @@ type Account {
   """
   participant_account: ParticipantAccount
 
+  """объект приватных данных пайщика кооператива."""
+  private_account: PrivateAccount
+
   """
   объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
   """
@@ -2326,6 +2329,9 @@ type ParticipantAccount {
   """LEGACY Флаг, имеет ли член право голоса"""
   has_vote: Boolean!
 
+  """Сумма вступительного взноса"""
+  initial_amount: String
+
   """LEGACY Флаг, внесен ли регистрационный взнос"""
   is_initial: Boolean!
 
@@ -2337,6 +2343,9 @@ type ParticipantAccount {
 
   """Время последнего обновления информации о члене"""
   last_update: DateTime!
+
+  """Сумма минимального паевого взноса"""
+  minimum_amount: String
 
   """Статус члена кооператива (accepted | blocked)"""
   status: String!
@@ -2771,6 +2780,15 @@ type PermissionLevelWeight {
 
   """Вес"""
   weight: Int!
+}
+
+type PrivateAccount {
+  entrepreneur_data: Entrepreneur
+  individual_data: Individual
+  organization_data: Organization
+
+  """Тип аккаунта"""
+  type: AccountType!
 }
 
 input ProhibitRequestInput {
@@ -3965,6 +3983,9 @@ input UpdateEntrepreneurDataInput {
   """Детали индивидуального предпринимателя"""
   details: EntrepreneurDetailsInput!
 
+  """Электронная почта"""
+  email: String!
+
   """Имя"""
   first_name: String!
 
@@ -3979,11 +4000,17 @@ input UpdateEntrepreneurDataInput {
 
   """Телефон"""
   phone: String!
+
+  """Имя пользователя"""
+  username: String!
 }
 
 input UpdateIndividualDataInput {
   """Дата рождения"""
   birthdate: String!
+
+  """Электронная почта"""
+  email: String!
 
   """Имя"""
   first_name: String!
@@ -4002,6 +4029,9 @@ input UpdateIndividualDataInput {
 
   """Телефон"""
   phone: String!
+
+  """Имя пользователя"""
+  username: String!
 }
 
 input UpdateOrganizationDataInput {
@@ -4013,6 +4043,9 @@ input UpdateOrganizationDataInput {
 
   """Детали организации"""
   details: OrganizationDetailsInput!
+
+  """Электронная почта"""
+  email: String!
 
   """Фактический адрес"""
   fact_address: String!
@@ -4033,7 +4066,10 @@ input UpdateOrganizationDataInput {
   short_name: String!
 
   """Тип организации"""
-  type: OrganizationType!
+  type: String!
+
+  """Имя пользователя"""
+  username: String!
 }
 
 input UpdateRequestInput {

@@ -60,8 +60,9 @@ div
   }
 
   const back = () => step.value--
-
-  branchStore.loadPublicBranches({ coopname: system.info.coopname })
+  
+  if (session.isAuth)
+    branchStore.loadPublicBranches({ coopname: system.info.coopname })
 
   const generate = async () => {
     isLoading.value = true

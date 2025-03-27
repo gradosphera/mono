@@ -1,5 +1,5 @@
 import { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus";
+import { Selector, type ValueTypes } from "../../zeus/index";
 
 // Определяем объект вручную, чтобы избежать потери типов
 const rawFreeProjectSelector = {

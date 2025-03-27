@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
-import { type GraphQLTypes, type InputType, Selector, type ValueTypes } from '../../zeus'
+import { type GraphQLTypes, type InputType, Selector, type ValueTypes } from '../../zeus/index'
 
 // Определяем объект вручную, чтобы избежать потери типов
 export const rawTransactionSelector = {

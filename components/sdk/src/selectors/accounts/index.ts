@@ -1,4 +1,6 @@
 export * from './accountSelector'
+export * from './accountsSelector'
 export * from './monoAccountSelector'
 export * from './participantAccountSelector'
+export * from './privateAccountSelector'
 export * from './userAccountSelector'

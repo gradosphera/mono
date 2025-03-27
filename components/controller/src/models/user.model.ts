@@ -9,7 +9,7 @@ import { userStatus, type IUser } from '../types/user.types';
 const { isEmail } = validator;
 
 interface IUserModel extends Model<IUser> {
-  isEmailTaken(email: string, excludeUsername?: mongoose.Types.ObjectId): Promise<boolean>;
+  isEmailTaken(email: string, excludeUsername?: string): Promise<boolean>;
   paginate(filter, options): any;
 }
 
@@ -88,8 +88,8 @@ const userSchema = new Schema<IUser, IUserModel>(
 userSchema.plugin(toJSON);
 userSchema.plugin(paginate);
 
-userSchema.statics.isEmailTaken = async function (email) {
-  const user = await this.findOne({ email }); //, username: { $ne: excludeUsername }
+userSchema.statics.isEmailTaken = async function (email: string, excludeUsername?: string) {
+  const user = await this.findOne({ email, username: { $ne: excludeUsername } });
 
   return !!user;
 };

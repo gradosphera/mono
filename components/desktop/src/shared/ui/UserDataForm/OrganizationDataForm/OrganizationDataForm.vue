@@ -7,6 +7,7 @@ div(v-if="userData.organization_data").q-gutter-sm.q-mt-md
     :options="[{ label: 'Потребительский Кооператив', value: 'coop' }, { label: 'Производственный Кооператив', value: 'prodcoop' }, { label: 'ООО', value: 'ooo' }]"
     emit-value
     map-options).q-mb-md
+    
   q-input(v-model="userData.organization_data.short_name" standout="bg-teal text-white" hint="ПК Ромашка" label="Краткое наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
   q-input(v-model="userData.organization_data.full_name" standout="bg-teal text-white" hint="Потребительский Кооператив 'Ромашка'" label="Полное наименование организации" :rules="[val => notEmpty(val)]" autocomplete="off")
   q-input(v-model="userData.organization_data.represented_by.last_name" standout="bg-teal text-white" label="Фамилия представителя" hint="" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")

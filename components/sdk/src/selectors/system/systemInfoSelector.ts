@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus";
+import { Selector, type ValueTypes } from "../../zeus/index";
 import { rawBlockchainInfoSelector } from "./blockchainInfoSelector";
 import { rawCooperatorAccountSelector } from "./cooperatorAccountSelector";
 import { rawBlockchainAccountSelector } from "../common/blockchainAccountSelector";
