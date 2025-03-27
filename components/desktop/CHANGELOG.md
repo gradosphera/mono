@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.10](https://github.com/coopenomics/mono/compare/v2.2.9...v2.2.10) (2025-03-27)
+
+
+### Bug Fixes
+
+* add Zeus type ([7bcb6e3](https://github.com/coopenomics/mono/commit/7bcb6e30a77b0ab89c5293188b58f08f19c8761e))
+
+
+
+
+
 ## [2.2.9](https://github.com/coopenomics/mono/compare/v2.2.8...v2.2.9) (2025-03-12)
 
 **Note:** Version bump only for package @coopenomics/desktop
