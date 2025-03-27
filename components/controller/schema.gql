@@ -3091,11 +3091,6 @@ input RegisterParticipantInput {
   wallet_agreement: SignedDigitalDocumentInput!
 }
 
-"""Роль пользователя при регистрации"""
-enum RegisterRole {
-  User
-}
-
 type RegisteredAccount {
   """Информация об зарегистрированном аккаунте"""
   account: Account!
@@ -3928,9 +3923,6 @@ input Update {
 }
 
 input UpdateAccountInput {
-  """Электронная почта"""
-  email: String!
-
   """Данные индивидуального предпринимателя"""
   entrepreneur_data: UpdateEntrepreneurDataInput
 
@@ -3945,12 +3937,6 @@ input UpdateAccountInput {
 
   """Имя аккаунта реферера"""
   referer: String
-
-  """Роль пользователя"""
-  role: RegisterRole!
-
-  """Тип аккаунта"""
-  type: AccountType!
 
   """Имя пользователя"""
   username: String!

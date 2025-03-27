@@ -3,7 +3,7 @@
 q-table(
   ref="tableRef"
   flat
-  :rows="accounts?.items"
+  :rows="accountStore.accounts.items"
   :columns="columns"
   row-key="username"
   :pagination="pagination"
@@ -71,7 +71,7 @@ q-table(
   import { EditableOrganizationCard } from 'src/shared/ui/EditableOrganizationCard';
   import { useAccountStore } from 'src/entities/Account/model';
   import moment from 'moment-with-locales-es6'
-  import { type IAccounts, AccountTypes, type IAccount, type IIndividualData, type IOrganizationData, type IEntrepreneurData } from 'src/entities/Account/types';
+  import { AccountTypes, type IAccount, type IIndividualData, type IOrganizationData, type IEntrepreneurData } from 'src/entities/Account/types';
   
   const accountStore = useAccountStore()
   
@@ -103,35 +103,35 @@ q-table(
 
   // Определяем, какой компонент использовать
   const useComponent = (account: IAccount) => {
-    switch (account.private_account?.type) {
-      case AccountTypes.Individual:
-        return EditableIndividualCard
-      case AccountTypes.Entrepreneur:
-        return EditableEntrepreneurCard
-      case AccountTypes.Organization:
-        return EditableOrganizationCard
-    }
+    if (account.private_account)
+      switch (account.private_account.type) {
+        case AccountTypes.Individual:
+          return EditableIndividualCard
+        case AccountTypes.Entrepreneur:
+          return EditableEntrepreneurCard
+        case AccountTypes.Organization:
+          return EditableOrganizationCard
+      }
   }
   
   const usePrivateData = (account: IAccount) => {
-    switch (account.private_account?.type) {
-      case AccountTypes.Individual:
-        return account.private_account?.individual_data
-      case AccountTypes.Entrepreneur:
-      return account.private_account?.entrepreneur_data
-      case AccountTypes.Organization:
-      return account.private_account?.organization_data
-    }
+    if (account.private_account)
+      switch (account.private_account.type) {
+        case AccountTypes.Individual:
+          return account.private_account?.individual_data
+        case AccountTypes.Entrepreneur:
+          return account.private_account?.entrepreneur_data
+        case AccountTypes.Organization:
+          return account.private_account?.organization_data
+      }
   }
-  
-  const accounts = ref<IAccounts>({items: [], totalCount: 0, totalPages: 0, currentPage: 1})
   
   // Загружаем данные
   const loadParticipants = async () => {
     try {
       onLoading.value = true
 
-      accounts.value = await accountStore.getAccounts({options: {
+      await accountStore.getAccounts({options: {
         page: 1,
         limit: 1000,
         sortOrder: 'DESC'

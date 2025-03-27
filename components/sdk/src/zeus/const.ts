@@ -467,7 +467,6 @@ export const AllTypesProps: Record<string,any> = {
 		user_agreement:"SignedDigitalDocumentInput",
 		wallet_agreement:"SignedDigitalDocumentInput"
 	},
-	RegisterRole: "enum" as const,
 	RepresentedByInput:{
 
 	},
@@ -539,9 +538,7 @@ export const AllTypesProps: Record<string,any> = {
 	UpdateAccountInput:{
 		entrepreneur_data:"UpdateEntrepreneurDataInput",
 		individual_data:"UpdateIndividualDataInput",
-		organization_data:"UpdateOrganizationDataInput",
-		role:"RegisterRole",
-		type:"AccountType"
+		organization_data:"UpdateOrganizationDataInput"
 	},
 	UpdateBankAccountInput:{
 		data:"BankAccountInput"
@@ -555,8 +552,7 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	UpdateOrganizationDataInput:{
 		details:"OrganizationDetailsInput",
-		represented_by:"RepresentedByInput",
-		type:"OrganizationType"
+		represented_by:"RepresentedByInput"
 	},
 	UpdateRequestInput:{
 
@@ -1104,10 +1100,12 @@ export const ReturnTypes: Record<string,any> = {
 		braname:"String",
 		created_at:"DateTime",
 		has_vote:"Boolean",
+		initial_amount:"String",
 		is_initial:"Boolean",
 		is_minimum:"Boolean",
 		last_min_pay:"DateTime",
 		last_update:"DateTime",
+		minimum_amount:"String",
 		status:"String",
 		type:"String",
 		username:"String"

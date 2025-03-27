@@ -1,6 +1,7 @@
 {
   "name": "@coopenomics/cleos",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "scripts": {
     "cleos": "./run.sh"
