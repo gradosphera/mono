@@ -3,10 +3,19 @@
 
 #include "src/result/createresult.cpp"
 #include "src/result/startdistrbn.cpp"
+#include "src/result/capauthcmmt.cpp"
+#include "src/result/setact1.cpp"
+#include "src/result/setact2.cpp"
 
 #include "src/investment/createinvest.cpp"
 #include "src/investment/approveinvst.cpp"
 #include "src/investment/capauthinvst.cpp"
+
+#include "src/commit/createcmmt.cpp"
+#include "src/commit/approvecmmt.cpp"
+#include "src/commit/declinecmmt.cpp"
+#include "src/commit/delcmmt.cpp"
+
 
 #include "src/claim/approveclaim.cpp"
 #include "src/claim/createclaim.cpp"
@@ -23,12 +32,6 @@
 #include "src/managment/allocate.cpp"
 #include "src/managment/diallocate.cpp"
 #include "src/managment/wthdrcallbck.cpp"
-
-#include "src/commit/createcmmt.cpp"
-#include "src/commit/approvecmmt.cpp"
-#include "src/commit/capauthcmmt.cpp"
-#include "src/commit/setact1.cpp"
-#include "src/commit/setact2.cpp"
 
 
 #include "src/withdraw_from_result/createwthd1.cpp"
@@ -58,18 +61,6 @@
 #include "src/fundprog/refreshprog.cpp"
 
 #include <optional>
-
-// TODO: внедрить коррекцию долей при выходе пайщика из проекта / программы
-// void capital::reduce_shares(name coopname, checksum256 project_hash, name username, asset amount) {
-//     require_auth(_capital);
-
-
-//     contributor_index contributors(_capital, coopname.value);
-//     auto idx = contributors.get_index<"byusername"_n>();
-//     auto itr = idx.find(username.value);
-//     eosio::check(itr != idx.end(), "Contributor not found");
-
-// }
 
 
 void capital::validate_project_hierarchy_depth(eosio::name coopname, checksum256 project_hash) {
@@ -148,7 +139,7 @@ eosio::asset capital::get_amount_for_withdraw_from_commit(eosio::name coopname, 
       c.status = "withdrawed"_n; 
     });
     
-    return itr -> spend;
+    return itr -> spended;
 }
 
 
@@ -474,26 +465,26 @@ void capital::ensure_contributor(name coopname, name username) {
 
 //----------------------------------------------------------------------------
 // calculcate_capital_amounts: для расчёта премий по формулам:
-//   - creators_bonus      = spend * 0.382
-//   - authors_bonus       = spend * 1.618
-//   - generated           = spend + creators_bonus + authors_bonus
+//   - creators_bonus      = spended * 0.382
+//   - authors_bonus       = spended * 1.618
+//   - generated           = spended + creators_bonus + authors_bonus
 //   - capitalists_bonus  = generated * 1.618
 //   - total               = generated + capitalists_bonus
 //----------------------------------------------------------------------------
-bonus_result capital::calculcate_capital_amounts(int64_t spend_amount) {
+bonus_result capital::calculcate_capital_amounts(int64_t spended_amount) {
     bonus_result br{};
 
-    // Преобразуем spend_amount в double для дальнейших расчетов
-    double spend = double(spend_amount);
+    // Преобразуем spended_amount в double для дальнейших расчетов
+    double spended = double(spended_amount);
 
-    // 1) creators_bonus = spend_amount * 0.382
-    br.creators_bonus = int64_t(spend * 0.382);
+    // 1) creators_bonus = spended_amount * 0.382
+    br.creators_bonus = int64_t(spended * 0.382);
 
-    // 2) authors_bonus = spend_amount * 1.618
-    br.authors_bonus = int64_t(spend * 1.618);
+    // 2) authors_bonus = spended_amount * 1.618
+    br.authors_bonus = int64_t(spended * 1.618);
 
-    // 3) generated = spend + creators_bonus + authors_bonus
-    br.generated = int64_t(spend + br.creators_bonus + br.authors_bonus);
+    // 3) generated = spended + creators_bonus + authors_bonus
+    br.generated = int64_t(spended + br.creators_bonus + br.authors_bonus);
 
     // 4) capitalists_bonus = generated * 1.618
     br.capitalists_bonus = int64_t(double(br.generated) * 1.618);

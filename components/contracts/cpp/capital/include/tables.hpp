@@ -19,10 +19,10 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] resactor {
     checksum256 project_hash;        // С каким результатом связана запись
     checksum256 result_hash;        // С каким результатом связана запись
     eosio::name username;           // Чей это учёт
-
+    eosio::asset provisional_amount = asset(0, _root_govern_symbol);
     eosio::asset available = asset(0, _root_govern_symbol);
     eosio::asset for_convert = asset(0, _root_govern_symbol);
-    eosio::asset spend = asset(0, _root_govern_symbol);    
+    eosio::asset spended = asset(0, _root_govern_symbol);    
     
     // Сколько пользователь имеет «авторских долей» в этом результате
     uint64_t authors_shares = 0;
@@ -71,7 +71,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
   document approved_statement;                 ///< принятая записка председателем или доверенным
   document authorization;                      ///< утвержденная записка советом
                                   
-  time_point_sec spend_at = current_time_point();  ///< Дата и время создания расхода.
+  time_point_sec spended_at = current_time_point();  ///< Дата и время создания расхода.
 
   uint64_t primary_key() const { return id; } ///< Основной ключ.
   uint64_t by_username() const { return username.value; } ///< По имени пользователя.
@@ -104,13 +104,12 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] commit {
     checksum256 result_hash;                     ///< Хэш результата, связанного с действием.
     checksum256 commit_hash;                     ///< Хэш действия.
     uint64_t contributed_hours;              ///< Сумма временных затрат, связанная с действием.
-    eosio::asset spend;                          ///< Сумма затрат, связанная с действием.
-    
-    document contribution_statement;                          ///< Техническое задание (спецификация) как приложение к договору УХД
-    document approved_statement;                 ///< Одобрение председателя или доверенного лица
-    document authorization;                          ///< Решение совета
-    document act1;                                ///< акт приема-передачи (1)
-    document act2;                                ///< акт приема-передачи (2)
+    eosio::asset rate_per_hour = asset(0, _root_govern_symbol); ///< Стоимость часа
+    eosio::asset spended = asset(0, _root_govern_symbol); ///< Сумма затрат, связанная с действием.
+    eosio::asset creators_bonus = asset(0, _root_govern_symbol); ///< Сумма затрат, связанная с действием.
+    eosio::asset authors_bonus = asset(0, _root_govern_symbol);///< Сумма затрат, связанная с действием.
+    eosio::asset capitalists_bonus = asset(0, _root_govern_symbol); ///< Сумма затрат, связанная с действием.
+    std::string decline_comment;
     time_point_sec created_at;                   ///< Дата и время создания действия.
 
     uint64_t primary_key() const { return id; } ///< Основной ключ.
@@ -183,7 +182,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] contributor {
     
     eosio::asset rate_per_hour = asset(0, _root_govern_symbol);
     
-    eosio::asset spend = asset(0, _root_govern_symbol);
+    eosio::asset spended = asset(0, _root_govern_symbol);
     eosio::asset withdrawed = asset(0, _root_govern_symbol);
     eosio::asset converted = asset(0, _root_govern_symbol);
     eosio::asset expensed = asset(0, _root_govern_symbol);
@@ -227,19 +226,26 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
     
     uint64_t authors_count;
     uint64_t authors_shares;
+    uint64_t commits_count;
+
     std::vector<uint64_t> expense_funds = {4}; 
     
     eosio::asset target = asset(0, _root_govern_symbol);
     eosio::asset invested = asset(0, _root_govern_symbol);
     eosio::asset available = asset(0, _root_govern_symbol);
     eosio::asset allocated = asset(0, _root_govern_symbol);
+    
+    eosio::asset creators_bonus = asset(0, _root_govern_symbol);
+    eosio::asset authors_bonus = asset(0, _root_govern_symbol);
+    eosio::asset capitalists_bonus = asset(0, _root_govern_symbol);
+    
     eosio::asset expensed = asset(0, _root_govern_symbol);
-    eosio::asset spend = asset(0, _root_govern_symbol);
+    eosio::asset spended = asset(0, _root_govern_symbol);
     eosio::asset generated = asset(0, _root_govern_symbol);
     eosio::asset converted = asset(0, _root_govern_symbol);
     eosio::asset claimed = asset(0, _root_govern_symbol);
     eosio::asset withdrawed = asset(0, _root_govern_symbol);
-
+    
     double parent_distribution_ratio = 1;  
     int64_t membership_cumulative_reward_per_share = 0; 
     
@@ -268,17 +274,20 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] result {
     eosio::name status = "created"_n; ///< created
     
     eosio::name coopname;
-    time_point_sec created_at = current_time_point();
-    time_point_sec expired_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + 365 * 86400);
+    eosio::name assignee;
+    std::string assignment;
+
     uint64_t authors_shares;
     uint64_t total_creators_bonus_shares; 
     
     uint64_t authors_count;    
     uint64_t commits_count;
+    time_point_sec created_at = current_time_point();
+    time_point_sec expired_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + 365 * 86400);
     
     eosio::asset allocated = asset(0, _root_govern_symbol); ///< аллоцированные на создание результата средства
     eosio::asset available = asset(0, _root_govern_symbol); ///< зарезерированные на создание результата средства
-    eosio::asset spend = asset(0, _root_govern_symbol); ///< фактически потраченные ресурсы на создание результат в виде времени (паевые взносы-возвраты)
+    eosio::asset spended = asset(0, _root_govern_symbol); ///< фактически потраченные ресурсы на создание результат в виде времени (паевые взносы-возвраты)
     eosio::asset expensed = asset(0, _root_govern_symbol); ///< фактически потраченные на создание результата средства в виде расходов (подписки, прочее)
     eosio::asset withdrawed = asset(0, _root_govern_symbol); ///< фактически возвращенные средства из результата
     
@@ -295,8 +304,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] result {
     eosio::asset creators_amount_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты авторам
     
     eosio::asset creators_bonus_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты авторам
-    
-    
+        
     eosio::asset capitalists_bonus_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты пайщикам
     
     uint64_t primary_key() const { return id; }     ///< Основной ключ.
@@ -446,7 +454,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] creator {
   checksum256 result_hash; ///< Хэш результата интеллектуальной деятельности
   
   eosio::name username; ///< Имя пользователя
-  eosio::asset spend = asset(0, _root_govern_symbol); ///< Стоимость использованных ресурсов
+  eosio::asset spended = asset(0, _root_govern_symbol); ///< Стоимость использованных ресурсов
 
   uint64_t primary_key() const { return id; }
   checksum256 by_result_hash() const { return result_hash; }

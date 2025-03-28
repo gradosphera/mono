@@ -28,7 +28,7 @@ public:
     void init(name coopname, name initiator);
 
     [[eosio::action]]
-    void createresult(name coopname, name application, checksum256 project_hash, checksum256 result_hash);
+    void createresult(name coopname, name application, checksum256 project_hash, checksum256 result_hash, eosio::name assignee, std::string assignment);
 
     [[eosio::action]]
     void wthdrcallbck(eosio::name coopname, eosio::name callback_type, checksum256 withdraw_hash);
@@ -114,9 +114,14 @@ public:
     
     // Коммиты
     [[eosio::action]]
-    void approvecmmt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 commit_hash, document approved_statement);
+    void approvecmmt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 commit_hash);
     [[eosio::action]]
-    void createcmmt(eosio::name coopname, eosio::name application, eosio::name creator, checksum256 result_hash, checksum256 commit_hash, uint64_t contributed_hours, document contribution_statement);
+    void createcmmt(eosio::name coopname, eosio::name application, eosio::name creator, checksum256 result_hash, checksum256 commit_hash, uint64_t contributed_hours);
+    [[eosio::action]]
+    void delcmmt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 commit_hash);
+    [[eosio::action]]
+    void declinecmmt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 commit_hash, std::string comment);
+    
     [[eosio::action]]
     void setact1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 commit_hash, document act);    
     [[eosio::action]]
@@ -194,7 +199,7 @@ private:
     
   void ensure_contributor(name coopname, name username);
   
-  static bonus_result calculcate_capital_amounts(int64_t spend_amount);
+  static bonus_result calculcate_capital_amounts(int64_t spended_amount);
   
   std::optional<author> get_author(eosio::name coopname, eosio::name username, const checksum256 &project_hash);
   std::optional<creator> get_creator(eosio::name coopname, eosio::name username, const checksum256 &result_hash);
