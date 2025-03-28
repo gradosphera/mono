@@ -1,6 +1,6 @@
 <!-- Layout.vue -->
 <template lang="pug">
-  q-layout(view="hHh LpR fff")
+  q-layout(view="lHh LpR fff")
     Header(:showDrawer="showDrawer" @toggle-left-drawer="toggleLeftDrawer")
 
     q-drawer(v-if="showDrawer" v-model="leftDrawerOpen" side="left" bordered :width="200")

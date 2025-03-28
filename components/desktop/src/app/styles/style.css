@@ -57,6 +57,9 @@
 .selected {
   border: 0.1px solid grey;
 }
+.no-padding {
+  padding: 0px !important;
+}
 
 .no-select {
   -webkit-touch-callout: none; /* iOS Safari */

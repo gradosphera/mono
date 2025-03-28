@@ -10,7 +10,7 @@
 *
 * @note Авторизация требуется от аккаунта: @p username
 */
-[[eosio::action]] void marketplace::moderate(eosio::name coopname, eosio::name username, uint64_t exchange_id, uint64_t cancellation_fee) { 
+[[eosio::action]] void marketplace::moderate(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id, uint64_t cancellation_fee) { 
   check_auth_or_fail(_marketplace, coopname, username, "moderate"_n);
   
   requests_index exchange(_marketplace, coopname.value);
@@ -45,9 +45,8 @@
 *
 * @note Авторизация требуется от аккаунта: @p username
 */
-[[eosio::action]] void marketplace::prohibit(eosio::name coopname, eosio::name username, uint64_t exchange_id, std::string meta) { 
-  require_auth(username);
-  check_auth_or_fail(_marketplace, coopname, username, "prohibit"_n);
+[[eosio::action]] void marketplace::prohibit(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id, std::string meta) { 
+  check_auth_or_fail(_marketplace, coopname, application, "prohibit"_n);
   
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
@@ -72,8 +71,8 @@
 *
 * @note Авторизация требуется от аккаунта: @p username
 */
-[[eosio::action]] void marketplace::unpublish(eosio::name coopname, eosio::name username, uint64_t exchange_id) { 
-  require_auth(username);
+[[eosio::action]] void marketplace::unpublish(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id) { 
+  check_auth_or_fail(_marketplace, coopname, application, "unpublish"_n);
   
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
@@ -100,8 +99,8 @@
 *
 * @note Авторизация требуется от аккаунта: @p username
 */
-[[eosio::action]] void marketplace::publish(eosio::name coopname, eosio::name username, uint64_t exchange_id) { 
-  require_auth(username);
+[[eosio::action]] void marketplace::publish(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id) { 
+  check_auth_or_fail(_marketplace, coopname, application, "publish"_n);
   
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);

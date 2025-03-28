@@ -1,3 +1,7 @@
+/**
+ * @brief 
+ * 
+ */
 void capital::createcnvrt(
     eosio::name coopname,
     eosio::name application,

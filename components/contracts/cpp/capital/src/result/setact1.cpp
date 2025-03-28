@@ -17,8 +17,8 @@ void capital::setact1(eosio::name coopname, eosio::name application, eosio::name
   // Проверяем статус. 
   eosio::check(commit_for_modify -> status == "authorized"_n, "Неверный статус для поставки акта приёма-передачи");
   
-  commits.modify(commit_for_modify, coopname, [&](auto &n){
-    n.status = "act1"_n;
-    n.act1 = act;
-  });
+  // commits.modify(commit_for_modify, coopname, [&](auto &n){
+    // n.status = "act1"_n;
+    // n.act1 = act;
+  // });
 };

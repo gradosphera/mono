@@ -199,7 +199,7 @@ export interface ICommit {
   result_hash: IChecksum256
   commit_hash: IChecksum256
   contributed_hours: IUint64
-  spend: IAsset
+  spended: IAsset
   contribution_statement: IDocument
   approved_statement: IDocument
   authorization: IDocument
@@ -222,7 +222,7 @@ export interface IContributor {
   convert_percent: IUint64
   contributed_hours: IUint64
   rate_per_hour: IAsset
-  spend: IAsset
+  spended: IAsset
   withdrawed: IAsset
   converted: IAsset
   expensed: IAsset
@@ -348,7 +348,7 @@ export interface ICreator {
   project_hash: IChecksum256
   result_hash: IChecksum256
   username: IName
-  spend: IAsset
+  spended: IAsset
 }
 
 export interface IDiallocate {
@@ -381,7 +381,7 @@ export interface IExpense {
   expense_statement: IDocument
   approved_statement: IDocument
   authorization: IDocument
-  spend_at: ITimePointSec
+  spended_at: ITimePointSec
 }
 
 export interface IFundprog {
@@ -464,7 +464,7 @@ export interface IProject {
   available: IAsset
   allocated: IAsset
   expensed: IAsset
-  spend: IAsset
+  spended: IAsset
   generated: IAsset
   converted: IAsset
   claimed: IAsset
@@ -522,7 +522,7 @@ export interface IResactor {
   username: IName
   available: IAsset
   for_convert: IAsset
-  spend: IAsset
+  spended: IAsset
   authors_shares: IUint64
   creators_bonus_shares: IUint64
   contributed_hours: IUint64
@@ -542,7 +542,7 @@ export interface IResult {
   commits_count: IUint64
   allocated: IAsset
   available: IAsset
-  spend: IAsset
+  spended: IAsset
   expensed: IAsset
   withdrawed: IAsset
   creators_amount: IAsset

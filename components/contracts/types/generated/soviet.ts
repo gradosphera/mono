@@ -485,7 +485,7 @@ export interface IProgram {
   start_at: ITimePointSec
   expired_at: ITimePointSec
   available: IAsset$
-  spended: IAsset$
+  spendeded: IAsset$
   blocked: IAsset$
   is_can_coop_spend_share_contributions: IBool$
   share_contributions: IAsset$

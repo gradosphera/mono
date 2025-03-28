@@ -10,7 +10,7 @@ void capital::capauthcmmt(eosio::name coopname, uint64_t commit_id, document aut
   //TODO: change to coopname
   commits.modify(commit, _soviet, [&](auto &n) {
     n.status = "authorized"_n;
-    n.authorization = authorization;
+    // n.authorization = authorization;
   });
   
 };

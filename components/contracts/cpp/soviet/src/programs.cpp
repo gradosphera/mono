@@ -78,7 +78,7 @@ void soviet::createprog(eosio::name coopname, eosio::name username, eosio::name 
     pr.membership_contributions = eosio::asset(0, _root_govern_symbol);
     
     pr.available = eosio::asset(0, _root_govern_symbol);
-    pr.spended = eosio::asset(0, _root_govern_symbol);
+    pr.spendeded = eosio::asset(0, _root_govern_symbol);
     pr.blocked = eosio::asset(0, _root_govern_symbol);
     
     pr.meta = meta;

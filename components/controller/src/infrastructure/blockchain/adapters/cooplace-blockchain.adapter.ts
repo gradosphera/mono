@@ -22,7 +22,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.UpdateRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -41,7 +41,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.AcceptRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -59,7 +59,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.CancelRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -78,7 +78,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.CompleteRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -97,7 +97,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.ConfirmReceive.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -116,7 +116,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.ConfirmSupply.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -135,7 +135,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.CreateOrder.actionName,
       authorization: [
         {
-          actor: data.params.username,
+          actor: data.params.coopname,
           permission: 'active',
         },
       ],
@@ -154,7 +154,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.CreateOffer.actionName,
       authorization: [
         {
-          actor: data.params.username,
+          actor: data.params.coopname,
           permission: 'active',
         },
       ],
@@ -173,7 +173,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.DeclineRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -192,7 +192,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.DeliverOnRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -211,7 +211,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.OpenDispute.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -230,7 +230,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.ModerateRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -249,7 +249,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.ProhibitRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -268,7 +268,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.PublishRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -287,7 +287,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.ReceiveOnRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -306,7 +306,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.SupplyOnRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],
@@ -325,7 +325,7 @@ export class CooplaceBlockchainAdapter implements CooplaceBlockchainPort {
       name: MarketContract.Actions.UnpublishRequest.actionName,
       authorization: [
         {
-          actor: data.username,
+          actor: data.coopname,
           permission: 'active',
         },
       ],

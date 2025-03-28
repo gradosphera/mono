@@ -1,5 +1,5 @@
-void capital::createresult(name coopname, name application, checksum256 project_hash, checksum256 result_hash) {
-    check_auth_or_fail(_capital, coopname, application, "generate"_n);
+void capital::createresult(name coopname, name application, checksum256 project_hash, checksum256 result_hash, eosio::name assignee, std::string assignment) {
+    check_auth_or_fail(_capital, coopname, application, "createresult"_n);
 
     auto project = get_project(coopname, project_hash);
     eosio::check(project.has_value(), "проект не найден");
@@ -13,6 +13,8 @@ void capital::createresult(name coopname, name application, checksum256 project_
     results.emplace(coopname, [&](auto &n){
       n.id = get_global_id_in_scope(_capital, coopname, "results"_n);
       n.coopname = coopname;
+      n.assignee = assignee;
+      n.assignment = assignment;
       n.project_hash = project_hash;
       n.result_hash = result_hash;
       n.authors_shares = project -> authors_shares;

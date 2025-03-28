@@ -8,13 +8,12 @@ import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import { ConnectionPage } from 'src/pages/Union/Connection';
 import { ListOfDocumentsPage } from 'src/pages/Documentor/ListOfDocuments';
 import { CoopCardPage } from 'src/pages/User/CardPage';
-// import { MainMarketplacePage } from 'src/pages/Marketplace/MainPage';
-// import { ModerationPage } from 'src/pages/Marketplace/Moderation';
-// import { CreateParentOfferPage } from 'src/pages/Marketplace/CreateParentOffer';
-// import { ShowcasePage } from 'src/pages/Marketplace/Showcase';
-// import { UserParentOffersPage } from 'src/pages/Marketplace/UserParentOffers';
-// import { UserSuppliesListPage } from 'src/pages/Marketplace/UserSuppliesList';
-// import { SuppliesListPage } from 'src/pages/Marketplace/SuppliesList';
+import { ModerationPage } from 'src/pages/Marketplace/Moderation';
+import { CreateParentOfferPage } from 'src/pages/Marketplace/CreateParentOffer';
+import { ShowcasePage } from 'src/pages/Marketplace/Showcase';
+import { UserParentOffersPage } from 'src/pages/Marketplace/UserParentOffers';
+import { UserSuppliesListPage } from 'src/pages/Marketplace/UserSuppliesList';
+import { SuppliesListPage } from 'src/pages/Marketplace/SuppliesList';
 
 export const manifest = {
   'name': 'UserDesktop',
@@ -24,24 +23,13 @@ export const manifest = {
   'routes': [
     {
       meta: {
-        title: 'Централ',
+        title: 'Стол пайщика',
         icon: 'fa-solid fa-id-card',
-        roles: [],
+        roles: ['user', 'chairman', 'member'],
       },
       path: '/:coopname/user',
       name: 'home',
       children: [
-        {
-          meta: {
-            title: 'Подключение',
-            icon: 'fas fa-link',
-            roles: ['user'],
-            conditions: 'isCoop === true && coopname === "voskhod"',
-          },
-          path: '/:coopname/connect',
-          name: 'connect',
-          component: markRaw(ConnectionPage),
-        },
         {
           meta: {
             title: 'Карта пайщика',
@@ -53,6 +41,17 @@ export const manifest = {
           name: 'coop-card',
           component: markRaw(CoopCardPage),
           children: [],
+        },
+        {
+          meta: {
+            title: 'Подключение',
+            icon: 'fas fa-link',
+            roles: ['user'],
+            conditions: 'isCoop === true && coopname === "voskhod"',
+          },
+          path: '/:coopname/connect',
+          name: 'connect',
+          component: markRaw(ConnectionPage),
         },
         // {
         // meta: {
@@ -76,6 +75,75 @@ export const manifest = {
         //   component: markRaw(UserWalletPage),
         //   children: [],
         // },
+        
+        // {
+        //   path: 'details',
+        //   name: 'settings-details',
+        //   component: markRaw(CooperativeDetails),
+        //   meta: {
+        //     title: 'Реквизиты',
+        //     icon: 'fa-solid fa-check-to-slot',
+        //     roles: [],
+        //   },
+        // },
+
+        // {
+        //   path: 'contributions',
+        //   name: 'settings-contributions',
+        //   component: markRaw(ChangeCooperativeContributions),
+        //   meta: {
+        //     title: 'Взносы',
+        //     icon: 'fa-solid fa-file-invoice',
+        //     roles: ['chairman', 'member'],
+        //   },
+        // },
+        {
+          // meta: {
+            // title: 'Подключения',
+            // icon: 'fas fa-link',
+            // roles: ['chairman', 'member'],
+          // },
+          path: '/:coopname/connections',
+          name: 'connections',
+          component: markRaw(UnionPageListOfCooperatives),
+
+        },
+
+        
+        {
+          path: '/:coopname/contacts',
+          name: 'contacts',
+          component: markRaw(ContactsPage),
+          meta: {
+            title: 'Контакты',
+            icon: 'fa-solid fa-info',
+            roles: [],
+          },
+        },
+
+        // {
+        //   meta: {
+        //     title: 'Поддержка',
+        //     icon: '',
+        //     roles: [],
+        //   },
+        //   path: 'support',
+        //   name: 'support',
+        //   component: markRaw(SupportPage),
+        //   children: [],
+        // },
+      ],
+    },
+
+    {
+      meta: {
+        title: 'Стол совета',
+        icon: 'fa-regular fa-circle',
+        roles: ['chairman', 'member'],
+      },
+      path: '/:coopname/soviet',
+      name: 'soviet',
+      children: [
         {
           path: 'agenda',
           name: 'agenda',
@@ -127,158 +195,104 @@ export const manifest = {
             roles: ['chairman', 'member'],
           },
         },
-        // {
-        //   path: 'details',
-        //   name: 'settings-details',
-        //   component: markRaw(CooperativeDetails),
-        //   meta: {
-        //     title: 'Реквизиты',
-        //     icon: 'fa-solid fa-check-to-slot',
-        //     roles: [],
-        //   },
-        // },
-
-        // {
-        //   path: 'contributions',
-        //   name: 'settings-contributions',
-        //   component: markRaw(ChangeCooperativeContributions),
-        //   meta: {
-        //     title: 'Взносы',
-        //     icon: 'fa-solid fa-file-invoice',
-        //     roles: ['chairman', 'member'],
-        //   },
-        // },
+      ]
+    },
+    {
+      meta: {
+        title: 'Стол заказов',
+        icon: 'fa-solid fa-shop',
+        roles: [],
+      },
+      path: '/:coopname/market',
+      name: 'market',
+      children: [
         {
-          // meta: {
-            // title: 'Подключения',
-            // icon: 'fas fa-link',
-            // roles: ['chairman', 'member'],
-          // },
-          path: '/:coopname/connections',
-          name: 'connections',
-          component: markRaw(UnionPageListOfCooperatives),
-
-        },
-
-        // {
-        //   path: '/:coopname/marketplace',
-        //   name: 'marketplace',
-        //   component: markRaw(MainMarketplacePage),
-        //   children: [
-        //     {
-        //       path: 'moderation',
-        //       name: 'marketplace-moderation',
-        //       component: markRaw(ModerationPage),
-        //       meta: {
-        //         title: 'Модерация',
-        //         icon: '',
-        //         roles: ['member', 'chairman'],
-        //       },
-        //     },
-        //     {
-        //       path: 'create-offer',
-        //       name: 'marketplace-create-offer',
-        //       component: markRaw(CreateParentOfferPage),
-        //       meta: {
-        //         title: 'Создать объявление',
-        //         icon: '',
-        //         roles: [],
-        //       },
-        //     },
-        //     {
-        //       path: 'showcase',
-        //       name: 'marketplace-showcase',
-        //       component: markRaw(ShowcasePage),
-        //       children: [
-        //         {
-        //           path: ':id',
-        //           name: 'marketplace-showcase-id',
-        //           component: markRaw(ShowcasePage),
-        //         },
-        //       ],
-        //       meta: {
-        //         title: 'Витрина',
-        //         icon: '',
-        //         roles: [],
-        //       },
-        //     },
-        //     {
-        //       path: 'user-offers',
-        //       name: 'marketplace-user-offers',
-        //       component: markRaw(UserParentOffersPage),
-        //       children: [
-        //         {
-        //           path: ':id',
-        //           name: 'marketplace-user-offer-id',
-        //           component: markRaw(UserParentOffersPage),
-        //         },
-        //       ],
-        //       meta: {
-        //         title: 'Мои объявления',
-        //         icon: '',
-        //         roles: [],
-        //       },
-        //     },
-        //     {
-        //       path: 'supplies',
-        //       name: 'marketplace-supplies',
-        //       component: markRaw(SuppliesListPage),
-        //       meta: {
-        //         title: 'Все заказы',
-        //         icon: '',
-        //         roles: ['member', 'chairman'],
-        //       },
-        //     },
-        //     {
-        //       path: 'user-supplies',
-        //       name: 'marketplace-user-supplies',
-        //       component: markRaw(UserSuppliesListPage),
-        //       meta: {
-        //         title: 'Мои заказы',
-        //         icon: '',
-        //         roles: [],
-        //       },
-        //     },
-        //   ],
-        // },
-        {
-          path: '/:coopname/contacts',
-          name: 'contacts',
-          component: markRaw(ContactsPage),
+          path: 'showcase',
+          name: 'marketplace-showcase',
+          component: markRaw(ShowcasePage),
+          children: [
+            {
+              path: ':id',
+              name: 'marketplace-showcase-id',
+              component: markRaw(ShowcasePage),
+            },
+          ],
           meta: {
-            title: 'Контакты',
-            icon: 'fa-solid fa-info',
+            title: 'Витрина',
+            icon: '',
             roles: [],
           },
         },
-
-        // {
-        //   meta: {
-        //     title: 'Поддержка',
-        //     icon: '',
-        //     roles: [],
-        //   },
-        //   path: 'support',
-        //   name: 'support',
-        //   component: markRaw(SupportPage),
-        //   children: [],
-        // },
-      ],
+        {
+          path: 'create-offer',
+          name: 'marketplace-create-offer',
+          component: markRaw(CreateParentOfferPage),
+          meta: {
+            title: 'Создать объявление',
+            icon: '',
+            roles: [],
+          },
+        },
+        {
+          path: 'user-offers',
+          name: 'marketplace-user-offers',
+          component: markRaw(UserParentOffersPage),
+          children: [
+            {
+              path: ':id',
+              name: 'marketplace-user-offer-id',
+              component: markRaw(UserParentOffersPage),
+            },
+          ],
+          meta: {
+            title: 'Мои объявления',
+            icon: '',
+            roles: [],
+          },
+        },
+        {
+          path: 'user-supplies',
+          name: 'marketplace-user-supplies',
+          component: markRaw(UserSuppliesListPage),
+          meta: {
+            title: 'Мои заказы',
+            icon: '',
+            roles: [],
+          },
+        },
+      ]
     },
-
-    // {
-    //   meta: {
-    //     title: 'Совет',
-    //     icon: 'fa-regular fa-circle',
-    //     roles: ['chairman', 'member'],
-    //   },
-    //   path: '/:coopname/soviet',
-    //   name: 'soviet',
-    //   children: [
-
-    //   ]
-    // },
-
+    {
+      meta: {
+        title: 'Стол администратора',
+        icon: 'fa-solid fa-shop-lock',
+        roles: ['chairman', 'member'],
+      },
+      path: '/:coopname/market-admin',
+      name: 'market-admin',
+      children: [
+        {
+          path: 'moderation',
+          name: 'marketplace-moderation',
+          component: markRaw(ModerationPage),
+          meta: {
+            title: 'Модерация',
+            icon: '',
+            roles: ['member', 'chairman'],
+          },
+        },
+        {
+          path: 'supplies',
+          name: 'marketplace-supplies',
+          component: markRaw(SuppliesListPage),
+          meta: {
+            title: 'Все заказы',
+            icon: '',
+            roles: ['member', 'chairman'],
+          },
+        },
+      ]
+    }
     //КООПЕРАТИВ
     // {
     //   meta: {

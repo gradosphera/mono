@@ -279,10 +279,10 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
  
 @note Авторизация требуется от аккаунта: @p username
 */
-[[eosio::action]] void marketplace::accept(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document) { 
-  require_auth(username);
- 
-  requests_index exchange(_marketplace, coopname.value);
+[[eosio::action]] void marketplace::accept(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id, document document) { 
+  check_auth_or_fail(_marketplace, coopname, application, "accept"_n);
+  
+ requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
   eosio::check(change != exchange.end(), "Заявка не найдена");
   eosio::check(change -> status == "published"_n, "Только заявка в статусе ожидания может быть принята");
@@ -325,8 +325,9 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
 
 
 
-[[eosio::action]] void marketplace::supply(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document) {
-  require_auth(username);
+[[eosio::action]] void marketplace::supply(eosio::name coopname, name application, eosio::name username, uint64_t exchange_id, document document) {
+  check_auth_or_fail(_marketplace, coopname, application, "supplycnfrm"_n);
+
 
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
@@ -357,8 +358,8 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
 \brief Отказ от предложения.
 **/
 
-[[eosio::action]] void marketplace::supplycnfrm(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document) { 
-  require_auth(username);
+[[eosio::action]] void marketplace::supplycnfrm(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id, document document) { 
+  check_auth_or_fail(_marketplace, coopname, application, "supplycnfrm"_n);
 
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
@@ -376,7 +377,7 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
   verify_document_or_fail(document);
 
   //подписываем акт приёма-передачи кооперативу пайщиком
-  exchange.modify(change, _marketplace, [&](auto &ch) {
+  exchange.modify(change, coopname, [&](auto &ch) {
     ch.status = "supplied2"_n;
     ch.product_contribution_act = document;
   });
@@ -411,8 +412,8 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
 
 
 
-[[eosio::action]] void marketplace::delivered(eosio::name coopname, eosio::name username, uint64_t exchange_id) {
-  require_auth(username);
+[[eosio::action]] void marketplace::delivered(eosio::name coopname, name application, eosio::name username, uint64_t exchange_id) {
+  check_auth_or_fail(_marketplace, coopname, application, "delivered"_n);
 
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
@@ -428,7 +429,7 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
 
   auto program = get_program_or_fail(coopname, change -> program_id);
 
-  exchange.modify(change, _marketplace, [&](auto &ch) {
+  exchange.modify(change, coopname, [&](auto &ch) {
     ch.status = "delivered"_n;
     ch.delivered_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     ch.deadline_for_receipt = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + change -> product_lifecycle_secs / 4);
@@ -441,8 +442,8 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
 \brief Подпись акта получения имущества пайщиком
 **/
 
-[[eosio::action]] void marketplace::recieve(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document) { 
-  require_auth(username);
+[[eosio::action]] void marketplace::recieve(eosio::name coopname, name application, eosio::name username, uint64_t exchange_id, document document) { 
+  check_auth_or_fail(_marketplace, coopname, application, "recieve"_n);
 
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
@@ -469,7 +470,7 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
   };
 
     //подписываем акт приёма-передачи кооперативу пайщиком
-  exchange.modify(change, _marketplace, [&](auto &ch){
+  exchange.modify(change, coopname, [&](auto &ch){
     ch.status = "recieved1"_n;
     ch.recieved_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     ch.warranty_delay_until = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + change -> product_lifecycle_secs / 4);
@@ -480,7 +481,8 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
 
 
 
-[[eosio::action]] void marketplace::recievecnfrm(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document) {
+[[eosio::action]] void marketplace::recievecnfrm(eosio::name coopname, name application, eosio::name username, uint64_t exchange_id, document document) {
+  check_auth_or_fail(_marketplace, coopname, application, "recievecnfrm"_n);
   
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
@@ -509,24 +511,20 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
     std::make_tuple(coopname, exchange_id)
   ).send();
 
-  
   //уменьшаем паевой фонд
   action(
     permission_level{ _marketplace, "active"_n},
     _fund,
     "subcirculate"_n,
     std::make_tuple(coopname, change -> total_cost, false)
-  ).send();
- 
+  ).send(); 
 }
 
 
+[[eosio::action]] void marketplace::dispute(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id, document document){
 
-
-[[eosio::action]] void marketplace::dispute(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document){
-
-  require_auth(username);
-  
+  check_auth_or_fail(_marketplace, coopname, application, "dispute"_n);
+    
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
   
@@ -648,9 +646,9 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
 
 * @note Авторизация требуется от аккаунта: @p username
 */
-[[eosio::action]] void marketplace::complete(eosio::name coopname, eosio::name username, uint64_t exchange_id) { 
-  require_auth(username);
-  
+[[eosio::action]] void marketplace::complete(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id) { 
+  check_auth_or_fail(_marketplace, coopname, application, "complete"_n);
+      
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
   eosio::check(change != exchange.end(), "Заявка не найдена");
@@ -750,9 +748,9 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
 * 
 * @note Авторизация требуется от аккаунта: @p username
 */
-[[eosio::action]] void marketplace::decline(eosio::name coopname, eosio::name username, uint64_t exchange_id, std::string meta) { 
-  require_auth(username);
-
+[[eosio::action]] void marketplace::decline(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id, std::string meta) { 
+  check_auth_or_fail(_marketplace, coopname, application, "decline"_n);
+  
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
   auto parent_change = exchange.find(change -> parent_id);
@@ -761,7 +759,7 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
   eosio::check(parent_change != exchange.end(), "Родительская заявка не найдена");
   eosio::check(change -> status == "published"_n, "Только заявка в статусе ожидания может быть отклонена");
 
-  exchange.modify(change, _marketplace, [&](auto &o){
+  exchange.modify(change, coopname, [&](auto &o){
     o.status = "declined"_n;
     o.declined_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     o.meta = meta;
@@ -782,8 +780,6 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
 }
 
 
-
-
 /**
 \ingroup public_actions
 \brief Отмена заявки и возврат токенов.
@@ -795,9 +791,9 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
 
 @note Авторизация требуется от аккаунта: @p username
 */
-[[eosio::action]] void marketplace::cancel(eosio::name coopname, eosio::name username, uint64_t exchange_id) { 
-  require_auth(username);
-
+[[eosio::action]] void marketplace::cancel(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id) { 
+  check_auth_or_fail(_marketplace, coopname, application, "cancel"_n);
+  
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
   eosio::check(change != exchange.end(), "Заявка не найдена");
@@ -904,9 +900,9 @@ void marketplace::cancel_child(eosio::name coopname, eosio::name username, uint6
 
 @note Авторизация требуется от аккаунта: @p username
 */
-[[eosio::action]] void marketplace::update(eosio::name coopname, eosio::name username, uint64_t exchange_id, uint64_t remain_units, eosio::asset unit_cost, std::string data, std::string meta) {
-  require_auth(username);
-
+[[eosio::action]] void marketplace::update(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id, uint64_t remain_units, eosio::asset unit_cost, std::string data, std::string meta) {
+  check_auth_or_fail(_marketplace, coopname, application, "update"_n);
+  
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
   eosio::check(change != exchange.end(), "Заявка на обмен не найдена");
@@ -943,8 +939,8 @@ void marketplace::cancel_child(eosio::name coopname, eosio::name username, uint6
 
 @note Авторизация требуется от аккаунта: @p username
 */
-[[eosio::action]] void marketplace::addunits(eosio::name coopname, eosio::name username, uint64_t exchange_id, uint64_t units) {
-  require_auth(username);
+[[eosio::action]] void marketplace::addunits(eosio::name coopname, eosio::name application, eosio::name username, uint64_t exchange_id, uint64_t units) {
+  check_auth_or_fail(_marketplace, coopname, application, "update"_n);
     
   requests_index exchange(_marketplace, coopname.value);
   auto change = exchange.find(exchange_id);
