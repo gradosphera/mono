@@ -16,7 +16,6 @@ div
         q-btn(
           v-if="showRegisterButton && !is('signup') && !is('install')"
           color="primary"
-          class="btn-menu"
           stretch
           :size="isMobile ? 'sm' : 'lg'"
           @click="signup"
@@ -27,7 +26,6 @@ div
         q-btn(
           v-if="showRegisterButton && is('signup')"
           color="primary"
-          class="btn-menu"
           stretch
           :size="isMobile ? 'sm' : 'lg'"
           @click="login"
@@ -182,10 +180,6 @@ div
     font-size: 20px;
   }
 
-  .btn-menu {
-    font-size: 20px;
-    height: 60px;
-  }
 
   .menu {
     right: 0px;

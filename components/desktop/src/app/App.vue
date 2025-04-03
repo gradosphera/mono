@@ -64,7 +64,7 @@ onMounted(async () => {
 
     console.error(e)
     handleException(e)
-    // router.push({ name: 'somethingBad' })
+
     isLoaded.value = true
     removeLoader()
   }

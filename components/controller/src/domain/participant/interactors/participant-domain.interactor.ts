@@ -48,7 +48,6 @@ export class ParticipantDomainInteractor {
     await this.accountDomainService.addProviderAccount(newAccount);
 
     await this.accountDomainService.addParticipantAccount({
-      registrator: config.coopname,
       referer: data.referer ? data.referer : '',
       coopname: config.coopname,
       meta: '',

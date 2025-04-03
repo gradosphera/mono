@@ -786,9 +786,12 @@ type BlockchainDecision {
   authorized_by: String!
   batch_id: Float!
   callback_contract: String!
+  confirm_callback: String!
   coopname: String!
   created_at: String!
+  decline_callback: String!
   expired_at: String!
+  hash: String!
   id: Float!
   meta: String!
   statement: SignedBlockchainDocument!

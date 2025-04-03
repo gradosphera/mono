@@ -14,6 +14,7 @@ import { ShowcasePage } from 'src/pages/Marketplace/Showcase';
 import { UserParentOffersPage } from 'src/pages/Marketplace/UserParentOffers';
 import { UserSuppliesListPage } from 'src/pages/Marketplace/UserSuppliesList';
 import { SuppliesListPage } from 'src/pages/Marketplace/SuppliesList';
+import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
 
 export const manifest = {
   'name': 'UserDesktop',
@@ -53,6 +54,17 @@ export const manifest = {
           name: 'connect',
           component: markRaw(ConnectionPage),
         },
+        {
+          meta: {
+            title: 'Реквизиты',
+            icon: 'fas fa-link',
+            roles: ['user', 'member', 'chairman']
+          },
+          path: '/:coopname/connect',
+          name: 'connect',
+          component: markRaw(UserPaymentMethodsPage),
+        },
+
         // {
         // meta: {
         //   title: 'Удостоверение',
@@ -75,7 +87,7 @@ export const manifest = {
         //   component: markRaw(UserWalletPage),
         //   children: [],
         // },
-        
+
         // {
         //   path: 'details',
         //   name: 'settings-details',
@@ -109,7 +121,7 @@ export const manifest = {
 
         },
 
-        
+
         {
           path: '/:coopname/contacts',
           name: 'contacts',
@@ -134,7 +146,6 @@ export const manifest = {
         // },
       ],
     },
-
     {
       meta: {
         title: 'Стол совета',

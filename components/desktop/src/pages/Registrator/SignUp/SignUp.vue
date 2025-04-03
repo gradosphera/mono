@@ -20,7 +20,6 @@
 
         WaitingRegistration
 
-        Welcome
     q-btn(@click="out" dense size="sm" flat) начать с начала
 
 
@@ -35,7 +34,6 @@ import SignStatement from './SignStatement.vue'
 import ReadStatement from './ReadStatement.vue'
 import PayInitial from './PayInitial.vue'
 import WaitingRegistration from './WaitingRegistration.vue'
-import Welcome from './Welcome.vue'
 import SelectBranch from './SelectBranch.vue'
 
 import { useSystemStore } from 'src/entities/System/model';
@@ -90,7 +88,7 @@ onBeforeUnmount(() => {
 watch(() => currentUser.participantAccount, (newValue) => {
   if (newValue) {
     clearUserData()
-    store.step = steps.Welcome
+    router.push({name: 'index'})
   }
 })
 

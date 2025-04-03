@@ -18,15 +18,12 @@ export default boot(async ({ router }) => {
   const account = useAccountStore();
   const session = useSessionStore();
 
-
   // Инициализация стора desktops
   await desktops.healthCheck();
   await desktops.loadDesktops();
   desktops.setActiveDesktop(desktops.defaultDesktopHash);
-
   // Инициализация сессии
   await cardStore.initWallet();
-
   // Загрузка аккаунта
   if (session.isAuth && session.username){
     try {
@@ -35,7 +32,6 @@ export default boot(async ({ router }) => {
       session.close()
     }
   }
-
 
   // Добавление динамических маршрутов как дочерних к 'base'
   const baseRoute = router.getRoutes().find(route => route.name === 'base');

@@ -1,11 +1,12 @@
-void capital::capauthclaim(eosio::name coopname, uint64_t claim_id, document decision) {
+void capital::capauthclaim(eosio::name coopname, checksum256 claim_hash, document decision) {
   require_auth(_soviet);
   
-  claim_index claims(_capital, coopname.value);
-  auto claim = claims.find(claim_id);
-  
-  eosio::check(claim != claims.end(), "Объект запроса доли не найден");
+  auto exist_claim = get_claim(coopname, claim_hash);
+  eosio::check(exist_claim.has_value(), "Объект запроса доли не найден");
 
+  claim_index claims(_capital, coopname.value);
+  auto claim = claims.find(exist_claim -> id);
+  
   // Проверяем статус
   eosio::check(claim -> status == "statement"_n, "Неверный статус");
 
@@ -29,7 +30,9 @@ void capital::capauthclaim(eosio::name coopname, uint64_t claim_id, document dec
     p.total_share_balance += claim -> total_amount;
   });
   
-  std::string memo = "Зачёт части целевого паевого взноса по договору УХД с ID: " + std::to_string(contributor -> id) + " в качестве паевого взноса по программе 'Цифровой Кошелёк' с ID: " + std::to_string(claim_id);
+  std::string memo = "Зачёт части целевого паевого взноса по договору УХД с ID: " + std::to_string(contributor -> id) + " в качестве паевого взноса по программе 'Цифровой Кошелёк' с ID: " + std::to_string(claim -> id);
+  
+  //TODO: здесь должны гасить долг, если он есть
   
   //Увеличиваем баланс средств в капитализации
   Wallet::add_blocked_funds(_capital, coopname, claim -> username, claim -> total_amount, _capital_program, memo);

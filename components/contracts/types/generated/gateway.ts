@@ -3,165 +3,79 @@
 export type IAsset = string
 export type IName = string
 export type IChecksum256 = string
-export type IPublicKey = string
-export type ISignature = string
 export type ITimePointSec = string
 export type IUint64 = number | string
 
-export interface IAdduser {
+export interface ICreateinpay {
   coopname: IName
   username: IName
-  initial: IAsset
-  minimum: IAsset
-  created_at: ITimePointSec
-  spread_initial: boolean
+  income_hash: IChecksum256
+  quantity: IAsset
+  callback_contract: IName
+  confirm_callback: IName
+  decline_callback: IName
 }
 
-export interface IBalances extends IBalancesBase {
+export interface ICreateoutpay {
+  coopname: IName
+  username: IName
+  outcome_hash: IChecksum256
+  quantity: IAsset
+  callback_contract: IName
+  confirm_callback: IName
+  decline_callback: IName
 }
 
-export interface IBalancesBase {
+export interface IIncome {
   id: IUint64
-  contract: IName
-  quantity: IAsset
-}
-
-export interface ICounts extends ICountsBase {
-}
-
-export interface ICountsBase {
-  key: IName
-  secondary_key: IName
-  value: IUint64
-}
-
-export interface ICreatewthdrw {
-  coopname: IName
-  application: IName
-  username: IName
-  withdraw_hash: IChecksum256
-  quantity: IAsset
-  document: IDocument
-  callback_contract: IName
-  callback_type: IName
-  memo: string
-}
-
-export interface ICrtwthdrexps {
-  coopname: IName
-  application: IName
-  username: IName
-  withdraw_hash: IChecksum256
-  quantity: IAsset
-  document: IDocument
-  callback_contract: IName
-  callback_type: IName
-  memo: string
-}
-
-export interface IDeposit {
   coopname: IName
   username: IName
-  deposit_id: IUint64
   type: IName
+  income_hash: IChecksum256
+  callback_contract: IName
+  confirm_callback: IName
+  decline_callback: IName
   quantity: IAsset
+  status: IName
+  created_at: ITimePointSec
 }
 
-export interface IDocument {
-  hash: IChecksum256
-  public_key: IPublicKey
-  signature: ISignature
-  meta: string
-}
-
-export interface IDpcomplete {
+export interface IIncomplete {
   coopname: IName
-  admin: IName
-  deposit_id: IUint64
-  memo: string
+  income_hash: IChecksum256
 }
 
-export interface IDprefund {
+export interface IIndecline {
   coopname: IName
-  admin: IName
-  deposit_id: IUint64
-  memo: string
+  income_hash: IChecksum256
+  reason: string
 }
 
 export interface IMigrate {
 }
 
-export interface INewdeposit {
+export interface IOutcome {
+  id: IUint64
   coopname: IName
   username: IName
-  deposit_id: IUint64
   type: IName
-  amount: IAsset
-  deposited_at: ITimePointSec
-}
-
-export interface INewdepositid {
-  username: IName
-  id: IUint64
-}
-
-export interface INewwithdraw {
-  coopname: IName
-  username: IName
-  withdraw_id: IUint64
-  withdraw_hash: IChecksum256
-  type: IName
-  amount: IAsset
-}
-
-export interface INewwithdrid {
-  username: IName
-  id: IUint64
-}
-
-export interface IOnedeposit {
-  id: IUint64
-  username: IName
-  coopname: IName
-  type: IName
-  token_contract: IName
-  quantity: IAsset
-  status: IName
-  link: string
-  memo: string
-  expired_at: ITimePointSec
-}
-
-export interface IWithdraw {
-  id: IUint64
-  username: IName
-  coopname: IName
-  withdraw_hash: IChecksum256
+  outcome_hash: IChecksum256
   callback_contract: IName
-  callback_type: IName
-  status: IName
+  confirm_callback: IName
+  decline_callback: IName
   quantity: IAsset
-  document: IDocument
-  memo: string
+  status: IName
   created_at: ITimePointSec
 }
 
-export interface IWithdrawauth {
+export interface IOutcomplete {
   coopname: IName
-  withdraw_id: IUint64
+  outcome_hash: IChecksum256
 }
 
-export interface IWthdcomplete {
+export interface IOutdecline {
   coopname: IName
-  application: IName
-  withdraw_hash: IChecksum256
-  memo: string
-}
-
-export interface IWthdfail {
-  coopname: IName
-  application: IName
-  withdraw_id: IUint64
-  memo: string
+  outcome_hash: IChecksum256
+  reason: string
 }
 

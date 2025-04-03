@@ -28,7 +28,7 @@ export class CooperativeClass {
     this.blockchain = blockchain
   }
 
-  async createParticipant(username: string, keys?: Keys) {
+  async addUser(username: string, keys?: Keys) {
     const account = await this.blockchain.generateKeypair(
       username,
       keys,
@@ -37,7 +37,6 @@ export class CooperativeClass {
     console.log('Регистрируем аккаунт')
 
     const data: RegistratorContract.Actions.AddUser.IAddUser = {
-      registrator: config.provider,
       coopname: config.provider,
       referer: '',
       username: account.username,
@@ -115,12 +114,12 @@ export class CooperativeClass {
   }
 }
 
-export async function createParticipant(username: string) {
+export async function addUser(username: string) {
   // инициализируем инстанс с ключами
   const blockchain = new Blockchain(config.network, config.private_keys)
   const cooperative = new CooperativeClass(blockchain)
 
-  await cooperative.createParticipant(username, {
+  await cooperative.addUser(username, {
     // eslint-disable-next-line node/prefer-global/process
     privateKey: process.env.EOSIO_PRV_KEY!,
     // eslint-disable-next-line node/prefer-global/process

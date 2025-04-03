@@ -9,11 +9,6 @@ export * as AddAdmin from './addAdmin'
 export * as DeleteAdmin from './deleteAdmin'
 
 /**
- * Действие регистрации платежа.
- */
-export * as RegisterPayment from './registerPayment'
-
-/**
  * Действие установки прав администраторов.
  */
 export * as SetRights from './setRights'

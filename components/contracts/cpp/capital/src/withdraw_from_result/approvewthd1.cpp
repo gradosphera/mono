@@ -16,7 +16,17 @@ void capital::approvewthd1(name coopname, name application, name approver, check
   
   //отправляем в совет
   action(permission_level{ _capital, "active"_n}, _soviet, "createagenda"_n,
-    std::make_tuple(coopname, withdraw -> username, _capital, _capital_withdraw_from_result_authorize_action, withdraw -> id, withdraw -> return_statement, std::string("")))
-  .send();  
+    std::make_tuple(
+      coopname, 
+      withdraw -> username, 
+      get_valid_soviet_action("capwthdrres"_n),
+      withdraw_hash, 
+      _capital,
+      "capauthwthd1"_n,
+      "capdeclwthd1"_n,
+      withdraw -> return_statement, 
+      std::string("")
+    )
+  ).send();  
     
 };

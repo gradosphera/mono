@@ -22,11 +22,13 @@ export default boot(async ({ router }) => {
   router.beforeEach(async (to, from, next) => {
     await desktops.healthCheck();
 
+    // проверяем установлено ли ПО, если нет - адресуем на install
     if (desktops.health?.status === 'install' && to.name !== 'install') {
       next({ name: 'install', params: { coopname: info.coopname } });
       return;
     }
 
+    //перенаправляем на главную страницу для авторизованного или не авторизованного пользователя
     if (to.name === 'index') {
       const homePage =
         session.isAuth && currentUser.isRegistrationComplete
@@ -37,6 +39,7 @@ export default boot(async ({ router }) => {
       return;
     }
 
+    //проверяем права доступа по роли пользователя в аккаунте провайдера
     if (hasAccess(to, currentUser.userAccount)) {
       next();
     } else {

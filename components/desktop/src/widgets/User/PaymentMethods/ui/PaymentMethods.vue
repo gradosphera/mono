@@ -1,87 +1,54 @@
 <template lang="pug">
 div(flat bordered).q-pa-md
-  p Указанные реквизиты используются кооперативом для возврата паевых взносов пайщику.
+  p Указанные реквизиты используются при платежах от кооператива в пользу пайщика.
 
   AddPaymentMethodButton(:username="username")
 
-  q-list.full-width.q-mt-lg
-    q-item(v-for="(method, index) in wallet.methods" :key="method.method_id").full-width
-      q-card(flat).full-width
-        div(v-if="method.method_type ==='sbp' && isSBPData(method.data)")
-          div(style="max-width: 300px").flex.justify-between
+  q-list.separator.q-mt-lg
+    q-item(
+      v-for="(method, index) in wallet.methods"
+      :key="method.method_id"
+    ).q-gutter-md.q-pa-md
+      q-item-section(side top)
+        span.text-bold {{ index + 1 }}.
+      q-item-section
+        div.flex.items-center.q-mb-sm
+          span.text-subtitle {{ method.method_type === 'sbp' ? 'Система Быстрых Платежей' : 'Банковские перевод' }}
 
-            span
-              span {{ index + 1}}.
-              span(v-if="method.method_type ==='sbp'").q-pl-xs СБП
-            DeletePaymentButton(:size="'xs'" :username="username" :method_id="method.method_id")
+        div(v-if="method.method_type === 'sbp' && isSBPData(method.data)")
+          q-item-label
+            span.text-caption.text-grey Телефон:&nbsp;
+            span.text-body2 {{ method.data.phone }}
 
+        div(v-if="method.method_type === 'bank_transfer' && isBankTransferData(method.data)")
+          q-item-label
+            span.text-caption.text-grey Валюта:&nbsp;
+            span.text-body2 {{ method.data.currency }}
 
-            q-input(v-model="method.data.phone" label="Номер телефона" standout="bg-teal text-white" readonly).full-width
+          q-item-label
+            span.text-caption.text-grey Банк:&nbsp;
+            span.text-body2 {{ method.data.bank_name }}
 
-        div(style="max-width: 300px" v-if="method.method_type ==='bank_transfer' && isBankTransferData(method.data)")
-          div.flex.justify-between
-            span
-              span {{ index + 1 }}.
-              span(v-if="method.method_type ==='bank_transfer'").q-pl-xs Банковский перевод
-            DeletePaymentButton(:size="'xs'" :username="username" :method_id="method.method_id")
+          q-item-label
+            span.text-caption.text-grey Корр. счет:&nbsp;
+            span.text-body2 {{ method.data.details.corr }}
 
-          div
-            q-select(
-              v-model="method.data.currency"
-              readonly
-              label="Валюта счёта"
-              standout="bg-teal text-white"
-              :options="[{ label: 'RUB', value: 'RUB' }]"
-              emit-value
-              map-options
-            )
+          q-item-label
+            span.text-caption.text-grey БИК:&nbsp;
+            span.text-body2 {{ method.data.details.bik }}
 
-            q-input(
-              v-model="method.data.bank_name"
-              readonly
-              standout="bg-teal text-white"
-              label="Наименование банка"
-              autocomplete="off"
-            )
+          q-item-label
+            span.text-caption.text-grey КПП:&nbsp;
+            span.text-body2 {{ method.data.details.kpp }}
 
-            q-input(
-              v-model="method.data.details.corr"
-              standout="bg-teal text-white"
-              readonly
-              mask="####################"
-              label="Корреспондентский счет"
-              autocomplete="off"
-            )
+          q-item-label
+            span.text-caption.text-grey Счет:&nbsp;
+            span.text-body2 {{ method.data.account_number }}
 
-            q-input(
-              v-model="method.data.details.bik"
-              readonly
-              standout="bg-teal text-white"
-              mask="#########"
-              label="БИК"
-              autocomplete="off"
-            )
-
-            q-input(
-              v-model="method.data.details.kpp"
-              readonly
-              standout="bg-teal text-white"
-              mask="#########"
-              label="КПП"
-              autocomplete="off"
-            )
-
-            q-input(
-              v-model="method.data.account_number"
-              standout="bg-teal text-white"
-              readonly
-              mask="####################"
-              label="Номер счета"
-              autocomplete="off"
-            )
-
+        DeletePaymentButton(:size="'xs'" :username="username" :method_id="method.method_id")
 
 </template>
+
 
 <script lang="ts" setup>
 import { useWalletStore } from 'src/entities/Wallet';

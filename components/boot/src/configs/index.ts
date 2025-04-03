@@ -88,6 +88,10 @@ export default {
       code_permissions_to: ['capital'],
     },
     {
+      name: 'wallet',
+      code_permissions_to: ['wallet'],
+    },
+    {
       name: 'soviet',
       code_permissions_to: ['soviet'],
     },

@@ -37,4 +37,21 @@ public:
   [[eosio::action]] void upversion(eosio::name scope, eosio::name username, uint64_t registry_id);
 
   struct [[eosio::table, eosio::contract(DRAFT)]] counts : counts_base {};
+  
+    
+  inline name get_payer_and_check_auth_in_scope(eosio::name scope, eosio::name username, eosio::name action){
+    eosio::name payer;
+    
+    if (scope == _draft) {
+      require_auth(_system);
+      payer = _system;
+    }
+    else {
+      get_cooperative_or_fail(scope);
+      check_auth_or_fail(_draft, scope, username, action);
+      payer = username;
+    };
+    
+    return payer;
+  }
 };

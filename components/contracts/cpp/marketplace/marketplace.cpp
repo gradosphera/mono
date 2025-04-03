@@ -1,8 +1,25 @@
 #include "marketplace.hpp"
 #include <eosio/transaction.hpp>
-#include "src/soviet.cpp"
-#include "src/admins.cpp"
+#include "src/accept.cpp"
+#include "src/addunits.cpp"
+#include "src/authorize.cpp"
+#include "src/cancel.cpp"
 #include "src/change.cpp"
+#include "src/complete.cpp"
+#include "src/decline.cpp"
+#include "src/delivered.cpp"
+#include "src/dispute.cpp"
+#include "src/moderate.cpp"
+#include "src/offer.cpp"
+#include "src/order.cpp"
+#include "src/prohibit.cpp"
+#include "src/publish.cpp"
+#include "src/recieve.cpp"
+#include "src/recievecnfrm.cpp"
+#include "src/supply.cpp"
+#include "src/supplycnfrm.cpp"
+#include "src/unpublish.cpp"
+#include "src/update.cpp"
 
 /**
  * @brief Пустой метод регистрации нового идентификатора

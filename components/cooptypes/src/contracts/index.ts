@@ -63,3 +63,8 @@ export * as SystemContract from './system'
  * Смарт-контракт управления интеллектуальной капитализацией кооператива.
  */
 export * as CapitalContract from './capital'
+
+/**
+ * Смарт-контракт управления взносами и возвратами взносов финансовыми средствами
+ */
+export * as WalletContract from './wallet'
