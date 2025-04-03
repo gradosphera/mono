@@ -114,7 +114,7 @@ public:
     [[eosio::action]]
     void createcmmt(eosio::name coopname, eosio::name application, eosio::name username, checksum256 result_hash, checksum256 commit_hash, uint64_t contributed_hours);
     [[eosio::action]]
-    void approvecmmt(eosio::name coopname, checksum256 commit_hash, std::optional<document> document);
+    void approvecmmt(eosio::name coopname, checksum256 commit_hash, document empty_document);
     [[eosio::action]]
     void declinecmmt(eosio::name coopname, checksum256 commit_hash, std::string reason);
     [[eosio::action]]

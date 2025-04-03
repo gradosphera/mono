@@ -36,8 +36,7 @@ export interface IApproveclaim {
 
 export interface IApprovecmmt {
   coopname: IName
-  commit_id: IUint64
-  document?: IDocument
+  commit_hash: IChecksum256
 }
 
 export interface IApprovecnvrt {
@@ -112,43 +111,43 @@ export interface IAuthor {
 
 export interface ICapauthclaim {
   coopname: IName
-  claim_id: IUint64
+  claim_hash: IChecksum256
   decision: IDocument
 }
 
 export interface ICapauthcmmt {
   coopname: IName
-  commit_id: IUint64
+  commit_hash: IChecksum256
   authorization: IDocument
 }
 
 export interface ICapauthexpns {
   coopname: IName
-  expense_id: IUint64
+  expense_hash: IChecksum256
   authorization: IDocument
 }
 
 export interface ICapauthinvst {
   coopname: IName
-  invest_id: IUint64
+  invest_hash: IChecksum256
   authorization: IDocument
 }
 
 export interface ICapauthwthd1 {
   coopname: IName
-  withdraw_id: IUint64
+  withdraw_hash: IChecksum256
   authorization: IDocument
 }
 
 export interface ICapauthwthd2 {
   coopname: IName
-  withdraw_id: IUint64
+  withdraw_hash: IChecksum256
   authorization: IDocument
 }
 
 export interface ICapauthwthd3 {
   coopname: IName
-  withdraw_id: IUint64
+  withdraw_hash: IChecksum256
   authorization: IDocument
 }
 
@@ -383,7 +382,7 @@ export interface IDebt {
 
 export interface IDebtauthcnfr {
   coopname: IName
-  debt_id: IUint64
+  debt_hash: IChecksum256
   decision: IDocument
 }
 
@@ -400,7 +399,7 @@ export interface IDebtpaydcln {
 
 export interface IDeclinecmmt {
   coopname: IName
-  commit_id: IUint64
+  commit_hash: IChecksum256
   reason: string
 }
 

@@ -15,7 +15,18 @@ void capital::approveinvst(name coopname, name application, name approver, check
   });
   
   //отправляем в совет
-  action(permission_level{ _capital, "active"_n}, _soviet, _capital_invest_authorize_action,
-    std::make_tuple(coopname, invest -> username, invest -> id, invest -> invest_statement, std::string("")))
-  .send();  
+  action(permission_level{ _capital, "active"_n}, _soviet, "createagenda"_n,
+    std::make_tuple(
+      coopname, 
+      invest -> username, 
+      get_valid_soviet_action("capitalinvst"_n), 
+      invest -> invest_hash,
+      _capital, 
+      "capauthinvst"_n, 
+      "capdeclinvst"_n, 
+      invest -> invest_statement, 
+      std::string("")
+    )
+  ).send();  
+  
 };

@@ -24,7 +24,7 @@ namespace Approver {
 
 
   inline std::optional<approval> get_approval(eosio::name coopname, const checksum256 &hash) {
-      approvals_index primary_index(_gateway, coopname.value);
+      approvals_index primary_index(_soviet, coopname.value);
       auto secondary_index = primary_index.get_index<"byhash"_n>();
 
       auto itr = secondary_index.find(hash);

@@ -174,26 +174,24 @@ export async function registerExpense(
   const blockchainWithdraw = (await blockchain.getTableRows(
     GatewayContract.contractName.production,
     coopname,
-    GatewayContract.Tables.Withdraws.tableName,
+    GatewayContract.Tables.Outcomes.tableName,
     1,
     expenseHash,
     expenseHash,
-    3,
+    2,
     'sha256',
   ))[0]
 
   console.log('🔍 Вывод средств:', blockchainWithdraw)
   expect(blockchainWithdraw).toBeDefined()
-  expect(blockchainWithdraw.withdraw_hash).toBe(expenseHash)
+  expect(blockchainWithdraw.outcome_hash).toBe(expenseHash)
   expect(blockchainWithdraw.quantity).toBe(expenseAmount)
-  expect(blockchainWithdraw.status).toBe('authorized')
+  expect(blockchainWithdraw.status).toBe('pending')
 
   // Завершение вывода
-  const completeWithdrawData: GatewayContract.Actions.CompleteWithdraw.ICompleteWithdraw = {
+  const completeWithdrawData: GatewayContract.Actions.CompleteOutcome.ICompleteOutcome = {
     coopname,
-    application: '',
-    memo: '',
-    withdraw_hash: expenseHash,
+    outcome_hash: expenseHash,
   }
 
   console.log(`\n✅ Завершение вывода ${expenseHash}`)
@@ -202,7 +200,7 @@ export async function registerExpense(
       actions: [
         {
           account: GatewayContract.contractName.production,
-          name: GatewayContract.Actions.CompleteWithdraw.actionName,
+          name: GatewayContract.Actions.CompleteOutcome.actionName,
           authorization: [{ actor: coopname, permission: 'active' }],
           data: completeWithdrawData,
         },

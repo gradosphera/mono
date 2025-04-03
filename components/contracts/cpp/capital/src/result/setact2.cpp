@@ -59,7 +59,7 @@ void capital::setact2(
     // results.modify(result, coopname, [&](auto &row) {
     //     row.available          -= commit->spended;
     //     row.spended              += commit->spended;
-    //     row.creators_amount    += commit->spended; 
+    //     row.creators_base    += commit->spended; 
     //     row.total_creators_bonus_shares    += commit->spended.amount; 
     //     row.creators_bonus     += creators_bonus;
     //     row.authors_bonus      += authors_bonus;

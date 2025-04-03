@@ -53,10 +53,10 @@ void capital::createcnvrt(
         n.convert_statement = convert_statement;
     });
     
-    eosio::check(result -> creators_amount_remain >= convert_amount, "Недостаточно средств в result.creators_amount_remain для конвертации");
+    eosio::check(result -> creators_base_remain >= convert_amount, "Недостаточно средств в result.creators_base_remain для конвертации");
 
     results.modify(result, coopname, [&](auto &r) {
-        r.creators_amount_remain -= convert_amount;
+        r.creators_base_remain -= convert_amount;
     });
     
     resactor_index ractors(_capital, coopname.value);

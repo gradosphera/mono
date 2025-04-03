@@ -28,7 +28,7 @@ export async function commitToResult(
     resultHash,
     2,
     'sha256',
-  ))[0] || { spend: '0.0000 RUB', commits_count: 0 }
+  ))[0] || { spended: '0.0000 RUB', commits_count: 0 }
 
   const prevProject = (await blockchain.getTableRows(
     CapitalContract.contractName.production,
@@ -39,7 +39,7 @@ export async function commitToResult(
     projectHash,
     3,
     'sha256',
-  ))[0] || { spend: '0.0000 RUB' }
+  ))[0] || { spended: '0.0000 RUB' }
 
   const prevContributor = (await blockchain.getTableRows(
     CapitalContract.contractName.production,
@@ -62,10 +62,9 @@ export async function commitToResult(
     coopname,
     application: coopname,
     result_hash: resultHash,
-    creator,
     commit_hash: commitHash,
-    contribution_statement: fakeDocument,
     contributed_hours: spendHours,
+    username: creator,
   }
 
   console.log(`\n🚀 Отправка транзакции CreateCommit для результата ${resultHash}`)
@@ -104,16 +103,14 @@ export async function commitToResult(
   console.log('🔍 Коммит после создания:', blockchainCommit)
   expect(blockchainCommit).toBeDefined()
   expect(blockchainCommit.commit_hash).toBe(commitHash)
-  expect(blockchainCommit.spend).toBe(totalSpended)
+  expect(blockchainCommit.spended).toBe(totalSpended)
   expect(blockchainCommit.status).toBe('created')
 
   // Утверждение коммита
-  const approveCommitData: CapitalContract.Actions.ApproveCommit.IApproveCommit = {
+  const approveCommitData: SovietContract.Actions.Approves.ConfirmApprove.IConfirmApprove = {
     coopname,
-    application: coopname,
-    commit_hash: commitHash,
-    approver: 'ant',
-    approved_statement: fakeDocument,
+    approval_hash: commitHash,
+    approved_document: fakeDocument,
   }
 
   console.log(`\n✅ Подтверждение коммита ${commitHash}`)
@@ -121,8 +118,8 @@ export async function commitToResult(
     {
       actions: [
         {
-          account: CapitalContract.contractName.production,
-          name: CapitalContract.Actions.ApproveCommit.actionName,
+          account: SovietContract.contractName.production,
+          name: SovietContract.Actions.Approves.ConfirmApprove.actionName,
           authorization: [{ actor: coopname, permission: 'active' }],
           data: approveCommitData,
         },
@@ -149,86 +146,84 @@ export async function commitToResult(
     'sha256',
   ))[0]
 
-  console.log('🔍 Коммит после утверждения:', blockchainCommit)
-  expect(blockchainCommit).toBeDefined()
-  expect(blockchainCommit.commit_hash).toBe(commitHash)
-  expect(blockchainCommit.status).toBe('approved')
+  // Коммит удаляем после утверждения
+  expect(blockchainCommit).toBeUndefined()
 
-  // Получение всех решений и выполнение последнего
-  const decisions = await blockchain.getTableRows(
-    SovietContract.contractName.production,
-    coopname,
-    'decisions',
-    1000,
-  )
-  const lastDecision = decisions[decisions.length - 1]
+  // // Получение всех решений и выполнение последнего
+  // const decisions = await blockchain.getTableRows(
+  //   SovietContract.contractName.production,
+  //   coopname,
+  //   'decisions',
+  //   1000,
+  // )
+  // const lastDecision = decisions[decisions.length - 1]
 
-  console.log(`\n📜 Выполнение последнего решения: ${lastDecision.id}`)
-  await processDecision(blockchain, lastDecision.id)
+  // console.log(`\n📜 Выполнение последнего решения: ${lastDecision.id}`)
+  // await processDecision(blockchain, lastDecision.id)
 
-  {
-    // Утверждение коммита
-    const act1Data: CapitalContract.Actions.SetAct1.ISetAct1 = {
-      coopname,
-      application: coopname,
-      username: creator,
-      commit_hash: commitHash,
-      act: fakeDocument,
-    }
+  // {
+  //   // Утверждение коммита
+  //   const act1Data: CapitalContract.Actions.SetAct1.ISetAct1 = {
+  //     coopname,
+  //     application: coopname,
+  //     username: creator,
+  //     commit_hash: commitHash,
+  //     act: fakeDocument,
+  //   }
 
-    console.log(`\n✅ Установка акта1 по коммиту ${commitHash}`)
-    const act1Result = await blockchain.api.transact(
-      {
-        actions: [
-          {
-            account: CapitalContract.contractName.production,
-            name: CapitalContract.Actions.SetAct1.actionName,
-            authorization: [{ actor: coopname, permission: 'active' }],
-            data: act1Data,
-          },
-        ],
-      },
-      {
-        blocksBehind: 3,
-        expireSeconds: 30,
-      },
-    )
+  //   console.log(`\n✅ Установка акта1 по коммиту ${commitHash}`)
+  //   const act1Result = await blockchain.api.transact(
+  //     {
+  //       actions: [
+  //         {
+  //           account: CapitalContract.contractName.production,
+  //           name: CapitalContract.Actions.SetAct1.actionName,
+  //           authorization: [{ actor: coopname, permission: 'active' }],
+  //           data: act1Data,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       blocksBehind: 3,
+  //       expireSeconds: 30,
+  //     },
+  //   )
 
-    getTotalRamUsage(act1Result)
-    expect(act1Result.transaction_id).toBeDefined()
-  }
+  //   getTotalRamUsage(act1Result)
+  //   expect(act1Result.transaction_id).toBeDefined()
+  // }
 
-  {
-    // Утверждение коммита
-    const act2Data: CapitalContract.Actions.SetAct2.ISetAct2 = {
-      coopname,
-      application: coopname,
-      username: creator,
-      commit_hash: commitHash,
-      act: fakeDocument,
-    }
+  // {
+  //   // Утверждение коммита
+  //   const act2Data: CapitalContract.Actions.SetAct2.ISetAct2 = {
+  //     coopname,
+  //     application: coopname,
+  //     username: creator,
+  //     commit_hash: commitHash,
+  //     act: fakeDocument,
+  //   }
 
-    console.log(`\n✅ Установка акта2 по коммиту ${commitHash}`)
-    const act2Result = await blockchain.api.transact(
-      {
-        actions: [
-          {
-            account: CapitalContract.contractName.production,
-            name: CapitalContract.Actions.SetAct2.actionName,
-            authorization: [{ actor: coopname, permission: 'active' }],
-            data: act2Data,
-          },
-        ],
-      },
-      {
-        blocksBehind: 3,
-        expireSeconds: 30,
-      },
-    )
+  //   console.log(`\n✅ Установка акта2 по коммиту ${commitHash}`)
+  //   const act2Result = await blockchain.api.transact(
+  //     {
+  //       actions: [
+  //         {
+  //           account: CapitalContract.contractName.production,
+  //           name: CapitalContract.Actions.SetAct2.actionName,
+  //           authorization: [{ actor: coopname, permission: 'active' }],
+  //           data: act2Data,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       blocksBehind: 3,
+  //       expireSeconds: 30,
+  //     },
+  //   )
 
-    getTotalRamUsage(act2Result)
-    expect(act2Result.transaction_id).toBeDefined()
-  }
+  //   getTotalRamUsage(act2Result)
+  //   expect(act2Result.transaction_id).toBeDefined()
+  // }
 
   // Проверка результата после утверждения коммита
   const finalResult = (await blockchain.getTableRows(
@@ -269,8 +264,8 @@ export async function commitToResult(
   console.log('▶ Проект:', finalProject)
   console.log('▶ Контрибьютор:', finalContributor)
 
-  // expect(parseFloat(finalResult.spend)).toBe(parseFloat(prevResult.spend) + parseFloat(totalSpended))
-  // expect(parseFloat(finalProject.spend)).toBe(parseFloat(prevProject.spend))
+  // expect(parseFloat(finalResult.spended)).toBe(parseFloat(prevResult.spended) + parseFloat(totalSpended))
+  // expect(parseFloat(finalProject.spended)).toBe(parseFloat(prevProject.spended))
 
   // Проверка, что у контрибьютора увеличились contributed_hours и available
   // expect(parseFloat(finalContributor.contributed_hours)).toBe(parseFloat(prevContributor.contributed_hours) + spendHours)

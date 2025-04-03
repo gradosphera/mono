@@ -80,4 +80,9 @@ export default [
     path: path.resolve(process.cwd(), '../contracts/build/contracts/wallet'),
     target: 'wallet',
   },
+  {
+    name: 'loan',
+    path: path.resolve(process.cwd(), '../contracts/build/contracts/loan'),
+    target: 'loan',
+  },
 ]

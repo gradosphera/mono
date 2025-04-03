@@ -65,7 +65,7 @@ public:
                     std::string meta);
 
   [[eosio::action]]
-  void confirmapprv(eosio::name coopname, checksum256 approval_hash, std::optional<document> approved_document);
+  void confirmapprv(eosio::name coopname, checksum256 approval_hash, document approved_document);
 
   [[eosio::action]]
   void declineapprv(eosio::name coopname, checksum256 approval_hash, std::string reason);

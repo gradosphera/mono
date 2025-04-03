@@ -20,6 +20,8 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   eosio::asset creators_bonus     (br.creators_bonus,    spended.symbol);
   eosio::asset authors_bonus      (br.authors_bonus,     spended.symbol);
   eosio::asset capitalists_bonus  (br.capitalists_bonus, spended.symbol);
+  eosio::asset generated  (br.generated, spended.symbol);
+  eosio::asset total  (br.total, spended.symbol);
   
   commit_index commits(_capital, coopname.value);
   auto commit_id = get_global_id_in_scope(_capital, coopname, "commits"_n);
@@ -35,9 +37,11 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
     a.contributed_hours = contributed_hours;
     a.rate_per_hour = contributor -> rate_per_hour;
     a.spended = spended;
+    a.generated = generated;
     a.creators_bonus = creators_bonus;
     a.authors_bonus = authors_bonus;
     a.capitalists_bonus = capitalists_bonus;
+    a.total = total;
     a.created_at = current_time_point();
   });
   

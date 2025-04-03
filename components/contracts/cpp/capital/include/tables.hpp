@@ -21,9 +21,9 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] resactor {
     eosio::name username;           // Чей это учёт
     eosio::asset provisional_amount = asset(0, _root_govern_symbol);
     eosio::asset debt_amount = asset(0, _root_govern_symbol);
+    eosio::asset spended = asset(0, _root_govern_symbol);    
     eosio::asset available = asset(0, _root_govern_symbol);
     eosio::asset for_convert = asset(0, _root_govern_symbol);
-    eosio::asset spended = asset(0, _root_govern_symbol);    
     
     // Сколько пользователь имеет «авторских долей» в этом результате
     uint64_t authors_shares = 0;
@@ -107,9 +107,12 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] commit {
     uint64_t contributed_hours;              ///< Сумма временных затрат, связанная с действием.
     eosio::asset rate_per_hour = asset(0, _root_govern_symbol); ///< Стоимость часа
     eosio::asset spended = asset(0, _root_govern_symbol); ///< Сумма затрат, связанная с действием.
+    eosio::asset generated = asset(0, _root_govern_symbol); ///< Сумма генерации, связанная с действием.
     eosio::asset creators_bonus = asset(0, _root_govern_symbol); ///< Сумма затрат, связанная с действием.
     eosio::asset authors_bonus = asset(0, _root_govern_symbol);///< Сумма затрат, связанная с действием.
     eosio::asset capitalists_bonus = asset(0, _root_govern_symbol); ///< Сумма затрат, связанная с действием.
+    eosio::asset total = asset(0, _root_govern_symbol); ///< Суммарная стоимость коммита на будущем приёме результата с учетом капитализации и генерации
+    
     std::string decline_comment;
     time_point_sec created_at;                   ///< Дата и время создания действия.
 
@@ -238,9 +241,11 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
     eosio::asset available = asset(0, _root_govern_symbol);
     eosio::asset allocated = asset(0, _root_govern_symbol);
     
+    eosio::asset creators_base = asset(0, _root_govern_symbol);
     eosio::asset creators_bonus = asset(0, _root_govern_symbol);
     eosio::asset authors_bonus = asset(0, _root_govern_symbol);
     eosio::asset capitalists_bonus = asset(0, _root_govern_symbol);
+    eosio::asset total = asset(0, _root_govern_symbol); // стоимость проекта с учетом генерации и капитализации
     
     eosio::asset expensed = asset(0, _root_govern_symbol);
     eosio::asset spended = asset(0, _root_govern_symbol);
@@ -291,20 +296,20 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] result {
     eosio::asset allocated = asset(0, _root_govern_symbol); ///< аллоцированные на создание результата средства
     eosio::asset available = asset(0, _root_govern_symbol); ///< зарезерированные на создание результата средства
     eosio::asset spended = asset(0, _root_govern_symbol); ///< фактически потраченные ресурсы на создание результат в виде времени (паевые взносы-возвраты)
+    eosio::asset generated = asset(0, _root_govern_symbol); ///< стоимость РИД с учётом премий авторов и создателей
     eosio::asset expensed = asset(0, _root_govern_symbol); ///< фактически потраченные на создание результата средства в виде расходов (подписки, прочее)
     eosio::asset withdrawed = asset(0, _root_govern_symbol); ///< фактически возвращенные средства из результата
     
-    eosio::asset creators_amount = asset(0, _root_govern_symbol); ///< себестоимость РИД
-    eosio::asset generated_amount = asset(0, _root_govern_symbol); ///< стоимость РИД с учётом премий авторов и создателей
+    eosio::asset creators_base = asset(0, _root_govern_symbol); ///< себестоимость РИД
     
-    eosio::asset creators_bonus = asset(0, _root_govern_symbol); ///< премии создателей - 0.382 от себестоимости (creators_amount)
-    eosio::asset authors_bonus = asset(0, _root_govern_symbol);  ///< премии авторов - 1.618 от себестоимости (creators_amount)
+    eosio::asset creators_bonus = asset(0, _root_govern_symbol); ///< премии создателей - 0.382 от себестоимости (creators_base)
+    eosio::asset authors_bonus = asset(0, _root_govern_symbol);  ///< премии авторов - 1.618 от себестоимости (creators_base)
     eosio::asset capitalists_bonus = asset(0, _root_govern_symbol); ///< премии пайщиков кооператива - 1.618 от generated_amount
     
-    eosio::asset total_amount = asset(0, _root_govern_symbol); ///< Капитализация РИД  (стоимость РИД в generated_amount + capitalists_bonus)
+    eosio::asset total = asset(0, _root_govern_symbol); ///< Стоимость РИД с учетом генерации и капитализации (стоимость РИД в spended + authors_bonus + creators_bonus + capitalists_bonus)
     
     eosio::asset authors_bonus_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты авторам
-    eosio::asset creators_amount_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты авторам
+    eosio::asset creators_base_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты авторам
     
     eosio::asset creators_bonus_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты авторам
         
@@ -335,9 +340,11 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] claim {
     eosio::name status = "created"_n; ///< created | statement | decision | act1 | act2 | completed
     time_point_sec created_at = current_time_point();
 
-    eosio::asset author_amount = asset(0, _root_govern_symbol);
-    eosio::asset creator_amount = asset(0, _root_govern_symbol);
-    eosio::asset capitalist_amount = asset(0, _root_govern_symbol);
+    eosio::asset creator_base_amount = asset(0, _root_govern_symbol);
+    eosio::asset creator_bonus_amount = asset(0, _root_govern_symbol);
+    eosio::asset author_bonus_amount = asset(0, _root_govern_symbol);
+    eosio::asset generation_amount = asset(0, _root_govern_symbol);
+    eosio::asset capitalists_bonus_amount = asset(0, _root_govern_symbol);
 
     eosio::asset total_amount = asset(0, _root_govern_symbol);
         
