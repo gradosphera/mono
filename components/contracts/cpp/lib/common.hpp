@@ -1,4 +1,5 @@
 #include "consts.hpp"
+#include "registry.hpp"
 #include "utils.hpp"
 #include "drafts.hpp"
 #include "accounts.hpp"
@@ -16,3 +17,8 @@
 
 #include "shared_wallet.hpp"
 #include "shared_gateway.hpp"
+#include "shared_approver.hpp"
+#include "shared_registrator.hpp"
+
+#include "approves.hpp"
+#include "debts.hpp"

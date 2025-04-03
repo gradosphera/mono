@@ -83,33 +83,41 @@ static constexpr eosio::name _capital_withdraw_from_result_authorize_action = "c
 static constexpr eosio::name _capital_expense_authorize_action = "capauthexpns"_n;
 
 static constexpr eosio::name _capital_commit_authorize_action = "capauthcmmt"_n;
-static constexpr eosio::name _capital_claim_authorize_action = "capauthclaim"_n;
 
 static constexpr eosio::name _capital_withdraw_from_project_authorize_action = "capauthwthd2"_n;
 
 static constexpr eosio::name _capital_withdraw_from_program_authorize_action = "capauthwthd3"_n;
 
 
+//capital::debts
+
 static constexpr eosio::name _claim_action = "claim"_n;
-
-// имя типа действия, которое передаётся в контракт gateway и ожидается в качестве параметра в коллбэке для определения маршрута подтверждения платежа
-static constexpr eosio::name _gateway_to_capital_expense_callback_type = "expense"_n;
-
-
-//gateway linked actions
-// имя действия в контракте gateway, которое вызывается другими контрактами для того, чтобы создать параметризированный вывод с указанием коллбэка, его типа и связанного хэша платежа. 
-static constexpr eosio::name _gateway_create_expense_withdraw_action = "crtwthdrexps"_n;
-
-
-//wallet linked actions
-// имя действия, которое вызывается контрактом gateway в любом подключенном callback контракте в момент подтверждения факта выплаты
-static constexpr eosio::name _withdraw_callback_action = "wthdrcallbck"_n;
 
 //program_types
 static constexpr eosio::name _wallet_program = "wallet"_n;
 static constexpr eosio::name _sosedi_program = "cooplace"_n;
 static constexpr eosio::name _source_program = "source"_n;
 static constexpr eosio::name _capital_program = "capital"_n;
+
+
+static const std::set<eosio::name> soviet_actions = {
+    "joincoop"_n, //регистрация пайщика
+    "capitalclaim"_n, //клайм прироста капитализации из результата
+    "createdebt"_n, //взять ссуду под залог будущего результата
+    "capresexpns"_n, //произвести выплату по расходам результата
+    "capwthdrprog"_n, //произвести возврат накопленных членских взносов по программе на капиталиста
+    "capwthdrproj"_n, //произвести возврат накопленных членских взносов по проекту на актора
+    "capwthdrres"_n, //произвести возврат из результата
+};
+
+static const std::set<eosio::name> gateway_income_actions = {
+    "deposit"_n, //паевой взнос по ЦПП Кошелёк
+};
+
+static const std::set<eosio::name> gateway_outcome_actions = {
+    "withdraw"_n, //возврат паевого взноса по ЦПП Кошелёк
+};
+
 
 //program_ids
 static constexpr uint64_t _wallet_program_id = 1;
@@ -133,6 +141,7 @@ static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный к�
 #define FUND "fund"
 #define BRANCH "branch"
 #define CAPITAL "capital"
+#define WALLET "wallet"
 /**
 * @ingroup public_consts
 * @{ 
@@ -143,6 +152,7 @@ static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный к�
     static constexpr eosio::name _capital = "capital"_n;
     static constexpr eosio::name _ano = "ano"_n;
     static constexpr eosio::name _gateway = "gateway"_n;
+    static constexpr eosio::name _wallet = "wallet"_n;
     static constexpr eosio::name _draft = "draft"_n;
     static constexpr eosio::name _marketplace = "marketplace"_n;
     static constexpr eosio::name _soviet = "soviet"_n;
@@ -166,6 +176,7 @@ static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный к�
         "fund"_n,
         "branch"_n,
         "capital"_n,
+        "wallet"_n,
         "contributor"_n,
         "eosio.token"_n,
         "eosio.msig"_n,
@@ -184,9 +195,6 @@ static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный к�
         "eosio.power"_n,
         "eosio.ram"_n,
         "eosio.stake"_n,
-        "fund"_n,
-        "capital"_n,
-        "contributor"_n,
         _provider
         // Добавьте другие аккаунты в список по мере необходимости
       };    

@@ -29,7 +29,17 @@ void capital::approveexpns(name coopname, name application, name approver, check
   
   //отправляем в совет
   action(permission_level{ _capital, "active"_n}, _soviet, "createagenda"_n,
-    std::make_tuple(coopname, expense -> username, _capital, _capital_expense_authorize_action, expense -> id, expense -> expense_statement, std::string("")))
-  .send();  
+    std::make_tuple(
+      coopname, 
+      expense -> username, 
+      get_valid_soviet_action("capresexpns"_n),
+      expense_hash, 
+      _capital, 
+      "capauthexpns"_n,
+      "capdeclexpns"_n, 
+      expense -> expense_statement, 
+      std::string("")
+    )
+  ).send();  
 
 }

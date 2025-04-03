@@ -63,7 +63,6 @@ export const install = async (data: IInstall): Promise<void> => {
       sovietExt.push({ ...member, username });
 
       const addUser: RegistratorContract.Actions.AddUser.IAddUser = {
-        registrator: config.coopname,
         coopname: config.coopname,
         referer: '',
         username,

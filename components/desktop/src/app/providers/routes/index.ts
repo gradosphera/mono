@@ -8,9 +8,7 @@ import { RouteRecordRaw } from 'vue-router';
 import { InstallCooperativePage } from 'src/pages/Installer';
 import { LostKeyPage } from 'src/pages/Registrator/LostKey/ui';
 import { ResetKeyPage } from 'src/pages/Registrator/ResetKey';
-import { UserSettingsPage } from 'src/pages/User/SettingsPage';
 import CooperativeSettingsPage from 'src/pages/Cooperative/SettingsPage/CooperativeSettingsPage.vue';
-import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
 import { AccumulationFunds, ExpenseFunds } from 'src/widgets/Cooperative/Funds';
 import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
 import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
@@ -72,19 +70,6 @@ const baseRoutes = [
         name: 'signup',
         component: SignUpPage,
         children: [],
-      },
-      {
-        path: 'settings/user',
-        name: 'user-settings',
-        component: UserSettingsPage,
-        children: [
-          {
-            path: 'payment-methods',
-            name: 'user-payment-methods',
-            component: UserPaymentMethodsPage,
-            children: [],
-          },
-        ],
       },
       {
         path: 'settings/cooperative',

@@ -20,6 +20,7 @@ import type { PaginationResultLegacy } from '~/types/pagination.types';
 import type { CreateDepositPaymentInputDomainInterface } from '../interfaces/create-deposit-input-domain.interface';
 import type { CreateInitialPaymentInputDomainInterface } from '../interfaces/create-initial-input-domain.interface';
 import type { SetPaymentStatusInputDomainInterface } from '../interfaces/set-payment-status-domain-input.interface';
+import { sha256 } from '~/utils/sha256';
 
 @Injectable()
 export class PaymentDomainService {
@@ -174,9 +175,8 @@ export class PaymentDomainService {
     if (data.status == 'refunded') {
       await blockchainService.cancelOrder({
         coopname: config.coopname,
-        admin: config.coopname,
-        deposit_id: order.order_num as number,
-        memo: '',
+        income_hash: sha256(order.order_num as number),
+        reason: '',
       });
 
       if (order.type === 'registration') {

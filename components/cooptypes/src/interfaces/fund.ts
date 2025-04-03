@@ -115,17 +115,6 @@ export interface IExpfund {
   expended: IAsset
 }
 
-export interface IFundwallet {
-  id: IUint64
-  coopname: IName
-  circulating: IAsset
-  membership: IAsset
-  accumulated: IAsset
-  withdrawed: IAsset
-  available: IAsset
-  expended: IAsset
-}
-
 export interface IFundwithdraw {
   coopname: IName
   username: IName
@@ -186,6 +175,12 @@ export interface ISubaccum {
 }
 
 export interface ISubcirculate {
+  coopname: IName
+  quantity: IAsset
+  skip_available_check: boolean
+}
+
+export interface ISubinitial {
   coopname: IName
   quantity: IAsset
 }

@@ -75,4 +75,9 @@ export default [
     path: path.resolve(process.cwd(), '../contracts/build/contracts/capital'),
     target: 'capital',
   },
+  {
+    name: 'wallet',
+    path: path.resolve(process.cwd(), '../contracts/build/contracts/wallet'),
+    target: 'wallet',
+  },
 ]

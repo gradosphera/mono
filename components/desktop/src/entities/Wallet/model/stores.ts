@@ -51,15 +51,6 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
 
   const loadUserWalet = async (params: ILoadUserWallet) => {
 
-    // const createEmptyWallet = (): IWalletData => ({
-    //   username: '',
-    //   coopname: '',
-    //   available: `0.0000 ${CURRENCY}`,
-    //   blocked: `0.0000 ${CURRENCY}`,
-    //   minimum: `0.0000 ${CURRENCY}`,
-    //   initial: `0.0000 ${CURRENCY}`,
-    // });
-
     try {
       const data = await Promise.all([
         // api.loadSingleUserWalletData(params),

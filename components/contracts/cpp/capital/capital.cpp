@@ -16,6 +16,15 @@
 #include "src/commit/declinecmmt.cpp"
 #include "src/commit/delcmmt.cpp"
 
+#include "src/debt/createdebt.cpp"
+#include "src/debt/approvedebt.cpp"
+
+#include "src/debt/debtauthcnfr.cpp"
+#include "src/debt/debtpaycnfrm.cpp"
+#include "src/debt/debtpaydcln.cpp"
+#include "src/debt/declinedebt.cpp"
+#include "src/debt/settledebt.cpp"
+
 
 #include "src/claim/approveclaim.cpp"
 #include "src/claim/createclaim.cpp"
@@ -31,7 +40,6 @@
 #include "src/managment/addauthor.cpp"
 #include "src/managment/allocate.cpp"
 #include "src/managment/diallocate.cpp"
-#include "src/managment/wthdrcallbck.cpp"
 
 
 #include "src/withdraw_from_result/createwthd1.cpp"
@@ -51,8 +59,11 @@
 
 #include "src/expense/approveexpns.cpp"
 #include "src/expense/capauthexpns.cpp"
+// #include "src/expense/capdeclexpns.cpp"
 #include "src/expense/createexpnse.cpp"
-#include "src/expense/expense_withdraw_callback.cpp"
+#include "src/expense/exppaycnfrm.cpp"
+
+
 
 #include "src/fundproj/fundproj.cpp"
 #include "src/fundproj/refreshproj.cpp"
@@ -302,6 +313,19 @@ std::optional<result> capital::get_result(eosio::name coopname, const checksum25
     return *result_itr;
 }
 
+
+std::optional<debt> capital::get_debt(eosio::name coopname, const checksum256 &debt_hash) {
+    debts_index debts(_capital, coopname.value);
+    auto hash_index = debts.get_index<"bydebthash"_n>();
+
+    auto itr = hash_index.find(debt_hash);
+    if (itr == hash_index.end()) {
+        return std::nullopt;
+    }
+
+    return *itr;
+}
+
 result capital::get_result_or_fail(eosio::name coopname, const checksum256 &result_hash, const char* msg) {
     auto maybe_result = get_result(coopname, result_hash);
     eosio::check(maybe_result.has_value(), msg);
@@ -377,7 +401,18 @@ std::optional<capital_tables::project_withdraw> capital::get_project_withdraw(eo
 }
 
 
-std::optional<claim> capital::get_claim(eosio::name coopname, const checksum256 &result_hash, eosio::name username) {
+std::optional<claim> capital::get_claim(eosio::name coopname, const checksum256 &claim_hash) {
+    claim_index claims(_capital, coopname.value);
+    auto idx = claims.get_index<"byhash"_n>();
+    
+    auto it = idx.find(claim_hash);
+    if (it == idx.end()) {
+        return std::nullopt;
+    }
+    return *it;
+}
+
+std::optional<claim> capital::get_claim_by_result_and_username(eosio::name coopname, const checksum256 &result_hash, eosio::name username) {
     claim_index claims(_capital, coopname.value);
     auto idx = claims.get_index<"byresuser"_n>();
     auto rkey = combine_checksum_ids(result_hash, username);
@@ -403,8 +438,8 @@ std::optional<convert> capital::get_convert(eosio::name coopname, const checksum
 }
 
 
-claim capital::get_claim_or_fail(eosio::name coopname, const checksum256 &result_hash, eosio::name username, const char* msg) {
-    auto c = get_claim(coopname, result_hash, username);
+claim capital::get_claim_by_result_and_username_or_fail(eosio::name coopname, const checksum256 &result_hash, eosio::name username, const char* msg) {
+    auto c = get_claim_by_result_and_username(coopname, result_hash, username);
     eosio::check(c.has_value(), msg);
     return *c;
 }

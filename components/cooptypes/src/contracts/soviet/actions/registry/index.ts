@@ -27,9 +27,3 @@ export * as NewAct from './newact'
  * @private
  */
 export * as NewDecision from './newdecision'
-
-/**
- * Действие фиксирует в реестре идентификатор созданной целевой потребительской программы кооператива.
- * @private
- */
-export * as NewProgram from './newprogram'

@@ -2,19 +2,22 @@ void capital::createclaim(
     eosio::name coopname,
     eosio::name application,
     eosio::name username,
-    checksum256 result_hash
+    checksum256 result_hash,
+    checksum256 claim_hash
 ) {
-    // Авторизация
-    check_auth_or_fail(_capital, coopname, application, "createclaim"_n);
+    require_auth(coopname);
 
     // Получаем результат (или кидаем ошибку)
     auto exist_result = get_result_or_fail(coopname, result_hash, "Результат не найден");
     eosio::check(exist_result.status == "opened"_n, "Распределение стоимости результата еще не начато или уже завершено");
     
     // Проверяем, нет ли уже такого клайма
-    auto existing_claim = get_claim(coopname, result_hash, username);
+    auto existing_claim = get_claim_by_result_and_username(coopname, result_hash, username);
     eosio::check(!existing_claim.has_value(), "Клайм уже существует");
 
+    auto exist_claim = get_claim(coopname, claim_hash);
+    eosio::check(exist_claim.has_value(), "Клайм с указанным хэш уже существует");
+    
     // Находим запись в таблице results
     result_index results(_capital, coopname.value);
     auto result = results.find(exist_result.id);
@@ -105,6 +108,7 @@ void capital::createclaim(
         n.id          = claim_id;
         n.username    = username;
         n.result_hash = result_hash;
+        n.claim_hash  = claim_hash;
         n.coopname    = coopname;
         n.status      = "created"_n;
         n.author_amount = asset(author_amount, _root_govern_symbol);

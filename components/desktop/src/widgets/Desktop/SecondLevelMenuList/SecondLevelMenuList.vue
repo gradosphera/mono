@@ -1,4 +1,5 @@
 <template lang="pug">
+div
   q-list(
     v-if="filteredRoutes"
     class="second-menu"
@@ -65,6 +66,7 @@
 
   const filteredRoutes = computed(() => {
     const secondLevelRoutes = desktop.getSecondLevel(route) as unknown as IRoute[];
+
     return secondLevelRoutes.filter((route) => {
       const rolesMatch = route.meta?.roles?.includes(context.value.userRole) || route.meta?.roles?.length === 0;
       const conditionMatch = route.meta?.conditions

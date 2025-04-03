@@ -57,3 +57,8 @@ export const _capital = {
   production: 'capital',
   testnet: 'capital',
 } as const
+
+export const _wallet = {
+  production: 'wallet',
+  testnet: 'wallet',
+} as const

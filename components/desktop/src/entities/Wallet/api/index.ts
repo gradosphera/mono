@@ -157,10 +157,12 @@ async function loadUserProgramWalletsData(
 }
 
 async function loadMethods(params: IGetPaymentMethods): Promise<IPaymentMethodData[]> {
-  const {username} = params
+  const { username } = params;
   const methods = (await sendGET(`/v1/methods/${username}`)) as IGetResponsePaymentMethodData;
 
-  return methods.results;
+  //тут стоит костыль, т.к. method_id это string, а фабрика документов не возвращает платежные методы с ID в виде number, по которым можно отсортировать.
+  //и дат там тоже нет. Как появятся даты/номера - так и сортировку эту поправим.
+  return methods.results.sort((a, b) => b.method_id.localeCompare(a.method_id));
 }
 
 async function loadUserAgreements(coopname: string, username: string): Promise<SovietContract.Tables.Agreements.IAgreement[]> {

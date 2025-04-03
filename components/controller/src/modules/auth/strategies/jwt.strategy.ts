@@ -21,8 +21,9 @@ export class JwtAuthStrategy extends PassportStrategy(JwtStrategy) {
     }
 
     const user = await User.findOne({ _id: payload.sub });
+
     if (!user) {
-      throw new Error('User not found');
+      throw new Error('Пользователь с указанным JWT не найден');
     }
 
     return user; // `user` будет добавлен в `req.user` в запросе

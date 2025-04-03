@@ -85,3 +85,9 @@ export interface ITranslation {
   lang: IName
   data: string
 }
+
+export interface IUpversion {
+  scope: IName
+  username: IName
+  registry_id: IUint64
+}

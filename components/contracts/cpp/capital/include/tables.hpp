@@ -20,6 +20,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] resactor {
     checksum256 result_hash;        // С каким результатом связана запись
     eosio::name username;           // Чей это учёт
     eosio::asset provisional_amount = asset(0, _root_govern_symbol);
+    eosio::asset debt_amount = asset(0, _root_govern_symbol);
     eosio::asset available = asset(0, _root_govern_symbol);
     eosio::asset for_convert = asset(0, _root_govern_symbol);
     eosio::asset spended = asset(0, _root_govern_symbol);    
@@ -183,6 +184,8 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] contributor {
     eosio::asset rate_per_hour = asset(0, _root_govern_symbol);
     
     eosio::asset spended = asset(0, _root_govern_symbol);
+    eosio::asset debt_amount = asset(0, _root_govern_symbol);
+    
     eosio::asset withdrawed = asset(0, _root_govern_symbol);
     eosio::asset converted = asset(0, _root_govern_symbol);
     eosio::asset expensed = asset(0, _root_govern_symbol);
@@ -323,6 +326,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] claim {
     uint64_t id;
     checksum256 project_hash;
     checksum256 result_hash;
+    checksum256 claim_hash;
     
     eosio::name coopname;
     eosio::name username;
@@ -343,6 +347,8 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] claim {
     
     uint64_t primary_key() const { return id; }     ///< Основной ключ.
     uint64_t by_username() const { return username.value; } ///< Индекс по владельцу
+    checksum256 by_hash() const { return claim_hash; } ///< Индекс по хэшу проекта
+    
     checksum256 by_result_hash() const { return result_hash; } ///< Индекс по хэшу
     checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта
     
@@ -353,6 +359,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] claim {
 
   typedef eosio::multi_index<"claims"_n, claim,
     indexed_by<"byusername"_n, const_mem_fun<claim, uint64_t, &claim::by_username>>,
+    indexed_by<"byhash"_n, const_mem_fun<claim, checksum256, &claim::by_hash>>,
     indexed_by<"byresult"_n, const_mem_fun<claim, checksum256, &claim::by_result_hash>>,
     indexed_by<"byprojecthash"_n, const_mem_fun<claim, checksum256, &claim::by_project_hash>>,
     indexed_by<"byresuser"_n, const_mem_fun<claim, uint128_t, &claim::by_result_user>>

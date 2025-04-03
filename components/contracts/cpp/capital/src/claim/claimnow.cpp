@@ -1,11 +1,11 @@
-void capital::claimnow(name coopname, name application, name username, checksum256 result_hash, document statement) {
-  check_auth_or_fail(_capital, coopname, application, "claimnow"_n);
+void capital::claimnow(name coopname, name application, name username, checksum256 claim_hash, document statement) {
+  require_auth(coopname);
 
   // проверяем заявление
   verify_document_or_fail(statement);
 
   // извлекаем клайм
-  auto claim = get_claim(coopname, result_hash, username);
+  auto claim = get_claim(coopname, claim_hash);
   eosio::check(claim.has_value(), "Объект запроса доли не найден");
   eosio::check(claim->status == "pending"_n, "Нельзя изменить статус клайма");
   eosio::check(claim -> username == username, "Неверно указано имя пользователя владельца результата");

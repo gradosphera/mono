@@ -24,6 +24,17 @@ export interface IAddmemberfee {
   memo: string
 }
 
+export interface IAddpartcpnt {
+  coopname: IName
+  username: IName
+  braname: IName
+  type: IName
+  created_at: ITimePointSec
+  initial: IAsset
+  minimum: IAsset
+  spread_initial: boolean
+}
+
 export interface IAddress {
   id: IUint64
   coopname: IName
@@ -58,16 +69,6 @@ export interface IAddstaff {
   position_title: string
 }
 
-export interface IAdduser {
-  coopname: IName
-  username: IName
-  type: IName
-  created_at: ITimePointSec
-  initial: IAsset
-  minimum: IAsset
-  spread_initial: boolean
-}
-
 export interface IAgreement {
   id: IUint64
   coopname: IName
@@ -79,6 +80,19 @@ export interface IAgreement {
   document: IDocument
   status: IName
   updated_at: ITimePointSec
+}
+
+export interface IApproval {
+  id: IUint64
+  coopname: IName
+  username: IName
+  document: IDocument
+  approval_hash: IChecksum256
+  callback_contract: IName
+  callback_action_approve: IName
+  callback_action_decline: IName
+  meta: string
+  created_at: ITimePointSec
 }
 
 export interface IAuthorize {
@@ -201,6 +215,12 @@ export interface IConfirmagree {
   agreement_id: IUint64
 }
 
+export interface IConfirmapprv {
+  coopname: IName
+  approval_hash: IChecksum256
+  approved_document?: IDocument
+}
+
 export interface ICounts extends ICountsBase {
 }
 
@@ -220,10 +240,23 @@ export interface ICreaddress {
 export interface ICreateagenda {
   coopname: IName
   username: IName
+  type: IName
+  hash: IChecksum256
   callback_contract: IName
-  callback_action: IName
-  batch_id: IUint64
+  confirm_callback: IName
+  decline_callback: IName
   statement: IDocument
+  meta: string
+}
+
+export interface ICreateapprv {
+  coopname: IName
+  username: IName
+  document: IDocument
+  approval_hash: IChecksum256
+  callback_contract: IName
+  callback_action_approve: IName
+  callback_action_decline: IName
   meta: string
 }
 
@@ -270,6 +303,9 @@ export interface IDecision {
   expired_at: ITimePointSec$
   meta: IString$
   callback_contract: IName$
+  confirm_callback: IName$
+  decline_callback: IName$
+  hash: IChecksum256$
 }
 
 export interface IDeclineagree {
@@ -278,6 +314,12 @@ export interface IDeclineagree {
   username: IName
   agreement_id: IUint64
   comment: string
+}
+
+export interface IDeclineapprv {
+  coopname: IName
+  approval_hash: IChecksum256
+  reason: string
 }
 
 export interface IDeclinedoc {
@@ -361,27 +403,12 @@ export interface IFundwithdraw {
 export interface IInit {
 }
 
-export interface IJoincoop {
-  coopname: IName
-  braname: IName
-  username: IName
-  document: IDocument
-}
-
 export interface IJoincoops {
   id: IUint64
   username: IName
   is_paid: boolean
   notice: string
   braname: IName$
-}
-
-export interface IMakecoagreem {
-  coopname: IName
-  administrator: IName
-  type: IName
-  draft_id: IUint64
-  program_id: IUint64
 }
 
 export interface IMigrate {
@@ -413,11 +440,6 @@ export interface INewdeclined {
   coopname: IName
   username: IName
   document: IDocument
-}
-
-export interface INewprogram {
-  coopname: IName
-  program_id: IUint64
 }
 
 export interface INewresolved {
@@ -506,11 +528,6 @@ export interface IProgwallet {
 export interface IRecieved {
   coopname: IName
   exchange_id: IUint64
-}
-
-export interface IRegpaid {
-  coopname: IName
-  username: IName
 }
 
 export interface IRight {

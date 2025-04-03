@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import Blockchain from '../blockchain'
 import config from '../configs'
 import { getTotalRamUsage, globalRamStats } from '../utils/getTotalRamUsage'
-import { createParticipant } from '../init/participant'
+import { addUser } from '../init/participant'
 import { generateRandomUsername } from '../utils/randomUsername'
 import { signWalletAgreement } from './wallet/signWalletAgreement'
 import { depositToWallet } from './wallet/depositToWallet'
@@ -23,7 +23,7 @@ beforeAll(async () => {
 
   tester1 = generateRandomUsername()
   console.log('tester1: ', tester1)
-  await createParticipant(tester1)
+  await addUser(tester1)
 }, 500_000)
 
 afterAll(() => {

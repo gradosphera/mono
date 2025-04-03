@@ -1,10 +1,11 @@
-void capital::capauthexpns(eosio::name coopname, uint64_t expense_id, document authorization) {
+void capital::capauthexpns(eosio::name coopname, checksum256 expense_hash, document authorization) {
   require_auth(_soviet);
   
-  expense_index expenses(_capital, coopname.value);
-  auto expense = expenses.find(expense_id);
+  auto exist_expense = get_expense(coopname, expense_hash);
+  eosio::check(exist_expense.has_value(), "Расход не найден");
   
-  eosio::check(expense != expenses.end(), "Расход не найден");
+  expense_index expenses(_capital, coopname.value);
+  auto expense = expenses.find(exist_expense -> id);
   
   auto contributor = get_active_contributor_or_fail(coopname, expense -> project_hash, expense -> username);
   eosio::check(contributor.has_value(), "Договор УХД с пайщиком по проекту не найден");
@@ -16,8 +17,16 @@ void capital::capauthexpns(eosio::name coopname, uint64_t expense_id, document a
   });
   
   // создаём объект исходящего платежа в gateway с коллбэком после обработки
-  action(permission_level{ _capital, "active"_n}, _gateway, _gateway_create_expense_withdraw_action,
-    std::make_tuple(coopname, ""_n, expense -> username, expense -> expense_hash, expense -> amount, expense -> expense_statement, _capital, _gateway_to_capital_expense_callback_type, std::string("")))
-  .send();  
+  action(permission_level{ _capital, "active"_n}, _gateway, "createoutpay"_n,
+    std::make_tuple(
+      coopname, 
+      expense -> username, 
+      expense -> expense_hash, 
+      expense -> amount, 
+      _capital, 
+      "exppaycnfrm"_n, 
+      "capdeclexpns"_n
+    )
+  ).send();  
 
 }

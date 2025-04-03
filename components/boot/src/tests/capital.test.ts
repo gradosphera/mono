@@ -4,7 +4,7 @@ import Blockchain from '../blockchain'
 import config from '../configs'
 import { getTotalRamUsage, globalRamStats } from '../utils/getTotalRamUsage'
 import { generateRandomSHA256 } from '../utils/randomHash'
-import { createParticipant } from '../init/participant'
+import { addUser } from '../init/participant'
 import { generateRandomUsername } from '../utils/randomUsername'
 import { sleep } from '../utils'
 import { processDecision } from './soviet/processDecision'
@@ -55,19 +55,19 @@ beforeAll(async () => {
 
   investor1 = generateRandomUsername()
   console.log('investor1: ', investor1)
-  await createParticipant(investor1)
+  await addUser(investor1)
 
   tester1 = generateRandomUsername()
   console.log('tester1: ', tester1)
-  await createParticipant(tester1)
+  await addUser(tester1)
 
   tester2 = generateRandomUsername()
   console.log('tester2: ', tester2)
-  await createParticipant(tester2)
+  await addUser(tester2)
 
   tester3 = generateRandomUsername()
   console.log('tester3: ', tester3)
-  await createParticipant(tester3)
+  await addUser(tester3)
 
   // const { stdout } = await execa('esno', [CLI_PATH, 'boot'], { stdio: 'inherit' })
   // expect(stdout).toContain('Boot process completed')
