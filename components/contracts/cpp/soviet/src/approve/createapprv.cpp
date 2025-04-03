@@ -13,7 +13,7 @@ void soviet::createapprv(eosio::name coopname,
     eosio::check(callback_action_approve != ""_n, "callback_action_approve required");
     eosio::check(callback_action_decline != ""_n, "callback_action_decline required");
 
-    if (!is_document_empty(document)) {
+    if (!is_empty_document(document)) {
       verify_document_or_fail(document);
     }
     

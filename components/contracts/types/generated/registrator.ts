@@ -58,6 +58,7 @@ export interface IConfirmpay {
 export interface IConfirmreg {
   coopname: IName
   registration_hash: IChecksum256
+  authorization: IDocument
 }
 
 export interface ICooperative {

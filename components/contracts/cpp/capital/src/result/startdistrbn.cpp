@@ -14,7 +14,7 @@ void capital::startdistrbn(name coopname, name application, checksum256 result_h
     results.modify(result_for_modify, coopname, [&](auto& row) {
       row.status = "opened"_n;
       row.authors_bonus_remain = row.authors_bonus;
-      row.creators_amount_remain = row.creators_amount;
+      row.creators_base_remain = row.creators_base;
       row.creators_bonus_remain = row.creators_bonus;
       row.capitalists_bonus_remain = row.capitalists_bonus;
     });

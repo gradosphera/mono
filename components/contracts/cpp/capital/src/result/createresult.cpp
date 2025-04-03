@@ -8,7 +8,9 @@ void capital::createresult(name coopname, name application, checksum256 project_
     result_index results(_capital, coopname.value);
     auto result = get_result(coopname, result_hash);
     eosio::check(!result.has_value(), "Объект результата уже существует");
-
+    
+    get_participant_or_fail(coopname, assignee);
+    
     // Создаём RESULT
     results.emplace(coopname, [&](auto &n){
       n.id = get_global_id_in_scope(_capital, coopname, "results"_n);

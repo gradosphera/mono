@@ -1,4 +1,4 @@
-void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, std::optional<document> document) {
+void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, document empty_document) {
   require_auth(_soviet);
   
   auto exist_commit = get_commit(coopname, commit_hash);
@@ -16,11 +16,15 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, std::op
   result_index results(_capital, coopname.value);
   auto result = results.find(exist_result -> id);
   
-  results.modify(result, coopname, [&](auto &row) {
+  results.modify(result, _capital, [&](auto &row) {
       row.spended            += commit -> spended;
+      row.creators_base    += commit -> spended;
+      row.generated          += commit -> generated;
       row.creators_bonus     += commit -> creators_bonus;
       row.authors_bonus      += commit -> authors_bonus;
       row.capitalists_bonus  += commit -> capitalists_bonus;
+      row.total              += commit -> total;
+      row.total_creators_bonus_shares += commit-> spended.amount;
       row.commits_count++;
   });
 
@@ -30,11 +34,15 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, std::op
   project_index projects(_capital, coopname.value);
   auto project = projects.find(exist_project -> id);
   
-  projects.modify(project, coopname, [&](auto &p) {
-      p.spended            += commit->spended;
+  projects.modify(project, _capital, [&](auto &p) {
+      p.spended            += commit -> spended;
+      p.generated          += commit -> generated;
+      p.creators_base    += commit -> spended;
       p.creators_bonus     += commit -> creators_bonus;
       p.authors_bonus      += commit -> authors_bonus;
       p.capitalists_bonus  += commit -> capitalists_bonus;
+      p.total              += commit -> total;
+      
       p.commits_count++;
   });
     
@@ -52,7 +60,7 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, std::op
   resactor_index ractors(_capital, coopname.value);
       
   if (!exist_resactor.has_value()) {
-    ractors.emplace(coopname, [&](auto &ra){
+    ractors.emplace(_capital, [&](auto &ra){
         ra.id            = ractors.available_primary_key();
         ra.project_hash  = commit->project_hash;
         ra.result_hash   = commit->result_hash;
@@ -61,14 +69,16 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, std::op
         ra.contributed_hours  = commit->contributed_hours;
         // сумма, которая доступна для получения ссуды и используется в качества залога
         ra.provisional_amount = commit->spended;
+        ra.creators_bonus_shares = commit->spended.amount;
     });
   } else {
     auto resactor = ractors.find(exist_resactor->id);
-    ractors.modify(resactor, coopname, [&](auto &ra) {
+    ractors.modify(resactor, _capital, [&](auto &ra) {
         ra.spended += commit->spended;
         ra.contributed_hours  += commit->contributed_hours;
         ra.provisional_amount += commit->spended;
-    });    
+        ra.creators_bonus_shares += commit->spended.amount;
+    });
   }
 
   commits.erase(commit);  

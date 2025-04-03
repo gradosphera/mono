@@ -30,6 +30,7 @@ macro(add_contract_build name)
 endmacro()
 
 # Добавляем все контракты
+add_contract_build(loan)
 add_contract_build(wallet)
 add_contract_build(capital)
 add_contract_build(branch)

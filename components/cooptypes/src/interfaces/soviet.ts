@@ -218,7 +218,7 @@ export interface IConfirmagree {
 export interface IConfirmapprv {
   coopname: IName
   approval_hash: IChecksum256
-  approved_document?: IDocument
+  approved_document: IDocument
 }
 
 export interface ICounts extends ICountsBase {

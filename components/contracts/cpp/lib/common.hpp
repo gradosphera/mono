@@ -19,6 +19,6 @@
 #include "shared_gateway.hpp"
 #include "shared_approver.hpp"
 #include "shared_registrator.hpp"
-
+#include "shared_loan.hpp"
 #include "approves.hpp"
 #include "debts.hpp"

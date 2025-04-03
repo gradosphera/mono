@@ -51,7 +51,7 @@ export async function depositToWallet(blockchain: any, coopname: string, usernam
   const prevCoopWallet = await getCoopWallet(blockchain, coopname)
   const prevCoopWalletAvailable = prevCoopWallet?.circulating_account?.available || '0.0000 RUB'
 
-  const data2: GatewayContract.Actions.CompleteIncome.ICompeteIncome = {
+  const data2: GatewayContract.Actions.CompleteIncome.ICompleteIncome = {
     coopname,
     income_hash: data.deposit_hash,
   }

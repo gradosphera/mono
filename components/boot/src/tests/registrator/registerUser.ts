@@ -67,7 +67,7 @@ export async function registerUser(blockchain: any, coopname: string, username: 
 
   // 🔹 3. Подтверждение прихода
   {
-    const data: GatewayContract.Actions.CompleteIncome.ICompeteIncome = {
+    const data: GatewayContract.Actions.CompleteIncome.ICompleteIncome = {
       coopname,
       income_hash: registration_hash,
     }

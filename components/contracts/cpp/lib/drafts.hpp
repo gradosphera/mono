@@ -21,7 +21,7 @@ void verify_document_or_fail(const document &doc)
   assert_recover_key(doc.hash, doc.signature, doc.public_key);
 };
 
-bool is_document_empty(const document &doc)
+bool is_empty_document(const document &doc)
 {
     constexpr checksum256 EMPTY_HASH = checksum256(); // Все нули по умолчанию
     
