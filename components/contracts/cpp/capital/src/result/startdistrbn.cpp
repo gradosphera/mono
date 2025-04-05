@@ -12,7 +12,7 @@ void capital::startdistrbn(name coopname, name application, checksum256 result_h
     auto result_for_modify = results.find(result -> id);
     
     results.modify(result_for_modify, coopname, [&](auto& row) {
-      row.status = "opened"_n;
+      row.status = "closed"_n;
       row.authors_bonus_remain = row.authors_bonus;
       row.creators_base_remain = row.creators_base;
       row.creators_bonus_remain = row.creators_bonus;

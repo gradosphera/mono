@@ -8,7 +8,22 @@ void capital::debtauthcnfr(eosio::name coopname, checksum256 debt_hash, document
 
     debts_index debts(_capital, coopname.value);
     auto debt = debts.find(exist_debt -> id);
-
+    debts.modify(debt, _capital, [&](auto &d){
+      d.status = "authorized"_n;
+      d.authorization = decision;  
+    });
+    
+    //Создаём объект долга в контракте loan
+    action(permission_level{ _capital, "active"_n}, _loan, "createdebt"_n,
+      std::make_tuple(
+        coopname, 
+        debt -> username, 
+        debt -> debt_hash, 
+        debt -> repaid_at,
+        debt -> amount
+      )
+    ).send();  
+    
     // создаём объект исходящего платежа в gateway с коллбэком после обработки
     action(permission_level{ _capital, "active"_n}, _gateway, "createoutpay"_n,
       std::make_tuple(

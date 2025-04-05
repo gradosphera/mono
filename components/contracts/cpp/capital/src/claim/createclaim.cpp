@@ -9,7 +9,7 @@ void capital::createclaim(
 
     // Получаем результат (или кидаем ошибку)
     auto exist_result = get_result_or_fail(coopname, result_hash, "Результат не найден");
-    eosio::check(exist_result.status == "opened"_n, "Распределение стоимости результата еще не начато или уже завершено");
+    eosio::check(exist_result.status == "closed"_n, "Распределение стоимости результата еще не начато или уже завершено");
     
     // Проверяем, нет ли уже такого клайма
     auto existing_claim = get_claim_by_result_and_username(coopname, result_hash, username);
@@ -105,7 +105,7 @@ void capital::createclaim(
         n.creator_base_amount     = creator_base;
         n.creator_bonus_amount    = creator_bonus;
         n.author_bonus_amount     = author_bonus;
-        n.capitalists_bonus_amount = capitalist_bonus;
+        n.capitalist_bonus_amount = capitalist_bonus;
         n.generation_amount       = author_bonus + creator_base + creator_bonus;
         n.total_amount            = total_amount;
     });

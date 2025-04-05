@@ -1,4 +1,4 @@
-void capital::createdebt(name coopname, name username, checksum256 result_hash, checksum256 debt_hash, asset amount, document statement) {
+void capital::createdebt(name coopname, name username, checksum256 result_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document statement) {
   require_auth(coopname);
   
   verify_document_or_fail(statement);
@@ -49,6 +49,7 @@ void capital::createdebt(name coopname, name username, checksum256 result_hash, 
     d.project_hash = result -> project_hash;
     d.amount = amount;
     d.statement = statement;
+    d.repaid_at = repaid_at;
   });
   
   
