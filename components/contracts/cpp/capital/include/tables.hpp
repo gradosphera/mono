@@ -344,7 +344,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] claim {
     eosio::asset creator_bonus_amount = asset(0, _root_govern_symbol);
     eosio::asset author_bonus_amount = asset(0, _root_govern_symbol);
     eosio::asset generation_amount = asset(0, _root_govern_symbol);
-    eosio::asset capitalists_bonus_amount = asset(0, _root_govern_symbol);
+    eosio::asset capitalist_bonus_amount = asset(0, _root_govern_symbol);
 
     eosio::asset total_amount = asset(0, _root_govern_symbol);
         

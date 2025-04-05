@@ -4,6 +4,18 @@
 #include <eosio/asset.hpp>
 #include <optional>
 
+using namespace eosio;
+using std::string;
+
+// Сигнатуры как макросы
+#define CREATEDEBT_SIGNATURE name coopname, name username, checksum256 debt_hash, time_point_sec repaid_at, asset quantity
+#define SETTLEDEBT_SIGNATURE name coopname, name username, checksum256 debt_hash, asset quantity
+
+// Типы для compile-time проверки
+using createdebt_action_type = void(CREATEDEBT_SIGNATURE);
+using settledebt_action_type = void(SETTLEDEBT_SIGNATURE);
+
+
 namespace Loan {
   using namespace eosio;
 

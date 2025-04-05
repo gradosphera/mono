@@ -122,7 +122,7 @@ public:
     
     // Долги
     [[eosio::action]]
-    void createdebt(name coopname, name username, checksum256 result_hash, checksum256 debt_hash, asset amount, document statement);
+    void createdebt(name coopname, name username, checksum256 result_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document statement);
     
     [[eosio::action]]
     void approvedebt(eosio::name coopname, checksum256 debt_hash, document approved_statement);

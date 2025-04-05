@@ -15,7 +15,7 @@ void capital::createcnvrt(
 
     // Получаем результат (или кидаем ошибку)
     auto exist_result = get_result_or_fail(coopname, result_hash, "Результат не найден");
-    eosio::check(exist_result.status == "opened"_n || exist_result.status == "created"_n, "Распределение стоимости результата еще не начато или уже завершено");
+    eosio::check(exist_result.status == "closed"_n, "Распределение стоимости результата еще не начато");
     
     // Проверяем, нет ли уже такой конвертации
     auto existing_convert = get_convert(coopname, convert_hash);
