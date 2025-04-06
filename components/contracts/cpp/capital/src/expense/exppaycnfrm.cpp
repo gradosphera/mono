@@ -12,14 +12,14 @@ void capital::exppaycnfrm(eosio::name coopname, checksum256 expense_hash) {
     c.expensed += expense -> amount;
   });
   
-  auto exist_result = get_result(coopname, expense -> result_hash);
-  eosio::check(exist_result.has_value(),"Результат не найден");
+  auto exist_assignment = get_assignment(coopname, expense -> assignment_hash);
+  eosio::check(exist_assignment.has_value(),"Задание не найдено");
   
-  result_index results(_capital, coopname.value);
-  auto result = results.find(exist_result -> id);
+  assignment_index assignments(_capital, coopname.value);
+  auto assignment = assignments.find(exist_assignment -> id);
   
   //TODO: make coopname payer
-  results.modify(result, payer, [&](auto &r){
+  assignments.modify(assignment, payer, [&](auto &r){
     r.expensed += expense -> amount;
   });  
   

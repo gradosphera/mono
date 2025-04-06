@@ -6,35 +6,35 @@ void capital::createcnvrt(
     eosio::name coopname,
     eosio::name application,
     eosio::name username,
-    checksum256 result_hash,
+    checksum256 assignment_hash,
     checksum256 convert_hash,
     document convert_statement
 ) {
     // Авторизация
     require_auth(coopname);
 
-    // Получаем результат (или кидаем ошибку)
-    auto exist_result = get_result_or_fail(coopname, result_hash, "Результат не найден");
-    eosio::check(exist_result.status == "closed"_n, "Распределение стоимости результата еще не начато");
+    // Получаем задание (или кидаем ошибку)
+    auto exist_assignment = get_assignment_or_fail(coopname, assignment_hash, "Задание не найдено");
+    eosio::check(exist_assignment.status == "closed"_n, "Распределение стоимости задания еще не начато");
     
     // Проверяем, нет ли уже такой конвертации
     auto existing_convert = get_convert(coopname, convert_hash);
     eosio::check(!existing_convert.has_value(), "Объект конвертации с указанным хэшем уже существует");
     
-    // Находим запись в таблице results
-    result_index results(_capital, coopname.value);
-    auto result = results.find(exist_result.id);
+    // Находим запись в таблице assignments
+    assignment_index assignments(_capital, coopname.value);
+    auto assignment = assignments.find(exist_assignment.id);
     
     // Получаем контрибьютора
-    auto exist_contributor = get_active_contributor_or_fail(coopname, exist_result.project_hash, username);
+    auto exist_contributor = get_active_contributor_or_fail(coopname, exist_assignment.project_hash, username);
     contributor_index contributors(_capital, coopname.value);
     auto contributor = contributors.find(exist_contributor->id);
 
-    // Попробуем найти resactor
-    auto exist_resactor = get_resactor_or_fail(coopname, result_hash, username, "Объект актора в результате не найден");
+    // Попробуем найти creauthor
+    auto exist_creauthor = get_creauthor_or_fail(coopname, assignment_hash, username, "Объект актора в результате не найден");
    
     //=== Сумма к конвертации ===
-    asset convert_amount = exist_resactor.available + exist_resactor.for_convert;
+    asset convert_amount = exist_creauthor.available + exist_creauthor.for_convert;
     eosio::check(convert_amount.amount > 0, "Нет доступных средств для конвертации");
     
     //=== Создаём запись в converts ===
@@ -44,8 +44,8 @@ void capital::createcnvrt(
     converts.emplace(coopname, [&](auto &n) {
         n.id          = convert_id;
         n.username    = username;
-        n.project_hash = exist_result.project_hash;
-        n.result_hash = result_hash;
+        n.project_hash = exist_assignment.project_hash;
+        n.assignment_hash = assignment_hash;
         n.convert_hash = convert_hash;
         n.coopname    = coopname;
         n.status      = "created"_n;
@@ -53,18 +53,18 @@ void capital::createcnvrt(
         n.convert_statement = convert_statement;
     });
     
-    eosio::check(result -> creators_base_remain >= convert_amount, "Недостаточно средств в result.creators_base_remain для конвертации");
+    eosio::check(assignment -> creators_base_remain >= convert_amount, "Недостаточно средств в assignment.creators_base_remain для конвертации");
 
-    results.modify(result, coopname, [&](auto &r) {
+    assignments.modify(assignment, coopname, [&](auto &r) {
         r.creators_base_remain -= convert_amount;
     });
     
-    resactor_index ractors(_capital, coopname.value);
+    creauthor_index ractors(_capital, coopname.value);
     
-    auto resactor = ractors.find(exist_resactor.id);
+    auto creauthor = ractors.find(exist_creauthor.id);
     
     //обнуляем доступные средства к выводу или конвертации
-    ractors.modify(resactor, coopname, [&](auto &ra) {
+    ractors.modify(creauthor, coopname, [&](auto &ra) {
         ra.for_convert = asset(0, _root_govern_symbol);
         ra.available = asset(0, _root_govern_symbol);
     });

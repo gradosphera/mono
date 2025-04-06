@@ -82,8 +82,6 @@ static constexpr eosio::name _capital_invest_authorize_action = "capauthinvst"_n
 static constexpr eosio::name _capital_withdraw_from_result_authorize_action = "capauthwthd1"_n;
 static constexpr eosio::name _capital_expense_authorize_action = "capauthexpns"_n;
 
-static constexpr eosio::name _capital_commit_authorize_action = "capauthcmmt"_n;
-
 static constexpr eosio::name _capital_withdraw_from_project_authorize_action = "capauthwthd2"_n;
 
 static constexpr eosio::name _capital_withdraw_from_program_authorize_action = "capauthwthd3"_n;
@@ -91,7 +89,7 @@ static constexpr eosio::name _capital_withdraw_from_program_authorize_action = "
 
 //capital::debts
 
-static constexpr eosio::name _claim_action = "claim"_n;
+static constexpr eosio::name _result_action = "result"_n;
 
 //program_types
 static constexpr eosio::name _wallet_program = "wallet"_n;
@@ -105,12 +103,12 @@ static const std::set<eosio::name> soviet_actions = {
     
     //CAPITAL
     "capitalinvst"_n, //заявление на инвестиции по договору УХД
-    "capitalclaim"_n, //клайм прироста капитализации из результата
-    "createdebt"_n, //взять ссуду под залог будущего результата
-    "capresexpns"_n, //произвести выплату по расходам результата
+    "createresult"_n, //клайм прироста капитализации из задания
+    "createdebt"_n, //взять ссуду под залог будущего задания
+    "capresexpns"_n, //произвести выплату по расходам задания
     "capwthdrprog"_n, //произвести возврат накопленных членских взносов по программе на капиталиста
     "capwthdrproj"_n, //произвести возврат накопленных членских взносов по проекту на актора
-    "capwthdrres"_n, //произвести возврат из результата
+    "capwthdrres"_n, //произвести возврат из задания
 };
 
 static const std::set<eosio::name> gateway_income_actions = {

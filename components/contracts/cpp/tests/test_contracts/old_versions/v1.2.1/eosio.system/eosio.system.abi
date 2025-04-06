@@ -285,7 +285,7 @@
          {"name":"is_active",       "type":"bool"},
          {"name":"url",             "type":"string"},
          {"name":"unpaid_blocks",   "type":"uint32"},
-         {"name":"last_claim_time", "type":"uint64"},
+         {"name":"last_result_time", "type":"uint64"},
          {"name":"location",        "type":"uint16"}
       ]
     },{
@@ -343,7 +343,7 @@
         {"name":"is_proxy",             "type":"bool"}
       ]
     },{
-      "name": "claimrewards",
+      "name": "resultrewards",
       "base": "",
       "fields": [
         {"name":"owner",   "type":"account_name"}
@@ -527,8 +527,8 @@
       "type": "voteproducer",
       "ricardian_contract": ""
    },{
-      "name": "claimrewards",
-      "type": "claimrewards",
+      "name": "resultrewards",
+      "type": "resultrewards",
       "ricardian_contract": ""
    },{
       "name": "setpriv",

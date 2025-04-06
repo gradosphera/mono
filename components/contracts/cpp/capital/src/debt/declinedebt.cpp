@@ -20,16 +20,16 @@ void capital::declinedebt(name coopname, checksum256 debt_hash, std::string reas
     c.debt_amount -= debt -> amount;
   });
   
-  auto exist_resactor = get_resactor(coopname, debt -> result_hash, debt -> username);
-  eosio::check(exist_resactor.has_value(), "Резактор не найден");
+  auto exist_creauthor = get_creauthor(coopname, debt -> assignment_hash, debt -> username);
+  eosio::check(exist_creauthor.has_value(), "Резактор не найден");
   
-  resactor_index resactors(_capital, coopname.value);
-  auto resactor = resactors.find(exist_resactor->id);
+  creauthor_index creauthors(_capital, coopname.value);
+  auto creauthor = creauthors.find(exist_creauthor->id);
   
-  eosio::check(resactor -> provisional_amount >= debt -> amount, "Недостаточно доступных средств для получения ссуды");
-  eosio::check(resactor -> debt_amount >= debt -> amount, "Возникла какая-то чудовищная ошибка: у пайщика недостаточно средств в долговом кошельке для того, чтобы принять возврат долга. Такого вообще не должно было быть, но если произошло, пожалуйста, срочно обратитесь в поддержку.");
+  eosio::check(creauthor -> provisional_amount >= debt -> amount, "Недостаточно доступных средств для получения ссуды");
+  eosio::check(creauthor -> debt_amount >= debt -> amount, "Возникла какая-то чудовищная ошибка: у пайщика недостаточно средств в долговом кошельке для того, чтобы принять возврат долга. Такого вообще не должно было быть, но если произошло, пожалуйста, срочно обратитесь в поддержку.");
   
-  resactors.modify(resactor, coopname, [&](auto &ra) {
+  creauthors.modify(creauthor, coopname, [&](auto &ra) {
     ra.debt_amount -= debt -> amount;
     ra.provisional_amount += debt -> amount;
   });

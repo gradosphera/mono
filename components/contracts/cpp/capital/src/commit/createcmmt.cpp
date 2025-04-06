@@ -1,10 +1,10 @@
-void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::name username, checksum256 result_hash, checksum256 commit_hash, uint64_t contributed_hours){
+void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::name username, checksum256 assignment_hash, checksum256 commit_hash, uint64_t contributed_hours){
   check_auth_or_fail(_capital, coopname, application, "createcmmt"_n);
   
-  auto result = get_result(coopname, result_hash);
-  eosio::check(result.has_value(), "Результат не найден");
+  auto assignment = get_assignment(coopname, assignment_hash);
+  eosio::check(assignment.has_value(), "Задание не найдено");
   
-  auto contributor = get_active_contributor_or_fail(coopname, result -> project_hash, username);
+  auto contributor = get_active_contributor_or_fail(coopname, assignment -> project_hash, username);
   
   auto exist_commit = get_commit(coopname, commit_hash);
   
@@ -31,8 +31,8 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
     a.coopname = coopname;
     a.application = application;
     a.username = username;
-    a.project_hash = result -> project_hash;
-    a.result_hash = result_hash;
+    a.project_hash = assignment -> project_hash;
+    a.assignment_hash = assignment_hash;
     a.commit_hash = commit_hash;
     a.contributed_hours = contributed_hours;
     a.rate_per_hour = contributor -> rate_per_hour;

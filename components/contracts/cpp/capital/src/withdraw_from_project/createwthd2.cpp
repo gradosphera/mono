@@ -42,7 +42,7 @@ void capital::createwthd2(name coopname, name application, name username, checks
   }
 
   // Запись возврата
-  auto exist_withdraw = get_result_withdraw(coopname, withdraw_hash);
+  auto exist_withdraw = get_project_withdraw(coopname, withdraw_hash);
   eosio::check(!exist_withdraw.has_value(), "Заявка на взнос-возврат с таким хэшем уже существует");
 
   capital_tables::project_withdraws_index project_withdraws(_capital, coopname.value);

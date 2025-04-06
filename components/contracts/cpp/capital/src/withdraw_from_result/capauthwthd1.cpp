@@ -9,7 +9,7 @@ void capital::capauthwthd1(eosio::name coopname, checksum256 withdraw_hash, docu
   auto withdraw = result_withdraws.find(exist_withdraw -> id);
   
   auto exist_contributor = capital::get_active_contributor_or_fail(coopname, withdraw -> project_hash, withdraw -> username);
-  auto exist_result = get_result_or_fail(coopname, withdraw -> result_hash, "Результат не найден");
+  auto exist_assignment = get_assignment_or_fail(coopname, withdraw -> assignment_hash, "Задание не найдено");
   
   // списание с УХД
   std::string memo_out = "Зачёт части целевого паевого взноса по договору УХД с ID: " + std::to_string(exist_contributor -> id) + " в качестве паевого взноса по программе 'Цифровой Кошелёк'";

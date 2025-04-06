@@ -6,10 +6,10 @@ void capital::setact1(eosio::name coopname, eosio::name application, eosio::name
   // commits
   auto commit = get_commit(coopname, commit_hash);
   eosio::check(commit.has_value(), "Объект коммита не найден");
-  eosio::check(commit -> username == username, "Неверно указано имя пользователя владельца результата");
+  eosio::check(commit -> username == username, "Неверно указано имя пользователя владельца задананиеа");
   
-  auto result = get_result(coopname, commit -> result_hash);
-  eosio::check(result.has_value(), "Результат не найден");
+  auto assignment = get_assignment(coopname, commit -> assignment_hash);
+  eosio::check(assignment.has_value(), "Задание не найдено");
 
   commit_index commits(_capital, coopname.value);
   auto commit_for_modify = commits.find(commit -> id);

@@ -450,7 +450,7 @@ void native::newaccount(const name& creator,
                name_bid_table bids(get_self(), get_self().value);
                auto current = bids.find( new_account_name.value );
                check( current != bids.end(), "no active bid for name" );
-               check( current->high_bidder == creator, "only highest bidder can claim" );
+               check( current->high_bidder == creator, "only highest bidder can result" );
                check( current->high_bid < 0, "auction for name is not closed yet" );
                bids.erase( current );
             } else {
