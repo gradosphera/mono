@@ -1,3 +1,7 @@
+#define CREATEOUTPAY_SIGNATURE name coopname, name username, checksum256 outcome_hash, asset quantity, name callback_contract, name confirm_callback, name decline_callback
+
+using createoutpay_interface = void(CREATEOUTPAY_SIGNATURE);
+
 namespace Gateway {
   inline eosio::name get_valid_income_action(const eosio::name& action) {
     eosio::check(gateway_income_actions.contains(action), "Недопустимое имя действия");

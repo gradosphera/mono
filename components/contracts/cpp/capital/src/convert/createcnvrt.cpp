@@ -11,7 +11,7 @@ void capital::createcnvrt(
     document convert_statement
 ) {
     // Авторизация
-    check_auth_or_fail(_capital, coopname, application, "createcnvrt"_n);
+    require_auth(coopname);
 
     // Получаем результат (или кидаем ошибку)
     auto exist_result = get_result_or_fail(coopname, result_hash, "Результат не найден");

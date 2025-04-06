@@ -30,7 +30,7 @@ public:
   [[eosio::action]] void indecline(eosio::name coopname, checksum256 income_hash, std::string reason);
   
   //outcome payments
-  [[eosio::action]] void createoutpay(eosio::name coopname, eosio::name username, checksum256 outcome_hash, eosio::asset quantity, name callback_contract, name confirm_callback, name decline_callback);
+  [[eosio::action]] void createoutpay(CREATEOUTPAY_SIGNATURE);
   [[eosio::action]] void outcomplete(eosio::name coopname, checksum256 outcome_hash);
   [[eosio::action]] void outdecline(eosio::name coopname, checksum256 outcome_hash, std::string reason);
     

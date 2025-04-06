@@ -3,7 +3,7 @@ void capital::startdistrbn(name coopname, name application, checksum256 result_h
 
     auto result = get_result(coopname, result_hash);
     eosio::check(result.has_value(), "Результат не найден");
-    eosio::check(result -> status == "created"_n, "Только результат в статусе created может быть запущен в распределение");
+    eosio::check(result -> status == "opened"_n, "Только результат в статусе opened может быть запущен в распределение");
     
     auto project = get_project(coopname, result -> project_hash);
     eosio::check(project.has_value(), "проект не найден");

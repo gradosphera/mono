@@ -12,8 +12,8 @@ using std::string;
 #define SETTLEDEBT_SIGNATURE name coopname, name username, checksum256 debt_hash, asset quantity
 
 // Типы для compile-time проверки
-using createdebt_action_type = void(CREATEDEBT_SIGNATURE);
-using settledebt_action_type = void(SETTLEDEBT_SIGNATURE);
+using createdebt_interface = void(CREATEDEBT_SIGNATURE);
+using settledebt_interface = void(SETTLEDEBT_SIGNATURE);
 
 
 namespace Loan {

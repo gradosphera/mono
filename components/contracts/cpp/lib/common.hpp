@@ -15,6 +15,7 @@
 #include "funds.hpp"
 #include "branch.hpp"
 #include "shared_actions.hpp"
+#include "shared_soviet.hpp"
 #include "shared_wallet.hpp"
 #include "shared_gateway.hpp"
 #include "shared_approver.hpp"

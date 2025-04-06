@@ -14,27 +14,30 @@ void capital::debtauthcnfr(eosio::name coopname, checksum256 debt_hash, document
     });
     
     //Создаём объект долга в контракте loan
-    action(permission_level{ _capital, "active"_n}, _loan, "createdebt"_n,
-      std::make_tuple(
-        coopname, 
-        debt -> username, 
-        debt -> debt_hash, 
-        debt -> repaid_at,
-        debt -> amount
-      )
-    ).send();  
+    Action::send<createdebt_interface>(
+      _loan,
+      "createdebt"_n,
+      _capital,
+      coopname, 
+      debt -> username, 
+      debt -> debt_hash, 
+      debt -> repaid_at,
+      debt -> amount
+    );
     
     // создаём объект исходящего платежа в gateway с коллбэком после обработки
-    action(permission_level{ _capital, "active"_n}, _gateway, "createoutpay"_n,
-      std::make_tuple(
-        coopname, 
-        debt -> username, 
-        debt -> debt_hash, 
-        debt -> amount, 
-        _capital, 
-        "debtpaycnfrm"_n, 
-        "dclnauthdebt"_n
-      )
-    ).send();  
+    Action::send<createoutpay_interface>(
+      _gateway,
+      "createoutpay"_n,
+      _capital,
+      coopname, 
+      debt -> username, 
+      debt -> debt_hash, 
+      debt -> amount, 
+      _capital, 
+      "debtpaycnfrm"_n, 
+      "dclnauthdebt"_n
+    );
+
 
 };
