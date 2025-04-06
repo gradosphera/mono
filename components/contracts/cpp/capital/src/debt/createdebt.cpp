@@ -11,6 +11,8 @@ void capital::createdebt(name coopname, name username, checksum256 result_hash, 
   result_index results(_capital, coopname.value);
   auto result = results.find(exist_result -> id);
   
+  eosio::check(result -> status == "opened"_n, "Только результаты в статусе opened могут быть основанием для выдачи ссуды");
+  
   auto exist_contributor = get_active_contributor_or_fail(coopname, result -> project_hash, username);
   eosio::check(exist_contributor.has_value(), "Договор УХД с пайщиком не найден");
   

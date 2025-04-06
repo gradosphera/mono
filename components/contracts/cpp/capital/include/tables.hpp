@@ -26,10 +26,10 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] resactor {
     eosio::asset for_convert = asset(0, _root_govern_symbol);
     
     // Сколько пользователь имеет «авторских долей» в этом результате
-    uint64_t authors_shares = 0;
+    uint64_t author_shares = 0;
     
     // Сколько пользователь имеет «создательских долей» в creators_bonus
-    uint64_t creators_bonus_shares = 0;
+    uint64_t creator_bonus_shares = 0;
     
     // Сколько часов вложено в результат
     uint64_t contributed_hours = 0;
@@ -279,7 +279,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] result {
     uint64_t id;
     checksum256 result_hash;
     checksum256 project_hash;
-    eosio::name status = "created"_n; ///< created
+    eosio::name status = "opened"_n; ///< opened | closed
     
     eosio::name coopname;
     eosio::name assignee;

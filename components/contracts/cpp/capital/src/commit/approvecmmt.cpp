@@ -10,7 +10,7 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
   auto exist_result = get_result(coopname, commit -> result_hash);
   eosio::check(exist_result.has_value(), "Результат не найден");
   
-  eosio::check(exist_result -> status == "created"_n, "Нельзя добавить коммит в уже закрытый результат");
+  eosio::check(exist_result -> status == "opened"_n, "Нельзя добавить коммит в уже закрытый результат");
   
   // Обновляем result
   result_index results(_capital, coopname.value);

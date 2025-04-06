@@ -40,7 +40,7 @@ void capital::createresult(name coopname, name application, checksum256 project_
           ra.result_hash = result_hash;
           ra.project_hash = project_hash;
           ra.username    = author_itr->username;
-          ra.authors_shares = author_itr -> shares;
+          ra.author_shares = author_itr -> shares;
         });
         authors_count++;
         author_itr++;

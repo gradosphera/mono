@@ -4,8 +4,6 @@
 #include "src/result/createresult.cpp"
 #include "src/result/startdistrbn.cpp"
 #include "src/result/capauthcmmt.cpp"
-#include "src/result/setact1.cpp"
-#include "src/result/setact2.cpp"
 
 #include "src/investment/createinvest.cpp"
 #include "src/investment/approveinvst.cpp"
@@ -25,11 +23,12 @@
 #include "src/debt/declinedebt.cpp"
 #include "src/debt/settledebt.cpp"
 
-
 #include "src/claim/approveclaim.cpp"
 #include "src/claim/createclaim.cpp"
 #include "src/claim/claimnow.cpp"
 #include "src/claim/capauthclaim.cpp"
+#include "src/claim/setact1.cpp"
+#include "src/claim/setact2.cpp"
 
 #include "src/registration/capregcontr.cpp"
 #include "src/registration/approvereg.cpp"

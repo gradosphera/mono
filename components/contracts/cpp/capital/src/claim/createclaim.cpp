@@ -28,46 +28,56 @@ void capital::createclaim(
     auto contributor = contributors.find(exist_contributor->id);
 
     // Попробуем найти resactor
-    auto optional_resactor = get_resactor(coopname, result_hash, username);
+    auto resactor = get_resactor(coopname, result_hash, username);
         
     //=== (A) Авторская часть ===
     eosio::asset author_bonus = asset(0, _root_govern_symbol);
     {
-        if (optional_resactor.has_value()) {
-            auto resactor = *optional_resactor;
-
+        if (resactor.has_value()) {
+            
+            //общее количество авторских премий всех авторов
             uint64_t authors_total       = result->authors_bonus.amount;
-            uint64_t user_auth_shares    = resactor.authors_shares; 
+            
+            //количество долей автора в результате
+            uint64_t user_auth_shares    = resactor -> author_shares; 
+            
+            //количество долей всех авторов в результате
             uint64_t total_auth_shares   = result->authors_shares; 
 
             if (authors_total > 0 && total_auth_shares > 0 && user_auth_shares > 0) {
-                uint128_t tmp = (uint128_t)authors_total * (uint128_t)user_auth_shares;
-                uint64_t calc_amount = (uint64_t)(tmp / (uint128_t)total_auth_shares);
                 
-                eosio::check(result->authors_bonus_remain.amount >= calc_amount, "Недостаточно средств для авторов");
-                            
-                author_bonus.amount = calc_amount;                
+                //считаем долю автора в авторских премиях результата
+                uint128_t tmp = (uint128_t)authors_total * (uint128_t)user_auth_shares;
+                author_bonus.amount = (uint64_t)(tmp / (uint128_t)total_auth_shares);
+                
             }
         }
     }
 
-    //=== (B) Создательская часть бонусов ===
+    //=== (B) Создательская часть ===
+    // Себестоимость
     eosio::asset creator_base = asset(0, _root_govern_symbol);
+    // Премии
     eosio::asset creator_bonus = asset(0, _root_govern_symbol);
     {
-        if (optional_resactor.has_value()) {
-            auto resactor = *optional_resactor;
-            creator_base.amount = resactor.spended.amount;
+        if (resactor.has_value()) {
             
+            //себестоимость потраченного времени создателем возвращаем как есть
+            creator_base.amount = resactor -> spended.amount;
+            
+            //сколько премий создателей на распределении в результате
             uint64_t creators_bonus_total        = result->creators_bonus.amount;
-            uint64_t user_creator_bonus_shares     = resactor.creators_bonus_shares;
+            
+            //количество долей премий создателя в результате
+            uint64_t user_creator_bonus_shares     = resactor -> creator_bonus_shares;
+            
+            //количество долей премий всех создателей в результате
             uint64_t total_creators_bonus_shares   = result->total_creators_bonus_shares; 
-
+            
             if (creators_bonus_total > 0 && total_creators_bonus_shares > 0 && user_creator_bonus_shares > 0) {
                 uint128_t tmp = (uint128_t)creators_bonus_total * (uint128_t)user_creator_bonus_shares;
+                //считаем премию автора в результате на основе его доли
                 creator_bonus.amount = (uint64_t)(tmp / (uint128_t)total_creators_bonus_shares);
-
-                eosio::check(result->creators_bonus_remain.amount >= creator_bonus.amount, "Недостаточно средств для создателей");
             }
         }
     }
@@ -75,25 +85,35 @@ void capital::createclaim(
     //=== (C) Капиталисты ===
     eosio::asset capitalist_bonus = asset(0, _root_govern_symbol);
     {
+        //сумма премий капиталистов на распределении
         uint64_t capitals_total   = result->capitalists_bonus.amount;
-        uint64_t user_cap_shares    = get_capital_user_share_balance(coopname, username);
-        uint64_t total_cap_shares   = get_capital_program_share_balance(coopname);
+        
+        //количество долей пользователя как капиталиста (участника ЦПП "Капитализация") в премиях капиталистов
+        uint64_t user_capital_shares    = get_capital_user_share_balance(coopname, username);
+        
+        //общее количество долей капиталистов
+        uint64_t total_capital_shares   = get_capital_program_share_balance(coopname);
 
-        if (capitals_total > 0 && total_cap_shares > 0 && user_cap_shares > 0) {
-            uint128_t tmp = (uint128_t)capitals_total * (uint128_t)user_cap_shares;
-            capitalist_bonus.amount = (uint64_t)(tmp / (uint128_t)total_cap_shares);
-
-            eosio::check(result->capitalists_bonus_remain.amount >= capitalist_bonus.amount, "Недостаточно средств для пайщиков");
+        if (capitals_total > 0 && total_capital_shares > 0 && user_capital_shares > 0) {
+            uint128_t tmp = (uint128_t)capitals_total * (uint128_t)user_capital_shares;            
+            //сумма премий пользователя как капиталиста
+            capitalist_bonus.amount = (uint64_t)(tmp / (uint128_t)total_capital_shares);
         }
     }
 
-    //=== Складываем всё ===
-    uint64_t total_claim_amount = author_bonus.amount + creator_base.amount + creator_bonus.amount + capitalist_bonus.amount;
-    eosio::asset total_amount(total_claim_amount, _root_govern_symbol);
-
+    //сумма долга пайщика
+    eosio::asset debt_amount = asset(0, _root_govern_symbol);
+    {
+        if (resactor.has_value()) {
+          debt_amount = resactor -> debt_amount;
+        }
+    }
+    
     //=== Создаём запись в claims ===
     claim_index claims(_capital, coopname.value);
     uint64_t claim_id = get_global_id_in_scope(_capital, coopname, "claims"_n);
+    
+    eosio::check(creator_base >= debt_amount, "Системная ошибка: долгов больше чем себестоимость взносов. Обратитесь в поддержку");
     
     claims.emplace(coopname, [&](auto &n) {
         n.id                      = claim_id;
@@ -102,15 +122,29 @@ void capital::createclaim(
         n.claim_hash              = claim_hash;
         n.coopname                = coopname;
         n.status                  = "created"_n;
+        //сумма себестоимости взноса создателя
         n.creator_base_amount     = creator_base;
+        //сумма долга, которая должна быть погашена отдельным заявлением, если она есть
+        n.debt_amount             = debt_amount;
+        //доступные средства к возврату или конвертации после выплаты долга
+        n.available               = creator_base - debt_amount;
+        //разблюдовка по типам премий
         n.creator_bonus_amount    = creator_bonus;
         n.author_bonus_amount     = author_bonus;
-        n.capitalist_bonus_amount = capitalist_bonus;
-        n.generation_amount       = author_bonus + creator_base + creator_bonus;
-        n.total_amount            = total_amount;
+        n.capitalist_bonus_amount = capitalist_bonus;// на эту премию пишем отдельное заявление на взнос
+        //сумма генераций должна быть внесена отдельным заявлением на взнос, потому - суммируем.
+        n.generation_amount       = creator_base + author_bonus + creator_bonus;
+        //total_amount - чисто информационный показатель, не используется в расчетах далее
+        n.total_amount            = creator_base + author_bonus + creator_bonus + capitalist_bonus;
     });
-
-    //=== Уменьшаем остаток bonus_remain ===
+    
+    //проверяем что премий достаточно и ошибок в расчетах нигде нет.                
+    eosio::check(result -> authors_bonus_remain >= author_bonus, "Недостаточно средств для выплаты премии автора. Вероятно, техническая ошибка. Пожалуйста, обратитесь в поддержку.");
+    eosio::check(result -> creators_bonus_remain >= creator_bonus, "Недостаточно средств для выплаты премий создателей. Обратитесь в поддержку.");
+    eosio::check(result -> creators_base_remain >= creator_base, "Недостаточно средств для выплаты себестоимости взносов создателей. Обратитесь в поддержку.");
+    eosio::check(result -> capitalists_bonus_remain >= capitalist_bonus, "Недостаточно средств для пайщиков");
+    
+    //=== Уменьшаем остатки в результате ===
     results.modify(result, coopname, [&](auto &r) {
         if (author_bonus.amount > 0) {
             r.authors_bonus_remain -= author_bonus;

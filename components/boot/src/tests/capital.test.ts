@@ -608,7 +608,7 @@ describe('тест контракта CAPITAL', () => {
     expect(blockchainResult.result_hash).toBe(result1.result_hash)
     expect(blockchainResult.project_hash).toBe(project1.project_hash)
     expect(blockchainResult.coopname).toBe('voskhod')
-    expect(blockchainResult.status).toBe('opened')
+    expect(blockchainResult.status).toBe('closed')
 
     expect(blockchainResult.creators_amount_remain).toBe(blockchainResult.creators_amount)
     expect(blockchainResult.creators_bonus_remain).toBe(blockchainResult.creators_bonus)

@@ -32,7 +32,7 @@ public:
   [[eosio::action]] void migrate();
   
   //agenda.cpp
-  [[eosio::action]] void createagenda(eosio::name coopname, eosio::name username, eosio::name type, checksum256 hash, name callback_contract, name confirm_callback, name decline_callback, document statement, std::string meta);
+  [[eosio::action]] void createagenda(CREATEAGENDA_SIGNATURE);
   void authorize_action_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
   
   
