@@ -15,7 +15,7 @@ void capital::setact2(
     auto exist_commit = get_commit(coopname, commit_hash);
     eosio::check(exist_commit.has_value(), "Коммит не найден");
     
-    eosio::check(exist_commit -> username == username, "Неверно указано имя пользователя владельца результата");
+    eosio::check(exist_commit -> username == username, "Неверно указано имя пользователя владельца задананиеа");
     eosio::check(exist_commit -> status == "act1"_n,   "Неверный статус для поставки акта");
 
     // Обновляем коммит
@@ -26,13 +26,13 @@ void capital::setact2(
     //     c.act2   = act;
     // });
 
-    // // Ищем результат и проект
-    // auto exist_result  = get_result_or_fail(coopname, commit->result_hash, "Результат не найден");
-    // auto exist_project = get_project(coopname, exist_result.project_hash);
+    // // Ищем задание и проект
+    // auto exist_assignment  = get_assignment_or_fail(coopname, commit->assignment_hash, "Задание не найдено");
+    // auto exist_project = get_project(coopname, exist_assignment.project_hash);
     // eosio::check(exist_project.has_value(), "Проект не найден");
 
     // // Ищем вкладчика
-    // auto exist_contributor = get_active_contributor_or_fail(coopname, exist_result.project_hash, commit->username);
+    // auto exist_contributor = get_active_contributor_or_fail(coopname, exist_assignment.project_hash, commit->username);
     // contributor_index contributors(_capital, coopname.value);
     // auto contributor = contributors.find(exist_contributor->id);
 
@@ -51,12 +51,12 @@ void capital::setact2(
     // eosio::asset capitalists_bonus  (br.capitalists_bonus, commit->spended.symbol);
     // eosio::asset total              (br.total,             commit->spended.symbol);
 
-    // // Обновляем result
-    // result_index results(_capital, coopname.value);
-    // auto result = results.find(exist_result.id);
-    // eosio::check(result->available >= commit->spended, "Недостаточно средств в результате для приёма коммита");
+    // // Обновляем assignment
+    // assignment_index assignments(_capital, coopname.value);
+    // auto assignment = assignments.find(exist_assignment.id);
+    // eosio::check(assignment->available >= commit->spended, "Недостаточно средств в задананиее для приёма коммита");
 
-    // results.modify(result, coopname, [&](auto &row) {
+    // assignments.modify(assignment, coopname, [&](auto &row) {
     //     row.available          -= commit->spended;
     //     row.spended              += commit->spended;
     //     row.creators_base    += commit->spended; 
@@ -86,16 +86,16 @@ void capital::setact2(
     //     c.contributed_hours  += commit->contributed_hours;
     // });
 
-    // // Обновляем запись в resactors (создательские доли)
-    // auto exist_resactor = get_resactor(coopname, commit->result_hash, commit->username);
-    // resactor_index ractors(_capital, coopname.value);
+    // // Обновляем запись в creauthors (создательские доли)
+    // auto exist_creauthor = get_creauthor(coopname, commit->assignment_hash, commit->username);
+    // creauthor_index ractors(_capital, coopname.value);
       
-    // if (!exist_resactor.has_value()) {
+    // if (!exist_creauthor.has_value()) {
       
     //   ractors.emplace(coopname, [&](auto &ra){
     //       ra.id            = ractors.available_primary_key();
     //       ra.project_hash  = commit->project_hash;
-    //       ra.result_hash   = commit->result_hash;
+    //       ra.assignment_hash   = commit->assignment_hash;
     //       ra.username      = commit->username;
     //       ra.creators_bonus_shares = commit->spended.amount;
     //       ra.spended = commit->spended;
@@ -106,8 +106,8 @@ void capital::setact2(
       
     // } else {
       
-    //   auto resactor = ractors.find(exist_resactor->id);
-    //   ractors.modify(resactor, coopname, [&](auto &ra) {
+    //   auto creauthor = ractors.find(exist_creauthor->id);
+    //   ractors.modify(creauthor, coopname, [&](auto &ra) {
     //       ra.creators_bonus_shares += commit -> spended.amount; 
     //       ra.for_convert += for_convert;
     //       ra.available += available;

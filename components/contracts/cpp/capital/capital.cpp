@@ -1,9 +1,8 @@
 // capital.cpp
 #include "capital.hpp"
 
-#include "src/result/createresult.cpp"
-#include "src/result/startdistrbn.cpp"
-#include "src/result/capauthcmmt.cpp"
+#include "src/assignment/createassign.cpp"
+#include "src/assignment/startdistrbn.cpp"
 
 #include "src/investment/createinvest.cpp"
 #include "src/investment/approveinvst.cpp"
@@ -23,12 +22,12 @@
 #include "src/debt/declinedebt.cpp"
 #include "src/debt/settledebt.cpp"
 
-#include "src/claim/approveclaim.cpp"
-#include "src/claim/createclaim.cpp"
-#include "src/claim/claimnow.cpp"
-#include "src/claim/capauthclaim.cpp"
-#include "src/claim/setact1.cpp"
-#include "src/claim/setact2.cpp"
+#include "src/result/approverslt.cpp"
+#include "src/result/updaterslt.cpp"
+#include "src/result/pushrslt.cpp"
+#include "src/result/authrslt.cpp"
+#include "src/result/setact1.cpp"
+#include "src/result/setact2.cpp"
 
 #include "src/registration/capregcontr.cpp"
 #include "src/registration/approvereg.cpp"
@@ -257,21 +256,6 @@ std::optional<progwallet> capital::get_capital_wallet(eosio::name coopname, eosi
   
 }
 
-
-std::optional<result_author> capital::get_result_author(eosio::name coopname, eosio::name username, const checksum256 &result_hash) {
-    result_authors_index result_authors(_capital, coopname.value);
-    auto result_author_index = result_authors.get_index<"byresauthor"_n>();
-
-    uint128_t combined_id = combine_checksum_ids(result_hash, username);
-    auto result_author_itr = result_author_index.find(combined_id);
-
-    if (result_author_itr == result_author_index.end()) {
-        return std::nullopt;
-    }
-
-    return *result_author_itr;
-}
-
 std::optional<author> capital::get_author(eosio::name coopname, eosio::name username, const checksum256 &project_hash) {
     authors_index authors(_capital, coopname.value);
     auto project_author_index = authors.get_index<"byprojauthor"_n>();
@@ -286,30 +270,30 @@ std::optional<author> capital::get_author(eosio::name coopname, eosio::name user
     return *author_itr;
 }
 
-std::optional<creator> capital::get_creator(eosio::name coopname, eosio::name username, const checksum256 &result_hash) {
+std::optional<creator> capital::get_creator(eosio::name coopname, eosio::name username, const checksum256 &assignment_hash) {
     creators_index creators(_capital, coopname.value);
-    auto result_creator_index = creators.get_index<"byresultcrtr"_n>();
+    auto assignment_creator_index = creators.get_index<"byassigncrtr"_n>();
 
-    uint128_t combined_id = combine_checksum_ids(result_hash, username);
-    auto creator_itr = result_creator_index.find(combined_id);
+    uint128_t combined_id = combine_checksum_ids(assignment_hash, username);
+    auto creator_itr = assignment_creator_index.find(combined_id);
 
-    if (creator_itr == result_creator_index.end()) {
+    if (creator_itr == assignment_creator_index.end()) {
         return std::nullopt;
     }
 
     return *creator_itr;
 }
 
-std::optional<result> capital::get_result(eosio::name coopname, const checksum256 &result_hash) {
-    result_index results(_capital, coopname.value);
-    auto result_hash_index = results.get_index<"byhash"_n>();
+std::optional<assignment> capital::get_assignment(eosio::name coopname, const checksum256 &assignment_hash) {
+    assignment_index assignments(_capital, coopname.value);
+    auto assignment_hash_index = assignments.get_index<"byhash"_n>();
 
-    auto result_itr = result_hash_index.find(result_hash);
-    if (result_itr == result_hash_index.end()) {
+    auto assignment_itr = assignment_hash_index.find(assignment_hash);
+    if (assignment_itr == assignment_hash_index.end()) {
         return std::nullopt;
     }
 
-    return *result_itr;
+    return *assignment_itr;
 }
 
 
@@ -325,10 +309,10 @@ std::optional<debt> capital::get_debt(eosio::name coopname, const checksum256 &d
     return *itr;
 }
 
-result capital::get_result_or_fail(eosio::name coopname, const checksum256 &result_hash, const char* msg) {
-    auto maybe_result = get_result(coopname, result_hash);
-    eosio::check(maybe_result.has_value(), msg);
-    return *maybe_result;
+assignment capital::get_assignment_or_fail(eosio::name coopname, const checksum256 &assignment_hash, const char* msg) {
+    auto maybe_assignment = get_assignment(coopname, assignment_hash);
+    eosio::check(maybe_assignment.has_value(), msg);
+    return *maybe_assignment;
 }
 
 
@@ -400,21 +384,21 @@ std::optional<capital_tables::project_withdraw> capital::get_project_withdraw(eo
 }
 
 
-std::optional<claim> capital::get_claim(eosio::name coopname, const checksum256 &claim_hash) {
-    claim_index claims(_capital, coopname.value);
-    auto idx = claims.get_index<"byhash"_n>();
+std::optional<result> capital::get_result(eosio::name coopname, const checksum256 &result_hash) {
+    result_index results(_capital, coopname.value);
+    auto idx = results.get_index<"byhash"_n>();
     
-    auto it = idx.find(claim_hash);
+    auto it = idx.find(result_hash);
     if (it == idx.end()) {
         return std::nullopt;
     }
     return *it;
 }
 
-std::optional<claim> capital::get_claim_by_result_and_username(eosio::name coopname, const checksum256 &result_hash, eosio::name username) {
-    claim_index claims(_capital, coopname.value);
-    auto idx = claims.get_index<"byresuser"_n>();
-    auto rkey = combine_checksum_ids(result_hash, username);
+std::optional<result> capital::get_result_by_assignment_and_username(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username) {
+    result_index results(_capital, coopname.value);
+    auto idx = results.get_index<"byresuser"_n>();
+    auto rkey = combine_checksum_ids(assignment_hash, username);
 
     auto it = idx.find(rkey);
     if (it == idx.end()) {
@@ -437,17 +421,17 @@ std::optional<convert> capital::get_convert(eosio::name coopname, const checksum
 }
 
 
-claim capital::get_claim_by_result_and_username_or_fail(eosio::name coopname, const checksum256 &result_hash, eosio::name username, const char* msg) {
-    auto c = get_claim_by_result_and_username(coopname, result_hash, username);
+result capital::get_result_by_assignment_and_username_or_fail(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username, const char* msg) {
+    auto c = get_result_by_assignment_and_username(coopname, assignment_hash, username);
     eosio::check(c.has_value(), msg);
     return *c;
 }
 
 
-std::optional<resactor> capital::get_resactor(eosio::name coopname, const checksum256 &result_hash, eosio::name username) {
-    resactor_index ractors(_capital, coopname.value);
+std::optional<creauthor> capital::get_creauthor(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username) {
+    creauthor_index ractors(_capital, coopname.value);
     auto idx  = ractors.get_index<"byresuser"_n>();
-    auto rkey = combine_checksum_ids(result_hash, username);
+    auto rkey = combine_checksum_ids(assignment_hash, username);
 
     auto it = idx.find(rkey);
     if (it == idx.end()) {
@@ -456,10 +440,10 @@ std::optional<resactor> capital::get_resactor(eosio::name coopname, const checks
     return *it;
 }
 
-resactor capital::get_resactor_or_fail(eosio::name coopname, const checksum256 &result_hash, eosio::name username, const char* msg) {
-    auto maybe_resactor = get_resactor(coopname, result_hash, username);
-    eosio::check(maybe_resactor.has_value(), msg);
-    return *maybe_resactor;
+creauthor capital::get_creauthor_or_fail(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username, const char* msg) {
+    auto maybe_creauthor = get_creauthor(coopname, assignment_hash, username);
+    eosio::check(maybe_creauthor.has_value(), msg);
+    return *maybe_creauthor;
 }
 
 

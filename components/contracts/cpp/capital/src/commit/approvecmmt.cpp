@@ -7,16 +7,16 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
   commit_index commits(_capital, coopname.value);
   auto commit = commits.find(exist_commit -> id);
   
-  auto exist_result = get_result(coopname, commit -> result_hash);
-  eosio::check(exist_result.has_value(), "Результат не найден");
+  auto exist_assignment = get_assignment(coopname, commit -> assignment_hash);
+  eosio::check(exist_assignment.has_value(), "Задание не найдено");
   
-  eosio::check(exist_result -> status == "opened"_n, "Нельзя добавить коммит в уже закрытый результат");
+  eosio::check(exist_assignment -> status == "opened"_n, "Нельзя добавить коммит в уже закрытый задание");
   
-  // Обновляем result
-  result_index results(_capital, coopname.value);
-  auto result = results.find(exist_result -> id);
+  // Обновляем assignment
+  assignment_index assignments(_capital, coopname.value);
+  auto assignment = assignments.find(exist_assignment -> id);
   
-  results.modify(result, _capital, [&](auto &row) {
+  assignments.modify(assignment, _capital, [&](auto &row) {
       row.spended            += commit -> spended;
       row.creators_base    += commit -> spended;
       row.generated          += commit -> generated;
@@ -37,7 +37,7 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
   projects.modify(project, _capital, [&](auto &p) {
       p.spended            += commit -> spended;
       p.generated          += commit -> generated;
-      p.creators_base    += commit -> spended;
+      p.creators_base      += commit -> spended;
       p.creators_bonus     += commit -> creators_bonus;
       p.authors_bonus      += commit -> authors_bonus;
       p.capitalists_bonus  += commit -> capitalists_bonus;
@@ -55,29 +55,29 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
       c.contributed_hours  += commit->contributed_hours;
   });
 
-  // Обновляем запись в resactors (создательские доли)
-  auto exist_resactor = get_resactor(coopname, commit->result_hash, commit->username);
-  resactor_index ractors(_capital, coopname.value);
+  // Обновляем запись в creauthors (создательские доли)
+  auto exist_creauthor = get_creauthor(coopname, commit->assignment_hash, commit->username);
+  creauthor_index ractors(_capital, coopname.value);
       
-  if (!exist_resactor.has_value()) {
+  if (!exist_creauthor.has_value()) {
     ractors.emplace(_capital, [&](auto &ra){
         ra.id            = ractors.available_primary_key();
         ra.project_hash  = commit->project_hash;
-        ra.result_hash   = commit->result_hash;
+        ra.assignment_hash   = commit->assignment_hash;
         ra.username      = commit->username;
         ra.spended = commit->spended;
         ra.contributed_hours  = commit->contributed_hours;
         // сумма, которая доступна для получения ссуды и используется в качества залога
         ra.provisional_amount = commit->spended;
-        ra.creators_bonus_shares = commit->spended.amount;
+        ra.creator_bonus_shares = commit->spended.amount;
     });
   } else {
-    auto resactor = ractors.find(exist_resactor->id);
-    ractors.modify(resactor, _capital, [&](auto &ra) {
+    auto creauthor = ractors.find(exist_creauthor->id);
+    ractors.modify(creauthor, _capital, [&](auto &ra) {
         ra.spended += commit->spended;
         ra.contributed_hours  += commit->contributed_hours;
         ra.provisional_amount += commit->spended;
-        ra.creators_bonus_shares += commit->spended.amount;
+        ra.creator_bonus_shares += commit->spended.amount;
     });
   }
 

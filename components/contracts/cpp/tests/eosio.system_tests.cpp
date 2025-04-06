@@ -1464,7 +1464,7 @@ using namespace eosio_system;
 //       produce_blocks(50);
 
 //       const auto     initial_global_state      = get_global_state();
-//       const uint64_t initial_claim_time        = microseconds_since_epoch_of_iso_string( initial_global_state["last_pervote_bucket_fill"] );
+//       const uint64_t initial_result_time        = microseconds_since_epoch_of_iso_string( initial_global_state["last_pervote_bucket_fill"] );
 //       const int64_t  initial_pervote_bucket    = initial_global_state["pervote_bucket"].as<int64_t>();
 //       const int64_t  initial_perblock_bucket   = initial_global_state["perblock_bucket"].as<int64_t>();
 //       const int64_t  initial_savings           = get_balance("eosio.saving"_n).get_amount();
@@ -1479,10 +1479,10 @@ using namespace eosio_system;
 //       const asset initial_supply  = get_token_supply();
 //       const asset initial_balance = get_balance("defproducera"_n);
 
-//       BOOST_REQUIRE_EQUAL(success(), push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//       BOOST_REQUIRE_EQUAL(success(), push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 
 //       const auto     global_state      = get_global_state();
-//       const uint64_t claim_time        = microseconds_since_epoch_of_iso_string( global_state["last_pervote_bucket_fill"] );
+//       const uint64_t result_time        = microseconds_since_epoch_of_iso_string( global_state["last_pervote_bucket_fill"] );
 //       const int64_t  pervote_bucket    = global_state["pervote_bucket"].as<int64_t>();
 //       const int64_t  perblock_bucket   = global_state["perblock_bucket"].as<int64_t>();
 //       const int64_t  savings           = get_balance("eosio.saving"_n).get_amount();
@@ -1494,9 +1494,9 @@ using namespace eosio_system;
 //       const asset supply  = get_token_supply();
 //       const asset balance = get_balance("defproducera"_n);
 
-//       BOOST_REQUIRE_EQUAL(claim_time, microseconds_since_epoch_of_iso_string( prod["last_claim_time"] ));
+//       BOOST_REQUIRE_EQUAL(result_time, microseconds_since_epoch_of_iso_string( prod["last_result_time"] ));
 
-//       auto usecs_between_fills = claim_time - initial_claim_time;
+//       auto usecs_between_fills = result_time - initial_result_time;
 //       int32_t secs_between_fills = usecs_between_fills/1000000;
 
 //       BOOST_REQUIRE_EQUAL(0, initial_savings);
@@ -1524,23 +1524,23 @@ using namespace eosio_system;
 //    }
 
 //    {
-//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already claimed rewards within past day"),
-//                           push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already resulted rewards within past day"),
+//                           push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 //    }
 
-//    // defproducera waits for 23 hours and 55 minutes, can't claim rewards yet
+//    // defproducera waits for 23 hours and 55 minutes, can't result rewards yet
 //    {
 //       produce_block(fc::seconds(23 * 3600 + 55 * 60));
-//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already claimed rewards within past day"),
-//                           push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already resulted rewards within past day"),
+//                           push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 //    }
 
-//    // wait 5 more minutes, defproducera can now claim rewards again
+//    // wait 5 more minutes, defproducera can now result rewards again
 //    {
 //       produce_block(fc::seconds(5 * 60));
 
 //       const auto     initial_global_state      = get_global_state();
-//       const uint64_t initial_claim_time        = microseconds_since_epoch_of_iso_string( initial_global_state["last_pervote_bucket_fill"] );
+//       const uint64_t initial_result_time        = microseconds_since_epoch_of_iso_string( initial_global_state["last_pervote_bucket_fill"] );
 //       const int64_t  initial_pervote_bucket    = initial_global_state["pervote_bucket"].as<int64_t>();
 //       const int64_t  initial_perblock_bucket   = initial_global_state["perblock_bucket"].as<int64_t>();
 //       const int64_t  initial_savings           = get_balance("eosio.saving"_n).get_amount();
@@ -1553,17 +1553,17 @@ using namespace eosio_system;
 //       BOOST_REQUIRE_EQUAL(initial_tot_unpaid_blocks, unpaid_blocks);
 //       BOOST_REQUIRE(0 < prod["total_votes"].as<double>());
 //       BOOST_TEST(initial_tot_vote_weight, prod["total_votes"].as<double>());
-//       BOOST_REQUIRE(0 < microseconds_since_epoch_of_iso_string( prod["last_claim_time"] ));
+//       BOOST_REQUIRE(0 < microseconds_since_epoch_of_iso_string( prod["last_result_time"] ));
 
 //       BOOST_REQUIRE_EQUAL(initial_tot_unpaid_blocks, unpaid_blocks);
 
 //       const asset initial_supply  = get_token_supply();
 //       const asset initial_balance = get_balance("defproducera"_n);
 
-//       BOOST_REQUIRE_EQUAL(success(), push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//       BOOST_REQUIRE_EQUAL(success(), push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 
 //       const auto global_state          = get_global_state();
-//       const uint64_t claim_time        = microseconds_since_epoch_of_iso_string( global_state["last_pervote_bucket_fill"] );
+//       const uint64_t result_time        = microseconds_since_epoch_of_iso_string( global_state["last_pervote_bucket_fill"] );
 //       const int64_t  pervote_bucket    = global_state["pervote_bucket"].as<int64_t>();
 //       const int64_t  perblock_bucket   = global_state["perblock_bucket"].as<int64_t>();
 //       const int64_t  savings           = get_balance("eosio.saving"_n).get_amount();
@@ -1575,8 +1575,8 @@ using namespace eosio_system;
 //       const asset supply  = get_token_supply();
 //       const asset balance = get_balance("defproducera"_n);
 
-//       BOOST_REQUIRE_EQUAL(claim_time, microseconds_since_epoch_of_iso_string( prod["last_claim_time"] ));
-//       auto usecs_between_fills = claim_time - initial_claim_time;
+//       BOOST_REQUIRE_EQUAL(result_time, microseconds_since_epoch_of_iso_string( prod["last_result_time"] ));
+//       auto usecs_between_fills = result_time - initial_result_time;
 
 //       BOOST_REQUIRE_EQUAL( int64_t( initial_supply.get_amount() * double(usecs_between_fills) * continuous_rate / usecs_per_year ),
 //                            supply.get_amount() - initial_supply.get_amount() );
@@ -1596,10 +1596,10 @@ using namespace eosio_system;
 //       }
 //    }
 
-//    // defproducerb tries to claim rewards but he's not on the list
+//    // defproducerb tries to result rewards but he's not on the list
 //    {
 //       BOOST_REQUIRE_EQUAL(wasm_assert_msg("unable to find key"),
-//                           push_action("defproducerb"_n, "claimrewards"_n, mvo()("owner", "defproducerb")));
+//                           push_action("defproducerb"_n, "resultrewards"_n, mvo()("owner", "defproducerb")));
 //    }
 
 //    // test stability over a year
@@ -1611,11 +1611,11 @@ using namespace eosio_system;
 //       const int64_t initial_savings = get_balance("eosio.saving"_n).get_amount();
 //       for (uint32_t i = 0; i < 7 * 52; ++i) {
 //          produce_block(fc::seconds(8 * 3600));
-//          BOOST_REQUIRE_EQUAL(success(), push_action("defproducerc"_n, "claimrewards"_n, mvo()("owner", "defproducerc")));
+//          BOOST_REQUIRE_EQUAL(success(), push_action("defproducerc"_n, "resultrewards"_n, mvo()("owner", "defproducerc")));
 //          produce_block(fc::seconds(8 * 3600));
-//          BOOST_REQUIRE_EQUAL(success(), push_action("defproducerb"_n, "claimrewards"_n, mvo()("owner", "defproducerb")));
+//          BOOST_REQUIRE_EQUAL(success(), push_action("defproducerb"_n, "resultrewards"_n, mvo()("owner", "defproducerb")));
 //          produce_block(fc::seconds(8 * 3600));
-//          BOOST_REQUIRE_EQUAL(success(), push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//          BOOST_REQUIRE_EQUAL(success(), push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 //       }
 //       const asset   supply  = get_token_supply();
 //       const int64_t savings = get_balance("eosio.saving"_n).get_amount();
@@ -1673,11 +1673,11 @@ using namespace eosio_system;
 //          const int64_t initial_savings = get_balance("eosio.saving"_n).get_amount();
 //          for (uint32_t i = 0; i < 7 * 52; ++i) {
 //             produce_block(fc::seconds(8 * 3600));
-//             BOOST_REQUIRE_EQUAL(success(), push_action("defproducerc"_n, "claimrewards"_n, mvo()("owner", "defproducerc")));
+//             BOOST_REQUIRE_EQUAL(success(), push_action("defproducerc"_n, "resultrewards"_n, mvo()("owner", "defproducerc")));
 //             produce_block(fc::seconds(8 * 3600));
-//             BOOST_REQUIRE_EQUAL(success(), push_action("defproducerb"_n, "claimrewards"_n, mvo()("owner", "defproducerb")));
+//             BOOST_REQUIRE_EQUAL(success(), push_action("defproducerb"_n, "resultrewards"_n, mvo()("owner", "defproducerb")));
 //             produce_block(fc::seconds(8 * 3600));
-//             BOOST_REQUIRE_EQUAL(success(), push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//             BOOST_REQUIRE_EQUAL(success(), push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 //          }
 //          const asset   final_supply  = get_token_supply();
 //          const int64_t final_savings = get_balance("eosio.saving"_n).get_amount();
@@ -1736,7 +1736,7 @@ using namespace eosio_system;
 //    t.produce_blocks(4);
 //    t.produce_block(fc::hours(24));
 
-//    BOOST_REQUIRE_EQUAL(t.success(), t.push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//    BOOST_REQUIRE_EQUAL(t.success(), t.push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 //    t.produce_block();
 //    asset current_supply;
 //    {
@@ -1748,15 +1748,15 @@ using namespace eosio_system;
 //    t.produce_block();
 
 //    t.produce_block(fc::hours(10*24));
-//    BOOST_REQUIRE_EQUAL(t.wasm_assert_msg("quantity exceeds available supply"), t.push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//    BOOST_REQUIRE_EQUAL(t.wasm_assert_msg("quantity exceeds available supply"), t.push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 
 //    t.produce_block(fc::hours(11*24));
-//    BOOST_REQUIRE_EQUAL(t.wasm_assert_msg("magnitude of asset amount must be less than 2^62"), t.push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//    BOOST_REQUIRE_EQUAL(t.wasm_assert_msg("magnitude of asset amount must be less than 2^62"), t.push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 
 //    t.produce_block(fc::hours(24));
-//    BOOST_REQUIRE_EQUAL(t.wasm_assert_msg("overflow in calculating new tokens to be issued; inflation rate is too high"), t.push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//    BOOST_REQUIRE_EQUAL(t.wasm_assert_msg("overflow in calculating new tokens to be issued; inflation rate is too high"), t.push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 //    BOOST_REQUIRE_EQUAL(t.success(), t.setinflation(500, 50000, 40000));
-//    BOOST_REQUIRE_EQUAL(t.wasm_assert_msg("quantity exceeds available supply"), t.push_action("defproducera"_n, "claimrewards"_n, mvo()("owner", "defproducera")));
+//    BOOST_REQUIRE_EQUAL(t.wasm_assert_msg("quantity exceeds available supply"), t.push_action("defproducera"_n, "resultrewards"_n, mvo()("owner", "defproducera")));
 // } FC_LOG_AND_RETHROW()
 
 // BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::unit_test::tolerance(1e-10)) try {
@@ -1870,7 +1870,7 @@ using namespace eosio_system;
 //       const auto prod_name = producer_names[prod_index];
 
 //       const auto     initial_global_state      = get_global_state();
-//       const uint64_t initial_claim_time        = microseconds_since_epoch_of_iso_string( initial_global_state["last_pervote_bucket_fill"] );
+//       const uint64_t initial_result_time        = microseconds_since_epoch_of_iso_string( initial_global_state["last_pervote_bucket_fill"] );
 //       const int64_t  initial_pervote_bucket    = initial_global_state["pervote_bucket"].as<int64_t>();
 //       const int64_t  initial_perblock_bucket   = initial_global_state["perblock_bucket"].as<int64_t>();
 //       const int64_t  initial_savings           = get_balance("eosio.saving"_n).get_amount();
@@ -1881,10 +1881,10 @@ using namespace eosio_system;
 //       const asset    initial_balance           = get_balance(prod_name);
 //       const uint32_t initial_unpaid_blocks     = get_producer_info(prod_name)["unpaid_blocks"].as<uint32_t>();
 
-//       BOOST_REQUIRE_EQUAL(success(), push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name)));
+//       BOOST_REQUIRE_EQUAL(success(), push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name)));
 
 //       const auto     global_state      = get_global_state();
-//       const uint64_t claim_time        = microseconds_since_epoch_of_iso_string( global_state["last_pervote_bucket_fill"] );
+//       const uint64_t result_time        = microseconds_since_epoch_of_iso_string( global_state["last_pervote_bucket_fill"] );
 //       const int64_t  pervote_bucket    = global_state["pervote_bucket"].as<int64_t>();
 //       const int64_t  perblock_bucket   = global_state["perblock_bucket"].as<int64_t>();
 //       const int64_t  savings           = get_balance("eosio.saving"_n).get_amount();
@@ -1895,7 +1895,7 @@ using namespace eosio_system;
 //       const asset    balance           = get_balance(prod_name);
 //       const uint32_t unpaid_blocks     = get_producer_info(prod_name)["unpaid_blocks"].as<uint32_t>();
 
-//       const uint64_t usecs_between_fills = claim_time - initial_claim_time;
+//       const uint64_t usecs_between_fills = result_time - initial_result_time;
 //       const int32_t secs_between_fills = static_cast<int32_t>(usecs_between_fills / 1000000);
 
 //       const double expected_supply_growth = initial_supply.get_amount() * double(usecs_between_fills) * cont_rate / usecs_per_year;
@@ -1923,18 +1923,18 @@ using namespace eosio_system;
 
 //       produce_blocks(5);
 
-//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already claimed rewards within past day"),
-//                           push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name)));
+//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already resulted rewards within past day"),
+//                           push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name)));
 //    }
 
 //    {
 //       const uint32_t prod_index = 23;
 //       const auto prod_name = producer_names[prod_index];
 //       BOOST_REQUIRE_EQUAL(success(),
-//                           push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name)));
+//                           push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name)));
 //       BOOST_REQUIRE_EQUAL(0, get_balance(prod_name).get_amount());
-//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already claimed rewards within past day"),
-//                           push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name)));
+//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already resulted rewards within past day"),
+//                           push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name)));
 //    }
 
 //    // Wait for 23 hours. By now, pervote_bucket has grown enough
@@ -1946,7 +1946,7 @@ using namespace eosio_system;
 //       const auto prod_name = producer_names[prod_index];
 
 //       const auto     initial_global_state      = get_global_state();
-//       const uint64_t initial_claim_time        = microseconds_since_epoch_of_iso_string( initial_global_state["last_pervote_bucket_fill"] );
+//       const uint64_t initial_result_time        = microseconds_since_epoch_of_iso_string( initial_global_state["last_pervote_bucket_fill"] );
 //       const int64_t  initial_pervote_bucket    = initial_global_state["pervote_bucket"].as<int64_t>();
 //       const int64_t  initial_perblock_bucket   = initial_global_state["perblock_bucket"].as<int64_t>();
 //       const int64_t  initial_savings           = get_balance("eosio.saving"_n).get_amount();
@@ -1957,10 +1957,10 @@ using namespace eosio_system;
 //       const asset    initial_balance           = get_balance(prod_name);
 //       const uint32_t initial_unpaid_blocks     = get_producer_info(prod_name)["unpaid_blocks"].as<uint32_t>();
 
-//       BOOST_REQUIRE_EQUAL(success(), push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name)));
+//       BOOST_REQUIRE_EQUAL(success(), push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name)));
 
 //       const auto     global_state      = get_global_state();
-//       const uint64_t claim_time        = microseconds_since_epoch_of_iso_string( global_state["last_pervote_bucket_fill"] );
+//       const uint64_t result_time        = microseconds_since_epoch_of_iso_string( global_state["last_pervote_bucket_fill"] );
 //       const int64_t  pervote_bucket    = global_state["pervote_bucket"].as<int64_t>();
 //       const int64_t  perblock_bucket   = global_state["perblock_bucket"].as<int64_t>();
 //       const int64_t  savings           = get_balance("eosio.saving"_n).get_amount();
@@ -1971,7 +1971,7 @@ using namespace eosio_system;
 //       const asset    balance           = get_balance(prod_name);
 //       const uint32_t unpaid_blocks     = get_producer_info(prod_name)["unpaid_blocks"].as<uint32_t>();
 
-//       const uint64_t usecs_between_fills = claim_time - initial_claim_time;
+//       const uint64_t usecs_between_fills = result_time - initial_result_time;
 
 //       const double expected_supply_growth = initial_supply.get_amount() * double(usecs_between_fills) * cont_rate / usecs_per_year;
 //       BOOST_REQUIRE_EQUAL( int64_t(expected_supply_growth), supply.get_amount() - initial_supply.get_amount() );
@@ -1998,18 +1998,18 @@ using namespace eosio_system;
 
 //       produce_blocks(5);
 
-//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already claimed rewards within past day"),
-//                           push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name)));
+//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already resulted rewards within past day"),
+//                           push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name)));
 //    }
 
 //    {
 //       const uint32_t prod_index = 24;
 //       const auto prod_name = producer_names[prod_index];
 //       BOOST_REQUIRE_EQUAL(success(),
-//                           push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name)));
+//                           push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name)));
 //       BOOST_REQUIRE(100 * 10000 <= get_balance(prod_name).get_amount());
-//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already claimed rewards within past day"),
-//                           push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name)));
+//       BOOST_REQUIRE_EQUAL(wasm_assert_msg("already resulted rewards within past day"),
+//                           push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name)));
 //    }
 
 //    {
@@ -2042,7 +2042,7 @@ using namespace eosio_system;
 //       BOOST_REQUIRE( !info["is_active"].as<bool>() );
 //       BOOST_REQUIRE( fc::crypto::public_key() == fc::crypto::public_key(info["producer_key"].as_string()) );
 //       BOOST_REQUIRE_EQUAL( wasm_assert_msg("producer does not have an active key"),
-//                            push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name) ) );
+//                            push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name) ) );
 //       produce_blocks(3 * 21 * 12);
 //       BOOST_REQUIRE_EQUAL( init_unpaid_blocks, get_producer_info(prod_name)["unpaid_blocks"].as<uint32_t>() );
 //       {
@@ -2088,11 +2088,11 @@ using namespace eosio_system;
 //       const asset    initial_supply            = get_token_supply();
 //       const asset    initial_balance           = get_balance(prod_name);
 //       const uint32_t initial_unpaid_blocks     = initial_prod_info["unpaid_blocks"].as<uint32_t>();
-//       const uint64_t initial_claim_time        = microseconds_since_epoch_of_iso_string( initial_prod_info["last_claim_time"] );
+//       const uint64_t initial_result_time        = microseconds_since_epoch_of_iso_string( initial_prod_info["last_result_time"] );
 //       const uint64_t initial_prod_update_time  = microseconds_since_epoch_of_iso_string( initial_prod_info2["last_votepay_share_update"] );
 
 //       BOOST_TEST_REQUIRE( 0 == get_producer_info2(prod_name)["votepay_share"].as_double() );
-//       BOOST_REQUIRE_EQUAL( success(), push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name) ) );
+//       BOOST_REQUIRE_EQUAL( success(), push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name) ) );
 
 //       const auto     prod_info         = get_producer_info(prod_name);
 //       const auto     prod_info2        = get_producer_info2(prod_name);
@@ -2105,7 +2105,7 @@ using namespace eosio_system;
 //       const asset    supply            = get_token_supply();
 //       const asset    balance           = get_balance(prod_name);
 //       const uint32_t unpaid_blocks     = prod_info["unpaid_blocks"].as<uint32_t>();
-//       const uint64_t claim_time        = microseconds_since_epoch_of_iso_string( prod_info["last_claim_time"] );
+//       const uint64_t result_time        = microseconds_since_epoch_of_iso_string( prod_info["last_result_time"] );
 //       const uint64_t prod_update_time  = microseconds_since_epoch_of_iso_string( prod_info2["last_votepay_share_update"] );
 
 //       const uint64_t usecs_between_fills         = bucket_fill_time - initial_bucket_fill_time;
@@ -2123,7 +2123,7 @@ using namespace eosio_system;
 
 //       const double expected_supply_growth = initial_supply.get_amount() * double(usecs_between_fills) * cont_rate / usecs_per_year;
 //       BOOST_REQUIRE_EQUAL( int64_t(expected_supply_growth), supply.get_amount() - initial_supply.get_amount() );
-//       BOOST_REQUIRE_EQUAL( claim_time, vpay_state_update );
+//       BOOST_REQUIRE_EQUAL( result_time, vpay_state_update );
 //       BOOST_REQUIRE( 100 * 10000 < from_pervote_bucket );
 //       BOOST_CHECK_EQUAL( expected_pervote_bucket - from_pervote_bucket, pervote_bucket );
 //       BOOST_CHECK_EQUAL( from_perblock_bucket + from_pervote_bucket, balance.get_amount() - initial_balance.get_amount() );
@@ -2131,8 +2131,8 @@ using namespace eosio_system;
 
 //       produce_block(fc::hours(2));
 
-//       BOOST_REQUIRE_EQUAL( wasm_assert_msg("already claimed rewards within past day"),
-//                            push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name) ) );
+//       BOOST_REQUIRE_EQUAL( wasm_assert_msg("already resulted rewards within past day"),
+//                            push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name) ) );
 //    }
 
 // } FC_LOG_AND_RETHROW()
@@ -2272,12 +2272,12 @@ using namespace eosio_system;
 //       BOOST_REQUIRE( 0 < init_info2["votepay_share"].as_double() );
 //       BOOST_REQUIRE( 0 < microseconds_since_epoch_of_iso_string( init_info2["last_votepay_share_update"] ) );
 
-//       BOOST_REQUIRE_EQUAL( success(), push_action(prod_name, "claimrewards"_n, mvo()("owner", prod_name)) );
+//       BOOST_REQUIRE_EQUAL( success(), push_action(prod_name, "resultrewards"_n, mvo()("owner", prod_name)) );
 
 //       BOOST_TEST_REQUIRE( 0 == get_producer_info2(prod_name)["votepay_share"].as_double() );
-//       BOOST_REQUIRE_EQUAL( get_producer_info(prod_name)["last_claim_time"].as_string(),
+//       BOOST_REQUIRE_EQUAL( get_producer_info(prod_name)["last_result_time"].as_string(),
 //                            get_producer_info2(prod_name)["last_votepay_share_update"].as_string() );
-//       BOOST_REQUIRE_EQUAL( get_producer_info(prod_name)["last_claim_time"].as_string(),
+//       BOOST_REQUIRE_EQUAL( get_producer_info(prod_name)["last_result_time"].as_string(),
 //                            get_global_state3()["last_vpay_state_update"].as_string() );
 //       const auto& gs3 = get_global_state3();
 //       double expected_total_votepay_shares = 0;
@@ -2327,7 +2327,7 @@ using namespace eosio_system;
 
 //    produce_block( fc::hours(1) );
 
-//    BOOST_REQUIRE_EQUAL( success(), push_action(proda, "claimrewards"_n, mvo()("owner", proda)) );
+//    BOOST_REQUIRE_EQUAL( success(), push_action(proda, "resultrewards"_n, mvo()("owner", proda)) );
 //    BOOST_TEST_REQUIRE( 0 == get_producer_info2(proda)["votepay_share"].as_double() );
 
 //    produce_block( fc::hours(24) );
@@ -2336,7 +2336,7 @@ using namespace eosio_system;
 
 //    produce_block( fc::hours(24) );
 
-//    BOOST_REQUIRE_EQUAL( success(), push_action(prodb, "claimrewards"_n, mvo()("owner", prodb)) );
+//    BOOST_REQUIRE_EQUAL( success(), push_action(prodb, "resultrewards"_n, mvo()("owner", prodb)) );
 //    BOOST_TEST_REQUIRE( 0 == get_producer_info2(prodb)["votepay_share"].as_double() );
 
 //    produce_block( fc::hours(10) );
@@ -2425,8 +2425,8 @@ using namespace eosio_system;
 //    last_update_time = microseconds_since_epoch_of_iso_string( cur_info2["last_votepay_share_update"] );
 //    total_votes      = get_producer_info(carol)["total_votes"].as_double();
 
-//    // carol claims rewards
-//    BOOST_REQUIRE_EQUAL( success(), push_action(carol, "claimrewards"_n, mvo()("owner", carol)) );
+//    // carol results rewards
+//    BOOST_REQUIRE_EQUAL( success(), push_action(carol, "resultrewards"_n, mvo()("owner", carol)) );
 
 //    produce_block( fc::hours(20) );
 
@@ -2441,7 +2441,7 @@ using namespace eosio_system;
 //    produce_block( fc::hours(54) );
 
 //    // bob votes for carol again
-//    // carol hasn't claimed rewards in over 3 days
+//    // carol hasn't resulted rewards in over 3 days
 //    total_votes = get_producer_info(carol)["total_votes"].as_double();
 //    BOOST_REQUIRE_EQUAL( success(), vote( bob, { carol } ) );
 //    BOOST_REQUIRE_EQUAL( get_producer_info2(carol)["last_votepay_share_update"].as_string(),
@@ -2453,7 +2453,7 @@ using namespace eosio_system;
 //    produce_block( fc::hours(20) );
 
 //    // bob votes for carol again
-//    // carol still hasn't claimed rewards
+//    // carol still hasn't resulted rewards
 //    BOOST_REQUIRE_EQUAL( success(), vote( bob, { carol } ) );
 //    BOOST_REQUIRE_EQUAL(get_producer_info2(carol)["last_votepay_share_update"].as_string(),
 //                        get_global_state3()["last_vpay_state_update"].as_string() );
@@ -2463,8 +2463,8 @@ using namespace eosio_system;
 
 //    produce_block( fc::hours(24) );
 
-//    // carol finally claims rewards
-//    BOOST_REQUIRE_EQUAL( success(), push_action( carol, "claimrewards"_n, mvo()("owner", carol) ) );
+//    // carol finally results rewards
+//    BOOST_REQUIRE_EQUAL( success(), push_action( carol, "resultrewards"_n, mvo()("owner", carol) ) );
 //    BOOST_TEST_REQUIRE( 0           == get_producer_info2(carol)["votepay_share"].as_double() );
 //    BOOST_TEST_REQUIRE( 0           == get_global_state2()["total_producer_votepay_share"].as_double() );
 //    BOOST_TEST_REQUIRE( total_votes == get_global_state3()["total_vpay_share_change_rate"].as_double() );
@@ -2472,7 +2472,7 @@ using namespace eosio_system;
 //    produce_block( fc::hours(5) );
 
 //    // alice votes for carol and emily
-//    // emily hasn't claimed rewards in over 3 days
+//    // emily hasn't resulted rewards in over 3 days
 //    last_update_time = microseconds_since_epoch_of_iso_string( get_producer_info2(carol)["last_votepay_share_update"] );
 //    BOOST_REQUIRE_EQUAL( success(), vote( alice, { carol, emily } ) );
 //    cur_info2 = get_producer_info2(carol);
@@ -2492,7 +2492,7 @@ using namespace eosio_system;
 //    produce_block( fc::hours(10) );
 
 //    // bob chooses alice as proxy
-//    // emily still hasn't claimed rewards
+//    // emily still hasn't resulted rewards
 //    last_update_time = microseconds_since_epoch_of_iso_string( get_producer_info2(carol)["last_votepay_share_update"] );
 //    BOOST_REQUIRE_EQUAL( success(), vote( bob, { }, alice ) );
 //    cur_info2 = get_producer_info2(carol);
@@ -2538,9 +2538,9 @@ using namespace eosio_system;
 //    BOOST_REQUIRE_EQUAL( success(), vote( alice, { carol, emily } ) );
 
 
-//    BOOST_REQUIRE_EQUAL( success(), push_action( carol, "claimrewards"_n, mvo()("owner", carol) ) );
+//    BOOST_REQUIRE_EQUAL( success(), push_action( carol, "resultrewards"_n, mvo()("owner", carol) ) );
 //    produce_block( fc::hours(1) );
-//    BOOST_REQUIRE_EQUAL( success(), push_action( emily, "claimrewards"_n, mvo()("owner", emily) ) );
+//    BOOST_REQUIRE_EQUAL( success(), push_action( emily, "resultrewards"_n, mvo()("owner", emily) ) );
 
 //    produce_block( fc::hours(3 * 24 + 1) );
 
@@ -2548,14 +2548,14 @@ using namespace eosio_system;
 //       signed_transaction trx;
 //       set_transaction_headers(trx);
 
-//       trx.actions.emplace_back( get_action( config::system_account_name, "claimrewards"_n, { {carol, config::active_name} },
+//       trx.actions.emplace_back( get_action( config::system_account_name, "resultrewards"_n, { {carol, config::active_name} },
 //                                             mvo()("owner", carol) ) );
 
 //       std::vector<account_name> prods = { carol, emily };
 //       trx.actions.emplace_back( get_action( config::system_account_name, "voteproducer"_n, { {alice, config::active_name} },
 //                                             mvo()("voter", alice)("proxy", name(0))("producers", prods) ) );
 
-//       trx.actions.emplace_back( get_action( config::system_account_name, "claimrewards"_n, { {emily, config::active_name} },
+//       trx.actions.emplace_back( get_action( config::system_account_name, "resultrewards"_n, { {emily, config::active_name} },
 //                                             mvo()("owner", emily) ) );
 
 //       trx.sign( get_private_key( carol, "active" ), control->get_chain_id() );
@@ -2633,12 +2633,12 @@ using namespace eosio_system;
 //                                "producers2"_n ) );
 //    BOOST_REQUIRE( !tbl );
 //    BOOST_REQUIRE_EQUAL( success(), regproducer("defproducera"_n) );
-//    BOOST_REQUIRE( microseconds_since_epoch_of_iso_string( get_producer_info("defproducera"_n)["last_claim_time"] ) < microseconds_since_epoch_of_iso_string( get_producer_info2("defproducera"_n)["last_votepay_share_update"] ) );
+//    BOOST_REQUIRE( microseconds_since_epoch_of_iso_string( get_producer_info("defproducera"_n)["last_result_time"] ) < microseconds_since_epoch_of_iso_string( get_producer_info2("defproducera"_n)["last_votepay_share_update"] ) );
 
 //    create_account_with_resources( "defproducer1"_n, config::system_account_name, core_sym::from_string("1.0000"), false, net, cpu );
 //    BOOST_REQUIRE_EQUAL( success(), regproducer("defproducer1"_n) );
-//    BOOST_REQUIRE( 0 < microseconds_since_epoch_of_iso_string( get_producer_info("defproducer1"_n)["last_claim_time"] ) );
-//    BOOST_REQUIRE_EQUAL( get_producer_info("defproducer1"_n)["last_claim_time"].as_string(),
+//    BOOST_REQUIRE( 0 < microseconds_since_epoch_of_iso_string( get_producer_info("defproducer1"_n)["last_result_time"] ) );
+//    BOOST_REQUIRE_EQUAL( get_producer_info("defproducer1"_n)["last_result_time"].as_string(),
 //                         get_producer_info2("defproducer1"_n)["last_votepay_share_update"].as_string() );
 
 // } FC_LOG_AND_RETHROW()
@@ -2695,8 +2695,8 @@ using namespace eosio_system;
 //    BOOST_REQUIRE_EQUAL( t.success(), t.vote("producvoterb"_n, vector<account_name>(producer_names.begin(), producer_names.end())) );
 //    t.produce_block( fc::hours(30) );
 //    BOOST_REQUIRE_EQUAL( t.success(), t.vote("producvoterc"_n, vector<account_name>(producer_names.begin(), producer_names.end())) );
-//    BOOST_REQUIRE_EQUAL( t.success(), t.push_action(producer_names[0], "claimrewards"_n, mvo()("owner", producer_names[0])) );
-//    BOOST_REQUIRE_EQUAL( t.success(), t.push_action(producer_names[1], "claimrewards"_n, mvo()("owner", producer_names[1])) );
+//    BOOST_REQUIRE_EQUAL( t.success(), t.push_action(producer_names[0], "resultrewards"_n, mvo()("owner", producer_names[0])) );
+//    BOOST_REQUIRE_EQUAL( t.success(), t.push_action(producer_names[1], "resultrewards"_n, mvo()("owner", producer_names[1])) );
 //    auto* tbl = t.control->db().find<eosio::chain::table_id_object, eosio::chain::by_code_scope_table>(
 //                                     boost::make_tuple( config::system_account_name,
 //                                                        config::system_account_name,
@@ -2710,7 +2710,7 @@ using namespace eosio_system;
 //    t.produce_blocks(2);
 //    t.produce_block( fc::hours(24 + 1) );
 
-//    BOOST_REQUIRE_EQUAL( t.success(), t.push_action(producer_names[0], "claimrewards"_n, mvo()("owner", producer_names[0])) );
+//    BOOST_REQUIRE_EQUAL( t.success(), t.push_action(producer_names[0], "resultrewards"_n, mvo()("owner", producer_names[0])) );
 //    BOOST_TEST_REQUIRE( 0 == t.get_global_state2()["total_producer_votepay_share"].as_double() );
 //    BOOST_TEST_REQUIRE( t.get_producer_info(producer_names[0])["total_votes"].as_double() == t.get_global_state3()["total_vpay_share_change_rate"].as_double() );
 
@@ -2892,13 +2892,13 @@ using namespace eosio_system;
 //    }
 
 //    {
-//       const char* claimrewards_activation_error_message = "cannot claim rewards until the chain is activated (at least 15% of all tokens participate in voting)";
+//       const char* resultrewards_activation_error_message = "cannot result rewards until the chain is activated (at least 15% of all tokens participate in voting)";
 //       BOOST_CHECK_EQUAL(0, get_global_state()["total_unpaid_blocks"].as<uint32_t>());
-//       BOOST_REQUIRE_EQUAL(wasm_assert_msg( claimrewards_activation_error_message ),
-//                           push_action(producer_names.front(), "claimrewards"_n, mvo()("owner", producer_names.front())));
+//       BOOST_REQUIRE_EQUAL(wasm_assert_msg( resultrewards_activation_error_message ),
+//                           push_action(producer_names.front(), "resultrewards"_n, mvo()("owner", producer_names.front())));
 //       BOOST_REQUIRE_EQUAL(0, get_balance(producer_names.front()).get_amount());
-//       BOOST_REQUIRE_EQUAL(wasm_assert_msg( claimrewards_activation_error_message ),
-//                           push_action(producer_names.back(), "claimrewards"_n, mvo()("owner", producer_names.back())));
+//       BOOST_REQUIRE_EQUAL(wasm_assert_msg( resultrewards_activation_error_message ),
+//                           push_action(producer_names.back(), "resultrewards"_n, mvo()("owner", producer_names.back())));
 //       BOOST_REQUIRE_EQUAL(0, get_balance(producer_names.back()).get_amount());
 //    }
 
@@ -2929,7 +2929,7 @@ using namespace eosio_system;
 //       BOOST_REQUIRE_EQUAL(true, all_21_produced);
 //       BOOST_REQUIRE_EQUAL(true, rest_didnt_produce);
 //       BOOST_REQUIRE_EQUAL(success(),
-//                           push_action(producer_names.front(), "claimrewards"_n, mvo()("owner", producer_names.front())));
+//                           push_action(producer_names.front(), "resultrewards"_n, mvo()("owner", producer_names.front())));
 //       BOOST_REQUIRE(0 < get_balance(producer_names.front()).get_amount());
 //    }
 
@@ -3252,7 +3252,7 @@ using namespace eosio_system;
 //    produce_block();
 
 //    BOOST_REQUIRE_EXCEPTION( create_accounts_with_resources( { "nofail"_n }, "dan"_n ), // dan shoudn't be able to do this, sam won
-//                             eosio_assert_message_exception, eosio_assert_message_is( "only highest bidder can claim" ) );
+//                             eosio_assert_message_exception, eosio_assert_message_is( "only highest bidder can result" ) );
 //    //wlog( "verify sam can create nofail" );
 //    create_accounts_with_resources( { "nofail"_n }, "sam"_n ); // sam should be able to do this, he won the bid
 //    //wlog( "verify nofail can create test.nofail" );
@@ -3395,11 +3395,11 @@ using namespace eosio_system;
 //                         bidname( "carl", "prefe", core_sym::from_string("2.0980") ) );
 //    produce_block( fc::hours(2) );
 //    produce_blocks(2);
-//    // bid for prefb has closed, only highest bidder can claim
+//    // bid for prefb has closed, only highest bidder can result
 //    BOOST_REQUIRE_EXCEPTION( create_account_with_resources( "prefb"_n, "alice"_n ),
-//                             eosio_assert_message_exception, eosio_assert_message_is( "only highest bidder can claim" ) );
+//                             eosio_assert_message_exception, eosio_assert_message_is( "only highest bidder can result" ) );
 //    BOOST_REQUIRE_EXCEPTION( create_account_with_resources( "prefb"_n, "carl"_n ),
-//                             eosio_assert_message_exception, eosio_assert_message_is( "only highest bidder can claim" ) );
+//                             eosio_assert_message_exception, eosio_assert_message_is( "only highest bidder can result" ) );
 //    create_account_with_resources( "prefb"_n, "eve"_n );
 
 //    BOOST_REQUIRE_EXCEPTION( create_account_with_resources( "prefe"_n, "carl"_n ),
@@ -3507,7 +3507,7 @@ using namespace eosio_system;
 //       BOOST_REQUIRE_EQUAL(success(), vote("producvoterd"_n, { producer_names[voted_out_index] }));
 //       produce_blocks(2 * 12 * 21);
 //       BOOST_REQUIRE(fc::crypto::public_key() != fc::crypto::public_key(get_producer_info(producer_names[voted_out_index])["producer_key"].as_string()));
-//       BOOST_REQUIRE_EQUAL(success(), push_action(producer_names[voted_out_index], "claimrewards"_n, mvo()("owner", producer_names[voted_out_index])));
+//       BOOST_REQUIRE_EQUAL(success(), push_action(producer_names[voted_out_index], "resultrewards"_n, mvo()("owner", producer_names[voted_out_index])));
 //    }
 
 // } FC_LOG_AND_RETHROW()
@@ -4381,7 +4381,7 @@ using namespace eosio_system;
 // } FC_LOG_AND_RETHROW()
 
 
-// BOOST_FIXTURE_TEST_CASE( buy_sell_claim_rex, eosio_system_tester ) try {
+// BOOST_FIXTURE_TEST_CASE( buy_sell_result_rex, eosio_system_tester ) try {
 
 //    const asset init_balance = core_sym::from_string("3000000.0000");
 //    const std::vector<account_name> accounts = { "aliceaccount"_n, "bobbyaccount"_n, "carolaccount"_n, "emilyaccount"_n, "frankaccount"_n };
@@ -5508,7 +5508,7 @@ using namespace eosio_system;
 //    BOOST_REQUIRE_EQUAL( 2 * ( stake_amount.get_amount() - small_amount.get_amount() ),
 //                         get_voter_info( b1 )["staked"].as<int64_t>() );
    
-//    BOOST_REQUIRE_EQUAL( wasm_assert_msg("b1 can only claim their tokens over 10 years"),
+//    BOOST_REQUIRE_EQUAL( wasm_assert_msg("b1 can only result their tokens over 10 years"),
 //                         unstake( b1, b1, final_amount, final_amount ) );
 
 //    BOOST_REQUIRE_EQUAL( wasm_assert_msg("must vote for at least 21 producers or for a proxy before buying REX"), 
@@ -5524,7 +5524,7 @@ using namespace eosio_system;
 
 //    produce_block( fc::days( 5 * 364 ) );
 
-//    BOOST_REQUIRE_EQUAL( wasm_assert_msg("b1 can only claim their tokens over 10 years"),
+//    BOOST_REQUIRE_EQUAL( wasm_assert_msg("b1 can only result their tokens over 10 years"),
 //                         unstake( b1, b1, small_amount, small_amount ) );
 
 // } FC_LOG_AND_RETHROW()

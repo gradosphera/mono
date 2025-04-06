@@ -272,7 +272,7 @@
             ]
         },
         {
-            "name": "claimrewards",
+            "name": "resultrewards",
             "base": "",
             "fields": [
                 {
@@ -824,7 +824,7 @@
                     "type": "uint32"
                 },
                 {
-                    "name": "last_claim_time",
+                    "name": "last_result_time",
                     "type": "time_point"
                 },
                 {
@@ -1659,12 +1659,12 @@
         {
             "name": "bidname",
             "type": "bidname",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Bid On a Premium Account Name\nsummary: '{{nowrap bidder}} bids on the premium account name {{nowrap newname}}'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/account.png#3d55a2fc3a5c20b456f5657faf666bc25ffd06f4836c5e8256f741149b0b294f\n---\n\n{{bidder}} bids {{bid}} on an auction to own the premium account name {{newname}}.\n\n{{bidder}} transfers {{bid}} to the system to cover the cost of the bid, which will be returned to {{bidder}} only if {{bidder}} is later outbid in the auction for {{newname}} by another account.\n\nIf the auction for {{newname}} closes with {{bidder}} remaining as the highest bidder, {{bidder}} will be authorized to create the account with name {{newname}}.\n\n## Bid refund behavior\n\nIf {{bidder}}’s bid on {{newname}} is later outbid by another account, {{bidder}} will be able to claim back the transferred amount of {{bid}}. The system will attempt to automatically do this on behalf of {{bidder}}, but the automatic refund may occasionally fail which will then require {{bidder}} to manually claim the refund with the bidrefund action.\n\n## Auction close criteria\n\nThe system should automatically close the auction for {{newname}} if it satisfies the condition that over a period of two minutes the following two properties continuously hold:\n\n- no one has bid on {{newname}} within the last 24 hours;\n- and, the value of the latest bid on {{newname}} is greater than the value of the bids on each of the other open auctions.\n\nBe aware that the condition to close the auction described above are sufficient but not necessary. The auction for {{newname}} cannot close unless both of the properties are simultaneously satisfied, but it may be closed without requiring the properties to hold for a period of 2 minutes."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Bid On a Premium Account Name\nsummary: '{{nowrap bidder}} bids on the premium account name {{nowrap newname}}'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/account.png#3d55a2fc3a5c20b456f5657faf666bc25ffd06f4836c5e8256f741149b0b294f\n---\n\n{{bidder}} bids {{bid}} on an auction to own the premium account name {{newname}}.\n\n{{bidder}} transfers {{bid}} to the system to cover the cost of the bid, which will be returned to {{bidder}} only if {{bidder}} is later outbid in the auction for {{newname}} by another account.\n\nIf the auction for {{newname}} closes with {{bidder}} remaining as the highest bidder, {{bidder}} will be authorized to create the account with name {{newname}}.\n\n## Bid refund behavior\n\nIf {{bidder}}’s bid on {{newname}} is later outbid by another account, {{bidder}} will be able to result back the transferred amount of {{bid}}. The system will attempt to automatically do this on behalf of {{bidder}}, but the automatic refund may occasionally fail which will then require {{bidder}} to manually result the refund with the bidrefund action.\n\n## Auction close criteria\n\nThe system should automatically close the auction for {{newname}} if it satisfies the condition that over a period of two minutes the following two properties continuously hold:\n\n- no one has bid on {{newname}} within the last 24 hours;\n- and, the value of the latest bid on {{newname}} is greater than the value of the bids on each of the other open auctions.\n\nBe aware that the condition to close the auction described above are sufficient but not necessary. The auction for {{newname}} cannot close unless both of the properties are simultaneously satisfied, but it may be closed without requiring the properties to hold for a period of 2 minutes."
         },
         {
             "name": "bidrefund",
             "type": "bidrefund",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Claim Refund on Name Bid\nsummary: 'Claim refund on {{nowrap newname}} bid'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/account.png#3d55a2fc3a5c20b456f5657faf666bc25ffd06f4836c5e8256f741149b0b294f\n---\n\n{{bidder}} claims refund on {{newname}} bid after being outbid by someone else."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: result Refund on Name Bid\nsummary: 'result refund on {{nowrap newname}} bid'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/account.png#3d55a2fc3a5c20b456f5657faf666bc25ffd06f4836c5e8256f741149b0b294f\n---\n\n{{bidder}} results refund on {{newname}} bid after being outbid by someone else."
         },
         {
             "name": "buyram",
@@ -1687,9 +1687,9 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Cancel Delayed Transaction\nsummary: '{{nowrap canceling_auth.actor}} cancels a delayed transaction'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/account.png#3d55a2fc3a5c20b456f5657faf666bc25ffd06f4836c5e8256f741149b0b294f\n---\n\n{{canceling_auth.actor}} cancels the delayed transaction with id {{trx_id}}."
         },
         {
-            "name": "claimrewards",
-            "type": "claimrewards",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Claim Block Producer Rewards\nsummary: '{{nowrap owner}} claims block and vote rewards'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/admin.png#9bf1cec664863bd6aaac0f814b235f8799fb02c850e9aa5da34e8a004bd6518e\n---\n\n{{owner}} claims block and vote rewards from the system."
+            "name": "resultrewards",
+            "type": "resultrewards",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: result Block Producer Rewards\nsummary: '{{nowrap owner}} results block and vote rewards'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/admin.png#9bf1cec664863bd6aaac0f814b235f8799fb02c850e9aa5da34e8a004bd6518e\n---\n\n{{owner}} results block and vote rewards from the system."
         },
         {
             "name": "closerex",
@@ -1779,7 +1779,7 @@
         {
             "name": "refund",
             "type": "refund",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Claim Unstaked Tokens\nsummary: 'Return previously unstaked tokens to {{nowrap owner}}'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/account.png#3d55a2fc3a5c20b456f5657faf666bc25ffd06f4836c5e8256f741149b0b294f\n---\n\nReturn previously unstaked tokens to {{owner}} after the unstaking period has elapsed."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: result Unstaked Tokens\nsummary: 'Return previously unstaked tokens to {{nowrap owner}}'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/account.png#3d55a2fc3a5c20b456f5657faf666bc25ffd06f4836c5e8256f741149b0b294f\n---\n\nReturn previously unstaked tokens to {{owner}} after the unstaking period has elapsed."
         },
         {
             "name": "regproducer",
@@ -1884,7 +1884,7 @@
         {
             "name": "undelegatebw",
             "type": "undelegatebw",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Unstake Tokens for NET and/or CPU\nsummary: 'Unstake tokens for NET and/or CPU from {{nowrap receiver}}'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/resource.png#3830f1ce8cb07f7757dbcf383b1ec1b11914ac34a1f9d8b065f07600fa9dac19\n---\n\n{{from}} unstakes from {{receiver}} {{unstake_net_quantity}} for NET bandwidth and {{unstake_cpu_quantity}} for CPU bandwidth.\n\nThe sum of these two quantities will be removed from the vote weight of {{receiver}} and will be made available to {{from}} after an uninterrupted 3 day period without further unstaking by {{from}}. After the uninterrupted 3 day period passes, the system will attempt to automatically return the funds to {{from}}’s regular token balance. However, this automatic refund may occasionally fail which will then require {{from}} to manually claim the funds with the refund action."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Unstake Tokens for NET and/or CPU\nsummary: 'Unstake tokens for NET and/or CPU from {{nowrap receiver}}'\nicon: http://127.0.0.1/ricardian_assets/eosio.contracts/icons/resource.png#3830f1ce8cb07f7757dbcf383b1ec1b11914ac34a1f9d8b065f07600fa9dac19\n---\n\n{{from}} unstakes from {{receiver}} {{unstake_net_quantity}} for NET bandwidth and {{unstake_cpu_quantity}} for CPU bandwidth.\n\nThe sum of these two quantities will be removed from the vote weight of {{receiver}} and will be made available to {{from}} after an uninterrupted 3 day period without further unstaking by {{from}}. After the uninterrupted 3 day period passes, the system will attempt to automatically return the funds to {{from}}’s regular token balance. However, this automatic refund may occasionally fail which will then require {{from}} to manually result the funds with the refund action."
         },
         {
             "name": "unlinkauth",

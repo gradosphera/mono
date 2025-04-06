@@ -26,7 +26,7 @@ If the auction for {{newname}} closes with {{bidder}} remaining as the highest b
 
 ## Bid refund behavior
 
-If {{bidder}}’s bid on {{newname}} is later outbid by another account, {{bidder}} will be able to claim back the transferred amount of {{bid}}. The system will attempt to automatically do this on behalf of {{bidder}}, but the automatic refund may occasionally fail which will then require {{bidder}} to manually claim the refund with the bidrefund action.
+If {{bidder}}’s bid on {{newname}} is later outbid by another account, {{bidder}} will be able to result back the transferred amount of {{bid}}. The system will attempt to automatically do this on behalf of {{bidder}}, but the automatic refund may occasionally fail which will then require {{bidder}} to manually result the refund with the bidrefund action.
 
 ## Auction close criteria
 
@@ -41,12 +41,12 @@ Be aware that the condition to close the auction described above are sufficient 
 
 ---
 spec_version: "0.2.0"
-title: Claim Refund on Name Bid
-summary: 'Claim refund on {{nowrap newname}} bid'
+title: result Refund on Name Bid
+summary: 'result refund on {{nowrap newname}} bid'
 icon: @ICON_BASE_URL@/@ACCOUNT_ICON_URI@
 ---
 
-{{bidder}} claims refund on {{newname}} bid after being outbid by someone else.
+{{bidder}} results refund on {{newname}} bid after being outbid by someone else.
 
 <h1 class="contract">buyram</h1>
 
@@ -94,16 +94,16 @@ icon: @ICON_BASE_URL@/@ACCOUNT_ICON_URI@
 
 {{canceling_auth.actor}} cancels the delayed transaction with id {{trx_id}}.
 
-<h1 class="contract">claimrewards</h1>
+<h1 class="contract">resultrewards</h1>
 
 ---
 spec_version: "0.2.0"
-title: Claim Block Producer Rewards
-summary: '{{nowrap owner}} claims block and vote rewards'
+title: result Block Producer Rewards
+summary: '{{nowrap owner}} results block and vote rewards'
 icon: @ICON_BASE_URL@/@ADMIN_ICON_URI@
 ---
 
-{{owner}} claims block and vote rewards from the system.
+{{owner}} results block and vote rewards from the system.
 
 <h1 class="contract">closerex</h1>
 
@@ -291,7 +291,7 @@ icon: @ICON_BASE_URL@/@REX_ICON_URI@
 
 ---
 spec_version: "0.2.0"
-title: Claim Unstaked Tokens
+title: result Unstaked Tokens
 summary: 'Return previously unstaked tokens to {{nowrap owner}}'
 icon: @ICON_BASE_URL@/@ACCOUNT_ICON_URI@
 ---
@@ -595,7 +595,7 @@ icon: @ICON_BASE_URL@/@RESOURCE_ICON_URI@
 
 {{from}} unstakes from {{receiver}} {{unstake_net_quantity}} for NET bandwidth and {{unstake_cpu_quantity}} for CPU bandwidth.
 
-The sum of these two quantities will be removed from the vote weight of {{receiver}} and will be made available to {{from}} after an uninterrupted 3 day period without further unstaking by {{from}}. After the uninterrupted 3 day period passes, the system will attempt to automatically return the funds to {{from}}’s regular token balance. However, this automatic refund may occasionally fail which will then require {{from}} to manually claim the funds with the refund action.
+The sum of these two quantities will be removed from the vote weight of {{receiver}} and will be made available to {{from}} after an uninterrupted 3 day period without further unstaking by {{from}}. After the uninterrupted 3 day period passes, the system will attempt to automatically return the funds to {{from}}’s regular token balance. However, this automatic refund may occasionally fail which will then require {{from}} to manually result the funds with the refund action.
 
 <h1 class="contract">unlinkauth</h1>
 
