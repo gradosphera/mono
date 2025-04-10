@@ -1,12 +1,12 @@
 import { ListOfOrdersPage } from 'src/pages/Cooperative/ListOfOrders';
-import { ListOfQuestionsWidget } from 'src/widgets/Cooperative/Agenda/ListOfQuestions';
+import { ListOfQuestionsPage } from 'src/pages/Cooperative/ListOfQuestions';
 import { markRaw } from 'vue';
-import { ContactsPage } from 'src/pages/Cooperative/Contacts';
+import { ContactsPage } from 'src/pages/Contacts';
 import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants';
 import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
-import { ConnectionPage } from 'src/pages/Union/Connection';
-import { ListOfDocumentsPage } from 'src/pages/Documentor/ListOfDocuments';
+import { ConnectionAgreementPage } from 'src/pages/Union/ConnectionAgreement';
+import { ListOfDocumentsPage } from 'src/pages/Cooperative/ListOfDocuments';
 import { CoopCardPage } from 'src/pages/User/CardPage';
 import { ModerationPage } from 'src/pages/Marketplace/Moderation';
 import { CreateParentOfferPage } from 'src/pages/Marketplace/CreateParentOffer';
@@ -52,7 +52,7 @@ export const manifest = {
           },
           path: '/:coopname/connect',
           name: 'connect',
-          component: markRaw(ConnectionPage),
+          component: markRaw(ConnectionAgreementPage),
         },
         {
           meta: {
@@ -102,7 +102,7 @@ export const manifest = {
         // {
         //   path: 'contributions',
         //   name: 'settings-contributions',
-        //   component: markRaw(ChangeCooperativeContributions),
+        //   component: markRaw(ChangeRegisterPaymentsPage),
         //   meta: {
         //     title: 'Взносы',
         //     icon: 'fa-solid fa-file-invoice',
@@ -158,7 +158,7 @@ export const manifest = {
         {
           path: 'agenda',
           name: 'agenda',
-          component: markRaw(ListOfQuestionsWidget),
+          component: markRaw(ListOfQuestionsPage),
           meta: {
             title: 'Повестка',
             icon: 'fa-solid fa-check-to-slot',

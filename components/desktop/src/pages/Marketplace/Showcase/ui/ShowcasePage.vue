@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useRequestStore } from 'src/entities/Request/model/stores'
-import { RequestCard } from 'src/widgets/Request/RequestCard'
+import { RequestCard } from 'src/widgets/Marketplace/RequestCard'
 import { OfferPage } from 'src/pages/Marketplace/OfferPage'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

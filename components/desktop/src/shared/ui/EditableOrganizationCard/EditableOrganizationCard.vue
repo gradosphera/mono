@@ -165,19 +165,19 @@ q-form(ref="form" v-if="data")
     @cancel="cancelChanges"
   )
 </template>
-  
+
   <script lang="ts" setup>
   import { ref } from 'vue';
   import { useEditableData } from 'src/shared/lib/composables/useEditableData';
   import { notEmpty, notEmptyPhone, validatePersonalName } from 'src/shared/lib/utils';
-  import { failAlert, SuccessAlert } from 'src/shared/api';
+  import { FailAlert, SuccessAlert } from 'src/shared/api';
   import { EditableActions } from 'src/shared/ui/EditableActions';
   import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
   import { type IOrganizationData } from 'src/entities/Account/types';
-  
+
   const emit = defineEmits(['update']);
   const { updateAccount } = useUpdateAccount();
-  
+
   const props = defineProps({
     participantData: {
       type: Object as () => IOrganizationData,
@@ -188,10 +188,10 @@ q-form(ref="form" v-if="data")
       default: false
     }
   });
-  
+
   const localOrganizationData = ref(props.participantData);
   const form = ref();
-  
+
   const handleSave = async () => {
     try {
       const account_data: IUpdateAccountInput = {
@@ -203,7 +203,7 @@ q-form(ref="form" v-if="data")
       SuccessAlert('Данные аккаунта обновлены');
     } catch (e) {
       console.log(e);
-      failAlert(e);
+      FailAlert(e);
     }
   };
   const { editableData: data, isEditing, isDisabled, saveChanges, cancelChanges } = useEditableData(
@@ -212,4 +212,3 @@ q-form(ref="form" v-if="data")
     form
   );
 </script>
-  

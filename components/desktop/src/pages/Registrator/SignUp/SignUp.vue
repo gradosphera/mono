@@ -97,7 +97,7 @@ watch(
   () => {
     if (store.step >= steps.GenerateAccount && store.step < steps.WaitingRegistration) {
       currentUser.loadProfile(username.value, info.coopname)
-      wallet.loadUserWalet({coopname: info.coopname, username: username.value})
+      wallet.loadUserWallet({coopname: info.coopname, username: username.value})
     }
   }
 )

@@ -49,6 +49,7 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
   const close = async (): Promise<void> => {
     isAuth.value = false;
     session.value = undefined;
+    globalStore.logout()
   };
 
   const init = async () => {

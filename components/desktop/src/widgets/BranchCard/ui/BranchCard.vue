@@ -6,7 +6,7 @@ import type { IBranch } from 'src/entities/Branch/model';
 import { EditableActions } from 'src/shared/ui/EditableActions';
 import { ref } from 'vue';
 import { useEditBranch } from 'src/features/Branch/EditBranch';
-import { failAlert } from 'src/shared/api';
+import { FailAlert } from 'src/shared/api';
 
 const props = defineProps({
   branch: {
@@ -22,7 +22,7 @@ const handleSave = async (updatedBranch: IBranch) => {
   try {
     await editBranch(updatedBranch)
   } catch(e){
-    failAlert(e)
+    FailAlert(e)
   }
 
 };

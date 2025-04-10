@@ -1,5 +1,5 @@
 <template lang="pug">
-q-btn(@click="publish") опубликовать  
+q-btn(@click="publish") опубликовать
 </template>
 
 <script setup lang="ts">

@@ -429,8 +429,8 @@ result capital::get_result_by_assignment_and_username_or_fail(eosio::name coopna
 
 
 std::optional<creauthor> capital::get_creauthor(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username) {
-    creauthor_index ractors(_capital, coopname.value);
-    auto idx  = ractors.get_index<"byresuser"_n>();
+    creauthor_index creathors(_capital, coopname.value);
+    auto idx  = creathors.get_index<"byresuser"_n>();
     auto rkey = combine_checksum_ids(assignment_hash, username);
 
     auto it = idx.find(rkey);
@@ -475,40 +475,29 @@ global_state capital::get_global_state(name coopname) {
 }
 
 
-void capital::ensure_contributor(name coopname, name username) {
-  // Получаем глобальное состояние для установки reward_per_share_last
-  auto gs = get_global_state(coopname);
-
-}
-
 //----------------------------------------------------------------------------
 // calculcate_capital_amounts: для расчёта премий по формулам:
 //   - creators_bonus      = spended * 0.382
-//   - authors_bonus       = spended * 1.618
+//   - authors_bonus       = spended * 0.618
 //   - generated           = spended + creators_bonus + authors_bonus
 //   - capitalists_bonus  = generated * 1.618
 //   - total               = generated + capitalists_bonus
 //----------------------------------------------------------------------------
-bonus_result capital::calculcate_capital_amounts(int64_t spended_amount) {
-    bonus_result br{};
+bonus_result capital::calculcate_capital_amounts(const eosio::asset& spended) {
+    bonus_result br;
 
-    // Преобразуем spended_amount в double для дальнейших расчетов
-    double spended = double(spended_amount);
-
-    // 1) creators_bonus = spended_amount * 0.382
-    br.creators_bonus = int64_t(spended * 0.382);
-
-    // 2) authors_bonus = spended_amount * 1.618
-    br.authors_bonus = int64_t(spended * 1.618);
-
-    // 3) generated = spended + creators_bonus + authors_bonus
-    br.generated = int64_t(spended + br.creators_bonus + br.authors_bonus);
-
-    // 4) capitalists_bonus = generated * 1.618
-    br.capitalists_bonus = int64_t(double(br.generated) * 1.618);
-
-    // 5) total = generated + capitalists_bonus
-    br.total = int64_t(br.generated + br.capitalists_bonus);
+    double amount = static_cast<double>(spended.amount);
+    eosio::symbol sym = spended.symbol;
+    
+    br.creator_base = spended;
+    br.autor_base = spended;
+    
+    br.creators_bonus     = eosio::asset(int64_t(amount * 0.382), sym);
+    br.authors_bonus      = eosio::asset(int64_t(amount * 0.618), sym);
+    br.generated          = eosio::asset(br.creator_base.amount + br.creators_bonus.amount + br.authors_bonus.amount + br.author_base.amount, sym);
+    br.capitalists_bonus  = eosio::asset( int64_t(static_cast<double>(br.generated.amount) * 1.618), sym);
+    br.total              = eosio::asset(br.generated.amount + br.capitalists_bonus.amount, sym);
 
     return br;
 }
+

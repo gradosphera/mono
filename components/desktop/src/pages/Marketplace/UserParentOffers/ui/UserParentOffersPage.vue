@@ -2,7 +2,7 @@
 import { useRequestStore } from 'src/entities/Request/model/stores'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { RequestCard } from 'src/widgets/Request/RequestCard'
+import { RequestCard } from 'src/widgets/Marketplace/RequestCard'
 import { OfferPage } from 'src/pages/Marketplace/OfferPage'
 
 import type { IRequestData } from 'src/entities/Request'

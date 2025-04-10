@@ -10,7 +10,7 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
   auto exist_assignment = get_assignment(coopname, commit -> assignment_hash);
   eosio::check(exist_assignment.has_value(), "Задание не найдено");
   
-  eosio::check(exist_assignment -> status == "opened"_n, "Нельзя добавить коммит в уже закрытый задание");
+  eosio::check(exist_assignment -> status == "opened"_n, "Нельзя добавить коммит в уже закрытое задание");
   
   // Обновляем assignment
   assignment_index assignments(_capital, coopname.value);
@@ -18,7 +18,7 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
   
   assignments.modify(assignment, _capital, [&](auto &row) {
       row.spended            += commit -> spended;
-      row.creators_base    += commit -> spended;
+      row.creators_base      += commit -> spended;
       row.generated          += commit -> generated;
       row.creators_bonus     += commit -> creators_bonus;
       row.authors_bonus      += commit -> authors_bonus;
@@ -57,11 +57,11 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
 
   // Обновляем запись в creauthors (создательские доли)
   auto exist_creauthor = get_creauthor(coopname, commit->assignment_hash, commit->username);
-  creauthor_index ractors(_capital, coopname.value);
+  creauthor_index creathors(_capital, coopname.value);
       
   if (!exist_creauthor.has_value()) {
-    ractors.emplace(_capital, [&](auto &ra){
-        ra.id            = ractors.available_primary_key();
+    creathors.emplace(_capital, [&](auto &ra){
+        ra.id            = creathors.available_primary_key();
         ra.project_hash  = commit->project_hash;
         ra.assignment_hash   = commit->assignment_hash;
         ra.username      = commit->username;
@@ -72,8 +72,8 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
         ra.creator_bonus_shares = commit->spended.amount;
     });
   } else {
-    auto creauthor = ractors.find(exist_creauthor->id);
-    ractors.modify(creauthor, _capital, [&](auto &ra) {
+    auto creauthor = creathors.find(exist_creauthor->id);
+    creathors.modify(creauthor, _capital, [&](auto &ra) {
         ra.spended += commit->spended;
         ra.contributed_hours  += commit->contributed_hours;
         ra.provisional_amount += commit->spended;

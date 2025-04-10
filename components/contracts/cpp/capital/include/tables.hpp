@@ -6,11 +6,11 @@
 using namespace eosio;
 
 struct bonus_result {
-    int64_t creators_bonus;
-    int64_t authors_bonus;
-    int64_t generated;
-    int64_t capitalists_bonus;
-    int64_t total;
+    asset creators_bonus;
+    asset authors_bonus;
+    asset generated;
+    asset capitalists_bonus;
+    asset total;
 };
 
 // creauthors.hpp (или в capital.hpp)
@@ -18,7 +18,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] creauthor {
     uint64_t    id;
     checksum256 project_hash;        // С каким результатом связана запись
     checksum256 assignment_hash;        // С каким результатом связана запись
-    eosio::name username;           // Чей это учёт
+    eosio::name username;           // 
     eosio::asset provisional_amount = asset(0, _root_govern_symbol);
     eosio::asset debt_amount = asset(0, _root_govern_symbol);
     eosio::asset spended = asset(0, _root_govern_symbol);    
@@ -193,7 +193,6 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] contributor {
     eosio::asset converted = asset(0, _root_govern_symbol);
     eosio::asset expensed = asset(0, _root_govern_symbol);
     eosio::asset returned = asset(0, _root_govern_symbol);
-    eosio::asset resulted = asset(0, _root_govern_symbol);
     
     eosio::asset share_balance = asset(0, _root_govern_symbol); ///< Баланс долей пайщика
     eosio::asset pending_rewards = asset(0, _root_govern_symbol); ///< Накопленные награды
@@ -251,7 +250,6 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
     eosio::asset spended = asset(0, _root_govern_symbol);
     eosio::asset generated = asset(0, _root_govern_symbol);
     eosio::asset converted = asset(0, _root_govern_symbol);
-    eosio::asset resulted = asset(0, _root_govern_symbol);
     eosio::asset withdrawed = asset(0, _root_govern_symbol);
     
     double parent_distribution_ratio = 1;  
@@ -354,7 +352,9 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] result {
         
     document result_statement; ///< Заявление
     document approved_statement; ///< Принятое заявление
-    document authorization; ///< Решение
+    document authorization; ///< Решение совета
+    document act1; ///< Акт1
+    document act2; ///< Акт2
     
     uint64_t primary_key() const { return id; }     ///< Основной ключ.
     uint64_t by_username() const { return username.value; } ///< Индекс по владельцу

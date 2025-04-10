@@ -1,5 +1,5 @@
 void capital::delcmmt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 commit_hash) {
-  check_auth_or_fail(_capital, coopname, application, "delcmmt"_n);
+  require_auth(coopname);
 
   auto exist_commit = get_commit(coopname, commit_hash);
   eosio::check(exist_commit.has_value(), "Коммит с указанным хэшем не существует");

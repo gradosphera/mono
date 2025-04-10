@@ -35,7 +35,7 @@ import { formatAssetToReadable } from 'src/shared/lib/utils/formatAssetToReadabl
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore()
 
-const { createDeposit, loadUserWalet } = useWalletStore()
+const { createDeposit, loadUserWallet } = useWalletStore()
 
 //TODO move username to Session entity
 const session = useSessionStore()
@@ -71,7 +71,7 @@ const paymentFail = (): void => {
 }
 
 const paymentSuccess = (): void => {
-  loadUserWalet({ coopname: info.coopname, username: session.username as string } as ILoadUserWallet)
+  loadUserWallet({ coopname: info.coopname, username: session.username as string } as ILoadUserWallet)
   clear()
   SuccessAlert('Платеж успешно принят')
 }
