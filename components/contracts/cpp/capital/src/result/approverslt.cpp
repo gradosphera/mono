@@ -18,18 +18,20 @@ void capital::approverslt(eosio::name coopname, eosio::name application, eosio::
   });
   
   //отправляем в совет
-  action(permission_level{ _capital, "active"_n}, _soviet, "createagenda"_n,
-    std::make_tuple(
-      coopname, 
-      result -> username, 
-      get_valid_soviet_action("createresult"_n), 
-      result -> result_hash,
-      _capital, 
-      "authrslt"_n, 
-      "declrslt"_n, 
-      result -> result_statement, 
-      std::string("")
-    )
-  ).send();  
+  Action::send<createagenda_interface>(
+    _soviet,
+    "createagenda"_n,
+    _capital,
+    coopname, 
+    result -> username, 
+    get_valid_soviet_action("createresult"_n), 
+    result -> result_hash,
+    _capital, 
+    "authrslt"_n, 
+    "declrslt"_n, 
+    result -> result_statement, 
+    std::string("")
+  );
+
   
 };

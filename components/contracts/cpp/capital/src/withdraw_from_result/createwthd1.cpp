@@ -29,12 +29,12 @@ void capital::createwthd1(eosio::name coopname, eosio::name application, eosio::
 
   auto exist_creauthor = get_creauthor_or_fail(coopname, exist_assignment -> assignment_hash, username, "Объект актора в результате не найден");
   
-  creauthor_index ractors(_capital, coopname.value);
-  auto creauthor = ractors.find(exist_creauthor.id);
+  creauthor_index creathors(_capital, coopname.value);
+  auto creauthor = creathors.find(exist_creauthor.id);
   
   eosio::check(creauthor -> available >= amount, "Недостаточно средств для создания возврата");
   
-  ractors.modify(creauthor, coopname, [&](auto &ra) {
+  creathors.modify(creauthor, coopname, [&](auto &ra) {
     ra.available -= amount;
   }); 
   

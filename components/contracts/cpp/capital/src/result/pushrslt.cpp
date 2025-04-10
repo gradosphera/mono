@@ -1,4 +1,4 @@
-void capital::pushrslt(name coopname, name application, name username, checksum256 result_hash, document statement) {
+void capital::pushrslt(name coopname, name application, checksum256 result_hash, document statement) {
   require_auth(coopname);
 
   // проверяем заявление
@@ -6,9 +6,8 @@ void capital::pushrslt(name coopname, name application, name username, checksum2
 
   // извлекаем клайм
   auto result = get_result(coopname, result_hash);
-  eosio::check(result.has_value(), "Объект запроса доли не найден");
+  eosio::check(result.has_value(), "Объект результата не найден");
   eosio::check(result -> status == "created"_n, "Неверный статус результата");
-  eosio::check(result -> username == username, "Неверно указано имя пользователя владельца задананиеа");
   
   // обновляем клайм, добавляя заявление
   result_index results(_capital, coopname.value);
@@ -17,6 +16,5 @@ void capital::pushrslt(name coopname, name application, name username, checksum2
   results.modify(result_for_modify, coopname, [&](auto &c){
     c.status = "statement"_n;
     c.result_statement = statement;
-  });
-  
+  }); 
 }

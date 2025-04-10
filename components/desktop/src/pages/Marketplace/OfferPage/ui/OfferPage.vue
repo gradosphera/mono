@@ -63,7 +63,7 @@ div(v-if="localRequest").row.justify-around.q-pt-lg
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ImageCarousel } from 'src/shared/ui/ImageCarousel'
-import { CreateChildOrderCard } from 'src/widgets/Request/CreateChildOrderCard'
+import { CreateChildOrderCard } from 'src/widgets/Marketplace/CreateChildOrderCard'
 
 import { PublishRequestButton } from 'src/features/Request/PublishRequest'
 import { UnpublishRequestButton } from 'src/features/Request/UnpublishRequest'

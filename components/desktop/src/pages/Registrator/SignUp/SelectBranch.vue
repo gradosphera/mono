@@ -21,7 +21,7 @@ div(v-if="store")
 <script lang="ts" setup>
 import { useBranchStore } from 'src/entities/Branch/model'
 import { useRegistratorStore } from 'src/entities/Registrator'
-import { failAlert } from 'src/shared/api';
+import { FailAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore()
 
@@ -36,7 +36,7 @@ const load = async () => {
     try{
       await branchStore.loadPublicBranches({ coopname: info.coopname })
     } catch(e: any){
-      failAlert(e)
+      FailAlert(e)
     }
 }
 

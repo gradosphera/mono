@@ -1,5 +1,5 @@
 <template lang="pug">
-q-btn(color="red" @click="dispute") вернуть по гарантии  
+q-btn(color="red" @click="dispute") вернуть по гарантии
 </template>
 <script setup lang="ts">
   import { FailAlert, SuccessAlert } from 'src/shared/api'

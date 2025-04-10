@@ -25,7 +25,7 @@ interface IWalletStore {
   methods: Ref<IPaymentMethodData[]>;
   agreements: Ref<SovietContract.Tables.Agreements.IAgreement[]>;
 
-  loadUserWalet: (params: ILoadUserWallet) => Promise<void>;
+  loadUserWallet: (params: ILoadUserWallet) => Promise<void>;
 
   //TODO move to features
   createDeposit: (params: ICreateDeposit) => Promise<IPaymentOrder>;
@@ -49,7 +49,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
   const agreements = ref<SovietContract.Tables.Agreements.IAgreement[]>([]);
 
 
-  const loadUserWalet = async (params: ILoadUserWallet) => {
+  const loadUserWallet = async (params: ILoadUserWallet) => {
 
     try {
       const data = await Promise.all([
@@ -90,7 +90,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
     withdraws,
     methods,
     agreements,
-    loadUserWalet,
+    loadUserWallet,
     createDeposit,
     createWithdraw,
   };

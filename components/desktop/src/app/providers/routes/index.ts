@@ -1,23 +1,22 @@
-import layout from 'src/pages/_layouts/default.vue';
+import layout from 'src/app/layouts/default.vue';
 import index from 'src/pages/index.vue';
-import blank from 'src/pages/blank/blank.vue';
-import permissionDenied from 'src/pages/_layouts/permissionDenied.vue';
+import { BlankPage } from 'src/pages/Blank';
+import { PermissionDenied } from 'src/pages/PermissionDenied';
 import { SignUpPage } from 'src/pages/Registrator/SignUp';
 import { SignInPage } from 'src/pages/Registrator/SignIn';
 import { RouteRecordRaw } from 'vue-router';
-import { InstallCooperativePage } from 'src/pages/Installer';
+import { InstallCooperativePage } from 'src/pages/Union/InstallCooperative';
 import { LostKeyPage } from 'src/pages/Registrator/LostKey/ui';
 import { ResetKeyPage } from 'src/pages/Registrator/ResetKey';
 import CooperativeSettingsPage from 'src/pages/Cooperative/SettingsPage/CooperativeSettingsPage.vue';
 import { AccumulationFunds, ExpenseFunds } from 'src/widgets/Cooperative/Funds';
-import { ChangeCooperativeContributions } from 'src/widgets/Cooperative/Contributions';
-import { ChangeCooperativeContacts } from 'src/widgets/Cooperative/Contacts';
+import { ChangeRegisterPaymentsPage } from 'src/pages/Cooperative/ChangeRegisterPayments';
+import { ChangeCooperativeContacts } from 'src/pages/Cooperative/ChangeContacts';
 import { MembersPage } from 'src/pages/Cooperative/MembersPage';
-import { InstalledExtensions } from 'src/pages/ExtStore/InstalledExtensions';
-import { ExtensionsShowcase } from 'src/pages/ExtStore/ExtensionsShowcase';
-import { ExtensionStoreBase } from 'src/pages/ExtStore/BaseRoute';
-import { ExtensionPage } from 'src/pages/ExtStore/ExtensionPage';
-import { ListOfBranchesPage } from 'src/pages/Cooperative/ListOfBranches';
+import { InstalledExtensions } from 'src/pages/ExtensionStore/InstalledExtensions';
+import { ExtensionsShowcase } from 'src/pages/ExtensionStore/ExtensionsShowcase';
+import { ExtensionPage } from 'src/pages/ExtensionStore/ExtensionPage';
+import { MemberBranchList } from 'src/pages/Cooperative/MemberBranchList';
 
 
 const baseRoutes = [
@@ -34,12 +33,12 @@ const baseRoutes = [
       {
         path: '/something-bad',
         name: 'somethingBad',
-        component: blank,
+        component: BlankPage,
       },
       {
         path: '/permission-denied',
         name: 'permissionDenied',
-        component: permissionDenied,
+        component: PermissionDenied,
       },
       {
         path: ':coopname/install',
@@ -85,7 +84,7 @@ const baseRoutes = [
           {
             path: 'branches',
             name: 'branches',
-            component: ListOfBranchesPage,
+            component: MemberBranchList,
             children: [],
           },
           {
@@ -103,7 +102,7 @@ const baseRoutes = [
           {
             path: 'initial-contributions',
             name: 'initial-contributions',
-            component: ChangeCooperativeContributions,
+            component: ChangeRegisterPaymentsPage,
             children: [],
           },
           {
@@ -123,7 +122,6 @@ const baseRoutes = [
       {
         path: 'extensions',
         name: 'extstore',
-        component: ExtensionStoreBase,
         children: [
           {
             path: 'showcase',
@@ -159,7 +157,7 @@ const baseRoutes = [
       {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
-        component: blank,
+        component: BlankPage,
       },
     ],
   },
@@ -252,17 +250,17 @@ const baseRoutes = [
 //       {
 //         path: '/something-bad',
 //         name: 'somethingBad',
-//         component: blank,
+//         component: BlankPage,
 //       },
 //       {
 //         path: '/permission-denied',
 //         name: 'permissionDenied',
-//         component: permissionDenied,
+//         component: PermissionDenied,
 //       },
 //       {
 //         path: '/:pathMatch(.*)*',
 //         name: 'NotFound',
-//         component: blank,
+//         component: BlankPage,
 //       },
 //     ],
 //   },

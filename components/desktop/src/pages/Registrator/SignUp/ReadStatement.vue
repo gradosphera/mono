@@ -43,7 +43,7 @@ div
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useCreateUser } from 'src/features/User/CreateUser'
-import { failAlert } from 'src/shared/api';
+import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
 import { ReadAgreementDialog } from 'src/features/Agreementer/ReadAgreementDialog';
 import { useAgreementStore } from 'src/entities/Agreement'
@@ -70,7 +70,7 @@ const loadStatement = async (): Promise<void> => {
     isLoading.value = false
   } catch (e: any) {
     isLoading.value = false
-    failAlert(e.message)
+    FailAlert(e.message)
   }
 }
 const back = () => {

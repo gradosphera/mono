@@ -18,7 +18,7 @@ export function useDeletePaymentMethod() {
 
     await sendPOST(`/v1/methods/${username}/delete`, {method_id})
 
-    await store.loadUserWalet({
+    await store.loadUserWallet({
       coopname: info.coopname,
       username: session.username
     })

@@ -30,7 +30,7 @@ void capital::createcnvrt(
     contributor_index contributors(_capital, coopname.value);
     auto contributor = contributors.find(exist_contributor->id);
 
-    // Попробуем найти creauthor
+    // Находим creauthor
     auto exist_creauthor = get_creauthor_or_fail(coopname, assignment_hash, username, "Объект актора в результате не найден");
    
     //=== Сумма к конвертации ===
@@ -59,12 +59,12 @@ void capital::createcnvrt(
         r.creators_base_remain -= convert_amount;
     });
     
-    creauthor_index ractors(_capital, coopname.value);
+    creauthor_index creathors(_capital, coopname.value);
     
-    auto creauthor = ractors.find(exist_creauthor.id);
+    auto creauthor = creathors.find(exist_creauthor.id);
     
     //обнуляем доступные средства к выводу или конвертации
-    ractors.modify(creauthor, coopname, [&](auto &ra) {
+    creathors.modify(creauthor, coopname, [&](auto &ra) {
         ra.for_convert = asset(0, _root_govern_symbol);
         ra.available = asset(0, _root_govern_symbol);
     });

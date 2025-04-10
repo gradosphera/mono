@@ -31,12 +31,12 @@ void capital::createassign(name coopname, name application, checksum256 project_
         
     uint64_t authors_count = 0;
     
-    creauthor_index ractors(_capital, coopname.value);
+    creauthor_index creathors(_capital, coopname.value);
     
     // Копируем запись автора идеи в assignment_authors
     while(author_itr != authors_hash_index.end() && author_itr->project_hash == project_hash) {
-        ractors.emplace(coopname, [&](auto &ra){
-          ra.id          = ractors.available_primary_key();
+        creathors.emplace(coopname, [&](auto &ra){
+          ra.id          = creathors.available_primary_key();
           ra.assignment_hash = assignment_hash;
           ra.project_hash = project_hash;
           ra.username    = author_itr->username;

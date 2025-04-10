@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useRequestStore } from 'src/entities/Request/model/stores'
-import { SupplyOrderRequest } from 'src/widgets/Request/SupplyOrderRequestCard'
+import { SupplyOrderRequest } from 'src/widgets/Marketplace/SupplyOrderRequestCard'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 const requestsStore = useRequestStore()

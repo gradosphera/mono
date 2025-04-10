@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { failAlert, SuccessAlert } from 'src/shared/api'
+import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { api } from '../../api'
 import type { ICreateOffer, IFormData } from 'src/features/Request/CreateParentOffer/model'
 import { computed, ref } from 'vue'
@@ -64,7 +64,7 @@ const handlerSubmit = async () => {
     SuccessAlert('Объявление успешно создано')
   } catch (e: any) {
     console.log(e)
-    failAlert(e.message)
+    FailAlert(e.message)
   }
 }
 </script>

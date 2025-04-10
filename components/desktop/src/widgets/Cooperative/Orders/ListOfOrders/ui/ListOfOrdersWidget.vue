@@ -66,14 +66,13 @@
   import { Notify } from 'quasar'
   import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
   // import { formatToHumanDate } from 'src/shared/lib/utils/dates/formatToHumanDate';
-  import { useOrderStore } from 'src/entities/Order';
-  import { SetOrderPaidStatusButton } from 'src/features/Order/SetStatus/ui/SetOrderPaidStatusButton';
-  import { SetOrderRefundedStatusButton } from 'src/features/Order/SetStatus/ui/SetOrderRefundedStatusButton';
+  import { usePaymentStore } from 'src/entities/Payment';
+  import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
+  import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
   // import { SetOrderCompletedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderCompletedStatusButton';
 
-  const orderStore = useOrderStore()
+  const orderStore = usePaymentStore()
   const orders = computed(() => orderStore.orders)
-  console.log('orders: ', orders.value)
   const onLoading = ref(false)
   const nextPage = ref(1)
   const lastPage = ref(1);
@@ -124,7 +123,7 @@
   const loadOrders = async (page = 1) => {
     try {
       onLoading.value = true
-      await orderStore.loadCoopOrders({username: props.receiver, page, limit: 25, sortBy: sortedQuery.value})
+      await orderStore.loadCoopPayments({username: props.receiver, page, limit: 25, sortBy: sortedQuery.value})
       lastPage.value = orderStore.orders?.totalPages || 1
       onLoading.value = false
     } catch (e: any) {

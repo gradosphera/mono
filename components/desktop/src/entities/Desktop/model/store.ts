@@ -84,8 +84,6 @@ export const useDesktopStore = defineStore(namespace, (): IDesktopStore => {
     if (currentRoute.matched && currentDesktop.value && currentRoute) {
 
       const matchingRootRoute = currentRoute.matched[1]
-      console.log('currentRoute: ', currentRoute)
-      console.log('matchingRootRoute', matchingRootRoute)
 
       if (matchingRootRoute) {
         return getNestedRoutes(matchingRootRoute)

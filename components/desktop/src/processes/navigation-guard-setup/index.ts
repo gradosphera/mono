@@ -1,0 +1,45 @@
+import { Router } from 'vue-router'
+import { useSessionStore } from 'src/entities/Session'
+import { useCurrentUserStore } from 'src/entities/User'
+import { useDesktopStore } from 'src/entities/Desktop/model'
+import { useSystemStore } from 'src/entities/System/model'
+
+function hasAccess(to, userAccount) {
+  if (!to.meta?.roles || to.meta?.roles.length === 0) return true
+  return userAccount && to.meta?.roles.includes(userAccount.role)
+}
+
+export function setupNavigationGuard(router: Router) {
+  const desktops = useDesktopStore()
+  const session = useSessionStore()
+  const currentUser = useCurrentUserStore()
+  const { info } = useSystemStore()
+
+  router.beforeEach(async (to, from, next) => {
+    await desktops.healthCheck()
+
+    // если требуется установка
+    if (desktops.health?.status === 'install' && to.name !== 'install') {
+      next({ name: 'install', params: { coopname: info.coopname } })
+      return
+    }
+
+    // редирект с index
+    if (to.name === 'index') {
+      const homePage =
+        session.isAuth && currentUser.isRegistrationComplete
+          ? desktops.currentDesktop?.authorizedHome
+          : desktops.currentDesktop?.nonAuthorizedHome
+
+      next({ name: homePage, params: { coopname: info.coopname } })
+      return
+    }
+
+    // проверка по ролям
+    if (hasAccess(to, currentUser.userAccount)) {
+      next()
+    } else {
+      next({ name: 'permissionDenied' })
+    }
+  })
+}

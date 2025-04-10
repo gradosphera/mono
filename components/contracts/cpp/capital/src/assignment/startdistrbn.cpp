@@ -11,6 +11,7 @@ void capital::startdistrbn(name coopname, name application, checksum256 assignme
     assignment_index assignments(_capital, coopname.value);
     auto assignment_for_modify = assignments.find(assignment -> id);
     
+    //заносим доступные средства к распределению
     assignments.modify(assignment_for_modify, coopname, [&](auto& row) {
       row.status = "closed"_n;
       row.authors_bonus_remain = row.authors_bonus;

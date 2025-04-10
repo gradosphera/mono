@@ -54,15 +54,7 @@ public:
   [[eosio::action]] void declinedoc(eosio::name coopname, eosio::name username, document document);
 
   //approves
-  [[eosio::action]]
-  void createapprv(eosio::name coopname,
-                    eosio::name username,
-                    document document,
-                    checksum256 approval_hash,
-                    eosio::name callback_contract,
-                    eosio::name callback_action_approve,
-                    eosio::name callback_action_decline,
-                    std::string meta);
+  [[eosio::action]] void createapprv(CREATEAPPRV_SIGNATURE);
 
   [[eosio::action]]
   void confirmapprv(eosio::name coopname, checksum256 approval_hash, document approved_document);

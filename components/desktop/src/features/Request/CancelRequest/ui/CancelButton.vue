@@ -1,5 +1,5 @@
 <template lang="pug">
-q-btn(color="red" @click="cancel") отменить поставку 
+q-btn(color="red" @click="cancel") отменить поставку
 </template>
 <script setup lang="ts">
   import { FailAlert, SuccessAlert } from 'src/shared/api'

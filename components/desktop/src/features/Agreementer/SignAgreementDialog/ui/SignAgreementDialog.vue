@@ -56,7 +56,7 @@ const sign = async () => {
   try {
     isSubmitting.value = true
     await signAgreement(session.username, props.agreement.type, agreementOnSign.value)
-    await useWalletStore().loadUserWalet({coopname: info.coopname, username: session.username})
+    await useWalletStore().loadUserWallet({coopname: info.coopname, username: session.username})
     isSubmitting.value = false
     show.value = false
     SuccessAlert('Документ принят')

@@ -6,7 +6,10 @@ import { QrPayPluginModule, Schema as QRPaySchema } from './qrpay/qrpay-extensio
 import path from 'path';
 
 export interface IRegistryExtension {
+  builtin: boolean;
   available: boolean;
+  internal: boolean;
+  external_url?: string;
   title: string;
   description: string;
   image: string;
@@ -32,6 +35,8 @@ function getInstructionsContent(dirPath: string): Promise<string> {
 
 export const AppRegistry: INamedExtension = {
   powerup: {
+    builtin: false,
+    internal: true,
     available: true,
     title: 'QUOTTER',
     description: 'Расширение для автоматической аренды квот вычислительных ресурсов.',
@@ -43,6 +48,8 @@ export const AppRegistry: INamedExtension = {
     instructions: getInstructionsContent('./powerup'),
   },
   yookassa: {
+    builtin: false,
+    internal: true,
     available: false,
     title: 'YOOKASSA',
     description: 'Расширение для приёма платежей с помощью ЮКасса. Для использования необходимо установить API-ключ.',
@@ -54,6 +61,8 @@ export const AppRegistry: INamedExtension = {
     instructions: getInstructionsContent('./yookassa'),
   },
   sberpoll: {
+    builtin: false,
+    internal: true,
     available: false,
     title: 'SBERKASSA',
     description: 'Расширение для автоматического приёма паевых взносов в Сбербанке.',
@@ -65,6 +74,8 @@ export const AppRegistry: INamedExtension = {
     instructions: getInstructionsContent('./sberpoll'),
   },
   qrpay: {
+    builtin: false,
+    internal: true,
     available: true,
     title: 'QR-CODE',
     description: 'Расширение для выставления QR-счёта на оплату из любого банковского приложения.',

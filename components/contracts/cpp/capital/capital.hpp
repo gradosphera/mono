@@ -81,7 +81,7 @@ public:
     );
     
     [[eosio::action]]
-    void pushrslt(name coopname, name application, name username, checksum256 result_hash, document statement);
+    void pushrslt(name coopname, name application, checksum256 result_hash, document statement);
     
     [[eosio::action]]
     void authrslt(eosio::name coopname, checksum256 result_hash, document decision);
@@ -218,10 +218,8 @@ private:
     * @return Текущее глобальное состояние.
     */
   global_state get_global_state(name coopname);
-    
-  void ensure_contributor(name coopname, name username);
-  
-  static bonus_result calculcate_capital_amounts(int64_t spended_amount);
+      
+  static bonus_result calculcate_capital_amounts(const eosio::asset& spended);
   
   std::optional<author> get_author(eosio::name coopname, eosio::name username, const checksum256 &project_hash);
   std::optional<creator> get_creator(eosio::name coopname, eosio::name username, const checksum256 &assignment_hash);
