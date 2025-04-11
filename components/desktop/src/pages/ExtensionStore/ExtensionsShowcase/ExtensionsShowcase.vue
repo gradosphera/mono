@@ -1,6 +1,6 @@
 <template lang="pug">
 div.row
-  div(v-for="extension in extStore.extensions" v-bind:key="extension.name").col-md-3.col-xs-12
+  div(v-for="extension in extStore.extensions" v-bind:key="extension.name").col-md-3.col-sm-6.col-xs-12
     ExtensionCard(:extension="extension")
 
 </template>

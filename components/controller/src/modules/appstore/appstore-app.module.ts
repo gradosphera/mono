@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AppManagementService } from './services/appstore-app.service';
+import { AppManagementService } from './services/extension.service';
 import { ExtensionDomainModule } from '~/domain/extension/extension-domain.module';
 import { AppStoreResolver } from './resolvers/extension.resolver';
 

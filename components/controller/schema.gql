@@ -1376,6 +1376,31 @@ input DeliverOnRequestInput {
   username: String!
 }
 
+type Desktop {
+  """Имя шаблона рабочих столов"""
+  authorizedHome: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Имя шаблона рабочих столов"""
+  layout: String!
+
+  """Имя шаблона рабочих столов"""
+  nonAuthorizedHome: String!
+
+  """Состав приложений рабочего стола"""
+  workspaces: [DesktopWorkspace!]!
+}
+
+type DesktopWorkspace {
+  """Имя приложения"""
+  name: String!
+
+  """Отображаемое название приложения"""
+  title: String!
+}
+
 input DisputeOnRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -1532,9 +1557,6 @@ type ExtendedBlockchainAction {
 }
 
 type Extension {
-  """Показывает, доступно ли расширение"""
-  available: Boolean!
-
   """Настройки конфигурации для расширения"""
   config: JSON
 
@@ -1547,19 +1569,34 @@ type Extension {
   """Показывает, включено ли расширение"""
   enabled: Boolean!
 
+  """Внешняя ссылка на iframe-интерфейс расширения"""
+  external_url: String
+
   """Изображение для расширения"""
   image: String
 
-  """Показывает, установлено ли расширение"""
-  installed: Boolean!
-
-  """Поле инструкция для установки"""
+  """Поле инструкция для установки (INSTALL)"""
   instructions: String!
+
+  """Показывает, доступно ли расширение"""
+  is_available: Boolean!
+
+  """Показывает, встроенное ли это расширение"""
+  is_builtin: Boolean!
+
+  """Показывает, рабочий стол ли это"""
+  is_desktop: Boolean!
+
+  """Показывает, установлено ли расширение"""
+  is_installed: Boolean!
+
+  """Показывает, внутреннее ли это расширение"""
+  is_internal: Boolean!
 
   """Уникальное имя расширения"""
   name: String!
 
-  """Поле подробного текстового описания"""
+  """Поле подробного текстового описания (README)"""
   readme: String!
 
   """Схема настроек конфигурации для расширения"""
@@ -1775,8 +1812,14 @@ input GetExtensionsInput {
   """Фильтр включенных расширений"""
   enabled: Boolean
 
+  """Фильтр активности"""
+  is_available: Boolean
+
+  """Фильтр рабочих столов"""
+  is_desktop: Boolean
+
   """Фильтр установленных расширений"""
-  installed: Boolean
+  is_installed: Boolean
 
   """Фильтр по имени"""
   name: String
@@ -2993,6 +3036,9 @@ type Query {
 
   """Получить список кооперативных участков"""
   getBranches(data: GetBranchesInput!): [Branch!]!
+
+  """Получить состав приложений рабочего стола"""
+  getDesktop: Desktop!
   getDocuments(data: GetDocumentsInput!): DocumentsPaginationResult!
 
   """Получить список расширений"""

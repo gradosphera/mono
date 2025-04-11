@@ -304,21 +304,30 @@ export const Gql = Chain(HOST, {
 
 export const ZeusScalars = ZeusSelect<ScalarCoders>();
 
+type BaseSymbol = number | string | undefined | boolean | null;
+
 type ScalarsSelector<T> = {
   [X in Required<{
-    [P in keyof T]: T[P] extends number | string | undefined | boolean ? P : never;
+    [P in keyof T]: T[P] extends BaseSymbol | Array<BaseSymbol> ? P : never;
   }>[keyof T]]: true;
 };
 
 export const fields = <T extends keyof ModelTypes>(k: T) => {
   const t = ReturnTypes[k];
+  const fnType = k in AllTypesProps ? AllTypesProps[k as keyof typeof AllTypesProps] : undefined;
+  const hasFnTypes = typeof fnType === 'object' ? fnType : undefined;
   const o = Object.fromEntries(
     Object.entries(t)
-      .filter(([, value]) => {
+      .filter(([k, value]) => {
+        const isFunctionType = hasFnTypes && k in hasFnTypes && !!hasFnTypes[k as keyof typeof hasFnTypes];
+        if (isFunctionType) return false;
         const isReturnType = ReturnTypes[value as string];
-        if (!isReturnType || (typeof isReturnType === 'string' && isReturnType.startsWith('scalar.'))) {
+        if (!isReturnType) return true;
+        if (typeof isReturnType !== 'string') return false;
+        if (isReturnType.startsWith('scalar.')) {
           return true;
         }
+        return false;
       })
       .map(([key]) => [key, true as const]),
   );
@@ -1477,9 +1486,12 @@ export type ValueTypes = {
 	authorized_by?:boolean | `@${string}`,
 	batch_id?:boolean | `@${string}`,
 	callback_contract?:boolean | `@${string}`,
+	confirm_callback?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
+	decline_callback?:boolean | `@${string}`,
 	expired_at?:boolean | `@${string}`,
+	hash?:boolean | `@${string}`,
 	id?:boolean | `@${string}`,
 	meta?:boolean | `@${string}`,
 	statement?:ValueTypes["SignedBlockchainDocument"],
@@ -1894,6 +1906,26 @@ export type ValueTypes = {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["Desktop"]: AliasType<{
+	/** Имя шаблона рабочих столов */
+	authorizedHome?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Имя шаблона рабочих столов */
+	layout?:boolean | `@${string}`,
+	/** Имя шаблона рабочих столов */
+	nonAuthorizedHome?:boolean | `@${string}`,
+	/** Состав приложений рабочего стола */
+	workspaces?:ValueTypes["DesktopWorkspace"],
+		__typename?: boolean | `@${string}`
+}>;
+	["DesktopWorkspace"]: AliasType<{
+	/** Имя приложения */
+	name?:boolean | `@${string}`,
+	/** Отображаемое название приложения */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["DisputeOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -2010,8 +2042,6 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["Extension"]: AliasType<{
-	/** Показывает, доступно ли расширение */
-	available?:boolean | `@${string}`,
 	/** Настройки конфигурации для расширения */
 	config?:boolean | `@${string}`,
 	/** Дата создания расширения */
@@ -2020,15 +2050,25 @@ export type ValueTypes = {
 	description?:boolean | `@${string}`,
 	/** Показывает, включено ли расширение */
 	enabled?:boolean | `@${string}`,
+	/** Внешняя ссылка на iframe-интерфейс расширения */
+	external_url?:boolean | `@${string}`,
 	/** Изображение для расширения */
 	image?:boolean | `@${string}`,
-	/** Показывает, установлено ли расширение */
-	installed?:boolean | `@${string}`,
-	/** Поле инструкция для установки */
+	/** Поле инструкция для установки (INSTALL) */
 	instructions?:boolean | `@${string}`,
+	/** Показывает, доступно ли расширение */
+	is_available?:boolean | `@${string}`,
+	/** Показывает, встроенное ли это расширение */
+	is_builtin?:boolean | `@${string}`,
+	/** Показывает, рабочий стол ли это */
+	is_desktop?:boolean | `@${string}`,
+	/** Показывает, установлено ли расширение */
+	is_installed?:boolean | `@${string}`,
+	/** Показывает, внутреннее ли это расширение */
+	is_internal?:boolean | `@${string}`,
 	/** Уникальное имя расширения */
 	name?:boolean | `@${string}`,
-	/** Поле подробного текстового описания */
+	/** Поле подробного текстового описания (README) */
 	readme?:boolean | `@${string}`,
 	/** Схема настроек конфигурации для расширения */
 	schema?:boolean | `@${string}`,
@@ -2185,8 +2225,10 @@ export type ValueTypes = {
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр рабочих столов */
+	is_desktop?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр установленных расширений */
-	installed?: boolean | undefined | null | Variable<any, string>,
+	is_installed?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по имени */
 	name?: string | undefined | null | Variable<any, string>
 };
@@ -2949,6 +2991,8 @@ getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Vari
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
+	/** Получить состав приложений рабочего стола */
+	getDesktop?:ValueTypes["Desktop"],
 getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>},ValueTypes["DocumentsPaginationResult"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentMethodPaginationResult"]],
@@ -4380,9 +4424,12 @@ export type ResolverInputTypes = {
 	authorized_by?:boolean | `@${string}`,
 	batch_id?:boolean | `@${string}`,
 	callback_contract?:boolean | `@${string}`,
+	confirm_callback?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
+	decline_callback?:boolean | `@${string}`,
 	expired_at?:boolean | `@${string}`,
+	hash?:boolean | `@${string}`,
 	id?:boolean | `@${string}`,
 	meta?:boolean | `@${string}`,
 	statement?:ResolverInputTypes["SignedBlockchainDocument"],
@@ -4798,6 +4845,26 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Desktop"]: AliasType<{
+	/** Имя шаблона рабочих столов */
+	authorizedHome?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Имя шаблона рабочих столов */
+	layout?:boolean | `@${string}`,
+	/** Имя шаблона рабочих столов */
+	nonAuthorizedHome?:boolean | `@${string}`,
+	/** Состав приложений рабочего стола */
+	workspaces?:ResolverInputTypes["DesktopWorkspace"],
+		__typename?: boolean | `@${string}`
+}>;
+	["DesktopWorkspace"]: AliasType<{
+	/** Имя приложения */
+	name?:boolean | `@${string}`,
+	/** Отображаемое название приложения */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["DisputeOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -4914,8 +4981,6 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["Extension"]: AliasType<{
-	/** Показывает, доступно ли расширение */
-	available?:boolean | `@${string}`,
 	/** Настройки конфигурации для расширения */
 	config?:boolean | `@${string}`,
 	/** Дата создания расширения */
@@ -4924,15 +4989,25 @@ export type ResolverInputTypes = {
 	description?:boolean | `@${string}`,
 	/** Показывает, включено ли расширение */
 	enabled?:boolean | `@${string}`,
+	/** Внешняя ссылка на iframe-интерфейс расширения */
+	external_url?:boolean | `@${string}`,
 	/** Изображение для расширения */
 	image?:boolean | `@${string}`,
-	/** Показывает, установлено ли расширение */
-	installed?:boolean | `@${string}`,
-	/** Поле инструкция для установки */
+	/** Поле инструкция для установки (INSTALL) */
 	instructions?:boolean | `@${string}`,
+	/** Показывает, доступно ли расширение */
+	is_available?:boolean | `@${string}`,
+	/** Показывает, встроенное ли это расширение */
+	is_builtin?:boolean | `@${string}`,
+	/** Показывает, рабочий стол ли это */
+	is_desktop?:boolean | `@${string}`,
+	/** Показывает, установлено ли расширение */
+	is_installed?:boolean | `@${string}`,
+	/** Показывает, внутреннее ли это расширение */
+	is_internal?:boolean | `@${string}`,
 	/** Уникальное имя расширения */
 	name?:boolean | `@${string}`,
-	/** Поле подробного текстового описания */
+	/** Поле подробного текстового описания (README) */
 	readme?:boolean | `@${string}`,
 	/** Схема настроек конфигурации для расширения */
 	schema?:boolean | `@${string}`,
@@ -5089,8 +5164,10 @@ export type ResolverInputTypes = {
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null,
+	/** Фильтр рабочих столов */
+	is_desktop?: boolean | undefined | null,
 	/** Фильтр установленных расширений */
-	installed?: boolean | undefined | null,
+	is_installed?: boolean | undefined | null,
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
@@ -5854,6 +5931,8 @@ getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | nul
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
+	/** Получить состав приложений рабочего стола */
+	getDesktop?:ResolverInputTypes["Desktop"],
 getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTypes["DocumentsPaginationResult"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaymentMethodPaginationResult"]],
@@ -7269,9 +7348,12 @@ export type ModelTypes = {
 	authorized_by: string,
 	batch_id: number,
 	callback_contract: string,
+	confirm_callback: string,
 	coopname: string,
 	created_at: string,
+	decline_callback: string,
 	expired_at: string,
+	hash: string,
 	id: number,
 	meta: string,
 	statement: ModelTypes["SignedBlockchainDocument"],
@@ -7674,6 +7756,24 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Desktop"]: {
+		/** Имя шаблона рабочих столов */
+	authorizedHome: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя шаблона рабочих столов */
+	layout: string,
+	/** Имя шаблона рабочих столов */
+	nonAuthorizedHome: string,
+	/** Состав приложений рабочего стола */
+	workspaces: Array<ModelTypes["DesktopWorkspace"]>
+};
+	["DesktopWorkspace"]: {
+		/** Имя приложения */
+	name: string,
+	/** Отображаемое название приложения */
+	title: string
+};
 	["DisputeOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -7785,9 +7885,7 @@ export type ModelTypes = {
 	user?: ModelTypes["UserDataUnion"] | undefined | null
 };
 	["Extension"]: {
-		/** Показывает, доступно ли расширение */
-	available: boolean,
-	/** Настройки конфигурации для расширения */
+		/** Настройки конфигурации для расширения */
 	config?: ModelTypes["JSON"] | undefined | null,
 	/** Дата создания расширения */
 	created_at: ModelTypes["DateTime"],
@@ -7795,15 +7893,25 @@ export type ModelTypes = {
 	description?: string | undefined | null,
 	/** Показывает, включено ли расширение */
 	enabled: boolean,
+	/** Внешняя ссылка на iframe-интерфейс расширения */
+	external_url?: string | undefined | null,
 	/** Изображение для расширения */
 	image?: string | undefined | null,
-	/** Показывает, установлено ли расширение */
-	installed: boolean,
-	/** Поле инструкция для установки */
+	/** Поле инструкция для установки (INSTALL) */
 	instructions: string,
+	/** Показывает, доступно ли расширение */
+	is_available: boolean,
+	/** Показывает, встроенное ли это расширение */
+	is_builtin: boolean,
+	/** Показывает, рабочий стол ли это */
+	is_desktop: boolean,
+	/** Показывает, установлено ли расширение */
+	is_installed: boolean,
+	/** Показывает, внутреннее ли это расширение */
+	is_internal: boolean,
 	/** Уникальное имя расширения */
 	name: string,
-	/** Поле подробного текстового описания */
+	/** Поле подробного текстового описания (README) */
 	readme: string,
 	/** Схема настроек конфигурации для расширения */
 	schema?: ModelTypes["JSON"] | undefined | null,
@@ -7956,8 +8064,10 @@ export type ModelTypes = {
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null,
+	/** Фильтр рабочих столов */
+	is_desktop?: boolean | undefined | null,
 	/** Фильтр установленных расширений */
-	installed?: boolean | undefined | null,
+	is_installed?: boolean | undefined | null,
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
@@ -8755,6 +8865,8 @@ export type ModelTypes = {
 	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
+	/** Получить состав приложений рабочего стола */
+	getDesktop: ModelTypes["Desktop"],
 	getDocuments: ModelTypes["DocumentsPaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<ModelTypes["Extension"]>,
@@ -10163,9 +10275,12 @@ export type GraphQLTypes = {
 	authorized_by: string,
 	batch_id: number,
 	callback_contract: string,
+	confirm_callback: string,
 	coopname: string,
 	created_at: string,
+	decline_callback: string,
 	expired_at: string,
+	hash: string,
 	id: number,
 	meta: string,
 	statement: GraphQLTypes["SignedBlockchainDocument"],
@@ -10580,6 +10695,26 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Desktop"]: {
+	__typename: "Desktop",
+	/** Имя шаблона рабочих столов */
+	authorizedHome: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя шаблона рабочих столов */
+	layout: string,
+	/** Имя шаблона рабочих столов */
+	nonAuthorizedHome: string,
+	/** Состав приложений рабочего стола */
+	workspaces: Array<GraphQLTypes["DesktopWorkspace"]>
+};
+	["DesktopWorkspace"]: {
+	__typename: "DesktopWorkspace",
+	/** Имя приложения */
+	name: string,
+	/** Отображаемое название приложения */
+	title: string
+};
 	["DisputeOnRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -10697,8 +10832,6 @@ export type GraphQLTypes = {
 };
 	["Extension"]: {
 	__typename: "Extension",
-	/** Показывает, доступно ли расширение */
-	available: boolean,
 	/** Настройки конфигурации для расширения */
 	config?: GraphQLTypes["JSON"] | undefined | null,
 	/** Дата создания расширения */
@@ -10707,15 +10840,25 @@ export type GraphQLTypes = {
 	description?: string | undefined | null,
 	/** Показывает, включено ли расширение */
 	enabled: boolean,
+	/** Внешняя ссылка на iframe-интерфейс расширения */
+	external_url?: string | undefined | null,
 	/** Изображение для расширения */
 	image?: string | undefined | null,
-	/** Показывает, установлено ли расширение */
-	installed: boolean,
-	/** Поле инструкция для установки */
+	/** Поле инструкция для установки (INSTALL) */
 	instructions: string,
+	/** Показывает, доступно ли расширение */
+	is_available: boolean,
+	/** Показывает, встроенное ли это расширение */
+	is_builtin: boolean,
+	/** Показывает, рабочий стол ли это */
+	is_desktop: boolean,
+	/** Показывает, установлено ли расширение */
+	is_installed: boolean,
+	/** Показывает, внутреннее ли это расширение */
+	is_internal: boolean,
 	/** Уникальное имя расширения */
 	name: string,
-	/** Поле подробного текстового описания */
+	/** Поле подробного текстового описания (README) */
 	readme: string,
 	/** Схема настроек конфигурации для расширения */
 	schema?: GraphQLTypes["JSON"] | undefined | null,
@@ -10871,8 +11014,10 @@ export type GraphQLTypes = {
 	["GetExtensionsInput"]: {
 		/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null,
+	/** Фильтр рабочих столов */
+	is_desktop?: boolean | undefined | null,
 	/** Фильтр установленных расширений */
-	installed?: boolean | undefined | null,
+	is_installed?: boolean | undefined | null,
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
@@ -11702,6 +11847,8 @@ export type GraphQLTypes = {
 	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
+	/** Получить состав приложений рабочего стола */
+	getDesktop: GraphQLTypes["Desktop"],
 	getDocuments: GraphQLTypes["DocumentsPaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<GraphQLTypes["Extension"]>,

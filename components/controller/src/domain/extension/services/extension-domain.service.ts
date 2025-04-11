@@ -70,6 +70,26 @@ export class ExtensionDomainService<TConfig = any> {
         enabled: true,
         config: {},
       },
+      {
+        name: 'chairman',
+        enabled: true,
+        config: {},
+      },
+      {
+        name: 'soviet',
+        enabled: true,
+        config: {},
+      },
+      {
+        name: 'participant',
+        enabled: true,
+        config: {},
+      },
+      {
+        name: 'contributor',
+        enabled: true,
+        config: {},
+      },
     ];
   }
 }

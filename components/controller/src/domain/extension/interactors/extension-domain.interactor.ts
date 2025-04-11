@@ -72,7 +72,6 @@ export class ExtensionDomainInteractor<TConfig = any> {
 
     for (const app of defaultApps) {
       if (!app.name) throw new Error('Имя у приложения должно быть задано');
-      console.log('app', app);
       const a = await this.extensionDomainService.getAppByName(app.name);
       if (!a) await this.extensionDomainService.installApp(app);
     }

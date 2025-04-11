@@ -12,7 +12,7 @@
   const extStore = useExtensionStore()
 
   onMounted(async () => {
-    extStore.loadExtensions({ installed: true })
+    extStore.loadExtensions({ is_installed: true })
   })
 
   </script>

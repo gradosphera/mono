@@ -17,6 +17,7 @@ import { InstalledExtensions } from 'src/pages/ExtensionStore/InstalledExtension
 import { ExtensionsShowcase } from 'src/pages/ExtensionStore/ExtensionsShowcase';
 import { ExtensionPage } from 'src/pages/ExtensionStore/ExtensionPage';
 import { MemberBranchList } from 'src/pages/Cooperative/MemberBranchList';
+import { ExtensionStoreBase } from 'src/pages/ExtensionStore/BaseRoute';
 
 
 const baseRoutes = [
@@ -122,6 +123,7 @@ const baseRoutes = [
       {
         path: 'extensions',
         name: 'extstore',
+        component: ExtensionStoreBase,
         children: [
           {
             path: 'showcase',

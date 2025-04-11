@@ -4,6 +4,9 @@ import { Module } from '@nestjs/common';
 import { ExtensionDomainInteractor } from './interactors/extension-domain.interactor';
 import { ExtensionDomainService } from './services/extension-domain.service';
 import { ExtensionLifecycleDomainService } from '~/domain/extension/services/extension-lifecycle-domain.service';
+import { ExtensionDomainListingService } from './services/extension-listing-domain.service';
+import { ExtensionDomainListingInteractor } from './interactors/extension-listing-domain.interactor';
+
 import { ExtensionsModule } from '~/extensions/extensions.module';
 import { nestApp } from '~/index';
 
@@ -11,8 +14,20 @@ import { nestApp } from '~/index';
   imports: [
     ExtensionsModule.register(), // Регистрируем модуль расширений с доступом ко всем плагинам
   ],
-  providers: [ExtensionDomainInteractor, ExtensionDomainService, ExtensionDomainInteractor, ExtensionLifecycleDomainService],
-  exports: [ExtensionDomainInteractor, ExtensionDomainService], // Экспортируем интерактор и сервис для использования в других модулях
+  providers: [
+    ExtensionDomainInteractor,
+    ExtensionDomainService,
+    ExtensionDomainInteractor,
+    ExtensionLifecycleDomainService,
+    ExtensionDomainListingService,
+    ExtensionDomainListingInteractor,
+  ],
+  exports: [
+    ExtensionDomainInteractor,
+    ExtensionDomainService,
+    ExtensionDomainListingService,
+    ExtensionDomainListingInteractor,
+  ], // Экспортируем интерактор и сервис для использования в других модулях
 })
 export class ExtensionDomainModule {
   constructor(

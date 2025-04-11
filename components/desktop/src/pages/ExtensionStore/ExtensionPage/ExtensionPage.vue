@@ -5,37 +5,40 @@ div(v-if="extension").row
     div.q-mt-md
       div(v-if="isSettings").row
         q-btn( v-if="!isEmpty" color="teal" @click="save").full-width сохранить
-        q-btn( v-if="isEmpty" @click="cancel").full-width назад
-      div(v-if="isMain && !extension.installed").q-gutter-sm.text-center
+        q-btn( v-if="isEmpty" @click="cancel" flat icon="fas fa-arrow-left").full-width назад
+      div(v-if="isMain && !extension.is_installed").q-gutter-sm.text-center
         q-btn(color="teal" @click="router.push({name: 'extension-install'})").full-width установить
 
-      div(v-if="isInstall && !extension.installed").q-gutter-sm.text-center
+      div(v-if="isInstall && !extension.is_installed").q-gutter-sm.text-center
         // это установка
         q-btn(color="teal" @click="install").full-width включить
 
-      div(v-if="isMain && extension.installed").row
+      div(v-if="isMain && extension.is_installed")
         q-btn(color="teal" @click="openSettings").full-width настройки
+        div(v-if="extension.is_builtin").q-mt-sm
+          p.text-center.text-grey минимальное расширение
+        div(v-else).row
+          div.col-6.q-pa-sm
+            q-btn(v-if="extension.enabled" size="sm" @click="disable" flat :disabled="extension.is_builtin").full-width
+              q-icon(name="fa-solid fa-toggle-on")
+              span.q-ml-xs включено
 
-        div.col-6.q-pa-sm
-          q-btn(v-if="extension.enabled" size="sm" @click="disable" flat ).full-width
-            q-icon(name="fa-solid fa-toggle-off").text-grey
-            span.q-ml-xs отключить
-          q-btn( size="sm" @click="enable" v-if="!extension.enabled" flat).full-width
-            q-icon(name="fa-solid fa-toggle-on")
-            span.q-ml-xs включить
+            q-btn( size="sm" @click="enable" v-if="!extension.enabled" flat :disabled="extension.is_builtin").full-width
+              q-icon(name="fa-solid fa-toggle-off").text-grey
+              span.q-ml-xs отключено
 
-        div.col-6.q-pa-sm
-          q-btn( size="sm" @click="uninstall" v-if="extension.installed" flat ).full-width
-            q-icon(name="delete").text-grey
-            span.q-ml-xs удалить
+          div.col-6.q-pa-sm
+            q-btn( size="sm" @click="uninstall" v-if="extension.is_installed" flat :disabled="extension.is_builtin").full-width
+              q-icon(name="delete").text-grey
+              span.q-ml-xs удалить
 
   div.col-md-9.col-sm-8.col-xs-12.q-pa-md
     div(v-if="isMain")
       div
         span.text-h1 {{extension.title}}
-          q-chip(square dense size="sm" color="green" outline v-if="extension.installed && extension.enabled").q-ml-sm активно
-          q-chip(square dense size="sm" color="orange" outline v-if="extension.installed && !extension.enabled").q-ml-sm отключено
-          q-chip(size="sm" dense color="orange" v-if="!extension.available" outline) в разработке
+          //- q-chip(square dense size="sm" color="green" outline v-if="extension.is_installed && extension.enabled").q-ml-sm установлено
+          //- q-chip(square dense size="sm" color="orange" outline v-if="extension.is_installed && !extension.enabled").q-ml-sm отключено
+          q-chip(size="sm" dense color="orange" v-if="!extension.is_available" outline) в разработке
         div
           q-chip(outline v-for="tag in extension.tags" v-bind:key="tag" dense size="sm") {{tag}}
 
@@ -61,12 +64,14 @@ import { extractGraphQLErrorMessages, FailAlert, SuccessAlert } from 'src/shared
 import { useUpdateExtension } from 'src/features/Extension/UpdateExtension';
 import { useUninstallExtension } from 'src/features/Extension/UninstallExtension';
 import { useInstallExtension } from 'src/features/Extension/InstallExtension';
+import { useDesktopStore } from 'src/entities/Desktop/model';
 
 const route = useRoute();
 const router = useRouter();
 const extStore = useExtensionStore();
 const data = ref({});
 const myFormRef = ref();
+const desktop = useDesktopStore()
 
 onMounted(async () => {
   if (route.params.name) {
@@ -119,6 +124,7 @@ const install = async () => {
     try {
       await installExtension(extension.value.name, true, data.value);
       router.push({ name: 'one-extension' });
+      desktop.loadDesktop()
       SuccessAlert('Расширение установлено');
     } catch (e: unknown) {
       FailAlert(`Ошибка установки расширения: ${extractGraphQLErrorMessages(e)}`);
@@ -131,6 +137,9 @@ const disable = async () => {
   if (extension.value) {
     try {
       await updateExtension(extension.value.name, false, extension.value.config);
+      // Если расширение отключено, удаляем его workspace
+      desktop.removeWorkspace(extension.value.name);
+
       SuccessAlert('Расширение обновлено');
     } catch (e: unknown) {
       FailAlert(`Ошибка отключения расширения: ${extractGraphQLErrorMessages(e)}`);
@@ -143,6 +152,10 @@ const enable = async () => {
   if (extension.value) {
     try {
       await updateExtension(extension.value.name, true, extension.value.config);
+
+      // Перезагружаем desktop с сервера, чтобы включённое расширение появилось
+      await desktop.loadDesktop();
+
       SuccessAlert('Расширение обновлено');
     } catch (e: any) {
       FailAlert(`Ошибка включения расширения: ${extractGraphQLErrorMessages(e)}`);
@@ -150,12 +163,14 @@ const enable = async () => {
   }
 };
 
+
 const uninstall = async () => {
   const { uninstallExtension } = useUninstallExtension();
   if (extension.value) {
     try {
       await uninstallExtension(extension.value.name);
       router.push({ name: 'one-extension' });
+      desktop.loadDesktop()
       SuccessAlert('Расширение удалено');
     } catch (e: any) {
       FailAlert(`Ошибка удаления расширения: ${extractGraphQLErrorMessages(e)}`);

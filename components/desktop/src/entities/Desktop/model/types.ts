@@ -1,4 +1,7 @@
-export interface IDesktop {
+import type { Queries } from '@coopenomics/sdk';
+
+export type IDesktop = Queries.Desktop.GetDesktop.IOutput[typeof Queries.Desktop.GetDesktop.name]
+export interface ILegacyDesktop {
   name: string;
   hash: string;
   authorizedHome: string;
