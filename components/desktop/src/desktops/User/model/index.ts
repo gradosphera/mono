@@ -304,51 +304,5 @@ export const manifest = {
         },
       ]
     }
-    //КООПЕРАТИВ
-    // {
-    //   meta: {
-    //     title: 'Кооператив',
-    //     icon: 'fa-solid fa-cog',
-    //     roles: ['chairman', 'member'],
-    //   },
-    //   path: '/:coopname/settings',
-    //   name: 'settings',
-    //   children: [
-
-    //   ]
-    // },
-
-
-
-
-      //страница контактов
-      // {
-      //   path: ':coopname/contacts',
-      //   name: 'contacts',
-      //   component: markRaw(ContactsPage),
-      //   meta: {
-      //     title: 'Контакты',
-      //     icon: 'fa-solid fa-info',
-      //     roles: [],
-      //   },
-      // },
-      // {
-      //   path: ':coopname/commutator',
-      //   name: 'commutator',
-      //   component: markRaw(Commutator),
-      //   meta: {
-      //     title: 'Коммутатор',
-      //     icon: '',
-      //     roles: [],
-      //   },
-      // },
   ],
-  'config': {
-    'layout': 'default',
-    'theme': 'light'
-  },
-  'schemas': {
-    'layout': 'avj schema here',
-    'theme': 'avj schema here'
-  }
 }

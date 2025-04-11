@@ -766,9 +766,12 @@ export const ReturnTypes: Record<string,any> = {
 		authorized_by:"String",
 		batch_id:"Float",
 		callback_contract:"String",
+		confirm_callback:"String",
 		coopname:"String",
 		created_at:"String",
+		decline_callback:"String",
 		expired_at:"String",
+		hash:"String",
 		id:"Float",
 		meta:"String",
 		statement:"SignedBlockchainDocument",
@@ -875,6 +878,17 @@ export const ReturnTypes: Record<string,any> = {
 		"...on FreeDecisionDocument":"FreeDecisionDocument",
 		"...on ParticipantApplicationDecisionDocument":"ParticipantApplicationDecisionDocument"
 	},
+	Desktop:{
+		authorizedHome:"String",
+		coopname:"String",
+		layout:"String",
+		nonAuthorizedHome:"String",
+		workspaces:"DesktopWorkspace"
+	},
+	DesktopWorkspace:{
+		name:"String",
+		title:"String"
+	},
 	DocumentPackage:{
 		acts:"ActDetail",
 		decision:"DecisionDetail",
@@ -925,14 +939,18 @@ export const ReturnTypes: Record<string,any> = {
 		user:"UserDataUnion"
 	},
 	Extension:{
-		available:"Boolean",
 		config:"JSON",
 		created_at:"DateTime",
 		description:"String",
 		enabled:"Boolean",
+		external_url:"String",
 		image:"String",
-		installed:"Boolean",
 		instructions:"String",
+		is_available:"Boolean",
+		is_builtin:"Boolean",
+		is_desktop:"Boolean",
+		is_installed:"Boolean",
+		is_internal:"Boolean",
 		name:"String",
 		readme:"String",
 		schema:"JSON",
@@ -1256,6 +1274,7 @@ export const ReturnTypes: Record<string,any> = {
 		getAccounts:"AccountsPaginationResult",
 		getAgenda:"AgendaWithDocuments",
 		getBranches:"Branch",
+		getDesktop:"Desktop",
 		getDocuments:"DocumentsPaginationResult",
 		getExtensions:"Extension",
 		getPaymentMethods:"PaymentMethodPaginationResult",
