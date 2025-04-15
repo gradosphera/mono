@@ -21,6 +21,7 @@ export function useInitWalletProcess() {
       await account.getAccount(session.username)
 
       await user.loadProfile(session.username, info.coopname)
+
       await wallet.loadUserWallet({
         coopname: info.coopname,
         username: session.username,

@@ -13,11 +13,11 @@
         q-item-section
           q-item-label.no-select
             span {{ route.meta.title }}
-        q-icon(
-          v-if="route.meta.roles && !route.meta.roles.includes('user') && route.meta.roles.length > 0"
-          name="fa-solid fa-lock-open"
-          :color="context.userRole === 'member' ? 'orange' : 'teal'"
-        )
+        //- q-icon(
+        //-   v-if="route.meta.roles && !route.meta.roles.includes('user') && route.meta.roles.length > 0"
+        //-   name="fa-solid fa-lock-open"
+        //-   :color="context.userRole === 'member' ? 'orange' : 'teal'"
+        //- )
   </template>
 
   <script lang="ts" setup>

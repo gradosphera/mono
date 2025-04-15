@@ -1,5 +1,14 @@
 <template lang="pug">
 q-form(ref="form" v-if="data")
+  q-input(
+    dense
+    v-model="data.email"
+    standout="bg-teal text-white"
+    label="Email"
+    :readonly="readonly"
+    :rules="[val => validEmail(val)]"
+    autocomplete="off"
+  )
   q-select(
     dense
     v-model="data.type"
@@ -174,7 +183,7 @@ q-form(ref="form" v-if="data")
   import { EditableActions } from 'src/shared/ui/EditableActions';
   import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
   import { type IOrganizationData } from 'src/entities/Account/types';
-
+  import { validEmail } from 'src/shared/lib/utils/validEmailRule';
   const emit = defineEmits(['update']);
   const { updateAccount } = useUpdateAccount();
 

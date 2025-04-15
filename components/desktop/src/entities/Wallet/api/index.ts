@@ -1,8 +1,6 @@
 import { fetchTable, sendGET } from '../../../shared/api';
 
 import {
-  ContractsList,
-  TablesList,
   LimitsList,
   SecondaryIndexesNumbers,
 } from 'src/shared/config';

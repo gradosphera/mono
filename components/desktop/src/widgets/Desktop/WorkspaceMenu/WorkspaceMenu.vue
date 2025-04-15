@@ -136,6 +136,7 @@ div
   .btn-menu {
     height: 100px;
     width: 100px;
+    border-radius: 0 !important;
   }
   .btn-icon {
     font-size: 20px !important;

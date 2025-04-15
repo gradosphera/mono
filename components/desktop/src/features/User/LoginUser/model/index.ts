@@ -3,14 +3,13 @@ import { useGlobalStore } from 'src/shared/store'
 import { api } from '../api'
 import {client} from 'src/shared/api/client'
 import { useCurrentUserStore } from 'src/entities/User'
-import { useSystemStore } from 'src/entities/System/model'
 import { useRegistratorStore } from 'src/entities/Registrator'
 import type { ITokens } from 'src/shared/lib/types/user'
+import { useInitWalletProcess } from 'src/processes/init-wallet'
 
 export function useLoginUser() {
   const globalStore = useGlobalStore()
   const currentUser = useCurrentUserStore()
-  const system = useSystemStore()
 
   async function login(email: string, wif: string): Promise<void> {
     const auth = await api.loginUser(email, wif);
@@ -35,7 +34,8 @@ export function useLoginUser() {
     await session.init()
     client.setToken(auth.tokens.access.token)
 
-    await currentUser.loadProfile(globalStore.username, system.info.coopname)
+    const { run } = useInitWalletProcess()
+    await run() //запускаем фоновое обновление кошелька - заменить на подписку потом
 
     if (!currentUser.isRegistrationComplete){
       const {state, steps} = useRegistratorStore()

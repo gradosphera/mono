@@ -50,9 +50,9 @@ div(v-if="isLoaded").breable-text
   }
 </script>
 <style>
-//стиль полного оверлея технического обслуживания
 .q-loading__backdrop {
-  opacity: 1 !important
+  /* стиль полного оверлея технического обслуживания */
+  opacity: 1 !important;
 }
 
 </style>

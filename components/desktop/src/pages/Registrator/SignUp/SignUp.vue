@@ -45,18 +45,15 @@ import { useRegistratorStore } from 'src/entities/Registrator'
 import { useLogoutUser } from 'src/features/User/Logout'
 import { useSessionStore } from 'src/entities/Session'
 import { useAgreementStore } from 'src/entities/Agreement'
-import { useWalletStore } from 'src/entities/Wallet'
 
 import { useRouter } from 'vue-router';
+import { useInitWalletProcess } from 'src/processes/init-wallet'
 
 const currentUser = useCurrentUserStore()
 const router = useRouter()
 const { state, clearUserData, steps } = useRegistratorStore()
-const session = useSessionStore()
 const store = state
-const username = computed(() => session.username)
 const agreementer = useAgreementStore()
-const wallet = useWalletStore()
 
 onMounted(() => {
   agreementer.loadCooperativeAgreements(info.coopname)
@@ -73,9 +70,6 @@ onMounted(() => {
 const out = async () => {
   const { logout } = await useLogoutUser()
   await logout()
-
-  clearUserData()
-
   window.location.reload()
 }
 
@@ -96,8 +90,9 @@ watch(
   () => [store.step, store.email, store.account, store.userData],
   () => {
     if (store.step >= steps.GenerateAccount && store.step < steps.WaitingRegistration) {
-      currentUser.loadProfile(username.value, info.coopname)
-      wallet.loadUserWallet({coopname: info.coopname, username: username.value})
+      useInitWalletProcess().run()
+      // currentUser.loadProfile(username.value, info.coopname)
+      // wallet.loadUserWallet({coopname: info.coopname, username: username.value})
     }
   }
 )
