@@ -15,7 +15,7 @@ module.exports = configure(function (/* ctx */) {
 
   return {
     htmlVariables: {
-      SITE_TITLE: process.env.SITE_TITLE || 'Цифровой Кооператив',
+      SITE_TITLE: process.env.COOP_SHORT_NAME || 'Цифровой Кооператив',
       SITE_DESCRIPTION:
         process.env.SITE_DESCRIPTION ||
         'кооперативная экономика для сообществ и бизнеса',

@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { UPLOAD_URL } from 'src/shared/config'
+import { ref, computed } from 'vue'
 import { ImagesPreview } from '../ImagesPreview'
 
 const emit = defineEmits(['updateImages'])
@@ -38,11 +37,13 @@ const uploaderRef = ref()
 const triggerUploader = () => {
   uploaderRef.value.pickFiles()
 }
+
+const upload_url = computed(() => process.env.UPLOAD_URL)
 </script>
 
 <template lang="pug">
 div
   q-btn(icon="add" class="q-ml-md" @click="triggerUploader") Загрузить изображения
-  q-uploader(v-show="false" ref="uploaderRef" color="grey" flat no-thumbnails multiple square auto-upload :url="UPLOAD_URL" :max-file-size="104857600" @uploaded="uploaded").full-width
+  q-uploader(v-show="false" ref="uploaderRef" color="grey" flat no-thumbnails multiple square auto-upload :url="upload_url" :max-file-size="104857600" @uploaded="uploaded").full-width
   ImagesPreview(v-if="images.length > 0" :images="images" :show-remove="true" @select-image="select" @remove-image="remove").q-ma-md
 </template>

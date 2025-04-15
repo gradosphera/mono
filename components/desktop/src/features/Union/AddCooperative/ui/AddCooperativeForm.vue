@@ -5,19 +5,19 @@ Form(:handler-submit="addNow" :is-submitting="isSubmitting" :showCancel="false" 
 
   q-input(standout="bg-teal text-white" hint="100 RUB" label="Вступительный взнос для физлиц и ИП" v-model="data.params.initial" type="number" :min="0" :rules="[val => notEmpty(val)]")
     template(#append)
-      span.text-overline {{CURRENCY}}
+      span.text-overline {{currency}}
 
   q-input(standout="bg-teal text-white" hint="300 RUB" label="Минимальный паевый взнос для физлиц и ИП" v-model="data.params.minimum" type="number" :min="0" :rules="[val => notEmpty(val)]")
     template(#append)
-      span.text-overline {{CURRENCY}}
+      span.text-overline {{currency}}
 
   q-input(standout="bg-teal text-white" hint="1000 RUB" label="Вступительный взнос для организаций" v-model="data.params.org_initial" type="number" :min="0" :rules="[val => notEmpty(val)]")
     template(#append)
-      span.text-overline {{CURRENCY}}
+      span.text-overline {{currency}}
 
   q-input(standout="bg-teal text-white" hint="3000 RUB" label="Минимальный паевый взнос для организаций" v-model="data.params.org_minimum" type="number" :min="0"  :rules="[val => notEmpty(val)]")
     template(#append)
-      span.text-overline {{CURRENCY}}
+      span.text-overline {{currency}}
 
 </template>
 <script lang="ts" setup>
@@ -27,14 +27,13 @@ import { Form } from 'src/shared/ui/Form';
 import { notEmpty, isDomain } from 'src/shared/lib/utils';
 import { useSessionStore } from 'src/entities/Session';
 import { RegistratorContract } from 'cooptypes';
-import { CURRENCY } from 'src/shared/config';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import type { IObjectedDocument } from 'src/shared/lib/types/document';
 
 const emit = defineEmits(['finish'])
 
 const {addCooperative} = useAddCooperative()
-
+const currency = computed(() => process.env.CURRENCY)
 const isSubmitting = ref(false)
 
 const props = defineProps({
