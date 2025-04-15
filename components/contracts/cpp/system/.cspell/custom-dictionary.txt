@@ -18,7 +18,7 @@ bytime
 canceldelay
 cfgpowerup
 changebw
-resultrewards
+claimrewards
 closerex
 cnclrexorder
 cpuloan
