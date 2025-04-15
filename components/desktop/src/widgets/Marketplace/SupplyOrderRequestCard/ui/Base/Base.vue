@@ -11,7 +11,6 @@ import {
   SeventhStep,
   EightStep,
 } from '../Steps'
-import { STORAGE_URL } from 'src/shared/config'
 
 //TODO изменить на обязательный импорт с типом
 const props = defineProps<{
@@ -54,7 +53,7 @@ const src = computed(() => {
   if (preview && preview.startsWith('https://')) {
     return preview // Превью уже содержит HTTPS, оставляем его как есть
   } else {
-    return STORAGE_URL + preview // Иначе, добавляем config.storageUrl
+    return process.env.STORAGE_URL + preview // Иначе, добавляем config.storageUrl
   }
 })
 </script>

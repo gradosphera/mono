@@ -5,10 +5,9 @@ div
     q-toolbar()
       q-btn(v-if="loggedIn && showDrawer" stretch icon="menu" flat @click="emitToggleLeftDrawer")
       q-btn(v-if="loggedIn && !showDrawer" stretch icon="fas fa-chevron-left" flat @click="goTo('index')")
-
       q-toolbar-title()
         q-btn(:size="isMobile ? 'md' : 'lg'" flat @click="goTo('index')")
-          span(v-if="showDrawer") {{ COOP_SHORT_NAME }}
+          span(v-if="showDrawer") {{ coopTitle }}
 
       SettingsDropdown(:isMobile="isMobile" :isChairman="isChairman" :isMember="isMember")
 
@@ -96,7 +95,6 @@ div
   import { computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import { useQuasar } from 'quasar'
-  import { COOP_SHORT_NAME } from 'src/shared/config'
   import { useCurrentUserStore } from 'src/entities/User'
   import { useSessionStore } from 'src/entities/Session'
   import config from 'src/app/config'
@@ -109,6 +107,8 @@ div
   const session = useSessionStore()
   const { width } = useWindowSize()
   const emit = defineEmits(['toggle-left-drawer'])
+
+  const coopTitle = computed(() => process.env.COOP_SHORT_NAME)
 
   const isDark = computed(() => $q.dark.isActive)
   const headerClass = computed(() =>

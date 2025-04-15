@@ -4,12 +4,11 @@ import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useSessionStore } from 'src/entities/Session';
 import { useUpdateCoop } from 'src/features/Cooperative/UpdateCoop';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { CURRENCY } from 'src/shared/config';
 import { formatToAsset } from 'src/shared/lib/utils/formatToAsset';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore()
-
+const currency = computed(() => process.env.CURRENCY)
 const coop = useCooperativeStore()
 coop.loadPublicCooperativeData(info.coopname)
 coop.loadPrivateCooperativeData()
@@ -29,10 +28,10 @@ const save = async () => {
       await updateCoop({
         coopname: info.coopname,
         username: session.username,
-        initial: formatToAsset(localCoop.value.initial, CURRENCY),
-        minimum: formatToAsset(localCoop.value.minimum, CURRENCY),
-        org_initial: formatToAsset(localCoop.value.org_initial, CURRENCY),
-        org_minimum: formatToAsset(localCoop.value.org_minimum, CURRENCY),
+        initial: formatToAsset(localCoop.value.initial, process.env.CURRENCY as string),
+        minimum: formatToAsset(localCoop.value.minimum, process.env.CURRENCY as string),
+        org_initial: formatToAsset(localCoop.value.org_initial, process.env.CURRENCY as string),
+        org_minimum: formatToAsset(localCoop.value.org_minimum, process.env.CURRENCY as string),
         announce: coop.publicCooperativeData?.announce,
         description: coop.publicCooperativeData?.description
       })
@@ -68,20 +67,20 @@ div.q-pa-md
 
       q-input(standout="bg-teal text-white" v-model="localCoop.initial" label="Вступительный взнос")
         template(#append)
-          span.text-overline {{ CURRENCY }}
+          span.text-overline {{ currency }}
 
       q-input(standout="bg-teal text-white" v-model="localCoop.minimum" label="Минимальный паевый взнос")
         template(#append)
-          span.text-overline {{ CURRENCY }}
+          span.text-overline {{ currency }}
 
     q-card(flat).q-pa-md.q-gutter-sm
       p.text-overline ЮРИДИЧЕСКИЕ ЛИЦА
       q-input(standout="bg-teal text-white" v-model="localCoop.org_initial" label="Вступительный взнос")
         template(#append)
-          span.text-overline {{ CURRENCY }}
+          span.text-overline {{ currency }}
       q-input(standout="bg-teal text-white" v-model="localCoop.org_minimum" label="Минимальный паевый взнос")
         template(#append)
-          span.text-overline {{ CURRENCY }}
+          span.text-overline {{ currency }}
 
   q-btn(@click="save" size="sm" color="primary")
     q-icon(name="save").q-mr-sm

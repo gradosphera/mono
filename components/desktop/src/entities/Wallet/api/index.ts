@@ -28,16 +28,16 @@ import {
   ILoadUserProgramWallets,
   ILoadUserWithdraws,
 } from '../model';
-import { SovietContract } from 'cooptypes';
+import { GatewayContract, SovietContract } from 'cooptypes';
 
 async function loadSingleUserWalletData(
   params: ILoadSingleUserWallet
 ): Promise<IWalletData> {
   return (
     await fetchTable(
-      ContractsList.Soviet,
+      SovietContract.contractName.production,
       params.coopname,
-      TablesList.Wallets,
+      SovietContract.Tables.Wallets.tableName,
       params.username,
       params.username,
       LimitsList.One
@@ -50,9 +50,9 @@ async function loadSingleUserDepositData(
 ): Promise<IDepositData> {
   return (
     await fetchTable(
-      ContractsList.Gateway,
+      GatewayContract.contractName.production,
       params.coopname,
-      TablesList.Deposits,
+      GatewayContract.Tables.Incomes.tableName,
       params.username,
       params.username,
       LimitsList.One
@@ -65,9 +65,9 @@ async function loadSingleUserProgramWalletData(
 ): Promise<IProgramWalletData> {
   return (
     await fetchTable(
-      ContractsList.Soviet,
+      SovietContract.contractName.production,
       params.coopname,
-      TablesList.ProgramWallets,
+      SovietContract.Tables.ProgramWallets.tableName,
       params.wallet_id,
       params.wallet_id,
       LimitsList.One
@@ -80,9 +80,9 @@ async function loadSingleUserWithdrawData(
 ): Promise<IWithdrawData> {
   return (
     await fetchTable(
-      ContractsList.Gateway,
+      GatewayContract.contractName.production,
       params.coopname,
-      TablesList.Withdraws,
+      GatewayContract.Tables.Outcomes.tableName,
       params.withdraw_id,
       params.withdraw_id,
       LimitsList.One
@@ -94,9 +94,9 @@ async function loadUserDepositsData(
   params: ILoadUserDeposits
 ): Promise<IDepositData[]> {
   return (await fetchTable(
-    ContractsList.Gateway,
+    GatewayContract.contractName.production,
     params.coopname,
-    TablesList.Deposits,
+    GatewayContract.Tables.Incomes.tableName,
     params.username,
     params.username,
     LimitsList.None,
@@ -108,9 +108,9 @@ async function loadUserWithdrawsData(
   params: ILoadUserWithdraws
 ): Promise<IWithdrawData[]> {
   return (await fetchTable(
-    ContractsList.Gateway,
+    GatewayContract.contractName.production,
     params.coopname,
-    TablesList.Withdraws,
+    GatewayContract.Tables.Outcomes.tableName,
     params.username,
     params.username,
     LimitsList.None,
