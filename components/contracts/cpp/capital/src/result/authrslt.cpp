@@ -11,7 +11,7 @@ void capital::authrslt(eosio::name coopname, checksum256 result_hash, document d
   eosio::check(result -> status == "statement"_n, "Неверный статус");
 
   results.modify(result, _capital, [&](auto &r){
-    r.status = "authorized";
+    r.status = "authorized"_n;
     r.authorization = decision;
   });
   

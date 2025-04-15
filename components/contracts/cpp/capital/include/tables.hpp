@@ -6,6 +6,8 @@
 using namespace eosio;
 
 struct bonus_result {
+    asset author_base;
+    asset creator_base;
     asset creators_bonus;
     asset authors_bonus;
     asset generated;
