@@ -37,9 +37,9 @@
             q-td {{ props.row.quantity }}
             q-td
               q-badge(v-if="props.row.type ==='registration'") регистрационный
-              q-badge(v-if="props.row.type ==='deposit'") паевый
+              q-badge(v-if="props.row.type ==='deposit'") паевой
 
-            q-td {{getNameFromUserData(props.row.user?.private_data)}}
+            q-td(style="max-width: 150px; word-wrap: break-word; white-space: normal;") {{getNameFromUserData(props.row.user?.private_data)}}
 
             q-td
               q-badge(v-if="props.row.status ==='completed'" color="teal") обработан

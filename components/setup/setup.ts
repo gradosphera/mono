@@ -70,9 +70,8 @@ async function developmentMenu(): Promise<void> {
 }
 
 async function setupFrontendTestnet(): Promise<void> {
-  await copyFile('../desktop/.env-example', '../desktop/.env');
-  await copyFile('../desktop/Env-testnet.ts', '../desktop/src/shared/config/Env.ts');
-
+  await copyFile('../desktop/.env-testnet', '../desktop/.env');
+  
   console.log('\n🚀 Начинаем сборку компонентов...');
   await runCommandWithSpinner('cd ../cooptypes && pnpm run build', 'Сборка библиотеки типов');
   await runCommandWithSpinner('cd ../factory && pnpm run build', 'Сборка фабрики документов');
@@ -85,8 +84,7 @@ async function setupFrontendTestnet(): Promise<void> {
 
 async function setupLocalFull(): Promise<void> {
   await copyFile('../desktop/.env-example', '../desktop/.env');
-  await copyFile('../desktop/Env-example.ts', '../desktop/src/shared/config/Env.ts');
-
+  
   await copyFile('../controller/.env-example', '../controller/.env');
   await copyFile('../boot/.env-example', '../boot/.env');
   await copyFile('../factory/.env-example', '../factory/.env');

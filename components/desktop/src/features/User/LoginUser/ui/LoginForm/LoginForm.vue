@@ -39,10 +39,6 @@ form(@submit.prevent="submit").full-width
 import { useCurrentUserStore } from 'src/entities/User';
 import { useLoginUser } from 'src/features/User/LoginUser';
 import { FailAlert } from 'src/shared/api';
-import { useSystemStore } from 'src/entities/System/model';
-const { info } = useSystemStore()
-
-import { useGlobalStore } from 'src/shared/store';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -52,7 +48,6 @@ const email = ref('')
 const privateKey = ref('')
 const loading = ref(false)
 const currentUser = useCurrentUserStore()
-const globalStore = useGlobalStore()
 
 
 const submit = async () => {
@@ -60,7 +55,6 @@ const submit = async () => {
   try {
     const { login } = useLoginUser()
     await login(email.value, privateKey.value)
-    await currentUser.loadProfile(globalStore.username, info.coopname)
 
     if (!currentUser.isRegistrationComplete) {
       router.push({ name: 'signup' })
