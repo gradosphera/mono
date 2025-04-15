@@ -12,13 +12,16 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   
   eosio::check(contributed_hours > 0, "Только положительная сумма часов");
   
+  // считаем сумму фактических затрат создателя на основе ставки в час и потраченного времени
   eosio::asset spended = contributor -> rate_per_hour * contributed_hours;
   
-  // Вычисляем премии
+  // Вычисляем премии на основе суммы фактических затрат
   auto amounts = capital::calculcate_capital_amounts(spended);
   
   commit_index commits(_capital, coopname.value);
   auto commit_id = get_global_id_in_scope(_capital, coopname, "commits"_n);
+  
+  //TODO: надо смотреть надо ли здесь добавлять creator_base и author_base
   commits.emplace(coopname, [&](auto &a) {
     a.id = commit_id;
     a.status = "created"_n;

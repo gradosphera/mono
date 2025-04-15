@@ -21,7 +21,7 @@ void capital::setact2(
     eosio::check(result -> status == "act1"_n, "Неверный статус результата.");
 
     results.modify(result, _capital, [&](auto &r){
-      r.status = "act2";
+      r.status = "act2"_n;
       r.act1 = act;
     });
 

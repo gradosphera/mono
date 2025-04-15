@@ -490,7 +490,7 @@ bonus_result capital::calculcate_capital_amounts(const eosio::asset& spended) {
     eosio::symbol sym = spended.symbol;
     
     br.creator_base = spended;
-    br.autor_base = spended;
+    br.author_base = spended;
     
     br.creators_bonus     = eosio::asset(int64_t(amount * 0.382), sym);
     br.authors_bonus      = eosio::asset(int64_t(amount * 0.618), sym);
