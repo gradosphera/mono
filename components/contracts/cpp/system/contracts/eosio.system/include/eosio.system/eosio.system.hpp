@@ -194,7 +194,7 @@ namespace eosiosystem {
          return convert_to_block_signing_authority( producer_key );
       }
 
-      // The unregprod and resultrewards actions modify unrelated fields of the producers table and under the default
+      // The unregprod and claimrewards actions modify unrelated fields of the producers table and under the default
       // serialization behavior they would increase the size of the serialized table if the producer_authority field
       // was not already present. This is acceptable (though not necessarily desired) because those two actions require
       // the authority of the producer who pays for the table rows.
@@ -786,7 +786,7 @@ namespace eosiosystem {
           * @param owner - producer account resulting per-block and per-vote rewards.
           */
          [[eosio::action]]
-         void resultrewards( const name& owner );
+         void claimrewards( const name& owner );
 
          /**
           * Set privilege status for an account. Allows to set privilege status for an account (turn it on/off).
@@ -923,7 +923,7 @@ namespace eosiosystem {
          
          using regproxy_action = eosio::action_wrapper<"regproxy"_n, &system_contract::regproxy>;
          
-         using resultrewards_action = eosio::action_wrapper<"resultrewards"_n, &system_contract::resultrewards>;
+         using resultrewards_action = eosio::action_wrapper<"claimrewards"_n, &system_contract::claimrewards>;
          
          using rmvproducer_action = eosio::action_wrapper<"rmvproducer"_n, &system_contract::rmvproducer>;
          

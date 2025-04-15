@@ -343,7 +343,7 @@
         {"name":"is_proxy",             "type":"bool"}
       ]
     },{
-      "name": "resultrewards",
+      "name": "claimrewards",
       "base": "",
       "fields": [
         {"name":"owner",   "type":"account_name"}
@@ -527,8 +527,8 @@
       "type": "voteproducer",
       "ricardian_contract": ""
    },{
-      "name": "resultrewards",
-      "type": "resultrewards",
+      "name": "claimrewards",
+      "type": "claimrewards",
       "ricardian_contract": ""
    },{
       "name": "setpriv",
