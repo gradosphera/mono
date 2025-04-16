@@ -1,10 +1,10 @@
 import { DraftContract } from 'cooptypes'
-import { PrivacyPolicy } from '../templates'
+import { PrivacyPolicy } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { PrivacyPolicy as Template } from '../templates'
+export { PrivacyPolicy as Template } from '../Templates'
 
 export class Factory extends DocFactory<PrivacyPolicy.Action> {
   constructor(storage: MongoDBConnector) {

@@ -1,6 +1,6 @@
 import type { JSONSchemaType } from 'ajv'
 import type { Cooperative } from 'cooptypes'
-import type { Registry } from '../templates/registry'
+import type { Registry } from '../Templates/registry'
 import type { CooperativeData } from '../Models/Cooperative'
 import type { ExternalEntrepreneurData, ExternalIndividualData, ExternalOrganizationData } from '../Models'
 

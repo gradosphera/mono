@@ -1,3 +1,8 @@
+export const _meet = {
+  production: 'meet',
+  testnet: 'meet',
+} as const
+
 export const _draft = {
   production: 'draft',
   testnet: 'drafttest222',
