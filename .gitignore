@@ -2,3 +2,5 @@ node_modules/
 lerna-debug.log
 components/controller/graph.png
 blockchain-data/
+scripts/changelog-prompt.txt
+scripts/changelog-release.md
