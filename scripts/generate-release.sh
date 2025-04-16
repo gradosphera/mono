@@ -1,20 +1,26 @@
 #!/bin/bash
 
-START_DATE="$1"
-VERSION="$2"
-FOCUS="$3"
-OPEN="$4"
-
-PROMPT_FILE="changelog-prompt.txt"
+INFO_FILE="release-info.md"
+PROMPT_FILE="changelog-prompt.md"
 OUTPUT_FILE="changelog-release.md"
 
-if [ -z "$START_DATE" ] || [ -z "$VERSION" ]; then
-  echo "Использование: ./generate-full-changelog.sh <start-date> <version> [focus] [--open]"
+if [ ! -f "$INFO_FILE" ]; then
+  echo "❌ Файл $INFO_FILE не найден"
   exit 1
 fi
 
 if [ -z "$OPENAI_API_KEY" ]; then
   echo "❌ Переменная окружения OPENAI_API_KEY не задана"
+  exit 1
+fi
+
+# Извлекаем данные
+VERSION=$(grep "^VERSION:" "$INFO_FILE" | cut -d':' -f2- | xargs)
+START_DATE=$(grep "^FROM DATE:" "$INFO_FILE" | cut -d':' -f2- | xargs)
+COMMENT=$(awk '/^COMMENT:/{flag=1; next} /^ *$/{flag=0} flag' "$INFO_FILE")
+
+if [ -z "$VERSION" ] || [ -z "$START_DATE" ]; then
+  echo "❌ В файле $INFO_FILE должны быть строки: VERSION и FROM DATE"
   exit 1
 fi
 
@@ -30,7 +36,7 @@ if [ -z "$ISSUES" ]; then
   exit 0
 fi
 
-# Формирование промпта
+# Формируем промпт
 cat <<EOF > "$PROMPT_FILE"
 Сгенерируй changelog для версии $VERSION.
 
@@ -42,16 +48,12 @@ cat <<EOF > "$PROMPT_FILE"
   ✨ Новые функции
   🐛 Исправления ошибок
   🔧 Улучшения
-- Каждый пункт списка должен указывать номер issue как markdown-ссылку на https://github.com/coopenomics/mono/issues/Номер (например: [#123](https://github.com/coopenomics/mono/issues/123))
+- Каждый пункт списка должен быть в формате:
+  - [#Номер](https://github.com/coopenomics/mono/issues/Номер): Краткое описание
 - Пиши кратко, строго и по делу.
 
-EOF
-
-if [ -n "$FOCUS" ]; then
-  echo "Комментарий разработчика для описания релиза: $FOCUS" >> "$PROMPT_FILE"
-fi
-
-cat <<EOF >> "$PROMPT_FILE"
+Комментарий разработчика для описания релиза:
+$COMMENT
 
 Ниже список закрытых issues, начиная с $START_DATE:
 
@@ -59,15 +61,6 @@ $ISSUES
 EOF
 
 echo "✅ Промпт сохранён в $PROMPT_FILE"
-
-if [ "$OPEN" == "--open" ]; then
-  if command -v subl &>/dev/null; then
-    subl "$PROMPT_FILE"
-  else
-    echo "⚠️  'subl' не найден. Установи CLI для Sublime или открой файл вручную."
-  fi
-fi
-
 echo "📡 Отправка запроса в OpenAI через HTTP-прокси localhost:801..."
 
 PROMPT=$(cat "$PROMPT_FILE" | jq -Rs .)
@@ -84,6 +77,7 @@ RESPONSE=$(curl https://api.openai.com/v1/chat/completions \
     \"max_tokens\": 10240
   }")
 
-echo "$RESPONSE" | jq -r '.choices[0].message.content' > "$OUTPUT_FILE"
+RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+echo "$RELEASE_BODY" > "$OUTPUT_FILE"
 
 echo "✅ Changelog сохранён в $OUTPUT_FILE"
