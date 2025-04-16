@@ -101,6 +101,8 @@ static constexpr eosio::name _capital_program = "capital"_n;
 static const std::set<eosio::name> soviet_actions = {
     "joincoop"_n, //регистрация пайщика
     
+    //MEET
+    "createagm"_n, //объявить плановое общее собрание
     //CAPITAL
     "capitalinvst"_n, //заявление на инвестиции по договору УХД
     "createresult"_n, //клайм прироста капитализации из задания
@@ -144,6 +146,7 @@ static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный к�
 #define CAPITAL "capital"
 #define WALLET "wallet"
 #define LOAN "loan"
+#define MEET "meet"
 /**
 * @ingroup public_consts
 * @{ 
@@ -163,6 +166,7 @@ static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный к�
     static constexpr eosio::name _fund = "fund"_n;
     static constexpr eosio::name _branch = "branch"_n;
     static constexpr eosio::name _loan = "loan"_n;
+    static constexpr eosio::name _meet = "meet"_n;
     static constexpr eosio::name _power_account = "eosio.power"_n;
     static constexpr eosio::name _saving_account = "eosio.saving"_n;
     

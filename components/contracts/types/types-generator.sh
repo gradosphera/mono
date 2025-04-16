@@ -16,6 +16,8 @@ declare -A contract_params_test=(
   [branch]="branch"
   [capital]="capital"
   [wallet]="wallet"
+  [loan]="loan"
+  [meet]="meet"
 )
 
 # Алиас для cleos через Docker

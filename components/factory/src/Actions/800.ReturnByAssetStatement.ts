@@ -1,10 +1,10 @@
 import { DraftContract } from 'cooptypes'
-import { ReturnByAssetStatement } from '../templates'
+import { ReturnByAssetStatement } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { ReturnByAssetStatement as Template } from '../templates'
+export { ReturnByAssetStatement as Template } from '../Templates'
 
 export class Factory extends DocFactory<ReturnByAssetStatement.Action> {
   constructor(storage: MongoDBConnector) {

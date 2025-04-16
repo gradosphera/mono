@@ -1,10 +1,10 @@
 import { DraftContract } from 'cooptypes'
-import { InvestByMoneyStatement } from '../templates'
+import { InvestByMoneyStatement } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { InvestByMoneyStatement as Template } from '../templates'
+export { InvestByMoneyStatement as Template } from '../Templates'
 
 export class Factory extends DocFactory<InvestByMoneyStatement.Action> {
   constructor(storage: MongoDBConnector) {

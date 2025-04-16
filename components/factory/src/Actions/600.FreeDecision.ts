@@ -8,9 +8,9 @@ import type {
 } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-import { FreeDecision } from '../templates'
+import { FreeDecision } from '../Templates'
 
-export { FreeDecision as Template } from '../templates'
+export { FreeDecision as Template } from '../Templates'
 
 export class Factory extends DocFactory<FreeDecision.Action> {
   constructor(storage: MongoDBConnector) {

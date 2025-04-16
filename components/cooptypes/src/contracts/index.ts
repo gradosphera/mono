@@ -68,3 +68,8 @@ export * as CapitalContract from './capital'
  * Смарт-контракт управления взносами и возвратами взносов финансовыми средствами
  */
 export * as WalletContract from './wallet'
+
+/**
+ * Смарт-контракт управления общими собраниями пайщиков
+ */
+export * as MeetContract from './meet'

@@ -1,4 +1,4 @@
-import type { AssetContributionStatement, InvestMembershipConvertation, InvestmentAgreement, ReturnByAssetStatement } from '../templates'
+import type { AssetContributionStatement, InvestMembershipConvertation, InvestmentAgreement, ReturnByAssetStatement } from '../Templates'
 
 export * as WalletAgreement from './1.WalletAgreement'
 export * as RegulationElectronicSignature from './2.RegulationElectronicSignature'
@@ -24,3 +24,10 @@ export * as InvestByResultStatement from './1001.InvestByResultStatement'
 export * as InvestByResultAct from './1002.InvestByResultAct'
 export * as InvestByMoneyStatement from './1005.InvestByMoneyStatement'
 export * as InvestMembershipConvertation from './1010.InvestMembershipConvertation'
+
+// общие собрания
+export * as AnnualGeneralMeetingAgenda from './300.AnnualGeneralMeetingAgenda'
+export * as SovietDecisionOnAnnualMeeting from './301.SovietDecisionOnAnnualMeeting'
+export * as AnnualMeetingNotification from './302.AnnualMeetingNotification'
+export * as VotingBallot from './303.VotingBallot'
+export * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecision'

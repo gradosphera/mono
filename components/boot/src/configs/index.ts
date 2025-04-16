@@ -92,6 +92,10 @@ export default {
       code_permissions_to: ['loan'],
     },
     {
+      name: 'meet',
+      code_permissions_to: ['meet'],
+    },
+    {
       name: 'wallet',
       code_permissions_to: ['wallet'],
     },
