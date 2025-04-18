@@ -26,7 +26,7 @@ export interface ICreatemeet {
   presider: IName
   secretary: IName
   agenda: IMeetPoint[]
-  statement: IDocument
+  proposal: IDocument
   open_at: ITimePointSec
   close_at: ITimePointSec
 }

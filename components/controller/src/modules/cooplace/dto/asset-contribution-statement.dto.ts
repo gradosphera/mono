@@ -7,6 +7,7 @@ import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
+import { SignedDigitalDocumentBase } from '~/modules/document/dto/signed-digital-document.base';
 import type { ExcludeCommonProps } from '~/modules/document/types';
 import { CommonRequestInputDTO } from './common-request-input.dto';
 import { CommonRequestResponseDTO } from './common-request-response.dto';
@@ -63,6 +64,14 @@ export class AssetContributionStatementMetaDocumentOutputDTO extends Intersectio
   BaseAssetContributionStatementMetaDocumentOutputDTO,
   MetaDocumentDTO
 ) {}
+
+@ObjectType(`AssetContributionStatementSignedDocument`)
+export class AssetContributionStatementSignedDocumentDTO extends SignedDigitalDocumentBase {
+  @Field(() => AssetContributionStatementMetaDocumentOutputDTO, {
+    description: 'Метаинформация для создания проекта свободного решения',
+  })
+  public override readonly meta!: AssetContributionStatementMetaDocumentOutputDTO;
+}
 
 @ObjectType(`AssetContributionStatementDocument`)
 export class AssetContributionStatementDocumentDTO extends GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {

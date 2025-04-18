@@ -24,9 +24,9 @@ import * as InvestMembershipConvertation from './1010.InvestMembershipConvertati
 import * as SosediAgreement from './699.SosediAgreement'
 
 import * as AnnualGeneralMeetingAgenda from './300.AnnualGeneralMeetingAgenda'
-import * as SovietDecisionOnAnnualMeeting from './301.SovietDecisionOnAnnualMeeting'
-import * as AnnualMeetingNotification from './302.AnnualMeetingNotification'
-import * as VotingBallot from './303.VotingBallot'
+import * as AnnualGeneralMeetingSovietDecision from './301.AnnualGeneralMeetingSovietDecision'
+import * as AnnualGeneralMeetingNotification from './302.AnnualGeneralMeetingNotification'
+import * as AnnualGeneralMeetingVotingBallot from './303.AnnualGeneralMeetingVotingBallot'
 import * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecision'
 
 export const Registry = {
@@ -38,9 +38,9 @@ export const Registry = {
   100: ParticipantApplication,
   101: SelectBranchStatement,
   300: AnnualGeneralMeetingAgenda,
-  301: SovietDecisionOnAnnualMeeting,
-  302: AnnualMeetingNotification,
-  303: VotingBallot,
+  301: AnnualGeneralMeetingSovietDecision,
+  302: AnnualGeneralMeetingNotification,
+  303: AnnualGeneralMeetingVotingBallot,
   304: AnnualGeneralMeetingDecision,
   501: DecisionOfParticipantApplication,
   599: ProjectFreeDecision,

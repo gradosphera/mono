@@ -12,7 +12,7 @@ export interface ITable {
   value?: any
 }
 
-export interface IAction {
+export interface IAction<T = any> {
   transaction_id: string
   account: string
   block_num: number
@@ -24,7 +24,7 @@ export interface IAction {
     actor: string
     permission: string
   }>
-  data: any
+  data: T
   action_ordinal: number
   global_sequence: string
   account_ram_deltas: Array<{

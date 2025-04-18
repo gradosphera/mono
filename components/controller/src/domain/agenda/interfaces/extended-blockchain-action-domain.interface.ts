@@ -1,4 +1,4 @@
-import type { BlockchainActionDomainInterface } from './blockchain-action-domain.interface';
+import type { BlockchainActionDomainInterface } from '../../common/interfaces/blockchain-action-domain.interface';
 import type { Cooperative } from 'cooptypes';
 
 export interface ExtendedBlockchainActionDomainInterface extends BlockchainActionDomainInterface {

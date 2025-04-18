@@ -7,6 +7,7 @@ import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
+import { SignedDigitalDocumentBase } from '~/modules/document/dto/signed-digital-document.base';
 import type { ExcludeCommonProps } from '~/modules/document/types';
 
 // интерфейс параметров для генерации
@@ -58,6 +59,14 @@ export class ParticipantApplicationDecisionSignedDocumentInputDTO extends Signed
 export class ParticipantApplicationDecisionMetaDocumentOutputDTO
   extends IntersectionType(BaseParticipantApplicationDecisionMetaDocumentOutputDTO, MetaDocumentDTO)
   implements action {}
+
+@ObjectType(`ParticipantApplicationDecisionSignedDocument`)
+export class ParticipantApplicationDecisionSignedDocumentDTO extends SignedDigitalDocumentBase {
+  @Field(() => ParticipantApplicationDecisionMetaDocumentOutputDTO, {
+    description: 'Метаинформация для создания проекта свободного решения',
+  })
+  public override readonly meta!: ParticipantApplicationDecisionMetaDocumentOutputDTO;
+}
 
 @ObjectType(`ParticipantApplicationDecisionDocument`)
 export class ParticipantApplicationDecisionDocumentDTO

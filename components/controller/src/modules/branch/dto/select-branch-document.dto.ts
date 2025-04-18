@@ -7,6 +7,7 @@ import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
+import { SignedDigitalDocumentBase } from '~/modules/document/dto/signed-digital-document.base';
 
 // утилита для выборки повторяющихся параметров из базовых интерфейсов
 type ExcludeCommonProps<T> = Omit<T, 'coopname' | 'username' | 'registry_id'>;
@@ -57,6 +58,13 @@ export class SelectBranchMetaDocumentOutputDTO
   extends IntersectionType(BaseSelectBranchMetaDocumentOutputDTO, MetaDocumentDTO)
   implements action {}
 
+@ObjectType(`SelectBranchSignedDocument`)
+export class SelectBranchSignedDocumentDTO extends SignedDigitalDocumentBase {
+  @Field(() => SelectBranchMetaDocumentOutputDTO, {
+    description: 'Метаинформация для документа выбора кооперативного участка',
+  })
+  public override readonly meta!: SelectBranchMetaDocumentOutputDTO;
+}
 @ObjectType(`SelectBranchDocument`)
 export class SelectBranchDocumentDTO extends GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {
   @Field(() => SelectBranchMetaDocumentOutputDTO, {

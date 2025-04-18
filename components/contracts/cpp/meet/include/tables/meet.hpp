@@ -27,7 +27,8 @@ struct [[eosio::table, eosio::contract(MEET)]] meet {
     
     document proposal;                         ///< Предложение
     document authorization;                    ///< Решение совета
-    
+    document decision1;                        ///< Подпись протокола секретарём общего собрания
+    document decision2;                        ///< Подпись протокола председателем общего собрания
     
     uint64_t primary_key() const { return id; } ///< Основной ключ.
     checksum256 by_hash() const { return hash;} ///< Хэш-ключ

@@ -1,24 +1,24 @@
 import { DraftContract } from 'cooptypes'
-import { VotingBallot } from '../Templates'
+import { AnnualGeneralMeetingNotification } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { VotingBallot as Template } from '../Templates'
+export { AnnualGeneralMeetingNotification as Template } from '../Templates'
 
-export class Factory extends DocFactory<VotingBallot.Action> {
+export class Factory extends DocFactory<AnnualGeneralMeetingNotification.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
-  async generateDocument(data: VotingBallot.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<VotingBallot.Model>
+  async generateDocument(data: AnnualGeneralMeetingNotification.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
+    let template: ITemplate<AnnualGeneralMeetingNotification.Model>
 
     if (process.env.SOURCE === 'local') {
-      template = VotingBallot.Template
+      template = AnnualGeneralMeetingNotification.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, VotingBallot.registry_id, data.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, AnnualGeneralMeetingNotification.registry_id, data.block_num)
     }
 
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data })
@@ -26,7 +26,7 @@ export class Factory extends DocFactory<VotingBallot.Action> {
     const vars = await super.getVars(data.coopname, data.block_num)
     const user = await super.getUser(data.username, data.block_num)
 
-    const combinedData: VotingBallot.Model = {
+    const combinedData: AnnualGeneralMeetingNotification.Model = {
       meta,
       coop,
       vars,

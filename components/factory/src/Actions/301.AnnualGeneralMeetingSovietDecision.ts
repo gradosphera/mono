@@ -1,24 +1,24 @@
 import { DraftContract } from 'cooptypes'
-import { SovietDecisionOnAnnualMeeting } from '../Templates'
+import { AnnualGeneralMeetingSovietDecision } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { SovietDecisionOnAnnualMeeting as Template } from '../Templates'
+export { AnnualGeneralMeetingSovietDecision as Template } from '../Templates'
 
-export class Factory extends DocFactory<SovietDecisionOnAnnualMeeting.Action> {
+export class Factory extends DocFactory<AnnualGeneralMeetingSovietDecision.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
-  async generateDocument(data: SovietDecisionOnAnnualMeeting.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<SovietDecisionOnAnnualMeeting.Model>
+  async generateDocument(data: AnnualGeneralMeetingSovietDecision.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
+    let template: ITemplate<AnnualGeneralMeetingSovietDecision.Model>
 
     if (process.env.SOURCE === 'local') {
-      template = SovietDecisionOnAnnualMeeting.Template
+      template = AnnualGeneralMeetingSovietDecision.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, SovietDecisionOnAnnualMeeting.registry_id, data.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, AnnualGeneralMeetingSovietDecision.registry_id, data.block_num)
     }
 
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data })
@@ -26,7 +26,7 @@ export class Factory extends DocFactory<SovietDecisionOnAnnualMeeting.Action> {
     const vars = await super.getVars(data.coopname, data.block_num)
     const user = await super.getUser(data.username, data.block_num)
 
-    const combinedData: SovietDecisionOnAnnualMeeting.Model = {
+    const combinedData: AnnualGeneralMeetingSovietDecision.Model = {
       meta,
       coop,
       vars,
