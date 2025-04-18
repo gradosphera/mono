@@ -1,5 +1,5 @@
 import type { SovietContract } from 'cooptypes';
-import type { BlockchainActionDomainInterface } from './blockchain-action-domain.interface';
+import type { BlockchainActionDomainInterface } from '../../common/interfaces/blockchain-action-domain.interface';
 
 export interface VotingAgendaDomainInterface {
   table: SovietContract.Tables.Decisions.IDecision;

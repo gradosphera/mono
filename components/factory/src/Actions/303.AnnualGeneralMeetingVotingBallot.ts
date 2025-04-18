@@ -1,24 +1,24 @@
 import { DraftContract } from 'cooptypes'
-import { AnnualMeetingNotification } from '../Templates'
+import { AnnualGeneralMeetingVotingBallot } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { AnnualMeetingNotification as Template } from '../Templates'
+export { AnnualGeneralMeetingVotingBallot as Template } from '../Templates'
 
-export class Factory extends DocFactory<AnnualMeetingNotification.Action> {
+export class Factory extends DocFactory<AnnualGeneralMeetingVotingBallot.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
-  async generateDocument(data: AnnualMeetingNotification.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<AnnualMeetingNotification.Model>
+  async generateDocument(data: AnnualGeneralMeetingVotingBallot.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
+    let template: ITemplate<AnnualGeneralMeetingVotingBallot.Model>
 
     if (process.env.SOURCE === 'local') {
-      template = AnnualMeetingNotification.Template
+      template = AnnualGeneralMeetingVotingBallot.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, AnnualMeetingNotification.registry_id, data.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, AnnualGeneralMeetingVotingBallot.registry_id, data.block_num)
     }
 
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data })
@@ -26,7 +26,7 @@ export class Factory extends DocFactory<AnnualMeetingNotification.Action> {
     const vars = await super.getVars(data.coopname, data.block_num)
     const user = await super.getUser(data.username, data.block_num)
 
-    const combinedData: AnnualMeetingNotification.Model = {
+    const combinedData: AnnualGeneralMeetingVotingBallot.Model = {
       meta,
       coop,
       vars,

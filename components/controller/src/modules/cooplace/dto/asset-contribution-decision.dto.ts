@@ -7,6 +7,7 @@ import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
+import { SignedDigitalDocumentBase } from '~/modules/document/dto/signed-digital-document.base';
 import type { ExcludeCommonProps } from '~/modules/document/types';
 
 // интерфейс параметров для генерации
@@ -71,6 +72,14 @@ export class AssetContributionDecisionMetaDocumentOutputDTO extends Intersection
   BaseAssetContributionDecisionMetaDocumentOutputDTO,
   MetaDocumentDTO
 ) {}
+
+@ObjectType(`AssetContributionDecisionSignedDocument`)
+export class AssetContributionDecisionSignedDocumentDTO extends SignedDigitalDocumentBase {
+  @Field(() => AssetContributionDecisionMetaDocumentOutputDTO, {
+    description: 'Метаинформация для создания проекта свободного решения',
+  })
+  public override readonly meta!: AssetContributionDecisionMetaDocumentOutputDTO;
+}
 
 @ObjectType(`AssetContributionDecisionDocument`)
 export class AssetContributionDecisionDocumentDTO extends GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {

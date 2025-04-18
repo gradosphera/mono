@@ -4,13 +4,13 @@ import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { CooperativeSchema, VarsSchema } from '../Schema'
 
-export const registry_id = Cooperative.Registry.SovietDecisionOnAnnualMeeting.registry_id
+export const registry_id = Cooperative.Registry.AnnualGeneralMeetingVotingBallot.registry_id
 
 // Модель действия для генерации
-export type Action = Cooperative.Registry.SovietDecisionOnAnnualMeeting.Action
+export type Action = Cooperative.Registry.AnnualGeneralMeetingVotingBallot.Action
 
 // Модель данных
-export type Model = Cooperative.Registry.SovietDecisionOnAnnualMeeting.Model
+export type Model = Cooperative.Registry.AnnualGeneralMeetingVotingBallot.Model
 
 // Схема для сверки
 export const Schema: JSONSchemaType<Model> = {
@@ -25,9 +25,9 @@ export const Schema: JSONSchemaType<Model> = {
 }
 
 export const Template: ITemplate<Model> = {
-  title: Cooperative.Registry.SovietDecisionOnAnnualMeeting.title,
-  description: Cooperative.Registry.SovietDecisionOnAnnualMeeting.description,
+  title: Cooperative.Registry.AnnualGeneralMeetingVotingBallot.title,
+  description: Cooperative.Registry.AnnualGeneralMeetingVotingBallot.description,
   model: Schema,
-  context: Cooperative.Registry.SovietDecisionOnAnnualMeeting.context,
-  translations: Cooperative.Registry.SovietDecisionOnAnnualMeeting.translations,
+  context: Cooperative.Registry.AnnualGeneralMeetingVotingBallot.context,
+  translations: Cooperative.Registry.AnnualGeneralMeetingVotingBallot.translations,
 }

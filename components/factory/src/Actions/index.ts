@@ -27,7 +27,7 @@ export * as InvestMembershipConvertation from './1010.InvestMembershipConvertati
 
 // общие собрания
 export * as AnnualGeneralMeetingAgenda from './300.AnnualGeneralMeetingAgenda'
-export * as SovietDecisionOnAnnualMeeting from './301.SovietDecisionOnAnnualMeeting'
-export * as AnnualMeetingNotification from './302.AnnualMeetingNotification'
-export * as VotingBallot from './303.VotingBallot'
+export * as AnnualGeneralMeetingSovietDecision from './301.AnnualGeneralMeetingSovietDecision'
+export * as AnnualGeneralMeetingNotification from './302.AnnualGeneralMeetingNotification'
+export * as AnnualGeneralMeetingVotingBallot from './303.AnnualGeneralMeetingVotingBallot'
 export * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecision'

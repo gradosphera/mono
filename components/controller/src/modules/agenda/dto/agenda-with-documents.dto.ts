@@ -1,7 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { DocumentPackageDTO } from './document-package.dto';
 import type { AgendaWithDocumentsDomainInterface } from '~/domain/agenda/interfaces/agenda-with-documents-domain.interface';
-import { BlockchainActionDTO } from './blockchain-action.dto';
+import { BlockchainActionDTO } from '../../common/dto/blockchain-action.dto';
 import { BlockchainDecisionDTO } from './blockchain-decision.dto';
 
 @ObjectType('AgendaWithDocuments')

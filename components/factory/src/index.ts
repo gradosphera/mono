@@ -69,9 +69,9 @@ export class Generator implements IGenerator {
 
       // общее собрание
       [Actions.AnnualGeneralMeetingAgenda.Template.registry_id]: new Actions.AnnualGeneralMeetingAgenda.Factory(this.storage), // 300
-      [Actions.SovietDecisionOnAnnualMeeting.Template.registry_id]: new Actions.SovietDecisionOnAnnualMeeting.Factory(this.storage), // 301
-      [Actions.AnnualMeetingNotification.Template.registry_id]: new Actions.AnnualMeetingNotification.Factory(this.storage), // 302
-      [Actions.VotingBallot.Template.registry_id]: new Actions.VotingBallot.Factory(this.storage), // 303
+      [Actions.AnnualGeneralMeetingSovietDecision.Template.registry_id]: new Actions.AnnualGeneralMeetingSovietDecision.Factory(this.storage), // 301
+      [Actions.AnnualGeneralMeetingNotification.Template.registry_id]: new Actions.AnnualGeneralMeetingNotification.Factory(this.storage), // 302
+      [Actions.AnnualGeneralMeetingVotingBallot.Template.registry_id]: new Actions.AnnualGeneralMeetingVotingBallot.Factory(this.storage), // 303
       [Actions.AnnualGeneralMeetingDecision.Template.registry_id]: new Actions.AnnualGeneralMeetingDecision.Factory(this.storage), // 304
 
       [Actions.DecisionOfParticipantApplication.Template.registry_id]: new Actions.DecisionOfParticipantApplication.Factory(this.storage), // 501
