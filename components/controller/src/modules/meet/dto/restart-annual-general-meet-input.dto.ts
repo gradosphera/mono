@@ -4,26 +4,28 @@ import { Type } from 'class-transformer';
 import { AnnualGeneralMeetingAgendaSignedDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-agenda-document.dto';
 import { RestartAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/restart-annual-general-meet-input-domain.interface';
 
-@InputType('RestartAnnualGeneralMeetInput')
+@InputType('RestartAnnualGeneralMeetInput', { description: 'DTO для перезапуска ежегодного общего собрания кооператива' })
 export class RestartAnnualGeneralMeetInputDTO implements RestartAnnualGeneralMeetInputDomainInterface {
-  @Field(() => String)
+  @Field(() => String, { description: 'Имя аккаунта кооператива' })
   @IsString()
   coopname!: string;
 
-  @Field(() => String)
+  @Field(() => String, { description: 'Хеш собрания, которое необходимо перезапустить' })
   @IsString()
   hash!: string;
 
-  @Field(() => AnnualGeneralMeetingAgendaSignedDocumentInputDTO)
+  @Field(() => AnnualGeneralMeetingAgendaSignedDocumentInputDTO, {
+    description: 'Новое предложение повестки ежегодного общего собрания',
+  })
   @ValidateNested()
   newproposal!: AnnualGeneralMeetingAgendaSignedDocumentInputDTO;
 
-  @Field(() => Date)
+  @Field(() => Date, { description: 'Новая дата открытия собрания' })
   @IsDate()
   @Type(() => Date)
   new_open_at!: Date;
 
-  @Field(() => Date)
+  @Field(() => Date, { description: 'Новая дата закрытия собрания' })
   @IsDate()
   @Type(() => Date)
   new_close_at!: Date;

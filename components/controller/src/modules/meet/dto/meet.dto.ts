@@ -4,61 +4,63 @@ import type { MeetRowProcessingDomainInterface } from '~/domain/meet/interfaces/
 import { AnnualGeneralMeetingAgendaDocumentAggregateDTO } from '../../document/documents-dto/annual-general-meeting-agenda-document.dto';
 import { AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO } from '../../document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
 
-@ObjectType('Meet')
+@ObjectType('Meet', { description: 'Данные о собрании кооператива' })
 export class MeetDTO implements MeetRowProcessingDomainInterface {
-  @Field(() => Number)
+  @Field(() => Number, { description: 'Уникальный идентификатор собрания' })
   id!: number;
 
-  @Field(() => String)
+  @Field(() => String, { description: 'Хеш собрания' })
   hash!: string;
 
-  @Field(() => String)
+  @Field(() => String, { description: 'Имя аккаунта кооператива' })
   coopname!: string;
 
-  @Field(() => String)
+  @Field(() => String, { description: 'Тип собрания' })
   type!: string;
 
-  @Field(() => String)
+  @Field(() => String, { description: 'Инициатор собрания' })
   initiator!: string;
 
-  @Field(() => String)
+  @Field(() => String, { description: 'Председатель собрания' })
   presider!: string;
 
-  @Field(() => String)
+  @Field(() => String, { description: 'Секретарь собрания' })
   secretary!: string;
 
-  @Field(() => String)
+  @Field(() => String, { description: 'Статус собрания' })
   status!: string;
 
-  @Field(() => Date)
+  @Field(() => Date, { description: 'Дата создания собрания' })
   created_at!: Date;
 
-  @Field(() => Date)
+  @Field(() => Date, { description: 'Дата открытия собрания' })
   open_at!: Date;
 
-  @Field(() => Date)
+  @Field(() => Date, { description: 'Дата закрытия собрания' })
   close_at!: Date;
 
-  @Field(() => Number)
+  @Field(() => Number, { description: 'Процент необходимого кворума' })
   quorum_percent!: number;
 
-  @Field(() => Number)
+  @Field(() => Number, { description: 'Количество подписанных бюллетеней' })
   signed_ballots!: number;
 
-  @Field(() => Number)
+  @Field(() => Number, { description: 'Текущий процент кворума' })
   current_quorum_percent!: number;
 
-  @Field(() => Number)
+  @Field(() => Number, { description: 'Цикл собрания' })
   cycle!: number;
 
-  @Field(() => Boolean)
+  @Field(() => Boolean, { description: 'Флаг достижения кворума' })
   quorum_passed!: boolean;
 
-  @Field(() => AnnualGeneralMeetingAgendaDocumentAggregateDTO)
+  @Field(() => AnnualGeneralMeetingAgendaDocumentAggregateDTO, { description: 'Документ с повесткой собрания' })
   @ValidateNested()
   proposal!: AnnualGeneralMeetingAgendaDocumentAggregateDTO;
 
-  @Field(() => AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO)
+  @Field(() => AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO, {
+    description: 'Документ с решением совета о проведении собрания',
+  })
   @ValidateNested()
   authorization!: AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO;
 

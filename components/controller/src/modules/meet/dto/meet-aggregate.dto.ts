@@ -7,26 +7,26 @@ import { MeetProcessingDTO } from './meet-processing.dto';
 import { MeetProcessedDTO } from './meet-processed.dto';
 import type { MeetDomainAggregate } from '~/domain/meet/interfaces/meet-aggregate.interface';
 
-@ObjectType('MeetAggregate')
+@ObjectType('MeetAggregate', { description: 'Агрегат данных о собрании, содержащий информацию о разных этапах' })
 export class MeetAggregateDTO implements MeetDomainAggregate {
-  @Field(() => String, { description: 'Идентификатор проекта свободного решения' })
+  @Field(() => String, { description: 'Хеш собрания' })
   @IsNotEmpty()
   @IsString()
   hash!: string;
 
-  @Field(() => MeetPreProcessingDTO, { nullable: true })
+  @Field(() => MeetPreProcessingDTO, { nullable: true, description: 'Данные собрания на этапе предварительной обработки' })
   @IsOptional()
   @ValidateNested()
   @Type(() => MeetPreProcessingDTO)
   pre?: MeetPreProcessingDTO;
 
-  @Field(() => MeetProcessingDTO, { nullable: true })
+  @Field(() => MeetProcessingDTO, { nullable: true, description: 'Данные собрания на этапе обработки' })
   @IsOptional()
   @ValidateNested()
   @Type(() => MeetProcessingDTO)
   processing?: MeetProcessingDTO;
 
-  @Field(() => MeetProcessedDTO, { nullable: true })
+  @Field(() => MeetProcessedDTO, { nullable: true, description: 'Данные собрания после обработки' })
   @IsOptional()
   @ValidateNested()
   @Type(() => MeetProcessedDTO)

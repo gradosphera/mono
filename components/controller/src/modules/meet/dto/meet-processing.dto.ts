@@ -4,17 +4,17 @@ import { Type } from 'class-transformer';
 import { MeetDTO } from './meet.dto';
 import { QuestionDTO } from './question.dto';
 
-@ObjectType('MeetProcessing')
+@ObjectType('MeetProcessing', { description: 'Данные о собрании в процессе обработки' })
 export class MeetProcessingDTO {
-  @Field(() => String)
+  @Field(() => String, { description: 'Хеш собрания' })
   hash!: string;
 
-  @Field(() => MeetDTO)
+  @Field(() => MeetDTO, { description: 'Основная информация о собрании' })
   @ValidateNested()
   @Type(() => MeetDTO)
   meet!: MeetDTO;
 
-  @Field(() => [QuestionDTO])
+  @Field(() => [QuestionDTO], { description: 'Список вопросов повестки собрания' })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => QuestionDTO)

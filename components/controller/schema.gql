@@ -159,15 +159,27 @@ input AddTrustedAccountInput {
   trusted: String!
 }
 
+"""Пункт повестки собрания"""
 type AgendaMeetPoint {
+  """Контекст или дополнительная информация по пункту повестки"""
   context: String!
+
+  """Предлагаемое решение по пункту повестки"""
   decision: String!
+
+  """Заголовок пункта повестки"""
   title: String!
 }
 
+"""Пункт повестки собрания (для ввода)"""
 input AgendaMeetPointInput {
+  """Контекст или дополнительная информация по пункту повестки"""
   context: String!
+
+  """Предлагаемое решение по пункту повестки"""
   decision: String!
+
+  """Заголовок пункта повестки"""
   title: String!
 }
 
@@ -1159,9 +1171,15 @@ input CancelRequestInput {
   username: String!
 }
 
+"""Входные данные для закрытия ежегодного общего собрания"""
 input CloseAnnualGeneralMeetInput {
+  """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Хеш собрания, которое необходимо закрыть"""
   hash: String!
+
+  """Подписанный документ с решением собрания"""
   meet_decision: SignedDigitalDocumentInput!
 }
 
@@ -2239,55 +2257,126 @@ input LogoutInput {
   refresh_token: String!
 }
 
+"""Данные о собрании кооператива"""
 type Meet {
+  """Документ с решением совета о проведении собрания"""
   authorization: AnnualGeneralMeetingSovietDecisionDocumentAggregate!
+
+  """Дата закрытия собрания"""
   close_at: DateTime!
+
+  """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Дата создания собрания"""
   created_at: DateTime!
+
+  """Текущий процент кворума"""
   current_quorum_percent: Float!
+
+  """Цикл собрания"""
   cycle: Float!
+
+  """Хеш собрания"""
   hash: String!
+
+  """Уникальный идентификатор собрания"""
   id: Float!
+
+  """Инициатор собрания"""
   initiator: String!
+
+  """Дата открытия собрания"""
   open_at: DateTime!
+
+  """Председатель собрания"""
   presider: String!
+
+  """Документ с повесткой собрания"""
   proposal: AnnualGeneralMeetingAgendaDocumentAggregate!
+
+  """Флаг достижения кворума"""
   quorum_passed: Boolean!
+
+  """Процент необходимого кворума"""
   quorum_percent: Float!
+
+  """Секретарь собрания"""
   secretary: String!
+
+  """Количество подписанных бюллетеней"""
   signed_ballots: Float!
+
+  """Статус собрания"""
   status: String!
+
+  """Тип собрания"""
   type: String!
 }
 
+"""Агрегат данных о собрании, содержащий информацию о разных этапах"""
 type MeetAggregate {
-  """Идентификатор проекта свободного решения"""
+  """Хеш собрания"""
   hash: String!
+
+  """Данные собрания на этапе предварительной обработки"""
   pre: MeetPreProcessing
+
+  """Данные собрания после обработки"""
   processed: MeetProcessed
+
+  """Данные собрания на этапе обработки"""
   processing: MeetProcessing
 }
 
+"""Предварительные данные собрания перед обработкой"""
 type MeetPreProcessing {
+  """Повестка собрания"""
   agenda: [AgendaMeetPoint!]!
+
+  """Дата закрытия собрания"""
   close_at: DateTime!
+
+  """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Хеш собрания"""
   hash: String!
+
+  """Инициатор собрания"""
   initiator: String!
+
+  """Дата открытия собрания"""
   open_at: DateTime!
+
+  """Председатель собрания"""
   presider: String!
+
+  """Документ с повесткой собрания"""
   proposal: AnnualGeneralMeetingAgendaDocumentAggregate
+
+  """Секретарь собрания"""
   secretary: String!
 }
 
+"""Данные о собрании после обработки"""
 type MeetProcessed {
+  """Решение по собранию в формате блокчейн-действия"""
   decision: BlockchainAction!
+
+  """Хеш собрания"""
   hash: String!
 }
 
+"""Данные о собрании в процессе обработки"""
 type MeetProcessing {
+  """Хеш собрания"""
   hash: String!
+
+  """Основная информация о собрании"""
   meet: Meet!
+
+  """Список вопросов повестки собрания"""
   questions: [Question!]!
 }
 
@@ -3449,19 +3538,57 @@ type Query {
   getSystemInfo: SystemInfo!
 }
 
+"""Вопрос повестки собрания с результатами голосования"""
 type Question {
+  """Контекст или дополнительная информация по вопросу"""
   context: String!
+
+  """Имя аккаунта кооператива"""
   coopname: String!
+
+  """
+  Количество голосов "Воздержался"
+  """
   counter_votes_abstained: Float!
+
+  """
+  Количество голосов "Против"
+  """
   counter_votes_against: Float!
+
+  """
+  Количество голосов "За"
+  """
   counter_votes_for: Float!
+
+  """Предлагаемое решение по вопросу"""
   decision: String!
+
+  """Уникальный идентификатор вопроса"""
   id: Float!
+
+  """Идентификатор собрания, к которому относится вопрос"""
   meet_id: Float!
+
+  """Порядковый номер вопроса в повестке"""
   number: Float!
+
+  """Заголовок вопроса"""
   title: String!
+
+  """
+  Список участников, проголосовавших "Воздержался"
+  """
   voters_abstained: [String!]!
+
+  """
+  Список участников, проголосовавших "Против"
+  """
   voters_against: [String!]!
+
+  """
+  Список участников, проголосовавших "За"
+  """
   voters_for: [String!]!
 }
 
@@ -3620,11 +3747,21 @@ type ResourceOverview {
   ram_bytes: Int!
 }
 
+"""DTO для перезапуска ежегодного общего собрания кооператива"""
 input RestartAnnualGeneralMeetInput {
+  """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Хеш собрания, которое необходимо перезапустить"""
   hash: String!
+
+  """Новая дата закрытия собрания"""
   new_close_at: DateTime!
+
+  """Новая дата открытия собрания"""
   new_open_at: DateTime!
+
+  """Новое предложение повестки ежегодного общего собрания"""
   newproposal: AnnualGeneralMeetingAgendaSignedDocumentInput!
 }
 
@@ -4691,15 +4828,27 @@ type Verification {
   verificator: String!
 }
 
+"""Пункт голосования для ежегодного общего собрания"""
 input VoteItemInput {
+  """Идентификатор вопроса повестки"""
   question_id: String!
+
+  """Решение по вопросу (вариант голосования)"""
   vote: String!
 }
 
+"""Входные данные для голосования на ежегодном общем собрании"""
 input VoteOnAnnualGeneralMeetInput {
+  """Бюллетень с решениями по вопросам повестки"""
   ballot: [VoteItemInput!]!
+
+  """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Хеш собрания, по которому производится голосование"""
   hash: String!
+
+  """Идентификатор члена кооператива, который голосует"""
   member: String!
 }
 
