@@ -1,5 +1,5 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { ValidateNested, IsNotEmpty } from 'class-validator';
+import { ValidateNested, IsNotEmpty, IsArray } from 'class-validator';
 import { Cooperative } from 'cooptypes';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
@@ -9,8 +9,10 @@ import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import { SignedDigitalDocumentBase } from '~/modules/document/dto/signed-digital-document.base';
 import type { ExcludeCommonProps } from '~/modules/document/types';
-import { CommonRequestInputDTO } from './common-request-input.dto';
-import { CommonRequestResponseDTO } from './common-request-response.dto';
+import { CommonRequestInputDTO } from '../../cooplace/dto/common-request-input.dto';
+import { CommonRequestResponseDTO } from '../../cooplace/dto/common-request-response.dto';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
+import { Type } from 'class-transformer';
 
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.ReturnByAssetStatement.Action;
@@ -80,4 +82,21 @@ export class ReturnByAssetStatementDocumentDTO extends GeneratedDocumentDTO impl
   })
   @ValidateNested()
   public readonly meta!: ReturnByAssetStatementMetaDocumentOutputDTO;
+}
+
+@ObjectType('ReturnByAssetStatementDocumentAggregate')
+export class ReturnByAssetStatementDocumentAggregateDTO
+  implements DocumentAggregateDomainInterface<ReturnByAssetStatementMetaDocumentOutputDTO>
+{
+  @Field(() => String)
+  hash!: string;
+
+  @Field(() => [ReturnByAssetStatementSignedDocumentDTO])
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ReturnByAssetStatementSignedDocumentDTO)
+  signatures!: ReturnByAssetStatementSignedDocumentDTO[];
+
+  @Field(() => ReturnByAssetStatementDocumentDTO, { nullable: true })
+  rawDocument?: ReturnByAssetStatementDocumentDTO;
 }

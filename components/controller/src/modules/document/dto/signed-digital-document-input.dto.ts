@@ -24,4 +24,16 @@ export class SignedDigitalDocumentInputDTO implements Cooperative.Document.ISign
   constructor(data: SignedDigitalDocumentInputDTO) {
     Object.assign(this, data);
   }
+
+  /**
+   * Преобразует подписанный документ DTO в формат ISignedDocument для блокчейна
+   */
+  toDocument(): Cooperative.Document.ISignedDocument {
+    return {
+      hash: this.hash,
+      public_key: this.public_key,
+      signature: this.signature,
+      meta: JSON.stringify(this.meta),
+    };
+  }
 }

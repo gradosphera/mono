@@ -12,6 +12,8 @@ export interface Action extends IGenerate {
   braname: string
 }
 
+export type Meta = IMetaDocument & Action
+
 // Модель данных
 export interface Model {
   type: string

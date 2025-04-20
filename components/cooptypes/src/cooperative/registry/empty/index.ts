@@ -7,6 +7,8 @@ export const registry_id = 0 // номер
 export interface Action extends IGenerate {
 }
 
+export type Meta = IMetaDocument & Action
+
 // Модель данных документа
 export interface Model {
   meta: IMetaDocument

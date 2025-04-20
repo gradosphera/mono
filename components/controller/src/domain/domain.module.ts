@@ -15,7 +15,7 @@ import { AuthDomainModule } from './auth/auth.module';
 import { AgendaDomainModule } from './agenda/agenda-domain.module';
 import { CooplaceDomainModule } from './cooplace/cooplace.module';
 import { DesktopDomainModule } from './desktop/desktop-domain.module';
-// import { MeetDomainModule } from './meet/meet-domain.module';
+import { MeetDomainModule } from './meet/meet-domain.module';
 
 @Module({
   imports: [
@@ -34,7 +34,7 @@ import { DesktopDomainModule } from './desktop/desktop-domain.module';
     FreeDecisionDomainModule,
     ParticipantDomainModule,
     CooplaceDomainModule,
-    // MeetDomainModule,
+    MeetDomainModule,
   ],
   exports: [
     AuthDomainModule,
@@ -52,7 +52,7 @@ import { DesktopDomainModule } from './desktop/desktop-domain.module';
     FreeDecisionDomainModule,
     ParticipantDomainModule,
     CooplaceDomainModule,
-    // MeetDomainModule,
+    MeetDomainModule,
   ],
 })
 export class DomainModule {}

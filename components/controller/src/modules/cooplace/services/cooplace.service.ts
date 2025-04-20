@@ -2,25 +2,28 @@ import { Injectable } from '@nestjs/common';
 import type {
   AssetContributionStatementDocumentDTO,
   AssetContributionStatementGenerateDocumentInputDTO,
-} from '../dto/asset-contribution-statement.dto';
+} from '../../document/documents-dto/asset-contribution-statement-document.dto';
 import type { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 import type {
   AssetContributionActGenerateDocumentInputDTO,
   AssetContributionActDocumentDTO,
-} from '../dto/asset-contribution-act.dto';
+} from '../../document/documents-dto/asset-contribution-act-document.dto';
 import type {
   AssetContributionDecisionGenerateDocumentInputDTO,
   AssetContributionDecisionDocumentDTO,
-} from '../dto/asset-contribution-decision.dto';
-import type { ReturnByAssetActGenerateDocumentInputDTO, ReturnByAssetActDocumentDTO } from '../dto/return-by-asset-act.dto';
+} from '../../document/documents-dto/asset-contribution-decision-document.dto';
+import type {
+  ReturnByAssetActGenerateDocumentInputDTO,
+  ReturnByAssetActDocumentDTO,
+} from '../../document/documents-dto/return-by-asset-act-document.dto';
 import type {
   ReturnByAssetDecisionGenerateDocumentInputDTO,
   ReturnByAssetDecisionDocumentDTO,
-} from '../dto/return-by-asset-decision.dto';
+} from '../../document/documents-dto/return-by-asset-decision-document.dto';
 import type {
   ReturnByAssetStatementGenerateDocumentInputDTO,
   ReturnByAssetStatementDocumentDTO,
-} from '../dto/return-by-asset-statement.dto';
+} from '../../document/documents-dto/return-by-asset-statement-document.dto';
 import { CooplaceDomainInteractor } from '~/domain/cooplace/interactors/cooplace.interactor';
 import type { AcceptChildOrderInputDTO } from '../dto/accept-child-order-input.dto';
 import type { CancelRequestInputDTO } from '../dto/cancel-request-input.dto';

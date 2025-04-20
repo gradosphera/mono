@@ -1,16 +1,14 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { IsArray, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { AgendaMeetPointDTO } from './agenda-meet-point-input.dto';
+import { AgendaMeetPointDTO } from './agenda-meet-point.dto';
 import type { MeetPreProcessingDomainInterface } from '~/domain/meet/interfaces/meet-pre-domain.interface';
+import { AnnualGeneralMeetingAgendaDocumentAggregateDTO } from '../../document/documents-dto/annual-general-meeting-agenda-document.dto';
 
 @ObjectType('MeetPreProcessing')
 export class MeetPreProcessingDTO implements MeetPreProcessingDomainInterface {
   @Field(() => String)
   coopname!: string;
-
-  @Field(() => String)
-  type!: string;
 
   @Field(() => String)
   hash!: string;
@@ -36,12 +34,9 @@ export class MeetPreProcessingDTO implements MeetPreProcessingDomainInterface {
   @Field(() => Date)
   close_at!: Date;
 
-  @Field(() => Date)
-  created_at!: Date;
-
-  @Field(() => Object, { nullable: true })
+  @Field(() => AnnualGeneralMeetingAgendaDocumentAggregateDTO, { nullable: true })
   @IsOptional()
-  proposal?: object; //TODO: replace
+  proposal?: AnnualGeneralMeetingAgendaDocumentAggregateDTO;
 
   constructor(data: MeetPreProcessingDTO) {
     Object.assign(this, data);

@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsString, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ReturnByAssetActSignedDocumentInputDTO } from './return-by-asset-act.dto';
+import { ReturnByAssetActSignedDocumentInputDTO } from '../../document/documents-dto/return-by-asset-act-document.dto';
 
 @InputType('ConfirmReceiveOnRequestInput', {
   description: 'Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи',

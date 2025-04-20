@@ -1,3 +1,17 @@
-import type { MeetContract } from 'cooptypes';
+/**
+ * Интерфейс элемента голосования
+ */
+export interface VoteItemInputDomainInterface {
+  question_id: string;
+  vote: string;
+}
 
-export type VoteOnAnnualGeneralMeetInputDomainInterface = MeetContract.Actions.Vote.IInput;
+/**
+ * Доменный интерфейс для голосования на собрании
+ */
+export interface VoteOnAnnualGeneralMeetInputDomainInterface {
+  coopname: string;
+  hash: string;
+  member: string;
+  ballot: VoteItemInputDomainInterface[];
+}

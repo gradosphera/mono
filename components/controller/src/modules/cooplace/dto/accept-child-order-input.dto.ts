@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { AssetContributionStatementSignedDocumentInputDTO } from './asset-contribution-statement.dto';
+import { AssetContributionStatementSignedDocumentInputDTO } from '../../document/documents-dto/asset-contribution-statement-document.dto';
 import { IsNumber, IsString } from 'class-validator';
 
 @InputType('AcceptChildOrderInput')

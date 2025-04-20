@@ -1,6 +1,8 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsString, ValidateNested, IsArray } from 'class-validator';
 import { Cooperative } from 'cooptypes';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
 import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
@@ -79,4 +81,21 @@ export class ProjectFreeDecisionDocumentDTO extends GeneratedDocumentDTO impleme
   })
   @ValidateNested()
   public readonly meta!: ProjectFreeDecisionMetaDocumentOutputDTO;
+}
+
+@ObjectType('ProjectFreeDecisionDocumentAggregate')
+export class ProjectFreeDecisionDocumentAggregateDTO
+  implements DocumentAggregateDomainInterface<ProjectFreeDecisionMetaDocumentOutputDTO>
+{
+  @Field(() => String)
+  hash!: string;
+
+  @Field(() => [ProjectFreeDecisionSignedDocumentDTO])
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProjectFreeDecisionSignedDocumentDTO)
+  signatures!: ProjectFreeDecisionSignedDocumentDTO[];
+
+  @Field(() => ProjectFreeDecisionDocumentDTO, { nullable: true })
+  rawDocument?: ProjectFreeDecisionDocumentDTO;
 }

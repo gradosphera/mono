@@ -1,6 +1,6 @@
 import { createUnionType } from '@nestjs/graphql';
-import { ParticipantApplicationDocumentDTO } from '~/modules/participant/dto/participant-application-document.dto';
-import { ProjectFreeDecisionDocumentDTO } from '~/modules/free-decision/dto/project-free-decision-document.dto';
+import { ParticipantApplicationDocumentDTO } from '~/modules/document/documents-dto/participant-application-document.dto';
+import { ProjectFreeDecisionDocumentDTO } from '~/modules/document/documents-dto/project-free-decision-document.dto';
 
 export type StatementDocumentUnionType = ParticipantApplicationDocumentDTO | ProjectFreeDecisionDocumentDTO;
 

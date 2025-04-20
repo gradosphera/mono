@@ -6,13 +6,16 @@ import { AuthRoles } from '~/modules/auth/decorators/auth.decorator';
 import {
   ProjectFreeDecisionDocumentDTO,
   ProjectFreeDecisionGenerateDocumentInputDTO,
-} from '../dto/project-free-decision-document.dto';
+} from '../../document/documents-dto/project-free-decision-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 import { Throttle } from '@nestjs/throttler';
 import { PublishProjectFreeDecisionInputDTO } from '../dto/publish-project-free-decision-input.dto';
 import { CreatedProjectFreeDecisionDTO } from '../dto/created-project-free-decision.dto';
 import { CreateProjectFreeDecisionInputDTO } from '../dto/create-project-free-decision.dto';
-import { FreeDecisionGenerateDocumentInputDTO, type FreeDecisionDocumentDTO } from '../dto/free-decision-document.dto';
+import {
+  FreeDecisionGenerateDocumentInputDTO,
+  type FreeDecisionDocumentDTO,
+} from '../../document/documents-dto/free-decision-document.dto';
 import { FreeDecisionService } from '../services/free-decision.service';
 
 @Resolver()

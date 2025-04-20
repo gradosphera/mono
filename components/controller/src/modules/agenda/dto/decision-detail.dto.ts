@@ -1,7 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import type { DecisionDetailDomainInterface } from '~/domain/agenda/interfaces/decision-detail-domain.interface';
 import { ExtendedBlockchainActionDTO } from './extended-action.dto';
-import { DecisionDocumentUnion, DecisionDocumentUnionType } from '../unions/decision-document.union';
+import { DecisionDocumentUnion, DecisionDocumentUnionType } from '../../document/unions/decision-document.union';
 
 @ObjectType('DecisionDetail', {
   description:

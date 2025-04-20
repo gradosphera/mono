@@ -1,9 +1,9 @@
 import { createUnionType } from '@nestjs/graphql';
 import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
-import { FreeDecisionDocumentDTO } from '~/modules/free-decision/dto/free-decision-document.dto';
-import { ProjectFreeDecisionDocumentDTO } from '~/modules/free-decision/dto/project-free-decision-document.dto';
-import { ParticipantApplicationDecisionDocumentDTO } from '~/modules/participant/dto/participant-application-decision-document.dto';
-import { ParticipantApplicationDocumentDTO } from '~/modules/participant/dto/participant-application-document.dto';
+import { FreeDecisionDocumentDTO } from '~/modules/document/documents-dto/free-decision-document.dto';
+import { ProjectFreeDecisionDocumentDTO } from '~/modules/document/documents-dto/project-free-decision-document.dto';
+import { ParticipantApplicationDecisionDocumentDTO } from '~/modules/document/documents-dto/participant-application-decision-document.dto';
+import { ParticipantApplicationDocumentDTO } from '~/modules/document/documents-dto/participant-application-document.dto';
 
 export type DocumentUnionType =
   | FreeDecisionDocumentDTO

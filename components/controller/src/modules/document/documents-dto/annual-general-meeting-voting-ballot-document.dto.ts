@@ -1,6 +1,8 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ValidateNested, IsArray } from 'class-validator';
 import { Cooperative } from 'cooptypes';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
 import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
@@ -70,4 +72,21 @@ export class AnnualGeneralMeetingVotingBallotDocumentDTO
   })
   @ValidateNested()
   public readonly meta!: AnnualGeneralMeetingVotingBallotMetaDocumentOutputDTO;
+}
+
+@ObjectType('AnnualGeneralMeetingVotingBallotDocumentAggregate')
+export class AnnualGeneralMeetingVotingBallotDocumentAggregateDTO
+  implements DocumentAggregateDomainInterface<AnnualGeneralMeetingVotingBallotMetaDocumentOutputDTO>
+{
+  @Field(() => String)
+  hash!: string;
+
+  @Field(() => [AnnualGeneralMeetingVotingBallotSignedDocumentDTO])
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AnnualGeneralMeetingVotingBallotSignedDocumentDTO)
+  signatures!: AnnualGeneralMeetingVotingBallotSignedDocumentDTO[];
+
+  @Field(() => AnnualGeneralMeetingVotingBallotDocumentDTO, { nullable: true })
+  rawDocument?: AnnualGeneralMeetingVotingBallotDocumentDTO;
 }

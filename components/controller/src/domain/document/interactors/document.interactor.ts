@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { GenerateDocumentDomainInterface } from '../interfaces/generate-document-domain.interface';
+import type { GenerateDocumentDomainInterfaceWithOptions } from '../interfaces/generate-document-domain-with-options.interface';
 import { DocumentDomainService } from '../services/document-domain.service';
 import type { DocumentDomainEntity } from '../entity/document-domain.entity';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
@@ -13,7 +13,7 @@ import { SovietContract } from 'cooptypes';
 export class DocumentDomainInteractor {
   constructor(private readonly documentDomainService: DocumentDomainService) {}
 
-  public async generateDocument(data: GenerateDocumentDomainInterface): Promise<DocumentDomainEntity> {
+  public async generateDocument(data: GenerateDocumentDomainInterfaceWithOptions): Promise<DocumentDomainEntity> {
     return await this.documentDomainService.generateDocument(data);
   }
 

@@ -1,9 +1,9 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString } from 'class-validator';
 import type { AgendaMeetPointInputDomainInterface } from '~/domain/meet/interfaces/agenda-meet-point-input-domain.interface';
 
-@ObjectType('AgendaMeetPoint')
-export class AgendaMeetPointDTO implements AgendaMeetPointInputDomainInterface {
+@InputType('AgendaMeetPointInput')
+export class AgendaMeetPointInputDTO implements AgendaMeetPointInputDomainInterface {
   @Field(() => String)
   @IsNotEmpty()
   @IsString()
@@ -19,7 +19,7 @@ export class AgendaMeetPointDTO implements AgendaMeetPointInputDomainInterface {
   @IsString()
   decision!: string;
 
-  constructor(data: AgendaMeetPointDTO) {
+  constructor(data: AgendaMeetPointInputDTO) {
     Object.assign(this, data);
   }
 }

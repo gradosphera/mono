@@ -4,11 +4,11 @@ import { ParticipantDomainInteractor } from '~/domain/participant/interactors/pa
 import type {
   ParticipantApplicationDocumentDTO,
   ParticipantApplicationGenerateDocumentInputDTO,
-} from '../dto/participant-application-document.dto';
+} from '../../document/documents-dto/participant-application-document.dto';
 import type {
   ParticipantApplicationDecisionDocumentDTO,
   ParticipantApplicationDecisionGenerateDocumentInputDTO,
-} from '../dto/participant-application-decision-document.dto';
+} from '../../document/documents-dto/participant-application-decision-document.dto';
 import type { AddParticipantInputDTO } from '../dto/add-participant-input.dto';
 import { AccountDTO } from '~/modules/account/dto/account.dto';
 import { generateUsername } from '~/utils/generate-username';

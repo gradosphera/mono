@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DOCUMENT_REPOSITORY, DocumentRepository } from '../repository/document.repository';
 import { GeneratorInfrastructureService } from '~/infrastructure/generator/generator.service';
-import type { GenerateDocumentDomainInterface } from '../interfaces/generate-document-domain.interface';
+import type { GenerateDocumentDomainInterfaceWithOptions } from '../interfaces/generate-document-domain-with-options.interface';
 import { DocumentDomainEntity } from '../entity/document-domain.entity';
 import { Cooperative, SovietContract } from 'cooptypes';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
@@ -12,15 +12,19 @@ import type { ActDetailDomainInterface } from '~/domain/agenda/interfaces/act-de
 import type { DecisionDetailDomainInterface } from '~/domain/agenda/interfaces/decision-detail-domain.interface';
 import type { ExtendedBlockchainActionDomainInterface } from '~/domain/agenda/interfaces/extended-blockchain-action-domain.interface';
 import type { StatementDetailDomainInterface } from '~/domain/agenda/interfaces/statement-detail-domain.interface';
+import { DocumentDomainAggregate } from '../aggregates/document-domain.aggregate';
+import type { DocumentMetaDomainInterface } from '../interfaces/document-meta-domain.interface';
+import { DocumentAggregator } from '../aggregators/document.aggregator';
 
 @Injectable()
 export class DocumentDomainService {
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documentRepository: DocumentRepository,
-    private readonly generatorInfrastructureService: GeneratorInfrastructureService
+    private readonly generatorInfrastructureService: GeneratorInfrastructureService,
+    private readonly documentAggregator: DocumentAggregator
   ) {}
 
-  public async generateDocument(data: GenerateDocumentDomainInterface): Promise<DocumentDomainEntity> {
+  public async generateDocument(data: GenerateDocumentDomainInterfaceWithOptions): Promise<DocumentDomainEntity> {
     return await this.generatorInfrastructureService.generateDocument(data);
   }
 
@@ -154,5 +158,17 @@ export class DocumentDomainService {
       acts: actDetails,
       links,
     };
+  }
+
+  /**
+   * Создает агрегатор документов на основе полного документа и подписанного документа
+   * Делегирует выполнение к DocumentAggregator
+   * @param signedDoc Подписанный документ (метаинформация)
+   * @returns Агрегатор документов
+   */
+  public async buildDocumentAggregate<T extends DocumentMetaDomainInterface>(
+    signedDoc: Cooperative.Document.ISignedDocument<T>
+  ): Promise<DocumentDomainAggregate<T>> {
+    return this.documentAggregator.buildDocumentAggregate(signedDoc);
   }
 }

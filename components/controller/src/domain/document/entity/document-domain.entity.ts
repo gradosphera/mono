@@ -15,14 +15,4 @@ export class DocumentDomainEntity implements GeneratedDocumentDomainInterface {
     this.meta = data.meta;
     this.binary = Buffer.from(data.binary).toString('base64'); // Преобразуем Uint8Array в Base64 строку
   }
-
-  toDTO(): Cooperative.Document.IGeneratedDocument {
-    return {
-      full_title: this.full_title,
-      html: this.html,
-      hash: this.hash,
-      meta: this.meta,
-      binary: Buffer.from(this.binary, 'base64'), // Преобразуем обратно в Uint8Array
-    };
-  }
 }

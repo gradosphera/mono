@@ -1,6 +1,8 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsOptional, IsString, ValidateNested, IsArray } from 'class-validator';
 import { Cooperative } from 'cooptypes';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
 import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
@@ -56,9 +58,7 @@ export class ParticipantApplicationSignedMetaDocumentInputDTO
 
 @InputType(`ParticipantApplicationSignedDocumentInput`)
 export class ParticipantApplicationSignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {
-  @Field(() => ParticipantApplicationSignedMetaDocumentInputDTO, {
-    description: 'Метаинформация для создания проекта свободного решения',
-  })
+  @Field(() => ParticipantApplicationSignedMetaDocumentInputDTO)
   public readonly meta!: ParticipantApplicationSignedMetaDocumentInputDTO;
 }
 
@@ -70,17 +70,30 @@ export class ParticipantApplicationMetaDocumentOutputDTO extends IntersectionTyp
 
 @ObjectType(`ParticipantApplicationSignedDocument`)
 export class ParticipantApplicationSignedDocumentDTO extends SignedDigitalDocumentBase {
-  @Field(() => ParticipantApplicationMetaDocumentOutputDTO, {
-    description: 'Метаинформация для создания проекта свободного решения',
-  })
+  @Field(() => ParticipantApplicationMetaDocumentOutputDTO)
   public override readonly meta!: ParticipantApplicationMetaDocumentOutputDTO;
 }
 
 @ObjectType(`ParticipantApplicationDocument`)
 export class ParticipantApplicationDocumentDTO extends GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {
-  @Field(() => ParticipantApplicationMetaDocumentOutputDTO, {
-    description: `Метаинформация для создания проекта свободного решения`,
-  })
+  @Field(() => ParticipantApplicationMetaDocumentOutputDTO)
   @ValidateNested()
   public readonly meta!: ParticipantApplicationMetaDocumentOutputDTO;
+}
+
+@ObjectType('ParticipantApplicationDocumentAggregate')
+export class ParticipantApplicationDocumentAggregateDTO
+  implements DocumentAggregateDomainInterface<ParticipantApplicationMetaDocumentOutputDTO>
+{
+  @Field(() => String)
+  hash!: string;
+
+  @Field(() => [ParticipantApplicationSignedDocumentDTO])
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ParticipantApplicationSignedDocumentDTO)
+  signatures!: ParticipantApplicationSignedDocumentDTO[];
+
+  @Field(() => ParticipantApplicationDocumentDTO, { nullable: true })
+  rawDocument?: ParticipantApplicationDocumentDTO;
 }

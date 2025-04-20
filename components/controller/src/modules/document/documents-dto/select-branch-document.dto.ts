@@ -1,6 +1,8 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsString, ValidateNested } from 'class-validator';
 import { Cooperative } from 'cooptypes';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
 import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
@@ -72,4 +74,21 @@ export class SelectBranchDocumentDTO extends GeneratedDocumentDTO implements Gen
   })
   @ValidateNested()
   public readonly meta!: SelectBranchMetaDocumentOutputDTO;
+}
+
+@ObjectType('SelectBranchDocumentAggregate')
+export class SelectBranchDocumentAggregateDTO
+  implements DocumentAggregateDomainInterface<SelectBranchMetaDocumentOutputDTO>
+{
+  @Field(() => String)
+  hash!: string;
+
+  @Field(() => [SelectBranchSignedDocumentDTO])
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SelectBranchSignedDocumentDTO)
+  signatures!: SelectBranchSignedDocumentDTO[];
+
+  @Field(() => SelectBranchDocumentDTO, { nullable: true })
+  rawDocument?: SelectBranchDocumentDTO;
 }

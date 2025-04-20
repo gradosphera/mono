@@ -1,6 +1,8 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { ValidateNested, IsNotEmpty, IsOptional, IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ValidateNested, IsNotEmpty, IsOptional, IsNumber, IsString, IsArray } from 'class-validator';
 import { Cooperative } from 'cooptypes';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
 import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
@@ -118,4 +120,21 @@ export class ReturnByAssetActDocumentDTO extends GeneratedDocumentDTO implements
   })
   @ValidateNested()
   public readonly meta!: ReturnByAssetActMetaDocumentOutputDTO;
+}
+
+@ObjectType('ReturnByAssetActDocumentAggregate')
+export class ReturnByAssetActDocumentAggregateDTO
+  implements DocumentAggregateDomainInterface<ReturnByAssetActMetaDocumentOutputDTO>
+{
+  @Field(() => String)
+  hash!: string;
+
+  @Field(() => [ReturnByAssetActSignedDocumentDTO])
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ReturnByAssetActSignedDocumentDTO)
+  signatures!: ReturnByAssetActSignedDocumentDTO[];
+
+  @Field(() => ReturnByAssetActDocumentDTO, { nullable: true })
+  rawDocument?: ReturnByAssetActDocumentDTO;
 }

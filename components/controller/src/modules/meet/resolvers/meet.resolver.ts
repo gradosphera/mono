@@ -3,81 +3,106 @@ import { GqlJwtAuthGuard } from '~/modules/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/modules/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/modules/auth/decorators/auth.decorator';
-import {
-  ProjectFreeDecisionDocumentDTO,
-  ProjectFreeDecisionGenerateDocumentInputDTO,
-} from '../dto/project-free-decision-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 import { Throttle } from '@nestjs/throttler';
-import { PublishProjectFreeDecisionInputDTO } from '../dto/publish-project-free-decision-input.dto';
-import { CreatedProjectFreeDecisionDTO } from '../dto/meet-aggregate.dto';
-import { CreateProjectFreeDecisionInputDTO } from '../dto/create-project-free-decision.dto';
+import { CreateAnnualGeneralMeetInputDTO } from '../dto/create-meet-agenda-input.dto';
+import { MeetService } from '../services/meet.service';
+import { MeetAggregateDTO } from '../dto/meet-aggregate.dto';
 import {
-  FreeDecisionGenerateDocumentInputDTO,
-  type FreeDecisionDocumentDTO,
-} from '../dto/annual-general-meeting-agenda-document.dto';
-import { FreeDecisionService } from '../services/meet.service';
+  AnnualGeneralMeetingAgendaDocumentDTO,
+  AnnualGeneralMeetingAgendaGenerateDocumentInputDTO,
+} from '~/modules/document/documents-dto/annual-general-meeting-agenda-document.dto';
+import { VoteOnAnnualGeneralMeetInputDTO } from '../dto/vote-on-annual-general-meet-input.dto';
+import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-meet-input.dto';
+import { CloseAnnualGeneralMeetInputDTO } from '../dto/close-annual-general-meet-input.dto';
+import { GenerateSovietDecisionOnAnnualMeetInputDTO } from '../dto/generate-soviet-decision-input.dto';
+import { AnnualGeneralMeetingSovietDecisionDocumentDTO } from '~/modules/document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
 
 @Resolver()
 export class MeetResolver {
-  constructor(private readonly freeDecisionService: FreeDecisionService) {}
+  constructor(private readonly meetService: MeetService) {}
 
-  @Mutation(() => ProjectFreeDecisionDocumentDTO, {
-    name: 'generateProjectOfFreeDecision',
-    description: 'Сгенерировать документ проекта свободного решения',
+  @Mutation(() => AnnualGeneralMeetingAgendaDocumentDTO, {
+    name: 'generateAnnualGeneralMeetAgendaDocument',
+    description: 'Сгенерировать предложение повестки общего собрания пайщиков',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
-  async generateProjectOfFreeDecision(
-    @Args('data', { type: () => ProjectFreeDecisionGenerateDocumentInputDTO })
-    data: ProjectFreeDecisionGenerateDocumentInputDTO,
+  async generateAnnualGeneralMeetAgendaDocument(
+    @Args('data', { type: () => AnnualGeneralMeetingAgendaGenerateDocumentInputDTO })
+    data: AnnualGeneralMeetingAgendaGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ProjectFreeDecisionDocumentDTO> {
-    return this.freeDecisionService.generateProjectOfFreeDecision(data, options);
+  ): Promise<AnnualGeneralMeetingAgendaDocumentDTO> {
+    return this.meetService.generateAnnualGeneralMeetAgendaDocument(data, options);
   }
 
-  @Mutation(() => ProjectFreeDecisionDocumentDTO, {
-    name: 'generateFreeDecision',
-    description: 'Сгенерировать протокол решения по предложенной повестке',
+  @Mutation(() => MeetAggregateDTO, {
+    name: 'createAnnualGeneralMeet',
+    description: 'Сгенерировать документ предложения повестки очередного общего собрания пайщиков',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async createAnnualGeneralMeet(
+    @Args('data', { type: () => CreateAnnualGeneralMeetInputDTO })
+    data: CreateAnnualGeneralMeetInputDTO
+  ): Promise<MeetAggregateDTO> {
+    return this.meetService.createAnnualGeneralMeet(data);
+  }
+
+  @Mutation(() => AnnualGeneralMeetingSovietDecisionDocumentDTO, {
+    name: 'generateSovietDecisionOnAnnualMeetDocument',
+    description: 'Сгенерировать документ решения Совета по проведению общего собрания пайщиков',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
-  async generateFreeDecision(
-    @Args('data', { type: () => FreeDecisionGenerateDocumentInputDTO })
-    data: FreeDecisionGenerateDocumentInputDTO,
+  async generateSovietDecisionOnAnnualMeetDocument(
+    @Args('data', { type: () => GenerateSovietDecisionOnAnnualMeetInputDTO })
+    data: GenerateSovietDecisionOnAnnualMeetInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<FreeDecisionDocumentDTO> {
-    return this.freeDecisionService.generateFreeDecision(data, options);
+  ): Promise<AnnualGeneralMeetingSovietDecisionDocumentDTO> {
+    return this.meetService.generateSovietDecisionOnAnnualMeetDocument(data, options);
   }
 
-  @Mutation(() => Boolean, {
-    name: 'publishProjectOfFreeDecision',
-    description: 'Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему',
+  @Mutation(() => MeetAggregateDTO, {
+    name: 'voteOnAnnualGeneralMeet',
+    description: 'Голосование на общем собрании пайщиков',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member'])
-  async publishProjectOfFreeDecision(
-    @Args('data', { type: () => PublishProjectFreeDecisionInputDTO })
-    data: PublishProjectFreeDecisionInputDTO
-  ): Promise<boolean> {
-    return this.freeDecisionService.publishProjectOfFreeDecision(data);
+  @AuthRoles(['member'])
+  async voteOnAnnualGeneralMeet(
+    @Args('data', { type: () => VoteOnAnnualGeneralMeetInputDTO })
+    data: VoteOnAnnualGeneralMeetInputDTO
+  ): Promise<MeetAggregateDTO> {
+    return this.meetService.vote(data);
   }
 
-  @Mutation(() => CreatedProjectFreeDecisionDTO, {
-    name: 'createProjectOfFreeDecision',
-    description:
-      'Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации',
+  @Mutation(() => MeetAggregateDTO, {
+    name: 'restartAnnualGeneralMeet',
+    description: 'Перезапуск общего собрания пайщиков',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member'])
-  async createProjectOfFreeDecision(
-    @Args('data', { type: () => CreateProjectFreeDecisionInputDTO })
-    data: CreateProjectFreeDecisionInputDTO
-  ): Promise<CreatedProjectFreeDecisionDTO> {
-    return this.freeDecisionService.createProjectOfFreeDecision(data);
+  @AuthRoles(['chairman'])
+  async restartAnnualGeneralMeet(
+    @Args('data', { type: () => RestartAnnualGeneralMeetInputDTO })
+    data: RestartAnnualGeneralMeetInputDTO
+  ): Promise<MeetAggregateDTO> {
+    return this.meetService.restartMeet(data);
+  }
+
+  @Mutation(() => MeetAggregateDTO, {
+    name: 'closeAnnualGeneralMeet',
+    description: 'Закрытие общего собрания пайщиков',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async closeAnnualGeneralMeet(
+    @Args('data', { type: () => CloseAnnualGeneralMeetInputDTO })
+    data: CloseAnnualGeneralMeetInputDTO
+  ): Promise<MeetAggregateDTO> {
+    return this.meetService.closeMeet(data);
   }
 }

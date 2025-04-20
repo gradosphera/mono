@@ -1,49 +1,63 @@
 import { Injectable } from '@nestjs/common';
-import type {
-  ProjectFreeDecisionDocumentDTO,
-  ProjectFreeDecisionGenerateDocumentInputDTO,
-} from '../dto/project-free-decision-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
-import { PublishProjectFreeDecisionInputDTO } from '../dto/publish-project-free-decision-input.dto';
-import type { CreateProjectFreeDecisionInputDTO } from '../dto/create-project-free-decision.dto';
-import { CreatedProjectFreeDecisionDTO } from '../dto/meet-aggregate.dto';
-import { v4 } from 'uuid';
+import { type CreateAnnualGeneralMeetInputDTO } from '../dto/create-meet-agenda-input.dto';
 import type {
-  FreeDecisionDocumentDTO,
-  FreeDecisionGenerateDocumentInputDTO,
-} from '../dto/annual-general-meeting-agenda-document.dto';
-import { FreeDecisionDomainInteractor } from '~/domain/free-decision/interactors/free-decision.interactor';
+  AnnualGeneralMeetingAgendaDocumentDTO,
+  AnnualGeneralMeetingAgendaGenerateDocumentInputDTO,
+} from '../../document/documents-dto/annual-general-meeting-agenda-document.dto';
+import { MeetDomainInteractor } from '~/domain/meet/interactors/meet.interactor';
+import type { MeetAggregateDTO } from '../dto/meet-aggregate.dto';
+import { VoteOnAnnualGeneralMeetInputDTO } from '../dto/vote-on-annual-general-meet-input.dto';
+import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-meet-input.dto';
+import { CloseAnnualGeneralMeetInputDTO } from '../dto/close-annual-general-meet-input.dto';
+import { GenerateSovietDecisionOnAnnualMeetInputDTO } from '../dto/generate-soviet-decision-input.dto';
+import { AnnualGeneralMeetingSovietDecisionDocumentDTO } from '../../document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
+import { Cooperative } from 'cooptypes';
 
 @Injectable()
 export class MeetService {
-  constructor(private readonly freeDecisionDomainInteractor: FreeDecisionDomainInteractor) {}
+  constructor(private readonly meetDomainInteractor: MeetDomainInteractor) {}
 
-  public async generateProjectOfFreeDecision(
-    data: ProjectFreeDecisionGenerateDocumentInputDTO,
+  public async generateAnnualGeneralMeetAgendaDocument(
+    data: AnnualGeneralMeetingAgendaGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ProjectFreeDecisionDocumentDTO> {
-    const document = await this.freeDecisionDomainInteractor.generateProjectOfFreeDecisionDocument(data, options);
+  ): Promise<AnnualGeneralMeetingAgendaDocumentDTO> {
+    data.registry_id = Cooperative.Registry.AnnualGeneralMeetingAgenda.registry_id;
+
+    const document = await this.meetDomainInteractor.generateAnnualGeneralMeetAgendaDocument(data, options);
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
-    return document as unknown as ProjectFreeDecisionDocumentDTO;
+    return document as unknown as AnnualGeneralMeetingAgendaDocumentDTO;
   }
 
-  public async generateFreeDecision(
-    data: FreeDecisionGenerateDocumentInputDTO,
+  public async createAnnualGeneralMeet(data: CreateAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
+    const aggregate = await this.meetDomainInteractor.createAnnualGeneralMeet(data);
+    return aggregate;
+  }
+
+  public async generateSovietDecisionOnAnnualMeetDocument(
+    data: GenerateSovietDecisionOnAnnualMeetInputDTO,
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<FreeDecisionDocumentDTO> {
-    const document = await this.freeDecisionDomainInteractor.generateFreeDecisionDocument(data, options);
+  ): Promise<AnnualGeneralMeetingSovietDecisionDocumentDTO> {
+    // Используем доменный объект, который возвращается из toDomain
+    data.registry_id = Cooperative.Registry.AnnualGeneralMeetingSovietDecision.registry_id;
+
+    const document = await this.meetDomainInteractor.generateSovietDecisionOnAnnualMeetDocument(data, options);
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
-    return document as unknown as FreeDecisionDocumentDTO;
+    return document as unknown as AnnualGeneralMeetingSovietDecisionDocumentDTO;
   }
 
-  public async publishProjectOfFreeDecision(data: PublishProjectFreeDecisionInputDTO): Promise<boolean> {
-    const selected = await this.freeDecisionDomainInteractor.publishProjectOfFreeDecision(data);
-    return selected;
+  public async vote(data: VoteOnAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
+    const aggregate = await this.meetDomainInteractor.vote(data);
+    return aggregate;
   }
 
-  public async createProjectOfFreeDecision(data: CreateProjectFreeDecisionInputDTO): Promise<CreatedProjectFreeDecisionDTO> {
-    const id = v4();
-    const project = await this.freeDecisionDomainInteractor.createProjectOfFreeDecision({ ...data, id });
-    return new CreatedProjectFreeDecisionDTO(project);
+  public async restartMeet(data: RestartAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
+    const aggregate = await this.meetDomainInteractor.restartMeet(data);
+    return aggregate;
+  }
+
+  public async closeMeet(data: CloseAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
+    const aggregate = await this.meetDomainInteractor.closeMeet(data);
+    return aggregate;
   }
 }
