@@ -1,4 +1,5 @@
 import type { Cooperative, MeetContract } from 'cooptypes';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import { assertType, type AssertKeysMatch } from '~/shared/asserts/blockchain-type.assert';
 
 export interface MeetRowProcessingDomainInterface {
@@ -18,8 +19,12 @@ export interface MeetRowProcessingDomainInterface {
   current_quorum_percent: number;
   cycle: number;
   quorum_passed: boolean;
-  proposal: Cooperative.Document.ISignedDocument<Cooperative.Registry.AnnualGeneralMeetingAgenda.Action>;
-  authorization: Cooperative.Document.ISignedDocument<Cooperative.Registry.SovietDecisionOnAnnualMeeting.Action>;
+  proposal: DocumentAggregateDomainInterface<
+    Cooperative.Registry.AnnualGeneralMeetingAgenda.Action & Cooperative.Document.IMetaDocument
+  >;
+  authorization: DocumentAggregateDomainInterface<
+    Cooperative.Registry.AnnualGeneralMeetingSovietDecision.Action & Cooperative.Document.IMetaDocument
+  >;
 }
 
 assertType<AssertKeysMatch<MeetContract.Tables.Meets.IOutput, MeetRowProcessingDomainInterface>>();

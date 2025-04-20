@@ -10,9 +10,9 @@ export class MeetProcessedDTO {
   @Field(() => BlockchainActionDTO)
   decision!: BlockchainActionDTO; //TODO: занести генератор DTO сюда чтобы получить типизированный результат по полям действия
 
-  @Field(() => Object, { nullable: true })
-  @IsOptional()
-  documents?: object[];
+  // @Field(() => Object, { nullable: true })
+  // @IsOptional()
+  // documents?: object[];
 
   constructor(data: MeetProcessedDTO) {
     Object.assign(this, data);

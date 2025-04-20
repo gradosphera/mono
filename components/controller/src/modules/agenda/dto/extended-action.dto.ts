@@ -4,7 +4,7 @@ import { EntrepreneurDTO } from '~/modules/common/dto/entrepreneur.dto';
 import { OrganizationDTO } from '~/modules/common/dto/organization.dto';
 import type { ExtendedBlockchainActionDomainInterface } from '~/domain/agenda/interfaces/extended-blockchain-action-domain.interface';
 import { BlockchainActionDTO } from '../../common/dto/blockchain-action.dto';
-import { UserDataUnion } from '../unions/user.union';
+import { UserDataUnion } from '../../document/unions/user.union';
 
 @ObjectType('ExtendedBlockchainAction', {
   description: 'Расширенное действие блокчейна с персональными данными пользователя, совершившего его.',

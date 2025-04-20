@@ -1,6 +1,8 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { ValidateNested, IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ValidateNested, IsNotEmpty, IsArray } from 'class-validator';
 import { Cooperative } from 'cooptypes';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
 import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
@@ -9,8 +11,8 @@ import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import { SignedDigitalDocumentBase } from '~/modules/document/dto/signed-digital-document.base';
 import type { ExcludeCommonProps } from '~/modules/document/types';
-import { CommonRequestInputDTO } from './common-request-input.dto';
-import { CommonRequestResponseDTO } from './common-request-response.dto';
+import { CommonRequestInputDTO } from '../../cooplace/dto/common-request-input.dto';
+import { CommonRequestResponseDTO } from '../../cooplace/dto/common-request-response.dto';
 
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.AssetContributionStatement.Action;
@@ -80,4 +82,21 @@ export class AssetContributionStatementDocumentDTO extends GeneratedDocumentDTO 
   })
   @ValidateNested()
   public readonly meta!: AssetContributionStatementMetaDocumentOutputDTO;
+}
+
+@ObjectType('AssetContributionStatementDocumentAggregate')
+export class AssetContributionStatementDocumentAggregateDTO
+  implements DocumentAggregateDomainInterface<AssetContributionStatementMetaDocumentOutputDTO>
+{
+  @Field(() => String)
+  hash!: string;
+
+  @Field(() => [AssetContributionStatementSignedDocumentDTO])
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AssetContributionStatementSignedDocumentDTO)
+  signatures!: AssetContributionStatementSignedDocumentDTO[];
+
+  @Field(() => AssetContributionStatementDocumentDTO, { nullable: true })
+  rawDocument?: AssetContributionStatementDocumentDTO;
 }

@@ -11,6 +11,8 @@ export interface Action extends IGenerate {
   contribution: IContributionAmount
 }
 
+export type Meta = IMetaDocument & Action
+
 // Модель данных документа
 export interface Model {
   meta: IMetaDocument

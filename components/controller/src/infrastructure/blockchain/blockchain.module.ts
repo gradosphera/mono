@@ -11,6 +11,9 @@ import { DecisionBlockchainAdapter } from './adapters/free-decision-blockchain.a
 import { FREE_DECISION_BLOCKCHAIN_PORT } from '~/domain/free-decision/interfaces/free-decision-blockchain.port';
 import { COOPLACE_BLOCKCHAIN_PORT } from '~/domain/cooplace/interfaces/cooplace-blockchain.port';
 import { CooplaceBlockchainAdapter } from './adapters/cooplace-blockchain.adapter';
+import { MEET_BLOCKCHAIN_PORT } from '~/domain/meet/ports/meet-blockchain.port';
+import { MeetBlockchainAdapter } from './adapters/meet-blockchain.adapter';
+import { DomainToBlockchainUtils } from './utils/domain-to-blockchain.utils';
 
 @Global()
 @Module({
@@ -40,6 +43,11 @@ import { CooplaceBlockchainAdapter } from './adapters/cooplace-blockchain.adapte
       provide: COOPLACE_BLOCKCHAIN_PORT,
       useClass: CooplaceBlockchainAdapter,
     },
+    {
+      provide: MEET_BLOCKCHAIN_PORT,
+      useClass: MeetBlockchainAdapter,
+    },
+    DomainToBlockchainUtils,
   ],
   exports: [
     BLOCKCHAIN_PORT,
@@ -48,6 +56,8 @@ import { CooplaceBlockchainAdapter } from './adapters/cooplace-blockchain.adapte
     ACCOUNT_BLOCKCHAIN_PORT,
     FREE_DECISION_BLOCKCHAIN_PORT,
     COOPLACE_BLOCKCHAIN_PORT,
+    MEET_BLOCKCHAIN_PORT,
+    DomainToBlockchainUtils,
   ],
 })
 export class BlockchainModule {}

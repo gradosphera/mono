@@ -10,11 +10,11 @@ import { ParticipantService } from '../services/participant.service';
 import {
   ParticipantApplicationDocumentDTO,
   ParticipantApplicationGenerateDocumentInputDTO,
-} from '../dto/participant-application-document.dto';
+} from '../../document/documents-dto/participant-application-document.dto';
 import {
   ParticipantApplicationDecisionDocumentDTO,
   ParticipantApplicationDecisionGenerateDocumentInputDTO,
-} from '../dto/participant-application-decision-document.dto';
+} from '../../document/documents-dto/participant-application-decision-document.dto';
 import { AccountDTO } from '~/modules/account/dto/account.dto';
 import { AddParticipantInputDTO } from '../dto/add-participant-input.dto';
 import { RegisterParticipantInputDTO } from '../dto/register-participant-input.dto';

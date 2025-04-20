@@ -1,6 +1,8 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { IsObject } from 'class-validator';
+import { ValidateNested } from 'class-validator';
 import type { MeetRowProcessingDomainInterface } from '~/domain/meet/interfaces/meet-row-processing-domain.interface';
+import { AnnualGeneralMeetingAgendaDocumentAggregateDTO } from '../../document/documents-dto/annual-general-meeting-agenda-document.dto';
+import { AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO } from '../../document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
 
 @ObjectType('Meet')
 export class MeetDTO implements MeetRowProcessingDomainInterface {
@@ -52,13 +54,13 @@ export class MeetDTO implements MeetRowProcessingDomainInterface {
   @Field(() => Boolean)
   quorum_passed!: boolean;
 
-  @Field(() => Object)
-  @IsObject()
-  proposal!: object; //TODO: change
+  @Field(() => AnnualGeneralMeetingAgendaDocumentAggregateDTO)
+  @ValidateNested()
+  proposal!: AnnualGeneralMeetingAgendaDocumentAggregateDTO;
 
-  @Field(() => Object)
-  @IsObject()
-  authorization!: object; //TODO: change
+  @Field(() => AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO)
+  @ValidateNested()
+  authorization!: AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO;
 
   constructor(data: MeetDTO) {
     Object.assign(this, data);

@@ -12,7 +12,10 @@ import { DeleteBranchGraphQLInput } from '../dto/delete-branch-input.dto';
 import { AddTrustedAccountGraphQLInput } from '../dto/add-trusted-account-input.dto';
 import { DeleteTrustedAccountGraphQLInput } from '../dto/delete-trusted-account-input.dto';
 import { SelectBranchInputDTO } from '../dto/select-branch-input.dto';
-import { SelectBranchDocumentDTO, SelectBranchGenerateDocumentInputDTO } from '../dto/select-branch-document.dto';
+import {
+  SelectBranchDocumentDTO,
+  SelectBranchGenerateDocumentInputDTO,
+} from '../../document/documents-dto/select-branch-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 
 @Resolver(() => BranchDTO)

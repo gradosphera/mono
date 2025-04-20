@@ -9,7 +9,10 @@ import type { AddTrustedAccountGraphQLInput } from '../dto/add-trusted-account-i
 import type { DeleteTrustedAccountGraphQLInput } from '../dto/delete-trusted-account-input.dto';
 import type { SelectBranchInputDTO } from '../dto/select-branch-input.dto';
 import type { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
-import type { SelectBranchDocumentDTO, SelectBranchGenerateDocumentInputDTO } from '../dto/select-branch-document.dto';
+import type {
+  SelectBranchDocumentDTO,
+  SelectBranchGenerateDocumentInputDTO,
+} from '../../document/documents-dto/select-branch-document.dto';
 
 @Injectable()
 export class BranchService {

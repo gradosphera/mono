@@ -9,24 +9,27 @@ import { CooplaceService } from '../services/cooplace.service';
 import {
   AssetContributionStatementDocumentDTO,
   AssetContributionStatementGenerateDocumentInputDTO,
-} from '../dto/asset-contribution-statement.dto';
+} from '../../document/documents-dto/asset-contribution-statement-document.dto';
 import {
   AssetContributionDecisionDocumentDTO,
   AssetContributionDecisionGenerateDocumentInputDTO,
-} from '../dto/asset-contribution-decision.dto';
+} from '../../document/documents-dto/asset-contribution-decision-document.dto';
 import {
   AssetContributionActDocumentDTO,
   AssetContributionActGenerateDocumentInputDTO,
-} from '../dto/asset-contribution-act.dto';
+} from '../../document/documents-dto/asset-contribution-act-document.dto';
 import {
   ReturnByAssetStatementDocumentDTO,
   ReturnByAssetStatementGenerateDocumentInputDTO,
-} from '../dto/return-by-asset-statement.dto';
+} from '../../document/documents-dto/return-by-asset-statement-document.dto';
 import {
   ReturnByAssetDecisionDocumentDTO,
   ReturnByAssetDecisionGenerateDocumentInputDTO,
-} from '../dto/return-by-asset-decision.dto';
-import { ReturnByAssetActDocumentDTO, ReturnByAssetActGenerateDocumentInputDTO } from '../dto/return-by-asset-act.dto';
+} from '../../document/documents-dto/return-by-asset-decision-document.dto';
+import {
+  ReturnByAssetActDocumentDTO,
+  ReturnByAssetActGenerateDocumentInputDTO,
+} from '../../document/documents-dto/return-by-asset-act-document.dto';
 import { AcceptChildOrderInputDTO } from '../dto/accept-child-order-input.dto';
 import { TransactionDTO } from '~/modules/common/dto/transaction-result-response.dto';
 import { CancelRequestInputDTO } from '../dto/cancel-request-input.dto';

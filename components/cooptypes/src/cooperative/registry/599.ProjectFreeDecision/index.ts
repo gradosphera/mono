@@ -10,6 +10,8 @@ export interface Action extends IGenerate {
   project_id: string
 }
 
+export type Meta = IMetaDocument & Action
+
 // Модель данных
 export interface Model {
   coop: ICooperativeData

@@ -1,4 +1,4 @@
-import { FundContract, GatewayContract, SovietContract, WalletContract } from 'cooptypes'
+import { FundContract, SovietContract, WalletContract } from 'cooptypes'
 import { expect } from 'vitest'
 import type Blockchain from '../../blockchain'
 

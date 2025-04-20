@@ -9,6 +9,8 @@ export interface Action extends IGenerate {
   request: ICommonRequest
 }
 
+export type Meta = IMetaDocument & Action
+
 // Модель данных документа
 export interface Model {
   meta: IMetaDocument

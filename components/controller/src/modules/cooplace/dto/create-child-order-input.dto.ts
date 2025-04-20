@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNumber, IsString, Matches, ValidateNested } from 'class-validator';
-import { ReturnByAssetStatementSignedDocumentInputDTO } from './return-by-asset-statement.dto';
+import { ReturnByAssetStatementSignedDocumentInputDTO } from '../../document/documents-dto/return-by-asset-statement-document.dto';
 import { ASSET_REGEX } from '~/types/shared';
 @InputType('CreateChildOrderInput')
 export class CreateChildOrderInputDTO {

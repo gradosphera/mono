@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsString, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { AssetContributionActSignedDocumentInputDTO } from './asset-contribution-act.dto';
+import { AssetContributionActSignedDocumentInputDTO } from '../../document/documents-dto/asset-contribution-act-document.dto';
 @InputType('SupplyOnRequestInput')
 export class SupplyOnRequestInputDTO {
   @Field({ description: 'Имя аккаунта кооператива' })

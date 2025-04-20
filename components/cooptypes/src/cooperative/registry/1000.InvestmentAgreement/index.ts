@@ -12,6 +12,8 @@ export interface Action extends IGenerate {
   terms?: string
 }
 
+export type Meta = IMetaDocument & Action
+
 // Модель данных документа
 export interface Model {
   meta: IMetaDocument
