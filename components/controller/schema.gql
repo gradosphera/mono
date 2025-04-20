@@ -2143,6 +2143,19 @@ input GetExtensionsInput {
   name: String
 }
 
+input GetMeetInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хеш собрания"""
+  hash: String!
+}
+
+input GetMeetsInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+}
+
 input GetPaymentMethodsInput {
   """Количество элементов на странице"""
   limit: Int! = 10
@@ -3527,6 +3540,12 @@ type Query {
 
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!
+
+  """Получить данные собрания по хешу"""
+  getMeet(data: GetMeetInput!): MeetAggregate!
+
+  """Получить список всех собраний кооператива"""
+  getMeets(data: GetMeetsInput!): [MeetAggregate!]!
 
   """Получить список методов оплаты"""
   getPaymentMethods(data: GetPaymentMethodsInput): PaymentMethodPaginationResult!

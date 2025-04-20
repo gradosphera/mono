@@ -14,11 +14,11 @@ export class TypeOrmMeetRepository implements MeetRepository {
     private readonly meetPreRepo: Repository<MeetPreEntity>
   ) {}
 
-  async findByHash(hash: string): Promise<MeetPreProcessingDomainEntity> {
+  async findByHash(hash: string): Promise<MeetPreProcessingDomainEntity | null> {
     const ormEntity = await this.meetPreRepo.findOne({ where: { hash } });
 
     if (!ormEntity) {
-      throw new HttpApiError(httpStatus.BAD_REQUEST, `Собрание с хешем ${hash} не найдено`);
+      return null;
     }
 
     return ormEntity.toDomainEntity();

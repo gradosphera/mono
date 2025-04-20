@@ -6,7 +6,7 @@ import type { MeetProcessingDomainInterface } from './meet-processing-domain.int
 
 export interface MeetDomainAggregate {
   hash: string;
-  pre?: MeetPreProcessingDomainInterface;
-  processing?: MeetProcessingDomainInterface;
-  processed?: MeetProcessedDomainInterface;
+  pre?: MeetPreProcessingDomainInterface | null;
+  processing?: MeetProcessingDomainInterface | null;
+  processed?: MeetProcessedDomainInterface | null;
 }

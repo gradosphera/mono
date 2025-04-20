@@ -12,6 +12,11 @@ import { RestartAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/inte
 import { CloseAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/close-annual-general-meet-input-domain.interface';
 import { CreateAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/create-annual-meet-input-domain.interface';
 import { DomainToBlockchainUtils } from '../utils/domain-to-blockchain.utils';
+import { GetMeetInputDomainInterface } from '~/domain/meet/interfaces/get-meet-input-domain.interface';
+import { GetMeetsInputDomainInterface } from '~/domain/meet/interfaces/get-meets-input-domain.interface';
+import { MeetProcessingDomainEntity } from '~/domain/meet/entities/meet-processing-domain.entity';
+import { MeetRowProcessingDomainInterface } from '~/domain/meet/interfaces/meet-row-processing-domain.interface';
+import { QuestionRowProcessingDomainInterface } from '~/domain/meet/interfaces/question-row-processing-domain.interface';
 
 @Injectable()
 export class MeetBlockchainAdapter implements MeetBlockchainPort {
@@ -20,25 +25,55 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
     private readonly domainToBlockchainUtils: DomainToBlockchainUtils
   ) {}
 
-  async getMeet(coopname: string, hash: string): Promise<MeetContract.Tables.Meets.IOutput | null> {
-    return this.blockchainService.getSingleRow(
+  async getMeet(data: GetMeetInputDomainInterface): Promise<MeetProcessingDomainEntity | null> {
+    const { coopname, hash } = data;
+    const meetData = await this.blockchainService.getSingleRow(
       MeetContract.contractName.production,
       coopname,
       MeetContract.Tables.Meets.tableName,
       hash,
       'secondary'
     );
+
+    if (!meetData) {
+      return null;
+    }
+
+    // Получаем вопросы повестки
+    const questions = await this.getQuestions({ coopname, hash });
+
+    // Преобразуем данные из блокчейна в доменную модель
+    return this.convertBlockchainDataToDomainProcessing(meetData, questions);
   }
 
-  async getMeets(coopname: string): Promise<MeetContract.Tables.Meets.IOutput[]> {
-    return this.blockchainService.getAllRows(
+  async getMeets(data: GetMeetsInputDomainInterface): Promise<MeetProcessingDomainEntity[]> {
+    const { coopname } = data;
+    const meetsData = await this.blockchainService.getAllRows(
       MeetContract.contractName.production,
       coopname,
       MeetContract.Tables.Meets.tableName
     );
+
+    if (!meetsData || meetsData.length === 0) {
+      return [];
+    }
+
+    // Преобразуем данные в домен
+    const meetsProcessing = await Promise.all(
+      meetsData.map(async (meetData) => {
+        // Получаем вопросы повестки для каждого собрания
+        const questions = await this.getQuestions({ coopname, hash: meetData.hash });
+
+        // Формируем обработанные данные в доменном формате
+        return this.convertBlockchainDataToDomainProcessing(meetData, questions);
+      })
+    );
+
+    return meetsProcessing;
   }
 
-  async getQuestions(coopname: string, hash: string): Promise<MeetContract.Tables.Questions.IOutput[]> {
+  async getQuestions(data: { coopname: string; hash: string }): Promise<MeetContract.Tables.Questions.IOutput[]> {
+    const { coopname, hash } = data;
     const allQuestions = await this.blockchainService.query(
       MeetContract.contractName.production,
       coopname,
@@ -51,6 +86,70 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
     );
 
     return allQuestions;
+  }
+
+  // Вспомогательный метод для преобразования данных из блокчейна в доменную модель
+  private convertBlockchainDataToDomainProcessing(
+    meetData: MeetContract.Tables.Meets.IOutput,
+    questions: MeetContract.Tables.Questions.IOutput[]
+  ): MeetProcessingDomainEntity {
+    return {
+      hash: meetData.hash,
+      meet: this.convertBlockchainMeetToDomainMeet(meetData),
+      questions: questions.map((q) => this.convertBlockchainQuestionToDomainQuestion(q)),
+    } as MeetProcessingDomainEntity;
+  }
+
+  // Вспомогательный метод для преобразования данных встречи
+  private convertBlockchainMeetToDomainMeet(meetData: MeetContract.Tables.Meets.IOutput): MeetRowProcessingDomainInterface {
+    return {
+      id: Number(meetData.id),
+      hash: meetData.hash,
+      coopname: meetData.coopname,
+      type: meetData.type,
+      initiator: meetData.initiator,
+      presider: meetData.presider,
+      secretary: meetData.secretary,
+      status: meetData.status,
+      created_at: new Date(meetData.created_at),
+      open_at: new Date(meetData.open_at),
+      close_at: new Date(meetData.close_at),
+      quorum_percent: Number(meetData.quorum_percent),
+      signed_ballots: Number(meetData.signed_ballots),
+      current_quorum_percent: Number(meetData.current_quorum_percent),
+      cycle: Number(meetData.cycle),
+      quorum_passed: meetData.quorum_passed,
+      proposal: this.parseBlockchainDocument(meetData.proposal),
+      authorization: this.parseBlockchainDocument(meetData.authorization),
+    };
+  }
+
+  // Вспомогательный метод для преобразования данных вопроса
+  private convertBlockchainQuestionToDomainQuestion(
+    questionData: MeetContract.Tables.Questions.IOutput
+  ): QuestionRowProcessingDomainInterface {
+    return {
+      id: Number(questionData.id),
+      number: Number(questionData.number),
+      meet_id: Number(questionData.meet_id),
+      coopname: questionData.coopname,
+      title: questionData.title,
+      context: questionData.context,
+      decision: questionData.decision,
+      counter_votes_for: Number(questionData.counter_votes_for),
+      counter_votes_against: Number(questionData.counter_votes_against),
+      counter_votes_abstained: Number(questionData.counter_votes_abstained),
+      voters_for: questionData.voters_for,
+      voters_against: questionData.voters_against,
+      voters_abstained: questionData.voters_abstained,
+    };
+  }
+
+  // Вспомогательный метод для разбора блокчейн-документа
+  private parseBlockchainDocument(blockchainDoc: any): any {
+    // Преобразование документа из формата блокчейна в формат домена
+    // Здесь должна быть реализована логика разбора документа с учетом специфики домена
+    return blockchainDoc;
   }
 
   async createMeet(data: CreateAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult> {
