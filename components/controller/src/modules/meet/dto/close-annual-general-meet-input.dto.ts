@@ -4,17 +4,17 @@ import { Type } from 'class-transformer';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import { CloseAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/close-annual-general-meet-input-domain.interface';
 
-@InputType('CloseAnnualGeneralMeetInput')
+@InputType('CloseAnnualGeneralMeetInput', { description: 'Входные данные для закрытия ежегодного общего собрания' })
 export class CloseAnnualGeneralMeetInputDTO implements CloseAnnualGeneralMeetInputDomainInterface {
-  @Field(() => String)
+  @Field(() => String, { description: 'Имя аккаунта кооператива' })
   @IsString()
   coopname!: string;
 
-  @Field(() => String)
+  @Field(() => String, { description: 'Хеш собрания, которое необходимо закрыть' })
   @IsString()
   hash!: string;
 
-  @Field(() => SignedDigitalDocumentInputDTO)
+  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Подписанный документ с решением собрания' })
   @ValidateNested()
   @Type(() => SignedDigitalDocumentInputDTO)
   meet_decision!: SignedDigitalDocumentInputDTO;
