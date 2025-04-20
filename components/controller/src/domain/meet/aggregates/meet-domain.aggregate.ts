@@ -9,9 +9,9 @@ export class MeetAggregate implements MeetDomainAggregate {
   public readonly hash: string;
 
   constructor(
-    public readonly pre?: MeetPreProcessingDomainEntity,
-    public readonly processing?: MeetProcessingDomainEntity,
-    public readonly processed?: MeetProcessedDomainEntity
+    public readonly pre?: MeetPreProcessingDomainEntity | null,
+    public readonly processing?: MeetProcessingDomainEntity | null,
+    public readonly processed?: MeetProcessedDomainEntity | null
   ) {
     this.hash = assertSingleHash(pre?.hash, processing?.hash, processed?.hash);
   }

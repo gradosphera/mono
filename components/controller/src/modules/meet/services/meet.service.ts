@@ -13,6 +13,8 @@ import { CloseAnnualGeneralMeetInputDTO } from '../dto/close-annual-general-meet
 import { GenerateSovietDecisionOnAnnualMeetInputDTO } from '../dto/generate-soviet-decision-input.dto';
 import { AnnualGeneralMeetingSovietDecisionDocumentDTO } from '../../document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
 import { Cooperative } from 'cooptypes';
+import { GetMeetInputDTO } from '../dto/get-meet-input.dto';
+import { GetMeetsInputDTO } from '../dto/get-meets-input.dto';
 
 @Injectable()
 export class MeetService {
@@ -44,6 +46,16 @@ export class MeetService {
     const document = await this.meetDomainInteractor.generateSovietDecisionOnAnnualMeetDocument(data, options);
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as AnnualGeneralMeetingSovietDecisionDocumentDTO;
+  }
+
+  public async getMeet(data: GetMeetInputDTO): Promise<MeetAggregateDTO> {
+    const aggregate = await this.meetDomainInteractor.getMeet(data);
+    return aggregate;
+  }
+
+  public async getMeets(data: GetMeetsInputDTO): Promise<MeetAggregateDTO[]> {
+    const aggregates = await this.meetDomainInteractor.getMeets(data);
+    return aggregates;
   }
 
   public async vote(data: VoteOnAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {

@@ -11,6 +11,8 @@ import { MeetPreProcessingDomainEntity } from '../entities/meet-pre-domain.entit
 import { VoteOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/vote-on-annual-general-meet-input.interface';
 import { RestartAnnualGeneralMeetInputDomainInterface } from '../interfaces/restart-annual-general-meet-input-domain.interface';
 import { CloseAnnualGeneralMeetInputDomainInterface } from '../interfaces/close-annual-general-meet-input-domain.interface';
+import { GetMeetInputDomainInterface } from '../interfaces/get-meet-input-domain.interface';
+import { GetMeetsInputDomainInterface } from '../interfaces/get-meets-input-domain.interface';
 
 @Injectable()
 export class MeetDomainInteractor {
@@ -37,8 +39,10 @@ export class MeetDomainInteractor {
     // Сохраняем данные в репозиторий
     await this.meetRepository.create(preProcessing);
 
+    // Получаем сохраненные данные из репозитория
     const preMeet = await this.meetRepository.findByHash(preProcessing.hash);
 
+    // Создаем агрегат, MeetAggregate сам проверит наличие данных
     return new MeetAggregate(preMeet);
   }
 
@@ -66,33 +70,86 @@ export class MeetDomainInteractor {
     return await this.documentDomainService.generateDocument({ data, options });
   }
 
+  async getMeet(data: GetMeetInputDomainInterface): Promise<MeetAggregate> {
+    // Получаем данные из блокчейна через порт
+    const processingMeet = await this.meetBlockchainPort.getMeet(data);
+
+    // Получаем данные из репозитория
+    const preMeet = await this.meetRepository.findByHash(data.hash);
+
+    // Создаем агрегат из обоих источников данных (репозиторий и блокчейн)
+    // MeetAggregate сам проверит наличие хотя бы одного элемента
+    return new MeetAggregate(preMeet, processingMeet);
+  }
+
+  async getMeets(data: GetMeetsInputDomainInterface): Promise<MeetAggregate[]> {
+    // Получаем данные из блокчейна через порт
+    const processingDataList = await this.meetBlockchainPort.getMeets(data);
+
+    // Если данных нет, возвращаем пустой массив
+    if (!processingDataList || processingDataList.length === 0) {
+      return [];
+    }
+
+    // Преобразуем данные в агрегаты, получая для каждого элемента данные из репозитория
+    const meetsAggregates = await Promise.all(
+      processingDataList.map(async (processingData) => {
+        // Получаем данные pre из репозитория для каждого элемента по его хешу
+        const preMeet = await this.meetRepository.findByHash(processingData.hash);
+
+        // Создаем агрегат с данными из репозитория и блокчейна
+        return new MeetAggregate(preMeet, processingData);
+      })
+    );
+
+    return meetsAggregates;
+  }
+
   async vote(data: VoteOnAnnualGeneralMeetInputDomainInterface): Promise<MeetAggregate> {
     // Вызов блокчейн порта для голосования
     await this.meetBlockchainPort.vote(data);
 
-    // Получаем обновленные данные из репозитория
-    const meet = await this.meetRepository.findByHash(data.hash);
+    // Получаем обновленные данные из обоих источников
+    const processingData = await this.meetBlockchainPort.getMeet({
+      coopname: data.coopname,
+      hash: data.hash,
+    });
 
-    return new MeetAggregate(meet);
+    const preMeet = await this.meetRepository.findByHash(data.hash);
+
+    // Создаем агрегат из обоих источников данных
+    return new MeetAggregate(preMeet, processingData);
   }
 
   async restartMeet(data: RestartAnnualGeneralMeetInputDomainInterface): Promise<MeetAggregate> {
     // Вызов блокчейн порта для перезапуска собрания
     await this.meetBlockchainPort.restartMeet(data);
 
-    // Получаем обновленные данные из репозитория
-    const meet = await this.meetRepository.findByHash(data.hash);
+    // Получаем обновленные данные из обоих источников
+    const processingData = await this.meetBlockchainPort.getMeet({
+      coopname: data.coopname,
+      hash: data.hash,
+    });
 
-    return new MeetAggregate(meet);
+    const preMeet = await this.meetRepository.findByHash(data.hash);
+
+    // Создаем агрегат из обоих источников данных
+    return new MeetAggregate(preMeet, processingData);
   }
 
   async closeMeet(data: CloseAnnualGeneralMeetInputDomainInterface): Promise<MeetAggregate> {
     // Вызов блокчейн порта для закрытия собрания
     await this.meetBlockchainPort.closeMeet(data);
 
-    // Получаем обновленные данные из репозитория
-    const meet = await this.meetRepository.findByHash(data.hash);
+    // Получаем обновленные данные из обоих источников
+    const processingData = await this.meetBlockchainPort.getMeet({
+      coopname: data.coopname,
+      hash: data.hash,
+    });
 
-    return new MeetAggregate(meet);
+    const preMeet = await this.meetRepository.findByHash(data.hash);
+
+    // Создаем агрегат из обоих источников данных
+    return new MeetAggregate(preMeet, processingData);
   }
 }

@@ -18,19 +18,19 @@ export class MeetAggregateDTO implements MeetDomainAggregate {
   @IsOptional()
   @ValidateNested()
   @Type(() => MeetPreProcessingDTO)
-  pre?: MeetPreProcessingDTO;
+  pre?: MeetPreProcessingDTO | null;
 
   @Field(() => MeetProcessingDTO, { nullable: true, description: 'Данные собрания на этапе обработки' })
   @IsOptional()
   @ValidateNested()
   @Type(() => MeetProcessingDTO)
-  processing?: MeetProcessingDTO;
+  processing?: MeetProcessingDTO | null;
 
   @Field(() => MeetProcessedDTO, { nullable: true, description: 'Данные собрания после обработки' })
   @IsOptional()
   @ValidateNested()
   @Type(() => MeetProcessedDTO)
-  processed?: MeetProcessedDTO;
+  processed?: MeetProcessedDTO | null;
 
   constructor(data: MeetAggregateDTO) {
     Object.assign(this, data);

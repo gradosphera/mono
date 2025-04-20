@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { GqlJwtAuthGuard } from '~/modules/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/modules/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -17,10 +17,38 @@ import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-
 import { CloseAnnualGeneralMeetInputDTO } from '../dto/close-annual-general-meet-input.dto';
 import { GenerateSovietDecisionOnAnnualMeetInputDTO } from '../dto/generate-soviet-decision-input.dto';
 import { AnnualGeneralMeetingSovietDecisionDocumentDTO } from '~/modules/document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
+import { GetMeetInputDTO } from '../dto/get-meet-input.dto';
+import { GetMeetsInputDTO } from '../dto/get-meets-input.dto';
 
 @Resolver()
 export class MeetResolver {
   constructor(private readonly meetService: MeetService) {}
+
+  @Query(() => MeetAggregateDTO, {
+    name: 'getMeet',
+    description: 'Получить данные собрания по хешу',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async getMeet(
+    @Args('data', { type: () => GetMeetInputDTO })
+    data: GetMeetInputDTO
+  ): Promise<MeetAggregateDTO> {
+    return this.meetService.getMeet(data);
+  }
+
+  @Query(() => [MeetAggregateDTO], {
+    name: 'getMeets',
+    description: 'Получить список всех собраний кооператива',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async getMeets(
+    @Args('data', { type: () => GetMeetsInputDTO })
+    data: GetMeetsInputDTO
+  ): Promise<MeetAggregateDTO[]> {
+    return this.meetService.getMeets(data);
+  }
 
   @Mutation(() => AnnualGeneralMeetingAgendaDocumentDTO, {
     name: 'generateAnnualGeneralMeetAgendaDocument',

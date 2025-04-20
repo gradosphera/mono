@@ -5,7 +5,7 @@ export interface MeetRepository {
    * Получить данные о проекте решения по идентификатору
    * @param id Идентификатор проекта решения
    */
-  findByHash(hash: string): Promise<MeetPreProcessingDomainEntity>;
+  findByHash(hash: string): Promise<MeetPreProcessingDomainEntity | null>;
   create(data: MeetPreProcessingDomainEntity);
 }
 

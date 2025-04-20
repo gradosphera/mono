@@ -4,11 +4,14 @@ import { VoteOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/vote-
 import { RestartAnnualGeneralMeetInputDomainInterface } from '../interfaces/restart-annual-general-meet-input-domain.interface';
 import { CloseAnnualGeneralMeetInputDomainInterface } from '../interfaces/close-annual-general-meet-input-domain.interface';
 import { CreateAnnualGeneralMeetInputDomainInterface } from '../interfaces/create-annual-meet-input-domain.interface';
+import { GetMeetInputDomainInterface } from '../interfaces/get-meet-input-domain.interface';
+import { GetMeetsInputDomainInterface } from '../interfaces/get-meets-input-domain.interface';
+import { MeetProcessingDomainEntity } from '../entities/meet-processing-domain.entity';
 
 export interface MeetBlockchainPort {
-  getMeet(coopname: string, hash: string): Promise<MeetContract.Tables.Meets.IOutput | null>;
-  getMeets(coopname: string): Promise<MeetContract.Tables.Meets.IOutput[]>;
-  getQuestions(coopname: string, hash: string): Promise<MeetContract.Tables.Questions.IOutput[]>;
+  getMeet(data: GetMeetInputDomainInterface): Promise<MeetProcessingDomainEntity | null>;
+  getMeets(data: GetMeetsInputDomainInterface): Promise<MeetProcessingDomainEntity[]>;
+  getQuestions(data: { coopname: string; hash: string }): Promise<MeetContract.Tables.Questions.IOutput[]>;
 
   createMeet(data: CreateAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult>;
   vote(data: VoteOnAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult>;
