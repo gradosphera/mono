@@ -1030,6 +1030,25 @@ export type ValueTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string | Variable<any, string>
 };
+	/** Пункт повестки собрания */
+["AgendaMeetPoint"]: AliasType<{
+	/** Контекст или дополнительная информация по пункту повестки */
+	context?:boolean | `@${string}`,
+	/** Предлагаемое решение по пункту повестки */
+	decision?:boolean | `@${string}`,
+	/** Заголовок пункта повестки */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Пункт повестки собрания (для ввода) */
+["AgendaMeetPointInput"]: {
+	/** Контекст или дополнительная информация по пункту повестки */
+	context: string | Variable<any, string>,
+	/** Предлагаемое решение по пункту повестки */
+	decision: string | Variable<any, string>,
+	/** Заголовок пункта повестки */
+	title: string | Variable<any, string>
+};
 	["AgendaWithDocuments"]: AliasType<{
 	/** Действие, которое привело к появлению вопроса на голосовании */
 	action?:ValueTypes["BlockchainAction"],
@@ -1046,6 +1065,169 @@ export type ValueTypes = {
 	["AgreementVar"]: AliasType<{
 	protocol_day_month_year?:boolean | `@${string}`,
 	protocol_number?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingAgendaDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания повестки общего собрания */
+	meta?:ValueTypes["AnnualGeneralMeetingAgendaMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingAgendaDocumentAggregate"]: AliasType<{
+	/** Хеш документа */
+	hash?:boolean | `@${string}`,
+	/** Исходный документ */
+	rawDocument?:ValueTypes["AnnualGeneralMeetingAgendaDocument"],
+	/** Подписи документа */
+	signatures?:ValueTypes["AnnualGeneralMeetingAgendaSignedDocument"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["AnnualGeneralMeetingAgendaMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingAgendaSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания повестки общего собрания */
+	meta?:ValueTypes["AnnualGeneralMeetingAgendaMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для создания протокола решения */
+	meta: ValueTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Публичный ключ документа */
+	public_key: string | Variable<any, string>,
+	/** Подпись документа */
+	signature: string | Variable<any, string>
+};
+	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
+	["AnnualGeneralMeetingSovietDecisionDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация */
+	meta?:ValueTypes["AnnualGeneralMeetingSovietDecisionDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingSovietDecisionDocumentAggregate"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	rawDocument?:ValueTypes["AnnualGeneralMeetingSovietDecisionDocument"],
+	signatures?:ValueTypes["AnnualGeneralMeetingSovietDecisionSignedDocument"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingSovietDecisionDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingSovietDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация */
+	meta?:ValueTypes["AnnualGeneralMeetingSovietDecisionDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["AssetContributionActDocument"]: AliasType<{
@@ -1240,6 +1422,14 @@ export type ValueTypes = {
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["AssetContributionDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["AssetContributionDecisionMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["AssetContributionStatementDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -1302,6 +1492,14 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 	/** Версия генератора, использованного для создания документа */
 	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionStatementSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["AssetContributionStatementMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["AssetContributionStatementSignedDocumentInput"]: {
@@ -1581,6 +1779,15 @@ export type ValueTypes = {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	/** Входные данные для закрытия ежегодного общего собрания */
+["CloseAnnualGeneralMeetInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хеш собрания, которое необходимо закрыть */
+	hash: string | Variable<any, string>,
+	/** Подписанный документ с решением собрания */
+	meet_decision: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
+};
 	["CommonRequestInput"]: {
 	currency: string | Variable<any, string>,
 	hash: string | Variable<any, string>,
@@ -1696,6 +1903,26 @@ export type ValueTypes = {
 }>;
 	/** Страна регистрации пользователя */
 ["Country"]:Country;
+	["CreateAnnualGeneralMeetInput"]: {
+	/** Повестка собрания */
+	agenda: Array<ValueTypes["AgendaMeetPointInput"]> | Variable<any, string>,
+	/** Время закрытия собрания */
+	close_at: ValueTypes["DateTime"] | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хеш */
+	hash: string | Variable<any, string>,
+	/** Имя аккаунта инициатора */
+	initiator: string | Variable<any, string>,
+	/** Время открытия собрания */
+	open_at: ValueTypes["DateTime"] | Variable<any, string>,
+	/** Имя аккаунта председателя */
+	presider: string | Variable<any, string>,
+	/** Предложение повестки собрания */
+	proposal: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"] | Variable<any, string>,
+	/** Имя аккаунта секретаря */
+	secretary: string | Variable<any, string>
+};
 	["CreateBankAccountInput"]: {
 	/** Данные для банковского перевода */
 	data: ValueTypes["BankAccountInput"] | Variable<any, string>,
@@ -2160,6 +2387,14 @@ export type ValueTypes = {
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["FreeDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания протокола решения */
+	meta?:ValueTypes["FreeDecisionMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -2185,6 +2420,14 @@ export type ValueTypes = {
 	["GenerateDocumentOptionsInput"]: {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null | Variable<any, string>
+};
+	["GenerateSovietDecisionOnAnnualMeetInput"]: {
+	/** Название кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш собрания, для которого генерируется решение совета */
+	meet_hash: string | Variable<any, string>,
+	/** Имя пользователя, создающего документ */
+	username: string | Variable<any, string>
 };
 	["GeneratedDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
@@ -2225,12 +2468,24 @@ export type ValueTypes = {
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр активности */
+	is_available?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр рабочих столов */
 	is_desktop?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр установленных расширений */
 	is_installed?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по имени */
 	name?: string | undefined | null | Variable<any, string>
+};
+	["GetMeetInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хеш собрания */
+	hash: string | Variable<any, string>
+};
+	["GetMeetsInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>
 };
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
@@ -2310,6 +2565,98 @@ export type ValueTypes = {
 	/** Токен доступа */
 	refresh_token: string | Variable<any, string>
 };
+	/** Данные о собрании кооператива */
+["Meet"]: AliasType<{
+	/** Документ с решением совета о проведении собрания */
+	authorization?:ValueTypes["AnnualGeneralMeetingSovietDecisionDocumentAggregate"],
+	/** Дата закрытия собрания */
+	close_at?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания собрания */
+	created_at?:boolean | `@${string}`,
+	/** Текущий процент кворума */
+	current_quorum_percent?:boolean | `@${string}`,
+	/** Цикл собрания */
+	cycle?:boolean | `@${string}`,
+	/** Хеш собрания */
+	hash?:boolean | `@${string}`,
+	/** Уникальный идентификатор собрания */
+	id?:boolean | `@${string}`,
+	/** Инициатор собрания */
+	initiator?:boolean | `@${string}`,
+	/** Дата открытия собрания */
+	open_at?:boolean | `@${string}`,
+	/** Председатель собрания */
+	presider?:boolean | `@${string}`,
+	/** Документ с повесткой собрания */
+	proposal?:ValueTypes["AnnualGeneralMeetingAgendaDocumentAggregate"],
+	/** Флаг достижения кворума */
+	quorum_passed?:boolean | `@${string}`,
+	/** Процент необходимого кворума */
+	quorum_percent?:boolean | `@${string}`,
+	/** Секретарь собрания */
+	secretary?:boolean | `@${string}`,
+	/** Количество подписанных бюллетеней */
+	signed_ballots?:boolean | `@${string}`,
+	/** Статус собрания */
+	status?:boolean | `@${string}`,
+	/** Тип собрания */
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Агрегат данных о собрании, содержащий информацию о разных этапах */
+["MeetAggregate"]: AliasType<{
+	/** Хеш собрания */
+	hash?:boolean | `@${string}`,
+	/** Данные собрания на этапе предварительной обработки */
+	pre?:ValueTypes["MeetPreProcessing"],
+	/** Данные собрания после обработки */
+	processed?:ValueTypes["MeetProcessed"],
+	/** Данные собрания на этапе обработки */
+	processing?:ValueTypes["MeetProcessing"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Предварительные данные собрания перед обработкой */
+["MeetPreProcessing"]: AliasType<{
+	/** Повестка собрания */
+	agenda?:ValueTypes["AgendaMeetPoint"],
+	/** Дата закрытия собрания */
+	close_at?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Хеш собрания */
+	hash?:boolean | `@${string}`,
+	/** Инициатор собрания */
+	initiator?:boolean | `@${string}`,
+	/** Дата открытия собрания */
+	open_at?:boolean | `@${string}`,
+	/** Председатель собрания */
+	presider?:boolean | `@${string}`,
+	/** Документ с повесткой собрания */
+	proposal?:ValueTypes["AnnualGeneralMeetingAgendaDocumentAggregate"],
+	/** Секретарь собрания */
+	secretary?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Данные о собрании после обработки */
+["MeetProcessed"]: AliasType<{
+	/** Решение по собранию в формате блокчейн-действия */
+	decision?:ValueTypes["BlockchainAction"],
+	/** Хеш собрания */
+	hash?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Данные о собрании в процессе обработки */
+["MeetProcessing"]: AliasType<{
+	/** Хеш собрания */
+	hash?:boolean | `@${string}`,
+	/** Основная информация о собрании */
+	meet?:ValueTypes["Meet"],
+	/** Список вопросов повестки собрания */
+	questions?:ValueTypes["Question"],
+		__typename?: boolean | `@${string}`
+}>;
 	["MetaDocument"]: AliasType<{
 	/** Номер блока, на котором был создан документ */
 	block_num?:boolean | `@${string}`,
@@ -2401,9 +2748,11 @@ acceptChildOrder?: [{	data: ValueTypes["AcceptChildOrderInput"] | Variable<any, 
 addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+closeAnnualGeneralMeet?: [{	data: ValueTypes["CloseAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ValueTypes["ConfirmSupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+createAnnualGeneralMeet?: [{	data: ValueTypes["CreateAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
 createChildOrder?: [{	data: ValueTypes["CreateChildOrderInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -2418,6 +2767,7 @@ deleteTrustedAccount?: [{	data: ValueTypes["DeleteTrustedAccountInput"] | Variab
 deliverOnRequest?: [{	data: ValueTypes["DeliverOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 disputeOnRequest?: [{	data: ValueTypes["DisputeOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 editBranch?: [{	data: ValueTypes["EditBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
+generateAnnualGeneralMeetAgendaDocument?: [{	data: ValueTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["AnnualGeneralMeetingAgendaDocument"]],
 generateAssetContributionAct?: [{	data: ValueTypes["AssetContributionActGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["AssetContributionActDocument"]],
 generateAssetContributionDecision?: [{	data: ValueTypes["AssetContributionDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["AssetContributionDecisionDocument"]],
 generateAssetContributionStatement?: [{	data: ValueTypes["AssetContributionStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["AssetContributionStatementDocument"]],
@@ -2431,6 +2781,7 @@ generateReturnByAssetDecision?: [{	data: ValueTypes["ReturnByAssetDecisionGenera
 generateReturnByAssetStatement?: [{	data: ValueTypes["ReturnByAssetStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["ReturnByAssetStatementDocument"]],
 generateSelectBranchDocument?: [{	data: ValueTypes["SelectBranchGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["SelectBranchDocument"]],
 generateSignatureAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+generateSovietDecisionOnAnnualMeetDocument?: [{	data: ValueTypes["GenerateSovietDecisionOnAnnualMeetInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["AnnualGeneralMeetingSovietDecisionDocument"]],
 generateUserAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateWalletAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 initSystem?: [{	data: ValueTypes["Init"] | Variable<any, string>},ValueTypes["SystemInfo"]],
@@ -2447,6 +2798,7 @@ refresh?: [{	data: ValueTypes["RefreshInput"] | Variable<any, string>},ValueType
 registerAccount?: [{	data: ValueTypes["RegisterAccountInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 registerParticipant?: [{	data: ValueTypes["RegisterParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
+restartAnnualGeneralMeet?: [{	data: ValueTypes["RestartAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 setPaymentStatus?: [{	data: ValueTypes["SetPaymentStatusInput"] | Variable<any, string>},ValueTypes["Payment"]],
 setWif?: [{	data: ValueTypes["SetWifInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -2459,6 +2811,7 @@ updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any
 updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
 updateRequest?: [{	data: ValueTypes["UpdateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes["SystemInfo"]],
+voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
 }>;
 	["Organization"]: AliasType<{
@@ -2605,6 +2958,14 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ParticipantApplicationDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["ParticipantApplicationDecisionMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ParticipantApplicationDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -2614,7 +2975,6 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	hash?:boolean | `@${string}`,
 	/** HTML содержимое документа */
 	html?:boolean | `@${string}`,
-	/** Метаинформация для создания проекта свободного решения */
 	meta?:ValueTypes["ParticipantApplicationMetaDocumentOutput"],
 		__typename?: boolean | `@${string}`
 }>;
@@ -2671,10 +3031,16 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ParticipantApplicationSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	meta?:ValueTypes["ParticipantApplicationMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ParticipantApplicationSignedDocumentInput"]: {
 	/** Хэш документа */
 	hash: string | Variable<any, string>,
-	/** Метаинформация для создания проекта свободного решения */
 	meta: ValueTypes["ParticipantApplicationSignedMetaDocumentInput"] | Variable<any, string>,
 	/** Публичный ключ документа */
 	public_key: string | Variable<any, string>,
@@ -2925,6 +3291,14 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ProjectFreeDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["ProjectFreeDecisionMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ProjectFreeDecisionSignedDocumentInput"]: {
 	/** Хэш документа */
 	hash: string | Variable<any, string>,
@@ -2995,10 +3369,42 @@ getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},V
 	getDesktop?:ValueTypes["Desktop"],
 getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>},ValueTypes["DocumentsPaginationResult"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
+getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
+getMeets?: [{	data: ValueTypes["GetMeetsInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentMethodPaginationResult"]],
 getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentPaginationResult"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Вопрос повестки собрания с результатами голосования */
+["Question"]: AliasType<{
+	/** Контекст или дополнительная информация по вопросу */
+	context?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Количество голосов "Воздержался" */
+	counter_votes_abstained?:boolean | `@${string}`,
+	/** Количество голосов "Против" */
+	counter_votes_against?:boolean | `@${string}`,
+	/** Количество голосов "За" */
+	counter_votes_for?:boolean | `@${string}`,
+	/** Предлагаемое решение по вопросу */
+	decision?:boolean | `@${string}`,
+	/** Уникальный идентификатор вопроса */
+	id?:boolean | `@${string}`,
+	/** Идентификатор собрания, к которому относится вопрос */
+	meet_id?:boolean | `@${string}`,
+	/** Порядковый номер вопроса в повестке */
+	number?:boolean | `@${string}`,
+	/** Заголовок вопроса */
+	title?:boolean | `@${string}`,
+	/** Список участников, проголосовавших "Воздержался" */
+	voters_abstained?:boolean | `@${string}`,
+	/** Список участников, проголосовавших "Против" */
+	voters_against?:boolean | `@${string}`,
+	/** Список участников, проголосовавших "За" */
+	voters_for?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["ReceiveOnRequestInput"]: {
@@ -3115,6 +3521,19 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	ram_bytes?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** DTO для перезапуска ежегодного общего собрания кооператива */
+["RestartAnnualGeneralMeetInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хеш собрания, которое необходимо перезапустить */
+	hash: string | Variable<any, string>,
+	/** Новая дата закрытия собрания */
+	new_close_at: ValueTypes["DateTime"] | Variable<any, string>,
+	/** Новая дата открытия собрания */
+	new_open_at: ValueTypes["DateTime"] | Variable<any, string>,
+	/** Новое предложение повестки ежегодного общего собрания */
+	newproposal: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"] | Variable<any, string>
+};
 	["ReturnByAssetActDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -3193,6 +3612,14 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	username?:boolean | `@${string}`,
 	/** Версия генератора, использованного для создания документа */
 	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetActSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["ReturnByAssetActMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["ReturnByAssetActSignedDocumentInput"]: {
@@ -3307,6 +3734,14 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ReturnByAssetDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["ReturnByAssetDecisionMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ReturnByAssetStatementDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -3369,6 +3804,14 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	username?:boolean | `@${string}`,
 	/** Версия генератора, использованного для создания документа */
 	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetStatementSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ValueTypes["ReturnByAssetStatementMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["ReturnByAssetStatementSignedDocumentInput"]: {
@@ -3484,6 +3927,14 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	username?:boolean | `@${string}`,
 	/** Версия генератора, использованного для создания документа */
 	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["SelectBranchSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta?:ValueTypes["SelectBranchMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["SelectBranchSignedDocumentInput"]: {
@@ -3851,6 +4302,24 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	verificator?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Пункт голосования для ежегодного общего собрания */
+["VoteItemInput"]: {
+	/** Идентификатор вопроса повестки */
+	question_id: string | Variable<any, string>,
+	/** Решение по вопросу (вариант голосования) */
+	vote: string | Variable<any, string>
+};
+	/** Входные данные для голосования на ежегодном общем собрании */
+["VoteOnAnnualGeneralMeetInput"]: {
+	/** Бюллетень с решениями по вопросам повестки */
+	ballot: Array<ValueTypes["VoteItemInput"]> | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хеш собрания, по которому производится голосование */
+	hash: string | Variable<any, string>,
+	/** Идентификатор члена кооператива, который голосует */
+	member: string | Variable<any, string>
+};
 	["WaitWeight"]: AliasType<{
 	/** Время ожидания в секундах */
 	wait_sec?:boolean | `@${string}`,
@@ -3968,6 +4437,25 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
+	/** Пункт повестки собрания */
+["AgendaMeetPoint"]: AliasType<{
+	/** Контекст или дополнительная информация по пункту повестки */
+	context?:boolean | `@${string}`,
+	/** Предлагаемое решение по пункту повестки */
+	decision?:boolean | `@${string}`,
+	/** Заголовок пункта повестки */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Пункт повестки собрания (для ввода) */
+["AgendaMeetPointInput"]: {
+	/** Контекст или дополнительная информация по пункту повестки */
+	context: string,
+	/** Предлагаемое решение по пункту повестки */
+	decision: string,
+	/** Заголовок пункта повестки */
+	title: string
+};
 	["AgendaWithDocuments"]: AliasType<{
 	/** Действие, которое привело к появлению вопроса на голосовании */
 	action?:ResolverInputTypes["BlockchainAction"],
@@ -3984,6 +4472,169 @@ export type ResolverInputTypes = {
 	["AgreementVar"]: AliasType<{
 	protocol_day_month_year?:boolean | `@${string}`,
 	protocol_number?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingAgendaDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация для создания повестки общего собрания */
+	meta?:ResolverInputTypes["AnnualGeneralMeetingAgendaMetaDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingAgendaDocumentAggregate"]: AliasType<{
+	/** Хеш документа */
+	hash?:boolean | `@${string}`,
+	/** Исходный документ */
+	rawDocument?:ResolverInputTypes["AnnualGeneralMeetingAgendaDocument"],
+	/** Подписи документа */
+	signatures?:ResolverInputTypes["AnnualGeneralMeetingAgendaSignedDocument"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AnnualGeneralMeetingAgendaMetaDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingAgendaSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания повестки общего собрания */
+	meta?:ResolverInputTypes["AnnualGeneralMeetingAgendaMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания протокола решения */
+	meta: ResolverInputTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AnnualGeneralMeetingSovietDecisionDocument"]: AliasType<{
+	/** Бинарное содержимое документа (base64) */
+	binary?:boolean | `@${string}`,
+	/** Полное название документа */
+	full_title?:boolean | `@${string}`,
+	/** Хэш документа */
+	hash?:boolean | `@${string}`,
+	/** HTML содержимое документа */
+	html?:boolean | `@${string}`,
+	/** Метаинформация */
+	meta?:ResolverInputTypes["AnnualGeneralMeetingSovietDecisionDocumentOutput"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingSovietDecisionDocumentAggregate"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	rawDocument?:ResolverInputTypes["AnnualGeneralMeetingSovietDecisionDocument"],
+	signatures?:ResolverInputTypes["AnnualGeneralMeetingSovietDecisionSignedDocument"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingSovietDecisionDocumentOutput"]: AliasType<{
+	/** Номер блока, на котором был создан документ */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива, связанное с документом */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания документа */
+	created_at?:boolean | `@${string}`,
+	/** Имя генератора, использованного для создания документа */
+	generator?:boolean | `@${string}`,
+	/** Язык документа */
+	lang?:boolean | `@${string}`,
+	/** Ссылки, связанные с документом */
+	links?:boolean | `@${string}`,
+	/** ID документа в реестре */
+	registry_id?:boolean | `@${string}`,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего документ */
+	username?:boolean | `@${string}`,
+	/** Версия генератора, использованного для создания документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AnnualGeneralMeetingSovietDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация */
+	meta?:ResolverInputTypes["AnnualGeneralMeetingSovietDecisionDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["AssetContributionActDocument"]: AliasType<{
@@ -4178,6 +4829,14 @@ export type ResolverInputTypes = {
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["AssetContributionDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["AssetContributionDecisionMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["AssetContributionStatementDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -4240,6 +4899,14 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 	/** Версия генератора, использованного для создания документа */
 	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["AssetContributionStatementSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["AssetContributionStatementMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["AssetContributionStatementSignedDocumentInput"]: {
@@ -4519,6 +5186,15 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	/** Входные данные для закрытия ежегодного общего собрания */
+["CloseAnnualGeneralMeetInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания, которое необходимо закрыть */
+	hash: string,
+	/** Подписанный документ с решением собрания */
+	meet_decision: ResolverInputTypes["SignedDigitalDocumentInput"]
+};
 	["CommonRequestInput"]: {
 	currency: string,
 	hash: string,
@@ -4634,6 +5310,26 @@ export type ResolverInputTypes = {
 }>;
 	/** Страна регистрации пользователя */
 ["Country"]:Country;
+	["CreateAnnualGeneralMeetInput"]: {
+	/** Повестка собрания */
+	agenda: Array<ResolverInputTypes["AgendaMeetPointInput"]>,
+	/** Время закрытия собрания */
+	close_at: ResolverInputTypes["DateTime"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш */
+	hash: string,
+	/** Имя аккаунта инициатора */
+	initiator: string,
+	/** Время открытия собрания */
+	open_at: ResolverInputTypes["DateTime"],
+	/** Имя аккаунта председателя */
+	presider: string,
+	/** Предложение повестки собрания */
+	proposal: ResolverInputTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"],
+	/** Имя аккаунта секретаря */
+	secretary: string
+};
 	["CreateBankAccountInput"]: {
 	/** Данные для банковского перевода */
 	data: ResolverInputTypes["BankAccountInput"],
@@ -5099,6 +5795,14 @@ export type ResolverInputTypes = {
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["FreeDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания протокола решения */
+	meta?:ResolverInputTypes["FreeDecisionMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -5124,6 +5828,14 @@ export type ResolverInputTypes = {
 	["GenerateDocumentOptionsInput"]: {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
+};
+	["GenerateSovietDecisionOnAnnualMeetInput"]: {
+	/** Название кооператива */
+	coopname: string,
+	/** Хэш собрания, для которого генерируется решение совета */
+	meet_hash: string,
+	/** Имя пользователя, создающего документ */
+	username: string
 };
 	["GeneratedDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
@@ -5164,12 +5876,24 @@ export type ResolverInputTypes = {
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null,
+	/** Фильтр активности */
+	is_available?: boolean | undefined | null,
 	/** Фильтр рабочих столов */
 	is_desktop?: boolean | undefined | null,
 	/** Фильтр установленных расширений */
 	is_installed?: boolean | undefined | null,
 	/** Фильтр по имени */
 	name?: string | undefined | null
+};
+	["GetMeetInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания */
+	hash: string
+};
+	["GetMeetsInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string
 };
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
@@ -5249,6 +5973,98 @@ export type ResolverInputTypes = {
 	/** Токен доступа */
 	refresh_token: string
 };
+	/** Данные о собрании кооператива */
+["Meet"]: AliasType<{
+	/** Документ с решением совета о проведении собрания */
+	authorization?:ResolverInputTypes["AnnualGeneralMeetingSovietDecisionDocumentAggregate"],
+	/** Дата закрытия собрания */
+	close_at?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания собрания */
+	created_at?:boolean | `@${string}`,
+	/** Текущий процент кворума */
+	current_quorum_percent?:boolean | `@${string}`,
+	/** Цикл собрания */
+	cycle?:boolean | `@${string}`,
+	/** Хеш собрания */
+	hash?:boolean | `@${string}`,
+	/** Уникальный идентификатор собрания */
+	id?:boolean | `@${string}`,
+	/** Инициатор собрания */
+	initiator?:boolean | `@${string}`,
+	/** Дата открытия собрания */
+	open_at?:boolean | `@${string}`,
+	/** Председатель собрания */
+	presider?:boolean | `@${string}`,
+	/** Документ с повесткой собрания */
+	proposal?:ResolverInputTypes["AnnualGeneralMeetingAgendaDocumentAggregate"],
+	/** Флаг достижения кворума */
+	quorum_passed?:boolean | `@${string}`,
+	/** Процент необходимого кворума */
+	quorum_percent?:boolean | `@${string}`,
+	/** Секретарь собрания */
+	secretary?:boolean | `@${string}`,
+	/** Количество подписанных бюллетеней */
+	signed_ballots?:boolean | `@${string}`,
+	/** Статус собрания */
+	status?:boolean | `@${string}`,
+	/** Тип собрания */
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Агрегат данных о собрании, содержащий информацию о разных этапах */
+["MeetAggregate"]: AliasType<{
+	/** Хеш собрания */
+	hash?:boolean | `@${string}`,
+	/** Данные собрания на этапе предварительной обработки */
+	pre?:ResolverInputTypes["MeetPreProcessing"],
+	/** Данные собрания после обработки */
+	processed?:ResolverInputTypes["MeetProcessed"],
+	/** Данные собрания на этапе обработки */
+	processing?:ResolverInputTypes["MeetProcessing"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Предварительные данные собрания перед обработкой */
+["MeetPreProcessing"]: AliasType<{
+	/** Повестка собрания */
+	agenda?:ResolverInputTypes["AgendaMeetPoint"],
+	/** Дата закрытия собрания */
+	close_at?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Хеш собрания */
+	hash?:boolean | `@${string}`,
+	/** Инициатор собрания */
+	initiator?:boolean | `@${string}`,
+	/** Дата открытия собрания */
+	open_at?:boolean | `@${string}`,
+	/** Председатель собрания */
+	presider?:boolean | `@${string}`,
+	/** Документ с повесткой собрания */
+	proposal?:ResolverInputTypes["AnnualGeneralMeetingAgendaDocumentAggregate"],
+	/** Секретарь собрания */
+	secretary?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Данные о собрании после обработки */
+["MeetProcessed"]: AliasType<{
+	/** Решение по собранию в формате блокчейн-действия */
+	decision?:ResolverInputTypes["BlockchainAction"],
+	/** Хеш собрания */
+	hash?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Данные о собрании в процессе обработки */
+["MeetProcessing"]: AliasType<{
+	/** Хеш собрания */
+	hash?:boolean | `@${string}`,
+	/** Основная информация о собрании */
+	meet?:ResolverInputTypes["Meet"],
+	/** Список вопросов повестки собрания */
+	questions?:ResolverInputTypes["Question"],
+		__typename?: boolean | `@${string}`
+}>;
 	["MetaDocument"]: AliasType<{
 	/** Номер блока, на котором был создан документ */
 	block_num?:boolean | `@${string}`,
@@ -5340,9 +6156,11 @@ acceptChildOrder?: [{	data: ResolverInputTypes["AcceptChildOrderInput"]},Resolve
 addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInputTypes["Account"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
+closeAnnualGeneralMeet?: [{	data: ResolverInputTypes["CloseAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ResolverInputTypes["ConfirmSupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
+createAnnualGeneralMeet?: [{	data: ResolverInputTypes["CreateAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
 createChildOrder?: [{	data: ResolverInputTypes["CreateChildOrderInput"]},ResolverInputTypes["Transaction"]],
@@ -5357,6 +6175,7 @@ deleteTrustedAccount?: [{	data: ResolverInputTypes["DeleteTrustedAccountInput"]}
 deliverOnRequest?: [{	data: ResolverInputTypes["DeliverOnRequestInput"]},ResolverInputTypes["Transaction"]],
 disputeOnRequest?: [{	data: ResolverInputTypes["DisputeOnRequestInput"]},ResolverInputTypes["Transaction"]],
 editBranch?: [{	data: ResolverInputTypes["EditBranchInput"]},ResolverInputTypes["Branch"]],
+generateAnnualGeneralMeetAgendaDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["AnnualGeneralMeetingAgendaDocument"]],
 generateAssetContributionAct?: [{	data: ResolverInputTypes["AssetContributionActGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["AssetContributionActDocument"]],
 generateAssetContributionDecision?: [{	data: ResolverInputTypes["AssetContributionDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["AssetContributionDecisionDocument"]],
 generateAssetContributionStatement?: [{	data: ResolverInputTypes["AssetContributionStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["AssetContributionStatementDocument"]],
@@ -5370,6 +6189,7 @@ generateReturnByAssetDecision?: [{	data: ResolverInputTypes["ReturnByAssetDecisi
 generateReturnByAssetStatement?: [{	data: ResolverInputTypes["ReturnByAssetStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["ReturnByAssetStatementDocument"]],
 generateSelectBranchDocument?: [{	data: ResolverInputTypes["SelectBranchGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["SelectBranchDocument"]],
 generateSignatureAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+generateSovietDecisionOnAnnualMeetDocument?: [{	data: ResolverInputTypes["GenerateSovietDecisionOnAnnualMeetInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["AnnualGeneralMeetingSovietDecisionDocument"]],
 generateUserAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateWalletAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 initSystem?: [{	data: ResolverInputTypes["Init"]},ResolverInputTypes["SystemInfo"]],
@@ -5386,6 +6206,7 @@ refresh?: [{	data: ResolverInputTypes["RefreshInput"]},ResolverInputTypes["Regis
 registerAccount?: [{	data: ResolverInputTypes["RegisterAccountInput"]},ResolverInputTypes["RegisteredAccount"]],
 registerParticipant?: [{	data: ResolverInputTypes["RegisterParticipantInput"]},ResolverInputTypes["Account"]],
 resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`],
+restartAnnualGeneralMeet?: [{	data: ResolverInputTypes["RestartAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
 setPaymentStatus?: [{	data: ResolverInputTypes["SetPaymentStatusInput"]},ResolverInputTypes["Payment"]],
 setWif?: [{	data: ResolverInputTypes["SetWifInput"]},boolean | `@${string}`],
@@ -5398,6 +6219,7 @@ updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},Resol
 updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
 updateRequest?: [{	data: ResolverInputTypes["UpdateRequestInput"]},ResolverInputTypes["Transaction"]],
 updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["SystemInfo"]],
+voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
 }>;
 	["Organization"]: AliasType<{
@@ -5544,6 +6366,14 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ParticipantApplicationDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["ParticipantApplicationDecisionMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ParticipantApplicationDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -5553,7 +6383,6 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	hash?:boolean | `@${string}`,
 	/** HTML содержимое документа */
 	html?:boolean | `@${string}`,
-	/** Метаинформация для создания проекта свободного решения */
 	meta?:ResolverInputTypes["ParticipantApplicationMetaDocumentOutput"],
 		__typename?: boolean | `@${string}`
 }>;
@@ -5610,10 +6439,16 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ParticipantApplicationSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	meta?:ResolverInputTypes["ParticipantApplicationMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ParticipantApplicationSignedDocumentInput"]: {
 	/** Хэш документа */
 	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
 	meta: ResolverInputTypes["ParticipantApplicationSignedMetaDocumentInput"],
 	/** Публичный ключ документа */
 	public_key: string,
@@ -5865,6 +6700,14 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ProjectFreeDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["ProjectFreeDecisionMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ProjectFreeDecisionSignedDocumentInput"]: {
 	/** Хэш документа */
 	hash: string,
@@ -5935,10 +6778,42 @@ getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputType
 	getDesktop?:ResolverInputTypes["Desktop"],
 getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTypes["DocumentsPaginationResult"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
+getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetAggregate"]],
+getMeets?: [{	data: ResolverInputTypes["GetMeetsInput"]},ResolverInputTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaymentMethodPaginationResult"]],
 getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaymentPaginationResult"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Вопрос повестки собрания с результатами голосования */
+["Question"]: AliasType<{
+	/** Контекст или дополнительная информация по вопросу */
+	context?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Количество голосов "Воздержался" */
+	counter_votes_abstained?:boolean | `@${string}`,
+	/** Количество голосов "Против" */
+	counter_votes_against?:boolean | `@${string}`,
+	/** Количество голосов "За" */
+	counter_votes_for?:boolean | `@${string}`,
+	/** Предлагаемое решение по вопросу */
+	decision?:boolean | `@${string}`,
+	/** Уникальный идентификатор вопроса */
+	id?:boolean | `@${string}`,
+	/** Идентификатор собрания, к которому относится вопрос */
+	meet_id?:boolean | `@${string}`,
+	/** Порядковый номер вопроса в повестке */
+	number?:boolean | `@${string}`,
+	/** Заголовок вопроса */
+	title?:boolean | `@${string}`,
+	/** Список участников, проголосовавших "Воздержался" */
+	voters_abstained?:boolean | `@${string}`,
+	/** Список участников, проголосовавших "Против" */
+	voters_against?:boolean | `@${string}`,
+	/** Список участников, проголосовавших "За" */
+	voters_for?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["ReceiveOnRequestInput"]: {
@@ -6055,6 +6930,19 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	ram_bytes?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** DTO для перезапуска ежегодного общего собрания кооператива */
+["RestartAnnualGeneralMeetInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания, которое необходимо перезапустить */
+	hash: string,
+	/** Новая дата закрытия собрания */
+	new_close_at: ResolverInputTypes["DateTime"],
+	/** Новая дата открытия собрания */
+	new_open_at: ResolverInputTypes["DateTime"],
+	/** Новое предложение повестки ежегодного общего собрания */
+	newproposal: ResolverInputTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"]
+};
 	["ReturnByAssetActDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -6133,6 +7021,14 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	username?:boolean | `@${string}`,
 	/** Версия генератора, использованного для создания документа */
 	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetActSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["ReturnByAssetActMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["ReturnByAssetActSignedDocumentInput"]: {
@@ -6247,6 +7143,14 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ReturnByAssetDecisionSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["ReturnByAssetDecisionMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ReturnByAssetStatementDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -6309,6 +7213,14 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	username?:boolean | `@${string}`,
 	/** Версия генератора, использованного для создания документа */
 	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReturnByAssetStatementSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для создания проекта свободного решения */
+	meta?:ResolverInputTypes["ReturnByAssetStatementMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["ReturnByAssetStatementSignedDocumentInput"]: {
@@ -6424,6 +7336,14 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	username?:boolean | `@${string}`,
 	/** Версия генератора, использованного для создания документа */
 	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["SelectBranchSignedDocument"]: AliasType<{
+	hash?:boolean | `@${string}`,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta?:ResolverInputTypes["SelectBranchMetaDocumentOutput"],
+	public_key?:boolean | `@${string}`,
+	signature?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["SelectBranchSignedDocumentInput"]: {
@@ -6793,6 +7713,24 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	verificator?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Пункт голосования для ежегодного общего собрания */
+["VoteItemInput"]: {
+	/** Идентификатор вопроса повестки */
+	question_id: string,
+	/** Решение по вопросу (вариант голосования) */
+	vote: string
+};
+	/** Входные данные для голосования на ежегодном общем собрании */
+["VoteOnAnnualGeneralMeetInput"]: {
+	/** Бюллетень с решениями по вопросам повестки */
+	ballot: Array<ResolverInputTypes["VoteItemInput"]>,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания, по которому производится голосование */
+	hash: string,
+	/** Идентификатор члена кооператива, который голосует */
+	member: string
+};
 	["WaitWeight"]: AliasType<{
 	/** Время ожидания в секундах */
 	wait_sec?:boolean | `@${string}`,
@@ -6907,6 +7845,24 @@ export type ModelTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
+	/** Пункт повестки собрания */
+["AgendaMeetPoint"]: {
+		/** Контекст или дополнительная информация по пункту повестки */
+	context: string,
+	/** Предлагаемое решение по пункту повестки */
+	decision: string,
+	/** Заголовок пункта повестки */
+	title: string
+};
+	/** Пункт повестки собрания (для ввода) */
+["AgendaMeetPointInput"]: {
+	/** Контекст или дополнительная информация по пункту повестки */
+	context: string,
+	/** Предлагаемое решение по пункту повестки */
+	decision: string,
+	/** Заголовок пункта повестки */
+	title: string
+};
 	["AgendaWithDocuments"]: {
 		/** Действие, которое привело к появлению вопроса на голосовании */
 	action: ModelTypes["BlockchainAction"],
@@ -6922,6 +7878,161 @@ export type ModelTypes = {
 	["AgreementVar"]: {
 		protocol_day_month_year: string,
 	protocol_number: string
+};
+	["AnnualGeneralMeetingAgendaDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания повестки общего собрания */
+	meta: ModelTypes["AnnualGeneralMeetingAgendaMetaDocumentOutput"]
+};
+	["AnnualGeneralMeetingAgendaDocumentAggregate"]: {
+		/** Хеш документа */
+	hash: string,
+	/** Исходный документ */
+	rawDocument?: ModelTypes["AnnualGeneralMeetingAgendaDocument"] | undefined | null,
+	/** Подписи документа */
+	signatures: Array<ModelTypes["AnnualGeneralMeetingAgendaSignedDocument"]>
+};
+	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AnnualGeneralMeetingAgendaMetaDocumentOutput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AnnualGeneralMeetingAgendaSignedDocument"]: {
+		hash: string,
+	/** Метаинформация для создания повестки общего собрания */
+	meta: ModelTypes["AnnualGeneralMeetingAgendaMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
+	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
+	/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания протокола решения */
+	meta: ModelTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AnnualGeneralMeetingSovietDecisionDocument"]: {
+		/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация */
+	meta: ModelTypes["AnnualGeneralMeetingSovietDecisionDocumentOutput"]
+};
+	["AnnualGeneralMeetingSovietDecisionDocumentAggregate"]: {
+		hash: string,
+	rawDocument?: ModelTypes["AnnualGeneralMeetingSovietDecisionDocument"] | undefined | null,
+	signatures: Array<ModelTypes["AnnualGeneralMeetingSovietDecisionSignedDocument"]>
+};
+	["AnnualGeneralMeetingSovietDecisionDocumentOutput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AnnualGeneralMeetingSovietDecisionSignedDocument"]: {
+		hash: string,
+	/** Метаинформация */
+	meta: ModelTypes["AnnualGeneralMeetingSovietDecisionDocumentOutput"],
+	public_key: string,
+	signature: string
 };
 	["AssetContributionActDocument"]: {
 		/** Бинарное содержимое документа (base64) */
@@ -7111,6 +8222,13 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["AssetContributionDecisionSignedDocument"]: {
+		hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["AssetContributionDecisionMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["AssetContributionStatementDocument"]: {
 		/** Бинарное содержимое документа (base64) */
 	binary: string,
@@ -7172,6 +8290,13 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["AssetContributionStatementSignedDocument"]: {
+		hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["AssetContributionStatementMetaDocumentOutput"],
+	public_key: string,
+	signature: string
 };
 	["AssetContributionStatementSignedDocumentInput"]: {
 	/** Хэш документа */
@@ -7440,6 +8565,15 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	/** Входные данные для закрытия ежегодного общего собрания */
+["CloseAnnualGeneralMeetInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания, которое необходимо закрыть */
+	hash: string,
+	/** Подписанный документ с решением собрания */
+	meet_decision: ModelTypes["SignedDigitalDocumentInput"]
+};
 	["CommonRequestInput"]: {
 	currency: string,
 	hash: string,
@@ -7551,6 +8685,26 @@ export type ModelTypes = {
 	verifications: Array<ModelTypes["Verification"]>
 };
 	["Country"]:Country;
+	["CreateAnnualGeneralMeetInput"]: {
+	/** Повестка собрания */
+	agenda: Array<ModelTypes["AgendaMeetPointInput"]>,
+	/** Время закрытия собрания */
+	close_at: ModelTypes["DateTime"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш */
+	hash: string,
+	/** Имя аккаунта инициатора */
+	initiator: string,
+	/** Время открытия собрания */
+	open_at: ModelTypes["DateTime"],
+	/** Имя аккаунта председателя */
+	presider: string,
+	/** Предложение повестки собрания */
+	proposal: ModelTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"],
+	/** Имя аккаунта секретаря */
+	secretary: string
+};
 	["CreateBankAccountInput"]: {
 	/** Данные для банковского перевода */
 	data: ModelTypes["BankAccountInput"],
@@ -8000,6 +9154,13 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["FreeDecisionSignedDocument"]: {
+		hash: string,
+	/** Метаинформация для создания протокола решения */
+	meta: ModelTypes["FreeDecisionMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -8025,6 +9186,14 @@ export type ModelTypes = {
 	["GenerateDocumentOptionsInput"]: {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
+};
+	["GenerateSovietDecisionOnAnnualMeetInput"]: {
+	/** Название кооператива */
+	coopname: string,
+	/** Хэш собрания, для которого генерируется решение совета */
+	meet_hash: string,
+	/** Имя пользователя, создающего документ */
+	username: string
 };
 	["GeneratedDocument"]: {
 		/** Бинарное содержимое документа (base64) */
@@ -8064,12 +9233,24 @@ export type ModelTypes = {
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null,
+	/** Фильтр активности */
+	is_available?: boolean | undefined | null,
 	/** Фильтр рабочих столов */
 	is_desktop?: boolean | undefined | null,
 	/** Фильтр установленных расширений */
 	is_installed?: boolean | undefined | null,
 	/** Фильтр по имени */
 	name?: string | undefined | null
+};
+	["GetMeetInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания */
+	hash: string
+};
+	["GetMeetsInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string
 };
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
@@ -8146,6 +9327,93 @@ export type ModelTypes = {
 	access_token: string,
 	/** Токен доступа */
 	refresh_token: string
+};
+	/** Данные о собрании кооператива */
+["Meet"]: {
+		/** Документ с решением совета о проведении собрания */
+	authorization: ModelTypes["AnnualGeneralMeetingSovietDecisionDocumentAggregate"],
+	/** Дата закрытия собрания */
+	close_at: ModelTypes["DateTime"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Дата создания собрания */
+	created_at: ModelTypes["DateTime"],
+	/** Текущий процент кворума */
+	current_quorum_percent: number,
+	/** Цикл собрания */
+	cycle: number,
+	/** Хеш собрания */
+	hash: string,
+	/** Уникальный идентификатор собрания */
+	id: number,
+	/** Инициатор собрания */
+	initiator: string,
+	/** Дата открытия собрания */
+	open_at: ModelTypes["DateTime"],
+	/** Председатель собрания */
+	presider: string,
+	/** Документ с повесткой собрания */
+	proposal: ModelTypes["AnnualGeneralMeetingAgendaDocumentAggregate"],
+	/** Флаг достижения кворума */
+	quorum_passed: boolean,
+	/** Процент необходимого кворума */
+	quorum_percent: number,
+	/** Секретарь собрания */
+	secretary: string,
+	/** Количество подписанных бюллетеней */
+	signed_ballots: number,
+	/** Статус собрания */
+	status: string,
+	/** Тип собрания */
+	type: string
+};
+	/** Агрегат данных о собрании, содержащий информацию о разных этапах */
+["MeetAggregate"]: {
+		/** Хеш собрания */
+	hash: string,
+	/** Данные собрания на этапе предварительной обработки */
+	pre?: ModelTypes["MeetPreProcessing"] | undefined | null,
+	/** Данные собрания после обработки */
+	processed?: ModelTypes["MeetProcessed"] | undefined | null,
+	/** Данные собрания на этапе обработки */
+	processing?: ModelTypes["MeetProcessing"] | undefined | null
+};
+	/** Предварительные данные собрания перед обработкой */
+["MeetPreProcessing"]: {
+		/** Повестка собрания */
+	agenda: Array<ModelTypes["AgendaMeetPoint"]>,
+	/** Дата закрытия собрания */
+	close_at: ModelTypes["DateTime"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания */
+	hash: string,
+	/** Инициатор собрания */
+	initiator: string,
+	/** Дата открытия собрания */
+	open_at: ModelTypes["DateTime"],
+	/** Председатель собрания */
+	presider: string,
+	/** Документ с повесткой собрания */
+	proposal?: ModelTypes["AnnualGeneralMeetingAgendaDocumentAggregate"] | undefined | null,
+	/** Секретарь собрания */
+	secretary: string
+};
+	/** Данные о собрании после обработки */
+["MeetProcessed"]: {
+		/** Решение по собранию в формате блокчейн-действия */
+	decision: ModelTypes["BlockchainAction"],
+	/** Хеш собрания */
+	hash: string
+};
+	/** Данные о собрании в процессе обработки */
+["MeetProcessing"]: {
+		/** Хеш собрания */
+	hash: string,
+	/** Основная информация о собрании */
+	meet: ModelTypes["Meet"],
+	/** Список вопросов повестки собрания */
+	questions: Array<ModelTypes["Question"]>
 };
 	["MetaDocument"]: {
 		/** Номер блока, на котором был создан документ */
@@ -8240,12 +9508,16 @@ export type ModelTypes = {
 	addTrustedAccount: ModelTypes["Branch"],
 	/** Отменить заявку */
 	cancelRequest: ModelTypes["Transaction"],
+	/** Закрытие общего собрания пайщиков */
+	closeAnnualGeneralMeet: ModelTypes["MeetAggregate"],
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: ModelTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 	confirmReceiveOnRequest: ModelTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	confirmSupplyOnRequest: ModelTypes["Transaction"],
+	/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
+	createAnnualGeneralMeet: ModelTypes["MeetAggregate"],
 	/** Добавить метод оплаты */
 	createBankAccount: ModelTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
@@ -8274,6 +9546,8 @@ export type ModelTypes = {
 	disputeOnRequest: ModelTypes["Transaction"],
 	/** Изменить кооперативный участок */
 	editBranch: ModelTypes["Branch"],
+	/** Сгенерировать предложение повестки общего собрания пайщиков */
+	generateAnnualGeneralMeetAgendaDocument: ModelTypes["AnnualGeneralMeetingAgendaDocument"],
 	/** Сгенерировать документ акта приема-передачи. */
 	generateAssetContributionAct: ModelTypes["AssetContributionActDocument"],
 	/** Сгенерировать документ решения о вступлении в кооператив. */
@@ -8300,6 +9574,8 @@ export type ModelTypes = {
 	generateSelectBranchDocument: ModelTypes["SelectBranchDocument"],
 	/** Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи. */
 	generateSignatureAgreement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать документ решения Совета по проведению общего собрания пайщиков */
+	generateSovietDecisionOnAnnualMeetDocument: ModelTypes["AnnualGeneralMeetingSovietDecisionDocument"],
 	/** Сгенерировать документ пользовательского соглашения. */
 	generateUserAgreement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
@@ -8332,6 +9608,8 @@ export type ModelTypes = {
 	registerParticipant: ModelTypes["Account"],
 	/** Заменить приватный ключ аккаунта */
 	resetKey: boolean,
+	/** Перезапуск общего собрания пайщиков */
+	restartAnnualGeneralMeet: ModelTypes["MeetAggregate"],
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
 	/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
@@ -8355,7 +9633,9 @@ export type ModelTypes = {
 	/** Обновить заявку */
 	updateRequest: ModelTypes["Transaction"],
 	/** Обновить параметры системы */
-	updateSystem: ModelTypes["SystemInfo"]
+	updateSystem: ModelTypes["SystemInfo"],
+	/** Голосование на общем собрании пайщиков */
+	voteOnAnnualGeneralMeet: ModelTypes["MeetAggregate"]
 };
 	["Organization"]: {
 		/** Город */
@@ -8495,6 +9775,13 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ParticipantApplicationDecisionSignedDocument"]: {
+		hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ParticipantApplicationDecisionMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["ParticipantApplicationDocument"]: {
 		/** Бинарное содержимое документа (base64) */
 	binary: string,
@@ -8504,7 +9791,6 @@ export type ModelTypes = {
 	hash: string,
 	/** HTML содержимое документа */
 	html: string,
-	/** Метаинформация для создания проекта свободного решения */
 	meta: ModelTypes["ParticipantApplicationMetaDocumentOutput"]
 };
 	["ParticipantApplicationGenerateDocumentInput"]: {
@@ -8559,10 +9845,15 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ParticipantApplicationSignedDocument"]: {
+		hash: string,
+	meta: ModelTypes["ParticipantApplicationMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["ParticipantApplicationSignedDocumentInput"]: {
 	/** Хэш документа */
 	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
 	meta: ModelTypes["ParticipantApplicationSignedMetaDocumentInput"],
 	/** Публичный ключ документа */
 	public_key: string,
@@ -8797,6 +10088,13 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ProjectFreeDecisionSignedDocument"]: {
+		hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ProjectFreeDecisionMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["ProjectFreeDecisionSignedDocumentInput"]: {
 	/** Хэш документа */
 	hash: string,
@@ -8870,12 +10168,45 @@ export type ModelTypes = {
 	getDocuments: ModelTypes["DocumentsPaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<ModelTypes["Extension"]>,
+	/** Получить данные собрания по хешу */
+	getMeet: ModelTypes["MeetAggregate"],
+	/** Получить список всех собраний кооператива */
+	getMeets: Array<ModelTypes["MeetAggregate"]>,
 	/** Получить список методов оплаты */
 	getPaymentMethods: ModelTypes["PaymentMethodPaginationResult"],
 	/** Получить список платежей */
 	getPayments: ModelTypes["PaymentPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"]
+};
+	/** Вопрос повестки собрания с результатами голосования */
+["Question"]: {
+		/** Контекст или дополнительная информация по вопросу */
+	context: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Количество голосов "Воздержался" */
+	counter_votes_abstained: number,
+	/** Количество голосов "Против" */
+	counter_votes_against: number,
+	/** Количество голосов "За" */
+	counter_votes_for: number,
+	/** Предлагаемое решение по вопросу */
+	decision: string,
+	/** Уникальный идентификатор вопроса */
+	id: number,
+	/** Идентификатор собрания, к которому относится вопрос */
+	meet_id: number,
+	/** Порядковый номер вопроса в повестке */
+	number: number,
+	/** Заголовок вопроса */
+	title: string,
+	/** Список участников, проголосовавших "Воздержался" */
+	voters_abstained: Array<string>,
+	/** Список участников, проголосовавших "Против" */
+	voters_against: Array<string>,
+	/** Список участников, проголосовавших "За" */
+	voters_for: Array<string>
 };
 	["ReceiveOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -8986,6 +10317,19 @@ export type ModelTypes = {
 	/** Используемая RAM */
 	ram_bytes: number
 };
+	/** DTO для перезапуска ежегодного общего собрания кооператива */
+["RestartAnnualGeneralMeetInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания, которое необходимо перезапустить */
+	hash: string,
+	/** Новая дата закрытия собрания */
+	new_close_at: ModelTypes["DateTime"],
+	/** Новая дата открытия собрания */
+	new_open_at: ModelTypes["DateTime"],
+	/** Новое предложение повестки ежегодного общего собрания */
+	newproposal: ModelTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"]
+};
 	["ReturnByAssetActDocument"]: {
 		/** Бинарное содержимое документа (base64) */
 	binary: string,
@@ -9063,6 +10407,13 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["ReturnByAssetActSignedDocument"]: {
+		hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ReturnByAssetActMetaDocumentOutput"],
+	public_key: string,
+	signature: string
 };
 	["ReturnByAssetActSignedDocumentInput"]: {
 	/** Хэш документа */
@@ -9174,6 +10525,13 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ReturnByAssetDecisionSignedDocument"]: {
+		hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ReturnByAssetDecisionMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["ReturnByAssetStatementDocument"]: {
 		/** Бинарное содержимое документа (base64) */
 	binary: string,
@@ -9235,6 +10593,13 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["ReturnByAssetStatementSignedDocument"]: {
+		hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: ModelTypes["ReturnByAssetStatementMetaDocumentOutput"],
+	public_key: string,
+	signature: string
 };
 	["ReturnByAssetStatementSignedDocumentInput"]: {
 	/** Хэш документа */
@@ -9347,6 +10712,13 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["SelectBranchSignedDocument"]: {
+		hash: string,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta: ModelTypes["SelectBranchMetaDocumentOutput"],
+	public_key: string,
+	signature: string
 };
 	["SelectBranchSignedDocumentInput"]: {
 	/** Хэш документа */
@@ -9695,6 +11067,24 @@ export type ModelTypes = {
 	/** Имя верификатора */
 	verificator: string
 };
+	/** Пункт голосования для ежегодного общего собрания */
+["VoteItemInput"]: {
+	/** Идентификатор вопроса повестки */
+	question_id: string,
+	/** Решение по вопросу (вариант голосования) */
+	vote: string
+};
+	/** Входные данные для голосования на ежегодном общем собрании */
+["VoteOnAnnualGeneralMeetInput"]: {
+	/** Бюллетень с решениями по вопросам повестки */
+	ballot: Array<ModelTypes["VoteItemInput"]>,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания, по которому производится голосование */
+	hash: string,
+	/** Идентификатор члена кооператива, который голосует */
+	member: string
+};
 	["WaitWeight"]: {
 		/** Время ожидания в секундах */
 	wait_sec: number,
@@ -9818,6 +11208,25 @@ export type GraphQLTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
+	/** Пункт повестки собрания */
+["AgendaMeetPoint"]: {
+	__typename: "AgendaMeetPoint",
+	/** Контекст или дополнительная информация по пункту повестки */
+	context: string,
+	/** Предлагаемое решение по пункту повестки */
+	decision: string,
+	/** Заголовок пункта повестки */
+	title: string
+};
+	/** Пункт повестки собрания (для ввода) */
+["AgendaMeetPointInput"]: {
+		/** Контекст или дополнительная информация по пункту повестки */
+	context: string,
+	/** Предлагаемое решение по пункту повестки */
+	decision: string,
+	/** Заголовок пункта повестки */
+	title: string
+};
 	["AgendaWithDocuments"]: {
 	__typename: "AgendaWithDocuments",
 	/** Действие, которое привело к появлению вопроса на голосовании */
@@ -9835,6 +11244,169 @@ export type GraphQLTypes = {
 	__typename: "AgreementVar",
 	protocol_day_month_year: string,
 	protocol_number: string
+};
+	["AnnualGeneralMeetingAgendaDocument"]: {
+	__typename: "AnnualGeneralMeetingAgendaDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация для создания повестки общего собрания */
+	meta: GraphQLTypes["AnnualGeneralMeetingAgendaMetaDocumentOutput"]
+};
+	["AnnualGeneralMeetingAgendaDocumentAggregate"]: {
+	__typename: "AnnualGeneralMeetingAgendaDocumentAggregate",
+	/** Хеш документа */
+	hash: string,
+	/** Исходный документ */
+	rawDocument?: GraphQLTypes["AnnualGeneralMeetingAgendaDocument"] | undefined | null,
+	/** Подписи документа */
+	signatures: Array<GraphQLTypes["AnnualGeneralMeetingAgendaSignedDocument"]>
+};
+	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AnnualGeneralMeetingAgendaMetaDocumentOutput"]: {
+	__typename: "AnnualGeneralMeetingAgendaMetaDocumentOutput",
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AnnualGeneralMeetingAgendaSignedDocument"]: {
+	__typename: "AnnualGeneralMeetingAgendaSignedDocument",
+	hash: string,
+	/** Метаинформация для создания повестки общего собрания */
+	meta: GraphQLTypes["AnnualGeneralMeetingAgendaMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
+	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
+		/** Хэш документа */
+	hash: string,
+	/** Метаинформация для создания протокола решения */
+	meta: GraphQLTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"],
+	/** Публичный ключ документа */
+	public_key: string,
+	/** Подпись документа */
+	signature: string
+};
+	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AnnualGeneralMeetingSovietDecisionDocument"]: {
+	__typename: "AnnualGeneralMeetingSovietDecisionDocument",
+	/** Бинарное содержимое документа (base64) */
+	binary: string,
+	/** Полное название документа */
+	full_title: string,
+	/** Хэш документа */
+	hash: string,
+	/** HTML содержимое документа */
+	html: string,
+	/** Метаинформация */
+	meta: GraphQLTypes["AnnualGeneralMeetingSovietDecisionDocumentOutput"]
+};
+	["AnnualGeneralMeetingSovietDecisionDocumentAggregate"]: {
+	__typename: "AnnualGeneralMeetingSovietDecisionDocumentAggregate",
+	hash: string,
+	rawDocument?: GraphQLTypes["AnnualGeneralMeetingSovietDecisionDocument"] | undefined | null,
+	signatures: Array<GraphQLTypes["AnnualGeneralMeetingSovietDecisionSignedDocument"]>
+};
+	["AnnualGeneralMeetingSovietDecisionDocumentOutput"]: {
+	__typename: "AnnualGeneralMeetingSovietDecisionDocumentOutput",
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["AnnualGeneralMeetingSovietDecisionSignedDocument"]: {
+	__typename: "AnnualGeneralMeetingSovietDecisionSignedDocument",
+	hash: string,
+	/** Метаинформация */
+	meta: GraphQLTypes["AnnualGeneralMeetingSovietDecisionDocumentOutput"],
+	public_key: string,
+	signature: string
 };
 	["AssetContributionActDocument"]: {
 	__typename: "AssetContributionActDocument",
@@ -10028,6 +11600,14 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["AssetContributionDecisionSignedDocument"]: {
+	__typename: "AssetContributionDecisionSignedDocument",
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["AssetContributionDecisionMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["AssetContributionStatementDocument"]: {
 	__typename: "AssetContributionStatementDocument",
 	/** Бинарное содержимое документа (base64) */
@@ -10091,6 +11671,14 @@ export type GraphQLTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["AssetContributionStatementSignedDocument"]: {
+	__typename: "AssetContributionStatementSignedDocument",
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["AssetContributionStatementMetaDocumentOutput"],
+	public_key: string,
+	signature: string
 };
 	["AssetContributionStatementSignedDocumentInput"]: {
 		/** Хэш документа */
@@ -10369,6 +11957,15 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	/** Входные данные для закрытия ежегодного общего собрания */
+["CloseAnnualGeneralMeetInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания, которое необходимо закрыть */
+	hash: string,
+	/** Подписанный документ с решением собрания */
+	meet_decision: GraphQLTypes["SignedDigitalDocumentInput"]
+};
 	["CommonRequestInput"]: {
 		currency: string,
 	hash: string,
@@ -10484,6 +12081,26 @@ export type GraphQLTypes = {
 };
 	/** Страна регистрации пользователя */
 ["Country"]: Country;
+	["CreateAnnualGeneralMeetInput"]: {
+		/** Повестка собрания */
+	agenda: Array<GraphQLTypes["AgendaMeetPointInput"]>,
+	/** Время закрытия собрания */
+	close_at: GraphQLTypes["DateTime"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш */
+	hash: string,
+	/** Имя аккаунта инициатора */
+	initiator: string,
+	/** Время открытия собрания */
+	open_at: GraphQLTypes["DateTime"],
+	/** Имя аккаунта председателя */
+	presider: string,
+	/** Предложение повестки собрания */
+	proposal: GraphQLTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"],
+	/** Имя аккаунта секретаря */
+	secretary: string
+};
 	["CreateBankAccountInput"]: {
 		/** Данные для банковского перевода */
 	data: GraphQLTypes["BankAccountInput"],
@@ -10949,6 +12566,14 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["FreeDecisionSignedDocument"]: {
+	__typename: "FreeDecisionSignedDocument",
+	hash: string,
+	/** Метаинформация для создания протокола решения */
+	meta: GraphQLTypes["FreeDecisionMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["GenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -10974,6 +12599,14 @@ export type GraphQLTypes = {
 	["GenerateDocumentOptionsInput"]: {
 		/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
+};
+	["GenerateSovietDecisionOnAnnualMeetInput"]: {
+		/** Название кооператива */
+	coopname: string,
+	/** Хэш собрания, для которого генерируется решение совета */
+	meet_hash: string,
+	/** Имя пользователя, создающего документ */
+	username: string
 };
 	["GeneratedDocument"]: {
 	__typename: "GeneratedDocument",
@@ -11014,12 +12647,24 @@ export type GraphQLTypes = {
 	["GetExtensionsInput"]: {
 		/** Фильтр включенных расширений */
 	enabled?: boolean | undefined | null,
+	/** Фильтр активности */
+	is_available?: boolean | undefined | null,
 	/** Фильтр рабочих столов */
 	is_desktop?: boolean | undefined | null,
 	/** Фильтр установленных расширений */
 	is_installed?: boolean | undefined | null,
 	/** Фильтр по имени */
 	name?: string | undefined | null
+};
+	["GetMeetInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания */
+	hash: string
+};
+	["GetMeetsInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string
 };
 	["GetPaymentMethodsInput"]: {
 		/** Количество элементов на странице */
@@ -11098,6 +12743,98 @@ export type GraphQLTypes = {
 	access_token: string,
 	/** Токен доступа */
 	refresh_token: string
+};
+	/** Данные о собрании кооператива */
+["Meet"]: {
+	__typename: "Meet",
+	/** Документ с решением совета о проведении собрания */
+	authorization: GraphQLTypes["AnnualGeneralMeetingSovietDecisionDocumentAggregate"],
+	/** Дата закрытия собрания */
+	close_at: GraphQLTypes["DateTime"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Дата создания собрания */
+	created_at: GraphQLTypes["DateTime"],
+	/** Текущий процент кворума */
+	current_quorum_percent: number,
+	/** Цикл собрания */
+	cycle: number,
+	/** Хеш собрания */
+	hash: string,
+	/** Уникальный идентификатор собрания */
+	id: number,
+	/** Инициатор собрания */
+	initiator: string,
+	/** Дата открытия собрания */
+	open_at: GraphQLTypes["DateTime"],
+	/** Председатель собрания */
+	presider: string,
+	/** Документ с повесткой собрания */
+	proposal: GraphQLTypes["AnnualGeneralMeetingAgendaDocumentAggregate"],
+	/** Флаг достижения кворума */
+	quorum_passed: boolean,
+	/** Процент необходимого кворума */
+	quorum_percent: number,
+	/** Секретарь собрания */
+	secretary: string,
+	/** Количество подписанных бюллетеней */
+	signed_ballots: number,
+	/** Статус собрания */
+	status: string,
+	/** Тип собрания */
+	type: string
+};
+	/** Агрегат данных о собрании, содержащий информацию о разных этапах */
+["MeetAggregate"]: {
+	__typename: "MeetAggregate",
+	/** Хеш собрания */
+	hash: string,
+	/** Данные собрания на этапе предварительной обработки */
+	pre?: GraphQLTypes["MeetPreProcessing"] | undefined | null,
+	/** Данные собрания после обработки */
+	processed?: GraphQLTypes["MeetProcessed"] | undefined | null,
+	/** Данные собрания на этапе обработки */
+	processing?: GraphQLTypes["MeetProcessing"] | undefined | null
+};
+	/** Предварительные данные собрания перед обработкой */
+["MeetPreProcessing"]: {
+	__typename: "MeetPreProcessing",
+	/** Повестка собрания */
+	agenda: Array<GraphQLTypes["AgendaMeetPoint"]>,
+	/** Дата закрытия собрания */
+	close_at: GraphQLTypes["DateTime"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания */
+	hash: string,
+	/** Инициатор собрания */
+	initiator: string,
+	/** Дата открытия собрания */
+	open_at: GraphQLTypes["DateTime"],
+	/** Председатель собрания */
+	presider: string,
+	/** Документ с повесткой собрания */
+	proposal?: GraphQLTypes["AnnualGeneralMeetingAgendaDocumentAggregate"] | undefined | null,
+	/** Секретарь собрания */
+	secretary: string
+};
+	/** Данные о собрании после обработки */
+["MeetProcessed"]: {
+	__typename: "MeetProcessed",
+	/** Решение по собранию в формате блокчейн-действия */
+	decision: GraphQLTypes["BlockchainAction"],
+	/** Хеш собрания */
+	hash: string
+};
+	/** Данные о собрании в процессе обработки */
+["MeetProcessing"]: {
+	__typename: "MeetProcessing",
+	/** Хеш собрания */
+	hash: string,
+	/** Основная информация о собрании */
+	meet: GraphQLTypes["Meet"],
+	/** Список вопросов повестки собрания */
+	questions: Array<GraphQLTypes["Question"]>
 };
 	["MetaDocument"]: {
 	__typename: "MetaDocument",
@@ -11195,12 +12932,16 @@ export type GraphQLTypes = {
 	addTrustedAccount: GraphQLTypes["Branch"],
 	/** Отменить заявку */
 	cancelRequest: GraphQLTypes["Transaction"],
+	/** Закрытие общего собрания пайщиков */
+	closeAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 	confirmReceiveOnRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	confirmSupplyOnRequest: GraphQLTypes["Transaction"],
+	/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
+	createAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
 	/** Добавить метод оплаты */
 	createBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
@@ -11229,6 +12970,8 @@ export type GraphQLTypes = {
 	disputeOnRequest: GraphQLTypes["Transaction"],
 	/** Изменить кооперативный участок */
 	editBranch: GraphQLTypes["Branch"],
+	/** Сгенерировать предложение повестки общего собрания пайщиков */
+	generateAnnualGeneralMeetAgendaDocument: GraphQLTypes["AnnualGeneralMeetingAgendaDocument"],
 	/** Сгенерировать документ акта приема-передачи. */
 	generateAssetContributionAct: GraphQLTypes["AssetContributionActDocument"],
 	/** Сгенерировать документ решения о вступлении в кооператив. */
@@ -11255,6 +12998,8 @@ export type GraphQLTypes = {
 	generateSelectBranchDocument: GraphQLTypes["SelectBranchDocument"],
 	/** Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи. */
 	generateSignatureAgreement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать документ решения Совета по проведению общего собрания пайщиков */
+	generateSovietDecisionOnAnnualMeetDocument: GraphQLTypes["AnnualGeneralMeetingSovietDecisionDocument"],
 	/** Сгенерировать документ пользовательского соглашения. */
 	generateUserAgreement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
@@ -11287,6 +13032,8 @@ export type GraphQLTypes = {
 	registerParticipant: GraphQLTypes["Account"],
 	/** Заменить приватный ключ аккаунта */
 	resetKey: boolean,
+	/** Перезапуск общего собрания пайщиков */
+	restartAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
 	/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
@@ -11310,7 +13057,9 @@ export type GraphQLTypes = {
 	/** Обновить заявку */
 	updateRequest: GraphQLTypes["Transaction"],
 	/** Обновить параметры системы */
-	updateSystem: GraphQLTypes["SystemInfo"]
+	updateSystem: GraphQLTypes["SystemInfo"],
+	/** Голосование на общем собрании пайщиков */
+	voteOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"]
 };
 	["Organization"]: {
 	__typename: "Organization",
@@ -11456,6 +13205,14 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ParticipantApplicationDecisionSignedDocument"]: {
+	__typename: "ParticipantApplicationDecisionSignedDocument",
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ParticipantApplicationDecisionMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["ParticipantApplicationDocument"]: {
 	__typename: "ParticipantApplicationDocument",
 	/** Бинарное содержимое документа (base64) */
@@ -11466,7 +13223,6 @@ export type GraphQLTypes = {
 	hash: string,
 	/** HTML содержимое документа */
 	html: string,
-	/** Метаинформация для создания проекта свободного решения */
 	meta: GraphQLTypes["ParticipantApplicationMetaDocumentOutput"]
 };
 	["ParticipantApplicationGenerateDocumentInput"]: {
@@ -11522,10 +13278,16 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ParticipantApplicationSignedDocument"]: {
+	__typename: "ParticipantApplicationSignedDocument",
+	hash: string,
+	meta: GraphQLTypes["ParticipantApplicationMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["ParticipantApplicationSignedDocumentInput"]: {
 		/** Хэш документа */
 	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
 	meta: GraphQLTypes["ParticipantApplicationSignedMetaDocumentInput"],
 	/** Публичный ключ документа */
 	public_key: string,
@@ -11777,6 +13539,14 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ProjectFreeDecisionSignedDocument"]: {
+	__typename: "ProjectFreeDecisionSignedDocument",
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ProjectFreeDecisionMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["ProjectFreeDecisionSignedDocumentInput"]: {
 		/** Хэш документа */
 	hash: string,
@@ -11852,12 +13622,46 @@ export type GraphQLTypes = {
 	getDocuments: GraphQLTypes["DocumentsPaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<GraphQLTypes["Extension"]>,
+	/** Получить данные собрания по хешу */
+	getMeet: GraphQLTypes["MeetAggregate"],
+	/** Получить список всех собраний кооператива */
+	getMeets: Array<GraphQLTypes["MeetAggregate"]>,
 	/** Получить список методов оплаты */
 	getPaymentMethods: GraphQLTypes["PaymentMethodPaginationResult"],
 	/** Получить список платежей */
 	getPayments: GraphQLTypes["PaymentPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"]
+};
+	/** Вопрос повестки собрания с результатами голосования */
+["Question"]: {
+	__typename: "Question",
+	/** Контекст или дополнительная информация по вопросу */
+	context: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Количество голосов "Воздержался" */
+	counter_votes_abstained: number,
+	/** Количество голосов "Против" */
+	counter_votes_against: number,
+	/** Количество голосов "За" */
+	counter_votes_for: number,
+	/** Предлагаемое решение по вопросу */
+	decision: string,
+	/** Уникальный идентификатор вопроса */
+	id: number,
+	/** Идентификатор собрания, к которому относится вопрос */
+	meet_id: number,
+	/** Порядковый номер вопроса в повестке */
+	number: number,
+	/** Заголовок вопроса */
+	title: string,
+	/** Список участников, проголосовавших "Воздержался" */
+	voters_abstained: Array<string>,
+	/** Список участников, проголосовавших "Против" */
+	voters_against: Array<string>,
+	/** Список участников, проголосовавших "За" */
+	voters_for: Array<string>
 };
 	["ReceiveOnRequestInput"]: {
 		/** Имя аккаунта кооператива */
@@ -11973,6 +13777,19 @@ export type GraphQLTypes = {
 	/** Используемая RAM */
 	ram_bytes: number
 };
+	/** DTO для перезапуска ежегодного общего собрания кооператива */
+["RestartAnnualGeneralMeetInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания, которое необходимо перезапустить */
+	hash: string,
+	/** Новая дата закрытия собрания */
+	new_close_at: GraphQLTypes["DateTime"],
+	/** Новая дата открытия собрания */
+	new_open_at: GraphQLTypes["DateTime"],
+	/** Новое предложение повестки ежегодного общего собрания */
+	newproposal: GraphQLTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"]
+};
 	["ReturnByAssetActDocument"]: {
 	__typename: "ReturnByAssetActDocument",
 	/** Бинарное содержимое документа (base64) */
@@ -12052,6 +13869,14 @@ export type GraphQLTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["ReturnByAssetActSignedDocument"]: {
+	__typename: "ReturnByAssetActSignedDocument",
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ReturnByAssetActMetaDocumentOutput"],
+	public_key: string,
+	signature: string
 };
 	["ReturnByAssetActSignedDocumentInput"]: {
 		/** Хэш документа */
@@ -12165,6 +13990,14 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ReturnByAssetDecisionSignedDocument"]: {
+	__typename: "ReturnByAssetDecisionSignedDocument",
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ReturnByAssetDecisionMetaDocumentOutput"],
+	public_key: string,
+	signature: string
+};
 	["ReturnByAssetStatementDocument"]: {
 	__typename: "ReturnByAssetStatementDocument",
 	/** Бинарное содержимое документа (base64) */
@@ -12228,6 +14061,14 @@ export type GraphQLTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["ReturnByAssetStatementSignedDocument"]: {
+	__typename: "ReturnByAssetStatementSignedDocument",
+	hash: string,
+	/** Метаинформация для создания проекта свободного решения */
+	meta: GraphQLTypes["ReturnByAssetStatementMetaDocumentOutput"],
+	public_key: string,
+	signature: string
 };
 	["ReturnByAssetStatementSignedDocumentInput"]: {
 		/** Хэш документа */
@@ -12343,6 +14184,14 @@ export type GraphQLTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["SelectBranchSignedDocument"]: {
+	__typename: "SelectBranchSignedDocument",
+	hash: string,
+	/** Метаинформация для документа выбора кооперативного участка */
+	meta: GraphQLTypes["SelectBranchMetaDocumentOutput"],
+	public_key: string,
+	signature: string
 };
 	["SelectBranchSignedDocumentInput"]: {
 		/** Хэш документа */
@@ -12711,6 +14560,24 @@ export type GraphQLTypes = {
 	/** Имя верификатора */
 	verificator: string
 };
+	/** Пункт голосования для ежегодного общего собрания */
+["VoteItemInput"]: {
+		/** Идентификатор вопроса повестки */
+	question_id: string,
+	/** Решение по вопросу (вариант голосования) */
+	vote: string
+};
+	/** Входные данные для голосования на ежегодном общем собрании */
+["VoteOnAnnualGeneralMeetInput"]: {
+		/** Бюллетень с решениями по вопросам повестки */
+	ballot: Array<GraphQLTypes["VoteItemInput"]>,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хеш собрания, по которому производится голосование */
+	hash: string,
+	/** Идентификатор члена кооператива, который голосует */
+	member: string
+};
 	["WaitWeight"]: {
 	__typename: "WaitWeight",
 	/** Время ожидания в секундах */
@@ -12771,7 +14638,11 @@ type ZEUS_VARIABLES = {
 	["AccountType"]: ValueTypes["AccountType"];
 	["AddParticipantInput"]: ValueTypes["AddParticipantInput"];
 	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
+	["AgendaMeetPointInput"]: ValueTypes["AgendaMeetPointInput"];
 	["AgreementInput"]: ValueTypes["AgreementInput"];
+	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"];
+	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"];
+	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"];
 	["AssetContributionActGenerateDocumentInput"]: ValueTypes["AssetContributionActGenerateDocumentInput"];
 	["AssetContributionActSignedDocumentInput"]: ValueTypes["AssetContributionActSignedDocumentInput"];
 	["AssetContributionActSignedMetaDocumentInput"]: ValueTypes["AssetContributionActSignedMetaDocumentInput"];
@@ -12782,11 +14653,13 @@ type ZEUS_VARIABLES = {
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["CancelRequestInput"]: ValueTypes["CancelRequestInput"];
+	["CloseAnnualGeneralMeetInput"]: ValueTypes["CloseAnnualGeneralMeetInput"];
 	["CommonRequestInput"]: ValueTypes["CommonRequestInput"];
 	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
 	["ConfirmReceiveOnRequestInput"]: ValueTypes["ConfirmReceiveOnRequestInput"];
 	["ConfirmSupplyOnRequestInput"]: ValueTypes["ConfirmSupplyOnRequestInput"];
 	["Country"]: ValueTypes["Country"];
+	["CreateAnnualGeneralMeetInput"]: ValueTypes["CreateAnnualGeneralMeetInput"];
 	["CreateBankAccountInput"]: ValueTypes["CreateBankAccountInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
 	["CreateChildOrderInput"]: ValueTypes["CreateChildOrderInput"];
@@ -12810,12 +14683,15 @@ type ZEUS_VARIABLES = {
 	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
+	["GenerateSovietDecisionOnAnnualMeetInput"]: ValueTypes["GenerateSovietDecisionOnAnnualMeetInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
 	["GetDocumentsFilterInput"]: ValueTypes["GetDocumentsFilterInput"];
 	["GetDocumentsInput"]: ValueTypes["GetDocumentsInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
+	["GetMeetInput"]: ValueTypes["GetMeetInput"];
+	["GetMeetsInput"]: ValueTypes["GetMeetsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
 	["GetPaymentsInput"]: ValueTypes["GetPaymentsInput"];
 	["Init"]: ValueTypes["Init"];
@@ -12847,6 +14723,7 @@ type ZEUS_VARIABLES = {
 	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
 	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
 	["ResetKeyInput"]: ValueTypes["ResetKeyInput"];
+	["RestartAnnualGeneralMeetInput"]: ValueTypes["RestartAnnualGeneralMeetInput"];
 	["ReturnByAssetActGenerateDocumentInput"]: ValueTypes["ReturnByAssetActGenerateDocumentInput"];
 	["ReturnByAssetActSignedDocumentInput"]: ValueTypes["ReturnByAssetActSignedDocumentInput"];
 	["ReturnByAssetActSignedMetaDocumentInput"]: ValueTypes["ReturnByAssetActSignedMetaDocumentInput"];
@@ -12876,4 +14753,6 @@ type ZEUS_VARIABLES = {
 	["UpdateRequestInput"]: ValueTypes["UpdateRequestInput"];
 	["UserStatus"]: ValueTypes["UserStatus"];
 	["VarsInput"]: ValueTypes["VarsInput"];
+	["VoteItemInput"]: ValueTypes["VoteItemInput"];
+	["VoteOnAnnualGeneralMeetInput"]: ValueTypes["VoteOnAnnualGeneralMeetInput"];
 }
