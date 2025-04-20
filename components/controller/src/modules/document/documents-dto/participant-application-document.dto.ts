@@ -1,6 +1,6 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString, ValidateNested, IsArray } from 'class-validator';
+import { ValidateNested, IsArray, IsString, IsOptional, IsBoolean } from 'class-validator';
 import { Cooperative } from 'cooptypes';
 import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
