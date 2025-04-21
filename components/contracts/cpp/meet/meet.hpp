@@ -33,7 +33,10 @@ public:
     void restartmeet(name coopname, checksum256 hash, document newproposal, time_point_sec new_open_at, time_point_sec new_close_at);
 
     [[eosio::action]]
-    void closemeet(name coopname, checksum256 hash, document meet_decision);
+    void signbysecr(name coopname, checksum256 hash, document secretary_decision);
+    
+    [[eosio::action]]
+    void signbypresid(name coopname, checksum256 hash, document presider_decision);
     
     // Сервисное действие:
     [[eosio::action]] void newgdecision(NEWGDECISION_SIGNATURE);

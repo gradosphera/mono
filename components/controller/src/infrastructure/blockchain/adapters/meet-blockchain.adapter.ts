@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MeetBlockchainPort } from '~/domain/meet/ports/meet-blockchain.port';
 import { BlockchainService } from '../blockchain.service';
-import { MeetContract } from 'cooptypes';
+import { MeetContract, type Cooperative } from 'cooptypes';
 import { TransactResult } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
@@ -17,12 +17,16 @@ import { GetMeetsInputDomainInterface } from '~/domain/meet/interfaces/get-meets
 import { MeetProcessingDomainEntity } from '~/domain/meet/entities/meet-processing-domain.entity';
 import { MeetRowProcessingDomainInterface } from '~/domain/meet/interfaces/meet-row-processing-domain.interface';
 import { QuestionRowProcessingDomainInterface } from '~/domain/meet/interfaces/question-row-processing-domain.interface';
+import { DocumentAggregator } from '~/domain/document/aggregators/document.aggregator';
+import { SignBySecretaryOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/sign-by-secretary-on-annual-general-meet-input-domain.interface';
+import { SignByPresiderOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/sign-by-presider-on-annual-general-meet-input-domain.interface';
 
 @Injectable()
 export class MeetBlockchainAdapter implements MeetBlockchainPort {
   constructor(
     private readonly blockchainService: BlockchainService,
-    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
+    private readonly documentAggregator: DocumentAggregator
   ) {}
 
   async getMeet(data: GetMeetInputDomainInterface): Promise<MeetProcessingDomainEntity | null> {
@@ -40,19 +44,22 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
     }
 
     // Получаем вопросы повестки
-    const questions = await this.getQuestions({ coopname, hash });
-
+    const questions = await this.getQuestions({ coopname, meetId: meetData.id });
     // Преобразуем данные из блокчейна в доменную модель
-    return this.convertBlockchainDataToDomainProcessing(meetData, questions);
+    return await this.convertBlockchainDataToDomainProcessing(meetData, questions);
   }
 
   async getMeets(data: GetMeetsInputDomainInterface): Promise<MeetProcessingDomainEntity[]> {
     const { coopname } = data;
+    console.log(`getMeets: получение данных для кооператива ${coopname}`);
+
     const meetsData = await this.blockchainService.getAllRows(
       MeetContract.contractName.production,
       coopname,
       MeetContract.Tables.Meets.tableName
     );
+
+    console.log(`getMeets: получено ${meetsData?.length || 0} собраний`);
 
     if (!meetsData || meetsData.length === 0) {
       return [];
@@ -60,48 +67,55 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
 
     // Преобразуем данные в домен
     const meetsProcessing = await Promise.all(
-      meetsData.map(async (meetData) => {
+      meetsData.map(async (meetData, index) => {
+        console.log(`getMeets: обработка собрания #${index + 1}, hash: ${meetData.hash}`);
+
         // Получаем вопросы повестки для каждого собрания
-        const questions = await this.getQuestions({ coopname, hash: meetData.hash });
+        const questions = await this.getQuestions({ coopname, meetId: meetData.id });
+        console.log(`getMeets: для собрания ${meetData.hash} получено ${questions.length} вопросов`);
 
         // Формируем обработанные данные в доменном формате
-        return this.convertBlockchainDataToDomainProcessing(meetData, questions);
+        return await this.convertBlockchainDataToDomainProcessing(meetData, questions);
       })
     );
 
+    console.log(`getMeets: обработка завершена, возвращаем ${meetsProcessing.length} собраний`);
     return meetsProcessing;
   }
 
-  async getQuestions(data: { coopname: string; hash: string }): Promise<MeetContract.Tables.Questions.IOutput[]> {
-    const { coopname, hash } = data;
+  async getQuestions(data: { coopname: string; meetId: string }): Promise<MeetContract.Tables.Questions.IOutput[]> {
+    const { coopname, meetId } = data;
     const allQuestions = await this.blockchainService.query(
       MeetContract.contractName.production,
       coopname,
       MeetContract.Tables.Questions.tableName,
       {
         indexPosition: 'secondary',
-        from: hash,
-        to: hash,
+        from: meetId,
+        to: meetId,
       }
     );
-
     return allQuestions;
   }
 
   // Вспомогательный метод для преобразования данных из блокчейна в доменную модель
-  private convertBlockchainDataToDomainProcessing(
+  private async convertBlockchainDataToDomainProcessing(
     meetData: MeetContract.Tables.Meets.IOutput,
     questions: MeetContract.Tables.Questions.IOutput[]
-  ): MeetProcessingDomainEntity {
-    return {
+  ): Promise<MeetProcessingDomainEntity> {
+    const data = {
       hash: meetData.hash,
-      meet: this.convertBlockchainMeetToDomainMeet(meetData),
+      meet: await this.convertBlockchainMeetToDomainMeet(meetData),
       questions: questions.map((q) => this.convertBlockchainQuestionToDomainQuestion(q)),
-    } as MeetProcessingDomainEntity;
+    };
+    console.log('data', data);
+    return data;
   }
 
   // Вспомогательный метод для преобразования данных встречи
-  private convertBlockchainMeetToDomainMeet(meetData: MeetContract.Tables.Meets.IOutput): MeetRowProcessingDomainInterface {
+  private async convertBlockchainMeetToDomainMeet(
+    meetData: MeetContract.Tables.Meets.IOutput
+  ): Promise<MeetRowProcessingDomainInterface> {
     return {
       id: Number(meetData.id),
       hash: meetData.hash,
@@ -119,8 +133,14 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
       current_quorum_percent: Number(meetData.current_quorum_percent),
       cycle: Number(meetData.cycle),
       quorum_passed: meetData.quorum_passed,
-      proposal: this.parseBlockchainDocument(meetData.proposal),
-      authorization: this.parseBlockchainDocument(meetData.authorization),
+      proposal:
+        meetData.proposal.hash !== '0000000000000000000000000000000000000000000000000000000000000000'
+          ? await this.parseBlockchainDocument(meetData.proposal)
+          : null,
+      authorization:
+        meetData.authorization.hash !== '0000000000000000000000000000000000000000000000000000000000000000'
+          ? await this.parseBlockchainDocument(meetData.authorization)
+          : null,
     };
   }
 
@@ -146,10 +166,40 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
   }
 
   // Вспомогательный метод для разбора блокчейн-документа
-  private parseBlockchainDocument(blockchainDoc: any): any {
-    // Преобразование документа из формата блокчейна в формат домена
-    // Здесь должна быть реализована логика разбора документа с учетом специфики домена
-    return blockchainDoc;
+  private async parseBlockchainDocument(blockchainDoc: Cooperative.Document.IChainDocument): Promise<any> {
+    try {
+      if (!blockchainDoc || !blockchainDoc.hash) {
+        console.log('parseBlockchainDocument: документ отсутствует или не содержит hash');
+        return blockchainDoc;
+      }
+
+      console.log(`parseBlockchainDocument: обработка документа hash=${blockchainDoc.hash}`);
+
+      // Логируем тип и значение meta перед преобразованием
+      console.log(`parseBlockchainDocument: тип meta = ${typeof blockchainDoc.meta}`);
+      if (typeof blockchainDoc.meta === 'string') {
+        console.log(`parseBlockchainDocument: первые 100 символов meta = ${blockchainDoc.meta.substring(0, 100)}`);
+      }
+
+      // Конвертируем в формат ISignedDocument
+      const signedDocument: Cooperative.Document.ISignedDocument = {
+        hash: blockchainDoc.hash,
+        public_key: blockchainDoc.public_key,
+        signature: blockchainDoc.signature,
+        meta: typeof blockchainDoc.meta === 'string' ? JSON.parse(blockchainDoc.meta) : blockchainDoc.meta,
+      };
+
+      console.log(`parseBlockchainDocument: подготовлен signedDocument, вызываем buildDocumentAggregate`);
+
+      // Создаем агрегат документа с помощью документного агрегатора
+      const result = await this.documentAggregator.buildDocumentAggregate(signedDocument);
+
+      console.log(`parseBlockchainDocument: получен результат buildDocumentAggregate`);
+      return result;
+    } catch (error) {
+      console.error(`parseBlockchainDocument: ОШИБКА при обработке документа:`, error);
+      throw error; // Перебрасываем ошибку выше для дальнейшей обработки
+    }
   }
 
   async createMeet(data: CreateAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult> {
@@ -225,22 +275,47 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
     return result;
   }
 
-  async closeMeet(data: CloseAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult> {
+  async signBySecretaryOnAnnualGeneralMeet(
+    data: SignBySecretaryOnAnnualGeneralMeetInputDomainInterface
+  ): Promise<TransactionResult> {
     const wif = await Vault.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
 
-    // Преобразуем доменный объект в инфраструктурный тип
-    const blockchainData: MeetContract.Actions.CloseMeet.IInput = {
+    const blockchainData: MeetContract.Actions.SignBySecretary.IInput = {
       coopname: data.coopname,
       hash: data.hash,
-      meet_decision: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.meet_decision),
+      secretary_decision: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.secretary_decision),
     };
 
     const result = (await this.blockchainService.transact({
       account: MeetContract.contractName.production,
-      name: MeetContract.Actions.CloseMeet.actionName,
+      name: MeetContract.Actions.SignBySecretary.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data: blockchainData,
+    })) as TransactResult;
+
+    return result;
+  }
+
+  async signByPresiderOnAnnualGeneralMeet(
+    data: SignByPresiderOnAnnualGeneralMeetInputDomainInterface
+  ): Promise<TransactionResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    const blockchainData: MeetContract.Actions.SignByPresider.IInput = {
+      coopname: data.coopname,
+      hash: data.hash,
+      presider_decision: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.presider_decision),
+    };
+
+    const result = (await this.blockchainService.transact({
+      account: MeetContract.contractName.production,
+      name: MeetContract.Actions.SignByPresider.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data: blockchainData,
     })) as TransactResult;

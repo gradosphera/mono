@@ -9,12 +9,13 @@ import { MeetDomainInteractor } from '~/domain/meet/interactors/meet.interactor'
 import type { MeetAggregateDTO } from '../dto/meet-aggregate.dto';
 import { VoteOnAnnualGeneralMeetInputDTO } from '../dto/vote-on-annual-general-meet-input.dto';
 import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-meet-input.dto';
-import { CloseAnnualGeneralMeetInputDTO } from '../dto/close-annual-general-meet-input.dto';
 import { GenerateSovietDecisionOnAnnualMeetInputDTO } from '../dto/generate-soviet-decision-input.dto';
 import { AnnualGeneralMeetingSovietDecisionDocumentDTO } from '../../document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
 import { Cooperative } from 'cooptypes';
 import { GetMeetInputDTO } from '../dto/get-meet-input.dto';
 import { GetMeetsInputDTO } from '../dto/get-meets-input.dto';
+import { SignBySecretaryOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-secretary-on-annual-general-meet-input.dto';
+import { SignByPresiderOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-presider-on-annual-general-meet-input.dto';
 
 @Injectable()
 export class MeetService {
@@ -68,8 +69,17 @@ export class MeetService {
     return aggregate;
   }
 
-  public async closeMeet(data: CloseAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
-    const aggregate = await this.meetDomainInteractor.closeMeet(data);
+  public async signBySecretaryOnAnnualGeneralMeet(
+    data: SignBySecretaryOnAnnualGeneralMeetInputDTO
+  ): Promise<MeetAggregateDTO> {
+    const aggregate = await this.meetDomainInteractor.signBySecretaryOnAnnualGeneralMeet(data);
+    return aggregate;
+  }
+
+  public async signByPresiderOnAnnualGeneralMeet(
+    data: SignByPresiderOnAnnualGeneralMeetInputDTO
+  ): Promise<MeetAggregateDTO> {
+    const aggregate = await this.meetDomainInteractor.signByPresiderOnAnnualGeneralMeet(data);
     return aggregate;
   }
 }

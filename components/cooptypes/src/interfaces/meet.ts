@@ -13,12 +13,6 @@ export interface IAuthmeet {
   authorization: IDocument
 }
 
-export interface IClosemeet {
-  coopname: IName
-  hash: IChecksum256
-  meet_decision: IDocument
-}
-
 export interface ICreatemeet {
   coopname: IName
   hash: IChecksum256
@@ -63,6 +57,8 @@ export interface IMeet {
   quorum_passed: boolean
   proposal: IDocument
   authorization: IDocument
+  decision1: IDocument
+  decision2: IDocument
 }
 
 export interface IMeetPoint {
@@ -113,6 +109,18 @@ export interface IRestartmeet {
   newproposal: IDocument
   new_open_at: ITimePointSec
   new_close_at: ITimePointSec
+}
+
+export interface ISignbypresid {
+  coopname: IName
+  hash: IChecksum256
+  presider_decision: IDocument
+}
+
+export interface ISignbysecr {
+  coopname: IName
+  hash: IChecksum256
+  secretary_decision: IDocument
 }
 
 export interface IVote {

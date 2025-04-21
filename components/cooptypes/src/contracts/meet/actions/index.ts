@@ -1,5 +1,6 @@
 export * as CreateMeet from './createMeet'
-export * as CloseMeet from './closeMeet'
 export * as RestartMeet from './restartMeet'
 export * as Vote from './vote'
 export * as NewDecision from './newDecision'
+export * as SignBySecretary from './signBySecretary'
+export * as SignByPresider from './signByPresider'

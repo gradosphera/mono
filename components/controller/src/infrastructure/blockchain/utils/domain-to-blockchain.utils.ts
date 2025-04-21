@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Cooperative } from 'cooptypes';
+import moment from 'moment';
 import { SignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 /**
@@ -24,11 +25,11 @@ export class DomainToBlockchainUtils {
   }
 
   /**
-   * Преобразует Date в формат ISO строки для блокчейна
-   * @param date Дата
-   * @returns Строка в формате ISO
+   * Преобразует Date в формат EOSIO time_point_sec для блокчейна
+   * @param date Дата или строка с датой
+   * @returns Строка в формате EOSIO time_point_sec (YYYY-MM-DDTHH:mm:ss.SSS)
    */
   convertDateToBlockchainFormat(date: Date | string): string {
-    return date instanceof Date ? date.toISOString() : date;
+    return moment(date).format('YYYY-MM-DDTHH:mm:ss.SSS');
   }
 }

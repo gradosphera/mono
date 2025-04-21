@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# DESKTOP
+
+- Пишем код фронтенда в архитектуре Feature Sliced Design (FSD). 
+- Стиль шаблонов PUG на composite API. 
+- Всегда создаём index.ts файлы для vue компонент. 
