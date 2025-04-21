@@ -4,6 +4,7 @@ import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants
 import { ListOfDocumentsPage } from 'src/pages/Cooperative/ListOfDocuments'
 import { ListOfOrdersPage } from 'src/pages/Cooperative/ListOfOrders'
 import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
+import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
 
 export default async function () {
   return {
@@ -66,6 +67,17 @@ export default async function () {
               title: 'Общие собрания',
               icon: 'fa-solid fa-users-between-lines',
               roles: ['chairman', 'member'],
+            },
+          },
+          {
+            path: 'meets/:id',
+            name: 'meet-details',
+            component: markRaw(MeetDetailsPage),
+            meta: {
+              title: 'Детали собрания',
+              icon: 'fa-solid fa-users-between-lines',
+              roles: ['chairman', 'member'],
+              hideInMenu: true,
             },
           },
         ]

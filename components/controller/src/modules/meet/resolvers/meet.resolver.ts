@@ -20,6 +20,8 @@ import { GetMeetInputDTO } from '../dto/get-meet-input.dto';
 import { GetMeetsInputDTO } from '../dto/get-meets-input.dto';
 import { SignBySecretaryOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-secretary-on-annual-general-meet-input.dto';
 import { SignByPresiderOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-presider-on-annual-general-meet-input.dto';
+import { GenerateBallotForAnnualGeneralMeetInputDTO } from '../dto/generate-ballot-input.dto';
+import { AnnualGeneralMeetingVotingBallotDocumentDTO } from '~/modules/document/documents-dto/annual-general-meeting-voting-ballot-document.dto';
 
 @Resolver()
 export class MeetResolver {
@@ -94,6 +96,22 @@ export class MeetResolver {
     options: GenerateDocumentOptionsInputDTO
   ): Promise<AnnualGeneralMeetingSovietDecisionDocumentDTO> {
     return this.meetService.generateSovietDecisionOnAnnualMeetDocument(data, options);
+  }
+
+  @Mutation(() => AnnualGeneralMeetingVotingBallotDocumentDTO, {
+    name: 'generateBallotForAnnualGeneralMeetDocument',
+    description: 'Сгенерировать бюллетень для голосования на общем собрании пайщиков',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['member'])
+  async generateBallotForAnnualGeneralMeetDocument(
+    @Args('data', { type: () => GenerateBallotForAnnualGeneralMeetInputDTO })
+    data: GenerateBallotForAnnualGeneralMeetInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<AnnualGeneralMeetingVotingBallotDocumentDTO> {
+    return this.meetService.generateBallotForAnnualGeneralMeet(data, options);
   }
 
   @Mutation(() => MeetAggregateDTO, {

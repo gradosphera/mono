@@ -5,12 +5,13 @@ import {
   VoteOnAnnualGeneralMeetInputDomainInterface,
   VoteItemInputDomainInterface,
 } from '~/domain/meet/interfaces/vote-on-annual-general-meet-input.interface';
+import { AnnualGeneralMeetingVotingBallotSignedDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-voting-ballot-document.dto';
 
 @InputType('VoteItemInput', { description: 'Пункт голосования для ежегодного общего собрания' })
 export class VoteItemInputDTO implements VoteItemInputDomainInterface {
-  @Field(() => String, { description: 'Идентификатор вопроса повестки' })
+  @Field(() => Number, { description: 'Идентификатор вопроса повестки' })
   @IsString()
-  question_id!: string;
+  question_id!: number;
 
   @Field(() => String, { description: 'Решение по вопросу (вариант голосования)' })
   @IsString()
@@ -35,5 +36,12 @@ export class VoteOnAnnualGeneralMeetInputDTO implements VoteOnAnnualGeneralMeetI
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => VoteItemInputDTO)
-  ballot!: VoteItemInputDTO[];
+  votes!: VoteItemInputDTO[];
+
+  @Field(() => AnnualGeneralMeetingVotingBallotSignedDocumentInputDTO, {
+    description: 'Подписанный бюллетень голосования',
+  })
+  @ValidateNested()
+  @Type(() => AnnualGeneralMeetingVotingBallotSignedDocumentInputDTO)
+  ballot!: AnnualGeneralMeetingVotingBallotSignedDocumentInputDTO;
 }

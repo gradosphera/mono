@@ -11,11 +11,13 @@ import { VoteOnAnnualGeneralMeetInputDTO } from '../dto/vote-on-annual-general-m
 import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-meet-input.dto';
 import { GenerateSovietDecisionOnAnnualMeetInputDTO } from '../dto/generate-soviet-decision-input.dto';
 import { AnnualGeneralMeetingSovietDecisionDocumentDTO } from '../../document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
+import { AnnualGeneralMeetingVotingBallotDocumentDTO } from '../../document/documents-dto/annual-general-meeting-voting-ballot-document.dto';
 import { Cooperative } from 'cooptypes';
 import { GetMeetInputDTO } from '../dto/get-meet-input.dto';
 import { GetMeetsInputDTO } from '../dto/get-meets-input.dto';
 import { SignBySecretaryOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-secretary-on-annual-general-meet-input.dto';
 import { SignByPresiderOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-presider-on-annual-general-meet-input.dto';
+import { GenerateBallotForAnnualGeneralMeetInputDTO } from '../dto/generate-ballot-input.dto';
 
 @Injectable()
 export class MeetService {
@@ -47,6 +49,18 @@ export class MeetService {
     const document = await this.meetDomainInteractor.generateSovietDecisionOnAnnualMeetDocument(data, options);
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as AnnualGeneralMeetingSovietDecisionDocumentDTO;
+  }
+
+  public async generateBallotForAnnualGeneralMeet(
+    data: GenerateBallotForAnnualGeneralMeetInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<AnnualGeneralMeetingVotingBallotDocumentDTO> {
+    // Устанавливаем registry_id для документа бюллетеня
+    data.registry_id = Cooperative.Registry.AnnualGeneralMeetingVotingBallot.registry_id;
+
+    const document = await this.meetDomainInteractor.generateBallotForAnnualGeneralMeet(data, options);
+    //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
+    return document as unknown as AnnualGeneralMeetingVotingBallotDocumentDTO;
   }
 
   public async getMeet(data: GetMeetInputDTO): Promise<MeetAggregateDTO> {

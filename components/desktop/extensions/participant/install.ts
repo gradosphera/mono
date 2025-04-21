@@ -3,6 +3,8 @@ import { CoopCardPage } from 'src/pages/User/CardPage'
 import { ConnectionAgreementPage } from 'src/pages/Union/ConnectionAgreement'
 import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage'
 import { ContactsPage } from 'src/pages/Contacts'
+import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
+import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
 import { agreementsBase } from 'src/shared/lib/consts/workspaces'
 
 export default async function () {
@@ -50,6 +52,27 @@ export default async function () {
             path: '/:coopname/connect',
             name: 'payment-methods',
             component: markRaw(UserPaymentMethodsPage),
+          },
+          {
+            meta: {
+              title: 'Общие собрания',
+              icon: 'fa-solid fa-users-between-lines',
+              roles: ['user', 'member', 'chairman'],
+            },
+            path: 'meets',
+            name: 'user-meets',
+            component: markRaw(ListOfMeetsPage),
+          },
+          {
+            path: 'meets/:id',
+            name: 'user-meet-details',
+            component: markRaw(MeetDetailsPage),
+            meta: {
+              title: 'Детали собрания',
+              icon: 'fa-solid fa-users-between-lines',
+              roles: ['user', 'member', 'chairman'],
+              hideInMenu: true,
+            },
           },
           {
             path: '/:coopname/contacts',

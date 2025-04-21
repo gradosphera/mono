@@ -529,6 +529,116 @@ type AnnualGeneralMeetingSovietDecisionSignedDocument {
   signature: String!
 }
 
+type AnnualGeneralMeetingVotingBallotDocument {
+  """Бинарное содержимое документа (base64)"""
+  binary: String!
+
+  """Полное название документа"""
+  full_title: String!
+
+  """Хэш документа"""
+  hash: String!
+
+  """HTML содержимое документа"""
+  html: String!
+
+  """Метаинформация для создания проекта свободного решения"""
+  meta: AnnualGeneralMeetingVotingBallotMetaDocumentOutput!
+}
+
+type AnnualGeneralMeetingVotingBallotMetaDocumentOutput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
+type AnnualGeneralMeetingVotingBallotSignedDocument {
+  hash: String!
+
+  """Метаинформация для создания протокола решения"""
+  meta: AnnualGeneralMeetingVotingBallotMetaDocumentOutput!
+  public_key: String!
+  signature: String!
+}
+
+input AnnualGeneralMeetingVotingBallotSignedDocumentInput {
+  """Хэш документа"""
+  hash: String!
+
+  """Метаинформация для создания протокола решения"""
+  meta: AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput!
+
+  """Публичный ключ документа"""
+  public_key: String!
+
+  """Подпись документа"""
+  signature: String!
+}
+
+input AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
 type AssetContributionActDocument {
   """Бинарное содержимое документа (base64)"""
   binary: String!
@@ -2130,6 +2240,20 @@ type FreeDecisionSignedDocument {
   signature: String!
 }
 
+"""
+Входные данные для генерации бюллетеня для голосования на общем собрании
+"""
+input GenerateBallotForAnnualGeneralMeetInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хеш собрания, для которого генерируется бюллетень"""
+  meet_hash: String!
+
+  """Имя пользователя, для которого генерируется бюллетень"""
+  username: String!
+}
+
 input GenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -2707,6 +2831,9 @@ type Mutation {
 
   """Сгенерировать документ заявления о вступлении в кооператив."""
   generateAssetContributionStatement(data: AssetContributionStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): AssetContributionStatementDocument!
+
+  """Сгенерировать бюллетень для голосования на общем собрании пайщиков"""
+  generateBallotForAnnualGeneralMeetDocument(data: GenerateBallotForAnnualGeneralMeetInput!, options: GenerateDocumentOptionsInput): AnnualGeneralMeetingVotingBallotDocument!
 
   """Сгенерировать протокол решения по предложенной повестке"""
   generateFreeDecision(data: FreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ProjectFreeDecisionDocument!
@@ -4975,7 +5102,7 @@ type Verification {
 """Пункт голосования для ежегодного общего собрания"""
 input VoteItemInput {
   """Идентификатор вопроса повестки"""
-  question_id: String!
+  question_id: Float!
 
   """Решение по вопросу (вариант голосования)"""
   vote: String!
@@ -4983,8 +5110,8 @@ input VoteItemInput {
 
 """Входные данные для голосования на ежегодном общем собрании"""
 input VoteOnAnnualGeneralMeetInput {
-  """Бюллетень с решениями по вопросам повестки"""
-  ballot: [VoteItemInput!]!
+  """Подписанный бюллетень голосования"""
+  ballot: AnnualGeneralMeetingVotingBallotSignedDocumentInput!
 
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -4994,6 +5121,9 @@ input VoteOnAnnualGeneralMeetInput {
 
   """Идентификатор члена кооператива, который голосует"""
   member: String!
+
+  """Бюллетень с решениями по вопросам повестки"""
+  votes: [VoteItemInput!]!
 }
 
 type WaitWeight {
