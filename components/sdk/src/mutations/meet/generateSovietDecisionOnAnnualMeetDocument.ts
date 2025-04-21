@@ -1,4 +1,4 @@
-import { meetAggregateSelector } from '../../selectors/meet'
+import { rawDocumentSelector } from '../../selectors'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'generateSovietDecisionOnAnnualMeetDocument'
@@ -7,7 +7,7 @@ export const name = 'generateSovietDecisionOnAnnualMeetDocument'
  * Генерация документа решения совета о проведении годового общего собрания пайщиков
  */
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'GenerateSovietDecisionOnAnnualMeetInput!') }, meetAggregateSelector],
+  [name]: [{ data: $('data', 'GenerateSovietDecisionOnAnnualMeetInput!') }, rawDocumentSelector],
 })
 
 export interface IInput {

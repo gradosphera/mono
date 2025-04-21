@@ -1,4 +1,4 @@
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, forwardRef } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { BRANCH_BLOCKCHAIN_PORT } from '~/domain/branch/interfaces/branch-blockchain.port';
 import { BLOCKCHAIN_PORT } from '~/domain/common/ports/blockchain.port';
@@ -14,9 +14,11 @@ import { CooplaceBlockchainAdapter } from './adapters/cooplace-blockchain.adapte
 import { MEET_BLOCKCHAIN_PORT } from '~/domain/meet/ports/meet-blockchain.port';
 import { MeetBlockchainAdapter } from './adapters/meet-blockchain.adapter';
 import { DomainToBlockchainUtils } from './utils/domain-to-blockchain.utils';
+import { DomainModule } from '~/domain/domain.module';
 
 @Global()
 @Module({
+  imports: [forwardRef(() => DomainModule)],
   providers: [
     BlockchainService,
     {

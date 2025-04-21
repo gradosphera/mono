@@ -1,6 +1,6 @@
 ---
 description: 
-globs: src/components/sdk
+globs: components/sdk/**
 alwaysApply: false
 ---
 

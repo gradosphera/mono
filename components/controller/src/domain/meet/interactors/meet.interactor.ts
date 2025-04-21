@@ -10,9 +10,10 @@ import { DocumentAggregator } from '~/domain/document/aggregators/document.aggre
 import { MeetPreProcessingDomainEntity } from '../entities/meet-pre-domain.entity';
 import { VoteOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/vote-on-annual-general-meet-input.interface';
 import { RestartAnnualGeneralMeetInputDomainInterface } from '../interfaces/restart-annual-general-meet-input-domain.interface';
-import { CloseAnnualGeneralMeetInputDomainInterface } from '../interfaces/close-annual-general-meet-input-domain.interface';
 import { GetMeetInputDomainInterface } from '../interfaces/get-meet-input-domain.interface';
 import { GetMeetsInputDomainInterface } from '../interfaces/get-meets-input-domain.interface';
+import { SignBySecretaryOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/sign-by-secretary-on-annual-general-meet-input-domain.interface';
+import { SignByPresiderOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/sign-by-presider-on-annual-general-meet-input-domain.interface';
 
 @Injectable()
 export class MeetDomainInteractor {
@@ -39,11 +40,20 @@ export class MeetDomainInteractor {
     // Сохраняем данные в репозиторий
     await this.meetRepository.create(preProcessing);
 
+    // Вызов блокчейн порта для создания собрания
+    await this.meetBlockchainPort.createMeet(data);
+
+    // Получаем обновленные данные из блокчейна
+    const processingData = await this.meetBlockchainPort.getMeet({
+      coopname: data.coopname,
+      hash: preProcessing.hash,
+    });
+
     // Получаем сохраненные данные из репозитория
     const preMeet = await this.meetRepository.findByHash(preProcessing.hash);
 
-    // Создаем агрегат, MeetAggregate сам проверит наличие данных
-    return new MeetAggregate(preMeet);
+    // Создаем агрегат из обоих источников данных (репозиторий и блокчейн)
+    return new MeetAggregate(preMeet, processingData);
   }
 
   async generateAnnualGeneralMeetDecisionDocument(
@@ -101,7 +111,7 @@ export class MeetDomainInteractor {
         return new MeetAggregate(preMeet, processingData);
       })
     );
-
+    console.dir(meetsAggregates, { depth: null });
     return meetsAggregates;
   }
 
@@ -137,19 +147,27 @@ export class MeetDomainInteractor {
     return new MeetAggregate(preMeet, processingData);
   }
 
-  async closeMeet(data: CloseAnnualGeneralMeetInputDomainInterface): Promise<MeetAggregate> {
-    // Вызов блокчейн порта для закрытия собрания
-    await this.meetBlockchainPort.closeMeet(data);
-
-    // Получаем обновленные данные из обоих источников
+  async signBySecretaryOnAnnualGeneralMeet(
+    data: SignBySecretaryOnAnnualGeneralMeetInputDomainInterface
+  ): Promise<MeetAggregate> {
+    await this.meetBlockchainPort.signBySecretaryOnAnnualGeneralMeet(data);
     const processingData = await this.meetBlockchainPort.getMeet({
       coopname: data.coopname,
       hash: data.hash,
     });
-
     const preMeet = await this.meetRepository.findByHash(data.hash);
+    return new MeetAggregate(preMeet, processingData);
+  }
 
-    // Создаем агрегат из обоих источников данных
+  async signByPresiderOnAnnualGeneralMeet(
+    data: SignByPresiderOnAnnualGeneralMeetInputDomainInterface
+  ): Promise<MeetAggregate> {
+    await this.meetBlockchainPort.signByPresiderOnAnnualGeneralMeet(data);
+    const processingData = await this.meetBlockchainPort.getMeet({
+      coopname: data.coopname,
+      hash: data.hash,
+    });
+    const preMeet = await this.meetRepository.findByHash(data.hash);
     return new MeetAggregate(preMeet, processingData);
   }
 }

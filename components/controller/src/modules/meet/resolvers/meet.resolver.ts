@@ -14,11 +14,12 @@ import {
 } from '~/modules/document/documents-dto/annual-general-meeting-agenda-document.dto';
 import { VoteOnAnnualGeneralMeetInputDTO } from '../dto/vote-on-annual-general-meet-input.dto';
 import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-meet-input.dto';
-import { CloseAnnualGeneralMeetInputDTO } from '../dto/close-annual-general-meet-input.dto';
 import { GenerateSovietDecisionOnAnnualMeetInputDTO } from '../dto/generate-soviet-decision-input.dto';
 import { AnnualGeneralMeetingSovietDecisionDocumentDTO } from '~/modules/document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
 import { GetMeetInputDTO } from '../dto/get-meet-input.dto';
 import { GetMeetsInputDTO } from '../dto/get-meets-input.dto';
+import { SignBySecretaryOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-secretary-on-annual-general-meet-input.dto';
+import { SignByPresiderOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-presider-on-annual-general-meet-input.dto';
 
 @Resolver()
 export class MeetResolver {
@@ -122,15 +123,28 @@ export class MeetResolver {
   }
 
   @Mutation(() => MeetAggregateDTO, {
-    name: 'closeAnnualGeneralMeet',
-    description: 'Закрытие общего собрания пайщиков',
+    name: 'signBySecretaryOnAnnualGeneralMeet',
+    description: 'Подписание решения секретарём на общем собрании пайщиков',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['secretary'])
+  async signBySecretaryOnAnnualGeneralMeet(
+    @Args('data', { type: () => SignBySecretaryOnAnnualGeneralMeetInputDTO })
+    data: SignBySecretaryOnAnnualGeneralMeetInputDTO
+  ): Promise<MeetAggregateDTO> {
+    return this.meetService.signBySecretaryOnAnnualGeneralMeet(data);
+  }
+
+  @Mutation(() => MeetAggregateDTO, {
+    name: 'signByPresiderOnAnnualGeneralMeet',
+    description: 'Подписание решения председателем на общем собрании пайщиков',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
-  async closeAnnualGeneralMeet(
-    @Args('data', { type: () => CloseAnnualGeneralMeetInputDTO })
-    data: CloseAnnualGeneralMeetInputDTO
+  async signByPresiderOnAnnualGeneralMeet(
+    @Args('data', { type: () => SignByPresiderOnAnnualGeneralMeetInputDTO })
+    data: SignByPresiderOnAnnualGeneralMeetInputDTO
   ): Promise<MeetAggregateDTO> {
-    return this.meetService.closeMeet(data);
+    return this.meetService.signByPresiderOnAnnualGeneralMeet(data);
   }
 }

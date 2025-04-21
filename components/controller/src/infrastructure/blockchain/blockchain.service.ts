@@ -123,15 +123,13 @@ export class BlockchainService implements BlockchainPort {
       name: tableName,
       client: this.apiClient,
     });
-
-    const rows = await table.query({
+    const rows = await table.all({
       scope,
       index_position: indexPosition,
       from,
       to,
       maxRows,
     });
-
     return JSON.parse(JSON.stringify(rows)) as T[];
   }
 

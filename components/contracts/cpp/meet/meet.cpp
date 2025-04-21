@@ -5,7 +5,8 @@
 #include "src/authmeet.cpp"
 #include "src/declmeet.cpp"
 #include "src/restartmeet.cpp"
-#include "src/closemeet.cpp"
+#include "src/signbysecr.cpp"
+#include "src/signbypresid.cpp"
 #include "src/newgdecision.cpp"
 
 #include <optional>

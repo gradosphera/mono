@@ -352,6 +352,116 @@ input AnnualGeneralMeetingAgendaSignedMetaDocumentInput {
   version: String!
 }
 
+type AnnualGeneralMeetingDecisionDocument {
+  """Бинарное содержимое документа (base64)"""
+  binary: String!
+
+  """Полное название документа"""
+  full_title: String!
+
+  """Хэш документа"""
+  hash: String!
+
+  """HTML содержимое документа"""
+  html: String!
+
+  """Метаинформация"""
+  meta: AnnualGeneralMeetingDecisionDocumentOutput!
+}
+
+type AnnualGeneralMeetingDecisionDocumentOutput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
+type AnnualGeneralMeetingDecisionSignedDocument {
+  hash: String!
+
+  """Метаинформация"""
+  meta: AnnualGeneralMeetingDecisionDocumentOutput!
+  public_key: String!
+  signature: String!
+}
+
+input AnnualGeneralMeetingDecisionSignedDocumentInput {
+  """Хэш документа"""
+  hash: String!
+
+  """Метаинформация"""
+  meta: AnnualGeneralMeetingDecisionSignedMetaDocumentInput!
+
+  """Публичный ключ документа"""
+  public_key: String!
+
+  """Подпись документа"""
+  signature: String!
+}
+
+input AnnualGeneralMeetingDecisionSignedMetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
 type AnnualGeneralMeetingSovietDecisionDocument {
   """Бинарное содержимое документа (base64)"""
   binary: String!
@@ -1169,18 +1279,6 @@ input CancelRequestInput {
 
   """Имя аккаунта пользователя"""
   username: String!
-}
-
-"""Входные данные для закрытия ежегодного общего собрания"""
-input CloseAnnualGeneralMeetInput {
-  """Имя аккаунта кооператива"""
-  coopname: String!
-
-  """Хеш собрания, которое необходимо закрыть"""
-  hash: String!
-
-  """Подписанный документ с решением собрания"""
-  meet_decision: SignedDigitalDocumentInput!
 }
 
 input CommonRequestInput {
@@ -2273,7 +2371,7 @@ input LogoutInput {
 """Данные о собрании кооператива"""
 type Meet {
   """Документ с решением совета о проведении собрания"""
-  authorization: AnnualGeneralMeetingSovietDecisionDocumentAggregate!
+  authorization: AnnualGeneralMeetingSovietDecisionDocumentAggregate
 
   """Дата закрытия собрания"""
   close_at: DateTime!
@@ -2532,9 +2630,6 @@ type Mutation {
   """Отменить заявку"""
   cancelRequest(data: CancelRequestInput!): Transaction!
 
-  """Закрытие общего собрания пайщиков"""
-  closeAnnualGeneralMeet(data: CloseAnnualGeneralMeetInput!): MeetAggregate!
-
   """Завершить заявку по истечению гарантийного срока"""
   completeRequest(data: CompleteRequestInput!): Transaction!
 
@@ -2723,6 +2818,12 @@ type Mutation {
 
   """Сохранить приватный ключ в зашифрованном серверном хранилище"""
   setWif(data: SetWifInput!): Boolean!
+
+  """Подписание решения председателем на общем собрании пайщиков"""
+  signByPresiderOnAnnualGeneralMeet(data: SignByPresiderOnAnnualGeneralMeetInput!): MeetAggregate!
+
+  """Подписание решения секретарём на общем собрании пайщиков"""
+  signBySecretaryOnAnnualGeneralMeet(data: SignBySecretaryOnAnnualGeneralMeetInput!): MeetAggregate!
 
   """
   Выслать токен для замены приватного ключа аккаунта на электронную почту
@@ -4414,6 +4515,30 @@ input SetWifInput {
 
   """Приватный ключ"""
   wif: String!
+}
+
+"""Входные данные для подписи решения председателем"""
+input SignByPresiderOnAnnualGeneralMeetInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хеш собрания"""
+  hash: String!
+
+  """Подписанный документ с решением председателя"""
+  presider_decision: AnnualGeneralMeetingDecisionSignedDocumentInput!
+}
+
+"""Входные данные для подписи решения секретарём"""
+input SignBySecretaryOnAnnualGeneralMeetInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хеш собрания"""
+  hash: String!
+
+  """Подписанный документ с решением секретаря"""
+  secretary_decision: AnnualGeneralMeetingDecisionSignedDocumentInput!
 }
 
 type SignedBlockchainDocument {

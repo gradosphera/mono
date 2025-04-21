@@ -1,4 +1,4 @@
-void meet::closemeet(name coopname, checksum256 hash, document meet_decision) {
+void meet::signbypresid(name coopname, checksum256 hash, document presider_decision) {
     require_auth(coopname);
 
     // 1. Находим собрание по хэшу
@@ -14,12 +14,14 @@ void meet::closemeet(name coopname, checksum256 hash, document meet_decision) {
     // Проверяем, что кворум достигнут
     eosio::check(meet_record.quorum_passed == true, 
                  "Собрание не достигло кворума, не может быть закрыто с успехом.");
-
+    
+    // Проверяем, что секретарь уже подписал протокол
+    eosio::check(meet_record.status == "preclose"_n, "Протокол должен быть сначала подписан секретарем собрания");
+    
     // Проверяем документ
-    verify_document_or_fail(meet_decision);
+    verify_document_or_fail(presider_decision);
 
     // Сформируем данные об итогах голосования по каждому вопросу
-    // (если это нужно, иначе можно просто передавать "пустые" результаты).
     Meet::questions_index questions(_meet, coopname.value);
     auto by_meet = questions.get_index<"bymeet"_n>();
     
@@ -45,11 +47,23 @@ void meet::closemeet(name coopname, checksum256 hash, document meet_decision) {
         });
     }
 
+    // Обновляем запись в таблице, сохраняя решение председателя
+    Meet::meets_index genmeets(_meet, coopname.value);
+    auto hash_index = genmeets.get_index<"byhash"_n>();
+    auto meet_itr = hash_index.find(hash);
+    
+    eosio::check(meet_itr != hash_index.end(), "Собрание не найдено");
+    
+    hash_index.modify(meet_itr, same_payer, [&](auto& m) {
+        m.decision2 = presider_decision;
+        m.status = "closed"_n;
+    });
+
     // *** Вызов сервисного действия newgdecision (inline action) ***
     Action::send<newgdecision_interface>(
         _meet,             // имя контракта, где объявлен action newgdecision
         "newgdecision"_n,  // имя экшена
-        _meet,        // актор (permission_level{get_self(),"active"})
+        _meet,             // актор (permission_level{get_self(),"active"})
         coopname,
         hash,
         results,
@@ -63,10 +77,4 @@ void meet::closemeet(name coopname, checksum256 hash, document meet_decision) {
     while (qitr != by_meet.end() && qitr->meet_id == meet_record.id) {
         qitr = by_meet.erase(qitr);
     }
-
-    // Удаляем само собрание
-    Meet::meets_index genmeets(_meet, coopname.value);
-    auto gm_itr = genmeets.find(meet_record.id);
-    eosio::check(gm_itr != genmeets.end(), "Собрание не найдено в genmeets при удалении");
-    genmeets.erase(gm_itr);
-}
+} 

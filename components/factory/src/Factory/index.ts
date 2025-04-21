@@ -358,16 +358,16 @@ export abstract class DocFactory<T extends IGenerate> {
       year: dateWithTimezone.format('YY'),
     }
   }
-  
+
   constructUHDContract(created_at: string): Cooperative.Document.IUHDContract {
     const date = created_at
       ? moment(created_at, 'DD.MM.YYYY HH:mm')
-      : moment();
-  
+      : moment()
+
     return {
       number: `УХД-${date.format('DD')}-${date.format('MM')}-${date.format('YY')}`,
       date: date.format('DD.MM.YYYY'),
-    };
+    }
   }
 
   getCommonUser(input: InternalGetUserResult): Cooperative.Model.ICommonUser {

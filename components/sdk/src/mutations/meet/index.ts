@@ -1,9 +1,4 @@
 /**
- * Закрытие собрания
- */
-export * as CloseAnnualGeneralMeet from './closeAnnualGeneralMeet'
-
-/**
  * Создание собрания
  */
 export * as CreateAnnualGeneralMeet from './createAnnualGeneralMeet'
@@ -22,6 +17,16 @@ export * as GenerateSovietDecisionOnAnnualMeetDocument from './generateSovietDec
  * Перезапуск собрания
  */
 export * as RestartAnnualGeneralMeet from './restartAnnualGeneralMeet'
+
+/**
+ * Подписание решения председателем
+ */
+export * as SignByPresiderOnAnnualGeneralMeet from './signByPresiderOnAnnualGeneralMeet'
+
+/**
+ * Подписание решения секретарём
+ */
+export * as SignBySecretaryOnAnnualGeneralMeet from './signBySecretaryOnAnnualGeneralMeet'
 
 /**
  * Голосование на собрании

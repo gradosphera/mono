@@ -60,9 +60,10 @@ export class MeetDTO implements MeetRowProcessingDomainInterface {
 
   @Field(() => AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO, {
     description: 'Документ с решением совета о проведении собрания',
+    nullable: true,
   })
   @ValidateNested()
-  authorization!: AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO;
+  authorization?: AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO;
 
   constructor(data: MeetDTO) {
     Object.assign(this, data);

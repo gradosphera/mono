@@ -22,7 +22,7 @@ export interface MeetRowProcessingDomainInterface {
   proposal: DocumentAggregateDomainInterface<
     Cooperative.Registry.AnnualGeneralMeetingAgenda.Action & Cooperative.Document.IMetaDocument
   >;
-  authorization: DocumentAggregateDomainInterface<
+  authorization?: DocumentAggregateDomainInterface<
     Cooperative.Registry.AnnualGeneralMeetingSovietDecision.Action & Cooperative.Document.IMetaDocument
   >;
 }

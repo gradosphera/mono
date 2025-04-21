@@ -1,0 +1,1 @@
+export {default as ListOfMeetsPage} from './ListOfMeetsPage.vue'

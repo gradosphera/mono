@@ -29,6 +29,12 @@ export const AllTypesProps: Record<string,any> = {
 	AnnualGeneralMeetingAgendaSignedMetaDocumentInput:{
 
 	},
+	AnnualGeneralMeetingDecisionSignedDocumentInput:{
+		meta:"AnnualGeneralMeetingDecisionSignedMetaDocumentInput"
+	},
+	AnnualGeneralMeetingDecisionSignedMetaDocumentInput:{
+
+	},
 	AssetContributionActGenerateDocumentInput:{
 
 	},
@@ -58,9 +64,6 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	CancelRequestInput:{
 
-	},
-	CloseAnnualGeneralMeetInput:{
-		meet_decision:"SignedDigitalDocumentInput"
 	},
 	CommonRequestInput:{
 
@@ -221,9 +224,6 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		cancelRequest:{
 			data:"CancelRequestInput"
-		},
-		closeAnnualGeneralMeet:{
-			data:"CloseAnnualGeneralMeetInput"
 		},
 		completeRequest:{
 			data:"CompleteRequestInput"
@@ -401,6 +401,12 @@ export const AllTypesProps: Record<string,any> = {
 		setWif:{
 			data:"SetWifInput"
 		},
+		signByPresiderOnAnnualGeneralMeet:{
+			data:"SignByPresiderOnAnnualGeneralMeetInput"
+		},
+		signBySecretaryOnAnnualGeneralMeet:{
+			data:"SignBySecretaryOnAnnualGeneralMeetInput"
+		},
 		startResetKey:{
 			data:"StartResetKeyInput"
 		},
@@ -573,6 +579,12 @@ export const AllTypesProps: Record<string,any> = {
 	SetWifInput:{
 
 	},
+	SignByPresiderOnAnnualGeneralMeetInput:{
+		presider_decision:"AnnualGeneralMeetingDecisionSignedDocumentInput"
+	},
+	SignBySecretaryOnAnnualGeneralMeetInput:{
+		secretary_decision:"AnnualGeneralMeetingDecisionSignedDocumentInput"
+	},
 	SignedDigitalDocumentInput:{
 		meta:"MetaDocumentInput"
 	},
@@ -720,6 +732,32 @@ export const ReturnTypes: Record<string,any> = {
 	AnnualGeneralMeetingAgendaSignedDocument:{
 		hash:"String",
 		meta:"AnnualGeneralMeetingAgendaMetaDocumentOutput",
+		public_key:"String",
+		signature:"String"
+	},
+	AnnualGeneralMeetingDecisionDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"AnnualGeneralMeetingDecisionDocumentOutput"
+	},
+	AnnualGeneralMeetingDecisionDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"String",
+		links:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
+	AnnualGeneralMeetingDecisionSignedDocument:{
+		hash:"String",
+		meta:"AnnualGeneralMeetingDecisionDocumentOutput",
 		public_key:"String",
 		signature:"String"
 	},
@@ -1234,7 +1272,6 @@ export const ReturnTypes: Record<string,any> = {
 		addParticipant:"Account",
 		addTrustedAccount:"Branch",
 		cancelRequest:"Transaction",
-		closeAnnualGeneralMeet:"MeetAggregate",
 		completeRequest:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
@@ -1288,6 +1325,8 @@ export const ReturnTypes: Record<string,any> = {
 		selectBranch:"Boolean",
 		setPaymentStatus:"Payment",
 		setWif:"Boolean",
+		signByPresiderOnAnnualGeneralMeet:"MeetAggregate",
+		signBySecretaryOnAnnualGeneralMeet:"MeetAggregate",
 		startResetKey:"Boolean",
 		supplyOnRequest:"Transaction",
 		uninstallExtension:"Boolean",

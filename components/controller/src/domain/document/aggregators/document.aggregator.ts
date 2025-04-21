@@ -25,7 +25,6 @@ export class DocumentAggregator {
   ): Promise<DocumentDomainAggregate<T>> {
     // Получаем полный документ по хешу
     const document = await this.getDocumentByHash(signedDoc.hash);
-
     // Проверяем, что в метаданных документа есть username
     if (!signedDoc.meta || !signedDoc.meta.username) {
       throw new BadRequestException('В документе отсутствует информация о пользователе (username)');
@@ -46,7 +45,6 @@ export class DocumentAggregator {
     };
 
     const signatures = [signature];
-
     return new DocumentDomainAggregate<T>(signedDoc.hash, document, signatures);
   }
 

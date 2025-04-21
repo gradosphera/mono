@@ -7,9 +7,9 @@ export const authorizations = [{ permissions: [Permissions.active], actor: Contr
 /**
  * Имя действия
  */
-export const actionName = 'closemeet'
+export const actionName = 'signbysecr'
 
 /**
  * @interface
  */
-export type IInput = Meet.IClosemeet
+export type IInput = Meet.ISignbysecr
