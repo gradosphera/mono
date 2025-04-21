@@ -35,6 +35,12 @@ export const AllTypesProps: Record<string,any> = {
 	AnnualGeneralMeetingDecisionSignedMetaDocumentInput:{
 
 	},
+	AnnualGeneralMeetingVotingBallotSignedDocumentInput:{
+		meta:"AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"
+	},
+	AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput:{
+
+	},
 	AssetContributionActGenerateDocumentInput:{
 
 	},
@@ -150,6 +156,9 @@ export const AllTypesProps: Record<string,any> = {
 		updated_at:"DateTime"
 	},
 	FreeDecisionGenerateDocumentInput:{
+
+	},
+	GenerateBallotForAnnualGeneralMeetInput:{
 
 	},
 	GenerateDocumentInput:{
@@ -293,6 +302,10 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		generateAssetContributionStatement:{
 			data:"AssetContributionStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateBallotForAnnualGeneralMeetDocument:{
+			data:"GenerateBallotForAnnualGeneralMeetInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		generateFreeDecision:{
@@ -643,7 +656,8 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	VoteOnAnnualGeneralMeetInput:{
-		ballot:"VoteItemInput"
+		ballot:"AnnualGeneralMeetingVotingBallotSignedDocumentInput",
+		votes:"VoteItemInput"
 	}
 }
 
@@ -789,6 +803,32 @@ export const ReturnTypes: Record<string,any> = {
 	AnnualGeneralMeetingSovietDecisionSignedDocument:{
 		hash:"String",
 		meta:"AnnualGeneralMeetingSovietDecisionDocumentOutput",
+		public_key:"String",
+		signature:"String"
+	},
+	AnnualGeneralMeetingVotingBallotDocument:{
+		binary:"String",
+		full_title:"String",
+		hash:"String",
+		html:"String",
+		meta:"AnnualGeneralMeetingVotingBallotMetaDocumentOutput"
+	},
+	AnnualGeneralMeetingVotingBallotMetaDocumentOutput:{
+		block_num:"Int",
+		coopname:"String",
+		created_at:"String",
+		generator:"String",
+		lang:"String",
+		links:"String",
+		registry_id:"Int",
+		timezone:"String",
+		title:"String",
+		username:"String",
+		version:"String"
+	},
+	AnnualGeneralMeetingVotingBallotSignedDocument:{
+		hash:"String",
+		meta:"AnnualGeneralMeetingVotingBallotMetaDocumentOutput",
 		public_key:"String",
 		signature:"String"
 	},
@@ -1294,6 +1334,7 @@ export const ReturnTypes: Record<string,any> = {
 		generateAssetContributionAct:"AssetContributionActDocument",
 		generateAssetContributionDecision:"AssetContributionDecisionDocument",
 		generateAssetContributionStatement:"AssetContributionStatementDocument",
+		generateBallotForAnnualGeneralMeetDocument:"AnnualGeneralMeetingVotingBallotDocument",
 		generateFreeDecision:"ProjectFreeDecisionDocument",
 		generateParticipantApplication:"ParticipantApplicationDocument",
 		generateParticipantApplicationDecision:"ParticipantApplicationDecisionDocument",

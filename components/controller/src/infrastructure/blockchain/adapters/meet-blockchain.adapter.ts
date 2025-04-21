@@ -233,11 +233,12 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
     this.blockchainService.initialize(data.coopname, wif);
 
     // Преобразуем доменный объект в инфраструктурный тип
-    const blockchainData: MeetContract.Actions.Vote.IInput = {
+    const blockchainData = {
       coopname: data.coopname,
       hash: data.hash,
       member: data.member,
-      ballot: data.ballot,
+      ballot: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.ballot),
+      votes: data.votes,
     };
 
     const result = (await this.blockchainService.transact({

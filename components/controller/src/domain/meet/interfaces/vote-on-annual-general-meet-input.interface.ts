@@ -1,8 +1,11 @@
+import { Cooperative } from 'cooptypes';
+import type { SignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+
 /**
  * Интерфейс элемента голосования
  */
 export interface VoteItemInputDomainInterface {
-  question_id: string;
+  question_id: number;
   vote: string;
 }
 
@@ -13,5 +16,6 @@ export interface VoteOnAnnualGeneralMeetInputDomainInterface {
   coopname: string;
   hash: string;
   member: string;
-  ballot: VoteItemInputDomainInterface[];
+  votes: VoteItemInputDomainInterface[];
+  ballot: SignedDocumentDomainInterface<Cooperative.Registry.AnnualGeneralMeetingDecision.Meta>;
 }

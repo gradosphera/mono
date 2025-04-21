@@ -185,6 +185,7 @@ static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный к�
         "capital"_n,
         "wallet"_n,
         "meet"_n,
+        "loan"_n,
         "contributor"_n,
         "eosio.token"_n,
         "eosio.msig"_n,

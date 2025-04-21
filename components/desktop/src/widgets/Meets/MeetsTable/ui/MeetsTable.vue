@@ -1,4 +1,5 @@
 <template lang="pug">
+
 q-table(
   ref="tableRef"
   flat
@@ -38,6 +39,14 @@ q-table(
           flat
           @click="() => $emit('vote', props.row)"
         ) Голосовать
+        q-btn(
+          v-if="canVote(props.row)"
+          size="sm"
+          color="secondary"
+          icon="fa-solid fa-eye"
+          flat
+          @click="() => $emit('view', props.row)"
+        ) Участвовать
 
     q-tr(v-if="expanded.get(props.row?.hash)" :key="`e_${props.row?.hash}`" :props="props" class="q-virtual-scroll--with-prev")
       q-td(colspan="100%")
@@ -57,25 +66,26 @@ import { date } from 'quasar'
 import { MeetInfoCard } from '../../MeetInfoCard'
 import type { IMeet } from 'src/entities/Meet'
 
-const props = defineProps<{
+defineProps<{
   meets: IMeet[],
   loading: boolean
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'vote', meet: IMeet): void
   (e: 'close', meet: IMeet): void
   (e: 'restart', meet: IMeet): void
+  (e: 'view', meet: IMeet): void
 }>()
 
 // Колонки для таблицы
 const columns = [
-  { name: 'hash', align: 'left', label: 'ID', field: 'hash', sortable: true },
-  { name: 'type', align: 'left', label: 'Тип', field: row => row.processing?.meet?.type, sortable: true },
-  { name: 'status', align: 'left', label: 'Статус', field: row => row.processing?.meet?.status, sortable: true },
-  { name: 'open_at', align: 'left', label: 'Дата открытия', field: row => row.processing?.meet?.open_at, sortable: true },
-  { name: 'close_at', align: 'left', label: 'Дата закрытия', field: row => row.processing?.meet?.close_at, sortable: true },
-  { name: 'actions', align: 'left', label: 'Действия', field: 'actions', sortable: false },
+  { name: 'hash', align: 'left', label: 'ID', field: (row: IMeet) => row.hash, sortable: true },
+  { name: 'type', align: 'left', label: 'Тип', field: (row: IMeet) => row.processing?.meet?.type, sortable: true },
+  { name: 'status', align: 'left', label: 'Статус', field: (row: IMeet) => row.processing?.meet?.status, sortable: true },
+  { name: 'open_at', align: 'left', label: 'Дата открытия', field: (row: IMeet) => row.processing?.meet?.open_at, sortable: true },
+  { name: 'close_at', align: 'left', label: 'Дата закрытия', field: (row: IMeet) => row.processing?.meet?.close_at, sortable: true },
+  { name: 'actions', align: 'left', label: 'Действия', field: () => '', sortable: false },
 ]
 
 // Состояние развернутых строк

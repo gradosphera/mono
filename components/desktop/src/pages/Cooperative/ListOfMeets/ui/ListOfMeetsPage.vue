@@ -17,6 +17,7 @@ div.q-pa-md
         @vote="handleVote"
         @close="handleCloseMeet"
         @restart="showRestartMeetDialog"
+        @view="navigateToMeetDetails"
       )
 
   CreateMeetForm(
@@ -34,7 +35,7 @@ div.q-pa-md
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { MeetsTable } from 'src/widgets/Meets'
 import { CreateMeetForm } from 'src/features/Meet/CreateMeetWithAgenda'
 import { RestartMeetForm } from 'src/features/Meet/RestartMeetWithProposal'
@@ -42,6 +43,7 @@ import { useMeetManagement } from '../model'
 import type { IMeet } from 'src/entities/Meet'
 
 const route = useRoute()
+const router = useRouter()
 const coopname = computed(() => route.params.coopname as string)
 
 const {
@@ -93,6 +95,17 @@ const handleRestartAndClose = async (data: any) => {
   } finally {
     isRestarting.value = false
   }
+}
+
+// Навигация на детальную страницу собрания
+const navigateToMeetDetails = (meet: IMeet) => {
+  router.push({
+    name: route.name === 'meets' ? 'meet-details' : 'user-meet-details',
+    params: {
+      coopname: coopname.value,
+      id: meet.hash
+    }
+  })
 }
 
 // Проверка разрешений

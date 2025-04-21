@@ -80,6 +80,14 @@ export class MeetDomainInteractor {
     return await this.documentDomainService.generateDocument({ data, options });
   }
 
+  async generateBallotForAnnualGeneralMeet(
+    data: Cooperative.Registry.AnnualGeneralMeetingVotingBallot.Action,
+    options: Cooperative.Document.IGenerationOptions
+  ): Promise<DocumentDomainEntity> {
+    data.registry_id = Cooperative.Registry.AnnualGeneralMeetingVotingBallot.registry_id;
+    return await this.documentDomainService.generateDocument({ data, options });
+  }
+
   async getMeet(data: GetMeetInputDomainInterface): Promise<MeetAggregate> {
     // Получаем данные из блокчейна через порт
     const processingMeet = await this.meetBlockchainPort.getMeet(data);
