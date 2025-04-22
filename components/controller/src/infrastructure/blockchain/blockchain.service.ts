@@ -1,6 +1,6 @@
 // infrastructure/blockchain/blockchain.service.ts
 import { Injectable } from '@nestjs/common';
-import { Action, APIClient, PrivateKey } from '@wharfkit/antelope';
+import { Action, API, APIClient, PrivateKey } from '@wharfkit/antelope';
 import { ContractKit, Table } from '@wharfkit/contract';
 import { Session, TransactResult } from '@wharfkit/session';
 import { WalletPluginPrivateKey } from '@wharfkit/wallet-plugin-privatekey';
@@ -59,7 +59,6 @@ export class BlockchainService implements BlockchainPort {
   }
 
   public async transact(actionOrActions: any | any[], broadcast = true): Promise<TransactResult> {
-    console.log('actionOrActions', actionOrActions);
     if (Array.isArray(actionOrActions)) {
       return this.sendActions(actionOrActions, broadcast);
     } else {
@@ -110,9 +109,10 @@ export class BlockchainService implements BlockchainPort {
       from?: string | number;
       to?: string | number;
       maxRows?: number;
-    } = { indexPosition: 'primary' }
+      keyType?: 'name' | 'sha256' | 'i64';
+    } = { indexPosition: 'primary', keyType: 'i64' }
   ): Promise<T[]> {
-    const { indexPosition = 'primary', from, to, maxRows } = options;
+    const { indexPosition = 'primary', from, to, maxRows, keyType } = options;
 
     const { abi } = await this.apiClient.v1.chain.get_abi(code);
     if (!abi) throw new Error(`ABI контракта ${code} не найден`);
@@ -126,6 +126,7 @@ export class BlockchainService implements BlockchainPort {
     const rows = await table.all({
       scope,
       index_position: indexPosition,
+      key_type: keyType,
       from,
       to,
       maxRows,
@@ -137,8 +138,9 @@ export class BlockchainService implements BlockchainPort {
     code: string,
     scope: string,
     tableName: string,
-    primaryKey: string | number,
-    indexPosition: IndexPosition = 'primary'
+    primaryKey: API.v1.TableIndexType,
+    indexPosition: IndexPosition = 'primary',
+    keyType: keyof API.v1.TableIndexTypes = 'i64'
   ): Promise<T | null> {
     const { abi } = await this.apiClient.v1.chain.get_abi(code);
     if (!abi) throw new Error(`ABI контракта ${code} не найден`);
@@ -150,9 +152,10 @@ export class BlockchainService implements BlockchainPort {
       client: this.apiClient,
     });
 
-    const row = await table.get(String(primaryKey), {
+    const row = await table.get(primaryKey, {
       scope,
       index_position: indexPosition,
+      key_type: keyType,
     });
 
     return row ? (JSON.parse(JSON.stringify(row)) as T) : null;

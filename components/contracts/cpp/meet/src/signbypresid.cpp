@@ -8,8 +8,10 @@ void meet::signbypresid(name coopname, checksum256 hash, document presider_decis
 
     // Проверяем, что текущее время > close_at
     auto now = current_time_point();
-    eosio::check(now.sec_since_epoch() > meet_record.close_at.sec_since_epoch(), 
-                 "Собрание ещё не завершено по времени (close_at).");
+    if (!TEST_MODE) {
+        eosio::check(now.sec_since_epoch() > meet_record.close_at.sec_since_epoch(), 
+                     "Собрание ещё не завершено по времени (close_at).");
+    }
 
     // Проверяем, что кворум достигнут
     eosio::check(meet_record.quorum_passed == true, 

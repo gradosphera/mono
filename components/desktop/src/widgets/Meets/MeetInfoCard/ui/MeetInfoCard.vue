@@ -6,6 +6,10 @@ div.row.q-pa-md
         div.text-h6 Информация о собрании
         div.q-mt-sm
           div.row
+            div.col-2.text-weight-bold Статус:
+            div.col {{ meet.processing?.meet?.status }}
+
+          div.row
             div.col-2.text-weight-bold Инициатор:
             div.col {{ meet.processing?.meet?.initiator }}
           div.row

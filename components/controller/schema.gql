@@ -3629,6 +3629,9 @@ type ProjectFreeDecisionMetaDocumentOutput {
   """Дата и время создания документа"""
   created_at: String!
 
+  """Идентификатор протокола решения собрания совета"""
+  decision_id: String!
+
   """Имя генератора, использованного для создания документа"""
   generator: String!
 

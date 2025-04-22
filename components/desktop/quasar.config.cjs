@@ -120,7 +120,8 @@ module.exports = configure(function (/* ctx */) {
       open: false, // opens browser window automatically
       port: 3005,
       hmr:{
-        overlay: false
+        clientPort: 3005,
+      //   overlay: false
       }
     },
 

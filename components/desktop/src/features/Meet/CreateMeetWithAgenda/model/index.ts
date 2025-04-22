@@ -2,6 +2,7 @@ import { generateAgenda } from 'src/features/Meet/GenerateAgenda/model'
 import { createMeet } from 'src/features/Meet/CreateMeet/model'
 import { useSignDocument } from 'src/shared/lib/document/model/entity'
 import { hashSHA256 } from 'src/shared/api/crypto'
+import { Mutations } from '@coopenomics/sdk'
 
 export interface ICreateMeetWithAgendaInput {
   coopname: string
@@ -18,9 +19,10 @@ export interface ICreateMeetWithAgendaInput {
   }[]
 }
 
-export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput) {
+type ICreateMeetResult = Mutations.Meet.CreateAnnualGeneralMeet.IOutput[typeof Mutations.Meet.CreateAnnualGeneralMeet.name];
+
+export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput): Promise<ICreateMeetResult> {
   const { signDocument } = useSignDocument()
-  console.log('on generate', data)
   // Генерируем документ повестки
   const generatedDocument = await generateAgenda({
     coopname: data.coopname,
@@ -45,6 +47,5 @@ export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput) {
     })),
     proposal: signedDocument
   })
-  console.log('result: ', result)
   return result
 }

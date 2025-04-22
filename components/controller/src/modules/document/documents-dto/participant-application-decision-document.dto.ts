@@ -1,6 +1,6 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
-import { IsString, ValidateNested, IsArray } from 'class-validator';
+import { ValidateNested, IsArray, IsNumber } from 'class-validator';
 import { Cooperative } from 'cooptypes';
 import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
@@ -18,14 +18,14 @@ type action = Cooperative.Registry.DecisionOfParticipantApplication.Action;
 @InputType(`BaseParticipantApplicationDecisionMetaDocumentInput`)
 class BaseParticipantApplicationDecisionMetaDocumentInputDTO implements ExcludeCommonProps<action> {
   @Field({ description: 'Идентификатор протокола решения собрания совета' })
-  @IsString()
+  @IsNumber()
   decision_id!: number;
 }
 
 @ObjectType(`BaseParticipantApplicationDecisionMetaDocumentOutput`)
 class BaseParticipantApplicationDecisionMetaDocumentOutputDTO implements ExcludeCommonProps<action> {
   @Field({ description: 'Идентификатор протокола решения собрания совета' })
-  @IsString()
+  @IsNumber()
   decision_id!: number;
 }
 

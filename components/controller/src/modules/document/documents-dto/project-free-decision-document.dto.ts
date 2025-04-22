@@ -1,6 +1,6 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
-import { IsString, ValidateNested, IsArray } from 'class-validator';
+import { IsString, ValidateNested, IsArray, IsNumber } from 'class-validator';
 import { Cooperative } from 'cooptypes';
 import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
@@ -30,6 +30,10 @@ class BaseProjectFreeDecisionMetaDocumentOutputDTO implements ExcludeCommonProps
   @Field({ description: 'Идентификатор проекта решения' })
   @IsString()
   project_id!: string;
+
+  @Field(() => Number, { description: 'Идентификатор протокола решения собрания совета' })
+  @IsNumber()
+  decision_id!: number;
 }
 
 @InputType(`ProjectFreeDecisionGenerateDocumentInput`)

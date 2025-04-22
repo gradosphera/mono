@@ -64,15 +64,15 @@ export default async function () {
             component: markRaw(ListOfMeetsPage),
           },
           {
-            path: 'meets/:id',
+            path: 'meets/:hash',
             name: 'user-meet-details',
             component: markRaw(MeetDetailsPage),
-            meta: {
-              title: 'Детали собрания',
-              icon: 'fa-solid fa-users-between-lines',
-              roles: ['user', 'member', 'chairman'],
-              hideInMenu: true,
-            },
+            // meta: {
+            //   title: 'Детали собрания',
+            //   icon: 'fa-solid fa-users-between-lines',
+            //   roles: ['user', 'member', 'chairman'],
+            //   hideInMenu: true,
+            // },
           },
           {
             path: '/:coopname/contacts',

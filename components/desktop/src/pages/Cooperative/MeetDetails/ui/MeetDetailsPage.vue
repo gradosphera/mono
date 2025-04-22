@@ -86,7 +86,7 @@ import { Notify } from 'quasar'
 import { MeetInfoCard } from 'src/widgets/Meets'
 import { useMeetStore } from 'src/entities/Meet'
 import { useSessionStore } from 'src/entities/Session'
-import { voteOnMeet, IVoteOnMeetInput } from 'src/features/Meet/VoteOnMeet'
+import { voteOnMeet, type IVoteOnMeetInput } from 'src/features/Meet/VoteOnMeet'
 import { generateBallot } from 'src/features/Meet/GenerateBallot'
 import { useSignDocument } from 'src/shared/lib/document'
 import { FailAlert } from 'src/shared/api'
@@ -99,7 +99,7 @@ const sessionStore = useSessionStore()
 const { signDocument } = useSignDocument()
 
 const coopname = computed(() => route.params.coopname as string)
-const meetId = computed(() => route.params.id as string)
+const meetHash = computed(() => route.params.hash as string)
 
 const meet = ref<IMeet | null>(null)
 const loading = ref(true)
@@ -132,7 +132,7 @@ const loadMeetDetails = async () => {
   try {
     const result = await meetStore.loadMeet({
       coopname: coopname.value,
-      hash: meetId.value
+      hash: meetHash.value
     })
     meet.value = result
   } catch (error: any) {
@@ -163,7 +163,7 @@ const submitVote = async () => {
     const generatedBallot = await generateBallot({
       coopname: coopname.value,
       username: sessionStore.username,
-      meet_hash: meetId.value
+      meet_hash: meetHash.value
     })
 
     // Подписание бюллетеня
@@ -172,7 +172,7 @@ const submitVote = async () => {
     // Отправка голоса
     await voteOnMeet({
       coopname: coopname.value,
-      hash: meetId.value,
+      hash: meetHash.value,
       ballot: signedBallot,
       member: sessionStore.username,
       votes: votesData

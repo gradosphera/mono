@@ -14,7 +14,9 @@ void meet::createmeet(name coopname, checksum256 hash, eosio::name initiator, na
   
   auto now = current_time_point();
   
-  check(open_at.sec_since_epoch() >= now.sec_since_epoch() + MIN_OPEN_AGM_DELAY_SEC, "Дата открытия должна быть по-крайней мере через 15 дней от сегодня");
+  if (!TEST_MODE) {
+    check(open_at.sec_since_epoch() >= now.sec_since_epoch() + MIN_OPEN_AGM_DELAY_SEC, "Дата открытия должна быть по-крайней мере через 15 дней от сегодня");
+  }
   check(close_at.sec_since_epoch() > open_at.sec_since_epoch(), "Дата закрытия должна быть после даты открытия");
   
   Meet::meets_index genmeets(_meet, coopname.value);
@@ -67,8 +69,8 @@ void meet::createmeet(name coopname, checksum256 hash, eosio::name initiator, na
     get_valid_soviet_action("createagm"_n), 
     hash,
     _meet,
-    "authagm"_n, 
-    "declagm"_n, 
+    "authmeet"_n, 
+    "declmeet"_n, 
     proposal, 
     std::string("")
   );

@@ -1,5 +1,5 @@
-import { restartMeet } from 'src/features/Meet/RestartMeet/model'
-import { generateAgenda } from 'src/features/Meet/GenerateAgenda/model'
+import { restartMeet, IRestartMeetResult } from 'src/features/Meet/RestartMeet/model'
+import { generateAgenda, IGenerateAgendaResult } from 'src/features/Meet/GenerateAgenda/model'
 import { useSignDocument } from 'src/shared/lib/document'
 
 export interface IRestartMeetWithProposalInput {
@@ -15,7 +15,7 @@ export interface IRestartMeetWithProposalInput {
   }[]
 }
 
-export async function restartMeetWithProposal(data: IRestartMeetWithProposalInput) {
+export async function restartMeetWithProposal(data: IRestartMeetWithProposalInput): Promise<IRestartMeetResult> {
   const { signDocument } = useSignDocument()
 
   // Генерируем новый документ повестки

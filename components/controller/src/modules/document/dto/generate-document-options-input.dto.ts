@@ -5,4 +5,7 @@ import type { Cooperative } from 'cooptypes';
 export class GenerateDocumentOptionsInputDTO implements Cooperative.Document.IGenerationOptions {
   @Field({ nullable: true, description: 'Пропустить сохранение' })
   skip_save?: boolean;
+
+  @Field({ nullable: true, description: 'Язык документа' })
+  lang?: string;
 }
