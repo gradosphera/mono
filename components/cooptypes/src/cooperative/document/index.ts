@@ -3,6 +3,7 @@ import type { IAction, IExtendedAction } from '../blockchain'
 
 export interface IGenerationOptions {
   skip_save?: boolean
+  lang?: string
 }
 
 export type LangType = 'ru'
@@ -167,3 +168,5 @@ export interface IContributionAmount {
   currency: string
   words: string
 }
+
+export * from './decisionsRegistry'

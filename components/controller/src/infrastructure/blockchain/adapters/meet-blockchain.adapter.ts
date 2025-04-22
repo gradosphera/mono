@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MeetBlockchainPort } from '~/domain/meet/ports/meet-blockchain.port';
 import { BlockchainService } from '../blockchain.service';
 import { MeetContract, type Cooperative } from 'cooptypes';
-import { TransactResult } from '@wharfkit/session';
+import { Checksum256, TransactResult } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/errors/http-api-error';
@@ -31,13 +31,17 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
 
   async getMeet(data: GetMeetInputDomainInterface): Promise<MeetProcessingDomainEntity | null> {
     const { coopname, hash } = data;
+    console.log('data', data);
     const meetData = await this.blockchainService.getSingleRow(
       MeetContract.contractName.production,
       coopname,
       MeetContract.Tables.Meets.tableName,
-      hash,
-      'secondary'
+      Checksum256.from(hash),
+      'secondary',
+      'sha256'
     );
+
+    console.log('meetData', meetData);
 
     if (!meetData) {
       return null;

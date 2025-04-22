@@ -32,6 +32,7 @@ export class FreeDecisionService {
     options: GenerateDocumentOptionsInputDTO
   ): Promise<FreeDecisionDocumentDTO> {
     const document = await this.freeDecisionDomainInteractor.generateFreeDecisionDocument(data, options);
+    console.log(document);
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as FreeDecisionDocumentDTO;
   }

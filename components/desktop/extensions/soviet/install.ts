@@ -70,15 +70,15 @@ export default async function () {
             },
           },
           {
-            path: 'meets/:id',
+            path: 'meets/:hash',
             name: 'meet-details',
             component: markRaw(MeetDetailsPage),
-            meta: {
-              title: 'Детали собрания',
-              icon: 'fa-solid fa-users-between-lines',
-              roles: ['chairman', 'member'],
-              hideInMenu: true,
-            },
+            // meta: {
+            //   title: 'Детали собрания',
+            //   icon: 'fa-solid fa-users-between-lines',
+            //   roles: ['chairman', 'member'],
+            //   hideInMenu: true,
+            // },
           },
         ]
       }

@@ -4,6 +4,7 @@ import { RegistratorContract, SovietContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
 import type { AccountBlockchainPort } from '~/domain/account/interfaces/account-blockchain.port';
 import Vault from '~/models/vault.model';
+import { Name } from '@wharfkit/antelope';
 
 @Injectable()
 export class AccountBlockchainAdapter implements AccountBlockchainPort {
@@ -35,7 +36,7 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       SovietContract.contractName.production,
       coopname,
       SovietContract.Tables.Participants.tableName,
-      username
+      Name.from(username)
     );
   }
   getUserAccount(username: string): Promise<RegistratorContract.Tables.Accounts.IAccount | null> {
@@ -43,7 +44,7 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       RegistratorContract.contractName.production,
       RegistratorContract.contractName.production,
       RegistratorContract.Tables.Accounts.tableName,
-      username
+      Name.from(username)
     );
   }
 
@@ -52,7 +53,7 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       RegistratorContract.contractName.production,
       RegistratorContract.contractName.production,
       RegistratorContract.Tables.Cooperatives.tableName,
-      coopname
+      Name.from(coopname)
     );
   }
 }

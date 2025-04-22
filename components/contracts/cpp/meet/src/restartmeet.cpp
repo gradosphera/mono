@@ -12,7 +12,9 @@ void meet::restartmeet(name coopname, checksum256 hash, document newproposal, ti
     eosio::check(meet_record.quorum_passed == false, "Собрание прошло кворум, перезапуск невозможен");
 
     // Валидируем новые даты
-    eosio::check(new_open_at.sec_since_epoch() >= now.sec_since_epoch() + MIN_OPEN_AGM_DELAY_SEC, "Дата открытия должна быть не менее чем через 15 дней от текущего момента");
+    if (!TEST_MODE) {
+        eosio::check(new_open_at.sec_since_epoch() >= now.sec_since_epoch() + MIN_OPEN_AGM_DELAY_SEC, "Дата открытия должна быть не менее чем через 15 дней от текущего момента");
+    }
     eosio::check(new_close_at.sec_since_epoch() > new_open_at.sec_since_epoch(), "Дата закрытия должна быть после даты открытия");
 
     // Проверяем документ нового предложения

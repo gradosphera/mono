@@ -1,6 +1,6 @@
 import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
-import { IsString, ValidateNested, IsArray } from 'class-validator';
+import { IsString, ValidateNested, IsArray, IsNumber } from 'class-validator';
 import { Cooperative } from 'cooptypes';
 import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
@@ -17,8 +17,8 @@ type action = Cooperative.Registry.FreeDecision.Action;
 
 @InputType(`BaseFreeDecisionMetaDocumentInput`)
 class BaseFreeDecisionMetaDocumentInputDTO implements ExcludeCommonProps<action> {
-  @Field({ description: 'Идентификатор протокола решения собрания совета' })
-  @IsString()
+  @Field(() => Number, { description: 'Идентификатор протокола решения собрания совета' })
+  @IsNumber()
   decision_id!: number;
 
   @Field({ description: 'Идентификатор проекта решения' })
@@ -28,8 +28,8 @@ class BaseFreeDecisionMetaDocumentInputDTO implements ExcludeCommonProps<action>
 
 @ObjectType(`BaseFreeDecisionMetaDocumentOutput`)
 class BaseFreeDecisionMetaDocumentOutputDTO implements ExcludeCommonProps<action> {
-  @Field({ description: 'Идентификатор повестки дня' })
-  @IsString()
+  @Field(() => Number, { description: 'Идентификатор повестки дня' })
+  @IsNumber()
   decision_id!: number;
 
   @Field({ description: 'Идентификатор протокола решения собрания совета' })

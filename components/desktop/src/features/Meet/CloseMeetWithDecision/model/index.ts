@@ -1,5 +1,5 @@
-import { signBySecretaryOnAnnualGeneralMeet, signByPresiderOnAnnualGeneralMeet } from 'src/features/Meet/CloseMeet/model'
-import { generateSovietDecision } from 'src/features/Meet/GenerateSovietDecision/model'
+import { signBySecretaryOnAnnualGeneralMeet, signByPresiderOnAnnualGeneralMeet, ISignBySecretaryResult, ISignByPresiderResult } from 'src/features/Meet/CloseMeet/model'
+import { generateSovietDecision, IGenerateSovietDecisionResult } from 'src/features/Meet/GenerateSovietDecision/model'
 import { useSignDocument } from 'src/shared/lib/document/model/entity'
 
 export interface ICloseMeetWithDecisionInput {
@@ -9,7 +9,7 @@ export interface ICloseMeetWithDecisionInput {
   meet_hash: string
 }
 
-export async function signBySecretaryOnAnnualGeneralMeetWithDecision(data: ICloseMeetWithDecisionInput) {
+export async function signBySecretaryOnAnnualGeneralMeetWithDecision(data: ICloseMeetWithDecisionInput): Promise<ISignBySecretaryResult> {
   const { signDocument } = useSignDocument()
   const generatedDocument = await generateSovietDecision({
     coopname: data.coopname,
@@ -25,7 +25,7 @@ export async function signBySecretaryOnAnnualGeneralMeetWithDecision(data: IClos
   return result
 }
 
-export async function signByPresiderOnAnnualGeneralMeetWithDecision(data: ICloseMeetWithDecisionInput) {
+export async function signByPresiderOnAnnualGeneralMeetWithDecision(data: ICloseMeetWithDecisionInput): Promise<ISignByPresiderResult> {
   const { signDocument } = useSignDocument()
   const generatedDocument = await generateSovietDecision({
     coopname: data.coopname,

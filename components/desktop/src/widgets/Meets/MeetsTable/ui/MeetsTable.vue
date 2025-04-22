@@ -3,6 +3,7 @@
 q-table(
   ref="tableRef"
   flat
+  grid
   :rows="meets"
   :columns="columns"
   :pagination="pagination"
@@ -47,6 +48,14 @@ q-table(
           flat
           @click="() => $emit('view', props.row)"
         ) Участвовать
+        q-btn(
+          size="sm"
+          color="accent"
+          icon="fa-solid fa-arrow-right"
+          flat
+          @click="() => router.push({ name: 'user-meet-details', params: { hash: props.row.hash } })"
+        ) Детали
+
 
     q-tr(v-if="expanded.get(props.row?.hash)" :key="`e_${props.row?.hash}`" :props="props" class="q-virtual-scroll--with-prev")
       q-td(colspan="100%")
@@ -65,6 +74,8 @@ import { ref, reactive } from 'vue'
 import { date } from 'quasar'
 import { MeetInfoCard } from '../../MeetInfoCard'
 import type { IMeet } from 'src/entities/Meet'
+import type { QTableColumn } from 'quasar'
+import { useRouter } from 'vue-router'
 
 defineProps<{
   meets: IMeet[],
@@ -78,8 +89,10 @@ defineEmits<{
   (e: 'view', meet: IMeet): void
 }>()
 
+const router = useRouter()
+
 // Колонки для таблицы
-const columns = [
+const columns: QTableColumn<IMeet>[] = [
   { name: 'hash', align: 'left', label: 'ID', field: (row: IMeet) => row.hash, sortable: true },
   { name: 'type', align: 'left', label: 'Тип', field: (row: IMeet) => row.processing?.meet?.type, sortable: true },
   { name: 'status', align: 'left', label: 'Статус', field: (row: IMeet) => row.processing?.meet?.status, sortable: true },
