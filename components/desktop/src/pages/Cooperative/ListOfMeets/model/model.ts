@@ -98,6 +98,7 @@ export function useMeetManagement(coopname: string) {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleVote = (meet: IMeet) => {
     Notify.create({
       message: 'Голосование в разработке',

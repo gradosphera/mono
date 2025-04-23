@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { api } from '../api'
 import type { Cooperative } from 'cooptypes'
-import type { DocumentType, IDocumentStore, IGetDocuments } from './types'
+import type { DocumentType, IDocumentStore, IGetDocuments, IPagination } from './types'
 import { useSystemStore } from 'src/entities/System/model'
 import { FailAlert } from 'src/shared/api'
 
@@ -17,6 +17,13 @@ export const useDocumentStore = defineStore(namespace, (): IDocumentStore => {
   const documents = ref<Cooperative.Document.IComplexDocument[]>([])
   const loading = ref(false)
   const documentType = ref<DocumentType>('newsubmitted')
+  
+  // Информация о пагинации
+  const pagination = ref<IPagination>({
+    totalCount: 0,
+    totalPages: 0,
+    currentPage: 0
+  })
 
   /**
    * Загрузка документов с сервера
@@ -40,13 +47,25 @@ export const useDocumentStore = defineStore(namespace, (): IDocumentStore => {
       const data: IGetDocuments = {
         filter: {
           receiver: info.coopname,
-          ...filter
+          additionalFilters: filter
         },
-        type: documentType.value
+        type: documentType.value,
+        page: 1,
+        limit: 10
       }
 
       const result = await api.loadDocuments(data)
-      documents.value = result
+      
+      // Приведение типов для совместимости
+      documents.value = result.items as unknown as Cooperative.Document.IComplexDocument[]
+      
+      // Сохраняем информацию о пагинации
+      pagination.value = {
+        totalCount: result.totalCount,
+        totalPages: result.totalPages,
+        currentPage: result.currentPage
+      }
+      
       loading.value = false
       return documents.value
     } catch (error: any) {
@@ -69,6 +88,7 @@ export const useDocumentStore = defineStore(namespace, (): IDocumentStore => {
     documents,
     loading,
     documentType,
+    pagination,
     loadDocuments,
     changeDocumentType
   }

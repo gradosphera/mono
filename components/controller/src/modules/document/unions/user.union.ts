@@ -8,15 +8,13 @@ export const UserDataUnion = createUnionType({
   description: 'Объединение информации о пользователях',
   types: () => [IndividualDTO, EntrepreneurDTO, OrganizationDTO] as const,
   resolveType(value) {
-    if (value instanceof IndividualDTO) {
+    // Определяем тип объекта по уникальным свойствам
+    if (IndividualDTO.isTypeOf(value)) {
       return IndividualDTO;
-    }
-    if (value instanceof EntrepreneurDTO) {
+    } else if (OrganizationDTO.isTypeOf(value)) {
+      return OrganizationDTO;
+    } else {
       return EntrepreneurDTO;
     }
-    if (value instanceof OrganizationDTO) {
-      return OrganizationDTO;
-    }
-    return null;
   },
 });

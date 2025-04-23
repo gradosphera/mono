@@ -5,6 +5,7 @@ import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage'
 import { ContactsPage } from 'src/pages/Contacts'
 import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
 import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
+import { UserDocumentsPage } from 'src/pages/User/DocumentsPage'
 import { agreementsBase } from 'src/shared/lib/consts/workspaces'
 
 export default async function () {
@@ -55,6 +56,16 @@ export default async function () {
           },
           {
             meta: {
+              title: 'Документы',
+              icon: 'fa-solid fa-file-invoice',
+              roles: ['user', 'member', 'chairman'],
+            },
+            path: 'documents',
+            name: 'user-documents',
+            component: markRaw(UserDocumentsPage),
+          },
+          {
+            meta: {
               title: 'Общие собрания',
               icon: 'fa-solid fa-users-between-lines',
               roles: ['user', 'member', 'chairman'],
@@ -67,12 +78,6 @@ export default async function () {
             path: 'meets/:hash',
             name: 'user-meet-details',
             component: markRaw(MeetDetailsPage),
-            // meta: {
-            //   title: 'Детали собрания',
-            //   icon: 'fa-solid fa-users-between-lines',
-            //   roles: ['user', 'member', 'chairman'],
-            //   hideInMenu: true,
-            // },
           },
           {
             path: '/:coopname/contacts',

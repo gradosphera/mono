@@ -1,11 +1,10 @@
 import { Notify } from 'quasar'
 import { useMeetStore } from 'src/entities/Meet'
-import { voteOnMeet, IVoteOnMeetInput } from 'src/features/Meet/VoteOnMeet'
+import { voteOnMeet } from 'src/features/Meet/VoteOnMeet'
 import { generateBallot } from 'src/features/Meet/GenerateBallot'
 import { useSignDocument } from 'src/shared/lib/document'
 import { useSessionStore } from 'src/entities/Session'
 import { FailAlert } from 'src/shared/api'
-import type { IMeet } from 'src/entities/Meet'
 
 export function useMeetDetails(coopname: string, meetId: string) {
   const meetStore = useMeetStore()

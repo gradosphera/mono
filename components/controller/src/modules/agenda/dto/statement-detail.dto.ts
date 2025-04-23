@@ -1,7 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import type { StatementDetailDomainInterface } from '~/domain/agenda/interfaces/statement-detail-domain.interface';
 import { ExtendedBlockchainActionDTO } from './extended-action.dto';
-import { StatementDocumentUnion, type StatementDocumentUnionType } from '../../document/unions/statement-document.union';
+import { StatementDocumentUnion } from '../../document/unions/statement-document.union';
 
 @ObjectType('StatementDetail', {
   description:
@@ -12,5 +12,5 @@ export class StatementDetailDTO implements StatementDetailDomainInterface {
   action!: ExtendedBlockchainActionDTO;
 
   @Field(() => StatementDocumentUnion)
-  document!: StatementDocumentUnionType;
+  document!: typeof StatementDocumentUnion;
 }

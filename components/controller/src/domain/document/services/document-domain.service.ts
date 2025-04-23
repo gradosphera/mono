@@ -10,7 +10,6 @@ import { getActions } from '~/utils/getFetch';
 import type { DocumentPackageDomainInterface } from '~/domain/agenda/interfaces/document-package-domain.interface';
 import type { ActDetailDomainInterface } from '~/domain/agenda/interfaces/act-detail-domain.interface';
 import type { DecisionDetailDomainInterface } from '~/domain/agenda/interfaces/decision-detail-domain.interface';
-import type { ExtendedBlockchainActionDomainInterface } from '~/domain/agenda/interfaces/extended-blockchain-action-domain.interface';
 import type { StatementDetailDomainInterface } from '~/domain/agenda/interfaces/statement-detail-domain.interface';
 import { DocumentDomainAggregate } from '../aggregates/document-domain.aggregate';
 import type { DocumentMetaDomainInterface } from '../interfaces/document-meta-domain.interface';
@@ -28,9 +27,8 @@ export class DocumentDomainService {
     return await this.generatorInfrastructureService.generateDocument(data);
   }
 
-  public async getDocumentByHash(hash: string): Promise<DocumentDomainEntity> {
+  public async getDocumentByHash(hash: string): Promise<DocumentDomainEntity | null> {
     const document = await this.documentRepository.findByHash(hash);
-    if (!document) throw new BadRequestException('Документ не найден');
     return document;
   }
 
@@ -40,6 +38,8 @@ export class DocumentDomainService {
    */
   async buildDocumentPackage(rawAction: Cooperative.Blockchain.IAction): Promise<DocumentPackageDomainInterface> {
     // Инициализация частей будущего DocumentPackage
+    const showLog = rawAction.data.decision_id == 2 || rawAction.data.decision_id == 4;
+    if (showLog) console.log('rawAction', 'LOG IT! WTF: ', rawAction);
     let statementDetail: StatementDetailDomainInterface | null = null;
     let decisionDetail: DecisionDetailDomainInterface | null = null;
     const actDetails: ActDetailDomainInterface[] = [];
@@ -53,12 +53,14 @@ export class DocumentDomainService {
     // -----------------------------------------------------
     {
       // Основной документ (statement)
+      if (showLog) console.log('rawData.document', rawData.document.hash, rawData.document.meta);
       const mainDocument = await this.getDocumentByHash(rawData.document.hash);
 
       // Если у документа есть ссылки, подгружаем их
       if (mainDocument?.meta?.links && Array.isArray(mainDocument.meta.links)) {
         for (const linkHash of mainDocument.meta.links) {
           const linkedDoc = await this.getDocumentByHash(linkHash);
+          if (showLog) console.log('linkedDoc', linkedDoc?.meta.title);
           if (linkedDoc) links.push(linkedDoc);
         }
       }
@@ -74,10 +76,15 @@ export class DocumentDomainService {
           user: userData,
         };
 
-        statementDetail = {
-          action: extendedAction,
-          document: mainDocument,
-        };
+        if (mainDocument) {
+          if (showLog) console.log('mainDocument', mainDocument.hash, mainDocument.meta);
+          statementDetail = {
+            action: extendedAction,
+            document: mainDocument,
+          };
+        } else {
+          // console.log('mainDocument not found', rawData.document);
+        }
       }
     }
 
@@ -108,22 +115,28 @@ export class DocumentDomainService {
             user: userData ?? null,
           };
 
+          if (showLog)
+            console.log('decisionAction', decisionAction.data?.document?.hash, decisionAction.data?.document?.meta);
           // Документ, прикреплённый к решению
           const decisionDocument = await this.getDocumentByHash(decisionAction?.data?.document?.hash);
-
+          if (showLog) console.log('decisionDocument', decisionDocument?.meta);
           if (decisionDocument?.meta?.links && Array.isArray(decisionDocument.meta.links)) {
             for (const linkHash of decisionDocument.meta.links) {
               const linkedDoc = await this.getDocumentByHash(linkHash);
+              if (showLog) console.log('linkedDoc', linkedDoc?.meta);
               if (linkedDoc) links.push(linkedDoc);
             }
           }
-
-          decisionDetail = {
-            action: extendedDecisionAction,
-            document: decisionDocument,
-            votes_for: [],
-            votes_against: [],
-          };
+          if (decisionDocument) {
+            decisionDetail = {
+              action: extendedDecisionAction,
+              document: decisionDocument,
+              votes_for: [],
+              votes_against: [],
+            };
+          } else {
+            console.log('decisionDocument not found', decisionAction?.data?.document);
+          }
         }
       }
     }
@@ -142,15 +155,9 @@ export class DocumentDomainService {
     // Если statementDetail или decisionDetail вдруг оказались null —
     // можно обработать это или бросить ошибку, в зависимости от бизнес-логики.
     // Здесь для примера присваиваем пустые объекты:
-    const statement = statementDetail || ({ action: {}, document: {} } as StatementDetailDomainInterface);
-    const decision: DecisionDetailDomainInterface =
-      decisionDetail ||
-      ({
-        action: {} as unknown as ExtendedBlockchainActionDomainInterface,
-        document: {} as unknown as GeneratedDocumentDomainInterface,
-        votes_for: [],
-        votes_against: [],
-      } as unknown as DecisionDetailDomainInterface);
+    const statement = statementDetail || null;
+    const decision = decisionDetail || null;
+    if (showLog) console.log({ statement, decision, acts: actDetails, links });
 
     return {
       statement,

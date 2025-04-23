@@ -10,8 +10,8 @@ export class DocumentService {
 
   async getDocuments(data: GetDocumentsInputDTO): Promise<PaginationResultDomainInterface<DocumentPackageDomainInterface>> {
     const query = {
-      receiver: data.filter.receiver,
       ...data.filter.additionalFilters,
+      receiver: data.filter.receiver,
     };
 
     return this.documentDomainInteractor.getDocuments({ query, page: data.page, limit: data.limit, type: data.type });
