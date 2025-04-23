@@ -45,7 +45,7 @@ export class DocumentDomainInteractor {
     for (const raw_action_document of actions.results) {
       const documentPackage = await this.documentDomainService.buildDocumentPackage(raw_action_document);
 
-      if (documentPackage.statement.action) response.items.push(documentPackage);
+      if (documentPackage.statement?.action) response.items.push(documentPackage);
     }
 
     return response;

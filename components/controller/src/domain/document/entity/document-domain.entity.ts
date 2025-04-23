@@ -9,6 +9,7 @@ export class DocumentDomainEntity implements GeneratedDocumentDomainInterface {
   binary: string; // Хранится как строка (Base64)
 
   constructor(data: Cooperative.Document.IGeneratedDocument) {
+    if (!data) throw new Error('Document data is required');
     this.full_title = data.full_title;
     this.html = data.html;
     this.hash = data.hash;

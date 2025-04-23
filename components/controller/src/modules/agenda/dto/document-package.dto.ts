@@ -12,13 +12,15 @@ import type { DocumentPackageDomainInterface } from '~/domain/agenda/interfaces/
 export class DocumentPackageDTO implements DocumentPackageDomainInterface {
   @Field(() => StatementDetailDTO, {
     description: 'Объект цифрового документа заявления',
+    nullable: true,
   })
-  statement!: StatementDetailDTO;
+  statement!: StatementDetailDTO | null;
 
   @Field(() => DecisionDetailDTO, {
     description: 'Объект цифрового документа решения',
+    nullable: true,
   })
-  decision!: DecisionDetailDTO;
+  decision!: DecisionDetailDTO | null;
 
   // Здесь будет объединение документов актов, когда они появятся.
   @Field(() => [ActDetailDTO], {

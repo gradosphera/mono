@@ -1,5 +1,5 @@
 import { signBySecretaryOnAnnualGeneralMeet, signByPresiderOnAnnualGeneralMeet, ISignBySecretaryResult, ISignByPresiderResult } from 'src/features/Meet/CloseMeet/model'
-import { generateSovietDecision, IGenerateSovietDecisionResult } from 'src/features/Meet/GenerateSovietDecision/model'
+import { generateSovietDecision } from 'src/features/Meet/GenerateSovietDecision/model'
 import { useSignDocument } from 'src/shared/lib/document/model/entity'
 
 export interface ICloseMeetWithDecisionInput {

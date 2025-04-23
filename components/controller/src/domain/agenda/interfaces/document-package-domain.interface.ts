@@ -4,8 +4,8 @@ import type { DecisionDetailDomainInterface } from './decision-detail-domain.int
 import type { StatementDetailDomainInterface } from './statement-detail-domain.interface';
 
 export interface DocumentPackageDomainInterface {
-  statement: StatementDetailDomainInterface;
-  decision: DecisionDetailDomainInterface;
+  statement: StatementDetailDomainInterface | null;
+  decision: DecisionDetailDomainInterface | null;
   acts: ActDetailDomainInterface[];
   links: GeneratedDocumentDomainInterface[];
 }
