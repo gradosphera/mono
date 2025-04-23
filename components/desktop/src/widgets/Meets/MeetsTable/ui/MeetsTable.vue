@@ -3,7 +3,7 @@
 q-table(
   ref="tableRef"
   flat
-  grid
+  :grid="isMobile"
   :rows="meets"
   :columns="columns"
   :pagination="pagination"
@@ -76,6 +76,7 @@ import { MeetInfoCard } from '../../MeetInfoCard'
 import type { IMeet } from 'src/entities/Meet'
 import type { QTableColumn } from 'quasar'
 import { useRouter } from 'vue-router'
+import { useWindowSize } from 'src/shared/hooks'
 
 defineProps<{
   meets: IMeet[],
@@ -90,6 +91,7 @@ defineEmits<{
 }>()
 
 const router = useRouter()
+const { isMobile } = useWindowSize()
 
 // Колонки для таблицы
 const columns: QTableColumn<IMeet>[] = [
@@ -119,6 +121,7 @@ const formatDate = (dateString: string) => {
 }
 
 // Проверки разрешений
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const canManageMeet = (meet: IMeet) => {
   return true // Здесь можно добавить проверку ролей
 }

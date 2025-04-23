@@ -1,5 +1,5 @@
 import { markRaw } from 'vue'
-import { ListOfQuestionsPage } from 'src/pages/Cooperative/ListOfQuestions'
+import { ListOfAgendaQuestions } from 'src/pages/Cooperative/ListOfAgenda'
 import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants'
 import { ListOfDocumentsPage } from 'src/pages/Cooperative/ListOfDocuments'
 import { ListOfOrdersPage } from 'src/pages/Cooperative/ListOfOrders'
@@ -22,7 +22,7 @@ export default async function () {
           {
             path: 'agenda',
             name: 'agenda',
-            component: markRaw(ListOfQuestionsPage),
+            component: markRaw(ListOfAgendaQuestions),
             meta: {
               title: 'Повестка',
               icon: 'fa-solid fa-check-to-slot',

@@ -39,7 +39,7 @@ import { useQuasar } from 'quasar'
 import { useCurrentUserStore } from 'src/entities/User'
 import { useSessionStore } from 'src/entities/Session'
 import config from 'src/app/config'
-import { useWindowSize } from 'vue-window-size'
+import { useWindowSize } from 'src/shared/hooks'
 import { SettingsDropdown } from 'src/widgets/Header/SettingsDropdown'
 import './HeaderStyles.scss'
 
@@ -47,7 +47,7 @@ const router = useRouter()
 const route = useRoute()
 const $q = useQuasar()
 const session = useSessionStore()
-const { width } = useWindowSize()
+const { isMobile } = useWindowSize()
 const emit = defineEmits(['toggle-left-drawer'])
 
 const coopTitle = computed(() => process.env.COOP_SHORT_NAME)
@@ -56,7 +56,6 @@ const isDark = computed(() => $q.dark.isActive)
 const headerClass = computed(() =>
   isDark.value ? 'text-white bg-dark' : 'text-black bg-light'
 )
-const isMobile = computed(() => width.value < 768)
 const currentUser = useCurrentUserStore()
 const loggedIn = computed(
   () => currentUser.isRegistrationComplete && session.isAuth

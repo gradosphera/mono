@@ -16,7 +16,7 @@ import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import { ref } from 'vue';
 import { useCreateProjectOfFreeDecision } from '../model';
-import { extractGraphQLErrorMessages, FailAlert, SuccessAlert } from 'src/shared/api';
+import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { notEmpty } from 'src/shared/lib/utils';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
