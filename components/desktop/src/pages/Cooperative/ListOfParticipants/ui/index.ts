@@ -1,1 +1,1 @@
-export {default as ListOfParticipantsPage} from './ListOfParticipantsPage.vue'
+export { default as ListOfParticipantsPage } from './ListOfParticipantsPage.vue'

@@ -6,6 +6,7 @@
         ref="tableRef"
         class="my-sticky-dynamic"
         flat
+        :grid="isMobile"
         :rows="orders.results"
         row-key="id"
         :columns="columns"
@@ -19,6 +20,14 @@
         :rows-per-page-options="[0]"
         :pagination="pagination"
       )
+        template(#item="props")
+          OrderCard(
+            :order="props.row"
+            :expanded="expanded.get(props.row.order_num)"
+            @toggle-expand="toggleExpand(props.row.order_num)"
+            @close-dropdown="closeDropdown(props.row.order_num)"
+          )
+
         template(#header="props")
           q-tr(:props="props")
             q-th(auto-width)
@@ -32,7 +41,15 @@
         template(#body="props")
           q-tr(:key="`m_${props.row.order_num}`" :props="props")
             q-td(auto-width)
-              q-btn(size="sm" color="primary" round dense :icon="expanded.get(props.row.order_num) ? 'remove' : 'add'" @click="toggleExpand(props.row.order_num)")
+              q-btn(
+                size="sm" 
+                color="primary" 
+                round 
+                dense 
+                :icon="expanded.get(props.row.order_num) ? 'remove' : 'add'" 
+                @click="toggleExpand(props.row.order_num)"
+                v-if="props.row.message"
+              )
             q-td {{props.row.order_num}}
             q-td {{ props.row.quantity }}
             q-td
@@ -53,9 +70,8 @@
                 q-list(dense)
                   SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
                   SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
-                  //- SetOrderCompletedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
 
-          q-tr(v-if="expanded.get(props.row.order_num)" :key="`e_${props.row.order_num}`" :props="props" class="q-virtual-scroll--with-prev")
+          q-tr(v-if="expanded.get(props.row.order_num) && props.row.message" :key="`e_${props.row.order_num}`" :props="props" class="q-virtual-scroll--with-prev")
             q-td(colspan="100%")
               div(v-if="props.row.status=='failed'")
                 p Причина ошибки: {{props.row.message}}
@@ -70,12 +86,15 @@
   import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
   import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
   // import { SetOrderCompletedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderCompletedStatusButton';
+  import OrderCard from './OrderCard.vue';
+  import { useWindowSize } from 'src/shared/hooks';
 
   const orderStore = usePaymentStore()
   const orders = computed(() => orderStore.orders)
   const onLoading = ref(false)
   const nextPage = ref(1)
   const lastPage = ref(1);
+  const { isMobile } = useWindowSize()
 
   const dropdowns = reactive({})
 
@@ -91,22 +110,21 @@
   })
 
   const onSort = (col) => {
-
     if (!col.sortable) return
 
-  // Меняем направление сортировки, если кликнули на тот же столбец
-  if (sortState.sortBy === col.name) {
-    sortState.sortDir = sortState.sortDir === 'asc' ? 'desc' : 'asc'
-  } else {
-    // Если сортируем новый столбец, сбрасываем на 'asc'
-    sortState.sortBy = col.name
-    sortState.sortDir = 'asc'
+    // Меняем направление сортировки, если кликнули на тот же столбец
+    if (sortState.sortBy === col.name) {
+      sortState.sortDir = sortState.sortDir === 'asc' ? 'desc' : 'asc'
+    } else {
+      // Если сортируем новый столбец, сбрасываем на 'asc'
+      sortState.sortBy = col.name
+      sortState.sortDir = 'asc'
+    }
+    orderStore.clear()
+    nextPage.value = 1
+    lastPage.value = 1
+    loadOrders(1) // Перезагружаем с новыми параметрами сортировки
   }
-  orderStore.clear()
-  nextPage.value = 1
-  lastPage.value = 1
-  loadOrders(1) // Перезагружаем с новыми параметрами сортировки
-}
 
   const closeDropdown = (id: string) => {
     dropdowns[id] = false // Закрываем дропдаун для конкретной строки
@@ -164,7 +182,7 @@
   })
 
 
-  const columns = [
+  const columns: any[] = [
     { name: 'order_num', align: 'left', label: '№', field: 'order_num', sortable: true },
     { name: 'quantity', align: 'left', label: 'Сумма', field: '', sortable: false },
     { name: 'type', align: 'left', label: 'Тип платежа', field: 'type', sortable: true },
