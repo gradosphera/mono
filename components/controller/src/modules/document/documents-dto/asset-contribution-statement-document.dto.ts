@@ -1,18 +1,11 @@
-import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { Type } from 'class-transformer';
-import { ValidateNested, IsNotEmpty, IsArray } from 'class-validator';
+import { InputType, Field, IntersectionType, OmitType } from '@nestjs/graphql';
+import { ValidateNested, IsNotEmpty } from 'class-validator';
 import { Cooperative } from 'cooptypes';
-import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
-import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
-import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
-import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
-import { SignedDigitalDocumentBase } from '~/modules/document/dto/signed-digital-document.base';
 import type { ExcludeCommonProps } from '~/modules/document/types';
 import { CommonRequestInputDTO } from '../../cooplace/dto/common-request-input.dto';
-import { CommonRequestResponseDTO } from '../../cooplace/dto/common-request-response.dto';
 
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.AssetContributionStatement.Action;
@@ -23,14 +16,6 @@ class BaseAssetContributionStatementMetaDocumentInputDTO implements ExcludeCommo
   @IsNotEmpty()
   @ValidateNested()
   request!: CommonRequestInputDTO;
-}
-
-@ObjectType(`BaseAssetContributionStatementMetaDocumentOutput`)
-class BaseAssetContributionStatementMetaDocumentOutputDTO {
-  @Field(() => CommonRequestResponseDTO, { description: 'Запрос на внесение имущественного паевого взноса' })
-  @IsNotEmpty()
-  @ValidateNested()
-  request!: CommonRequestResponseDTO;
 }
 
 @InputType(`AssetContributionStatementGenerateDocumentInput`)
@@ -59,44 +44,4 @@ export class AssetContributionStatementSignedDocumentInputDTO extends SignedDigi
     description: 'Метаинформация для создания проекта свободного решения',
   })
   public readonly meta!: AssetContributionStatementSignedMetaDocumentInputDTO;
-}
-
-@ObjectType(`AssetContributionStatementMetaDocumentOutput`)
-export class AssetContributionStatementMetaDocumentOutputDTO extends IntersectionType(
-  BaseAssetContributionStatementMetaDocumentOutputDTO,
-  MetaDocumentDTO
-) {}
-
-@ObjectType(`AssetContributionStatementSignedDocument`)
-export class AssetContributionStatementSignedDocumentDTO extends SignedDigitalDocumentBase {
-  @Field(() => AssetContributionStatementMetaDocumentOutputDTO, {
-    description: 'Метаинформация для создания проекта свободного решения',
-  })
-  public override readonly meta!: AssetContributionStatementMetaDocumentOutputDTO;
-}
-
-@ObjectType(`AssetContributionStatementDocument`)
-export class AssetContributionStatementDocumentDTO extends GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {
-  @Field(() => AssetContributionStatementMetaDocumentOutputDTO, {
-    description: `Метаинформация для создания проекта свободного решения`,
-  })
-  @ValidateNested()
-  public readonly meta!: AssetContributionStatementMetaDocumentOutputDTO;
-}
-
-@ObjectType('AssetContributionStatementDocumentAggregate')
-export class AssetContributionStatementDocumentAggregateDTO
-  implements DocumentAggregateDomainInterface<AssetContributionStatementMetaDocumentOutputDTO>
-{
-  @Field(() => String)
-  hash!: string;
-
-  @Field(() => [AssetContributionStatementSignedDocumentDTO])
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AssetContributionStatementSignedDocumentDTO)
-  signatures!: AssetContributionStatementSignedDocumentDTO[];
-
-  @Field(() => AssetContributionStatementDocumentDTO, { nullable: true })
-  rawDocument?: AssetContributionStatementDocumentDTO;
 }

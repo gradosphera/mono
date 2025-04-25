@@ -1,19 +1,19 @@
-import { createdProjectFreeDecisionSelector } from '../../selectors/decisions';
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus/index';
+import { createdProjectFreeDecisionSelector } from '../../selectors'
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'createProjectOfFreeDecision'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'CreateProjectFreeDecisionInput!')}, createdProjectFreeDecisionSelector]
-});
+  [name]: [{ data: $('data', 'CreateProjectFreeDecisionInput!') }, createdProjectFreeDecisionSelector],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
-  data: ModelTypes['CreateProjectFreeDecisionInput'],
+  data: ModelTypes['CreateProjectFreeDecisionInput']
 }
 
-export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

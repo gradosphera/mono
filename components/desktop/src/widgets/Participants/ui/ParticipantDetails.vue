@@ -16,7 +16,7 @@ div
       component(:is="useComponent(participant)" :participantData="usePrivateData(participant)" @update="onUpdate")
 
     q-tab-panel.q-pa-none(name="document")
-      ListOfDocumentsWidget(:filter="{ receiver: participant.username }")
+      ListOfDocumentsWidget(:username="participant.username" :filter="{}")
 </template>
 
 <script setup lang="ts">

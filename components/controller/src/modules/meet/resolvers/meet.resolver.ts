@@ -8,20 +8,16 @@ import { Throttle } from '@nestjs/throttler';
 import { CreateAnnualGeneralMeetInputDTO } from '../dto/create-meet-agenda-input.dto';
 import { MeetService } from '../services/meet.service';
 import { MeetAggregateDTO } from '../dto/meet-aggregate.dto';
-import {
-  AnnualGeneralMeetingAgendaDocumentDTO,
-  AnnualGeneralMeetingAgendaGenerateDocumentInputDTO,
-} from '~/modules/document/documents-dto/annual-general-meeting-agenda-document.dto';
+import { AnnualGeneralMeetingAgendaGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-agenda-document.dto';
 import { VoteOnAnnualGeneralMeetInputDTO } from '../dto/vote-on-annual-general-meet-input.dto';
 import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-meet-input.dto';
 import { GenerateSovietDecisionOnAnnualMeetInputDTO } from '../dto/generate-soviet-decision-input.dto';
-import { AnnualGeneralMeetingSovietDecisionDocumentDTO } from '~/modules/document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
 import { GetMeetInputDTO } from '../dto/get-meet-input.dto';
 import { GetMeetsInputDTO } from '../dto/get-meets-input.dto';
 import { SignBySecretaryOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-secretary-on-annual-general-meet-input.dto';
 import { SignByPresiderOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-presider-on-annual-general-meet-input.dto';
 import { GenerateBallotForAnnualGeneralMeetInputDTO } from '../dto/generate-ballot-input.dto';
-import { AnnualGeneralMeetingVotingBallotDocumentDTO } from '~/modules/document/documents-dto/annual-general-meeting-voting-ballot-document.dto';
+import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 
 @Resolver()
 export class MeetResolver {
@@ -53,7 +49,7 @@ export class MeetResolver {
     return this.meetService.getMeets(data);
   }
 
-  @Mutation(() => AnnualGeneralMeetingAgendaDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateAnnualGeneralMeetAgendaDocument',
     description: 'Сгенерировать предложение повестки общего собрания пайщиков',
   })
@@ -65,7 +61,7 @@ export class MeetResolver {
     data: AnnualGeneralMeetingAgendaGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<AnnualGeneralMeetingAgendaDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.meetService.generateAnnualGeneralMeetAgendaDocument(data, options);
   }
 
@@ -82,7 +78,7 @@ export class MeetResolver {
     return this.meetService.createAnnualGeneralMeet(data);
   }
 
-  @Mutation(() => AnnualGeneralMeetingSovietDecisionDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateSovietDecisionOnAnnualMeetDocument',
     description: 'Сгенерировать документ решения Совета по проведению общего собрания пайщиков',
   })
@@ -94,11 +90,11 @@ export class MeetResolver {
     data: GenerateSovietDecisionOnAnnualMeetInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<AnnualGeneralMeetingSovietDecisionDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.meetService.generateSovietDecisionOnAnnualMeetDocument(data, options);
   }
 
-  @Mutation(() => AnnualGeneralMeetingVotingBallotDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateBallotForAnnualGeneralMeetDocument',
     description: 'Сгенерировать бюллетень для голосования на общем собрании пайщиков',
   })
@@ -110,7 +106,7 @@ export class MeetResolver {
     data: GenerateBallotForAnnualGeneralMeetInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<AnnualGeneralMeetingVotingBallotDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.meetService.generateBallotForAnnualGeneralMeet(data, options);
   }
 

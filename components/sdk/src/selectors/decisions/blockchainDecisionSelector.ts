@@ -1,6 +1,6 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ModelTypes, type ValueTypes } from "../../zeus/index";
-import { rawSignedBlockchainDocumentSelector } from "../documents/signedBlockchainDocumentSelector";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
+import { rawSignedBlockchainDocumentSelector } from '../documents/signedBlockchainDocumentSelector'
 
 export const rawBlockchainDecisionSelector = {
   approved: true,
@@ -19,10 +19,14 @@ export const rawBlockchainDecisionSelector = {
   validated: true,
   votes_against: true,
   votes_for: true,
-};
+  callback_contract: true,
+  confirm_callback: true,
+  decline_callback: true,
+  hash: true,
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['SignedBlockchainDocument']> = rawSignedBlockchainDocumentSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['BlockchainDecision']> = rawBlockchainDecisionSelector
 
-export type blockchainDecisionModel = ModelTypes['SignedBlockchainDocument'];
-export const blockchainDecisionSelector = Selector('SignedBlockchainDocument')(rawSignedBlockchainDocumentSelector);
+export type blockchainDecisionModel = ModelTypes['BlockchainDecision']
+export const blockchainDecisionSelector = Selector('BlockchainDecision')(rawBlockchainDecisionSelector)

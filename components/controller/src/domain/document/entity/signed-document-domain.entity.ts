@@ -4,23 +4,20 @@ import type { OrganizationDomainInterface } from '~/domain/common/interfaces/org
 import type { EntrepreneurDomainInterface } from '~/domain/common/interfaces/entrepreneur-domain.interface';
 import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
 
-export class SignedDocumentDomainEntity<T extends DocumentMetaDomainInterface> implements SignedDocumentDomainInterface<T> {
+export class SignedDocumentDomainEntity implements SignedDocumentDomainInterface {
   hash: string;
   public_key: string;
   signature: string;
-  meta: T;
+  meta: DocumentMetaDomainInterface;
   is_valid: boolean;
-  signer: IndividualDomainInterface | OrganizationDomainInterface | EntrepreneurDomainInterface;
+  signer: IndividualDomainInterface | OrganizationDomainInterface | EntrepreneurDomainInterface | null;
 
-  constructor(
-    data: SignedDocumentDomainEntity<T>,
-    signer: IndividualDomainInterface | OrganizationDomainInterface | EntrepreneurDomainInterface
-  ) {
+  constructor(data: Omit<SignedDocumentDomainEntity, 'is_valid'>) {
     this.public_key = data.public_key;
     this.signature = data.signature;
     this.hash = data.hash;
     this.meta = data.meta;
     this.is_valid = true; //TODO - calc it
-    this.signer = signer;
+    this.signer = data.signer;
   }
 }

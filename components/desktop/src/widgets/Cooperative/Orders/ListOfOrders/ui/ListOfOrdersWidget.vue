@@ -1,81 +1,82 @@
 <template lang="pug">
   div.row.justify-center
     div.col-12
-      q-table(
-        v-if="orders && orders.results"
-        ref="tableRef"
-        class="my-sticky-dynamic"
-        flat
-        :grid="isMobile"
-        :rows="orders.results"
-        row-key="id"
-        :columns="columns"
-        :table-colspan="9"
-        :loading="onLoading"
-        :no-data-label="'ордера не найдены'"
-        virtual-scroll
-        @virtual-scroll="onScroll"
-        :virtual-scroll-item-size="48"
-        :virtual-scroll-sticky-size-start="48"
-        :rows-per-page-options="[0]"
-        :pagination="pagination"
-      )
-        template(#item="props")
-          OrderCard(
-            :order="props.row"
-            :expanded="expanded.get(props.row.order_num)"
-            @toggle-expand="toggleExpand(props.row.order_num)"
-            @close-dropdown="closeDropdown(props.row.order_num)"
-          )
+      div.scroll-area(style="height: 90vh; overflow-y: auto;")
+        q-table(
+          v-if="orders && orders.results"
+          ref="tableRef"
+          flat
+          :grid="isMobile"
+          :rows="orders.results"
+          row-key="id"
+          :columns="columns"
+          :table-colspan="9"
+          :loading="onLoading"
+          :no-data-label="'ордера не найдены'"
+          virtual-scroll
+          @virtual-scroll="onScroll"
+          :virtual-scroll-target="'.scroll-area'"
+          :virtual-scroll-item-size="48"
+          :virtual-scroll-sticky-size-start="48"
+          :rows-per-page-options="[0]"
+          :pagination="pagination"
+          class="q-mb-md"
+        )
+          template(#item="props")
+            OrderCard(
+              :order="props.row"
+              :expanded="expanded.get(props.row.order_num)"
+              @toggle-expand="toggleExpand(props.row.order_num)"
+              @close-dropdown="closeDropdown(props.row.order_num)"
+            )
 
-        template(#header="props")
-          q-tr(:props="props")
-            q-th(auto-width)
-            q-th(
-              v-for="col in props.cols"
-              :key="col.name"
-              :props="props"
-              @click="onSort(col)"
-            ) {{ col.label }}
+          template(#header="props")
+            q-tr(:props="props")
+              q-th(auto-width)
+              q-th(
+                v-for="col in props.cols"
+                :key="col.name"
+                :props="props"
+                @click="onSort(col)"
+              ) {{ col.label }}
 
-        template(#body="props")
-          q-tr(:key="`m_${props.row.order_num}`" :props="props")
-            q-td(auto-width)
-              q-btn(
-                size="sm" 
-                color="primary" 
-                round 
-                dense 
-                :icon="expanded.get(props.row.order_num) ? 'remove' : 'add'" 
-                @click="toggleExpand(props.row.order_num)"
-                v-if="props.row.message"
-              )
-            q-td {{props.row.order_num}}
-            q-td {{ props.row.quantity }}
-            q-td
-              q-badge(v-if="props.row.type ==='registration'") регистрационный
-              q-badge(v-if="props.row.type ==='deposit'") паевой
+          template(#body="props")
+            q-tr(:key="`m_${props.row.order_num}`" :props="props")
+              q-td(auto-width)
+                q-btn(
+                  size="sm"
+                  color="primary"
+                  round
+                  dense
+                  :icon="expanded.get(props.row.order_num) ? 'remove' : 'add'"
+                  @click="toggleExpand(props.row.order_num)"
+                  v-if="props.row.message"
+                )
+              q-td {{props.row.order_num}}
+              q-td {{ props.row.quantity }}
+              q-td
+                q-badge(v-if="props.row.type ==='registration'") регистрационный
+                q-badge(v-if="props.row.type ==='deposit'") паевой
 
-            q-td(style="max-width: 150px; word-wrap: break-word; white-space: normal;") {{getNameFromUserData(props.row.user?.private_data)}}
+              q-td(style="max-width: 150px; word-wrap: break-word; white-space: normal;") {{getNameFromUserData(props.row.user?.private_data)}}
 
-            q-td
-              q-badge(v-if="props.row.status ==='completed'" color="teal") обработан
-              q-badge(v-if="props.row.status ==='pending'" color="orange") ожидание оплаты
-              q-badge(v-if="props.row.status ==='failed'" color="red") ошибка
-              q-badge(v-if="props.row.status ==='paid'" color="orange") оплачен
-              q-badge(v-if="props.row.status ==='refunded'" color="grey") отменён
-              q-badge(v-if="props.row.status ==='expired'" color="grey") истёк
-            q-td
-              q-btn-dropdown(size="sm" label="действия" color="primary" v-model="dropdowns[props.row.order_num]")
-                q-list(dense)
-                  SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
-                  SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
+              q-td
+                q-badge(v-if="props.row.status ==='completed'" color="teal") обработан
+                q-badge(v-if="props.row.status ==='pending'" color="orange") ожидание оплаты
+                q-badge(v-if="props.row.status ==='failed'" color="red") ошибка
+                q-badge(v-if="props.row.status ==='paid'" color="orange") оплачен
+                q-badge(v-if="props.row.status ==='refunded'" color="grey") отменён
+                q-badge(v-if="props.row.status ==='expired'" color="grey") истёк
+              q-td
+                q-btn-dropdown(size="sm" label="действия" color="primary" v-model="dropdowns[props.row.order_num]")
+                  q-list(dense)
+                    SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
+                    SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
 
-          q-tr(v-if="expanded.get(props.row.order_num) && props.row.message" :key="`e_${props.row.order_num}`" :props="props" class="q-virtual-scroll--with-prev")
-            q-td(colspan="100%")
-              div(v-if="props.row.status=='failed'")
-                p Причина ошибки: {{props.row.message}}
-
+            q-tr(v-if="expanded.get(props.row.order_num) && props.row.message" :key="`e_${props.row.order_num}`" :props="props" class="q-virtual-scroll--with-prev")
+              q-td(colspan="100%")
+                div(v-if="props.row.status=='failed'")
+                  p Причина ошибки: {{props.row.message}}
 </template>
 <script setup lang="ts">
   import { onMounted, ref, computed, reactive, nextTick } from 'vue'
@@ -201,24 +202,6 @@
   const pagination = ref({ rowsPerPage: 0 })
   </script>
 
-<style lang="sass">
-.my-sticky-dynamic
-  /* height or max-height is important */
-  height: 100vh
-
-  /* this will be the loading indicator */
-  thead tr:last-child th
-    /* height of all previous header rows */
-    top: 48px
-  thead tr:first-child th
-    top: 0
-
-  /* prevent scrolling behind sticky top row on focus */
-  tbody
-    /* height of all previous header rows */
-    scroll-margin-top: 48px
-
-</style>
 <style>
 .q-list--dense > .q-item, .q-item--dense {
   padding: 0px !important;

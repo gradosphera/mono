@@ -3,7 +3,7 @@ import { IsArray, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { AgendaMeetPointDTO } from './agenda-meet-point.dto';
 import type { MeetPreProcessingDomainInterface } from '~/domain/meet/interfaces/meet-pre-domain.interface';
-import { AnnualGeneralMeetingAgendaDocumentAggregateDTO } from '../../document/documents-dto/annual-general-meeting-agenda-document.dto';
+import { DocumentAggregateDTO } from '~/modules/document/dto/document-aggregate.dto';
 
 @ObjectType('MeetPreProcessing', { description: 'Предварительные данные собрания перед обработкой' })
 export class MeetPreProcessingDTO implements MeetPreProcessingDomainInterface {
@@ -34,12 +34,12 @@ export class MeetPreProcessingDTO implements MeetPreProcessingDomainInterface {
   @Field(() => Date, { description: 'Дата закрытия собрания' })
   close_at!: Date;
 
-  @Field(() => AnnualGeneralMeetingAgendaDocumentAggregateDTO, {
+  @Field(() => DocumentAggregateDTO, {
     nullable: true,
-    description: 'Документ с повесткой собрания',
+    description: 'Документ с предложением повестки собрания',
   })
   @IsOptional()
-  proposal?: AnnualGeneralMeetingAgendaDocumentAggregateDTO;
+  proposal?: DocumentAggregateDTO;
 
   constructor(data: MeetPreProcessingDTO) {
     Object.assign(this, data);

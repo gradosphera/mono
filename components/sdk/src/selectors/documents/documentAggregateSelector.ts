@@ -1,27 +1,15 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { Selector, type ValueTypes } from '../../zeus/index'
-
-// Селектор для метаданных документа
-export const rawDocumentMetaSelector = {
-  block_num: true,
-  coopname: true,
-  created_at: true,
-  generator: true,
-  lang: true,
-  links: true,
-  registry_id: true,
-  timezone: true,
-  title: true,
-  username: true,
-  version: true,
-}
+import { rawUserUnionSelector } from '../common/userUnionSelector'
 
 // Селектор для подписи документа
 export const rawDocumentSignatureSelector = {
   hash: true,
   public_key: true,
   signature: true,
-  meta: rawDocumentMetaSelector,
+  meta: true,
+  is_valid: true,
+  signer: rawUserUnionSelector,
 }
 
 // Селектор для сырого документа
@@ -30,7 +18,7 @@ export const rawRawDocumentSelector = {
   binary: true,
   full_title: true,
   html: true,
-  meta: rawDocumentMetaSelector,
+  meta: true,
 }
 
 // Селектор для агрегата документа
@@ -46,7 +34,7 @@ export const rawDocumentAggregateSelector = {
  * Важно: не используем массив для signatures - Zeus сам применит
  * селектор к каждому элементу массива
  */
-export const rawDocumentAggregateBaseSelector = rawDocumentAggregateSelector
+export const documentAggregateSelector = rawDocumentAggregateSelector
 
 // Проверка валидности селектора документа на первом попавшемся типе т.к. абстрактные типы zeus в документацию не затягивает
-const _validate: MakeAllFieldsRequired<ValueTypes['AnnualGeneralMeetingAgendaDocumentAggregate']> = rawDocumentAggregateSelector
+const _validate: MakeAllFieldsRequired<ValueTypes['DocumentAggregate']> = rawDocumentAggregateSelector

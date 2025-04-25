@@ -59,7 +59,12 @@
         q-tr(v-show="props.expand" :key="`e_${props.row.username}`" :props="props" class="q-virtual-scroll--with-prev")
           q-td(colspan="100%")
             slot(:expand="props.expand" :receiver="props.row.username")
-            ListOfDocumentsWidget(:expand="true" :documentType="'newsubmitted'" :filter="{receiver: props.row.username, data: getDataFilter(props.row.document.hash)}")
+            ListOfDocumentsWidget(
+              :username="props.row.username"
+              :filter="{data: getDataFilter(props.row.document.hash)}"
+              :expand="true"
+              :documentType="'newsubmitted'"
+            )
 
   </template>
   <script setup lang="ts">

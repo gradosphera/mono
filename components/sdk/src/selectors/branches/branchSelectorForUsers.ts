@@ -1,9 +1,9 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus/index";
-import { rawBankAccountSelector } from "../common/bankAccountSelector";
-import { rawIndividualSelector } from "../common/individualSelector";
-import { rawPaymentMethodSelector } from "../paymentMethods/paymentMethodSelector";
-import { rawBankPaymentMethodSelector } from "../paymentMethods/rawBankPaymentMethodSelector";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { Selector, type ValueTypes } from '../../zeus/index'
+import { rawBankAccountSelector } from '../common/bankAccountSelector'
+import { rawIndividualSelector } from '../common/individualSelector'
+import { rawPaymentMethodSelector } from '../paymentMethods/paymentMethodSelector'
+import { rawBankPaymentMethodSelector } from '../paymentMethods/rawBankPaymentMethodSelector'
 
 const rawBranchSelectorForUsers = {
   coopname: true,
@@ -30,14 +30,14 @@ const rawBranchSelectorForUsers = {
   short_name: true,
   bank_account: rawBankPaymentMethodSelector,
   type: true,
-};
+}
 
 // Проверка валидности
 const _validate: MakeAllFieldsRequired<
-  Omit<ValueTypes["Branch"], "trustee" | "trusted">
-> = rawBranchSelectorForUsers;
+  Omit<ValueTypes['Branch'], 'trustee' | 'trusted'>
+> = rawBranchSelectorForUsers
 
-export const branchSelectorForUsers = Selector("Branch")(
+export const branchSelectorForUsers = Selector('Branch')(
   rawBranchSelectorForUsers,
-);
-export { rawBranchSelectorForUsers };
+)
+export { rawBranchSelectorForUsers }

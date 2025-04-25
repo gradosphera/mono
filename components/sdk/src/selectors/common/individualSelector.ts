@@ -1,5 +1,5 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import type { ValueTypes } from "../../zeus/index";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import type { ValueTypes } from '../../zeus/index'
 
 // "Сырой" объект
 const rawIndividualSelector = {
@@ -18,12 +18,10 @@ const rawIndividualSelector = {
     series: true,
   },
   username: true,
-};
-
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['Branch']['trusted']> = rawIndividualSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['Individual']> = rawIndividualSelector
 
-
-export const individualSelector = rawIndividualSelector; // Используем "сырой" объект напрямую
-export { rawIndividualSelector };
+export const individualSelector = rawIndividualSelector // Используем "сырой" объект напрямую
+export { rawIndividualSelector }

@@ -54,17 +54,19 @@ export interface IExtendedTable extends ITable {
 }
 
 export interface IExtendedAction extends IAction {
-  user: IIndividualData | IEntrepreneurData | IOrganizationData | null
+  user?: IIndividualData | IEntrepreneurData | IOrganizationData | null
 }
 
 export interface IGetActions {
   results: IAction[]
   page: number
   limit: number
+  total: number
 }
 
 export interface IGetTables {
   results: ITable[]
   page: number
   limit: number
+  total: number
 }

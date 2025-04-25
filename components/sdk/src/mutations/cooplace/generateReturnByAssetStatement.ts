@@ -1,10 +1,10 @@
-import { returnByAssetStatementDocumentSelector } from '../../selectors/cooplace'
+import { documentSelector } from '../../selectors'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'generateReturnByAssetStatement'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'ReturnByAssetStatementGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput') }, returnByAssetStatementDocumentSelector],
+  [name]: [{ data: $('data', 'ReturnByAssetStatementGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput') }, documentSelector],
 })
 
 export interface IInput {

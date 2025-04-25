@@ -2,8 +2,8 @@
 div.q-pa-xs.col-xs-12.col-sm-12.col-md-12.q-mt-md
   q-card(bordered flat)
     q-card-section.q-py-xs
-      div.text-subtitle2 {{ document.statement?.document?.full_title || '' }}
-      div.text-caption ID: {{ document.statement?.action?.data?.document.hash?.substring(0, 10) || '' }}
+      div.text-subtitle2 {{ document.statement?.documentAggregate?.rawDocument?.full_title || '' }}
+      div.text-caption ID: {{ getDocumentHash(document).substring(0, 10) || '' }}
 
     q-separator
 
@@ -20,10 +20,10 @@ div.q-pa-xs.col-xs-12.col-sm-12.col-md-12.q-mt-md
 
 <script setup lang="ts">
 import { ComplexDocument } from 'src/shared/ui/ComplexDocument'
-import { Cooperative } from 'cooptypes'
+import type { IDocumentPackageAggregate } from 'src/entities/Document/model'
 
 withDefaults(defineProps<{
-  document: Cooperative.Document.IComplexDocument
+  document: IDocumentPackageAggregate
   expanded?: boolean
 }>(), {
   expanded: false
@@ -32,4 +32,17 @@ withDefaults(defineProps<{
 defineEmits<{
   (e: 'toggle-expand'): void
 }>()
-</script> 
+
+// Получение хеша документа из агрегата
+function getDocumentHash(doc: IDocumentPackageAggregate) {
+  if (doc.statement?.documentAggregate?.rawDocument?.hash) {
+    return doc.statement.documentAggregate.rawDocument.hash
+  }
+
+  if (doc.decision?.documentAggregate?.rawDocument?.hash) {
+    return doc.decision.documentAggregate.rawDocument.hash
+  }
+
+  return 'нет хеша'
+}
+</script>

@@ -7,8 +7,8 @@ div.row.no-wrap
   q-btn(v-if="isVotedAgainst(decision)" disabled dense flat).text-red
     q-icon(name="fas fa-thumbs-down")
     span.q-pl-xs {{decision.votes_against.length}}
-
-  q-checkbox( v-model="approved" disable :true-value="1" :false-value="0" )
+  
+  q-checkbox( v-model="approved" disable)
 
   q-btn(v-if="isVotedAgainst(decision) || !isVotedAny(decision)" :disabled="isVotedAny(decision)" dense flat @click="$emit('vote-for')").text-green
     span.q-pr-xs {{decision.votes_for.length}}

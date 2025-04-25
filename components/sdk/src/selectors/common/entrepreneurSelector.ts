@@ -1,5 +1,5 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import type { ValueTypes } from "../../zeus/index";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import type { ValueTypes } from '../../zeus/index'
 
 // "Сырой" объект
 export const rawEntrepreneurSelector = {
@@ -17,12 +17,9 @@ export const rawEntrepreneurSelector = {
   middle_name: true,
   phone: true,
   username: true,
-};
-
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['Entrepreneur']> = rawEntrepreneurSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['Entrepreneur']> = rawEntrepreneurSelector
 
-
-export const entrepreneurSelector = rawEntrepreneurSelector; // Используем "сырой" объект напрямую
-
+export const entrepreneurSelector = rawEntrepreneurSelector // Используем "сырой" объект напрямую

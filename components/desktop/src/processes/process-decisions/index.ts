@@ -7,8 +7,9 @@ import { useSessionStore } from 'src/entities/Session'
 import { useGlobalStore } from 'src/shared/store'
 import { useVoteForDecision } from 'src/features/Decision/VoteForDecision'
 import { useVoteAgainstDecision } from 'src/features/Decision/VoteAgainstDecision'
-import { sendGET } from 'src/shared/api'
-import { ref, Ref } from 'vue'
+import { computed } from 'vue'
+import { useAgendaStore } from 'src/entities/Agenda/model'
+import type { IAgenda } from 'src/entities/Agenda/model'
 
 /**
  * Процесс обработки решений
@@ -17,8 +18,11 @@ import { ref, Ref } from 'vue'
 export function useDecisionProcessor() {
   const { info } = useSystemStore()
   const session = useSessionStore()
-  const decisions: Ref<Cooperative.Document.IComplexAgenda[]> = ref([])
-  const loading = ref(false)
+  const agendaStore = useAgendaStore()
+  
+  // Данные повестки и состояние загрузки
+  const decisions = computed(() => agendaStore.agenda)
+  const loading = computed(() => agendaStore.loading)
 
   /**
    * Форматирует заголовок вопроса
@@ -36,26 +40,72 @@ export function useDecisionProcessor() {
   }
 
   /**
+   * Получает заголовок документа из агрегата
+   */
+  function getDocumentTitle(row: IAgenda) {
+    // Используем только агрегаты документов
+    if (row.documents?.statement?.documentAggregate?.rawDocument?.full_title) {
+      return row.documents.statement.documentAggregate.rawDocument.full_title
+    }
+    
+    if (row.documents?.decision?.documentAggregate?.rawDocument?.full_title) {
+      return row.documents.decision.documentAggregate.rawDocument.full_title
+    }
+    
+    // Поддержка исходного формата для таблицы
+    if (row.table?.statement?.meta && typeof row.table.statement.meta === 'string') {
+      try {
+        const meta = JSON.parse(row.table.statement.meta)
+        if (meta.title) return meta.title
+      } catch (e) {
+        // Игнорируем ошибку парсинга JSON
+      }
+    }
+    
+    return 'Вопрос без заголовка'
+  }
+
+  /**
    * Загружает список вопросов на повестке
    */
   async function loadDecisions(coopname: string, hidden = false) {
     try {
-      loading.value = hidden ? false : true
-      decisions.value = await sendGET('/v1/coop/agenda', {
-        coopname
-      }) as Cooperative.Document.IComplexAgenda[]
-      loading.value = false
-      return decisions.value
+      const result = await agendaStore.loadAgenda({ coopname }, hidden)
+      return result
     } catch (error) {
-      loading.value = false
       throw error
     }
   }
 
   /**
+   * Получает хеш документа из агрегата
+   */
+  function getDocumentHash(row: IAgenda) {
+    // Используем только агрегаты документов
+    if (row.documents?.statement?.documentAggregate?.rawDocument?.hash) {
+      return row.documents.statement.documentAggregate.rawDocument.hash
+    }
+    
+    if (row.documents?.decision?.documentAggregate?.rawDocument?.hash) {
+      return row.documents.decision.documentAggregate.rawDocument.hash
+    }
+    
+    // Поддержка исходного формата для таблицы
+    if (row.table?.statement?.hash) {
+      return row.table.statement.hash
+    }
+    
+    return null
+  }
+
+  /**
    * Генерирует документ решения в зависимости от его типа
    */
-  async function generateDecisionDocument(row: Cooperative.Document.IComplexAgenda) {
+  async function generateDecisionDocument(row: IAgenda) {
+    if (!row.table?.id || !row.table?.username || !row.table?.type) {
+      throw new Error('Некорректные данные решения')
+    }
+    
     const decision_id = Number(row.table.id)
     const username = row.table.username
     const type = row.table.type
@@ -104,7 +154,11 @@ export function useDecisionProcessor() {
   /**
    * Авторизует и выполняет решение
    */
-  async function authorizeAndExecuteDecision(row: Cooperative.Document.IComplexAgenda) {
+  async function authorizeAndExecuteDecision(row: IAgenda) {
+    if (!row.table?.id) {
+      throw new Error('Некорректные данные решения')
+    }
+    
     const decision_id = Number(row.table.id)
 
     // Генерируем документ решения
@@ -215,6 +269,8 @@ export function useDecisionProcessor() {
     isVotedFor,
     isVotedAgainst,
     isVotedAny,
-    formatDecisionTitle
+    formatDecisionTitle,
+    getDocumentTitle,
+    getDocumentHash
   }
 }

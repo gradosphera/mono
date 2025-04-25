@@ -12,11 +12,9 @@ import { DeleteBranchGraphQLInput } from '../dto/delete-branch-input.dto';
 import { AddTrustedAccountGraphQLInput } from '../dto/add-trusted-account-input.dto';
 import { DeleteTrustedAccountGraphQLInput } from '../dto/delete-trusted-account-input.dto';
 import { SelectBranchInputDTO } from '../dto/select-branch-input.dto';
-import {
-  SelectBranchDocumentDTO,
-  SelectBranchGenerateDocumentInputDTO,
-} from '../../document/documents-dto/select-branch-document.dto';
+import { SelectBranchGenerateDocumentInputDTO } from '../../document/documents-dto/select-branch-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
+import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 
 @Resolver(() => BranchDTO)
 export class BranchResolver {
@@ -89,7 +87,7 @@ export class BranchResolver {
     return this.branchService.selectBranch(data);
   }
 
-  @Mutation(() => SelectBranchDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateSelectBranchDocument',
     description: 'Сгенерировать документ, подтверждающий выбор кооперативного участка',
   })
@@ -99,7 +97,7 @@ export class BranchResolver {
     @Args('data', { type: () => SelectBranchGenerateDocumentInputDTO }) data: SelectBranchGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<SelectBranchDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.branchService.generateSelectBranchDocument(data, options);
   }
 }

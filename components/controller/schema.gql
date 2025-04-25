@@ -88,11 +88,11 @@ type AccountsPaginationResult {
 }
 
 """
-Массив комплексных актов, содержащих полную информацию о сгенерированном и опубликованном документах
+Комплексный объект акта, содержащий полную информацию о сгенерированном и опубликованном документе с его агрегатом
 """
-type ActDetail {
+type ActDetailAggregate {
   action: ExtendedBlockchainAction
-  document: GeneratedDocument
+  documentAggregate: DocumentAggregate
 }
 
 type ActionAuthorization {
@@ -188,7 +188,7 @@ type AgendaWithDocuments {
   action: BlockchainAction!
 
   """Пакет документов, включающий разные подсекции"""
-  documents: DocumentPackage!
+  documents: DocumentPackageAggregate!
 
   """Запись в таблице блокчейна о вопросе на голосовании"""
   table: BlockchainDecision!
@@ -202,29 +202,6 @@ input AgreementInput {
 type AgreementVar {
   protocol_day_month_year: String!
   protocol_number: String!
-}
-
-type AnnualGeneralMeetingAgendaDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания повестки общего собрания"""
-  meta: AnnualGeneralMeetingAgendaMetaDocumentOutput!
-}
-
-type AnnualGeneralMeetingAgendaDocumentAggregate {
-  hash: String!
-  rawDocument: AnnualGeneralMeetingAgendaDocument
-  signatures: [AnnualGeneralMeetingAgendaSignedDocument!]!
 }
 
 input AnnualGeneralMeetingAgendaGenerateDocumentInput {
@@ -257,50 +234,6 @@ input AnnualGeneralMeetingAgendaGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
-}
-
-type AnnualGeneralMeetingAgendaMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type AnnualGeneralMeetingAgendaSignedDocument {
-  hash: String!
-
-  """Метаинформация для создания повестки общего собрания"""
-  meta: AnnualGeneralMeetingAgendaMetaDocumentOutput!
-  public_key: String!
-  signature: String!
 }
 
 input AnnualGeneralMeetingAgendaSignedDocumentInput {
@@ -352,67 +285,6 @@ input AnnualGeneralMeetingAgendaSignedMetaDocumentInput {
   version: String!
 }
 
-type AnnualGeneralMeetingDecisionDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация"""
-  meta: AnnualGeneralMeetingDecisionDocumentOutput!
-}
-
-type AnnualGeneralMeetingDecisionDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type AnnualGeneralMeetingDecisionSignedDocument {
-  hash: String!
-
-  """Метаинформация"""
-  meta: AnnualGeneralMeetingDecisionDocumentOutput!
-  public_key: String!
-  signature: String!
-}
-
 input AnnualGeneralMeetingDecisionSignedDocumentInput {
   """Хэш документа"""
   hash: String!
@@ -460,134 +332,6 @@ input AnnualGeneralMeetingDecisionSignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
-}
-
-type AnnualGeneralMeetingSovietDecisionDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация"""
-  meta: AnnualGeneralMeetingSovietDecisionDocumentOutput!
-}
-
-type AnnualGeneralMeetingSovietDecisionDocumentAggregate {
-  hash: String!
-  rawDocument: AnnualGeneralMeetingSovietDecisionDocument
-  signatures: [AnnualGeneralMeetingSovietDecisionSignedDocument!]!
-}
-
-type AnnualGeneralMeetingSovietDecisionDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type AnnualGeneralMeetingSovietDecisionSignedDocument {
-  hash: String!
-
-  """Метаинформация"""
-  meta: AnnualGeneralMeetingSovietDecisionDocumentOutput!
-  public_key: String!
-  signature: String!
-}
-
-type AnnualGeneralMeetingVotingBallotDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: AnnualGeneralMeetingVotingBallotMetaDocumentOutput!
-}
-
-type AnnualGeneralMeetingVotingBallotMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type AnnualGeneralMeetingVotingBallotSignedDocument {
-  hash: String!
-
-  """Метаинформация для создания протокола решения"""
-  meta: AnnualGeneralMeetingVotingBallotMetaDocumentOutput!
-  public_key: String!
-  signature: String!
 }
 
 input AnnualGeneralMeetingVotingBallotSignedDocumentInput {
@@ -639,23 +383,6 @@ input AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput {
   version: String!
 }
 
-type AssetContributionActDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: AssetContributionActMetaDocumentOutput!
-}
-
 input AssetContributionActGenerateDocumentInput {
   """Идентификатор акта"""
   act_id: String!
@@ -701,56 +428,6 @@ input AssetContributionActGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
-}
-
-type AssetContributionActMetaDocumentOutput {
-  """Идентификатор акта"""
-  act_id: String!
-
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Имя аккаунта кооперативного участка"""
-  braname: String
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Идентификатор решения"""
-  decision_id: Float!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """Имя аккаунта получателя на кооперативном участке"""
-  receiver: String!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Идентификатор заявки"""
-  request_id: Float!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
 }
 
 input AssetContributionActSignedDocumentInput {
@@ -817,23 +494,6 @@ input AssetContributionActSignedMetaDocumentInput {
   version: String!
 }
 
-type AssetContributionDecisionDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: AssetContributionDecisionMetaDocumentOutput!
-}
-
 input AssetContributionDecisionGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -872,73 +532,6 @@ input AssetContributionDecisionGenerateDocumentInput {
   version: String
 }
 
-type AssetContributionDecisionMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Идентификатор решения"""
-  decision_id: Float!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Идентификатор заявки"""
-  request_id: Float!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type AssetContributionDecisionSignedDocument {
-  hash: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: AssetContributionDecisionMetaDocumentOutput!
-  public_key: String!
-  signature: String!
-}
-
-type AssetContributionStatementDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: AssetContributionStatementMetaDocumentOutput!
-}
-
 input AssetContributionStatementGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -972,53 +565,6 @@ input AssetContributionStatementGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
-}
-
-type AssetContributionStatementMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Запрос на внесение имущественного паевого взноса"""
-  request: CommonRequestResponse!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type AssetContributionStatementSignedDocument {
-  hash: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: AssetContributionStatementMetaDocumentOutput!
-  public_key: String!
-  signature: String!
 }
 
 input AssetContributionStatementSignedDocumentInput {
@@ -1392,18 +938,6 @@ input CancelRequestInput {
 }
 
 input CommonRequestInput {
-  currency: String!
-  hash: String!
-  program_id: Int!
-  title: String!
-  total_cost: String!
-  type: String!
-  unit_cost: String!
-  unit_of_measurement: String!
-  units: Int!
-}
-
-type CommonRequestResponse {
   currency: String!
   hash: String!
   program_id: Int!
@@ -1816,17 +1350,14 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 """
-Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и документ самого решения.
+Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и агрегат документа самого решения.
 """
-type DecisionDetail {
+type DecisionDetailAggregate {
   action: ExtendedBlockchainAction!
-  document: DecisionDocumentUnion!
+  documentAggregate: DocumentAggregate!
   votes_against: [ExtendedBlockchainAction!]!
   votes_for: [ExtendedBlockchainAction!]!
 }
-
-"""Объединение типов документов протоколов решения совета"""
-union DecisionDocumentUnion = FreeDecisionDocument | ParticipantApplicationDecisionDocument
 
 input DeclineRequestInput {
   """Имя аккаунта кооператива"""
@@ -1921,29 +1452,35 @@ input DisputeOnRequestInput {
   username: String!
 }
 
-"""
-Комплексный объект папки цифрового документа, который включает в себя заявление, решение, акты и связанные документы
-"""
-type DocumentPackage {
-  """Массив объект(ов) актов, относящихся к заявлению"""
-  acts: [ActDetail!]!
-
-  """Объект цифрового документа решения"""
-  decision: DecisionDetail!
-
-  """Массив связанных документов, извлечённых из мета-данных"""
-  links: [GeneratedDocument!]!
-
-  """Объект цифрового документа заявления"""
-  statement: StatementDetail!
+type DocumentAggregate {
+  hash: String!
+  rawDocument: GeneratedDocument
+  signatures: [SignedDigitalDocument!]!
 }
 
-type DocumentsPaginationResult {
+"""
+Комплексный объект папки цифрового документа с агрегатами, который включает в себя заявление, решение, акты и связанные документы
+"""
+type DocumentPackageAggregate {
+  """Массив объект(ов) актов с агрегатами, относящихся к заявлению"""
+  acts: [ActDetailAggregate!]!
+
+  """Объект цифрового документа решения с агрегатом"""
+  decision: DecisionDetailAggregate
+
+  """Массив связанных документов с агрегатами, извлечённых из мета-данных"""
+  links: [DocumentAggregate!]!
+
+  """Объект цифрового документа заявления с агрегатом"""
+  statement: StatementDetailAggregate
+}
+
+type DocumentsAggregatePaginationResult {
   """Текущая страница"""
   currentPage: Int!
 
   """Элементы текущей страницы"""
-  items: [DocumentPackage!]!
+  items: [DocumentPackageAggregate!]!
 
   """Общее количество элементов"""
   totalCount: Int!
@@ -2135,23 +1672,6 @@ input ExtensionInput {
   updated_at: DateTime
 }
 
-type FreeDecisionDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: FreeDecisionMetaDocumentOutput!
-}
-
 input FreeDecisionGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -2188,56 +1708,6 @@ input FreeDecisionGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
-}
-
-type FreeDecisionMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Идентификатор повестки дня"""
-  decision_id: Float!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """Идентификатор протокола решения собрания совета"""
-  project_id: String!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type FreeDecisionSignedDocument {
-  hash: String!
-
-  """Метаинформация для создания протокола решения"""
-  meta: FreeDecisionMetaDocumentOutput!
-  public_key: String!
-  signature: String!
 }
 
 """
@@ -2287,6 +1757,9 @@ input GenerateDocumentInput {
 }
 
 input GenerateDocumentOptionsInput {
+  """Язык документа"""
+  lang: String
+
   """Пропустить сохранение"""
   skip_save: Boolean
 }
@@ -2316,7 +1789,7 @@ type GeneratedDocument {
   html: String!
 
   """Метаданные документа"""
-  meta: MetaDocument!
+  meta: JSON!
 }
 
 input GetAccountInput {
@@ -2338,7 +1811,6 @@ input GetBranchesInput {
 
 input GetDocumentsFilterInput {
   additionalFilters: JSON
-  receiver: String!
 }
 
 input GetDocumentsInput {
@@ -2346,6 +1818,7 @@ input GetDocumentsInput {
   limit: Int
   page: Int
   type: String
+  username: String!
 }
 
 input GetExtensionsInput {
@@ -2495,7 +1968,7 @@ input LogoutInput {
 """Данные о собрании кооператива"""
 type Meet {
   """Документ с решением совета о проведении собрания"""
-  authorization: AnnualGeneralMeetingSovietDecisionDocumentAggregate
+  authorization: DocumentAggregate
 
   """Дата закрытия собрания"""
   close_at: DateTime!
@@ -2528,7 +2001,7 @@ type Meet {
   presider: String!
 
   """Документ с повесткой собрания"""
-  proposal: AnnualGeneralMeetingAgendaDocumentAggregate!
+  proposal: DocumentAggregate!
 
   """Флаг достижения кворума"""
   quorum_passed: Boolean!
@@ -2587,8 +2060,8 @@ type MeetPreProcessing {
   """Председатель собрания"""
   presider: String!
 
-  """Документ с повесткой собрания"""
-  proposal: AnnualGeneralMeetingAgendaDocumentAggregate
+  """Документ с предложением повестки собрания"""
+  proposal: DocumentAggregate
 
   """Секретарь собрания"""
   secretary: String!
@@ -2613,41 +2086,6 @@ type MeetProcessing {
 
   """Список вопросов повестки собрания"""
   questions: [Question!]!
-}
-
-type MetaDocument {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
 }
 
 input MetaDocumentInput {
@@ -2821,46 +2259,46 @@ type Mutation {
   editBranch(data: EditBranchInput!): Branch!
 
   """Сгенерировать предложение повестки общего собрания пайщиков"""
-  generateAnnualGeneralMeetAgendaDocument(data: AnnualGeneralMeetingAgendaGenerateDocumentInput!, options: GenerateDocumentOptionsInput): AnnualGeneralMeetingAgendaDocument!
+  generateAnnualGeneralMeetAgendaDocument(data: AnnualGeneralMeetingAgendaGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ акта приема-передачи."""
-  generateAssetContributionAct(data: AssetContributionActGenerateDocumentInput!, options: GenerateDocumentOptionsInput): AssetContributionActDocument!
+  generateAssetContributionAct(data: AssetContributionActGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ решения о вступлении в кооператив."""
-  generateAssetContributionDecision(data: AssetContributionDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): AssetContributionDecisionDocument!
+  generateAssetContributionDecision(data: AssetContributionDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ заявления о вступлении в кооператив."""
-  generateAssetContributionStatement(data: AssetContributionStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): AssetContributionStatementDocument!
+  generateAssetContributionStatement(data: AssetContributionStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать бюллетень для голосования на общем собрании пайщиков"""
-  generateBallotForAnnualGeneralMeetDocument(data: GenerateBallotForAnnualGeneralMeetInput!, options: GenerateDocumentOptionsInput): AnnualGeneralMeetingVotingBallotDocument!
+  generateBallotForAnnualGeneralMeetDocument(data: GenerateBallotForAnnualGeneralMeetInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать протокол решения по предложенной повестке"""
-  generateFreeDecision(data: FreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ProjectFreeDecisionDocument!
+  generateFreeDecision(data: FreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ заявления о вступлении в кооператив."""
-  generateParticipantApplication(data: ParticipantApplicationGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ParticipantApplicationDocument!
+  generateParticipantApplication(data: ParticipantApplicationGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ протокол решения собрания совета"""
-  generateParticipantApplicationDecision(data: ParticipantApplicationDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ParticipantApplicationDecisionDocument!
+  generateParticipantApplicationDecision(data: ParticipantApplicationDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ согласия с политикой конфиденциальности."""
   generatePrivacyAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ проекта свободного решения"""
-  generateProjectOfFreeDecision(data: ProjectFreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ProjectFreeDecisionDocument!
+  generateProjectOfFreeDecision(data: ProjectFreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ акта возврата имущества."""
-  generateReturnByAssetAct(data: ReturnByAssetActGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ReturnByAssetActDocument!
+  generateReturnByAssetAct(data: ReturnByAssetActGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ решения о возврате имущества."""
-  generateReturnByAssetDecision(data: ReturnByAssetDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ReturnByAssetDecisionDocument!
+  generateReturnByAssetDecision(data: ReturnByAssetDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ заявления о возврате имущества."""
-  generateReturnByAssetStatement(data: ReturnByAssetStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): ReturnByAssetStatementDocument!
+  generateReturnByAssetStatement(data: ReturnByAssetStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ, подтверждающий выбор кооперативного участка"""
-  generateSelectBranchDocument(data: SelectBranchGenerateDocumentInput!, options: GenerateDocumentOptionsInput): SelectBranchDocument!
+  generateSelectBranchDocument(data: SelectBranchGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """
   Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи.
@@ -2870,7 +2308,7 @@ type Mutation {
   """
   Сгенерировать документ решения Совета по проведению общего собрания пайщиков
   """
-  generateSovietDecisionOnAnnualMeetDocument(data: GenerateSovietDecisionOnAnnualMeetInput!, options: GenerateDocumentOptionsInput): AnnualGeneralMeetingSovietDecisionDocument!
+  generateSovietDecisionOnAnnualMeetDocument(data: GenerateSovietDecisionOnAnnualMeetInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ пользовательского соглашения."""
   generateUserAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -3107,23 +2545,6 @@ type ParticipantAccount {
   username: String!
 }
 
-type ParticipantApplicationDecisionDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: ParticipantApplicationDecisionMetaDocumentOutput!
-}
-
 input ParticipantApplicationDecisionGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -3157,68 +2578,6 @@ input ParticipantApplicationDecisionGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
-}
-
-type ParticipantApplicationDecisionMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Идентификатор протокола решения собрания совета"""
-  decision_id: Float!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type ParticipantApplicationDecisionSignedDocument {
-  hash: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: ParticipantApplicationDecisionMetaDocumentOutput!
-  public_key: String!
-  signature: String!
-}
-
-type ParticipantApplicationDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-  meta: ParticipantApplicationMetaDocumentOutput!
 }
 
 input ParticipantApplicationGenerateDocumentInput {
@@ -3262,48 +2621,6 @@ input ParticipantApplicationGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
-}
-
-type ParticipantApplicationMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type ParticipantApplicationSignedDocument {
-  hash: String!
-  meta: ParticipantApplicationMetaDocumentOutput!
-  public_key: String!
-  signature: String!
 }
 
 input ParticipantApplicationSignedDocumentInput {
@@ -3567,23 +2884,6 @@ input ProhibitRequestInput {
   username: String!
 }
 
-type ProjectFreeDecisionDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: ProjectFreeDecisionMetaDocumentOutput!
-}
-
 input ProjectFreeDecisionGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -3617,56 +2917,6 @@ input ProjectFreeDecisionGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
-}
-
-type ProjectFreeDecisionMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Идентификатор протокола решения собрания совета"""
-  decision_id: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """Идентификатор проекта решения"""
-  project_id: String!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type ProjectFreeDecisionSignedDocument {
-  hash: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: ProjectFreeDecisionMetaDocumentOutput!
-  public_key: String!
-  signature: String!
 }
 
 input ProjectFreeDecisionSignedDocumentInput {
@@ -3767,7 +3017,7 @@ type Query {
 
   """Получить состав приложений рабочего стола"""
   getDesktop: Desktop!
-  getDocuments(data: GetDocumentsInput!): DocumentsPaginationResult!
+  getDocuments(data: GetDocumentsInput!): DocumentsAggregatePaginationResult!
 
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!
@@ -4015,23 +3265,6 @@ input RestartAnnualGeneralMeetInput {
   newproposal: AnnualGeneralMeetingAgendaSignedDocumentInput!
 }
 
-type ReturnByAssetActDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: ReturnByAssetActMetaDocumentOutput!
-}
-
 input ReturnByAssetActGenerateDocumentInput {
   """Идентификатор акта"""
   act_id: String!
@@ -4077,65 +3310,6 @@ input ReturnByAssetActGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
-}
-
-type ReturnByAssetActMetaDocumentOutput {
-  """Идентификатор акта"""
-  act_id: String!
-
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Имя аккаунта кооперативного участка"""
-  braname: String
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Идентификатор решения"""
-  decision_id: Float!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Идентификатор заявки"""
-  request_id: Float!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя аккаунта получателя на кооперативном участке"""
-  transmitter: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type ReturnByAssetActSignedDocument {
-  hash: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: ReturnByAssetActMetaDocumentOutput!
-  public_key: String!
-  signature: String!
 }
 
 input ReturnByAssetActSignedDocumentInput {
@@ -4202,23 +3376,6 @@ input ReturnByAssetActSignedMetaDocumentInput {
   version: String!
 }
 
-type ReturnByAssetDecisionDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: ReturnByAssetDecisionMetaDocumentOutput!
-}
-
 input ReturnByAssetDecisionGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -4257,73 +3414,6 @@ input ReturnByAssetDecisionGenerateDocumentInput {
   version: String
 }
 
-type ReturnByAssetDecisionMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Идентификатор решения"""
-  decision_id: Float!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Идентификатор заявки"""
-  request_id: Float!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type ReturnByAssetDecisionSignedDocument {
-  hash: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: ReturnByAssetDecisionMetaDocumentOutput!
-  public_key: String!
-  signature: String!
-}
-
-type ReturnByAssetStatementDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: ReturnByAssetStatementMetaDocumentOutput!
-}
-
 input ReturnByAssetStatementGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -4357,53 +3447,6 @@ input ReturnByAssetStatementGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
-}
-
-type ReturnByAssetStatementMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Запрос на внесение имущественного паевого взноса"""
-  request: CommonRequestResponse!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type ReturnByAssetStatementSignedDocument {
-  hash: String!
-
-  """Метаинформация для создания проекта свободного решения"""
-  meta: ReturnByAssetStatementMetaDocumentOutput!
-  public_key: String!
-  signature: String!
 }
 
 input ReturnByAssetStatementSignedDocumentInput {
@@ -4463,23 +3506,6 @@ type SbpAccount {
   phone: String!
 }
 
-type SelectBranchDocument {
-  """Бинарное содержимое документа (base64)"""
-  binary: String!
-
-  """Полное название документа"""
-  full_title: String!
-
-  """Хэш документа"""
-  hash: String!
-
-  """HTML содержимое документа"""
-  html: String!
-
-  """Метаинформация для документа выбора кооперативного участка"""
-  meta: SelectBranchMetaDocumentOutput!
-}
-
 input SelectBranchGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -4527,53 +3553,6 @@ input SelectBranchInput {
 
   """Имя аккаунта пользователя"""
   username: String!
-}
-
-type SelectBranchMetaDocumentOutput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Идентификатор имени аккаунта кооперативного участка"""
-  braname: String!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
-type SelectBranchSignedDocument {
-  hash: String!
-
-  """Метаинформация для документа выбора кооперативного участка"""
-  meta: SelectBranchMetaDocumentOutput!
-  public_key: String!
-  signature: String!
 }
 
 input SelectBranchSignedDocumentInput {
@@ -4685,6 +3664,15 @@ type SignedBlockchainDocument {
   signature: String!
 }
 
+type SignedDigitalDocument {
+  hash: String!
+  is_valid: Boolean!
+  meta: JSON!
+  public_key: String!
+  signature: String!
+  signer: UserDataUnion
+}
+
 input SignedDigitalDocumentInput {
   """Хэш документа"""
   hash: String!
@@ -4710,17 +3698,12 @@ input StartResetKeyInput {
 }
 
 """
-Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета)
+Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) с агрегатом документа
 """
-type StatementDetail {
+type StatementDetailAggregate {
   action: ExtendedBlockchainAction!
-  document: StatementDocumentUnion!
+  documentAggregate: DocumentAggregate!
 }
-
-"""
-Объединение типов документов заявлений, или других документов, за которыми следует появление протокола решения совета
-"""
-union StatementDocumentUnion = ParticipantApplicationDocument | ProjectFreeDecisionDocument
 
 input SupplyOnRequestInput {
   """Имя аккаунта кооператива"""

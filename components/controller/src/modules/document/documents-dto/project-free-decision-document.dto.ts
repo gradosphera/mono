@@ -1,15 +1,9 @@
-import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { Type } from 'class-transformer';
-import { IsString, ValidateNested, IsArray, IsNumber } from 'class-validator';
+import { InputType, Field, IntersectionType, OmitType } from '@nestjs/graphql';
+import { IsString } from 'class-validator';
 import { Cooperative } from 'cooptypes';
-import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
-import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
-import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
-import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
-import { SignedDigitalDocumentBase } from '~/modules/document/dto/signed-digital-document.base';
 import type { ExcludeCommonProps } from '~/modules/document/types';
 
 // интерфейс параметров для генерации
@@ -23,17 +17,6 @@ class BaseProjectFreeDecisionMetaDocumentInputDTO implements ExcludeCommonProps<
   @Field({ description: 'Идентификатор проекта решения' })
   @IsString()
   project_id!: string;
-}
-
-@ObjectType(`BaseProjectFreeDecisionMetaDocumentOutput`)
-class BaseProjectFreeDecisionMetaDocumentOutputDTO implements ExcludeCommonProps<action> {
-  @Field({ description: 'Идентификатор проекта решения' })
-  @IsString()
-  project_id!: string;
-
-  @Field(() => Number, { description: 'Идентификатор протокола решения собрания совета' })
-  @IsNumber()
-  decision_id!: number;
 }
 
 @InputType(`ProjectFreeDecisionGenerateDocumentInput`)
@@ -63,43 +46,4 @@ export class ProjectFreeDecisionSignedDocumentInputDTO extends SignedDigitalDocu
     description: 'Метаинформация для создания проекта свободного решения',
   })
   public readonly meta!: ProjectFreeDecisionSignedMetaDocumentInputDTO;
-}
-
-@ObjectType(`ProjectFreeDecisionMetaDocumentOutput`)
-export class ProjectFreeDecisionMetaDocumentOutputDTO
-  extends IntersectionType(BaseProjectFreeDecisionMetaDocumentOutputDTO, MetaDocumentDTO)
-  implements action {}
-
-@ObjectType(`ProjectFreeDecisionSignedDocument`)
-export class ProjectFreeDecisionSignedDocumentDTO extends SignedDigitalDocumentBase {
-  @Field(() => ProjectFreeDecisionMetaDocumentOutputDTO, {
-    description: 'Метаинформация для создания проекта свободного решения',
-  })
-  public override readonly meta!: ProjectFreeDecisionMetaDocumentOutputDTO;
-}
-
-@ObjectType(`ProjectFreeDecisionDocument`)
-export class ProjectFreeDecisionDocumentDTO extends GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {
-  @Field(() => ProjectFreeDecisionMetaDocumentOutputDTO, {
-    description: `Метаинформация для создания проекта свободного решения`,
-  })
-  @ValidateNested()
-  public readonly meta!: ProjectFreeDecisionMetaDocumentOutputDTO;
-}
-
-@ObjectType('ProjectFreeDecisionDocumentAggregate')
-export class ProjectFreeDecisionDocumentAggregateDTO
-  implements DocumentAggregateDomainInterface<ProjectFreeDecisionMetaDocumentOutputDTO>
-{
-  @Field(() => String)
-  hash!: string;
-
-  @Field(() => [ProjectFreeDecisionSignedDocumentDTO])
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ProjectFreeDecisionSignedDocumentDTO)
-  signatures!: ProjectFreeDecisionSignedDocumentDTO[];
-
-  @Field(() => ProjectFreeDecisionDocumentDTO, { nullable: true })
-  rawDocument?: ProjectFreeDecisionDocumentDTO;
 }

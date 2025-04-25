@@ -3,9 +3,6 @@ import GraphQLJSON from 'graphql-type-json';
 
 @InputType('GetDocumentsFilterInput')
 export class GetDocumentsFilterInputDTO {
-  @Field(() => String)
-  receiver!: string;
-
-  @Field(() => GraphQLJSON, { nullable: true }) // Используйте JSON тип для динамических свойств
+  @Field(() => GraphQLJSON, { nullable: true })
   additionalFilters?: Record<string, unknown>;
 }

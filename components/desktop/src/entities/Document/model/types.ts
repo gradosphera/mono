@@ -1,9 +1,9 @@
-import type { Ref } from 'vue';
-import type { Cooperative } from 'cooptypes';
-import type { Queries } from '@coopenomics/sdk';
+import type { Queries, Zeus } from '@coopenomics/sdk';
 
-export type IComplexDocument = Cooperative.Document.IComplexDocument;
-export type ZComplexDocument = Queries.Documents.GetDocuments.IOutput[typeof Queries.Documents.GetDocuments.name];
+export type IDocumentPackageAggregate = Zeus.ModelTypes['DocumentPackageAggregate'];
+export type IDocumentAggregate = Zeus.ModelTypes['DocumentAggregate'];
+export type ZGetDocumentsResult = Queries.Documents.GetDocuments.IOutput[typeof Queries.Documents.GetDocuments.name];
+export type IGetDocuments = Queries.Documents.GetDocuments.IInput['data']
 
 // Информация о пагинации
 export interface IPagination {
@@ -13,35 +13,6 @@ export interface IPagination {
 }
 
 // Типы документов в системе
-export type DocumentType = 'newresolved' | 'newsubmitted';
+export type DocumentType = 'newsubmitted' | 'newresolved';
 
-// Интерфейс для фильтрации документов
-export interface IDocumentFilter {
-  receiver: string;
-  additionalFilters?: Record<string, any>;
-}
-
-// Интерфейс для запроса документов
-export interface IGetDocuments {
-  filter: IDocumentFilter;
-  type: DocumentType;
-  limit?: number;
-  page?: number;
-}
-
-// Состояние документов в хранилище
-export interface IDocumentState {
-  documents: IComplexDocument[];
-  loading: boolean;
-}
-
-// Интерфейс хранилища документов
-export interface IDocumentStore {
-  documents: Ref<IComplexDocument[]>;
-  loading: Ref<boolean>;
-  documentType: Ref<DocumentType>;
-  pagination: Ref<IPagination>;
-  loadDocuments: (filter: Record<string, any>, type?: DocumentType, hidden?: boolean) => Promise<IComplexDocument[]>;
-  changeDocumentType: (type: DocumentType, filter: Record<string, any>) => Promise<void>;
-}
 
