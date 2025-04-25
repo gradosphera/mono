@@ -1,4 +1,4 @@
-import { meetAggregateSelector } from '../../selectors/meet'
+import { meetAggregateSelector } from '../../selectors'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'restartAnnualGeneralMeet'

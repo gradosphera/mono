@@ -54,21 +54,23 @@ export class AccountDomainService {
 
     const provider_account = (await userService.findUser(username)) as unknown as MonoAccountDomainInterface;
     let individual_data, organization_data, entrepreneur_data;
-
-    if (provider_account.type == 'individual') {
+    if (provider_account && provider_account.type == 'individual') {
       individual_data = await this.individualRepository.findByUsername(username);
-    } else if (provider_account.type == 'organization') {
+    } else if (provider_account && provider_account.type == 'organization') {
       organization_data = await this.organizationRepository.findByUsername(username);
-    } else if (provider_account.type == 'entrepreneur') {
+    } else if (provider_account && provider_account.type == 'entrepreneur') {
       entrepreneur_data = await this.entrepreneurRepository.findByUsername(username);
     }
+    let private_account: PrivateAccountDomainInterface | null = null;
 
-    const private_account: PrivateAccountDomainInterface = {
-      type: provider_account.type as AccountType,
-      individual_data,
-      organization_data,
-      entrepreneur_data,
-    };
+    if (provider_account) {
+      private_account = {
+        type: provider_account.type as AccountType,
+        individual_data,
+        organization_data,
+        entrepreneur_data,
+      };
+    }
 
     return new AccountDomainEntity({
       username,
@@ -106,11 +108,11 @@ export class AccountDomainService {
    */
   async getPrivateAccount(
     username: string
-  ): Promise<IndividualDomainInterface | OrganizationDomainInterface | EntrepreneurDomainInterface> {
+  ): Promise<IndividualDomainInterface | OrganizationDomainInterface | EntrepreneurDomainInterface | null> {
     const account = await this.getAccount(username);
 
     if (!account.private_account) {
-      throw new BadRequestException('Приватные данные пользователя не найдены');
+      return null;
     }
 
     if (account.private_account.type === 'individual' && account.private_account.individual_data) {
@@ -125,6 +127,6 @@ export class AccountDomainService {
       return account.private_account.entrepreneur_data;
     }
 
-    throw new BadRequestException('Неподдерживаемый тип аккаунта или данные отсутствуют');
+    return null;
   }
 }

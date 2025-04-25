@@ -1,4 +1,4 @@
-import { rawDocumentSelector } from '../../selectors'
+import { documentSelector } from '../../selectors'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'generateBallotForAnnualGeneralMeetDocument'
@@ -12,7 +12,7 @@ export const mutation = Selector('Mutation')({
       data: $('data', 'GenerateBallotForAnnualGeneralMeetInput!'),
       options: $('options', 'GenerateDocumentOptionsInput'),
     },
-    rawDocumentSelector,
+    documentSelector,
   ],
 })
 

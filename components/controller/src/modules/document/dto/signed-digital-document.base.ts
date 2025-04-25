@@ -1,8 +1,7 @@
 // signed-digital-document.base.ts
 import { Field, ObjectType } from '@nestjs/graphql';
 import { IsString } from 'class-validator';
-import type { MetaDocumentDTO } from './meta-document.dto';
-
+import GraphQLJSON from 'graphql-type-json';
 @ObjectType({ isAbstract: true })
 export abstract class SignedDigitalDocumentBase {
   @Field(() => String)
@@ -17,7 +16,8 @@ export abstract class SignedDigitalDocumentBase {
   @IsString()
   public readonly signature!: string;
 
-  public readonly meta!: MetaDocumentDTO;
+  @Field(() => GraphQLJSON)
+  public readonly meta!: any;
 
   constructor(data: SignedDigitalDocumentBase) {
     Object.assign(this, data);

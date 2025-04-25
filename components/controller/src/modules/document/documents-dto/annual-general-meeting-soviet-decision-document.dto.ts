@@ -1,15 +1,8 @@
-import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { Type } from 'class-transformer';
-import { ValidateNested, IsArray } from 'class-validator';
+import { InputType, Field, IntersectionType, OmitType } from '@nestjs/graphql';
 import { Cooperative } from 'cooptypes';
-import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
-import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
-import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
-import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
-import { SignedDigitalDocumentBase } from '~/modules/document/dto/signed-digital-document.base';
 import type { ExcludeCommonProps } from '~/modules/document/types';
 
 // интерфейс параметров для генерации
@@ -17,11 +10,6 @@ type action = Cooperative.Registry.AnnualGeneralMeetingSovietDecision.Action;
 
 @InputType(`BaseAnnualGeneralMeetingSovietDecisionDocumentInput`)
 class BaseAnnualGeneralMeetingSovietDecisionDocumentInputDTO implements ExcludeCommonProps<action> {
-  // Мета пока не содержит дополнительных полей
-}
-
-@ObjectType(`BaseAnnualGeneralMeetingSovietDecisionDocumentOutput`)
-class BaseAnnualGeneralMeetingSovietDecisionDocumentOutputDTO implements ExcludeCommonProps<action> {
   // Мета пока не содержит дополнительных полей
 }
 
@@ -47,46 +35,4 @@ export class AnnualGeneralMeetingSovietDecisionSignedDocumentInputDTO extends Si
     description: 'Метаинформация',
   })
   public readonly meta!: AnnualGeneralMeetingSovietDecisionSignedMetaDocumentInputDTO;
-}
-
-@ObjectType(`AnnualGeneralMeetingSovietDecisionDocumentOutput`)
-export class AnnualGeneralMeetingSovietDecisionDocumentOutputDTO
-  extends IntersectionType(BaseAnnualGeneralMeetingSovietDecisionDocumentOutputDTO, MetaDocumentDTO)
-  implements action {}
-
-@ObjectType(`AnnualGeneralMeetingSovietDecisionSignedDocument`)
-export class AnnualGeneralMeetingSovietDecisionSignedDocumentDTO extends SignedDigitalDocumentBase {
-  @Field(() => AnnualGeneralMeetingSovietDecisionDocumentOutputDTO, {
-    description: 'Метаинформация',
-  })
-  public override readonly meta!: AnnualGeneralMeetingSovietDecisionDocumentOutputDTO;
-}
-
-@ObjectType(`AnnualGeneralMeetingSovietDecisionDocument`)
-export class AnnualGeneralMeetingSovietDecisionDocumentDTO
-  extends GeneratedDocumentDTO
-  implements GeneratedDocumentDomainInterface
-{
-  @Field(() => AnnualGeneralMeetingSovietDecisionDocumentOutputDTO, {
-    description: `Метаинформация`,
-  })
-  @ValidateNested()
-  public readonly meta!: AnnualGeneralMeetingSovietDecisionDocumentOutputDTO;
-}
-
-@ObjectType('AnnualGeneralMeetingSovietDecisionDocumentAggregate')
-export class AnnualGeneralMeetingSovietDecisionDocumentAggregateDTO
-  implements DocumentAggregateDomainInterface<AnnualGeneralMeetingSovietDecisionDocumentOutputDTO>
-{
-  @Field(() => String)
-  hash!: string;
-
-  @Field(() => [AnnualGeneralMeetingSovietDecisionSignedDocumentDTO])
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AnnualGeneralMeetingSovietDecisionSignedDocumentDTO)
-  signatures!: AnnualGeneralMeetingSovietDecisionSignedDocumentDTO[];
-
-  @Field(() => AnnualGeneralMeetingSovietDecisionDocumentDTO, { nullable: true })
-  rawDocument?: AnnualGeneralMeetingSovietDecisionDocumentDTO;
 }

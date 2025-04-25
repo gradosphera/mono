@@ -1,15 +1,9 @@
-import { InputType, Field, ObjectType, IntersectionType, OmitType } from '@nestjs/graphql';
-import { Type } from 'class-transformer';
-import { ValidateNested, IsNotEmpty, IsNumber, IsArray } from 'class-validator';
+import { InputType, Field, IntersectionType, OmitType } from '@nestjs/graphql';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 import { Cooperative } from 'cooptypes';
-import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
-import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
 import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
-import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
-import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
-import { SignedDigitalDocumentBase } from '~/modules/document/dto/signed-digital-document.base';
 import type { ExcludeCommonProps } from '~/modules/document/types';
 
 // интерфейс параметров для генерации
@@ -17,19 +11,6 @@ type action = Cooperative.Registry.AssetContributionDecision.Action;
 
 @InputType(`BaseAssetContributionDecisionMetaDocumentInput`)
 class BaseAssetContributionDecisionMetaDocumentInputDTO implements ExcludeCommonProps<action> {
-  @Field({ description: 'Идентификатор заявки' })
-  @IsNotEmpty()
-  @IsNumber()
-  request_id!: number;
-
-  @Field({ description: 'Идентификатор решения' })
-  @IsNotEmpty()
-  @IsNumber()
-  decision_id!: number;
-}
-
-@ObjectType(`BaseAssetContributionDecisionMetaDocumentOutput`)
-class BaseAssetContributionDecisionMetaDocumentOutputDTO {
   @Field({ description: 'Идентификатор заявки' })
   @IsNotEmpty()
   @IsNumber()
@@ -67,44 +48,4 @@ export class AssetContributionDecisionSignedDocumentInputDTO extends SignedDigit
     description: 'Метаинформация для создания проекта свободного решения',
   })
   public readonly meta!: AssetContributionDecisionSignedMetaDocumentInputDTO;
-}
-
-@ObjectType(`AssetContributionDecisionMetaDocumentOutput`)
-export class AssetContributionDecisionMetaDocumentOutputDTO extends IntersectionType(
-  BaseAssetContributionDecisionMetaDocumentOutputDTO,
-  MetaDocumentDTO
-) {}
-
-@ObjectType(`AssetContributionDecisionSignedDocument`)
-export class AssetContributionDecisionSignedDocumentDTO extends SignedDigitalDocumentBase {
-  @Field(() => AssetContributionDecisionMetaDocumentOutputDTO, {
-    description: 'Метаинформация для создания проекта свободного решения',
-  })
-  public override readonly meta!: AssetContributionDecisionMetaDocumentOutputDTO;
-}
-
-@ObjectType(`AssetContributionDecisionDocument`)
-export class AssetContributionDecisionDocumentDTO extends GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {
-  @Field(() => AssetContributionDecisionMetaDocumentOutputDTO, {
-    description: `Метаинформация для создания проекта свободного решения`,
-  })
-  @ValidateNested()
-  public readonly meta!: AssetContributionDecisionMetaDocumentOutputDTO;
-}
-
-@ObjectType('AssetContributionDecisionDocumentAggregate')
-export class AssetContributionDecisionDocumentAggregateDTO
-  implements DocumentAggregateDomainInterface<AssetContributionDecisionMetaDocumentOutputDTO>
-{
-  @Field(() => String)
-  hash!: string;
-
-  @Field(() => [AssetContributionDecisionSignedDocumentDTO])
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AssetContributionDecisionSignedDocumentDTO)
-  signatures!: AssetContributionDecisionSignedDocumentDTO[];
-
-  @Field(() => AssetContributionDecisionDocumentDTO, { nullable: true })
-  rawDocument?: AssetContributionDecisionDocumentDTO;
 }

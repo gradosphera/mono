@@ -5,7 +5,7 @@ import { DocumentDomainEntity } from '../entity/document-domain.entity';
 import { Cooperative } from 'cooptypes';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import type { DocumentMetaDomainInterface } from '../interfaces/document-meta-domain.interface';
-import type { SignedDocumentDomainEntity } from '../entity/signed-document-domain.entity';
+import { SignedDocumentDomainEntity } from '../entity/signed-document-domain.entity';
 
 @Injectable()
 export class DocumentAggregator {
@@ -22,9 +22,10 @@ export class DocumentAggregator {
    */
   public async buildDocumentAggregate<T extends DocumentMetaDomainInterface>(
     signedDoc: Cooperative.Document.ISignedDocument<T>
-  ): Promise<DocumentDomainAggregate<T>> {
+  ): Promise<DocumentDomainAggregate> {
     // Получаем полный документ по хешу
     const document = await this.getDocumentByHash(signedDoc.hash);
+
     // Проверяем, что в метаданных документа есть username
     if (!signedDoc.meta || !signedDoc.meta.username) {
       throw new BadRequestException('В документе отсутствует информация о пользователе (username)');
@@ -34,18 +35,17 @@ export class DocumentAggregator {
     const signer = await this.accountDomainService.getPrivateAccount(signedDoc.meta.username);
 
     // Формируем объект подписи
-    const signature: SignedDocumentDomainEntity<T> = {
+    const signature = new SignedDocumentDomainEntity({
       ...signedDoc,
-      is_valid: true,
       signer,
       hash: signedDoc.hash,
       public_key: signedDoc.public_key,
       signature: signedDoc.signature,
       meta: signedDoc.meta,
-    };
+    });
 
     const signatures = [signature];
-    return new DocumentDomainAggregate<T>(signedDoc.hash, document, signatures);
+    return new DocumentDomainAggregate(signedDoc.hash, document, signatures);
   }
 
   /**

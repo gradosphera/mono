@@ -1,20 +1,19 @@
-import { paymentMethodSelector } from '../../selectors/paymentMethods/paymentMethodSelector';
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus/index';
+import { paymentMethodSelector } from '../../selectors/paymentMethods/paymentMethodSelector'
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'deletePaymentMethod'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{data: $('data', 'DeletePaymentMethodInput!')}, true]
-});
+  [name]: [{ data: $('data', 'DeletePaymentMethodInput!') }, true],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
   data: ModelTypes['DeletePaymentMethodInput']
 }
 
-export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
-
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

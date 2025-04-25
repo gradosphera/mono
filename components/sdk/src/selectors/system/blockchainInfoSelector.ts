@@ -1,5 +1,6 @@
-import { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, ValueTypes } from "../../zeus/index";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import type { ValueTypes } from '../../zeus/index'
+import { Selector } from '../../zeus/index'
 
 // Селектор для blockchain_info
 export const rawBlockchainInfoSelector = {
@@ -19,12 +20,11 @@ export const rawBlockchainInfoSelector = {
   server_version_string: true,
   virtual_block_cpu_limit: true,
   virtual_block_net_limit: true,
-};
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['BlockchainInfoDTO']> = rawBlockchainInfoSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['BlockchainInfoDTO']> = rawBlockchainInfoSelector
 
-
-export const blockchainInfoSelector = Selector("BlockchainInfoDTO")(
+export const blockchainInfoSelector = Selector('BlockchainInfoDTO')(
   rawBlockchainInfoSelector,
-);
+)

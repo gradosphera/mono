@@ -32,7 +32,7 @@ export class MeetPreEntity implements MeetPreProcessingDomainInterface {
   close_at!: Date;
 
   @Column('jsonb', { nullable: true })
-  proposal?: DocumentAggregateDomainInterface<Cooperative.Registry.AnnualGeneralMeetingAgenda.Meta>;
+  proposal?: DocumentAggregateDomainInterface;
 
   @CreateDateColumn()
   created_at!: Date;

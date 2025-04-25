@@ -1,5 +1,6 @@
-import { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, ValueTypes } from "../../zeus/index";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import type { ValueTypes } from '../../zeus/index'
+import { Selector } from '../../zeus/index'
 
 // Селектор для payment details
 export const rawPaymentDetailsSelector = {
@@ -10,7 +11,7 @@ export const rawPaymentDetailsSelector = {
   fee_amount: true,
   fee_percent: true,
   tolerance_percent: true,
-};
+}
 
 // Селектор для payment
 export const rawPaymentSelector = {
@@ -26,9 +27,9 @@ export const rawPaymentSelector = {
   symbol: true,
   updated_at: true,
   username: true,
-};
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['Payment']> = rawPaymentSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['Payment']> = rawPaymentSelector
 
-export const paymentSelector = Selector("Payment")(rawPaymentSelector);
+export const paymentSelector = Selector('Payment')(rawPaymentSelector)

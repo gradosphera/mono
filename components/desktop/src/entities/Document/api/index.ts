@@ -1,14 +1,14 @@
 import { client } from 'src/shared/api/client';
 import { Queries } from '@coopenomics/sdk';
-import type { IGetDocuments, ZComplexDocument } from '../model/types';
+import type { IGetDocuments, ZGetDocumentsResult } from '../model/types';
 
 /**
  * Загрузка документов с сервера
  * @param data параметры запроса документов
- * @returns массив документов
+ * @returns результат запроса с пагинацией и документами
  */
-async function loadDocuments(data: IGetDocuments): Promise<ZComplexDocument> {
-  const { [Queries.Documents.GetDocuments.name]: output } = await client.Query(
+async function loadDocuments(data: IGetDocuments): Promise<ZGetDocumentsResult> {
+  const { getDocuments: output } = await client.Query(
     Queries.Documents.GetDocuments.query,
     {
       variables: {

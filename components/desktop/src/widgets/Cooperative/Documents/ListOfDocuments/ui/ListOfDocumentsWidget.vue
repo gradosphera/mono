@@ -5,6 +5,7 @@ div.row.justify-center
       :documents="documentStore.documents"
       :loading="documentStore.loading"
       @toggle-expand="toggleExpand"
+      @load="loadMoreDocuments"
     )
       template(#top v-if="showFilter")
         div.full-width
@@ -21,19 +22,21 @@ div.row.justify-center
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, onBeforeUnmount } from 'vue'
 import { DocumentModel } from 'src/entities/Document'
 import { DocumentsTable } from '../ui'
 import { FailAlert } from 'src/shared/api'
 import type { DocumentType } from 'src/entities/Document/model/types'
 
 const props = defineProps({
+  username: {
+    type: String,
+    required: true
+  },
   filter: {
     type: Object,
-    required: true,
-    validator: (value: any) => {
-      return typeof value.receiver === 'string'
-    }
+    required: false,
+    default: () => ({})
   },
   showFilter: {
     type: Boolean,
@@ -60,10 +63,28 @@ async function onTypeChange(newType: DocumentType) {
   if (newType === 'newresolved' || newType === 'newsubmitted') {
     typeForToggle.value = newType
     try {
-      await documentStore.changeDocumentType(newType, props.filter)
+      await documentStore.changeDocumentType(newType, props.username, props.filter)
     } catch (e) {
       FailAlert(e)
     }
+  }
+}
+
+// Функция для загрузки следующей страницы документов
+async function loadMoreDocuments() {
+  try {
+    // Проверяем, не загружаются ли уже документы
+    if (documentStore.loading) {
+      return
+    }
+
+    const nextPage = documentStore.pagination.currentPage + 1
+
+    if (nextPage <= documentStore.pagination.totalPages)
+      await documentStore.changePage(nextPage, props.username, props.filter)
+
+  } catch (e) {
+    FailAlert(e)
   }
 }
 
@@ -72,9 +93,21 @@ function toggleExpand(document: any) {
   emit('toggle-expand', document)
 }
 
+// Периодическое обновление данных
+let interval: number | null = null
+
 // Загрузка документов при монтировании
 onMounted(() => {
-  documentStore.changeDocumentType(typeForToggle.value, props.filter)
+  // Начальная загрузка документов
+  documentStore.resetDocuments()
+  documentStore.changeDocumentType(typeForToggle.value, props.username, props.filter)
     .catch(e => FailAlert(e))
+})
+
+// Очистка таймера при размонтировании компонента
+onBeforeUnmount(() => {
+  if (interval !== null) {
+    window.clearInterval(interval)
+  }
 })
 </script>

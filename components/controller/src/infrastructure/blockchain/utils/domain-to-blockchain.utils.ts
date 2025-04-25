@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Cooperative } from 'cooptypes';
 import moment from 'moment';
-import { SignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 /**
  * Утилитарный класс для конвертации доменных объектов в инфраструктурные типы блокчейна
@@ -13,9 +12,9 @@ export class DomainToBlockchainUtils {
    * @param document Доменный объект подписанного документа
    * @returns Объект документа в формате блокчейна
    */
-  convertSignedDocumentToBlockchainFormat<T>(
-    document: SignedDocumentDomainInterface<T>
-  ): Cooperative.Document.ISignedDocument {
+  convertSignedDocumentToBlockchainFormat(
+    document: Cooperative.Document.ISignedDocument
+  ): Cooperative.Document.IChainDocument {
     return {
       hash: document.hash,
       public_key: document.public_key,

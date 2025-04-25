@@ -51,20 +51,24 @@ export class Database {
 
     const pipeline = [
       { $match: filter },
-      { $sort: { block_num: -1 } }, // Сортировка по primary_key и block_num
+      { $sort: { block_num: -1 } },
       { $group: { _id: '$primary_key', doc: { $first: '$$ROOT' } } },
       { $replaceRoot: { newRoot: '$doc' } },
       { $sort: { block_num: -1 } },
-      { $skip: (page - 1) * limit }, // Применяется внутри пайплайна
-      { $limit: limit }, // Применяется внутри пайплайна
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
     ]
 
     const result = await this.deltas.aggregate(pipeline).toArray()
+
+    // Считаем количество уникальных primary_key
+    const total = await this.deltas.distinct('primary_key', filter || {}).then(arr => arr.length)
 
     return {
       results: result as IDelta[],
       page,
       limit,
+      total,
     }
   }
 
@@ -76,7 +80,7 @@ export class Database {
 
     const result = await this.actions.aggregate([
       { $match: query },
-      { $sort: { block_num: -1 } }, // Сортировка по primary_key и block_num
+      { $sort: { block_num: -1 } },
       { $group: { _id: '$global_sequence', doc: { $first: '$$ROOT' } } },
       { $replaceRoot: { newRoot: '$doc' } },
       { $sort: { block_num: -1 } },
@@ -84,16 +88,14 @@ export class Database {
       { $limit: limit },
     ]).toArray()
 
-    // const result = await this.actions.find(query as any)
-    //   .skip((page - 1) * limit)
-    //   .sort({ block_num: -1, _id: -1 })
-    //   .limit(limit)
-    //   .toArray()
+    // Считаем количество уникальных global_sequence
+    const total = await this.actions.distinct('global_sequence', query).then(arr => arr.length)
 
     return {
       results: result as unknown as IAction[],
       page,
       limit,
+      total,
     }
   }
 

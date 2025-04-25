@@ -48,4 +48,8 @@ void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash
     "addinitial"_n,
     std::make_tuple(coopname, candidate -> initial)
   ).send();
+  
+  candidates_index candidates(_registrator, coopname.value);
+  auto it = candidates.find(candidate -> username.value);
+  candidates.erase(it);
 }

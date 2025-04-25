@@ -14,6 +14,6 @@ export class DocumentDomainEntity implements GeneratedDocumentDomainInterface {
     this.html = data.html;
     this.hash = data.hash;
     this.meta = data.meta;
-    this.binary = Buffer.from(data.binary).toString('base64'); // Преобразуем Uint8Array в Base64 строку
+    this.binary = Buffer.from(data.binary.buffer).toString('base64');
   }
 }

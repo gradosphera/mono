@@ -1,10 +1,10 @@
-import { projectFreeDecisionDocumentSelector } from '../../selectors/documents/projectFreeDecisionSelector'
+import { documentSelector } from '../../selectors'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'generateProjectOfFreeDecision'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'ProjectFreeDecisionGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput') }, projectFreeDecisionDocumentSelector],
+  [name]: [{ data: $('data', 'ProjectFreeDecisionGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput') }, documentSelector],
 })
 
 export interface IInput {

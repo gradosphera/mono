@@ -1,19 +1,19 @@
-import { branchSelector, type branchModel } from '../../selectors';
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus/index';
+import { type branchModel, branchSelector } from '../../selectors'
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'createBranch'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{data: $('data', 'CreateBranchInput!')}, branchSelector]
-});
+  [name]: [{ data: $('data', 'CreateBranchInput!') }, branchSelector],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
-  data: ModelTypes['CreateBranchInput'],
+  data: ModelTypes['CreateBranchInput']
 }
 
-export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

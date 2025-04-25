@@ -1,71 +1,91 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { api } from '../api'
-import type { Cooperative } from 'cooptypes'
-import type { DocumentType, IDocumentStore, IGetDocuments, IPagination } from './types'
-import { useSystemStore } from 'src/entities/System/model'
+import type { DocumentType, IGetDocuments, IPagination, IDocumentPackageAggregate } from './types'
 import { FailAlert } from 'src/shared/api'
 
 const namespace = 'documentStore'
 
+interface IDocumentStore {
+  documents: Ref<IDocumentPackageAggregate[]>
+  loading: Ref<boolean>
+  documentType: Ref<DocumentType>
+  pagination: Ref<IPagination>
+  changePage: (page: number, username: string, filter: Record<string, any>, hidden?: boolean) => Promise<IDocumentPackageAggregate[]>
+  changeDocumentType: (type: DocumentType, username: string, filter: Record<string, any>) => Promise<void>
+  resetDocuments: () => void
+}
 /**
  * Хранилище для работы с документами
  */
 export const useDocumentStore = defineStore(namespace, (): IDocumentStore => {
-  const { info } = useSystemStore()
-
-  const documents = ref<Cooperative.Document.IComplexDocument[]>([])
+  const documents = ref<IDocumentPackageAggregate[]>([])
   const loading = ref(false)
   const documentType = ref<DocumentType>('newsubmitted')
-  
+
   // Информация о пагинации
   const pagination = ref<IPagination>({
     totalCount: 0,
     totalPages: 0,
-    currentPage: 0
+    currentPage: 1
   })
 
   /**
-   * Загрузка документов с сервера
+   * Сброс состояния документов
+   */
+  const resetDocuments = () => {
+    documents.value = []
+    pagination.value = {
+      totalCount: 0,
+      totalPages: 0,
+      currentPage: 1
+    }
+  }
+
+  /**
+   * Изменяет страницу для пагинации и загружает данные
+   * @param page номер страницы
+   * @param username имя пользователя или кооператива
    * @param filter параметры фильтрации
-   * @param type тип документов для загрузки
    * @param hidden флаг скрытой загрузки (без индикатора)
    * @returns массив документов
    */
-  const loadDocuments = async (
+  const changePage = async (
+    page: number,
+    username: string,
     filter: Record<string, any>,
-    type?: DocumentType,
     hidden = false
-  ): Promise<Cooperative.Document.IComplexDocument[]> => {
+  ): Promise<IDocumentPackageAggregate[]> => {
     try {
       loading.value = hidden ? false : true
 
-      if (type) {
-        documentType.value = type
-      }
+      pagination.value.currentPage = page
 
       const data: IGetDocuments = {
-        filter: {
-          receiver: info.coopname,
-          additionalFilters: filter
-        },
+        username,
+        filter,
         type: documentType.value,
-        page: 1,
+        page: page,
         limit: 10
       }
 
       const result = await api.loadDocuments(data)
-      
-      // Приведение типов для совместимости
-      documents.value = result.items as unknown as Cooperative.Document.IComplexDocument[]
-      
-      // Сохраняем информацию о пагинации
+
+      // Если это первая страница, заменяем документы
+      // Иначе добавляем новые документы к существующим
+      if (page === 1) {
+        documents.value = result.items
+      } else {
+        documents.value = [...documents.value, ...result.items]
+      }
+
+      // Обновляем информацию о пагинации
       pagination.value = {
         totalCount: result.totalCount,
         totalPages: result.totalPages,
         currentPage: result.currentPage
       }
-      
+
       loading.value = false
       return documents.value
     } catch (error: any) {
@@ -79,9 +99,10 @@ export const useDocumentStore = defineStore(namespace, (): IDocumentStore => {
   /**
    * Изменяет тип документов для отображения
    */
-  const changeDocumentType = async (type: DocumentType, filter: Record<string, any>) => {
+  const changeDocumentType = async (type: DocumentType, username: string, filter: Record<string, any>) => {
     documentType.value = type
-    await loadDocuments(filter, type)
+    // Сбрасываем текущую страницу при смене типа и загружаем документы
+    await changePage(1, username, filter)
   }
 
   return {
@@ -89,7 +110,8 @@ export const useDocumentStore = defineStore(namespace, (): IDocumentStore => {
     loading,
     documentType,
     pagination,
-    loadDocuments,
-    changeDocumentType
+    changePage,
+    changeDocumentType,
+    resetDocuments
   }
 })

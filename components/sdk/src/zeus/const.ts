@@ -687,9 +687,9 @@ export const ReturnTypes: Record<string,any> = {
 		totalCount:"Int",
 		totalPages:"Int"
 	},
-	ActDetail:{
+	ActDetailAggregate:{
 		action:"ExtendedBlockchainAction",
-		document:"GeneratedDocument"
+		documentAggregate:"DocumentAggregate"
 	},
 	ActionAuthorization:{
 		actor:"String",
@@ -711,206 +711,12 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	AgendaWithDocuments:{
 		action:"BlockchainAction",
-		documents:"DocumentPackage",
+		documents:"DocumentPackageAggregate",
 		table:"BlockchainDecision"
 	},
 	AgreementVar:{
 		protocol_day_month_year:"String",
 		protocol_number:"String"
-	},
-	AnnualGeneralMeetingAgendaDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"AnnualGeneralMeetingAgendaMetaDocumentOutput"
-	},
-	AnnualGeneralMeetingAgendaDocumentAggregate:{
-		hash:"String",
-		rawDocument:"AnnualGeneralMeetingAgendaDocument",
-		signatures:"AnnualGeneralMeetingAgendaSignedDocument"
-	},
-	AnnualGeneralMeetingAgendaMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	AnnualGeneralMeetingAgendaSignedDocument:{
-		hash:"String",
-		meta:"AnnualGeneralMeetingAgendaMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
-	AnnualGeneralMeetingDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"AnnualGeneralMeetingDecisionDocumentOutput"
-	},
-	AnnualGeneralMeetingDecisionDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	AnnualGeneralMeetingDecisionSignedDocument:{
-		hash:"String",
-		meta:"AnnualGeneralMeetingDecisionDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
-	AnnualGeneralMeetingSovietDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"AnnualGeneralMeetingSovietDecisionDocumentOutput"
-	},
-	AnnualGeneralMeetingSovietDecisionDocumentAggregate:{
-		hash:"String",
-		rawDocument:"AnnualGeneralMeetingSovietDecisionDocument",
-		signatures:"AnnualGeneralMeetingSovietDecisionSignedDocument"
-	},
-	AnnualGeneralMeetingSovietDecisionDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	AnnualGeneralMeetingSovietDecisionSignedDocument:{
-		hash:"String",
-		meta:"AnnualGeneralMeetingSovietDecisionDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
-	AnnualGeneralMeetingVotingBallotDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"AnnualGeneralMeetingVotingBallotMetaDocumentOutput"
-	},
-	AnnualGeneralMeetingVotingBallotMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	AnnualGeneralMeetingVotingBallotSignedDocument:{
-		hash:"String",
-		meta:"AnnualGeneralMeetingVotingBallotMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
-	AssetContributionActDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"AssetContributionActMetaDocumentOutput"
-	},
-	AssetContributionActMetaDocumentOutput:{
-		act_id:"String",
-		block_num:"Int",
-		braname:"String",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		receiver:"String",
-		registry_id:"Int",
-		request_id:"Float",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	AssetContributionDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"AssetContributionDecisionMetaDocumentOutput"
-	},
-	AssetContributionDecisionMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		request_id:"Float",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	AssetContributionDecisionSignedDocument:{
-		hash:"String",
-		meta:"AssetContributionDecisionMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
-	AssetContributionStatementDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"AssetContributionStatementMetaDocumentOutput"
-	},
-	AssetContributionStatementMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		request:"CommonRequestResponse",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	AssetContributionStatementSignedDocument:{
-		hash:"String",
-		meta:"AssetContributionStatementMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
 	},
 	AuthSequence:{
 		account:"String",
@@ -1041,17 +847,6 @@ export const ReturnTypes: Record<string,any> = {
 		trustee:"Individual",
 		type:"String"
 	},
-	CommonRequestResponse:{
-		currency:"String",
-		hash:"String",
-		program_id:"Int",
-		title:"String",
-		total_cost:"String",
-		type:"String",
-		unit_cost:"String",
-		unit_of_measurement:"String",
-		units:"Int"
-	},
 	ContactsDTO:{
 		chairman:"PublicChairman",
 		details:"OrganizationDetails",
@@ -1092,15 +887,11 @@ export const ReturnTypes: Record<string,any> = {
 		question:"String"
 	},
 	DateTime: `scalar.DateTime` as const,
-	DecisionDetail:{
+	DecisionDetailAggregate:{
 		action:"ExtendedBlockchainAction",
-		document:"DecisionDocumentUnion",
+		documentAggregate:"DocumentAggregate",
 		votes_against:"ExtendedBlockchainAction",
 		votes_for:"ExtendedBlockchainAction"
-	},
-	DecisionDocumentUnion:{
-		"...on FreeDecisionDocument":"FreeDecisionDocument",
-		"...on ParticipantApplicationDecisionDocument":"ParticipantApplicationDecisionDocument"
 	},
 	Desktop:{
 		authorizedHome:"String",
@@ -1113,15 +904,20 @@ export const ReturnTypes: Record<string,any> = {
 		name:"String",
 		title:"String"
 	},
-	DocumentPackage:{
-		acts:"ActDetail",
-		decision:"DecisionDetail",
-		links:"GeneratedDocument",
-		statement:"StatementDetail"
+	DocumentAggregate:{
+		hash:"String",
+		rawDocument:"GeneratedDocument",
+		signatures:"SignedDigitalDocument"
 	},
-	DocumentsPaginationResult:{
+	DocumentPackageAggregate:{
+		acts:"ActDetailAggregate",
+		decision:"DecisionDetailAggregate",
+		links:"DocumentAggregate",
+		statement:"StatementDetailAggregate"
+	},
+	DocumentsAggregatePaginationResult:{
 		currentPage:"Int",
-		items:"DocumentPackage",
+		items:"DocumentPackageAggregate",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -1182,40 +978,12 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String",
 		updated_at:"DateTime"
 	},
-	FreeDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"FreeDecisionMetaDocumentOutput"
-	},
-	FreeDecisionMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		project_id:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	FreeDecisionSignedDocument:{
-		hash:"String",
-		meta:"FreeDecisionMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
 	GeneratedDocument:{
 		binary:"String",
 		full_title:"String",
 		hash:"String",
 		html:"String",
-		meta:"MetaDocument"
+		meta:"JSON"
 	},
 	Individual:{
 		birthdate:"String",
@@ -1235,7 +1003,7 @@ export const ReturnTypes: Record<string,any> = {
 		weight:"Int"
 	},
 	Meet:{
-		authorization:"AnnualGeneralMeetingSovietDecisionDocumentAggregate",
+		authorization:"DocumentAggregate",
 		close_at:"DateTime",
 		coopname:"String",
 		created_at:"DateTime",
@@ -1246,7 +1014,7 @@ export const ReturnTypes: Record<string,any> = {
 		initiator:"String",
 		open_at:"DateTime",
 		presider:"String",
-		proposal:"AnnualGeneralMeetingAgendaDocumentAggregate",
+		proposal:"DocumentAggregate",
 		quorum_passed:"Boolean",
 		quorum_percent:"Float",
 		secretary:"String",
@@ -1268,7 +1036,7 @@ export const ReturnTypes: Record<string,any> = {
 		initiator:"String",
 		open_at:"DateTime",
 		presider:"String",
-		proposal:"AnnualGeneralMeetingAgendaDocumentAggregate",
+		proposal:"DocumentAggregate",
 		secretary:"String"
 	},
 	MeetProcessed:{
@@ -1279,19 +1047,6 @@ export const ReturnTypes: Record<string,any> = {
 		hash:"String",
 		meet:"Meet",
 		questions:"Question"
-	},
-	MetaDocument:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
 	},
 	MonoAccount:{
 		email:"String",
@@ -1330,22 +1085,22 @@ export const ReturnTypes: Record<string,any> = {
 		deliverOnRequest:"Transaction",
 		disputeOnRequest:"Transaction",
 		editBranch:"Branch",
-		generateAnnualGeneralMeetAgendaDocument:"AnnualGeneralMeetingAgendaDocument",
-		generateAssetContributionAct:"AssetContributionActDocument",
-		generateAssetContributionDecision:"AssetContributionDecisionDocument",
-		generateAssetContributionStatement:"AssetContributionStatementDocument",
-		generateBallotForAnnualGeneralMeetDocument:"AnnualGeneralMeetingVotingBallotDocument",
-		generateFreeDecision:"ProjectFreeDecisionDocument",
-		generateParticipantApplication:"ParticipantApplicationDocument",
-		generateParticipantApplicationDecision:"ParticipantApplicationDecisionDocument",
+		generateAnnualGeneralMeetAgendaDocument:"GeneratedDocument",
+		generateAssetContributionAct:"GeneratedDocument",
+		generateAssetContributionDecision:"GeneratedDocument",
+		generateAssetContributionStatement:"GeneratedDocument",
+		generateBallotForAnnualGeneralMeetDocument:"GeneratedDocument",
+		generateFreeDecision:"GeneratedDocument",
+		generateParticipantApplication:"GeneratedDocument",
+		generateParticipantApplicationDecision:"GeneratedDocument",
 		generatePrivacyAgreement:"GeneratedDocument",
-		generateProjectOfFreeDecision:"ProjectFreeDecisionDocument",
-		generateReturnByAssetAct:"ReturnByAssetActDocument",
-		generateReturnByAssetDecision:"ReturnByAssetDecisionDocument",
-		generateReturnByAssetStatement:"ReturnByAssetStatementDocument",
-		generateSelectBranchDocument:"SelectBranchDocument",
+		generateProjectOfFreeDecision:"GeneratedDocument",
+		generateReturnByAssetAct:"GeneratedDocument",
+		generateReturnByAssetDecision:"GeneratedDocument",
+		generateReturnByAssetStatement:"GeneratedDocument",
+		generateSelectBranchDocument:"GeneratedDocument",
 		generateSignatureAgreement:"GeneratedDocument",
-		generateSovietDecisionOnAnnualMeetDocument:"AnnualGeneralMeetingSovietDecisionDocument",
+		generateSovietDecisionOnAnnualMeetDocument:"GeneratedDocument",
 		generateUserAgreement:"GeneratedDocument",
 		generateWalletAgreement:"GeneratedDocument",
 		initSystem:"SystemInfo",
@@ -1411,59 +1166,6 @@ export const ReturnTypes: Record<string,any> = {
 		status:"String",
 		type:"String",
 		username:"String"
-	},
-	ParticipantApplicationDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ParticipantApplicationDecisionMetaDocumentOutput"
-	},
-	ParticipantApplicationDecisionMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	ParticipantApplicationDecisionSignedDocument:{
-		hash:"String",
-		meta:"ParticipantApplicationDecisionMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
-	ParticipantApplicationDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ParticipantApplicationMetaDocumentOutput"
-	},
-	ParticipantApplicationMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	ParticipantApplicationSignedDocument:{
-		hash:"String",
-		meta:"ParticipantApplicationMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
 	},
 	Passport:{
 		code:"String",
@@ -1539,33 +1241,6 @@ export const ReturnTypes: Record<string,any> = {
 		organization_data:"Organization",
 		type:"AccountType"
 	},
-	ProjectFreeDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ProjectFreeDecisionMetaDocumentOutput"
-	},
-	ProjectFreeDecisionMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		project_id:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	ProjectFreeDecisionSignedDocument:{
-		hash:"String",
-		meta:"ProjectFreeDecisionMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
 	PublicChairman:{
 		first_name:"String",
 		last_name:"String",
@@ -1577,7 +1252,7 @@ export const ReturnTypes: Record<string,any> = {
 		getAgenda:"AgendaWithDocuments",
 		getBranches:"Branch",
 		getDesktop:"Desktop",
-		getDocuments:"DocumentsPaginationResult",
+		getDocuments:"DocumentsAggregatePaginationResult",
 		getExtensions:"Extension",
 		getMeet:"MeetAggregate",
 		getMeets:"MeetAggregate",
@@ -1629,121 +1304,8 @@ export const ReturnTypes: Record<string,any> = {
 		owner:"String",
 		ram_bytes:"Int"
 	},
-	ReturnByAssetActDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ReturnByAssetActMetaDocumentOutput"
-	},
-	ReturnByAssetActMetaDocumentOutput:{
-		act_id:"String",
-		block_num:"Int",
-		braname:"String",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		request_id:"Float",
-		timezone:"String",
-		title:"String",
-		transmitter:"String",
-		username:"String",
-		version:"String"
-	},
-	ReturnByAssetActSignedDocument:{
-		hash:"String",
-		meta:"ReturnByAssetActMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
-	ReturnByAssetDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ReturnByAssetDecisionMetaDocumentOutput"
-	},
-	ReturnByAssetDecisionMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		request_id:"Float",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	ReturnByAssetDecisionSignedDocument:{
-		hash:"String",
-		meta:"ReturnByAssetDecisionMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
-	ReturnByAssetStatementDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ReturnByAssetStatementMetaDocumentOutput"
-	},
-	ReturnByAssetStatementMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		request:"CommonRequestResponse",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	ReturnByAssetStatementSignedDocument:{
-		hash:"String",
-		meta:"ReturnByAssetStatementMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
-	},
 	SbpAccount:{
 		phone:"String"
-	},
-	SelectBranchDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"SelectBranchMetaDocumentOutput"
-	},
-	SelectBranchMetaDocumentOutput:{
-		block_num:"Int",
-		braname:"String",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	SelectBranchSignedDocument:{
-		hash:"String",
-		meta:"SelectBranchMetaDocumentOutput",
-		public_key:"String",
-		signature:"String"
 	},
 	SignedBlockchainDocument:{
 		hash:"String",
@@ -1751,13 +1313,17 @@ export const ReturnTypes: Record<string,any> = {
 		public_key:"String",
 		signature:"String"
 	},
-	StatementDetail:{
-		action:"ExtendedBlockchainAction",
-		document:"StatementDocumentUnion"
+	SignedDigitalDocument:{
+		hash:"String",
+		is_valid:"Boolean",
+		meta:"JSON",
+		public_key:"String",
+		signature:"String",
+		signer:"UserDataUnion"
 	},
-	StatementDocumentUnion:{
-		"...on ParticipantApplicationDocument":"ParticipantApplicationDocument",
-		"...on ProjectFreeDecisionDocument":"ProjectFreeDecisionDocument"
+	StatementDetailAggregate:{
+		action:"ExtendedBlockchainAction",
+		documentAggregate:"DocumentAggregate"
 	},
 	SystemInfo:{
 		blockchain_account:"BlockchainAccount",

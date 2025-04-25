@@ -1,20 +1,20 @@
-import { participantApplicationDecisionDocumentSelector } from '../../selectors';
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus/index';
+import { documentSelector } from '../../selectors'
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'generateParticipantApplicationDecision'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{data: $('data', 'ParticipantApplicationDecisionGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput')}, participantApplicationDecisionDocumentSelector]
-});
+  [name]: [{ data: $('data', 'ParticipantApplicationDecisionGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput') }, documentSelector],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
   data: ModelTypes['ParticipantApplicationDecisionGenerateDocumentInput']
-  options?: ModelTypes['GenerateDocumentOptionsInput'];
+  options?: ModelTypes['GenerateDocumentOptionsInput']
 }
 
-export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

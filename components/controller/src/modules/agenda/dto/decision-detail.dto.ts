@@ -1,7 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import type { DecisionDetailDomainInterface } from '~/domain/agenda/interfaces/decision-detail-domain.interface';
 import { ExtendedBlockchainActionDTO } from './extended-action.dto';
-import { DecisionDocumentUnion } from '../../document/unions/decision-document.union';
+import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 
 @ObjectType('DecisionDetail', {
   description:
@@ -11,8 +11,8 @@ export class DecisionDetailDTO implements DecisionDetailDomainInterface {
   @Field(() => ExtendedBlockchainActionDTO)
   action!: ExtendedBlockchainActionDTO;
 
-  @Field(() => DecisionDocumentUnion)
-  document!: typeof DecisionDocumentUnion;
+  @Field(() => GeneratedDocumentDTO)
+  document!: GeneratedDocumentDTO;
 
   @Field(() => [ExtendedBlockchainActionDTO])
   votes_for!: ExtendedBlockchainActionDTO[];
