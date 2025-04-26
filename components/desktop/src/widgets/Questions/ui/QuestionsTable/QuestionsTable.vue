@@ -50,8 +50,7 @@ div.scroll-area(style="height: 90vh; overflow-y: auto;")
 
         q-td {{ props.row.table.id }}
         q-td {{ props.row.table.username }}
-        q-td
-          q-badge {{ getDecisionTitle(props.row) }}
+        q-td(style="max-width: 200px; word-wrap: break-word; white-space: normal;") {{ getDecisionTitle(props.row) }}
 
         q-td {{formatToFromNow(props.row.table.expired_at)}}
         q-td
@@ -114,6 +113,10 @@ const props = defineProps({
   isVotedAny: {
     type: Function,
     required: true
+  },
+  processingDecisions: {
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -146,7 +149,6 @@ const columns = [
 
 // Состояние UI
 const expanded = reactive(new Map()) // Map для отслеживания состояния развертывания каждой записи
-const authorizeLoading = ref<Record<number, boolean>>({})
 const tableRef = ref(null)
 const pagination = ref({ rowsPerPage: 10 })
 
@@ -156,19 +158,13 @@ const toggleExpand = (id: any) => {
 }
 
 const isProcessing = (decisionId: number) => {
-  return authorizeLoading.value[decisionId] || false
+  // Используем только processingDecisions из props
+  return Boolean(props.processingDecisions[decisionId])
 }
 
 // Обработчики событий
-const onAuthorizeDecision = async (row: Cooperative.Document.IComplexAgenda) => {
-  const decision_id = Number(row.table.id)
-  authorizeLoading.value[decision_id] = true
-
-  try {
-    emit('authorize', row)
-  } finally {
-    authorizeLoading.value[decision_id] = false
-  }
+const onAuthorizeDecision = (row: Cooperative.Document.IComplexAgenda) => {
+  emit('authorize', row)
 }
 
 const onVoteFor = (decision_id: number) => {

@@ -1,14 +1,20 @@
-import type { IGetCoopOrders, IGetResponse, IOrderResponse } from '@coopenomics/controller'
-import { sendGET } from 'src/shared/api'
+import { client } from 'src/shared/api/client';
+import { Queries } from '@coopenomics/sdk';
+import type { IGetPaymentsInputData, IGetPaymentsInputOptions, IPaymentPaginationResult } from '../model/types';
 
-const loadCoopPayments = async(params: IGetCoopOrders): Promise<IGetResponse<IOrderResponse>> => {
-  console.log('params: ', params)
-  return await sendGET('/v1/orders/all', params) as IGetResponse<IOrderResponse>
+/**
+ * Загружает список платежей с использованием GraphQL API
+ */
+async function loadPayments(data?: IGetPaymentsInputData, options?: IGetPaymentsInputOptions): Promise<IPaymentPaginationResult> {
+  const variables: Queries.Payments.GetPayments.IInput = {data, options}
+
+  const { [Queries.Payments.GetPayments.name]: output } = await client.Query(
+    Queries.Payments.GetPayments.query,
+    {
+      variables
+    }
+  );
+  return output;
 }
 
-const loadMyPayments = async(username?: string, page?: number, limit?: number): Promise<IGetResponse<IOrderResponse>> => {
-  return await sendGET(`/v1/orders/${username}`, {page, limit}) as IGetResponse<IOrderResponse>
-}
-
-
-export const api = {loadCoopPayments, loadMyPayments}
+export const api = { loadPayments };

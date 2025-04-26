@@ -117,7 +117,6 @@ export const install = async (data: IInstall): Promise<void> => {
       description: '',
     });
   } catch (e: any) {
-    console.log('on error', e);
     for (const user of users) {
       await userService.deleteUserByUsername(user.username);
       await generator.del('individual', { username: user.username });

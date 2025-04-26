@@ -1,11 +1,11 @@
 <template lang="pug">
-q-btn(@click="showDialog = true" size="sm" color="primary")
+q-btn(@click="showDialog = true" color="primary")
   q-icon(name="fa-solid fa-chevron-down").q-mr-sm
   span получить возврат
 
   q-dialog(v-model="showDialog" @hide="clear")
     ModalBase( :title='"Введите сумму"' )
-      Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm
+      Form(:disabled="true" :handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm
         q-input(v-model="quantity" standout="bg-teal text-white" type="number" :min="0" :step="1000" :rules="[val => val > 0 || 'Сумма взноса должна быть положительной']")
           template(#append)
             span.text-overline {{ currency }}

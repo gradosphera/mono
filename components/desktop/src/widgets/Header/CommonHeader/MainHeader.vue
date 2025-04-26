@@ -4,9 +4,8 @@ q-header(bordered :class="headerClass").header
   q-toolbar()
     q-btn(v-if="loggedIn && showDrawer" stretch icon="menu" flat @click="emitToggleLeftDrawer")
     q-btn(v-if="loggedIn && !showDrawer" stretch icon="fas fa-chevron-left" flat @click="goTo('index')")
+    //- q-btn(flat stretch @click="goTo('index')" icon="far fa-home")
     q-toolbar-title()
-      q-btn(:size="isMobile ? 'md' : 'lg'" flat @click="goTo('index')")
-        span(v-if="showDrawer") {{ coopTitle }}
 
     SettingsDropdown(:isMobile="isMobile" :isChairman="isChairman" :isMember="isMember")
 
@@ -50,7 +49,7 @@ const session = useSessionStore()
 const { isMobile } = useWindowSize()
 const emit = defineEmits(['toggle-left-drawer'])
 
-const coopTitle = computed(() => process.env.COOP_SHORT_NAME)
+// const coopTitle = computed(() => process.env.COOP_SHORT_NAME)
 
 const isDark = computed(() => $q.dark.isActive)
 const headerClass = computed(() =>

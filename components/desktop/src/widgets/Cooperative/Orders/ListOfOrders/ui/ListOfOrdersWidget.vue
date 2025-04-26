@@ -3,16 +3,16 @@
     div.col-12
       div.scroll-area(style="height: 90vh; overflow-y: auto;")
         q-table(
-          v-if="orders && orders.results"
+          v-if="payments && payments.items"
           ref="tableRef"
           flat
           :grid="isMobile"
-          :rows="orders.results"
+          :rows="payments.items"
           row-key="id"
           :columns="columns"
           :table-colspan="9"
           :loading="onLoading"
-          :no-data-label="'ордера не найдены'"
+          :no-data-label="'платежи не найдены'"
           virtual-scroll
           @virtual-scroll="onScroll"
           :virtual-scroll-target="'.scroll-area'"
@@ -25,9 +25,9 @@
           template(#item="props")
             OrderCard(
               :order="props.row"
-              :expanded="expanded.get(props.row.order_num)"
-              @toggle-expand="toggleExpand(props.row.order_num)"
-              @close-dropdown="closeDropdown(props.row.order_num)"
+              :expanded="expanded.get(props.row.id)"
+              :hideActions="hideActions"
+              @toggle-expand="toggleExpand(props.row.id)"
             )
 
           template(#header="props")
@@ -41,73 +41,64 @@
               ) {{ col.label }}
 
           template(#body="props")
-            q-tr(:key="`m_${props.row.order_num}`" :props="props")
+            q-tr(:key="`m_${props.row.id}`" :props="props")
               q-td(auto-width)
                 q-btn(
                   size="sm"
                   color="primary"
                   round
                   dense
-                  :icon="expanded.get(props.row.order_num) ? 'remove' : 'add'"
-                  @click="toggleExpand(props.row.order_num)"
-                  v-if="props.row.message"
+                  :icon="expanded.get(props.row.id) ? 'remove' : 'add'"
+                  @click="toggleExpand(props.row.id)"
                 )
-              q-td {{props.row.order_num}}
-              q-td {{ props.row.quantity }}
+              q-td {{props.row.id}}
+              q-td {{ props.row.amount }} {{props.row.symbol}}
               q-td
-                q-badge(v-if="props.row.type ==='registration'") регистрационный
-                q-badge(v-if="props.row.type ==='deposit'") паевой
+                q-badge(v-if="props.row.details.data.includes('registration')") регистрационный
+                q-badge(v-else) паевой
 
-              q-td(style="max-width: 150px; word-wrap: break-word; white-space: normal;") {{getNameFromUserData(props.row.user?.private_data)}}
+              q-td(style="max-width: 150px; word-wrap: break-word; white-space: normal;") {{props.row.username}}
+
 
               q-td
-                q-badge(v-if="props.row.status ==='completed'" color="teal") обработан
-                q-badge(v-if="props.row.status ==='pending'" color="orange") ожидание оплаты
-                q-badge(v-if="props.row.status ==='failed'" color="red") ошибка
-                q-badge(v-if="props.row.status ==='paid'" color="orange") оплачен
-                q-badge(v-if="props.row.status ==='refunded'" color="grey") отменён
-                q-badge(v-if="props.row.status ==='expired'" color="grey") истёк
+                q-badge(v-if="props.row.status ==='COMPLETED'" color="teal") обработан
+                q-badge(v-if="props.row.status ==='PENDING'" color="orange") ожидание оплаты
+                q-badge(v-if="props.row.status ==='FAILED'" color="red") ошибка
+                q-badge(v-if="props.row.status ==='PAID'" color="orange") оплачен
+                q-badge(v-if="props.row.status ==='REFUNDED'" color="grey") отменён
+                q-badge(v-if="props.row.status ==='EXPIRED'" color="grey") истёк
               q-td
-                q-btn-dropdown(size="sm" label="действия" color="primary" v-model="dropdowns[props.row.order_num]")
-                  q-list(dense)
-                    SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
-                    SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
+                SetOrderPaidStatusButton(
+                  v-if="!hideActions && ['EXPIRED', 'PENDING', 'FAILED'].includes(props.row.status)"
+                  :id="props.row.id"
+                )
+                span(v-else-if="!hideActions").text-grey нет доступных действий
 
-            q-tr(v-if="expanded.get(props.row.order_num) && props.row.message" :key="`e_${props.row.order_num}`" :props="props" class="q-virtual-scroll--with-prev")
+            q-tr(v-if="expanded.get(props.row.id)" :key="`e_${props.row.id}`" :props="props" class="q-virtual-scroll--with-prev")
               q-td(colspan="100%")
-                div(v-if="props.row.status=='failed'")
-                  p Причина ошибки: {{props.row.message}}
+                div(v-if="props.row.status=='FAILED'")
+                  span Причина ошибки: {{props.row.message ?? 'нет дополнительной информации'}}
+                div(v-else)
+                  span нет дополнительной информации
 </template>
 <script setup lang="ts">
   import { onMounted, ref, computed, reactive, nextTick } from 'vue'
   import { Notify } from 'quasar'
-  import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
-  // import { formatToHumanDate } from 'src/shared/lib/utils/dates/formatToHumanDate';
-  import { usePaymentStore } from 'src/entities/Payment';
+  import { usePaymentStore } from 'src/entities/Payment/model';
   import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
-  import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
-  // import { SetOrderCompletedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderCompletedStatusButton';
   import OrderCard from './OrderCard.vue';
   import { useWindowSize } from 'src/shared/hooks';
 
-  const orderStore = usePaymentStore()
-  const orders = computed(() => orderStore.orders)
+  const paymentStore = usePaymentStore()
+  const payments = computed(() => paymentStore.payments)
   const onLoading = ref(false)
   const nextPage = ref(1)
   const lastPage = ref(1);
   const { isMobile } = useWindowSize()
 
-  const dropdowns = reactive({})
-
   const sortState = reactive({
     sortBy: '',
     sortDir: ''
-  })
-
-  const sortedQuery = computed(() => {
-    if (sortState.sortBy && sortState.sortDir)
-      return `${sortState.sortBy}:${sortState.sortDir}`
-    else return ''
   })
 
   const onSort = (col) => {
@@ -121,29 +112,45 @@
       sortState.sortBy = col.name
       sortState.sortDir = 'asc'
     }
-    orderStore.clear()
+    paymentStore.clear()
     nextPage.value = 1
     lastPage.value = 1
-    loadOrders(1) // Перезагружаем с новыми параметрами сортировки
-  }
-
-  const closeDropdown = (id: string) => {
-    dropdowns[id] = false // Закрываем дропдаун для конкретной строки
+    loadPayments(1) // Перезагружаем с новыми параметрами сортировки
   }
 
   const props = defineProps({
-    receiver: {
+    username: {
       type: String,
       required: false,
       default: null
     },
+    hideActions: {
+      type: Boolean,
+      default: false
+    }
   })
 
-  const loadOrders = async (page = 1) => {
+  const loadPayments = async (page = 1) => {
     try {
       onLoading.value = true
-      await orderStore.loadCoopPayments({username: props.receiver, page, limit: 25, sortBy: sortedQuery.value})
-      lastPage.value = orderStore.orders?.totalPages || 1
+
+      // Данные для фильтрации
+      const data = props.username ? { username: props.username } : undefined;
+
+      // Опции пагинации и сортировки
+      const options = {
+        page,
+        limit: 25,
+        sortBy: sortState.sortBy || undefined,
+        sortOrder: sortState.sortDir ? sortState.sortDir.toUpperCase() as 'ASC' | 'DESC' : 'ASC'
+      };
+
+      await paymentStore.loadPayments(data, options);
+
+      if (payments.value) {
+        lastPage.value = payments.value.totalPages || 1
+      }
+
       onLoading.value = false
     } catch (e: any) {
       onLoading.value = false
@@ -157,16 +164,15 @@
 
   // Функция обработки виртуального скролла
   const onScroll = ({ to, ref }) => {
-    if(orders.value) {
-
-      const lastIndex = orders.value.results.length - 1
+    if(payments.value) {
+      const lastIndex = payments.value.items.length - 1
 
       if (onLoading.value !== true && nextPage.value < lastPage.value && to === lastIndex) {
         onLoading.value = true
 
         setTimeout(() => {
           nextPage.value++
-          loadOrders(nextPage.value) // Загружаем следующую страницу
+          loadPayments(nextPage.value) // Загружаем следующую страницу
 
           nextTick(() => {
             ref.refresh() // Обновляем виртуальный скролл после загрузки
@@ -178,17 +184,18 @@
   }
 
   onMounted(() => {
-    orderStore.clear()
-    loadOrders()
+    paymentStore.clear()
+    loadPayments()
   })
 
 
   const columns: any[] = [
-    { name: 'order_num', align: 'left', label: '№', field: 'order_num', sortable: true },
-    { name: 'quantity', align: 'left', label: 'Сумма', field: '', sortable: false },
-    { name: 'type', align: 'left', label: 'Тип платежа', field: 'type', sortable: true },
-    { name: 'name', align: 'left', label: 'От кого', field: '', sortable: false },
-    { name: 'status', align: 'left', label: 'Статус', field: '', sortable: true },
+    { name: 'id', align: 'left', label: '№', field: 'id', sortable: true },
+    { name: 'amount', align: 'left', label: 'Сумма', field: 'amount', sortable: true },
+    { name: 'type', align: 'left', label: 'Тип платежа', field: '', sortable: false },
+    { name: 'username', align: 'left', label: 'От кого', field: 'username', sortable: true },
+    { name: 'status', align: 'left', label: 'Статус', field: 'status', sortable: true },
+    { name: 'actions', align: 'left', label: '', field: '', sortable: false, hide: props.hideActions },
   ] as any
 
   const expanded = reactive(new Map()) // Используем Map для отслеживания состояния развертывания каждой записи

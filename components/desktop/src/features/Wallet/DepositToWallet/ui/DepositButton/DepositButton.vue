@@ -1,5 +1,5 @@
 <template lang="pug">
-q-btn(@click="showDialog=true" color="primary" size="sm")
+q-btn(@click="showDialog=true" color="primary")
   q-icon(name="fa-solid fa-chevron-up").q-mr-sm
   span Совершить взнос
   q-dialog(v-model="showDialog" @hide="clear")

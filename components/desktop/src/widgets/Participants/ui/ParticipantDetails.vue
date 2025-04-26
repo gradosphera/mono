@@ -1,17 +1,16 @@
 <template lang="pug">
 div
-  q-tabs.q-mt-sm(
+  q-tabs.compact-tabs(
     v-model="currentTab"
     align="justify"
     stretch
     dense
-    indicator-color="lime"
-    class="bg-grey-2"
+    indicator-color="black"
   )
-    q-tab(name="info" label="Данные" class="bg-primary text-white")
-    q-tab(name="document" label="Документы" class="bg-primary text-white")
+    q-tab(name="info" label="Данные" class="bg-primary text-white compact-tab")
+    q-tab(name="document" label="Документы" class="bg-primary text-white compact-tab")
 
-  q-tab-panels.q-mt-xs(v-model="currentTab" animated)
+  q-tab-panels.q-mt-sm.tab-panels-card(v-model="currentTab" animated)
     q-tab-panel.q-pa-none(name="info")
       component(:is="useComponent(participant)" :participantData="usePrivateData(participant)" @update="onUpdate")
 
@@ -25,6 +24,7 @@ import { EditableEntrepreneurCard } from 'src/shared/ui/EditableEntrepreneurCard
 import { EditableIndividualCard } from 'src/shared/ui/EditableIndividualCard'
 import { EditableOrganizationCard } from 'src/shared/ui/EditableOrganizationCard'
 import { ListOfDocumentsWidget } from 'src/widgets/Cooperative/Documents/ListOfDocuments'
+import 'src/shared/ui/TabStyles/index.scss'
 import {
   AccountTypes,
   type IAccount,

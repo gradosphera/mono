@@ -18,7 +18,7 @@ div.scroll-area(style="height: 90vh; overflow-y: auto;")
     :pagination="pagination"
     :class="{'my-sticky-dynamic': documents.length > 0}"
     class="q-mb-md"
-  )
+  ).documents-table
     template(#top v-if="$slots.top")
       slot(name="top")
     template(#item="props")
@@ -170,3 +170,8 @@ const toggleExpand = (id: any) => {
   emit('toggle-expand', id)
 }
 </script>
+<style>
+.documents-table .q-table__top{
+  padding: 0px !important;
+}
+</style>

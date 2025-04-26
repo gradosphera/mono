@@ -2,7 +2,7 @@ import { markRaw } from 'vue'
 import { ListOfAgendaQuestions } from 'src/pages/Cooperative/ListOfAgenda'
 import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants'
 import { ListOfDocumentsPage } from 'src/pages/Cooperative/ListOfDocuments'
-import { ListOfOrdersPage } from 'src/pages/Cooperative/ListOfOrders'
+import { PaymentsPage } from 'src/pages/Cooperative/Payments'
 import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
 import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
 
@@ -50,9 +50,9 @@ export default async function () {
             },
           },
           {
-            path: 'orders/:username?',
-            name: 'orders',
-            component: markRaw(ListOfOrdersPage),
+            path: 'payments/:username?',
+            name: 'payments',
+            component: markRaw(PaymentsPage),
             meta: {
               title: 'Платежи',
               icon: 'fa-solid fa-file-invoice',
@@ -64,7 +64,7 @@ export default async function () {
             name: 'meets',
             component: markRaw(ListOfMeetsPage),
             meta: {
-              title: 'Общие собрания',
+              title: 'Собрания',
               icon: 'fa-solid fa-users-between-lines',
               roles: ['chairman', 'member'],
             },

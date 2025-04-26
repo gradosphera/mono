@@ -41,7 +41,7 @@ q-table(
       :props="props"
       class="q-virtual-scroll--with-prev"
     )
-      q-td(colspan="100%" style="padding: 0 !important;")
+      q-td(colspan="100%")
         ParticipantDetails(
           :participant="props.row"
           :tab-name="currentTab[props.row.username]"

@@ -175,49 +175,51 @@ q-form(ref="form" v-if="data")
   )
 </template>
 
-  <script lang="ts" setup>
-  import { ref } from 'vue';
-  import { useEditableData } from 'src/shared/lib/composables/useEditableData';
-  import { notEmpty, notEmptyPhone, validatePersonalName } from 'src/shared/lib/utils';
-  import { FailAlert, SuccessAlert } from 'src/shared/api';
-  import { EditableActions } from 'src/shared/ui/EditableActions';
-  import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
-  import { type IOrganizationData } from 'src/entities/Account/types';
-  import { validEmail } from 'src/shared/lib/utils/validEmailRule';
-  const emit = defineEmits(['update']);
-  const { updateAccount } = useUpdateAccount();
+<script lang="ts" setup>
+import { ref } from 'vue';
+import { useEditableData } from 'src/shared/lib/composables/useEditableData';
+import { notEmpty, notEmptyPhone, validatePersonalName } from 'src/shared/lib/utils';
+import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { EditableActions } from 'src/shared/ui/EditableActions';
+import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
+import { type IOrganizationData } from 'src/entities/Account/types';
+import { validEmail } from 'src/shared/lib/utils/validEmailRule';
+import 'src/shared/ui/InputStyles/index.scss';
 
-  const props = defineProps({
-    participantData: {
-      type: Object as () => IOrganizationData,
-      required: true
-    },
-    readonly: {
-      type: Boolean,
-      default: false
-    }
-  });
+const emit = defineEmits(['update']);
+const { updateAccount } = useUpdateAccount();
 
-  const localOrganizationData = ref(props.participantData);
-  const form = ref();
+const props = defineProps({
+  participantData: {
+    type: Object as () => IOrganizationData,
+    required: true
+  },
+  readonly: {
+    type: Boolean,
+    default: false
+  }
+});
 
-  const handleSave = async () => {
-    try {
-      const account_data: IUpdateAccountInput = {
-        username: props.participantData.username,
-        organization_data: data.value,
-      };
-      await updateAccount(account_data);
-      emit('update', JSON.parse(JSON.stringify(data.value)));
-      SuccessAlert('Данные аккаунта обновлены');
-    } catch (e) {
-      console.log(e);
-      FailAlert(e);
-    }
-  };
-  const { editableData: data, isEditing, isDisabled, saveChanges, cancelChanges } = useEditableData(
-    localOrganizationData.value,
-    handleSave,
-    form
-  );
+const localOrganizationData = ref(props.participantData);
+const form = ref();
+
+const handleSave = async () => {
+  try {
+    const account_data: IUpdateAccountInput = {
+      username: props.participantData.username,
+      organization_data: data.value,
+    };
+    await updateAccount(account_data);
+    emit('update', JSON.parse(JSON.stringify(data.value)));
+    SuccessAlert('Данные аккаунта обновлены');
+  } catch (e) {
+    console.log(e);
+    FailAlert(e);
+  }
+};
+const { editableData: data, isEditing, isDisabled, saveChanges, cancelChanges } = useEditableData(
+  localOrganizationData.value,
+  handleSave,
+  form
+);
 </script>

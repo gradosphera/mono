@@ -18,7 +18,6 @@ const namespace = 'wallet';
 
 interface IWalletStore {
   /*  доменный интерфейс кошелька пользователя */
-  // wallet: Ref<IWalletData>;
   program_wallets: Ref<ExtendedProgramWalletData[]>;
   deposits: Ref<IDepositData[]>;
   withdraws: Ref<IWithdrawData[]>;
@@ -33,14 +32,6 @@ interface IWalletStore {
 }
 
 export const useWalletStore = defineStore(namespace, (): IWalletStore => {
-  // const wallet = ref<IWalletData>({
-  //   username: '',
-  //   coopname: '',
-  //   available: `0.0000 ${CURRENCY}`,
-  //   blocked: `0.0000 ${CURRENCY}`,
-  //   minimum: `0.0000 ${CURRENCY}`,
-  //   initial: `0.0000 ${CURRENCY}`,
-  // });
 
   const deposits = ref<IDepositData[]>([]);
   const withdraws = ref<IWithdrawData[]>([]);
@@ -53,7 +44,6 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
 
     try {
       const data = await Promise.all([
-        // api.loadSingleUserWalletData(params),
         api.loadUserDepositsData(params),
         api.loadUserWithdrawsData(params),
         api.loadUserProgramWalletsData(params),
@@ -61,7 +51,6 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
         api.loadUserAgreements(params.coopname, params.username)
       ]);
 
-      // wallet.value = data[0] ?? createEmptyWallet();
       deposits.value = data[0] ?? [];
       withdraws.value = data[1] ?? [];
       program_wallets.value = data[2] ?? [];
