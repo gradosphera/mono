@@ -4,13 +4,13 @@ import { paginationSelector } from '../../utils/paginationSelector'
 import { $, Selector } from '../../zeus/index'
 
 const paymentPaginationSelector = { ...paginationSelector, items: rawPaymentSelector }
-const name = 'getPayments'
+export const name = 'getPayments'
 
 /**
  * Извлекает платежи
  */
 export const query = Selector('Query')({
-  [name]: [{ data: $('data', 'GetPaymentsInput') }, paymentPaginationSelector],
+  [name]: [{ data: $('data', 'GetPaymentsInput'), options: $('options', 'PaginationInput') }, paymentPaginationSelector],
 })
 
 export interface IInput {
@@ -19,7 +19,8 @@ export interface IInput {
    */
   [key: string]: unknown
 
-  data: ModelTypes['GetPaymentsInput']
+  data?: ModelTypes['GetPaymentsInput']
+  options?: ModelTypes['PaginationInput']
 }
 
 export type IOutput = InputType<GraphQLTypes['Query'], typeof query>

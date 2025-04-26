@@ -291,7 +291,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     data: userAgreementData,
   });
 
-  const result = await eos.transact(
+  await eos.transact(
     {
       actions,
     },
@@ -306,8 +306,6 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
 
 async function createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICreateboard) {
   const eos = await getInstance(config.coopname);
-
-  // console.log('data: ', data);
 
   const actions = [
     {

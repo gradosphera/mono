@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-btn(@click="showDialog=true" color="primary" size="sm" icon="add") добавить реквизиты
+  q-btn(@click="showDialog=true" color="primary" icon="add") добавить реквизиты
 
   //- q-badge(flat rounded color="grey").q-ml-sm
   //-   q-icon(name="far fa-question")

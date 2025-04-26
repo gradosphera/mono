@@ -1,7 +1,20 @@
-import { sendPOST } from 'src/shared/api'
+import { client } from 'src/shared/api/client';
+import { Mutations } from '@coopenomics/sdk';
+import type { IPayment } from 'src/entities/Payment/model';
 
-const setStatus = async (id: string, status: 'paid' | 'completed' | 'repending' | 'refunded') => {
-  await sendPOST('/v1/orders/set-order-status', {id, status})
+type ISetPaymentStatusInput = Mutations.Payments.SetPaymentStatus.IInput['data']
+
+async function setPaymentStatus(data: ISetPaymentStatusInput): Promise<IPayment> {
+  const { [Mutations.Payments.SetPaymentStatus.name]: result } = await client.Mutation(
+    Mutations.Payments.SetPaymentStatus.mutation,
+    {
+      variables: {
+        data
+      }
+    }
+  );
+
+  return result;
 }
 
-export const api = {setStatus}
+export const api = { setPaymentStatus };

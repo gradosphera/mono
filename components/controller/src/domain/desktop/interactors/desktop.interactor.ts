@@ -17,7 +17,7 @@ export class DesktopDomainInteractor {
     });
     const workspaces = apps.map((workspace) => new DesktopWorkspaceDomainEntity(workspace));
     const layout = 'default';
-    const authorizedHome = 'card-coop';
+    const authorizedHome = 'profile';
     const nonAuthorizedHome = 'signup';
     return new DesktopDomainEntity({ coopname: config.coopname, layout, workspaces, authorizedHome, nonAuthorizedHome });
   }

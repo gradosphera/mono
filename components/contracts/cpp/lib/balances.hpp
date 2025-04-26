@@ -23,24 +23,6 @@ typedef eosio::multi_index<"balances"_n, balances_base, eosio::indexed_by<"bycon
 
 
 // -----------------------------------------------------------------
-// Таблица кошельков
-// -----------------------------------------------------------------
-struct [[eosio::table, eosio::contract(SOVIET)]] onewallet {
-  eosio::name username;
-  eosio::name coopname;
-  eosio::asset available;
-  eosio::asset blocked;
-  eosio::asset minimum;
-  eosio::binary_extension<eosio::asset> initial;
-  
-  uint64_t primary_key() const { return username.value; } /*!< return username - primary_key */
-};
-
-typedef eosio::multi_index<"wallets"_n, onewallet> wallets_index;
-
-
-
-// -----------------------------------------------------------------
 // Таблица кошельков конкретных программ
 // -----------------------------------------------------------------
 struct [[eosio::table, eosio::contract(SOVIET)]] progwallet {

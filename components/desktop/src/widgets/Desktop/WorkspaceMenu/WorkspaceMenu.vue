@@ -4,7 +4,7 @@ div
     v-model="slideIndex"
     animated
     infinite
-    arrows
+    :arrows="menuWorkspaces.length > 1"
     swipeable
     control-type="flat"
     control-color="grey"
@@ -31,7 +31,7 @@ div
   q-dialog(v-model="showDialog")
     q-card(style="min-width: 300px; max-width: 90vw")
       q-bar.bg-primary.text-white
-        span Выберите приложение
+        span Выберите рабочий стол
         q-space
         q-btn(flat dense icon="close" v-close-popup)
           q-tooltip Закрыть
@@ -40,7 +40,8 @@ div
         div(
           v-for="(item, index) in menuWorkspaces"
           :key="item.workspaceName"
-        ).col-6
+          :class="{ 'col-6': !(index === menuWorkspaces.length - 1 && menuWorkspaces.length % 2 !== 0), 'col-12': index === menuWorkspaces.length - 1 && menuWorkspaces.length % 2 !== 0 }"
+        )
           q-btn(
             stack
             flat

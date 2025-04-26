@@ -33,8 +33,7 @@ div.q-pa-xs.col-xs-12.col-sm-12.col-md-12.q-mt-md
         v-if="isChairman"
         :loading="isProcessing"
         @click="$emit('authorize')"
-      )
-        | Утвердить
+      ) Утвердить
 
     q-slide-transition
       div(v-show="expanded")

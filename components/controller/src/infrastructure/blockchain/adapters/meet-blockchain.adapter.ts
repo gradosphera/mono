@@ -30,7 +30,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
 
   async getMeet(data: GetMeetInputDomainInterface): Promise<MeetProcessingDomainEntity | null> {
     const { coopname, hash } = data;
-    console.log('data', data);
+
     const meetData = await this.blockchainService.getSingleRow(
       MeetContract.contractName.production,
       coopname,
@@ -39,8 +39,6 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
       'secondary',
       'sha256'
     );
-
-    console.log('meetData', meetData);
 
     if (!meetData) {
       return null;
@@ -54,15 +52,11 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
 
   async getMeets(data: GetMeetsInputDomainInterface): Promise<MeetProcessingDomainEntity[]> {
     const { coopname } = data;
-    console.log(`getMeets: получение данных для кооператива ${coopname}`);
-
     const meetsData = await this.blockchainService.getAllRows(
       MeetContract.contractName.production,
       coopname,
       MeetContract.Tables.Meets.tableName
     );
-
-    console.log(`getMeets: получено ${meetsData?.length || 0} собраний`);
 
     if (!meetsData || meetsData.length === 0) {
       return [];
@@ -70,19 +64,15 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
 
     // Преобразуем данные в домен
     const meetsProcessing = await Promise.all(
-      meetsData.map(async (meetData, index) => {
-        console.log(`getMeets: обработка собрания #${index + 1}, hash: ${meetData.hash}`);
-
+      meetsData.map(async (meetData) => {
         // Получаем вопросы повестки для каждого собрания
         const questions = await this.getQuestions({ coopname, meetId: meetData.id });
-        console.log(`getMeets: для собрания ${meetData.hash} получено ${questions.length} вопросов`);
 
         // Формируем обработанные данные в доменном формате
         return await this.convertBlockchainDataToDomainProcessing(meetData, questions);
       })
     );
 
-    console.log(`getMeets: обработка завершена, возвращаем ${meetsProcessing.length} собраний`);
     return meetsProcessing;
   }
 
@@ -111,7 +101,6 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
       meet: await this.convertBlockchainMeetToDomainMeet(meetData),
       questions: questions.map((q) => this.convertBlockchainQuestionToDomainQuestion(q)),
     };
-    console.log('data', data);
     return data;
   }
 
@@ -172,16 +161,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
   private async parseBlockchainDocument(blockchainDoc: Cooperative.Document.IChainDocument): Promise<any> {
     try {
       if (!blockchainDoc || !blockchainDoc.hash) {
-        console.log('parseBlockchainDocument: документ отсутствует или не содержит hash');
         return blockchainDoc;
-      }
-
-      console.log(`parseBlockchainDocument: обработка документа hash=${blockchainDoc.hash}`);
-
-      // Логируем тип и значение meta перед преобразованием
-      console.log(`parseBlockchainDocument: тип meta = ${typeof blockchainDoc.meta}`);
-      if (typeof blockchainDoc.meta === 'string') {
-        console.log(`parseBlockchainDocument: первые 100 символов meta = ${blockchainDoc.meta.substring(0, 100)}`);
       }
 
       // Конвертируем в формат ISignedDocument
@@ -192,12 +172,8 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
         meta: typeof blockchainDoc.meta === 'string' ? JSON.parse(blockchainDoc.meta) : blockchainDoc.meta,
       };
 
-      console.log(`parseBlockchainDocument: подготовлен signedDocument, вызываем buildDocumentAggregate`);
-
       // Создаем агрегат документа с помощью документного агрегатора
       const result = await this.documentAggregator.buildDocumentAggregate(signedDocument);
-
-      console.log(`parseBlockchainDocument: получен результат buildDocumentAggregate`);
       return result;
     } catch (error) {
       console.error(`parseBlockchainDocument: ОШИБКА при обработке документа:`, error);

@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-btn(size="sm" @click="showAdd = true" color="primary")
+  q-btn(@click="showAdd = true" color="primary")
     q-icon(name="add")
     span добавить пайщика
   q-dialog(v-model="showAdd" persistent :maximized="false" )

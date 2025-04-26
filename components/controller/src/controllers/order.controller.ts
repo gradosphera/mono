@@ -43,8 +43,6 @@ export const getOrders = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const getMyOrders = catchAsync(async (req: Request, res: Response) => {
-  console.log(req.params);
-
   const filter = pick(req.query, ['status', 'id']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
 

@@ -31,14 +31,14 @@ div.q-pa-xs.col-xs-12.col-sm-12.col-md-12.q-mt-md
     q-card-actions(align="right")
       q-btn(
         v-if="order.message"
-        size="sm" 
-        flat 
-        icon="expand_more" 
+        size="sm"
+        flat
+        icon="expand_more"
         @click="$emit('toggle-expand')"
       )
         | {{ expanded ? 'Скрыть' : 'Подробнее' }}
-      
-      q-btn-dropdown(size="sm" label="действия" color="primary")
+
+      q-btn-dropdown(v-if="!hideActions" size="sm" label="действия" color="primary")
         q-list(dense)
           SetOrderPaidStatusButton(:id="order.id" @close="$emit('close-dropdown')")
           SetOrderRefundedStatusButton(:id="order.id" @close="$emit('close-dropdown')")
@@ -63,8 +63,12 @@ defineProps({
   expanded: {
     type: Boolean,
     default: false
+  },
+  hideActions: {
+    type: Boolean,
+    default: false
   }
 })
 
 defineEmits(['toggle-expand', 'close-dropdown'])
-</script> 
+</script>

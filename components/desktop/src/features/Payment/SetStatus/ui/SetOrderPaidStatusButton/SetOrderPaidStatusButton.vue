@@ -1,6 +1,6 @@
 <template lang="pug">
-q-item(clickable flat size="sm" @click="showDialog=true").full-width
-  div.q-pa-sm
+q-btn(color="teal" clickable size="sm" @click="showDialog=true")
+  div
     q-icon(name="fa-regular fa-square-check").q-mr-xs
     span отметить оплаченным
 
@@ -18,6 +18,7 @@ import { useSetStatus } from '../../model';
 import { ref } from 'vue';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
+
 const {setPaidStatus} = useSetStatus()
 const isSubmitting = ref(false)
 const showDialog = ref(false)
@@ -37,13 +38,16 @@ const close = () => {
 }
 
 const setPaid = async() => {
+  isSubmitting.value = true
   try {
     await setPaidStatus(props.id)
-    SuccessAlert('Статус ордера обновлён')
+    SuccessAlert('Статус платежа обновлён')
     close()
   } catch(e: any) {
     FailAlert(`Возникла ошибка: ${e.message}`)
     close()
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>

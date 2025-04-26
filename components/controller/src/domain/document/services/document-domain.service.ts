@@ -58,7 +58,6 @@ export class DocumentDomainService {
       page,
       limit,
     });
-    console.log('getImmutableSignedDocuments response', response);
     return response;
   }
 }
