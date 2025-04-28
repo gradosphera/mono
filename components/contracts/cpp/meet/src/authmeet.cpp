@@ -7,7 +7,8 @@ void meet::authmeet(eosio::name coopname, checksum256 hash, document authorizati
   Meet::meets_index genmeets(_meet, coopname.value);
   auto genmeet = genmeets.find(exist_meet -> id);
   
-  eosio::check(genmeet -> open_at.sec_since_epoch() >= current_time_point().sec_since_epoch() + MIN_OPEN_AGM_DELAY_SEC,
+  if (!TEST_MODE)
+    eosio::check(genmeet -> open_at.sec_since_epoch() >= current_time_point().sec_since_epoch() + MIN_OPEN_AGM_DELAY_SEC,
              "Дата открытия должна быть по крайней мере через 15 дней от момента решения совета");
 
   //TODO: change payer to coopname

@@ -6,14 +6,16 @@ import { MeetDomainInteractor } from '~/domain/meet/interactors/meet.interactor'
 import type { MeetAggregateDTO } from '../dto/meet-aggregate.dto';
 import { VoteOnAnnualGeneralMeetInputDTO } from '../dto/vote-on-annual-general-meet-input.dto';
 import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-meet-input.dto';
-import { GenerateSovietDecisionOnAnnualMeetInputDTO } from '../dto/generate-soviet-decision-input.dto';
 import { Cooperative } from 'cooptypes';
 import { GetMeetInputDTO } from '../dto/get-meet-input.dto';
 import { GetMeetsInputDTO } from '../dto/get-meets-input.dto';
 import { SignBySecretaryOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-secretary-on-annual-general-meet-input.dto';
 import { SignByPresiderOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-presider-on-annual-general-meet-input.dto';
-import { GenerateBallotForAnnualGeneralMeetInputDTO } from '../dto/generate-ballot-input.dto';
 import type { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
+import { AnnualGeneralMeetingVotingBallotGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-voting-ballot-document.dto';
+import { AnnualGeneralMeetingSovietDecisionGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
+import { AnnualGeneralMeetingDecisionGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-decision-document.dto';
+import { AnnualGeneralMeetingNotificationGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-notification-document.dto';
 
 @Injectable()
 export class MeetService {
@@ -21,11 +23,12 @@ export class MeetService {
 
   public async generateAnnualGeneralMeetAgendaDocument(
     data: AnnualGeneralMeetingAgendaGenerateDocumentInputDTO,
-    options: GenerateDocumentOptionsInputDTO
+    options?: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
+    // Устанавливаем registry_id для документа повестки
     data.registry_id = Cooperative.Registry.AnnualGeneralMeetingAgenda.registry_id;
 
-    const document = await this.meetDomainInteractor.generateAnnualGeneralMeetAgendaDocument(data, options);
+    const document = await this.meetDomainInteractor.generateAnnualGeneralMeetAgendaDocument(data, options || {});
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }
@@ -35,26 +38,50 @@ export class MeetService {
     return aggregate;
   }
 
-  public async generateSovietDecisionOnAnnualMeetDocument(
-    data: GenerateSovietDecisionOnAnnualMeetInputDTO,
-    options: GenerateDocumentOptionsInputDTO
+  public async generateAnnualGeneralMeetDecisionDocument(
+    data: AnnualGeneralMeetingDecisionGenerateDocumentInputDTO,
+    options?: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    // Используем доменный объект, который возвращается из toDomain
+    // Устанавливаем registry_id для документа решения
+    data.registry_id = Cooperative.Registry.AnnualGeneralMeetingDecision.registry_id;
+
+    const document = await this.meetDomainInteractor.generateAnnualGeneralMeetDecisionDocument(data, options || {});
+    //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
+    return document as unknown as GeneratedDocumentDTO;
+  }
+
+  public async generateAnnualGeneralMeetNotificationDocument(
+    data: AnnualGeneralMeetingNotificationGenerateDocumentInputDTO,
+    options?: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    // Устанавливаем registry_id для документа уведомления
+    data.registry_id = Cooperative.Registry.AnnualGeneralMeetingNotification.registry_id;
+
+    const document = await this.meetDomainInteractor.generateAnnualGeneralMeetNotificationDocument(data, options || {});
+    //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
+    return document as unknown as GeneratedDocumentDTO;
+  }
+
+  public async generateSovietDecisionOnAnnualMeetDocument(
+    data: AnnualGeneralMeetingSovietDecisionGenerateDocumentInputDTO,
+    options?: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    // Устанавливаем registry_id для документа решения совета
     data.registry_id = Cooperative.Registry.AnnualGeneralMeetingSovietDecision.registry_id;
 
-    const document = await this.meetDomainInteractor.generateSovietDecisionOnAnnualMeetDocument(data, options);
+    const document = await this.meetDomainInteractor.generateSovietDecisionOnAnnualMeetDocument(data, options || {});
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }
 
   public async generateBallotForAnnualGeneralMeet(
-    data: GenerateBallotForAnnualGeneralMeetInputDTO,
-    options: GenerateDocumentOptionsInputDTO
+    data: AnnualGeneralMeetingVotingBallotGenerateDocumentInputDTO,
+    options?: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     // Устанавливаем registry_id для документа бюллетеня
     data.registry_id = Cooperative.Registry.AnnualGeneralMeetingVotingBallot.registry_id;
 
-    const document = await this.meetDomainInteractor.generateBallotForAnnualGeneralMeet(data, options);
+    const document = await this.meetDomainInteractor.generateBallotForAnnualGeneralMeet(data, options || {});
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }

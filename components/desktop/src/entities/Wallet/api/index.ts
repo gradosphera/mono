@@ -6,7 +6,6 @@ import {
 } from 'src/shared/config';
 
 import {
-  IWalletData,
   IDepositData,
   IWithdrawData,
   IProgramWalletData,
@@ -18,7 +17,6 @@ import {
 } from '../model';
 
 import {
-  ILoadSingleUserWallet,
   ILoadSingleUserDeposit,
   ILoadSingleUserProgramWallet,
   ILoadSingleUserWithdraw,
@@ -27,21 +25,6 @@ import {
   ILoadUserWithdraws,
 } from '../model';
 import { GatewayContract, SovietContract } from 'cooptypes';
-
-async function loadSingleUserWalletData(
-  params: ILoadSingleUserWallet
-): Promise<IWalletData> {
-  return (
-    await fetchTable(
-      SovietContract.contractName.production,
-      params.coopname,
-      SovietContract.Tables.Wallets.tableName,
-      params.username,
-      params.username,
-      LimitsList.One
-    )
-  )[0] as IWalletData;
-}
 
 async function loadSingleUserDepositData(
   params: ILoadSingleUserDeposit
@@ -180,7 +163,6 @@ async function loadUserAgreements(coopname: string, username: string): Promise<S
 
 
 export const api = {
-  loadSingleUserWalletData,
   loadSingleUserDepositData,
   loadSingleUserProgramWalletData,
   loadSingleUserWithdrawData,

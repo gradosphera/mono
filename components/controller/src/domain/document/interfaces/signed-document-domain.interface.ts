@@ -3,7 +3,7 @@ import type { IndividualDomainInterface } from '~/domain/common/interfaces/indiv
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
 import type { DocumentMetaDomainInterface } from './document-meta-domain.interface';
 
-export interface SignedDocumentDomainInterface {
+export interface ExtendedSignedDocumentDomainInterface {
   hash: string;
   public_key: string;
   signature: string;

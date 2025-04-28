@@ -1,4 +1,5 @@
 import {
+  AnnualGeneralMeetingDecision,
   AnnualGeneralMeetingSovietDecision, // 300
   DecisionOfParticipantApplication, // 501
   FreeDecision, // 600
@@ -19,7 +20,8 @@ export const decisionsRegistry: Record<string, number> = {
   joincoop: DecisionOfParticipantApplication.registry_id, // регистрация пайщика
   freedecision: FreeDecision.registry_id,
 
-  createagm: AnnualGeneralMeetingSovietDecision.registry_id, // объявить плановое общее собрание
+  creategm: AnnualGeneralMeetingSovietDecision.registry_id, // предложение повестки планового общего собрания
+  completegm: AnnualGeneralMeetingDecision.registry_id, // решение общего собрания пайщиков
   // capitalinvst: InvestByResultDecision.registry_id, // заявление на инвестиции по договору УХД
   // createresult: InvestByResultAct.registry_id, // клайм прироста капитализации из задания
   // createdebt: InvestByMoneyStatement.registry_id, // взять ссуду под залог будущего задания

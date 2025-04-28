@@ -7,7 +7,13 @@ export const name = 'generateAnnualGeneralMeetAgendaDocument'
  * Генерация документа повестки годового общего собрания пайщиков
  */
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'AnnualGeneralMeetingAgendaGenerateDocumentInput!') }, documentSelector],
+  [name]: [
+    {
+      data: $('data', 'AnnualGeneralMeetingAgendaGenerateDocumentInput!'),
+      options: $('options', 'GenerateDocumentOptionsInput'),
+    },
+    documentSelector,
+  ],
 })
 
 export interface IInput {
@@ -17,6 +23,7 @@ export interface IInput {
   [key: string]: unknown
 
   data: ModelTypes['AnnualGeneralMeetingAgendaGenerateDocumentInput']
+  options?: ModelTypes['GenerateDocumentOptionsInput']
 }
 
 export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

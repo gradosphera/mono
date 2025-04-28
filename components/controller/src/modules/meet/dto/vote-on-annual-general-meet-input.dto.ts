@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsArray, ValidateNested } from 'class-validator';
+import { IsString, IsArray, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
   VoteOnAnnualGeneralMeetInputDomainInterface,
@@ -10,7 +10,7 @@ import { AnnualGeneralMeetingVotingBallotSignedDocumentInputDTO } from '~/module
 @InputType('VoteItemInput', { description: 'Пункт голосования для ежегодного общего собрания' })
 export class VoteItemInputDTO implements VoteItemInputDomainInterface {
   @Field(() => Number, { description: 'Идентификатор вопроса повестки' })
-  @IsString()
+  @IsNumber()
   question_id!: number;
 
   @Field(() => String, { description: 'Решение по вопросу (вариант голосования)' })
@@ -30,7 +30,7 @@ export class VoteOnAnnualGeneralMeetInputDTO implements VoteOnAnnualGeneralMeetI
 
   @Field(() => String, { description: 'Идентификатор члена кооператива, который голосует' })
   @IsString()
-  member!: string;
+  username!: string;
 
   @Field(() => [VoteItemInputDTO], { description: 'Бюллетень с решениями по вопросам повестки' })
   @IsArray()

@@ -2,9 +2,8 @@
 <template lang="pug">
 q-header(bordered :class="headerClass").header
   q-toolbar()
-    q-btn(v-if="loggedIn && showDrawer" stretch icon="menu" flat @click="emitToggleLeftDrawer")
-    q-btn(v-if="loggedIn && !showDrawer" stretch icon="fas fa-chevron-left" flat @click="goTo('index')")
-    //- q-btn(flat stretch @click="goTo('index')" icon="far fa-home")
+    q-btn(v-if="loggedIn" stretch icon="menu" flat @click="emitToggleLeftDrawer")
+    BackButton(v-if="loggedIn")
     q-toolbar-title()
 
     SettingsDropdown(:isMobile="isMobile" :isChairman="isChairman" :isMember="isMember")
@@ -40,6 +39,7 @@ import { useSessionStore } from 'src/entities/Session'
 import config from 'src/app/config'
 import { useWindowSize } from 'src/shared/hooks'
 import { SettingsDropdown } from 'src/widgets/Header/SettingsDropdown'
+import { BackButton } from 'src/widgets/Header/BackButton'
 import './HeaderStyles.scss'
 
 const router = useRouter()
@@ -49,6 +49,7 @@ const session = useSessionStore()
 const { isMobile } = useWindowSize()
 const emit = defineEmits(['toggle-left-drawer'])
 
+// Получаем информацию для навигации назад
 // const coopTitle = computed(() => process.env.COOP_SHORT_NAME)
 
 const isDark = computed(() => $q.dark.isActive)
@@ -63,13 +64,6 @@ const loggedIn = computed(
 const isChairman = computed(() => currentUser.userAccount?.role === 'chairman')
 const isMember = computed(() => currentUser.userAccount?.role === 'member')
 
-defineProps({
-  showDrawer: {
-    type: Boolean,
-    required: true
-  }
-})
-
 const showRegisterButton = computed(() => {
   if (!loggedIn.value) {
     return config.registrator.showRegisterButton
@@ -78,10 +72,6 @@ const showRegisterButton = computed(() => {
 })
 
 const is = (what: string) => route.name === what
-
-const goTo = (name: string) => {
-  router.push({ name })
-}
 
 const signup = () => {
   router.push({ name: 'signup' })

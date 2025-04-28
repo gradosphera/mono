@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, Ref } from 'vue'
 import { api } from '../api'
-import type { IMeet, IGetMeetsInput, IGetMeetInput } from '../types';
+import type { IMeet, IGetMeetsInput, IGetMeetInput, ICloseMeetInput, IRestartMeetInput } from '../types';
 
 const namespace = 'meetStore';
 
@@ -11,6 +11,8 @@ interface IMeetStore {
   loading: Ref<boolean>
   loadMeets: (data: IGetMeetsInput) => Promise<IMeet[]>;
   loadMeet: (data: IGetMeetInput) => Promise<IMeet>;
+  closeMeet: (data: ICloseMeetInput) => Promise<IMeet>;
+  restartMeet: (data: IRestartMeetInput) => Promise<IMeet>;
 }
 
 export const useMeetStore = defineStore(namespace, (): IMeetStore => {
@@ -40,11 +42,31 @@ export const useMeetStore = defineStore(namespace, (): IMeetStore => {
     }
   };
 
+  const closeMeet = async (data: ICloseMeetInput) => {
+    loading.value = true
+    try {
+      return await api.closeMeet(data);
+    } finally {
+      loading.value = false
+    }
+  };
+
+  const restartMeet = async (data: IRestartMeetInput) => {
+    loading.value = true
+    try {
+      return await api.restartMeet(data);
+    } finally {
+      loading.value = false
+    }
+  };
+
   return {
     meets,
     currentMeet,
     loading,
     loadMeets,
-    loadMeet
+    loadMeet,
+    closeMeet,
+    restartMeet
   }
 })

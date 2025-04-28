@@ -31,3 +31,13 @@ export interface IRoute {
 }
 
 export type { IHealthResponse } from '@coopenomics/controller'
+
+export interface IBackNavigationButton {
+  text: string
+  onClick: () => void
+  componentId: string
+}
+
+export interface IDesktopWithNavigation extends IDesktop {
+  backNavigationButton: IBackNavigationButton | null
+}

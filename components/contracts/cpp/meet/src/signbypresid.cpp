@@ -1,4 +1,4 @@
-void meet::signbypresid(name coopname, checksum256 hash, document presider_decision) {
+void meet::signbypresid(name coopname, name username, checksum256 hash, document presider_decision) {
     require_auth(coopname);
 
     // 1. Находим собрание по хэшу
@@ -6,6 +6,8 @@ void meet::signbypresid(name coopname, checksum256 hash, document presider_decis
     eosio::check(meet_opt.has_value(), "Собрание не найдено");
     auto meet_record = meet_opt.value();
 
+    eosio::check(username == meet_record.presider, "Вы не являетесь председателем собрания");
+    
     // Проверяем, что текущее время > close_at
     auto now = current_time_point();
     if (!TEST_MODE) {
@@ -79,4 +81,12 @@ void meet::signbypresid(name coopname, checksum256 hash, document presider_decis
     while (qitr != by_meet.end() && qitr->meet_id == meet_record.id) {
         qitr = by_meet.erase(qitr);
     }
+      
+  // отправляем документ в принятый реестр
+  action(
+    permission_level{ _meet, "active"_n},
+    _soviet,
+    "newresolved"_n,
+    std::make_tuple(coopname, username, get_valid_soviet_action("completegm"_n), uint64_t(0), presider_decision)
+  ).send();
 } 

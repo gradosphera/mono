@@ -212,10 +212,10 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
     this.blockchainService.initialize(data.coopname, wif);
 
     // Преобразуем доменный объект в инфраструктурный тип
-    const blockchainData = {
+    const blockchainData: MeetContract.Actions.Vote.IInput = {
       coopname: data.coopname,
       hash: data.hash,
-      member: data.member,
+      username: data.username,
       ballot: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.ballot),
       votes: data.votes,
     };
@@ -265,6 +265,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
 
     const blockchainData: MeetContract.Actions.SignBySecretary.IInput = {
       coopname: data.coopname,
+      username: data.username,
       hash: data.hash,
       secretary_decision: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.secretary_decision),
     };
@@ -289,6 +290,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
 
     const blockchainData: MeetContract.Actions.SignByPresider.IInput = {
       coopname: data.coopname,
+      username: data.username,
       hash: data.hash,
       presider_decision: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.presider_decision),
     };

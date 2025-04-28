@@ -28,14 +28,14 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
         )
         q-input(
           v-model="formData.open_at"
-          label="Дата открытия"
+          label="Дата и время открытия, UTC"
           type="datetime-local"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
         )
         q-input(
           v-model="formData.close_at"
-          label="Дата закрытия"
+          label="Дата и время закрытия, UTC"
           type="datetime-local"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
@@ -102,8 +102,8 @@ const formData = reactive(
     'initiator': 'ant',
     'presider': 'ant',
     'secretary': 'ant',
-    'open_at': '2026-02-02T12:12',
-    'close_at': '2026-02-02T12:13',
+    'open_at': new Date(Date.now() + 10000).toISOString().slice(0, 16),
+    'close_at': new Date(Date.now() + 120000).toISOString().slice(0, 16),
     'username': 'ant',
     'agenda_points': [
         {

@@ -84,7 +84,7 @@ void meet::restartmeet(name coopname, checksum256 hash, document newproposal, ti
         _meet,
         coopname,
         meet_record.initiator,
-        get_valid_soviet_action("createagm"_n),
+        get_valid_soviet_action("creategm"_n),
         hash,
         _meet,
         "authagm"_n,

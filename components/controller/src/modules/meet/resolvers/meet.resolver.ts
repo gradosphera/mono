@@ -11,13 +11,15 @@ import { MeetAggregateDTO } from '../dto/meet-aggregate.dto';
 import { AnnualGeneralMeetingAgendaGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-agenda-document.dto';
 import { VoteOnAnnualGeneralMeetInputDTO } from '../dto/vote-on-annual-general-meet-input.dto';
 import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-meet-input.dto';
-import { GenerateSovietDecisionOnAnnualMeetInputDTO } from '../dto/generate-soviet-decision-input.dto';
 import { GetMeetInputDTO } from '../dto/get-meet-input.dto';
 import { GetMeetsInputDTO } from '../dto/get-meets-input.dto';
 import { SignBySecretaryOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-secretary-on-annual-general-meet-input.dto';
 import { SignByPresiderOnAnnualGeneralMeetInputDTO } from '../dto/sign-by-presider-on-annual-general-meet-input.dto';
-import { GenerateBallotForAnnualGeneralMeetInputDTO } from '../dto/generate-ballot-input.dto';
 import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
+import { AnnualGeneralMeetingVotingBallotGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-voting-ballot-document.dto';
+import { AnnualGeneralMeetingSovietDecisionGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
+import { AnnualGeneralMeetingDecisionGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-decision-document.dto';
+import { AnnualGeneralMeetingNotificationGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-notification-document.dto';
 
 @Resolver()
 export class MeetResolver {
@@ -28,7 +30,7 @@ export class MeetResolver {
     description: 'Получить данные собрания по хешу',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async getMeet(
     @Args('data', { type: () => GetMeetInputDTO })
     data: GetMeetInputDTO
@@ -41,7 +43,7 @@ export class MeetResolver {
     description: 'Получить список всех собраний кооператива',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async getMeets(
     @Args('data', { type: () => GetMeetsInputDTO })
     data: GetMeetsInputDTO
@@ -86,8 +88,8 @@ export class MeetResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
   async generateSovietDecisionOnAnnualMeetDocument(
-    @Args('data', { type: () => GenerateSovietDecisionOnAnnualMeetInputDTO })
-    data: GenerateSovietDecisionOnAnnualMeetInputDTO,
+    @Args('data', { type: () => AnnualGeneralMeetingSovietDecisionGenerateDocumentInputDTO })
+    data: AnnualGeneralMeetingSovietDecisionGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
@@ -102,8 +104,8 @@ export class MeetResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['member'])
   async generateBallotForAnnualGeneralMeetDocument(
-    @Args('data', { type: () => GenerateBallotForAnnualGeneralMeetInputDTO })
-    data: GenerateBallotForAnnualGeneralMeetInputDTO,
+    @Args('data', { type: () => AnnualGeneralMeetingVotingBallotGenerateDocumentInputDTO })
+    data: AnnualGeneralMeetingVotingBallotGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
@@ -141,7 +143,7 @@ export class MeetResolver {
     description: 'Подписание решения секретарём на общем собрании пайщиков',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['secretary'])
+  @AuthRoles(['chairman', 'member'])
   async signBySecretaryOnAnnualGeneralMeet(
     @Args('data', { type: () => SignBySecretaryOnAnnualGeneralMeetInputDTO })
     data: SignBySecretaryOnAnnualGeneralMeetInputDTO
@@ -154,11 +156,43 @@ export class MeetResolver {
     description: 'Подписание решения председателем на общем собрании пайщиков',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member'])
   async signByPresiderOnAnnualGeneralMeet(
     @Args('data', { type: () => SignByPresiderOnAnnualGeneralMeetInputDTO })
     data: SignByPresiderOnAnnualGeneralMeetInputDTO
   ): Promise<MeetAggregateDTO> {
     return this.meetService.signByPresiderOnAnnualGeneralMeet(data);
+  }
+
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'generateAnnualGeneralMeetDecisionDocument',
+    description: 'Сгенерировать документ решения общего собрания пайщиков',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateAnnualGeneralMeetDecisionDocument(
+    @Args('data', { type: () => AnnualGeneralMeetingDecisionGenerateDocumentInputDTO })
+    data: AnnualGeneralMeetingDecisionGenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.meetService.generateAnnualGeneralMeetDecisionDocument(data, options);
+  }
+
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'generateAnnualGeneralMeetNotificationDocument',
+    description: 'Сгенерировать документ уведомления о проведении общего собрания пайщиков',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateAnnualGeneralMeetNotificationDocument(
+    @Args('data', { type: () => AnnualGeneralMeetingNotificationGenerateDocumentInputDTO })
+    data: AnnualGeneralMeetingNotificationGenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.meetService.generateAnnualGeneralMeetNotificationDocument(data, options);
   }
 }

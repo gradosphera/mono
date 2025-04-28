@@ -13,7 +13,6 @@ export type ExtendedProgramWalletData = IProgramWalletData & {
 
 export type IDepositData = GatewayContract.Tables.Incomes.IIncome;
 export type IWithdrawData = GatewayContract.Tables.Outcomes.IOutcome;
-export type IWalletData = SovietContract.Tables.Wallets.IWallets;
 
 export interface ILoadSingleUserWallet {
   coopname: string;

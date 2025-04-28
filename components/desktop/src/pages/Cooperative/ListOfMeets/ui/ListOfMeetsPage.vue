@@ -1,50 +1,37 @@
 <template lang="pug">
 div.q-pa-md
-  div.text-h6.q-mb-md Общие собрания
+  router-view(v-if="$route.name !== 'user-meets' && $route.name !== 'meets'")
+  template(v-else)
+    div.row.justify-center
+      div.col-12
+        div.row.q-mb-md(v-if="canCreateMeet")
+          CreateMeet(@create="handleCreate")
 
-  div.row.justify-center
-    div.col-12
-      div.row.q-mb-md.justify-end(v-if="canCreateMeet")
-        q-btn(
-          color="primary"
-          label="Создать общее собрание"
-          @click="showCreateMeetDialog = true"
+        MeetsTable(
+          :meets="meets"
+          :loading="loading"
+          @vote="handleVote"
+          @close="handleCloseMeet"
+          @restart="showRestartMeetDialog"
+          @view="navigateToMeetDetails"
         )
-
-      MeetsTable(
-        :meets="meets"
-        :loading="loading"
-        @vote="handleVote"
-        @close="handleCloseMeet"
-        @restart="showRestartMeetDialog"
-        @view="navigateToMeetDetails"
-      )
-
-  CreateMeetForm(
-    v-model="showCreateMeetDialog"
-    :loading="isCreating"
-    @create="handleCreateAndClose"
-  )
-  RestartMeetForm(
-    v-model="showRestartDialog"
-    :meet="currentMeetToRestart"
-    :loading="isRestarting"
-    @restart="handleRestartAndClose"
-  )
+    
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { MeetsTable } from 'src/widgets/Meets'
-import { CreateMeetForm } from 'src/features/Meet/CreateMeetWithAgenda'
-import { RestartMeetForm } from 'src/features/Meet/RestartMeetWithProposal'
+import { MeetsTable } from 'src/widgets/Meets/MeetsTable'
+import { CreateMeet } from 'src/features/Meet/CreateMeet'
 import { useMeetManagement } from '../model'
 import type { IMeet } from 'src/entities/Meet'
+import { useCurrentUserStore } from 'src/entities/User'
 
 const route = useRoute()
 const router = useRouter()
 const coopname = computed(() => route.params.coopname as string)
+
+const {isChairman, isMember} = useCurrentUserStore()
 
 const {
   meets,
@@ -52,49 +39,20 @@ const {
   loadMeets,
   handleCreateMeet,
   handleCloseMeet,
-  handleRestartMeet,
   handleVote
 } = useMeetManagement(coopname.value)
 
 // Диалоги
-const showCreateMeetDialog = ref(false)
-const showRestartDialog = ref(false)
 const currentMeetToRestart = ref<IMeet | null>(null)
 
-// Состояния загрузки
-const isCreating = ref(false)
-const isRestarting = ref(false)
-
 // Обработчики
-const handleCreateAndClose = async (formData: any) => {
-  isCreating.value = true
-  try {
-    const success = await handleCreateMeet(formData)
-    if (success) {
-      showCreateMeetDialog.value = false
-    }
-  }
-  finally {
-    isCreating.value = false
-  }
+const handleCreate = async (formData: any) => {
+  const success = await handleCreateMeet(formData)
+  return success
 }
 
 const showRestartMeetDialog = (meet: IMeet) => {
   currentMeetToRestart.value = meet
-  showRestartDialog.value = true
-}
-
-const handleRestartAndClose = async (data: any) => {
-  isRestarting.value = true
-  try {
-    const success = await handleRestartMeet(data)
-    if (success) {
-      showRestartDialog.value = false
-      currentMeetToRestart.value = null
-    }
-  } finally {
-    isRestarting.value = false
-  }
 }
 
 // Навигация на детальную страницу собрания
@@ -103,18 +61,30 @@ const navigateToMeetDetails = (meet: IMeet) => {
     name: route.name === 'meets' ? 'meet-details' : 'user-meet-details',
     params: {
       coopname: coopname.value,
-      id: meet.hash
+      hash: meet.hash
     }
   })
 }
 
 // Проверка разрешений
 const canCreateMeet = computed(() => {
-  return true // Здесь можно добавить проверку ролей
+  return isMember || isChairman
 })
 
 // Загрузка данных при монтировании компонента
 onMounted(() => {
-  loadMeets()
+  if (route.name === 'user-meets' || route.name === 'meets') {
+    loadMeets()
+  }
 })
+
+// Следим за изменениями маршрута
+watch(
+  () => route.name,
+  (newRouteName) => {
+    if (newRouteName === 'user-meets' || newRouteName === 'meets') {
+      loadMeets()
+    }
+  }
+)
 </script>

@@ -97,11 +97,16 @@ export default async function () {
             path: 'meets',
             name: 'user-meets',
             component: markRaw(ListOfMeetsPage),
-          },
-          {
-            path: 'meets/:hash',
-            name: 'user-meet-details',
-            component: markRaw(MeetDetailsPage),
+            children: [
+              {
+                path: ':hash',
+                name: 'user-meet-details',
+                component: markRaw(MeetDetailsPage),
+                meta: {
+                  test: true
+                }
+              },
+            ],
           },
           {
             path: '/:coopname/contacts',

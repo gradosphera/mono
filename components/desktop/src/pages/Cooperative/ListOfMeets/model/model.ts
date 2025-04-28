@@ -1,9 +1,9 @@
 import { computed } from 'vue'
 import { Notify } from 'quasar'
 import { useMeetStore } from 'src/entities/Meet/model/store'
-import { createMeetWithAgenda } from 'src/features/Meet/CreateMeetWithAgenda/model'
+import { createMeetWithAgenda } from 'src/features/Meet/CreateMeet/model'
 import { signByPresiderOnAnnualGeneralMeetWithDecision } from 'src/features/Meet/CloseMeetWithDecision/model'
-import { restartMeetWithProposal } from 'src/features/Meet/RestartMeetWithProposal/model'
+import { restartMeetWithProposal } from 'src/features/Meet/RestartMeet/model'
 import { useSessionStore } from 'src/entities/Session'
 import type { IMeet } from 'src/entities/Meet'
 import { FailAlert } from 'src/shared/api'
@@ -56,7 +56,6 @@ export function useMeetManagement(coopname: string) {
         coopname,
         hash: meet.hash,
         username: sessionStore.username,
-        meet_hash: meet.hash
       })
 
       await loadMeets()

@@ -21,6 +21,7 @@ interface IUserStore {
   userAccount: Ref<IUserAccountData | null>;
   isRegistrationComplete: ComputedRef<boolean>;
   isChairman: ComputedRef<boolean>;
+  isMember: ComputedRef<boolean>;
 }
 
 const namespaceCurrentUser = 'currentUser';
@@ -43,7 +44,8 @@ export const useCurrentUserStore = defineStore(
           (userEntity.userAccount.value || false) &&
           userEntity.participantAccount.value != null
       ),
-      isChairman: computed(() => userEntity.userAccount.value?.role === 'chairman')
+      isChairman: computed(() => userEntity.userAccount.value?.role === 'chairman'),
+      isMember: computed(() => userEntity.userAccount.value?.role === 'member'),
     };
   }
 );

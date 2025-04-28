@@ -102,7 +102,9 @@ static const std::set<eosio::name> soviet_actions = {
     "joincoop"_n, //регистрация пайщика
     
     //MEET
-    "createagm"_n, //объявить плановое общее собрание
+    "creategm"_n,//предложение повестки планового общего собрание
+    "completegm"_n, //решение общего собрания пайщиков
+    
     //CAPITAL
     "capitalinvst"_n, //заявление на инвестиции по договору УХД
     "createresult"_n, //клайм прироста капитализации из задания

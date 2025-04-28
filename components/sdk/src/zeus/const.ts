@@ -29,10 +29,22 @@ export const AllTypesProps: Record<string,any> = {
 	AnnualGeneralMeetingAgendaSignedMetaDocumentInput:{
 
 	},
+	AnnualGeneralMeetingDecisionGenerateDocumentInput:{
+
+	},
 	AnnualGeneralMeetingDecisionSignedDocumentInput:{
 		meta:"AnnualGeneralMeetingDecisionSignedMetaDocumentInput"
 	},
 	AnnualGeneralMeetingDecisionSignedMetaDocumentInput:{
+
+	},
+	AnnualGeneralMeetingNotificationGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingSovietDecisionGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingVotingBallotGenerateDocumentInput:{
 
 	},
 	AnnualGeneralMeetingVotingBallotSignedDocumentInput:{
@@ -158,16 +170,10 @@ export const AllTypesProps: Record<string,any> = {
 	FreeDecisionGenerateDocumentInput:{
 
 	},
-	GenerateBallotForAnnualGeneralMeetInput:{
-
-	},
 	GenerateDocumentInput:{
 
 	},
 	GenerateDocumentOptionsInput:{
-
-	},
-	GenerateSovietDecisionOnAnnualMeetInput:{
 
 	},
 	GetAccountInput:{
@@ -179,11 +185,8 @@ export const AllTypesProps: Record<string,any> = {
 	GetBranchesInput:{
 
 	},
-	GetDocumentsFilterInput:{
-		additionalFilters:"JSON"
-	},
 	GetDocumentsInput:{
-		filter:"GetDocumentsFilterInput"
+		filter:"JSON"
 	},
 	GetExtensionsInput:{
 
@@ -292,6 +295,14 @@ export const AllTypesProps: Record<string,any> = {
 			data:"AnnualGeneralMeetingAgendaGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
+		generateAnnualGeneralMeetDecisionDocument:{
+			data:"AnnualGeneralMeetingDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateAnnualGeneralMeetNotificationDocument:{
+			data:"AnnualGeneralMeetingNotificationGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
 		generateAssetContributionAct:{
 			data:"AssetContributionActGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
@@ -305,7 +316,7 @@ export const AllTypesProps: Record<string,any> = {
 			options:"GenerateDocumentOptionsInput"
 		},
 		generateBallotForAnnualGeneralMeetDocument:{
-			data:"GenerateBallotForAnnualGeneralMeetInput",
+			data:"AnnualGeneralMeetingVotingBallotGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		generateFreeDecision:{
@@ -349,7 +360,7 @@ export const AllTypesProps: Record<string,any> = {
 			options:"GenerateDocumentOptionsInput"
 		},
 		generateSovietDecisionOnAnnualMeetDocument:{
-			data:"GenerateSovietDecisionOnAnnualMeetInput",
+			data:"AnnualGeneralMeetingSovietDecisionGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		generateUserAgreement:{
@@ -1086,6 +1097,8 @@ export const ReturnTypes: Record<string,any> = {
 		disputeOnRequest:"Transaction",
 		editBranch:"Branch",
 		generateAnnualGeneralMeetAgendaDocument:"GeneratedDocument",
+		generateAnnualGeneralMeetDecisionDocument:"GeneratedDocument",
+		generateAnnualGeneralMeetNotificationDocument:"GeneratedDocument",
 		generateAssetContributionAct:"GeneratedDocument",
 		generateAssetContributionDecision:"GeneratedDocument",
 		generateAssetContributionStatement:"GeneratedDocument",

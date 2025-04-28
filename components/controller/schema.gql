@@ -285,6 +285,38 @@ input AnnualGeneralMeetingAgendaSignedMetaDocumentInput {
   version: String!
 }
 
+input AnnualGeneralMeetingDecisionGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
 input AnnualGeneralMeetingDecisionSignedDocumentInput {
   """Хэш документа"""
   hash: String!
@@ -332,6 +364,102 @@ input AnnualGeneralMeetingDecisionSignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
+}
+
+input AnnualGeneralMeetingNotificationGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+input AnnualGeneralMeetingSovietDecisionGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+input AnnualGeneralMeetingVotingBallotGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
 }
 
 input AnnualGeneralMeetingVotingBallotSignedDocumentInput {
@@ -1710,20 +1838,6 @@ input FreeDecisionGenerateDocumentInput {
   version: String
 }
 
-"""
-Входные данные для генерации бюллетеня для голосования на общем собрании
-"""
-input GenerateBallotForAnnualGeneralMeetInput {
-  """Имя аккаунта кооператива"""
-  coopname: String!
-
-  """Хеш собрания, для которого генерируется бюллетень"""
-  meet_hash: String!
-
-  """Имя пользователя, для которого генерируется бюллетень"""
-  username: String!
-}
-
 input GenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -1764,17 +1878,6 @@ input GenerateDocumentOptionsInput {
   skip_save: Boolean
 }
 
-input GenerateSovietDecisionOnAnnualMeetInput {
-  """Название кооператива"""
-  coopname: String!
-
-  """Хэш собрания, для которого генерируется решение совета"""
-  meet_hash: String!
-
-  """Имя пользователя, создающего документ"""
-  username: String!
-}
-
 type GeneratedDocument {
   """Бинарное содержимое документа (base64)"""
   binary: String!
@@ -1809,12 +1912,8 @@ input GetBranchesInput {
   coopname: String!
 }
 
-input GetDocumentsFilterInput {
-  additionalFilters: JSON
-}
-
 input GetDocumentsInput {
-  filter: GetDocumentsFilterInput!
+  filter: JSON!
   limit: Int
   page: Int
   type: String
@@ -2261,6 +2360,14 @@ type Mutation {
   """Сгенерировать предложение повестки общего собрания пайщиков"""
   generateAnnualGeneralMeetAgendaDocument(data: AnnualGeneralMeetingAgendaGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
+  """Сгенерировать документ решения общего собрания пайщиков"""
+  generateAnnualGeneralMeetDecisionDocument(data: AnnualGeneralMeetingDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """
+  Сгенерировать документ уведомления о проведении общего собрания пайщиков
+  """
+  generateAnnualGeneralMeetNotificationDocument(data: AnnualGeneralMeetingNotificationGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
   """Сгенерировать документ акта приема-передачи."""
   generateAssetContributionAct(data: AssetContributionActGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
@@ -2271,7 +2378,7 @@ type Mutation {
   generateAssetContributionStatement(data: AssetContributionStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать бюллетень для голосования на общем собрании пайщиков"""
-  generateBallotForAnnualGeneralMeetDocument(data: GenerateBallotForAnnualGeneralMeetInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  generateBallotForAnnualGeneralMeetDocument(data: AnnualGeneralMeetingVotingBallotGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать протокол решения по предложенной повестке"""
   generateFreeDecision(data: FreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -2308,7 +2415,7 @@ type Mutation {
   """
   Сгенерировать документ решения Совета по проведению общего собрания пайщиков
   """
-  generateSovietDecisionOnAnnualMeetDocument(data: GenerateSovietDecisionOnAnnualMeetInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  generateSovietDecisionOnAnnualMeetDocument(data: AnnualGeneralMeetingSovietDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ пользовательского соглашения."""
   generateUserAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -3636,6 +3743,9 @@ input SignByPresiderOnAnnualGeneralMeetInput {
 
   """Подписанный документ с решением председателя"""
   presider_decision: AnnualGeneralMeetingDecisionSignedDocumentInput!
+
+  """Имя аккаунта пользователя"""
+  username: String!
 }
 
 """Входные данные для подписи решения секретарём"""
@@ -3648,6 +3758,9 @@ input SignBySecretaryOnAnnualGeneralMeetInput {
 
   """Подписанный документ с решением секретаря"""
   secretary_decision: AnnualGeneralMeetingDecisionSignedDocumentInput!
+
+  """Имя аккаунта пользователя"""
+  username: String!
 }
 
 type SignedBlockchainDocument {
@@ -4106,7 +4219,7 @@ input VoteOnAnnualGeneralMeetInput {
   hash: String!
 
   """Идентификатор члена кооператива, который голосует"""
-  member: String!
+  username: String!
 
   """Бюллетень с решениями по вопросам повестки"""
   votes: [VoteItemInput!]!

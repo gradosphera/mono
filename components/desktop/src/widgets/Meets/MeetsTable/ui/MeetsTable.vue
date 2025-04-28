@@ -15,7 +15,6 @@ q-table(
 ).full-height
   template(#header="props")
     q-tr(:props="props")
-      q-th(auto-width)
       q-th(
         v-for="col in props.cols"
         :key="col.name"
@@ -24,8 +23,6 @@ q-table(
 
   template(#body="props")
     q-tr(:key="`m_${props.row?.hash}`" :props="props")
-      q-td(auto-width)
-        q-btn(size="sm" color="primary" round dense :icon="expanded.get(props.row?.hash) ? 'remove' : 'add'" @click="toggleExpand(props.row?.hash)")
       q-td {{ props.row.hash.substring(0, 10) }}
       q-td {{ props.row.processing?.meet?.type }}
       q-td {{ props.row.processing?.meet?.status }}
@@ -53,30 +50,18 @@ q-table(
           color="accent"
           icon="fa-solid fa-arrow-right"
           flat
-          @click="() => router.push({ name: 'user-meet-details', params: { hash: props.row.hash } })"
-        ) Детали
-
-
-    q-tr(v-if="expanded.get(props.row?.hash)" :key="`e_${props.row?.hash}`" :props="props" class="q-virtual-scroll--with-prev")
-      q-td(colspan="100%")
-        MeetInfoCard(
-          :meet="props.row"
-          :can-manage="canManageMeet(props.row)"
-          :can-close="canClose(props.row)"
-          :can-restart="canRestart(props.row)"
-          @close="$emit('close', props.row)"
-          @restart="$emit('restart', props.row)"
-        )
+          @click="navigateToMeetDetails(props.row)"
+        ) Подробнее
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import { date } from 'quasar'
-import { MeetInfoCard } from '../../MeetInfoCard'
 import type { IMeet } from 'src/entities/Meet'
 import type { QTableColumn } from 'quasar'
 import { useRouter } from 'vue-router'
 import { useWindowSize } from 'src/shared/hooks'
+import { useDesktopStore } from 'src/entities/Desktop/model'
 
 defineProps<{
   meets: IMeet[],
@@ -85,13 +70,12 @@ defineProps<{
 
 defineEmits<{
   (e: 'vote', meet: IMeet): void
-  (e: 'close', meet: IMeet): void
-  (e: 'restart', meet: IMeet): void
   (e: 'view', meet: IMeet): void
 }>()
 
 const router = useRouter()
 const { isMobile } = useWindowSize()
+const desktop = useDesktopStore()
 
 // Колонки для таблицы
 const columns: QTableColumn<IMeet>[] = [
@@ -103,14 +87,6 @@ const columns: QTableColumn<IMeet>[] = [
   { name: 'actions', align: 'left', label: 'Действия', field: () => '', sortable: false },
 ]
 
-// Состояние развернутых строк
-const expanded = reactive(new Map())
-
-// Функция для переключения состояния развертывания
-const toggleExpand = (id: string) => {
-  expanded.set(id, !expanded.get(id))
-}
-
 const tableRef = ref(null)
 const pagination = ref({ rowsPerPage: 10 })
 
@@ -120,21 +96,23 @@ const formatDate = (dateString: string) => {
   return date.formatDate(dateString, 'DD.MM.YYYY HH:mm')
 }
 
-// Проверки разрешений
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const canManageMeet = (meet: IMeet) => {
-  return true // Здесь можно добавить проверку ролей
-}
-
-const canClose = (meet: IMeet) => {
-  return meet.processing?.meet?.status === 'open'
-}
-
-const canRestart = (meet: IMeet) => {
-  return meet.processing?.meet?.status === 'closed'
-}
-
 const canVote = (meet: IMeet) => {
   return meet.processing?.meet?.status === 'open'
+}
+
+// Определение текущего воркспейса и подходящего маршрута для деталей собрания
+const navigateToMeetDetails = (meet: IMeet) => {
+  const currentWorkspace = desktop.activeWorkspaceName
+  const isSoviet = currentWorkspace === 'soviet'
+  
+  const routeName = isSoviet ? 'meet-details' : 'user-meet-details'
+  
+  router.push({ 
+    name: routeName, 
+    params: { 
+      hash: meet.hash,
+      coopname: router.currentRoute.value.params.coopname
+    } 
+  })
 }
 </script>
