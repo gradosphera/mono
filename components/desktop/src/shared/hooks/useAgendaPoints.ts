@@ -1,6 +1,6 @@
-import type { ICreateMeetInput } from 'src/features/Meet'
+import type { Mutations } from '@coopenomics/sdk'
 
-export type AgendaPoint = ICreateMeetInput['agenda'][number]
+export type AgendaPoint = Mutations.Meet.CreateAnnualGeneralMeet.IInput['data']['agenda'][number]
 
 export function useAgendaPoints(points: AgendaPoint[]) {
   const addAgendaPoint = () => {

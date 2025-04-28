@@ -1,12 +1,14 @@
 // Заглушка для получения числа пайщиков кооператива.
 uint64_t get_total_participants(eosio::name coopname) {
     // Здесь можно реализовать получение актуальных данных, например, через inline action или вызов другого контракта.
-    return 100; // Пример: 100 пайщиков
+    return 2; // Пример: 100 пайщиков
 }
 
-void meet::vote(name coopname, checksum256 hash, name member, std::vector<vote_point> ballot) {
-    require_auth(member);
-
+void meet::vote(name coopname, checksum256 hash, name username, document ballot, std::vector<vote_point> votes) {
+    require_auth(coopname);
+    
+    verify_document_or_fail(ballot);
+    
     // Получаем объект собрания
     auto meet_opt = get_meet(coopname, hash);
     eosio::check(meet_opt.has_value(), "Собрание не найдено");
@@ -26,17 +28,17 @@ void meet::vote(name coopname, checksum256 hash, name member, std::vector<vote_p
          itr != questions_by_meet.end() && itr->meet_id == meet_record.id; ++itr) {
         meeting_questions.push_back(*itr);
     }
-    eosio::check(ballot.size() == meeting_questions.size(), "Бюллетень должен содержать голоса по всем вопросам");
+    eosio::check(votes.size() == meeting_questions.size(), "Бюллетень должен содержать голоса по всем вопросам");
 
     // Проверяем, что бюллетень содержит все идентификаторы вопросов без дублирования
     std::set<uint64_t> question_ids;
     for (const auto &q : meeting_questions) {
         question_ids.insert(q.id);
     }
-    std::set<uint64_t> ballot_ids;
-    for (const auto &b : ballot) {
+    std::set<uint64_t> votes_ids;
+    for (const auto &b : votes) {
         eosio::check(question_ids.find(b.question_id) != question_ids.end(), "В бюллетене указан неизвестный вопрос");
-        bool inserted = ballot_ids.insert(b.question_id).second;
+        bool inserted = votes_ids.insert(b.question_id).second;
         eosio::check(inserted, "Дублирование голосов по одному вопросу недопустимо");
     }
 
@@ -44,30 +46,30 @@ void meet::vote(name coopname, checksum256 hash, name member, std::vector<vote_p
     for (const auto &q : meeting_questions) {
         auto already_voted = [&](const std::vector<name>& voters) -> bool {
             for (const auto &v : voters) {
-                if (v == member) return true;
+                if (v == username) return true;
             }
             return false;
         };
         eosio::check(!already_voted(q.voters_for)
                   && !already_voted(q.voters_against)
-                  && !already_voted(q.voters_abstained), "Участник уже голосовал");
+                  && !already_voted(q.voters_abstained), "Ваш голос уже учтён");
     }
 
     // Обрабатываем каждый голос из бюллетеня и обновляем соответствующие записи в таблице questions
-    for (const auto &b : ballot) {
+    for (const auto &b : votes) {
         auto qitr = questions.find(b.question_id);
         eosio::check(qitr != questions.end(), "Вопрос не найден");
 
         questions.modify(qitr, coopname, [&](auto &q) {
             if (b.vote == "for"_n) {
                 q.counter_votes_for++;
-                q.voters_for.push_back(member);
+                q.voters_for.push_back(username);
             } else if (b.vote == "against"_n) {
                 q.counter_votes_against++;
-                q.voters_against.push_back(member);
+                q.voters_against.push_back(username);
             } else if (b.vote == "abstained"_n) {
                 q.counter_votes_abstained++;
-                q.voters_abstained.push_back(member);
+                q.voters_abstained.push_back(username);
             } else {
                 eosio::check(false, "Недопустимое значение голоса");
             }
@@ -82,7 +84,7 @@ void meet::vote(name coopname, checksum256 hash, name member, std::vector<vote_p
         m.signed_ballots++; // регистрируем принятый бюллетень
         uint64_t total_participants = get_total_participants(coopname);
         m.current_quorum_percent = (m.signed_ballots * 100) / total_participants;
-        if (m.current_quorum_percent >= m.quorum_percent) {
+        if (m.current_quorum_percent > m.quorum_percent) {
             m.quorum_passed = true;
         }
     });

@@ -113,12 +113,14 @@ export interface IRestartmeet {
 
 export interface ISignbypresid {
   coopname: IName
+  username: IName
   hash: IChecksum256
   presider_decision: IDocument
 }
 
 export interface ISignbysecr {
   coopname: IName
+  username: IName
   hash: IChecksum256
   secretary_decision: IDocument
 }
@@ -126,8 +128,9 @@ export interface ISignbysecr {
 export interface IVote {
   coopname: IName
   hash: IChecksum256
-  member: IName
-  ballot: IVotePoint[]
+  username: IName
+  ballot: IDocument
+  votes: IVotePoint[]
 }
 
 export interface IVotePoint {

@@ -3,7 +3,6 @@
 div
   MainHeader(
     v-if="!matched('cooperative-settings') && !matched('user-settings') && !matched('extstore')"
-    :showDrawer="showDrawer"
     @toggle-left-drawer="emitToggleLeftDrawer"
   )
   UserSettingsHeader(v-if="matched('user-settings')")

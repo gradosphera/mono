@@ -28,16 +28,16 @@ public:
     void declmeet(name coopname, checksum256 hash, std::string reason);
 
     [[eosio::action]]
-    void vote(name coopname, checksum256 hash, name member, std::vector<vote_point> ballot);
+    void vote(name coopname, checksum256 hash, name username, document ballot, std::vector<vote_point> votes);
     
     [[eosio::action]]
     void restartmeet(name coopname, checksum256 hash, document newproposal, time_point_sec new_open_at, time_point_sec new_close_at);
 
     [[eosio::action]]
-    void signbysecr(name coopname, checksum256 hash, document secretary_decision);
+    void signbysecr(name coopname, name username, checksum256 hash, document secretary_decision);
     
     [[eosio::action]]
-    void signbypresid(name coopname, checksum256 hash, document presider_decision);
+    void signbypresid(name coopname, name username, checksum256 hash, document presider_decision);
     
     // Сервисное действие:
     [[eosio::action]] void newgdecision(NEWGDECISION_SIGNATURE);

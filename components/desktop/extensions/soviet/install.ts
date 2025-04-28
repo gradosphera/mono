@@ -68,17 +68,13 @@ export default async function () {
               icon: 'fa-solid fa-users-between-lines',
               roles: ['chairman', 'member'],
             },
-          },
-          {
-            path: 'meets/:hash',
-            name: 'meet-details',
-            component: markRaw(MeetDetailsPage),
-            // meta: {
-            //   title: 'Детали собрания',
-            //   icon: 'fa-solid fa-users-between-lines',
-            //   roles: ['chairman', 'member'],
-            //   hideInMenu: true,
-            // },
+            children: [
+              {
+                path: ':hash',
+                name: 'meet-details',
+                component: markRaw(MeetDetailsPage),
+              },
+            ],
           },
         ]
       }

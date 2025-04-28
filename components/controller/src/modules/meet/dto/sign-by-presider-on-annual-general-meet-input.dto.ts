@@ -10,6 +10,10 @@ export class SignByPresiderOnAnnualGeneralMeetInputDTO implements SignByPresider
   @IsString()
   coopname!: string;
 
+  @Field(() => String, { description: 'Имя аккаунта пользователя' })
+  @IsString()
+  username!: string;
+
   @Field(() => String, { description: 'Хеш собрания' })
   @IsString()
   hash!: string;

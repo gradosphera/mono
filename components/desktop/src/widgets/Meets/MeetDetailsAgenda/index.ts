@@ -1,0 +1,1 @@
+export { default as MeetDetailsAgenda } from './MeetDetailsAgenda.vue' 

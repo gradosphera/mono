@@ -66,7 +66,7 @@ void meet::createmeet(name coopname, checksum256 hash, eosio::name initiator, na
     _meet,
     coopname, 
     initiator, 
-    get_valid_soviet_action("createagm"_n), 
+    get_valid_soviet_action("creategm"_n), 
     hash,
     _meet,
     "authmeet"_n, 
@@ -74,5 +74,4 @@ void meet::createmeet(name coopname, checksum256 hash, eosio::name initiator, na
     proposal, 
     std::string("")
   );
-
 }

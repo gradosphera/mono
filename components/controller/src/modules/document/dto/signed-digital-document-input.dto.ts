@@ -1,5 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsJSON, IsString } from 'class-validator';
+import { IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import type { Cooperative } from 'cooptypes';
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 
@@ -18,7 +19,8 @@ export class SignedDigitalDocumentInputDTO implements Cooperative.Document.ISign
   public readonly signature!: string;
 
   @Field(() => MetaDocumentInputDTO, { description: 'Метаинформация документа' })
-  @IsJSON()
+  @ValidateNested()
+  @Type(() => MetaDocumentInputDTO)
   public readonly meta!: MetaDocumentInputDTO;
 
   constructor(data: SignedDigitalDocumentInputDTO) {

@@ -1,11 +1,11 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import type { SignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { ExtendedSignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import { UserDataUnion } from '../unions/user.union';
 import GraphQLJSON from 'graphql-type-json';
 import { IsString } from 'class-validator';
 
 @ObjectType('SignedDigitalDocument')
-export class SignedDigitalDocumentDTO implements SignedDocumentDomainInterface {
+export class SignedDigitalDocumentDTO implements ExtendedSignedDocumentDomainInterface {
   @Field(() => String)
   @IsString()
   public readonly hash!: string;

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { RouteRecordRaw, type RouteMeta, type Router } from 'vue-router'
-import type { IDesktop, IHealthResponse } from './types'
+import type { IHealthResponse, IBackNavigationButton, IDesktopWithNavigation } from './types'
 import { api } from '../api'
 
 interface WorkspaceMenuItem {
@@ -15,7 +15,7 @@ interface WorkspaceMenuItem {
 const namespace = 'desktops'
 
 export const useDesktopStore = defineStore(namespace, () => {
-  const currentDesktop = ref<IDesktop>()
+  const currentDesktop = ref<IDesktopWithNavigation>()
   const health = ref<IHealthResponse>()
   const online = ref<boolean>()
 
@@ -30,7 +30,11 @@ export const useDesktopStore = defineStore(namespace, () => {
         }
       });
     }
-    currentDesktop.value = newDesktop;
+    // Добавляем поле backNavigationButton если оно отсутствует
+    currentDesktop.value = {
+      ...newDesktop,
+      backNavigationButton: currentDesktop.value?.backNavigationButton || null
+    };
   }
 
   async function healthCheck(): Promise<void> {
@@ -101,6 +105,21 @@ export const useDesktopStore = defineStore(namespace, () => {
     }
   }
 
+  // Методы для управления навигацией
+  function setBackNavigationButton(button: IBackNavigationButton) {
+    if (!currentDesktop.value) return
+    currentDesktop.value.backNavigationButton = button
+  }
+
+  function removeBackNavigationButton(componentId: string) {
+    if (!currentDesktop.value) return
+    if (currentDesktop.value.backNavigationButton?.componentId === componentId) {
+      currentDesktop.value.backNavigationButton = null
+    }
+  }
+
+  const backNavigationButton = computed(() => currentDesktop.value?.backNavigationButton)
+
   return {
     currentDesktop,
     health,
@@ -113,6 +132,10 @@ export const useDesktopStore = defineStore(namespace, () => {
     selectWorkspace,
     activeSecondLevelRoutes,
     registerWorkspaceMenus,
-    removeWorkspace
+    removeWorkspace,
+    // Новые методы
+    setBackNavigationButton,
+    removeBackNavigationButton,
+    backNavigationButton
   };
 });

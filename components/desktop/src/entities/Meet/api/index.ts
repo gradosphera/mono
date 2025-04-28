@@ -1,6 +1,6 @@
 import { client } from 'src/shared/api/client';
-import { Queries } from '@coopenomics/sdk';
-import type { IGetMeetsInput, IGetMeetInput } from '../types';
+import { Queries, Mutations } from '@coopenomics/sdk';
+import type { IGetMeetsInput, IGetMeetInput, ICloseMeetInput, IRestartMeetInput } from '../types';
 
 async function loadMeets(data: IGetMeetsInput) {
   const { [Queries.Meet.GetMeets.name]: output } = await client.Query(
@@ -26,7 +26,33 @@ async function loadMeet(data: IGetMeetInput) {
   return output;
 }
 
+async function closeMeet(data: ICloseMeetInput) {
+  const { [Mutations.Meet.SignByPresiderOnAnnualGeneralMeet.name]: output } = await client.Mutation(
+    Mutations.Meet.SignByPresiderOnAnnualGeneralMeet.mutation,
+    {
+      variables: {
+        data
+      }
+    }
+  );
+  return output;
+}
+
+async function restartMeet(data: IRestartMeetInput) {
+  const { [Mutations.Meet.RestartAnnualGeneralMeet.name]: output } = await client.Mutation(
+    Mutations.Meet.RestartAnnualGeneralMeet.mutation,
+    {
+      variables: {
+        data
+      }
+    }
+  );
+  return output;
+}
+
 export const api = {
   loadMeets,
-  loadMeet
+  loadMeet,
+  closeMeet,
+  restartMeet
 }

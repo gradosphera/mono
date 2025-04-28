@@ -9,6 +9,16 @@ export * as CreateAnnualGeneralMeet from './createAnnualGeneralMeet'
 export * as GenerateAnnualGeneralMeetAgendaDocument from './generateAnnualGeneralMeetAgendaDocument'
 
 /**
+ * Генерация документа решения собрания
+ */
+export * as GenerateAnnualGeneralMeetDecisionDocument from './generateAnnualGeneralMeetDecisionDocument'
+
+/**
+ * Генерация документа уведомления о проведении собрания
+ */
+export * as GenerateAnnualGeneralMeetNotificationDocument from './generateAnnualGeneralMeetNotificationDocument'
+
+/**
  * Генерация бюллетеня для голосования на собрании
  */
 export * as GenerateBallotForAnnualGeneralMeetDocument from './generateBallotForAnnualGeneralMeetDocument'

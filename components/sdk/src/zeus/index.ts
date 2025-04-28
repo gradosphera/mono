@@ -1123,6 +1123,28 @@ export type ValueTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
+	["AnnualGeneralMeetingDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
 	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
 	/** Хэш документа */
 	hash: string | Variable<any, string>,
@@ -1156,6 +1178,72 @@ export type ValueTypes = {
 	username: string | Variable<any, string>,
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
+};
+	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
 };
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
 	/** Хэш документа */
@@ -2140,15 +2228,6 @@ export type ValueTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null | Variable<any, string>
 };
-	/** Входные данные для генерации бюллетеня для голосования на общем собрании */
-["GenerateBallotForAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хеш собрания, для которого генерируется бюллетень */
-	meet_hash: string | Variable<any, string>,
-	/** Имя пользователя, для которого генерируется бюллетень */
-	username: string | Variable<any, string>
-};
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -2177,14 +2256,6 @@ export type ValueTypes = {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null | Variable<any, string>
 };
-	["GenerateSovietDecisionOnAnnualMeetInput"]: {
-	/** Название кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш собрания, для которого генерируется решение совета */
-	meet_hash: string | Variable<any, string>,
-	/** Имя пользователя, создающего документ */
-	username: string | Variable<any, string>
-};
 	["GeneratedDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -2211,11 +2282,8 @@ export type ValueTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>
 };
-	["GetDocumentsFilterInput"]: {
-	additionalFilters?: ValueTypes["JSON"] | undefined | null | Variable<any, string>
-};
 	["GetDocumentsInput"]: {
-	filter: ValueTypes["GetDocumentsFilterInput"] | Variable<any, string>,
+	filter: ValueTypes["JSON"] | Variable<any, string>,
 	limit?: number | undefined | null | Variable<any, string>,
 	page?: number | undefined | null | Variable<any, string>,
 	type?: string | undefined | null | Variable<any, string>,
@@ -2498,10 +2566,12 @@ deliverOnRequest?: [{	data: ValueTypes["DeliverOnRequestInput"] | Variable<any, 
 disputeOnRequest?: [{	data: ValueTypes["DisputeOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 editBranch?: [{	data: ValueTypes["EditBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
 generateAnnualGeneralMeetAgendaDocument?: [{	data: ValueTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+generateAnnualGeneralMeetDecisionDocument?: [{	data: ValueTypes["AnnualGeneralMeetingDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+generateAnnualGeneralMeetNotificationDocument?: [{	data: ValueTypes["AnnualGeneralMeetingNotificationGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateAssetContributionAct?: [{	data: ValueTypes["AssetContributionActGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateAssetContributionDecision?: [{	data: ValueTypes["AssetContributionDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateAssetContributionStatement?: [{	data: ValueTypes["AssetContributionStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateBallotForAnnualGeneralMeetDocument?: [{	data: ValueTypes["GenerateBallotForAnnualGeneralMeetInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+generateBallotForAnnualGeneralMeetDocument?: [{	data: ValueTypes["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateFreeDecision?: [{	data: ValueTypes["FreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateParticipantApplication?: [{	data: ValueTypes["ParticipantApplicationGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateParticipantApplicationDecision?: [{	data: ValueTypes["ParticipantApplicationDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -2512,7 +2582,7 @@ generateReturnByAssetDecision?: [{	data: ValueTypes["ReturnByAssetDecisionGenera
 generateReturnByAssetStatement?: [{	data: ValueTypes["ReturnByAssetStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateSelectBranchDocument?: [{	data: ValueTypes["SelectBranchGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateSignatureAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateSovietDecisionOnAnnualMeetDocument?: [{	data: ValueTypes["GenerateSovietDecisionOnAnnualMeetInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+generateSovietDecisionOnAnnualMeetDocument?: [{	data: ValueTypes["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateUserAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateWalletAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 initSystem?: [{	data: ValueTypes["Init"] | Variable<any, string>},ValueTypes["SystemInfo"]],
@@ -3385,7 +3455,9 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Хеш собрания */
 	hash: string | Variable<any, string>,
 	/** Подписанный документ с решением председателя */
-	presider_decision: ValueTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"] | Variable<any, string>
+	presider_decision: ValueTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"] | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
 };
 	/** Входные данные для подписи решения секретарём */
 ["SignBySecretaryOnAnnualGeneralMeetInput"]: {
@@ -3394,7 +3466,9 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Хеш собрания */
 	hash: string | Variable<any, string>,
 	/** Подписанный документ с решением секретаря */
-	secretary_decision: ValueTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"] | Variable<any, string>
+	secretary_decision: ValueTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"] | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
 };
 	["SignedBlockchainDocument"]: AliasType<{
 	/** Хеш документа */
@@ -3731,7 +3805,7 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Хеш собрания, по которому производится голосование */
 	hash: string | Variable<any, string>,
 	/** Идентификатор члена кооператива, который голосует */
-	member: string | Variable<any, string>,
+	username: string | Variable<any, string>,
 	/** Бюллетень с решениями по вопросам повестки */
 	votes: Array<ValueTypes["VoteItemInput"]> | Variable<any, string>
 };
@@ -3945,6 +4019,28 @@ export type ResolverInputTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["AnnualGeneralMeetingDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
 	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
 	/** Хэш документа */
 	hash: string,
@@ -3978,6 +4074,72 @@ export type ResolverInputTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
 	/** Хэш документа */
@@ -4962,15 +5124,6 @@ export type ResolverInputTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
-	/** Входные данные для генерации бюллетеня для голосования на общем собрании */
-["GenerateBallotForAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания, для которого генерируется бюллетень */
-	meet_hash: string,
-	/** Имя пользователя, для которого генерируется бюллетень */
-	username: string
-};
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -4999,14 +5152,6 @@ export type ResolverInputTypes = {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
 };
-	["GenerateSovietDecisionOnAnnualMeetInput"]: {
-	/** Название кооператива */
-	coopname: string,
-	/** Хэш собрания, для которого генерируется решение совета */
-	meet_hash: string,
-	/** Имя пользователя, создающего документ */
-	username: string
-};
 	["GeneratedDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -5033,11 +5178,8 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	["GetDocumentsFilterInput"]: {
-	additionalFilters?: ResolverInputTypes["JSON"] | undefined | null
-};
 	["GetDocumentsInput"]: {
-	filter: ResolverInputTypes["GetDocumentsFilterInput"],
+	filter: ResolverInputTypes["JSON"],
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
 	type?: string | undefined | null,
@@ -5320,10 +5462,12 @@ deliverOnRequest?: [{	data: ResolverInputTypes["DeliverOnRequestInput"]},Resolve
 disputeOnRequest?: [{	data: ResolverInputTypes["DisputeOnRequestInput"]},ResolverInputTypes["Transaction"]],
 editBranch?: [{	data: ResolverInputTypes["EditBranchInput"]},ResolverInputTypes["Branch"]],
 generateAnnualGeneralMeetAgendaDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+generateAnnualGeneralMeetDecisionDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+generateAnnualGeneralMeetNotificationDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingNotificationGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateAssetContributionAct?: [{	data: ResolverInputTypes["AssetContributionActGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateAssetContributionDecision?: [{	data: ResolverInputTypes["AssetContributionDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateAssetContributionStatement?: [{	data: ResolverInputTypes["AssetContributionStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateBallotForAnnualGeneralMeetDocument?: [{	data: ResolverInputTypes["GenerateBallotForAnnualGeneralMeetInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+generateBallotForAnnualGeneralMeetDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateFreeDecision?: [{	data: ResolverInputTypes["FreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateParticipantApplication?: [{	data: ResolverInputTypes["ParticipantApplicationGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateParticipantApplicationDecision?: [{	data: ResolverInputTypes["ParticipantApplicationDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -5334,7 +5478,7 @@ generateReturnByAssetDecision?: [{	data: ResolverInputTypes["ReturnByAssetDecisi
 generateReturnByAssetStatement?: [{	data: ResolverInputTypes["ReturnByAssetStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateSelectBranchDocument?: [{	data: ResolverInputTypes["SelectBranchGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateSignatureAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateSovietDecisionOnAnnualMeetDocument?: [{	data: ResolverInputTypes["GenerateSovietDecisionOnAnnualMeetInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+generateSovietDecisionOnAnnualMeetDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateUserAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateWalletAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 initSystem?: [{	data: ResolverInputTypes["Init"]},ResolverInputTypes["SystemInfo"]],
@@ -6208,7 +6352,9 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	/** Хеш собрания */
 	hash: string,
 	/** Подписанный документ с решением председателя */
-	presider_decision: ResolverInputTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"]
+	presider_decision: ResolverInputTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Входные данные для подписи решения секретарём */
 ["SignBySecretaryOnAnnualGeneralMeetInput"]: {
@@ -6217,7 +6363,9 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	/** Хеш собрания */
 	hash: string,
 	/** Подписанный документ с решением секретаря */
-	secretary_decision: ResolverInputTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"]
+	secretary_decision: ResolverInputTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["SignedBlockchainDocument"]: AliasType<{
 	/** Хеш документа */
@@ -6555,7 +6703,7 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	/** Хеш собрания, по которому производится голосование */
 	hash: string,
 	/** Идентификатор члена кооператива, который голосует */
-	member: string,
+	username: string,
 	/** Бюллетень с решениями по вопросам повестки */
 	votes: Array<ResolverInputTypes["VoteItemInput"]>
 };
@@ -6763,6 +6911,28 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["AnnualGeneralMeetingDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
 	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
 	/** Хэш документа */
 	hash: string,
@@ -6796,6 +6966,72 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
 	/** Хэш документа */
@@ -7756,15 +7992,6 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
-	/** Входные данные для генерации бюллетеня для голосования на общем собрании */
-["GenerateBallotForAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания, для которого генерируется бюллетень */
-	meet_hash: string,
-	/** Имя пользователя, для которого генерируется бюллетень */
-	username: string
-};
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -7793,14 +8020,6 @@ export type ModelTypes = {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
 };
-	["GenerateSovietDecisionOnAnnualMeetInput"]: {
-	/** Название кооператива */
-	coopname: string,
-	/** Хэш собрания, для которого генерируется решение совета */
-	meet_hash: string,
-	/** Имя пользователя, создающего документ */
-	username: string
-};
 	["GeneratedDocument"]: {
 		/** Бинарное содержимое документа (base64) */
 	binary: string,
@@ -7826,11 +8045,8 @@ export type ModelTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	["GetDocumentsFilterInput"]: {
-	additionalFilters?: ModelTypes["JSON"] | undefined | null
-};
 	["GetDocumentsInput"]: {
-	filter: ModelTypes["GetDocumentsFilterInput"],
+	filter: ModelTypes["JSON"],
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
 	type?: string | undefined | null,
@@ -8128,6 +8344,10 @@ export type ModelTypes = {
 	editBranch: ModelTypes["Branch"],
 	/** Сгенерировать предложение повестки общего собрания пайщиков */
 	generateAnnualGeneralMeetAgendaDocument: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать документ решения общего собрания пайщиков */
+	generateAnnualGeneralMeetDecisionDocument: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать документ уведомления о проведении общего собрания пайщиков */
+	generateAnnualGeneralMeetNotificationDocument: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ акта приема-передачи. */
 	generateAssetContributionAct: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ решения о вступлении в кооператив. */
@@ -9042,7 +9262,9 @@ export type ModelTypes = {
 	/** Хеш собрания */
 	hash: string,
 	/** Подписанный документ с решением председателя */
-	presider_decision: ModelTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"]
+	presider_decision: ModelTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Входные данные для подписи решения секретарём */
 ["SignBySecretaryOnAnnualGeneralMeetInput"]: {
@@ -9051,7 +9273,9 @@ export type ModelTypes = {
 	/** Хеш собрания */
 	hash: string,
 	/** Подписанный документ с решением секретаря */
-	secretary_decision: ModelTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"]
+	secretary_decision: ModelTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["SignedBlockchainDocument"]: {
 		/** Хеш документа */
@@ -9372,7 +9596,7 @@ export type ModelTypes = {
 	/** Хеш собрания, по которому производится голосование */
 	hash: string,
 	/** Идентификатор члена кооператива, который голосует */
-	member: string,
+	username: string,
 	/** Бюллетень с решениями по вопросам повестки */
 	votes: Array<ModelTypes["VoteItemInput"]>
 };
@@ -9592,6 +9816,28 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["AnnualGeneralMeetingDecisionGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
 	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
 		/** Хэш документа */
 	hash: string,
@@ -9625,6 +9871,72 @@ export type GraphQLTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
 		/** Хэш документа */
@@ -10609,15 +10921,6 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
-	/** Входные данные для генерации бюллетеня для голосования на общем собрании */
-["GenerateBallotForAnnualGeneralMeetInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания, для которого генерируется бюллетень */
-	meet_hash: string,
-	/** Имя пользователя, для которого генерируется бюллетень */
-	username: string
-};
 	["GenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -10646,14 +10949,6 @@ export type GraphQLTypes = {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
 };
-	["GenerateSovietDecisionOnAnnualMeetInput"]: {
-		/** Название кооператива */
-	coopname: string,
-	/** Хэш собрания, для которого генерируется решение совета */
-	meet_hash: string,
-	/** Имя пользователя, создающего документ */
-	username: string
-};
 	["GeneratedDocument"]: {
 	__typename: "GeneratedDocument",
 	/** Бинарное содержимое документа (base64) */
@@ -10680,11 +10975,8 @@ export type GraphQLTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	["GetDocumentsFilterInput"]: {
-		additionalFilters?: GraphQLTypes["JSON"] | undefined | null
-};
 	["GetDocumentsInput"]: {
-		filter: GraphQLTypes["GetDocumentsFilterInput"],
+		filter: GraphQLTypes["JSON"],
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
 	type?: string | undefined | null,
@@ -10991,6 +11283,10 @@ export type GraphQLTypes = {
 	editBranch: GraphQLTypes["Branch"],
 	/** Сгенерировать предложение повестки общего собрания пайщиков */
 	generateAnnualGeneralMeetAgendaDocument: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать документ решения общего собрания пайщиков */
+	generateAnnualGeneralMeetDecisionDocument: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать документ уведомления о проведении общего собрания пайщиков */
+	generateAnnualGeneralMeetNotificationDocument: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ акта приема-передачи. */
 	generateAssetContributionAct: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ решения о вступлении в кооператив. */
@@ -11933,7 +12229,9 @@ export type GraphQLTypes = {
 	/** Хеш собрания */
 	hash: string,
 	/** Подписанный документ с решением председателя */
-	presider_decision: GraphQLTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"]
+	presider_decision: GraphQLTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Входные данные для подписи решения секретарём */
 ["SignBySecretaryOnAnnualGeneralMeetInput"]: {
@@ -11942,7 +12240,9 @@ export type GraphQLTypes = {
 	/** Хеш собрания */
 	hash: string,
 	/** Подписанный документ с решением секретаря */
-	secretary_decision: GraphQLTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"]
+	secretary_decision: GraphQLTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["SignedBlockchainDocument"]: {
 	__typename: "SignedBlockchainDocument",
@@ -12280,7 +12580,7 @@ export type GraphQLTypes = {
 	/** Хеш собрания, по которому производится голосование */
 	hash: string,
 	/** Идентификатор члена кооператива, который голосует */
-	member: string,
+	username: string,
 	/** Бюллетень с решениями по вопросам повестки */
 	votes: Array<GraphQLTypes["VoteItemInput"]>
 };
@@ -12349,8 +12649,12 @@ type ZEUS_VARIABLES = {
 	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"];
 	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"];
 	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"];
+	["AnnualGeneralMeetingDecisionGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingDecisionGenerateDocumentInput"];
 	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"];
 	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"];
+	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingNotificationGenerateDocumentInput"];
+	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"];
+	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"];
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedDocumentInput"];
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"];
 	["AssetContributionActGenerateDocumentInput"]: ValueTypes["AssetContributionActGenerateDocumentInput"];
@@ -12390,14 +12694,11 @@ type ZEUS_VARIABLES = {
 	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
 	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
-	["GenerateBallotForAnnualGeneralMeetInput"]: ValueTypes["GenerateBallotForAnnualGeneralMeetInput"];
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
-	["GenerateSovietDecisionOnAnnualMeetInput"]: ValueTypes["GenerateSovietDecisionOnAnnualMeetInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
-	["GetDocumentsFilterInput"]: ValueTypes["GetDocumentsFilterInput"];
 	["GetDocumentsInput"]: ValueTypes["GetDocumentsInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
 	["GetMeetInput"]: ValueTypes["GetMeetInput"];

@@ -1,4 +1,4 @@
-void meet::signbysecr(name coopname, checksum256 hash, document secretary_decision) {
+void meet::signbysecr(name coopname, name username, checksum256 hash, document secretary_decision) {
     require_auth(coopname);
 
     // 1. Находим собрание по хэшу
@@ -6,8 +6,10 @@ void meet::signbysecr(name coopname, checksum256 hash, document secretary_decisi
     eosio::check(meet_opt.has_value(), "Собрание не найдено");
     auto meet_record = meet_opt.value();
 
+    eosio::check(username == meet_record.secretary, "Вы не являетесь секретарем собрания");
     // Проверяем, что текущее время > close_at
     auto now = current_time_point();
+    
     eosio::check(now.sec_since_epoch() > meet_record.close_at.sec_since_epoch(), 
                  "Собрание ещё не завершено по времени (close_at).");
 
@@ -29,4 +31,15 @@ void meet::signbysecr(name coopname, checksum256 hash, document secretary_decisi
         m.decision1 = secretary_decision;
         m.status = "preclose"_n; // Новый статус после подписи секретарем
     });
+    
+    
+  
+  // отправляем документ во входящий реестр
+  action(
+    permission_level{ _meet, "active"_n},
+    _soviet,
+    "newsubmitted"_n,
+    std::make_tuple(coopname, username, get_valid_soviet_action("completegm"_n), uint64_t(0), secretary_decision)
+  ).send();
+
 } 

@@ -1,0 +1,1 @@
+export { default as MeetDetailsVoting } from './MeetDetailsVoting.vue' 

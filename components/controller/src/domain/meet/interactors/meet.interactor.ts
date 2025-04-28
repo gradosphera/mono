@@ -64,7 +64,7 @@ export class MeetDomainInteractor {
     return await this.documentDomainService.generateDocument({ data, options });
   }
 
-  async generateAnnualMeetNotificationDocument(
+  async generateAnnualGeneralMeetNotificationDocument(
     data: Cooperative.Registry.AnnualGeneralMeetingNotification.Action,
     options: Cooperative.Document.IGenerationOptions
   ): Promise<DocumentDomainEntity> {

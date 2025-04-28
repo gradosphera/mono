@@ -7,7 +7,10 @@ export const name = 'generateSovietDecisionOnAnnualMeetDocument'
  * Генерация документа решения совета о проведении годового общего собрания пайщиков
  */
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'GenerateSovietDecisionOnAnnualMeetInput!') }, documentSelector],
+  [name]: [{
+    data: $('data', 'AnnualGeneralMeetingSovietDecisionGenerateDocumentInput!'),
+    options: $('options', 'GenerateDocumentOptionsInput'),
+  }, documentSelector],
 })
 
 export interface IInput {
@@ -16,7 +19,8 @@ export interface IInput {
    */
   [key: string]: unknown
 
-  data: ModelTypes['GenerateSovietDecisionOnAnnualMeetInput']
+  data: ModelTypes['AnnualGeneralMeetingSovietDecisionGenerateDocumentInput']
+  options?: ModelTypes['GenerateDocumentOptionsInput']
 }
 
 export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

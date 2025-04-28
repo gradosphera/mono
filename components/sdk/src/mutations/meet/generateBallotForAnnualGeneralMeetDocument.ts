@@ -9,7 +9,7 @@ export const name = 'generateBallotForAnnualGeneralMeetDocument'
 export const mutation = Selector('Mutation')({
   [name]: [
     {
-      data: $('data', 'GenerateBallotForAnnualGeneralMeetInput!'),
+      data: $('data', 'AnnualGeneralMeetingVotingBallotGenerateDocumentInput!'),
       options: $('options', 'GenerateDocumentOptionsInput'),
     },
     documentSelector,
@@ -22,7 +22,7 @@ export interface IInput {
    */
   [key: string]: unknown
 
-  data: ModelTypes['GenerateBallotForAnnualGeneralMeetInput']
+  data: ModelTypes['AnnualGeneralMeetingVotingBallotGenerateDocumentInput']
   options?: ModelTypes['GenerateDocumentOptionsInput']
 }
 

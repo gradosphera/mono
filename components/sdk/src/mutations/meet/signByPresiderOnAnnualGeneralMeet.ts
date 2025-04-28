@@ -7,7 +7,7 @@ export const name = 'signByPresiderOnAnnualGeneralMeet'
  * Подписание решения председателем на годовом общем собрании пайщиков
  */
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'SignByPresiderOnAnnualGeneralMeetInput') }, meetAggregateSelector],
+  [name]: [{ data: $('data', 'SignByPresiderOnAnnualGeneralMeetInput!') }, meetAggregateSelector],
 })
 
 export interface IInput {

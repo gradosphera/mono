@@ -27,34 +27,12 @@ div.row.q-pa-md
           div.row
             div.col-2.text-weight-bold Кворум достигнут:
             div.col {{ meet.processing?.meet?.quorum_passed ? 'Да' : 'Нет' }}
-
-      q-card-actions(v-if="canManage")
-        q-btn(
-          v-if="canClose"
-          color="negative"
-          label="Закрыть собрание"
-          @click="$emit('close')"
-        )
-        q-btn(
-          v-if="canRestart"
-          color="primary"
-          label="Перезапустить собрание"
-          @click="$emit('restart')"
-        )
 </template>
 
 <script setup lang="ts">
 import type { IMeet } from 'src/entities/Meet'
 
 defineProps<{
-  meet: IMeet,
-  canManage: boolean,
-  canClose: boolean,
-  canRestart: boolean
-}>()
-
-defineEmits<{
-  (e: 'close'): void
-  (e: 'restart'): void
+  meet: IMeet
 }>()
 </script>

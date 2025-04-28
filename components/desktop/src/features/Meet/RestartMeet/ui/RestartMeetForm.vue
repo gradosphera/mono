@@ -7,60 +7,48 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
       q-btn(icon="close" flat round dense v-close-popup @click="$emit('update:modelValue', false)")
     q-card-section
       q-form(@submit="handleSubmit")
+        div.text-subtitle1.q-mb-sm Выберите новые даты для собрания
         q-input(
           v-model="formData.new_open_at"
-          label="Новая дата открытия"
+          label="Новая дата и время открытия, UTC"
           type="datetime-local"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
+          class="q-mb-md"
         )
         q-input(
           v-model="formData.new_close_at"
-          label="Новая дата закрытия"
+          label="Новая дата и время закрытия, UTC"
           type="datetime-local"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
+          class="q-mb-md"
         )
 
-        div.text-h6.q-mt-md Новая повестка собрания
+        div.text-subtitle1.q-mb-sm При перезапуске собрания будут использованы существующие пункты повестки:
 
-        div(v-for="(point, index) in formData.agenda_points" :key="index")
-          div.row.q-mb-sm
-            div.col
-              q-input(
-                v-model="point.title"
-                label="Заголовок"
-                :rules="[val => !!val || 'Обязательное поле']"
-                dense
-              )
-            div.col
-              q-input(
-                v-model="point.context"
-                label="Описание"
-                :rules="[val => !!val || 'Обязательное поле']"
-                dense
-              )
-            div.col
-              q-input(
-                v-model="point.decision"
-                label="Решение"
-                :rules="[val => !!val || 'Обязательное поле']"
-                dense
-              )
-            div.col-auto
-              q-btn(flat icon="delete" @click="removeAgendaPoint(index)")
-
-        div.text-center.q-mb-md
-          q-btn(outline label="Добавить пункт повестки" @click="addAgendaPoint")
+        div.q-pa-sm.q-my-sm.bg-grey-2.rounded-borders(v-if="meet?.processing?.questions?.length")
+          div.q-mb-md(v-for="(question, index) in meet.processing.questions" :key="index")
+            div.text-weight-bold {{ question.title }}
+            div.text-caption {{ question.context }}
+        
+        div.q-pa-sm.q-my-sm.bg-red-1.text-red-8.rounded-borders(v-else)
+          div.text-center Вопросы повестки не найдены
 
     q-card-actions(align="right")
       q-btn(flat label="Отмена" v-close-popup @click="$emit('update:modelValue', false)" :disable="loading")
-      q-btn(color="primary" label="Перезапустить" type="submit" @click="handleSubmit" :loading="loading")
+      q-btn(
+        color="primary" 
+        label="Перезапустить" 
+        type="submit" 
+        @click="handleSubmit" 
+        :loading="loading"
+        :disable="!meet?.processing?.questions?.length"
+      )
 </template>
 
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
-import { useAgendaPoints } from 'src/shared/hooks/useAgendaPoints'
 import type { IMeet } from 'src/entities/Meet'
 
 const props = defineProps<{
@@ -77,31 +65,24 @@ const emit = defineEmits<{
 // Форма для перезапуска собрания
 const formData = reactive({
   new_open_at: '',
-  new_close_at: '',
-  agenda_points: [{
-    title: '',
-    context: '',
-    decision: ''
-  }]
+  new_close_at: ''
 })
-
-const { addAgendaPoint, removeAgendaPoint } = useAgendaPoints(formData.agenda_points)
 
 // Сброс формы при открытии диалога
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
     formData.new_open_at = ''
     formData.new_close_at = ''
-    formData.agenda_points = [{
-      title: '',
-      context: '',
-      decision: ''
-    }]
   }
 })
 
 const handleSubmit = () => {
   if (!props.meet) return
+  
+  // Проверяем наличие вопросов повестки
+  if (!props.meet.processing?.questions || props.meet.processing.questions.length === 0) {
+    return
+  }
 
   emit('restart', {
     ...formData,
