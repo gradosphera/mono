@@ -26,6 +26,14 @@ export const Schema: JSONSchemaType<Model> = {
       type: 'string',
       enum: ['individual', 'entrepreneur', 'organization'],
     },
+    coop: {
+      type: 'object',
+      properties: {
+        ...CooperativeSchema.properties,
+      },
+      required: [...CooperativeSchema.required],
+      additionalProperties: true,
+    },
     individual: {
       type: 'object',
       properties: {
@@ -71,7 +79,7 @@ export const Schema: JSONSchemaType<Model> = {
       additionalProperties: true,
     },
   },
-  required: ['meta', 'type', 'branch', 'vars'],
+  required: ['meta', 'type', 'branch', 'vars', 'coop'],
   additionalProperties: true,
 }
 

@@ -41,7 +41,7 @@ export class Factory extends DocFactory<SelectBranchStatement.Action> {
 
     const vars = await super.getVars(data.coopname, data.block_num)
 
-    const combinedData: SelectBranchStatement.Model = { ...userData, meta, branch, type: user.type, vars }
+    const combinedData: SelectBranchStatement.Model = { ...userData, meta, branch, type: user.type, vars, coop }
 
     // валидируем скомбинированные данные
     await super.validate(combinedData, template.model)
