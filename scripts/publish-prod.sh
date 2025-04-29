@@ -23,7 +23,7 @@ fi
 echo "Публикуем версию: $VERSION"
 
 # Переходим на main и мержим testnet
-git checkout main
+git checkout -f main
 git merge -X theirs testnet
 
 # Публикуем с нужной версией
