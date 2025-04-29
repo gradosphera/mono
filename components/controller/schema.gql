@@ -2848,6 +2848,9 @@ type Payment {
   """Символ тикера валюты платежа"""
   symbol: String!
 
+  """Тип платежа (deposit или registration)"""
+  type: String!
+
   """Дата обновления платежа"""
   updated_at: DateTime!
 
