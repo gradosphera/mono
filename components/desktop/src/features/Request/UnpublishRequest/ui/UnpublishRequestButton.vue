@@ -1,5 +1,5 @@
 <template lang="pug">
-q-btn(@click="unpublish") снять с публикации  
+q-btn(@click="unpublish") снять с публикации
 </template>
 
 <script setup lang="ts">

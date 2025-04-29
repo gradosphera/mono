@@ -3,7 +3,14 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';
 import fetch from 'isomorphic-fetch';
 import EosApi from 'eosjs-api';
 import getInternalAction from '../utils/getInternalAction';
-import { GatewayContract, RegistratorContract, SovietContract, type Cooperative, type SystemContract } from 'cooptypes';
+import {
+  GatewayContract,
+  RegistratorContract,
+  SovietContract,
+  WalletContract,
+  type Cooperative,
+  type SystemContract,
+} from 'cooptypes';
 import { IUser } from '../types/user.types';
 import { GetAccountResult, GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 import config from '../config/config';
@@ -13,6 +20,7 @@ import httpStatus from 'http-status';
 import type { IOrder } from '../types/order.types';
 import type { IBCAction } from '../types';
 import Vault from '../models/vault.model';
+import { sha256 } from '~/utils/sha256';
 
 const rpc = new JsonRpc(process.env.BLOCKCHAIN_RPC as string, { fetch });
 
@@ -124,7 +132,6 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
 
   // Создаем newaccount
   const newaccount: RegistratorContract.Actions.CreateAccount.ICreateAccount = {
-    registrator: process.env.COOPNAME as string,
     coopname: process.env.COOPNAME as string,
     referer: user.referer ? user.referer : '',
     username: user.username,
@@ -145,16 +152,23 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
   });
 
   // Создаем registerUserData
+  // Проверяем наличие заявления на вступление и создаем joinCooperativeData
+  const statement = await TempDocument.findOne({ username: user.username, type: tempdocType.JoinStatement });
+  if (!statement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено заявление на вступление');
 
-  const registerUserData: RegistratorContract.Actions.RegisterUser.IRegistrerUser = {
+  const participantApplicationMeta = statement.document.meta as Cooperative.Registry.ParticipantApplication.Action;
+  const registration_hash = sha256(order.order_num as number);
+
+  const registerUserData: RegistratorContract.Actions.RegisterUser.IRegisterUser = {
     coopname: process.env.COOPNAME as string,
-    registrator: process.env.COOPNAME as string,
     username: user.username,
     type: user.type,
+    braname: participantApplicationMeta.braname ? participantApplicationMeta.braname : '',
+    statement: { ...statement.document, meta: JSON.stringify(statement.document.meta) },
+    registration_hash,
   };
 
   //не следует создавать аккаунт в случаях, если он уже есть у пользователя
-
   actions.push({
     account: RegistratorContract.contractName.production,
     name: RegistratorContract.Actions.RegisterUser.actionName,
@@ -167,61 +181,15 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     data: registerUserData,
   });
 
-  // Проверяем наличие заявления на вступление и создаем joinCooperativeData
-  const statement = await TempDocument.findOne({ username: user.username, type: tempdocType.JoinStatement });
-  if (!statement) throw new ApiError(httpStatus.BAD_REQUEST, 'Не найдено заявление на вступление');
-
-  const participantApplicationMeta = statement.document.meta as Cooperative.Registry.ParticipantApplication.Action;
-
-  const joinCooperativeData: RegistratorContract.Actions.JoinCooperative.IJoinCooperative = {
-    coopname: process.env.COOPNAME as string,
-    registrator: process.env.COOPNAME as string,
-    braname: participantApplicationMeta.braname ? participantApplicationMeta.braname : '',
-    username: user.username,
-    document: { ...statement.document, meta: JSON.stringify(statement.document.meta) },
-  };
-  actions.push({
-    account: RegistratorContract.contractName.production,
-    name: RegistratorContract.Actions.JoinCooperative.actionName,
-    authorization: [
-      {
-        actor: config.coopname,
-        permission: 'active',
-      },
-    ],
-    data: joinCooperativeData,
-  });
-
-  // Создаем createDeposit
-  const createDeposit: GatewayContract.Actions.CreateDeposit.ICreateDeposit = {
-    coopname: config.coopname,
-    username: user.username,
-    type: 'registration',
-    quantity: order.quantity,
-    deposit_id: order.order_num as number,
-  };
-  actions.push({
-    account: GatewayContract.contractName.production,
-    name: GatewayContract.Actions.CreateDeposit.actionName,
-    authorization: [
-      {
-        actor: config.coopname,
-        permission: 'active',
-      },
-    ],
-    data: createDeposit,
-  });
-
   // Создаем completeDeposit
-  const completeDeposit: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit = {
+  const completeDeposit: GatewayContract.Actions.CompleteIncome.ICompleteIncome = {
     coopname: config.coopname,
-    admin: config.coopname,
-    deposit_id: order.order_num as number,
-    memo: '',
+    income_hash: registration_hash,
   };
+
   actions.push({
     account: GatewayContract.contractName.production,
-    name: GatewayContract.Actions.CompleteDeposit.actionName,
+    name: GatewayContract.Actions.CompleteIncome.actionName,
     authorization: [
       {
         actor: config.coopname,
@@ -323,7 +291,7 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
     data: userAgreementData,
   });
 
-  const result = await eos.transact(
+  await eos.transact(
     {
       actions,
     },
@@ -338,8 +306,6 @@ async function registerBlockchainAccount(user: IUser, order: IOrder) {
 
 async function createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICreateboard) {
   const eos = await getInstance(config.coopname);
-
-  // console.log('data: ', data);
 
   const actions = [
     {
@@ -400,26 +366,24 @@ async function createOrder(data) {
 
 async function completeDeposit(order: IOrder) {
   const eos = await getInstance(config.coopname);
+  const deposit_hash = sha256(order.order_num as number);
 
-  const createDeposit: GatewayContract.Actions.CreateDeposit.ICreateDeposit = {
+  const createDeposit: WalletContract.Actions.CreateDeposit.ICreateDeposit = {
     coopname: config.coopname,
     username: order.username,
-    type: 'deposit',
     quantity: order.quantity,
-    deposit_id: order.order_num as number,
+    deposit_hash,
   };
 
-  const completeDeposit: GatewayContract.Actions.CompleteDeposit.ICompleteDeposit = {
+  const completeDeposit: GatewayContract.Actions.CompleteIncome.ICompleteIncome = {
     coopname: config.coopname,
-    admin: config.coopname,
-    deposit_id: order.order_num as number,
-    memo: '',
+    income_hash: deposit_hash,
   };
 
   const actions = [
     {
-      account: GatewayContract.contractName.production,
-      name: GatewayContract.Actions.CreateDeposit.actionName,
+      account: WalletContract.contractName.production,
+      name: WalletContract.Actions.CreateDeposit.actionName,
       authorization: [
         {
           actor: config.coopname,
@@ -430,7 +394,7 @@ async function completeDeposit(order: IOrder) {
     },
     {
       account: GatewayContract.contractName.production,
-      name: GatewayContract.Actions.CompleteDeposit.actionName,
+      name: GatewayContract.Actions.CompleteIncome.actionName,
       authorization: [
         {
           actor: config.coopname,
@@ -536,10 +500,10 @@ export async function changeKey(data: RegistratorContract.Actions.ChangeKey.ICha
   );
 }
 
-export async function cancelOrder(data: GatewayContract.Actions.RefundDeposit.IRefundDeposit) {
-  const action: IBCAction<GatewayContract.Actions.RefundDeposit.IRefundDeposit> = {
+export async function cancelOrder(data: GatewayContract.Actions.DeclineIncome.IDeclineIncome) {
+  const action: IBCAction<GatewayContract.Actions.DeclineIncome.IDeclineIncome> = {
     account: GatewayContract.contractName.production,
-    name: GatewayContract.Actions.RefundDeposit.actionName,
+    name: GatewayContract.Actions.DeclineIncome.actionName,
     authorization: [
       {
         actor: config.coopname,

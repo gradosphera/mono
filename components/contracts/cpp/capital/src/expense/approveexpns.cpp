@@ -16,20 +16,30 @@ void capital::approveexpns(name coopname, name application, name approver, check
   
   auto contributor = get_active_contributor_or_fail(coopname, expense -> project_hash, expense -> username);
   
-  auto exist_result = get_result(coopname, expense -> result_hash);
-  eosio::check(exist_result.has_value(),"Результат не найден");
-  eosio::check(exist_result -> available >= expense -> amount, "Недостаточно средств в результате для списания расходов");
+  auto exist_assignment = get_assignment(coopname, expense -> assignment_hash);
+  eosio::check(exist_assignment.has_value(),"Задание не найдено");
+  eosio::check(exist_assignment -> available >= expense -> amount, "Недостаточно средств в результате для списания расходов");
 
-  result_index results(_capital, coopname.value);
-  auto result = results.find(exist_result -> id);
+  assignment_index assignments(_capital, coopname.value);
+  auto assignment = assignments.find(exist_assignment -> id);
   
-  results.modify(result, coopname, [&](auto &r){
+  assignments.modify(assignment, coopname, [&](auto &r){
     r.available -= expense -> amount;
   });  
   
   //отправляем в совет
   action(permission_level{ _capital, "active"_n}, _soviet, "createagenda"_n,
-    std::make_tuple(coopname, expense -> username, _capital, _capital_expense_authorize_action, expense -> id, expense -> expense_statement, std::string("")))
-  .send();  
+    std::make_tuple(
+      coopname, 
+      expense -> username, 
+      get_valid_soviet_action("capresexpns"_n),
+      expense_hash, 
+      _capital, 
+      "capauthexpns"_n,
+      "capdeclexpns"_n, 
+      expense -> expense_statement, 
+      std::string("")
+    )
+  ).send();  
 
 }

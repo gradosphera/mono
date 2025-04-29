@@ -1,27 +1,29 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { IsJSON, IsString } from 'class-validator';
-import { Cooperative } from 'cooptypes';
-import { MetaDocumentDTO } from '~/modules/document/dto/meta-document.dto';
+import type { ExtendedSignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import { UserDataUnion } from '../unions/user.union';
+import GraphQLJSON from 'graphql-type-json';
+import { IsString } from 'class-validator';
 
 @ObjectType('SignedDigitalDocument')
-export class SignedDigitalDocumentDTO<TMeta> implements Cooperative.Document.ISignedDocument {
-  @Field(() => String, { description: 'Хеш документа' })
+export class SignedDigitalDocumentDTO implements ExtendedSignedDocumentDomainInterface {
+  @Field(() => String)
   @IsString()
   public readonly hash!: string;
 
-  @Field(() => String, { description: 'Публичный ключ документа' })
+  @Field(() => String)
   @IsString()
   public readonly public_key!: string;
 
-  @Field(() => String, { description: 'Подпись документа' })
+  @Field(() => String)
   @IsString()
   public readonly signature!: string;
 
-  @Field(() => MetaDocumentDTO, { description: 'Метаинформация документа' })
-  @IsJSON()
-  public readonly meta!: MetaDocumentDTO;
+  @Field(() => GraphQLJSON)
+  public readonly meta!: any;
 
-  constructor(data: SignedDigitalDocumentDTO<TMeta>) {
-    Object.assign(this, data);
-  }
+  @Field(() => Boolean)
+  public readonly is_valid!: boolean;
+
+  @Field(() => UserDataUnion, { nullable: true })
+  public readonly signer!: typeof UserDataUnion | null;
 }

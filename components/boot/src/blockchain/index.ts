@@ -4,6 +4,7 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig'
 import { Api, JsonRpc, Serialize } from 'eosjs'
 import {
   DraftContract,
+  GatewayContract,
   RegistratorContract,
   SovietContract,
   SystemContract,
@@ -513,8 +514,8 @@ export default class Blockchain {
     console.log('Новый кооператив пре-иниализирован: ', params)
   }
 
-  // TODO change registerOrganization to registerCooperative
-  async registerOrganization(
+  // TODO change registerCooperative to registerCooperative
+  async registerCooperative(
     params: RegistratorContract.Actions.RegisterCooperative.IRegisterCooperative,
   ) {
     await this.update_pass_instance()
@@ -573,7 +574,7 @@ export default class Blockchain {
     )
   }
 
-  async registerAccount2(
+  async createAccount(
     params: RegistratorContract.Actions.CreateAccount.ICreateAccount,
   ) {
     await this.update_pass_instance()
@@ -586,7 +587,7 @@ export default class Blockchain {
             name: RegistratorContract.Actions.CreateAccount.actionName,
             authorization: [
               {
-                actor: params.registrator,
+                actor: params.coopname,
                 permission: 'active',
               },
             ],
@@ -618,7 +619,7 @@ export default class Blockchain {
             name: RegistratorContract.Actions.RegisterUser.actionName,
             authorization: [
               {
-                actor: params.registrator,
+                actor: params.coopname,
                 permission: 'active',
               },
             ],
@@ -800,36 +801,39 @@ export default class Blockchain {
 
   async exec(params: SovietContract.Actions.Decisions.Exec.IExec) {
     await this.update_pass_instance()
-
-    await this.api.transact(
-      {
-        actions: [
-          {
-            account: SovietContract.contractName.production,
-            name: SovietContract.Actions.Decisions.Exec.actionName,
-            authorization: [
-              {
-                actor: params.executer,
-                permission: 'active',
+    try {
+      await this.api.transact(
+        {
+          actions: [
+            {
+              account: SovietContract.contractName.production,
+              name: SovietContract.Actions.Decisions.Exec.actionName,
+              authorization: [
+                {
+                  actor: params.executer,
+                  permission: 'active',
+                },
+              ],
+              data: {
+                ...params,
               },
-            ],
-            data: {
-              ...params,
             },
-          },
-        ],
-      },
-      {
-        blocksBehind: 3,
-        expireSeconds: 30,
-      },
-    )
-
+          ],
+        },
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        },
+      )
+    }
+    catch (e) {
+      console.dir(e, { depth: null })
+    }
     console.log('Решение исполнено: ', params)
   }
 
-  async joinCoop(
-    params: RegistratorContract.Actions.JoinCooperative.IJoinCooperative,
+  async ConfirmPayment(
+    params: GatewayContract.Actions.CompleteIncome.ICompeteIncome,
   ) {
     await this.update_pass_instance()
 
@@ -837,11 +841,11 @@ export default class Blockchain {
       {
         actions: [
           {
-            account: RegistratorContract.contractName.production,
-            name: RegistratorContract.Actions.JoinCooperative.actionName,
+            account: GatewayContract.contractName.production,
+            name: GatewayContract.Actions.CompleteIncome.actionName,
             authorization: [
               {
-                actor: params.registrator,
+                actor: params.coopname,
                 permission: 'active',
               },
             ],
@@ -968,38 +972,6 @@ export default class Blockchain {
             authorization: [
               {
                 actor: params.username,
-                permission: 'active',
-              },
-            ],
-            data: {
-              ...params,
-            },
-          },
-        ],
-      },
-      {
-        blocksBehind: 3,
-        expireSeconds: 30,
-      },
-    )
-
-    console.log('Программа установлена: ', params)
-  }
-
-  async makeCoagreement(
-    params: SovietContract.Actions.Agreements.MakeCoagreement.IMakeCoagreement,
-  ) {
-    await this.update_pass_instance()
-
-    await this.api.transact(
-      {
-        actions: [
-          {
-            account: SovietContract.contractName.production,
-            name: SovietContract.Actions.Agreements.MakeCoagreement.actionName,
-            authorization: [
-              {
-                actor: params.administrator,
                 permission: 'active',
               },
             ],

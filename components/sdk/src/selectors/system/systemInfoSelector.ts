@@ -1,8 +1,8 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus/index";
-import { rawBlockchainInfoSelector } from "./blockchainInfoSelector";
-import { rawCooperatorAccountSelector } from "./cooperatorAccountSelector";
-import { rawBlockchainAccountSelector } from "../common/blockchainAccountSelector";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { Selector, type ValueTypes } from '../../zeus/index'
+import { rawBlockchainAccountSelector } from '../common/blockchainAccountSelector'
+import { rawBlockchainInfoSelector } from './blockchainInfoSelector'
+import { rawCooperatorAccountSelector } from './cooperatorAccountSelector'
 
 export const rawContactsSelector = {
   chairman: {
@@ -19,7 +19,7 @@ export const rawContactsSelector = {
   full_address: true,
   full_name: true,
   phone: true,
-};
+}
 
 export const rawVarsSelector = {
   confidential_email: true,
@@ -57,7 +57,7 @@ export const rawVarsSelector = {
     protocol_number: true,
   },
   website: true,
-};
+}
 
 const rawSystemInfoSelector = {
   blockchain_info: rawBlockchainInfoSelector,
@@ -67,9 +67,9 @@ const rawSystemInfoSelector = {
   system_status: true,
   contacts: rawContactsSelector,
   vars: rawVarsSelector,
-};
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['SystemInfo']> = rawSystemInfoSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['SystemInfo']> = rawSystemInfoSelector
 
-export const systemInfoSelector = Selector("SystemInfo")(rawSystemInfoSelector);
+export const systemInfoSelector = Selector('SystemInfo')(rawSystemInfoSelector)

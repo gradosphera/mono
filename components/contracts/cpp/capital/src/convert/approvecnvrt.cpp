@@ -4,13 +4,13 @@ void capital::approvecnvrt(eosio::name coopname, eosio::name application, eosio:
   verify_document_or_fail(approved_statement);
   
   auto exist_convert = get_convert(coopname, convert_hash);
-  eosio::check(exist_convert.has_value(), "Конвертация пользователя для результата не найдена");
+  eosio::check(exist_convert.has_value(), "Конвертация пользователя для задананиеа не найдена");
   convert_index converts(_capital, coopname.value);
   
   auto convert = converts.find(exist_convert -> id);
   
-  auto result = get_result(coopname, convert -> result_hash);
-  eosio::check(result.has_value(), "Результат не найден");
+  auto assignment = get_assignment(coopname, convert -> assignment_hash);
+  eosio::check(assignment.has_value(), "Задание не найдено");
   
   // добавляем доли актору и отмечаем статистику сконвертированных сумм
   auto contributor = get_active_contributor_or_fail(coopname, convert -> project_hash, convert -> username);
@@ -36,7 +36,7 @@ void capital::approvecnvrt(eosio::name coopname, eosio::name application, eosio:
   
   std::string memo = "Зачёт части целевого паевого взноса по договору УХД с ID: " + std::to_string(contributor -> id) + " в качестве паевого взноса по программе 'Капитализация' с ID: " + std::to_string(convert -> id);
   
-  //Списываем баланс средств с УХД только при наличии convert_amount в claim
+  //Списываем баланс средств с УХД только при наличии convert_amount в result
   Wallet::sub_blocked_funds(_capital, coopname, convert -> username, convert -> convert_amount, _source_program, memo);
   
   //Увеличиваем баланс средств в капитализации

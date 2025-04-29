@@ -14,7 +14,43 @@ export const AllTypesProps: Record<string,any> = {
 	AddTrustedAccountInput:{
 
 	},
+	AgendaMeetPointInput:{
+
+	},
 	AgreementInput:{
+
+	},
+	AnnualGeneralMeetingAgendaGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingAgendaSignedDocumentInput:{
+		meta:"AnnualGeneralMeetingAgendaSignedMetaDocumentInput"
+	},
+	AnnualGeneralMeetingAgendaSignedMetaDocumentInput:{
+
+	},
+	AnnualGeneralMeetingDecisionGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingDecisionSignedDocumentInput:{
+		meta:"AnnualGeneralMeetingDecisionSignedMetaDocumentInput"
+	},
+	AnnualGeneralMeetingDecisionSignedMetaDocumentInput:{
+
+	},
+	AnnualGeneralMeetingNotificationGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingSovietDecisionGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingVotingBallotGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingVotingBallotSignedDocumentInput:{
+		meta:"AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"
+	},
+	AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput:{
 
 	},
 	AssetContributionActGenerateDocumentInput:{
@@ -60,6 +96,12 @@ export const AllTypesProps: Record<string,any> = {
 		document:"AssetContributionActSignedDocumentInput"
 	},
 	Country: "enum" as const,
+	CreateAnnualGeneralMeetInput:{
+		agenda:"AgendaMeetPointInput",
+		close_at:"DateTime",
+		open_at:"DateTime",
+		proposal:"AnnualGeneralMeetingAgendaSignedDocumentInput"
+	},
 	CreateBankAccountInput:{
 		data:"BankAccountInput"
 	},
@@ -143,13 +185,16 @@ export const AllTypesProps: Record<string,any> = {
 	GetBranchesInput:{
 
 	},
-	GetDocumentsFilterInput:{
-		additionalFilters:"JSON"
-	},
 	GetDocumentsInput:{
-		filter:"GetDocumentsFilterInput"
+		filter:"JSON"
 	},
 	GetExtensionsInput:{
+
+	},
+	GetMeetInput:{
+
+	},
+	GetMeetsInput:{
 
 	},
 	GetPaymentMethodsInput:{
@@ -201,6 +246,9 @@ export const AllTypesProps: Record<string,any> = {
 		confirmSupplyOnRequest:{
 			data:"ConfirmSupplyOnRequestInput"
 		},
+		createAnnualGeneralMeet:{
+			data:"CreateAnnualGeneralMeetInput"
+		},
 		createBankAccount:{
 			data:"CreateBankAccountInput"
 		},
@@ -243,6 +291,18 @@ export const AllTypesProps: Record<string,any> = {
 		editBranch:{
 			data:"EditBranchInput"
 		},
+		generateAnnualGeneralMeetAgendaDocument:{
+			data:"AnnualGeneralMeetingAgendaGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateAnnualGeneralMeetDecisionDocument:{
+			data:"AnnualGeneralMeetingDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateAnnualGeneralMeetNotificationDocument:{
+			data:"AnnualGeneralMeetingNotificationGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
 		generateAssetContributionAct:{
 			data:"AssetContributionActGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
@@ -253,6 +313,10 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		generateAssetContributionStatement:{
 			data:"AssetContributionStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateBallotForAnnualGeneralMeetDocument:{
+			data:"AnnualGeneralMeetingVotingBallotGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		generateFreeDecision:{
@@ -293,6 +357,10 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		generateSignatureAgreement:{
 			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateSovietDecisionOnAnnualMeetDocument:{
+			data:"AnnualGeneralMeetingSovietDecisionGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		generateUserAgreement:{
@@ -345,6 +413,9 @@ export const AllTypesProps: Record<string,any> = {
 		resetKey:{
 			data:"ResetKeyInput"
 		},
+		restartAnnualGeneralMeet:{
+			data:"RestartAnnualGeneralMeetInput"
+		},
 		selectBranch:{
 			data:"SelectBranchInput"
 		},
@@ -353,6 +424,12 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		setWif:{
 			data:"SetWifInput"
+		},
+		signByPresiderOnAnnualGeneralMeet:{
+			data:"SignByPresiderOnAnnualGeneralMeetInput"
+		},
+		signBySecretaryOnAnnualGeneralMeet:{
+			data:"SignBySecretaryOnAnnualGeneralMeetInput"
 		},
 		startResetKey:{
 			data:"StartResetKeyInput"
@@ -380,6 +457,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		updateSystem:{
 			data:"Update"
+		},
+		voteOnAnnualGeneralMeet:{
+			data:"VoteOnAnnualGeneralMeetInput"
 		}
 	},
 	OrganizationDetailsInput:{
@@ -440,6 +520,12 @@ export const AllTypesProps: Record<string,any> = {
 		getExtensions:{
 			data:"GetExtensionsInput"
 		},
+		getMeet:{
+			data:"GetMeetInput"
+		},
+		getMeets:{
+			data:"GetMeetsInput"
+		},
 		getPaymentMethods:{
 			data:"GetPaymentMethodsInput"
 		},
@@ -472,6 +558,11 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	ResetKeyInput:{
 
+	},
+	RestartAnnualGeneralMeetInput:{
+		new_close_at:"DateTime",
+		new_open_at:"DateTime",
+		newproposal:"AnnualGeneralMeetingAgendaSignedDocumentInput"
 	},
 	ReturnByAssetActGenerateDocumentInput:{
 
@@ -511,6 +602,12 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	SetWifInput:{
 
+	},
+	SignByPresiderOnAnnualGeneralMeetInput:{
+		presider_decision:"AnnualGeneralMeetingDecisionSignedDocumentInput"
+	},
+	SignBySecretaryOnAnnualGeneralMeetInput:{
+		secretary_decision:"AnnualGeneralMeetingDecisionSignedDocumentInput"
 	},
 	SignedDigitalDocumentInput:{
 		meta:"MetaDocumentInput"
@@ -565,6 +662,13 @@ export const AllTypesProps: Record<string,any> = {
 		signature_agreement:"AgreementInput",
 		user_agreement:"AgreementInput",
 		wallet_agreement:"AgreementInput"
+	},
+	VoteItemInput:{
+
+	},
+	VoteOnAnnualGeneralMeetInput:{
+		ballot:"AnnualGeneralMeetingVotingBallotSignedDocumentInput",
+		votes:"VoteItemInput"
 	}
 }
 
@@ -594,9 +698,9 @@ export const ReturnTypes: Record<string,any> = {
 		totalCount:"Int",
 		totalPages:"Int"
 	},
-	ActDetail:{
+	ActDetailAggregate:{
 		action:"ExtendedBlockchainAction",
-		document:"GeneratedDocument"
+		documentAggregate:"DocumentAggregate"
 	},
 	ActionAuthorization:{
 		actor:"String",
@@ -611,82 +715,19 @@ export const ReturnTypes: Record<string,any> = {
 		receiver:"String",
 		recv_sequence:"String"
 	},
+	AgendaMeetPoint:{
+		context:"String",
+		decision:"String",
+		title:"String"
+	},
 	AgendaWithDocuments:{
 		action:"BlockchainAction",
-		documents:"DocumentPackage",
+		documents:"DocumentPackageAggregate",
 		table:"BlockchainDecision"
 	},
 	AgreementVar:{
 		protocol_day_month_year:"String",
 		protocol_number:"String"
-	},
-	AssetContributionActDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"AssetContributionActMetaDocumentOutput"
-	},
-	AssetContributionActMetaDocumentOutput:{
-		act_id:"String",
-		block_num:"Int",
-		braname:"String",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		receiver:"String",
-		registry_id:"Int",
-		request_id:"Float",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	AssetContributionDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"AssetContributionDecisionMetaDocumentOutput"
-	},
-	AssetContributionDecisionMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		request_id:"Float",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	AssetContributionStatementDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"AssetContributionStatementMetaDocumentOutput"
-	},
-	AssetContributionStatementMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		request:"CommonRequestResponse",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
 	},
 	AuthSequence:{
 		account:"String",
@@ -766,9 +807,12 @@ export const ReturnTypes: Record<string,any> = {
 		authorized_by:"String",
 		batch_id:"Float",
 		callback_contract:"String",
+		confirm_callback:"String",
 		coopname:"String",
 		created_at:"String",
+		decline_callback:"String",
 		expired_at:"String",
+		hash:"String",
 		id:"Float",
 		meta:"String",
 		statement:"SignedBlockchainDocument",
@@ -814,17 +858,6 @@ export const ReturnTypes: Record<string,any> = {
 		trustee:"Individual",
 		type:"String"
 	},
-	CommonRequestResponse:{
-		currency:"String",
-		hash:"String",
-		program_id:"Int",
-		title:"String",
-		total_cost:"String",
-		type:"String",
-		unit_cost:"String",
-		unit_of_measurement:"String",
-		units:"Int"
-	},
 	ContactsDTO:{
 		chairman:"PublicChairman",
 		details:"OrganizationDetails",
@@ -865,25 +898,37 @@ export const ReturnTypes: Record<string,any> = {
 		question:"String"
 	},
 	DateTime: `scalar.DateTime` as const,
-	DecisionDetail:{
+	DecisionDetailAggregate:{
 		action:"ExtendedBlockchainAction",
-		document:"DecisionDocumentUnion",
+		documentAggregate:"DocumentAggregate",
 		votes_against:"ExtendedBlockchainAction",
 		votes_for:"ExtendedBlockchainAction"
 	},
-	DecisionDocumentUnion:{
-		"...on FreeDecisionDocument":"FreeDecisionDocument",
-		"...on ParticipantApplicationDecisionDocument":"ParticipantApplicationDecisionDocument"
+	Desktop:{
+		authorizedHome:"String",
+		coopname:"String",
+		layout:"String",
+		nonAuthorizedHome:"String",
+		workspaces:"DesktopWorkspace"
 	},
-	DocumentPackage:{
-		acts:"ActDetail",
-		decision:"DecisionDetail",
-		links:"GeneratedDocument",
-		statement:"StatementDetail"
+	DesktopWorkspace:{
+		name:"String",
+		title:"String"
 	},
-	DocumentsPaginationResult:{
+	DocumentAggregate:{
+		hash:"String",
+		rawDocument:"GeneratedDocument",
+		signatures:"SignedDigitalDocument"
+	},
+	DocumentPackageAggregate:{
+		acts:"ActDetailAggregate",
+		decision:"DecisionDetailAggregate",
+		links:"DocumentAggregate",
+		statement:"StatementDetailAggregate"
+	},
+	DocumentsAggregatePaginationResult:{
 		currentPage:"Int",
-		items:"DocumentPackage",
+		items:"DocumentPackageAggregate",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -925,14 +970,18 @@ export const ReturnTypes: Record<string,any> = {
 		user:"UserDataUnion"
 	},
 	Extension:{
-		available:"Boolean",
 		config:"JSON",
 		created_at:"DateTime",
 		description:"String",
 		enabled:"Boolean",
+		external_url:"String",
 		image:"String",
-		installed:"Boolean",
 		instructions:"String",
+		is_available:"Boolean",
+		is_builtin:"Boolean",
+		is_desktop:"Boolean",
+		is_installed:"Boolean",
+		is_internal:"Boolean",
 		name:"String",
 		readme:"String",
 		schema:"JSON",
@@ -940,34 +989,12 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String",
 		updated_at:"DateTime"
 	},
-	FreeDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"FreeDecisionMetaDocumentOutput"
-	},
-	FreeDecisionMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		project_id:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
 	GeneratedDocument:{
 		binary:"String",
 		full_title:"String",
 		hash:"String",
 		html:"String",
-		meta:"MetaDocument"
+		meta:"JSON"
 	},
 	Individual:{
 		birthdate:"String",
@@ -986,18 +1013,51 @@ export const ReturnTypes: Record<string,any> = {
 		key:"String",
 		weight:"Int"
 	},
-	MetaDocument:{
-		block_num:"Int",
+	Meet:{
+		authorization:"DocumentAggregate",
+		close_at:"DateTime",
 		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
+		created_at:"DateTime",
+		current_quorum_percent:"Float",
+		cycle:"Float",
+		hash:"String",
+		id:"Float",
+		initiator:"String",
+		open_at:"DateTime",
+		presider:"String",
+		proposal:"DocumentAggregate",
+		quorum_passed:"Boolean",
+		quorum_percent:"Float",
+		secretary:"String",
+		signed_ballots:"Float",
+		status:"String",
+		type:"String"
+	},
+	MeetAggregate:{
+		hash:"String",
+		pre:"MeetPreProcessing",
+		processed:"MeetProcessed",
+		processing:"MeetProcessing"
+	},
+	MeetPreProcessing:{
+		agenda:"AgendaMeetPoint",
+		close_at:"DateTime",
+		coopname:"String",
+		hash:"String",
+		initiator:"String",
+		open_at:"DateTime",
+		presider:"String",
+		proposal:"DocumentAggregate",
+		secretary:"String"
+	},
+	MeetProcessed:{
+		decision:"BlockchainAction",
+		hash:"String"
+	},
+	MeetProcessing:{
+		hash:"String",
+		meet:"Meet",
+		questions:"Question"
 	},
 	MonoAccount:{
 		email:"String",
@@ -1021,6 +1081,7 @@ export const ReturnTypes: Record<string,any> = {
 		completeRequest:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
+		createAnnualGeneralMeet:"MeetAggregate",
 		createBankAccount:"PaymentMethod",
 		createBranch:"Branch",
 		createChildOrder:"Transaction",
@@ -1035,19 +1096,24 @@ export const ReturnTypes: Record<string,any> = {
 		deliverOnRequest:"Transaction",
 		disputeOnRequest:"Transaction",
 		editBranch:"Branch",
-		generateAssetContributionAct:"AssetContributionActDocument",
-		generateAssetContributionDecision:"AssetContributionDecisionDocument",
-		generateAssetContributionStatement:"AssetContributionStatementDocument",
-		generateFreeDecision:"ProjectFreeDecisionDocument",
-		generateParticipantApplication:"ParticipantApplicationDocument",
-		generateParticipantApplicationDecision:"ParticipantApplicationDecisionDocument",
+		generateAnnualGeneralMeetAgendaDocument:"GeneratedDocument",
+		generateAnnualGeneralMeetDecisionDocument:"GeneratedDocument",
+		generateAnnualGeneralMeetNotificationDocument:"GeneratedDocument",
+		generateAssetContributionAct:"GeneratedDocument",
+		generateAssetContributionDecision:"GeneratedDocument",
+		generateAssetContributionStatement:"GeneratedDocument",
+		generateBallotForAnnualGeneralMeetDocument:"GeneratedDocument",
+		generateFreeDecision:"GeneratedDocument",
+		generateParticipantApplication:"GeneratedDocument",
+		generateParticipantApplicationDecision:"GeneratedDocument",
 		generatePrivacyAgreement:"GeneratedDocument",
-		generateProjectOfFreeDecision:"ProjectFreeDecisionDocument",
-		generateReturnByAssetAct:"ReturnByAssetActDocument",
-		generateReturnByAssetDecision:"ReturnByAssetDecisionDocument",
-		generateReturnByAssetStatement:"ReturnByAssetStatementDocument",
-		generateSelectBranchDocument:"SelectBranchDocument",
+		generateProjectOfFreeDecision:"GeneratedDocument",
+		generateReturnByAssetAct:"GeneratedDocument",
+		generateReturnByAssetDecision:"GeneratedDocument",
+		generateReturnByAssetStatement:"GeneratedDocument",
+		generateSelectBranchDocument:"GeneratedDocument",
 		generateSignatureAgreement:"GeneratedDocument",
+		generateSovietDecisionOnAnnualMeetDocument:"GeneratedDocument",
 		generateUserAgreement:"GeneratedDocument",
 		generateWalletAgreement:"GeneratedDocument",
 		initSystem:"SystemInfo",
@@ -1064,9 +1130,12 @@ export const ReturnTypes: Record<string,any> = {
 		registerAccount:"RegisteredAccount",
 		registerParticipant:"Account",
 		resetKey:"Boolean",
+		restartAnnualGeneralMeet:"MeetAggregate",
 		selectBranch:"Boolean",
 		setPaymentStatus:"Payment",
 		setWif:"Boolean",
+		signByPresiderOnAnnualGeneralMeet:"MeetAggregate",
+		signBySecretaryOnAnnualGeneralMeet:"MeetAggregate",
 		startResetKey:"Boolean",
 		supplyOnRequest:"Transaction",
 		uninstallExtension:"Boolean",
@@ -1075,7 +1144,8 @@ export const ReturnTypes: Record<string,any> = {
 		updateBankAccount:"PaymentMethod",
 		updateExtension:"Extension",
 		updateRequest:"Transaction",
-		updateSystem:"SystemInfo"
+		updateSystem:"SystemInfo",
+		voteOnAnnualGeneralMeet:"MeetAggregate"
 	},
 	Organization:{
 		city:"String",
@@ -1110,47 +1180,6 @@ export const ReturnTypes: Record<string,any> = {
 		type:"String",
 		username:"String"
 	},
-	ParticipantApplicationDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ParticipantApplicationDecisionMetaDocumentOutput"
-	},
-	ParticipantApplicationDecisionMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	ParticipantApplicationDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ParticipantApplicationMetaDocumentOutput"
-	},
-	ParticipantApplicationMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
 	Passport:{
 		code:"String",
 		issued_at:"String",
@@ -1169,6 +1198,7 @@ export const ReturnTypes: Record<string,any> = {
 		provider:"String",
 		status:"PaymentStatus",
 		symbol:"String",
+		type:"String",
 		updated_at:"DateTime",
 		username:"String"
 	},
@@ -1225,27 +1255,6 @@ export const ReturnTypes: Record<string,any> = {
 		organization_data:"Organization",
 		type:"AccountType"
 	},
-	ProjectFreeDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ProjectFreeDecisionMetaDocumentOutput"
-	},
-	ProjectFreeDecisionMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		project_id:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
 	PublicChairman:{
 		first_name:"String",
 		last_name:"String",
@@ -1256,11 +1265,29 @@ export const ReturnTypes: Record<string,any> = {
 		getAccounts:"AccountsPaginationResult",
 		getAgenda:"AgendaWithDocuments",
 		getBranches:"Branch",
-		getDocuments:"DocumentsPaginationResult",
+		getDesktop:"Desktop",
+		getDocuments:"DocumentsAggregatePaginationResult",
 		getExtensions:"Extension",
+		getMeet:"MeetAggregate",
+		getMeets:"MeetAggregate",
 		getPaymentMethods:"PaymentMethodPaginationResult",
 		getPayments:"PaymentPaginationResult",
 		getSystemInfo:"SystemInfo"
+	},
+	Question:{
+		context:"String",
+		coopname:"String",
+		counter_votes_abstained:"Float",
+		counter_votes_against:"Float",
+		counter_votes_for:"Float",
+		decision:"String",
+		id:"Float",
+		meet_id:"Float",
+		number:"Float",
+		title:"String",
+		voters_abstained:"String",
+		voters_against:"String",
+		voters_for:"String"
 	},
 	RefundRequest:{
 		cpu_amount:"String",
@@ -1291,97 +1318,8 @@ export const ReturnTypes: Record<string,any> = {
 		owner:"String",
 		ram_bytes:"Int"
 	},
-	ReturnByAssetActDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ReturnByAssetActMetaDocumentOutput"
-	},
-	ReturnByAssetActMetaDocumentOutput:{
-		act_id:"String",
-		block_num:"Int",
-		braname:"String",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		request_id:"Float",
-		timezone:"String",
-		title:"String",
-		transmitter:"String",
-		username:"String",
-		version:"String"
-	},
-	ReturnByAssetDecisionDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ReturnByAssetDecisionMetaDocumentOutput"
-	},
-	ReturnByAssetDecisionMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		decision_id:"Float",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		request_id:"Float",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
-	ReturnByAssetStatementDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"ReturnByAssetStatementMetaDocumentOutput"
-	},
-	ReturnByAssetStatementMetaDocumentOutput:{
-		block_num:"Int",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		request:"CommonRequestResponse",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
-	},
 	SbpAccount:{
 		phone:"String"
-	},
-	SelectBranchDocument:{
-		binary:"String",
-		full_title:"String",
-		hash:"String",
-		html:"String",
-		meta:"SelectBranchMetaDocumentOutput"
-	},
-	SelectBranchMetaDocumentOutput:{
-		block_num:"Int",
-		braname:"String",
-		coopname:"String",
-		created_at:"String",
-		generator:"String",
-		lang:"String",
-		links:"String",
-		registry_id:"Int",
-		timezone:"String",
-		title:"String",
-		username:"String",
-		version:"String"
 	},
 	SignedBlockchainDocument:{
 		hash:"String",
@@ -1389,13 +1327,17 @@ export const ReturnTypes: Record<string,any> = {
 		public_key:"String",
 		signature:"String"
 	},
-	StatementDetail:{
-		action:"ExtendedBlockchainAction",
-		document:"StatementDocumentUnion"
+	SignedDigitalDocument:{
+		hash:"String",
+		is_valid:"Boolean",
+		meta:"JSON",
+		public_key:"String",
+		signature:"String",
+		signer:"UserDataUnion"
 	},
-	StatementDocumentUnion:{
-		"...on ParticipantApplicationDocument":"ParticipantApplicationDocument",
-		"...on ProjectFreeDecisionDocument":"ProjectFreeDecisionDocument"
+	StatementDetailAggregate:{
+		action:"ExtendedBlockchainAction",
+		documentAggregate:"DocumentAggregate"
 	},
 	SystemInfo:{
 		blockchain_account:"BlockchainAccount",

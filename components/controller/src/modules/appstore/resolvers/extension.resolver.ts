@@ -1,5 +1,6 @@
+// ========== ./resolvers/extension.resolver.ts ==========
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { AppManagementService } from '../services/appstore-app.service';
+import { AppManagementService } from '../services/extension.service';
 import { ExtensionDTO } from '../dto/extension-graphql.dto';
 import { ExtensionGraphQLInput } from '../dto/extension-graphql-input.dto';
 import { UseGuards } from '@nestjs/common';
@@ -26,7 +27,7 @@ export class AppStoreResolver<TConfig = any> {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async installApp(
-    @Args('data', { type: () => ExtensionGraphQLInput }) data: ExtensionGraphQLInput
+    @Args('data', { type: () => ExtensionGraphQLInput }) data: ExtensionGraphQLInput<TConfig>
   ): Promise<ExtensionDTO<TConfig>> {
     return this.appManagementService.installApp(data);
   }
@@ -35,7 +36,7 @@ export class AppStoreResolver<TConfig = any> {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async updateExtension(
-    @Args('data', { type: () => ExtensionGraphQLInput }) data: ExtensionGraphQLInput
+    @Args('data', { type: () => ExtensionGraphQLInput }) data: ExtensionGraphQLInput<TConfig>
   ): Promise<ExtensionDTO<TConfig>> {
     return this.appManagementService.updateApp(data);
   }

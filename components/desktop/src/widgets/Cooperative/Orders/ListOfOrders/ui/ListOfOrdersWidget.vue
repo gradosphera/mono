@@ -1,131 +1,156 @@
 <template lang="pug">
   div.row.justify-center
     div.col-12
-      q-table(
-        v-if="orders && orders.results"
-        ref="tableRef"
-        class="my-sticky-dynamic"
-        flat
-        :rows="orders.results"
-        row-key="id"
-        :columns="columns"
-        :table-colspan="9"
-        :loading="onLoading"
-        :no-data-label="'ордера не найдены'"
-        virtual-scroll
-        @virtual-scroll="onScroll"
-        :virtual-scroll-item-size="48"
-        :virtual-scroll-sticky-size-start="48"
-        :rows-per-page-options="[0]"
-        :pagination="pagination"
-      )
-        template(#header="props")
-          q-tr(:props="props")
-            q-th(auto-width)
-            q-th(
-              v-for="col in props.cols"
-              :key="col.name"
-              :props="props"
-              @click="onSort(col)"
-            ) {{ col.label }}
+      div.scroll-area(style="height: 90vh; overflow-y: auto;")
+        q-table(
+          v-if="payments && payments.items"
+          ref="tableRef"
+          flat
+          :grid="isMobile"
+          :rows="payments.items"
+          row-key="id"
+          :columns="columns"
+          :table-colspan="9"
+          :loading="onLoading"
+          :no-data-label="'платежи не найдены'"
+          virtual-scroll
+          @virtual-scroll="onScroll"
+          :virtual-scroll-target="'.scroll-area'"
+          :virtual-scroll-item-size="48"
+          :virtual-scroll-sticky-size-start="48"
+          :rows-per-page-options="[0]"
+          :pagination="pagination"
+          class="q-mb-md"
+        )
+          template(#item="props")
+            OrderCard(
+              :order="props.row"
+              :expanded="expanded.get(props.row.id)"
+              :hideActions="hideActions"
+              @toggle-expand="toggleExpand(props.row.id)"
+            )
 
-        template(#body="props")
-          q-tr(:key="`m_${props.row.order_num}`" :props="props")
-            q-td(auto-width)
-              q-btn(size="sm" color="primary" round dense :icon="expanded.get(props.row.order_num) ? 'remove' : 'add'" @click="toggleExpand(props.row.order_num)")
-            q-td {{props.row.order_num}}
-            q-td {{ props.row.quantity }}
-            q-td
-              q-badge(v-if="props.row.type ==='registration'") регистрационный
-              q-badge(v-if="props.row.type ==='deposit'") паевый
+          template(#header="props")
+            q-tr(:props="props")
+              q-th(auto-width)
+              q-th(
+                v-for="col in props.cols"
+                :key="col.name"
+                :props="props"
+                @click="onSort(col)"
+              ) {{ col.label }}
 
-            q-td {{getNameFromUserData(props.row.user?.private_data)}}
+          template(#body="props")
+            q-tr(:key="`m_${props.row.id}`" :props="props")
+              q-td(auto-width)
+                q-btn(
+                  size="sm"
+                  color="primary"
+                  round
+                  dense
+                  :icon="expanded.get(props.row.id) ? 'remove' : 'add'"
+                  @click="toggleExpand(props.row.id)"
+                )
+              q-td {{props.row.id}}
+              q-td {{ props.row.amount }} {{props.row.symbol}}
+              q-td
+                q-badge(v-if="props.row.details.data.includes('registration')") регистрационный
+                q-badge(v-else) паевой
 
-            q-td
-              q-badge(v-if="props.row.status ==='completed'" color="teal") обработан
-              q-badge(v-if="props.row.status ==='pending'" color="orange") ожидание оплаты
-              q-badge(v-if="props.row.status ==='failed'" color="red") ошибка
-              q-badge(v-if="props.row.status ==='paid'" color="orange") оплачен
-              q-badge(v-if="props.row.status ==='refunded'" color="grey") отменён
-              q-badge(v-if="props.row.status ==='expired'" color="grey") истёк
-            q-td
-              q-btn-dropdown(size="sm" label="действия" color="primary" v-model="dropdowns[props.row.order_num]")
-                q-list(dense)
-                  SetOrderPaidStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
-                  SetOrderRefundedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
-                  //- SetOrderCompletedStatusButton(:id="props.row.id" @close="closeDropdown(props.row.order_num)")
+              q-td(style="max-width: 150px; word-wrap: break-word; white-space: normal;") {{props.row.username}}
 
-          q-tr(v-if="expanded.get(props.row.order_num)" :key="`e_${props.row.order_num}`" :props="props" class="q-virtual-scroll--with-prev")
-            q-td(colspan="100%")
-              div(v-if="props.row.status=='failed'")
-                p Причина ошибки: {{props.row.message}}
 
+              q-td
+                q-badge(v-if="props.row.status ==='COMPLETED'" color="teal") обработан
+                q-badge(v-if="props.row.status ==='PENDING'" color="orange") ожидание оплаты
+                q-badge(v-if="props.row.status ==='FAILED'" color="red") ошибка
+                q-badge(v-if="props.row.status ==='PAID'" color="orange") оплачен
+                q-badge(v-if="props.row.status ==='REFUNDED'" color="grey") отменён
+                q-badge(v-if="props.row.status ==='EXPIRED'" color="grey") истёк
+              q-td
+                SetOrderPaidStatusButton(
+                  v-if="!hideActions && ['EXPIRED', 'PENDING', 'FAILED'].includes(props.row.status)"
+                  :id="props.row.id"
+                )
+                span(v-else-if="!hideActions").text-grey нет доступных действий
+
+            q-tr(v-if="expanded.get(props.row.id)" :key="`e_${props.row.id}`" :props="props" class="q-virtual-scroll--with-prev")
+              q-td(colspan="100%")
+                div(v-if="props.row.status=='FAILED'")
+                  span Причина ошибки: {{props.row.message ?? 'нет дополнительной информации'}}
+                div(v-else)
+                  span нет дополнительной информации
 </template>
 <script setup lang="ts">
   import { onMounted, ref, computed, reactive, nextTick } from 'vue'
   import { Notify } from 'quasar'
-  import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
-  // import { formatToHumanDate } from 'src/shared/lib/utils/dates/formatToHumanDate';
-  import { useOrderStore } from 'src/entities/Order';
-  import { SetOrderPaidStatusButton } from 'src/features/Order/SetStatus/ui/SetOrderPaidStatusButton';
-  import { SetOrderRefundedStatusButton } from 'src/features/Order/SetStatus/ui/SetOrderRefundedStatusButton';
-  // import { SetOrderCompletedStatusButton } from 'src/features/Cooperative/Orders/SetStatus/ui/SetOrderCompletedStatusButton';
+  import { usePaymentStore } from 'src/entities/Payment/model';
+  import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
+  import OrderCard from './OrderCard.vue';
+  import { useWindowSize } from 'src/shared/hooks';
 
-  const orderStore = useOrderStore()
-  const orders = computed(() => orderStore.orders)
-  console.log('orders: ', orders.value)
+  const paymentStore = usePaymentStore()
+  const payments = computed(() => paymentStore.payments)
   const onLoading = ref(false)
   const nextPage = ref(1)
   const lastPage = ref(1);
-
-  const dropdowns = reactive({})
+  const { isMobile } = useWindowSize()
 
   const sortState = reactive({
     sortBy: '',
     sortDir: ''
   })
 
-  const sortedQuery = computed(() => {
-    if (sortState.sortBy && sortState.sortDir)
-      return `${sortState.sortBy}:${sortState.sortDir}`
-    else return ''
-  })
-
   const onSort = (col) => {
-
     if (!col.sortable) return
 
-  // Меняем направление сортировки, если кликнули на тот же столбец
-  if (sortState.sortBy === col.name) {
-    sortState.sortDir = sortState.sortDir === 'asc' ? 'desc' : 'asc'
-  } else {
-    // Если сортируем новый столбец, сбрасываем на 'asc'
-    sortState.sortBy = col.name
-    sortState.sortDir = 'asc'
-  }
-  orderStore.clear()
-  nextPage.value = 1
-  lastPage.value = 1
-  loadOrders(1) // Перезагружаем с новыми параметрами сортировки
-}
-
-  const closeDropdown = (id: string) => {
-    dropdowns[id] = false // Закрываем дропдаун для конкретной строки
+    // Меняем направление сортировки, если кликнули на тот же столбец
+    if (sortState.sortBy === col.name) {
+      sortState.sortDir = sortState.sortDir === 'asc' ? 'desc' : 'asc'
+    } else {
+      // Если сортируем новый столбец, сбрасываем на 'asc'
+      sortState.sortBy = col.name
+      sortState.sortDir = 'asc'
+    }
+    paymentStore.clear()
+    nextPage.value = 1
+    lastPage.value = 1
+    loadPayments(1) // Перезагружаем с новыми параметрами сортировки
   }
 
   const props = defineProps({
-    receiver: {
+    username: {
       type: String,
       required: false,
       default: null
     },
+    hideActions: {
+      type: Boolean,
+      default: false
+    }
   })
 
-  const loadOrders = async (page = 1) => {
+  const loadPayments = async (page = 1) => {
     try {
       onLoading.value = true
-      await orderStore.loadCoopOrders({username: props.receiver, page, limit: 25, sortBy: sortedQuery.value})
-      lastPage.value = orderStore.orders?.totalPages || 1
+
+      // Данные для фильтрации
+      const data = props.username ? { username: props.username } : undefined;
+
+      // Опции пагинации и сортировки
+      const options = {
+        page,
+        limit: 25,
+        sortBy: sortState.sortBy || undefined,
+        sortOrder: sortState.sortDir ? sortState.sortDir.toUpperCase() as 'ASC' | 'DESC' : 'ASC'
+      };
+
+      await paymentStore.loadPayments(data, options);
+
+      if (payments.value) {
+        lastPage.value = payments.value.totalPages || 1
+      }
+
       onLoading.value = false
     } catch (e: any) {
       onLoading.value = false
@@ -139,16 +164,15 @@
 
   // Функция обработки виртуального скролла
   const onScroll = ({ to, ref }) => {
-    if(orders.value) {
-
-      const lastIndex = orders.value.results.length - 1
+    if(payments.value) {
+      const lastIndex = payments.value.items.length - 1
 
       if (onLoading.value !== true && nextPage.value < lastPage.value && to === lastIndex) {
         onLoading.value = true
 
         setTimeout(() => {
           nextPage.value++
-          loadOrders(nextPage.value) // Загружаем следующую страницу
+          loadPayments(nextPage.value) // Загружаем следующую страницу
 
           nextTick(() => {
             ref.refresh() // Обновляем виртуальный скролл после загрузки
@@ -160,17 +184,18 @@
   }
 
   onMounted(() => {
-    orderStore.clear()
-    loadOrders()
+    paymentStore.clear()
+    loadPayments()
   })
 
 
-  const columns = [
-    { name: 'order_num', align: 'left', label: '№', field: 'order_num', sortable: true },
-    { name: 'quantity', align: 'left', label: 'Сумма', field: '', sortable: false },
-    { name: 'type', align: 'left', label: 'Тип платежа', field: 'type', sortable: true },
-    { name: 'name', align: 'left', label: 'От кого', field: '', sortable: false },
-    { name: 'status', align: 'left', label: 'Статус', field: '', sortable: true },
+  const columns: any[] = [
+    { name: 'id', align: 'left', label: '№', field: 'id', sortable: true },
+    { name: 'amount', align: 'left', label: 'Сумма', field: 'amount', sortable: true },
+    { name: 'type', align: 'left', label: 'Тип платежа', field: '', sortable: false },
+    { name: 'username', align: 'left', label: 'От кого', field: 'username', sortable: true },
+    { name: 'status', align: 'left', label: 'Статус', field: 'status', sortable: true },
+    { name: 'actions', align: 'left', label: '', field: '', sortable: false, hide: props.hideActions },
   ] as any
 
   const expanded = reactive(new Map()) // Используем Map для отслеживания состояния развертывания каждой записи
@@ -184,24 +209,6 @@
   const pagination = ref({ rowsPerPage: 0 })
   </script>
 
-<style lang="sass">
-.my-sticky-dynamic
-  /* height or max-height is important */
-  height: 100vh
-
-  /* this will be the loading indicator */
-  thead tr:last-child th
-    /* height of all previous header rows */
-    top: 48px
-  thead tr:first-child th
-    top: 0
-
-  /* prevent scrolling behind sticky top row on focus */
-  tbody
-    /* height of all previous header rows */
-    scroll-margin-top: 48px
-
-</style>
 <style>
 .q-list--dense > .q-item, .q-item--dense {
   padding: 0px !important;

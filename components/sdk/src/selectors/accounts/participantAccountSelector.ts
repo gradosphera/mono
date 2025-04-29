@@ -1,5 +1,5 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus/index";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { Selector, type ValueTypes } from '../../zeus/index'
 
 export const rawParticipantAccountSelector = {
   braname: true,
@@ -12,12 +12,13 @@ export const rawParticipantAccountSelector = {
   status: true,
   type: true,
   username: true,
-};
+  initial_amount: true,
+  minimum_amount: true,
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes["ParticipantAccount"]> = rawParticipantAccountSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['ParticipantAccount']> = rawParticipantAccountSelector
 
-export const participantAccountSelector = Selector("ParticipantAccount")(
+export const participantAccountSelector = Selector('ParticipantAccount')(
   rawParticipantAccountSelector,
-);
-
+)

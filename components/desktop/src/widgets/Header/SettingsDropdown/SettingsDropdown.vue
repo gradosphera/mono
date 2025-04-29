@@ -3,12 +3,6 @@ q-btn-dropdown(flat :size="isMobile ? 'sm' : 'md'" :dense="isMobile" stretch ico
   q-list
     ToogleDarkLight(:isMobile="isMobile" :showText="true")
 
-    q-item(v-if="loggedIn" flat clickable v-close-popup @click="open('user-payment-methods')")
-      q-item-section
-        q-item-label
-          q-icon(name="fa-solid fa-wrench").q-mr-sm
-          span.font10px НАСТРОЙКИ ПАЙЩИКА
-
     q-item(v-if="loggedIn && (isChairman || isMember)" flat clickable v-close-popup @click="open('members')")
       q-item-section
         q-item-label

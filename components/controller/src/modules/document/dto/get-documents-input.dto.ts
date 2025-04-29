@@ -1,10 +1,13 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { GetDocumentsFilterInputDTO } from './get-documents-filter-input.dto';
+import GraphQLJSON from 'graphql-type-json';
 
 @InputType('GetDocumentsInput')
 export class GetDocumentsInputDTO {
-  @Field(() => GetDocumentsFilterInputDTO)
-  filter!: GetDocumentsFilterInputDTO;
+  @Field(() => String)
+  username!: string;
+
+  @Field(() => GraphQLJSON)
+  filter!: Record<string, unknown>;
 
   @Field(() => Int, { nullable: true })
   limit?: number;

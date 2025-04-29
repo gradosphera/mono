@@ -10,6 +10,8 @@ export interface Action extends IGenerate {
   decision_id: number
 }
 
+export type Meta = IMetaDocument & Action
+
 // Модель данных документа
 export interface Model {
   meta: IMetaDocument

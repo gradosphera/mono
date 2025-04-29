@@ -20,7 +20,6 @@ export interface IAccount {
 }
 
 export interface IAdduser {
-  registrator: IName
   coopname: IName
   referer: IName
   username: IName
@@ -32,6 +31,18 @@ export interface IAdduser {
   meta: string
 }
 
+export interface ICandidate {
+  username: IName
+  coopname: IName
+  braname: IName
+  status: IName
+  created_at: ITimePointSec
+  statement: IDocument
+  registration_hash: IChecksum256
+  initial: IAsset
+  minimum: IAsset
+}
+
 export interface IChangekey {
   coopname: IName
   changer: IName
@@ -39,9 +50,14 @@ export interface IChangekey {
   public_key: IPublicKey
 }
 
+export interface IConfirmpay {
+  coopname: IName
+  registration_hash: IChecksum256
+}
+
 export interface IConfirmreg {
   coopname: IName
-  username: IName
+  registration_hash: IChecksum256
 }
 
 export interface ICooperative {
@@ -69,6 +85,18 @@ export interface ICreatebranch {
   braname: IName
 }
 
+export interface IDeclinepay {
+  coopname: IName
+  registration_hash: IChecksum256
+  reason: string
+}
+
+export interface IDeclinereg {
+  coopname: IName
+  registration_hash: IChecksum256
+  reason: string
+}
+
 export interface IDelcoop {
   registrator: IName
   coopname: IName
@@ -92,19 +120,10 @@ export interface IEnabranches {
 export interface IInit {
 }
 
-export interface IJoincoop {
-  registrator: IName
-  coopname: IName
-  braname: IName
-  username: IName
-  document: IDocument
-}
-
 export interface IMigrate {
 }
 
 export interface INewaccount {
-  registrator: IName
   coopname: IName
   referer: IName
   username: IName
@@ -131,10 +150,12 @@ export interface IRegcoop {
 }
 
 export interface IReguser {
-  registrator: IName
   coopname: IName
+  braname: IName
   username: IName
   type: IName
+  statement: IDocument
+  registration_hash: IChecksum256
 }
 
 export interface IStcoopstatus {

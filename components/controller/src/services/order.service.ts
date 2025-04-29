@@ -17,6 +17,7 @@ import config from '../config/config';
 import { userStatus } from '../types/user.types';
 import { nestApp } from '..';
 import { ProviderInteractor } from '~/domain/provider/provider.interactor';
+import { sha256 } from '~/utils/sha256';
 
 export async function createOrder(
   username: string,
@@ -168,9 +169,8 @@ export async function setStatus(id: string, status: string) {
   if (status == 'refunded') {
     await blockchainService.cancelOrder({
       coopname: config.coopname,
-      admin: config.coopname,
-      deposit_id: order.order_num as number,
-      memo: '',
+      income_hash: sha256(order.order_num as number),
+      reason: '',
     });
 
     if (order.type === 'registration') {

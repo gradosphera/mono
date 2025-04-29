@@ -76,8 +76,6 @@ public:
   [[eosio::action]] void publish(eosio::name coopname, eosio::name username, uint64_t exchange_id);
 
 
-
-    
   struct [[eosio::table, eosio::contract("marketplace")]] balances : balances_base {};
   struct [[eosio::table, eosio::contract("marketplace")]] counts : counts_base {};
 

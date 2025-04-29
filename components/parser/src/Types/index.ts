@@ -33,10 +33,12 @@ export interface ITableResult {
   results: IDelta[]
   page: number
   limit: number
+  total: number
 }
 
 export interface IActionResult {
   results: IAction[]
   page: number
   limit: number
+  total: number
 }

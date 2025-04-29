@@ -1,20 +1,18 @@
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus/index';
-
-type inputModel = ModelTypes['UninstallExtensionInput']
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'uninstallExtension'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{data: $('data', 'UninstallExtensionInput!')}, true]
-});
+  [name]: [{ data: $('data', 'UninstallExtensionInput!') }, true],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
-  data: ModelTypes['UninstallExtensionInput'],
+  data: ModelTypes['UninstallExtensionInput']
 }
 
-export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

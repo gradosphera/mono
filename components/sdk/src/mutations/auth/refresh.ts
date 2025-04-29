@@ -1,19 +1,19 @@
-import { registeredAccountSelector } from '../../selectors/accounts/registeredAccountSelector';
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus/index';
+import { registeredAccountSelector } from '../../selectors/accounts/registeredAccountSelector'
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'refresh'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{data: $('data', 'RefreshInput!')}, registeredAccountSelector]
-});
+  [name]: [{ data: $('data', 'RefreshInput!') }, registeredAccountSelector],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
-  data: ModelTypes['RefreshInput'],
+  data: ModelTypes['RefreshInput']
 }
 
-export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

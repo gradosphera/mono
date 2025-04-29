@@ -11,9 +11,8 @@ export type ExtendedProgramWalletData = IProgramWalletData & {
   program_details: ICoopProgramData; // | или другие типы будущих программ
 };
 
-export type IDepositData = GatewayContract.Tables.Deposits.IDeposits;
-export type IWithdrawData = GatewayContract.Tables.Withdraws.IWithdraws;
-export type IWalletData = SovietContract.Tables.Wallets.IWallets;
+export type IDepositData = GatewayContract.Tables.Incomes.IIncome;
+export type IWithdrawData = GatewayContract.Tables.Outcomes.IOutcome;
 
 export interface ILoadSingleUserWallet {
   coopname: string;

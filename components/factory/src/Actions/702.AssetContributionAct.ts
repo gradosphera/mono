@@ -1,11 +1,11 @@
 import { DraftContract } from 'cooptypes'
-import { AssetContributionAct } from '../templates'
+import { AssetContributionAct } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 import type { ExternalOrganizationData } from '../Models'
 
-export { AssetContributionAct as Template } from '../templates'
+export { AssetContributionAct as Template } from '../Templates'
 
 export class Factory extends DocFactory<AssetContributionAct.Action> {
   constructor(storage: MongoDBConnector) {

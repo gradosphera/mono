@@ -2,14 +2,15 @@
  * @brief Принимаем решение совета и вносим средства на кошелек пайщика при УХД
  * 
  */
-void capital::capauthinvst(eosio::name coopname, uint64_t invest_id, document authorization) {
+void capital::capauthinvst(eosio::name coopname, checksum256 invest_hash, document authorization) {
   require_auth(_soviet);
-
+  
+  auto exist_invest = get_invest(coopname, invest_hash);
+  eosio::check(exist_invest.has_value(), "Инвестиция не найдена");
+  
   invest_index invests(_capital, coopname.value);
-  auto invest = invests.find(invest_id);
-  
-  eosio::check(invest != invests.end(), "Инвестиция не найдена");
-  
+  auto invest = invests.find(exist_invest -> id);
+    
   auto contributor = get_active_contributor_or_fail(coopname, invest -> project_hash, invest -> username);
   eosio::check(contributor.has_value(), "Договор УХД с пайщиком по проекту не найден");
   

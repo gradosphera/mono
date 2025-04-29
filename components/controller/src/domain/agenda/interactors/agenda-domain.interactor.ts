@@ -6,10 +6,14 @@ import { SovietContract } from 'cooptypes';
 import type { AgendaWithDocumentsDomainInterface } from '../interfaces/agenda-with-documents-domain.interface';
 import { getActions } from '~/utils/getFetch';
 import type { VotingAgendaDomainInterface } from '../interfaces/voting-agenda-domain.interface';
+import { DocumentPackageAggregator } from '~/domain/document/aggregators/document-package.aggregator';
 
 @Injectable()
 export class AgendaDomainInteractor {
-  constructor(private readonly documentDomainService: DocumentDomainService) {}
+  constructor(
+    private readonly documentDomainService: DocumentDomainService,
+    private readonly documentPackageAggregator: DocumentPackageAggregator
+  ) {}
 
   async getAgenda(): Promise<AgendaWithDocumentsDomainInterface[]> {
     // Шаг 1: Загрузить повестку дня
@@ -19,13 +23,12 @@ export class AgendaDomainInteractor {
     const complexAgenda: AgendaWithDocumentsDomainInterface[] = [];
 
     for (const { action, table } of agenda) {
-      // Создание пакета документов для каждого действия
-      const documents = await this.documentDomainService.buildDocumentPackage(action);
-
+      // Создание пакета документов для каждого действия с использованием нового агрегатора
+      const documents = await this.documentPackageAggregator.buildDocumentPackageAggregate(action);
       // Проверяем наличие заявления, прежде чем добавлять в комплексную повестку
       // Делаем только потому что в локальной разработке заявлений после перезапуска блокчейна может и не быть в истории цепочки,
       // а это ломает отображение на фронте. При нормальные условиях заявление всегда должно быть.
-      if (documents.statement?.document) {
+      if (documents.statement?.documentAggregate) {
         complexAgenda.push({
           table,
           action,

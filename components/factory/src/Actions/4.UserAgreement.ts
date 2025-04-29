@@ -1,10 +1,10 @@
 import { DraftContract } from 'cooptypes'
-import { UserAgreement } from '../templates'
+import { UserAgreement } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { UserAgreement as Template } from '../templates'
+export { UserAgreement as Template } from '../Templates'
 
 export class Factory extends DocFactory<UserAgreement.Action> {
   constructor(storage: MongoDBConnector) {

@@ -1,22 +1,22 @@
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from "../../zeus/index";
-import { extensionSelector } from "../../selectors/extensions/extensionSelector";
+import { extensionSelector } from '../../selectors/extensions/extensionSelector'
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'getExtensions'
 
 /**
  * Извлекает расширения
  */
-export const query = Selector("Query")({
-  [name]: [{ data: $("data", "GetExtensionsInput") }, extensionSelector],
-});
+export const query = Selector('Query')({
+  [name]: [{ data: $('data', 'GetExtensionsInput') }, extensionSelector],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
-  data: ModelTypes['GetExtensionsInput'],
+  data: ModelTypes['GetExtensionsInput']
 }
 
-export type IOutput = InputType<GraphQLTypes['Query'], typeof query>;
+export type IOutput = InputType<GraphQLTypes['Query'], typeof query>

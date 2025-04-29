@@ -4,7 +4,7 @@ import Blockchain from '../blockchain'
 import config from '../configs'
 import { getTotalRamUsage, globalRamStats } from '../utils/getTotalRamUsage'
 import { generateRandomSHA256 } from '../utils/randomHash'
-import { createParticipant } from '../init/participant'
+import { addUser } from '../init/participant'
 import { generateRandomUsername } from '../utils/randomUsername'
 import { sleep } from '../utils'
 import { processDecision } from './soviet/processDecision'
@@ -55,19 +55,19 @@ beforeAll(async () => {
 
   investor1 = generateRandomUsername()
   console.log('investor1: ', investor1)
-  await createParticipant(investor1)
+  await addUser(investor1)
 
   tester1 = generateRandomUsername()
   console.log('tester1: ', tester1)
-  await createParticipant(tester1)
+  await addUser(tester1)
 
   tester2 = generateRandomUsername()
   console.log('tester2: ', tester2)
-  await createParticipant(tester2)
+  await addUser(tester2)
 
   tester3 = generateRandomUsername()
   console.log('tester3: ', tester3)
-  await createParticipant(tester3)
+  await addUser(tester3)
 
   // const { stdout } = await execa('esno', [CLI_PATH, 'boot'], { stdio: 'inherit' })
   // expect(stdout).toContain('Boot process completed')
@@ -397,6 +397,8 @@ describe('тест контракта CAPITAL', () => {
       application: 'voskhod',
       project_hash: project1.project_hash,
       result_hash: generateRandomSHA256(),
+      assignee: 'ant',
+      assignment: 'Задание #1: тут описание',
     }
 
     result1 = data
@@ -477,55 +479,56 @@ describe('тест контракта CAPITAL', () => {
     const { finalResult, commitHash } = await commitToResult(blockchain, 'voskhod', result1.result_hash, result1.project_hash, tester1, tester1CommitHours)
     commits.push(commitHash)
 
-    expect(finalResult.creators_amount).toBe('10000.0000 RUB')
+    expect(finalResult.creators_base).toBe('10000.0000 RUB')
     expect(finalResult.creators_bonus).toBe('3820.0000 RUB')
     expect(finalResult.authors_bonus).toBe('16180.0000 RUB')
-    expect(finalResult.generated_amount).toBe('30000.0000 RUB')
+    expect(finalResult.generated).toBe('30000.0000 RUB')
     expect(finalResult.capitalists_bonus).toBe('48540.0000 RUB')
-    expect(finalResult.total_amount).toBe('78540.0000 RUB')
+    expect(finalResult.total).toBe('78540.0000 RUB')
   })
 
   it('добавить коммит создателя tester2 на 10 часов по 1000 RUB', async () => {
     const { finalResult, commitHash } = await commitToResult(blockchain, 'voskhod', result1.result_hash, result1.project_hash, tester2, tester2CommitHours)
     commits.push(commitHash)
 
-    expect(finalResult.creators_amount).toBe('20000.0000 RUB')
+    expect(finalResult.creators_base).toBe('20000.0000 RUB')
     expect(finalResult.creators_bonus).toBe('7640.0000 RUB')
     expect(finalResult.authors_bonus).toBe('32360.0000 RUB')
-    expect(finalResult.generated_amount).toBe('60000.0000 RUB')
+    expect(finalResult.generated).toBe('60000.0000 RUB')
     expect(finalResult.capitalists_bonus).toBe('97080.0000 RUB')
-    expect(finalResult.total_amount).toBe('157080.0000 RUB')
+    expect(finalResult.total).toBe('157080.0000 RUB')
   })
 
-  it('пишем заявление на возврат в кошелёк от tester1 на 10000 RUB', async () => {
-    const withdrawAmount = `${(tester1CommitHours * parseFloat(ratePerHour)).toFixed(4)} RUB`
-    console.log('commits: ', commits)
-    const { withdrawHash, transactionId } = await withdrawContribution(
-      blockchain,
-      'voskhod',
-      tester1,
-      result1.result_hash,
-      result1.project_hash,
-      [commits[0]],
-      withdrawAmount,
-      fakeDocument,
-    )
-  })
+  // TODO: заменить на получение ссуды, а возврат перенести ниже
+  // it('пишем заявление на возврат в кошелёк от tester1 на 10000 RUB', async () => {
+  //   const withdrawAmount = `${(tester1CommitHours * parseFloat(ratePerHour)).toFixed(4)} RUB`
+  //   console.log('commits: ', commits)
+  //   const { withdrawHash, transactionId } = await withdrawContribution(
+  //     blockchain,
+  //     'voskhod',
+  //     tester1,
+  //     result1.result_hash,
+  //     result1.project_hash,
+  //     [commits[0]],
+  //     withdrawAmount,
+  //     fakeDocument,
+  //   )
+  // })
 
-  it('пишем заявление на возврат в кошелёк от tester2 на 10000 RUB', async () => {
-    const withdrawAmount = `${(tester2CommitHours * parseFloat(ratePerHour)).toFixed(4)} RUB`
+  // it('пишем заявление на возврат в кошелёк от tester2 на 10000 RUB', async () => {
+  //   const withdrawAmount = `${(tester2CommitHours * parseFloat(ratePerHour)).toFixed(4)} RUB`
 
-    const { withdrawHash, transactionId } = await withdrawContribution(
-      blockchain,
-      'voskhod',
-      tester2,
-      result1.result_hash,
-      result1.project_hash,
-      [commits[1]],
-      withdrawAmount,
-      fakeDocument,
-    )
-  })
+  //   const { withdrawHash, transactionId } = await withdrawContribution(
+  //     blockchain,
+  //     'voskhod',
+  //     tester2,
+  //     result1.result_hash,
+  //     result1.project_hash,
+  //     [commits[1]],
+  //     withdrawAmount,
+  //     fakeDocument,
+  //   )
+  // })
 
   it('регистрируем расход на 1000 RUB', async () => {
     const expenseAmount = '1000.0000 RUB'
@@ -605,15 +608,24 @@ describe('тест контракта CAPITAL', () => {
     expect(blockchainResult.result_hash).toBe(result1.result_hash)
     expect(blockchainResult.project_hash).toBe(project1.project_hash)
     expect(blockchainResult.coopname).toBe('voskhod')
-    expect(blockchainResult.status).toBe('opened')
+    expect(blockchainResult.status).toBe('closed')
+
+    expect(blockchainResult.creators_amount_remain).toBe(blockchainResult.creators_amount)
+    expect(blockchainResult.creators_bonus_remain).toBe(blockchainResult.creators_bonus)
+    expect(blockchainResult.authors_bonus_remain).toBe(blockchainResult.authors_bonus)
+    expect(blockchainResult.capitalists_bonus_remain).toBe(blockchainResult.capitalists_bonus)
+    console.log('Результат после старта приёма: ', blockchainResult)
   })
 
   it('обновляем капитал первого создателя в результате', async () => {
+    const claim_hash = generateRandomSHA256()
+
     const data: CapitalContract.Actions.CreateClaim.ICreateClaim = {
       coopname: 'voskhod',
       application: 'voskhod',
       result_hash: result1.result_hash,
       username: tester1,
+      claim_hash,
     }
 
     const result = await blockchain.api.transact(
@@ -656,11 +668,14 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('обновляем капитал второго создателя в результате', async () => {
+    const claim_hash = generateRandomSHA256()
+
     const data: CapitalContract.Actions.CreateClaim.ICreateClaim = {
       coopname: 'voskhod',
       application: 'voskhod',
       result_hash: result1.result_hash,
       username: tester2,
+      claim_hash,
     }
 
     const result = await blockchain.api.transact(
@@ -703,11 +718,14 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('повторно обновляем капитал второго создателя в результате и ожидаем ошибку', async () => {
+    const claim_hash = generateRandomSHA256()
+
     const data: CapitalContract.Actions.CreateClaim.ICreateClaim = {
       coopname: 'voskhod',
       application: 'voskhod',
       result_hash: result1.result_hash,
       username: tester2,
+      claim_hash,
     }
 
     try {
@@ -742,11 +760,14 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('обновляем капитал инвестора в результате', async () => {
+    const claim_hash = generateRandomSHA256()
+
     const data: CapitalContract.Actions.CreateClaim.ICreateClaim = {
       coopname: 'voskhod',
       application: 'voskhod',
       result_hash: result1.result_hash,
       username: investor1,
+      claim_hash,
     }
 
     const result = await blockchain.api.transact(
@@ -789,11 +810,14 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('повторно обновляем капитал инвестора в результате и ожидаем ошибку', async () => {
+    const claim_hash = generateRandomSHA256()
+
     const data: CapitalContract.Actions.CreateClaim.ICreateClaim = {
       coopname: 'voskhod',
       application: 'voskhod',
       result_hash: result1.result_hash,
       username: investor1,
+      claim_hash,
     }
 
     try {

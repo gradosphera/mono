@@ -1,35 +1,63 @@
-void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::name creator, checksum256 result_hash, checksum256 commit_hash, uint64_t contributed_hours, document contribution_statement){
-  check_auth_or_fail(_capital, coopname, application, "createcmmt"_n);
+void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::name username, checksum256 assignment_hash, checksum256 commit_hash, uint64_t contributed_hours){
+  require_auth(coopname);
   
-  verify_document_or_fail(contribution_statement);
+  auto assignment = get_assignment(coopname, assignment_hash);
+  eosio::check(assignment.has_value(), "Задание не найдено");
   
-  auto result = get_result(coopname, result_hash);
-  eosio::check(result.has_value(), "Результат не найден");
-  
-  auto contributor = get_active_contributor_or_fail(coopname, result -> project_hash, creator);
+  auto contributor = get_active_contributor_or_fail(coopname, assignment -> project_hash, username);
   
   auto exist_commit = get_commit(coopname, commit_hash);
+  
   eosio::check(!exist_commit.has_value(), "Действие с указанным хэшем уже существует");
   
-  eosio::check(contributed_hours > 0, "Только положительная сумма");
+  eosio::check(contributed_hours > 0, "Только положительная сумма часов");
   
-  eosio::asset spend = contributor -> rate_per_hour * contributed_hours;
+  // считаем сумму фактических затрат создателя на основе ставки в час и потраченного времени
+  eosio::asset spended = contributor -> rate_per_hour * contributed_hours;
+  
+  // Вычисляем премии на основе суммы фактических затрат
+  auto amounts = capital::calculcate_capital_amounts(spended);
   
   commit_index commits(_capital, coopname.value);
+  auto commit_id = get_global_id_in_scope(_capital, coopname, "commits"_n);
   
+  //TODO: надо смотреть надо ли здесь добавлять creator_base и author_base
   commits.emplace(coopname, [&](auto &a) {
-    a.id = get_global_id_in_scope(_capital, coopname, "commits"_n);
+    a.id = commit_id;
     a.status = "created"_n;
     a.coopname = coopname;
     a.application = application;
-    a.username = creator;
-    a.project_hash = result -> project_hash;
-    a.result_hash = result_hash;
+    a.username = username;
+    a.project_hash = assignment -> project_hash;
+    a.assignment_hash = assignment_hash;
     a.commit_hash = commit_hash;
     a.contributed_hours = contributed_hours;
-    a.spend = spend;
+    a.rate_per_hour = contributor -> rate_per_hour;
+    a.spended = spended;
+    a.generated = amounts.generated;
+    a.creators_bonus = amounts.creators_bonus;
+    a.authors_bonus = amounts.authors_bonus;
+    a.capitalists_bonus = amounts.capitalists_bonus;
+    a.total = amounts.total;
     a.created_at = current_time_point();
-    a.contribution_statement = contribution_statement;
   });
+  
+  auto empty_doc = document{};
+  
+  //отправить на approve председателю
+  Action::send<createapprv_interface>(
+    _soviet,
+    "createapprv"_n,
+    _capital,
+    coopname,
+    username,
+    empty_doc,
+    commit_hash,
+    _capital,
+    "approvecmmt"_n,
+    "declinecmmt"_n,
+    std::string("")
+  );
+
   
 }

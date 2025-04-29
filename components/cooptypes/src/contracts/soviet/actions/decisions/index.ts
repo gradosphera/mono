@@ -46,12 +46,6 @@ export * as WithdrawDecision from './withdrawDecision'
 export * as FundWithdrawDecision from './fundWithdrawDecision'
 
 /**
- * Действие поставляет в совет на голосование заявление на вступление в кооператив.
- * @private
- */
-export * as JoinCoopDecision from './joinCoopDecision'
-
-/**
  * Действие поставляет в совет информацию о завершении процесса клиринга и инициирует выпуск закрывающих документов в реестр.
  * @private
  */

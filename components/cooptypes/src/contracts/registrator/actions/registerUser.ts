@@ -12,4 +12,4 @@ export const actionName = 'reguser'
 /**
  * @interface
  */
-export type IRegistrerUser = Registrator.IReguser
+export type IRegisterUser = Registrator.IReguser

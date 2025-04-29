@@ -1,2 +1,2 @@
-export * as Deposits from './deposits'
-export * as Withdraws from './withdraws'
+export * as Incomes from './incomes'
+export * as Outcomes from './outcomes'

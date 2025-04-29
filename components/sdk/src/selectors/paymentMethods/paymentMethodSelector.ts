@@ -1,12 +1,12 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ModelTypes, type ValueTypes } from "../../zeus/index";
-import { rawBankAccountSelector } from "../common/bankAccountSelector";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
+import { rawBankAccountSelector } from '../common/bankAccountSelector'
 
 const rawPaymentMethodSelector = {
   data: {
-    __typename: true,
-    ["...on BankAccount"]: rawBankAccountSelector,
-    ["...on SbpAccount"]: {
+    '__typename': true,
+    '...on BankAccount': rawBankAccountSelector,
+    '...on SbpAccount': {
       phone: true,
     },
   },
@@ -16,11 +16,11 @@ const rawPaymentMethodSelector = {
   method_id: true,
   method_type: true,
   username: true,
-};
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['PaymentMethod']> = rawPaymentMethodSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['PaymentMethod']> = rawPaymentMethodSelector
 
 export type paymentMethodModel = ModelTypes['PaymentMethod']
-export const paymentMethodSelector = Selector('PaymentMethod')(rawPaymentMethodSelector);
-export { rawPaymentMethodSelector };
+export const paymentMethodSelector = Selector('PaymentMethod')(rawPaymentMethodSelector)
+export { rawPaymentMethodSelector }

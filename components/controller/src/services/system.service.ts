@@ -63,7 +63,6 @@ export const install = async (data: IInstall): Promise<void> => {
       sovietExt.push({ ...member, username });
 
       const addUser: RegistratorContract.Actions.AddUser.IAddUser = {
-        registrator: config.coopname,
         coopname: config.coopname,
         referer: '',
         username,
@@ -118,7 +117,6 @@ export const install = async (data: IInstall): Promise<void> => {
       description: '',
     });
   } catch (e: any) {
-    console.log('on error', e);
     for (const user of users) {
       await userService.deleteUserByUsername(user.username);
       await generator.del('individual', { username: user.username });

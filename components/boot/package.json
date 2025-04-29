@@ -11,6 +11,7 @@
   "scripts": {
     "enter": "./scripts/enter.sh",
     "cli": "esno src/index.ts",
+    "deploy": "esno src/index.ts deploy",
     "cleos": "esno src/index.ts cleos",
     "unlock": "esno src/index.ts unlock",
     "boot": "esno src/index.ts boot",

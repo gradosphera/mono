@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 /* Стили для полосы прокрутки содержимого drawer */
 .q-drawer__content::-webkit-scrollbar {
   width: 0px;
@@ -56,6 +57,9 @@
 
 .selected {
   border: 0.1px solid grey;
+}
+.no-padding {
+  padding: 0px !important;
 }
 
 .no-select {

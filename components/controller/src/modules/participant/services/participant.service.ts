@@ -1,19 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 import { ParticipantDomainInteractor } from '~/domain/participant/interactors/participant-domain.interactor';
-import type {
-  ParticipantApplicationDocumentDTO,
-  ParticipantApplicationGenerateDocumentInputDTO,
-} from '../dto/participant-application-document.dto';
-import type {
-  ParticipantApplicationDecisionDocumentDTO,
-  ParticipantApplicationDecisionGenerateDocumentInputDTO,
-} from '../dto/participant-application-decision-document.dto';
+import type { ParticipantApplicationGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-document.dto';
+import type { ParticipantApplicationDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-decision-document.dto';
 import type { AddParticipantInputDTO } from '../dto/add-participant-input.dto';
 import { AccountDTO } from '~/modules/account/dto/account.dto';
 import { generateUsername } from '~/utils/generate-username';
 import { RegisterRole } from '~/modules/account/enum/account-role-on-register.enum';
 import type { RegisterParticipantInputDTO } from '../dto/register-participant-input.dto';
+import type { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 
 @Injectable()
 export class ParticipantService {
@@ -22,17 +17,17 @@ export class ParticipantService {
   public async generateParticipantApplication(
     data: ParticipantApplicationGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ParticipantApplicationDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     const document = await this.participantDomainInteractor.generateParticipantApplication(data, options);
-    return document as unknown as ParticipantApplicationDocumentDTO;
+    return document as unknown as GeneratedDocumentDTO;
   }
 
   public async generateParticipantApplicationDecision(
     data: ParticipantApplicationDecisionGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ParticipantApplicationDecisionDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     const document = await this.participantDomainInteractor.generateParticipantApplicationDecision(data, options);
-    return document as unknown as ParticipantApplicationDecisionDocumentDTO;
+    return document as unknown as GeneratedDocumentDTO;
   }
 
   public async addParticipant(data: AddParticipantInputDTO): Promise<AccountDTO> {

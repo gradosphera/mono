@@ -1,0 +1,20 @@
+import { client } from 'src/shared/api/client';
+import { Queries } from '@coopenomics/sdk';
+import type { IGetPaymentsInputData, IGetPaymentsInputOptions, IPaymentPaginationResult } from '../model/types';
+
+/**
+ * Загружает список платежей с использованием GraphQL API
+ */
+async function loadPayments(data?: IGetPaymentsInputData, options?: IGetPaymentsInputOptions): Promise<IPaymentPaginationResult> {
+  const variables: Queries.Payments.GetPayments.IInput = {data, options}
+
+  const { [Queries.Payments.GetPayments.name]: output } = await client.Query(
+    Queries.Payments.GetPayments.query,
+    {
+      variables
+    }
+  );
+  return output;
+}
+
+export const api = { loadPayments };

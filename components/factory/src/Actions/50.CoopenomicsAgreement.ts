@@ -1,10 +1,10 @@
 import { DraftContract } from 'cooptypes'
-import { CoopenomicsAgreement } from '../templates'
+import { CoopenomicsAgreement } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { CoopenomicsAgreement as Template } from '../templates'
+export { CoopenomicsAgreement as Template } from '../Templates'
 
 export class Factory extends DocFactory<CoopenomicsAgreement.Action> {
   constructor(storage: MongoDBConnector) {

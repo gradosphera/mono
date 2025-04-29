@@ -1,5 +1,6 @@
 <template lang="pug">
-q-card(style="word-break: break-all !important; white-space: normal !important;").q-pa-md.dynamic-padding
+q-card(:flat="isMobile" style="word-break: break-all !important; white-space: normal !important;").dynamic-padding
+
   div(v-if="loading").full-width.text-center
     div(style="margin:auto;").flex.q-pa-sm.full-width.text-center
       q-spinner
@@ -7,6 +8,7 @@ q-card(style="word-break: break-all !important; white-space: normal !important;"
   div(v-if="!loading")
     div(v-html="safeHtml").description.q-pa-xs
     div.row.q-mt-lg.q-pa-sm.justify-center
+
       q-card(style="word-break: break-all !important; text-wrap: pretty;" flat).col-md-8.col-xs-12.q-pa-sm.verify-card
         div.q-mr-lg.q-mt-md
           q-badge(:color="doc.hash == regeneratedHash ? 'teal' : 'red'").text-center.q-pa-xs
@@ -14,51 +16,72 @@ q-card(style="word-break: break-all !important; white-space: normal !important;"
             span контрольная сумма
           p.q-mr-lg.q-ml-lg.text-grey {{ doc.hash }}
 
-        div.q-mr-lg.q-mt-md
-          q-badge(:color="signature_verified ? 'teal' : 'red'").text-center.q-pa-xs
-            q-icon(:name="signature_verified ? 'check_circle' : 'cancel'" ).q-mr-sm
-            span цифровая подпись
-          p.q-mr-lg.q-ml-lg.text-grey {{ actionDocumentData?.document?.signature }}
+        // Показываем все подписи (если это агрегат документа)
+        template(v-if="documentAggregate && documentAggregate.signatures && documentAggregate.signatures.length > 0")
+          div.q-mr-lg.q-mt-md
+            q-badge(:color="hasInvalidSignature ? 'red' : 'teal'").text-center.q-pa-xs
+              q-icon(:name="hasInvalidSignature ? 'cancel' : 'verified'").q-mr-sm
+              span Подписи ({{ documentAggregate.signatures.length }})
 
-        div.q-mr-lg.q-mt-md
-          q-badge(:color="signature_verified ? 'teal' : 'red'").text-center.q-pa-xs
-            q-icon(:name="signature_verified ? 'check_circle' : 'cancel'" ).q-mr-sm
-            span публичный ключ
-          p.q-mr-lg.q-ml-lg.text-grey {{ actionDocumentData?.document?.public_key }}
+          // Список всех подписей
+          q-list(bordered separator dense)
+            q-expansion-item(
+              v-for="(signature, index) in documentAggregate.signatures"
+              :key="index"
+              :label="`Подпись ${index + 1}: ${getSignerName(signature.signer)}`"
+              header-class="signature-header"
+              dense
+            )
+              q-card(flat)
+                q-card-section
+                  div.q-mb-sm
+                    q-badge(:color="signatures_verified[index] ? 'teal' : 'red'").text-center.q-pa-xs
+                      span Подписант
+                    p.q-mt-sm.q-ml-lg {{ getSignerName(signature.signer) }}
 
-        div.text-center.q-gutter-sm
+                  div(v-if="signature.public_key").q-mb-sm
+                    q-badge(:color="signatures_verified[index] ? 'teal' : 'red'").text-center.q-pa-xs
+                      span Публичный ключ
+                    p.q-mt-sm.q-ml-lg {{ signature.public_key }}
+
+                  div(v-if="signature.signature").q-mb-sm
+                    q-badge(:color="signatures_verified[index] ? 'teal' : 'red'").text-center.q-pa-xs
+                      span Цифровая подпись
+                    p.q-mt-sm.q-ml-lg {{ signature.signature }}
+
+                  div.q-mt-md
+                    q-badge(:color="signatures_verified[index] ? 'teal' : 'red'").text-center.q-pa-xs
+                      q-icon(:name="signatures_verified[index] ? 'check_circle' : 'cancel'").q-mr-sm
+                      span Статус подписи: {{ signatures_verified[index] ? 'Верифицирована' : 'Не верифицирована' }}
+
+        div.text-center.q-gutter-sm.q-mt-md
           q-btn(size="sm" color="primary" icon="download" @click="download") скачать
           //- q-btn(size="sm" color="primary" icon="download" @click="download2") скачать2
-
           q-btn(size="sm" color="primary" icon="fa-solid fa-check-double" @click="regenerate" :loading="onRegenerate") сверить
 
-</template>
 
+</template>
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { Cooperative, SovietContract } from 'cooptypes'
+import { ref, computed, onMounted } from 'vue'
 import { Signature, PublicKey } from '@wharfkit/antelope';
 import { useGlobalStore } from 'src/shared/store';
 import DOMPurify from 'dompurify';
 import { DigitalDocument } from 'src/shared/lib/document';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
+import { useWindowSize } from 'src/shared/hooks';
 
 const props = defineProps({
-  action: {
-    type: Object as () => Cooperative.Blockchain.IExtendedAction,
-    required: true,
-  },
-  doc: {
-    type: Object as () => Cooperative.Document.IGeneratedDocument,
+  documentAggregate: {
+    type: Object,
     required: true
   }
 })
 
-const actionDocumentData = ref(props.action.data as SovietContract.Actions.Registry.NewSubmitted.INewSubmitted)
-const doc = ref(props.doc)
+const doc = computed(() => props.documentAggregate.rawDocument)
 const loading = ref(false)
-const signature_verified = ref(false)
-
+const signatures_verified = ref<boolean[]>([])
+const { isMobile } = useWindowSize()
 const regeneratedHash = ref()
 const onRegenerate = ref(false)
 const regenerated = ref()
@@ -89,79 +112,77 @@ const safeHtml = computed(() => sanitizeHtml(doc.value.html));
 
 
 const hashBuffer = async () => {
-  // Декодирование из base64
-  const binaryString = window.atob(doc.value.binary.toString());
+  try {
+    // Декодирование из base64
+    const binaryString = atob(doc.value.binary);
+    const len = binaryString.length;
+    const data = new Uint8Array(len);
 
-  const len = binaryString.length;
+    for (let i = 0; i < len; i++) {
+      data[i] = binaryString.charCodeAt(i);
+    }
 
-  const data = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    data[i] = binaryString.charCodeAt(i);
+    // Вычисление хэша из декодированных бинарных данных
+    regeneratedHash.value = (await useGlobalStore().hashMessage(data)).toUpperCase();
+    console.log('Хэш успешно вычислен:', regeneratedHash.value);
+  } catch (error) {
+    console.error('Ошибка при вычислении хэша:', error);
   }
-
-  // Вычисление хэша из декодированных бинарных данных
-  regeneratedHash.value = (await useGlobalStore().hashMessage(data)).toUpperCase();
 }
 
-hashBuffer()
-
-
-const verifySignature = () => {
-  const public_key = PublicKey.from(actionDocumentData.value.document.public_key)
-  const signature = Signature.from(actionDocumentData.value.document.signature)
-  const hash = actionDocumentData.value.document.hash
-  signature_verified.value = signature.verifyDigest(hash, public_key)
+// Получение ФИО подписанта
+const getSignerName = (signer: any) => {
+  if (!signer) return 'Неизвестный подписант';
+  return getNameFromUserData(signer) || signer;
 }
 
-verifySignature()
+// Верификация всех подписей из агрегата
+const verifySignatures = () => {
+  if (props.documentAggregate?.signatures?.length > 0) {
+    signatures_verified.value = props.documentAggregate.signatures.map(signatureData => {
+      try {
+        if (signatureData.public_key && signatureData.signature) {
+          const public_key = PublicKey.from(signatureData.public_key)
+          const signature = Signature.from(signatureData.signature)
+          const hash = doc.value.hash
+          const is_valid = signature.verifyDigest(hash, public_key)
+          return is_valid
+        } else {
+          return signatureData.is_valid
+        }
+      } catch (error) {
+        console.error('Ошибка при верификации подписи:', error)
+        return false
+      }
+    })
+  }
+}
 
-// TODO удалить позже
-// использовали для отладки сверки. Позволяет скачать регенерированный документ после нажатия на кнопку сверки.
-// async function download2() {
-//   // Преобразование base64 строки в Blob
-//   console.log('regenerated: ', regenerated)
-//   const binaryData = new Uint8Array(Object.values(regenerated.value.binary));
-//   const blob = new Blob([binaryData], { type: 'application/pdf' });
-
-//   // Создание временной ссылки для скачивания файла
-//   const link = document.createElement('a');
-//   link.href = URL.createObjectURL(blob);
-//   link.download = regenerated.value.full_title ? regenerated.value.full_title : `${regenerated.value.meta.title} - ${regenerated.value.meta.username} - ${regenerated.value.meta.created_at}.pdf`;
-
-//   // Имитация клика по ссылке для начала скачивания
-//   document.body.appendChild(link);
-//   link.click();
-
-//   // Очистка после скачивания
-//   document.body.removeChild(link);
-//   URL.revokeObjectURL(link.href);
-// }
-
+onMounted(() => {
+  hashBuffer()
+  verifySignatures()
+})
 
 async function download() {
-  // Преобразование base64 строки в Blob
-  const response = await fetch(`data:application/pdf;base64,${doc.value.binary.toString()}`);
-  const blob = await response.blob();
+  try {
+    // PDF теперь в формате base64, можно использовать data URL
+    const link = document.createElement('a');
+    link.href = `data:application/pdf;base64,${doc.value.binary}`;
+    link.download = doc.value.full_title ? doc.value.full_title : `${doc.value.meta.title} - ${doc.value.meta.username} - ${doc.value.meta.created_at}.pdf`;
 
-  // Создание временной ссылки для скачивания файла
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = doc.value.full_title ? doc.value.full_title : `${doc.value.meta.title} - ${doc.value.meta.username} - ${doc.value.meta.created_at}.pdf`;
-
-  // Имитация клика по ссылке для начала скачивания
-  document.body.appendChild(link);
-  link.click();
-
-  // Очистка после скачивания
-  document.body.removeChild(link);
-  URL.revokeObjectURL(link.href);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('Ошибка при скачивании файла:', error);
+  }
 }
+
+// Вычисляем, есть ли хотя бы одна невалидная подпись
+const hasInvalidSignature = computed(() => signatures_verified.value.some(v => v === false))
 
 </script>
 <style>
-.description table {
-
-}
 
 .description td {
   word-break: break-all !important;
@@ -187,6 +208,15 @@ async function download() {
   font-size: 10px !important;
 }
 
+.signature-header {
+  font-size: 12px;
+}
+
+.signature-text {
+  font-size: 10px;
+  word-break: break-all;
+}
+
 @media (min-width: 700px) {
   .dynamic-padding {
     padding: 50px !important;
@@ -194,7 +224,7 @@ async function download() {
 }
 @media (max-width: 700px) {
   .dynamic-padding {
-    padding: 20px !important;
+    padding: 10px !important;
   }
 }
 </style>

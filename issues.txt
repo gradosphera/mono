@@ -1,0 +1,435 @@
+#232: Поднять бэкенд полного обозревателя блоков
+
+
+
+---
+#231: Фикс багов десктопа
+
+* [x] при регистрации не обновляется состояние после получения решения * [x] не выходит из системы нормально (после выхода и перехода на страницу регистратора какие-то данные там есть).  * [x] баг аудентификации на регистрации * [x] перенос на другую строку в платежах * [x] в карточке организации емейл был скрыт для редактирования * [x] добавлено правило проверки даты при добавлении пайщика
+
+---
+#226: Встроить редактирование пайщиков
+
+* [x] добавить private_account в бэкенд * [x] ввести проверку на соответствие имен пользователей в запросе на обновление и почт * [x] перевести запросы пайщиков на graphql * [x] встроить функции обновления * [x] устранить ошибки и предупреждения * [ ] проверить регистрацию
+
+---
+#225: Скорректировать возврат паевого взноса из результата интеллектуальной деятельности
+
+* [x] Устранить логику взноса-возврата взноса при withdraw, т.к. там результат уже принят через решение по актам. * [x] Убрать логику перебора коммитов при создании объекта возврата - работаем напрямую с contributor и его доступным балансом по договору УХД
+
+---
+#224: Написать ТЗ по контракту капитализации
+
+
+
+---
+#218: Встроить логику фондирования членскими взносами
+
+* [x] считать личный вес share_balance на основе available + for_convert в момент конвертации * [x] до момента конвертации средства не являются share_balance и не принимают участие в распределении * [x] использовать  Все членские взносы стекаются в проект и распределяются рубильником на 2 части: локальную и глобальную. Под локальной частью подразумевается та часть средств, которая должна распределиться среди инвесторов/создателей конкретно этого проекта. Под глобальной частью подразумевается та часть средств, которая должна распределиться среди инвесторов/создателей целевой потребительской программы “капитализация”.  * [x] обновление балансов и расчет долей в членских взносах по проектам * [x] возврат средств из проектов и учёт средств при возврате  Куда записываем расчетную величину накопленного остатка? В баланс контрибьютора, в его таблицу. Затем мы используем эти средства для создания заявления на возврат с дальнейшим исполнением. Т.е. паевой взнос можно вернуть только из числа накопленных средств членских взносов программы. 
+
+---
+#211: Ввести отображение наименования организации в таблице пайщиков
+
+
+
+---
+#209: Создать скрипт-загрузчик, который устанавливает MONO для целей разработки
+
+
+
+---
+#204: Создать рабочий прототип модуля экспорта результатов из трекера
+
+
+
+---
+#203: Написать смарт-контракт капитализации результатов интеллектуальной деятельности
+
+
+
+---
+#202: Внести изменения в README.md для гладкой установки
+
+
+
+---
+#199: Onboarding-процесс для задач по маркетплейсу (Илья Смирнов)
+
+1) Установить и настроить локальный проект для внесения изменений: <https://github.com/coopenomics/mono>  2) Изучить документацию разработчика: <https://цифровой-кооператив.рф/documentation/>  3) Протестировать запуск локального инстанса перед внесением изменений по первой задачей (докер, seed-скрипты, тестовые данные для заполнения локальной базы)  4) Выяснить стандартный gitflow при внесении изменений по задаче
+
+---
+#182: Запроектировать технический бизнес-процесс списания расходов результата проекта
+
+Расход создается с хэш-идентификатором, который хранит информацию о реквизитах платежа во внешней системе учёта MONO относительно блокчейна.  При создании расхода необходимо указать хэш платежа, который должен быть предварительно создан в MONO. Создание платежа в MONO автоматически повлечет за собой его отображение в разделе "платежи", если не предусмотреть обратное. Также в разделе платежи сейчас отображаются только входящие платежи, и исходящие там вообще не встроены ещё.   Учитывая то, что входящие платежи скорее всего желательно тоже перевести на хэш-идентификаторы, то получается, что необходимо переписать модуль приёма платежей, адаптировав его под это изначально.   Пусть так, и у нас есть модуль платежей, который генерирует объекты платежа с суммами с указанием реквизитов. Однако основой для их отображения должна служить блокчейн-база, т.к. именно в ней происходит сейчас утвердение расходов.   А у нас сейчас вообще не так, по-крайней мере для входящих платежей. Все входящие платежи создаются в базе MONO, которая создаёт объект в блокчейне в момент приема платежа и автоматически его отмечает исполненным, что удаляет запись из бч и запускает бизнес-процесс приёма платежа согласно типу.   В контракте шлюза сейчас есть реализация возврата с документами. Наверное она даже как-то работает. Чтобы не переписывать сейчас шлюз на бэкенде, необходимо только добавить ему функционал для работы с исходящими платежами.   В контракте у нас при возврате фигурирует bank_account_id который необходимо заменить на withdraw_hash, где в случае расхода он должен быть равен expense_hash, который должен быть предварительно сформирован при подготовке служебной записки.   Тогда, здесь необходимо:  * заменить bank_account_id на withdraw_hash в контракте gateway * пристроить систему генерации исходящих платежей с опорой на их блокчейн-двойник.  * причем создание исходящего платежа должно происходить в транзакционной манере, т.е. мы сперва генерим хэш и делаем некое предсохранение в базе, затем отправляем транзакцию в блокчейн, и только затем сохраняем исходящий платеж в базу. Тогда у каждого платежа в базе будет зеркало в бч.   Если в случае со взносами мы создаем объект взноса в момент приёма платежа, и делаем это в основном из за того, что мы не можем при регистрации пайщика создать платеж в привязке к аккаунту т.к. его еще нет. То в случае с возвратом мы можем создавать исходящие объекты сразу в блокчейне и привязываться к ним. Тут вообще никак иначе нельзя т.к. во многих случаях управление возвратами происходит по условиям смарт-контрактов, а ручками бухгалтер или кто доверенный может вмешаться только при достижении определенных его условий.   Тогда получается, что при создании исходящего платежа необходимо:  * принять от пайщика детали платежа (идентификатор реквизитов) * принять от пайщика детали расхода (если расход) * использовать информацию для генерации документа * проверить что детали платежа ок и все в целом ок * сгенерировать хэш платежа * отправить в блокчейн транзакцию и убедиться что всё ок * сохранить в локальной базе детали платежа  И именно в таком порядке. В случае облома на этапе транзакции в блокчейне - в локальной базе ничего не должно остаться. Тогда мы сможем на уровне блокчейна управлять статусами готовности платежа и при этом иметь возможность получать закрытые данные по платежу из базы.   В таком случае необходимо, чтобы шлюз не удалял самостоятельно объекты исходящих платежей, а только переводил их в статус, который позволяет доверенному лицу удалить их из базы и блокчейна одновременно из интерфейса.   Тогда всё будет ок.
+
+---
+#169: Добавить шаблон акта приема-передачи результата интеллектуальной деятельности в кооператив
+
+
+
+---
+#168: Добавить шаблон заявления на взнос деньгами с ЦПП Цифровой Кошелек по договору УХД
+
+
+
+---
+#167: Добавить шаблон заявления на взнос результатом в фабрику
+
+
+
+---
+#152: Отключить избыточные оповещения на исходящих переводах
+
+
+
+---
+#150: Баг: обновление карточки банковского счета кооперативного участка
+
+
+
+---
+#149: Баг перехода назад на ключ доступа с заявления
+
+При переходе назад от заявления к ключу доступа переходим не туда. Скорее всего уходим на выбор кооперативных участков, который скрыт.   step
+
+---
+#146: Добавить поле ИНН в реквизиты и кнопку "скопировать реквизиты"
+
+
+
+---
+#145: Отобразить иконки прав доступа в листе кнопок меню
+
+
+
+---
+#144: Срезать константу COOPNAME из десктопа
+
+
+
+---
+#139: Убрать ограничение в 24 часа для первой ссылки приглашения
+
+
+
+---
+#138: Сделать кнопку настроек кооператива доступной для членов совета
+
+
+
+---
+#136: Рефакторинг техдокументации #1
+
+* [x] Как это работает * [x] Архитектура * [x] Язык API * [x] Обзор SDK * [x] Установка * [ ] ~~Подключение~~ * [x] Инициализация * [x] Раздел подключений и автоматизация * [x] Аккаунты  * [ ]
+
+---
+#135: new issue
+
+test
+
+---
+#134: Сделать страницу CONNECT доступной для подключенных кооперативов в VOSKHOD
+
+
+
+---
+#133: Методы Canvas перевести в класс SDK #test
+
+
+
+---
+#132: Добавить описание интерфейсов переменных в макросы main.py
+
+
+
+---
+#126: Убрать срок действия первого приглашения? на addParticipant. Чтоб не объяснять о восстановлении ключа каждому 1
+
+
+
+---
+#125: Добавить набор методов для работы с Canvas и собственноручной подписью в SDK
+
+
+
+---
+#121: createInitial -> createInitialPayment, createDeposit -> createDepositPayment
+
+
+
+---
+#120: Добавить класс Document и метод signDocument в SDK
+
+
+
+---
+#118: Убрать из getAccounts.Input поле username за ненадобностью
+
+
+
+---
+#117: Устранить мутацию удаления аккаунта deleteAccount
+
+
+
+---
+#115: Добавить класс Account для генерации имени и ключей в SDK
+
+
+
+---
+#113: Убрать указание роли пользователя из Account.RegisterAccount
+
+
+
+---
+#109: Скорректировать IInput интерфейсы во всех мутациях и запросах SDK
+
+* [x] addParticipant ( data AddParticipantInput! ) Account! * [x] addTrustedAccount ( data AddTrustedAccountInput! ) Branch! * [x] createBankAccount ( data CreateBankAccountInput! ) PaymentMethod! * [x] createBranch ( data CreateBranchInput! ) Branch! * [x] createDeposit ( data CreateDepositPaymentInput! ) Payment! * [x] createInitialPayment ( data CreateInitialPaymentInput! ) Payment! * [x] createProjectOfFreeDecision ( data CreateProjectFreeDecisionInput! ) CreatedProjectFreeDecision! * [x] deleteAccount ( data DeleteAccountInput! ) Boolean! * [x] deleteBranch ( data DeleteBranchInput! ) Boolean! * [x] deletePaymentMethod ( data DeletePaymentMethodInput! ) Boolean! * [x] deleteTrustedAccount ( data DeleteTrustedAccountInput! ) Branch! * [x] editBranch ( data EditBranchInput! ) Branch! * [x] generateFreeDecision ( data FreeDecisionGenerateDocumentInput! , options GenerateDocumentOptionsInput ) ProjectFreeDecisionDocument! * [x] generateParticipantApplication ( data ParticipantApplicationGenerateDocumentInput! , options GenerateDocumentOptionsInput ) ParticipantApplicationDocument! * [x] generateParticipantApplicationDecision ( data ParticipantApplicationDecisionGenerateDocumentInput! , options GenerateDocumentOptionsInput ) ParticipantApplicationDecisionDocument! * [x] generatePrivacyAgreement ( data GenerateDocumentInput! , options GenerateDocumentOptionsInput ) GeneratedDocument! * [x] generateProjectOfFreeDecision ( data ProjectFreeDecisionGenerateDocumentInput! , options GenerateDocumentOptionsInput ) ProjectFreeDecisionDocument! * [x] generateSelectBranchDocument ( data SelectBranchGenerateDocumentInput! , options GenerateDocumentOptionsInput ) SelectBranchDocument! * [x] generateSignatureAgreement ( data GenerateDocumentInput! , options GenerateDocumentOptionsInput ) GeneratedDocument! * [x] generateUserAgreement ( data GenerateDocumentInput! , options GenerateDocumentOptionsInput ) GeneratedDocument! * [x] generateWalletAgreement ( data GenerateDocumentInput! , options GenerateDocumentOptionsInput ) GeneratedDocument! * [x] initSystem ( data Init! ) SystemInfo! * [x] installExtension ( data ExtensionInput! ) Extension! * [x] installSystem ( data Install! ) SystemInfo! * [x] login ( data LoginInput! ) RegisteredAccount! * [x] logout ( data LogoutInput! ) Boolean! * [x] publishProjectOfFreeDecision ( data PublishProjectFreeDecisionInput! ) Boolean! * [x] refresh ( data RefreshInput! ) RegisteredAccount! * [x] registerAccount ( data RegisterAccountInput! ) RegisteredAccount! * [x] registerParticipant ( data RegisterParticipantInput! ) Account! * [x] resetKey ( data ResetKeyInput! ) Boolean! * [x] selectBranch ( data SelectBranchInput! ) Boolean! * [x] setPaymentStatus ( data SetPaymentStatusInput! ) Payment! * [x] setWif ( data SetWifInput! ) Boolean! * [x] startResetKey ( data StartResetKeyInput! ) Boolean! * [x] uninstallExtension ( data UninstallExtensionInput! ) Boolean! * [x] updateAccount ( data UpdateAccountInput! ) Account! * [x] updateBankAccount ( data UpdateBankAccountInput! ) PaymentMethod! * [x] updateExtension ( data ExtensionInput! ) Extension! * [x] updateSystem ( data Update! ) SystemInfo!  **QUERIES**  * [x] getAccount ( data GetAccountInput! ) Account! * [x] getAccounts ( data GetAccountsInput , options PaginationInput ) AccountsPaginationResult! * [x] getAgenda [AgendaWithDocuments!]! * [x] getBranches ( data GetBranchesInput! ) [Branch!]! * [x] getDocuments ( data GetDocumentsInput! ) DocumentsPaginationResult! * [x] getExtensions ( data GetExtensionsInput ) [Extension!]! * [x] getPaymentMethods ( data GetPaymentMethodsInput ) PaymentMethodPaginationResult! * [x] getPayments ( data GetPaymentsInput , options PaginationInput ) PaymentPaginationResult! * [x] getSystemInfo SystemInfo!
+
+---
+#105: Выпустить достаточно-полную версию документации
+
+Раздел Руководители:  * [ ] Пересмотреть и обновить что есть * [ ] Добавить новые скрины и методы  Раздел Пайщики:  * [ ] Добавить сценарий восстановления ключа  * [ ]
+
+---
+#104: Собрать селекторы, запросы и мутации в SDK
+
+**Mutations**  * [ ] System → contacts * [x] updateSystem?! * [x] addParticipant ( data AddParticipantInput! ) Account! * [x] addTrustedAccount ( data AddTrustedAccountInput! ) Branch! * [x] createBankAccount ( data CreateBankAccountInput! ) PaymentMethod! * [x] createBranch ( data CreateBranchInput! ) Branch! * [x] createDeposit ( data CreateDepositPaymentInputDTO! ) Payment! * [x] createInitialPayment ( data CreateInitialPaymentInput! ) Payment! * [x] createProjectOfFreeDecision ( data CreateProjectFreeDecisionInput! ) CreatedProjectFreeDecision! * [x] deleteAccount ( data DeleteAccountInput! ) Boolean! * [x] deleteBranch ( data DeleteBranchInput! ) Boolean! * [x] deletePaymentMethod ( data DeletePaymentMethodInput! ) Boolean! * [x] deleteTrustedAccount ( data DeleteTrustedAccountInput! ) Branch! * [x] editBranch ( data EditBranchInput! ) Branch! * [x] generateFreeDecision ( data FreeDecisionGenerateDocumentInput! , options GenerateDocumentOptionsInput ) ProjectFreeDecisionDocument! * [x] generateParticipantApplication ( data ParticipantApplicationGenerateDocumentInput! , options GenerateDocumentOptionsInput ) ParticipantApplicationDocument! * [x] generateParticipantApplicationDecision ( data ParticipantApplicationDecisionGenerateDocumentInput! , options GenerateDocumentOptionsInput ) ParticipantApplicationDecisionDocument! * [x] generatePrivacyAgreement ( data GenerateDocumentInput! , options GenerateDocumentOptionsInput ) GeneratedDocument! * [x] generateProjectOfFreeDecision ( data ProjectFreeDecisionGenerateDocumentInput! , options GenerateDocumentOptionsInput ) ProjectFreeDecisionDocument! * [x] generateSelectBranchDocument ( data SelectBranchGenerateDocumentInput! , options GenerateDocumentOptionsInput ) SelectBranchDocument! * [x] generateSignatureAgreement ( data GenerateDocumentInput! , options GenerateDocumentOptionsInput ) GeneratedDocument! * [x] generateUserAgreement ( data GenerateDocumentInput! , options GenerateDocumentOptionsInput ) GeneratedDocument! * [x] generateWalletAgreement ( data GenerateDocumentInput! , options GenerateDocumentOptionsInput ) GeneratedDocument! * [x] installExtension ( data ExtensionInput! ) Extension! * [x] login ( data LoginInput! ) RegisteredAccount! * [x] logout ( data LogoutInput! ) Boolean! * [x] publishProjectOfFreeDecision ( data PublishProjectFreeDecisionInput! ) Boolean! * [x] refresh ( data RefreshInput! ) RegisteredAccount! * [x] registerAccount ( data RegisterAccountInput! ) RegisteredAccount! * [x] registerParticipant ( data RegisterParticipantInput! ) Account! * [x] resetKey ( data ResetKeyInput! ) Boolean! * [x] selectBranch ( data SelectBranchInput! ) Boolean! * [x] setPaymentStatus ( data SetPaymentStatusInput! ) Payment! * [x] startResetKey ( data StartResetKeyInput! ) Boolean! * [x] uninstallExtension ( data UninstallExtensionInput! ) Boolean! * [x] updateAccount ( data UpdateAccountInput! ) Account! * [x] updateBankAccount ( data UpdateBankAccountInput! ) PaymentMethod! * [x] updateExtension ( data ExtensionInput! ) Extension! * [x] installSystem(install!) SystemInfo * [x] initSystem(init!) * [x] setWif * [x] updateSystem  \ **Queries**  * [x] getAccount ( data GetAccountInput! ) Account! * [x] getAccounts ( data GetAccountsInput , options PaginationInput ) AccountsPaginationResult! * [x] getAgenda [AgendaWithDocuments!]! * [x] getBranches ( data GetBranchesInput! ) [Branch!]! * [x] getDocuments ( data GetDocumentsInput! ) DocumentsPaginationResult! * [x] getExtensions ( data GetExtensionsInput ) [Extension!]! * [x] getPaymentMethods ( data GetPaymentMethodsInput ) PaymentMethodPaginationResult! * [x] getPayments ( data GetPaymentsInput , options PaginationInput ) PaymentPaginationResult! * [x] getSystemInfo SystemInfo! * [x] System → vars * [x] System → contacts  ```typescript CreateDepositPaymentInputDTO - проверить на DTO в названиях ```
+
+---
+#103: Занести auth.controller в гексагон
+
+
+
+---
+#102: Занести user.controller в гексагон
+
+queries  * [x] getUsers → getAccounts * [x] getUser → getAccount  mutations  * [x] createUser → registerAccount   * [x] изменить состав входящего DTO (убрать дубль email)   * [ ] сделать доменный интерфейс очевидным (вынести в cooptypes) * [x] addUser → addParticipant * [x] joinCoop → registerParticipant   * [x] 4 соглашения, заявление и username * [x] updateUser → updateAccount * [x] deleteUser → deleteAccount  Завести в селекторы  Перевести терминал  срезать перенесенное из контроллера
+
+---
+#96: Баг продолжения регистрации с другого устройства
+
+Локальный тестовый ключ: 5JpMnzu3ab9tX74b8TgrW99iutZbLtjwkR1gTYwFkRyPY888WBt
+
+---
+#95: Устранить избыточные логи quotter
+
+
+
+---
+#94: Удобная задокументированная версия QL-клиента
+
+
+
+---
+#91: Повесить роли членам совета и залогиненному лицу в карточку
+
+
+
+---
+#89: Занести все существующие методы в задокументированный graphql
+
+user  * [x] registerUser * [x] addUser * [x] getUsers * [x] getUser  auth  * [x] login * [x] refreshTokens * [x] lostKey * [x] resetKey * [ ] send-verification-email * [ ] verify-email  coop  * [x] **agenda** * [ ] staff * [ ] info  documents  * [x] **getDocuments** * [x] generate (всех по списку)  methods  * [x] listPaymentMethod * [x] addPaymentMethod * [x] deletePaymentMethod  orders → **payments**  * [x] initialPayment * [x] createDeposit * [x] setOrderStatus * [x] getCoopOrders * [ ] IPN (после отключения express-роутера) * [ ] **getProviders** * [x] getMyOrders  participant  * [x] joinCooperative * [x] selectBranch  plugins (extensions)  * [x] setPlugin * [x] setConfig  system  * [x] **contacts (из coop)** * [x] health * [x] init * [x] install * [x] setWif (объединить с install и оставить отдельным) * [x] get-vars * [x] **updateSystem (mutation set-vars, updateOrganization, settings, …)** * [x] save-vars * [ ] manageSettings * [ ] settings  decision  * [x] createProjectFreeDecision * [x] createFreeDecision
+
+---
+#87: Генерация документов в GraphQL с документацией
+
+* [x] SelectBranch [101] * [x] ProjectFreeDecision[599] * [x] FreeDecision[600] * [x] ParticipantApplication [100] * [x] Decision[500] * [x] WalletAgreement [1] * [x] PrivacyAgreement[2] * [x] SignatureAgreement[3] * [x] UserAgreement[4] * [ ] добавить мутации и селекторы в coopjs * [ ] настроить отгрузку документации в MONO
+
+---
+#85: Выбор кооперативного участка "добавленным" пайщиком
+
+* [x] ввести запрос DTO на аккаунт пользователя и таблицу participant (user), * [x] проверка прав доступа * [x] загрузка комплексного аккаунта в бутере * [x] Добавить наблюдателя с всплывающим окном на присоединение к КУ, если он не выбран, а branched == true * [x] Использовать метод изменения кооперативного участка с каким-то вложенным документом * [x] Добавить мутацию на выбор участка * [x] мигрировать таблицы контракта
+
+---
+#83: Ввести требования аудентификации для отдельного поля и документировать их
+
+
+
+---
+#82: добавить chain_id в controller .env
+
+
+
+---
+#81: добавить фактические адреса существующих организаций кооперативов как копии юридических адресов
+
+
+
+---
+#79: Отобразить флаг включения кооперативных участков
+
+* [x] метод контракта добавить * [x] добавить методы в cooptypes * [x] добавить мутацию на включение и отключение * [ ] добавить запрос на sysinfo с DTO (аналог текущему health) * [ ] добавить мутацию и запрос в coopjs * [ ] отобразить описание и кнопку в терминале
+
+---
+#74: Сделать основной загрузчик BOOT явным и последовательным
+
+
+
+---
+#72: Реализовать шаблон гексагональной архитектуры на примере appstore
+
+``` src/ ├── app.ts                 # Основной файл Express приложения ├── bootstrap.ts           # Точка запуска приложения ├── config/                # Конфигурационные файлы приложения │   ├── config.ts          # Основной конфиг приложения │   └── ...                # Другие конфигурационные файлы ├── domain/                # Корневая бизнес-логика (интеракторы, репозитории, сущности) │   ├── user/              # Домен пользователя │   │   ├── interactors/   # Интеракторы для пользователя (сценарии использования) │   │   │   ├── CreateUserInteractor.ts    # Интерактор для создания пользователя │   │   │   ├── DeleteUserInteractor.ts    # Интерактор для удаления пользователя │   │   │   ├── UpdateUserInteractor.ts    # Интерактор для обновления пользователя │   │   │   └── ...                         # Другие интеракторы пользователя │   │   ├── repositories/  # Интерфейсы и абстракции для работы с данными │   │   │   ├── user.repository.interface.ts # Интерфейс репозитория пользователя │   │   │   └── ... │   │   └── entities/      # Бизнес-сущности пользователя │   │       └── user.entity.ts              # Сущность пользователя │   └── order/             # Домен заказов │       ├── interactors/ │       │   ├── ProcessOrderInteractor.ts   # Интерактор для обработки заказа │       │   ├── CancelOrderInteractor.ts    # Интерактор для отмены заказа │       │   └── ...                         # Другие интеракторы для заказов │       ├── repositories/ │       │   └── order.repository.interface.ts # Интерфейс репозитория заказов │       └── entities/ │           └── order.entity.ts              # Сущность заказа ├── infrastructure/        # Инфраструктурный слой (реализации репозиториев и подключение к базам данных) │   ├── database/          # Конкретные реализации репозиториев для разных баз данных │   │   ├── mongo/ │   │   │   ├── repositories/ │   │   │   │   └── mongo-user.repository.ts   # Mongo реализация репозитория для пользователя │   │   │   └── ...                             # Другие реализации для MongoDB │   │   └── postgres/ │   │       ├── repositories/ │   │       │   └── postgres-user.repository.ts # Postgres реализация репозитория для пользователя │   │       └── ...                             # Другие реализации для PostgreSQL │   └── services/           # Вспомогательные инфраструктурные сервисы (например, для отправки email) │       ├── email.service.ts │       └── ... ├── modules/               # Основные модули приложения │   ├── user/              # Модуль пользователя в NestJS │   │   ├── dto/           # DTO для модуля пользователя │   │   │   └── create-user.dto.ts # DTO для создания пользователя │   │   ├── entities/      # ORM-сущности, если используются отдельно от бизнес-сущностей │   │   │   └── user.orm-entity.ts # ORM-сущность для PostgreSQL, если требуется │   │   ├── resolvers/     # GraphQL резолверы или REST контроллеры │   │   │   └── user.resolver.ts   # Резолвер пользователя │   │   └── services/      # Локальные сервисы модуля, например, для валидации │   │       └── user.service.ts    # Вспомогательный сервис модуля │   ├── order/             # Пример другого модуля (например, для заказов) │   │   ├── dto/ │   │   ├── entities/ │   │   ├── resolvers/ │   │   └── services/ │   └── appstore/          # Модуль AppStore │       ├── controllers/   # Контроллеры и резолверы для AppStore │       │   └── appstore.controller.ts   # Контроллер AppStore │       ├── resolvers/     # Резолверы GraphQL для AppStore (если используются) │       │   └── appstore.resolver.ts     # Резолвер AppStore │       ├── services/      # Сервисы для инфраструктурных задач AppStore │       │   ├── AppManagementService.ts  # Основной сервис управления приложениями │       │   ├── AuthApiService.ts        # Сервис аутентификации для внешних приложений │       │   └── PermissionsApiService.ts # Сервис управления правами доступа │       ├── dto/           # DTO для AppStore │       └── appstore.module.ts # Главный модуль AppStore ├── controllers/           # Контроллеры Express-приложения (если они ещё используются) ├── middlewares/           # Middleware для Express (если используется) ├── routes/                # Маршруты Express (например, для API v1) ├── services/              # Общие сервисы Express ├── models/                # Модели MongoDB или другие схемы, если необходимо оставить └── utils/                 # Утилиты и вспомогательные функции ```
+
+---
+#69: nestJS & postgres & graphql & apollo прототип на действующем контроллере
+
+* [x] собрать прототип nestjs & postgres & migrator * [ ] собрать прототип apollo server & graphql code generator & apollo client
+
+---
+#68: Шаблон витрины приложений
+
+* [ ] верхне-правое меню настроек * [ ] Шаблон настроек * [ ] Витрина плагинов * [ ] Витрина приложений * [ ] Выход  Витрина:  * [ ] первой отдельной записью идет витрина * [ ] установленные приложения отображаются в левом меню * [ ] окно приложения: виджет, настройки, лог
+
+---
+#67: Собрать прототип лендинга с документацией
+
+
+
+---
+#64: Перевести платежи на систему плагинов
+
+
+
+---
+#63: Собрать витрину доступных расширений
+
+* [x] перенести оставшиеся расширения на модули * [x] добавить сущность лога * [x] отключить монго-модель расширений * [x] рефакторинг * [x] собрать API-клиент * [x] построить интерфейс graphql для получения списка доступных плагинов * [x] построить интерфейс мутации graphql для установки плагина * [x] рефакторинг * [x] проверить документирование * [x] установить клиента * [x] модель - стор расширений * [x] загрузка доступных расширений * [x] загрузка установленных расширений * [x] витрина расширений * [x] виджет расширения * [x] проверка аудентификации * [ ] ~~страница просмотра лога расширения~~ * [x] мутация установки расширения * [x] мутация отключения расширения * [x] мутация удаления расширения * [x] страница не установленного расширения (страница установки) * [x] страница установленного расширения, редактирования конфигурации и просмотра логов * [x] страница редактирования конфигурации расширени * [ ] ~~выделить стейт из конфига~~ * [x] ввести проверку конфига при установке * [x] кнопка “назад” в шапке * [x] внести ясность по отсутстующим настройкам * [x] ввести [install.md](http://install.md) с инструкцией по установке * [x] рефакторинг маршрутизатора
+
+---
+#57: Собрать лендинг на сайт mono
+
+
+
+---
+#55: Растащить настройки кооператива и пользовательские
+
+
+
+---
+#53: Устранить баг детерменированной регенерации документов
+
+
+
+---
+#52: Устранить избыточное сохранение документа при регенерации
+
+* [x] ввести опцию в параметры генератора * [ ] передать опции сквозь контроллер
+
+---
+#43: Повесить лоадер на кнопку запуска установки совета
+
+
+
+---
+#41: перенести провайдера с adonisJS на nestJS
+
+* [ ]
+
+---
+#40: Развернуть облачное хранилище на тест и проде
+
+
+
+---
+#39: Собрать пред-генератор документов кооператива для приёма в совете
+
+* [x] сохранять в облаке в папку кооператива * [x] разбить на 2 папки: PDF / docx * [x] создавать публичную ссылку на docx * [x] возвращать ссылку в задаче
+
+---
+#38: Баг извлечения повестки в авто-кооперативах
+
+
+
+---
+#36: Собрать контроллер оплат ресурсов
+
+Проверка ресурсов выполняется контроллером кооператива:  * при достижении условий автономно каждую минуту * по каждой транзитной транзакции ?  Сейчас транзитов еще нет, поэтому, каждую минуту. Возможно, так и оставим потом, чтоб не путать и не путаться.
+
+---
+#35: Исправить баг отсутствующего потребителя в нотификаторе
+
+
+
+---
+#32: Баг обновления состава совета другим советом (сброс состава)
+
+
+
+---
+#28: Генерация и подпись соглашения на подключение
+
+На спецстранице отобразить соглашение на подключение к платформе. Проверить подписано ли оно ранее. Подписав, отправить его администратору. После подписи соглашения, для того, чтобы документ отобразился в разделе документы у пайщика, необходимо принять его администратором. Т.е. администратор должен вызвать метод confirmagree. До этого соглашение считается условно-принятым, т.е. в реестре документов отмечается как newsubmitted, но еще не newresolved, т.е. этот документ еще может и не попасть в реестр финальный. Поэтому, или необходимо изменить приём документов в пользу делать сразу newresolved, тогда документ сразу будет отображен где надо, или вообще изменить подход к подключению. Скорее всего второе.  Agreements это соглашения между пайщиками и кооперативом сейчас. У нас же здесь что-то вроде metaAgreement, который заключается между кооперативом и провайдером, и больше он нигде фигурировать не будет.  * [x] изменить метод regcoop и структуру orgs для приёма подписанного соглашения на подключение * [x] добавить в regcoop вызов newresolved и newsubmitted * [x] убрать agreements newresolved и newsubmitted из числа общего отображения документов - мы всегда вытаскиваем их связями с заявлениями сейчас и нет смысла плодить их в главном экране. * [x] обновить типы (registrator) * [x] соединить подпись соглашения с вызовом метода создания кооператива * [x] отобразить статус подключения * [x] отобразить документ в реестре после приёма администратором * [x] встроить инструкцию подключения * [x] отобразить документ соглашения на экране подключения администратору * [x] добавить выбор типа извлекаемого документа необязательным параметром (type=submitted | resolved) * [x] разворачивать список сразу, если документ 1 * [x] запросить домен в форме подключения * [x] тест * [x] скорректировать сумму в соглашении * [x] установить обновленные соглашения всех типов на тест * [x] выкатить на тест * [x] фикс бага обновления состояния документа * [x] обновить соглашения на проде * [x] выкатить на прод * [x] обновить переменные на тесте и проде
+
+---
+#27: Скорректировать отображение воркспейсов и меню
+
+Воркспейсы по ролям:  * пайщик * член совета * председатель * администратор  воркспейсы отложим. Сейчас встроим всё в один спейс и уберём меню выбора.  radial-gradient(circle, #35a2ff 0%, #014a88 100%)"
+
+---
+#26: Фикс бага извлечения кооператива из организаций, когда их несколько
+
+
+
+---
+#25: Настроить резервное копирование в S3 по расписанию
+
+
+
+---
+#24: Убрать кнопку "Утвердить" в совете для членов
+
+
+
+---
+#23: Баг временного отображения соглашений на подпись после входа на медленном интернете
+
+
+
+---
+#22: Передать, сохранить и использовать параметр ключа на бэкенд при установке и в процессе работы
+
+При запуске кооператива ему необходим ключ на сервере для осуществления регистраций и прочих сервисных операций. Для этого нам нужно активное разрешение ключа, который необходимо хранить на сервере. В минимальной реализации храним в базе данных. В расширенной переносим хранение ключа в VAULT.  Минимальная версия подразумевает создание модели для хранения ключа и операций с ним. Важно, что при восстановлении доступа, ключ будет не действительным. Необходимо переустанавливать ключи, если необходимо.  * [x] при установке сохранять ключ в базу set_wif(wif) * [x] использовать ключ из базы get_wif() * [x] отобразить настройку для обновления ключа в базе
+
+---
+#21: Баг разворота повестки - открываются несколько папок с документами вместо одной
+
+
+
+---
+#19: Собрать временное решение поставки ПО на docker
+
+* [x] собрать плейбук на сборку * [x] риверсировать сайты на маршруты по портам * [x] автовыпуск и обновление сертификатов SSL * [x] параметризировать сборку * [x] перевести продакшн на новую сборку * [x] убрать cloudflare переадресацию http → https для ЦК * [x] настроить punicode параметр для nginx * [x] баг подгрузки данных в nginx на первом старте ??? * [x] параллельный запуск нескольких групп контейнеров * [x] подтереть мусор
+
+---
+#18: Пройти путь запуска кооператива на тестнете
+
+
+
+---
+#14: BUG: ApiError: Invalid time format при добавлении пайщика через админку
+
+При добавлении пайщика дата не верно передаётся, в объекте при проверке на контроллере уже invalid date. Проверить фронт.
+
+---
+#13: Восстановить работу деплоя через сборку в semaphore
+
+Временное решение до выноса переменных окружения в терминале в настройки приложения.  Установка:  * [x] подключить semaphore на деплой контрактов  Миграция:  * [x] soviet::createprog * [x] for(draft of drafts) draft::create_draft * [x] soviet::makecoagreement (wallet, signature, user, privacy, coopenomics) * [x] затащить параметры [генератора в .env при деплое ??](http://e.vn)\   \   Контроллер: * [x] установить vars * [x] установить settings
+
+---
+#9: Построить маршруты создания бакета, загрузки-чтения файлов в-из MINIO
+
+
+
+---
+#3: Добавить скролл для страницы реестра пайщиков
+
+
+
+---
+#2: Ввести подписки на важное
+
+использовать subscriptions у graphql
+
+---

@@ -1,9 +1,14 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ModelTypes, type ValueTypes } from "../../zeus/index";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 
 const rawExtensionSelector = {
   name: true,
-  available: true,
+  is_available: true,
+  is_installed: true,
+  is_desktop: true,
+  is_builtin: true,
+  external_url: true,
+  is_internal: true,
   enabled: true,
   updated_at: true,
   created_at: true,
@@ -15,12 +20,11 @@ const rawExtensionSelector = {
   tags: true,
   readme: true,
   instructions: true,
-  installed: true,
-};
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['Extension']> = rawExtensionSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['Extension']> = rawExtensionSelector
 export type extensionModel = ModelTypes['Extension']
 
-export const extensionSelector = Selector('Extension')(rawExtensionSelector);
-export { rawExtensionSelector };
+export const extensionSelector = Selector('Extension')(rawExtensionSelector)
+export { rawExtensionSelector }

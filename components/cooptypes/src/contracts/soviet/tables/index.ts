@@ -54,11 +54,6 @@ export * as Participants from './participants'
 export * as ProgramWallets from './programWallets'
 
 /**
- * Таблица содержит сводный баланс пайщиков кооператива.
- */
-export * as Wallets from './wallets'
-
-/**
  * Таблица содержит подписанные пайщиками документы соглашений с кооперативом
  */
 export * as Agreements from './agreements'

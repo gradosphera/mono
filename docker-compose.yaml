@@ -67,7 +67,28 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - 127.0.0.1:5432:5432
-
+  
+  medusa:
+    build:
+      context: ./components/medusa/backend
+      dockerfile: Dockerfile
+    image: medusa:test
+    container_name: medusa-server
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./components/medusa/medusa-config.js:/app/medusa-config.js
+      - ./components/medusa/.env:/app/.env
+    command: >
+      /bin/bash -c "
+        psql -h postgres -U postgres -tc \"SELECT 1 FROM pg_database WHERE datname = 'medusa'\" | grep -q 1 || psql -h postgres -U postgres -c \"CREATE DATABASE medusa\";
+        medusa develop
+      "
+    networks:
+      - dicoop
 volumes:
   mongo_data:
   postgres_data:

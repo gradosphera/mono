@@ -11,7 +11,8 @@ export function SuccessAlert(message: string): void {
   })
 }
 
-export function FailAlert(message: string): void {
+export function FailAlert(error: any): void{
+  const message = extractGraphQLErrorMessages(error)
   Notify.create({
     message,
     type: 'negative',
@@ -19,9 +20,4 @@ export function FailAlert(message: string): void {
       { icon: 'close', color: 'white', round: true, size:'sm', flat: true, handler: () => { /* ... */ } }
     ]
   })
-}
-
-export function failAlert(error: any): void{
-  const message = extractGraphQLErrorMessages(error)
-  FailAlert(message)
 }

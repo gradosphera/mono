@@ -91,7 +91,7 @@ namespace eosiosystem {
    * 
    * - Users can stake tokens for CPU and Network bandwidth, and then vote for producers or
    *    delegate their vote to a proxy.
-   * - Producers register in order to be voted for, and can claim per-block and per-vote rewards.
+   * - Producers register in order to be voted for, and can result per-block and per-vote rewards.
    * - Users can buy and sell RAM at a market-determined price.
    * - Users can bid on premium names.
    */
@@ -104,7 +104,7 @@ namespace eosiosystem {
    struct [[eosio::table, eosio::contract("eosio.system")]] name_bid {
      name            newname;
      name            high_bidder;
-     int64_t         high_bid = 0; ///< negative high_bid == closed auction waiting to be claimed
+     int64_t         high_bid = 0; ///< negative high_bid == closed auction waiting to be resulted
      time_point      last_bid_time;
 
      uint64_t primary_key()const { return newname.value;                    }
@@ -172,7 +172,7 @@ namespace eosiosystem {
       bool                                                     is_active = true;
       std::string                                              url;
       uint32_t                                                 unpaid_blocks = 0;
-      time_point                                               last_claim_time;
+      time_point                                               last_result_time;
       uint16_t                                                 location = 0;
       eosio::binary_extension<eosio::block_signing_authority>  producer_authority; // added in version 1.9.0
 
@@ -211,7 +211,7 @@ namespace eosiosystem {
             << t.is_active
             << t.url
             << t.unpaid_blocks
-            << t.last_claim_time
+            << t.last_result_time
             << t.location;
 
          if( !t.producer_authority.has_value() ) return ds;
@@ -227,7 +227,7 @@ namespace eosiosystem {
                    >> t.is_active
                    >> t.url
                    >> t.unpaid_blocks
-                   >> t.last_claim_time
+                   >> t.last_result_time
                    >> t.location
                    >> t.producer_authority;
       }
@@ -414,7 +414,7 @@ namespace eosiosystem {
     *
     * - Users can stake tokens for CPU and Network bandwidth, and then vote for producers or
     *    delegate their vote to a proxy.
-    * - Producers register in order to be voted for, and can claim per-block and per-vote rewards.
+    * - Producers register in order to be voted for, and can result per-block and per-vote rewards.
     * - Users can buy and sell RAM at a market-determined price.
     * - Users can bid on premium names.
     */
@@ -641,10 +641,10 @@ namespace eosiosystem {
          void buyrambytes( const name& payer, const name& receiver, uint32_t bytes );
 
          /**
-          * Refund action, this action is called after the delegation-period to claim all pending
+          * Refund action, this action is called after the delegation-period to result all pending
           * unstaked tokens belonging to owner.
           *
-          * @param owner - the owner of the tokens claimed.
+          * @param owner - the owner of the tokens resulted.
           */
          [[eosio::action]]
          void refund( const name& owner );
@@ -782,8 +782,8 @@ namespace eosiosystem {
 #endif
 
          /**
-          * Claim rewards action, claims block producing and vote rewards.
-          * @param owner - producer account claiming per-block and per-vote rewards.
+          * result rewards action, results block producing and vote rewards.
+          * @param owner - producer account resulting per-block and per-vote rewards.
           */
          [[eosio::action]]
          void claimrewards( const name& owner );
@@ -923,7 +923,7 @@ namespace eosiosystem {
          
          using regproxy_action = eosio::action_wrapper<"regproxy"_n, &system_contract::regproxy>;
          
-         using claimrewards_action = eosio::action_wrapper<"claimrewards"_n, &system_contract::claimrewards>;
+         using resultrewards_action = eosio::action_wrapper<"claimrewards"_n, &system_contract::claimrewards>;
          
          using rmvproducer_action = eosio::action_wrapper<"rmvproducer"_n, &system_contract::rmvproducer>;
          

@@ -1,0 +1,1 @@
+export { default as UserDocumentsPage } from './UserDocumentsPage.vue' 

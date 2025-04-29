@@ -285,7 +285,7 @@
          {"name":"is_active",       "type":"bool"},
          {"name":"url",             "type":"string"},
          {"name":"unpaid_blocks",   "type":"uint32"},
-         {"name":"last_claim_time", "type":"uint64"},
+         {"name":"last_result_time", "type":"uint64"},
          {"name":"location",        "type":"uint16"}
       ]
     },{

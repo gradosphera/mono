@@ -1,9 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { Type } from 'class-transformer';
-import { IsString, ValidateNested, IsObject } from 'class-validator';
-import { MetaDocumentDTO } from './meta-document.dto';
+import { IsString, IsObject } from 'class-validator';
 import type { GeneratedDocumentDomainInterface } from '~/domain/document/interfaces/generated-document-domain.interface';
-
+import { GraphQLJSON } from 'graphql-type-json';
 @ObjectType('GeneratedDocument')
 export class GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {
   @Field({ description: 'Полное название документа' })
@@ -18,10 +16,8 @@ export class GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {
   @IsString()
   hash!: string;
 
-  @Field(() => MetaDocumentDTO, { description: 'Метаданные документа' })
-  @ValidateNested()
-  @Type(() => MetaDocumentDTO)
-  meta!: MetaDocumentDTO;
+  @Field(() => GraphQLJSON, { description: 'Метаданные документа' })
+  meta!: any;
 
   @Field(() => String, { description: 'Бинарное содержимое документа (base64)' })
   @IsObject()

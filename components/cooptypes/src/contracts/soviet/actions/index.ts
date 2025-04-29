@@ -45,3 +45,8 @@ export * as Agreements from './agreements'
  * Пространство управления членством в кооперативных участках
  */
 export * as Branches from './branches'
+
+/**
+ * Пространство управления предварительными решениями председателя или доверенных им лиц
+ */
+export * as Approves from './approves'

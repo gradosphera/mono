@@ -3,9 +3,7 @@ import type { ModelTypes } from '../../zeus/index'
 /**
  * Интерфейс для метаданных документа.
  */
-export type IMetaDocument = ModelTypes['MetaDocument'] & {
-  [key: string]: any
-}
+export type IMetaDocument = any
 
 /**
  * Интерфейс для сгенерированного документа, который требуется подписать.

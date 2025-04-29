@@ -1,0 +1,38 @@
+import { InputType, Field, IntersectionType, OmitType } from '@nestjs/graphql';
+import { Cooperative } from 'cooptypes';
+import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-meta-document-input.dto';
+import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
+import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
+import type { ExcludeCommonProps } from '~/modules/document/types';
+
+// интерфейс параметров для генерации
+type action = Cooperative.Registry.AnnualGeneralMeetingSovietDecision.Action;
+
+@InputType(`BaseAnnualGeneralMeetingSovietDecisionDocumentInput`)
+class BaseAnnualGeneralMeetingSovietDecisionDocumentInputDTO implements ExcludeCommonProps<action> {
+  // Мета пока не содержит дополнительных полей
+}
+
+@InputType(`AnnualGeneralMeetingSovietDecisionGenerateDocumentInput`)
+export class AnnualGeneralMeetingSovietDecisionGenerateDocumentInputDTO
+  extends IntersectionType(
+    BaseAnnualGeneralMeetingSovietDecisionDocumentInputDTO,
+    OmitType(GenerateMetaDocumentInputDTO, ['registry_id'] as const)
+  )
+  implements action
+{
+  registry_id!: number;
+}
+
+@InputType(`AnnualGeneralMeetingSovietDecisionSignedMetaDocumentInput`)
+export class AnnualGeneralMeetingSovietDecisionSignedMetaDocumentInputDTO
+  extends IntersectionType(BaseAnnualGeneralMeetingSovietDecisionDocumentInputDTO, MetaDocumentInputDTO)
+  implements action {}
+
+@InputType(`AnnualGeneralMeetingSovietDecisionSignedDocumentInput`)
+export class AnnualGeneralMeetingSovietDecisionSignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {
+  @Field(() => AnnualGeneralMeetingSovietDecisionSignedMetaDocumentInputDTO, {
+    description: 'Метаинформация',
+  })
+  public readonly meta!: AnnualGeneralMeetingSovietDecisionSignedMetaDocumentInputDTO;
+}

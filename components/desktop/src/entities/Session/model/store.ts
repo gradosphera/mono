@@ -4,7 +4,6 @@ import { computed, ComputedRef, Ref, ref } from 'vue';
 import { Session } from '@wharfkit/session';
 import { WalletPluginPrivateKey } from '@wharfkit/wallet-plugin-privatekey';
 import { FailAlert, readBlockchain } from 'src/shared/api';
-import { CHAIN_ID, CHAIN_URL } from 'src/shared/config';
 import { PrivateKey, Serializer } from '@wharfkit/antelope';
 import { GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 
@@ -49,6 +48,7 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
   const close = async (): Promise<void> => {
     isAuth.value = false;
     session.value = undefined;
+    globalStore.logout()
   };
 
   const init = async () => {
@@ -67,8 +67,8 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
             actor: globalStore.username,
             permission: 'active',
             chain: {
-              id: CHAIN_ID,
-              url: CHAIN_URL,
+              id: process.env.CHAIN_ID as string,
+              url: process.env.CHAIN_URL as string,
             },
             walletPlugin: new WalletPluginPrivateKey(
               globalStore.wif as PrivateKey

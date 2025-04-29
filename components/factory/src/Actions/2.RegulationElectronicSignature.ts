@@ -1,10 +1,10 @@
 import { DraftContract } from 'cooptypes'
-import { RegulationElectronicSignature } from '../templates'
+import { RegulationElectronicSignature } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { RegulationElectronicSignature as Template } from '../templates'
+export { RegulationElectronicSignature as Template } from '../Templates'
 
 export class Factory extends DocFactory<RegulationElectronicSignature.Action> {
   constructor(storage: MongoDBConnector) {

@@ -55,4 +55,8 @@ export class OrganizationDTO implements OrganizationDomainInterface {
     this.email = data.email;
     this.details = new OrganizationDetailsDTO(data.details);
   }
+
+  static isTypeOf(value: any): boolean {
+    return value.details && value.full_name && !value.first_name;
+  }
 }

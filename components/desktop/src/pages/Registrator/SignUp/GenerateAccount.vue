@@ -9,9 +9,8 @@ div
 
     q-input.q-mt-lg(
       v-if='account.private_key',
-      v-model='account.private_key',
-      label='Приватный ключ',
-      :readonly='true'
+      :model-value='account.private_key',
+      label='Приватный ключ'
     )
 
     q-checkbox(v-model="i_save", label="Я сохранил имя и ключ в надёжном месте")

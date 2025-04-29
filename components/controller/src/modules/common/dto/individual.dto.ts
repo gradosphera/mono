@@ -42,4 +42,8 @@ export class IndividualDTO implements IndividualDomainInterface {
     this.email = data.email;
     this.passport = data.passport ? new PassportDTO(data.passport) : undefined;
   }
+
+  static isTypeOf(value: any): boolean {
+    return value.first_name && value.last_name && !value.details;
+  }
 }

@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, ValidateNested } from 'class-validator';
-import { ParticipantApplicationSignedDocumentInputDTO } from './participant-application-document.dto';
+import { ParticipantApplicationSignedDocumentInputDTO } from '../../document/documents-dto/participant-application-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 
 @InputType('RegisterParticipantInput')

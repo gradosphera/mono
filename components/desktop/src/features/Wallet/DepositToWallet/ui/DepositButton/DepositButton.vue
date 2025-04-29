@@ -1,5 +1,5 @@
 <template lang="pug">
-q-btn(@click="showDialog=true" color="primary" size="sm")
+q-btn(@click="showDialog=true" color="primary")
   q-icon(name="fa-solid fa-chevron-up").q-mr-sm
   span Совершить взнос
   q-dialog(v-model="showDialog" @hide="clear")
@@ -7,7 +7,7 @@ q-btn(@click="showDialog=true" color="primary" size="sm")
       Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm
         q-input(v-model="quantity" standout="bg-teal text-white" type="number" :min="0" :step="1000" :rules="[val => val > 0 || 'Сумма взноса должна быть положительной']")
           template(#append)
-            span.text-overline {{ CURRENCY }}
+            span.text-overline {{ currency }}
 
     ModalBase(v-else :title='"Совершите взнос"' style="min-height: 200px !important;")
       div(style="max-width:400px").q-pa-md
@@ -21,13 +21,12 @@ q-btn(@click="showDialog=true" color="primary" size="sm")
   </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Form } from 'src/shared/ui/Form'
 import { ModalBase } from 'src/shared/ui/ModalBase'
 import { useWalletStore } from 'src/entities/Wallet'
 import type { ILoadUserWallet } from 'src/entities/Wallet/model'
 import { PayWithProvider } from 'src/shared/ui/PayWithProvider'
-import { CURRENCY } from 'src/shared/config'
 import { SuccessAlert, FailAlert } from 'src/shared/api'
 import { useSessionStore } from 'src/entities/Session'
 import type { IPaymentOrder } from 'src/shared/lib/types/payments'
@@ -35,7 +34,7 @@ import { formatAssetToReadable } from 'src/shared/lib/utils/formatAssetToReadabl
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore()
 
-const { createDeposit, loadUserWalet } = useWalletStore()
+const { createDeposit, loadUserWallet } = useWalletStore()
 
 //TODO move username to Session entity
 const session = useSessionStore()
@@ -55,7 +54,7 @@ const handlerSubmit = async (): Promise<void> => {
   isSubmitting.value = true
   try {
     paymentOrder.value = (await createDeposit({
-      quantity: `${parseFloat(quantity.value.toString()).toFixed(4)} ${CURRENCY}`
+      quantity: `${parseFloat(quantity.value.toString()).toFixed(4)} ${process.env.CURRENCY}`
     })) as IPaymentOrder
     isSubmitting.value = false
   } catch (e: any) {
@@ -65,13 +64,15 @@ const handlerSubmit = async (): Promise<void> => {
   }
 }
 
+const currency = computed(() => process.env.CURRENCY)
+
 const paymentFail = (): void => {
   clear()
   FailAlert('Произошла ошибка при приёме платежа')
 }
 
 const paymentSuccess = (): void => {
-  loadUserWalet({ coopname: info.coopname, username: session.username as string } as ILoadUserWallet)
+  loadUserWallet({ coopname: info.coopname, username: session.username as string } as ILoadUserWallet)
   clear()
   SuccessAlert('Платеж успешно принят')
 }

@@ -1,6 +1,5 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
-import { type GraphQLTypes, type InputType, Selector, type ValueTypes } from '../../zeus/index'
-import { rawDocumentMetaSelector, rawDocumentSelector } from '../common/documentSelector'
+import { Selector, type ValueTypes } from '../../zeus/index'
 
 // Определяем объект вручную, чтобы избежать потери типов
 export const rawCommonRequestSelector = {
@@ -15,9 +14,9 @@ export const rawCommonRequestSelector = {
   program_id: true,
 }
 
-// Проверяем raw на соответствие типу
-const _validate: MakeAllFieldsRequired<ValueTypes['CommonRequestResponse']>
-  = rawCommonRequestSelector
+// // Проверяем raw на соответствие типу
+// const _validate: MakeAllFieldsRequired<ValueTypes['CommonRequestResponse']>
+//   = rawCommonRequestSelector
 
-// Передаём raw в селектор
-export const generateCommonRequestResponseSelector = Selector('CommonRequestResponse')(rawCommonRequestSelector)
+// // Передаём raw в селектор
+// export const generateCommonRequestResponseSelector = Selector('CommonRequestResponse')(rawCommonRequestSelector)
