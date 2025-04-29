@@ -19,6 +19,7 @@ export interface Model {
   type: string
   meta: IMetaDocument
   vars: IVars
+  coop: ICooperativeData
   branch: IOrganizationData
   individual?: IIndividualData
   organization?: IOrganizationData
