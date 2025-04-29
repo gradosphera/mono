@@ -33,7 +33,7 @@
     "dev:lib": "lerna run dev --parallel --scope @coopenomics/factory --scope cooptypes",
     "dev:all": "lerna run dev --parallel",
     "gpt-commit": "git add . && commitgpt",
-    "testnet": "git checkout testnet && git merge dev && lerna publish prerelease && git push && git checkout dev && git merge testnet",
+    "testnet": "git checkout testnet && git merge dev && lerna publish && git push && git checkout dev && git merge testnet",
     "production": "git checkout main && git merge -X theirs testnet && lerna publish  --conventional-commits --conventional-graduate && git push && git checkout dev && git merge main",
     "docs-publish": "pnpm gh-pages --nojekyll -d docs/site --repo git@github.com:coopenomics/monocoop.git"
   }
