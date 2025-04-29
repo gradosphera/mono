@@ -14,6 +14,8 @@ export interface Action extends IGenerate {
   skip_save: boolean
 }
 
+export type Meta = IMetaDocument & Action
+
 // Модель данных
 export interface Model {
   type: string

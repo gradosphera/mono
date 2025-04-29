@@ -88,6 +88,18 @@ export default {
       code_permissions_to: ['capital'],
     },
     {
+      name: 'loan',
+      code_permissions_to: ['loan'],
+    },
+    {
+      name: 'meet',
+      code_permissions_to: ['meet'],
+    },
+    {
+      name: 'wallet',
+      code_permissions_to: ['wallet'],
+    },
+    {
       name: 'soviet',
       code_permissions_to: ['soviet'],
     },

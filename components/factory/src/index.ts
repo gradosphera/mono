@@ -1,5 +1,5 @@
 export * from './Interfaces'
-export * from './templates'
+export * from './Templates'
 export * from './Schema'
 
 import type { Filter, InsertOneResult, UpdateResult } from 'mongodb'
@@ -66,6 +66,14 @@ export class Generator implements IGenerator {
       [Actions.CoopenomicsAgreement.Template.registry_id]: new Actions.CoopenomicsAgreement.Factory(this.storage), // 50
       [Actions.ParticipantApplication.Template.registry_id]: new Actions.ParticipantApplication.Factory(this.storage), // 100
       [Actions.SelectBranchStatement.Template.registry_id]: new Actions.SelectBranchStatement.Factory(this.storage), // 101
+
+      // общее собрание
+      [Actions.AnnualGeneralMeetingAgenda.Template.registry_id]: new Actions.AnnualGeneralMeetingAgenda.Factory(this.storage), // 300
+      [Actions.AnnualGeneralMeetingSovietDecision.Template.registry_id]: new Actions.AnnualGeneralMeetingSovietDecision.Factory(this.storage), // 301
+      [Actions.AnnualGeneralMeetingNotification.Template.registry_id]: new Actions.AnnualGeneralMeetingNotification.Factory(this.storage), // 302
+      [Actions.AnnualGeneralMeetingVotingBallot.Template.registry_id]: new Actions.AnnualGeneralMeetingVotingBallot.Factory(this.storage), // 303
+      [Actions.AnnualGeneralMeetingDecision.Template.registry_id]: new Actions.AnnualGeneralMeetingDecision.Factory(this.storage), // 304
+
       [Actions.DecisionOfParticipantApplication.Template.registry_id]: new Actions.DecisionOfParticipantApplication.Factory(this.storage), // 501
       [Actions.ProjectFreeDecision.Template.registry_id]: new Actions.ProjectFreeDecision.Factory(this.storage), // 599
       [Actions.FreeDecision.Template.registry_id]: new Actions.FreeDecision.Factory(this.storage), // 600
@@ -85,7 +93,6 @@ export class Generator implements IGenerator {
 
       [Actions.InvestByMoneyStatement.Template.registry_id]: new Actions.InvestByMoneyStatement.Factory(this.storage), // 1005
       [Actions.InvestMembershipConvertation.Template.registry_id]: new Actions.InvestMembershipConvertation.Factory(this.storage), // 1010
-
     }
     await this.storage.connect()
   }

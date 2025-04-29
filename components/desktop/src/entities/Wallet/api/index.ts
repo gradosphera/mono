@@ -1,14 +1,11 @@
 import { fetchTable, sendGET } from '../../../shared/api';
 
 import {
-  ContractsList,
-  TablesList,
   LimitsList,
   SecondaryIndexesNumbers,
 } from 'src/shared/config';
 
 import {
-  IWalletData,
   IDepositData,
   IWithdrawData,
   IProgramWalletData,
@@ -20,7 +17,6 @@ import {
 } from '../model';
 
 import {
-  ILoadSingleUserWallet,
   ILoadSingleUserDeposit,
   ILoadSingleUserProgramWallet,
   ILoadSingleUserWithdraw,
@@ -28,31 +24,16 @@ import {
   ILoadUserProgramWallets,
   ILoadUserWithdraws,
 } from '../model';
-import { SovietContract } from 'cooptypes';
-
-async function loadSingleUserWalletData(
-  params: ILoadSingleUserWallet
-): Promise<IWalletData> {
-  return (
-    await fetchTable(
-      ContractsList.Soviet,
-      params.coopname,
-      TablesList.Wallets,
-      params.username,
-      params.username,
-      LimitsList.One
-    )
-  )[0] as IWalletData;
-}
+import { GatewayContract, SovietContract } from 'cooptypes';
 
 async function loadSingleUserDepositData(
   params: ILoadSingleUserDeposit
 ): Promise<IDepositData> {
   return (
     await fetchTable(
-      ContractsList.Gateway,
+      GatewayContract.contractName.production,
       params.coopname,
-      TablesList.Deposits,
+      GatewayContract.Tables.Incomes.tableName,
       params.username,
       params.username,
       LimitsList.One
@@ -65,9 +46,9 @@ async function loadSingleUserProgramWalletData(
 ): Promise<IProgramWalletData> {
   return (
     await fetchTable(
-      ContractsList.Soviet,
+      SovietContract.contractName.production,
       params.coopname,
-      TablesList.ProgramWallets,
+      SovietContract.Tables.ProgramWallets.tableName,
       params.wallet_id,
       params.wallet_id,
       LimitsList.One
@@ -80,9 +61,9 @@ async function loadSingleUserWithdrawData(
 ): Promise<IWithdrawData> {
   return (
     await fetchTable(
-      ContractsList.Gateway,
+      GatewayContract.contractName.production,
       params.coopname,
-      TablesList.Withdraws,
+      GatewayContract.Tables.Outcomes.tableName,
       params.withdraw_id,
       params.withdraw_id,
       LimitsList.One
@@ -94,9 +75,9 @@ async function loadUserDepositsData(
   params: ILoadUserDeposits
 ): Promise<IDepositData[]> {
   return (await fetchTable(
-    ContractsList.Gateway,
+    GatewayContract.contractName.production,
     params.coopname,
-    TablesList.Deposits,
+    GatewayContract.Tables.Incomes.tableName,
     params.username,
     params.username,
     LimitsList.None,
@@ -108,9 +89,9 @@ async function loadUserWithdrawsData(
   params: ILoadUserWithdraws
 ): Promise<IWithdrawData[]> {
   return (await fetchTable(
-    ContractsList.Gateway,
+    GatewayContract.contractName.production,
     params.coopname,
-    TablesList.Withdraws,
+    GatewayContract.Tables.Outcomes.tableName,
     params.username,
     params.username,
     LimitsList.None,
@@ -157,10 +138,12 @@ async function loadUserProgramWalletsData(
 }
 
 async function loadMethods(params: IGetPaymentMethods): Promise<IPaymentMethodData[]> {
-  const {username} = params
+  const { username } = params;
   const methods = (await sendGET(`/v1/methods/${username}`)) as IGetResponsePaymentMethodData;
 
-  return methods.results;
+  //тут стоит костыль, т.к. method_id это string, а фабрика документов не возвращает платежные методы с ID в виде number, по которым можно отсортировать.
+  //и дат там тоже нет. Как появятся даты/номера - так и сортировку эту поправим.
+  return methods.results.sort((a, b) => b.method_id.localeCompare(a.method_id));
 }
 
 async function loadUserAgreements(coopname: string, username: string): Promise<SovietContract.Tables.Agreements.IAgreement[]> {
@@ -180,7 +163,6 @@ async function loadUserAgreements(coopname: string, username: string): Promise<S
 
 
 export const api = {
-  loadSingleUserWalletData,
   loadSingleUserDepositData,
   loadSingleUserProgramWalletData,
   loadSingleUserWithdrawData,

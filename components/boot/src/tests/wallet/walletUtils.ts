@@ -1,5 +1,6 @@
-import { FundContract, GatewayContract, SovietContract } from 'cooptypes'
+import { FundContract, SovietContract, WalletContract } from 'cooptypes'
 import { expect } from 'vitest'
+import type Blockchain from '../../blockchain'
 
 export async function getUserProgramWallet(blockchain: any, coopname: string, username: string, program_id: number) {
   const wallets = await blockchain.getTableRows(
@@ -24,7 +25,7 @@ export async function getCoopProgramWallet(blockchain: any, coopname: string, pr
     program_id.toString(),
     program_id.toString(),
   )
-  console.log('PROGRAMS:', program)
+
   return program[0]
 }
 
@@ -37,14 +38,16 @@ export async function getCoopWallet(blockchain: any, coopname: string) {
   ))[0]
 }
 
-export async function getDeposit(blockchain: any, coopname: string, deposit_id: number) {
+export async function getDeposit(blockchain: Blockchain, coopname: string, deposit_hash: string) {
   return (await blockchain.getTableRows(
-    GatewayContract.contractName.production,
+    WalletContract.contractName.production,
     coopname,
-    'deposits',
+    WalletContract.Tables.Deposits.tableName,
     1,
-    deposit_id.toString(),
-    deposit_id.toString(),
+    deposit_hash,
+    deposit_hash,
+    2,
+    'sha256',
   ))[0]
 }
 

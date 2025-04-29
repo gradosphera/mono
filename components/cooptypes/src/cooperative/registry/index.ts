@@ -26,3 +26,10 @@ export * as InvestByMoneyStatement from './1005.InvestByMoneyStatement'
 export * as InvestMembershipConvertation from './1010.InvestMembershipConvertation'
 
 export * as SosediAgreement from './699.SosediAgreement'
+
+// общие собрания
+export * as AnnualGeneralMeetingAgenda from './300.AnnualGeneralMeetingAgenda'
+export * as AnnualGeneralMeetingSovietDecision from './301.AnnualGeneralMeetingSovietDecision'
+export * as AnnualGeneralMeetingNotification from './302.AnnualGeneralMeetingNotification'
+export * as AnnualGeneralMeetingVotingBallot from './303.AnnualGeneralMeetingVotingBallot'
+export * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecision'

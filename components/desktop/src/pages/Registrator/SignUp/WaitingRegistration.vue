@@ -22,6 +22,7 @@ const { info } = useSystemStore()
 
 import { Loader } from 'src/shared/ui/Loader';
 import { useRegistratorStore } from 'src/entities/Registrator'
+
 const store = useRegistratorStore()
 
 const currentStep = store.steps.WaitingRegistration
@@ -62,10 +63,5 @@ const update = async () => {
     clearInterval(interval.value)
   }
 }
-
-watch(() => participantAccount, (newValue) => {
-  if (newValue) store.next()
-})
-
 
 </script>

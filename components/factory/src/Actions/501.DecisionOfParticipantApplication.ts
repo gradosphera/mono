@@ -8,9 +8,9 @@ import type {
 } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-import { DecisionOfParticipantApplication } from '../templates'
+import { DecisionOfParticipantApplication } from '../Templates'
 
-export { DecisionOfParticipantApplication as Template } from '../templates'
+export { DecisionOfParticipantApplication as Template } from '../Templates'
 
 export class Factory extends DocFactory<DecisionOfParticipantApplication.Action> {
   constructor(storage: MongoDBConnector) {

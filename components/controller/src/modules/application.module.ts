@@ -16,6 +16,8 @@ import { ParticipantModule } from './participant/participant.module';
 import { AgendaModule } from './agenda/agenda.module';
 import { PaymentModule } from './payment/payment.module';
 import { CooplaceModule } from './cooplace/cooplace.module';
+import { DesktopModule } from './desktop/desktop.module';
+import { MeetModule } from './meet/meet.module';
 
 @Module({
   imports: [
@@ -24,6 +26,7 @@ import { CooplaceModule } from './cooplace/cooplace.module';
     AgendaModule,
     AppStoreModule,
     AuthModule,
+    DesktopModule,
     BranchModule,
     LoggerModule,
     PaymentMethodModule,
@@ -35,6 +38,7 @@ import { CooplaceModule } from './cooplace/cooplace.module';
     DecisionModule,
     ParticipantModule,
     CooplaceModule,
+    MeetModule,
   ],
   exports: [
     AccountModule,
@@ -43,6 +47,7 @@ import { CooplaceModule } from './cooplace/cooplace.module';
     AppStoreModule,
     AuthModule,
     BranchModule,
+    DesktopModule,
     LoggerModule,
     PaymentMethodModule,
     PaymentModule,
@@ -53,6 +58,7 @@ import { CooplaceModule } from './cooplace/cooplace.module';
     DecisionModule,
     ParticipantModule,
     CooplaceModule,
+    MeetModule,
   ],
 })
 export class ApplicationModule {}

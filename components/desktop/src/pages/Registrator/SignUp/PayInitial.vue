@@ -5,7 +5,7 @@ div(v-if="store?.state?.payment?.details?.amount_without_fee")
       p Пожалуйста, совершите оплату регистрационного взноса {{ formatAssetToReadable(store.state.payment.details.amount_without_fee) }}. Комиссия провайдера {{ store.state.payment.details.fact_fee_percent }}%, всего к оплате: {{ store.state.payment.details.amount_plus_fee }}.
       div.q-mt-md
         span.text-bold Внимание!
-        span.q-ml-xs Оплату необходимо произвести с банковского счета, который принадлежит именно Вам. При поступлении средств с другого счета, оплата будет аннулирована, а вступление в кооператив приостановлено.
+        span.q-ml-xs Оплату необходимо произвести с банковского счета пайщика, который вступает в кооператив. При поступлении средств с другого счета, оплата будет аннулирована, а вступление в кооператив приостановлено.
       PayWithProvider(:payment-order="store.state.payment" @payment-fail="paymentFail" @payment-success="paymentSuccess")
 
 </template>

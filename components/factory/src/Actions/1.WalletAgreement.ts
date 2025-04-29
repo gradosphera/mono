@@ -1,10 +1,10 @@
 import { DraftContract } from 'cooptypes'
-import { WalletAgreement } from '../templates'
+import { WalletAgreement } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { WalletAgreement as Template } from '../templates'
+export { WalletAgreement as Template } from '../Templates'
 
 export class Factory extends DocFactory<WalletAgreement.Action> {
   constructor(storage: MongoDBConnector) {

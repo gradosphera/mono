@@ -7,14 +7,8 @@ import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate
 import { Throttle } from '@nestjs/throttler';
 import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 import { ParticipantService } from '../services/participant.service';
-import {
-  ParticipantApplicationDocumentDTO,
-  ParticipantApplicationGenerateDocumentInputDTO,
-} from '../dto/participant-application-document.dto';
-import {
-  ParticipantApplicationDecisionDocumentDTO,
-  ParticipantApplicationDecisionGenerateDocumentInputDTO,
-} from '../dto/participant-application-decision-document.dto';
+import { ParticipantApplicationGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-document.dto';
+import { ParticipantApplicationDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-decision-document.dto';
 import { AccountDTO } from '~/modules/account/dto/account.dto';
 import { AddParticipantInputDTO } from '../dto/add-participant-input.dto';
 import { RegisterParticipantInputDTO } from '../dto/register-participant-input.dto';
@@ -23,7 +17,7 @@ import { RegisterParticipantInputDTO } from '../dto/register-participant-input.d
 export class ParticipantResolver {
   constructor(private readonly participantService: ParticipantService) {}
 
-  @Mutation(() => ParticipantApplicationDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateParticipantApplication',
     description: 'Сгенерировать документ заявления о вступлении в кооператив.',
   })
@@ -35,11 +29,11 @@ export class ParticipantResolver {
     data: ParticipantApplicationGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ParticipantApplicationDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.participantService.generateParticipantApplication(data, options);
   }
 
-  @Mutation(() => ParticipantApplicationDecisionDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateParticipantApplicationDecision',
     description: 'Сгенерировать документ протокол решения собрания совета',
   })

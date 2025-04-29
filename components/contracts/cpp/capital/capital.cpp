@@ -1,17 +1,33 @@
 // capital.cpp
 #include "capital.hpp"
 
-#include "src/result/createresult.cpp"
-#include "src/result/startdistrbn.cpp"
+#include "src/assignment/createassign.cpp"
+#include "src/assignment/startdistrbn.cpp"
 
 #include "src/investment/createinvest.cpp"
 #include "src/investment/approveinvst.cpp"
 #include "src/investment/capauthinvst.cpp"
 
-#include "src/claim/approveclaim.cpp"
-#include "src/claim/createclaim.cpp"
-#include "src/claim/claimnow.cpp"
-#include "src/claim/capauthclaim.cpp"
+#include "src/commit/createcmmt.cpp"
+#include "src/commit/approvecmmt.cpp"
+#include "src/commit/declinecmmt.cpp"
+#include "src/commit/delcmmt.cpp"
+
+#include "src/debt/createdebt.cpp"
+#include "src/debt/approvedebt.cpp"
+
+#include "src/debt/debtauthcnfr.cpp"
+#include "src/debt/debtpaycnfrm.cpp"
+#include "src/debt/debtpaydcln.cpp"
+#include "src/debt/declinedebt.cpp"
+#include "src/debt/settledebt.cpp"
+
+#include "src/result/approverslt.cpp"
+#include "src/result/updaterslt.cpp"
+#include "src/result/pushrslt.cpp"
+#include "src/result/authrslt.cpp"
+#include "src/result/setact1.cpp"
+#include "src/result/setact2.cpp"
 
 #include "src/registration/capregcontr.cpp"
 #include "src/registration/approvereg.cpp"
@@ -22,13 +38,6 @@
 #include "src/managment/addauthor.cpp"
 #include "src/managment/allocate.cpp"
 #include "src/managment/diallocate.cpp"
-#include "src/managment/wthdrcallbck.cpp"
-
-#include "src/commit/createcmmt.cpp"
-#include "src/commit/approvecmmt.cpp"
-#include "src/commit/capauthcmmt.cpp"
-#include "src/commit/setact1.cpp"
-#include "src/commit/setact2.cpp"
 
 
 #include "src/withdraw_from_result/createwthd1.cpp"
@@ -48,8 +57,11 @@
 
 #include "src/expense/approveexpns.cpp"
 #include "src/expense/capauthexpns.cpp"
+// #include "src/expense/capdeclexpns.cpp"
 #include "src/expense/createexpnse.cpp"
-#include "src/expense/expense_withdraw_callback.cpp"
+#include "src/expense/exppaycnfrm.cpp"
+
+
 
 #include "src/fundproj/fundproj.cpp"
 #include "src/fundproj/refreshproj.cpp"
@@ -58,18 +70,6 @@
 #include "src/fundprog/refreshprog.cpp"
 
 #include <optional>
-
-// TODO: внедрить коррекцию долей при выходе пайщика из проекта / программы
-// void capital::reduce_shares(name coopname, checksum256 project_hash, name username, asset amount) {
-//     require_auth(_capital);
-
-
-//     contributor_index contributors(_capital, coopname.value);
-//     auto idx = contributors.get_index<"byusername"_n>();
-//     auto itr = idx.find(username.value);
-//     eosio::check(itr != idx.end(), "Contributor not found");
-
-// }
 
 
 void capital::validate_project_hierarchy_depth(eosio::name coopname, checksum256 project_hash) {
@@ -148,7 +148,7 @@ eosio::asset capital::get_amount_for_withdraw_from_commit(eosio::name coopname, 
       c.status = "withdrawed"_n; 
     });
     
-    return itr -> spend;
+    return itr -> spended;
 }
 
 
@@ -256,21 +256,6 @@ std::optional<progwallet> capital::get_capital_wallet(eosio::name coopname, eosi
   
 }
 
-
-std::optional<result_author> capital::get_result_author(eosio::name coopname, eosio::name username, const checksum256 &result_hash) {
-    result_authors_index result_authors(_capital, coopname.value);
-    auto result_author_index = result_authors.get_index<"byresauthor"_n>();
-
-    uint128_t combined_id = combine_checksum_ids(result_hash, username);
-    auto result_author_itr = result_author_index.find(combined_id);
-
-    if (result_author_itr == result_author_index.end()) {
-        return std::nullopt;
-    }
-
-    return *result_author_itr;
-}
-
 std::optional<author> capital::get_author(eosio::name coopname, eosio::name username, const checksum256 &project_hash) {
     authors_index authors(_capital, coopname.value);
     auto project_author_index = authors.get_index<"byprojauthor"_n>();
@@ -285,36 +270,49 @@ std::optional<author> capital::get_author(eosio::name coopname, eosio::name user
     return *author_itr;
 }
 
-std::optional<creator> capital::get_creator(eosio::name coopname, eosio::name username, const checksum256 &result_hash) {
+std::optional<creator> capital::get_creator(eosio::name coopname, eosio::name username, const checksum256 &assignment_hash) {
     creators_index creators(_capital, coopname.value);
-    auto result_creator_index = creators.get_index<"byresultcrtr"_n>();
+    auto assignment_creator_index = creators.get_index<"byassigncrtr"_n>();
 
-    uint128_t combined_id = combine_checksum_ids(result_hash, username);
-    auto creator_itr = result_creator_index.find(combined_id);
+    uint128_t combined_id = combine_checksum_ids(assignment_hash, username);
+    auto creator_itr = assignment_creator_index.find(combined_id);
 
-    if (creator_itr == result_creator_index.end()) {
+    if (creator_itr == assignment_creator_index.end()) {
         return std::nullopt;
     }
 
     return *creator_itr;
 }
 
-std::optional<result> capital::get_result(eosio::name coopname, const checksum256 &result_hash) {
-    result_index results(_capital, coopname.value);
-    auto result_hash_index = results.get_index<"byhash"_n>();
+std::optional<assignment> capital::get_assignment(eosio::name coopname, const checksum256 &assignment_hash) {
+    assignment_index assignments(_capital, coopname.value);
+    auto assignment_hash_index = assignments.get_index<"byhash"_n>();
 
-    auto result_itr = result_hash_index.find(result_hash);
-    if (result_itr == result_hash_index.end()) {
+    auto assignment_itr = assignment_hash_index.find(assignment_hash);
+    if (assignment_itr == assignment_hash_index.end()) {
         return std::nullopt;
     }
 
-    return *result_itr;
+    return *assignment_itr;
 }
 
-result capital::get_result_or_fail(eosio::name coopname, const checksum256 &result_hash, const char* msg) {
-    auto maybe_result = get_result(coopname, result_hash);
-    eosio::check(maybe_result.has_value(), msg);
-    return *maybe_result;
+
+std::optional<debt> capital::get_debt(eosio::name coopname, const checksum256 &debt_hash) {
+    debts_index debts(_capital, coopname.value);
+    auto hash_index = debts.get_index<"bydebthash"_n>();
+
+    auto itr = hash_index.find(debt_hash);
+    if (itr == hash_index.end()) {
+        return std::nullopt;
+    }
+
+    return *itr;
+}
+
+assignment capital::get_assignment_or_fail(eosio::name coopname, const checksum256 &assignment_hash, const char* msg) {
+    auto maybe_assignment = get_assignment(coopname, assignment_hash);
+    eosio::check(maybe_assignment.has_value(), msg);
+    return *maybe_assignment;
 }
 
 
@@ -386,10 +384,21 @@ std::optional<capital_tables::project_withdraw> capital::get_project_withdraw(eo
 }
 
 
-std::optional<claim> capital::get_claim(eosio::name coopname, const checksum256 &result_hash, eosio::name username) {
-    claim_index claims(_capital, coopname.value);
-    auto idx = claims.get_index<"byresuser"_n>();
-    auto rkey = combine_checksum_ids(result_hash, username);
+std::optional<result> capital::get_result(eosio::name coopname, const checksum256 &result_hash) {
+    result_index results(_capital, coopname.value);
+    auto idx = results.get_index<"byhash"_n>();
+    
+    auto it = idx.find(result_hash);
+    if (it == idx.end()) {
+        return std::nullopt;
+    }
+    return *it;
+}
+
+std::optional<result> capital::get_result_by_assignment_and_username(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username) {
+    result_index results(_capital, coopname.value);
+    auto idx = results.get_index<"byresuser"_n>();
+    auto rkey = combine_checksum_ids(assignment_hash, username);
 
     auto it = idx.find(rkey);
     if (it == idx.end()) {
@@ -412,17 +421,17 @@ std::optional<convert> capital::get_convert(eosio::name coopname, const checksum
 }
 
 
-claim capital::get_claim_or_fail(eosio::name coopname, const checksum256 &result_hash, eosio::name username, const char* msg) {
-    auto c = get_claim(coopname, result_hash, username);
+result capital::get_result_by_assignment_and_username_or_fail(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username, const char* msg) {
+    auto c = get_result_by_assignment_and_username(coopname, assignment_hash, username);
     eosio::check(c.has_value(), msg);
     return *c;
 }
 
 
-std::optional<resactor> capital::get_resactor(eosio::name coopname, const checksum256 &result_hash, eosio::name username) {
-    resactor_index ractors(_capital, coopname.value);
-    auto idx  = ractors.get_index<"byresuser"_n>();
-    auto rkey = combine_checksum_ids(result_hash, username);
+std::optional<creauthor> capital::get_creauthor(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username) {
+    creauthor_index creathors(_capital, coopname.value);
+    auto idx  = creathors.get_index<"byresuser"_n>();
+    auto rkey = combine_checksum_ids(assignment_hash, username);
 
     auto it = idx.find(rkey);
     if (it == idx.end()) {
@@ -431,10 +440,10 @@ std::optional<resactor> capital::get_resactor(eosio::name coopname, const checks
     return *it;
 }
 
-resactor capital::get_resactor_or_fail(eosio::name coopname, const checksum256 &result_hash, eosio::name username, const char* msg) {
-    auto maybe_resactor = get_resactor(coopname, result_hash, username);
-    eosio::check(maybe_resactor.has_value(), msg);
-    return *maybe_resactor;
+creauthor capital::get_creauthor_or_fail(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username, const char* msg) {
+    auto maybe_creauthor = get_creauthor(coopname, assignment_hash, username);
+    eosio::check(maybe_creauthor.has_value(), msg);
+    return *maybe_creauthor;
 }
 
 
@@ -466,40 +475,29 @@ global_state capital::get_global_state(name coopname) {
 }
 
 
-void capital::ensure_contributor(name coopname, name username) {
-  // Получаем глобальное состояние для установки reward_per_share_last
-  auto gs = get_global_state(coopname);
-
-}
-
 //----------------------------------------------------------------------------
 // calculcate_capital_amounts: для расчёта премий по формулам:
-//   - creators_bonus      = spend * 0.382
-//   - authors_bonus       = spend * 1.618
-//   - generated           = spend + creators_bonus + authors_bonus
+//   - creators_bonus      = spended * 0.382
+//   - authors_bonus       = spended * 0.618
+//   - generated           = spended + creators_bonus + authors_bonus
 //   - capitalists_bonus  = generated * 1.618
 //   - total               = generated + capitalists_bonus
 //----------------------------------------------------------------------------
-bonus_result capital::calculcate_capital_amounts(int64_t spend_amount) {
-    bonus_result br{};
+bonus_result capital::calculcate_capital_amounts(const eosio::asset& spended) {
+    bonus_result br;
 
-    // Преобразуем spend_amount в double для дальнейших расчетов
-    double spend = double(spend_amount);
-
-    // 1) creators_bonus = spend_amount * 0.382
-    br.creators_bonus = int64_t(spend * 0.382);
-
-    // 2) authors_bonus = spend_amount * 1.618
-    br.authors_bonus = int64_t(spend * 1.618);
-
-    // 3) generated = spend + creators_bonus + authors_bonus
-    br.generated = int64_t(spend + br.creators_bonus + br.authors_bonus);
-
-    // 4) capitalists_bonus = generated * 1.618
-    br.capitalists_bonus = int64_t(double(br.generated) * 1.618);
-
-    // 5) total = generated + capitalists_bonus
-    br.total = int64_t(br.generated + br.capitalists_bonus);
+    double amount = static_cast<double>(spended.amount);
+    eosio::symbol sym = spended.symbol;
+    
+    br.creator_base = spended;
+    br.author_base = spended;
+    
+    br.creators_bonus     = eosio::asset(int64_t(amount * 0.382), sym);
+    br.authors_bonus      = eosio::asset(int64_t(amount * 0.618), sym);
+    br.generated          = eosio::asset(br.creator_base.amount + br.creators_bonus.amount + br.authors_bonus.amount + br.author_base.amount, sym);
+    br.capitalists_bonus  = eosio::asset( int64_t(static_cast<double>(br.generated.amount) * 1.618), sym);
+    br.total              = eosio::asset(br.generated.amount + br.capitalists_bonus.amount, sym);
 
     return br;
 }
+

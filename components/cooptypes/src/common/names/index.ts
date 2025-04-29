@@ -1,3 +1,8 @@
+export const _meet = {
+  production: 'meet',
+  testnet: 'meet',
+} as const
+
 export const _draft = {
   production: 'draft',
   testnet: 'drafttest222',
@@ -56,4 +61,9 @@ export const _branch = {
 export const _capital = {
   production: 'capital',
   testnet: 'capital',
+} as const
+
+export const _wallet = {
+  production: 'wallet',
+  testnet: 'wallet',
 } as const

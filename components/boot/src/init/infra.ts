@@ -316,7 +316,6 @@ export async function startInfra() {
 
   const cooperative = new CooperativeClass(blockchain)
 
-  await cooperative.createAgreements(config.provider)
   await cooperative.createPrograms(config.provider)
 
   console.log(`Арендуем ресурсы провайдеру`)

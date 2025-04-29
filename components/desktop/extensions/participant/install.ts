@@ -1,0 +1,125 @@
+import { markRaw } from 'vue'
+import { ProfilePage } from 'src/pages/User/ProfilePage'
+import { WalletPage } from 'src/pages/User/WalletPage'
+import { ConnectionAgreementPage } from 'src/pages/Union/ConnectionAgreement'
+import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage'
+import { ContactsPage } from 'src/pages/Contacts'
+// import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
+// import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
+import { UserDocumentsPage } from 'src/pages/User/DocumentsPage'
+import { UserPaymentsPage } from 'src/pages/User/PaymentsPage'
+import { agreementsBase } from 'src/shared/lib/consts/workspaces'
+
+export default async function () {
+  return {
+    workspace: 'participant',
+    routes: [
+      {
+        meta: {
+          title: 'Стол пайщика',
+          icon: 'fa-solid fa-id-card',
+          roles: ['user', 'chairman', 'member'],
+        },
+        path: '/:coopname/user',
+        name: 'participant',
+        children: [
+          {
+            meta: {
+              title: 'Мой Профиль',
+              icon: 'fa-solid fa-user',
+              roles: [],
+              agreements: agreementsBase
+            },
+            path: 'profile',
+            name: 'profile',
+            component: markRaw(ProfilePage),
+            children: [],
+          },
+          {
+            meta: {
+              title: 'Мой Кошелёк',
+              icon: 'fa-solid fa-wallet',
+              roles: [],
+              agreements: agreementsBase
+            },
+            path: 'wallet',
+            name: 'wallet',
+            component: markRaw(WalletPage),
+            children: [],
+          },
+          {
+            meta: {
+              title: 'Моё Подключение',
+              icon: 'fas fa-link',
+              roles: ['user'],
+              conditions: 'isCoop === true && coopname === "voskhod"',
+            },
+            path: '/:coopname/connect',
+            name: 'connect',
+            component: markRaw(ConnectionAgreementPage),
+          },
+          {
+            meta: {
+              title: 'Мои Реквизиты',
+              icon: 'fas fa-link',
+              roles: ['user', 'member', 'chairman']
+            },
+            path: '/:coopname/connect',
+            name: 'payment-methods',
+            component: markRaw(UserPaymentMethodsPage),
+          },
+          {
+            meta: {
+              title: 'Мои Документы',
+              icon: 'fa-solid fa-file-invoice',
+              roles: ['user', 'member', 'chairman'],
+            },
+            path: 'documents',
+            name: 'user-documents',
+            component: markRaw(UserDocumentsPage),
+          },
+          {
+            meta: {
+              title: 'Мои Платежи',
+              icon: 'fa-solid fa-money-bill-transfer',
+              roles: ['user', 'member', 'chairman'],
+            },
+            path: 'payments',
+            name: 'user-payments',
+            component: markRaw(UserPaymentsPage),
+          },
+          // {
+          //   meta: {
+          //     title: 'Мои Собрания',
+          //     icon: 'fa-solid fa-users-between-lines',
+          //     roles: ['user', 'member', 'chairman'],
+          //   },
+          //   path: 'meets',
+          //   name: 'user-meets',
+          //   component: markRaw(ListOfMeetsPage),
+          //   children: [
+          //     {
+          //       path: ':hash',
+          //       name: 'user-meet-details',
+          //       component: markRaw(MeetDetailsPage),
+          //       meta: {
+          //         test: true
+          //       }
+          //     },
+          //   ],
+          // },
+          {
+            path: '/:coopname/contacts',
+            name: 'contacts',
+            component: markRaw(ContactsPage),
+            meta: {
+              title: 'Наши Контакты',
+              icon: 'fa-solid fa-info',
+              roles: [],
+            },
+          },
+        ]
+      }
+    ]
+  }
+}

@@ -34,11 +34,6 @@ export * as RegisterCooperative from './registerCooperative'
 export * as ChangeKey from './changeKey'
 
 /**
- * Действие подачи заявления на вступление в кооператив
- */
-export * as JoinCooperative from './joinCooperative'
-
-/**
  * Действие, которые вызывается системным контрактом для инициализации.
  * @private
  */

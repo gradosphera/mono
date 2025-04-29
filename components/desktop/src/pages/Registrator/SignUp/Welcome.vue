@@ -2,11 +2,11 @@
 div
   q-step(
     :name="store.steps.Welcome"
-    :title="'Добро пожаловать в ' + COOP_SHORT_NAME"
+    :title="'Добро пожаловать в ' + coopTitle"
     :done="store.isStepDone('Welcome')"
   )
 
-    p Совет кооператива {{ COOP_SHORT_NAME }} принял положительное решение о приёме Вас в пайщики, выдал удостоверение и создал цифровой кошелёк для Вас.
+    p Совет кооператива {{ coopTitle }} принял положительное решение о приёме Вас в пайщики, выдал удостоверение и создал цифровой кошелёк для Вас.
 
     div.q-mt-lg
       q-btn(
@@ -17,11 +17,12 @@ div
   </template>
 
 <script lang="ts" setup>
-import { COOP_SHORT_NAME } from 'src/shared/config'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router';
 import { useRegistratorStore } from 'src/entities/Registrator';
 const router = useRouter()
 const store = useRegistratorStore()
+const coopTitle = computed(() => process.env.COOP_SHORT_NAME)
 
 const next = () => {
   router.push({ name: 'index' })

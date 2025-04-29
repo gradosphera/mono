@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BranchBlockchainPort } from '~/domain/branch/interfaces/branch-blockchain.port';
 import { BlockchainService } from '../blockchain.service';
 import { BranchContract, SovietContract } from 'cooptypes';
-import { TransactResult } from '@wharfkit/session';
+import { Name, TransactResult } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/errors/http-api-error';
@@ -23,7 +23,7 @@ export class BranchBlockchainAdapter implements BranchBlockchainPort {
       BranchContract.contractName.production,
       coopname,
       BranchContract.Tables.Branches.tableName,
-      braname
+      Name.from(braname)
     );
   }
 

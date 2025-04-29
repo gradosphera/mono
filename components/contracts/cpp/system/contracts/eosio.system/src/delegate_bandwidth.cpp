@@ -33,7 +33,7 @@ namespace eosiosystem {
 
    /**
     *  When buying ram the payer irreversibly transfers quant to system contract and only
-    *  the receiver may reclaim the tokens via the sellram action. The receiver pays for the
+    *  the receiver may reresult the tokens via the sellram action. The receiver pays for the
     *  storage of all database records associated with this action.
     *
     *  RAM is a scarce resource whose supply is defined by global properties max_ram_size. RAM is

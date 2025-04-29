@@ -245,10 +245,10 @@ struct [[eosio::table, eosio::contract(SOVIET)]] decision {
   eosio::binary_extension<std::string> meta; ///< мета-данные
   
   eosio::binary_extension<name> callback_contract; ///< контракт для вызова после принятия решения
-
-  //TODO add expired_at and index
-  // eosio::time_point_sec expired_at; ///< Время создания карточки решения.
-
+  eosio::binary_extension<name> confirm_callback; ///< действие для вызова после принятия решения
+  eosio::binary_extension<name> decline_callback; ///< действие для вызова после отклонения решения
+  eosio::binary_extension<checksum256> hash; ///< входящий идентификатор решения
+  
   /**
    * @brief Возвращает первичный ключ решения.
    * @return uint64_t - первичный ключ, равный уникальному идентификатору решения.

@@ -1,8 +1,11 @@
 import type { SovietContract } from '../../contracts'
 import type { IAction, IExtendedAction } from '../blockchain'
 
+export * from './decisionsRegistry'
+// export * from './documentsRegistry'
 export interface IGenerationOptions {
   skip_save?: boolean
+  lang?: string
 }
 
 export type LangType = 'ru'

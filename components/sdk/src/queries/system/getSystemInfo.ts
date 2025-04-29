@@ -1,20 +1,20 @@
-import { Selector, type GraphQLTypes, type InputType } from "../../zeus/index";
-import { systemInfoSelector } from "../../selectors/system/systemInfoSelector";
+import { systemInfoSelector } from '../../selectors/system/systemInfoSelector'
+import { type GraphQLTypes, type InputType, Selector } from '../../zeus/index'
 
 export const name = 'getSystemInfo'
 
 /**
  * Извлекает информацию о состоянии системы
  */
-export const query = Selector("Query")({
+export const query = Selector('Query')({
   [name]: systemInfoSelector,
-});
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 }
 
-export type IOutput = InputType<GraphQLTypes['Query'], typeof query>;
+export type IOutput = InputType<GraphQLTypes['Query'], typeof query>

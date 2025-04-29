@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BlockchainService } from '../blockchain.service';
 import { SovietContract } from 'cooptypes';
-import { TransactResult } from '@wharfkit/session';
+import { TransactResult, UInt64 } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/errors/http-api-error';
@@ -24,7 +24,7 @@ export class DecisionBlockchainAdapter implements FreeDecisionBlockchainPort {
       SovietContract.contractName.production,
       coopname,
       SovietContract.Tables.Decisions.tableName,
-      decision_id
+      UInt64.from(decision_id)
     );
   }
 

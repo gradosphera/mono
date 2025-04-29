@@ -1,8 +1,8 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { DocumentPackageDTO } from './document-package.dto';
 import type { AgendaWithDocumentsDomainInterface } from '~/domain/agenda/interfaces/agenda-with-documents-domain.interface';
-import { BlockchainActionDTO } from './blockchain-action.dto';
+import { BlockchainActionDTO } from '../../common/dto/blockchain-action.dto';
 import { BlockchainDecisionDTO } from './blockchain-decision.dto';
+import { DocumentPackageAggregateDTO } from './document-package-aggregate.dto';
 
 @ObjectType('AgendaWithDocuments')
 export class AgendaWithDocumentsDTO implements AgendaWithDocumentsDomainInterface {
@@ -16,8 +16,8 @@ export class AgendaWithDocumentsDTO implements AgendaWithDocumentsDomainInterfac
   })
   action!: BlockchainActionDTO;
 
-  @Field(() => DocumentPackageDTO, {
+  @Field(() => DocumentPackageAggregateDTO, {
     description: 'Пакет документов, включающий разные подсекции',
   })
-  documents!: DocumentPackageDTO;
+  documents!: DocumentPackageAggregateDTO;
 }

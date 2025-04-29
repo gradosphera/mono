@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-btn(size="sm" @click="showAdd = true" color="primary")
+  q-btn(@click="showAdd = true" color="primary")
     q-icon(name="add")
     span добавить пайщика
   q-dialog(v-model="showAdd" persistent :maximized="false" )
@@ -22,14 +22,13 @@ div
                 q-input(@change="changeEmail" v-model="state.email" standout="bg-teal text-white" label="Электронная почта" :rules='[validateEmail, validateExists]').q-mb-md
 
               template(#bottom="{userDataForm}")
-
                 q-input(
                   standout="bg-teal text-white"
                   v-model="addUserState.created_at"
                   mask="datetime"
                   label="Дата и время подписания заявления"
                   placeholder="год/месяц/день часы:минуты"
-                  :rules="[val => notEmpty(val)]"
+                  :rules="[val => notEmpty(val), val => validateDateWithinRange(100)(val)]"
                   autocomplete="off"
                   hint="когда пайщик был принят в кооператив"
                 ).q-mt-md
@@ -99,6 +98,7 @@ import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore()
 
 import { notEmpty } from 'src/shared/lib/utils';
+import { validateDateWithinRange } from 'src/shared/lib/utils/dates/validateDateWithinRange';
 import { useAccountStore } from 'src/entities/Account/model';
 
 const { state, addUserState, clearUserData } = useRegistratorStore()
@@ -216,7 +216,7 @@ const addUserNow = (userDataForm: any) => {
         accountStore.getAccounts()
       } catch (e: any) {
         loading.value = false
-        FailAlert(`Возникла ошибка: ${e.message}`)
+        FailAlert(e)
       }
 
     } else {

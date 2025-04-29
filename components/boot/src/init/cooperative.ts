@@ -6,6 +6,7 @@ import type { Account, Contract, Keys } from '../types'
 import config, { GOVERN_SYMBOL, SYMBOL } from '../configs'
 import Blockchain from '../blockchain'
 import { sendPostToCoopbackWithSecret, sleep } from '../utils'
+import { generateRandomSHA256 } from '../utils/randomHash'
 
 const test_hash
   = '157192b276da23cc84ab078fc8755c051c5f0430bf4802e55718221e6b76c777'
@@ -46,48 +47,6 @@ export class CooperativeClass {
     })
   }
 
-  async createAgreements(coopname: string) {
-    // console.log('создаём кооперативное соглашение/положение по кошельку')
-    await this.blockchain.makeCoagreement({
-      coopname,
-      administrator: coopname,
-      type: 'wallet',
-      draft_id: TCooperative.Registry.WalletAgreement.registry_id,
-      program_id: 1,
-    })
-
-    await this.blockchain.makeCoagreement({
-      coopname,
-      administrator: coopname,
-      type: 'signature',
-      draft_id: TCooperative.Registry.RegulationElectronicSignature.registry_id,
-      program_id: 0,
-    })
-    await this.blockchain.makeCoagreement({
-      coopname,
-      administrator: coopname,
-      type: 'user',
-      draft_id: TCooperative.Registry.UserAgreement.registry_id,
-      program_id: 0,
-    })
-
-    await this.blockchain.makeCoagreement({
-      coopname,
-      administrator: coopname,
-      type: 'privacy',
-      draft_id: TCooperative.Registry.PrivacyPolicy.registry_id,
-      program_id: 0,
-    })
-
-    await this.blockchain.makeCoagreement({
-      coopname,
-      administrator: coopname,
-      type: 'coopenomics',
-      draft_id: TCooperative.Registry.CoopenomicsAgreement.registry_id,
-      program_id: 0,
-    })
-  }
-
   async createCooperative(username: string, keys?: Keys) {
     const account = await this.blockchain.generateKeypair(
       username,
@@ -96,8 +55,7 @@ export class CooperativeClass {
     )
     console.log('Регистрируем аккаунт')
 
-    await this.blockchain.registerAccount2({
-      registrator: config.provider,
+    await this.blockchain.createAccount({
       coopname: config.provider,
       referer: '',
       username: account.username,
@@ -106,40 +64,22 @@ export class CooperativeClass {
     })
 
     console.log('Регистрируем аккаунт как пользователя')
+    const registration_hash = generateRandomSHA256()
 
     await this.blockchain.registerUser({
-      registrator: config.provider,
       coopname: config.provider,
+      braname: '',
       username: account.username,
       type: 'organization',
-    })
-
-    console.log('Переводим аккаунт в организации')
-
-    await this.blockchain.registerOrganization({
-      username: account.username,
-      coopname: account.username,
-      params: {
-        is_cooperative: true,
-        coop_type: 'conscoop',
-        announce: 'Тестовый кооператив',
-        description: 'Тестовое описание',
-        initial: `100.0000 ${config.token.govern_symbol}`,
-        minimum: `300.0000 ${config.token.govern_symbol}`,
-        org_initial: `1000.0000 ${config.token.govern_symbol}`,
-        org_minimum: `3000.0000 ${config.token.govern_symbol}`,
-      },
-      document,
+      statement: document,
+      registration_hash,
     })
 
     console.log('Отправляем заявление на вступление')
 
-    await this.blockchain.joinCoop({
-      registrator: config.provider_chairman,
+    await this.blockchain.ConfirmPayment({
       coopname: config.provider,
-      username: account.username,
-      document,
-      braname: '',
+      income_hash: registration_hash,
     })
 
     console.log('Голосуем по решению в провайдере')
@@ -182,9 +122,23 @@ export class CooperativeClass {
       },
     })
 
-    console.log('создаём программы и соглашения новому кооперативу')
-    // await this.createPrograms(username)
-    await this.createAgreements(username)
+    console.log('Переводим аккаунт в кооператив')
+
+    await this.blockchain.registerCooperative({
+      username: account.username,
+      coopname: account.username,
+      params: {
+        is_cooperative: true,
+        coop_type: 'conscoop',
+        announce: 'Тестовый кооператив',
+        description: 'Тестовое описание',
+        initial: `100.0000 ${config.token.govern_symbol}`,
+        minimum: `300.0000 ${config.token.govern_symbol}`,
+        org_initial: `1000.0000 ${config.token.govern_symbol}`,
+        org_minimum: `3000.0000 ${config.token.govern_symbol}`,
+      },
+      document,
+    })
 
     console.log('Переводим инициализационные токены')
     await this.blockchain.transfer({ from: 'eosio', to: username, quantity: `100.0000 ${SYMBOL}`, memo: '' })

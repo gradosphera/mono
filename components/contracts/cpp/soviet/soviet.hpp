@@ -32,7 +32,7 @@ public:
   [[eosio::action]] void migrate();
   
   //agenda.cpp
-  [[eosio::action]] void createagenda(eosio::name coopname, eosio::name username, name callback_contract, name callback_action, uint64_t batch_id, document statement, std::string meta);
+  [[eosio::action]] void createagenda(CREATEAGENDA_SIGNATURE);
   void authorize_action_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
   
   
@@ -49,24 +49,29 @@ public:
   [[eosio::action]] void newact(eosio::name coopname, eosio::name username, eosio::name action, uint64_t decision_id, document document);
   [[eosio::action]] void newdecision(eosio::name coopname, eosio::name username,  eosio::name action, uint64_t decision_id, document document);
   [[eosio::action]] void newbatch(eosio::name coopname, eosio::name action, uint64_t batch_id);
-  [[eosio::action]] void newprogram(eosio::name coopname, uint64_t program_id);
   [[eosio::action]] void newdeclined(eosio::name coopname, eosio::name username, document document);
 
   [[eosio::action]] void declinedoc(eosio::name coopname, eosio::name username, document document);
+
+  //approves
+  [[eosio::action]] void createapprv(CREATEAPPRV_SIGNATURE);
+
+  [[eosio::action]]
+  void confirmapprv(eosio::name coopname, checksum256 approval_hash, document approved_document);
+
+  [[eosio::action]]
+  void declineapprv(eosio::name coopname, checksum256 approval_hash, std::string reason);
+
 
   //registrator.cpp
   [[eosio::action]] void cancelreg(eosio::name coopname, eosio::name username, std::string message);
 
   //regaccount.cpp
-  [[eosio::action]] void joincoop(eosio::name coopname, eosio::name braname, eosio::name username, document document);
-  [[eosio::action]] void adduser(eosio::name coopname, eosio::name username, eosio::name type, eosio::time_point_sec created_at, eosio::asset initial, eosio::asset minimum, bool spread_initial);
-  
-  static void joincoop_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id, uint64_t batch_id);
+  [[eosio::action]] void addpartcpnt(eosio::name coopname, eosio::name username, eosio::name braname, eosio::name type, eosio::time_point_sec created_at, eosio::asset initial, eosio::asset minimum, bool spread_initial);
 
   //automator.cpp
   [[eosio::action]] void automate(eosio::name coopname, uint64_t board_id, eosio::name member, eosio::name action_type, eosio::name provider, std::string encrypted_private_key);
   [[eosio::action]] void disautomate(eosio::name coopname, uint64_t board_id, eosio::name member, uint64_t automation_id );
-  static void is_valid_action_for_automation(eosio::name action_type);
   static void make_base_coagreements(eosio::name coopname, eosio::symbol govern_symbol);
   
   //chairman.cpp
@@ -80,8 +85,7 @@ public:
   [[eosio::action]] void setrights(eosio::name coopname, eosio::name chairman, eosio::name username, std::vector<right> rights);
   [[eosio::action]] void validate(eosio::name coopname, eosio::name username, uint64_t decision_id);
 
-  [[eosio::action]] void regpaid(eosio::name coopname, eosio::name username);
-  
+  //programs  
   [[eosio::action]] void openprogwall(name coopname, name username, name program_type, uint64_t agreement_id);
 
   //voting.cpp
@@ -101,7 +105,6 @@ public:
   [[eosio::action]] void disableprog(eosio::name coopname, uint64_t program_id);
   
   //agreements.cpp
-  [[eosio::action]] void makecoagreem(eosio::name coopname, eosio::name administrator, eosio::name type, uint64_t draft_id, uint64_t program_id);
   [[eosio::action]] void sndagreement(eosio::name coopname, eosio::name administrator, eosio::name username, eosio::name agreement_type, document document);
   [[eosio::action]] void confirmagree(eosio::name coopname, eosio::name administrator, eosio::name username, uint64_t agreement_id);
   [[eosio::action]] void declineagree(eosio::name coopname, eosio::name administrator, eosio::name username, uint64_t agreement_id, std::string comment);

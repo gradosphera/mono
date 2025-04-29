@@ -84,7 +84,7 @@ export class BranchDomainInteractor {
     if (existingBranch) {
       throw new HttpApiError(httpStatus.BAD_REQUEST, 'Кооперативный участок уже создан');
     }
-    console.log('data: ', data);
+
     // извлекаем информацию о кооперативе
     const cooperative = await this.organizationRepository.findByUsername(data.coopname);
 

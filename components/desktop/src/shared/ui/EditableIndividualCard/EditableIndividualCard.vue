@@ -8,7 +8,7 @@ q-form(ref="form" v-if="data")
     :readonly="readonly"
     :rules="[val => validEmail(val)]"
     autocomplete="off"
-  )  
+  )
   q-input(
     dense
     v-model="data.first_name"
@@ -152,19 +152,20 @@ q-form(ref="form" v-if="data")
     @cancel="cancelChanges"
   )
   </template>
-  
+
   <script lang="ts" setup>
   import { ref } from 'vue';
   import { useEditableData } from 'src/shared/lib/composables/useEditableData';
   import { validEmail } from 'src/shared/lib/utils/validEmailRule';
   import { validatePersonalName, notEmpty } from 'src/shared/lib/utils';
-  import { failAlert, SuccessAlert } from 'src/shared/api';
+  import { FailAlert, SuccessAlert } from 'src/shared/api';
   import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
   import { EditableActions } from 'src/shared/ui/EditableActions';
   import { type IIndividualData } from 'src/entities/Account/types';
-  
+  import 'src/shared/ui/InputStyles/index.scss';
+
   const { updateAccount } = useUpdateAccount()
-  
+
   const props = defineProps({
     participantData: {
       type: Object as () => IIndividualData,
@@ -175,11 +176,11 @@ q-form(ref="form" v-if="data")
       default: false
     }
   });
-  
+
   const localParticipantData = ref(props.participantData);
   const form = ref();
   const emit = defineEmits(['update']);
-  
+
   const handleSave = async () => {
     try {
       const account_data: IUpdateAccountInput = {
@@ -190,14 +191,13 @@ q-form(ref="form" v-if="data")
       emit('update', JSON.parse(JSON.stringify(data.value)))
       SuccessAlert('Данные аккаунта обновлены')
     } catch (e: any) {
-      failAlert(e);
+      FailAlert(e);
     }
   };
-  
+
   const { editableData: data, isEditing, isDisabled, saveChanges, cancelChanges } = useEditableData(
     localParticipantData.value,
     handleSave,
     form
   );
   </script>
-  

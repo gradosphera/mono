@@ -125,14 +125,15 @@ q-form(ref="form")
   import { ref } from 'vue';
   import { useEditableData } from 'src/shared/lib/composables/useEditableData';
   import { notEmpty, notEmptyPhone, validatePersonalName } from 'src/shared/lib/utils';
-  import { failAlert, SuccessAlert } from 'src/shared/api';
+  import { FailAlert, SuccessAlert } from 'src/shared/api';
   import { EditableActions } from 'src/shared/ui/EditableActions';
   import { type IUpdateAccountInput, useUpdateAccount } from 'src/features/Account/UpdateAccount/model';
   import { type IEntrepreneurData } from 'src/entities/Account/types';
-  
+  import 'src/shared/ui/InputStyles/index.scss';
+
   const emit = defineEmits(['update']);
   const { updateAccount } = useUpdateAccount();
-  
+
   const props = defineProps({
     participantData: {
       type: Object as () => IEntrepreneurData,
@@ -143,10 +144,10 @@ q-form(ref="form")
       default: false
     }
   });
-  
+
   const localEntrepreneurData = ref(props.participantData);
   const form = ref();
-  
+
   const handleSave = async () => {
     try {
       const account_data: IUpdateAccountInput = {
@@ -158,10 +159,10 @@ q-form(ref="form")
       SuccessAlert('Данные аккаунта обновлены');
     } catch (e) {
       console.log(e);
-      failAlert(e);
+      FailAlert(e);
     }
   };
-  
+
   const { editableData: data, isEditing, isDisabled, saveChanges, cancelChanges } = useEditableData(
     localEntrepreneurData.value,
     handleSave,

@@ -14,6 +14,7 @@ import { PROJECT_FREE_DECISION_REPOSITORY } from '~/domain/common/repositories/p
 import { ProjectFreeDecisionRepositoryImplementation } from './repositories/project-free-decision-generator.repository';
 import { VARS_REPOSITORY } from '~/domain/common/repositories/vars.repository';
 import { VarsRepositoryImplementation } from './repositories/vars-generator.repository';
+
 @Global()
 @Module({
   providers: [

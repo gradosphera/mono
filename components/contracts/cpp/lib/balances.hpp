@@ -1,39 +1,5 @@
 
 /**
- * @ingroup public_tables
- * @brief Таблица `deposits` отслеживает депозиты в контракте GATEWAY.
- */
-
-struct [[eosio::table, eosio::contract(GATEWAY)]] onedeposit {
-    uint64_t id; /*!< Уникальный идентификатор записи депозита */
-    eosio::name username; /*!< Имя аккаунта пользователя, совершившего депозит */
-    eosio::name coopname; /*!< Имя аккаунта кооператива, в контексте которого совершается депозит */
-    eosio::name type; /*!< Тип взноса (deposit | initial) */
-    
-    eosio::name token_contract; /*!< Имя аккаунта контракта токена для депозита */
-    eosio::asset quantity; /*!< Количество средств во внутренней валюте */
-
-    eosio::name status; /*!< Статус депозита */
-    std::string link; /*!< Ссылка на дополнительную информацию или внешние данные */
-    std::string memo; /*!< Примечание к депозиту */
-    eosio::time_point_sec expired_at; ///< Время истечения срока давности
-
-    uint64_t primary_key() const { return id; } /*!< Возвращает id как первичный ключ */
-    uint64_t by_username() const { return username.value; } /*!< Индекс по имени пользователя */
-    uint64_t by_status() const { return status.value; } /*!< Индекс по статусу депозита */
-    uint64_t by_expired() const { return expired_at.sec_since_epoch(); } /*!< Индекс по статусу истечения */
-};
-
-typedef eosio::multi_index<
-    "deposits"_n, onedeposit,
-    eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<onedeposit, uint64_t, &onedeposit::by_username>>,
-    eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<onedeposit, uint64_t, &onedeposit::by_status>>,
-    eosio::indexed_by<"byexpired"_n, eosio::const_mem_fun<onedeposit, uint64_t, &onedeposit::by_expired>>
-> deposits_index; /*!< Мультииндекс для доступа и манипуляции данными таблицы `deposits` */
-
-
-
-/**
 \ingroup public_tables
 \brief Структура таблицы баланса.
 
@@ -54,24 +20,6 @@ struct balances_base {
 };
 
 typedef eosio::multi_index<"balances"_n, balances_base, eosio::indexed_by<"byconsym"_n, eosio::const_mem_fun<balances_base, uint128_t, &balances_base::byconsym>>> balances_index; /*!< Тип мультииндекса для таблицы балансов */
-
-
-// -----------------------------------------------------------------
-// Таблица кошельков
-// -----------------------------------------------------------------
-struct [[eosio::table, eosio::contract(SOVIET)]] onewallet {
-  eosio::name username;
-  eosio::name coopname;
-  eosio::asset available;
-  eosio::asset blocked;
-  eosio::asset minimum;
-  eosio::binary_extension<eosio::asset> initial;
-  
-  uint64_t primary_key() const { return username.value; } /*!< return username - primary_key */
-};
-
-typedef eosio::multi_index<"wallets"_n, onewallet> wallets_index;
-
 
 
 // -----------------------------------------------------------------

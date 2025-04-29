@@ -1,26 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import type {
-  AssetContributionStatementDocumentDTO,
-  AssetContributionStatementGenerateDocumentInputDTO,
-} from '../dto/asset-contribution-statement.dto';
+import type { AssetContributionStatementGenerateDocumentInputDTO } from '../../document/documents-dto/asset-contribution-statement-document.dto';
 import type { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
-import type {
-  AssetContributionActGenerateDocumentInputDTO,
-  AssetContributionActDocumentDTO,
-} from '../dto/asset-contribution-act.dto';
-import type {
-  AssetContributionDecisionGenerateDocumentInputDTO,
-  AssetContributionDecisionDocumentDTO,
-} from '../dto/asset-contribution-decision.dto';
-import type { ReturnByAssetActGenerateDocumentInputDTO, ReturnByAssetActDocumentDTO } from '../dto/return-by-asset-act.dto';
-import type {
-  ReturnByAssetDecisionGenerateDocumentInputDTO,
-  ReturnByAssetDecisionDocumentDTO,
-} from '../dto/return-by-asset-decision.dto';
-import type {
-  ReturnByAssetStatementGenerateDocumentInputDTO,
-  ReturnByAssetStatementDocumentDTO,
-} from '../dto/return-by-asset-statement.dto';
+import type { AssetContributionActGenerateDocumentInputDTO } from '../../document/documents-dto/asset-contribution-act-document.dto';
+import type { AssetContributionDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/asset-contribution-decision-document.dto';
+import type { ReturnByAssetActGenerateDocumentInputDTO } from '../../document/documents-dto/return-by-asset-act-document.dto';
+import type { ReturnByAssetDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/return-by-asset-decision-document.dto';
+import type { ReturnByAssetStatementGenerateDocumentInputDTO } from '../../document/documents-dto/return-by-asset-statement-document.dto';
 import { CooplaceDomainInteractor } from '~/domain/cooplace/interactors/cooplace.interactor';
 import type { AcceptChildOrderInputDTO } from '../dto/accept-child-order-input.dto';
 import type { CancelRequestInputDTO } from '../dto/cancel-request-input.dto';
@@ -40,6 +25,7 @@ import type { SupplyOnRequestInputDTO } from '../dto/supply-on-request-input.dto
 import type { UnpublishRequestInputDTO } from '../dto/unpublish-request-input.dto';
 import type { UpdateRequestInputDTO } from '../dto/update-request-input.dto';
 import type { TransactionDTO } from '~/modules/common/dto/transaction-result-response.dto';
+import type { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 
 @Injectable()
 export class CooplaceService {
@@ -48,49 +34,49 @@ export class CooplaceService {
   public async generateAssetContributionStatement(
     data: AssetContributionStatementGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<AssetContributionStatementDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     const document = await this.cooplaceDomainInteractor.generateAssetContributionStatementDocument(data, options);
-    return document as unknown as AssetContributionStatementDocumentDTO;
+    return document as unknown as GeneratedDocumentDTO;
   }
 
   public async generateAssetContributionDecision(
     data: AssetContributionDecisionGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<AssetContributionDecisionDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     const document = await this.cooplaceDomainInteractor.generateAssetContributionDecisionDocument(data, options);
-    return document as unknown as AssetContributionDecisionDocumentDTO;
+    return document as unknown as GeneratedDocumentDTO;
   }
 
   public async generateAssetContributionAct(
     data: AssetContributionActGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<AssetContributionActDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     const document = await this.cooplaceDomainInteractor.generateAssetContributionActDocument(data, options);
-    return document as unknown as AssetContributionActDocumentDTO;
+    return document as unknown as GeneratedDocumentDTO;
   }
 
   public async generateReturnByAssetStatement(
     data: ReturnByAssetStatementGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ReturnByAssetStatementDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     const document = await this.cooplaceDomainInteractor.generateReturnByAssetStatementDocument(data, options);
-    return document as unknown as ReturnByAssetStatementDocumentDTO;
+    return document as unknown as GeneratedDocumentDTO;
   }
 
   public async generateReturnByAssetDecision(
     data: ReturnByAssetDecisionGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ReturnByAssetDecisionDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     const document = await this.cooplaceDomainInteractor.generateReturnByAssetDecisionDocument(data, options);
-    return document as unknown as ReturnByAssetDecisionDocumentDTO;
+    return document as unknown as GeneratedDocumentDTO;
   }
 
   public async generateReturnByAssetAct(
     data: ReturnByAssetActGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ReturnByAssetActDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     const document = await this.cooplaceDomainInteractor.generateReturnByAssetActDocument(data, options);
-    return document as unknown as ReturnByAssetActDocumentDTO;
+    return document as unknown as GeneratedDocumentDTO;
   }
 
   public async acceptChildOrder(data: AcceptChildOrderInputDTO): Promise<TransactionDTO> {

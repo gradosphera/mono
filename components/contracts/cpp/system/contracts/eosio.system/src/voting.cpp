@@ -44,8 +44,8 @@ namespace eosiosystem {
             info.url                = url;
             info.location           = location;
             info.producer_authority.emplace( producer_authority );
-            if ( info.last_claim_time == time_point() )
-               info.last_claim_time = ct;
+            if ( info.last_result_time == time_point() )
+               info.last_result_time = ct;
          });
 
       } else {
@@ -56,7 +56,7 @@ namespace eosiosystem {
             info.is_active          = true;
             info.url                = url;
             info.location           = location;
-            info.last_claim_time    = ct;
+            info.last_result_time    = ct;
             info.producer_authority.emplace( producer_authority );
          });
       }

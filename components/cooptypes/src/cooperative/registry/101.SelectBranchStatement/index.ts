@@ -12,11 +12,14 @@ export interface Action extends IGenerate {
   braname: string
 }
 
+export type Meta = IMetaDocument & Action
+
 // Модель данных
 export interface Model {
   type: string
   meta: IMetaDocument
   vars: IVars
+  coop: ICooperativeData
   branch: IOrganizationData
   individual?: IIndividualData
   organization?: IOrganizationData

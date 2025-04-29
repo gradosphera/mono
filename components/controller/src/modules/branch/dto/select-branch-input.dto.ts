@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import type { SelectBranchInputDomainInterface } from '~/domain/branch/interfaces/select-branch-domain-input.interface';
-import { SelectBranchSignedDocumentInputDTO } from './select-branch-document.dto';
+import { SelectBranchSignedDocumentInputDTO } from '../../document/documents-dto/select-branch-document.dto';
 
 @InputType('SelectBranchInput')
 export class SelectBranchInputDTO implements SelectBranchInputDomainInterface {

@@ -81,6 +81,7 @@ export class PaymentDomainEntity {
       id: this.id,
       blockchain_id: this.orderNum,
       provider: this.provider,
+      type: this.type,
       details: details || ({} as PaymentDetailsDTO),
       status: this.status,
       message: this.message || '',

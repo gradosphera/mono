@@ -1,18 +1,18 @@
-import { $, Selector, type GraphQLTypes, type InputType, type ModelTypes } from '../../zeus/index';
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'selectBranch'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{data: $('data', 'SelectBranchInput!')}, true]
-});
+  [name]: [{ data: $('data', 'SelectBranchInput!') }, true],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
-  data: ModelTypes['SelectBranchInput'],
+  data: ModelTypes['SelectBranchInput']
 }
 
-export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>;
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

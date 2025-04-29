@@ -1,3 +1,4 @@
+import type { API } from '@wharfkit/antelope';
 import type { IndexPosition } from '~/infrastructure/blockchain/blockchain.service';
 import type { BlockchainAccountInterface } from '~/types/shared';
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
@@ -13,8 +14,9 @@ export interface BlockchainPort {
     code: string,
     scope: string,
     tableName: string,
-    primaryKey: string | number,
-    indexPosition?: IndexPosition
+    primaryKey: API.v1.TableIndexType,
+    indexPosition?: IndexPosition,
+    keyType?: 'name' | 'sha256' | 'i64'
   ): Promise<any | null>;
   query(
     code: string,

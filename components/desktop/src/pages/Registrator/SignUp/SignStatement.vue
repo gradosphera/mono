@@ -28,7 +28,7 @@
   <script lang="ts" setup>
   import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
   import { Notify } from 'quasar'
-  import { failAlert, FailAlert } from 'src/shared/api'
+  import { FailAlert } from 'src/shared/api'
   import { Loader } from 'src/shared/ui/Loader'
   import { useRegistratorStore } from 'src/entities/Registrator'
   import { useCreateUser } from 'src/features/User/CreateUser'
@@ -151,7 +151,7 @@ import { client } from 'src/shared/api/client'
       store.next()
     } catch (err: any) {
       onSign.value = false
-      failAlert(err)
+      FailAlert(err)
     }
   }
   </script>

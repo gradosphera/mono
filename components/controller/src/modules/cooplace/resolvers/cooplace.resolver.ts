@@ -6,27 +6,12 @@ import { AuthRoles } from '~/modules/auth/decorators/auth.decorator';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 import { Throttle } from '@nestjs/throttler';
 import { CooplaceService } from '../services/cooplace.service';
-import {
-  AssetContributionStatementDocumentDTO,
-  AssetContributionStatementGenerateDocumentInputDTO,
-} from '../dto/asset-contribution-statement.dto';
-import {
-  AssetContributionDecisionDocumentDTO,
-  AssetContributionDecisionGenerateDocumentInputDTO,
-} from '../dto/asset-contribution-decision.dto';
-import {
-  AssetContributionActDocumentDTO,
-  AssetContributionActGenerateDocumentInputDTO,
-} from '../dto/asset-contribution-act.dto';
-import {
-  ReturnByAssetStatementDocumentDTO,
-  ReturnByAssetStatementGenerateDocumentInputDTO,
-} from '../dto/return-by-asset-statement.dto';
-import {
-  ReturnByAssetDecisionDocumentDTO,
-  ReturnByAssetDecisionGenerateDocumentInputDTO,
-} from '../dto/return-by-asset-decision.dto';
-import { ReturnByAssetActDocumentDTO, ReturnByAssetActGenerateDocumentInputDTO } from '../dto/return-by-asset-act.dto';
+import { AssetContributionStatementGenerateDocumentInputDTO } from '../../document/documents-dto/asset-contribution-statement-document.dto';
+import { AssetContributionDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/asset-contribution-decision-document.dto';
+import { AssetContributionActGenerateDocumentInputDTO } from '../../document/documents-dto/asset-contribution-act-document.dto';
+import { ReturnByAssetStatementGenerateDocumentInputDTO } from '../../document/documents-dto/return-by-asset-statement-document.dto';
+import { ReturnByAssetDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/return-by-asset-decision-document.dto';
+import { ReturnByAssetActGenerateDocumentInputDTO } from '../../document/documents-dto/return-by-asset-act-document.dto';
 import { AcceptChildOrderInputDTO } from '../dto/accept-child-order-input.dto';
 import { TransactionDTO } from '~/modules/common/dto/transaction-result-response.dto';
 import { CancelRequestInputDTO } from '../dto/cancel-request-input.dto';
@@ -45,12 +30,13 @@ import { ReceiveOnRequestInputDTO } from '../dto/receive-on-request-input.dto';
 import { SupplyOnRequestInputDTO } from '../dto/supply-on-request-input.dto';
 import { UnpublishRequestInputDTO } from '../dto/unpublish-request-input.dto';
 import { UpdateRequestInputDTO } from '../dto/update-request-input.dto';
+import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 
 @Resolver()
 export class CooplaceResolver {
   constructor(private readonly cooplaceService: CooplaceService) {}
 
-  @Mutation(() => AssetContributionStatementDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateAssetContributionStatement',
     description: 'Сгенерировать документ заявления о вступлении в кооператив.',
   })
@@ -62,11 +48,11 @@ export class CooplaceResolver {
     data: AssetContributionStatementGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<AssetContributionStatementDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.cooplaceService.generateAssetContributionStatement(data, options);
   }
 
-  @Mutation(() => AssetContributionDecisionDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateAssetContributionDecision',
     description: 'Сгенерировать документ решения о вступлении в кооператив.',
   })
@@ -78,11 +64,11 @@ export class CooplaceResolver {
     data: AssetContributionDecisionGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<AssetContributionDecisionDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.cooplaceService.generateAssetContributionDecision(data, options);
   }
 
-  @Mutation(() => AssetContributionActDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateAssetContributionAct',
     description: 'Сгенерировать документ акта приема-передачи.',
   })
@@ -94,11 +80,11 @@ export class CooplaceResolver {
     data: AssetContributionActGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<AssetContributionActDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.cooplaceService.generateAssetContributionAct(data, options);
   }
 
-  @Mutation(() => ReturnByAssetStatementDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateReturnByAssetStatement',
     description: 'Сгенерировать документ заявления о возврате имущества.',
   })
@@ -110,11 +96,11 @@ export class CooplaceResolver {
     data: ReturnByAssetStatementGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ReturnByAssetStatementDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.cooplaceService.generateReturnByAssetStatement(data, options);
   }
 
-  @Mutation(() => ReturnByAssetDecisionDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateReturnByAssetDecision',
     description: 'Сгенерировать документ решения о возврате имущества.',
   })
@@ -126,11 +112,11 @@ export class CooplaceResolver {
     data: ReturnByAssetDecisionGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ReturnByAssetDecisionDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.cooplaceService.generateReturnByAssetDecision(data, options);
   }
 
-  @Mutation(() => ReturnByAssetActDocumentDTO, {
+  @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateReturnByAssetAct',
     description: 'Сгенерировать документ акта возврата имущества.',
   })
@@ -142,7 +128,7 @@ export class CooplaceResolver {
     data: ReturnByAssetActGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
-  ): Promise<ReturnByAssetActDocumentDTO> {
+  ): Promise<GeneratedDocumentDTO> {
     return this.cooplaceService.generateReturnByAssetAct(data, options);
   }
 

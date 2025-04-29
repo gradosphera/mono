@@ -14,6 +14,8 @@ import { ParticipantDomainModule } from './participant/participant-domain.module
 import { AuthDomainModule } from './auth/auth.module';
 import { AgendaDomainModule } from './agenda/agenda-domain.module';
 import { CooplaceDomainModule } from './cooplace/cooplace.module';
+import { DesktopDomainModule } from './desktop/desktop-domain.module';
+import { MeetDomainModule } from './meet/meet-domain.module';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { CooplaceDomainModule } from './cooplace/cooplace.module';
     AgendaDomainModule,
     AccountDomainModule,
     AgreementDomainModule,
+    DesktopDomainModule,
     ExtensionDomainModule,
     PaymentDomainModule,
     PaymentMethodDomainModule,
@@ -31,12 +34,14 @@ import { CooplaceDomainModule } from './cooplace/cooplace.module';
     FreeDecisionDomainModule,
     ParticipantDomainModule,
     CooplaceDomainModule,
+    MeetDomainModule,
   ],
   exports: [
     AuthDomainModule,
     AgendaDomainModule,
     AccountDomainModule,
     AgreementDomainModule,
+    DesktopDomainModule,
     ExtensionDomainModule,
     PaymentDomainModule,
     PaymentMethodDomainModule,
@@ -47,6 +52,7 @@ import { CooplaceDomainModule } from './cooplace/cooplace.module';
     FreeDecisionDomainModule,
     ParticipantDomainModule,
     CooplaceDomainModule,
+    MeetDomainModule,
   ],
 })
 export class DomainModule {}

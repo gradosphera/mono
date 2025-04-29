@@ -1,7 +1,7 @@
 <template lang='pug'>
 div
   q-step(:name="store.steps.EmailInput", title='Введите электронную почту', :done="store.isStepDone('EmailInput')")
-    p Добро пожаловать в {{ COOP_SHORT_NAME }}! Для начала регистрации, пожалуйста, введите вашу электронную почту:
+    p Добро пожаловать в {{ coopTitle }}! Для начала регистрации, пожалуйста, введите вашу электронную почту:
 
     q-input.q-mt-lg(
       v-model.trim='email',
@@ -27,14 +27,13 @@ div
 import { ref, computed, watch } from 'vue'
 import { useCreateUser } from 'src/features/User/CreateUser'
 import { debounce } from 'quasar'
-import { COOP_SHORT_NAME } from 'src/shared/config'
 import { useRegistratorStore } from 'src/entities/Registrator'
 const store = useRegistratorStore()
 
 const api = useCreateUser()
 
 watch(() => store.state.email, () => email.value = store.state.email)
-
+const coopTitle = computed(() => process.env.COOP_SHORT_NAME)
 const email = ref(store.state.email)
 
 const inLoading = ref(false)

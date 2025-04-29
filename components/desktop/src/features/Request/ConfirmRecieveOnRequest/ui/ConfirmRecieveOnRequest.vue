@@ -1,5 +1,5 @@
 <template lang="pug">
-q-btn(color="green" @click="confirmRecieve") выдал имущество 
+q-btn(color="green" @click="confirmRecieve") выдал имущество
 </template>
 <script setup lang="ts">
   import { FailAlert, SuccessAlert } from 'src/shared/api'

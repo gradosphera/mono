@@ -75,7 +75,7 @@ import type { Zeus } from '@coopenomics/sdk';
 import { EditableActions } from 'src/shared/ui/EditableActions';
 import { notEmpty } from 'src/shared/lib/utils';
 import { useUpdateBranchBankAccount } from 'src/features/PaymentMethod/UpdateBankAccount/model';
-import { failAlert } from 'src/shared/api';
+import { FailAlert } from 'src/shared/api';
 
 const props = defineProps({
   bankDetails: {
@@ -93,7 +93,7 @@ const handleSave = async (data: Zeus.ModelTypes['BankPaymentMethod']) => {
     const { updateBankAccount } = useUpdateBranchBankAccount();
     await updateBankAccount(data);
   } catch(e){
-    failAlert(e)
+    FailAlert(e)
   }
 };
 

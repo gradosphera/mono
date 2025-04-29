@@ -9,6 +9,9 @@ import { ExtensionEntity } from './entities/extension.entity';
 import { LogExtensionEntity } from './entities/log-extension.entity';
 import { LOG_EXTENSION_REPOSITORY } from '~/domain/extension/repositories/log-extension-domain.repository';
 import { TypeOrmLogExtensionDomainRepository } from './repositories/typeorm-log-extension.repository';
+import { MeetPreEntity } from './entities/meet-pre.entity';
+import { MEET_REPOSITORY } from '~/domain/meet/repositories/meet.repository';
+import { TypeOrmMeetRepository } from './repositories/typeorm-meet.repository';
 
 @Global()
 @Module({
@@ -25,7 +28,7 @@ import { TypeOrmLogExtensionDomainRepository } from './repositories/typeorm-log-
       synchronize: true, // Отключите в продакшене
       logging: false,
     }),
-    NestTypeOrmModule.forFeature([ExtensionEntity, LogExtensionEntity]),
+    NestTypeOrmModule.forFeature([ExtensionEntity, LogExtensionEntity, MeetPreEntity]),
   ],
   providers: [
     {
@@ -36,7 +39,11 @@ import { TypeOrmLogExtensionDomainRepository } from './repositories/typeorm-log-
       provide: LOG_EXTENSION_REPOSITORY,
       useClass: TypeOrmLogExtensionDomainRepository,
     },
+    {
+      provide: MEET_REPOSITORY,
+      useClass: TypeOrmMeetRepository,
+    },
   ],
-  exports: [NestTypeOrmModule, EXTENSION_REPOSITORY, LOG_EXTENSION_REPOSITORY],
+  exports: [NestTypeOrmModule, EXTENSION_REPOSITORY, LOG_EXTENSION_REPOSITORY, MEET_REPOSITORY],
 })
 export class TypeOrmModule {}

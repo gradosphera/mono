@@ -1,5 +1,5 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ValueTypes } from "../../zeus/index";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { Selector, type ValueTypes } from '../../zeus/index'
 
 export const rawBlockchainActionSelector = {
   account: true,
@@ -36,11 +36,11 @@ export const rawBlockchainActionSelector = {
   },
   receiver: true,
   transaction_id: true,
-};
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['BlockchainAction']> = rawBlockchainActionSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['BlockchainAction']> = rawBlockchainActionSelector
 
-export const blockchainActionSelector = Selector("BlockchainAction")(
+export const blockchainActionSelector = Selector('BlockchainAction')(
   rawBlockchainActionSelector,
-);
+)

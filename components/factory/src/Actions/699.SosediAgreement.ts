@@ -1,10 +1,10 @@
 import { DraftContract } from 'cooptypes'
-import { SosediAgreement } from '../templates'
+import { SosediAgreement } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { SosediAgreement as Template } from '../templates'
+export { SosediAgreement as Template } from '../Templates'
 
 export class Factory extends DocFactory<SosediAgreement.Action> {
   constructor(storage: MongoDBConnector) {

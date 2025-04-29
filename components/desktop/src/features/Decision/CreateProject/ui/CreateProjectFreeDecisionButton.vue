@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-btn(@click="show = true" color="primary" size="sm" icon="add") предложить повестку
+  q-btn(@click="show = true" color="primary" icon="add") предложить повестку
   q-dialog(v-model="show" persistent :maximized="false" )
     ModalBase(style="width: 500px; max-width: 100% !important;" :title="'Предложить повестку'" :show_close="true")
       Form(:handler-submit="create" :is-submitting="isSubmitting" :showSubmit="!isLoading" :showCancel="true" :button-submit-txt="'Создать'" @cancel="clear" ).q-pa-md

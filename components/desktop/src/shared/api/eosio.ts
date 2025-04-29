@@ -1,12 +1,11 @@
 import { TransactResult } from '@wharfkit/session';
 import { APIClient, PrivateKey } from '@wharfkit/antelope';
 import { ContractKit } from '@wharfkit/contract';
-import { CHAIN_URL } from '../config/Env';
 import { useGlobalStore } from '../store';
 import { Account } from '@wharfkit/account'
 
 export const readBlockchain = new APIClient({
-  url: CHAIN_URL,
+  url: process.env.CHAIN_URL,
 });
 
 export const contractKit = new ContractKit({

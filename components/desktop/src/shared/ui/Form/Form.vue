@@ -7,6 +7,7 @@ interface IFormProps {
   showCancel?: boolean
   buttonSubmitTxt?: string
   buttonCancelTxt?: string
+  disabled?: boolean
 }
 
 withDefaults(defineProps<IFormProps>(), {
@@ -15,6 +16,7 @@ withDefaults(defineProps<IFormProps>(), {
   showSubmit: true,
   buttonSubmitTxt: 'Продолжить',
   buttonCancelTxt: 'Отменить',
+  disabled: false,
 })
 
 const cancel = (): void => {
@@ -28,6 +30,6 @@ q-form(@submit.prevent="handlerSubmit")
     slot
     div.flex
       q-btn(v-if="showCancel" flat @click="cancel" size="sm") {{ buttonCancelTxt }}
-      q-btn(v-if="showSubmit" size="sm" type="submit" :loading="isSubmitting" color="primary") {{ buttonSubmitTxt }}
+      q-btn(v-if="showSubmit" size="sm" type="submit" :loading="isSubmitting" color="primary" :disabled="disabled") {{ buttonSubmitTxt }}
 
 </template>

@@ -13,6 +13,10 @@ import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common
 import { INDIVIDUAL_REPOSITORY, IndividualRepository } from '~/domain/common/repositories/individual.repository';
 import type { PrivateAccountDomainInterface } from '../interfaces/private-account-domain.interface';
 import type { AccountType } from '~/modules/account/enum/account-type.enum';
+import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
+import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
+import type { EntrepreneurDomainInterface } from '~/domain/common/interfaces/entrepreneur-domain.interface';
+
 @Injectable()
 export class AccountDomainService {
   constructor(
@@ -50,21 +54,23 @@ export class AccountDomainService {
 
     const provider_account = (await userService.findUser(username)) as unknown as MonoAccountDomainInterface;
     let individual_data, organization_data, entrepreneur_data;
-
-    if (provider_account.type == 'individual') {
+    if (provider_account && provider_account.type == 'individual') {
       individual_data = await this.individualRepository.findByUsername(username);
-    } else if (provider_account.type == 'organization') {
+    } else if (provider_account && provider_account.type == 'organization') {
       organization_data = await this.organizationRepository.findByUsername(username);
-    } else if (provider_account.type == 'entrepreneur') {
+    } else if (provider_account && provider_account.type == 'entrepreneur') {
       entrepreneur_data = await this.entrepreneurRepository.findByUsername(username);
     }
+    let private_account: PrivateAccountDomainInterface | null = null;
 
-    const private_account: PrivateAccountDomainInterface = {
-      type: provider_account.type as AccountType,
-      individual_data,
-      organization_data,
-      entrepreneur_data,
-    };
+    if (provider_account) {
+      private_account = {
+        type: provider_account.type as AccountType,
+        individual_data,
+        organization_data,
+        entrepreneur_data,
+      };
+    }
 
     return new AccountDomainEntity({
       username,
@@ -93,5 +99,34 @@ export class AccountDomainService {
 
   async getUserAccount(username: string): Promise<RegistratorContract.Tables.Accounts.IAccount | null> {
     return await this.accountBlockchainPort.getUserAccount(username);
+  }
+
+  /**
+   * Извлекает данные подписанта из приватного аккаунта пользователя
+   * @param username Имя пользователя
+   * @returns Данные подписанта (физ. лицо, организация или ИП)
+   */
+  async getPrivateAccount(
+    username: string
+  ): Promise<IndividualDomainInterface | OrganizationDomainInterface | EntrepreneurDomainInterface | null> {
+    const account = await this.getAccount(username);
+
+    if (!account.private_account) {
+      return null;
+    }
+
+    if (account.private_account.type === 'individual' && account.private_account.individual_data) {
+      return account.private_account.individual_data;
+    }
+
+    if (account.private_account.type === 'organization' && account.private_account.organization_data) {
+      return account.private_account.organization_data;
+    }
+
+    if (account.private_account.type === 'entrepreneur' && account.private_account.entrepreneur_data) {
+      return account.private_account.entrepreneur_data;
+    }
+
+    return null;
   }
 }

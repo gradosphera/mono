@@ -1,0 +1,44 @@
+
+/**
+\ingroup public_actions
+\brief Изменение ключа активной учетной записи
+*
+* Этот метод позволяет изменить активный ключ указанной учетной записи.
+* Только аккаунт автономной некомерческой организации "Кооперативная Экономика" имеет право изменять ключи учетных записей.
+*
+* @param username Имя аккаунта, ключ которого требуется изменить
+* @param public_key Новый публичный ключ для активной учетной записи
+*
+* @note Авторизация требуется от аккаунта: @p changer
+*/
+void registrator::changekey(eosio::name coopname, eosio::name changer, eosio::name username,
+                                              eosio::public_key public_key)
+{
+  require_auth(changer);
+
+  auto cooperative = get_cooperative_or_fail(coopname);
+  check_auth_or_fail(_registrator, coopname, changer, "changekey"_n);
+  
+  accounts_index accounts(_registrator, _registrator.value);
+
+  auto participant = get_participant_or_fail(coopname, username);
+  eosio::check(participant.status == "accepted"_n, "Пайщик не активен в кооперативе");
+  
+  eosio::check(cooperative.status.value() == "active"_n, "Кооператив не активен и не может изменять ключи доступа");
+  
+  auto coop_account = accounts.find(username.value);
+  eosio::check(coop_account != accounts.end(), "Аккаунт кооператива не найден");
+  
+  authority active_auth;
+  active_auth.threshold = 1;
+  key_weight keypermission{public_key, 1};
+  active_auth.keys.emplace_back(keypermission);
+
+  // Change active authority of card to a new key
+  eosio::action(eosio::permission_level(_registrator, eosio::name("active")),
+                eosio::name("eosio"), eosio::name("changekey"),
+                std::tuple(username, eosio::name("active"),
+                           eosio::name("owner"), active_auth))
+      .send();
+
+}

@@ -37,7 +37,7 @@ export class PaymentResolver {
       'Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member', 'user'])
+  @AuthRoles(['chairman', 'member'])
   async createInitialPayment(
     @Args('data', { type: () => CreateInitialPaymentInputDTO }) data: CreateInitialPaymentInputDTO
   ): Promise<PaymentDTO> {
@@ -50,7 +50,7 @@ export class PaymentResolver {
       'Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member', 'user'])
+  @AuthRoles(['chairman', 'member'])
   async createDeposit(
     @Args('data', { type: () => CreateDepositPaymentInputDTO }) data: CreateDepositPaymentInputDTO
   ): Promise<PaymentDTO> {

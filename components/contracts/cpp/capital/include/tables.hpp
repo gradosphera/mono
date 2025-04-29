@@ -6,50 +6,53 @@
 using namespace eosio;
 
 struct bonus_result {
-    int64_t creators_bonus;
-    int64_t authors_bonus;
-    int64_t generated;
-    int64_t capitalists_bonus;
-    int64_t total;
+    asset author_base;
+    asset creator_base;
+    asset creators_bonus;
+    asset authors_bonus;
+    asset generated;
+    asset capitalists_bonus;
+    asset total;
 };
 
-// resactors.hpp (или в capital.hpp)
-struct [[eosio::table, eosio::contract(CAPITAL)]] resactor {
+// creauthors.hpp (или в capital.hpp)
+struct [[eosio::table, eosio::contract(CAPITAL)]] creauthor {
     uint64_t    id;
     checksum256 project_hash;        // С каким результатом связана запись
-    checksum256 result_hash;        // С каким результатом связана запись
-    eosio::name username;           // Чей это учёт
-
+    checksum256 assignment_hash;        // С каким результатом связана запись
+    eosio::name username;           // 
+    eosio::asset provisional_amount = asset(0, _root_govern_symbol);
+    eosio::asset debt_amount = asset(0, _root_govern_symbol);
+    eosio::asset spended = asset(0, _root_govern_symbol);    
     eosio::asset available = asset(0, _root_govern_symbol);
     eosio::asset for_convert = asset(0, _root_govern_symbol);
-    eosio::asset spend = asset(0, _root_govern_symbol);    
     
     // Сколько пользователь имеет «авторских долей» в этом результате
-    uint64_t authors_shares = 0;
+    uint64_t author_shares = 0;
     
     // Сколько пользователь имеет «создательских долей» в creators_bonus
-    uint64_t creators_bonus_shares = 0;
+    uint64_t creator_bonus_shares = 0;
     
-    // Сколько часов вложено в результат
+    // Сколько часов вложено в задание
     uint64_t contributed_hours = 0;
     
     uint64_t primary_key() const { return id; }
     
-    checksum256 by_result_hash() const { return result_hash; } ///< Индекс по хэшу результата
+    checksum256 by_assignment_hash() const { return assignment_hash; } ///< Индекс по хэшу задания
     checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта
   
-    // Индекс по (result_hash + username)
+    // Индекс по (assignment_hash + username)
     uint128_t by_resuser() const {
-        return combine_checksum_ids(result_hash, username);
+        return combine_checksum_ids(assignment_hash, username);
     }
 };
 
 typedef eosio::multi_index<
-    "resactors"_n, resactor,
-    indexed_by<"byproject"_n, const_mem_fun<resactor, checksum256, &resactor::by_project_hash>>,
-    indexed_by<"byresult"_n, const_mem_fun<resactor, checksum256, &resactor::by_result_hash>>,
-    indexed_by<"byresuser"_n, const_mem_fun<resactor, uint128_t, &resactor::by_resuser>>
-> resactor_index;
+    "creauthors"_n, creauthor,
+    indexed_by<"byproject"_n, const_mem_fun<creauthor, checksum256, &creauthor::by_project_hash>>,
+    indexed_by<"byassignment"_n, const_mem_fun<creauthor, checksum256, &creauthor::by_assignment_hash>>,
+    indexed_by<"byresuser"_n, const_mem_fun<creauthor, uint128_t, &creauthor::by_resuser>>
+> creauthor_index;
 
 
 
@@ -61,7 +64,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
   
   name status = "created"_n;                   ///< Статус расхода (created | approved | authorized)
   checksum256 project_hash;                    ///< Хэш проекта, связанного с расходом.
-  checksum256 result_hash;                     ///< Хэш результата, связанного с расходом.
+  checksum256 assignment_hash;                     ///< Хэш задания, связанного с расходом.
   checksum256 expense_hash;                    ///< Хэш расхода.
   uint64_t fund_id;                            ///< Идентификатор фонда списания (expfunds в контакте fund)
   eosio::asset amount;                         ///< Сумма расхода.
@@ -71,12 +74,12 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
   document approved_statement;                 ///< принятая записка председателем или доверенным
   document authorization;                      ///< утвержденная записка советом
                                   
-  time_point_sec spend_at = current_time_point();  ///< Дата и время создания расхода.
+  time_point_sec spended_at = current_time_point();  ///< Дата и время создания расхода.
 
   uint64_t primary_key() const { return id; } ///< Основной ключ.
   uint64_t by_username() const { return username.value; } ///< По имени пользователя.
   checksum256 by_expense_hash() const { return expense_hash; } ///< Индекс по хэшу задачи.
-  checksum256 by_result_hash() const { return result_hash; } ///< Индекс по хэшу результата.
+  checksum256 by_assignment_hash() const { return assignment_hash; } ///< Индекс по хэшу задания.
   checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта.
 
 };
@@ -85,7 +88,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
     "expenses"_n, expense,
     indexed_by<"byusername"_n, const_mem_fun<expense, uint64_t, &expense::by_username>>,
     indexed_by<"byhash"_n, const_mem_fun<expense, checksum256, &expense::by_expense_hash>>,
-    indexed_by<"byresulthash"_n, const_mem_fun<expense, checksum256, &expense::by_result_hash>>,
+    indexed_by<"byassignment"_n, const_mem_fun<expense, checksum256, &expense::by_assignment_hash>>,
     indexed_by<"byprojhash"_n, const_mem_fun<expense, checksum256, &expense::by_project_hash>>
   > expense_index;
 
@@ -101,22 +104,24 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] commit {
     name username;                               ///< Имя пользователя, совершившего действие.
     name status;                                 ///< Статус коммита (created | approved | authorized | act1 | act2 )
     checksum256 project_hash;                    ///< Хэш проекта, связанного с действием.
-    checksum256 result_hash;                     ///< Хэш результата, связанного с действием.
+    checksum256 assignment_hash;                     ///< Хэш задания, связанного с действием.
     checksum256 commit_hash;                     ///< Хэш действия.
     uint64_t contributed_hours;              ///< Сумма временных затрат, связанная с действием.
-    eosio::asset spend;                          ///< Сумма затрат, связанная с действием.
+    eosio::asset rate_per_hour = asset(0, _root_govern_symbol); ///< Стоимость часа
+    eosio::asset spended = asset(0, _root_govern_symbol); ///< Сумма затрат, связанная с действием.
+    eosio::asset generated = asset(0, _root_govern_symbol); ///< Сумма генерации, связанная с действием.
+    eosio::asset creators_bonus = asset(0, _root_govern_symbol); ///< Сумма затрат, связанная с действием.
+    eosio::asset authors_bonus = asset(0, _root_govern_symbol);///< Сумма затрат, связанная с действием.
+    eosio::asset capitalists_bonus = asset(0, _root_govern_symbol); ///< Сумма затрат, связанная с действием.
+    eosio::asset total = asset(0, _root_govern_symbol); ///< Суммарная стоимость коммита на будущем приёме задания с учетом капитализации и генерации
     
-    document contribution_statement;                          ///< Техническое задание (спецификация) как приложение к договору УХД
-    document approved_statement;                 ///< Одобрение председателя или доверенного лица
-    document authorization;                          ///< Решение совета
-    document act1;                                ///< акт приема-передачи (1)
-    document act2;                                ///< акт приема-передачи (2)
+    std::string decline_comment;
     time_point_sec created_at;                   ///< Дата и время создания действия.
 
     uint64_t primary_key() const { return id; } ///< Основной ключ.
     uint64_t by_username() const { return username.value; } ///< По имени пользователя.
     checksum256 by_commit_hash() const { return commit_hash; } ///< Индекс по хэшу задачи.
-    checksum256 by_result_hash() const { return result_hash; } ///< Индекс по хэшу результата.
+    checksum256 by_assignment_hash() const { return assignment_hash; } ///< Индекс по хэшу задания.
     checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта.
 };
 
@@ -124,7 +129,7 @@ typedef eosio::multi_index<
     "commits"_n, commit,
     indexed_by<"byusername"_n, const_mem_fun<commit, uint64_t, &commit::by_username>>,
     indexed_by<"byhash"_n, const_mem_fun<commit, checksum256, &commit::by_commit_hash>>,
-    indexed_by<"byresulthash"_n, const_mem_fun<commit, checksum256, &commit::by_result_hash>>,
+    indexed_by<"byassignment"_n, const_mem_fun<commit, checksum256, &commit::by_assignment_hash>>,
     indexed_by<"byprojhash"_n, const_mem_fun<commit, checksum256, &commit::by_project_hash>>
 > commit_index;
 
@@ -183,12 +188,13 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] contributor {
     
     eosio::asset rate_per_hour = asset(0, _root_govern_symbol);
     
-    eosio::asset spend = asset(0, _root_govern_symbol);
+    eosio::asset spended = asset(0, _root_govern_symbol);
+    eosio::asset debt_amount = asset(0, _root_govern_symbol);
+    
     eosio::asset withdrawed = asset(0, _root_govern_symbol);
     eosio::asset converted = asset(0, _root_govern_symbol);
     eosio::asset expensed = asset(0, _root_govern_symbol);
     eosio::asset returned = asset(0, _root_govern_symbol);
-    eosio::asset claimed = asset(0, _root_govern_symbol);
     
     eosio::asset share_balance = asset(0, _root_govern_symbol); ///< Баланс долей пайщика
     eosio::asset pending_rewards = asset(0, _root_govern_symbol); ///< Накопленные награды
@@ -227,19 +233,27 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
     
     uint64_t authors_count;
     uint64_t authors_shares;
+    uint64_t commits_count;
+
     std::vector<uint64_t> expense_funds = {4}; 
     
     eosio::asset target = asset(0, _root_govern_symbol);
     eosio::asset invested = asset(0, _root_govern_symbol);
     eosio::asset available = asset(0, _root_govern_symbol);
     eosio::asset allocated = asset(0, _root_govern_symbol);
+    
+    eosio::asset creators_base = asset(0, _root_govern_symbol);
+    eosio::asset creators_bonus = asset(0, _root_govern_symbol);
+    eosio::asset authors_bonus = asset(0, _root_govern_symbol);
+    eosio::asset capitalists_bonus = asset(0, _root_govern_symbol);
+    eosio::asset total = asset(0, _root_govern_symbol); // стоимость проекта с учетом генерации и капитализации
+    
     eosio::asset expensed = asset(0, _root_govern_symbol);
-    eosio::asset spend = asset(0, _root_govern_symbol);
+    eosio::asset spended = asset(0, _root_govern_symbol);
     eosio::asset generated = asset(0, _root_govern_symbol);
     eosio::asset converted = asset(0, _root_govern_symbol);
-    eosio::asset claimed = asset(0, _root_govern_symbol);
     eosio::asset withdrawed = asset(0, _root_govern_symbol);
-
+    
     double parent_distribution_ratio = 1;  
     int64_t membership_cumulative_reward_per_share = 0; 
     
@@ -261,59 +275,62 @@ typedef eosio::multi_index<"projects"_n, project,
 > project_index;
 
 
-struct [[eosio::table, eosio::contract(CAPITAL)]] result {
+struct [[eosio::table, eosio::contract(CAPITAL)]] assignment {
     uint64_t id;
-    checksum256 result_hash;
+    checksum256 assignment_hash;
     checksum256 project_hash;
-    eosio::name status = "created"_n; ///< created
-    
+    eosio::name status = "opened"_n; ///< opened | closed
+
     eosio::name coopname;
+    eosio::name assignee;
+    std::string description;
+
+    uint64_t authors_shares;
+    uint64_t total_creators_bonus_shares;
+
+    uint64_t authors_count;
+    uint64_t commits_count;
     time_point_sec created_at = current_time_point();
     time_point_sec expired_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + 365 * 86400);
-    uint64_t authors_shares;
-    uint64_t total_creators_bonus_shares; 
     
-    uint64_t authors_count;    
-    uint64_t commits_count;
+    eosio::asset allocated = asset(0, _root_govern_symbol); ///< аллоцированные на создание задания средства
+    eosio::asset available = asset(0, _root_govern_symbol); ///< зарезерированные на создание задания средства
+    eosio::asset spended = asset(0, _root_govern_symbol); ///< фактически потраченные ресурсы на создание задание в виде времени (паевые взносы-возвраты)
+    eosio::asset generated = asset(0, _root_govern_symbol); ///< стоимость РИД с учётом премий авторов и создателей
+    eosio::asset expensed = asset(0, _root_govern_symbol); ///< фактически потраченные на создание задания средства в виде расходов (подписки, прочее)
+    eosio::asset withdrawed = asset(0, _root_govern_symbol); ///< фактически возвращенные средства из задания
     
-    eosio::asset allocated = asset(0, _root_govern_symbol); ///< аллоцированные на создание результата средства
-    eosio::asset available = asset(0, _root_govern_symbol); ///< зарезерированные на создание результата средства
-    eosio::asset spend = asset(0, _root_govern_symbol); ///< фактически потраченные ресурсы на создание результат в виде времени (паевые взносы-возвраты)
-    eosio::asset expensed = asset(0, _root_govern_symbol); ///< фактически потраченные на создание результата средства в виде расходов (подписки, прочее)
-    eosio::asset withdrawed = asset(0, _root_govern_symbol); ///< фактически возвращенные средства из результата
+    eosio::asset creators_base = asset(0, _root_govern_symbol); ///< себестоимость РИД
     
-    eosio::asset creators_amount = asset(0, _root_govern_symbol); ///< себестоимость РИД
-    eosio::asset generated_amount = asset(0, _root_govern_symbol); ///< стоимость РИД с учётом премий авторов и создателей
-    
-    eosio::asset creators_bonus = asset(0, _root_govern_symbol); ///< премии создателей - 0.382 от себестоимости (creators_amount)
-    eosio::asset authors_bonus = asset(0, _root_govern_symbol);  ///< премии авторов - 1.618 от себестоимости (creators_amount)
+    eosio::asset creators_bonus = asset(0, _root_govern_symbol); ///< премии создателей - 0.382 от себестоимости (creators_base)
+    eosio::asset authors_bonus = asset(0, _root_govern_symbol);  ///< премии авторов - 1.618 от себестоимости (creators_base)
     eosio::asset capitalists_bonus = asset(0, _root_govern_symbol); ///< премии пайщиков кооператива - 1.618 от generated_amount
     
-    eosio::asset total_amount = asset(0, _root_govern_symbol); ///< Капитализация РИД  (стоимость РИД в generated_amount + capitalists_bonus)
+    eosio::asset total = asset(0, _root_govern_symbol); ///< Стоимость РИД с учетом генерации и капитализации (стоимость РИД в spended + authors_bonus + creators_bonus + capitalists_bonus)
     
     eosio::asset authors_bonus_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты авторам
-    eosio::asset creators_amount_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты авторам
+    eosio::asset creators_base_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты авторам
     
     eosio::asset creators_bonus_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты авторам
-    
-    
+        
     eosio::asset capitalists_bonus_remain = asset(0, _root_govern_symbol); ///< сумма остатка для выплаты пайщикам
     
     uint64_t primary_key() const { return id; }     ///< Основной ключ.
-    checksum256 by_hash() const { return result_hash; } ///< Индекс по хэшу результата.
+    checksum256 by_hash() const { return assignment_hash; } ///< Индекс по хэшу задания.
     checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу идеи    
 };
 
-  typedef eosio::multi_index<"results"_n, result,
-    indexed_by<"byhash"_n, const_mem_fun<result, checksum256, &result::by_hash>>,
-    indexed_by<"byprojecthash"_n, const_mem_fun<result, checksum256, &result::by_project_hash>>
-  > result_index;
+  typedef eosio::multi_index<"assignments"_n, assignment,
+    indexed_by<"byhash"_n, const_mem_fun<assignment, checksum256, &assignment::by_hash>>,
+    indexed_by<"byprojecthash"_n, const_mem_fun<assignment, checksum256, &assignment::by_project_hash>>
+  > assignment_index;
 
 
 
-struct [[eosio::table, eosio::contract(CAPITAL)]] claim {
+struct [[eosio::table, eosio::contract(CAPITAL)]] result {
     uint64_t id;
     checksum256 project_hash;
+    checksum256 assignment_hash;
     checksum256 result_hash;
     
     eosio::name coopname;
@@ -323,39 +340,50 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] claim {
     eosio::name status = "created"_n; ///< created | statement | decision | act1 | act2 | completed
     time_point_sec created_at = current_time_point();
 
-    eosio::asset author_amount = asset(0, _root_govern_symbol);
-    eosio::asset creator_amount = asset(0, _root_govern_symbol);
-    eosio::asset capitalist_amount = asset(0, _root_govern_symbol);
-
+    eosio::asset creator_base_amount = asset(0, _root_govern_symbol);
+    eosio::asset debt_amount = asset(0, _root_govern_symbol);
+    
+    eosio::asset creator_bonus_amount = asset(0, _root_govern_symbol);
+    eosio::asset author_bonus_amount = asset(0, _root_govern_symbol);
+    eosio::asset generation_amount = asset(0, _root_govern_symbol);
+    eosio::asset capitalist_bonus_amount = asset(0, _root_govern_symbol);
+    
     eosio::asset total_amount = asset(0, _root_govern_symbol);
+    eosio::asset available_for_return = asset(0, _root_govern_symbol);
+    eosio::asset available_for_convert = asset(0, _root_govern_symbol);
         
-    document claim_statement; ///< Заявление
+    document result_statement; ///< Заявление
     document approved_statement; ///< Принятое заявление
-    document authorization; ///< Решение
+    document authorization; ///< Решение совета
+    document act1; ///< Акт1
+    document act2; ///< Акт2
     
     uint64_t primary_key() const { return id; }     ///< Основной ключ.
     uint64_t by_username() const { return username.value; } ///< Индекс по владельцу
-    checksum256 by_result_hash() const { return result_hash; } ///< Индекс по хэшу
+    checksum256 by_hash() const { return result_hash; } ///< Индекс по хэшу проекта
+    
+    checksum256 by_assignment_hash() const { return assignment_hash; } ///< Индекс по хэшу
     checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта
     
-    uint128_t by_result_user() const {
-        return combine_checksum_ids(result_hash, username);
+    uint128_t by_assignment_user() const {
+        return combine_checksum_ids(assignment_hash, username);
     }
 };
 
-  typedef eosio::multi_index<"claims"_n, claim,
-    indexed_by<"byusername"_n, const_mem_fun<claim, uint64_t, &claim::by_username>>,
-    indexed_by<"byresult"_n, const_mem_fun<claim, checksum256, &claim::by_result_hash>>,
-    indexed_by<"byprojecthash"_n, const_mem_fun<claim, checksum256, &claim::by_project_hash>>,
-    indexed_by<"byresuser"_n, const_mem_fun<claim, uint128_t, &claim::by_result_user>>
-  > claim_index;
+  typedef eosio::multi_index<"results"_n, result,
+    indexed_by<"byusername"_n, const_mem_fun<result, uint64_t, &result::by_username>>,
+    indexed_by<"byhash"_n, const_mem_fun<result, checksum256, &result::by_hash>>,
+    indexed_by<"byassignment"_n, const_mem_fun<result, checksum256, &result::by_assignment_hash>>,
+    indexed_by<"byprojecthash"_n, const_mem_fun<result, checksum256, &result::by_project_hash>>,
+    indexed_by<"byresuser"_n, const_mem_fun<result, uint128_t, &result::by_assignment_user>>
+  > result_index;
 
 
 
 struct [[eosio::table, eosio::contract(CAPITAL)]] convert {
     uint64_t id;
     checksum256 project_hash;
-    checksum256 result_hash;
+    checksum256 assignment_hash;
     checksum256 convert_hash;
     
     eosio::name coopname;
@@ -372,18 +400,18 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] convert {
     uint64_t primary_key() const { return id; }     ///< Основной ключ.
     uint64_t by_username() const { return username.value; } ///< Индекс по владельцу
     checksum256 by_convert_hash() const { return convert_hash; } ///< Индекс по хэшу
-    checksum256 by_result_hash() const { return result_hash; } ///< Индекс по хэшу
+    checksum256 by_assignment_hash() const { return assignment_hash; } ///< Индекс по хэшу
     checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта
     
-    uint128_t by_result_user() const {
-        return combine_checksum_ids(result_hash, username);
+    uint128_t by_assignment_user() const {
+        return combine_checksum_ids(assignment_hash, username);
     }
 };
 
   typedef eosio::multi_index<"converts"_n, convert,
     indexed_by<"byusername"_n, const_mem_fun<convert, uint64_t, &convert::by_username>>,
     indexed_by<"byhash"_n, const_mem_fun<convert, checksum256, &convert::by_convert_hash>>,
-    indexed_by<"byresult"_n, const_mem_fun<convert, checksum256, &convert::by_result_hash>>,
+    indexed_by<"byassignment"_n, const_mem_fun<convert, checksum256, &convert::by_assignment_hash>>,
     indexed_by<"byprojecthash"_n, const_mem_fun<convert, checksum256, &convert::by_project_hash>>
   > convert_index;
 
@@ -410,60 +438,32 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] author {
   > authors_index;
 
 
-/**
- * @brief Таблица для учёта авторства на результатах
- * Принимает в себя копии объектов авторов из проекта. И используется для распределения премий по конкретному результату.
- */
-struct [[eosio::table, eosio::contract(CAPITAL)]] result_author {
-    uint64_t id;
-    checksum256 project_hash;
-    checksum256 result_hash;
-    
-    eosio::name username;
-    
-    uint64_t shares;
-    
-    uint64_t primary_key() const { return id; } ///< Основной ключ
-    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя
-    checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу идеи
-    
-    uint128_t by_result_author() const {
-        return combine_checksum_ids(project_hash, username);
-    }
-};
-
-  typedef eosio::multi_index<"resauthors"_n, result_author,
-    indexed_by<"byusername"_n, const_mem_fun<result_author, uint64_t, &result_author::by_username>>,
-    indexed_by<"byprojecthash"_n, const_mem_fun<result_author, checksum256, &result_author::by_project_hash>>,
-    indexed_by<"byresauthor"_n, const_mem_fun<result_author, uint128_t, &result_author::by_result_author>>
-  > result_authors_index;
-
 
 struct [[eosio::table, eosio::contract(CAPITAL)]] creator {
   uint64_t id; ///< id и primary_key
   
   checksum256 project_hash; ///< Хэш идеи
-  checksum256 result_hash; ///< Хэш результата интеллектуальной деятельности
+  checksum256 assignment_hash; ///< Хэш задания интеллектуальной деятельности
   
   eosio::name username; ///< Имя пользователя
-  eosio::asset spend = asset(0, _root_govern_symbol); ///< Стоимость использованных ресурсов
+  eosio::asset spended = asset(0, _root_govern_symbol); ///< Стоимость использованных ресурсов
 
   uint64_t primary_key() const { return id; }
-  checksum256 by_result_hash() const { return result_hash; }
+  checksum256 by_assignment_hash() const { return assignment_hash; }
   checksum256 by_project_hash() const { return project_hash; }
   
-  uint128_t by_result_creator() const {
-        return combine_checksum_ids(result_hash, username);
+  uint128_t by_assignment_creator() const {
+        return combine_checksum_ids(assignment_hash, username);
     }
     
   uint64_t by_username() const { return username.value; }
 };
 
   typedef eosio::multi_index<"creators"_n, creator,
-    indexed_by<"byresulthash"_n, const_mem_fun<creator, checksum256, &creator::by_result_hash>>,
+    indexed_by<"byassignment"_n, const_mem_fun<creator, checksum256, &creator::by_assignment_hash>>,
     indexed_by<"byprojecthash"_n, const_mem_fun<creator, checksum256, &creator::by_project_hash>>,
     indexed_by<"byusername"_n, const_mem_fun<creator, uint64_t, &creator::by_username>>,
-    indexed_by<"byresultcrtr"_n, const_mem_fun<creator, uint128_t, &creator::by_result_creator>>
+    indexed_by<"byassigncrtr"_n, const_mem_fun<creator, uint128_t, &creator::by_assignment_creator>>
   > creators_index;
 
 /**
@@ -513,7 +513,7 @@ namespace capital_tables {
       uint64_t id;                                ///< Уникальный ID запроса на возврат.
       name coopname;                              ///< Имя аккаунта кооператива
       checksum256 project_hash;                    ///< Хэш проекта
-      checksum256 result_hash;                    ///< Хэш результата
+      checksum256 assignment_hash;                    ///< Хэш задания
       checksum256 withdraw_hash;                  ///< Уникальный внешний ключ
       name username;                              ///< Имя аккаунта участника, запрашивающего возврат.
       name status = "created"_n;                  ///< Статус взноса-возврата (created | approved | )
@@ -539,7 +539,7 @@ namespace capital_tables {
       indexed_by<"byhash"_n, const_mem_fun<result_withdraw, checksum256, &result_withdraw::by_hash>>,
       indexed_by<"byusername"_n, const_mem_fun<result_withdraw, uint64_t, &result_withdraw::by_account>>,
       indexed_by<"bycreated"_n, const_mem_fun<result_withdraw, uint64_t, &result_withdraw::by_created>>
-    > result_withdraws_index; ///< Таблица для хранения запросов на возврат из результата.
+    > result_withdraws_index; ///< Таблица для хранения запросов на возврат из задания.
 
   
   struct [[eosio::table, eosio::contract(CAPITAL)]] project_withdraw {

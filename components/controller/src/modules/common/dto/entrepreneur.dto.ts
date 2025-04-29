@@ -50,4 +50,8 @@ export class EntrepreneurDTO implements EntrepreneurDomainInterface {
     this.full_address = data.full_address;
     this.details = new EntrepreneurDetailsDTO(data.details);
   }
+
+  static isTypeOf(value: any): boolean {
+    return value.details && value.first_name && value.last_name;
+  }
 }

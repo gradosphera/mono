@@ -3,9 +3,9 @@ import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 import DataService from '../Services/Databazor/DataService'
-import { SelectBranchStatement } from '../templates'
+import { SelectBranchStatement } from '../Templates'
 
-export { SelectBranchStatement as Template } from '../templates'
+export { SelectBranchStatement as Template } from '../Templates'
 
 export class Factory extends DocFactory<SelectBranchStatement.Action> {
   constructor(storage: MongoDBConnector) {
@@ -41,7 +41,7 @@ export class Factory extends DocFactory<SelectBranchStatement.Action> {
 
     const vars = await super.getVars(data.coopname, data.block_num)
 
-    const combinedData: SelectBranchStatement.Model = { ...userData, meta, branch, type: user.type, vars }
+    const combinedData: SelectBranchStatement.Model = { ...userData, meta, branch, type: user.type, vars, coop }
 
     // валидируем скомбинированные данные
     await super.validate(combinedData, template.model)

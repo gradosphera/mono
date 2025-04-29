@@ -1,25 +1,26 @@
-import type {GraphQLTypes, InputType, ModelTypes } from '../../zeus/index';
-import { $, Selector } from '../../zeus/index';
-import { paginationSelector } from '../../utils/paginationSelector';
-import { rawPaymentSelector } from '../../selectors/payments';
+import type { GraphQLTypes, InputType, ModelTypes } from '../../zeus/index'
+import { rawPaymentSelector } from '../../selectors/payments'
+import { paginationSelector } from '../../utils/paginationSelector'
+import { $, Selector } from '../../zeus/index'
 
-const paymentPaginationSelector = {...paginationSelector, items: rawPaymentSelector};
-const name = 'getPayments'
+const paymentPaginationSelector = { ...paginationSelector, items: rawPaymentSelector }
+export const name = 'getPayments'
 
 /**
  * Извлекает платежи
  */
-export const query = Selector("Query")({
-  [name]: [{data: $('data', 'GetPaymentsInput')}, paymentPaginationSelector]
-});
+export const query = Selector('Query')({
+  [name]: [{ data: $('data', 'GetPaymentsInput'), options: $('options', 'PaginationInput') }, paymentPaginationSelector],
+})
 
 export interface IInput {
   /**
    * @private
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 
-  data: ModelTypes['GetPaymentsInput'],
+  data?: ModelTypes['GetPaymentsInput']
+  options?: ModelTypes['PaginationInput']
 }
 
-export type IOutput = InputType<GraphQLTypes['Query'], typeof query>;
+export type IOutput = InputType<GraphQLTypes['Query'], typeof query>

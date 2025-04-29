@@ -94,11 +94,11 @@ namespace eosiosystem {
       check( prod.active(), "producer does not have an active key" );
 
       check( _gstate.thresh_activated_stake_time != time_point(),
-                    "cannot claim rewards until the chain is activated (at least 15% of all tokens participate in voting)" );
+                    "cannot result rewards until the chain is activated (at least 15% of all tokens participate in voting)" );
 
       const auto ct = current_time_point();
 
-      check( ct - prod.last_claim_time > microseconds(useconds_per_day), "already claimed rewards within past day" );
+      check( ct - prod.last_result_time > microseconds(useconds_per_day), "already resulted rewards within past day" );
 
       const asset token_supply   = token::get_supply(token_account, core_symbol().code() );
   
@@ -123,7 +123,7 @@ namespace eosiosystem {
       _gstate.total_unpaid_blocks -= prod.unpaid_blocks;
 
       _producers.modify( prod, same_payer, [&](auto& p) {
-         p.last_claim_time = ct;
+         p.last_result_time = ct;
          p.unpaid_blocks   = 0;
       });
 

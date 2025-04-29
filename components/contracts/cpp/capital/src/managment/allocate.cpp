@@ -1,4 +1,4 @@
-void capital::allocate(eosio::name coopname, eosio::name application, checksum256 project_hash, checksum256 result_hash, eosio::asset amount) {
+void capital::allocate(eosio::name coopname, eosio::name application, checksum256 project_hash, checksum256 assignment_hash, eosio::asset amount) {
   check_auth_or_fail(_capital, coopname, application, "allocate"_n);
 
   Wallet::validate_asset(amount);
@@ -6,9 +6,9 @@ void capital::allocate(eosio::name coopname, eosio::name application, checksum25
   auto project = get_project(coopname, project_hash);
   eosio::check(project.has_value(), "Проект с указанным хэшем не найден");
     
-  auto result = get_result(coopname, result_hash);
-  eosio::check(result.has_value(), "Объект результата не найден");
-  eosio::check(project -> available >= amount, "Недостаточно средств в проекте для аллокации в результат");
+  auto assignment = get_assignment(coopname, assignment_hash);
+  eosio::check(assignment.has_value(), "Объект задананиеа не найден");
+  eosio::check(project -> available >= amount, "Недостаточно средств в проекте для аллокации в задание");
         
   project_index projects(_capital, coopname.value);
   auto project_for_modify = projects.find(project -> id);
@@ -18,10 +18,10 @@ void capital::allocate(eosio::name coopname, eosio::name application, checksum25
     row.allocated += amount;
   });
   
-  result_index results(_capital, coopname.value);
-  auto result_for_modify = results.find(result -> id);
+  assignment_index assignments(_capital, coopname.value);
+  auto assignment_for_modify = assignments.find(assignment -> id);
   
-  results.modify(result_for_modify, coopname, [&](auto& row) {
+  assignments.modify(assignment_for_modify, coopname, [&](auto& row) {
     row.allocated += amount;
     row.available += amount;
   });

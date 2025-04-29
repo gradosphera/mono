@@ -2,18 +2,25 @@ import { Injectable } from '@nestjs/common';
 import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
 import type { GetDocumentsInputDTO } from '../dto/get-documents-input.dto';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
-import type { DocumentPackageDomainInterface } from '~/domain/agenda/interfaces/document-package-domain.interface';
+import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
 
 @Injectable()
 export class DocumentService {
   constructor(private readonly documentDomainInteractor: DocumentDomainInteractor) {}
 
-  async getDocuments(data: GetDocumentsInputDTO): Promise<PaginationResultDomainInterface<DocumentPackageDomainInterface>> {
+  async getDocumentsAggregate(
+    data: GetDocumentsInputDTO
+  ): Promise<PaginationResultDomainInterface<DocumentPackageAggregateDomainInterface>> {
     const query = {
-      receiver: data.filter.receiver,
-      ...data.filter.additionalFilters,
+      ...data.filter,
+      receiver: data.username,
     };
 
-    return this.documentDomainInteractor.getDocuments({ query, page: data.page, limit: data.limit, type: data.type });
+    return this.documentDomainInteractor.getDocumentsAggregate({
+      query,
+      page: data.page,
+      limit: data.limit,
+      type: data.type,
+    });
   }
 }

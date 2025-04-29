@@ -1,7 +1,9 @@
 <template lang="pug">
 div
-  q-btn(@click="showDialog=true" :size="size" flat dense) удалить
+  q-btn(@click="showDialog=true" :size="size" flat dense)
     q-icon(name="close")
+    span.q-ml-xs удалить
+
   q-dialog(v-model="showDialog" @hide="clear")
     ModalBase(:title='"Удалить метод платежа"' )
       Form(:handler-submit="handlerSubmit" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-pa-sm
