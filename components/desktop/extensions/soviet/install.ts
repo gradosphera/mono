@@ -3,8 +3,8 @@ import { ListOfAgendaQuestions } from 'src/pages/Cooperative/ListOfAgenda'
 import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants'
 import { ListOfDocumentsPage } from 'src/pages/Cooperative/ListOfDocuments'
 import { PaymentsPage } from 'src/pages/Cooperative/Payments'
-import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
-import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
+// import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
+// import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
 
 export default async function () {
   return {
@@ -59,23 +59,23 @@ export default async function () {
               roles: ['chairman', 'member'],
             },
           },
-          {
-            path: 'meets',
-            name: 'meets',
-            component: markRaw(ListOfMeetsPage),
-            meta: {
-              title: 'Собрания',
-              icon: 'fa-solid fa-users-between-lines',
-              roles: ['chairman', 'member'],
-            },
-            children: [
-              {
-                path: ':hash',
-                name: 'meet-details',
-                component: markRaw(MeetDetailsPage),
-              },
-            ],
-          },
+          // {
+          //   path: 'meets',
+          //   name: 'meets',
+          //   component: markRaw(ListOfMeetsPage),
+          //   meta: {
+          //     title: 'Собрания',
+          //     icon: 'fa-solid fa-users-between-lines',
+          //     roles: ['chairman', 'member'],
+          //   },
+          //   children: [
+          //     {
+          //       path: ':hash',
+          //       name: 'meet-details',
+          //       component: markRaw(MeetDetailsPage),
+          //     },
+          //   ],
+          // },
         ]
       }
     ]
