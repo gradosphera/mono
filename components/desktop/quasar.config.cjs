@@ -111,12 +111,16 @@ module.exports = configure(function (/* ctx */) {
           { server: false },
         ],
       ],
+
+      optimizeDeps: {
+        include: ['@dicebear/core', '@dicebear/collection']
+      },
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
-      vueDevtools: false,
+vueDevtools: false,
       open: false, // opens browser window automatically
       port: 3005,
       hmr:{
@@ -185,6 +189,9 @@ module.exports = configure(function (/* ctx */) {
       middlewares: [
         'render', // keep this as last one
       ],
+
+      // Не обрабатывать эти модули для SSR
+      noExternal: ['@dicebear/core', '@dicebear/collection']
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa

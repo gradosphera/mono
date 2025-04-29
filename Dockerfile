@@ -28,11 +28,7 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/*
 
 # Последовательная сборка библиотек в правильном порядке
-RUN cd components/cooptypes && pnpm run build && \
-cd ../sdk && pnpm run build && \
-cd ../factory && pnpm run build && \
-cd ../../ && lerna run build
-
+RUN lerna run build
 
 # Путь к виртуальному окружению
 ENV PATH="/venv/bin:$PATH"

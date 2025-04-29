@@ -17,8 +17,10 @@
     "dev": "concurrently -n 'DESKTOP' -c 'bgRed.white' \"quasar dev\"",
     "devnet": "quasar dev",
     "build:lib": "vite build",
-    "build": "quasar build",
-    "prepublishOnly": "npm run build:lib"
+    "build:spa": "quasar build",
+    "build": "quasar build --mode ssr",
+    "prepublishOnly": "npm run build:lib",
+    "start": "node -r ./alias-resolver.js dist/ssr/index.js"
   },
   "dependencies": {
     "@coopenomics/controller": "workspace:*",
@@ -52,7 +54,9 @@
     "email-regex": "^5.0.0",
     "eosjs": "^22.1.0",
     "express": "^4.21.0",
+    "graphql-ws": "^5.16.0",
     "idb": "^8.0.0",
+    "isomorphic-ws": "^5.0.0",
     "lodash": "^4.17.21",
     "moment-with-locales-es6": "^1.0.1",
     "pinia": "^2.0.11",
@@ -60,6 +64,7 @@
     "pug": "^3.0.3",
     "qrcode": "^1.5.4",
     "quasar": "^2.16.0",
+    "serialize-javascript": "^6.0.2",
     "swiper": "^11.1.7",
     "vite": "2.9.16",
     "vue": "^3.4.18",
