@@ -684,9 +684,15 @@ importers:
       express:
         specifier: ^4.21.0
         version: 4.21.1
+      graphql-ws:
+        specifier: ^5.16.0
+        version: 5.16.0(graphql@16.9.0)
       idb:
         specifier: ^8.0.0
         version: 8.0.0
+      isomorphic-ws:
+        specifier: ^5.0.0
+        version: 5.0.0(ws@8.18.0)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -708,6 +714,9 @@ importers:
       quasar:
         specifier: ^2.16.0
         version: 2.17.1
+      serialize-javascript:
+        specifier: ^6.0.2
+        version: 6.0.2
       swiper:
         specifier: ^11.1.7
         version: 11.1.14
@@ -3769,6 +3778,7 @@ packages:
   '@intlify/vite-plugin-vue-i18n@3.4.0':
     resolution: {integrity: sha512-XXcZBgwJ+3FRu11c4ARoY9N00kElPii0/jNZ49qR045Ka7/YGCwb1Ku14BBlMSEHiHDSjLQknLwrJKSQGVZLyA==}
     engines: {node: '>= 12'}
+    deprecated: This package no longer supported. About maintenance status, see https://github.com/intlify/bundle-tools?tab=readme-ov-file#-packages
     peerDependencies:
       petite-vue-i18n: ^9.1.0
       vite: ^2.0.0
