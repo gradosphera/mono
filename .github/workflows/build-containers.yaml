@@ -30,27 +30,27 @@ jobs:
       # Сначала собираем базовый образ
       - name: Build base image
         run: |
-          docker build -t coopenomics/mono-base:${{ env.DOCKER_TAG }} -f Dockerfile .
-          docker push coopenomics/mono-base:${{ env.DOCKER_TAG }}
+          docker build -t dicoop/mono-base:${{ env.DOCKER_TAG }} -f Dockerfile .
+          docker push dicoop/mono-base:${{ env.DOCKER_TAG }}
           
       # Затем образы для каждого сервиса
       - name: Build service images
         run: |
           # Создаем упрощенные Dockerfile для сервисов
-          echo "FROM coopenomics/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.notificator
+          echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.notificator
           echo "CMD [\"pnpm\", \"-F\", \"coop-notificator\", \"run\", \"start\"]" >> Dockerfile.notificator
           
-          echo "FROM coopenomics/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.coopback
+          echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.coopback
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/controller\", \"run\", \"start\"]" >> Dockerfile.coopback
           
-          echo "FROM coopenomics/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.cooparser
+          echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.cooparser
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/parser\", \"run\", \"start\"]" >> Dockerfile.cooparser
           
           # Собираем и публикуем образы
-          docker build -t coopenomics/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
-          docker build -t coopenomics/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
-          docker build -t coopenomics/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
+          docker build -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
+          docker build -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
+          docker build -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
           
-          docker push coopenomics/notificator:${{ env.DOCKER_TAG }}
-          docker push coopenomics/coopback:${{ env.DOCKER_TAG }}
-          docker push coopenomics/cooparser:${{ env.DOCKER_TAG }}
+          docker push dicoop/notificator:${{ env.DOCKER_TAG }}
+          docker push dicoop/coopback:${{ env.DOCKER_TAG }}
+          docker push dicoop/cooparser:${{ env.DOCKER_TAG }}
