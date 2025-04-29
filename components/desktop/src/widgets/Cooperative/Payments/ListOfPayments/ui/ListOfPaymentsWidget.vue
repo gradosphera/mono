@@ -54,8 +54,8 @@
               q-td {{props.row.id}}
               q-td {{ props.row.amount }}
               q-td
-                q-badge(v-if="props.row.details.data.includes('registration')") регистрационный
-                q-badge(v-else) паевой
+                q-badge(v-if="props.row.type === 'registration'" color="teal") регистрационный
+                q-badge(v-else color="teal") паевой
 
               q-td(style="max-width: 150px; word-wrap: break-word; white-space: normal;") {{props.row.username}}
 
@@ -207,7 +207,7 @@
 
   const tableRef = ref(null)
   const pagination = ref({ rowsPerPage: 0 })
-  </script>
+</script>
 
 <style>
 .q-list--dense > .q-item, .q-item--dense {

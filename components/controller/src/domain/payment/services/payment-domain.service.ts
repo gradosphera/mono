@@ -198,7 +198,7 @@ export class PaymentDomainService {
     return order;
   }
 
-  async getOrders(filter: any = {}, options: any): Promise<PaginationResultLegacy<IOrder>> {
+  async getOrders(filter: any = {}, options: any = {}): Promise<PaginationResultLegacy<IOrder>> {
     const orders = await Order.paginate(filter, options);
     return orders;
   }

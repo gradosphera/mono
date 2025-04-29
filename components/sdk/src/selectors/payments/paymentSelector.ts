@@ -21,6 +21,7 @@ export const rawPaymentSelector = {
   details: rawPaymentDetailsSelector,
   expired_at: true,
   id: true,
+  type: true,
   message: true,
   provider: true,
   status: true,

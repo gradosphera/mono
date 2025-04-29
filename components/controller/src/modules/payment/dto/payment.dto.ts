@@ -16,6 +16,11 @@ export class PaymentDTO {
   @Field(() => PaymentDetailsDTO, { description: 'Детали платежа' })
   details!: PaymentDetailsDTO;
 
+  @Field(() => String, {
+    description: 'Тип платежа (deposit или registration)',
+  })
+  type!: string;
+
   @Field(() => PaymentStatus, {
     description: 'Идентификатор номера платежа, который отображается пользователю в платежных документах',
   })

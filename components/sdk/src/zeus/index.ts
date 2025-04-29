@@ -2829,6 +2829,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	status?:boolean | `@${string}`,
 	/** Символ тикера валюты платежа */
 	symbol?:boolean | `@${string}`,
+	/** Тип платежа (deposit или registration) */
+	type?:boolean | `@${string}`,
 	/** Дата обновления платежа */
 	updated_at?:boolean | `@${string}`,
 	/** Имя аккаунта пользователя, совершающего платеж */
@@ -5725,6 +5727,8 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	status?:boolean | `@${string}`,
 	/** Символ тикера валюты платежа */
 	symbol?:boolean | `@${string}`,
+	/** Тип платежа (deposit или registration) */
+	type?:boolean | `@${string}`,
 	/** Дата обновления платежа */
 	updated_at?:boolean | `@${string}`,
 	/** Имя аккаунта пользователя, совершающего платеж */
@@ -8650,6 +8654,8 @@ export type ModelTypes = {
 	status: ModelTypes["PaymentStatus"],
 	/** Символ тикера валюты платежа */
 	symbol: string,
+	/** Тип платежа (deposit или registration) */
+	type: string,
 	/** Дата обновления платежа */
 	updated_at: ModelTypes["DateTime"],
 	/** Имя аккаунта пользователя, совершающего платеж */
@@ -11595,6 +11601,8 @@ export type GraphQLTypes = {
 	status: GraphQLTypes["PaymentStatus"],
 	/** Символ тикера валюты платежа */
 	symbol: string,
+	/** Тип платежа (deposit или registration) */
+	type: string,
 	/** Дата обновления платежа */
 	updated_at: GraphQLTypes["DateTime"],
 	/** Имя аккаунта пользователя, совершающего платеж */

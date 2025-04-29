@@ -1198,6 +1198,7 @@ export const ReturnTypes: Record<string,any> = {
 		provider:"String",
 		status:"PaymentStatus",
 		symbol:"String",
+		type:"String",
 		updated_at:"DateTime",
 		username:"String"
 	},
