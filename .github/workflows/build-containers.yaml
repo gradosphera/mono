@@ -11,7 +11,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Получаем всю историю, чтобы убедиться, что все изменения присутствуют
+          
+      - name: Debug info
+        run: |
+          echo "Последние коммиты:"
+          git log -n 5 --oneline
+          echo "Текущая ветка: $(git branch --show-current)"
+          echo "Содержимое компонентов:"
+          ls -la components/desktop/src-ssr/middlewares
+          echo "Содержимое package.json desktop:"
+          cat components/desktop/package.json | grep version
         
       - name: Set docker tag
         run: |
@@ -30,6 +43,7 @@ jobs:
       # Сначала собираем базовый образ с отключенным кешем
       - name: Build base image
         run: |
+          echo "Сборка базового образа без кеша"
           docker build --no-cache -t dicoop/mono-base:${{ env.DOCKER_TAG }} -f Dockerfile .
           docker push dicoop/mono-base:${{ env.DOCKER_TAG }}
           
@@ -49,7 +63,7 @@ jobs:
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.desktop
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/desktop\", \"run\", \"ssr\"]" >> Dockerfile.desktop
           
-          # Собираем и публикуем образы
+          # Собираем и публикуем образы без кеша
           docker build --no-cache -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
           docker build --no-cache -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
           docker build --no-cache -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
