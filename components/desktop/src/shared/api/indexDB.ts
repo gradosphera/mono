@@ -1,7 +1,8 @@
 import { openDB } from 'idb';
+import { env } from 'src/shared/config';
 
 async function openIndexedDB(dbName: string, storeName: string) {
-  if (!process.env.CLIENT) {
+  if (!env.CLIENT) {
     return;
   }
 
@@ -17,7 +18,7 @@ async function openIndexedDB(dbName: string, storeName: string) {
 }
 
 export async function getFromIndexedDB(dbName: string, storeName: string, key: string) {
-  if (!process.env.CLIENT) {
+  if (!env.CLIENT) {
     return;
   }
 
@@ -28,7 +29,7 @@ export async function getFromIndexedDB(dbName: string, storeName: string, key: s
 }
 
 export async function setToIndexedDB(dbName: string, storeName: string, key: string, value: any) {
-  if (!process.env.CLIENT) {
+  if (!env.CLIENT) {
     return;
   }
 

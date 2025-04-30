@@ -32,6 +32,8 @@ import { useSessionStore } from 'src/entities/Session'
 import type { IPaymentOrder } from 'src/shared/lib/types/payments'
 import { formatAssetToReadable } from 'src/shared/lib/utils/formatAssetToReadable'
 import { useSystemStore } from 'src/entities/System/model';
+import { env } from 'src/shared/config';
+
 const { info } = useSystemStore()
 
 const { createDeposit, loadUserWallet } = useWalletStore()
@@ -54,7 +56,7 @@ const handlerSubmit = async (): Promise<void> => {
   isSubmitting.value = true
   try {
     paymentOrder.value = (await createDeposit({
-      quantity: `${parseFloat(quantity.value.toString()).toFixed(4)} ${process.env.CURRENCY}`
+      quantity: `${parseFloat(quantity.value.toString()).toFixed(4)} ${env.CURRENCY}`
     })) as IPaymentOrder
     isSubmitting.value = false
   } catch (e: any) {
@@ -64,7 +66,7 @@ const handlerSubmit = async (): Promise<void> => {
   }
 }
 
-const currency = computed(() => process.env.CURRENCY)
+const currency = computed(() => env.CURRENCY)
 
 const paymentFail = (): void => {
   clear()

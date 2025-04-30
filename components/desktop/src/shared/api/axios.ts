@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useGlobalStore } from '../store';
+import { env } from 'src/shared/config';
 
 export async function sendGET(
   url: string,
@@ -13,7 +14,7 @@ export async function sendGET(
       // if (!tokens || !tokens.access || !tokens.access.token)
       //   throw new Error('Ошибка авторизации: токен доступа не найден');
 
-      const response = await axios.get(process.env.BACKEND_URL + url, {
+      const response = await axios.get(env.BACKEND_URL + url, {
         params,
         headers: {
           Authorization: `Bearer ${tokens?.access?.token}`,
@@ -21,7 +22,7 @@ export async function sendGET(
       });
       return response.data;
     } else {
-      const response = await axios.get(process.env.BACKEND_URL + url, {
+      const response = await axios.get(env.BACKEND_URL + url, {
         params,
       });
       return response.data;
@@ -49,14 +50,14 @@ export async function sendPOST(
       // if (!tokens || !tokens.access || !tokens.access.token)
       //   throw new Error('Ошибка авторизации: токен доступа не найден');
 
-      const response = await axios.post(process.env.BACKEND_URL + url, data, {
+      const response = await axios.post(env.BACKEND_URL + url, data, {
         headers: {
           Authorization: `Bearer ${tokens?.access?.token}`,
         },
       });
       return response.data;
     } else {
-      const response = await axios.post(process.env.BACKEND_URL + url, data);
+      const response = await axios.post(env.BACKEND_URL + url, data);
       return response.data;
     }
   } catch (e: any) {

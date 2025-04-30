@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { ImagesPreview } from '../ImagesPreview'
+import { env } from 'src/shared/config'
 
 const emit = defineEmits(['updateImages'])
 
@@ -38,7 +39,7 @@ const triggerUploader = () => {
   uploaderRef.value.pickFiles()
 }
 
-const upload_url = computed(() => process.env.UPLOAD_URL)
+const upload_url = computed(() => env.UPLOAD_URL)
 </script>
 
 <template lang="pug">

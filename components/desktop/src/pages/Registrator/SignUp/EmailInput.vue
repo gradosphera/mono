@@ -28,12 +28,14 @@ import { ref, computed, watch } from 'vue'
 import { useCreateUser } from 'src/features/User/CreateUser'
 import { debounce } from 'quasar'
 import { useRegistratorStore } from 'src/entities/Registrator'
+import { env } from 'src/shared/config'
+
 const store = useRegistratorStore()
 
 const api = useCreateUser()
 
 watch(() => store.state.email, () => email.value = store.state.email)
-const coopTitle = computed(() => process.env.COOP_SHORT_NAME)
+const coopTitle = computed(() => env.COOP_SHORT_NAME)
 const email = ref(store.state.email)
 
 const inLoading = ref(false)

@@ -3,9 +3,10 @@ import { APIClient, PrivateKey } from '@wharfkit/antelope';
 import { ContractKit } from '@wharfkit/contract';
 import { useGlobalStore } from '../store';
 import { Account } from '@wharfkit/account'
+import { env } from 'src/shared/config';
 
 export const readBlockchain = new APIClient({
-  url: process.env.CHAIN_URL,
+  url: env.CHAIN_URL,
 });
 
 export const contractKit = new ContractKit({

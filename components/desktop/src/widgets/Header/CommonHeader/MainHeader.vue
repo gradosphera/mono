@@ -41,6 +41,7 @@ import { useWindowSize } from 'src/shared/hooks'
 import { SettingsDropdown } from 'src/widgets/Header/SettingsDropdown'
 import { BackButton } from 'src/widgets/Header/BackButton'
 import './HeaderStyles.scss'
+// import { env } from 'src/shared/config'
 
 const router = useRouter()
 const route = useRoute()
@@ -50,7 +51,7 @@ const { isMobile } = useWindowSize()
 const emit = defineEmits(['toggle-left-drawer'])
 
 // Получаем информацию для навигации назад
-// const coopTitle = computed(() => process.env.COOP_SHORT_NAME)
+// const coopTitle = computed(() => env.COOP_SHORT_NAME)
 
 const isDark = computed(() => $q.dark.isActive)
 const headerClass = computed(() =>

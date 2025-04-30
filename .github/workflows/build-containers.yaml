@@ -49,7 +49,7 @@ jobs:
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.desktop
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/desktop\", \"run\", \"ssr\"]" >> Dockerfile.desktop
           
-          # Собираем и публикуем образы без кеша
+          # Собираем и публикуем образы
           docker build -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
           docker build -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
           docker build -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
