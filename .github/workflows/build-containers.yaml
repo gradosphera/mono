@@ -50,10 +50,10 @@ jobs:
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/desktop\", \"run\", \"ssr\"]" >> Dockerfile.desktop
           
           # Собираем и публикуем образы
-          docker build -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
-          docker build -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
-          docker build -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
-          docker build -t dicoop/desktop:${{ env.DOCKER_TAG }} -f Dockerfile.desktop .
+          docker build --no-cache -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
+          docker build --no-cache -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
+          docker build --no-cache -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
+          docker build --no-cache -t dicoop/desktop:${{ env.DOCKER_TAG }} -f Dockerfile.desktop .
           
           docker push dicoop/notificator:${{ env.DOCKER_TAG }}
           docker push dicoop/coopback:${{ env.DOCKER_TAG }}
