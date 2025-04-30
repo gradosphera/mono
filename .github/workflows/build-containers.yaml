@@ -59,3 +59,16 @@ jobs:
           docker push dicoop/coopback:${{ env.DOCKER_TAG }}
           docker push dicoop/cooparser:${{ env.DOCKER_TAG }}
           docker push dicoop/desktop:${{ env.DOCKER_TAG }}
+          
+      # шаг с отправкой хука
+      - name: Trigger deployment webhook
+        if: ${{ success() }}
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            ENV="production"
+          else
+            ENV="testnet"
+          fi
+          
+          # Отправка хука на сервер для запуска деплоя
+          curl -X POST ${{ vars.WEBHOOK_URL }}?env=$ENV&tag=${{ env.DOCKER_TAG }}
