@@ -14,49 +14,55 @@ export interface EnvVars {
   SERVER?: boolean;
   VUE_ROUTER_MODE?: string;
   VUE_ROUTER_BASE?: string;
+  [key: string]: string | boolean | undefined;
 }
 
-// Для SPA и клиента SSR — явные обращения (Quasar заменит их при сборке)
-function getStaticEnv(): EnvVars {
-  return {
-    NODE_ENV: process.env.NODE_ENV,
-    BACKEND_URL: process.env.BACKEND_URL,
-    CHAIN_URL: process.env.CHAIN_URL,
-    CHAIN_ID: process.env.CHAIN_ID,
-    CURRENCY: process.env.CURRENCY,
-    COOP_SHORT_NAME: process.env.COOP_SHORT_NAME,
-    SITE_DESCRIPTION: process.env.SITE_DESCRIPTION,
-    SITE_IMAGE: process.env.SITE_IMAGE,
-    STORAGE_URL: process.env.STORAGE_URL,
-    UPLOAD_URL: process.env.UPLOAD_URL,
-    CLIENT: process.env.CLIENT as unknown as boolean,
-    SERVER: process.env.SERVER as unknown as boolean,
-    VUE_ROUTER_MODE: process.env.VUE_ROUTER_MODE,
-    VUE_ROUTER_BASE: process.env.VUE_ROUTER_BASE
-  };
+// Расширяем глобальный Window чтобы TypeScript понимал window.__ENV__
+declare global {
+  interface Window {
+    __ENV__?: EnvVars;
+  }
 }
 
-// Для сервера SSR — читает Docker-переменные в рантайме
-function getRuntimeEnv(): EnvVars {
-  // Используем тот же объект, что и для статичных значений,
-  // но читаем из реального process.env в рантайме
-  return {
-    NODE_ENV: process.env.NODE_ENV,
-    BACKEND_URL: process.env.BACKEND_URL,
-    CHAIN_URL: process.env.CHAIN_URL,
-    CHAIN_ID: process.env.CHAIN_ID,
-    CURRENCY: process.env.CURRENCY,
-    COOP_SHORT_NAME: process.env.COOP_SHORT_NAME,
-    SITE_DESCRIPTION: process.env.SITE_DESCRIPTION,
-    SITE_IMAGE: process.env.SITE_IMAGE,
-    STORAGE_URL: process.env.STORAGE_URL,
-    UPLOAD_URL: process.env.UPLOAD_URL,
-    CLIENT: process.env.CLIENT as unknown as boolean,
-    SERVER: process.env.SERVER as unknown as boolean,
-    VUE_ROUTER_MODE: process.env.VUE_ROUTER_MODE,
-    VUE_ROUTER_BASE: process.env.VUE_ROUTER_BASE
-  };
+/**
+ * Определение переменных окружения для разных сред
+ * - На сервере (SSR): берем напрямую из process.env
+ * - На клиенте (SSR): используем window.__ENV__, инжектированные с сервера
+ * - В SPA режиме: переменные заменяются при сборке
+ */
+function getEnv(): EnvVars {
+  // SSR сервер или SPA сборка
+  if (typeof process !== 'undefined' && process.env) {
+    // Для SSR сервера - берем реальные переменные
+    // Для SPA - эти значения заменятся при сборке
+    return {
+      NODE_ENV: process.env.NODE_ENV,
+      BACKEND_URL: process.env.BACKEND_URL,
+      CHAIN_URL: process.env.CHAIN_URL,
+      CHAIN_ID: process.env.CHAIN_ID,
+      CURRENCY: process.env.CURRENCY,
+      COOP_SHORT_NAME: process.env.COOP_SHORT_NAME,
+      SITE_DESCRIPTION: process.env.SITE_DESCRIPTION,
+      SITE_IMAGE: process.env.SITE_IMAGE,
+      STORAGE_URL: process.env.STORAGE_URL,
+      UPLOAD_URL: process.env.UPLOAD_URL,
+      CLIENT: process.env.CLIENT as unknown as boolean,
+      SERVER: process.env.SERVER as unknown as boolean,
+      VUE_ROUTER_MODE: process.env.VUE_ROUTER_MODE,
+      VUE_ROUTER_BASE: process.env.VUE_ROUTER_BASE
+    };
+  }
+
+  // SSR клиент - берем из window.__ENV__
+  if (typeof window !== 'undefined' && window.__ENV__) {
+    console.log('Используем window.__ENV__', window.__ENV__);
+    return window.__ENV__;
+  }
+
+  // Запасной вариант, если ничего не сработало
+  console.warn('Не удалось получить переменные окружения!');
+  return {};
 }
 
-// Выбираем стратегию в зависимости от режима
-export const env: EnvVars = process.env.SERVER ? getRuntimeEnv() : getStaticEnv();
+// Экспортируем переменные окружения
+export const env: EnvVars = getEnv();
