@@ -20,9 +20,11 @@ div
 import { computed } from 'vue'
 import { useRouter } from 'vue-router';
 import { useRegistratorStore } from 'src/entities/Registrator';
+import { env } from 'src/shared/config';
+
 const router = useRouter()
 const store = useRegistratorStore()
-const coopTitle = computed(() => process.env.COOP_SHORT_NAME)
+const coopTitle = computed(() => env.COOP_SHORT_NAME)
 
 const next = () => {
   router.push({ name: 'index' })

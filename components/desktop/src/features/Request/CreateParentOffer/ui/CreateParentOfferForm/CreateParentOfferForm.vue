@@ -6,6 +6,7 @@ import { computed, ref } from 'vue'
 import { Form } from 'src/shared/ui/Form'
 import { useCooperativeStore } from 'src/entities/Cooperative'
 import { ImageUploaderWithPreview } from '../ImageUploaderWithPreview'
+import { env } from 'src/shared/config'
 
 const props = defineProps({
   username: {
@@ -48,7 +49,7 @@ const handlerSubmit = async () => {
       coopname: props.coopname,
       program_id: formData.value.program_id,
       units: formData.value.units,
-      unit_cost: parseFloat(unit_cost.toString()).toFixed(4) + ' ' + process.env.CURRENCY,
+      unit_cost: parseFloat(unit_cost.toString()).toFixed(4) + ' ' + env.CURRENCY,
       product_lifecycle_secs: 86400 * formData.value.product_lifecycle_days,
       data: {
         title: formData.value.title,

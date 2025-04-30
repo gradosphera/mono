@@ -7,8 +7,10 @@ import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { formatToAsset } from 'src/shared/lib/utils/formatToAsset';
 import { ref, watch, computed } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
+import { env } from 'src/shared/config';
+
 const { info } = useSystemStore()
-const currency = computed(() => process.env.CURRENCY)
+const currency = computed(() => env.CURRENCY)
 const coop = useCooperativeStore()
 coop.loadPublicCooperativeData(info.coopname)
 coop.loadPrivateCooperativeData()
@@ -28,10 +30,10 @@ const save = async () => {
       await updateCoop({
         coopname: info.coopname,
         username: session.username,
-        initial: formatToAsset(localCoop.value.initial, process.env.CURRENCY as string),
-        minimum: formatToAsset(localCoop.value.minimum, process.env.CURRENCY as string),
-        org_initial: formatToAsset(localCoop.value.org_initial, process.env.CURRENCY as string),
-        org_minimum: formatToAsset(localCoop.value.org_minimum, process.env.CURRENCY as string),
+        initial: formatToAsset(localCoop.value.initial, env.CURRENCY as string),
+        minimum: formatToAsset(localCoop.value.minimum, env.CURRENCY as string),
+        org_initial: formatToAsset(localCoop.value.org_initial, env.CURRENCY as string),
+        org_minimum: formatToAsset(localCoop.value.org_minimum, env.CURRENCY as string),
         announce: coop.publicCooperativeData?.announce,
         description: coop.publicCooperativeData?.description
       })

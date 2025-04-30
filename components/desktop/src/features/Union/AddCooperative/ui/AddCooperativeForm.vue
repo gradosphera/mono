@@ -29,11 +29,12 @@ import { useSessionStore } from 'src/entities/Session';
 import { RegistratorContract } from 'cooptypes';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import type { IObjectedDocument } from 'src/shared/lib/types/document';
+import { env } from 'src/shared/config';
 
 const emit = defineEmits(['finish'])
 
 const {addCooperative} = useAddCooperative()
-const currency = computed(() => process.env.CURRENCY)
+const currency = computed(() => env.CURRENCY)
 const isSubmitting = ref(false)
 
 const props = defineProps({
@@ -82,9 +83,6 @@ const addNow = async () => {
   } catch(e: any){
     FailAlert(e.message)
   }
-
-
-
 }
 
 </script>

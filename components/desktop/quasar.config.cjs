@@ -10,6 +10,7 @@
 require('dotenv').config();
 const { configure } = require('quasar/wrappers');
 const path = require('path');
+
 const env = {
   NODE_ENV: process.env.NODE_ENV,
   BASE_URL: process.env.BASE_URL,
@@ -21,7 +22,7 @@ const env = {
   SITE_DESCRIPTION: process.env.SITE_DESCRIPTION,
   SITE_IMAGE: process.env.SITE_IMAGE
 };
-console.log(env);
+
 module.exports = configure(function (/* ctx */) {
 
   return {

@@ -6,7 +6,7 @@ import { WalletPluginPrivateKey } from '@wharfkit/wallet-plugin-privatekey';
 import { FailAlert, readBlockchain } from 'src/shared/api';
 import { PrivateKey, Serializer } from '@wharfkit/antelope';
 import { GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
-
+import { env } from 'src/shared/config';
 interface ISessionStore {
   isAuth: Ref<boolean>;
   username: ComputedRef<string>;
@@ -67,8 +67,8 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
             actor: globalStore.username,
             permission: 'active',
             chain: {
-              id: process.env.CHAIN_ID as string,
-              url: process.env.CHAIN_URL as string,
+              id: env.CHAIN_ID as string,
+              url: env.CHAIN_URL as string,
             },
             walletPlugin: new WalletPluginPrivateKey(
               globalStore.wif as PrivateKey
