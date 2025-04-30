@@ -42,7 +42,9 @@ div(v-if="extension").row
         div
           q-chip(outline v-for="tag in extension.tags" v-bind:key="tag" dense size="sm") {{tag}}
 
-      vue-markdown(:source="extension.readme").description.q-mt-md
+      ClientOnly
+        template(#default)
+          vue-markdown(:source="extension.readme").description.q-mt-md
     div(v-if="(isSettings || isInstall) && extension.schema")
       q-form(ref="myFormRef")
         div(v-if="isEmpty && !isInstall")
@@ -50,21 +52,31 @@ div(v-if="extension").row
             p.text-h6 Нет настроек
             span Расширение не предоставило настроек для изменения.
         div(v-if="!isEmpty")
-          vue-markdown(:source="extension.instructions").description.q-mt-md
+
+          //- vue-markdown(:source="extension.instructions").description.q-mt-md
+          ClientOnly
+            template(#default)
+              vue-markdown(v-if="extension.instructions" :source="extension.instructions").description.q-mt-md
           ZodForm(:schema="extension.schema" v-model="data")
 
 </template>
 <script lang="ts" setup>
 import { useExtensionStore } from 'src/entities/Extension/model';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ZodForm } from 'src/shared/ui/ZodForm';
-import VueMarkdown from 'vue-markdown-render'
+// import VueMarkdown from 'vue-markdown-render'
 import { extractGraphQLErrorMessages, FailAlert, SuccessAlert } from 'src/shared/api';
 import { useUpdateExtension } from 'src/features/Extension/UpdateExtension';
 import { useUninstallExtension } from 'src/features/Extension/UninstallExtension';
 import { useInstallExtension } from 'src/features/Extension/InstallExtension';
 import { useDesktopStore } from 'src/entities/Desktop/model';
+import { ClientOnly } from 'src/shared/ui/ClientOnly';
+
+// Клиентский компонент для markdown, загружаемый только на клиенте
+const VueMarkdown = defineAsyncComponent(() =>
+  import('vue-markdown-render').then(mod => mod.default)
+);
 
 const route = useRoute();
 const router = useRouter();

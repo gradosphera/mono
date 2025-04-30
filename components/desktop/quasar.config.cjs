@@ -72,6 +72,7 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
+      // env: require('dotenv').config().parsed,
       env: {
         NODE_ENV: process.env.NODE_ENV,
         BASE_URL: process.env.BASE_URL,
@@ -136,11 +137,11 @@ module.exports = configure(function (/* ctx */) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
-vueDevtools: false,
+      vueDevtools: false,
       open: false, // opens browser window automatically
       port: 3005,
       hmr:{
-        clientPort: 3005,
+        // clientPort: 3005,
       //   overlay: false
       }
     },
