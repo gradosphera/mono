@@ -72,7 +72,23 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
-      env: require('dotenv').config().parsed,
+      env: {
+        NODE_ENV: process.env.NODE_ENV,
+        BASE_URL: process.env.BASE_URL,
+        BACKEND_URL: process.env.BACKEND_URL,
+        CHAIN_URL: process.env.CHAIN_URL,
+        CHAIN_ID: process.env.CHAIN_ID,
+        CURRENCY: process.env.CURRENCY,
+        COOP_SHORT_NAME: process.env.COOP_SHORT_NAME,
+        SITE_DESCRIPTION: process.env.SITE_DESCRIPTION,
+        SITE_IMAGE: process.env.SITE_IMAGE,
+        REDIS_HOST: process.env.REDIS_HOST,
+        REDIS_PORT: process.env.REDIS_PORT,
+        REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+        COOPNAME: process.env.COOPNAME,
+        PORT: process.env.PORT,
+        SENTRY_DSN: process.env.SENTRY_DSN
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
