@@ -2,12 +2,18 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY . .
+# Сначала копируем только файлы package.json
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY components/*/package.json ./components/
 
+# Устанавливаем инструменты
 RUN npm install -g pnpm lerna
 
-# Установка всех зависимостей
+# Устанавливаем зависимости
 RUN pnpm install
+
+# Теперь копируем остальные файлы
+COPY . .
 
 # Установка системных зависимостей для WeasyPrint
 RUN apk add --no-cache \
