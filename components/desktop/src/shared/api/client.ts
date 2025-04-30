@@ -1,5 +1,9 @@
 import { Client } from '@coopenomics/sdk'
+console.log(process.env.BACKEND_URL)
+console.log(process.env.CHAIN_URL)
+console.log(process.env.CHAIN_ID)
 
+console.log(process.env)
 // Создаем и экспортируем экземпляр API-клиента
 export const client = Client.create({
   api_url: process.env.BACKEND_URL + '/v1/graphql',
