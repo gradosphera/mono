@@ -16,7 +16,7 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "concurrently -n 'DESKTOP' -c 'bgRed.white' \"quasar dev\"",
     "devnet": "quasar dev",
-    "dev:ssr": "quasar dev -m ssr",
+    "ssr": "quasar dev --mode ssr",
     "build:lib": "vite build",
     "build:spa": "quasar build",
     "build": "quasar build --mode ssr",
