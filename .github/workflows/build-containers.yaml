@@ -27,10 +27,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      # Сначала собираем базовый образ
+      # Сначала собираем базовый образ с отключенным кешем
       - name: Build base image
         run: |
-          docker build -t dicoop/mono-base:${{ env.DOCKER_TAG }} -f Dockerfile .
+          docker build --no-cache -t dicoop/mono-base:${{ env.DOCKER_TAG }} -f Dockerfile .
           docker push dicoop/mono-base:${{ env.DOCKER_TAG }}
           
       # Затем образы для каждого сервиса
@@ -49,7 +49,7 @@ jobs:
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.desktop
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/desktop\", \"run\", \"ssr\"]" >> Dockerfile.desktop
           
-          # Собираем и публикуем образы
+          # Собираем и публикуем образы без кеша
           docker build -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
           docker build -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
           docker build -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
