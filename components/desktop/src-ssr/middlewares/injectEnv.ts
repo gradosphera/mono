@@ -1,11 +1,14 @@
+import { Request, Response, NextFunction } from 'express';
+import { EnvVars } from '../../src/shared/config/Environment';
+
 /**
  * SSR middleware для инъекции переменных окружения в браузер
  * Создает window.__ENV__ со всеми переменными, которые должны быть доступны на клиенте
  */
-module.exports = function (/* { app, resolver, urlPath, publicPath, render } */) {
-  return async (req, res, next) => {
+export default function (/* { app, resolver, urlPath, publicPath, render } */) {
+  return async (req: Request, res: Response, next: NextFunction) => {
     // Получаем переменные из process.env, которые нужны клиенту
-    const envForClient = {
+    const envForClient: EnvVars = {
       NODE_ENV: process.env.NODE_ENV,
       BACKEND_URL: process.env.BACKEND_URL,
       CHAIN_URL: process.env.CHAIN_URL,
@@ -36,7 +39,7 @@ module.exports = function (/* { app, resolver, urlPath, publicPath, render } */)
       if (typeof html === 'string') {
         html = html.replace('</head>', `${script}</head>`);
       }
-      originalSend.call(this, html);
+      return originalSend.call(this, html);
     };
 
     // Продолжаем обработку запроса
