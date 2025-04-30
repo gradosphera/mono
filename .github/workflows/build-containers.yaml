@@ -13,18 +13,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Получаем всю историю, чтобы убедиться, что все изменения присутствуют
-          
-      - name: Debug info
-        run: |
-          echo "Последние коммиты:"
-          git log -n 5 --oneline
-          echo "Текущая ветка: $(git branch --show-current)"
-          echo "Содержимое компонентов:"
-          ls -la components/desktop/src-ssr/middlewares
-          echo "Содержимое package.json desktop:"
-          cat components/desktop/package.json | grep version
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
         
       - name: Set docker tag
         run: |
@@ -40,41 +31,45 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      # Сначала собираем базовый образ с отключенным кешем
-      - name: Build base image
-        run: |
-          echo "Сборка базового образа без кеша"
-          docker build --no-cache -t dicoop/mono-base:${{ env.DOCKER_TAG }} -f Dockerfile .
-          docker push dicoop/mono-base:${{ env.DOCKER_TAG }}
+      # Построение общего образа с общими зависимостями
+      - name: Build and push shared image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: dicoop/mono-base:${{ env.DOCKER_TAG }}
+          cache-from: type=registry,ref=dicoop/mono-base:cache
+          cache-to: type=registry,ref=dicoop/mono-base:cache,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+          target: runtime
           
-      # Затем образы для каждого сервиса
-      - name: Build service images
+      # Создаем и публикуем отдельные сервисные образы
+      - name: Create and push notificator image
         run: |
-          # Создаем упрощенные Dockerfile для сервисов
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.notificator
           echo "CMD [\"pnpm\", \"-F\", \"coop-notificator\", \"run\", \"start\"]" >> Dockerfile.notificator
+          docker buildx build --push -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
           
+      - name: Create and push controller image  
+        run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.coopback
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/controller\", \"run\", \"start\"]" >> Dockerfile.coopback
+          docker buildx build --push -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
           
+      - name: Create and push parser image
+        run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.cooparser
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/parser\", \"run\", \"start\"]" >> Dockerfile.cooparser
+          docker buildx build --push -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
           
+      - name: Create and push desktop image
+        run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.desktop
-          echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/desktop\", \"run\", \"ssr\"]" >> Dockerfile.desktop
+          echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/desktop\", \"run\", \"start\"]" >> Dockerfile.desktop
+          docker buildx build --push -t dicoop/desktop:${{ env.DOCKER_TAG }} -f Dockerfile.desktop .
           
-          # Собираем и публикуем образы без кеша
-          docker build --no-cache -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
-          docker build --no-cache -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
-          docker build --no-cache -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
-          docker build --no-cache -t dicoop/desktop:${{ env.DOCKER_TAG }} -f Dockerfile.desktop .
-          
-          docker push dicoop/notificator:${{ env.DOCKER_TAG }}
-          docker push dicoop/coopback:${{ env.DOCKER_TAG }}
-          docker push dicoop/cooparser:${{ env.DOCKER_TAG }}
-          docker push dicoop/desktop:${{ env.DOCKER_TAG }}
-          
-      # шаг с отправкой хука
+      # Отправка хука
       - name: Trigger deployment webhook
         if: ${{ success() }}
         run: |
