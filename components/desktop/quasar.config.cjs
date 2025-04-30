@@ -10,7 +10,24 @@
 require('dotenv').config();
 const { configure } = require('quasar/wrappers');
 const path = require('path');
-
+const env = {
+  NODE_ENV: process.env.NODE_ENV,
+  BASE_URL: process.env.VITE_BASE_URL || process.env.BASE_URL,
+  BACKEND_URL: process.env.VITE_BACKEND_URL || process.env.BACKEND_URL,
+  CHAIN_URL: process.env.VITE_CHAIN_URL || process.env.CHAIN_URL,
+  CHAIN_ID: process.env.VITE_CHAIN_ID || process.env.CHAIN_ID,
+  CURRENCY: process.env.VITE_CURRENCY || process.env.CURRENCY,
+  COOP_SHORT_NAME: process.env.VITE_COOP_SHORT_NAME || process.env.COOP_SHORT_NAME,
+  SITE_DESCRIPTION: process.env.VITE_SITE_DESCRIPTION || process.env.SITE_DESCRIPTION,
+  SITE_IMAGE: process.env.VITE_SITE_IMAGE || process.env.SITE_IMAGE,
+  REDIS_HOST: process.env.VITE_REDIS_HOST || process.env.REDIS_HOST,
+  REDIS_PORT: process.env.VITE_REDIS_PORT || process.env.REDIS_PORT,
+  REDIS_PASSWORD: process.env.VITE_REDIS_PASSWORD || process.env.REDIS_PASSWORD,
+  COOPNAME: process.env.VITE_COOPNAME || process.env.COOPNAME,
+  PORT: process.env.VITE_PORT || process.env.PORT,
+  SENTRY_DSN: process.env.VITE_SENTRY_DSN || process.env.SENTRY_DSN
+};
+console.log(env);
 module.exports = configure(function (/* ctx */) {
 
   return {
@@ -73,23 +90,7 @@ module.exports = configure(function (/* ctx */) {
       // publicPath: '/',
       // analyze: true,
       // env: require('dotenv').config().parsed,
-      env: {
-        NODE_ENV: process.env.NODE_ENV,
-        BASE_URL: process.env.VITE_BASE_URL || process.env.BASE_URL,
-        BACKEND_URL: process.env.VITE_BACKEND_URL || process.env.BACKEND_URL,
-        CHAIN_URL: process.env.VITE_CHAIN_URL || process.env.CHAIN_URL,
-        CHAIN_ID: process.env.VITE_CHAIN_ID || process.env.CHAIN_ID,
-        CURRENCY: process.env.VITE_CURRENCY || process.env.CURRENCY,
-        COOP_SHORT_NAME: process.env.VITE_COOP_SHORT_NAME || process.env.COOP_SHORT_NAME,
-        SITE_DESCRIPTION: process.env.VITE_SITE_DESCRIPTION || process.env.SITE_DESCRIPTION,
-        SITE_IMAGE: process.env.VITE_SITE_IMAGE || process.env.SITE_IMAGE,
-        REDIS_HOST: process.env.VITE_REDIS_HOST || process.env.REDIS_HOST,
-        REDIS_PORT: process.env.VITE_REDIS_PORT || process.env.REDIS_PORT,
-        REDIS_PASSWORD: process.env.VITE_REDIS_PASSWORD || process.env.REDIS_PASSWORD,
-        COOPNAME: process.env.VITE_COOPNAME || process.env.COOPNAME,
-        PORT: process.env.VITE_PORT || process.env.PORT,
-        SENTRY_DSN: process.env.VITE_SENTRY_DSN || process.env.SENTRY_DSN
-      },
+      env,
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
