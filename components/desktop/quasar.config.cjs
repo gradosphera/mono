@@ -19,13 +19,7 @@ const env = {
   CURRENCY: process.env.VITE_CURRENCY || process.env.CURRENCY,
   COOP_SHORT_NAME: process.env.VITE_COOP_SHORT_NAME || process.env.COOP_SHORT_NAME,
   SITE_DESCRIPTION: process.env.VITE_SITE_DESCRIPTION || process.env.SITE_DESCRIPTION,
-  SITE_IMAGE: process.env.VITE_SITE_IMAGE || process.env.SITE_IMAGE,
-  REDIS_HOST: process.env.VITE_REDIS_HOST || process.env.REDIS_HOST,
-  REDIS_PORT: process.env.VITE_REDIS_PORT || process.env.REDIS_PORT,
-  REDIS_PASSWORD: process.env.VITE_REDIS_PASSWORD || process.env.REDIS_PASSWORD,
-  COOPNAME: process.env.VITE_COOPNAME || process.env.COOPNAME,
-  PORT: process.env.VITE_PORT || process.env.PORT,
-  SENTRY_DSN: process.env.VITE_SENTRY_DSN || process.env.SENTRY_DSN
+  SITE_IMAGE: process.env.VITE_SITE_IMAGE || process.env.SITE_IMAGE
 };
 console.log(env);
 module.exports = configure(function (/* ctx */) {
