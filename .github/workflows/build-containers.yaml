@@ -65,10 +65,13 @@ jobs:
         if: ${{ success() }}
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
-            ENV="production"
+            # Хук для продакшена
+            curl -X POST ${{ vars.PRODUCTION_WEBHOOK_URL }} \
+              -H 'Content-Type: application/json' \
+              -d '${{ env.DOCKER_TAG }}'
           else
-            ENV="testnet"
+            # Хук для тестнета
+            curl -X POST ${{ vars.TESTNET_WEBHOOK_URL }} \
+              -H 'Content-Type: application/json' \
+              -d '${{ env.DOCKER_TAG }}'
           fi
-          
-          # Отправка хука на сервер для запуска деплоя
-          curl -X POST ${{ vars.WEBHOOK_URL }}?env=$ENV&tag=${{ env.DOCKER_TAG }}
