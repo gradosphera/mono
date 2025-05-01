@@ -1,49 +1,29 @@
-/**
- * Создание собрания
- */
+/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
 export * as CreateAnnualGeneralMeet from './createAnnualGeneralMeet'
 
-/**
- * Генерация документа повестки собрания
- */
+/** Сгенерировать предложение повестки общего собрания пайщиков */
 export * as GenerateAnnualGeneralMeetAgendaDocument from './generateAnnualGeneralMeetAgendaDocument'
 
-/**
- * Генерация документа решения собрания
- */
+/** Сгенерировать документ решения общего собрания пайщиков */
 export * as GenerateAnnualGeneralMeetDecisionDocument from './generateAnnualGeneralMeetDecisionDocument'
 
-/**
- * Генерация документа уведомления о проведении собрания
- */
+/** Сгенерировать документ уведомления о проведении общего собрания пайщиков */
 export * as GenerateAnnualGeneralMeetNotificationDocument from './generateAnnualGeneralMeetNotificationDocument'
 
-/**
- * Генерация бюллетеня для голосования на собрании
- */
+/** Сгенерировать бюллетень для голосования на общем собрании пайщиков */
 export * as GenerateBallotForAnnualGeneralMeetDocument from './generateBallotForAnnualGeneralMeetDocument'
 
-/**
- * Генерация документа решения совета о проведении собрания
- */
+/** Сгенерировать документ решения Совета по проведению общего собрания пайщиков */
 export * as GenerateSovietDecisionOnAnnualMeetDocument from './generateSovietDecisionOnAnnualMeetDocument'
 
-/**
- * Перезапуск собрания
- */
+/** Перезапуск общего собрания пайщиков */
 export * as RestartAnnualGeneralMeet from './restartAnnualGeneralMeet'
 
-/**
- * Подписание решения председателем
- */
+/** Подписание решения председателем на общем собрании пайщиков */
 export * as SignByPresiderOnAnnualGeneralMeet from './signByPresiderOnAnnualGeneralMeet'
 
-/**
- * Подписание решения секретарём
- */
+/** Подписание решения секретарём на общем собрании пайщиков */
 export * as SignBySecretaryOnAnnualGeneralMeet from './signBySecretaryOnAnnualGeneralMeet'
 
-/**
- * Голосование на собрании
- */
+/** Голосование на общем собрании пайщиков */
 export * as VoteOnAnnualGeneralMeet from './voteOnAnnualGeneralMeet'
