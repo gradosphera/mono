@@ -14,9 +14,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        
       - name: Set docker tag
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
@@ -31,47 +28,43 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      # Построение общего образа с общими зависимостями
-      - name: Build and push shared image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: dicoop/mono-base:${{ env.DOCKER_TAG }}
-          # Отключаем кеширование, так как оно вызывает проблемы
-          no-cache: true
-          target: runtime
+      # Построение базового образа
+      - name: Build base image
+        run: |
+          # Соберем базовый образ без кеша, чтобы гарантировать обновления
+          docker build --no-cache -t dicoop/mono-base:${{ env.DOCKER_TAG }} -f Dockerfile --target runtime .
+          docker push dicoop/mono-base:${{ env.DOCKER_TAG }}
           
-      # Создаем и публикуем отдельные сервисные образы
-      - name: Create and push notificator image
+      # Создаем сервисные образы
+      - name: Build notificator image
         run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.notificator
           echo "CMD [\"pnpm\", \"-F\", \"coop-notificator\", \"run\", \"start\"]" >> Dockerfile.notificator
           docker build -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
           docker push dicoop/notificator:${{ env.DOCKER_TAG }}
           
-      - name: Create and push controller image  
+      - name: Build controller image  
         run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.coopback
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/controller\", \"run\", \"start\"]" >> Dockerfile.coopback
           docker build -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
           docker push dicoop/coopback:${{ env.DOCKER_TAG }}
           
-      - name: Create and push parser image
+      - name: Build parser image
         run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.cooparser
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/parser\", \"run\", \"start\"]" >> Dockerfile.cooparser
           docker build -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
           docker push dicoop/cooparser:${{ env.DOCKER_TAG }}
           
-      - name: Create and push desktop image
+      - name: Build desktop image
         run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.desktop
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/desktop\", \"run\", \"start\"]" >> Dockerfile.desktop
           docker build -t dicoop/desktop:${{ env.DOCKER_TAG }} -f Dockerfile.desktop .
           docker push dicoop/desktop:${{ env.DOCKER_TAG }}
           
-      # Отправка хука
+      # Отправка хука для деплоя
       - name: Trigger deployment webhook
         if: ${{ success() }}
         run: |

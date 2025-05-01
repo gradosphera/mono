@@ -2,25 +2,17 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Копируем только конфигурационные файлы сначала
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY components/*/package.json ./components/temp/
-# Восстановление структуры директорий
-RUN for file in ./components/temp/*.json; do \
-      dir=$(basename $(dirname $file)); \
-      mkdir -p ./components/$dir; \
-      mv $file ./components/$dir/package.json; \
-    done && \
-    rm -rf ./components/temp
-
-# Устанавливаем инструменты и зависимости
-RUN npm install -g pnpm@8 lerna@7
-RUN pnpm install --force
-
-# Копируем весь исходный код
+# Сразу копируем все файлы
 COPY . .
 
-# Установка WeasyPrint
+# Устанавливаем инструменты
+RUN npm install -g pnpm lerna
+
+# Установка зависимостей
+# Используем версию pnpm, совместимую с существующим lock-файлом
+RUN pnpm install
+
+# Установка системных зависимостей для WeasyPrint
 RUN apk add --no-cache \
     python3 \
     py3-pip \
@@ -41,9 +33,10 @@ RUN apk add --no-cache \
 # Сборка всех компонентов
 RUN lerna run build
 
-# Финальная стадия - общий образ
+# Финальный образ
 FROM builder AS runtime
 
+# Настройка переменных окружения
 ENV PATH="/venv/bin:$PATH"
 
 # Проверка WeasyPrint
