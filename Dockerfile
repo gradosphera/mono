@@ -13,12 +13,8 @@ RUN pnpm fetch
 # Копируем весь код
 COPY . .
 
-# Проверяем, что middlewares файлы существуют перед установкой
-RUN echo "Проверка файлов middlewares:" && \
-    ls -la components/desktop/src-ssr/middlewares/ || echo "Директория middlewares не найдена!"
-
-# Устанавливаем зависимости
-RUN pnpm install --offline
+# Устанавливаем зависимости и очищаем кеш pnpm
+RUN pnpm install --offline && pnpm store prune
 
 # Устанавливаем системные зависимости для WeasyPrint (только для controller)
 RUN apk add --no-cache \
@@ -36,46 +32,38 @@ RUN apk add --no-cache \
     harfbuzz-subset \
     && python3 -m venv /venv \
     && /venv/bin/pip install WeasyPrint==62.3 \
-    && rm -rf /var/cache/*
+    && pip cache purge \
+    && rm -rf /var/cache/* /tmp/*
 
-    
 # Сборка всех компонентов
 RUN pnpm run -r build
 
-# Проверяем, что файлы middlewares все еще существуют после сборки
-RUN echo "Проверка файлов middlewares после сборки:" && \
-    ls -la components/desktop/src-ssr/middlewares/ || echo "Директория middlewares не найдена после сборки!"
+# Для каждого пакета создаем отдельные директории с необходимыми файлами
+# Desktop - с ручным копированием src-ssr директории
+RUN pnpm deploy --filter=@coopenomics/desktop --prod --legacy /prod/desktop && \
+    rm -rf /tmp/* /var/tmp/* 
 
-# Деплоим каждый компонент в отдельную директорию с только необходимыми зависимостями
-RUN pnpm deploy --filter=@coopenomics/desktop --prod --legacy /prod/desktop
+# Controller - с WeasyPrint
+RUN pnpm deploy --filter=@coopenomics/controller --prod --legacy /prod/controller && \
+    rm -rf /tmp/* /var/tmp/*
 
-# Проверяем содержимое после pnpm deploy
-RUN echo "Содержимое /prod/desktop:" && \
-    ls -la /prod/desktop && \
-    echo "Содержимое /prod/desktop/src-ssr (если существует):" && \
-    ls -la /prod/desktop/src-ssr/ || echo "Директория src-ssr не найдена в /prod/desktop!"
-    
-# Копируем middlewares директорию вручную, если pnpm deploy не включил ее
-RUN if [ -d "components/desktop/src-ssr/middlewares" ] && [ ! -d "/prod/desktop/src-ssr/middlewares" ]; then \
-      echo "Создаем директорию middlewares вручную"; \
-      mkdir -p /prod/desktop/src-ssr/middlewares && \
-      cp -r components/desktop/src-ssr/middlewares/* /prod/desktop/src-ssr/middlewares/; \
-    fi
+# Parser
+RUN pnpm deploy --filter=@coopenomics/parser --prod --legacy /prod/parser && \
+    rm -rf /tmp/* /var/tmp/*
 
-RUN pnpm deploy --filter=@coopenomics/controller --prod --legacy /prod/controller
-RUN pnpm deploy --filter=@coopenomics/parser --prod --legacy /prod/parser
-RUN pnpm deploy --filter=coop-notificator --prod --legacy /prod/notificator
+# Notificator
+RUN pnpm deploy --filter=coop-notificator --prod --legacy /prod/notificator && \
+    rm -rf /tmp/* /var/tmp/*
+
+# Очистка для уменьшения размера слоя
+RUN rm -rf node_modules .git .github && \
+    find /app -type d -name "node_modules" -exec rm -rf {} +
 
 # Образ для desktop
 FROM base AS desktop
 # Копируем собранное приложение
 COPY --from=build /prod/desktop /app
 WORKDIR /app
-# Проверяем содержимое финального образа
-RUN echo "Содержимое /app/src-ssr:" && \
-    ls -la /app/src-ssr/ || echo "Директория src-ssr не найдена в финальном образе!" && \
-    echo "Содержимое /app/src-ssr/middlewares (если существует):" && \
-    ls -la /app/src-ssr/middlewares/ || echo "Директория middlewares не найдена в финальном образе!"
 CMD ["pnpm", "run", "start"]
 
 # Образ для controller
