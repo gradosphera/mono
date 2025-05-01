@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+<!-- Render hero under tabs -->
+{% block tabs %}
+  {{ super() }}
+
+  <!-- Additional styles for landing page -->
+  <style>
+
+    /* Application header should be static for the landing page */
+    .md-header {
+      position: initial;
+    }
+
+    /* Remove spacing, as we cannot hide it completely */
+    .md-main__inner {
+      margin: 0;
+    }
+
+    /* Hide main content for now */
+    .md-content {
+      display: none !important;
+    }
+    
+    .md-grid {
+      max-width: 100%;
+    }
+    .md-main {
+      flex-grow: initial !important;
+    }
+    
+    /* .md-sidebar{
+      display: none !important;
+    } */
+    
+    /* Hide table of contents */
+    @media screen and (min-width: 60em) {
+      .md-sidebar--secondary {
+        display: none;
+      }
+    }
+
+    /* Hide navigation */
+    /* @media screen and (min-width: 76.25em) {
+      .md-sidebar--primary {
+        display: none;
+      }
+    } */
+    /* .md-sidebar__scrollwrap{
+      display: none !important;
+    } */
+
+</style>
+
+  <!-- Hero for landing page -->
+  <section class="mdx-container" style="height: 100vh !important;">
+    <iframe src="https://blog.coopenomics.world/mono" class="full-width-iframe"></iframe>
+  </section>
+{% endblock %}
+
+<!-- Content (empty for landing) -->
+<!-- {% block content %}{% endblock %} -->
+
+<!-- Application footer -->
+{% block footer %}{{ super() }}{% endblock %}
