@@ -48,7 +48,6 @@ plugins:
   - section-index
   # - awesome-pages
   # - table-reader
-  - blog
   # - social:https://squidfunk.github.io/mkdocs-material/
   #   cards_layout: default
 
