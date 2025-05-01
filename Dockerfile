@@ -38,6 +38,7 @@ RUN apk add --no-cache \
     && /venv/bin/pip install WeasyPrint==62.3 \
     && rm -rf /var/cache/*
 
+    
 # Сборка всех компонентов
 RUN pnpm run -r build
 
