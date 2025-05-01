@@ -32,8 +32,6 @@ export default ssrMiddleware(({ app }) => {
     </script>
     `;
 
-    console.log('envForClient', envForClient);
-
     // Оригинальный метод отправки HTML
     const originalSend = res.send;
 
