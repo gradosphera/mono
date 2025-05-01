@@ -85,7 +85,7 @@ jobs:
         working-directory: ./components/docs
 
       - name: Publish to GitHub Pages
-        run: npx gh-pages --nojekyll -d site --repo git@github.com:coopenomics/mono.git
+        run: npx gh-pages --nojekyll -d site --repo https://x-access-token:${GITHUB_TOKEN}@github.com/coopenomics/mono.git
         working-directory: ./components/docs
         env:
           GIT_AUTHOR_NAME: github-actions
