@@ -56,7 +56,6 @@ function getEnv(): EnvVars {
 
   // SSR клиент - берем из window.__ENV__
   if (typeof window !== 'undefined' && window.__ENV__) {
-    console.log('Используем window.__ENV__', window.__ENV__);
     return window.__ENV__;
   }
 

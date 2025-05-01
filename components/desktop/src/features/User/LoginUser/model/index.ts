@@ -14,7 +14,7 @@ export function useLoginUser() {
   async function login(email: string, wif: string): Promise<void> {
     const auth = await api.loginUser(email, wif);
     const { tokens, account } = await client.login(email, wif);
-
+    console.log('login', auth, tokens, account)
     // Создаём объект tokens с правильными типами
     const adaptedTokens: ITokens = {
       access: {
@@ -36,8 +36,9 @@ export function useLoginUser() {
 
     const { run } = useInitWalletProcess()
     await run() //запускаем фоновое обновление кошелька - заменить на подписку потом
-
+    console.log('login done')
     if (!currentUser.isRegistrationComplete){
+      console.log('continue registration process here')
       const {state, steps} = useRegistratorStore()
       state.userData.type = currentUser.userAccount?.type as 'individual' | 'entrepreneur' | 'organization'
       const privateData = currentUser.userAccount?.private_data || {};
@@ -48,7 +49,7 @@ export function useLoginUser() {
         organization: state.userData.organization_data,
         entrepreneur: state.userData.entrepreneur_data
       };
-
+      console.log('dataMap', dataMap)
       const data = dataMap[state.userData.type];
       if (data) {
         for (const key of Object.keys(privateData)) {
@@ -74,7 +75,7 @@ export function useLoginUser() {
       else if (currentUser.userAccount?.status === 'registered')
         state.step = steps.Welcome
     }
-
+    console.log('continue registration process done')
   }
 
   return {
