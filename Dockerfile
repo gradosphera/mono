@@ -13,6 +13,10 @@ RUN pnpm fetch
 # Копируем весь код
 COPY . .
 
+# Проверяем, что middleware файлы существуют перед установкой
+RUN echo "Проверка файлов middleware:" && \
+    ls -la components/desktop/src-ssr/middleware/ || echo "Директория middleware не найдена!"
+
 # Устанавливаем зависимости
 RUN pnpm install --offline
 
@@ -37,8 +41,26 @@ RUN apk add --no-cache \
 # Сборка всех компонентов
 RUN pnpm run -r build
 
+# Проверяем, что файлы middleware все еще существуют после сборки
+RUN echo "Проверка файлов middleware после сборки:" && \
+    ls -la components/desktop/src-ssr/middleware/ || echo "Директория middleware не найдена после сборки!"
+
 # Деплоим каждый компонент в отдельную директорию с только необходимыми зависимостями
 RUN pnpm deploy --filter=@coopenomics/desktop --prod --legacy /prod/desktop
+
+# Проверяем содержимое после pnpm deploy
+RUN echo "Содержимое /prod/desktop:" && \
+    ls -la /prod/desktop && \
+    echo "Содержимое /prod/desktop/src-ssr (если существует):" && \
+    ls -la /prod/desktop/src-ssr/ || echo "Директория src-ssr не найдена в /prod/desktop!"
+    
+# Копируем middleware директорию вручную, если pnpm deploy не включил ее
+RUN if [ -d "components/desktop/src-ssr/middleware" ] && [ ! -d "/prod/desktop/src-ssr/middleware" ]; then \
+      echo "Создаем директорию middleware вручную"; \
+      mkdir -p /prod/desktop/src-ssr/middleware && \
+      cp -r components/desktop/src-ssr/middleware/* /prod/desktop/src-ssr/middleware/; \
+    fi
+
 RUN pnpm deploy --filter=@coopenomics/controller --prod --legacy /prod/controller
 RUN pnpm deploy --filter=@coopenomics/parser --prod --legacy /prod/parser
 RUN pnpm deploy --filter=coop-notificator --prod --legacy /prod/notificator
@@ -48,6 +70,11 @@ FROM base AS desktop
 # Копируем собранное приложение
 COPY --from=build /prod/desktop /app
 WORKDIR /app
+# Проверяем содержимое финального образа
+RUN echo "Содержимое /app/src-ssr:" && \
+    ls -la /app/src-ssr/ || echo "Директория src-ssr не найдена в финальном образе!" && \
+    echo "Содержимое /app/src-ssr/middleware (если существует):" && \
+    ls -la /app/src-ssr/middleware/ || echo "Директория middleware не найдена в финальном образе!"
 CMD ["pnpm", "run", "start"]
 
 # Образ для controller
