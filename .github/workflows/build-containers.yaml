@@ -13,17 +13,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          clean: true
-          fetch-depth: 0
-          
-      - name: Debug - Проверка файлов в репозитории
-        run: |
-          echo "Проверяем файлы в директории components/desktop/src-ssr/middlewares/"
-          ls -la components/desktop/src-ssr/middlewares/
-          echo "Содержимое последних коммитов:"
-          git log -n 3 --name-status
-          
+        
       - name: Set docker tag
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
@@ -38,46 +28,53 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      - name: Remove existing images
+      - name: Free disk space before building
         run: |
-          echo "Удаление существующих образов..."
-          docker rmi dicoop/desktop:${{ env.DOCKER_TAG }} || true
-          docker rmi dicoop/coopback:${{ env.DOCKER_TAG }} || true
-          docker rmi dicoop/cooparser:${{ env.DOCKER_TAG }} || true
-          docker rmi dicoop/notificator:${{ env.DOCKER_TAG }} || true
-          docker system prune -f
+          echo "Освобождаем место на диске..."
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          docker system prune -af
+          df -h
           
       # Сборка и публикация каждого образа с соответствующим target
       - name: Build desktop image
         run: |
-          echo "Сборка desktop образа..."
-          # Проверяем перед сборкой
-          ls -la components/desktop/src-ssr/middlewares/
-          # Полностью отключаем кеширование при сборке
           docker build --no-cache --target desktop -t dicoop/desktop:${{ env.DOCKER_TAG }} .
-          # Проверяем содержимое собранного образа
-          container_id=$(docker create dicoop/desktop:${{ env.DOCKER_TAG }})
-          docker cp $container_id:/app/src-ssr/middlewares ./middlewares_in_container
-          echo "Файлы в контейнере (middlewares):"
-          ls -la ./middlewares_in_container
-          docker rm $container_id
-          # Отправляем образ
           docker push dicoop/desktop:${{ env.DOCKER_TAG }}
+          # Очистка после сборки
+          docker image prune -f
+          docker system prune -f
+          df -h
           
       - name: Build controller image
         run: |
-          docker build --no-cache --target controller -t dicoop/coopback:${{ env.DOCKER_TAG }} .
+          docker build --target controller -t dicoop/coopback:${{ env.DOCKER_TAG }} .
           docker push dicoop/coopback:${{ env.DOCKER_TAG }}
+          # Очистка после сборки
+          docker image prune -f
+          docker system prune -f
+          df -h
           
       - name: Build parser image
         run: |
-          docker build --no-cache --target parser -t dicoop/cooparser:${{ env.DOCKER_TAG }} .
+          docker build --target parser -t dicoop/cooparser:${{ env.DOCKER_TAG }} .
           docker push dicoop/cooparser:${{ env.DOCKER_TAG }}
+          # Очистка после сборки
+          docker image prune -f
+          docker system prune -f
+          df -h
           
       - name: Build notificator image
         run: |
-          docker build --no-cache --target notificator -t dicoop/notificator:${{ env.DOCKER_TAG }} .
+          docker build --target notificator -t dicoop/notificator:${{ env.DOCKER_TAG }} .
           docker push dicoop/notificator:${{ env.DOCKER_TAG }}
+          # Очистка после сборки
+          docker image prune -f
+          docker system prune -f
+          df -h
           
       # Отправка хука для деплоя
       - name: Trigger deployment webhook
