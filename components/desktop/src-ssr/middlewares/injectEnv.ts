@@ -1,12 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
+import { ssrMiddleware } from 'quasar/wrappers';
 import { EnvVars } from '../../src/shared/config/Environment';
 
 /**
  * SSR middleware для инъекции переменных окружения в браузер
  * Создает window.__ENV__ со всеми переменными, которые должны быть доступны на клиенте
  */
-export default function (/* { app, resolver, urlPath, publicPath, render } */) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+export default ssrMiddleware(({ app }) => {
+  // Регистрируем middleware для всех запросов
+  app.use((req, res, next) => {
     // Получаем переменные из process.env, которые нужны клиенту
     const envForClient: EnvVars = {
       NODE_ENV: process.env.NODE_ENV,
@@ -44,5 +45,5 @@ export default function (/* { app, resolver, urlPath, publicPath, render } */) {
 
     // Продолжаем обработку запроса
     next();
-  };
-};
+  });
+});
