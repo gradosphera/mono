@@ -40,7 +40,7 @@ jobs:
 
       - name: Patch spectaql-config.yml for CI
         run: |
-          sed -i.bak "0,/url:.*/s|url:.*|url: 'https://testnet.coopenomics.world/v1/graphql'|" spectaql-config.yml
+          sed -i.bak "0,/url:.*/s|url:.*|url: 'https://testnet.coopenomics.world/backend/v1/graphql'|" spectaql-config.yml
         working-directory: ./components/controller
 
       - name: Show patched spectaql-config.yml
