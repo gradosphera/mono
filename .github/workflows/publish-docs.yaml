@@ -47,6 +47,10 @@ jobs:
         run: cat spectaql-config.yml
         working-directory: ./components/controller
 
+      - name: Build cooptypes
+        run: pnpm run build
+        working-directory: ./components/cooptypes
+
       - name: Generate controller docs
         run: pnpm run docs
         working-directory: ./components/controller
