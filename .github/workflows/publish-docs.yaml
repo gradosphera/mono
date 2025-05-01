@@ -31,9 +31,9 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install mkdocs-material mkdocs-macros-plugin mkdocs-section-index mkdocs-blog pymdown-extensions
+          pip install mkdocs-material mkdocs-macros-plugin mkdocs-section-index pymdown-extensions
         working-directory: ./components/docs
-
+        
       - name: Install Node.js dependencies
         run: pnpm install
         working-directory: ./components/docs
