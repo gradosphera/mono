@@ -19,8 +19,8 @@ jobs:
           
       - name: Debug - Проверка файлов в репозитории
         run: |
-          echo "Проверяем файлы в директории components/desktop/src-ssr/middleware/"
-          ls -la components/desktop/src-ssr/middleware/
+          echo "Проверяем файлы в директории components/desktop/src-ssr/middlewares/"
+          ls -la components/desktop/src-ssr/middlewares/
           echo "Содержимое последних коммитов:"
           git log -n 3 --name-status
           
@@ -52,14 +52,14 @@ jobs:
         run: |
           echo "Сборка desktop образа..."
           # Проверяем перед сборкой
-          ls -la components/desktop/src-ssr/middleware/
+          ls -la components/desktop/src-ssr/middlewares/
           # Полностью отключаем кеширование при сборке
           docker build --no-cache --target desktop -t dicoop/desktop:${{ env.DOCKER_TAG }} .
           # Проверяем содержимое собранного образа
           container_id=$(docker create dicoop/desktop:${{ env.DOCKER_TAG }})
-          docker cp $container_id:/app/src-ssr/middleware ./middleware_in_container
-          echo "Файлы в контейнере (middleware):"
-          ls -la ./middleware_in_container
+          docker cp $container_id:/app/src-ssr/middlewares ./middlewares_in_container
+          echo "Файлы в контейнере (middlewares):"
+          ls -la ./middlewares_in_container
           docker rm $container_id
           # Отправляем образ
           docker push dicoop/desktop:${{ env.DOCKER_TAG }}
