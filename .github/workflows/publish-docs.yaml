@@ -38,6 +38,11 @@ jobs:
         run: pnpm install
         working-directory: ./components/docs
 
+      - name: Patch spectaql-config.yml for CI
+        run: |
+          sed -i.bak "s|url:.*|url: 'https://лк.цифровой-кооператив.рф/v1/graphql'|" spectaql-config.yml
+        working-directory: ./components/controller 
+        
       - name: Generate controller docs
         run: pnpm run docs
         working-directory: ./components/controller
@@ -77,4 +82,5 @@ jobs:
           GIT_AUTHOR_EMAIL: github-actions@github.com
           GIT_COMMITTER_NAME: github-actions
           GIT_COMMITTER_EMAIL: github-actions@github.com
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
