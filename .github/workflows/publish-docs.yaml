@@ -78,6 +78,12 @@ jobs:
           mkdir -p ./components/docs/docs/cooptypes
           cp -r ./components/cooptypes/docs/* ./components/docs/docs/cooptypes/
 
+      - name: Build docs (mkdocs)
+        run: |
+          source venv/bin/activate
+          mkdocs build
+        working-directory: ./components/docs
+
       - name: Publish to GitHub Pages
         run: npx gh-pages --nojekyll -d site --repo git@github.com:coopenomics/mono.git
         working-directory: ./components/docs
