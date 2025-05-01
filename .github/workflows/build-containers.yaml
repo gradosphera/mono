@@ -28,53 +28,26 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      - name: Free disk space before building
-        run: |
-          echo "Освобождаем место на диске..."
-          df -h
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          docker system prune -af
-          df -h
-          
       # Сборка и публикация каждого образа с соответствующим target
       - name: Build desktop image
         run: |
-          docker build --no-cache --target desktop -t dicoop/desktop:${{ env.DOCKER_TAG }} .
+          docker build --target desktop -t dicoop/desktop:${{ env.DOCKER_TAG }} .
           docker push dicoop/desktop:${{ env.DOCKER_TAG }}
-          # Очистка после сборки
-          docker image prune -f
-          docker system prune -f
-          df -h
           
       - name: Build controller image
         run: |
           docker build --target controller -t dicoop/coopback:${{ env.DOCKER_TAG }} .
           docker push dicoop/coopback:${{ env.DOCKER_TAG }}
-          # Очистка после сборки
-          docker image prune -f
-          docker system prune -f
-          df -h
           
       - name: Build parser image
         run: |
           docker build --target parser -t dicoop/cooparser:${{ env.DOCKER_TAG }} .
           docker push dicoop/cooparser:${{ env.DOCKER_TAG }}
-          # Очистка после сборки
-          docker image prune -f
-          docker system prune -f
-          df -h
           
       - name: Build notificator image
         run: |
           docker build --target notificator -t dicoop/notificator:${{ env.DOCKER_TAG }} .
           docker push dicoop/notificator:${{ env.DOCKER_TAG }}
-          # Очистка после сборки
-          docker image prune -f
-          docker system prune -f
-          df -h
           
       # Отправка хука для деплоя
       - name: Trigger deployment webhook
