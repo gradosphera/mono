@@ -40,9 +40,13 @@ jobs:
 
       - name: Patch spectaql-config.yml for CI
         run: |
-          sed -i.bak "s|url:.*|url: 'https://лк.цифровой-кооператив.рф/backend/v1/graphql'|" spectaql-config.yml
-        working-directory: ./components/controller 
-        
+          sed -i.bak "0,/url:.*/s|url:.*|url: 'https://testnet.coopenomics.world/v1/graphql'|" spectaql-config.yml
+        working-directory: ./components/controller
+
+      - name: Show patched spectaql-config.yml
+        run: cat spectaql-config.yml
+        working-directory: ./components/controller
+
       - name: Generate controller docs
         run: pnpm run docs
         working-directory: ./components/controller
