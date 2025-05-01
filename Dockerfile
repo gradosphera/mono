@@ -15,7 +15,7 @@ RUN for file in ./components/temp/*.json; do \
 
 # Устанавливаем инструменты и зависимости
 RUN npm install -g pnpm@8 lerna@7
-RUN pnpm install --frozen-lockfile --prefer-offline
+RUN pnpm install --force
 
 # Копируем весь исходный код
 COPY . .
@@ -38,11 +38,11 @@ RUN apk add --no-cache \
     && /venv/bin/pip install WeasyPrint==62.3 \
     && rm -rf /var/cache/*
 
-    # Сборка всех компонентов
+# Сборка всех компонентов
 RUN lerna run build
 
 # Финальная стадия - общий образ
-FROM builder as runtime
+FROM builder AS runtime
 
 ENV PATH="/venv/bin:$PATH"
 

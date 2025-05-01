@@ -38,10 +38,8 @@ jobs:
           context: .
           push: true
           tags: dicoop/mono-base:${{ env.DOCKER_TAG }}
-          cache-from: type=registry,ref=dicoop/mono-base:cache
-          cache-to: type=registry,ref=dicoop/mono-base:cache,mode=max
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
+          # Отключаем кеширование, так как оно вызывает проблемы
+          no-cache: true
           target: runtime
           
       # Создаем и публикуем отдельные сервисные образы
@@ -49,25 +47,29 @@ jobs:
         run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.notificator
           echo "CMD [\"pnpm\", \"-F\", \"coop-notificator\", \"run\", \"start\"]" >> Dockerfile.notificator
-          docker buildx build --push -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
+          docker build -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
+          docker push dicoop/notificator:${{ env.DOCKER_TAG }}
           
       - name: Create and push controller image  
         run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.coopback
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/controller\", \"run\", \"start\"]" >> Dockerfile.coopback
-          docker buildx build --push -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
+          docker build -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
+          docker push dicoop/coopback:${{ env.DOCKER_TAG }}
           
       - name: Create and push parser image
         run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.cooparser
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/parser\", \"run\", \"start\"]" >> Dockerfile.cooparser
-          docker buildx build --push -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
+          docker build -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
+          docker push dicoop/cooparser:${{ env.DOCKER_TAG }}
           
       - name: Create and push desktop image
         run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.desktop
           echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/desktop\", \"run\", \"start\"]" >> Dockerfile.desktop
-          docker buildx build --push -t dicoop/desktop:${{ env.DOCKER_TAG }} -f Dockerfile.desktop .
+          docker build -t dicoop/desktop:${{ env.DOCKER_TAG }} -f Dockerfile.desktop .
+          docker push dicoop/desktop:${{ env.DOCKER_TAG }}
           
       # Отправка хука
       - name: Trigger deployment webhook
