@@ -28,27 +28,41 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      # Сборка и публикация каждого образа с соответствующим target
+      # Сначала собираем базовый образ с runtime
+      - name: Build base image
+        run: |
+          docker build --target runtime -t dicoop/mono-base:${{ env.DOCKER_TAG }} .
+          docker push dicoop/mono-base:${{ env.DOCKER_TAG }}
+            
+      # Создаем сервисные образы на основе базового
       - name: Build desktop image
         run: |
-          docker build --target desktop -t dicoop/desktop:${{ env.DOCKER_TAG }} .
+          echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.desktop
+          echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/desktop\", \"run\", \"start\"]" >> Dockerfile.desktop
+          docker build -t dicoop/desktop:${{ env.DOCKER_TAG }} -f Dockerfile.desktop .
           docker push dicoop/desktop:${{ env.DOCKER_TAG }}
-          
+            
       - name: Build controller image
         run: |
-          docker build --target controller -t dicoop/coopback:${{ env.DOCKER_TAG }} .
+          echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.coopback
+          echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/controller\", \"run\", \"start\"]" >> Dockerfile.coopback
+          docker build -t dicoop/coopback:${{ env.DOCKER_TAG }} -f Dockerfile.coopback .
           docker push dicoop/coopback:${{ env.DOCKER_TAG }}
-          
+            
       - name: Build parser image
         run: |
-          docker build --target parser -t dicoop/cooparser:${{ env.DOCKER_TAG }} .
+          echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.cooparser
+          echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/parser\", \"run\", \"start\"]" >> Dockerfile.cooparser
+          docker build -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
           docker push dicoop/cooparser:${{ env.DOCKER_TAG }}
-          
+            
       - name: Build notificator image
         run: |
-          docker build --target notificator -t dicoop/notificator:${{ env.DOCKER_TAG }} .
+          echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.notificator
+          echo "CMD [\"pnpm\", \"-F\", \"coop-notificator\", \"run\", \"start\"]" >> Dockerfile.notificator
+          docker build -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
           docker push dicoop/notificator:${{ env.DOCKER_TAG }}
-          
+            
       # Отправка хука для деплоя
       - name: Trigger deployment webhook
         if: ${{ success() }}
