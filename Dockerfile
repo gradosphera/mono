@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -16,7 +16,7 @@ COPY . .
 # Устанавливаем зависимости
 RUN pnpm install --offline
 
-# Устанавливаем системные зависимости для WeasyPrint
+# Устанавливаем системные зависимости для WeasyPrint (только для controller)
 RUN apk add --no-cache \
     python3 \
     py3-pip \
@@ -38,16 +38,13 @@ RUN apk add --no-cache \
 RUN pnpm run -r build
 
 # Деплоим каждый компонент в отдельную директорию с только необходимыми зависимостями
-RUN pnpm deploy --filter=@coopenomics/desktop --prod /prod/desktop
-RUN pnpm deploy --filter=@coopenomics/controller --prod /prod/controller
-RUN pnpm deploy --filter=@coopenomics/parser --prod /prod/parser
-RUN pnpm deploy --filter=coop-notificator --prod /prod/notificator
+RUN pnpm deploy --filter=@coopenomics/desktop --prod --legacy /prod/desktop
+RUN pnpm deploy --filter=@coopenomics/controller --prod --legacy /prod/controller
+RUN pnpm deploy --filter=@coopenomics/parser --prod --legacy /prod/parser
+RUN pnpm deploy --filter=coop-notificator --prod --legacy /prod/notificator
 
 # Образ для desktop
 FROM base AS desktop
-# Копируем WeasyPrint из сборочного образа
-COPY --from=build /venv /venv
-ENV PATH="/venv/bin:$PATH"
 # Копируем собранное приложение
 COPY --from=build /prod/desktop /app
 WORKDIR /app
@@ -55,7 +52,7 @@ CMD ["pnpm", "run", "start"]
 
 # Образ для controller
 FROM base AS controller
-# Копируем WeasyPrint из сборочного образа
+# Копируем WeasyPrint из сборочного образа - нужен только для controller
 COPY --from=build /venv /venv
 ENV PATH="/venv/bin:$PATH"
 # Копируем собранное приложение
@@ -65,9 +62,6 @@ CMD ["pnpm", "run", "start"]
 
 # Образ для parser
 FROM base AS parser
-# Копируем WeasyPrint из сборочного образа
-COPY --from=build /venv /venv
-ENV PATH="/venv/bin:$PATH"
 # Копируем собранное приложение
 COPY --from=build /prod/parser /app
 WORKDIR /app
@@ -75,9 +69,6 @@ CMD ["pnpm", "run", "start"]
 
 # Образ для notificator
 FROM base AS notificator
-# Копируем WeasyPrint из сборочного образа
-COPY --from=build /venv /venv
-ENV PATH="/venv/bin:$PATH"
 # Копируем собранное приложение
 COPY --from=build /prod/notificator /app
 WORKDIR /app
