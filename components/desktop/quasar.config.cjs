@@ -19,7 +19,10 @@ module.exports = configure(function (ctx) {
 
   // Загружаем переменные окружения всегда в режиме разработки
   // или только для клиентской части в продакшн
-  const env = (isDev || !isSSR) ? require('dotenv').config().parsed : undefined;
+  const env = (isDev || !isSSR) ? require('dotenv').config().parsed : {
+    CLIENT: process.env.CLIENT,
+    SERVER: process.env.SERVER,
+  };
 
   return {
     htmlVariables: {

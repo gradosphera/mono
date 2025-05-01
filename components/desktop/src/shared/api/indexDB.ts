@@ -2,8 +2,8 @@ import { openDB } from 'idb';
 import { env } from '../config';
 
 async function openIndexedDB(dbName: string, storeName: string) {
-  console.log('getFromIndexedDB', env.CLIENT)
-  if (!env.CLIENT) {
+
+  if (!process.env.CLIENT) {
     return;
   }
 
@@ -19,10 +19,10 @@ async function openIndexedDB(dbName: string, storeName: string) {
 }
 
 export async function getFromIndexedDB(dbName: string, storeName: string, key: string) {
-  console.log('getFromIndexedDB', env.CLIENT)
-  if (!env.CLIENT) {
+  if (!process.env.CLIENT) {
     return;
   }
+
 
   const db = await openIndexedDB(dbName, storeName);
   if (db) {
@@ -31,8 +31,7 @@ export async function getFromIndexedDB(dbName: string, storeName: string, key: s
 }
 
 export async function setToIndexedDB(dbName: string, storeName: string, key: string, value: any) {
-  console.log('setToIndexedDB', env.CLIENT)
-  if (!env.CLIENT) {
+  if (!process.env.CLIENT) {
     return;
   }
 
