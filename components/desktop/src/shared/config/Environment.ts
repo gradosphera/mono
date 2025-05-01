@@ -32,9 +32,6 @@ declare global {
  */
 function getEnv(): EnvVars {
   // SSR сервер или SPA сборка
-  console.log('process', process);
-  console.log('process.env', process?.env);
-  console.log('window.__ENV__', window?.__ENV__);
 
   if (typeof process !== 'undefined' && process.env) {
     // Для SSR сервера - берем реальные переменные
