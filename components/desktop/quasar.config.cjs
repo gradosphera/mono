@@ -11,19 +11,22 @@ require('dotenv').config();
 const { configure } = require('quasar/wrappers');
 const path = require('path');
 
-const env = {
-  NODE_ENV: process.env.NODE_ENV,
-  BASE_URL: process.env.BASE_URL,
-  BACKEND_URL: process.env.BACKEND_URL,
-  CHAIN_URL: process.env.CHAIN_URL,
-  CHAIN_ID: process.env.CHAIN_ID,
-  CURRENCY: process.env.CURRENCY,
-  COOP_SHORT_NAME: process.env.COOP_SHORT_NAME,
-  SITE_DESCRIPTION: process.env.SITE_DESCRIPTION,
-  SITE_IMAGE: process.env.SITE_IMAGE
-};
 
-module.exports = configure(function (/* ctx */) {
+module.exports = configure(function (ctx) {
+
+  const isSSR = ctx.mode.ssr;
+
+  const env = isSSR ? undefined : {
+    NODE_ENV: process.env.NODE_ENV,
+    BASE_URL: process.env.BASE_URL,
+    BACKEND_URL: process.env.BACKEND_URL,
+    CHAIN_URL: process.env.CHAIN_URL,
+    CHAIN_ID: process.env.CHAIN_ID,
+    CURRENCY: process.env.CURRENCY,
+    COOP_SHORT_NAME: process.env.COOP_SHORT_NAME,
+    SITE_DESCRIPTION: process.env.SITE_DESCRIPTION,
+    SITE_IMAGE: process.env.SITE_IMAGE
+  };
 
   return {
     htmlVariables: {
