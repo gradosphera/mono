@@ -13,7 +13,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        
+        with:
+          clean: true
+          fetch-depth: 0
+          
+      - name: Debug - Проверка файлов в репозитории
+        run: |
+          echo "Проверяем файлы в директории components/desktop/src-ssr/middleware/"
+          ls -la components/desktop/src-ssr/middleware/
+          echo "Содержимое последних коммитов:"
+          git log -n 3 --name-status
+          
       - name: Set docker tag
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
@@ -28,25 +38,45 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
+      - name: Remove existing images
+        run: |
+          echo "Удаление существующих образов..."
+          docker rmi dicoop/desktop:${{ env.DOCKER_TAG }} || true
+          docker rmi dicoop/coopback:${{ env.DOCKER_TAG }} || true
+          docker rmi dicoop/cooparser:${{ env.DOCKER_TAG }} || true
+          docker rmi dicoop/notificator:${{ env.DOCKER_TAG }} || true
+          docker system prune -f
+          
       # Сборка и публикация каждого образа с соответствующим target
       - name: Build desktop image
         run: |
+          echo "Сборка desktop образа..."
+          # Проверяем перед сборкой
+          ls -la components/desktop/src-ssr/middleware/
+          # Полностью отключаем кеширование при сборке
           docker build --no-cache --target desktop -t dicoop/desktop:${{ env.DOCKER_TAG }} .
+          # Проверяем содержимое собранного образа
+          container_id=$(docker create dicoop/desktop:${{ env.DOCKER_TAG }})
+          docker cp $container_id:/app/src-ssr/middleware ./middleware_in_container
+          echo "Файлы в контейнере (middleware):"
+          ls -la ./middleware_in_container
+          docker rm $container_id
+          # Отправляем образ
           docker push dicoop/desktop:${{ env.DOCKER_TAG }}
           
       - name: Build controller image
         run: |
-          docker build --target controller -t dicoop/coopback:${{ env.DOCKER_TAG }} .
+          docker build --no-cache --target controller -t dicoop/coopback:${{ env.DOCKER_TAG }} .
           docker push dicoop/coopback:${{ env.DOCKER_TAG }}
           
       - name: Build parser image
         run: |
-          docker build --target parser -t dicoop/cooparser:${{ env.DOCKER_TAG }} .
+          docker build --no-cache --target parser -t dicoop/cooparser:${{ env.DOCKER_TAG }} .
           docker push dicoop/cooparser:${{ env.DOCKER_TAG }}
           
       - name: Build notificator image
         run: |
-          docker build --target notificator -t dicoop/notificator:${{ env.DOCKER_TAG }} .
+          docker build --no-cache --target notificator -t dicoop/notificator:${{ env.DOCKER_TAG }} .
           docker push dicoop/notificator:${{ env.DOCKER_TAG }}
           
       # Отправка хука для деплоя
