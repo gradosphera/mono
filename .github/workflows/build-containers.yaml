@@ -13,7 +13,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        
+        with:
+          ref: testnet
+          fetch-depth: 0
+      
+      - name: Debug info
+        run: |
+          echo "Текущая ветка:"
+          git branch --show-current
+          echo "Последние коммиты:"
+          git log -n 3 --oneline
+          echo "Проверяем файлы в директории components/desktop/src-ssr:"
+          ls -la components/desktop/src-ssr/ || echo "Директория не найдена!"
+          echo "Проверяем файлы в middlewares:"
+          ls -la components/desktop/src-ssr/middlewares/ || echo "Директория middlewares не найдена!"
+          
       - name: Set docker tag
         run: |
           if [[ $GITHUB_REF == refs/tags/* ]]; then
