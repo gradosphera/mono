@@ -1,7 +1,7 @@
 {
   "name": "@coopenomics/docs",
   "type": "module",
-  "version": "2025.4.29",
+  "version": "2025.5.2",
   "private": true,
   "packageManager": "pnpm@9.9.0",
   "description": "Документация для монорепозитория",
@@ -9,7 +9,6 @@
   "license": "BY-NC-SA 4.0",
   "keywords": [],
   "sideEffects": false,
-
   "scripts": {
     "publish": "pnpm gh-pages --nojekyll -d site --repo git@github.com:coopenomics/mono.git"
   },
