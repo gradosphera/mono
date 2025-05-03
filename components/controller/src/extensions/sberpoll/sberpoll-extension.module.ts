@@ -18,6 +18,9 @@ import type { ExtensionDomainEntity } from '~/domain/extension/entities/extensio
 import { z } from 'zod';
 import type { Cooperative } from 'cooptypes';
 
+// Дефолтные параметры конфигурации
+export const defaultConfig = {};
+
 interface Link {
   href: string;
   rel: string;
@@ -82,6 +85,7 @@ export class SberpollPlugin extends PollingProvider {
   plugin!: ExtensionDomainEntity<IConfig>;
 
   public configSchemas = Schema;
+  public defaultConfig = defaultConfig;
 
   public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 0; ///%

@@ -112,7 +112,7 @@ public:
   
   //decisions
   [[eosio::action]] void withdraw(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document statement);
-  
+  [[eosio::action]] void cancelexprd(eosio::name coopname, uint64_t decision_id);
 
   //contributions.cpp
   // [[eosio::action]] void addbalance(eosio::name coopname, eosio::name username, eosio::asset quantity);

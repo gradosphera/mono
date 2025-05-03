@@ -8,6 +8,9 @@ import type { ExtensionDomainEntity } from '~/domain/extension/entities/extensio
 import { z } from 'zod';
 import { BaseExtModule } from '../base.extension.module';
 
+// Дефолтные параметры конфигурации
+export const defaultConfig = {};
+
 export const Schema = z.object({});
 
 // Интерфейс для параметров конфигурации плагина
@@ -33,6 +36,7 @@ export class BuiltinPlugin extends BaseExtModule {
   }
 
   public configSchemas = Schema;
+  public defaultConfig = defaultConfig;
 }
 
 @Module({

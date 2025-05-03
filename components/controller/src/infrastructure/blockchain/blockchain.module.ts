@@ -7,8 +7,8 @@ import { SystemBlockchainAdapter } from './adapters/system.adapter';
 import { SYSTEM_BLOCKCHAIN_PORT } from '~/domain/system/interfaces/system-blockchain.port';
 import { ACCOUNT_BLOCKCHAIN_PORT } from '~/domain/account/interfaces/account-blockchain.port';
 import { AccountBlockchainAdapter } from './adapters/account.adapter';
-import { DecisionBlockchainAdapter } from './adapters/free-decision-blockchain.adapter';
-import { FREE_DECISION_BLOCKCHAIN_PORT } from '~/domain/free-decision/interfaces/free-decision-blockchain.port';
+import { SovietBlockchainAdapter } from './adapters/soviet-blockchain.adapter';
+import { SOVIET_BLOCKCHAIN_PORT } from '~/domain/common/ports/soviet-blockchain.port';
 import { COOPLACE_BLOCKCHAIN_PORT } from '~/domain/cooplace/interfaces/cooplace-blockchain.port';
 import { CooplaceBlockchainAdapter } from './adapters/cooplace-blockchain.adapter';
 import { MEET_BLOCKCHAIN_PORT } from '~/domain/meet/ports/meet-blockchain.port';
@@ -38,8 +38,8 @@ import { DomainModule } from '~/domain/domain.module';
       useClass: AccountBlockchainAdapter,
     },
     {
-      provide: FREE_DECISION_BLOCKCHAIN_PORT,
-      useClass: DecisionBlockchainAdapter,
+      provide: SOVIET_BLOCKCHAIN_PORT,
+      useClass: SovietBlockchainAdapter,
     },
     {
       provide: COOPLACE_BLOCKCHAIN_PORT,
@@ -56,7 +56,7 @@ import { DomainModule } from '~/domain/domain.module';
     BRANCH_BLOCKCHAIN_PORT,
     SYSTEM_BLOCKCHAIN_PORT,
     ACCOUNT_BLOCKCHAIN_PORT,
-    FREE_DECISION_BLOCKCHAIN_PORT,
+    SOVIET_BLOCKCHAIN_PORT,
     COOPLACE_BLOCKCHAIN_PORT,
     MEET_BLOCKCHAIN_PORT,
     DomainToBlockchainUtils,

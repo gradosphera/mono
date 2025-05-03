@@ -70,3 +70,8 @@ export * as Disautomate from './disautomate'
  * Создаёт проект свободного решения и выносит его на голосование
  */
 export * as CreateFreeDecision from './freeDecision'
+
+/**
+ * Отменяет проект решения по истечению срока
+ */
+export * as Cancelexprd from './cancelexprd'

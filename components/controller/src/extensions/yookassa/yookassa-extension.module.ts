@@ -20,6 +20,9 @@ import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { z } from 'zod';
 
+// Дефолтные параметры конфигурации
+export const defaultConfig = {};
+
 interface IIpnRequest {
   event: string;
   object: {
@@ -142,6 +145,7 @@ export class YookassaPlugin extends IPNProvider {
   }
 
   public configSchemas = Schema;
+  public defaultConfig = defaultConfig;
 
   public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 3.5; ///%

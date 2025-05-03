@@ -7,6 +7,7 @@ export abstract class BaseExtModule implements OnModuleInit {
   abstract name: string;
   abstract plugin: ExtensionDomainEntity<any>;
   public configSchemas: ZodObject<any> = z.object({});
+  abstract defaultConfig: Record<string, any>;
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async onModuleInit() {}

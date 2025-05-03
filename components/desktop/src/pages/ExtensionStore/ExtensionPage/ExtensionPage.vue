@@ -33,7 +33,7 @@ div(v-if="extension").row
               span.q-ml-xs удалить
 
   div.col-md-9.col-sm-8.col-xs-12.q-pa-md
-    div(v-if="isMain")
+    div(v-if="isMain").info-card
       div
         span.text-h1 {{extension.title}}
           //- q-chip(square dense size="sm" color="green" outline v-if="extension.is_installed && extension.enabled").q-ml-sm установлено
@@ -45,19 +45,21 @@ div(v-if="extension").row
       ClientOnly
         template(#default)
           vue-markdown(:source="extension.readme").description.q-mt-md
-    div(v-if="(isSettings || isInstall) && extension.schema")
+    div(v-if="(isSettings || isInstall) && extension.schema").info-card
       q-form(ref="myFormRef")
         div(v-if="isEmpty && !isInstall")
           div.q-pa-md
             p.text-h6 Нет настроек
             span Расширение не предоставило настроек для изменения.
-        div(v-if="!isEmpty")
+        div(v-if="!isEmpty && !isInstall")
 
           //- vue-markdown(:source="extension.instructions").description.q-mt-md
           ClientOnly
             template(#default)
-              vue-markdown(v-if="extension.instructions" :source="extension.instructions").description.q-mt-md
-          ZodForm(:schema="extension.schema" v-model="data")
+              vue-markdown(v-if="extension.instructions && isInstall" :source="extension.instructions").description.q-mt-md
+          div
+            p.text-h5 Настройки
+            ZodForm(:schema="extension.schema" v-model="data").q-mt-lg
 
 </template>
 <script lang="ts" setup>

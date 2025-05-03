@@ -1,12 +1,12 @@
 <template lang="pug">
 div
-  q-card(flat v-for="(property, propertyName) in schema.properties" :key="propertyName")
+  div(flat v-for="(property, propertyName) in schema.properties" :key="propertyName")
     div(v-if="isVisible(property)")
       component(
         standout="bg-teal text-white"
         :is="getComponentType(property)"
         v-bind="getComponentProps(property, propertyName)"
-      ).q-mt-md
+      ).q-mt-lg
         // Слот для prepend, если указано
         template(v-slot:prepend v-if="property.description?.prepend")
           span {{ property.description.prepend }}

@@ -3,6 +3,12 @@
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import { EXTENSION_REPOSITORY, ExtensionDomainRepository } from '../repositories/extension-domain.repository';
 import { ExtensionDomainEntity } from '../entities/extension-domain.entity';
+import { defaultConfig as chairmanDefaultConfig } from '~/extensions/chairman/chairman-extension.module';
+import { defaultConfig as powerupDefaultConfig } from '~/extensions/powerup/powerup-extension.module';
+import { defaultConfig as qrpayDefaultConfig } from '~/extensions/qrpay/qrpay-extension.module';
+import { defaultConfig as builtinDefaultConfig } from '~/extensions/builtin/builtin-extension.module';
+import { defaultConfig as yookassaDefaultConfig } from '~/extensions/yookassa/yookassa-extension.module';
+import { defaultConfig as sberpollDefaultConfig } from '~/extensions/sberpoll/sberpoll-extension.module';
 
 @Injectable()
 export class ExtensionDomainService<TConfig = any> {
@@ -53,42 +59,42 @@ export class ExtensionDomainService<TConfig = any> {
       {
         name: 'powerup',
         enabled: true,
-        config: {
-          dailyPackageSize: 5,
-          topUpAmount: 5,
-          systemSymbol: 'AXON',
-          systemPrecision: 4,
-          thresholds: {
-            cpu: 5000,
-            net: 1024,
-            ram: 10240,
-          },
-        },
+        config: powerupDefaultConfig,
       },
       {
         name: 'qrpay',
         enabled: true,
-        config: {},
+        config: qrpayDefaultConfig,
       },
       {
         name: 'chairman',
         enabled: true,
-        config: {},
+        config: chairmanDefaultConfig,
       },
       {
         name: 'soviet',
         enabled: true,
-        config: {},
+        config: builtinDefaultConfig,
       },
       {
         name: 'participant',
         enabled: true,
-        config: {},
+        config: builtinDefaultConfig,
       },
       {
         name: 'contributor',
         enabled: true,
-        config: {},
+        config: builtinDefaultConfig,
+      },
+      {
+        name: 'yookassa',
+        enabled: false,
+        config: yookassaDefaultConfig,
+      },
+      {
+        name: 'sberpoll',
+        enabled: false,
+        config: sberpollDefaultConfig,
       },
     ];
   }
