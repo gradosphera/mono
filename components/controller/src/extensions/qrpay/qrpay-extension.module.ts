@@ -17,6 +17,9 @@ import { z } from 'zod';
 import config from '~/config/config';
 import type { Cooperative } from 'cooptypes';
 
+// Дефолтные параметры конфигурации
+export const defaultConfig = {};
+
 export const Schema = z.object({});
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 
@@ -39,6 +42,7 @@ export class QrPayPlugin extends PaymentProvider {
 
   plugin!: ExtensionDomainEntity<IConfig>;
   public configSchemas = Schema;
+  public defaultConfig = defaultConfig;
 
   public tolerance_percent = 0; /// (0.0005%) < Допустимая погрешность приёма платежей
   public fee_percent = 0; ///%

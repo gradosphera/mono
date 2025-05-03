@@ -102,6 +102,11 @@ export interface IAuthorize {
   document: IDocument
 }
 
+export interface ICancelexprd {
+  coopname: IName
+  decision_id: IUint64
+}
+
 export interface IAutomate {
   coopname: IName
   board_id: IUint64

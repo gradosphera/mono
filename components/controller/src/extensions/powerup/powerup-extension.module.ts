@@ -21,66 +21,95 @@ function describeField(description: DeserializedDescriptionOfExtension): string 
   return JSON.stringify(description);
 }
 
+// Дефолтные параметры конфигурации
+export const defaultConfig = {
+  dailyPackageSize: 5,
+  topUpAmount: 5,
+  systemSymbol: 'AXON',
+  systemPrecision: 4,
+  thresholds: {
+    cpu: 5000,
+    net: 1024,
+    ram: 10240,
+  },
+  lastDailyReplenishmentDate: '',
+};
+
 // Определение Zod-схемы
 export const Schema = z.object({
-  dailyPackageSize: z.number().describe(
-    describeField({
-      label: 'Сумма автоматической ежедневной аренды квот',
-      note: 'минимум: 5 AXON',
-      rules: ['val >= 5'],
-      prepend: 'AXON',
-    })
-  ),
-  topUpAmount: z.number().describe(
-    describeField({
-      label: 'Сумма пополнения при достижении минимального порога квот',
-      rules: ['val > 0'],
-      prepend: 'AXON',
-      note: '',
-    })
-  ),
+  dailyPackageSize: z
+    .number()
+    .default(defaultConfig.dailyPackageSize)
+    .describe(
+      describeField({
+        label: 'Сумма автоматической ежедневной аренды квот вычислительных ресурсов',
+        note: `Минимум: 5 ${defaultConfig.systemSymbol}. Пополняет автоматически каждый день вычислительные ресурсы кооператива на указанную сумму токенов.`,
+        rules: ['val >= 5'],
+        prepend: defaultConfig.systemSymbol,
+      })
+    ),
+  topUpAmount: z
+    .number()
+    .default(defaultConfig.topUpAmount)
+    .describe(
+      describeField({
+        label: 'Сумма экстренного пополнения при достижении минимального порога квот',
+        rules: ['val > 0'],
+        prepend: defaultConfig.systemSymbol,
+        note: `На эту сумму происходит автоматическое пополнение, когда любой из ресурсов (CPU, NET или RAM) выходит за пределы минимальной квоты.`,
+      })
+    ),
   thresholds: z.object({
-    cpu: z.number().describe(
-      describeField({
-        label: 'Минимальный остаток квоты CPU',
-        note: '',
-        prepend: 'CPU',
-        append: 'ms',
-        rules: ['val >= 0'],
-      })
-    ),
-    net: z.number().describe(
-      describeField({
-        label: 'Минимальный остаток квоты NET',
-        note: '',
-        prepend: 'NET',
-        append: 'bytes',
-        rules: ['val >= 0'],
-      })
-    ),
-    ram: z.number().describe(
-      describeField({
-        label: 'Минимальный остаток квоты RAM',
-        note: '',
-        prepend: 'RAM',
-        append: 'bytes',
-        rules: ['val >= 0'],
-      })
-    ),
+    cpu: z
+      .number()
+      .default(defaultConfig.thresholds.cpu)
+      .describe(
+        describeField({
+          label: 'Минимальный остаток квоты CPU',
+          note: 'Если количество CPU аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
+          prepend: 'CPU',
+          append: 'ms',
+          rules: ['val >= 0'],
+        })
+      ),
+    net: z
+      .number()
+      .default(defaultConfig.thresholds.net)
+      .describe(
+        describeField({
+          label: 'Минимальный остаток квоты NET',
+          note: 'Если количество NET аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
+          prepend: 'NET',
+          append: 'bytes',
+          rules: ['val >= 0'],
+        })
+      ),
+    ram: z
+      .number()
+      .default(defaultConfig.thresholds.ram)
+      .describe(
+        describeField({
+          label: 'Минимальный остаток квоты RAM',
+          note: 'Если количество RAM аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
+          prepend: 'RAM',
+          append: 'bytes',
+          rules: ['val >= 0'],
+        })
+      ),
   }),
   lastDailyReplenishmentDate: z
     .string()
-    .default('')
+    .default(defaultConfig.lastDailyReplenishmentDate)
     .describe(
       describeField({ label: 'Дата последнего ежедневного пополнения', visible: false, minLength: 10, maxLength: 10 })
     ),
   systemPrecision: z
     .number()
-    .default(4)
+    .default(defaultConfig.systemPrecision)
     .describe(describeField({ label: 'Точность системного утилити-токена', visible: false })),
   systemSymbol: z
     .string()
-    .default('AXON')
+    .default(defaultConfig.systemSymbol)
     .describe(
       describeField({ label: 'Символ системного утилити-токена', visible: false, minLength: 3, maxLength: 5, maxRows: 4 })
     ),
@@ -115,6 +144,7 @@ export class PowerupPlugin extends BaseExtModule {
   plugin!: ExtensionDomainEntity<IConfig>;
 
   public configSchemas = Schema;
+  public defaultConfig = defaultConfig;
 
   async initialize() {
     const pluginData = await this.extensionRepository.findByName(this.name);

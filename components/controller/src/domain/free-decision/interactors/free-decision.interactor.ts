@@ -4,7 +4,7 @@ import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.e
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import type { PublishProjectFreeDecisionInputDomainInterface } from '../interfaces/publish-project-free-decision.interface';
 import config from '~/config/config';
-import { FREE_DECISION_BLOCKCHAIN_PORT, FreeDecisionBlockchainPort } from '../interfaces/free-decision-blockchain.port';
+import { SOVIET_BLOCKCHAIN_PORT, SovietBlockchainPort } from '../../common/ports/soviet-blockchain.port';
 import {
   PROJECT_FREE_DECISION_REPOSITORY,
   ProjectFreeDecisionRepository,
@@ -16,7 +16,7 @@ export class FreeDecisionDomainInteractor {
   constructor(
     private readonly documentDomainService: DocumentDomainService,
     @Inject(PROJECT_FREE_DECISION_REPOSITORY) private readonly projectDecisionRepository: ProjectFreeDecisionRepository,
-    @Inject(FREE_DECISION_BLOCKCHAIN_PORT) private readonly FreeDecisionBlockchainPort: FreeDecisionBlockchainPort
+    @Inject(SOVIET_BLOCKCHAIN_PORT) private readonly SovietBlockchainPort: SovietBlockchainPort
   ) {}
 
   async createProjectOfFreeDecision(data: Cooperative.Document.IProjectData): Promise<ProjectFreeDecisionDomainEntity> {
@@ -51,7 +51,7 @@ export class FreeDecisionDomainInteractor {
     if (data.coopname != config.coopname)
       throw new BadRequestException('Указанное имя аккаунта кооператива не обслуживается здесь');
 
-    await this.FreeDecisionBlockchainPort.publichProjectOfFreeDecision({
+    await this.SovietBlockchainPort.publishProjectOfFreeDecision({
       coopname: data.coopname,
       username: data.username,
       meta: data.meta,

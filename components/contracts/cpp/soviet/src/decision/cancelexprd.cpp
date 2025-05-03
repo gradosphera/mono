@@ -1,0 +1,35 @@
+void soviet::cancelexprd(eosio::name coopname, uint64_t decision_id) { 
+  require_auth(coopname);
+
+  decisions_index decisions(_soviet, coopname.value);
+  auto decision = decisions.find(decision_id);
+  eosio::check(decision != decisions.end(), "Решение не найдено");
+  
+  // Проверка истечения срока
+  bool expired = true;
+  if ( decision -> expired_at.has_value() ) {
+    expired = (eosio::time_point_sec(eosio::current_time_point()) > decision->expired_at.value());
+  }
+  
+  eosio::check(expired, "Срок действия решения ещё не истёк");
+  
+  // Проверка наличия всех необходимых полей для отправки коллбэка
+  if (decision->callback_contract.has_value() && 
+      decision->decline_callback.has_value() && 
+      decision->hash.has_value()) {
+    
+    // Отправка коллбэка отклонения
+    Action::send<decline_callback_interface>(
+      decision->callback_contract.value(),
+      //TODO: delete it
+      decision->decline_callback.value() == "declagm"_n ? "declmeet"_n : decision->decline_callback.value(),
+      _soviet,
+      coopname,
+      decision->hash.value(),
+      std::string("Отклонение по истечению срока")
+    );
+  }
+  
+  // Удаление решения
+  decisions.erase(decision);
+}

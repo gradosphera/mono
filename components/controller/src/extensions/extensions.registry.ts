@@ -7,6 +7,7 @@ import { SberpollPluginModule, Schema as SberpollSchema } from './sberpoll/sberp
 import { QrPayPluginModule, Schema as QRPaySchema } from './qrpay/qrpay-extension.module';
 import path from 'path';
 import { BuiltinPluginModule, Schema as BuiltinSchema } from './builtin/builtin-extension.module';
+import { ChairmanPluginModule, Schema as ChairmanSchema } from './chairman/chairman-extension.module';
 
 /**
  * Основной интерфейс для описания расширения в реестре.
@@ -76,16 +77,16 @@ export const AppRegistry: INamedExtension = {
   chairman: {
     is_builtin: true,
     is_internal: true,
-    is_available: false,
+    is_available: true,
     is_desktop: true,
     title: 'Стол Председателя',
     description: 'Расширение для председателя совета кооператива.',
     image: 'https://i.ibb.co/6C5F3kD/Chat-GPT-Image-10-2025-20-42-42.png',
-    class: BuiltinPluginModule,
-    schema: BuiltinSchema,
+    class: ChairmanPluginModule,
+    schema: ChairmanSchema,
     tags: ['стол', 'управление'],
-    readme: getReadmeContent('./yookassa'),
-    instructions: getInstructionsContent('./yookassa'),
+    readme: getReadmeContent('./chairman'),
+    instructions: getInstructionsContent('./chairman'),
   },
   trustee: {
     is_builtin: true,
