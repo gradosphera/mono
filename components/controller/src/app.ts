@@ -22,7 +22,7 @@ if (config.env !== 'test') {
 }
 
 // set security HTTP headers
-app.use(helmet({hsts: false}));
+app.use(helmet({ hsts: false }));
 
 // parse json request body
 app.use(express.json());
