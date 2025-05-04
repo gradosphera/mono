@@ -168,8 +168,9 @@ export class ChairmanPlugin extends BaseExtModule {
 
       // Находим истекшие решения
       const expiredDecisions = decisions.filter((decision) => {
-        // Если поле expired_at не существует, пропускаем
-        if (!decision.expired_at) return false;
+        // TODO: убрать после первого деплоя т.к. все старые решения отменятся.
+        // Если поле expired_at не существует, добавляем
+        if (!decision.expired_at) return true;
 
         // Если решение уже принято и не требуется отменять принятые решения, пропускаем
         if (decision.approved && !this.plugin.config.cancelApprovedDecisions) return false;
