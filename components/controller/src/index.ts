@@ -21,6 +21,13 @@ async function bootstrap() {
   // Запускаем миграцию
   await migrateData();
 
+  // Проверяем, был ли запущен режим только миграций
+  const args = process.argv.slice(2);
+  if (args.includes('--migrations-only')) {
+    logger.info('Режим только миграций - сервер не будет запущен');
+    process.exit(0);
+  }
+
   // Подключение к MongoDB
   await mongoose.connect(config.mongoose.url);
   logger.info('Connected to MongoDB');

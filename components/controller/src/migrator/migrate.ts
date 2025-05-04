@@ -1,97 +1,68 @@
 import 'reflect-metadata';
 import mongoose from 'mongoose';
-import { DataSource } from 'typeorm';
-// Импорт моделей или схем для MongoDB и PostgreSQL
-import { PluginConfig } from '~/models/pluginConfig.model';
-import { ExtensionEntity } from '~/infrastructure/database/typeorm/entities/extension.entity';
-import config from '~/config/config';
 import logger from '~/config/logger';
+import config from '~/config/config';
+import { MigrationManager } from './migrationManager';
 
 // Настройка подключения к MongoDB
 const mongoConnect = async () => {
-  await mongoose.connect(config.mongoose.url);
-  console.log('Connected to MongoDB for migration');
+  try {
+    logger.info('Подключение к MongoDB...');
+    await mongoose.connect(config.mongoose.url);
+    logger.info('Успешное подключение к MongoDB для миграции');
+  } catch (error) {
+    logger.error('Ошибка подключения к MongoDB:', error);
+    throw error;
+  }
 };
 
-// Настройка подключения к PostgreSQL
-const AppDataSource = new DataSource({
-  type: 'postgres',
-  host: config.postgres.host,
-  port: Number(config.postgres.port),
-  username: config.postgres.username,
-  password: config.postgres.password,
-  database: config.postgres.database,
-  entities: [ExtensionEntity],
-  synchronize: true, // Рекомендуется отключить в продакшене
-});
+/**
+ * Запуск миграций данных
+ */
+export const migrateData = async (): Promise<void> => {
+  let migrationManager: MigrationManager | null = null;
 
-export const migrateData = async () => {
   try {
+    logger.info('===== Начало процесса миграции данных =====');
+
+    // Подключаемся к MongoDB
     await mongoConnect();
-    await AppDataSource.initialize();
 
-    console.log('Получение записей...');
-    // Обращаемся напрямую к коллекции
-    const organizationsCollection = mongoose.connection.collection('organizations');
-    console.log('Обновление организаций...');
+    logger.info('Инициализация менеджера миграций...');
 
-    // Находим все записи, где поле fact_address отсутствует
-    const organizations = await organizationsCollection.find({ fact_address: { $exists: false } }).toArray();
+    // Инициализируем менеджер миграций
+    migrationManager = new MigrationManager();
+    await migrationManager.initialize();
 
-    for (const organization of organizations) {
-      await organizationsCollection.updateOne(
-        { _id: organization._id }, // Условие для обновления
-        { $set: { fact_address: organization.full_address } } // Копируем значение full_address в fact_address
-      );
-    }
+    logger.info('Менеджер миграций инициализирован успешно');
 
-    console.log(`Обновлено организаций: ${organizations.length}`);
+    // Запускаем миграции
+    await migrationManager.runMigrations();
 
-    console.log('Получение записей...');
-
-    const paymentMethodsCollection = mongoose.connection.collection('paymentMethods');
-    console.log('Обновление платежных методов...');
-
-    // Находим все записи с числовым method_id
-    const paymentMethods = await paymentMethodsCollection.find({ method_id: { $type: 'int' } }).toArray();
-
-    for (const paymentMethod of paymentMethods) {
-      await paymentMethodsCollection.updateOne(
-        { _id: paymentMethod._id }, // Условие для обновления
-        { $set: { method_id: String(paymentMethod.method_id) } } // Преобразование method_id в строку
-      );
-    }
-
-    console.log(`Обновлено платежных методов: ${paymentMethods.length}`);
-
-    // console.log('Connected to PostgreSQL');
-
-    // // Получаем данные из MongoDB
-    // const mongoData = await PluginConfig.find().exec();
-    // const postgresRepo = AppDataSource.getRepository(ExtensionEntity);
-
-    // logger.info(`Запускаем миграцию данных mongo - postgres`);
-    // // Переносим данные в PostgreSQL
-    // for (const data of mongoData) {
-    //   const app = data.toObject();
-
-    //   // Проверяем, существует ли запись с таким же значением name
-    //   const existingApp = await postgresRepo.findOne({ where: { name: app.name } });
-
-    //   if (!existingApp) {
-    //     // Если записи нет, вставляем новую
-    //     await postgresRepo.insert(app);
-    //     logger.info(`Запись с именем ${app.name} добавлена.`);
-    //   } else {
-    //     logger.info(`Запись с именем ${app.name} уже существует, пропуск...`);
-    //   }
-    // }
-
-    logger.info('Data migration completed successfully');
+    logger.info('===== Миграция данных успешно завершена =====');
   } catch (error) {
-    logger.error('Error during data migration:', error);
+    logger.error('===== Ошибка при выполнении миграции данных =====', error);
+    if (error instanceof Error) {
+      logger.error('Детали ошибки:', error.message);
+      logger.error('Стек ошибки:', error.stack);
+    }
   } finally {
-    await mongoose.disconnect();
-    await AppDataSource.destroy();
+    // Закрываем соединения
+    logger.info('Закрытие соединений с базами данных...');
+    if (migrationManager) {
+      try {
+        await migrationManager.close();
+        logger.info('Соединение с PostgreSQL закрыто');
+      } catch (closeError) {
+        logger.error('Ошибка при закрытии соединения с PostgreSQL:', closeError);
+      }
+    }
+    try {
+      await mongoose.disconnect();
+      logger.info('Соединение с MongoDB закрыто');
+    } catch (mongoCloseError) {
+      logger.error('Ошибка при закрытии соединения с MongoDB:', mongoCloseError);
+    }
+    logger.info('===== Процесс миграции данных завершен =====');
   }
 };
