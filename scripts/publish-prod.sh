@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Получаем дату в формате YYYY.M.D без лидирующих нулей
+# Получаем дату в формате vYYYY.M.D без лидирующих нулей
 BASE_VERSION="v$(date +%Y).$(date +%-m).$(date +%-d)"
 
 # Получаем последний тег с сегодняшней датой
@@ -22,12 +22,15 @@ fi
 
 echo "Версионируем: $VERSION"
 
+# Убираем v для lerna
+LERNA_VERSION="${VERSION#v}"
+
 # Переходим на main и мержим testnet
 git checkout -f main
 git merge -X theirs testnet
 
 # Только версия и тег, без публикации
-lerna version "$VERSION" --yes --no-push=false --no-git-tag-version=false --force-publish
+lerna version "$LERNA_VERSION" --yes --no-push=false --no-git-tag-version=false --force-publish
 
 git push --follow-tags
 
