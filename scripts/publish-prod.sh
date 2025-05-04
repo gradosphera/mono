@@ -2,7 +2,7 @@
 set -e
 
 # Получаем дату в формате YYYY.M.D без лидирующих нулей
-BASE_VERSION="$(date +%Y).$(date +%-m).$(date +%-d)"
+BASE_VERSION="v$(date +%Y).$(date +%-m).$(date +%-d)"
 
 # Получаем последний тег с сегодняшней датой
 LAST_TAG=$(git tag --list | grep "^$BASE_VERSION" | sort -V | tail -n 1)
