@@ -27,7 +27,7 @@ git checkout -f main
 git merge -X theirs testnet
 
 # Только версия и тег, без публикации
-lerna version "$VERSION" --yes --no-push=false --no-git-tag-version=false
+lerna version "$VERSION" --yes --no-push=false --no-git-tag-version=false --force-publish
 
 git push --follow-tags
 
