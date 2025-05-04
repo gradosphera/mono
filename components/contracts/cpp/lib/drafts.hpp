@@ -3,13 +3,6 @@
 #include <eosio/contract.hpp>
 #include <eosio/system.hpp>
 
-struct signature_info {
-    eosio::name signer;              // аккаунт подписавшего
-    eosio::public_key public_key;    // публичный ключ
-    eosio::signature signature;      // подпись хэша
-    eosio::time_point_sec signed_at; // время подписания
-};
-
 struct document
 {
   // Чексумма документа (SHA256)
@@ -23,6 +16,7 @@ struct document
 };
 
 struct signature_info {
+    uint32_t id;                     // идентификатор номера подписи
     eosio::name signer;              // аккаунт подписавшего
     eosio::public_key public_key;    // публичный ключ
     eosio::signature signature;      // подпись хэша
@@ -39,7 +33,7 @@ struct document2 {
     eosio::checksum256 doc_hash;    // хэш содержимого документа
     eosio::checksum256 meta_hash;   // хэш мета-данных
     
-    // Мета-данные как JSON-строка
+    // Мета-данные документа
     std::string meta;
     
     // Вектор подписей (может содержать несколько подписантов)
