@@ -20,17 +20,16 @@ else
   fi
 fi
 
-echo "Публикуем версию: $VERSION"
+echo "Версионируем: $VERSION"
 
 # Переходим на main и мержим testnet
 git checkout -f main
 git merge -X theirs testnet
 
-# Публикуем с нужной версией
-lerna publish "$VERSION" --yes
+# Только версия и тег, без публикации
+lerna version "$VERSION" --yes --no-push=false --no-git-tag-version=false
 
-# Пушим изменения
-git push
+git push --follow-tags
 
 # Возвращаемся на dev и мержим main
 git checkout dev
