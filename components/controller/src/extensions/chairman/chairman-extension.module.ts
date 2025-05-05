@@ -165,8 +165,6 @@ export class ChairmanPlugin extends BaseExtModule {
 
       // Текущая дата для сравнения
       const now = new Date();
-      console.log('decisions: ', decisions);
-      console.log('this.plugin.config.cancelApprovedDecisions', this.plugin.config.cancelApprovedDecisions);
       // Находим истекшие решения
       const expiredDecisions = decisions.filter((decision) => {
         // TODO: убрать после первого деплоя т.к. все старые решения отменятся.
@@ -182,8 +180,6 @@ export class ChairmanPlugin extends BaseExtModule {
         // Проверяем, истек ли срок
         return expiredDate <= now;
       });
-
-      console.log('expiredDecisions: ', expiredDecisions);
 
       this.logger.info(`Найдено ${expiredDecisions.length} истекших решений для кооператива ${coopname}`);
 

@@ -6,6 +6,7 @@ export type IChecksum256 = string
 export type IPublicKey = string
 export type ISignature = string
 export type ITimePointSec = string
+export type IUint32 = number
 export type IUint64 = number | string
 
 export interface IAddbal {
@@ -78,6 +79,19 @@ export interface IAgreement {
   draft_id: IUint64
   version: IUint64
   document: IDocument
+  status: IName
+  updated_at: ITimePointSec
+}
+
+export interface IAgreement2 {
+  id: IUint64
+  coopname: IName
+  username: IName
+  type: IName
+  program_id: IUint64
+  draft_id: IUint64
+  version: IUint64
+  document: IDocument2
   status: IName
   updated_at: ITimePointSec
 }
@@ -155,6 +169,11 @@ export interface IBoards {
   members: IBoardMember[]
   created_at: ITimePointSec
   last_update: ITimePointSec
+}
+
+export interface ICancelexprd {
+  coopname: IName
+  decision_id: IUint64
 }
 
 export interface ICancelreg {
@@ -358,6 +377,15 @@ export interface IDocument {
   meta: string
 }
 
+export interface IDocument2 {
+  version: string
+  hash: IChecksum256
+  doc_hash: IChecksum256
+  meta_hash: IChecksum256
+  meta: string
+  signatures: ISignatureInfo[]
+}
+
 export interface IEditaddress {
   coopname: IName
   chairman: IName
@@ -414,6 +442,11 @@ export interface IJoincoops {
 export interface IMigrate {
 }
 
+export interface IMigrateagree {
+  coopname: IName
+  agreement_id: IUint64
+}
+
 export interface INewact {
   coopname: IName
   username: IName
@@ -456,15 +489,6 @@ export interface INewsubmitted {
   action: IName
   decision_id: IUint64
   document: IDocument
-}
-
-export interface IOnewallet {
-  username: IName
-  coopname: IName
-  available: IAsset
-  blocked: IAsset
-  minimum: IAsset
-  initial: IAsset$
 }
 
 export interface IOpenprogwall {
@@ -553,6 +577,14 @@ export interface ISetrights {
   chairman: IName
   username: IName
   rights: IRight[]
+}
+
+export interface ISignatureInfo {
+  id: IUint32
+  signer: IName
+  public_key: IPublicKey
+  signature: ISignature
+  signed_at: ITimePointSec
 }
 
 export interface ISndagreement {

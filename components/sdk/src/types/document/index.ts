@@ -1,27 +1,22 @@
+import type { Cooperative } from 'cooptypes'
 import type { ModelTypes } from '../../zeus/index'
 
 /**
  * Интерфейс для метаданных документа.
  */
-export type IMetaDocument = any
+export type IMetaDocument = Cooperative.Document.IMetaDocument
 
 /**
  * Интерфейс для сгенерированного документа, который требуется подписать.
  */
-export interface IGeneratedDocument<T = any> {
-  full_title: string // Полное название документа
-  html: string // HTML-содержимое документа
-  hash: string // Хэш документа
-  meta: IMetaDocument & T // Метаданные документа
-  binary: string // Бинарные данные документа
-}
+export type IGeneratedDocument<T = any> = Cooperative.Document.ZGeneratedDocument<T>
+
+/**
+ * Интерфейс для информации о подписи в документе.
+ */
+export type ISignatureInfo = Cooperative.Document.ISignatureInfo
 
 /**
  * Интерфейс для подписанного документа.
  */
-export interface ISignedDocument<T = any> {
-  hash: string // Хэш документа
-  public_key: string // Публичный ключ, использованный для подписи
-  signature: string // Цифровая подпись
-  meta: IMetaDocument & T // Метаданные документа
-}
+export type ISignedDocument<T = any> = Cooperative.Document.ISignedDocument2<T>

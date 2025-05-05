@@ -6,6 +6,10 @@ import { Cooperative } from 'cooptypes';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import type { DocumentMetaDomainInterface } from '../interfaces/document-meta-domain.interface';
 import { SignedDocumentDomainEntity } from '../entity/signed-document-domain.entity';
+import {
+  ExtendedSignedDocument2DomainInterface,
+  SignatureInfoDomainInterface,
+} from '../interfaces/signed-document-domain.interface';
 
 @Injectable()
 export class DocumentAggregator {
@@ -17,11 +21,11 @@ export class DocumentAggregator {
   /**
    * Создает агрегатор документов на основе полного документа и подписанного документа
    * Автоматически извлекает подписанта на основе username из документа
-   * @param signedDoc Подписанный документ (метаинформация)
+   * @param signedDoc Подписанный документ (метаинформация) в новом формате
    * @returns Агрегатор документов
    */
   public async buildDocumentAggregate<T extends DocumentMetaDomainInterface>(
-    signedDoc: Cooperative.Document.ISignedDocument<T>
+    signedDoc: Cooperative.Document.ISignedDocument2<T>
   ): Promise<DocumentDomainAggregate> {
     // Получаем полный документ по хешу
     const document = await this.getDocumentByHash(signedDoc.hash);
@@ -31,21 +35,41 @@ export class DocumentAggregator {
       throw new BadRequestException('В документе отсутствует информация о пользователе (username)');
     }
 
-    // Получаем данные подписанта на основе username из документа
-    const signer = await this.accountDomainService.getPrivateAccount(signedDoc.meta.username);
+    // Массив для хранения информации о подписантах
+    const signatureInfos: SignatureInfoDomainInterface[] = [];
 
-    // Формируем объект подписи
-    const signature = new SignedDocumentDomainEntity({
-      ...signedDoc,
-      signer,
+    // Если есть хотя бы одна подпись
+    if (signedDoc.signatures && signedDoc.signatures.length > 0) {
+      for (const signature of signedDoc.signatures) {
+        // Получаем данные подписанта на основе signer из подписи
+        const signer = await this.accountDomainService.getPrivateAccount(signature.signer);
+
+        // Формируем объект информации о подписи
+        const signatureInfo: SignatureInfoDomainInterface = {
+          id: signature.id,
+          signer: signature.signer,
+          public_key: signature.public_key,
+          signature: signature.signature,
+          signed_at: new Date(signature.signed_at),
+          is_valid: true, // Предполагаем, что подпись валидна
+          signer_info: signer,
+        };
+
+        signatureInfos.push(signatureInfo);
+      }
+    }
+
+    // Формируем документ в соответствии с интерфейсом ExtendedSignedDocument2DomainInterface
+    const extendedDoc: ExtendedSignedDocument2DomainInterface = {
+      version: signedDoc.version,
       hash: signedDoc.hash,
-      public_key: signedDoc.public_key,
-      signature: signedDoc.signature,
+      doc_hash: signedDoc.doc_hash,
+      meta_hash: signedDoc.meta_hash,
       meta: signedDoc.meta,
-    });
+      signatures: signatureInfos,
+    };
 
-    const signatures = [signature];
-    return new DocumentDomainAggregate(signedDoc.hash, document, signatures);
+    return new DocumentDomainAggregate(signedDoc.hash, extendedDoc, document);
   }
 
   /**
