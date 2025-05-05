@@ -170,3 +170,68 @@ export interface IContributionAmount {
   currency: string
   words: string
 }
+
+// Новые интерфейсы для обновленной версии документов
+export interface ISignatureInfo {
+  id: number
+  signer: string // eosio::name в виде строки
+  public_key: string
+  signature: string
+  signed_at: string // time_point_sec в виде строки
+}
+
+export interface IChainDocument2 {
+  version: string
+  hash: string // checksum256 в виде строки
+  doc_hash: string // checksum256 в виде строки
+  meta_hash: string // checksum256 в виде строки
+  meta: string
+  signatures: ISignatureInfo[]
+}
+
+export interface ISignedDocument2<T = any> {
+  version: string
+  hash: string
+  doc_hash: string
+  meta_hash: string
+  meta: IMetaDocument & T
+  signatures: ISignatureInfo[]
+}
+
+// Новые интерфейсы для комплексных документов, использующие ISignedDocument2
+export interface IComplexStatement2 {
+  action: IExtendedAction
+  document: IGeneratedDocument
+  signed_document: ISignedDocument2
+}
+
+export interface IComplexDecision2 {
+  action: IExtendedAction
+  document: IGeneratedDocument
+  signed_document: ISignedDocument2
+  votes_for: IExtendedAction[]
+  votes_against: IExtendedAction[]
+}
+
+export interface IComplexAct2 {
+  action?: IExtendedAction
+  document?: IGeneratedDocument
+  signed_document?: ISignedDocument2
+}
+
+export interface IComplexDocument2 {
+  statement: IComplexStatement2
+  decision: IComplexDecision2
+  acts: IComplexAct2[]
+  links: IGeneratedDocument[]
+}
+
+export interface IGetComplexDocuments2 {
+  results: IComplexDocument2[]
+  page: number
+  limit: number
+}
+
+export interface IComplexAgenda2 extends IAgenda {
+  documents: IComplexDocument2
+}

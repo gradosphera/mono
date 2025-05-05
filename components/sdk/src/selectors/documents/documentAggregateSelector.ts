@@ -2,16 +2,6 @@ import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { Selector, type ValueTypes } from '../../zeus/index'
 import { rawUserUnionSelector } from '../common/userUnionSelector'
 
-// Селектор для подписи документа
-export const rawDocumentSignatureSelector = {
-  hash: true,
-  public_key: true,
-  signature: true,
-  meta: true,
-  is_valid: true,
-  signer: rawUserUnionSelector,
-}
-
 // Селектор для сырого документа
 export const rawRawDocumentSelector = {
   hash: true,
@@ -21,20 +11,39 @@ export const rawRawDocumentSelector = {
   meta: true,
 }
 
-// Селектор для агрегата документа
+// Селектор для информации о подписи в документе версии 2
+export const rawSignatureInfoSelector = {
+  id: true,
+  signer: true,
+  public_key: true,
+  signature: true,
+  signed_at: true,
+  is_valid: true,
+  signer_info: rawUserUnionSelector,
+}
+
+// Селектор для документа версии 2
+export const rawDocumentSignatureSelector = {
+  version: true,
+  hash: true,
+  doc_hash: true,
+  meta_hash: true,
+  meta: true,
+  signatures: rawSignatureInfoSelector,
+}
+
+// Селектор для агрегата документа версии 2
 export const rawDocumentAggregateSelector = {
   hash: true,
-  signatures: rawDocumentSignatureSelector,
+  document: rawDocumentSignatureSelector,
   rawDocument: rawRawDocumentSelector,
 }
 
-/**
- * Базовый селектор для всех агрегатов документов
- * Соответствует структуре DocumentAggregateBaseDTO в бэкенде
- * Важно: не используем массив для signatures - Zeus сам применит
- * селектор к каждому элементу массива
- */
-export const documentAggregateSelector = rawDocumentAggregateSelector
-
 // Проверка валидности селектора документа на первом попавшемся типе т.к. абстрактные типы zeus в документацию не затягивает
 const _validate: MakeAllFieldsRequired<ValueTypes['DocumentAggregate']> = rawDocumentAggregateSelector
+
+/**
+ * Базовый селектор для всех агрегатов документов версии 2
+ * Соответствует новой структуре DocumentAggregateBaseDTO в бэкенде
+ */
+export const documentAggregateSelector = rawDocumentAggregateSelector

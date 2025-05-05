@@ -34,7 +34,7 @@ export class DocumentDomainService {
    * @param signedDoc Подписанный документ (метаинформация)
    * @returns Агрегатор документов
    */
-  public async buildDocumentAggregate(signedDoc: Cooperative.Document.ISignedDocument): Promise<DocumentDomainAggregate> {
+  public async buildDocumentAggregate(signedDoc: Cooperative.Document.ISignedDocument2): Promise<DocumentDomainAggregate> {
     return this.documentAggregator.buildDocumentAggregate(signedDoc);
   }
 

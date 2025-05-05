@@ -13,13 +13,15 @@ export class DomainToBlockchainUtils {
    * @returns Объект документа в формате блокчейна
    */
   convertSignedDocumentToBlockchainFormat(
-    document: Cooperative.Document.ISignedDocument
-  ): Cooperative.Document.IChainDocument {
+    document: Cooperative.Document.ISignedDocument2
+  ): Cooperative.Document.IChainDocument2 {
     return {
+      version: document.version,
       hash: document.hash,
-      public_key: document.public_key,
-      signature: document.signature,
+      doc_hash: document.doc_hash,
+      meta_hash: document.meta_hash,
       meta: JSON.stringify(document.meta),
+      signatures: document.signatures,
     };
   }
 
@@ -30,5 +32,23 @@ export class DomainToBlockchainUtils {
    */
   convertDateToBlockchainFormat(date: Date | string): string {
     return moment(date).format('YYYY-MM-DDTHH:mm:ss.SSS');
+  }
+
+  /**
+   * Преобразует объект IChainDocument2 в ISignedDocument2
+   * @param chainDoc Документ из блокчейна
+   * @returns Документ в формате ISignedDocument2
+   */
+  static convertChainDocumentToSignedDocument2(
+    chainDoc: Cooperative.Document.IChainDocument2
+  ): Cooperative.Document.ISignedDocument2 {
+    return {
+      version: chainDoc.version,
+      hash: chainDoc.hash,
+      doc_hash: chainDoc.doc_hash,
+      meta_hash: chainDoc.meta_hash,
+      meta: typeof chainDoc.meta === 'string' ? JSON.parse(chainDoc.meta) : chainDoc.meta,
+      signatures: chainDoc.signatures,
+    };
   }
 }

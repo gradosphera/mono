@@ -6,6 +6,7 @@ export type IChecksum256 = string
 export type IPublicKey = string
 export type ISignature = string
 export type ITimePointSec = string
+export type IUint32 = number
 
 export interface IAccount {
   username: IName
@@ -81,6 +82,26 @@ export interface ICooperative {
   document: IDocument$
 }
 
+export interface ICooperative2 {
+  username: IName
+  parent_username: IName
+  announce: string
+  description: string
+  is_cooperative: boolean
+  is_branched: boolean
+  is_enrolled: boolean
+  coop_type: IName
+  registration: IAsset
+  initial: IAsset
+  minimum: IAsset
+  org_registration: IAsset$
+  org_initial: IAsset$
+  org_minimum: IAsset$
+  status: IName$
+  created_at: ITimePointSec$
+  document: IDocument2$
+}
+
 export interface ICreatebranch {
   coopname: IName
   braname: IName
@@ -112,6 +133,15 @@ export interface IDocument {
   public_key: IPublicKey
   signature: ISignature
   meta: string
+}
+
+export interface IDocument2 {
+  version: string
+  hash: IChecksum256
+  doc_hash: IChecksum256
+  meta_hash: IChecksum256
+  meta: string
+  signatures: ISignatureInfo[]
 }
 
 export interface IEnabranches {
@@ -157,6 +187,14 @@ export interface IReguser {
   type: IName
   statement: IDocument
   registration_hash: IChecksum256
+}
+
+export interface ISignatureInfo {
+  id: IUint32
+  signer: IName
+  public_key: IPublicKey
+  signature: ISignature
+  signed_at: ITimePointSec
 }
 
 export interface IStcoopstatus {

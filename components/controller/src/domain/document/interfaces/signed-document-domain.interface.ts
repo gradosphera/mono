@@ -12,3 +12,22 @@ export interface ExtendedSignedDocumentDomainInterface {
   signer: IndividualDomainInterface | OrganizationDomainInterface | EntrepreneurDomainInterface | null;
   //TODO: signed_at
 }
+
+export interface SignatureInfoDomainInterface {
+  id: number;
+  signer: string;
+  public_key: string;
+  signature: string;
+  signed_at: Date;
+  is_valid?: boolean;
+  signer_info?: IndividualDomainInterface | OrganizationDomainInterface | EntrepreneurDomainInterface | null;
+}
+
+export interface ExtendedSignedDocument2DomainInterface {
+  version: string;
+  hash: string;
+  doc_hash: string;
+  meta_hash: string;
+  meta: DocumentMetaDomainInterface;
+  signatures: SignatureInfoDomainInterface[];
+}

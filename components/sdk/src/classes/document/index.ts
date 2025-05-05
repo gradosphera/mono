@@ -1,5 +1,5 @@
 import type { Cooperative } from 'cooptypes'
-import type { IGeneratedDocument, ISignedDocument } from '../../types/document'
+import type { IGeneratedDocument, ISignedDocument, ISignatureInfo } from '../../types/document'
 import type { ModelTypes } from '../../zeus/index'
 import { PrivateKey } from '@wharfkit/antelope'
 
@@ -49,16 +49,45 @@ export class Document {
   /**
    * Подписывает документ и возвращает его в формате ISignedDocument.
    * @param document Сгенерированный документ для подписи.
+   * @param account Имя аккаунта подписывающего (signer)
+   * @param signatureId ID подписи (обычно 1 для первой подписи)
+   * @param version Версия стандарта документа
    * @returns Подписанный документ.
    */
-  public async signDocument<T>(document: IGeneratedDocument<T>): Promise<ISignedDocument<T>> {
-    const digitalSignature = this.signDigest(document.hash)
+  public async signDocument<T>(
+    document: IGeneratedDocument<T>,
+    account: string,
+    signatureId: number = 1,
+    version: string = '1.0'
+  ): Promise<ISignedDocument<T>> {
+    if (!this.wif)
+      throw new Error(`Ключ не установлен, выполните вызов метода setWif перед подписью документа`)
 
-    return {
-      hash: document.hash,
+    // Подпись хэша документа
+    const digitalSignature = this.signDigest(document.hash)
+    
+    // Текущая дата в формате ISO для поля signed_at
+    const signed_at = new Date().toISOString()
+
+    // Создаем информацию о подписи
+    const signatureInfo: ISignatureInfo = {
+      id: signatureId,
+      signer: account,
       public_key: digitalSignature.public_key,
       signature: digitalSignature.signature,
+      signed_at
+    }
+
+    // Хэш метаданных (пока используем пустую строку, в будущем можно вычислять реальный хэш)
+    const meta_hash = document.hash // Заглушка, в реальном приложении нужно вычислять отдельно
+
+    return {
+      version,
+      hash: document.hash,
+      doc_hash: document.hash, // Заглушка, в реальном приложении doc_hash может отличаться от основного хэша
+      meta_hash,
       meta: document.meta,
+      signatures: [signatureInfo]
     }
   }
 

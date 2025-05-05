@@ -158,19 +158,14 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
   }
 
   // Вспомогательный метод для разбора блокчейн-документа
-  private async parseBlockchainDocument(blockchainDoc: Cooperative.Document.IChainDocument): Promise<any> {
+  private async parseBlockchainDocument(blockchainDoc: Cooperative.Document.IChainDocument2): Promise<any> {
     try {
       if (!blockchainDoc || !blockchainDoc.hash) {
         return blockchainDoc;
       }
 
-      // Конвертируем в формат ISignedDocument
-      const signedDocument: Cooperative.Document.ISignedDocument = {
-        hash: blockchainDoc.hash,
-        public_key: blockchainDoc.public_key,
-        signature: blockchainDoc.signature,
-        meta: typeof blockchainDoc.meta === 'string' ? JSON.parse(blockchainDoc.meta) : blockchainDoc.meta,
-      };
+      // Конвертируем в формат ISignedDocument2 через утилиту
+      const signedDocument = DomainToBlockchainUtils.convertChainDocumentToSignedDocument2(blockchainDoc);
 
       // Создаем агрегат документа с помощью документного агрегатора
       const result = await this.documentAggregator.buildDocumentAggregate(signedDocument);
