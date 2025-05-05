@@ -108,6 +108,7 @@ public:
   [[eosio::action]] void sndagreement(eosio::name coopname, eosio::name administrator, eosio::name username, eosio::name agreement_type, document document);
   [[eosio::action]] void confirmagree(eosio::name coopname, eosio::name administrator, eosio::name username, uint64_t agreement_id);
   [[eosio::action]] void declineagree(eosio::name coopname, eosio::name administrator, eosio::name username, uint64_t agreement_id, std::string comment);
+  [[eosio::action]] void migrateagree(eosio::name coopname, uint64_t agreement_id);
   
   
   //decisions

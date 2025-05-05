@@ -2,6 +2,9 @@
 void soviet::migrate() {
     require_auth(_soviet); // Проверяем авторизацию
 
+    
+
+    // Старый код миграции (закомментирован)
     // cooperatives_index coops(_registrator, _registrator.value);
 
     // for (auto coop_it = coops.begin(); coop_it != coops.end(); ++coop_it) {

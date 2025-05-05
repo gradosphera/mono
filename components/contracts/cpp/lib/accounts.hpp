@@ -302,3 +302,109 @@ account get_account_or_fail(eosio::name username) {
   return *account;
 };
 
+/**
+ * @ingroup public_tables
+ * @brief Структура, представляющая организации с новым документом document2.
+ * @details Эта структура содержит информацию о юридических лицах (организациях), их верификации и других параметрах.
+ */
+struct [[eosio::table, eosio::contract(REGISTRATOR)]] cooperative2 {
+  eosio::name username; ///< Имя аккаунта организации.
+  eosio::name parent_username; ///< Имя родительской организации, если есть.
+  
+  std::string announce; ///< Анонс организации.
+  std::string description; ///< Описание организации.
+  bool is_cooperative = false; ///< Флаг, указывающий, является ли организация кооперативом.
+  
+  bool is_branched = false; ///< Флаг, указывающий, перешел ли кооператив на собрания уполномоченных
+  bool is_enrolled = false; ///< Флаг, указывающий, активен ли кооператив в системе
+  
+  eosio::name coop_type; ///< Тип некоммерческой организации (если это кооператив).
+  
+  eosio::asset registration; ///< Регистрационный взнос физического лица / ип
+  eosio::asset initial; ///< Вступительный членский взнос физического лица / ип
+  eosio::asset minimum; ///< Минимальный паевый взнос физического лица / ип
+  
+  eosio::binary_extension<eosio::asset> org_registration; ///< Регистрационный взнос юридического лица
+  eosio::binary_extension<eosio::asset> org_initial;  ///< Вступительный членский взнос юридического лица
+  eosio::binary_extension<eosio::asset> org_minimum; ///< Минимальный паевый взнос юридического лица
+  
+  eosio::binary_extension<eosio::name> status; ///< Статус процесса подключения
+  eosio::binary_extension<eosio::time_point_sec> created_at; ///< Дата поступления заявки на подключение (pending | ... | active | blocked)
+  eosio::binary_extension<document2> document; ///< Подписанный документ соглашения на подключение
+  
+  
+  /**
+   * @brief Возвращает первичный ключ учетной записи организации.
+   * @return uint64_t - первичный ключ, равный значению имени аккаунта организации.
+  */
+  
+  uint64_t primary_key() const {
+    return username.value;
+  }
+
+  /**
+   * @brief Сравнивает символ токена кооператива и представленный
+   */
+  void check_symbol_or_fail(eosio::asset contribution) {
+    eosio::check(initial.symbol == contribution.symbol && minimum.symbol == contribution.symbol, "Неверный контракт токена");
+  }
+  
+  uint64_t by_status() const { 
+    return status.has_value() ? status.value().value : 0; 
+  }
+
+  uint64_t by_created() const { 
+    return created_at.has_value() ? created_at.value().sec_since_epoch() : 0; 
+  }
+  /**
+   * @brief Возвращает ключ по родительской организации.
+   * @return uint64_t - ключ, равный значению имени родительской организации.
+   */
+  uint64_t by_parent() const {
+    return parent_username.value;
+  }
+
+  /**
+   * @brief Возвращает ключ для индекса кооперативных подразделений организации.
+   * @return uint128_t - составной ключ, включающий значения имени организации и родительской организации.
+   */
+  uint128_t by_coop_childs() const {
+    return combine_ids(username.value, parent_username.value);
+  }
+
+  /**
+   * @brief Возвращает индекс для определения, является ли организация кооперативом.
+   * @return uint64_t - ключ, равный 1, если организация является кооперативом, иначе 0.
+   */
+  uint64_t is_coop_index() const {
+    return is_cooperative == true ? 1 : 0;
+  }
+
+  /**
+   * @brief Возвращает ключ для индекса по типу некоммерческой организации (если это кооператив).
+   * @return uint64_t - ключ, равный значению типа некоммерческой организации.
+   */
+  uint64_t bycooptype() const {
+    return coop_type.value;
+  }
+
+
+  /**
+   * @brief Проверяет, является ли организация кооперативом.
+   * @return bool - true, если организация является кооперативом, иначе false.
+   */
+  bool is_coop() const {
+    return is_cooperative;
+  }
+
+};
+
+typedef eosio::multi_index<"coops"_n, cooperative2,
+eosio::indexed_by<"iscoop"_n, eosio::const_mem_fun<cooperative2, uint64_t,
+                                                       &cooperative2::is_coop_index>>,
+eosio::indexed_by<"byparent"_n, eosio::const_mem_fun<cooperative2, uint64_t,
+                                                       &cooperative2::by_parent>>,
+eosio::indexed_by<"bycoopchilds"_n, eosio::const_mem_fun<cooperative2, uint128_t, &cooperative2::by_coop_childs>>,
+eosio::indexed_by<"bycooptype"_n, eosio::const_mem_fun<cooperative2, uint64_t, &cooperative2::bycooptype>>
+> cooperatives2_index;
+
