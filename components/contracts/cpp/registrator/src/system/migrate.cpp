@@ -1,6 +1,14 @@
 [[eosio::action]] void registrator::migrate() {
   require_auth(_registrator);
 
+  // Новый код: удаление всех записей из cooperatives2_index
+  cooperatives2_index coops2(_registrator, _registrator.value);
+  auto coop2_itr = coops2.begin();
+  while (coop2_itr != coops2.end()) {
+    coop2_itr = coops2.erase(coop2_itr);
+  }
+
+  /*
   cooperatives_index coops(_registrator, _registrator.value);
   // Миграция cooperative -> cooperative2
   cooperatives2_index coops2(_registrator, _registrator.value);
@@ -63,4 +71,5 @@
           });
       }
   }
+  */
 }
