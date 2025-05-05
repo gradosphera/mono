@@ -6,7 +6,7 @@ void capital::setact2(
     eosio::name application,
     eosio::name username,
     checksum256 result_hash,
-    document act
+    document2 act
 ) {
     check_auth_or_fail(_capital, coopname, application, "setact2"_n);
     verify_document_or_fail(act);

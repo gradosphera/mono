@@ -1,7 +1,7 @@
 /**
  * @brief Регистрация пайщика в контракте и получение договора УХД от него.
  */
-void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, uint64_t convert_percent, eosio::asset rate_per_hour, time_point_sec created_at, document agreement) {
+void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, uint64_t convert_percent, eosio::asset rate_per_hour, time_point_sec created_at, document2 agreement) {
   check_auth_or_fail(_capital, coopname, application, "regcontrib"_n);
   
   verify_document_or_fail(agreement);

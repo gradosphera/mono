@@ -1,4 +1,4 @@
-void capital::createexpnse(eosio::name coopname, eosio::name application, checksum256 expense_hash, checksum256 assignment_hash, name creator, uint64_t fund_id, asset amount, std::string description, document statement){
+void capital::createexpnse(eosio::name coopname, eosio::name application, checksum256 expense_hash, checksum256 assignment_hash, name creator, uint64_t fund_id, asset amount, std::string description, document2 statement){
   check_auth_or_fail(_capital, coopname, application, "createexpns"_n);
   
   verify_document_or_fail(statement);

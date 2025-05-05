@@ -1,4 +1,4 @@
-void capital::createinvest(name coopname, name application, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document statement) {
+void capital::createinvest(name coopname, name application, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document2 statement) {
   check_auth_or_fail(_capital, coopname, application, "createinvest"_n);
   
   verify_document_or_fail(statement);

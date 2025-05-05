@@ -1,4 +1,4 @@
-void capital::capauthwthd1(eosio::name coopname, checksum256 withdraw_hash, document authorization) {
+void capital::capauthwthd1(eosio::name coopname, checksum256 withdraw_hash, document2 authorization) {
   require_auth(_soviet);
   
   //Получаем объект возврата

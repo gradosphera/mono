@@ -80,9 +80,9 @@ struct [[eosio::table, eosio::contract(SOVIET)]] agreement2 {
 
 };
 
-typedef eosio::multi_index<"agreements"_n, agreement, 
-  eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<agreement, uint64_t, &agreement::by_username>>,
-  eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<agreement, uint64_t, &agreement::by_status>>,
-  eosio::indexed_by<"bydraft"_n, eosio::const_mem_fun<agreement, uint64_t, &agreement::by_draft>>,
-  eosio::indexed_by<"byuserdraft"_n, eosio::const_mem_fun<agreement, uint128_t, &agreement::by_user_and_draft>>
+typedef eosio::multi_index<"agreements2"_n, agreement2, 
+  eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<agreement2, uint64_t, &agreement2::by_username>>,
+  eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<agreement2, uint64_t, &agreement2::by_status>>,
+  eosio::indexed_by<"bydraft"_n, eosio::const_mem_fun<agreement2, uint64_t, &agreement2::by_draft>>,
+  eosio::indexed_by<"byuserdraft"_n, eosio::const_mem_fun<agreement2, uint128_t, &agreement2::by_user_and_draft>>
 > agreements2_index;

@@ -1,7 +1,7 @@
 [[eosio::action]] void registrator::stcoopstatus(eosio::name coopname, eosio::name administrator, eosio::name status) {
     check_auth_or_fail(_registrator, _provider, administrator, "stcoopstatus"_n); //ожидаем разрешений от оператора
     
-    cooperatives_index coops(_registrator, _registrator.value);
+    cooperatives2_index coops(_registrator, _registrator.value);
     
     auto coop = coops.find(coopname.value);
     

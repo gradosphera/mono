@@ -1,4 +1,4 @@
-void capital::approvedebt(eosio::name coopname, checksum256 debt_hash, document approved_statement)
+void capital::approvedebt(eosio::name coopname, checksum256 debt_hash, document2 approved_statement)
 {
     require_auth(_soviet);
 

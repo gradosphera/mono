@@ -1,4 +1,4 @@
-void capital::approvewthd2(name coopname, name application, name approver, checksum256 withdraw_hash, document approved_return_statement) {
+void capital::approvewthd2(name coopname, name application, name approver, checksum256 withdraw_hash, document2 approved_return_statement) {
   check_auth_or_fail(_capital, coopname, application, "approvewthd2"_n);
   
   verify_document_or_fail(approved_return_statement);

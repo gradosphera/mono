@@ -1,4 +1,4 @@
-void meet::signbysecr(name coopname, name username, checksum256 hash, document secretary_decision) {
+void meet::signbysecr(name coopname, name username, checksum256 hash, document2 secretary_decision) {
     require_auth(coopname);
 
     // 1. Находим собрание по хэшу

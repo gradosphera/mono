@@ -31,7 +31,7 @@
       n.registered_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()); 
   });
 
-  cooperatives_index coops(_registrator, _registrator.value);
+  cooperatives2_index coops(_registrator, _registrator.value);
   eosio::check(_provider_initial.symbol == _provider_minimum.symbol && _provider_minimum.symbol == _root_govern_symbol, "Неверные символы для взносов");
   eosio::check(_provider_org_initial.symbol == _provider_org_minimum.symbol && _provider_org_minimum.symbol == _root_govern_symbol, "Неверные символы для взносов");
 

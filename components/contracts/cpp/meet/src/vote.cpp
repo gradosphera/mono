@@ -4,7 +4,7 @@ uint64_t get_total_participants(eosio::name coopname) {
     return 2; // Пример: 100 пайщиков
 }
 
-void meet::vote(name coopname, checksum256 hash, name username, document ballot, std::vector<vote_point> votes) {
+void meet::vote(name coopname, checksum256 hash, name username, document2 ballot, std::vector<vote_point> votes) {
     require_auth(coopname);
     
     verify_document_or_fail(ballot);

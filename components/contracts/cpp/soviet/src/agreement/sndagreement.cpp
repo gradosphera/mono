@@ -1,4 +1,4 @@
-[[eosio::action]] void soviet::sndagreement(eosio::name coopname, eosio::name administrator, eosio::name username, eosio::name agreement_type, document document) {
+[[eosio::action]] void soviet::sndagreement(eosio::name coopname, eosio::name administrator, eosio::name username, eosio::name agreement_type, document2 document) {
   
   eosio::check(has_auth(username) || has_auth(administrator), "Недостаточно прав доступа");
   
@@ -47,7 +47,7 @@
     } 
   } 
   
-  agreements_index agreements(_soviet, coopname.value);
+  agreements2_index agreements(_soviet, coopname.value);
   auto agreements_by_username_and_draft = agreements.template get_index<"byuserdraft"_n>();
   auto index = combine_ids(username.value, coagreement.draft_id);
 

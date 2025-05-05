@@ -160,9 +160,9 @@ namespace Wallet {
     eosio::name status; /*!< Статус операции вывода */
     
     eosio::asset quantity; /*!< Количество средств для вывода во внутренней валюте */
-    document statement; /*!< Заявление на возврат */
-    document approved_statement; /*!< Предварительно-принятое заявление */
-    document authorization; /*!< Решение совета */
+    document2 statement; /*!< Заявление на возврат */
+    document2 approved_statement; /*!< Предварительно-принятое заявление */
+    document2 authorization; /*!< Решение совета */
     
     eosio::time_point_sec created_at = current_time_point(); ///< Время истечения срока давности
     

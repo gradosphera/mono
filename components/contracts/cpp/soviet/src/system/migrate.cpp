@@ -5,7 +5,7 @@ void soviet::migrate() {
     
 
     // Старый код миграции (закомментирован)
-    // cooperatives_index coops(_registrator, _registrator.value);
+    // cooperatives2_index coops(_registrator, _registrator.value);
 
     // for (auto coop_it = coops.begin(); coop_it != coops.end(); ++coop_it) {
     //     eosio::name coopname = coop_it->username;

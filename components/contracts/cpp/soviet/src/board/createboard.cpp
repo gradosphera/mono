@@ -25,7 +25,7 @@ void soviet::createboard(eosio::name coopname, eosio::name username, eosio::name
 
   eosio::name payer = username;
 
-  cooperatives_index coops(_registrator, _registrator.value);
+  cooperatives2_index coops(_registrator, _registrator.value);
   auto org = coops.find(coopname.value);
   eosio::check(org != coops.end(), "Организация не найдена");
   eosio::check(org -> is_coop(), "Организация - не кооператив");

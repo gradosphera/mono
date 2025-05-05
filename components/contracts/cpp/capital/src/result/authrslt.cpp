@@ -1,4 +1,4 @@
-void capital::authrslt(eosio::name coopname, checksum256 result_hash, document decision) {
+void capital::authrslt(eosio::name coopname, checksum256 result_hash, document2 decision) {
   require_auth(_soviet);
   
   auto exist_result = get_result(coopname, result_hash);

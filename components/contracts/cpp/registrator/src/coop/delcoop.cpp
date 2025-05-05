@@ -6,7 +6,7 @@
   
   eosio::check(_provider != coopname, "Провайдер не может быть удален");
     
-  cooperatives_index coops(_registrator, _registrator.value);
+  cooperatives2_index coops(_registrator, _registrator.value);
   auto coop = coops.find(coopname.value);
   
   eosio::check(coop != coops.end(), "Кооператив не найден");

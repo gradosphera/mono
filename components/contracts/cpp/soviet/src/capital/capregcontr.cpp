@@ -1,4 +1,4 @@
-[[eosio::action]] void soviet::capregcontr(eosio::name coopname, eosio::name username, uint64_t contributor_id, document statement, std::string meta){
+[[eosio::action]] void soviet::capregcontr(eosio::name coopname, eosio::name username, uint64_t contributor_id, document2 statement, std::string meta){
   require_auth(_capital);
 
   decisions_index decisions(_soviet, coopname.value);

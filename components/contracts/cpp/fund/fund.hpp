@@ -82,7 +82,7 @@ class [[eosio::contract(FUND)]] fund : public eosio::contract {
   // метод вывода средств из фондов накопления
   [[eosio::action]] void fundwithdraw(eosio::name coopname,
                                       eosio::name username, eosio::name type,
-                                      uint64_t fund_id, document document,
+                                      uint64_t fund_id, document2 document,
                                       eosio::asset quantity,
                                       std::string bank_data_id);
   // используется только на фондах накопления

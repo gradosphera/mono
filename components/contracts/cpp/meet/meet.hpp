@@ -21,23 +21,23 @@ public:
     static constexpr bool TEST_MODE = true; // Флаг тестового режима
 
     [[eosio::action]]
-    void createmeet(name coopname, checksum256 hash, eosio::name initiator, name presider, name secretary, std::vector<meet_point> agenda, document proposal, time_point_sec open_at, time_point_sec close_at);
+    void createmeet(name coopname, checksum256 hash, eosio::name initiator, name presider, name secretary, std::vector<meet_point> agenda, document2 proposal, time_point_sec open_at, time_point_sec close_at);
     [[eosio::action]]
-    void authmeet(eosio::name coopname, checksum256 hash, document authorization);
+    void authmeet(eosio::name coopname, checksum256 hash, document2 authorization);
     [[eosio::action]]
     void declmeet(name coopname, checksum256 hash, std::string reason);
 
     [[eosio::action]]
-    void vote(name coopname, checksum256 hash, name username, document ballot, std::vector<vote_point> votes);
+    void vote(name coopname, checksum256 hash, name username, document2 ballot, std::vector<vote_point> votes);
     
     [[eosio::action]]
-    void restartmeet(name coopname, checksum256 hash, document newproposal, time_point_sec new_open_at, time_point_sec new_close_at);
+    void restartmeet(name coopname, checksum256 hash, document2 newproposal, time_point_sec new_open_at, time_point_sec new_close_at);
 
     [[eosio::action]]
-    void signbysecr(name coopname, name username, checksum256 hash, document secretary_decision);
+    void signbysecr(name coopname, name username, checksum256 hash, document2 secretary_decision);
     
     [[eosio::action]]
-    void signbypresid(name coopname, name username, checksum256 hash, document presider_decision);
+    void signbypresid(name coopname, name username, checksum256 hash, document2 presider_decision);
     
     // Сервисное действие:
     [[eosio::action]] void newgdecision(NEWGDECISION_SIGNATURE);

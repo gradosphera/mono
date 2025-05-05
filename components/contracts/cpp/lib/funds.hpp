@@ -71,7 +71,7 @@ struct [[eosio::table,
   eosio::name type;
   uint64_t fund_id;
   eosio::asset quantity;
-  document document;
+  document2 document;
   std::string bank_data_id;
   eosio::time_point_sec expired_at;
 

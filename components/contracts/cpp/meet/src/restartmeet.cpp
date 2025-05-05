@@ -1,4 +1,4 @@
-void meet::restartmeet(name coopname, checksum256 hash, document newproposal, time_point_sec new_open_at, time_point_sec new_close_at) {
+void meet::restartmeet(name coopname, checksum256 hash, document2 newproposal, time_point_sec new_open_at, time_point_sec new_close_at) {
     require_auth(coopname);
 
     // Получаем объект собрания
@@ -28,7 +28,7 @@ void meet::restartmeet(name coopname, checksum256 hash, document newproposal, ti
     uint64_t old_cycle = meet_itr->cycle;
     uint64_t old_quorum = meet_itr->quorum_percent;
     
-    document empty_document;
+    document2 empty_document;
     
     genmeets.modify(meet_itr, coopname, [&](auto &m) {
         m.proposal           = newproposal;

@@ -1,5 +1,5 @@
 
-void soviet::withdraw(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document statement) { 
+void soviet::withdraw(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document2 statement) { 
 
   require_auth(_gateway);
 

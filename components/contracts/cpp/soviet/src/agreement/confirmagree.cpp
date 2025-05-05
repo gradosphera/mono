@@ -2,7 +2,7 @@
   check_auth_or_fail(_soviet, coopname, administrator, "confirmagree"_n);
   
   
-  agreements_index agreements(_soviet, coopname.value);
+  agreements2_index agreements(_soviet, coopname.value);
   auto indoc = agreements.find(agreement_id);
   
   bool is = is_participant_of_cpp_by_program_id(coopname, username, indoc -> program_id);

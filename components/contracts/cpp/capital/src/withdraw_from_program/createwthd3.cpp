@@ -1,4 +1,4 @@
-void capital::createwthd3(name coopname, name application, name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document return_statement) {
+void capital::createwthd3(name coopname, name application, name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document2 return_statement) {
   check_auth_or_fail(_capital, coopname, application, "createwthd3"_n);
 
   verify_document_or_fail(return_statement);

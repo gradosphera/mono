@@ -30,7 +30,7 @@
  * Общая функция для создания как родительских, так и дочерних заявок.
  */
 void marketplace::create (eosio::name type, const exchange_params& params) {
-  cooperatives_index coops(_registrator, _registrator.value);
+  cooperatives2_index coops(_registrator, _registrator.value);
   auto coop = coops.find(params.coopname.value);
   eosio::check(coop != coops.end() && coop -> is_coop(), "Кооператив не найден");
   eosio::check(params.unit_cost.symbol == coop -> initial.symbol, "Неверный символ токен");
@@ -61,7 +61,7 @@ void marketplace::create_parent(eosio::name type, const exchange_params& params)
   
   eosio::check(params.parent_id == 0, "Родительская заявка создаётся без указания родителя");
 
-  cooperatives_index coops(_registrator, _registrator.value);
+  cooperatives2_index coops(_registrator, _registrator.value);
   auto coop = coops.find(params.coopname.value);
   eosio::check(coop != coops.end(), "Кооператив не найден");
   eosio::check(coop -> is_coop() == true, "Организация - не кооператив");
@@ -123,7 +123,7 @@ void marketplace::create_child(eosio::name type, const exchange_params& params) 
   eosio::check(parent_change != exchange.end(), "Заявка не обнаружена");
   eosio::check(parent_change -> status == "published"_n, "Заявка не опубликована или не прошла модерацию");
 
-  cooperatives_index coops(_registrator, _registrator.value);
+  cooperatives2_index coops(_registrator, _registrator.value);
   auto coop = coops.find(params.coopname.value);
   eosio::check(coop != coops.end(), "Кооператив не найден");
   eosio::check(coop -> is_coop() == true, "Организация - не кооператив");

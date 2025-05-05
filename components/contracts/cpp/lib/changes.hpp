@@ -25,7 +25,7 @@ struct exchange_params {
   uint64_t units; /*!< Количество частей (штук) товара или услуги */
   eosio::asset unit_cost; /*!< Цена за единицу (штуку) товара или услуги */
   uint64_t product_lifecycle_secs; /*!< Время жизни продукта, заявляемое поставщиком */
-  std::optional<document> document; /*!< Сопутствующий подписанный документ на взнос или возврат взноса */
+  std::optional<document2> document; /*!< Сопутствующий подписанный документ на взнос или возврат взноса */
   std::string data; /*!< Дополнительные данные, специфичные для заявки */
   std::string meta; /*!< Метаданные о заявке */
 };
@@ -83,20 +83,20 @@ struct [[eosio::table, eosio::contract(MARKETPLACE)]] request {
   eosio::name money_contributor;
   eosio::name product_contributor;
 
-  document contribute_product_statement;
-  document return_product_statement;
+  document2 contribute_product_statement;
+  document2 return_product_statement;
   
   uint64_t contribution_product_decision_id;
-  document contribution_product_authorization;
+  document2 contribution_product_authorization;
   
   uint64_t return_product_decision_id;
-  document return_product_authorization;
+  document2 return_product_authorization;
   
-  document product_contribution_act_validation;
-  document product_contribution_act;  
+  document2 product_contribution_act_validation;
+  document2 product_contribution_act;  
 
-  document product_recieve_act;  
-  document product_recieve_act_validation;
+  document2 product_recieve_act;  
+  document2 product_recieve_act_validation;
   
   uint64_t product_lifecycle_secs;
   uint64_t cancellation_fee; //up to 100

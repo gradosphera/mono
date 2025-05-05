@@ -1,4 +1,4 @@
-void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash, document authorization)
+void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash, document2 authorization)
 {
   require_auth(_soviet);
   

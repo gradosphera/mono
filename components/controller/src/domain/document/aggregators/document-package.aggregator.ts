@@ -47,7 +47,14 @@ export class DocumentPackageAggregator {
 
     if (docVersion === '0') {
       // --- СТАРЫЙ ФОРМАТ (INewSubmitted) ---
-      const rawData: SovietContract.Actions.Registry.NewSubmitted.INewSubmitted = rawAction.data;
+      interface legacyNewSubmitted {
+        coopname: string;
+        username: string;
+        action: string;
+        decision_id: number;
+        document: Cooperative.Document.IChainDocument;
+      }
+      const rawData: legacyNewSubmitted = rawAction.data;
       // -----------------------------------------------------
       // ШАГ 1: Подготовка ЗАЯВЛЕНИЯ (Statement)
       // -----------------------------------------------------

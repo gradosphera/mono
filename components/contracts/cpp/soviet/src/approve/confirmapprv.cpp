@@ -1,4 +1,4 @@
-void soviet::confirmapprv(eosio::name coopname, checksum256 approval_hash, document approved_document)
+void soviet::confirmapprv(eosio::name coopname, checksum256 approval_hash, document2 approved_document)
 {
    require_auth(coopname);
 

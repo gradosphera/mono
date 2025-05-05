@@ -3,7 +3,7 @@
 \brief Отказ от предложения.
 **/
 
-[[eosio::action]] void marketplace::supplycnfrm(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document) { 
+[[eosio::action]] void marketplace::supplycnfrm(eosio::name coopname, eosio::name username, uint64_t exchange_id, document2 document) { 
   require_auth(coopname);
 
   requests_index exchange(_marketplace, coopname.value);

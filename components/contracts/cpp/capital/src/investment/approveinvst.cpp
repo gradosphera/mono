@@ -1,4 +1,4 @@
-void capital::approveinvst(name coopname, name application, name approver, checksum256 invest_hash, document approved_statement) {
+void capital::approveinvst(name coopname, name application, name approver, checksum256 invest_hash, document2 approved_statement) {
   check_auth_or_fail(_capital, coopname, application, "approveinvst"_n);
   
   verify_document_or_fail(approved_statement);

@@ -2,7 +2,7 @@
  * @brief Принимаем решение совета и вносим средства на кошелек пайщика при УХД
  * 
  */
-void capital::capauthinvst(eosio::name coopname, checksum256 invest_hash, document authorization) {
+void capital::capauthinvst(eosio::name coopname, checksum256 invest_hash, document2 authorization) {
   require_auth(_soviet);
   
   auto exist_invest = get_invest(coopname, invest_hash);

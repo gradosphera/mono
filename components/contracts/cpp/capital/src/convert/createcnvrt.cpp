@@ -8,7 +8,7 @@ void capital::createcnvrt(
     eosio::name username,
     checksum256 assignment_hash,
     checksum256 convert_hash,
-    document convert_statement
+    document2 convert_statement
 ) {
     // Авторизация
     require_auth(coopname);

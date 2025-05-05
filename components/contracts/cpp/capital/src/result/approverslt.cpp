@@ -1,4 +1,4 @@
-void capital::approverslt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 result_hash, document approved_statement){
+void capital::approverslt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 result_hash, document2 approved_statement){
   require_auth(coopname);
   
   verify_document_or_fail(approved_statement);

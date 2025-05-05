@@ -1,4 +1,4 @@
-void capital::capauthwthd3(name coopname, checksum256 withdraw_hash, document authorization) {
+void capital::capauthwthd3(name coopname, checksum256 withdraw_hash, document2 authorization) {
   require_auth(_soviet);
   
   auto exist_withdraw = get_program_withdraw(coopname, withdraw_hash);

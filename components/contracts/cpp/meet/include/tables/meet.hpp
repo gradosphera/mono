@@ -25,10 +25,10 @@ struct [[eosio::table, eosio::contract(MEET)]] meet {
     uint64_t cycle = 1;                          /// Цикл общего собрания, который указывает на то, что были предыдущие собрания, которые не состоялись по кворуму
     bool quorum_passed;                          /// Флаг пройденного кворума
     
-    document proposal;                         ///< Предложение
-    document authorization;                    ///< Решение совета
-    document decision1;                        ///< Подпись протокола секретарём общего собрания
-    document decision2;                        ///< Подпись протокола председателем общего собрания
+    document2 proposal;                         ///< Предложение
+    document2 authorization;                    ///< Решение совета
+    document2 decision1;                        ///< Подпись протокола секретарём общего собрания
+    document2 decision2;                        ///< Подпись протокола председателем общего собрания
     
     uint64_t primary_key() const { return id; } ///< Основной ключ.
     checksum256 by_hash() const { return hash;} ///< Хэш-ключ

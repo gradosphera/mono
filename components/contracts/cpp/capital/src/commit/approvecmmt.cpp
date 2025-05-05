@@ -1,4 +1,4 @@
-void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, document empty_document) {
+void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, document2 empty_document) {
   require_auth(_soviet);
   
   auto exist_commit = get_commit(coopname, commit_hash);

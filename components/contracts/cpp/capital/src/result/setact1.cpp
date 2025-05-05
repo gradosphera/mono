@@ -1,4 +1,4 @@
-void capital::setact1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 commit_hash, document act) {
+void capital::setact1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 commit_hash, document2 act) {
   check_auth_or_fail(_capital, coopname, application, "setact1"_n);
   
   verify_document_or_fail(act);

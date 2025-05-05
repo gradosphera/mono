@@ -9,7 +9,7 @@
 *
 * @note Авторизация требуется от аккаунта: @p registrator
 */
-[[eosio::action]] void registrator::reguser(eosio::name coopname, eosio::name braname, eosio::name username, eosio::name type, document statement, checksum256 registration_hash)
+[[eosio::action]] void registrator::reguser(eosio::name coopname, eosio::name braname, eosio::name username, eosio::name type, document2 statement, checksum256 registration_hash)
 {
   require_auth(coopname);
   
