@@ -4,20 +4,29 @@ set -e
 # Получаем дату в формате vYYYY.M.D без лидирующих нулей
 BASE_VERSION="v$(date +%Y).$(date +%-m).$(date +%-d)"
 
-# Получаем последний тег с сегодняшней датой
-LAST_TAG=$(git tag --list | grep "^$BASE_VERSION" | sort -V | tail -n 1)
+# Получаем все теги с сегодняшней датой
+TAGS=($(git tag --list | grep "^$BASE_VERSION" | sort -V))
 
-if [[ -z "$LAST_TAG" ]]; then
+MAX_SUFFIX=0
+for TAG in "${TAGS[@]}"; do
+  if [[ "$TAG" =~ ^$BASE_VERSION-(\d+)$ ]]; then
+    SUFFIX=${BASH_REMATCH[1]}
+    if (( SUFFIX > MAX_SUFFIX )); then
+      MAX_SUFFIX=$SUFFIX
+    fi
+  elif [[ "$TAG" == "$BASE_VERSION" ]]; then
+    if (( MAX_SUFFIX < 0 )); then
+      MAX_SUFFIX=0
+    fi
+  fi
+done
+
+if (( ${#TAGS[@]} == 0 )); then
+  VERSION="$BASE_VERSION"
+elif (( MAX_SUFFIX == 0 )) && [[ ! " ${TAGS[@]} " =~ " $BASE_VERSION " ]]; then
   VERSION="$BASE_VERSION"
 else
-  # Если есть дефис после даты, увеличиваем суффикс
-  if [[ "$LAST_TAG" =~ ^$BASE_VERSION-(\d+)$ ]]; then
-    SUFFIX=$(echo "$LAST_TAG" | awk -F- '{print $2}')
-    VERSION="$BASE_VERSION-$((SUFFIX+1))"
-  else
-    # Первый инкремент
-    VERSION="$BASE_VERSION-1"
-  fi
+  VERSION="$BASE_VERSION-$((MAX_SUFFIX+1))"
 fi
 
 echo "Версионируем: $VERSION"
