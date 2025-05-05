@@ -283,25 +283,6 @@ eosio::indexed_by<"bycooptype"_n, eosio::const_mem_fun<cooperative, uint64_t, &c
 > cooperatives_index;
 
 
-cooperative get_cooperative_or_fail(eosio::name coopname) {
-  cooperatives_index coops(_registrator, _registrator.value);
-  auto org = coops.find(coopname.value);
-  eosio::check(org != coops.end(), "Организация не найдена");
-  eosio::check(org -> is_coop(), "Организация - не кооператив");
-  eosio::check(org -> status.value() == "active"_n, "Кооператив не активен");
-  
-  return *org;
-};
-
-
-account get_account_or_fail(eosio::name username) {
-  accounts_index accounts(_registrator, _registrator.value);
-  auto account = accounts.find(username.value);
-  eosio::check(account != accounts.end(), "Аккаунт не найден");
-
-  return *account;
-};
-
 /**
  * @ingroup public_tables
  * @brief Структура, представляющая организации с новым документом document2.
@@ -408,3 +389,22 @@ eosio::indexed_by<"bycoopchilds"_n, eosio::const_mem_fun<cooperative2, uint128_t
 eosio::indexed_by<"bycooptype"_n, eosio::const_mem_fun<cooperative2, uint64_t, &cooperative2::bycooptype>>
 > cooperatives2_index;
 
+
+cooperative2 get_cooperative_or_fail(eosio::name coopname) {
+  cooperatives2_index coops(_registrator, _registrator.value);
+  auto org = coops.find(coopname.value);
+  eosio::check(org != coops.end(), "Организация не найдена");
+  eosio::check(org -> is_coop(), "Организация - не кооператив");
+  eosio::check(org -> status.value() == "active"_n, "Кооператив не активен");
+  
+  return *org;
+};
+
+
+account get_account_or_fail(eosio::name username) {
+  accounts_index accounts(_registrator, _registrator.value);
+  auto account = accounts.find(username.value);
+  eosio::check(account != accounts.end(), "Аккаунт не найден");
+
+  return *account;
+};

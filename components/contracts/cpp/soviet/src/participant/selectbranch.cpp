@@ -1,4 +1,4 @@
-[[eosio::action]] void soviet::selectbranch(eosio::name coopname, eosio::name username, eosio::name braname, document document){
+[[eosio::action]] void soviet::selectbranch(eosio::name coopname, eosio::name username, eosio::name braname, document2 document){
   require_auth(coopname);
   
   verify_document_or_fail(document);

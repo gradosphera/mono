@@ -6,7 +6,7 @@
  * @param username 
  * @param approved_agreement 
  */
-void capital::approvereg(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 project_hash, eosio::name username, document approved_agreement) {
+void capital::approvereg(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 project_hash, eosio::name username, document2 approved_agreement) {
   check_auth_or_fail(_capital, coopname, application, "approvereg"_n);
   
   verify_document_or_fail(approved_agreement);

@@ -1,7 +1,7 @@
 /**
  * @brief Принимаем запрос на повстку дня для голосования совета о приёме инвестиций по УХД
  */
-[[eosio::action]] void soviet::capauthinvst(eosio::name coopname, eosio::name username, uint64_t invest_id, document statement, std::string meta){
+[[eosio::action]] void soviet::capauthinvst(eosio::name coopname, eosio::name username, uint64_t invest_id, document2 statement, std::string meta){
   require_auth(_capital);
 
   decisions_index decisions(_soviet, coopname.value);

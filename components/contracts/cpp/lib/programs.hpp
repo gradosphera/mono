@@ -69,7 +69,7 @@ bool is_participant_of_cpp_by_program_id(eosio::name coopname, eosio::name usern
   auto program = get_program_or_fail(coopname, program_id);
 
   //достать agreement и проверить статус 
-  agreements_index agreements(_soviet, coopname.value);
+  agreements2_index agreements(_soviet, coopname.value);
   auto agreement = agreements.find(wallet -> agreement_id);
   
   if (agreement -> status == "declined"_n)
@@ -103,7 +103,7 @@ bool is_valid_participant_of_program_by_type(eosio::name coopname, eosio::name u
     return false;
   
   //достать agreement и проверить статус 
-  agreements_index agreements(_soviet, coopname.value);
+  agreements2_index agreements(_soviet, coopname.value);
   auto agreement = agreements.find(wallet -> agreement_id);
   
   if (agreement -> status == "declined"_n)

@@ -1,4 +1,4 @@
-void wallet::approvewthd(eosio::name coopname, checksum256 withdraw_hash, document approved_statement) {
+void wallet::approvewthd(eosio::name coopname, checksum256 withdraw_hash, document2 approved_statement) {
   require_auth(_soviet);
   
   auto exist_withdraw = Wallet::get_withdraw(coopname, withdraw_hash);  

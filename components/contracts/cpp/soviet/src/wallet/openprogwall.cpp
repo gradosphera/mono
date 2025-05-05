@@ -7,7 +7,7 @@ void soviet::openprogwall(name coopname, name username, name program_type, uint6
     auto program_id = get_program_id(program_type);
 
     if (agreement_id > 0) {
-      agreements_index agreements(_soviet, coopname.value);
+      agreements2_index agreements(_soviet, coopname.value);
       auto agreement = agreements.find(agreement_id);
       check(agreement != agreements.end(), "Соглашение не найдено");  
       check(agreement -> username == username, "Неверный пользователь соглашения и кошелька");

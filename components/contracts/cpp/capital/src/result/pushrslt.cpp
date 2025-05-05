@@ -1,4 +1,4 @@
-void capital::pushrslt(name coopname, name application, checksum256 result_hash, document statement) {
+void capital::pushrslt(name coopname, name application, checksum256 result_hash, document2 statement) {
   require_auth(coopname);
 
   // проверяем заявление

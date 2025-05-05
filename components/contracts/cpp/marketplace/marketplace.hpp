@@ -39,7 +39,7 @@ public:
   [[eosio::action]] void newid(uint64_t id, eosio::name type);
 
   //soviet.cpp
-  [[eosio::action]] void authorize(eosio::name coopname, uint64_t exchange_id, uint64_t contribution_product_decision_id, document contribution_product_authorization, uint64_t return_product_decision_id, document return_product_authorization);
+  [[eosio::action]] void authorize(eosio::name coopname, uint64_t exchange_id, uint64_t contribution_product_decision_id, document2 contribution_product_authorization, uint64_t return_product_decision_id, document2 return_product_authorization);
   
   //change.cpp
   [[eosio::action]] void offer(const exchange_params& params);
@@ -51,16 +51,16 @@ public:
   static void cancel_parent(eosio::name coopname, eosio::name username, uint64_t exchange_id);
   static void cancel_child(eosio::name coopname, eosio::name username, uint64_t exchange_id);
 
-  [[eosio::action]] void accept(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document);
+  [[eosio::action]] void accept(eosio::name coopname, eosio::name username, uint64_t exchange_id, document2 document);
   [[eosio::action]] void decline(eosio::name coopname, eosio::name username, uint64_t exchange_id, std::string meta);
 
-  [[eosio::action]] void supplycnfrm(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document);
-  [[eosio::action]] void supply(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document);
+  [[eosio::action]] void supplycnfrm(eosio::name coopname, eosio::name username, uint64_t exchange_id, document2 document);
+  [[eosio::action]] void supply(eosio::name coopname, eosio::name username, uint64_t exchange_id, document2 document);
   [[eosio::action]] void delivered(eosio::name coopname, eosio::name username, uint64_t exchange_id);
-  [[eosio::action]] void recieve(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document);
-  [[eosio::action]] void recievecnfrm(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document);
+  [[eosio::action]] void recieve(eosio::name coopname, eosio::name username, uint64_t exchange_id, document2 document);
+  [[eosio::action]] void recievecnfrm(eosio::name coopname, eosio::name username, uint64_t exchange_id, document2 document);
 
-  [[eosio::action]] void dispute(eosio::name coopname, eosio::name username, uint64_t exchange_id, document document);
+  [[eosio::action]] void dispute(eosio::name coopname, eosio::name username, uint64_t exchange_id, document2 document);
   
   [[eosio::action]] void complete(eosio::name coopname, eosio::name username, uint64_t exchange_id);
 

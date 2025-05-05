@@ -1,7 +1,7 @@
 /**
  * @brief Принимаем запрос на повстку дня для голосования совета о приёме инвестиций по УХД
  */
-[[eosio::action]] void soviet::createagenda(eosio::name coopname, eosio::name username, eosio::name type, checksum256 hash, name callback_contract, name confirm_callback, name decline_callback, document statement, std::string meta){
+[[eosio::action]] void soviet::createagenda(eosio::name coopname, eosio::name username, eosio::name type, checksum256 hash, name callback_contract, name confirm_callback, name decline_callback, document2 statement, std::string meta){
   auto payer = check_auth_and_get_payer_or_fail(contracts_whitelist);
   
   decisions_index decisions(_soviet, coopname.value);

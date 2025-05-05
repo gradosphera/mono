@@ -1,4 +1,4 @@
-void capital::createdebt(name coopname, name username, checksum256 assignment_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document statement) {
+void capital::createdebt(name coopname, name username, checksum256 assignment_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document2 statement) {
   require_auth(coopname);
   
   verify_document_or_fail(statement);

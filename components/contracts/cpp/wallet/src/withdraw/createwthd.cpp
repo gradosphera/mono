@@ -1,7 +1,7 @@
 /**
  * @ingroup public_actions
  */
-void wallet::createwthd(eosio::name coopname, eosio::name username, checksum256 withdraw_hash, eosio::asset quantity, document statement) {
+void wallet::createwthd(eosio::name coopname, eosio::name username, checksum256 withdraw_hash, eosio::asset quantity, document2 statement) {
   
   require_auth(coopname);
 

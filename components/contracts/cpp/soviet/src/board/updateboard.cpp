@@ -22,7 +22,7 @@ void soviet::updateboard(eosio::name coopname, eosio::name username, uint64_t bo
   
   check_auth_or_fail(_soviet, coopname, username, "updateboard"_n);
   
-  cooperatives_index coops(_registrator, _registrator.value);
+  cooperatives2_index coops(_registrator, _registrator.value);
   auto org = coops.find(coopname.value);
   eosio::check(org != coops.end(), "Организация не найдена");
   eosio::check(org -> is_coop(), "Организация - не кооператив");

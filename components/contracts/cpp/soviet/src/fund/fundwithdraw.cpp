@@ -4,7 +4,7 @@
 
 * @note Авторизация требуется от аккаунта: @p _fund
 */
-void soviet::fundwithdraw(eosio::name coopname, eosio::name username, eosio::name type, uint64_t withdraw_id, document document) { 
+void soviet::fundwithdraw(eosio::name coopname, eosio::name username, eosio::name type, uint64_t withdraw_id, document2 document) { 
   require_auth(_fund);
   
   decisions_index decisions(_soviet, coopname.value);
@@ -40,7 +40,7 @@ void soviet::subaccum_effect(eosio::name executer, eosio::name coopname, uint64_
   auto withdraw = fundwithdraws.find(secondary_id);
   eosio::check(withdraw != fundwithdraws.end(), "Объект не найден");
   eosio::name username = withdraw -> username;
-  document document = withdraw -> document;
+  document2 document = withdraw -> document;
 
   action(
       permission_level{ _soviet, "active"_n},

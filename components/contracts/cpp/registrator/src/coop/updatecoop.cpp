@@ -24,7 +24,7 @@
 
   eosio::check(account != accounts.end(), "Аккаунт не зарегистрирован");
 
-  cooperatives_index coops(_registrator, _registrator.value);
+  cooperatives2_index coops(_registrator, _registrator.value);
   auto org = coops.find(coopname.value);
 
   eosio::check(org != coops.end(), "Организация не найдена");

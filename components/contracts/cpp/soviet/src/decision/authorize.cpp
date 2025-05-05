@@ -10,7 +10,7 @@
 * 
 * @note Авторизация требуется от аккаунта: @p chairman
 */
-void soviet::authorize(eosio::name coopname, eosio::name chairman, uint64_t decision_id, document document) { 
+void soviet::authorize(eosio::name coopname, eosio::name chairman, uint64_t decision_id, document2 document) { 
   require_auth(chairman);
 
   boards_index boards(_soviet, coopname.value);

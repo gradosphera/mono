@@ -6,7 +6,7 @@ namespace Registrator {
     eosio::name braname;
     name status; ///< created | payed
     eosio::time_point_sec created_at; ///< Время регистрации аккаунта.
-    document statement; ///< Заявление на вступление
+    document2 statement; ///< Заявление на вступление
     checksum256 registration_hash;///< Идентификатор платежа регистрационного взноса
     eosio::asset initial;
     eosio::asset minimum;

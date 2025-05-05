@@ -70,9 +70,9 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
   eosio::asset amount;                         ///< Сумма расхода.
   std::string description;                     ///< Публичное описание расхода. 
 
-  document expense_statement;                          ///< Служебная записка
-  document approved_statement;                 ///< принятая записка председателем или доверенным
-  document authorization;                      ///< утвержденная записка советом
+  document2 expense_statement;                          ///< Служебная записка
+  document2 approved_statement;                 ///< принятая записка председателем или доверенным
+  document2 authorization;                      ///< утвержденная записка советом
                                   
   time_point_sec spended_at = current_time_point();  ///< Дата и время создания расхода.
 
@@ -148,8 +148,8 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] invest {
     eosio::asset amount = asset(0, _root_govern_symbol); ///< Сумма инвестиции.
     name status;                                ///< created | signed | authorized | blocked
     time_point_sec invested_at;                 ///< Дата приёма инвестиции.
-    document invest_statement;                         ///< Заявление на зачёт из кошелька.
-    document approved_statement;              ///< Подпись председателя на принятом заявлении. 
+    document2 invest_statement;                         ///< Заявление на зачёт из кошелька.
+    document2 approved_statement;              ///< Подпись председателя на принятом заявлении. 
     
     uint64_t primary_key() const { return id; } ///< Основной ключ.
     uint64_t by_username() const { return username.value; } ///< Индекс по имени аккаунта.
@@ -177,9 +177,9 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] contributor {
     checksum256 project_hash;
     name status;
     time_point_sec created_at;
-    document agreement;
-    document approved_agreement;
-    document authorization;
+    document2 agreement;
+    document2 approved_agreement;
+    document2 authorization;
 
     eosio::asset invested = asset(0, _root_govern_symbol);
     
@@ -352,11 +352,11 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] result {
     eosio::asset available_for_return = asset(0, _root_govern_symbol);
     eosio::asset available_for_convert = asset(0, _root_govern_symbol);
         
-    document result_statement; ///< Заявление
-    document approved_statement; ///< Принятое заявление
-    document authorization; ///< Решение совета
-    document act1; ///< Акт1
-    document act2; ///< Акт2
+    document2 result_statement; ///< Заявление
+    document2 approved_statement; ///< Принятое заявление
+    document2 authorization; ///< Решение совета
+    document2 act1; ///< Акт1
+    document2 act2; ///< Акт2
     
     uint64_t primary_key() const { return id; }     ///< Основной ключ.
     uint64_t by_username() const { return username.value; } ///< Индекс по владельцу
@@ -393,7 +393,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] convert {
 
     eosio::asset convert_amount = asset(0, _root_govern_symbol);
 
-    document convert_statement; ///< Заявление
+    document2 convert_statement; ///< Заявление
 
     time_point_sec created_at = current_time_point();
     
@@ -518,14 +518,14 @@ namespace capital_tables {
       name username;                              ///< Имя аккаунта участника, запрашивающего возврат.
       name status = "created"_n;                  ///< Статус взноса-возврата (created | approved | )
       asset amount = asset(0, _root_govern_symbol);      ///< Запрошенная сумма для возврата.
-      document contribution_statement;            ///< Заявление на паевой взнос авторскими правами           
-      document return_statement;                  ///< Заявление на возврат паевого взноса деньгами
+      document2 contribution_statement;            ///< Заявление на паевой взнос авторскими правами           
+      document2 return_statement;                  ///< Заявление на возврат паевого взноса деньгами
       
-      document approved_contribution_statement;   ///< Принятое председателем заявление на взнос
-      document approved_return_statement;         ///< Принятое председателем заявление на возврат взноса деньгами
+      document2 approved_contribution_statement;   ///< Принятое председателем заявление на взнос
+      document2 approved_return_statement;         ///< Принятое председателем заявление на возврат взноса деньгами
       
-      document authorized_contribution_statement; ///< Решение совета на приём взноса
-      document authorized_return_statement;       ///< Решение совета на возврат взноса
+      document2 authorized_contribution_statement; ///< Решение совета на приём взноса
+      document2 authorized_return_statement;       ///< Решение совета на возврат взноса
       
       time_point_sec created_at = current_time_point();                   ///< Дата и время создания действия.                       ///< Время создания запроса.
       
@@ -550,9 +550,9 @@ namespace capital_tables {
       name username;                              ///< Имя аккаунта участника, запрашивающего возврат.
       name status = "created"_n;                  ///< Статус взноса-возврата (created | approved | )
       asset amount = asset(0, _root_govern_symbol);      ///< Запрошенная сумма для возврата.
-      document return_statement;                  ///< Заявление на возврат паевого взноса деньгами
+      document2 return_statement;                  ///< Заявление на возврат паевого взноса деньгами
       
-      document approved_return_statement;         ///< Принятое председателем заявление на возврат взноса деньгами
+      document2 approved_return_statement;         ///< Принятое председателем заявление на возврат взноса деньгами
       
       time_point_sec created_at = current_time_point();                   ///< Дата и время создания действия.                       ///< Время создания запроса.
       
@@ -578,9 +578,9 @@ namespace capital_tables {
       name username;                              ///< Имя аккаунта участника, запрашивающего возврат.
       name status = "created"_n;                  ///< Статус взноса-возврата (created | approved | )
       asset amount = asset(0, _root_govern_symbol);      ///< Запрошенная сумма для возврата.
-      document return_statement;                  ///< Заявление на возврат паевого взноса деньгами
+      document2 return_statement;                  ///< Заявление на возврат паевого взноса деньгами
       
-      document approved_return_statement;         ///< Принятое председателем заявление на возврат взноса деньгами
+      document2 approved_return_statement;         ///< Принятое председателем заявление на возврат взноса деньгами
       
       time_point_sec created_at = current_time_point();                   ///< Дата и время создания действия.                       ///< Время создания запроса.
       

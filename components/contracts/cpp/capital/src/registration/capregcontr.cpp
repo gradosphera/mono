@@ -5,7 +5,7 @@
  * @param application 
  * @param contributor_id 
  */
-void capital::capregcontr(eosio::name coopname, uint64_t contributor_id, document authorization) {
+void capital::capregcontr(eosio::name coopname, uint64_t contributor_id, document2 authorization) {
   require_auth(_soviet);
   
   contributor_index contributors(_capital, coopname.value);

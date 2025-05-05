@@ -41,7 +41,6 @@
 
 #include "src/doc/declinedoc.cpp"
 #include "src/doc/newact.cpp"
-#include "src/doc/newbatch.cpp"
 #include "src/doc/newdecision.cpp"
 #include "src/doc/newdeclined.cpp"
 #include "src/doc/newresolved.cpp"

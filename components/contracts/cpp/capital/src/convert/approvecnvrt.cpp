@@ -1,4 +1,4 @@
-void capital::approvecnvrt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 convert_hash, document approved_statement){
+void capital::approvecnvrt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 convert_hash, document2 approved_statement){
   check_auth_or_fail(_capital, coopname, application, "approvecnvrt"_n);
   
   verify_document_or_fail(approved_statement);

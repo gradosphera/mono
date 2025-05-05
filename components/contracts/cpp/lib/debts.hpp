@@ -8,9 +8,9 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] debt {
   checksum256      project_hash;
   time_point_sec   repaid_at;
   asset            amount;
-  document         statement;
-  document         approved_statement;
-  document         authorization;
+  document2         statement;
+  document2         approved_statement;
+  document2         authorization;
   std::string      memo;
   
   uint64_t primary_key() const { return id; }

@@ -1,4 +1,4 @@
-[[eosio::action]] void soviet::newdecision(eosio::name coopname, eosio::name username, eosio::name action, uint64_t decision_id, document document) {
+[[eosio::action]] void soviet::newdecision(eosio::name coopname, eosio::name username, eosio::name action, checksum256 hash, document2 document) {
   require_auth(_soviet);
 
   require_recipient(coopname);

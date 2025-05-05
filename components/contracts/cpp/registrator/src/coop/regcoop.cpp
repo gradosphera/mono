@@ -6,7 +6,7 @@
 *
 * @note Авторизация требуется от одного из аккаунтов: @p coopname || username
 */
-[[eosio::action]] void registrator::regcoop(eosio::name coopname, eosio::name username, org_data params, document document)
+[[eosio::action]] void registrator::regcoop(eosio::name coopname, eosio::name username, org_data params, document2 document)
 {
   check_auth_or_fail(_registrator, coopname, username, "regcoop"_n);
   
@@ -22,7 +22,7 @@
   
   eosio::check(account->type == "organization"_n, "Только организация может быть подключена к системе");
 
-  cooperatives_index coops(_registrator, _registrator.value);
+  cooperatives2_index coops(_registrator, _registrator.value);
   eosio::check(params.initial.symbol == params.minimum.symbol && params.initial.symbol == _root_govern_symbol, "Неверные символы для взносов");
   eosio::check(params.org_initial.symbol == params.org_minimum.symbol && params.org_initial.symbol == _root_govern_symbol, "Неверные символы для взносов");  
   eosio::check(params.initial.amount > 0 && params.org_initial.amount > 0 && params.minimum.amount > 0 && params.org_minimum.amount > 0, "Вступительный и минимальный паевые взносы должны быть положительными");

@@ -228,7 +228,7 @@ struct [[eosio::table, eosio::contract(SOVIET)]] decision {
   
   eosio::name type; ///< Тип решения: // joincoop | change | ...
   uint64_t batch_id; ///< Идентификатор карточки, связанной с типом решения.
-  document statement; ///< Документ заявления
+  document2 statement; ///< Документ заявления
   
   std::vector<eosio::name> votes_for; ///< Список имен, голосовавших "за" решение.
   std::vector<eosio::name> votes_against; ///< Список имен, голосовавших "против" решения.
@@ -237,7 +237,7 @@ struct [[eosio::table, eosio::contract(SOVIET)]] decision {
   bool approved = false; ///< Сигнальный флаг, указывающий, что решение советом принято.
   bool authorized = false; ///< Флаг, указывающий, что получена авторизация председателя после голосования и валидации до исполнения.
   eosio::name authorized_by; ///< Имя аккаунта председателя
-  document authorization; ///< Документ подписанного решения председателем
+  document2 authorization; ///< Документ подписанного решения председателем
 
   eosio::time_point_sec created_at; ///< Время создания карточки решения.
   

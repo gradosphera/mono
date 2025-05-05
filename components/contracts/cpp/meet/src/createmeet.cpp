@@ -1,4 +1,4 @@
-void meet::createmeet(name coopname, checksum256 hash, eosio::name initiator, name presider, name secretary, std::vector<meet_point> agenda, document proposal, time_point_sec open_at, time_point_sec close_at) {
+void meet::createmeet(name coopname, checksum256 hash, eosio::name initiator, name presider, name secretary, std::vector<meet_point> agenda, document2 proposal, time_point_sec open_at, time_point_sec close_at) {
   require_auth(coopname);
   
   verify_document_or_fail(proposal);

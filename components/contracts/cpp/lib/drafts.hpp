@@ -40,13 +40,15 @@ struct document2 {
     std::vector<signature_info> signatures;
 };
 
-void verify_document_or_fail(const document &doc)
+void verify_document_or_fail(const document2 &doc)
 {
-  // Проверка завершится прерыванием, если восстановление подписи провалится
-  assert_recover_key(doc.hash, doc.signature, doc.public_key);
+  for (const auto &sig : doc.signatures) {
+    // Проверка завершится прерыванием, если восстановление подписи провалится
+    assert_recover_key(doc.hash, sig.signature, sig.public_key);
+  }
 };
 
-bool is_empty_document(const document &doc)
+bool is_empty_document(const document2 &doc)
 {
     constexpr checksum256 EMPTY_HASH = checksum256(); // Все нули по умолчанию
     
@@ -99,5 +101,4 @@ typedef eosio::multi_index<
         "bydraftlang"_n,
         eosio::const_mem_fun<translation, uint128_t, &translation::by_draft_lang>>>
     translations_index;
-
 

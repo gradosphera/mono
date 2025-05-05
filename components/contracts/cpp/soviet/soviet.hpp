@@ -41,23 +41,22 @@ public:
 
   //ниже реестр хранилища документов
   
-  //черновик пачки
-  [[eosio::action]] void newsubmitted(eosio::name coopname, eosio::name username, eosio::name action, uint64_t decision_id, document document);
   
   //документ
-  [[eosio::action]] void newresolved(eosio::name coopname, eosio::name username, eosio::name action, uint64_t decision_id, document document);
-  [[eosio::action]] void newact(eosio::name coopname, eosio::name username, eosio::name action, uint64_t decision_id, document document);
-  [[eosio::action]] void newdecision(eosio::name coopname, eosio::name username,  eosio::name action, uint64_t decision_id, document document);
-  [[eosio::action]] void newbatch(eosio::name coopname, eosio::name action, uint64_t batch_id);
-  [[eosio::action]] void newdeclined(eosio::name coopname, eosio::name username, document document);
+  [[eosio::action]] void newsubmitted(eosio::name coopname, eosio::name username, eosio::name action, checksum256 hash, document2 document);
+  [[eosio::action]] void newresolved(eosio::name coopname, eosio::name username, eosio::name action, checksum256 hash, document2 document);
+  [[eosio::action]] void newdecision(eosio::name coopname, eosio::name username,  eosio::name action, checksum256 hash, document2 document);
+  
+  [[eosio::action]] void newact(eosio::name coopname, eosio::name username, eosio::name action, checksum256 hash, document2 document);
+  [[eosio::action]] void newdeclined(eosio::name coopname, eosio::name username, checksum256 hash, document2 document);
 
-  [[eosio::action]] void declinedoc(eosio::name coopname, eosio::name username, document document);
+  [[eosio::action]] void declinedoc(eosio::name coopname, eosio::name username, checksum256 hash, document2 document);
 
   //approves
   [[eosio::action]] void createapprv(CREATEAPPRV_SIGNATURE);
 
   [[eosio::action]]
-  void confirmapprv(eosio::name coopname, checksum256 approval_hash, document approved_document);
+  void confirmapprv(eosio::name coopname, checksum256 approval_hash, document2 approved_document);
 
   [[eosio::action]]
   void declineapprv(eosio::name coopname, checksum256 approval_hash, std::string reason);
@@ -75,7 +74,7 @@ public:
   static void make_base_coagreements(eosio::name coopname, eosio::symbol govern_symbol);
   
   //chairman.cpp
-  [[eosio::action]] void authorize(eosio::name coopname, eosio::name chairman, uint64_t decision_id, document document);
+  [[eosio::action]] void authorize(eosio::name coopname, eosio::name chairman, uint64_t decision_id, document2 document);
   [[eosio::action]] void createboard(eosio::name coopname, eosio::name username, eosio::name type, std::vector<board_member> members, std::string name, std::string description);
   [[eosio::action]] void updateboard(eosio::name coopname, eosio::name username, uint64_t board_id, std::vector<board_member> members, std::string name, std::string description);
   
@@ -105,14 +104,14 @@ public:
   [[eosio::action]] void disableprog(eosio::name coopname, uint64_t program_id);
   
   //agreements.cpp
-  [[eosio::action]] void sndagreement(eosio::name coopname, eosio::name administrator, eosio::name username, eosio::name agreement_type, document document);
+  [[eosio::action]] void sndagreement(eosio::name coopname, eosio::name administrator, eosio::name username, eosio::name agreement_type, document2 document);
   [[eosio::action]] void confirmagree(eosio::name coopname, eosio::name administrator, eosio::name username, uint64_t agreement_id);
   [[eosio::action]] void declineagree(eosio::name coopname, eosio::name administrator, eosio::name username, uint64_t agreement_id, std::string comment);
   [[eosio::action]] void migrateagree(eosio::name coopname, uint64_t agreement_id);
   
   
   //decisions
-  [[eosio::action]] void withdraw(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document statement);
+  [[eosio::action]] void withdraw(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document2 statement);
   [[eosio::action]] void cancelexprd(eosio::name coopname, uint64_t decision_id);
 
   //contributions.cpp
@@ -137,18 +136,18 @@ public:
 
   //fund.cpp
   void subaccum_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id, uint64_t program_id);
-  [[eosio::action]] void fundwithdraw(eosio::name coopname, eosio::name username, eosio::name type, uint64_t withdraw_id, document document);
+  [[eosio::action]] void fundwithdraw(eosio::name coopname, eosio::name username, eosio::name type, uint64_t withdraw_id, document2 document);
   
   //participants.cpp
   [[eosio::action]] void block(eosio::name coopname, eosio::name admin, eosio::name username, std::string message);
   [[eosio::action]] void unblock(eosio::name coopname, eosio::name admin, eosio::name username, bool is_registration, std::string message);
     
   //branches.cpp
-  [[eosio::action]] void selectbranch(eosio::name coopname, eosio::name username, eosio::name braname, document document);
+  [[eosio::action]] void selectbranch(eosio::name coopname, eosio::name username, eosio::name braname, document2 document);
   
   //decisions.cpp
   void freedecision_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
-  [[eosio::action]] void freedecision(eosio::name coopname, eosio::name username, document document, std::string meta);
+  [[eosio::action]] void freedecision(eosio::name coopname, eosio::name username, document2 document, std::string meta);
 
   //branch.cpp
   [[eosio::action]] void deletebranch(eosio::name coopname, eosio::name braname);
@@ -156,10 +155,10 @@ public:
   //capital.cpp
   void capital_return_on_withdraw_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
   
-  [[eosio::action]] void capregcontr(eosio::name coopname, eosio::name username, uint64_t contributor_id, document statement, std::string meta);
+  [[eosio::action]] void capregcontr(eosio::name coopname, eosio::name username, uint64_t contributor_id, document2 statement, std::string meta);
   void capital_register_contributor_authorize_action_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
   void capital_invest_authorize_action_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
-  [[eosio::action]] void capauthinvst(eosio::name coopname, eosio::name username, uint64_t invest_id, document statement, std::string meta);
+  [[eosio::action]] void capauthinvst(eosio::name coopname, eosio::name username, uint64_t invest_id, document2 statement, std::string meta);
   
 };
   

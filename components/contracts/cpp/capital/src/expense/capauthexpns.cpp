@@ -1,4 +1,4 @@
-void capital::capauthexpns(eosio::name coopname, checksum256 expense_hash, document authorization) {
+void capital::capauthexpns(eosio::name coopname, checksum256 expense_hash, document2 authorization) {
   require_auth(_soviet);
   
   auto exist_expense = get_expense(coopname, expense_hash);

@@ -3,7 +3,7 @@
 
   auto cooperative = get_cooperative_or_fail(coopname);
   
-  cooperatives_index coops(_registrator, _registrator.value);
+  cooperatives2_index coops(_registrator, _registrator.value);
   auto coop = coops.find(coopname.value);
   
   coops.modify(coop, _branch, [&](auto &c){

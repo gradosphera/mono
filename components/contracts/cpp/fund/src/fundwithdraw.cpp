@@ -8,7 +8,7 @@
 [[eosio::action]] void fund::fundwithdraw(eosio::name coopname,
                                           eosio::name username,
                                           eosio::name type, uint64_t fund_id,
-                                          document document,
+                                          document2 document,
                                           eosio::asset quantity,
                                           std::string bank_data_id) {
   eosio::check(type == _afund_withdraw_action || type == _efund_withdraw_action,

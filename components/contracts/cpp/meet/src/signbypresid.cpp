@@ -1,4 +1,4 @@
-void meet::signbypresid(name coopname, name username, checksum256 hash, document presider_decision) {
+void meet::signbypresid(name coopname, name username, checksum256 hash, document2 presider_decision) {
     require_auth(coopname);
 
     // 1. Находим собрание по хэшу

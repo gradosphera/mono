@@ -38,9 +38,9 @@ public:
   [[eosio::action]] void updateaccnt(eosio::name username, eosio::name account_to_change, std::string meta);
   [[eosio::action]] void updatecoop(eosio::name coopname, eosio::name username, eosio::asset initial, eosio::asset minimum, eosio::asset org_initial, eosio::asset org_minimum, std::string announce, std::string description);
 
-  [[eosio::action]] void reguser(eosio::name coopname, eosio::name braname, eosio::name username, eosio::name type, document statement, checksum256 registration_hash);
+  [[eosio::action]] void reguser(eosio::name coopname, eosio::name braname, eosio::name username, eosio::name type, document2 statement, checksum256 registration_hash);
 
-  [[eosio::action]] void regcoop(eosio::name coopname, eosio::name username, org_data params, document document);
+  [[eosio::action]] void regcoop(eosio::name coopname, eosio::name username, org_data params, document2 document);
   [[eosio::action]] void delcoop(eosio::name registrator, eosio::name coopname);  
   [[eosio::action]] void stcoopstatus(eosio::name coopname, eosio::name username, eosio::name status);
   
@@ -57,7 +57,7 @@ public:
   
   [[eosio::action]] void changekey(eosio::name coopname, eosio::name changer, eosio::name username, eosio::public_key public_key);
   
-  [[eosio::action]] void confirmreg(eosio::name coopname, checksum256 registration_hash, document authorization);
+  [[eosio::action]] void confirmreg(eosio::name coopname, checksum256 registration_hash, document2 authorization);
   [[eosio::action]] void confirmpay(name coopname, checksum256 registration_hash);
   [[eosio::action]] void declinepay(name coopname, checksum256 registration_hash, std::string reason);
   [[eosio::action]] void declinereg(name coopname, checksum256 registration_hash, std::string reason);

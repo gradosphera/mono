@@ -42,7 +42,7 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
     a.created_at = current_time_point();
   });
   
-  auto empty_doc = document{};
+  auto empty_doc = document2{};
   
   //отправить на approve председателю
   Action::send<createapprv_interface>(

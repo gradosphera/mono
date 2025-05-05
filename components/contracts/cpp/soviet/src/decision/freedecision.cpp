@@ -1,4 +1,4 @@
-[[eosio::action]] void soviet::freedecision(eosio::name coopname, eosio::name username, document document, std::string meta) {
+[[eosio::action]] void soviet::freedecision(eosio::name coopname, eosio::name username, document2 document, std::string meta) {
   
   check_auth_or_fail(_soviet, coopname, username, "freedecision"_n);
   

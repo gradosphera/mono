@@ -1,4 +1,4 @@
-void meet::authmeet(eosio::name coopname, checksum256 hash, document authorization) {
+void meet::authmeet(eosio::name coopname, checksum256 hash, document2 authorization) {
   require_auth(_soviet);
   
   auto exist_meet = get_meet(coopname, hash);
