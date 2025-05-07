@@ -4,58 +4,49 @@ import { rawBlockchainAccountSelector } from '../common/blockchainAccountSelecto
 import { rawBlockchainInfoSelector } from './blockchainInfoSelector'
 import { rawCooperatorAccountSelector } from './cooperatorAccountSelector'
 
+export const rawPublicChairmanSelector = {
+  first_name: true,
+  last_name: true,
+  middle_name: true,
+}
+
+export const rawOrganizationDetailsSelector = {
+  inn: true,
+  kpp: true,
+  ogrn: true,
+}
+
 export const rawContactsSelector = {
-  chairman: {
-    first_name: true,
-    last_name: true,
-    middle_name: true,
-  },
-  details: {
-    inn: true,
-    kpp: true,
-    ogrn: true,
-  },
+  chairman: rawPublicChairmanSelector,
+  details: rawOrganizationDetailsSelector,
   email: true,
   full_address: true,
   full_name: true,
   phone: true,
 }
 
+export const rawAgreementVarSelector = {
+  protocol_day_month_year: true,
+  protocol_number: true,
+}
+
 export const rawVarsSelector = {
   confidential_email: true,
   confidential_link: true,
   contact_email: true,
-  coopenomics_agreement: {
-    protocol_day_month_year: true,
-    protocol_number: true,
-  },
+  coopenomics_agreement: rawAgreementVarSelector,
   coopname: true,
   full_abbr: true,
   full_abbr_dative: true,
   full_abbr_genitive: true,
   name: true,
-  participant_application: {
-    protocol_day_month_year: true,
-    protocol_number: true,
-  },
+  participant_application: rawAgreementVarSelector,
   passport_request: true,
-  privacy_agreement: {
-    protocol_day_month_year: true,
-    protocol_number: true,
-  },
+  privacy_agreement: rawAgreementVarSelector,
   short_abbr: true,
-  signature_agreement: {
-    protocol_day_month_year: true,
-    protocol_number: true,
-  },
-  user_agreement: {
-    protocol_day_month_year: true,
-    protocol_number: true,
-  },
-  wallet_agreement: {
-    protocol_day_month_year: true,
-    protocol_number: true,
-  },
+  signature_agreement: rawAgreementVarSelector,
+  user_agreement: rawAgreementVarSelector,
+  wallet_agreement: rawAgreementVarSelector,
   website: true,
 }
 

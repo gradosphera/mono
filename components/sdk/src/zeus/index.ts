@@ -1090,14 +1090,18 @@ export type ValueTypes = {
 	version?: string | undefined | null | Variable<any, string>
 };
 	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация для создания протокола решения */
 	meta: ValueTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -1146,14 +1150,18 @@ export type ValueTypes = {
 	version?: string | undefined | null | Variable<any, string>
 };
 	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация */
 	meta: ValueTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -1246,14 +1254,18 @@ export type ValueTypes = {
 	version?: string | undefined | null | Variable<any, string>
 };
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация для создания протокола решения */
 	meta: ValueTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -1312,14 +1324,18 @@ export type ValueTypes = {
 	version?: string | undefined | null | Variable<any, string>
 };
 	["AssetContributionActSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ValueTypes["AssetContributionActSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["AssetContributionActSignedMetaDocumentInput"]: {
 	/** Идентификатор акта */
@@ -1406,14 +1422,18 @@ export type ValueTypes = {
 	version?: string | undefined | null | Variable<any, string>
 };
 	["AssetContributionStatementSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["AssetContributionStatementSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -2041,9 +2061,9 @@ export type ValueTypes = {
 	username: string | Variable<any, string>
 };
 	["DocumentAggregate"]: AliasType<{
+	document?:ValueTypes["SignedDigitalDocument"],
 	hash?:boolean | `@${string}`,
 	rawDocument?:ValueTypes["GeneratedDocument"],
-	signatures?:ValueTypes["SignedDigitalDocument"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Комплексный объект папки цифрового документа с агрегатами, который включает в себя заявление, решение, акты и связанные документы */
@@ -2750,13 +2770,17 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	version?: string | undefined | null | Variable<any, string>
 };
 	["ParticipantApplicationSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	meta: ValueTypes["ParticipantApplicationSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["ParticipantApplicationSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -2965,14 +2989,18 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	version?: string | undefined | null | Variable<any, string>
 };
 	["ProjectFreeDecisionSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ValueTypes["ProjectFreeDecisionSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -3232,14 +3260,18 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	version?: string | undefined | null | Variable<any, string>
 };
 	["ReturnByAssetActSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ValueTypes["ReturnByAssetActSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["ReturnByAssetActSignedMetaDocumentInput"]: {
 	/** Идентификатор акта */
@@ -3326,14 +3358,18 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	version?: string | undefined | null | Variable<any, string>
 };
 	["ReturnByAssetStatementSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ValueTypes["ReturnByAssetStatementSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -3401,14 +3437,18 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	username: string | Variable<any, string>
 };
 	["SelectBranchSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация для документа выбора кооперативного участка */
 	meta: ValueTypes["SelectBranchSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["SelectBranchSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -3472,35 +3512,71 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
-	["SignedBlockchainDocument"]: AliasType<{
-	/** Хеш документа */
-	hash?:boolean | `@${string}`,
-	/** Метаинформация документа */
-	meta?:boolean | `@${string}`,
-	/** Публичный ключ документа */
-	public_key?:boolean | `@${string}`,
-	/** Подпись документа */
-	signature?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["SignedDigitalDocument"]: AliasType<{
-	hash?:boolean | `@${string}`,
+	["SignatureInfo"]: AliasType<{
+	id?:boolean | `@${string}`,
 	is_valid?:boolean | `@${string}`,
 	meta?:boolean | `@${string}`,
 	public_key?:boolean | `@${string}`,
 	signature?:boolean | `@${string}`,
-	signer?:ValueTypes["UserDataUnion"],
+	signed_at?:boolean | `@${string}`,
+	signed_hash?:boolean | `@${string}`,
+	signer?:boolean | `@${string}`,
+	signer_info?:ValueTypes["UserDataUnion"],
+		__typename?: boolean | `@${string}`
+}>;
+	["SignatureInfoInput"]: {
+	/** Идентификатор номера подписи */
+	id: number | Variable<any, string>,
+	/** Мета-данные подписи */
+	meta: ValueTypes["JSON"] | Variable<any, string>,
+	/** Публичный ключ */
+	public_key: string | Variable<any, string>,
+	/** Подпись хэша */
+	signature: string | Variable<any, string>,
+	/** Время подписания */
+	signed_at: string | Variable<any, string>,
+	/** Подписанный хэш */
+	signed_hash: string | Variable<any, string>,
+	/** Аккаунт подписавшего */
+	signer: string | Variable<any, string>
+};
+	["SignedBlockchainDocument"]: AliasType<{
+	/** Хэш содержимого документа */
+	doc_hash?:boolean | `@${string}`,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash?:boolean | `@${string}`,
+	/** Метаинформация документа (в формате JSON-строки) */
+	meta?:boolean | `@${string}`,
+	/** Хэш мета-данных */
+	meta_hash?:boolean | `@${string}`,
+	/** Вектор подписей */
+	signatures?:ValueTypes["SignatureInfo"],
+	/** Версия стандарта документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["SignedDigitalDocument"]: AliasType<{
+	doc_hash?:boolean | `@${string}`,
+	hash?:boolean | `@${string}`,
+	meta?:boolean | `@${string}`,
+	meta_hash?:boolean | `@${string}`,
+	signatures?:ValueTypes["SignatureInfo"],
+	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["SignedDigitalDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация документа */
 	meta: ValueTypes["MetaDocumentInput"] | Variable<any, string>,
-	/** Публичный ключ документа */
-	public_key: string | Variable<any, string>,
-	/** Подпись документа */
-	signature: string | Variable<any, string>
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
 };
 	["SovietMemberInput"]: {
 	individual_data: ValueTypes["CreateIndividualDataInput"] | Variable<any, string>,
@@ -3988,14 +4064,18 @@ export type ResolverInputTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания протокола решения */
 	meta: ResolverInputTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -4044,14 +4124,18 @@ export type ResolverInputTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация */
 	meta: ResolverInputTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -4144,14 +4228,18 @@ export type ResolverInputTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания протокола решения */
 	meta: ResolverInputTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -4210,14 +4298,18 @@ export type ResolverInputTypes = {
 	version?: string | undefined | null
 };
 	["AssetContributionActSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ResolverInputTypes["AssetContributionActSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AssetContributionActSignedMetaDocumentInput"]: {
 	/** Идентификатор акта */
@@ -4304,14 +4396,18 @@ export type ResolverInputTypes = {
 	version?: string | undefined | null
 };
 	["AssetContributionStatementSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ResolverInputTypes["AssetContributionStatementSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AssetContributionStatementSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -4939,9 +5035,9 @@ export type ResolverInputTypes = {
 	username: string
 };
 	["DocumentAggregate"]: AliasType<{
+	document?:ResolverInputTypes["SignedDigitalDocument"],
 	hash?:boolean | `@${string}`,
 	rawDocument?:ResolverInputTypes["GeneratedDocument"],
-	signatures?:ResolverInputTypes["SignedDigitalDocument"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Комплексный объект папки цифрового документа с агрегатами, который включает в себя заявление, решение, акты и связанные документы */
@@ -5648,13 +5744,17 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	version?: string | undefined | null
 };
 	["ParticipantApplicationSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	meta: ResolverInputTypes["ParticipantApplicationSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ParticipantApplicationSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -5864,14 +5964,18 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	version?: string | undefined | null
 };
 	["ProjectFreeDecisionSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ResolverInputTypes["ProjectFreeDecisionSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -6131,14 +6235,18 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	version?: string | undefined | null
 };
 	["ReturnByAssetActSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ResolverInputTypes["ReturnByAssetActSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ReturnByAssetActSignedMetaDocumentInput"]: {
 	/** Идентификатор акта */
@@ -6225,14 +6333,18 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	version?: string | undefined | null
 };
 	["ReturnByAssetStatementSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ResolverInputTypes["ReturnByAssetStatementSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -6300,14 +6412,18 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	username: string
 };
 	["SelectBranchSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для документа выбора кооперативного участка */
 	meta: ResolverInputTypes["SelectBranchSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["SelectBranchSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -6371,35 +6487,71 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	/** Имя аккаунта пользователя */
 	username: string
 };
-	["SignedBlockchainDocument"]: AliasType<{
-	/** Хеш документа */
-	hash?:boolean | `@${string}`,
-	/** Метаинформация документа */
-	meta?:boolean | `@${string}`,
-	/** Публичный ключ документа */
-	public_key?:boolean | `@${string}`,
-	/** Подпись документа */
-	signature?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["SignedDigitalDocument"]: AliasType<{
-	hash?:boolean | `@${string}`,
+	["SignatureInfo"]: AliasType<{
+	id?:boolean | `@${string}`,
 	is_valid?:boolean | `@${string}`,
 	meta?:boolean | `@${string}`,
 	public_key?:boolean | `@${string}`,
 	signature?:boolean | `@${string}`,
-	signer?:ResolverInputTypes["UserDataUnion"],
+	signed_at?:boolean | `@${string}`,
+	signed_hash?:boolean | `@${string}`,
+	signer?:boolean | `@${string}`,
+	signer_info?:ResolverInputTypes["UserDataUnion"],
+		__typename?: boolean | `@${string}`
+}>;
+	["SignatureInfoInput"]: {
+	/** Идентификатор номера подписи */
+	id: number,
+	/** Мета-данные подписи */
+	meta: ResolverInputTypes["JSON"],
+	/** Публичный ключ */
+	public_key: string,
+	/** Подпись хэша */
+	signature: string,
+	/** Время подписания */
+	signed_at: string,
+	/** Подписанный хэш */
+	signed_hash: string,
+	/** Аккаунт подписавшего */
+	signer: string
+};
+	["SignedBlockchainDocument"]: AliasType<{
+	/** Хэш содержимого документа */
+	doc_hash?:boolean | `@${string}`,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash?:boolean | `@${string}`,
+	/** Метаинформация документа (в формате JSON-строки) */
+	meta?:boolean | `@${string}`,
+	/** Хэш мета-данных */
+	meta_hash?:boolean | `@${string}`,
+	/** Вектор подписей */
+	signatures?:ResolverInputTypes["SignatureInfo"],
+	/** Версия стандарта документа */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["SignedDigitalDocument"]: AliasType<{
+	doc_hash?:boolean | `@${string}`,
+	hash?:boolean | `@${string}`,
+	meta?:boolean | `@${string}`,
+	meta_hash?:boolean | `@${string}`,
+	signatures?:ResolverInputTypes["SignatureInfo"],
+	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["SignedDigitalDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация документа */
 	meta: ResolverInputTypes["MetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["SovietMemberInput"]: {
 	individual_data: ResolverInputTypes["CreateIndividualDataInput"],
@@ -6882,14 +7034,18 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания протокола решения */
 	meta: ModelTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -6938,14 +7094,18 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация */
 	meta: ModelTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -7038,14 +7198,18 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания протокола решения */
 	meta: ModelTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -7104,14 +7268,18 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["AssetContributionActSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ModelTypes["AssetContributionActSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AssetContributionActSignedMetaDocumentInput"]: {
 	/** Идентификатор акта */
@@ -7198,14 +7366,18 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["AssetContributionStatementSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ModelTypes["AssetContributionStatementSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AssetContributionStatementSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -7371,13 +7543,13 @@ export type ModelTypes = {
 	authorized: boolean,
 	authorized_by: string,
 	batch_id: number,
-	callback_contract: string,
-	confirm_callback: string,
+	callback_contract?: string | undefined | null,
+	confirm_callback?: string | undefined | null,
 	coopname: string,
 	created_at: string,
-	decline_callback: string,
+	decline_callback?: string | undefined | null,
 	expired_at: string,
-	hash: string,
+	hash?: string | undefined | null,
 	id: number,
 	meta: string,
 	statement: ModelTypes["SignedBlockchainDocument"],
@@ -7816,9 +7988,9 @@ export type ModelTypes = {
 	username: string
 };
 	["DocumentAggregate"]: {
-		hash: string,
-	rawDocument?: ModelTypes["GeneratedDocument"] | undefined | null,
-	signatures: Array<ModelTypes["SignedDigitalDocument"]>
+		document: ModelTypes["SignedDigitalDocument"],
+	hash: string,
+	rawDocument?: ModelTypes["GeneratedDocument"] | undefined | null
 };
 	/** Комплексный объект папки цифрового документа с агрегатами, который включает в себя заявление, решение, акты и связанные документы */
 ["DocumentPackageAggregate"]: {
@@ -8576,13 +8748,17 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["ParticipantApplicationSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	meta: ModelTypes["ParticipantApplicationSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ParticipantApplicationSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -8777,14 +8953,18 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["ProjectFreeDecisionSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ModelTypes["ProjectFreeDecisionSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -9044,14 +9224,18 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["ReturnByAssetActSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ModelTypes["ReturnByAssetActSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ReturnByAssetActSignedMetaDocumentInput"]: {
 	/** Идентификатор акта */
@@ -9138,14 +9322,18 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["ReturnByAssetStatementSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: ModelTypes["ReturnByAssetStatementSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -9212,14 +9400,18 @@ export type ModelTypes = {
 	username: string
 };
 	["SelectBranchSignedDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для документа выбора кооперативного участка */
 	meta: ModelTypes["SelectBranchSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["SelectBranchSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -9283,33 +9475,68 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
-	["SignedBlockchainDocument"]: {
-		/** Хеш документа */
-	hash: string,
-	/** Метаинформация документа */
-	meta: string,
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
-};
-	["SignedDigitalDocument"]: {
-		hash: string,
-	is_valid: boolean,
+	["SignatureInfo"]: {
+		id: number,
+	is_valid?: boolean | undefined | null,
 	meta: ModelTypes["JSON"],
 	public_key: string,
 	signature: string,
-	signer?: ModelTypes["UserDataUnion"] | undefined | null
+	signed_at: string,
+	signed_hash: string,
+	signer: string,
+	signer_info?: ModelTypes["UserDataUnion"] | undefined | null
+};
+	["SignatureInfoInput"]: {
+	/** Идентификатор номера подписи */
+	id: number,
+	/** Мета-данные подписи */
+	meta: ModelTypes["JSON"],
+	/** Публичный ключ */
+	public_key: string,
+	/** Подпись хэша */
+	signature: string,
+	/** Время подписания */
+	signed_at: string,
+	/** Подписанный хэш */
+	signed_hash: string,
+	/** Аккаунт подписавшего */
+	signer: string
+};
+	["SignedBlockchainDocument"]: {
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация документа (в формате JSON-строки) */
+	meta: string,
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfo"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["SignedDigitalDocument"]: {
+		doc_hash: string,
+	hash: string,
+	meta: ModelTypes["JSON"],
+	meta_hash: string,
+	signatures: Array<ModelTypes["SignatureInfo"]>,
+	version: string
 };
 	["SignedDigitalDocumentInput"]: {
-	/** Хэш документа */
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация документа */
 	meta: ModelTypes["MetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["SovietMemberInput"]: {
 	individual_data: ModelTypes["CreateIndividualDataInput"],
@@ -9789,14 +10016,18 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания протокола решения */
 	meta: GraphQLTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -9845,14 +10076,18 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация */
 	meta: GraphQLTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -9945,14 +10180,18 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания протокола решения */
 	meta: GraphQLTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -10011,14 +10250,18 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["AssetContributionActSignedDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: GraphQLTypes["AssetContributionActSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AssetContributionActSignedMetaDocumentInput"]: {
 		/** Идентификатор акта */
@@ -10105,14 +10348,18 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["AssetContributionStatementSignedDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: GraphQLTypes["AssetContributionStatementSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["AssetContributionStatementSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -10286,13 +10533,13 @@ export type GraphQLTypes = {
 	authorized: boolean,
 	authorized_by: string,
 	batch_id: number,
-	callback_contract: string,
-	confirm_callback: string,
+	callback_contract?: string | undefined | null,
+	confirm_callback?: string | undefined | null,
 	coopname: string,
 	created_at: string,
-	decline_callback: string,
+	decline_callback?: string | undefined | null,
 	expired_at: string,
-	hash: string,
+	hash?: string | undefined | null,
 	id: number,
 	meta: string,
 	statement: GraphQLTypes["SignedBlockchainDocument"],
@@ -10741,9 +10988,9 @@ export type GraphQLTypes = {
 };
 	["DocumentAggregate"]: {
 	__typename: "DocumentAggregate",
+	document: GraphQLTypes["SignedDigitalDocument"],
 	hash: string,
-	rawDocument?: GraphQLTypes["GeneratedDocument"] | undefined | null,
-	signatures: Array<GraphQLTypes["SignedDigitalDocument"]>
+	rawDocument?: GraphQLTypes["GeneratedDocument"] | undefined | null
 };
 	/** Комплексный объект папки цифрового документа с агрегатами, который включает в себя заявление, решение, акты и связанные документы */
 ["DocumentPackageAggregate"]: {
@@ -11521,13 +11768,17 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["ParticipantApplicationSignedDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	meta: GraphQLTypes["ParticipantApplicationSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ParticipantApplicationSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -11737,14 +11988,18 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["ProjectFreeDecisionSignedDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: GraphQLTypes["ProjectFreeDecisionSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -12012,14 +12267,18 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["ReturnByAssetActSignedDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: GraphQLTypes["ReturnByAssetActSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ReturnByAssetActSignedMetaDocumentInput"]: {
 		/** Идентификатор акта */
@@ -12106,14 +12365,18 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["ReturnByAssetStatementSignedDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для создания проекта свободного решения */
 	meta: GraphQLTypes["ReturnByAssetStatementSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -12181,14 +12444,18 @@ export type GraphQLTypes = {
 	username: string
 };
 	["SelectBranchSignedDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для документа выбора кооперативного участка */
 	meta: GraphQLTypes["SelectBranchSignedMetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["SelectBranchSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -12252,35 +12519,71 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
-	["SignedBlockchainDocument"]: {
-	__typename: "SignedBlockchainDocument",
-	/** Хеш документа */
-	hash: string,
-	/** Метаинформация документа */
-	meta: string,
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
-};
-	["SignedDigitalDocument"]: {
-	__typename: "SignedDigitalDocument",
-	hash: string,
-	is_valid: boolean,
+	["SignatureInfo"]: {
+	__typename: "SignatureInfo",
+	id: number,
+	is_valid?: boolean | undefined | null,
 	meta: GraphQLTypes["JSON"],
 	public_key: string,
 	signature: string,
-	signer?: GraphQLTypes["UserDataUnion"] | undefined | null
+	signed_at: string,
+	signed_hash: string,
+	signer: string,
+	signer_info?: GraphQLTypes["UserDataUnion"] | undefined | null
+};
+	["SignatureInfoInput"]: {
+		/** Идентификатор номера подписи */
+	id: number,
+	/** Мета-данные подписи */
+	meta: GraphQLTypes["JSON"],
+	/** Публичный ключ */
+	public_key: string,
+	/** Подпись хэша */
+	signature: string,
+	/** Время подписания */
+	signed_at: string,
+	/** Подписанный хэш */
+	signed_hash: string,
+	/** Аккаунт подписавшего */
+	signer: string
+};
+	["SignedBlockchainDocument"]: {
+	__typename: "SignedBlockchainDocument",
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация документа (в формате JSON-строки) */
+	meta: string,
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfo"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["SignedDigitalDocument"]: {
+	__typename: "SignedDigitalDocument",
+	doc_hash: string,
+	hash: string,
+	meta: GraphQLTypes["JSON"],
+	meta_hash: string,
+	signatures: Array<GraphQLTypes["SignatureInfo"]>,
+	version: string
 };
 	["SignedDigitalDocumentInput"]: {
-		/** Хэш документа */
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация документа */
 	meta: GraphQLTypes["MetaDocumentInput"],
-	/** Публичный ключ документа */
-	public_key: string,
-	/** Подпись документа */
-	signature: string
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
 };
 	["SovietMemberInput"]: {
 		individual_data: GraphQLTypes["CreateIndividualDataInput"],
@@ -12758,6 +13061,7 @@ type ZEUS_VARIABLES = {
 	["SetWifInput"]: ValueTypes["SetWifInput"];
 	["SignByPresiderOnAnnualGeneralMeetInput"]: ValueTypes["SignByPresiderOnAnnualGeneralMeetInput"];
 	["SignBySecretaryOnAnnualGeneralMeetInput"]: ValueTypes["SignBySecretaryOnAnnualGeneralMeetInput"];
+	["SignatureInfoInput"]: ValueTypes["SignatureInfoInput"];
 	["SignedDigitalDocumentInput"]: ValueTypes["SignedDigitalDocumentInput"];
 	["SovietMemberInput"]: ValueTypes["SovietMemberInput"];
 	["StartResetKeyInput"]: ValueTypes["StartResetKeyInput"];

@@ -1,5 +1,6 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { Selector, type ValueTypes } from '../../zeus/index'
+import { rawSignedBlockchainDocumentSelector } from '../documents/signedBlockchainDocumentSelector'
 
 // Селектор для cooperator_account
 export const rawCooperatorAccountSelector = {
@@ -7,12 +8,7 @@ export const rawCooperatorAccountSelector = {
   coop_type: true,
   created_at: true,
   description: true,
-  document: {
-    hash: true,
-    public_key: true,
-    meta: true,
-    signature: true,
-  },
+  document: rawSignedBlockchainDocumentSelector,
   initial: true,
   is_branched: true,
   is_cooperative: true,

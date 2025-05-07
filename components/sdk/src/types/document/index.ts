@@ -1,5 +1,4 @@
 import type { Cooperative } from 'cooptypes'
-import type { ModelTypes } from '../../zeus/index'
 
 /**
  * Интерфейс для метаданных документа.

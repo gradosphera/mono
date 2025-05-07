@@ -1,7 +1,6 @@
-import type { Cooperative } from 'cooptypes'
-import type { IGeneratedDocument, ISignedDocument, ISignatureInfo } from '../../types/document'
-import type { ModelTypes } from '../../zeus/index'
+import type { IGeneratedDocument, ISignatureInfo, ISignedDocument } from '../../types/document'
 import { PrivateKey } from '@wharfkit/antelope'
+import { Crypto } from '../crypto'
 
 /**
  * Класс для управления и подписания документов с использованием WIF-ключа.
@@ -47,6 +46,22 @@ export class Document {
   }
 
   /**
+   * Вычисляет meta_hash, hash и signed_hash по актуальной логике в зависимости от версии.
+   */
+  private async calculateHashes({ meta, documentHash, signed_at, version = '1' }: { meta: any, documentHash: string, signed_at: string, version?: string }): Promise<{ meta_hash: string, hash: string, signed_hash: string }> {
+    if (version === '1' || !version) {
+      const meta_hash = await Crypto.sha256(JSON.stringify(meta))
+      const hash = await Crypto.sha256(meta_hash + documentHash)
+      const signed_hash = await Crypto.sha256(hash + signed_at)
+      return { meta_hash, hash, signed_hash }
+    }
+    // Здесь можно добавить другие версии расчёта
+    // Например:
+    // if (version === '2') { ... }
+    throw new Error(`Неизвестная версия алгоритма: ${version}`)
+  }
+
+  /**
    * Подписывает документ и возвращает его в формате ISignedDocument.
    * @param document Сгенерированный документ для подписи.
    * @param account Имя аккаунта подписывающего (signer)
@@ -58,16 +73,19 @@ export class Document {
     document: IGeneratedDocument<T>,
     account: string,
     signatureId: number = 1,
-    version: string = '1.0'
+    version: string = '1',
   ): Promise<ISignedDocument<T>> {
     if (!this.wif)
       throw new Error(`Ключ не установлен, выполните вызов метода setWif перед подписью документа`)
 
     // Подпись хэша документа
     const digitalSignature = this.signDigest(document.hash)
-    
+
     // Текущая дата в формате ISO для поля signed_at
     const signed_at = new Date().toISOString()
+
+    // Вычисляем все хэши через отдельную функцию, передавая версию
+    const { meta_hash, hash, signed_hash } = await this.calculateHashes({ meta: document.meta, documentHash: document.hash, signed_at, version })
 
     // Создаем информацию о подписи
     const signatureInfo: ISignatureInfo = {
@@ -75,19 +93,18 @@ export class Document {
       signer: account,
       public_key: digitalSignature.public_key,
       signature: digitalSignature.signature,
-      signed_at
+      signed_at,
+      signed_hash,
+      meta: '',
     }
-
-    // Хэш метаданных (пока используем пустую строку, в будущем можно вычислять реальный хэш)
-    const meta_hash = document.hash // Заглушка, в реальном приложении нужно вычислять отдельно
 
     return {
       version,
-      hash: document.hash,
+      hash,
       doc_hash: document.hash, // Заглушка, в реальном приложении doc_hash может отличаться от основного хэша
       meta_hash,
       meta: document.meta,
-      signatures: [signatureInfo]
+      signatures: [signatureInfo],
     }
   }
 

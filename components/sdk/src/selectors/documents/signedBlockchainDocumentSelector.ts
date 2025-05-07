@@ -1,16 +1,18 @@
-import type { MakeAllFieldsRequired } from "../../utils/MakeAllFieldsRequired";
-import { Selector, type ModelTypes, type ValueTypes } from "../../zeus/index";
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
+import { rawSignatureInfoSelector } from './signatureInfoSelector'
 
 export const rawSignedBlockchainDocumentSelector = {
+  version: true,
   hash: true,
+  doc_hash: true,
+  meta_hash: true,
   meta: true,
-  public_key: true,
-  signature: true,
-};
-
+  signatures: rawSignatureInfoSelector,
+}
 
 // Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['SignedBlockchainDocument']> = rawSignedBlockchainDocumentSelector;
+const _validate: MakeAllFieldsRequired<ValueTypes['SignedBlockchainDocument']> = rawSignedBlockchainDocumentSelector
 
-export type SignedBlockchainDocumentModel = ModelTypes['SignedBlockchainDocument'];
-export const signedBlockchainDocumentSelector = Selector('SignedBlockchainDocument')(rawSignedBlockchainDocumentSelector);
+export type SignedBlockchainDocumentModel = ModelTypes['SignedBlockchainDocument']
+export const signedBlockchainDocumentSelector = Selector('SignedBlockchainDocument')(rawSignedBlockchainDocumentSelector)
