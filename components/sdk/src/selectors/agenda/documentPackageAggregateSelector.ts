@@ -18,7 +18,7 @@ export const rawExtendedBlockchainActionSelector = {
   },
 }
 
-/** ActDetailAggregate — для поля documentAggregate указываем union типов актов. */
+/** ActDetailAggregate — Аггрегат c документом для акта */
 export const rawActDetailAggregateSelector = {
   action: rawExtendedBlockchainActionSelector,
   documentAggregate: rawDocumentAggregateSelector,

@@ -24,7 +24,8 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	AnnualGeneralMeetingAgendaSignedDocumentInput:{
-		meta:"AnnualGeneralMeetingAgendaSignedMetaDocumentInput"
+		meta:"AnnualGeneralMeetingAgendaSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	AnnualGeneralMeetingAgendaSignedMetaDocumentInput:{
 
@@ -33,7 +34,8 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	AnnualGeneralMeetingDecisionSignedDocumentInput:{
-		meta:"AnnualGeneralMeetingDecisionSignedMetaDocumentInput"
+		meta:"AnnualGeneralMeetingDecisionSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	AnnualGeneralMeetingDecisionSignedMetaDocumentInput:{
 
@@ -48,7 +50,8 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	AnnualGeneralMeetingVotingBallotSignedDocumentInput:{
-		meta:"AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"
+		meta:"AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput:{
 
@@ -57,7 +60,8 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	AssetContributionActSignedDocumentInput:{
-		meta:"AssetContributionActSignedMetaDocumentInput"
+		meta:"AssetContributionActSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	AssetContributionActSignedMetaDocumentInput:{
 
@@ -69,7 +73,8 @@ export const AllTypesProps: Record<string,any> = {
 		request:"CommonRequestInput"
 	},
 	AssetContributionStatementSignedDocumentInput:{
-		meta:"AssetContributionStatementSignedMetaDocumentInput"
+		meta:"AssetContributionStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	AssetContributionStatementSignedMetaDocumentInput:{
 		request:"CommonRequestInput"
@@ -476,7 +481,8 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	ParticipantApplicationSignedDocumentInput:{
-		meta:"ParticipantApplicationSignedMetaDocumentInput"
+		meta:"ParticipantApplicationSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	ParticipantApplicationSignedMetaDocumentInput:{
 
@@ -492,7 +498,8 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	ProjectFreeDecisionSignedDocumentInput:{
-		meta:"ProjectFreeDecisionSignedMetaDocumentInput"
+		meta:"ProjectFreeDecisionSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	ProjectFreeDecisionSignedMetaDocumentInput:{
 
@@ -568,7 +575,8 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	ReturnByAssetActSignedDocumentInput:{
-		meta:"ReturnByAssetActSignedMetaDocumentInput"
+		meta:"ReturnByAssetActSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	ReturnByAssetActSignedMetaDocumentInput:{
 
@@ -580,7 +588,8 @@ export const AllTypesProps: Record<string,any> = {
 		request:"CommonRequestInput"
 	},
 	ReturnByAssetStatementSignedDocumentInput:{
-		meta:"ReturnByAssetStatementSignedMetaDocumentInput"
+		meta:"ReturnByAssetStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	ReturnByAssetStatementSignedMetaDocumentInput:{
 		request:"CommonRequestInput"
@@ -592,7 +601,8 @@ export const AllTypesProps: Record<string,any> = {
 		document:"SelectBranchSignedDocumentInput"
 	},
 	SelectBranchSignedDocumentInput:{
-		meta:"SelectBranchSignedMetaDocumentInput"
+		meta:"SelectBranchSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	SelectBranchSignedMetaDocumentInput:{
 
@@ -609,8 +619,12 @@ export const AllTypesProps: Record<string,any> = {
 	SignBySecretaryOnAnnualGeneralMeetInput:{
 		secretary_decision:"AnnualGeneralMeetingDecisionSignedDocumentInput"
 	},
+	SignatureInfoInput:{
+		meta:"JSON"
+	},
 	SignedDigitalDocumentInput:{
-		meta:"MetaDocumentInput"
+		meta:"MetaDocumentInput",
+		signatures:"SignatureInfoInput"
 	},
 	SovietMemberInput:{
 		individual_data:"CreateIndividualDataInput"
@@ -916,9 +930,9 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String"
 	},
 	DocumentAggregate:{
+		document:"SignedDigitalDocument",
 		hash:"String",
-		rawDocument:"GeneratedDocument",
-		signatures:"SignedDigitalDocument"
+		rawDocument:"GeneratedDocument"
 	},
 	DocumentPackageAggregate:{
 		acts:"ActDetailAggregate",
@@ -1321,19 +1335,32 @@ export const ReturnTypes: Record<string,any> = {
 	SbpAccount:{
 		phone:"String"
 	},
-	SignedBlockchainDocument:{
-		hash:"String",
-		meta:"String",
-		public_key:"String",
-		signature:"String"
-	},
-	SignedDigitalDocument:{
-		hash:"String",
+	SignatureInfo:{
+		id:"Float",
 		is_valid:"Boolean",
 		meta:"JSON",
 		public_key:"String",
 		signature:"String",
-		signer:"UserDataUnion"
+		signed_at:"String",
+		signed_hash:"String",
+		signer:"String",
+		signer_info:"UserDataUnion"
+	},
+	SignedBlockchainDocument:{
+		doc_hash:"String",
+		hash:"String",
+		meta:"String",
+		meta_hash:"String",
+		signatures:"SignatureInfo",
+		version:"String"
+	},
+	SignedDigitalDocument:{
+		doc_hash:"String",
+		hash:"String",
+		meta:"JSON",
+		meta_hash:"String",
+		signatures:"SignatureInfo",
+		version:"String"
 	},
 	StatementDetailAggregate:{
 		action:"ExtendedBlockchainAction",
