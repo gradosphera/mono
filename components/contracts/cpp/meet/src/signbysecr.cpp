@@ -35,11 +35,16 @@ void meet::signbysecr(name coopname, name username, checksum256 hash, document2 
     
   
   // отправляем документ во входящий реестр
-  action(
-    permission_level{ _meet, "active"_n},
+  
+  Action::send<newsubmitted_interface>(
     _soviet,
     "newsubmitted"_n,
-    std::make_tuple(coopname, username, get_valid_soviet_action("completegm"_n), uint64_t(0), secretary_decision)
-  ).send();
+    _meet,
+    coopname,
+    username,
+    get_valid_soviet_action("completegm"_n),
+    hash,
+    secretary_decision
+  );
 
 } 

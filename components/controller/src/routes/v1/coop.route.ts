@@ -6,7 +6,6 @@ import * as coopController from '../../controllers/coop.controller';
 
 const router = Router();
 
-router.route('/agenda').get(auth('loadAgenda'), validate(coopValidation.loadAgenda), coopController.loadAgenda);
 router.route('/staff').get(auth('loadStaff'), validate(coopValidation.loadStaff), coopController.loadStaff);
 router.route('/info').get(auth('loadInfo'), coopController.loadInfo);
 

@@ -10,6 +10,7 @@ import { useVoteAgainstDecision } from 'src/features/Decision/VoteAgainstDecisio
 import { computed } from 'vue'
 import { useAgendaStore } from 'src/entities/Agenda/model'
 import type { IAgenda } from 'src/entities/Agenda/model'
+import { DigitalDocument } from 'src/shared/lib/document'
 
 /**
  * Процесс обработки решений
@@ -19,7 +20,7 @@ export function useDecisionProcessor() {
   const { info } = useSystemStore()
   const session = useSessionStore()
   const agendaStore = useAgendaStore()
-  
+
   // Данные повестки и состояние загрузки
   const decisions = computed(() => agendaStore.agenda)
   const loading = computed(() => agendaStore.loading)
@@ -47,11 +48,11 @@ export function useDecisionProcessor() {
     if (row.documents?.statement?.documentAggregate?.rawDocument?.full_title) {
       return row.documents.statement.documentAggregate.rawDocument.full_title
     }
-    
+
     if (row.documents?.decision?.documentAggregate?.rawDocument?.full_title) {
       return row.documents.decision.documentAggregate.rawDocument.full_title
     }
-    
+
     // Поддержка исходного формата для таблицы
     if (row.table?.statement?.meta && typeof row.table.statement.meta === 'string') {
       try {
@@ -61,7 +62,7 @@ export function useDecisionProcessor() {
         // Игнорируем ошибку парсинга JSON
       }
     }
-    
+
     return 'Вопрос без заголовка'
   }
 
@@ -85,16 +86,16 @@ export function useDecisionProcessor() {
     if (row.documents?.statement?.documentAggregate?.rawDocument?.hash) {
       return row.documents.statement.documentAggregate.rawDocument.hash
     }
-    
+
     if (row.documents?.decision?.documentAggregate?.rawDocument?.hash) {
       return row.documents.decision.documentAggregate.rawDocument.hash
     }
-    
+
     // Поддержка исходного формата для таблицы
     if (row.table?.statement?.hash) {
       return row.table.statement.hash
     }
-    
+
     return null
   }
 
@@ -105,7 +106,7 @@ export function useDecisionProcessor() {
     if (!row.table?.id || !row.table?.username || !row.table?.type) {
       throw new Error('Некорректные данные решения')
     }
-    
+
     const decision_id = Number(row.table.id)
     const username = row.table.username
     const type = row.table.type
@@ -157,27 +158,22 @@ export function useDecisionProcessor() {
     if (!row.table?.id) {
       throw new Error('Некорректные данные решения')
     }
-    
+
     const decision_id = Number(row.table.id)
 
     // Генерируем документ решения
     const document = await generateDecisionDocument(row)
 
-    // Подписываем документ
-    const signed_hash_of_document = useGlobalStore().signDigest(document.hash)
-    const chainDocument: Cooperative.Document.IChainDocument = {
-      hash: document.hash,
-      meta: JSON.stringify(document.meta),
-      signature: signed_hash_of_document.signature,
-      public_key: signed_hash_of_document.public_key,
-    }
+    // Создаем экземпляр класса DigitalDocument и подписываем документ
+    const digitalDocument = new DigitalDocument(document)
+    const signedDocument = await digitalDocument.sign(session.username)
 
     // Подготавливаем данные для транзакций
     const authorizeData: SovietContract.Actions.Decisions.Authorize.IAuthorize = {
       coopname: info.coopname,
       chairman: session.username,
       decision_id,
-      document: chainDocument,
+      document: {...signedDocument, meta: JSON.stringify(signedDocument.meta)},
     }
 
     const execData: SovietContract.Actions.Decisions.Exec.IExec = {

@@ -82,6 +82,7 @@ export class BlockchainService implements BlockchainPort {
       const formedAction = await this.formActionFromAbi(action);
       data.push(formedAction);
     }
+
     return await this.session.transact({ actions: data }, { broadcast });
   }
 

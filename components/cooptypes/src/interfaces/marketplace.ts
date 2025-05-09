@@ -6,13 +6,14 @@ export type IChecksum256 = string
 export type IPublicKey = string
 export type ISignature = string
 export type ITimePointSec = string
+export type IUint32 = number
 export type IUint64 = number | string
 
 export interface IAccept {
   coopname: IName
   username: IName
   exchange_id: IUint64
-  document: IDocument
+  document: IDocument2
 }
 
 export interface IAddunits {
@@ -26,9 +27,9 @@ export interface IAuthorize {
   coopname: IName
   exchange_id: IUint64
   contribution_product_decision_id: IUint64
-  contribution_product_authorization: IDocument
+  contribution_product_authorization: IDocument2
   return_product_decision_id: IUint64
-  return_product_authorization: IDocument
+  return_product_authorization: IDocument2
 }
 
 export interface IBalances extends IBalancesBase {
@@ -78,14 +79,16 @@ export interface IDispute {
   coopname: IName
   username: IName
   exchange_id: IUint64
-  document: IDocument
+  document: IDocument2
 }
 
-export interface IDocument {
+export interface IDocument2 {
+  version: string
   hash: IChecksum256
-  public_key: IPublicKey
-  signature: ISignature
+  doc_hash: IChecksum256
+  meta_hash: IChecksum256
   meta: string
+  signatures: ISignatureInfo[]
 }
 
 export interface IExchangeParams {
@@ -96,7 +99,7 @@ export interface IExchangeParams {
   units: IUint64
   unit_cost: IAsset
   product_lifecycle_secs: IUint64
-  document?: IDocument
+  document?: IDocument2
   data: string
   meta: string
 }
@@ -141,14 +144,14 @@ export interface IRecieve {
   coopname: IName
   username: IName
   exchange_id: IUint64
-  document: IDocument
+  document: IDocument2
 }
 
 export interface IRecievecnfrm {
   coopname: IName
   username: IName
   exchange_id: IUint64
-  document: IDocument
+  document: IDocument2
 }
 
 export interface IRequest {
@@ -172,16 +175,16 @@ export interface IRequest {
   meta: string
   money_contributor: IName
   product_contributor: IName
-  contribute_product_statement: IDocument
-  return_product_statement: IDocument
+  contribute_product_statement: IDocument2
+  return_product_statement: IDocument2
   contribution_product_decision_id: IUint64
-  contribution_product_authorization: IDocument
+  contribution_product_authorization: IDocument2
   return_product_decision_id: IUint64
-  return_product_authorization: IDocument
-  product_contribution_act_validation: IDocument
-  product_contribution_act: IDocument
-  product_recieve_act: IDocument
-  product_recieve_act_validation: IDocument
+  return_product_authorization: IDocument2
+  product_contribution_act_validation: IDocument2
+  product_contribution_act: IDocument2
+  product_recieve_act: IDocument2
+  product_recieve_act_validation: IDocument2
   product_lifecycle_secs: IUint64
   cancellation_fee: IUint64
   cancellation_fee_amount: IAsset
@@ -200,18 +203,28 @@ export interface IRequest {
   warranty_return_id: IUint64
 }
 
+export interface ISignatureInfo {
+  id: IUint32
+  signed_hash: IChecksum256
+  signer: IName
+  public_key: IPublicKey
+  signature: ISignature
+  signed_at: ITimePointSec
+  meta: string
+}
+
 export interface ISupply {
   coopname: IName
   username: IName
   exchange_id: IUint64
-  document: IDocument
+  document: IDocument2
 }
 
 export interface ISupplycnfrm {
   coopname: IName
   username: IName
   exchange_id: IUint64
-  document: IDocument
+  document: IDocument2
 }
 
 export interface IUnpublish {

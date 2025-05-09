@@ -62,13 +62,6 @@ watch(email, checkEmailExists)
 const setEmail = () => {
   if (isValidEmail.value && !isEmailExist.value) {
     store.state.email = email.value
-    if (store.state.userData.individual_data)
-      store.state.userData.individual_data.email = email.value
-    if (store.state.userData.organization_data)
-      store.state.userData.organization_data.email = email.value
-    if (store.state.userData.entrepreneur_data)
-      store.state.userData.entrepreneur_data.email = email.value
-
     store.next();
   }
 }

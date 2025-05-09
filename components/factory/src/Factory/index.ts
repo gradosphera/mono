@@ -400,6 +400,26 @@ export abstract class DocFactory<T extends IGenerate> {
     await this.storage.saveDraft(document)
   }
 
+  /**
+   * Форматирует ассет (например "100.0000 RUB") до указанной точности
+   * @param assetString строка с ассетом в формате "100.0000 RUB"
+   * @param precision количество знаков после запятой (по умолчанию 2)
+   * @returns отформатированная строка ассета (например "100.00 RUB")
+   */
+  formatAsset(assetString: string, precision: number = 2): string {
+    if (!assetString)
+      return assetString
+
+    const parts = assetString.split(' ')
+    if (parts.length !== 2)
+      return assetString
+
+    const [value, symbol] = parts
+    const numericValue = Number.parseFloat(value)
+
+    return `${numericValue.toFixed(precision)} ${symbol}`
+  }
+
   async getMeta<T extends IMetaDocumentPartial>({
     title,
     username,

@@ -77,6 +77,7 @@ export const Schema: JSONSchemaType<Model> = {
     },
     signature: {
       type: 'string',
+      nullable: true,
     },
     vars: VarsSchema,
     meta: {
@@ -87,8 +88,24 @@ export const Schema: JSONSchemaType<Model> = {
       required: [...IMetaJSONSchema.required],
       additionalProperties: true,
     },
+    initial: {
+      type: 'string',
+      nullable: true,
+    },
+    minimum: {
+      type: 'string',
+      nullable: true,
+    },
+    org_initial: {
+      type: 'string',
+      nullable: true,
+    },
+    org_minimum: {
+      type: 'string',
+      nullable: true,
+    },
   },
-  required: ['meta', 'coop', 'type', 'signature'],
+  required: ['meta', 'coop', 'type'],
   additionalProperties: true,
 }
 

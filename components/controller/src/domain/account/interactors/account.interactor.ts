@@ -1,7 +1,7 @@
 import { AccountDomainEntity } from '../entities/account-domain.entity';
 import config from '~/config/config';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { tokenService, userService } from '~/services';
 import type { MonoAccountDomainInterface } from '../interfaces/mono-account-domain.interface';
 import type { GetAccountsInputDomainInterface } from '../interfaces/get-accounts-input.interface';
@@ -20,6 +20,10 @@ import { ENTREPRENEUR_REPOSITORY, EntrepreneurRepository } from '~/domain/common
 import { IndividualDomainEntity } from '~/domain/branch/entities/individual-domain.entity';
 import { OrganizationDomainEntity } from '~/domain/branch/entities/organization-domain.entity';
 import { EntrepreneurDomainEntity } from '~/domain/branch/entities/entrepreneur-domain.entity';
+import { ACCOUNT_BLOCKCHAIN_PORT, AccountBlockchainPort } from '../interfaces/account-blockchain.port';
+import { CANDIDATE_REPOSITORY, CandidateRepository } from '../repository/candidate.repository';
+import { userStatus } from '~/types/user.types';
+import { sha256 } from '~/utils/sha256';
 
 @Injectable()
 export class AccountDomainInteractor {
@@ -27,56 +31,69 @@ export class AccountDomainInteractor {
     private readonly accountDomainService: AccountDomainService,
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
     @Inject(INDIVIDUAL_REPOSITORY) private readonly individualRepository: IndividualRepository,
-    @Inject(ENTREPRENEUR_REPOSITORY) private readonly entrepreneurRepository: EntrepreneurRepository
+    @Inject(ENTREPRENEUR_REPOSITORY) private readonly entrepreneurRepository: EntrepreneurRepository,
+    @Inject(ACCOUNT_BLOCKCHAIN_PORT) private readonly accountBlockchainPort: AccountBlockchainPort,
+    @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository
   ) {}
 
+  private readonly logger = new Logger(AccountDomainInteractor.name);
+
   async updateAccount(data: UpdateAccountDomainInterface): Promise<AccountDomainEntity> {
-    const exist = await this.getAccount(data.username);
+    const user = await userService.updateUserByUsername(data.username, data);
+    const account = await this.getAccount(user.username);
 
-    if (!exist.provider_account) throw new Error(`Аккаунт провайдера не найден для обновления`);
-
-    // обновляем данные в хранилище
-    if (exist.provider_account?.type === 'individual' && data.individual_data) {
-      //здесь и далее мы подставляем email и username т.к. они требуются в интерфесе генератора
-      const individual = new IndividualDomainEntity({ ...data.individual_data, username: data.username });
-      await this.individualRepository.create(individual);
-
-      await userService.updateUserByUsername(data.username, {
-        email: data.individual_data.email,
-      });
-    } else if (exist.provider_account?.type === 'organization' && data.organization_data) {
-      const organization = new OrganizationDomainEntity({
-        ...data.organization_data,
-        username: data.username,
-      });
-      await this.organizationRepository.create(organization);
-
-      await userService.updateUserByUsername(data.username, {
-        email: data.organization_data.email,
-      });
-    } else if (exist.provider_account?.type === 'entrepreneur' && data.entrepreneur_data) {
-      const entrepreneur = new EntrepreneurDomainEntity({
-        ...data.entrepreneur_data,
-        username: data.username,
-      });
-      await this.entrepreneurRepository.create(entrepreneur);
-
-      await userService.updateUserByUsername(data.username, {
-        email: data.entrepreneur_data.email,
-      });
-    }
-
-    return await this.getAccount(data.username);
+    const result = new AccountDomainEntity(account);
+    return result;
   }
 
   async deleteAccount(username: string): Promise<void> {
     await userService.deleteUserByUsername(username);
   }
 
+  async getUserProfile(
+    username: string,
+    accountType: AccountType
+  ): Promise<IndividualDomainEntity | OrganizationDomainEntity | EntrepreneurDomainEntity> {
+    switch (accountType) {
+      case AccountType.individual:
+        return this.individualRepository.findByUsername(username);
+      case AccountType.organization:
+        return this.organizationRepository.findByUsername(username);
+      case AccountType.entrepreneur:
+        return this.entrepreneurRepository.findByUsername(username);
+      default:
+        throw new Error(`Неизвестный тип аккаунта: ${accountType}`);
+    }
+  }
+
   async registerAccount(data: RegisterAccountDomainInterface): Promise<RegisteredAccountDomainInterface> {
     //TODO refactor after migrate from mongo
     const user = await userService.createUser({ ...data, role: 'user' });
     const tokens = await tokenService.generateAuthTokens(user);
+
+    // Создаем нового кандидата в репозитории
+    const now = new Date();
+    await this.candidateRepository.create({
+      username: data.username,
+      coopname: config.coopname,
+      braname: '', // Может быть задано позже
+      status: 'pending', // Начальный статус
+      type: data.type, // Используем тип из входных данных
+      created_at: now,
+      documents: {
+        statement: undefined, // Документы будут добавлены позже
+        wallet_agreement: undefined,
+        signature_agreement: undefined,
+        privacy_agreement: undefined,
+        user_agreement: undefined,
+      },
+      referer: data.referer,
+      public_key: data.public_key,
+      meta: JSON.stringify({}),
+      registration_hash: sha256(data.username), // Будет установлен при обработке платежа
+    });
+
+    this.logger.log(`Создан новый кандидат: ${data.username}, тип: ${data.type}`);
 
     const account = await this.getAccount(data.username);
 
@@ -111,5 +128,36 @@ export class AccountDomainInteractor {
     }
 
     return result;
+  }
+
+  /**
+   * Регистрирует аккаунт в блокчейне.
+   * @param username - Имя пользователя
+   */
+  async registerBlockchainAccount(username: string): Promise<void> {
+    this.logger.log(`Начало регистрации аккаунта ${username} в блокчейне`);
+
+    // Получаем кандидата из репозитория
+    const candidate = await this.candidateRepository.findByUsername(username);
+    if (!candidate) {
+      throw new HttpException(`Кандидат с именем ${username} не найден`, HttpStatus.NOT_FOUND);
+    }
+
+    try {
+      // Вызываем порт для регистрации в блокчейне, передавая объект кандидата целиком
+      await this.accountBlockchainPort.registerBlockchainAccount(candidate);
+
+      // Обновляем статус пользователя
+      await userService.updateUserByUsername(username, {
+        status: userStatus['4_Registered'],
+        is_registered: true,
+        has_account: true,
+      });
+
+      this.logger.log(`Успешная регистрация аккаунта ${username} в блокчейне`);
+    } catch (error: any) {
+      this.logger.error(`Ошибка при регистрации аккаунта ${username} в блокчейне: ${error.message}`, error.stack);
+      throw new HttpException(`Ошибка при регистрации в блокчейне: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

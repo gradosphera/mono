@@ -1,5 +1,5 @@
-import type { IGeneratedDocument, ISignatureInfo, ISignedDocument } from '../../types/document'
-import { PrivateKey } from '@wharfkit/antelope'
+import type { IGeneratedDocument, ISignatureInfo, ISignedChainDocument, ISignedDocument } from '../../types/document'
+import { PrivateKey, PublicKey, Signature } from '@wharfkit/antelope'
 import { Crypto } from '../crypto'
 
 /**
@@ -48,8 +48,8 @@ export class Document {
   /**
    * Вычисляет meta_hash, hash и signed_hash по актуальной логике в зависимости от версии.
    */
-  private async calculateHashes({ meta, documentHash, signed_at, version = '1' }: { meta: any, documentHash: string, signed_at: string, version?: string }): Promise<{ meta_hash: string, hash: string, signed_hash: string }> {
-    if (version === '1' || !version) {
+  private async calculateHashes({ meta, documentHash, signed_at, version = '1.0.0' }: { meta: any, documentHash: string, signed_at: string, version?: string }): Promise<{ meta_hash: string, hash: string, signed_hash: string }> {
+    if (version === '1.0.0' || !version) {
       const meta_hash = await Crypto.sha256(JSON.stringify(meta))
       const hash = await Crypto.sha256(meta_hash + documentHash)
       const signed_hash = await Crypto.sha256(hash + signed_at)
@@ -66,26 +66,26 @@ export class Document {
    * @param document Сгенерированный документ для подписи.
    * @param account Имя аккаунта подписывающего (signer)
    * @param signatureId ID подписи (обычно 1 для первой подписи)
-   * @param version Версия стандарта документа
    * @returns Подписанный документ.
    */
   public async signDocument<T>(
     document: IGeneratedDocument<T>,
     account: string,
     signatureId: number = 1,
-    version: string = '1',
   ): Promise<ISignedDocument<T>> {
+    const version = '1.0.0'
+
     if (!this.wif)
       throw new Error(`Ключ не установлен, выполните вызов метода setWif перед подписью документа`)
 
-    // Подпись хэша документа
-    const digitalSignature = this.signDigest(document.hash)
-
-    // Текущая дата в формате ISO для поля signed_at
-    const signed_at = new Date().toISOString()
+    // Текущая дата в формате EOSIO
+    const now = new Date()
+    const signed_at = now.toISOString().split('.')[0]
 
     // Вычисляем все хэши через отдельную функцию, передавая версию
     const { meta_hash, hash, signed_hash } = await this.calculateHashes({ meta: document.meta, documentHash: document.hash, signed_at, version })
+    // Подпись хэша документа
+    const digitalSignature = this.signDigest(signed_hash)
 
     // Создаем информацию о подписи
     const signatureInfo: ISignatureInfo = {
@@ -101,7 +101,7 @@ export class Document {
     return {
       version,
       hash,
-      doc_hash: document.hash, // Заглушка, в реальном приложении doc_hash может отличаться от основного хэша
+      doc_hash: document.hash, // TODO: после миграции фабрики заменить здесь на doc_hash
       meta_hash,
       meta: document.meta,
       signatures: [signatureInfo],
@@ -130,6 +130,129 @@ export class Document {
       message: digest,
       signature: signed.toString(),
       public_key: this.wif.toPublic().toString(),
+    }
+  }
+
+  /**
+   * Статический метод для валидации подписанного документа.
+   * Проверяет корректность дат, подписей и их порядок.
+   *
+   * @param document Подписанный документ для проверки
+   * @returns true если документ валиден, иначе false
+   */
+  public static validateDocument<T = any>(document: ISignedDocument<T>): boolean {
+    try {
+      const { signatures } = document
+
+      // Проверка наличия подписей
+      if (!signatures || signatures.length === 0) {
+        return false
+      }
+
+      // Проверка сортировки и последовательности id
+      for (let i = 0; i < signatures.length; i++) {
+        // Проверка, что id начинаются с 0 или 1 и увеличиваются последовательно
+        if ((signatures[i].id !== i && signatures[i].id !== i + 1)) {
+          return false
+        }
+
+        // Проверка подписи
+        try {
+          const publicKeyObj = PublicKey.from(signatures[i].public_key)
+          const signatureObj = Signature.from(signatures[i].signature)
+          const verified = signatureObj.verifyDigest(signatures[i].signed_hash, publicKeyObj)
+
+          if (!verified) {
+            return false
+          }
+        }
+        // eslint-disable-next-line unused-imports/no-unused-vars
+        catch (_) {
+          return false
+        }
+      }
+
+      return true
+    }
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    catch (_) {
+      return false
+    }
+  }
+
+  /**
+   * Статический метод для преобразования подписанного документа в формат для блокчейна.
+   * Преобразует метаданные в строки JSON.
+   *
+   * @param document Подписанный документ для финализации
+   * @returns Документ в формате для отправки в блокчейн
+   */
+  public static finalize<T = any>(document: ISignedDocument<T>): ISignedChainDocument {
+    // Преобразуем meta документа в строку JSON
+    const stringifiedMeta = JSON.stringify(document.meta)
+
+    // Преобразуем meta в каждой подписи
+    const finalizedSignatures = document.signatures.map(sig => ({
+      ...sig,
+      meta: typeof sig.meta === 'object' ? JSON.stringify(sig.meta) : sig.meta,
+    }))
+
+    return {
+      version: document.version,
+      hash: document.hash,
+      doc_hash: document.doc_hash,
+      meta_hash: document.meta_hash,
+      meta: stringifiedMeta,
+      signatures: finalizedSignatures,
+    }
+  }
+
+  /**
+   * Статический метод для преобразования документа из формата блокчейна в стандартный формат.
+   * Преобразует строки JSON метаданных в объекты.
+   *
+   * @param document Документ в формате блокчейна
+   * @returns Стандартный подписанный документ
+   */
+  public static parse<T = any>(document: ISignedChainDocument): ISignedDocument<T> {
+    // Преобразуем строку meta документа в объект
+    const parsedMeta = typeof document.meta === 'string' ? JSON.parse(document.meta) : document.meta
+
+    // Преобразуем meta в каждой подписи из строки в объект, если это строка
+    const parsedSignatures = document.signatures.map(sig => ({
+      ...sig,
+      meta: typeof sig.meta === 'string' && sig.meta !== '' ? JSON.parse(sig.meta) : sig.meta,
+    }))
+
+    return {
+      version: document.version,
+      hash: document.hash,
+      doc_hash: document.doc_hash,
+      meta_hash: document.meta_hash,
+      meta: parsedMeta,
+      signatures: parsedSignatures,
+    }
+  }
+
+  /**
+   * Статический метод для валидации отдельной подписи документа.
+   * Проверяет корректность даты и цифровой подписи.
+   *
+   * @param signature Информация о подписи для проверки
+   * @returns true если подпись валидна, иначе false
+   */
+  public static validateSignature(signature: ISignatureInfo): boolean {
+    try {
+      // Проверка подписи
+      const publicKeyObj = PublicKey.from(signature.public_key)
+      const signatureObj = Signature.from(signature.signature)
+      const verified = signatureObj.verifyDigest(signature.signed_hash, publicKeyObj)
+
+      return verified
+    }
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    catch (_) {
+      return false
     }
   }
 }

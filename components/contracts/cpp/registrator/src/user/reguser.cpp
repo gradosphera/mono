@@ -67,6 +67,17 @@
     c.minimum = minimum;
   });
   
+  Action::send<newpackage_interface>(
+    _soviet,
+    "newpackage"_n,
+    _registrator,
+    coopname,
+    username,
+    "joincoop"_n,
+    registration_hash
+  );
+
+  
   // создаём объект входящего платежа в gateway с коллбэком после обработки
   action(permission_level{ _registrator, "active"_n}, _gateway, "createinpay"_n,
     std::make_tuple(

@@ -38,7 +38,7 @@ export interface ICandidate {
   braname: IName
   status: IName
   created_at: ITimePointSec
-  statement: IDocument
+  statement: IDocument2
   registration_hash: IChecksum256
   initial: IAsset
   minimum: IAsset
@@ -59,7 +59,7 @@ export interface IConfirmpay {
 export interface IConfirmreg {
   coopname: IName
   registration_hash: IChecksum256
-  authorization: IDocument
+  authorization: IDocument2
 }
 
 export interface ICooperative {
@@ -177,7 +177,7 @@ export interface IRegcoop {
   coopname: IName
   username: IName
   params: IOrgData
-  document: IDocument
+  document: IDocument2
 }
 
 export interface IReguser {
@@ -185,16 +185,18 @@ export interface IReguser {
   braname: IName
   username: IName
   type: IName
-  statement: IDocument
+  statement: IDocument2
   registration_hash: IChecksum256
 }
 
 export interface ISignatureInfo {
   id: IUint32
+  signed_hash: IChecksum256
   signer: IName
   public_key: IPublicKey
   signature: ISignature
   signed_at: ITimePointSec
+  meta: string
 }
 
 export interface IStcoopstatus {

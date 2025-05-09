@@ -62,3 +62,8 @@ export * as Agreements from './agreements'
  * Таблица содержит реестр внутри-кооперативных соглашений/положений с пайщиками
  */
 export * as CoopAgreements from './coopAgreements'
+
+/**
+ * Таблица содержит реестр внутри-кооперативных соглашений/положений с пайщиками v2
+ */
+export * as AgreementsLegacy from './agreements_legacy'

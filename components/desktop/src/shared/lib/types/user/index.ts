@@ -1,4 +1,3 @@
-import { IObjectedDocument } from '../document';
 import { Cooperative } from 'cooptypes';
 
 export interface IKeyPair {
@@ -12,7 +11,7 @@ export interface IGeneratedAccount extends IKeyPair {
 
 export interface IToken {
   token: string;
-  expires: Date;
+  expires: unknown;
 }
 
 export interface ITokens {
@@ -41,13 +40,4 @@ export interface IUser {
 export interface ICreatedUser {
   user: IUser;
   tokens: ITokens;
-}
-
-export interface ISendStatement {
-  username: string;
-  statement: IObjectedDocument;
-  wallet_agreement: IObjectedDocument;
-  privacy_agreement: IObjectedDocument;
-  signature_agreement: IObjectedDocument;
-  user_agreement: IObjectedDocument;
 }

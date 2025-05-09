@@ -54,19 +54,6 @@ export interface IIndecline {
 export interface IMigrate {
 }
 
-export interface IOnedeposit {
-  id: IUint64
-  username: IName
-  coopname: IName
-  type: IName
-  token_contract: IName
-  quantity: IAsset
-  status: IName
-  link: string
-  memo: string
-  expired_at: ITimePointSec
-}
-
 export interface IOutcome {
   id: IUint64
   coopname: IName

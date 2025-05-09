@@ -55,7 +55,7 @@ const sign = async () => {
 
   try {
     isSubmitting.value = true
-    await signAgreement(session.username, props.agreement.type, agreementOnSign.value)
+    await signAgreement(props.agreement.type, agreementOnSign.value)
     await useWalletStore().loadUserWallet({coopname: info.coopname, username: session.username})
     isSubmitting.value = false
     show.value = false

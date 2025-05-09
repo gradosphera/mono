@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia';
 import { computed, reactive } from 'vue';
 import { IGeneratedAccount } from 'src/shared/lib/types/user';
-import { type ICreateUserData } from 'src/shared/lib/types/user/IUserData';
+import { type IRegisterAccount } from 'src/shared/lib/types/user/IUserData';
 import type { Cooperative } from 'cooptypes';
 import { useSystemStore } from 'src/entities/System/model';
+import type { IDocument, ISignatureInfo } from 'src/shared/lib/types/document';
+import { Zeus } from '@coopenomics/sdk';
+import { AccountTypes } from 'src/entities/Account/types';
 
 const namespace = 'registrator';
 
@@ -15,8 +18,10 @@ const initialAccountState: IGeneratedAccount = {
 };
 
 // Начальное состояние для userData
-const initialUserDataState: ICreateUserData = {
-  type: 'individual',
+const initialUserDataState: IRegisterAccount = {
+  email: '',
+  username: '',
+  type: AccountTypes.individual,
   individual_data: {
     first_name: '',
     last_name: '',
@@ -24,10 +29,9 @@ const initialUserDataState: ICreateUserData = {
     birthdate: '',
     full_address: '',
     phone: '',
-    email: '',
   },
   organization_data: {
-    type: 'coop',
+    type: Zeus.OrganizationType.COOP,
     short_name: '',
     full_name: '',
     represented_by: {
@@ -42,7 +46,6 @@ const initialUserDataState: ICreateUserData = {
     full_address: '',
     fact_address: '',
     phone: '',
-    email: '',
     details: {
       kpp: '',
       inn: '',
@@ -66,8 +69,7 @@ const initialUserDataState: ICreateUserData = {
     middle_name: '',
     birthdate: '',
     phone: '',
-    email: '',
-    country: 'Russia',
+    country: Zeus.Country.Russia,
     city: '',
     full_address: '',
     details: {
@@ -89,11 +91,13 @@ const initialUserDataState: ICreateUserData = {
 };
 
 // Начальное состояние для любого документа
-const initialDocumentState = {
+const initialDocumentState: IDocument = {
   hash: '',
   meta: {} as Cooperative.Document.IMetaDocument,
-  public_key: '',
-  signature: '',
+  meta_hash: '',
+  version: '',
+  doc_hash: '',
+  signatures: [] as ISignatureInfo[],
 };
 
 // Начальное состояние для payment

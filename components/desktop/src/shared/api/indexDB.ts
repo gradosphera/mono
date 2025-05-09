@@ -1,5 +1,4 @@
 import { openDB } from 'idb';
-import { env } from '../config';
 
 async function openIndexedDB(dbName: string, storeName: string) {
 

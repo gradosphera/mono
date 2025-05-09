@@ -1,11 +1,14 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, ValidateNested, IsNumber, IsArray, ArrayMinSize } from 'class-validator';
+import { IsString, ValidateNested, IsNumber, IsArray, ArrayMinSize, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { Cooperative } from 'cooptypes';
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
+import type { ISignatureInfoDomainInterface } from '~/domain/document/interfaces/signature-info-domain.interface';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import GraphQLJSON from 'graphql-type-json';
 
-@InputType('SignatureInfo')
-export class SignatureInfoDTO implements Cooperative.Document.ISignatureInfo {
+@InputType('SignatureInfoInput')
+export class SignatureInfoDTO implements ISignatureInfoDomainInterface {
   @Field(() => Number, { description: 'Идентификатор номера подписи' })
   @IsNumber()
   public readonly id!: number;
@@ -25,10 +28,18 @@ export class SignatureInfoDTO implements Cooperative.Document.ISignatureInfo {
   @Field(() => String, { description: 'Время подписания' })
   @IsString()
   public readonly signed_at!: string;
+
+  @Field(() => String, { description: 'Подписанный хэш' })
+  @IsString()
+  public readonly signed_hash!: string;
+
+  @Field(() => GraphQLJSON, { description: 'Мета-данные подписи' })
+  @IsObject()
+  public readonly meta!: any;
 }
 
 @InputType('SignedDigitalDocumentInput')
-export class SignedDigitalDocumentInputDTO implements Cooperative.Document.ISignedDocument2 {
+export class SignedDigitalDocumentInputDTO implements ISignedDocumentDomainInterface {
   @Field(() => String, { description: 'Версия стандарта документа' })
   @IsString()
   public readonly version!: string;

@@ -1,13 +1,20 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ParticipantApplicationSignedDocumentInputDTO } from '../../document/documents-dto/participant-application-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
+import type { RegisterParticipantDomainInterface } from '~/domain/participant/interfaces/register-participant-domain.interface';
 
 @InputType('RegisterParticipantInput')
-export class RegisterParticipantInputDTO {
+export class RegisterParticipantInputDTO implements RegisterParticipantDomainInterface {
   @Field({ description: 'Имя аккаунта пайщика' })
   @IsNotEmpty({ message: 'Поле "username" обязательно для заполнения.' })
+  @IsString()
   username!: string;
+
+  @Field({ description: 'Имя кооперативного участка', nullable: true })
+  @IsString()
+  @IsOptional()
+  braname?: string;
 
   @Field(() => ParticipantApplicationSignedDocumentInputDTO, {
     description: 'Подписанный документ заявления на вступление в кооператив от пайщика',

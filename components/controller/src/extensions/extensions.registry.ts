@@ -78,7 +78,7 @@ export const AppRegistry: INamedExtension = {
     is_builtin: true,
     is_internal: true,
     is_available: true,
-    is_desktop: true,
+    is_desktop: false,
     title: 'Стол Председателя',
     description: 'Расширение для председателя совета кооператива.',
     image: 'https://i.ibb.co/6C5F3kD/Chat-GPT-Image-10-2025-20-42-42.png',

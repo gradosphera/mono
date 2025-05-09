@@ -3,11 +3,12 @@ import { AccountType } from '../enum/account-type.enum';
 import { CreateEntrepreneurDataInputDTO } from './create-entrepreneur-data-input.dto';
 import { CreateIndividualDataInputDTO } from './create-individual-data-input.dto';
 import { CreateOrganizationDataInputDTO } from './create-organization-data-input.dto';
-import { IsNotEmpty, IsOptional, ValidateIf, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+import type { RegisterAccountDomainInterface } from '~/domain/account/interfaces/register-account-input.interface';
 
 @InputType('RegisterAccountInput')
-export class RegisterAccountInputDTO {
+export class RegisterAccountInputDTO implements RegisterAccountDomainInterface {
   @Field({ description: 'Электронная почта' })
   @IsNotEmpty({ message: 'Поле "email" обязательно для заполнения.' })
   email!: string;
@@ -24,9 +25,9 @@ export class RegisterAccountInputDTO {
   @IsNotEmpty({ message: 'Поле "username" обязательно для заполнения.' })
   username!: string;
 
-  @Field({ nullable: true, description: 'Публичный ключ' })
-  @IsOptional()
-  public_key?: string;
+  @Field({ description: 'Публичный ключ' })
+  @IsString()
+  public_key!: string;
 
   @Field(() => CreateEntrepreneurDataInputDTO, { nullable: true, description: 'Данные индивидуального предпринимателя' })
   @ValidateNested()

@@ -32,6 +32,9 @@ void soviet::change(eosio::name coopname, eosio::name parent_username, eosio::na
     c.contribution_product_decision_id = decision_id_1;
     c.return_product_decision_id = decision_id_2;
   });
+  
+  // Вызов для первого решения
+  checksum256 hash = eosio::sha256((char*)&batch_id, sizeof(batch_id));
 
   decisions.emplace(_soviet, [&](auto &d) {
     d.id = decision_id_1;
@@ -42,6 +45,7 @@ void soviet::change(eosio::name coopname, eosio::name parent_username, eosio::na
     d.statement = change -> contribute_product_statement;
     d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     d.expired_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _decision_expiration);
+    d.hash = hash;
   });
   
   decisions.emplace(_soviet, [&](auto &d){
@@ -53,29 +57,32 @@ void soviet::change(eosio::name coopname, eosio::name parent_username, eosio::na
     d.statement = change -> return_product_statement;
     d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     d.expired_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _decision_expiration);
+    d.hash = hash;  
   });
 
-  action(
-    permission_level{ _soviet, "active"_n},
+  Action::send<newsubmitted_interface>(
     _soviet,
     "newsubmitted"_n,
-    std::make_tuple(coopname, product_contributor, _product_contribution_action, decision_id_1, change -> contribute_product_statement)
-  ).send();
+    _soviet,
+    coopname,
+    product_contributor,
+    _product_contribution_action,
+    hash,
+    change -> contribute_product_statement
+  );
   
-  action(
-    permission_level{ _soviet, "active"_n},
+  // Вызов для второго решения
+  
+  Action::send<newsubmitted_interface>(
     _soviet,
     "newsubmitted"_n,
-    std::make_tuple(coopname, money_contributor, _product_return_action, decision_id_2, change -> return_product_statement)
-  ).send();
-  
-
-  action(
-    permission_level{ _soviet, "active"_n},
     _soviet,
-    "newbatch"_n,
-    std::make_tuple(coopname, _change_action, batch_id)
-  ).send();
+    coopname,
+    money_contributor,
+    _product_return_action,
+    hash,
+    change -> return_product_statement
+  );
 
 };
 

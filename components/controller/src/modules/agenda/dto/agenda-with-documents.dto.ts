@@ -20,4 +20,10 @@ export class AgendaWithDocumentsDTO implements AgendaWithDocumentsDomainInterfac
     description: 'Пакет документов, включающий разные подсекции',
   })
   documents!: DocumentPackageAggregateDTO;
+
+  constructor(data: AgendaWithDocumentsDomainInterface) {
+    this.table = data.table;
+    this.action = data.action;
+    this.documents = data.documents;
+  }
 }

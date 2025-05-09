@@ -12,19 +12,28 @@
   });
     
   // отправляем документ во входящий реестр
-  action(
-    permission_level{ _soviet, "active"_n},
+  checksum256 hash = document.hash;
+  
+  Action::send<newsubmitted_interface>(
     _soviet,
     "newsubmitted"_n,
-    std::make_tuple(coopname, username, "selectbranch"_n, uint64_t(0), document)
-  ).send();
+    _soviet,
+    coopname,
+    username,
+    "selectbranch"_n,
+    hash,
+    document
+  );
   
   // отправляем документ в принятый реестр
-  action(
-    permission_level{ _soviet, "active"_n},
+  Action::send<newresolved_interface>(
     _soviet,
     "newresolved"_n,
-    std::make_tuple(coopname, username, "selectbranch"_n, uint64_t(0), document)
-  ).send();
-  
+    _soviet,
+    coopname,
+    username,
+    "selectbranch"_n,
+    hash,
+    document
+  );
 }

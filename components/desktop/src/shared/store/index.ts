@@ -4,7 +4,6 @@ import { defineStore } from 'pinia';
 import { ref, Ref } from 'vue';
 import { decrypt, encrypt, hashSHA256 } from '../api/crypto';
 import { IMessageSignature } from '../lib/types/crypto';
-import { useSessionStore } from 'src/entities/Session';
 import { TransactResult } from '@wharfkit/session';
 import { readBlockchain } from '../api';
 import { ITokens } from '../lib/types/user';
@@ -161,16 +160,18 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
   };
 
   const sendAction = async (action: any, broadcast: boolean) => {
-    const session = useSessionStore();
+    // Получаем хранилище сессии с помощью импорта, избегая циклической зависимости
+    const sessionStore = (await import('src/entities/Session')).useSessionStore();
     const formedAction = await formActionFromAbi(action);
 
-    return session.session?.transact({
+    return sessionStore.session?.transact({
       action: formedAction,
     }, { broadcast });
   };
 
   const sendActions = async (actions: any[], broadcast: boolean) => {
-    const session = useSessionStore();
+    // Получаем хранилище сессии с помощью импорта, избегая циклической зависимости
+    const sessionStore = (await import('src/entities/Session')).useSessionStore();
     const data: Action[] = [];
 
     for (const action of actions) {
@@ -178,7 +179,7 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
       data.push(formedAction);
     }
 
-    return session.session?.transact({
+    return sessionStore.session?.transact({
       actions: data,
     }, { broadcast });
   };

@@ -93,7 +93,7 @@ const init = async () => {
 }
 
 const sign = async() => {
-  await document.value.sign()
+  await document.value.sign(session.username)
 }
 
 init()

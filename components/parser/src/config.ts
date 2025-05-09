@@ -36,7 +36,7 @@ export const subsribedTables: IDeltaConfig[] = [
 
   // регистратор
   { code: 'registrator', table: 'accounts' },
-  { code: 'registrator', table: 'orgs' },
+  { code: 'registrator', table: 'coops' },
 ]
 
 export const subsribedActions: IActionConfig[] = [
@@ -47,8 +47,11 @@ export const subsribedActions: IActionConfig[] = [
   { code: 'soviet', action: 'voteagainst' },
   { code: 'soviet', action: 'newsubmitted' },
   { code: 'soviet', action: 'newresolved' },
-
   { code: 'soviet', action: 'newdecision' },
+  { code: 'soviet', action: 'newpackage' },
+  { code: 'soviet', action: 'newact' },
+  { code: 'soviet', action: 'newagreement' },
+  { code: 'soviet', action: 'newdeclined' },
   // // registrator.joincoop
   { code: 'soviet', action: 'joincoop' },
   { code: 'soviet', action: 'joincoopdec' },

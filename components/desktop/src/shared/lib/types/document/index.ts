@@ -1,27 +1,13 @@
-import type { Cooperative } from 'cooptypes';
+import type { Zeus } from '@coopenomics/sdk/index';
 
-export interface ISignatureInfo {
-  id: number;
-  signer: string;
-  public_key: string;
-  signature: string;
-  signed_at: string;
+// Добавляю реэкспорты типов документов
+export type IChainDocument2 = Zeus.ModelTypes['SignedBlockchainDocument']
+export type ISignedDocument = Zeus.ModelTypes['SignedDigitalDocumentInput']
+export type ISignatureInfo = Zeus.ModelTypes['SignatureInfo']
+export type IMetaDocument<T = any> = Zeus.ModelTypes['MetaDocumentInput'] & T
+export type IComplexDocument = Zeus.ModelTypes['DocumentPackageAggregate']
+export type IDocument<T = any> = Omit<Zeus.ModelTypes['SignedDigitalDocumentInput'], 'meta'> & {
+  meta: IMetaDocument<T>
 }
-
-export interface IObjectedDocument {
-  version: string;
-  hash: string;
-  doc_hash: string;
-  meta_hash: string;
-  meta: Cooperative.Document.IMetaDocument;
-  signatures: ISignatureInfo[];
-}
-
-export interface IDocument {
-  version: string;
-  hash: string;
-  doc_hash: string;
-  meta_hash: string;
-  meta: string;
-  signatures: ISignatureInfo[];
-}
+// Для обратной совместимости
+export type IObjectedDocument = IDocument;

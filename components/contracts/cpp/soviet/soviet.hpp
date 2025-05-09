@@ -43,12 +43,14 @@ public:
   
   
   //документ
-  [[eosio::action]] void newsubmitted(eosio::name coopname, eosio::name username, eosio::name action, checksum256 hash, document2 document);
-  [[eosio::action]] void newresolved(eosio::name coopname, eosio::name username, eosio::name action, checksum256 hash, document2 document);
-  [[eosio::action]] void newdecision(eosio::name coopname, eosio::name username,  eosio::name action, checksum256 hash, document2 document);
-  
-  [[eosio::action]] void newact(eosio::name coopname, eosio::name username, eosio::name action, checksum256 hash, document2 document);
-  [[eosio::action]] void newdeclined(eosio::name coopname, eosio::name username, checksum256 hash, document2 document);
+  [[eosio::action]] void newsubmitted(NEWSUBMITTED_SIGNATURE);
+  [[eosio::action]] void newresolved(NEWRESOLVED_SIGNATURE);
+  [[eosio::action]] void newdecision(NEWDECISION_SIGNATURE);
+  [[eosio::action]] void newagreement(NEWAGREEMENT_SIGNATURE);
+  [[eosio::action]] void newpackage(NEWPACKAGE_SIGNATURE);
+
+  [[eosio::action]] void newact(NEWACT_SIGNATURE);
+  [[eosio::action]] void newdeclined(NEWDECLINED_SIGNATURE);
 
   [[eosio::action]] void declinedoc(eosio::name coopname, eosio::name username, checksum256 hash, document2 document);
 

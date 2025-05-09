@@ -1,10 +1,11 @@
 import { BlockchainService } from '../src/infrastructure/blockchain/blockchain.service';
 import Vault from '../src/models/vault.model';
 import config from '../src/config/config';
+import type { SovietContract } from 'cooptypes';
 
 export default {
   name: 'Синхронизация данных из блокчейна',
-  isTest: true, // Включаем тестовый режим - миграция не будет сохранена в БД
+  isTest: false, // Включаем тестовый режим - миграция не будет сохранена в БД
 
   async up({ blockchain }: { blockchain: BlockchainService }): Promise<boolean> {
     console.log('Выполнение миграции: Синхронизация данных из блокчейна');
@@ -28,6 +29,64 @@ export default {
           // Инициализируем блокчейн-сервис с полученным ключом
           blockchain.initialize(coopname, wif);
           console.log(`Блокчейн-сервис инициализирован с аккаунтом ${coopname}`);
+
+          const oldRows = await blockchain.getAllRows<SovietContract.Tables.AgreementsLegacy.IAgreementLegacy>(
+            'soviet',
+            coopname,
+            'agreements'
+          );
+
+          console.log('Получено legacy соглашений:', oldRows.length);
+
+          // Получаем все строки из таблицы agreements2
+          const newRows = await blockchain.getAllRows<SovietContract.Tables.Agreements.IAgreement>(
+            'soviet',
+            coopname,
+            'agreements2'
+          );
+
+          console.log('Получено новых соглашений:', newRows.length);
+
+          // Находим соглашения, которые ещё не были перенесены
+          const newAgreementIds = new Set(newRows.map((row) => row.id));
+          const notMigratedAgreements = oldRows.filter((row) => !newAgreementIds.has(row.id));
+
+          console.log('Соглашения, которые НЕ были перенесены:', notMigratedAgreements.length);
+          console.log('Детали непереносимых соглашений:');
+          notMigratedAgreements.forEach((agreement) => {
+            console.log(
+              `ID: ${agreement.id}, Пользователь: ${agreement.username}, Тип: ${agreement.type}, Статус: ${agreement.status}`
+            );
+          });
+
+          // Подготовка массива транзакций для миграции
+          if (notMigratedAgreements.length > 0) {
+            console.log('Подготовлен массив транзакций для миграции');
+            console.log('COOPNAME: ', coopname);
+
+            // Последовательная миграция соглашений
+            for (let i = 0; i < notMigratedAgreements.length; i++) {
+              const agreement = notMigratedAgreements[i];
+              console.log(`Миграция соглашения ${i + 1}/${notMigratedAgreements.length}, ID: ${agreement.id}`);
+
+              try {
+                await blockchain.transact({
+                  account: 'soviet',
+                  name: 'migrateagree',
+                  authorization: [{ actor: coopname, permission: 'active' }],
+                  data: {
+                    coopname,
+                    agreement_id: agreement.id,
+                  },
+                });
+                console.log(`✅ Соглашение ID: ${agreement.id} успешно перенесено`);
+              } catch (error) {
+                console.error(`❌ Ошибка при переносе соглашения ID: ${agreement.id}:`, error);
+              }
+            }
+
+            console.log('Миграция соглашений завершена');
+          }
 
           // Теперь можно выполнять транзакции от имени аккаунта
           // blockchain.transact(...);

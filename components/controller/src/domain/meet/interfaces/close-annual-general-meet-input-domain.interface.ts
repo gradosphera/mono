@@ -1,4 +1,4 @@
-import type { Cooperative } from 'cooptypes';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 /**
  * Доменный интерфейс для закрытия собрания
@@ -6,5 +6,5 @@ import type { Cooperative } from 'cooptypes';
 export interface CloseAnnualGeneralMeetInputDomainInterface {
   coopname: string;
   hash: string;
-  meet_decision: Cooperative.Document.ISignedDocument;
+  meet_decision: ISignedDocumentDomainInterface;
 }

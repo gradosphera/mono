@@ -17,10 +17,12 @@ struct document
 
 struct signature_info {
     uint32_t id;                     // идентификатор номера подписи
+    checksum256 signed_hash;         // подписанный хэш, включающий доп. данные (дату подписи)
     eosio::name signer;              // аккаунт подписавшего
     eosio::public_key public_key;    // публичный ключ
     eosio::signature signature;      // подпись хэша
     eosio::time_point_sec signed_at; // время подписания
+    std::string meta;                // мета-данные подписи
 };
 
 struct document2 {
@@ -44,7 +46,7 @@ void verify_document_or_fail(const document2 &doc)
 {
   for (const auto &sig : doc.signatures) {
     // Проверка завершится прерыванием, если восстановление подписи провалится
-    assert_recover_key(doc.hash, sig.signature, sig.public_key);
+    assert_recover_key(sig.signed_hash, sig.signature, sig.public_key);
   }
 };
 

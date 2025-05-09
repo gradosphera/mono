@@ -3,9 +3,10 @@
 import { Module } from '@nestjs/common';
 import { PaymentInteractor } from './interactors/payment.interactor';
 import { PaymentDomainService } from './services/payment-domain.service';
+import { AccountDomainModule } from '../account/account-domain.module';
 
 @Module({
-  imports: [],
+  imports: [AccountDomainModule],
   providers: [PaymentInteractor, PaymentDomainService],
   exports: [PaymentInteractor, PaymentDomainService],
 })

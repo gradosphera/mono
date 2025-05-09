@@ -14,14 +14,14 @@ interface ICloseMeetWithDecisionInput {
 
 export async function signBySecretaryOnAnnualGeneralMeetWithDecision(data: ICloseMeetWithDecisionInput): Promise<ISignBySecretaryResult> {
   const { signDocument } = useSignDocument()
-  
+
   const variables: Mutations.Meet.GenerateAnnualGeneralMeetDecisionDocument.IInput = {
-    data: {    
+    data: {
       coopname: data.coopname,
       username: data.username,
     }
   }
-  
+
   // Генерируем документ решения
   const { [Mutations.Meet.GenerateAnnualGeneralMeetDecisionDocument.name]: generatedDocument } = await client.Mutation(
     Mutations.Meet.GenerateAnnualGeneralMeetDecisionDocument.mutation,
@@ -29,9 +29,9 @@ export async function signBySecretaryOnAnnualGeneralMeetWithDecision(data: IClos
       variables
     }
   )
-  
+
   // Подписываем документ
-  const signedDocument = await signDocument(generatedDocument)
+  const signedDocument = await signDocument(generatedDocument, data.username)
 
   const variables2: Mutations.Meet.SignBySecretaryOnAnnualGeneralMeet.IInput = {
     data: {
@@ -48,15 +48,15 @@ export async function signBySecretaryOnAnnualGeneralMeetWithDecision(data: IClos
       variables: variables2
     }
   )
-  
+
   return result
 }
 
 export async function signByPresiderOnAnnualGeneralMeetWithDecision(data: ICloseMeetWithDecisionInput): Promise<ISignByPresiderResult> {
   const { signDocument } = useSignDocument()
-  
+
   const variables: Mutations.Meet.GenerateAnnualGeneralMeetDecisionDocument.IInput = {
-    data: {    
+    data: {
       coopname: data.coopname,
       username: data.username,
     }
@@ -68,16 +68,16 @@ export async function signByPresiderOnAnnualGeneralMeetWithDecision(data: IClose
       variables
     }
   )
-  
+
   // Подписываем документ
-  const signedDocument = await signDocument(generatedDocument)
-  
+  const signedDocument = await signDocument(generatedDocument, data.username)
+
   const variables2: Mutations.Meet.SignByPresiderOnAnnualGeneralMeet.IInput = {
     data: {
       coopname: data.coopname,
       hash: data.hash,
       username: data.username,
-      presider_decision: signedDocument 
+      presider_decision: signedDocument
     }
   }
   // Закрываем собрание с подписанным решением председателя
@@ -87,6 +87,6 @@ export async function signByPresiderOnAnnualGeneralMeetWithDecision(data: IClose
       variables: variables2
     }
   )
-  
+
   return result
 }

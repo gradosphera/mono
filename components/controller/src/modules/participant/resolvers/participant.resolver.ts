@@ -69,7 +69,7 @@ export class ParticipantResolver {
       'Зарегистрировать заявление и подписанные положения, подготовив пакет документов к отправке в совет на голосование после поступления оплаты.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member', 'user'])
+  @AuthRoles(['chairman', 'member'])
   async registerParticipant(
     @Args('data', { type: () => RegisterParticipantInputDTO })
     data: RegisterParticipantInputDTO

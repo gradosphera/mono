@@ -2757,7 +2757,7 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null | Variable<any, string>,
 	/** Изображение собственноручной подписи (base-64) */
-	signature: string | Variable<any, string>,
+	signature?: string | undefined | null | Variable<any, string>,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
@@ -2800,7 +2800,7 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	/** ID документа в реестре */
 	registry_id: number | Variable<any, string>,
 	/** Изображение собственноручной подписи (base-64) */
-	signature: string | Variable<any, string>,
+	signature?: string | undefined | null | Variable<any, string>,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
@@ -3146,6 +3146,8 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	username: string | Variable<any, string>
 };
 	["RegisterParticipantInput"]: {
+	/** Имя кооперативного участка */
+	braname?: string | undefined | null | Variable<any, string>,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -5731,7 +5733,7 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
 	/** Изображение собственноручной подписи (base-64) */
-	signature: string,
+	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -5774,7 +5776,7 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Изображение собственноручной подписи (base-64) */
-	signature: string,
+	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -6121,6 +6123,8 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	username: string
 };
 	["RegisterParticipantInput"]: {
+	/** Имя кооперативного участка */
+	braname?: string | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -8735,7 +8739,7 @@ export type ModelTypes = {
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
 	/** Изображение собственноручной подписи (base-64) */
-	signature: string,
+	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -8778,7 +8782,7 @@ export type ModelTypes = {
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Изображение собственноручной подписи (base-64) */
-	signature: string,
+	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -9114,6 +9118,8 @@ export type ModelTypes = {
 	username: string
 };
 	["RegisterParticipantInput"]: {
+	/** Имя кооперативного участка */
+	braname?: string | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ModelTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -11755,7 +11761,7 @@ export type GraphQLTypes = {
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
 	/** Изображение собственноручной подписи (base-64) */
-	signature: string,
+	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -11798,7 +11804,7 @@ export type GraphQLTypes = {
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Изображение собственноручной подписи (base-64) */
-	signature: string,
+	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -12153,7 +12159,9 @@ export type GraphQLTypes = {
 	username: string
 };
 	["RegisterParticipantInput"]: {
-		/** Подписанный документ политики конфиденциальности от пайщика */
+		/** Имя кооперативного участка */
+	braname?: string | undefined | null,
+	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ положения о цифровой подписи от пайщика */
 	signature_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
@@ -12905,9 +12913,9 @@ export type GraphQLTypes = {
     }
 /** Тип аккаунта пользователя в системе */
 export enum AccountType {
-	Entrepreneur = "Entrepreneur",
-	Individual = "Individual",
-	Organization = "Organization"
+	entrepreneur = "entrepreneur",
+	individual = "individual",
+	organization = "organization"
 }
 /** Страна регистрации пользователя */
 export enum Country {

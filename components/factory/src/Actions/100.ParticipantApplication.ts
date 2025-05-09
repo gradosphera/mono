@@ -51,8 +51,6 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
     if (data.braname)
       branch = await super.getOrganization(data.braname, data.block_num)
 
-    console.log(branch)
-
     let { signature, ...modifieddata } = data
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...modifieddata }) // Генерируем мета-данные
 
@@ -87,7 +85,19 @@ export class Factory extends DocFactory<ParticipantApplication.Action> {
 
     const vars = await super.getVars(data.coopname, data.block_num)
 
-    const combinedData: ParticipantApplication.Model = { ...userData, meta, coop: extended_coop, branch, type: user.type, vars, signature }
+    const combinedData: ParticipantApplication.Model = {
+      ...userData,
+      meta,
+      coop: extended_coop,
+      branch,
+      type: user.type,
+      vars,
+      signature,
+      initial: super.formatAsset(coop.initial),
+      minimum: super.formatAsset(coop.minimum),
+      org_initial: super.formatAsset(coop.org_initial),
+      org_minimum: super.formatAsset(coop.org_minimum),
+    }
 
     // валидируем скомбинированные данные
     await super.validate(combinedData, template.model)

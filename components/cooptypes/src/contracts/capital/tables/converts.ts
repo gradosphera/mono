@@ -4,7 +4,7 @@ import { Actors } from '../../../common'
 /**
  * Имя таблицы
  */
-export const tableName = 'resauthors'
+export const tableName = 'converts'
 
 /**
  * Таблица хранится в {@link Actors._coopname | области памяти кооператива}.
@@ -13,6 +13,6 @@ export const scope = Actors._coopname
 
 /**
  * @interface
- * Таблица содержит информацию об авторах.
+ * Таблица содержит информацию о конвертациях.
  */
-export type IResultAuthor = Capital.IResultAuthor
+export type IConvert = Capital.IConvert

@@ -10,6 +10,8 @@ void soviet::fundwithdraw(eosio::name coopname, eosio::name username, eosio::nam
   decisions_index decisions(_soviet, coopname.value);
   auto decision_id = get_id(_soviet, coopname, "decisions"_n);
   
+  checksum256 hash = eosio::sha256((char*)&withdraw_id, sizeof(withdraw_id));
+  
   decisions.emplace(_registrator, [&](auto &d){
     d.id = decision_id;
     d.coopname = coopname;
@@ -19,14 +21,20 @@ void soviet::fundwithdraw(eosio::name coopname, eosio::name username, eosio::nam
     d.statement = document;
     d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     d.expired_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _decision_expiration);
+    d.hash = hash;
   });
   
-  action(
-    permission_level{ _soviet, "active"_n},
+  
+  Action::send<newsubmitted_interface>(
     _soviet,
     "newsubmitted"_n,
-    std::make_tuple(coopname, username, "fundwithdraw"_n, decision_id, document)
-  ).send();
+    _soviet,
+    coopname,
+    username,
+    "fundwithdraw"_n,
+    hash,
+    document
+  );
   
 };
 
@@ -49,21 +57,27 @@ void soviet::subaccum_effect(eosio::name executer, eosio::name coopname, uint64_
       std::make_tuple(coopname, decision -> type, secondary_id, decision -> authorization)
   ).send();
   
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newresolved"_n,
-      std::make_tuple(coopname, withdraw -> username, decision -> type, decision_id, document)
-  ).send();
+  Action::send<newresolved_interface>(
+    _soviet,
+    "newresolved"_n,
+    _soviet,
+    coopname,
+    withdraw -> username,
+    decision -> type,
+    decision -> hash.value(),
+    document
+  );
   
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newdecision"_n,
-      std::make_tuple(coopname, withdraw -> username, decision -> type, decision_id, decision -> authorization)
-  ).send();
-
+  Action::send<newdecision_interface>(
+    _soviet,
+    "newdecision"_n,
+    _soviet,
+    coopname,
+    withdraw -> username,
+    decision -> type,
+    decision -> hash.value(),
+    decision -> authorization
+  );
 
   decisions.erase(decision);
-
 };

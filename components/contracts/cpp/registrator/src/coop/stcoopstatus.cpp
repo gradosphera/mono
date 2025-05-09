@@ -18,12 +18,18 @@
       ).send();
       
       if (coop -> status.value() == "pending"_n) {
-        action(
-          permission_level{ _registrator, "active"_n},
+        checksum256 hash = eosio::sha256((char*)&coopname, sizeof(coopname));
+        
+        Action::send<newresolved_interface>(
           _soviet,
           "newresolved"_n,
-          std::make_tuple(_provider, coopname, "regcoop"_n, uint64_t(0), coop -> document.value())
-        ).send();
+          _registrator,
+          _provider,
+          coopname,
+          "regcoop"_n,
+          hash,
+          coop -> document.value()
+        );
       }
     }
     

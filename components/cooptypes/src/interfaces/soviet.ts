@@ -100,7 +100,7 @@ export interface IApproval {
   id: IUint64
   coopname: IName
   username: IName
-  document: IDocument
+  document: IDocument2
   approval_hash: IChecksum256
   callback_contract: IName
   callback_action_approve: IName
@@ -113,7 +113,7 @@ export interface IAuthorize {
   coopname: IName
   chairman: IName
   decision_id: IUint64
-  document: IDocument
+  document: IDocument2
 }
 
 export interface IAutomate {
@@ -192,7 +192,7 @@ export interface ICapauthinvst {
   coopname: IName
   username: IName
   invest_id: IUint64
-  statement: IDocument
+  statement: IDocument2
   meta: string
 }
 
@@ -200,7 +200,7 @@ export interface ICapregcontr {
   coopname: IName
   username: IName
   contributor_id: IUint64
-  statement: IDocument
+  statement: IDocument2
   meta: string
 }
 
@@ -237,7 +237,7 @@ export interface IConfirmagree {
 export interface IConfirmapprv {
   coopname: IName
   approval_hash: IChecksum256
-  approved_document: IDocument
+  approved_document: IDocument2
 }
 
 export interface ICounts extends ICountsBase {
@@ -264,14 +264,14 @@ export interface ICreateagenda {
   callback_contract: IName
   confirm_callback: IName
   decline_callback: IName
-  statement: IDocument
+  statement: IDocument2
   meta: string
 }
 
 export interface ICreateapprv {
   coopname: IName
   username: IName
-  document: IDocument
+  document: IDocument2
   approval_hash: IChecksum256
   callback_contract: IName
   callback_action_approve: IName
@@ -310,14 +310,14 @@ export interface IDecision {
   username: IName
   type: IName
   batch_id: IUint64
-  statement: IDocument
+  statement: IDocument2
   votes_for: IName[]
   votes_against: IName[]
   validated: boolean
   approved: boolean
   authorized: boolean
   authorized_by: IName
-  authorization: IDocument
+  authorization: IDocument2
   created_at: ITimePointSec
   expired_at: ITimePointSec
   meta: string
@@ -344,7 +344,8 @@ export interface IDeclineapprv {
 export interface IDeclinedoc {
   coopname: IName
   username: IName
-  document: IDocument
+  hash: IChecksum256
+  document: IDocument2
 }
 
 export interface IDeladdress {
@@ -416,7 +417,7 @@ export interface IExec {
 export interface IFreedecision {
   coopname: IName
   username: IName
-  document: IDocument
+  document: IDocument2
   meta: string
 }
 
@@ -425,7 +426,7 @@ export interface IFundwithdraw {
   username: IName
   type: IName
   withdraw_id: IUint64
-  document: IDocument
+  document: IDocument2
 }
 
 export interface IInit {
@@ -451,51 +452,52 @@ export interface INewact {
   coopname: IName
   username: IName
   action: IName
-  decision_id: IUint64
-  document: IDocument
-}
-
-export interface INewbatch {
-  coopname: IName
-  action: IName
-  batch_id: IUint64
+  package: IChecksum256
+  document: IDocument2
 }
 
 export interface INewdecision {
   coopname: IName
   username: IName
   action: IName
-  decision_id: IUint64
-  document: IDocument
+  package: IChecksum256
+  document: IDocument2
 }
 
 export interface INewdeclined {
   coopname: IName
   username: IName
-  document: IDocument
+  package: IChecksum256
+  document: IDocument2
 }
 
 export interface INewresolved {
   coopname: IName
   username: IName
   action: IName
-  decision_id: IUint64
-  document: IDocument
+  package: IChecksum256
+  document: IDocument2
+}
+
+export interface INewagreement {
+  coopname: IName
+  username: IName
+  agreement_type: IName
+  document: IDocument2
+}
+
+export interface INewpackage {
+  coopname: IName
+  username: IName
+  action: IName
+  package: IChecksum256
 }
 
 export interface INewsubmitted {
   coopname: IName
   username: IName
   action: IName
-  decision_id: IUint64
-  document: IDocument2
-}
-
-export interface INewsubmitted2 {
-  coopname: IName
-  username: IName
-  action: IName
-  decision_id: IUint64
+  package: IChecksum256
   document: IDocument2
 }
 
@@ -577,7 +579,7 @@ export interface ISelectbranch {
   coopname: IName
   username: IName
   braname: IName
-  document: IDocument
+  document: IDocument2
 }
 
 export interface ISetrights {
@@ -589,10 +591,12 @@ export interface ISetrights {
 
 export interface ISignatureInfo {
   id: IUint32
+  signed_hash: IChecksum256
   signer: IName
   public_key: IPublicKey
   signature: ISignature
   signed_at: ITimePointSec
+  meta: string
 }
 
 export interface ISndagreement {
@@ -600,7 +604,7 @@ export interface ISndagreement {
   administrator: IName
   username: IName
   agreement_type: IName
-  document: IDocument
+  document: IDocument2
 }
 
 export interface IStaff {
@@ -668,5 +672,5 @@ export interface IWithdraw {
   coopname: IName
   username: IName
   withdraw_id: IUint64
-  statement: IDocument
+  statement: IDocument2
 }

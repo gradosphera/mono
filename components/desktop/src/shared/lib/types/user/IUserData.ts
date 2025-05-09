@@ -1,3 +1,4 @@
+import type { Mutations } from '@coopenomics/sdk';
 import { Cooperative } from 'cooptypes';
 
 export type IEntrepreneurData = Cooperative.Users.IEntrepreneurData;
@@ -20,9 +21,7 @@ export interface IUserData {
 
 
 
-export interface ICreateUserData {
-  type: 'individual' | 'entrepreneur' | 'organization';
-  entrepreneur_data?: ICreateEntrepreneurData & {bank_account: Cooperative.Payments.IBankAccount};
-  individual_data?: ICreateIndividualData;
-  organization_data?: ICreateOrganizationData & {bank_account: Cooperative.Payments.IBankAccount};
-}
+export type IRegisterAccount = Mutations.Accounts.RegisterAccount.IInput['data'];
+export type IRegisteredAccountResult = Mutations.Accounts.RegisterAccount.IOutput[typeof Mutations.Accounts.RegisterAccount.name];
+
+

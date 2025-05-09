@@ -7,6 +7,12 @@
       :documentAggregate="documentData.statement.documentAggregate"
     )
 
+    // Отображение документа решения с агрегатом
+    BaseDocument(
+      v-if="documentData.decision && documentData.decision.documentAggregate"
+      :documentAggregate="documentData.decision.documentAggregate"
+    )
+
     // Отображение связанных документов из агрегата
     div(v-if="documentData.links.length > 0 && documentData.statement")
       div(
@@ -17,11 +23,7 @@
           :documentAggregate="linkedDoc"
         )
 
-    // Отображение документа решения с агрегатом
-    BaseDocument(
-      v-if="documentData.decision && documentData.decision.documentAggregate"
-      :documentAggregate="documentData.decision.documentAggregate"
-    )
+
 </template>
 
 <script setup lang="ts">

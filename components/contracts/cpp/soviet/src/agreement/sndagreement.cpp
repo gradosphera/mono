@@ -79,5 +79,16 @@
       row.updated_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     });
   }
+  
+  Action::send<newagreement_interface>(
+    _soviet,
+    "newagreement"_n,
+    _soviet,
+    coopname,
+    username,
+    agreement_type,
+    document
+  );
+
 }
 

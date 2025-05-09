@@ -51,7 +51,7 @@ div.scroll-area(style="height: 90vh; overflow-y: auto;")
 
         q-td {{ getDocumentHash(props.row).substring(0, 10) || '' }}
         q-td {{ getDocumentTitle(props.row) }}
-        
+
       q-tr(
         v-if="expanded.get(props.row?.id || props.row?.statement?.action?.global_sequence)"
         :key="`e_${props.row?.id || props.row?.statement?.action?.global_sequence}`"
@@ -145,7 +145,7 @@ const columns:any[] = [
     field: (row: any) => getDocumentTitle(row),
     sortable: true
   },
-  
+
 ]
 
 // Функция для переключения состояния развертывания

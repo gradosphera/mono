@@ -7,7 +7,6 @@ import coopRoute from './coop.route';
 import monoRoute from './system.route';
 import dataRoute from './document.route';
 import notifyRoute from './notify.route';
-import participantsRoute from './participant.route';
 import methodRoute from './method.route';
 import pluginRoute from './plugin.route';
 
@@ -27,10 +26,6 @@ const defaultRoutes = [
   {
     path: '/users',
     route: userRoute,
-  },
-  {
-    path: '/participants',
-    route: participantsRoute,
   },
   {
     path: '/documents',

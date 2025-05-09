@@ -83,10 +83,15 @@ void meet::signbypresid(name coopname, name username, checksum256 hash, document
     }
       
   // отправляем документ в принятый реестр
-  action(
-    permission_level{ _meet, "active"_n},
+  
+  Action::send<newresolved_interface>(
     _soviet,
     "newresolved"_n,
-    std::make_tuple(coopname, username, get_valid_soviet_action("completegm"_n), uint64_t(0), presider_decision)
-  ).send();
+    _meet,
+    coopname,
+    username,
+    get_valid_soviet_action("completegm"_n),
+    hash,
+    presider_decision
+  );
 } 

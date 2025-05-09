@@ -45,7 +45,8 @@ export class AccountResolver {
     name: 'registerAccount',
     description: 'Зарегистрировать аккаунт пользователя в системе',
   })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  //TODO:
+  // @UseGuards(GqlJwtAuthGuard, RolesGuard)
   async registerAccount(
     @Args('data', { type: () => RegisterAccountInputDTO })
     data: RegisterAccountInputDTO

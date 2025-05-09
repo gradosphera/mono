@@ -57,18 +57,18 @@ watch(() => props.tabName, (newVal) => {
 // Компонент для редактирования данных
 const useComponent = (account: IAccount) => {
   switch (account.private_account?.type) {
-    case AccountTypes.Individual: return EditableIndividualCard
-    case AccountTypes.Entrepreneur: return EditableEntrepreneurCard
-    case AccountTypes.Organization: return EditableOrganizationCard
+    case AccountTypes.individual: return EditableIndividualCard
+    case AccountTypes.entrepreneur: return EditableEntrepreneurCard
+    case AccountTypes.organization: return EditableOrganizationCard
   }
 }
 
 // Получение данных участника
 const usePrivateData = (account: IAccount) => {
   switch (account.private_account?.type) {
-    case AccountTypes.Individual: return account.private_account.individual_data
-    case AccountTypes.Entrepreneur: return account.private_account.entrepreneur_data
-    case AccountTypes.Organization: return account.private_account.organization_data
+    case AccountTypes.individual: return account.private_account.individual_data
+    case AccountTypes.entrepreneur: return account.private_account.entrepreneur_data
+    case AccountTypes.organization: return account.private_account.organization_data
   }
 }
 

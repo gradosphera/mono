@@ -9,6 +9,7 @@ import { DocumentAggregator } from '../aggregators/document.aggregator';
 import { DocumentPackageAggregator } from '../aggregators/document-package.aggregator';
 import { getActions } from '~/utils/getFetch';
 import { toDotNotation } from '~/utils/toDotNotation';
+import type { ISignedDocumentDomainInterface } from '../interfaces/signed-document-domain.interface';
 
 @Injectable()
 export class DocumentDomainService {
@@ -34,7 +35,7 @@ export class DocumentDomainService {
    * @param signedDoc Подписанный документ (метаинформация)
    * @returns Агрегатор документов
    */
-  public async buildDocumentAggregate(signedDoc: Cooperative.Document.ISignedDocument2): Promise<DocumentDomainAggregate> {
+  public async buildDocumentAggregate(signedDoc: ISignedDocumentDomainInterface): Promise<DocumentDomainAggregate | null> {
     return this.documentAggregator.buildDocumentAggregate(signedDoc);
   }
 
