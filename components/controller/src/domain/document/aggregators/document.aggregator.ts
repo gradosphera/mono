@@ -2,15 +2,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { DOCUMENT_REPOSITORY, DocumentRepository } from '../repository/document.repository';
 import { DocumentDomainAggregate } from '../aggregates/document-domain.aggregate';
 import { DocumentDomainEntity } from '../entity/document-domain.entity';
-import { Cooperative } from 'cooptypes';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import type { DocumentMetaDomainInterface } from '../interfaces/document-meta-domain.interface';
-import { SignedDocumentDomainEntity } from '../entity/signed-document-domain.entity';
 import {
-  ExtendedSignedDocument2DomainInterface,
+  ExtendedSignedDocumentDomainInterface,
   SignatureInfoDomainInterface,
-} from '../interfaces/signed-document-domain.interface';
-
+} from '../interfaces/extended-signed-document-domain.interface';
+import type { ISignedDocumentDomainInterface } from '../interfaces/signed-document-domain.interface';
+import { Classes } from '@coopenomics/sdk';
 @Injectable()
 export class DocumentAggregator {
   constructor(
@@ -24,11 +23,9 @@ export class DocumentAggregator {
    * @param signedDoc Подписанный документ (метаинформация) в новом формате
    * @returns Агрегатор документов
    */
-  public async buildDocumentAggregate<T extends DocumentMetaDomainInterface>(
-    signedDoc: Cooperative.Document.ISignedDocument2<T>
-  ): Promise<DocumentDomainAggregate> {
+  public async buildDocumentAggregate(signedDoc: ISignedDocumentDomainInterface): Promise<DocumentDomainAggregate | null> {
     // Получаем полный документ по хешу
-    const document = await this.getDocumentByHash(signedDoc.hash);
+    const document = await this.getDocumentByHash(signedDoc.doc_hash);
 
     // Проверяем, что в метаданных документа есть username
     if (!signedDoc.meta || !signedDoc.meta.username) {
@@ -47,20 +44,22 @@ export class DocumentAggregator {
         // Формируем объект информации о подписи
         const signatureInfo: SignatureInfoDomainInterface = {
           id: signature.id,
+          signed_hash: signature.signed_hash,
           signer: signature.signer,
           public_key: signature.public_key,
           signature: signature.signature,
-          signed_at: new Date(signature.signed_at),
-          is_valid: true, // Предполагаем, что подпись валидна
+          signed_at: signature.signed_at,
+          is_valid: Classes.Document.validateSignature(signature),
           signer_info: signer,
+          meta: signature.meta,
         };
 
         signatureInfos.push(signatureInfo);
       }
     }
 
-    // Формируем документ в соответствии с интерфейсом ExtendedSignedDocument2DomainInterface
-    const extendedDoc: ExtendedSignedDocument2DomainInterface = {
+    // Формируем документ в соответствии с интерфейсом ExtendedSignedDocumentDomainInterface
+    const extendedDoc: ExtendedSignedDocumentDomainInterface = {
       version: signedDoc.version,
       hash: signedDoc.hash,
       doc_hash: signedDoc.doc_hash,
@@ -68,6 +67,7 @@ export class DocumentAggregator {
       meta: signedDoc.meta,
       signatures: signatureInfos,
     };
+    if (!document) return null;
 
     return new DocumentDomainAggregate(signedDoc.hash, extendedDoc, document);
   }
@@ -77,9 +77,8 @@ export class DocumentAggregator {
    * @param hash Хеш документа
    * @returns Документ
    */
-  private async getDocumentByHash(hash: string): Promise<DocumentDomainEntity> {
+  private async getDocumentByHash(hash: string): Promise<DocumentDomainEntity | null> {
     const document = await this.documentRepository.findByHash(hash);
-    if (!document) throw new BadRequestException('Документ не найден');
     return document;
   }
 }

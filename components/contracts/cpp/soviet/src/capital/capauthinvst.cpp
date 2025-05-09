@@ -7,6 +7,7 @@
   decisions_index decisions(_soviet, coopname.value);
   
   auto decision_id = get_id(_soviet, coopname, "decisions"_n);
+  checksum256 decision_hash = eosio::sha256((char*)&decision_id, sizeof(decision_id));
   
   decisions.emplace(_soviet, [&](auto &d) {
     d.id = decision_id;
@@ -18,15 +19,19 @@
     d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     d.expired_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _decision_expiration);
     d.meta = meta;
+    d.hash = decision_hash;
   });
-  
-  action(
-    permission_level{ _soviet, "active"_n},
+    
+  Action::send<newsubmitted_interface>(
     _soviet,
     "newsubmitted"_n,
-    std::make_tuple(coopname, username, _capital_invest_authorize_action, decision_id, statement)
-  ).send();
-  
+    _soviet,
+    coopname,
+    username,
+    _capital_invest_authorize_action,
+    decision_hash,
+    statement
+  );
 }
 
 void soviet::capital_invest_authorize_action_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id) { 
@@ -39,20 +44,28 @@ void soviet::capital_invest_authorize_action_effect(eosio::name executer, eosio:
     _capital_invest_authorize_action,
     std::make_tuple(coopname, decision -> batch_id, decision -> authorization)
   ).send();
+    
+  Action::send<newresolved_interface>(
+    _soviet,
+    "newresolved"_n,
+    _soviet,
+    coopname,
+    decision -> username,
+    decision -> type,
+    decision -> hash.value(),
+    decision -> statement
+  );
   
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newresolved"_n,
-      std::make_tuple(coopname, decision -> username, decision -> type, decision_id, decision -> statement)
-  ).send();
-  
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newdecision"_n,
-      std::make_tuple(coopname, decision -> username, decision -> type, decision_id, decision -> authorization)
-  ).send();
+  Action::send<newdecision_interface>(
+    _soviet,
+    "newdecision"_n,
+    _soviet,
+    coopname,
+    decision -> username,
+    decision -> type,
+    decision -> hash.value(),
+    decision -> authorization
+  );
   
   decisions.erase(decision);
 }

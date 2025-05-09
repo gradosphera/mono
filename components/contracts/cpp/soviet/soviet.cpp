@@ -45,6 +45,8 @@
 #include "src/doc/newdeclined.cpp"
 #include "src/doc/newresolved.cpp"
 #include "src/doc/newsubmitted.cpp"
+#include "src/doc/newagreement.cpp"
+#include "src/doc/newpackage.cpp"
 
 #include "src/fund/fundwithdraw.cpp"
 

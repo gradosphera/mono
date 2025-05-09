@@ -1,21 +1,39 @@
 import { PrivateKey } from '@wharfkit/antelope';
 import {
-  ICreatedUser,
-  IKeyPair,
-  ISendStatement,
+  IKeyPair
 } from 'src/shared/lib/types/user';
 import { sendPOST } from 'src/shared/api';
-import { ICreateUser } from '../model';
 import type { ICreatedPayment } from '@coopenomics/controller';
+import { Mutations } from '@coopenomics/sdk';
+import { client } from 'src/shared/api/client';
+import type { IRegisterAccount, IRegisteredAccountResult } from 'src/shared/lib/types/user/IUserData';
+import type { ISendStatement, ISendStatementResult } from '../model';
 
-async function createUser(data: ICreateUser): Promise<ICreatedUser> {
-  const response = await sendPOST('/v1/users', data, true);
-
-  return response;
+async function createUser(data: IRegisterAccount): Promise<IRegisteredAccountResult> {
+  const { [Mutations.Accounts.RegisterAccount.name]: result } = await client.Mutation(
+    Mutations.Accounts.RegisterAccount.mutation,
+    {
+      variables: {
+        data
+      }
+    }
+  );
+  console.log('result: ', result, data);
+  return result;
 }
 
-async function sendStatement(data: ISendStatement): Promise<void> {
-  await sendPOST('/v1/participants/join-cooperative', data);
+async function sendStatement(data: ISendStatement): Promise<ISendStatementResult> {
+  console.log('send statement: ', data);
+  const { [Mutations.Participants.RegisterParticipant.name]: result } = await client.Mutation(
+    Mutations.Participants.RegisterParticipant.mutation,
+    {
+      variables: {
+        data
+      }
+    }
+  );
+
+  return result;
 }
 
 async function emailIsExist(email: string): Promise<boolean> {

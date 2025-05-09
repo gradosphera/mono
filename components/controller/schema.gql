@@ -68,9 +68,9 @@ type AccountResourceInfo {
 
 """Тип аккаунта пользователя в системе"""
 enum AccountType {
-  Entrepreneur
-  Individual
-  Organization
+  entrepreneur
+  individual
+  organization
 }
 
 type AccountsPaginationResult {
@@ -237,17 +237,23 @@ input AnnualGeneralMeetingAgendaGenerateDocumentInput {
 }
 
 input AnnualGeneralMeetingAgendaSignedDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
 
   """Метаинформация для создания протокола решения"""
   meta: AnnualGeneralMeetingAgendaSignedMetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input AnnualGeneralMeetingAgendaSignedMetaDocumentInput {
@@ -318,17 +324,23 @@ input AnnualGeneralMeetingDecisionGenerateDocumentInput {
 }
 
 input AnnualGeneralMeetingDecisionSignedDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
 
   """Метаинформация"""
   meta: AnnualGeneralMeetingDecisionSignedMetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input AnnualGeneralMeetingDecisionSignedMetaDocumentInput {
@@ -463,17 +475,23 @@ input AnnualGeneralMeetingVotingBallotGenerateDocumentInput {
 }
 
 input AnnualGeneralMeetingVotingBallotSignedDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
 
   """Метаинформация для создания протокола решения"""
   meta: AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput {
@@ -559,17 +577,23 @@ input AssetContributionActGenerateDocumentInput {
 }
 
 input AssetContributionActSignedDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
 
   """Метаинформация для создания проекта свободного решения"""
   meta: AssetContributionActSignedMetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input AssetContributionActSignedMetaDocumentInput {
@@ -696,17 +720,23 @@ input AssetContributionStatementGenerateDocumentInput {
 }
 
 input AssetContributionStatementSignedDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
 
   """Метаинформация для создания проекта свободного решения"""
   meta: AssetContributionStatementSignedMetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input AssetContributionStatementSignedMetaDocumentInput {
@@ -936,13 +966,13 @@ type BlockchainDecision {
   authorized: Boolean!
   authorized_by: String!
   batch_id: Float!
-  callback_contract: String!
-  confirm_callback: String!
+  callback_contract: String
+  confirm_callback: String
   coopname: String!
   created_at: String!
-  decline_callback: String!
+  decline_callback: String
   expired_at: String!
-  hash: String!
+  hash: String
   id: Float!
   meta: String!
   statement: SignedBlockchainDocument!
@@ -1581,9 +1611,9 @@ input DisputeOnRequestInput {
 }
 
 type DocumentAggregate {
+  document: SignedDigitalDocument!
   hash: String!
   rawDocument: GeneratedDocument
-  signatures: [SignedDigitalDocument!]!
 }
 
 """
@@ -2710,7 +2740,7 @@ input ParticipantApplicationGenerateDocumentInput {
   links: [String!]
 
   """Изображение собственноручной подписи (base-64)"""
-  signature: String!
+  signature: String
 
   """
   Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю)
@@ -2731,15 +2761,21 @@ input ParticipantApplicationGenerateDocumentInput {
 }
 
 input ParticipantApplicationSignedDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
   meta: ParticipantApplicationSignedMetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input ParticipantApplicationSignedMetaDocumentInput {
@@ -2768,7 +2804,7 @@ input ParticipantApplicationSignedMetaDocumentInput {
   registry_id: Int!
 
   """Изображение собственноручной подписи (base-64)"""
-  signature: String!
+  signature: String
 
   """
   Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю)
@@ -3030,17 +3066,23 @@ input ProjectFreeDecisionGenerateDocumentInput {
 }
 
 input ProjectFreeDecisionSignedDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
 
   """Метаинформация для создания проекта свободного решения"""
   meta: ProjectFreeDecisionSignedMetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input ProjectFreeDecisionSignedMetaDocumentInput {
@@ -3267,6 +3309,9 @@ input RegisterAccountInput {
 }
 
 input RegisterParticipantInput {
+  """Имя кооперативного участка"""
+  braname: String
+
   """Подписанный документ политики конфиденциальности от пайщика"""
   privacy_agreement: SignedDigitalDocumentInput!
 
@@ -3423,17 +3468,23 @@ input ReturnByAssetActGenerateDocumentInput {
 }
 
 input ReturnByAssetActSignedDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
 
   """Метаинформация для создания проекта свободного решения"""
   meta: ReturnByAssetActSignedMetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input ReturnByAssetActSignedMetaDocumentInput {
@@ -3560,17 +3611,23 @@ input ReturnByAssetStatementGenerateDocumentInput {
 }
 
 input ReturnByAssetStatementSignedDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
 
   """Метаинформация для создания проекта свободного решения"""
   meta: ReturnByAssetStatementSignedMetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input ReturnByAssetStatementSignedMetaDocumentInput {
@@ -3666,17 +3723,23 @@ input SelectBranchInput {
 }
 
 input SelectBranchSignedDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
 
   """Метаинформация для документа выбора кооперативного участка"""
   meta: SelectBranchSignedMetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input SelectBranchSignedMetaDocumentInput {
@@ -3766,41 +3829,88 @@ input SignBySecretaryOnAnnualGeneralMeetInput {
   username: String!
 }
 
-type SignedBlockchainDocument {
-  """Хеш документа"""
-  hash: String!
-
-  """Метаинформация документа"""
-  meta: String!
-
-  """Публичный ключ документа"""
-  public_key: String!
-
-  """Подпись документа"""
-  signature: String!
-}
-
-type SignedDigitalDocument {
-  hash: String!
-  is_valid: Boolean!
+type SignatureInfo {
+  id: Float!
+  is_valid: Boolean
   meta: JSON!
   public_key: String!
   signature: String!
-  signer: UserDataUnion
+  signed_at: String!
+  signed_hash: String!
+  signer: String!
+  signer_info: UserDataUnion
+}
+
+input SignatureInfoInput {
+  """Идентификатор номера подписи"""
+  id: Float!
+
+  """Мета-данные подписи"""
+  meta: JSON!
+
+  """Публичный ключ"""
+  public_key: String!
+
+  """Подпись хэша"""
+  signature: String!
+
+  """Время подписания"""
+  signed_at: String!
+
+  """Подписанный хэш"""
+  signed_hash: String!
+
+  """Аккаунт подписавшего"""
+  signer: String!
+}
+
+type SignedBlockchainDocument {
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
+  hash: String!
+
+  """Метаинформация документа (в формате JSON-строки)"""
+  meta: String!
+
+  """Хэш мета-данных"""
+  meta_hash: String!
+
+  """Вектор подписей"""
+  signatures: [SignatureInfo!]!
+
+  """Версия стандарта документа"""
+  version: String!
+}
+
+type SignedDigitalDocument {
+  doc_hash: String!
+  hash: String!
+  meta: JSON!
+  meta_hash: String!
+  signatures: [SignatureInfo!]!
+  version: String!
 }
 
 input SignedDigitalDocumentInput {
-  """Хэш документа"""
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
   hash: String!
 
   """Метаинформация документа"""
   meta: MetaDocumentInput!
 
-  """Публичный ключ документа"""
-  public_key: String!
+  """Хэш мета-данных"""
+  meta_hash: String!
 
-  """Подпись документа"""
-  signature: String!
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
 }
 
 input SovietMemberInput {

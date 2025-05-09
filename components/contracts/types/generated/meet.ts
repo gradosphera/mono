@@ -5,12 +5,13 @@ export type IChecksum256 = string
 export type IPublicKey = string
 export type ISignature = string
 export type ITimePointSec = string
+export type IUint32 = number
 export type IUint64 = number | string
 
 export interface IAuthmeet {
   coopname: IName
   hash: IChecksum256
-  authorization: IDocument
+  authorization: IDocument2
 }
 
 export interface ICreatemeet {
@@ -20,7 +21,7 @@ export interface ICreatemeet {
   presider: IName
   secretary: IName
   agenda: IMeetPoint[]
-  proposal: IDocument
+  proposal: IDocument2
   open_at: ITimePointSec
   close_at: ITimePointSec
 }
@@ -31,11 +32,13 @@ export interface IDeclmeet {
   reason: string
 }
 
-export interface IDocument {
+export interface IDocument2 {
+  version: string
   hash: IChecksum256
-  public_key: IPublicKey
-  signature: ISignature
+  doc_hash: IChecksum256
+  meta_hash: IChecksum256
   meta: string
+  signatures: ISignatureInfo[]
 }
 
 export interface IMeet {
@@ -55,10 +58,10 @@ export interface IMeet {
   current_quorum_percent: IUint64
   cycle: IUint64
   quorum_passed: boolean
-  proposal: IDocument
-  authorization: IDocument
-  decision1: IDocument
-  decision2: IDocument
+  proposal: IDocument2
+  authorization: IDocument2
+  decision1: IDocument2
+  decision2: IDocument2
 }
 
 export interface IMeetPoint {
@@ -106,30 +109,40 @@ export interface IQuestionResult {
 export interface IRestartmeet {
   coopname: IName
   hash: IChecksum256
-  newproposal: IDocument
+  newproposal: IDocument2
   new_open_at: ITimePointSec
   new_close_at: ITimePointSec
+}
+
+export interface ISignatureInfo {
+  id: IUint32
+  signed_hash: IChecksum256
+  signer: IName
+  public_key: IPublicKey
+  signature: ISignature
+  signed_at: ITimePointSec
+  meta: string
 }
 
 export interface ISignbypresid {
   coopname: IName
   username: IName
   hash: IChecksum256
-  presider_decision: IDocument
+  presider_decision: IDocument2
 }
 
 export interface ISignbysecr {
   coopname: IName
   username: IName
   hash: IChecksum256
-  secretary_decision: IDocument
+  secretary_decision: IDocument2
 }
 
 export interface IVote {
   coopname: IName
   hash: IChecksum256
   username: IName
-  ballot: IDocument
+  ballot: IDocument2
   votes: IVotePoint[]
 }
 

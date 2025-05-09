@@ -48,16 +48,16 @@ loadParticipants()
 
 const update = (account: IAccount, newData: IIndividualData | IOrganizationData | IEntrepreneurData) => {
   switch (account.private_account?.type) {
-    case AccountTypes.Individual:
+    case AccountTypes.individual:
       account.private_account.individual_data = {
         ...newData as IIndividualData,
         passport: (newData as IIndividualData).passport ?? undefined
       }
       break
-    case AccountTypes.Entrepreneur:
+    case AccountTypes.entrepreneur:
       account.private_account.entrepreneur_data = newData as IEntrepreneurData
       break
-    case AccountTypes.Organization:
+    case AccountTypes.organization:
       account.private_account.organization_data = newData as IOrganizationData
       break
   }

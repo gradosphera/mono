@@ -6,6 +6,7 @@ export type IChecksum256 = string
 export type IPublicKey = string
 export type ISignature = string
 export type ITimePointSec = string
+export type IUint32 = number
 export type IUint64 = number | string
 
 export interface IAccfund {
@@ -88,11 +89,13 @@ export interface IDelfund {
   fund_id: IUint64
 }
 
-export interface IDocument {
+export interface IDocument2 {
+  version: string
   hash: IChecksum256
-  public_key: IPublicKey
-  signature: ISignature
+  doc_hash: IChecksum256
+  meta_hash: IChecksum256
   meta: string
+  signatures: ISignatureInfo[]
 }
 
 export interface IEditfund {
@@ -120,7 +123,7 @@ export interface IFundwithdraw {
   username: IName
   type: IName
   fund_id: IUint64
-  document: IDocument
+  document: IDocument2
   quantity: IAsset
   bank_data_id: string
 }
@@ -133,7 +136,7 @@ export interface IFwithdraw {
   type: IName
   fund_id: IUint64
   quantity: IAsset
-  document: IDocument
+  document: IDocument2
   bank_data_id: string
   expired_at: ITimePointSec
 }
@@ -156,6 +159,16 @@ export interface INewwithdraw {
   coopname: IName
   type: IName
   id: IUint64
+}
+
+export interface ISignatureInfo {
+  id: IUint32
+  signed_hash: IChecksum256
+  signer: IName
+  public_key: IPublicKey
+  signature: ISignature
+  signed_at: ITimePointSec
+  meta: string
 }
 
 export interface ISimpleWallet {

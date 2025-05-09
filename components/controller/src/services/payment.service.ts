@@ -32,36 +32,9 @@ export class PaymentEffectProcessor {
   }
 
   private async process(order: IOrder) {
-    logger.info(`Processing blockchain data for order ${order.id}`, { source: 'process' });
-
-    try {
-      const user = await getUserByUsername(order.username);
-
-      if (order.type === 'registration') {
-        await blockchainService.registerBlockchainAccount(user, order);
-
-        logger.info('New user registered:', { source: 'process', username: user.username });
-
-        user.status = userStatus['4_Registered'];
-        user.is_registered = true;
-        user.has_account = true;
-        await user.save();
-
-        await Order.updateOne({ _id: order.id }, { status: orderStatus.completed });
-      } else if (order.type === 'deposit') {
-        await blockchainService.completeDeposit(order);
-
-        await Order.updateOne({ _id: order.id }, { status: orderStatus.completed });
-
-        logger.info(`User ${user.username} made a share contribution of ${order.quantity}`, { source: 'process' });
-      }
-    } catch (e: any) {
-      await Order.updateOne({ _id: order.id }, { status: orderStatus.failed, message: e.message });
-      logger.error(`Error processing blockchain transaction for order: ${order.id} with message: ${e.message}`, e);
-    }
+    logger.info(`NOT Processing blockchain data for order ${order.id}`);
   }
 }
-
 // export const init = () => {
 //   redisSubscriber.subscribe(`${config.coopname}:orderStatusUpdate`);
 

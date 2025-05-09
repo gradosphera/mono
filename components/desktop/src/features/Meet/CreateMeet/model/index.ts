@@ -43,7 +43,7 @@ export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput): Pr
     username: data.username
   })
   // Подписываем документ
-  const signedDocument = await signDocument(generatedDocument)
+  const signedDocument = await signDocument(generatedDocument, data.username)
 
   // Создаем собрание
   const result = await createMeet({

@@ -19,12 +19,10 @@ export interface MeetRowProcessingDomainInterface {
   current_quorum_percent: number;
   cycle: number;
   quorum_passed: boolean;
-  proposal: DocumentAggregateDomainInterface<
-    Cooperative.Registry.AnnualGeneralMeetingAgenda.Action & Cooperative.Document.IMetaDocument
-  >;
-  authorization?: DocumentAggregateDomainInterface<
-    Cooperative.Registry.AnnualGeneralMeetingSovietDecision.Action & Cooperative.Document.IMetaDocument
-  >;
+  proposal: DocumentAggregateDomainInterface;
+  authorization?: DocumentAggregateDomainInterface;
+  decision1?: DocumentAggregateDomainInterface;
+  decision2?: DocumentAggregateDomainInterface;
 }
 
 assertType<AssertKeysMatch<MeetContract.Tables.Meets.IOutput, MeetRowProcessingDomainInterface>>();

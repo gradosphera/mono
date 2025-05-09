@@ -1,4 +1,3 @@
-
 // удостоверить акт приёма-передачи от кооператива
 // это должно срабатывать на выдаче имущества заказчику для формирования закрывающего списка документов
 void soviet::recieved (eosio::name coopname, uint64_t exchange_id) {
@@ -9,47 +8,73 @@ void soviet::recieved (eosio::name coopname, uint64_t exchange_id) {
   eosio::check(request != exchange.end(), "Заявка не обнаружена");
   eosio::check(request -> parent_id > 0, "Только встречная заявка может быть обработана");
 
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newdecision"_n,
-      std::make_tuple(coopname, request -> money_contributor, _product_return_action, request -> return_product_decision_id, request -> return_product_authorization)
-  ).send();
+  checksum256 hash = eosio::sha256((char*)&request -> id, sizeof(request -> id));
+  
+  Action::send<newdecision_interface>(
+    _soviet,
+    "newdecision"_n,
+    _soviet,
+    coopname,
+    request -> money_contributor,
+    _product_return_action,
+    hash,
+    request -> return_product_authorization
+  );
 
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newresolved"_n,
-      std::make_tuple(coopname, request -> money_contributor, _product_return_action, request -> return_product_decision_id, request -> return_product_statement)
-  ).send();
+  Action::send<newresolved_interface>(
+    _soviet,
+    "newresolved"_n,
+    _soviet,
+    coopname,
+    request -> money_contributor,
+    _product_return_action,
+    hash,
+    request -> return_product_statement
+  );
   
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newact"_n,
-      std::make_tuple(coopname, request -> money_contributor, _product_return_action, request -> return_product_decision_id, request -> product_recieve_act_validation)
-  ).send();
+  Action::send<newact_interface>(
+    _soviet,
+    "newact"_n,
+    _soviet,
+    coopname,
+    request -> money_contributor,
+    _product_return_action,
+    hash,
+    request -> product_recieve_act_validation
+  );
   
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newdecision"_n,
-      std::make_tuple(coopname, request -> product_contributor, _product_contribution_action, request -> contribution_product_decision_id, request -> contribution_product_authorization)
-  ).send();
+  Action::send<newdecision_interface>(
+    _soviet,
+    "newdecision"_n,
+    _soviet,
+    coopname,
+    request -> product_contributor,
+    _product_contribution_action,
+    hash,
+    request -> contribution_product_authorization
+  );
 
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newresolved"_n,
-      std::make_tuple(coopname, request -> product_contributor, _product_contribution_action, request -> contribution_product_decision_id, request -> contribute_product_statement)
-  ).send();
+  Action::send<newresolved_interface>(
+    _soviet,
+    "newresolved"_n,
+    _soviet,
+    coopname,
+    request -> product_contributor,
+    _product_contribution_action,
+    hash,
+    request -> contribute_product_statement
+  );
   
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newact"_n,
-      std::make_tuple(coopname, request -> product_contributor, _product_contribution_action, request -> contribution_product_decision_id, request -> product_contribution_act_validation)
-  ).send();
+  Action::send<newact_interface>(
+    _soviet,
+    "newact"_n,
+    _soviet,
+    coopname,
+    request -> product_contributor,
+    _product_contribution_action,
+    hash,
+    request -> product_contribution_act_validation
+  );
 
 };
 

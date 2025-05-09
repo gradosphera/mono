@@ -1,4 +1,3 @@
-
 void soviet::withdraw(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document2 statement) { 
 
   require_auth(_gateway);
@@ -7,7 +6,9 @@ void soviet::withdraw(eosio::name coopname, eosio::name username, uint64_t withd
   
   decisions_index decisions(_soviet, coopname.value);
   auto decision_id = get_id(_soviet, coopname, "decisions"_n);
-    
+  
+  checksum256 hash = eosio::sha256((char*)&withdraw_id, sizeof(withdraw_id));
+  
   decisions.emplace(_gateway, [&](auto &d){
     d.id = decision_id;
     d.coopname = coopname;
@@ -16,15 +17,20 @@ void soviet::withdraw(eosio::name coopname, eosio::name username, uint64_t withd
     d.batch_id = withdraw_id;
     d.statement = statement;
     d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+    d.hash = hash;
   });
 
-  action(
-    permission_level{ _soviet, "active"_n},
+  
+  Action::send<newsubmitted_interface>(
     _soviet,
     "newsubmitted"_n,
-    std::make_tuple(coopname, username, decision_id)
-  ).send();
-  
+    _soviet,
+    coopname,
+    username,
+    _withdraw_action,
+    hash,
+    statement
+  );
 };
 
 void soviet::withdraw_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id, uint64_t batch_id) { 
@@ -40,20 +46,27 @@ void soviet::withdraw_effect(eosio::name executer, eosio::name coopname, uint64_
       std::make_tuple(coopname, batch_id)
   ).send();
   
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newresolved"_n,
-      std::make_tuple(coopname, decision -> username, _withdraw_action, decision_id, decision -> statement)
-  ).send();
+  Action::send<newresolved_interface>(
+    _soviet,
+    "newresolved"_n,
+    _soviet,
+    coopname,
+    decision -> username,
+    _withdraw_action,
+    decision -> hash.value(),
+    decision -> statement
+  );
   
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newdecision"_n,
-      std::make_tuple(coopname, decision -> username, _withdraw_action, decision_id, decision -> authorization)
-  ).send();
+  Action::send<newdecision_interface>(
+    _soviet,
+    "newdecision"_n,
+    _soviet,
+    coopname,
+    decision -> username,
+    _withdraw_action,
+    decision -> hash.value(),
+    decision -> authorization
+  );
 
   decisions.erase(decision);
-  
 }

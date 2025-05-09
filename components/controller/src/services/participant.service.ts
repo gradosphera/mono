@@ -1,14 +1,18 @@
 import { PublicKey, Signature } from '@wharfkit/antelope';
-import type { IAddUser, IDocument, IJoinCooperative } from '../types';
 import ApiError from '../utils/ApiError';
 import { getUserByUsername } from './user.service';
 import http from 'http-status';
 import TempDocument, { tempdocType } from '../models/tempDocument.model';
 import mongoose from 'mongoose';
 import { userStatus, type IUser } from '../types/user.types';
+import type { RegisterParticipantDomainInterface } from '~/domain/participant/interfaces/register-participant-domain.interface';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
-const verifyDocumentSignature = (user: IUser, document: IDocument): void => {
-  const { hash, public_key, signature } = document;
+const verifyDocumentSignature = (user: IUser, document: ISignedDocumentDomainInterface): void => {
+  const { hash, signatures } = document;
+  const public_key = signatures[0].public_key;
+  const signature = signatures[0].signature;
+
   const publicKeyObj = PublicKey.from(public_key);
   const signatureObj = Signature.from(signature);
 
@@ -17,14 +21,14 @@ const verifyDocumentSignature = (user: IUser, document: IDocument): void => {
     throw new ApiError(http.INTERNAL_SERVER_ERROR, 'Invalid signature');
   }
 
-  if (user.public_key !== document.public_key) throw new ApiError(http.BAD_REQUEST, 'Public keys are mismatched');
+  if (user.public_key !== public_key) throw new ApiError(http.BAD_REQUEST, 'Public keys are mismatched');
 };
 
 /**
  * Join a Cooperative
  *
  */
-export const joinCooperative = async (data: IJoinCooperative): Promise<void> => {
+export const joinCooperative = async (data: RegisterParticipantDomainInterface): Promise<void> => {
   const user = await getUserByUsername(data.username);
 
   if (!user) {
@@ -34,7 +38,7 @@ export const joinCooperative = async (data: IJoinCooperative): Promise<void> => 
   if (user.status !== userStatus['1_Created'] && user.status !== userStatus['2_Joined']) {
     throw new ApiError(http.NOT_FOUND, 'Пользователь уже вступил в кооператив');
   }
-
+  //TODO -> statement1 -> statement and fix verify
   verifyDocumentSignature(user, data.statement);
   verifyDocumentSignature(user, data.wallet_agreement);
   verifyDocumentSignature(user, data.user_agreement);

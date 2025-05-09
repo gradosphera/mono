@@ -1,4 +1,5 @@
-import type { Cooperative, MeetContract } from 'cooptypes';
+import type { Cooperative } from 'cooptypes';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 /**
  * Интерфейс элемента голосования
@@ -16,5 +17,5 @@ export interface VoteOnAnnualGeneralMeetInputDomainInterface {
   hash: string;
   username: string;
   votes: VoteItemInputDomainInterface[];
-  ballot: Cooperative.Document.ISignedDocument;
+  ballot: ISignedDocumentDomainInterface<Cooperative.Registry.AnnualGeneralMeetingVotingBallot.Action>;
 }

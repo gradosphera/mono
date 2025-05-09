@@ -28,7 +28,7 @@ import { notEmpty, isDomain } from 'src/shared/lib/utils';
 import { useSessionStore } from 'src/entities/Session';
 import { RegistratorContract } from 'cooptypes';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
-import type { IObjectedDocument } from 'src/shared/lib/types/document';
+import type { IDocument } from 'src/shared/lib/types/document';
 import { env } from 'src/shared/config';
 
 const emit = defineEmits(['finish'])
@@ -39,7 +39,7 @@ const isSubmitting = ref(false)
 
 const props = defineProps({
   document: {
-    type: Object as () => IObjectedDocument,
+    type: Object as () => IDocument,
     required: true,
   }
 })
@@ -62,10 +62,12 @@ const data = ref<RegistratorContract.Actions.RegisterCooperative.IRegisterCooper
   },
   username: session.username,
   document: {
+    version: '1.0.0',
     hash: '',
-    public_key: '',
-    signature: '',
-    meta: ''
+    doc_hash: '',
+    meta_hash: '',
+    meta: '',
+    signatures: []
   }
 })
 

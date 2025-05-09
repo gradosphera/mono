@@ -6,12 +6,13 @@ export type IChecksum256 = string
 export type IPublicKey = string
 export type ISignature = string
 export type ITimePointSec = string
+export type IUint32 = number
 export type IUint64 = number | string
 
 export interface IApprovewthd {
   coopname: IName
   withdraw_hash: IChecksum256
-  approved_statement: IDocument
+  approved_statement: IDocument2
 }
 
 export interface IAuthwthd {
@@ -42,7 +43,7 @@ export interface ICreatewthd {
   username: IName
   withdraw_hash: IChecksum256
   quantity: IAsset
-  statement: IDocument
+  statement: IDocument2
 }
 
 export interface IDeclinedpst {
@@ -67,14 +68,26 @@ export interface IDeposit {
   created_at: ITimePointSec
 }
 
-export interface IDocument {
+export interface IDocument2 {
+  version: string
   hash: IChecksum256
-  public_key: IPublicKey
-  signature: ISignature
+  doc_hash: IChecksum256
+  meta_hash: IChecksum256
   meta: string
+  signatures: ISignatureInfo[]
 }
 
 export interface IMigrate {
+}
+
+export interface ISignatureInfo {
+  id: IUint32
+  signed_hash: IChecksum256
+  signer: IName
+  public_key: IPublicKey
+  signature: ISignature
+  signed_at: ITimePointSec
+  meta: string
 }
 
 export interface IWithdraw {
@@ -84,8 +97,8 @@ export interface IWithdraw {
   withdraw_hash: IChecksum256
   status: IName
   quantity: IAsset
-  statement: IDocument
-  approved_statement: IDocument
-  authorization: IDocument
+  statement: IDocument2
+  approved_statement: IDocument2
+  authorization: IDocument2
   created_at: ITimePointSec
 }

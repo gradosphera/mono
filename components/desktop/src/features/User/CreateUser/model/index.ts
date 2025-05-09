@@ -2,13 +2,12 @@ import { api } from '../api';
 import emailRegex from 'email-regex';
 const emailValidator = emailRegex({ exact: true });
 
-import { IGeneratedAccount, ISendStatement } from 'src/shared/lib/types/user';
+import { IGeneratedAccount } from 'src/shared/lib/types/user';
 
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
 import { useSystemStore } from 'src/entities/System/model';
 
-import { IObjectedDocument } from 'src/shared/lib/types/document';
 import {
   ICreatedPayment,
 } from 'src/shared/lib/types/payments';
@@ -16,10 +15,11 @@ import {
   useCurrentUserStore,
 } from 'src/entities/User';
 import { useRegistratorStore } from 'src/entities/Registrator'
-import { IEntrepreneurData, IIndividualData, IOrganizationData, IUserData } from 'src/shared/lib/types/user/IUserData';
+import { IEntrepreneurData, IIndividualData, IOrganizationData, IUserData, type IRegisterAccount } from 'src/shared/lib/types/user/IUserData';
 import { client } from 'src/shared/api/client';
-import { Mutations } from '@coopenomics/sdk';
-
+import { Mutations, Zeus } from '@coopenomics/sdk';
+import { DigitalDocument } from 'src/shared/lib/document';
+import { IDocument } from 'src/shared/lib/types/document';
 export interface ICreateUser {
   email: string;
   entrepreneur_data?: IEntrepreneurData;
@@ -31,6 +31,11 @@ export interface ICreateUser {
   type: 'individual' | 'entrepreneur' | 'organization';
   username: string;
 }
+
+
+export type ISendStatement = Mutations.Participants.RegisterParticipant.IInput['data'];
+export type ISendStatementResult = Mutations.Participants.RegisterParticipant.IOutput[typeof Mutations.Participants.RegisterParticipant.name];
+
 
 export function useCreateUser() {
   const store = useRegistratorStore().state
@@ -46,6 +51,7 @@ export function useCreateUser() {
   async function sendStatementAndAgreements(): Promise<void> {
     const data: ISendStatement = {
       username: store.account.username,
+      braname: store.selectedBranch,
       statement: store.statement,
       wallet_agreement: store.walletAgreement,
       privacy_agreement: store.privacyAgreement,
@@ -57,7 +63,7 @@ export function useCreateUser() {
   }
 
 
-  async function signStatement(): Promise<IObjectedDocument> {
+  async function signStatement(): Promise<IDocument> {
     const variables: Mutations.Participants.GenerateParticipantApplication.IInput = {
       data: {
         signature: store.signature,
@@ -65,7 +71,7 @@ export function useCreateUser() {
         coopname: info.coopname,
         username: store.account.username,
         braname: store.selectedBranch,
-        links: [store.walletAgreement.hash, store.privacyAgreement.hash, store.signatureAgreement.hash, store.userAgreement.hash]
+        links: [store.walletAgreement.doc_hash, store.privacyAgreement.doc_hash, store.signatureAgreement.doc_hash, store.userAgreement.doc_hash]
       }
     }
 
@@ -74,12 +80,13 @@ export function useCreateUser() {
       { variables }
     );
 
-    store.statement = await client.Document.signDocument(result)
+    const digitalDocument = new DigitalDocument(result);
+    store.statement = await digitalDocument.sign(store.account.username);
 
     return store.statement;
   }
 
-  async function signPrivacyAgreement(): Promise<IObjectedDocument> {
+  async function signPrivacyAgreement(): Promise<IDocument> {
     const variables: Mutations.Agreements.GeneratePrivacyAgreement.IInput = {
       data: {
         coopname: info.coopname,
@@ -92,12 +99,13 @@ export function useCreateUser() {
       { variables }
     );
 
-    store.privacyAgreement = await client.Document.signDocument(result)
+    const digitalDocument = new DigitalDocument(result);
+    store.privacyAgreement = await digitalDocument.sign(store.account.username);
 
     return store.privacyAgreement;
   }
 
-  async function signSignatureAgreement(): Promise<IObjectedDocument> {
+  async function signSignatureAgreement(): Promise<IDocument> {
     const variables: Mutations.Agreements.GenerateSignatureAgreement.IInput = {
       data: {
         coopname: info.coopname,
@@ -110,14 +118,14 @@ export function useCreateUser() {
       { variables }
     );
 
-    store.signatureAgreement = await client.Document.signDocument(result)
+    const digitalDocument = new DigitalDocument(result);
+    store.signatureAgreement = await digitalDocument.sign(store.account.username);
 
     return store.signatureAgreement;
-
   }
 
 
-  async function signUserAgreement(): Promise<IObjectedDocument> {
+  async function signUserAgreement(): Promise<IDocument> {
     const variables: Mutations.Agreements.GenerateUserAgreement.IInput = {
       data: {
         coopname: info.coopname,
@@ -130,16 +138,16 @@ export function useCreateUser() {
       { variables }
     );
 
-    store.userAgreement = await client.Document.signDocument(result)
+    const digitalDocument = new DigitalDocument(result);
+    store.userAgreement = await digitalDocument.sign(store.account.username);
 
     return store.userAgreement;
-
   }
 
 
 
 
-  async function signWalletAgreement(): Promise<IObjectedDocument> {
+  async function signWalletAgreement(): Promise<IDocument> {
     const variables: Mutations.Agreements.GenerateWalletAgreement.IInput = {
       data: {
         coopname: info.coopname,
@@ -152,7 +160,8 @@ export function useCreateUser() {
       { variables }
     );
 
-    store.walletAgreement = await client.Document.signDocument(result)
+    const digitalDocument = new DigitalDocument(result);
+    store.walletAgreement = await digitalDocument.sign(store.account.username);
 
     return store.walletAgreement;
   }
@@ -175,44 +184,43 @@ export function useCreateUser() {
     );
 
     return result;
-
   }
 
   async function createUser(
     email: string,
     userData: IUserData,
-    account: IGeneratedAccount
+    generatedAccount: IGeneratedAccount
   ): Promise<void> {
 
     const synthData = { type: userData.type } as any;
 
-    if (synthData.type === 'individual') {
+    if (synthData.type === Zeus.AccountType.individual) {
       synthData.individual_data = userData.individual_data;
-    } else if (synthData.type === 'organization') {
+    } else if (synthData.type === Zeus.AccountType.organization) {
       synthData.organization_data = userData.organization_data;
-    } else if (synthData.type === 'entrepreneur') {
+    } else if (synthData.type === Zeus.AccountType.entrepreneur) {
       synthData.entrepreneur_data = userData.entrepreneur_data;
     }
-    const data: ICreateUser = {
+    console.log('synthData: ', synthData);
+    const data: IRegisterAccount = {
       ...synthData,
-      role: 'user',
       email,
-      username: account.username,
-      public_key: account.public_key,
+      username: generatedAccount.username,
+      public_key: generatedAccount.public_key,
     };
-
-    const { user, tokens } = await api.createUser(data);
+    console.log('data: ', data);
+    const { account, tokens } = await api.createUser(data);
 
     const globalStore = useGlobalStore();
     const sessionStore = useSessionStore();
 
     await globalStore.setTokens(tokens);
-    await globalStore.setWif(user.username, account.private_key);
+    await globalStore.setWif(account.username, generatedAccount.private_key);
 
     await sessionStore.init();
 
     const currentUser = useCurrentUserStore();
-    await currentUser.loadProfile(user.username, info.coopname);
+    await currentUser.loadProfile(account.username, info.coopname);
   }
 
   function emailIsValid(email: string): boolean {

@@ -18,7 +18,7 @@ div
 </template>
 <script lang="ts" setup>
   import { defineProps, defineEmits, reactive, watch } from 'vue';
-  import { QInput, QCheckbox, QSelect, QCard } from 'quasar';
+  import { QInput, QCheckbox, QSelect } from 'quasar';
   import type { IExtensionConfigSchema, ISchemaProperty } from 'src/entities/Extension/model';
 
   // Устанавливаем имя компонента для рекурсивного вызова

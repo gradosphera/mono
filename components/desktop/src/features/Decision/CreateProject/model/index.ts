@@ -24,7 +24,7 @@ export function useCreateProjectOfFreeDecision() {
 
     const { signDocument } = useSignDocument()
 
-    const signedDocument = await signDocument(generatedDocument)
+    const signedDocument = await signDocument(generatedDocument, username)
 
     await publishProjectOfFreeDecision({
       coopname: coopname,

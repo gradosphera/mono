@@ -30,11 +30,11 @@ export const useMeetDetailsVoting = (
     if (!meet?.processing?.meet) return false
 
     const isAuthorized = meet.processing.meet.status === 'authorized'
-    
+
     const now = moment()
     const openAt = moment(meet.processing.meet.open_at)
     const closeAt = moment(meet.processing.meet.close_at)
-    
+
     const isWithinTimeframe = now.isAfter(openAt) && now.isBefore(closeAt)
 
     return isAuthorized && isWithinTimeframe
@@ -84,7 +84,7 @@ export const useMeetDetailsVoting = (
         username: sessionStore.username,
       })
 
-      const signedBallot = await signDocument(generatedBallot)
+      const signedBallot = await signDocument(generatedBallot, sessionStore.username)
 
       const vote: IVoteOnMeetInput = {
         coopname,
@@ -114,4 +114,4 @@ export const useMeetDetailsVoting = (
     formattedCloseDate,
     submitVote
   }
-} 
+}

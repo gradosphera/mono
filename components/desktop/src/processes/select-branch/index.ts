@@ -47,7 +47,7 @@ export function useSelectBranchProcess() {
   const sign = async () => {
     try {
       isSubmitting.value = true
-      const doc = await digitalDocument.sign()
+      const doc = await digitalDocument.sign<Cooperative.Registry.SelectBranchStatement.Meta>(session.username)
 
       await selectBranch({
         braname: selectedBranch.value,

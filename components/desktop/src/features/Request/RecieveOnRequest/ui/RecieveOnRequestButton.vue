@@ -23,7 +23,7 @@ q-btn(color="green" @click="recieve") получил имущество
 
   const recieve = async () => {
     try {
-      await api.recieve({
+      await api.recieveOnRequest({
         coopname: props.coopname,
         username: props.username,
         request_id: props.requestId,

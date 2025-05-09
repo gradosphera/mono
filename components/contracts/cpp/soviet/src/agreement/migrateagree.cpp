@@ -10,7 +10,7 @@
  * @param agreement_id ID соглашения для миграции
  */
 void soviet::migrateagree(eosio::name coopname, uint64_t agreement_id) {
-    require_auth(_self);
+    require_auth(coopname);
     
     // Открываем таблицы agreements и agreements2
     agreements_index agreements(_self, coopname.value);
@@ -34,7 +34,7 @@ void soviet::migrateagree(eosio::name coopname, uint64_t agreement_id) {
     sig.public_key = agreement_itr->document.public_key; // Копируем публичный ключ
     sig.signature = agreement_itr->document.signature; // Копируем подпись
     sig.signed_at = agreement_itr->updated_at; // Время подписания берем из updated_at
-    
+    sig.signed_hash = agreement_itr -> document.hash; // Добавляем signed_hash
     // Добавляем подпись в вектор подписей
     new_doc.signatures.push_back(sig);
     

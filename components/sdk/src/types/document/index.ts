@@ -19,3 +19,8 @@ export type ISignatureInfo = Cooperative.Document.ISignatureInfo
  * Интерфейс для подписанного документа.
  */
 export type ISignedDocument<T = any> = Cooperative.Document.ISignedDocument2<T>
+
+/**
+ * Интерфейс для подписанного документа.
+ */
+export type ISignedChainDocument = Cooperative.Document.IChainDocument2

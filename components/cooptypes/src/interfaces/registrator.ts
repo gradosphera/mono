@@ -6,6 +6,7 @@ export type IChecksum256 = string
 export type IPublicKey = string
 export type ISignature = string
 export type ITimePointSec = string
+export type IUint32 = number
 
 export interface IAccount {
   username: IName
@@ -37,7 +38,7 @@ export interface ICandidate {
   braname: IName
   status: IName
   created_at: ITimePointSec
-  statement: IDocument
+  statement: IDocument2
   registration_hash: IChecksum256
   initial: IAsset
   minimum: IAsset
@@ -58,6 +59,7 @@ export interface IConfirmpay {
 export interface IConfirmreg {
   coopname: IName
   registration_hash: IChecksum256
+  authorization: IDocument2
 }
 
 export interface ICooperative {
@@ -78,6 +80,26 @@ export interface ICooperative {
   status: IName
   created_at: ITimePointSec
   document: IDocument
+}
+
+export interface ICooperative2 {
+  username: IName
+  parent_username: IName
+  announce: string
+  description: string
+  is_cooperative: boolean
+  is_branched: boolean
+  is_enrolled: boolean
+  coop_type: IName
+  registration: IAsset
+  initial: IAsset
+  minimum: IAsset
+  org_registration: IAsset
+  org_initial: IAsset
+  org_minimum: IAsset
+  status: IName
+  created_at: ITimePointSec
+  document: IDocument2
 }
 
 export interface ICreatebranch {
@@ -113,6 +135,15 @@ export interface IDocument {
   meta: string
 }
 
+export interface IDocument2 {
+  version: string
+  hash: IChecksum256
+  doc_hash: IChecksum256
+  meta_hash: IChecksum256
+  meta: string
+  signatures: ISignatureInfo[]
+}
+
 export interface IEnabranches {
   coopname: IName
 }
@@ -146,7 +177,7 @@ export interface IRegcoop {
   coopname: IName
   username: IName
   params: IOrgData
-  document: IDocument
+  document: IDocument2
 }
 
 export interface IReguser {
@@ -154,8 +185,18 @@ export interface IReguser {
   braname: IName
   username: IName
   type: IName
-  statement: IDocument
+  statement: IDocument2
   registration_hash: IChecksum256
+}
+
+export interface ISignatureInfo {
+  id: IUint32
+  signed_hash: IChecksum256
+  signer: IName
+  public_key: IPublicKey
+  signature: ISignature
+  signed_at: ITimePointSec
+  meta: string
 }
 
 export interface IStcoopstatus {

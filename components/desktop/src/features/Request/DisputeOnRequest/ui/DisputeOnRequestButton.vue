@@ -23,7 +23,7 @@ q-btn(color="red" @click="dispute") вернуть по гарантии
 
   const dispute = async () => {
     try {
-      await api.dispute({
+      await api.disputeOnRequest({
         coopname: props.coopname,
         username: props.username,
         request_id: props.requestId,

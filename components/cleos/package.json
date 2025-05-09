@@ -4,7 +4,7 @@
   "private": true,
   "description": "",
   "scripts": {
-    "cleos": "./run.sh"
+    "run": "./run.sh"
   },
   "keywords": [],
   "author": "",

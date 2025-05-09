@@ -1,14 +1,20 @@
 [[eosio::action]] void registrator::migrate() {
   require_auth(_registrator);
+  // Registrator::candidates_legacy_index candidates_legacy(_registrator, _provider.value);
+  // auto candidate_legacy_itr = candidates_legacy.begin();
+  // while (candidate_legacy_itr != candidates_legacy.end()) {
+  //   candidate_legacy_itr = candidates_legacy.erase(candidate_legacy_itr);
+  // }
+
+
 
   // Новый код: удаление всех записей из cooperatives2_index
-  cooperatives2_index coops2(_registrator, _registrator.value);
-  auto coop2_itr = coops2.begin();
-  while (coop2_itr != coops2.end()) {
-    coop2_itr = coops2.erase(coop2_itr);
-  }
-
-  /*
+  // cooperatives2_index coops2(_registrator, _registrator.value);
+  // auto coop2_itr = coops2.begin();
+  // while (coop2_itr != coops2.end()) {
+  //   coop2_itr = coops2.erase(coop2_itr);
+  // }
+  
   cooperatives_index coops(_registrator, _registrator.value);
   // Миграция cooperative -> cooperative2
   cooperatives2_index coops2(_registrator, _registrator.value);
@@ -56,7 +62,7 @@
                   sig.signer = coop_itr->username;
                   sig.public_key = coop_itr->document.value().public_key;
                   sig.signature = coop_itr->document.value().signature;
-                  
+                  sig.signed_hash = coop_itr->document.value().hash;
                   // Используем created_at как время подписания, если доступно
                   if (coop_itr->created_at.has_value()) {
                       sig.signed_at = coop_itr->created_at.value();
@@ -71,5 +77,4 @@
           });
       }
   }
-  */
 }

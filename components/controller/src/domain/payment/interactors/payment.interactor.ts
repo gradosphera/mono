@@ -1,9 +1,8 @@
 // domain/payment/interactors/PaymentInteractor.ts
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Order } from '~/models';
 import { userService, blockchainService } from '~/services';
-import logger from '~/config/logger';
 import { userStatus } from '~/types/user.types';
 import { type IOrder } from '~/types/order.types';
 import { PaymentTypeDomainInterface } from '../interfaces/payment-type-domain.interface';
@@ -19,10 +18,14 @@ import type { SetPaymentStatusInputDomainInterface } from '../interfaces/set-pay
 import { PaymentDomainService } from '../services/payment-domain.service';
 import type { PaginationResultLegacy } from '~/types/pagination.types';
 import { PaymentDomainEntity } from '../entity/payment.entity';
+import { AccountDomainInteractor } from '~/domain/account/interactors/account.interactor';
 
 @Injectable()
 export class PaymentInteractor {
-  constructor(private readonly paymentDomainService: PaymentDomainService) {}
+  constructor(
+    private readonly paymentDomainService: PaymentDomainService,
+    private readonly accountDomainInteractor: AccountDomainInteractor
+  ) {}
 
   private readonly logger = new Logger(PaymentInteractor.name);
 
@@ -60,7 +63,7 @@ export class PaymentInteractor {
   async execute(id: string, status: string) {
     const order = await Order.findById(id);
     if (!order) {
-      logger.error(`Order with id ${id} not found`);
+      this.logger.error(`Order with id ${id} not found`);
       return;
     }
 
@@ -70,29 +73,22 @@ export class PaymentInteractor {
         break;
 
       case PaymentStatus.FAILED:
-        logger.warn(`Payment for order ${id} failed`);
+        this.logger.warn(`Payment for order ${id} failed`);
         break;
 
       default:
-        logger.info(`Status ${status} for order ${id} does not require processing`);
+        this.logger.log(`Status ${status} for order ${id} does not require processing`);
     }
   }
 
   private async processOrder(order: IOrder) {
-    logger.info(`Processing blockchain data for order ${order.id}`);
+    this.logger.log(`Processing blockchain data for order ${order.id}`);
 
     try {
-      const user = await userService.getUserByUsername(order.username);
-
       if (order.type === PaymentTypeDomainInterface.REGISTRATION) {
-        await blockchainService.registerBlockchainAccount(user, order);
-        logger.info('New user registered:', { username: user.username });
-
-        // Обновляем пользователя
-        user.status = userStatus['4_Registered'];
-        user.is_registered = true;
-        user.has_account = true;
-        await user.save();
+        // Используем новый интерактор для регистрации в блокчейне
+        await this.accountDomainInteractor.registerBlockchainAccount(order.username);
+        this.logger.log('New user registered:', { username: order.username });
 
         // Обновляем статус заказа
         await Order.updateOne({ _id: order.id }, { status: PaymentStatus.COMPLETED });
@@ -101,11 +97,11 @@ export class PaymentInteractor {
 
         // Обновляем статус заказа
         await Order.updateOne({ _id: order.id }, { status: PaymentStatus.COMPLETED });
-        logger.info(`User ${user.username} made a share contribution of ${order.quantity}`);
+        this.logger.log(`User ${order.username} made a share contribution of ${order.quantity}`);
       }
     } catch (e: any) {
       await Order.updateOne({ _id: order.id }, { status: PaymentStatus.FAILED, message: e.message });
-      logger.error(`Error processing blockchain transaction for order: ${order.id} with message: ${e.message}`, e);
+      this.logger.error(`Error processing blockchain transaction for order: ${order.id} with message: ${e.message}`, e);
     }
   }
 }

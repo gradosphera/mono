@@ -8,7 +8,7 @@ export interface RegisterAccountDomainInterface {
   };
   individual_data?: Omit<Cooperative.Users.IIndividualData, 'username'>;
   organization_data?: CreateOrganizationDataInputDomainInterface;
-  public_key?: string;
+  public_key: string;
   referer?: string;
   type: 'individual' | 'entrepreneur' | 'organization';
   username: string;

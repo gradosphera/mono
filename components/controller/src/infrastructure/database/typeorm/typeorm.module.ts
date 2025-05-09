@@ -15,6 +15,9 @@ import { TypeOrmMeetRepository } from './repositories/typeorm-meet.repository';
 import { MigrationEntity } from './entities/migration.entity';
 import { MIGRATION_REPOSITORY } from '~/domain/system/repositories/migration-domain.repository';
 import { TypeOrmMigrationRepository } from './repositories/typeorm-migration.repository';
+import { CandidateEntity } from './entities/candidate.entity';
+import { CANDIDATE_REPOSITORY } from '~/domain/account/repository/candidate.repository';
+import { TypeOrmCandidateRepository } from './repositories/typeorm-candidate.repository';
 
 @Global()
 @Module({
@@ -30,7 +33,7 @@ import { TypeOrmMigrationRepository } from './repositories/typeorm-migration.rep
       synchronize: true, // Отключите в продакшене
       logging: false,
     }),
-    NestTypeOrmModule.forFeature([ExtensionEntity, LogExtensionEntity, MeetPreEntity, MigrationEntity]),
+    NestTypeOrmModule.forFeature([ExtensionEntity, LogExtensionEntity, MeetPreEntity, MigrationEntity, CandidateEntity]),
   ],
   providers: [
     {
@@ -49,7 +52,18 @@ import { TypeOrmMigrationRepository } from './repositories/typeorm-migration.rep
       provide: MIGRATION_REPOSITORY,
       useClass: TypeOrmMigrationRepository,
     },
+    {
+      provide: CANDIDATE_REPOSITORY,
+      useClass: TypeOrmCandidateRepository,
+    },
   ],
-  exports: [NestTypeOrmModule, EXTENSION_REPOSITORY, LOG_EXTENSION_REPOSITORY, MEET_REPOSITORY, MIGRATION_REPOSITORY],
+  exports: [
+    NestTypeOrmModule,
+    EXTENSION_REPOSITORY,
+    LOG_EXTENSION_REPOSITORY,
+    MEET_REPOSITORY,
+    MIGRATION_REPOSITORY,
+    CANDIDATE_REPOSITORY,
+  ],
 })
 export class TypeOrmModule {}

@@ -1,6 +1,5 @@
 export * as AddAuthor from './addAuthor'
 export * as Allocate from './allocate'
-export * as ApproveClaim from './approveClaim'
 export * as ApproveCommit from './approveCommit'
 export * as ApproveInvest from './approveInvest'
 export * as ApproveRegister from './approveRegister'
@@ -9,11 +8,8 @@ export * as ApproveWithdrawResult from './approveWithdrawResult'
 export * as ApproveWithdrawProgram from './approveWithdrawProgram'
 export * as ApproveWithdrawProject from './approveWithdrawProject'
 
-export * as ClaimNow from './claimNow'
-
 export * as CreateCommit from './createCommit'
 export * as CreateProject from './createProject'
-export * as CreateResult from './createResult'
 export * as CreateExpense from './createExpense'
 export * as CreateInvest from './createInvest'
 
@@ -38,5 +34,4 @@ export * as WithdrawProject from './withdrawProject'
 export * as WithdrawProgram from './withdrawProgram'
 
 export * as CreateConvert from './createConvert'
-export * as CreateClaim from './createClaim'
 export * as ApproveConvert from './approveConvert'

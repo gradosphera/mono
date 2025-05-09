@@ -10,12 +10,4 @@ router
   .route('/generate')
   .post(auth('regenerateDocument'), validate(documentValidation.RGenerate), documentController.generateDocument);
 
-router
-  .route('/get-documents')
-  .get(auth('getDocuments'), validate(documentValidation.RGetDocuments), documentController.getDocuments);
-
-// router
-//   .route('/get-my-documents')
-//   .get(auth('getMyDocuments'), validate(documentValidation.RGetDocuments), documentController.getDocuments);
-
 export default router;

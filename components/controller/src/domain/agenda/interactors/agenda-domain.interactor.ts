@@ -17,7 +17,7 @@ export class AgendaDomainInteractor {
 
   async getAgenda(): Promise<AgendaWithDocumentsDomainInterface[]> {
     // Шаг 1: Загрузить повестку дня
-    const agenda = await this.loadAgenda(config.coopname);
+    const agenda = await this.loadQuestion(config.coopname);
 
     // Шаг 2: Построить комплексную повестку (complexAgenda)
     const complexAgenda: AgendaWithDocumentsDomainInterface[] = [];
@@ -44,7 +44,7 @@ export class AgendaDomainInteractor {
   /**
    * Загружает повестку дня (agenda) на основании решений и связанных действий.
    */
-  async loadAgenda(coopname: string): Promise<VotingAgendaDomainInterface[]> {
+  async loadQuestion(coopname: string): Promise<VotingAgendaDomainInterface[]> {
     //TODO блокчейн-адаптер здесь повесить
     const api = await blockchainService.getApi();
 
@@ -57,7 +57,6 @@ export class AgendaDomainInteractor {
     )) as SovietContract.Tables.Decisions.IDecision[];
 
     const agenda: VotingAgendaDomainInterface[] = [];
-
     for (const decision of decisions) {
       // Ищем экшен, связанный с конкретным решением
       const actionResponse = await getActions(`${process.env.SIMPLE_EXPLORER_API}/get-actions`, {
@@ -65,7 +64,7 @@ export class AgendaDomainInteractor {
           account: SovietContract.contractName.production,
           name: SovietContract.Actions.Registry.NewSubmitted.actionName,
           receiver: process.env.COOPNAME,
-          'data.decision_id': String(decision.id),
+          'data.package': String(decision.hash.toUpperCase()),
         }),
         page: 1,
         limit: 1,
@@ -79,7 +78,6 @@ export class AgendaDomainInteractor {
         });
       }
     }
-
     return agenda;
   }
 }

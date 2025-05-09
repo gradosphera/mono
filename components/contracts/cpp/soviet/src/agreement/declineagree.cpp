@@ -10,4 +10,16 @@
   agreements.modify(indoc, administrator, [&](auto &d) { 
     d.status = "declined"_n;
   });
+  
+  checksum256 hash = checksum256();
+  
+  Action::send<newdeclined_interface>(
+    _soviet,
+    "newdeclined"_n,
+    _soviet,
+    coopname,
+    username,
+    checksum256(),
+    indoc -> document
+  );
 }

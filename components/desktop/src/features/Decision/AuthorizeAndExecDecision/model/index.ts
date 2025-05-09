@@ -29,21 +29,18 @@ export function useAuthorizeAndExecDecision() {
       throw new Error('Ошибка при генерации документа решения');
     }
 
-    const signed_hash_of_document = useGlobalStore().signDigest(document.hash);
-
-    const chainDocument: Cooperative.Document.IChainDocument = {
-      hash: document.hash,
-      meta: JSON.stringify(document.meta),
-      signature: signed_hash_of_document.signature,
-      public_key: signed_hash_of_document.public_key,
-    };
+    const rawDocument = new DigitalDocument(document)
+    const signedDocument = await rawDocument.sign<any>(username)
 
     const authorizeData: SovietContract.Actions.Decisions.Authorize.IAuthorize =
       {
         coopname: info.coopname,
         chairman: session.username,
         decision_id,
-        document: chainDocument,
+        document: {
+          ...signedDocument,
+          meta: JSON.stringify(signedDocument.meta),
+        },
       };
 
     const execData: SovietContract.Actions.Decisions.Exec.IExec = {

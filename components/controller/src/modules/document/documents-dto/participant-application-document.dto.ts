@@ -11,9 +11,9 @@ type action = Cooperative.Registry.ParticipantApplication.Action;
 
 @InputType(`BaseParticipantApplicationMetaDocumentInput`)
 class BaseParticipantApplicationMetaDocumentInputDTO implements ExcludeCommonProps<action> {
-  @Field({ description: 'Изображение собственноручной подписи (base-64)' })
+  @Field({ description: 'Изображение собственноручной подписи (base-64)', nullable: true })
   @IsString()
-  signature!: string;
+  signature?: string;
 
   @Field({ description: 'Имя аккаунта кооперативного участка' })
   @IsOptional()

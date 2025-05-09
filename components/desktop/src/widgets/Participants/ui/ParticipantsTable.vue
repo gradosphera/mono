@@ -101,11 +101,11 @@ const getName = (account: IAccount) => {
   const d = account.private_account
   if (!d) return ''
   switch (d.type) {
-    case AccountTypes.Individual:
+    case AccountTypes.individual:
       return `${d.individual_data?.last_name} ${d.individual_data?.first_name} ${d.individual_data?.middle_name}`
-    case AccountTypes.Entrepreneur:
+    case AccountTypes.entrepreneur:
       return `ИП ${d.entrepreneur_data?.last_name} ${d.entrepreneur_data?.first_name} ${d.entrepreneur_data?.middle_name}`
-    case AccountTypes.Organization:
+    case AccountTypes.organization:
       return d.organization_data?.short_name
     default:
       return ''

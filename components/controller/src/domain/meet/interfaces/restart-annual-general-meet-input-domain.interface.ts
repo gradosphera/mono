@@ -1,5 +1,5 @@
 import type { Cooperative } from 'cooptypes';
-import type { SignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { SignedDocumentDomainInterface } from '~/domain/document/interfaces/extended-signed-document-domain.interface';
 
 /**
  * Доменный интерфейс для перезапуска собрания

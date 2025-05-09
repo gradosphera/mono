@@ -1,10 +1,10 @@
-import type * as Capital from '../../../interfaces/capital'
+import type * as Soviet from '../../../interfaces/soviet'
 import { Actors } from '../../../common'
 
 /**
  * Имя таблицы
  */
-export const tableName = 'claims'
+export const tableName = 'agreements'
 
 /**
  * Таблица хранится в {@link Actors._coopname | области памяти кооператива}.
@@ -13,6 +13,6 @@ export const scope = Actors._coopname
 
 /**
  * @interface
- * Таблица содержит информацию о претензиях.
+ * @deprecated
  */
-export type IClaim = Capital.IClaim
+export type IAgreementLegacy = Soviet.IAgreement

@@ -48,10 +48,16 @@
     });
     
     //newSubmitted
-    action(
-      permission_level{ _registrator, "active"_n},
+    checksum256 hash = eosio::sha256((char*)&coopname, sizeof(coopname));
+    
+    Action::send<newsubmitted_interface>(
       _soviet,
       "newsubmitted"_n,
-      std::make_tuple(_provider, coopname, "regcoop"_n, uint64_t(0), document)
-    ).send();
+      _registrator,
+      _provider,
+      coopname,
+      "regcoop"_n,
+      hash,
+      document
+    );
 }

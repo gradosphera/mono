@@ -1,7 +1,9 @@
 import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
 import { generateAgenda } from 'src/features/Meet/GenerateAgenda/model'
-import { useSignDocument } from 'src/shared/lib/document'
+import { DigitalDocument } from 'src/shared/lib/document'
+import { useSessionStore } from 'src/entities/Session';
+import type { Cooperative } from 'cooptypes';
 
 export type IRestartMeetInput = Mutations.Meet.RestartAnnualGeneralMeet.IInput['data'];
 export type IRestartMeetResult = Mutations.Meet.RestartAnnualGeneralMeet.IOutput[typeof Mutations.Meet.RestartAnnualGeneralMeet.name];
@@ -33,14 +35,15 @@ export async function restartMeet(data: IRestartMeetInput): Promise<IRestartMeet
 }
 
 export async function restartMeetWithProposal(data: IRestartMeetWithProposalInput): Promise<IRestartMeetResult> {
-  const { signDocument } = useSignDocument()
+  const { username } = useSessionStore()
   // Генерируем документ повестки
   const generatedDocument = await generateAgenda({
     coopname: data.coopname,
     username: data.username
   })
   // Подписываем документ
-  const signedDocument = await signDocument(generatedDocument)
+  const rawDocument = new DigitalDocument(generatedDocument)
+  const signedDocument = await rawDocument.sign<Cooperative.Registry.AnnualGeneralMeetingAgenda.Meta>(username)
 
   // Перезапускаем собрание
   const result = await restartMeet({

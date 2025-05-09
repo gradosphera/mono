@@ -4,9 +4,11 @@
   import type { ICreateChildOrderProps } from '../../model'
   import { withDefaults } from 'vue'
   import { useRouter } from 'vue-router'
-  import { client } from 'src/shared/api/client'
+  import { useSessionStore } from 'src/entities/Session'
+  import { DigitalDocument } from 'src/shared/lib/document'
 
   const router = useRouter()
+  const { username } = useSessionStore()
   const props = withDefaults(defineProps<ICreateChildOrderProps>(), {})
 
   const createOrder = async () => {
@@ -28,21 +30,24 @@
         username: props.username
       })
 
-      const signedDocument = await client.Document.signDocument(document)
+      // Создаем документ и подписываем его
+      const digitalDocument = new DigitalDocument(document)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const signedDocument = await digitalDocument.sign(username)
 
-      await api.createChildOrder({
-        coopname: props.coopname,
-        username: props.username,
-        parent_id: Number(props.offer.id),
-        program_id: Number(props.offer.program_id),
-        units: props.units,
-        unit_cost: props.offer.unit_cost,
-        data: '',
-        document: signedDocument,
-        meta: '',
-        product_lifecycle_secs: 100
-      })
-      SuccessAlert('Заказ создан')
+      // await api.createChildOrder({
+      //   coopname: props.coopname,
+      //   username: props.username,
+      //   parent_id: Number(props.offer.id),
+      //   program_id: Number(props.offer.program_id),
+      //   units: props.units,
+      //   unit_cost: props.offer.unit_cost,
+      //   data: '',
+      //   document: {...signedDocument, meta: JSON.stringify(signedDocument.meta)},
+      //   meta: '',
+      //   product_lifecycle_secs: 100
+      // })
+      SuccessAlert('Заказ НЕ создан')
       router.push({ name: 'marketplace-user-supplies' }) //TODO роутинг
     } catch (e: any) {
       FailAlert(e.message)

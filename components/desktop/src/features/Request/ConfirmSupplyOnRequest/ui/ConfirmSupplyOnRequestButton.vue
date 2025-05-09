@@ -24,7 +24,7 @@ q-btn(color="green" @click="supply") Подписать акт передачи
 
   const supply = async () => {
     try {
-      await api.confirmSupplyOnRequest({
+      await api.confirmSupply({
         coopname: props.coopname,
         username: props.username,
         request_id: props.requestId,

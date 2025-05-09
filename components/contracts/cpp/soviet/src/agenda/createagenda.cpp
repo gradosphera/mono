@@ -23,12 +23,16 @@
     d.decline_callback = decline_callback;
   });
   
-  action(
-    permission_level{ _soviet, "active"_n},
+  Action::send<newsubmitted_interface>(
     _soviet,
     "newsubmitted"_n,
-    std::make_tuple(coopname, username, _capital_invest_authorize_action, decision_id, statement)
-  ).send();  
+    _soviet,
+    coopname,
+    username,
+    type,
+    hash,
+    statement
+  );
 }
 
 
@@ -46,19 +50,29 @@ void soviet::authorize_action_effect(eosio::name executer, eosio::name coopname,
     std::make_tuple(coopname, decision -> hash, decision -> authorization)
   ).send();
   
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newresolved"_n,
-      std::make_tuple(coopname, decision -> username, decision -> type, decision_id, decision -> statement)
-  ).send();
+  checksum256 decision_hash = eosio::sha256((char*)&decision_id, sizeof(decision_id));
   
-  action(
-      permission_level{ _soviet, "active"_n},
-      _soviet,
-      "newdecision"_n,
-      std::make_tuple(coopname, decision -> username, decision -> type, decision_id, decision -> authorization)
-  ).send();
+  Action::send<newresolved_interface>(
+    _soviet, 
+    "newresolved"_n,
+    _soviet,
+    coopname,
+    decision -> username,
+    decision -> type,
+    decision -> hash.value(),
+    decision -> statement
+  );
+  
+  Action::send<newdecision_interface>(
+    _soviet,
+    "newdecision"_n,
+    _soviet,
+    coopname,
+    decision -> username,
+    decision -> type,
+    decision -> hash.value(),
+    decision -> authorization
+  );
   
   decisions.erase(decision);
 }
