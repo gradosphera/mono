@@ -41,7 +41,7 @@ export class FreeDecisionDomainInteractor {
   }
 
   async publishProjectOfFreeDecision(data: PublishProjectFreeDecisionInputDomainInterface): Promise<boolean> {
-    const document = await this.documentDomainService.getDocumentByHash(data.document.hash);
+    const document = await this.documentDomainService.getDocumentByHash(data.document.doc_hash);
 
     if (!document) throw new BadRequestException('Документ не найден');
 

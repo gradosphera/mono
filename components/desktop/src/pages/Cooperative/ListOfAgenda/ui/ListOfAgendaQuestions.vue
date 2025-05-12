@@ -69,18 +69,18 @@ const onAuthorizeDecision = async (row) => {
   }
 }
 
-const onVoteFor = async (decision_id) => {
-  processingDecisions.value[decision_id] = true
+const onVoteFor = async (row) => {
+  processingDecisions.value[row.table.id] = true
 
   try {
-    await voteForDecision(decision_id)
+    await voteForDecision(row)
     SuccessAlert('Голос принят')
     await loadDecisions(route.params.coopname as string)
   } catch (e) {
     FailAlert(e)
   } finally {
     // Гарантированно сбрасываем состояние загрузки
-    processingDecisions.value[decision_id] = false
+    processingDecisions.value[row.table.id] = false
 
     // Добавляем таймаут для гарантии обновления UI
     setTimeout(() => {
@@ -89,18 +89,18 @@ const onVoteFor = async (decision_id) => {
   }
 }
 
-const onVoteAgainst = async (decision_id) => {
-  processingDecisions.value[decision_id] = true
+const onVoteAgainst = async (row) => {
+  processingDecisions.value[row.table.id] = true
 
   try {
-    await voteAgainstDecision(decision_id)
+    await voteAgainstDecision(row)
     SuccessAlert('Голос принят')
     await loadDecisions(route.params.coopname as string)
   } catch (e) {
     FailAlert(e)
   } finally {
     // Гарантированно сбрасываем состояние загрузки
-    processingDecisions.value[decision_id] = false
+    processingDecisions.value[row.table.id] = false
 
     // Добавляем таймаут для гарантии обновления UI
     setTimeout(() => {

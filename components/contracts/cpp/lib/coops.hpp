@@ -285,6 +285,9 @@ struct [[eosio::table, eosio::contract(SOVIET)]] decision {
    */
   uint64_t byauthorized() const { return authorized; }
 
+  
+  checksum256 byhash() const { return hash.value(); }
+
 
   void check_for_any_vote_exist(eosio::name member) const {
     // Проверяем, есть ли имя участника в голосах за
@@ -305,7 +308,8 @@ typedef eosio::multi_index< "decisions"_n, decision,
   eosio::indexed_by<"bytype"_n, eosio::const_mem_fun<decision, uint64_t, &decision::bytype>>,
   eosio::indexed_by<"byapproved"_n, eosio::const_mem_fun<decision, uint64_t, &decision::byapproved>>,
   eosio::indexed_by<"byvalidated"_n, eosio::const_mem_fun<decision, uint64_t, &decision::byvalidated>>,
-  eosio::indexed_by<"byauthorized"_n, eosio::const_mem_fun<decision, uint64_t, &decision::byauthorized>>
+  eosio::indexed_by<"byauthorized"_n, eosio::const_mem_fun<decision, uint64_t, &decision::byauthorized>>,
+  eosio::indexed_by<"byhash"_n, eosio::const_mem_fun<decision, checksum256, &decision::byhash>>
 > decisions_index;
 
 

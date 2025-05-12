@@ -214,22 +214,29 @@ export function useDecisionProcessor() {
   /**
    * Голосовать "за" решение
    */
-  async function voteForDecision(decision_id: number) {
-    const { voteForDecision: vote } = useVoteForDecision()
-    await vote(decision_id)
-    return true
+  async function voteForDecision(row: IAgenda) {
+    if (!row.table?.id) {
+      throw new Error('Не удалось получить ID решения');
+    }
+
+    const decision_id = Number(row.table.id);
+    const { voteForDecision: vote } = useVoteForDecision();
+    await vote(decision_id);
+    return true;
   }
 
   /**
    * Голосовать "против" решения
    */
-  async function voteAgainstDecision(decision_id: number) {
-    await useVoteAgainstDecision().voteAgainstDecision({
-      coopname: info.coopname,
-      member: session.username,
-      decision_id,
-    })
-    return true
+  async function voteAgainstDecision(row: IAgenda) {
+    if (!row.table?.id) {
+      throw new Error('Не удалось получить ID решения');
+    }
+
+    const decision_id = Number(row.table.id);
+    const { voteAgainstDecision } = useVoteAgainstDecision();
+    await voteAgainstDecision(decision_id);
+    return true;
   }
 
   /**

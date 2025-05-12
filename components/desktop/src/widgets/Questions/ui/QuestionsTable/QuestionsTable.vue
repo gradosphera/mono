@@ -30,8 +30,8 @@ div.scroll-area(style="height: 90vh; overflow-y: auto;")
         :is-voted-any="isVotedAny"
         @toggle-expand="toggleExpand(props.row.table.id)"
         @authorize="onAuthorizeDecision(props.row)"
-        @vote-for="onVoteFor(props.row.table.id)"
-        @vote-against="onVoteAgainst(props.row.table.id)"
+        @vote-for="onVoteFor(props.row)"
+        @vote-against="onVoteAgainst(props.row)"
       )
 
     template(#header="props")
@@ -59,8 +59,8 @@ div.scroll-area(style="height: 90vh; overflow-y: auto;")
             :is-voted-for="isVotedFor"
             :is-voted-against="isVotedAgainst"
             :is-voted-any="isVotedAny"
-            @vote-for="onVoteFor(props.row.table.id)"
-            @vote-against="onVoteAgainst(props.row.table.id)"
+            @vote-for="onVoteFor(props.row)"
+            @vote-against="onVoteAgainst(props.row)"
           )
         q-td
           q-btn(
@@ -167,11 +167,11 @@ const onAuthorizeDecision = (row: Cooperative.Document.IComplexAgenda) => {
   emit('authorize', row)
 }
 
-const onVoteFor = (decision_id: number) => {
-  emit('vote-for', decision_id)
+const onVoteFor = (row: Cooperative.Document.IComplexAgenda) => {
+  emit('vote-for', row)
 }
 
-const onVoteAgainst = (decision_id: number) => {
-  emit('vote-against', decision_id)
+const onVoteAgainst = (row: Cooperative.Document.IComplexAgenda) => {
+  emit('vote-against', row)
 }
 </script>
