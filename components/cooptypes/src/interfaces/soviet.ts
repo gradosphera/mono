@@ -657,15 +657,25 @@ export interface IValidate {
 }
 
 export interface IVoteagainst {
-  coopname: IName
-  member: IName
-  decision_id: IUint64
+  version: string
+  coopname: string
+  username: string
+  decision_id: number
+  signed_at: string
+  signed_hash: string
+  signature: string
+  public_key: string
 }
 
 export interface IVotefor {
-  coopname: IName
-  member: IName
-  decision_id: IUint64
+  version: string
+  coopname: string
+  username: string
+  decision_id: number
+  signed_at: string
+  signed_hash: string
+  signature: string
+  public_key: string
 }
 
 export interface IWithdraw {

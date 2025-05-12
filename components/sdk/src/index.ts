@@ -23,8 +23,11 @@ if (typeof globalThis.WebSocket === 'undefined') {
 export class Client {
   private static instance: Client | null = null
   private currentHeaders: Record<string, string> = {}
+  private account: Classes.Account
   private blockchain: Classes.Blockchain
   private document: Classes.Document
+  private crypto: Classes.Crypto
+  private vote: Classes.Vote
   private thunder: ReturnType<typeof Thunder>
   private static scalars = ZeusScalars({
     DateTime: {
@@ -36,12 +39,16 @@ export class Client {
   private constructor(private readonly options: ClientConnectionOptions) {
     this.currentHeaders = options.headers || {}
     this.thunder = Client.createThunder(options.api_url)
+    this.account = new Classes.Account()
     this.blockchain = new Classes.Blockchain(options)
     this.document = new Classes.Document(options.wif)
+    this.crypto = new Classes.Crypto()
+    this.vote = new Classes.Vote(options.wif)
 
     if (options.wif && options.username) {
       this.blockchain.setWif(options.username, options.wif)
       this.document.setWif(options.wif)
+      this.vote.setWif(options.wif)
     }
     else if ((options.wif && !options.username) || (!options.wif && options.username)) {
       throw new Error('wif и username должны быть указаны одновременно')
@@ -104,7 +111,7 @@ export class Client {
 
     this.blockchain.setWif(username, wif)
     this.document.setWif(wif)
-
+    this.vote.setWif(wif)
     this.currentHeaders.Authorization = `Bearer ${result.tokens.access.token}`
 
     return result
@@ -119,6 +126,16 @@ export class Client {
   }
 
   /**
+   * Установка WIF.
+   * @param wif WIF для установки.
+   */
+  public setWif(username: string, wif: string): void {
+    this.blockchain.setWif(username, wif)
+    this.document.setWif(wif)
+    this.vote.setWif(wif)
+  }
+
+  /**
    * Доступ к Blockchain.
    */
   public get Blockchain(): Classes.Blockchain {
@@ -126,10 +143,31 @@ export class Client {
   }
 
   /**
+   * Доступ к Account.
+   */
+  public get Account(): Classes.Account {
+    return this.account
+  }
+
+  /**
    * Доступ к Document.
    */
   public get Document(): Classes.Document {
     return this.document
+  }
+
+  /**
+   * Доступ к Crypto.
+   */
+  public get Crypto(): Classes.Crypto {
+    return this.crypto
+  }
+
+  /**
+   * Доступ к Vote.
+   */
+  public get Vote(): Classes.Vote {
+    return this.vote
   }
 
   /**

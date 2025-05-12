@@ -90,8 +90,28 @@ public:
   [[eosio::action]] void openprogwall(name coopname, name username, name program_type, uint64_t agreement_id);
 
   //voting.cpp
-  [[eosio::action]] void votefor(eosio::name coopname, eosio::name member, uint64_t decision_id);
-  [[eosio::action]] void voteagainst(eosio::name coopname, eosio::name member, uint64_t decision_id);
+  [[eosio::action]] void votefor(
+    std::string version,
+    eosio::name coopname, 
+    eosio::name username, 
+    uint64_t decision_id, 
+    eosio::time_point_sec signed_at,
+    checksum256 signed_hash,
+    eosio::signature signature,
+    eosio::public_key public_key
+  );
+  
+  [[eosio::action]] void voteagainst(
+    std::string version,
+    eosio::name coopname, 
+    eosio::name username, 
+    uint64_t decision_id,
+    eosio::time_point_sec signed_at,
+    checksum256 signed_hash,
+    eosio::signature signature,
+    eosio::public_key public_key    
+  );
+  
   [[eosio::action]] void cancelvote(eosio::name coopname, eosio::name member, uint64_t decision_id);
 
   //marketplace.cpp
