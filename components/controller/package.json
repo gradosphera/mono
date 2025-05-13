@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/controller",
-  "version": "2025.5.5-2",
+  "version": "2025.5.13",
   "description": "",
   "private": false,
   "bin": "bin/createNodejsApp.js",
@@ -64,6 +64,7 @@
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
     "@coopenomics/factory": "workspace:*",
+    "@coopenomics/sdk": "workspace:*",
     "@graphql-codegen/typescript-graphql-request": "^6.2.0",
     "@graphql-codegen/typescript-resolvers": "^4.4.0",
     "@graphql-tools/schema": "^10.0.7",
@@ -155,8 +156,7 @@
     "ws": "^8.18.0",
     "xss-clean": "^0.1.1",
     "zod": "^3.23.8",
-    "zod-to-json-schema": "^3.23.5",
-    "@coopenomics/sdk": "workspace:*"
+    "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.24.1",
