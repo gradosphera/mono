@@ -1202,6 +1202,7 @@ export const ReturnTypes: Record<string,any> = {
 		series:"Int"
 	},
 	Payment:{
+		account:"Account",
 		amount:"Float",
 		blockchain_id:"Float",
 		created_at:"DateTime",

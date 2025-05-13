@@ -1,6 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { PaymentDetailsDTO } from './payment-details.dto';
 import { PaymentStatus } from '~/domain/payment/interfaces/payment-status-domain.interface';
+import { AccountDTO } from '~/modules/account/dto/account.dto';
 
 @ObjectType('Payment')
 export class PaymentDTO {
@@ -45,6 +46,11 @@ export class PaymentDTO {
     description: 'Имя аккаунта пользователя, совершающего платеж',
   })
   username!: string;
+
+  @Field(() => AccountDTO, {
+    description: 'Аккаунт пользователя, совершающего платеж',
+  })
+  account!: AccountDTO;
 
   @Field(() => Date, {
     description: 'Дата истечения срока давности платежа',

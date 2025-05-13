@@ -29,7 +29,6 @@
               :hideActions="hideActions"
               @toggle-expand="toggleExpand(props.row.id)"
             )
-
           template(#header="props")
             q-tr(:props="props")
               q-th(auto-width)
@@ -51,14 +50,12 @@
                   :icon="expanded.get(props.row.id) ? 'remove' : 'add'"
                   @click="toggleExpand(props.row.id)"
                 )
-              q-td {{props.row.id}}
-              q-td {{ props.row.amount }}
+              q-td(style="max-width: 150px; word-wrap: break-word; white-space: normal;") {{ getName(props.row.account) }}
+
+              q-td {{ props.row.amount }} {{props.row.symbol}}
               q-td
-                q-badge(v-if="props.row.type === 'registration'" color="teal") регистрационный
-                q-badge(v-else color="teal") паевой
-
-              q-td(style="max-width: 150px; word-wrap: break-word; white-space: normal;") {{props.row.username}}
-
+                span(v-if="props.row.type === 'registration'") регистрационный
+                span(v-else) паевой
 
               q-td
                 q-badge(v-if="props.row.status ==='COMPLETED'" color="teal") обработан
@@ -88,6 +85,7 @@
   import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
   import PaymentCard from './PaymentCard.vue';
   import { useWindowSize } from 'src/shared/hooks';
+  import { getName } from 'src/shared/lib/utils';
 
   const paymentStore = usePaymentStore()
   const payments = computed(() => paymentStore.payments)
@@ -190,10 +188,11 @@
 
 
   const columns: any[] = [
-    { name: 'id', align: 'left', label: '№', field: 'id', sortable: true },
+    // { name: 'id', align: 'left', label: '№', field: 'id', sortable: true },
+    { name: 'account', align: 'left', label: 'От кого', field: 'account', sortable: true },
     { name: 'amount', align: 'left', label: 'Сумма', field: 'amount', sortable: true },
     { name: 'type', align: 'left', label: 'Тип платежа', field: '', sortable: false },
-    { name: 'username', align: 'left', label: 'От кого', field: 'username', sortable: true },
+    // { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
     { name: 'status', align: 'left', label: 'Статус', field: 'status', sortable: true },
     { name: 'actions', align: 'left', label: '', field: '', sortable: false, hide: props.hideActions },
   ] as any

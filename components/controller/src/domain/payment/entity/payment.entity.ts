@@ -3,6 +3,8 @@ import { PaymentStatus } from '../interfaces/payment-status-domain.interface';
 import { type IOrder } from '~/types';
 import type { PaymentDTO } from '~/modules/payment/dto/payment.dto';
 import type { PaymentTypeDomainInterface } from '../interfaces/payment-type-domain.interface';
+import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
+import { AccountDTO } from '~/modules/account/dto/account.dto';
 
 export class PaymentDomainEntity {
   id?: string;
@@ -16,6 +18,7 @@ export class PaymentDomainEntity {
   username!: string;
   quantity!: string;
   symbol!: string;
+  account!: AccountDomainEntity;
   details?: {
     data: any;
     amount_plus_fee: string;
@@ -30,7 +33,16 @@ export class PaymentDomainEntity {
   createdAt!: Date;
   updatedAt!: Date;
 
-  constructor(data: Partial<IOrder & { created_at?: Date; updated_at?: Date }>) {
+  constructor(orderData: IOrder, account?: AccountDomainEntity);
+  constructor(data: Partial<IOrder & { created_at?: Date; updated_at?: Date; account?: AccountDomainEntity }>);
+  constructor(
+    orderOrData: IOrder | Partial<IOrder & { created_at?: Date; updated_at?: Date; account?: AccountDomainEntity }>,
+    accountParam?: AccountDomainEntity
+  ) {
+    // Распознаем форму вызова конструктора
+    const data = orderOrData as Partial<IOrder & { created_at?: Date; updated_at?: Date; account?: AccountDomainEntity }>;
+    const account = accountParam || data.account;
+
     Object.assign(this, {
       id: data.id,
       orderNum: data.order_num,
@@ -44,6 +56,7 @@ export class PaymentDomainEntity {
       quantity: data.quantity,
       symbol: data.symbol,
       details: data.details,
+      account: account,
       expiredAt:
         data.expired_at ||
         (() => {
@@ -63,6 +76,9 @@ export class PaymentDomainEntity {
     }
     if (this.orderNum === undefined || this.orderNum === null) {
       throw new Error('Order number is required for PaymentDTO');
+    }
+    if (!this.account) {
+      throw new Error('Account is required for PaymentDTO');
     }
 
     const details: PaymentDetailsDTO | undefined = this.details
@@ -88,6 +104,7 @@ export class PaymentDomainEntity {
       amount: parseFloat(this.quantity),
       symbol: this.symbol,
       username: this.username,
+      account: new AccountDTO(this.account),
       expired_at: this.expiredAt,
       created_at: this.createdAt,
       updated_at: this.updatedAt,

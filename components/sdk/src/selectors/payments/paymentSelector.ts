@@ -1,6 +1,7 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import type { ValueTypes } from '../../zeus/index'
 import { Selector } from '../../zeus/index'
+import { rawAccountSelector } from '../accounts'
 
 // Селектор для payment details
 export const rawPaymentDetailsSelector = {
@@ -15,6 +16,7 @@ export const rawPaymentDetailsSelector = {
 
 // Селектор для payment
 export const rawPaymentSelector = {
+  account: rawAccountSelector,
   amount: true,
   blockchain_id: true,
   created_at: true,

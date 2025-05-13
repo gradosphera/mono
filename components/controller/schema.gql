@@ -2850,6 +2850,9 @@ input PassportInput {
 }
 
 type Payment {
+  """Аккаунт пользователя, совершающего платеж"""
+  account: Account!
+
   """Сумма платежа"""
   amount: Float!
 
@@ -3296,7 +3299,7 @@ input RegisterAccountInput {
   organization_data: CreateOrganizationDataInput
 
   """Публичный ключ"""
-  public_key: String
+  public_key: String!
 
   """Имя аккаунта реферера"""
   referer: String

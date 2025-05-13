@@ -21,6 +21,7 @@ const initialAccountState: IGeneratedAccount = {
 const initialUserDataState: IRegisterAccount = {
   email: '',
   username: '',
+  public_key: '',
   type: AccountTypes.individual,
   individual_data: {
     first_name: '',
