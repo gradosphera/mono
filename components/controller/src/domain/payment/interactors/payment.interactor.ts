@@ -1,6 +1,6 @@
 // domain/payment/interactors/PaymentInteractor.ts
 
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Order } from '~/models';
 import { userService, blockchainService } from '~/services';
 import { userStatus } from '~/types/user.types';
@@ -35,8 +35,28 @@ export class PaymentInteractor {
   ): Promise<PaginationResultDomainInterface<PaymentDomainEntity>> {
     const pre_result: PaginationResultLegacy<IOrder> = await this.paymentDomainService.getOrders(data, options);
 
+    const items = await Promise.all(
+      pre_result.results.map(async (el) => {
+        try {
+          // Получаем аккаунт для каждого платежа
+          const account = await this.accountDomainInteractor.getAccount(el.username);
+
+          // Создаем объект платежа, просто передавая IOrder и account
+          return new PaymentDomainEntity(el, account);
+        } catch (error: any) {
+          this.logger.warn(
+            `Не удалось получить данные аккаунта для платежа ${el.id}, username: ${el.username}: ${error.message}`
+          );
+          return null;
+        }
+      })
+    );
+
+    // Удаляем null из массива
+    const validItems = items.filter(Boolean) as PaymentDomainEntity[];
+
     const result: PaginationResultDomainInterface<PaymentDomainEntity> = {
-      items: pre_result.results.map((el) => new PaymentDomainEntity(el)),
+      items: validItems,
       totalCount: pre_result.totalResults,
       totalPages: pre_result.totalPages,
       currentPage: pre_result.page,
@@ -46,18 +66,51 @@ export class PaymentInteractor {
   }
 
   async createInitialPayment(data: CreateInitialPaymentInputDomainInterface): Promise<PaymentDomainEntity> {
-    const result = await this.paymentDomainService.createInitialOrder(data);
-    return new PaymentDomainEntity(result);
+    try {
+      // Сначала получаем аккаунт
+      const account = await this.accountDomainInteractor.getAccount(data.username);
+
+      // Затем создаем платеж
+      const result = await this.paymentDomainService.createInitialOrder(data);
+
+      // Создаем и возвращаем сущность платежа, просто передавая IOrder и account
+      return new PaymentDomainEntity(result, account);
+    } catch (error: any) {
+      this.logger.error(`Не удалось создать регистрационный платеж: ${error.message}`);
+      throw new NotFoundException(`Не удалось найти аккаунт пользователя ${data.username} или создать платеж`);
+    }
   }
 
   async createDeposit(data: CreateDepositPaymentInputDomainInterface): Promise<PaymentDomainEntity> {
-    const result = await this.paymentDomainService.createDeposit(data);
-    return new PaymentDomainEntity(result);
+    try {
+      // Сначала получаем аккаунт
+      const account = await this.accountDomainInteractor.getAccount(data.username);
+
+      // Затем создаем платеж
+      const result = await this.paymentDomainService.createDeposit(data);
+
+      // Создаем и возвращаем сущность платежа, просто передавая IOrder и account
+      return new PaymentDomainEntity(result, account);
+    } catch (error: any) {
+      this.logger.error(`Не удалось создать паевой платеж: ${error.message}`);
+      throw new NotFoundException(`Не удалось найти аккаунт пользователя ${data.username} или создать платеж`);
+    }
   }
 
   async setPaymentStatus(data: SetPaymentStatusInputDomainInterface): Promise<PaymentDomainEntity> {
-    const result = await this.paymentDomainService.setStatus(data);
-    return new PaymentDomainEntity(result);
+    try {
+      // Получаем обновленный платеж
+      const result = await this.paymentDomainService.setStatus(data);
+
+      // Получаем аккаунт
+      const account = await this.accountDomainInteractor.getAccount(result.username);
+
+      // Создаем и возвращаем сущность платежа, просто передавая IOrder и account
+      return new PaymentDomainEntity(result, account);
+    } catch (error: any) {
+      this.logger.error(`Не удалось обновить статус платежа: ${error.message}`);
+      throw new NotFoundException(`Не удалось найти платеж с ID ${data.id} или аккаунт пользователя`);
+    }
   }
 
   async execute(id: string, status: string) {

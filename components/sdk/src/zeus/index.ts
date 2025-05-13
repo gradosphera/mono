@@ -2833,6 +2833,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	series: number | Variable<any, string>
 };
 	["Payment"]: AliasType<{
+	/** Аккаунт пользователя, совершающего платеж */
+	account?:ValueTypes["Account"],
 	/** Сумма платежа */
 	amount?:boolean | `@${string}`,
 	/** Идентификационный номер платежа в блокчейне */
@@ -3137,7 +3139,7 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Данные организации */
 	organization_data?: ValueTypes["CreateOrganizationDataInput"] | undefined | null | Variable<any, string>,
 	/** Публичный ключ */
-	public_key?: string | undefined | null | Variable<any, string>,
+	public_key: string | Variable<any, string>,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null | Variable<any, string>,
 	/** Тип аккаунта */
@@ -5809,6 +5811,8 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	series: number
 };
 	["Payment"]: AliasType<{
+	/** Аккаунт пользователя, совершающего платеж */
+	account?:ResolverInputTypes["Account"],
 	/** Сумма платежа */
 	amount?:boolean | `@${string}`,
 	/** Идентификационный номер платежа в блокчейне */
@@ -6114,7 +6118,7 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	/** Данные организации */
 	organization_data?: ResolverInputTypes["CreateOrganizationDataInput"] | undefined | null,
 	/** Публичный ключ */
-	public_key?: string | undefined | null,
+	public_key: string,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null,
 	/** Тип аккаунта */
@@ -8814,7 +8818,9 @@ export type ModelTypes = {
 	series: number
 };
 	["Payment"]: {
-		/** Сумма платежа */
+		/** Аккаунт пользователя, совершающего платеж */
+	account: ModelTypes["Account"],
+	/** Сумма платежа */
 	amount: number,
 	/** Идентификационный номер платежа в блокчейне */
 	blockchain_id: number,
@@ -9109,7 +9115,7 @@ export type ModelTypes = {
 	/** Данные организации */
 	organization_data?: ModelTypes["CreateOrganizationDataInput"] | undefined | null,
 	/** Публичный ключ */
-	public_key?: string | undefined | null,
+	public_key: string,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null,
 	/** Тип аккаунта */
@@ -11838,6 +11844,8 @@ export type GraphQLTypes = {
 };
 	["Payment"]: {
 	__typename: "Payment",
+	/** Аккаунт пользователя, совершающего платеж */
+	account: GraphQLTypes["Account"],
 	/** Сумма платежа */
 	amount: number,
 	/** Идентификационный номер платежа в блокчейне */
@@ -12150,7 +12158,7 @@ export type GraphQLTypes = {
 	/** Данные организации */
 	organization_data?: GraphQLTypes["CreateOrganizationDataInput"] | undefined | null,
 	/** Публичный ключ */
-	public_key?: string | undefined | null,
+	public_key: string,
 	/** Имя аккаунта реферера */
 	referer?: string | undefined | null,
 	/** Тип аккаунта */

@@ -62,8 +62,8 @@ import { ref, reactive } from 'vue'
 import { useWindowSize } from 'src/shared/hooks'
 import moment from 'moment-with-locales-es6'
 import { ParticipantCard, ParticipantDetails } from '.'
+import { getName } from 'src/shared/lib/utils'
 import {
-  AccountTypes,
   type IAccount,
   type IIndividualData,
   type IOrganizationData,
@@ -95,22 +95,6 @@ const columns: any[] = [
   { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
   { name: 'created_at', align: 'left', label: 'Зарегистрирован', field: 'created_at', sortable: true },
 ]
-
-// Функция для получения имени участника
-const getName = (account: IAccount) => {
-  const d = account.private_account
-  if (!d) return ''
-  switch (d.type) {
-    case AccountTypes.individual:
-      return `${d.individual_data?.last_name} ${d.individual_data?.first_name} ${d.individual_data?.middle_name}`
-    case AccountTypes.entrepreneur:
-      return `ИП ${d.entrepreneur_data?.last_name} ${d.entrepreneur_data?.first_name} ${d.entrepreneur_data?.middle_name}`
-    case AccountTypes.organization:
-      return d.organization_data?.short_name
-    default:
-      return ''
-  }
-}
 
 // Форматирование даты
 const formatDate = (date?: string) =>
