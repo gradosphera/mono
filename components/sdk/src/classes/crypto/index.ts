@@ -2,6 +2,10 @@
  * Класс Crypto предоставляет универсальные методы для работы с криптографией.
  * В частности, реализован статический метод для получения sha256-хэша.
  */
+
+// Статический импорт для Node.js
+import * as nodeCrypto from 'node:crypto'
+
 export class Crypto {
   /**
    * Получить sha256-хэш от строки или числа (hex-строка).
@@ -12,24 +16,28 @@ export class Crypto {
   static async sha256(data: string | number): Promise<string> {
     const str = String(data)
 
-    // Node.js
-    if (typeof window === 'undefined') {
+    // Проверяем наличие браузерного API
+    const isBrowser = typeof window !== 'undefined'
+      && typeof window.crypto !== 'undefined'
+      && typeof window.crypto.subtle !== 'undefined'
+
+    if (isBrowser) {
+      // Используем браузерный Web Crypto API
+      const encoder = new TextEncoder()
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', encoder.encode(str))
+      return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+    }
+    else {
+      // Используем Node.js crypto
       try {
-        const { createHash } = await import('node:crypto')
-        return createHash('sha256').update(str).digest('hex')
+        return nodeCrypto.createHash('sha256').update(str).digest('hex')
       }
       catch (error) {
         console.warn('Node.js crypto модуль недоступен', error)
+        throw new Error('Криптографические функции не поддерживаются в этом окружении')
       }
     }
-
-    // Браузер
-    if (typeof window !== 'undefined' && window.crypto?.subtle) {
-      const encoder = new TextEncoder()
-      const hashBuffer = await window.crypto.subtle.digest('SHA-256', encoder.encode(str))
-      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('')
-    }
-
-    throw new Error('Криптографические функции не поддерживаются в этом окружении')
   }
 }
