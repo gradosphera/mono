@@ -660,7 +660,7 @@ export interface IVoteagainst {
   version: string
   coopname: string
   username: string
-  decision_id: number
+  decision_id: IUint64
   signed_at: string
   signed_hash: string
   signature: string
@@ -671,7 +671,7 @@ export interface IVotefor {
   version: string
   coopname: string
   username: string
-  decision_id: number
+  decision_id: IUint64
   signed_at: string
   signed_hash: string
   signature: string

@@ -36,6 +36,7 @@
     "dist"
   ],
   "scripts": {
+    "prebuild": "pnpm run typecheck",
     "build": "unbuild",
     "dev": "concurrently -n 'GENERATOR' -c 'bgGreen.black' \"nodemon --watch src --ext ts --exec 'unbuild'\"",
     "lint": "eslint .",
