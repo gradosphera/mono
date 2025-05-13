@@ -160,6 +160,9 @@ importers:
       '@coopenomics/factory':
         specifier: workspace:*
         version: link:../factory
+      '@coopenomics/sdk':
+        specifier: workspace:*
+        version: link:../sdk
       '@graphql-codegen/typescript-graphql-request':
         specifier: ^6.2.0
         version: 6.2.0(encoding@0.1.13)(graphql-request@7.1.2(graphql@16.9.0))(graphql-tag@2.12.6(graphql@16.9.0))(graphql@16.9.0)
