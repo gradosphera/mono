@@ -113,9 +113,14 @@ export async function preLoading() {
       name: 'votefor',
       receiver: 'soviet',
       data: {
+        version: '1.0.0',
         coopname: 'voskhod',
-        member: 'ant',
+        username: 'ant',
         decision_id: '2',
+        signed_at: '2024-01-01T00:00:00.000Z',
+        signed_hash: 'hash',
+        signature: 'signature',
+        public_key: 'public_key',
       } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
     })
 
@@ -125,9 +130,14 @@ export async function preLoading() {
       name: 'votefor',
       receiver: 'soviet',
       data: {
+        version: '1.0.0',
         coopname: 'voskhod',
-        member: 'ant',
+        username: 'ant',
         decision_id: '3',
+        signed_at: '2024-01-01T00:00:00.000Z',
+        signed_hash: 'hash',
+        signature: 'signature',
+        public_key: 'public_key',
       } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
     })
 
@@ -137,9 +147,14 @@ export async function preLoading() {
       name: 'votefor',
       receiver: 'soviet',
       data: {
+        version: '1.0.0',
         coopname: 'voskhod',
-        member: 'ant',
+        username: 'ant',
         decision_id: '4',
+        signed_at: '2024-01-01T00:00:00.000Z',
+        signed_hash: 'hash',
+        signature: 'signature',
+        public_key: 'public_key',
       } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
     })
 
@@ -149,9 +164,14 @@ export async function preLoading() {
       name: 'votefor',
       receiver: 'soviet',
       data: {
+        version: '1.0.0',
         coopname: 'voskhod',
-        member: 'ant',
+        username: 'ant',
         decision_id: '5',
+        signed_at: '2024-01-01T00:00:00.000Z',
+        signed_hash: 'hash',
+        signature: 'signature',
+        public_key: 'public_key',
       } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
     })
 

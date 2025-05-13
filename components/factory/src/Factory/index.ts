@@ -445,4 +445,14 @@ export abstract class DocFactory<T extends IGenerate> {
       ...restParams,
     }
   }
+
+  public formatAsset(asset: string, precision: number = 2): string {
+    if (!asset)
+      return ''
+    const match = asset.match(/^(\d+\.\d+)\s+([A-Z]+)$/)
+    if (!match)
+      return asset
+    const [, amount, symbol] = match
+    return `${Number.parseFloat(amount).toFixed(precision)} ${symbol}`
+  }
 }
