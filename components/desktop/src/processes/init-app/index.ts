@@ -5,8 +5,10 @@ import type { Router } from 'vue-router'
 import { useBranchOverlayProcess } from '../watch-branch-overlay'
 import { setupNavigationGuard } from '../navigation-guard-setup'
 import { useInitExtensionsProcess } from 'src/processes/init-installed-extensions'
+import { applyThemeFromStorage } from 'src/shared/lib/utils'
 
 export async function useInitAppProcess(router: Router) {
+  applyThemeFromStorage()
   const system = useSystemStore()
   await system.loadSystemInfo()
 

@@ -1,5 +1,5 @@
 <template lang="pug">
-q-item(flat clickable @click="$q.dark.toggle()")
+q-item(flat clickable @click="toggleTheme")
   q-item-section
     q-item-label
       q-icon(:name="isDark ? 'brightness_7' : 'brightness_3'").q-mr-sm
@@ -11,9 +11,11 @@ q-item(flat clickable @click="$q.dark.toggle()")
 
 import { useQuasar } from 'quasar';
 import { computed } from 'vue';
+import { saveThemeToStorage } from 'src/shared/lib/utils';
 
 const $q = useQuasar()
 const isDark = computed(() => $q.dark.isActive)
+
 defineProps({
   isMobile: {
     type: Boolean,
@@ -26,6 +28,11 @@ defineProps({
     required: false
   }
 })
+
+function toggleTheme() {
+  $q.dark.toggle();
+  saveThemeToStorage($q.dark.isActive);
+}
 </script>
 <style scoped>
 .btn-font {

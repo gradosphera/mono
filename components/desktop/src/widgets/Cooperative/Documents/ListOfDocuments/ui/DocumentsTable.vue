@@ -53,6 +53,7 @@ div.scroll-area(style="height: 90vh; overflow-y: auto;")
         q-td {{ getDocumentTitle(props.row) }}
 
       q-tr(
+        no-hover
         v-if="expanded.get(props.row?.id || props.row?.statement?.action?.global_sequence)"
         :key="`e_${props.row?.id || props.row?.statement?.action?.global_sequence}`"
         :props="props"

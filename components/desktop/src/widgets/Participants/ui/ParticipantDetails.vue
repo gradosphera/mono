@@ -12,6 +12,7 @@ div
 
   q-tab-panels.q-mt-sm.tab-panels-card(v-model="currentTab" animated)
     q-tab-panel.q-pa-none(name="info")
+      //приватные данные
       component(:is="useComponent(participant)" :participantData="usePrivateData(participant)" @update="onUpdate")
 
     q-tab-panel.q-pa-none(name="document")

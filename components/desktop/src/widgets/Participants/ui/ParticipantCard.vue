@@ -5,12 +5,20 @@ div.q-pa-xs.col-xs-12.col-sm-6.col-md-4.col-lg-3.q-mt-md
       div.text-h6 {{ getName(participant) }}
       q-separator.q-my-md
       div
-        div.text-caption Е-почта:
-        div.text-subtitle1.q-mb-xs {{ participant.provider_account?.email || 'Не указана' }}
-        div.text-caption Аккаунт:
-        div.text-subtitle1.q-mb-xs {{ participant.username }}
-        div.text-caption Зарегистрирован:
-        div.text-subtitle1 {{ formatDate(participant.blockchain_account?.created) }}
+        div.q-mb-md
+          div.text-caption Аккаунт:
+          div.text-subtitle1.q-mb-xs {{ participant.username }}
+        div.q-mb-md
+          div.text-caption Дата вступления:
+          div.text-subtitle1.q-mb-xs {{ formatDate(String(participant.participant_account?.created_at || '')) == '' ? 'отсутствует' : formatDate(String(participant.participant_account?.created_at || '')) }}
+        div
+          div.text-caption Активен:
+          q-checkbox(
+            :model-value="participant.participant_account?.status === 'accepted'"
+            disable
+            color="primary"
+            size="sm"
+          )
     q-card-actions(align="right")
       q-btn(
         color="primary"
