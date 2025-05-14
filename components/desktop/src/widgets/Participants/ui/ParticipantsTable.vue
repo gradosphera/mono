@@ -31,17 +31,28 @@ q-table(
           :icon="expanded.get(props.row.username) ? 'remove' : 'add'"
           @click="onToggleExpand(props.row.username)"
         )
+
       q-td(style="max-width: 150px; word-wrap: break-word; white-space: normal;") {{ getName(props.row) }}
-      q-td {{ props.row.provider_account?.email }}
       q-td {{ props.row.username }}
-      q-td {{ formatDate(props.row.blockchain_account?.created) }}
+
+      q-td {{ formatDate(props.row.participant_account?.created_at) == '' ? 'отсутствует' : formatDate(props.row.participant_account?.created_at) }}
+
+      q-td
+        q-checkbox(
+          :model-value="props.row.participant_account?.status === 'accepted'"
+          disable
+          color="primary"
+          size="sm"
+        )
+
     q-tr(
+      no-hover
       v-if="expanded.get(props.row.username)"
       :key="`e_${props.row.username}`"
       :props="props"
       class="q-virtual-scroll--with-prev"
-    )
-      q-td(colspan="100%")
+    ).no-hover
+      q-td(colspan="100%").no-hover
         ParticipantDetails(
           :participant="props.row"
           :tab-name="currentTab[props.row.username]"
@@ -91,9 +102,9 @@ const { isMobile } = useWindowSize()
 // Колонки таблицы
 const columns: any[] = [
   { name: 'name', align: 'left', label: 'ФИО / Наименование', field: 'name', sortable: true },
-  { name: 'email', align: 'left', label: 'Е-почта', field: 'email', sortable: true },
   { name: 'username', align: 'left', label: 'Аккаунт', field: 'username', sortable: true },
-  { name: 'created_at', align: 'left', label: 'Зарегистрирован', field: 'created_at', sortable: true },
+  { name: 'created_at', align: 'left', label: 'Дата вступления', field: 'created_at', sortable: true },
+  { name: 'status', align: 'left', label: 'Активен', field: 'status', sortable: true },
 ]
 
 // Форматирование даты
@@ -111,3 +122,14 @@ const onUpdate = (account: IAccount, newData: IIndividualData | IOrganizationDat
   emit('update', account, newData)
 }
 </script>
+
+<style>
+.no-hover.q-tr--hover,
+.no-hover.q-table__tr--hover,
+.no-hover:hover,
+.no-hover:focus {
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
+</style>

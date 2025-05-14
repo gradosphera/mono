@@ -20,6 +20,25 @@
     <meta property="og:image" content="<%- SITE_IMAGE %>" />
   </head>
   <body>
+    <script>
+      try {
+        var theme = localStorage.getItem('theme-mode');
+        if (theme === 'dark') {
+          document.body.style.background = '#121212';
+        } else if (theme === 'light') {
+          document.body.style.background = '#f5f5f5';
+        }
+      } catch (e) {
+        console.log('error on set theme', e);
+      }
+      // Показываем лоадер только после того, как DOM готов
+      document.addEventListener('DOMContentLoaded', function() {
+        try {
+          var loader = document.querySelector('.loader-container');
+          if (loader) loader.style.display = 'flex';
+        } catch (e) {}
+      });
+    </script>
     <style>
       body {
         margin: 0;
@@ -42,7 +61,7 @@
       }
 
       .loader-container {
-        display: flex;
+        display: none;
         justify-content: center;
         align-items: center;
         height: 100%;
@@ -57,7 +76,7 @@
         border-radius: 50%;
         position: relative;
         animation: rotate 2s linear infinite;
-        border-top: 3px solid black;
+        border-top: 3px solid rgb(131, 130, 130);
         border-right: 3px solid transparent;
       }
 
