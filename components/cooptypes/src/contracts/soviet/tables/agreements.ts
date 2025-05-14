@@ -4,7 +4,7 @@ import { Actors } from '../../../common'
 /**
  * Имя таблицы
  */
-export const tableName = 'agreements2'
+export const tableName = 'agreements3'
 
 /**
  * Таблица хранится в {@link Actors._coopname | области памяти кооператива}.

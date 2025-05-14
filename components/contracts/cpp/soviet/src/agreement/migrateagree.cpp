@@ -39,7 +39,7 @@ void soviet::migrateagree(eosio::name coopname, uint64_t agreement_id) {
     new_doc.signatures.push_back(sig);
     
     // Создаем новую запись в agreement2 с тем же ID
-    eosio::multi_index<"agreements2"_n, agreement2> agreements2(_self, coopname.value);
+    agreements2_index agreements2(_self, coopname.value);
     
     agreements2.emplace(_self, [&](auto& new_agreement) {
         new_agreement.id = agreement_itr->id;

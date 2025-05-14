@@ -40,7 +40,7 @@ const required_agreements = computed(() => {
     if (required.value.includes(agreement.type)) {
       // Найти, если пользователь уже подписал это соглашение
       const userAgreement = userAgreements.value.find(ua => ua.type === agreement.type);
-
+      console.log('userAgreements: ', userAgreements.value)
       if (userAgreement) {
         // Найти соответствующий шаблон для соглашения
         const template = templates.value.find(t => t.registry_id === agreement.draft_id);
