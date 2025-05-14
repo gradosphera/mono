@@ -18,7 +18,6 @@
 #include "src/agreement/declineagree.cpp"
 #include "src/agreement/sndagreement.cpp"
 #include "src/agreement/migrateagree.cpp"
-
 #include "src/approve/confirmapprv.cpp"
 #include "src/approve/createapprv.cpp"
 #include "src/approve/declineapprv.cpp"

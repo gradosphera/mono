@@ -147,8 +147,9 @@ async function loadMethods(params: IGetPaymentMethods): Promise<IPaymentMethodDa
 }
 
 async function loadUserAgreements(coopname: string, username: string): Promise<SovietContract.Tables.Agreements.IAgreement[]> {
-  return (
-    await fetchTable(
+
+    console.log('coopname: ', coopname, 'username: ', username)
+    const result = await fetchTable(
       SovietContract.contractName.production,
       coopname,
       SovietContract.Tables.Agreements.tableName,
@@ -157,7 +158,8 @@ async function loadUserAgreements(coopname: string, username: string): Promise<S
       LimitsList.None,
       'secondary'
     )
-  ) as SovietContract.Tables.Agreements.IAgreement[];
+    console.log('result: ', result)
+    return result as SovietContract.Tables.Agreements.IAgreement[];
 
 }
 
