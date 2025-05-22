@@ -6,13 +6,12 @@ div
     icon="fa-solid fa-rotate"
     label="Перезапустить собрание"
     @click="showRestartDialog = true"
-    :loading="isProcessing"
+    :loading="loading || isProcessing"
   )
 
   RestartMeetForm(
     v-model="showRestartDialog"
-    :meet="meet"
-    :loading="isProcessing"
+    :loading="loading || isProcessing"
     @restart="handleRestart"
   )
 </template>
@@ -20,11 +19,10 @@ div
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RestartMeetForm } from '.';
-import type { IMeet } from 'src/entities/Meet'
 
 defineProps<{
-  meet: IMeet
   showButton?: boolean
+  loading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -43,4 +41,4 @@ const handleRestart = async (data: any) => {
     isProcessing.value = false
   }
 }
-</script> 
+</script>

@@ -8,6 +8,7 @@ import { DocumentPackageAggregator } from './aggregators/document-package.aggreg
 import { DocumentPackageUtils } from './aggregators/document-package-utils.aggregator';
 import { DocumentPackageV0Aggregator } from './aggregators/document-package-v0.aggregator';
 import { DocumentPackageV1Aggregator } from './aggregators/document-package-v1.aggregator';
+import { DocumentAggregationService } from './services/document-aggregation.service';
 
 @Module({
   imports: [InfrastructureModule, forwardRef(() => AccountDomainModule)],
@@ -19,6 +20,7 @@ import { DocumentPackageV1Aggregator } from './aggregators/document-package-v1.a
     DocumentPackageUtils,
     DocumentPackageV0Aggregator,
     DocumentPackageV1Aggregator,
+    DocumentAggregationService,
   ],
   exports: [
     DocumentDomainInteractor,
@@ -28,6 +30,7 @@ import { DocumentPackageV1Aggregator } from './aggregators/document-package-v1.a
     DocumentPackageUtils,
     DocumentPackageV0Aggregator,
     DocumentPackageV1Aggregator,
+    DocumentAggregationService,
   ],
 })
 export class DocumentDomainModule {}

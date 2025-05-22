@@ -1,7 +1,7 @@
 <template lang="pug">
   div.row.justify-center
     div.col-12
-      div.scroll-area(style="height: 90vh; overflow-y: auto;")
+      div.scroll-area(style="height: calc(100% - $toolbar-min-height); overflow-y: auto;")
         q-table(
           v-if="payments && payments.items"
           ref="tableRef"

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MeetPreEntity } from '../entities/meet-pre.entity';
-import { MeetRepository } from '~/domain/meet/repositories/meet.repository';
+import { MeetRepository } from '~/domain/meet/repositories/meet-pre.repository';
 import { MeetPreProcessingDomainEntity } from '~/domain/meet/entities/meet-pre-domain.entity';
 import { HttpApiError } from '~/errors/http-api-error';
 import httpStatus from 'http-status';
@@ -15,7 +15,8 @@ export class TypeOrmMeetRepository implements MeetRepository {
   ) {}
 
   async findByHash(hash: string): Promise<MeetPreProcessingDomainEntity | null> {
-    const ormEntity = await this.meetPreRepo.findOne({ where: { hash } });
+    const upperHash = hash.toUpperCase();
+    const ormEntity = await this.meetPreRepo.findOne({ where: { hash: upperHash } });
 
     if (!ormEntity) {
       return null;
@@ -25,7 +26,10 @@ export class TypeOrmMeetRepository implements MeetRepository {
   }
 
   async create(data: MeetPreProcessingDomainEntity): Promise<void> {
-    const ormEntity = MeetPreEntity.fromDomainEntity(data);
+    const ormEntity = MeetPreEntity.fromDomainEntity({
+      ...data,
+      hash: data.hash.toUpperCase(),
+    });
     await this.meetPreRepo.save(ormEntity);
   }
 }

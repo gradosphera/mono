@@ -27,33 +27,32 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 
         div.text-subtitle1.q-mb-sm При перезапуске собрания будут использованы существующие пункты повестки:
 
-        div.q-pa-sm.q-my-sm.bg-grey-2.rounded-borders(v-if="meet?.processing?.questions?.length")
-          div.q-mb-md(v-for="(question, index) in meet.processing.questions" :key="index")
-            div.text-weight-bold {{ question.title }}
+        q-card(bordered flat v-if="meetStore.currentMeet?.processing?.questions?.length").q-pa-sm.q-my-sm.rounded-borders
+          div.q-mb-md(v-for="(question, index) in meetStore.currentMeet.processing.questions" :key="index")
+            div.text-caption.text-grey-6 {{ index + 1 }}. {{ question.title }}
             div.text-caption {{ question.context }}
-        
+
         div.q-pa-sm.q-my-sm.bg-red-1.text-red-8.rounded-borders(v-else)
           div.text-center Вопросы повестки не найдены
 
     q-card-actions(align="right")
       q-btn(flat label="Отмена" v-close-popup @click="$emit('update:modelValue', false)" :disable="loading")
       q-btn(
-        color="primary" 
-        label="Перезапустить" 
-        type="submit" 
-        @click="handleSubmit" 
+        color="primary"
+        label="Перезапустить"
+        type="submit"
+        @click="handleSubmit"
         :loading="loading"
-        :disable="!meet?.processing?.questions?.length"
+        :disable="!meetStore.currentMeet?.processing?.questions?.length"
       )
 </template>
 
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
-import type { IMeet } from 'src/entities/Meet'
+import { useMeetStore } from 'src/entities/Meet'
 
 const props = defineProps<{
   modelValue: boolean,
-  meet: IMeet | null,
   loading?: boolean
 }>()
 
@@ -62,31 +61,39 @@ const emit = defineEmits<{
   (e: 'restart', data: any): void
 }>()
 
+const meetStore = useMeetStore()
+
 // Форма для перезапуска собрания
 const formData = reactive({
-  new_open_at: '',
-  new_close_at: ''
+  new_open_at: new Date(Date.now() + 10000).toISOString().slice(0, 16),
+  new_close_at: new Date(Date.now() + 60000).toISOString().slice(0, 16),
 })
+
 
 // Сброс формы при открытии диалога
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
-    formData.new_open_at = ''
-    formData.new_close_at = ''
+    formData.new_open_at = new Date(Date.now() + 10000).toISOString().slice(0, 16)
+    formData.new_close_at = new Date(Date.now() + 60000).toISOString().slice(0, 16)
   }
 })
 
 const handleSubmit = () => {
-  if (!props.meet) return
-  
+  const meet = meetStore.currentMeet
+  if (!meet) return
+
   // Проверяем наличие вопросов повестки
-  if (!props.meet.processing?.questions || props.meet.processing.questions.length === 0) {
+  if (!meet.processing?.questions || meet.processing.questions.length === 0) {
     return
   }
 
   emit('restart', {
     ...formData,
-    hash: props.meet.hash
+    agenda_points: meet.processing.questions.map(q => ({
+      title: q.title,
+      context: q.context,
+      decision: q.decision
+    }))
   })
 }
 </script>

@@ -46,7 +46,7 @@ export class QuestionDTO implements QuestionRowProcessingDomainInterface {
   @IsArray()
   voters_abstained!: string[];
 
-  constructor(data: QuestionDTO) {
+  constructor(data: QuestionRowProcessingDomainInterface) {
     Object.assign(this, data);
   }
 }

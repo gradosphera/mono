@@ -2171,6 +2171,8 @@ export type ValueTypes = {
 	user?:ValueTypes["UserDataUnion"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Расширенный статус собрания на основе дат и состояния */
+["ExtendedMeetStatus"]:ExtendedMeetStatus;
 	["Extension"]: AliasType<{
 	/** Настройки конфигурации для расширения */
 	config?:boolean | `@${string}`,
@@ -2423,6 +2425,10 @@ export type ValueTypes = {
 	current_quorum_percent?:boolean | `@${string}`,
 	/** Цикл собрания */
 	cycle?:boolean | `@${string}`,
+	/** Документ с решением секретаря */
+	decision1?:ValueTypes["DocumentAggregate"],
+	/** Документ с решением председателя */
+	decision2?:ValueTypes["DocumentAggregate"],
 	/** Хеш собрания */
 	hash?:boolean | `@${string}`,
 	/** Уникальный идентификатор собрания */
@@ -2485,20 +2491,56 @@ export type ValueTypes = {
 }>;
 	/** Данные о собрании после обработки */
 ["MeetProcessed"]: AliasType<{
-	/** Решение по собранию в формате блокчейн-действия */
-	decision?:ValueTypes["BlockchainAction"],
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Документ решения из блокчейна */
+	decision?:ValueTypes["SignedBlockchainDocument"],
+	/** Агрегат документа решения */
+	decisionAggregate?:ValueTypes["DocumentAggregate"],
 	/** Хеш собрания */
 	hash?:boolean | `@${string}`,
+	/** Пройден ли кворум */
+	quorum_passed?:boolean | `@${string}`,
+	/** Процент кворума */
+	quorum_percent?:boolean | `@${string}`,
+	/** Результаты голосования по вопросам */
+	results?:ValueTypes["MeetQuestionResult"],
+	/** Количество подписанных бюллетеней */
+	signed_ballots?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Данные о собрании в процессе обработки */
 ["MeetProcessing"]: AliasType<{
+	/** Расширенный статус собрания на основе дат и состояния */
+	extendedStatus?:boolean | `@${string}`,
 	/** Хеш собрания */
 	hash?:boolean | `@${string}`,
+	/** Флаг указывающий, голосовал ли текущий пользователь */
+	isVoted?:boolean | `@${string}`,
 	/** Основная информация о собрании */
 	meet?:ValueTypes["Meet"],
 	/** Список вопросов повестки собрания */
 	questions?:ValueTypes["Question"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Результат голосования по вопросу */
+["MeetQuestionResult"]: AliasType<{
+	/** Принят ли вопрос */
+	accepted?:boolean | `@${string}`,
+	/** Контекст вопроса */
+	context?:boolean | `@${string}`,
+	/** Принятое решение */
+	decision?:boolean | `@${string}`,
+	/** Идентификатор вопроса */
+	question_id?:boolean | `@${string}`,
+	/** Заголовок вопроса */
+	title?:boolean | `@${string}`,
+	/** Количество воздержавшихся */
+	votes_abstained?:boolean | `@${string}`,
+	/** Количество голосов против */
+	votes_against?:boolean | `@${string}`,
+	/** Количество голосов за */
+	votes_for?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["MetaDocumentInput"]: {
@@ -3532,7 +3574,7 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	/** Идентификатор номера подписи */
 	id: number | Variable<any, string>,
 	/** Мета-данные подписи */
-	meta: ValueTypes["JSON"] | Variable<any, string>,
+	meta: string | Variable<any, string>,
 	/** Публичный ключ */
 	public_key: string | Variable<any, string>,
 	/** Подпись хэша */
@@ -5149,6 +5191,8 @@ export type ResolverInputTypes = {
 	user?:ResolverInputTypes["UserDataUnion"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Расширенный статус собрания на основе дат и состояния */
+["ExtendedMeetStatus"]:ExtendedMeetStatus;
 	["Extension"]: AliasType<{
 	/** Настройки конфигурации для расширения */
 	config?:boolean | `@${string}`,
@@ -5401,6 +5445,10 @@ export type ResolverInputTypes = {
 	current_quorum_percent?:boolean | `@${string}`,
 	/** Цикл собрания */
 	cycle?:boolean | `@${string}`,
+	/** Документ с решением секретаря */
+	decision1?:ResolverInputTypes["DocumentAggregate"],
+	/** Документ с решением председателя */
+	decision2?:ResolverInputTypes["DocumentAggregate"],
 	/** Хеш собрания */
 	hash?:boolean | `@${string}`,
 	/** Уникальный идентификатор собрания */
@@ -5463,20 +5511,56 @@ export type ResolverInputTypes = {
 }>;
 	/** Данные о собрании после обработки */
 ["MeetProcessed"]: AliasType<{
-	/** Решение по собранию в формате блокчейн-действия */
-	decision?:ResolverInputTypes["BlockchainAction"],
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Документ решения из блокчейна */
+	decision?:ResolverInputTypes["SignedBlockchainDocument"],
+	/** Агрегат документа решения */
+	decisionAggregate?:ResolverInputTypes["DocumentAggregate"],
 	/** Хеш собрания */
 	hash?:boolean | `@${string}`,
+	/** Пройден ли кворум */
+	quorum_passed?:boolean | `@${string}`,
+	/** Процент кворума */
+	quorum_percent?:boolean | `@${string}`,
+	/** Результаты голосования по вопросам */
+	results?:ResolverInputTypes["MeetQuestionResult"],
+	/** Количество подписанных бюллетеней */
+	signed_ballots?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Данные о собрании в процессе обработки */
 ["MeetProcessing"]: AliasType<{
+	/** Расширенный статус собрания на основе дат и состояния */
+	extendedStatus?:boolean | `@${string}`,
 	/** Хеш собрания */
 	hash?:boolean | `@${string}`,
+	/** Флаг указывающий, голосовал ли текущий пользователь */
+	isVoted?:boolean | `@${string}`,
 	/** Основная информация о собрании */
 	meet?:ResolverInputTypes["Meet"],
 	/** Список вопросов повестки собрания */
 	questions?:ResolverInputTypes["Question"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Результат голосования по вопросу */
+["MeetQuestionResult"]: AliasType<{
+	/** Принят ли вопрос */
+	accepted?:boolean | `@${string}`,
+	/** Контекст вопроса */
+	context?:boolean | `@${string}`,
+	/** Принятое решение */
+	decision?:boolean | `@${string}`,
+	/** Идентификатор вопроса */
+	question_id?:boolean | `@${string}`,
+	/** Заголовок вопроса */
+	title?:boolean | `@${string}`,
+	/** Количество воздержавшихся */
+	votes_abstained?:boolean | `@${string}`,
+	/** Количество голосов против */
+	votes_against?:boolean | `@${string}`,
+	/** Количество голосов за */
+	votes_for?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["MetaDocumentInput"]: {
@@ -6511,7 +6595,7 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	/** Идентификатор номера подписи */
 	id: number,
 	/** Мета-данные подписи */
-	meta: ResolverInputTypes["JSON"],
+	meta: string,
 	/** Публичный ключ */
 	public_key: string,
 	/** Подпись хэша */
@@ -8100,6 +8184,7 @@ export type ModelTypes = {
 	/** Доп. данные о пользователе (физ/ИП/организация) */
 	user?: ModelTypes["UserDataUnion"] | undefined | null
 };
+	["ExtendedMeetStatus"]:ExtendedMeetStatus;
 	["Extension"]: {
 		/** Настройки конфигурации для расширения */
 	config?: ModelTypes["JSON"] | undefined | null,
@@ -8348,6 +8433,10 @@ export type ModelTypes = {
 	current_quorum_percent: number,
 	/** Цикл собрания */
 	cycle: number,
+	/** Документ с решением секретаря */
+	decision1?: ModelTypes["DocumentAggregate"] | undefined | null,
+	/** Документ с решением председателя */
+	decision2?: ModelTypes["DocumentAggregate"] | undefined | null,
 	/** Хеш собрания */
 	hash: string,
 	/** Уникальный идентификатор собрания */
@@ -8359,7 +8448,7 @@ export type ModelTypes = {
 	/** Председатель собрания */
 	presider: string,
 	/** Документ с повесткой собрания */
-	proposal: ModelTypes["DocumentAggregate"],
+	proposal?: ModelTypes["DocumentAggregate"] | undefined | null,
 	/** Флаг достижения кворума */
 	quorum_passed: boolean,
 	/** Процент необходимого кворума */
@@ -8407,19 +8496,54 @@ export type ModelTypes = {
 };
 	/** Данные о собрании после обработки */
 ["MeetProcessed"]: {
-		/** Решение по собранию в формате блокчейн-действия */
-	decision: ModelTypes["BlockchainAction"],
+		/** Имя кооператива */
+	coopname: string,
+	/** Документ решения из блокчейна */
+	decision: ModelTypes["SignedBlockchainDocument"],
+	/** Агрегат документа решения */
+	decisionAggregate?: ModelTypes["DocumentAggregate"] | undefined | null,
 	/** Хеш собрания */
-	hash: string
+	hash: string,
+	/** Пройден ли кворум */
+	quorum_passed: boolean,
+	/** Процент кворума */
+	quorum_percent: number,
+	/** Результаты голосования по вопросам */
+	results: Array<ModelTypes["MeetQuestionResult"]>,
+	/** Количество подписанных бюллетеней */
+	signed_ballots: number
 };
 	/** Данные о собрании в процессе обработки */
 ["MeetProcessing"]: {
-		/** Хеш собрания */
+		/** Расширенный статус собрания на основе дат и состояния */
+	extendedStatus: ModelTypes["ExtendedMeetStatus"],
+	/** Хеш собрания */
 	hash: string,
+	/** Флаг указывающий, голосовал ли текущий пользователь */
+	isVoted: boolean,
 	/** Основная информация о собрании */
 	meet: ModelTypes["Meet"],
 	/** Список вопросов повестки собрания */
 	questions: Array<ModelTypes["Question"]>
+};
+	/** Результат голосования по вопросу */
+["MeetQuestionResult"]: {
+		/** Принят ли вопрос */
+	accepted: boolean,
+	/** Контекст вопроса */
+	context: string,
+	/** Принятое решение */
+	decision: string,
+	/** Идентификатор вопроса */
+	question_id: number,
+	/** Заголовок вопроса */
+	title: string,
+	/** Количество воздержавшихся */
+	votes_abstained: number,
+	/** Количество голосов против */
+	votes_against: number,
+	/** Количество голосов за */
+	votes_for: number
 };
 	["MetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -9502,7 +9626,7 @@ export type ModelTypes = {
 	/** Идентификатор номера подписи */
 	id: number,
 	/** Мета-данные подписи */
-	meta: ModelTypes["JSON"],
+	meta: string,
 	/** Публичный ключ */
 	public_key: string,
 	/** Подпись хэша */
@@ -11109,6 +11233,8 @@ export type GraphQLTypes = {
 	/** Доп. данные о пользователе (физ/ИП/организация) */
 	user?: GraphQLTypes["UserDataUnion"] | undefined | null
 };
+	/** Расширенный статус собрания на основе дат и состояния */
+["ExtendedMeetStatus"]: ExtendedMeetStatus;
 	["Extension"]: {
 	__typename: "Extension",
 	/** Настройки конфигурации для расширения */
@@ -11362,6 +11488,10 @@ export type GraphQLTypes = {
 	current_quorum_percent: number,
 	/** Цикл собрания */
 	cycle: number,
+	/** Документ с решением секретаря */
+	decision1?: GraphQLTypes["DocumentAggregate"] | undefined | null,
+	/** Документ с решением председателя */
+	decision2?: GraphQLTypes["DocumentAggregate"] | undefined | null,
 	/** Хеш собрания */
 	hash: string,
 	/** Уникальный идентификатор собрания */
@@ -11373,7 +11503,7 @@ export type GraphQLTypes = {
 	/** Председатель собрания */
 	presider: string,
 	/** Документ с повесткой собрания */
-	proposal: GraphQLTypes["DocumentAggregate"],
+	proposal?: GraphQLTypes["DocumentAggregate"] | undefined | null,
 	/** Флаг достижения кворума */
 	quorum_passed: boolean,
 	/** Процент необходимого кворума */
@@ -11424,20 +11554,56 @@ export type GraphQLTypes = {
 	/** Данные о собрании после обработки */
 ["MeetProcessed"]: {
 	__typename: "MeetProcessed",
-	/** Решение по собранию в формате блокчейн-действия */
-	decision: GraphQLTypes["BlockchainAction"],
+	/** Имя кооператива */
+	coopname: string,
+	/** Документ решения из блокчейна */
+	decision: GraphQLTypes["SignedBlockchainDocument"],
+	/** Агрегат документа решения */
+	decisionAggregate?: GraphQLTypes["DocumentAggregate"] | undefined | null,
 	/** Хеш собрания */
-	hash: string
+	hash: string,
+	/** Пройден ли кворум */
+	quorum_passed: boolean,
+	/** Процент кворума */
+	quorum_percent: number,
+	/** Результаты голосования по вопросам */
+	results: Array<GraphQLTypes["MeetQuestionResult"]>,
+	/** Количество подписанных бюллетеней */
+	signed_ballots: number
 };
 	/** Данные о собрании в процессе обработки */
 ["MeetProcessing"]: {
 	__typename: "MeetProcessing",
+	/** Расширенный статус собрания на основе дат и состояния */
+	extendedStatus: GraphQLTypes["ExtendedMeetStatus"],
 	/** Хеш собрания */
 	hash: string,
+	/** Флаг указывающий, голосовал ли текущий пользователь */
+	isVoted: boolean,
 	/** Основная информация о собрании */
 	meet: GraphQLTypes["Meet"],
 	/** Список вопросов повестки собрания */
 	questions: Array<GraphQLTypes["Question"]>
+};
+	/** Результат голосования по вопросу */
+["MeetQuestionResult"]: {
+	__typename: "MeetQuestionResult",
+	/** Принят ли вопрос */
+	accepted: boolean,
+	/** Контекст вопроса */
+	context: string,
+	/** Принятое решение */
+	decision: string,
+	/** Идентификатор вопроса */
+	question_id: number,
+	/** Заголовок вопроса */
+	title: string,
+	/** Количество воздержавшихся */
+	votes_abstained: number,
+	/** Количество голосов против */
+	votes_against: number,
+	/** Количество голосов за */
+	votes_for: number
 };
 	["MetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -12551,7 +12717,7 @@ export type GraphQLTypes = {
 		/** Идентификатор номера подписи */
 	id: number,
 	/** Мета-данные подписи */
-	meta: GraphQLTypes["JSON"],
+	meta: string,
 	/** Публичный ключ */
 	public_key: string,
 	/** Подпись хэша */
@@ -12929,6 +13095,19 @@ export enum AccountType {
 export enum Country {
 	Russia = "Russia"
 }
+/** Расширенный статус собрания на основе дат и состояния */
+export enum ExtendedMeetStatus {
+	AUTHORIZED = "AUTHORIZED",
+	CLOSED = "CLOSED",
+	CREATED = "CREATED",
+	EXPIRED_NO_QUORUM = "EXPIRED_NO_QUORUM",
+	NONE = "NONE",
+	ONRESTART = "ONRESTART",
+	PRECLOSED = "PRECLOSED",
+	VOTING_COMPLETED = "VOTING_COMPLETED",
+	VOTING_IN_PROGRESS = "VOTING_IN_PROGRESS",
+	WAITING_FOR_OPENING = "WAITING_FOR_OPENING"
+}
 /** Тип юридического лица */
 export enum OrganizationType {
 	AO = "AO",
@@ -13019,6 +13198,7 @@ type ZEUS_VARIABLES = {
 	["DisputeOnRequestInput"]: ValueTypes["DisputeOnRequestInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
 	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];
+	["ExtendedMeetStatus"]: ValueTypes["ExtendedMeetStatus"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
 	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];

@@ -85,7 +85,6 @@ import { computed } from 'vue';
 import { AddPaymentMethodButton } from 'src/features/PaymentMethod/AddPaymentMethod';
 import type { IBankTransferData, ISBPData } from 'src/features/PaymentMethod/AddPaymentMethod/model';
 import { DeletePaymentButton } from 'src/features/PaymentMethod/DeletePaymentMethod/ui';
-import 'src/shared/ui/CardStyles/index.scss';
 
 const props = defineProps({
   username: {

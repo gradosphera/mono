@@ -7,6 +7,8 @@ void meet::signbysecr(name coopname, name username, checksum256 hash, document2 
     auto meet_record = meet_opt.value();
 
     eosio::check(username == meet_record.secretary, "Вы не являетесь секретарем собрания");
+    eosio::check(meet_record.status == "authorized"_n, "Собрание не находится в статусе 'authorized'");
+
     // Проверяем, что текущее время > close_at
     auto now = current_time_point();
     
@@ -18,7 +20,7 @@ void meet::signbysecr(name coopname, name username, checksum256 hash, document2 
                  "Собрание не достигло кворума, не может быть закрыто с успехом.");
 
     // Проверяем документ
-    verify_document_or_fail(secretary_decision);
+    verify_document_or_fail(secretary_decision, {meet_record.secretary});
 
     // Обновляем запись в таблице, сохраняя решение секретаря
     Meet::meets_index genmeets(_meet, coopname.value);
@@ -29,7 +31,7 @@ void meet::signbysecr(name coopname, name username, checksum256 hash, document2 
     
     hash_index.modify(meet_itr, same_payer, [&](auto& m) {
         m.decision1 = secretary_decision;
-        m.status = "preclose"_n; // Новый статус после подписи секретарем
+        m.status = "preclosed"_n; // Новый статус после подписи секретарем
     });
     
     

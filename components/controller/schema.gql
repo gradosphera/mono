@@ -1757,6 +1757,39 @@ type ExtendedBlockchainAction {
   user: UserDataUnion
 }
 
+"""Расширенный статус собрания на основе дат и состояния"""
+enum ExtendedMeetStatus {
+  """Авторизовано"""
+  AUTHORIZED
+
+  """Закрыто"""
+  CLOSED
+
+  """Создано"""
+  CREATED
+
+  """Истекло без кворума"""
+  EXPIRED_NO_QUORUM
+
+  """Неопределенное состояние"""
+  NONE
+
+  """Ожидаем утверждения новой даты собрания"""
+  ONRESTART
+
+  """Предварительно закрыто"""
+  PRECLOSED
+
+  """Голосование завершено, ожидает подписей"""
+  VOTING_COMPLETED
+
+  """Голосование идет"""
+  VOTING_IN_PROGRESS
+
+  """Ожидает открытия"""
+  WAITING_FOR_OPENING
+}
+
 type Extension {
   """Настройки конфигурации для расширения"""
   config: JSON
@@ -2114,6 +2147,12 @@ type Meet {
   """Цикл собрания"""
   cycle: Float!
 
+  """Документ с решением секретаря"""
+  decision1: DocumentAggregate
+
+  """Документ с решением председателя"""
+  decision2: DocumentAggregate
+
   """Хеш собрания"""
   hash: String!
 
@@ -2130,7 +2169,7 @@ type Meet {
   presider: String!
 
   """Документ с повесткой собрания"""
-  proposal: DocumentAggregate!
+  proposal: DocumentAggregate
 
   """Флаг достижения кворума"""
   quorum_passed: Boolean!
@@ -2198,23 +2237,74 @@ type MeetPreProcessing {
 
 """Данные о собрании после обработки"""
 type MeetProcessed {
-  """Решение по собранию в формате блокчейн-действия"""
-  decision: BlockchainAction!
+  """Имя кооператива"""
+  coopname: String!
+
+  """Документ решения из блокчейна"""
+  decision: SignedBlockchainDocument!
+
+  """Агрегат документа решения"""
+  decisionAggregate: DocumentAggregate
 
   """Хеш собрания"""
   hash: String!
+
+  """Пройден ли кворум"""
+  quorum_passed: Boolean!
+
+  """Процент кворума"""
+  quorum_percent: Int!
+
+  """Результаты голосования по вопросам"""
+  results: [MeetQuestionResult!]!
+
+  """Количество подписанных бюллетеней"""
+  signed_ballots: Int!
 }
 
 """Данные о собрании в процессе обработки"""
 type MeetProcessing {
+  """Расширенный статус собрания на основе дат и состояния"""
+  extendedStatus: ExtendedMeetStatus!
+
   """Хеш собрания"""
   hash: String!
+
+  """Флаг указывающий, голосовал ли текущий пользователь"""
+  isVoted: Boolean!
 
   """Основная информация о собрании"""
   meet: Meet!
 
   """Список вопросов повестки собрания"""
   questions: [Question!]!
+}
+
+"""Результат голосования по вопросу"""
+type MeetQuestionResult {
+  """Принят ли вопрос"""
+  accepted: Boolean!
+
+  """Контекст вопроса"""
+  context: String!
+
+  """Принятое решение"""
+  decision: String!
+
+  """Идентификатор вопроса"""
+  question_id: Int!
+
+  """Заголовок вопроса"""
+  title: String!
+
+  """Количество воздержавшихся"""
+  votes_abstained: Int!
+
+  """Количество голосов против"""
+  votes_against: Int!
+
+  """Количество голосов за"""
+  votes_for: Int!
 }
 
 input MetaDocumentInput {
@@ -3849,7 +3939,7 @@ input SignatureInfoInput {
   id: Float!
 
   """Мета-данные подписи"""
-  meta: JSON!
+  meta: String!
 
   """Публичный ключ"""
   public_key: String!

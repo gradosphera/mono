@@ -1,6 +1,6 @@
 // utils/assertSingleHash.ts
 export function assertSingleHash(...hashes: Array<string | undefined>): string {
-  const filtered = hashes.filter((h): h is string => !!h);
+  const filtered = hashes.filter((h): h is string => !!h).map((h) => h.toUpperCase());
   if (filtered.length === 0) {
     throw new Error('Hash для объекта meet не найден');
   }

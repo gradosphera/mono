@@ -1,69 +1,45 @@
 <template lang="pug">
-div.q-pa-md
+div
   router-view(v-if="$route.name !== 'user-meets' && $route.name !== 'meets'")
   template(v-else)
     div.row.justify-center
       div.col-12
-        div.row.q-mb-md(v-if="canCreateMeet")
-          CreateMeet(@create="handleCreate")
+        div.row.q-pa-md(v-if="canCreateMeet")
+          CreateMeet
 
         MeetsTable(
           :meets="meets"
           :loading="loading"
-          @vote="handleVote"
-          @close="handleCloseMeet"
-          @restart="showRestartMeetDialog"
-          @view="navigateToMeetDetails"
         )
-    
+
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onMounted, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { MeetsTable } from 'src/widgets/Meets/MeetsTable'
 import { CreateMeet } from 'src/features/Meet/CreateMeet'
-import { useMeetManagement } from '../model'
-import type { IMeet } from 'src/entities/Meet'
+import { useMeetStore } from 'src/entities/Meet'
 import { useCurrentUserStore } from 'src/entities/User'
+import { FailAlert } from 'src/shared/api'
 
 const route = useRoute()
-const router = useRouter()
 const coopname = computed(() => route.params.coopname as string)
+const meetStore = useMeetStore()
 
 const {isChairman, isMember} = useCurrentUserStore()
 
-const {
-  meets,
-  loading,
-  loadMeets,
-  handleCreateMeet,
-  handleCloseMeet,
-  handleVote
-} = useMeetManagement(coopname.value)
+// Данные напрямую из стора
+const meets = computed(() => meetStore.meets)
+const loading = computed(() => meetStore.loading)
 
-// Диалоги
-const currentMeetToRestart = ref<IMeet | null>(null)
-
-// Обработчики
-const handleCreate = async (formData: any) => {
-  const success = await handleCreateMeet(formData)
-  return success
-}
-
-const showRestartMeetDialog = (meet: IMeet) => {
-  currentMeetToRestart.value = meet
-}
-
-// Навигация на детальную страницу собрания
-const navigateToMeetDetails = (meet: IMeet) => {
-  router.push({
-    name: route.name === 'meets' ? 'meet-details' : 'user-meet-details',
-    params: {
-      coopname: coopname.value,
-      hash: meet.hash
-    }
-  })
+// Загрузка списка собраний
+const loadMeets = async () => {
+  try {
+    await meetStore.loadMeets({ coopname: coopname.value })
+  } catch (e: any) {
+    FailAlert(e)
+  }
 }
 
 // Проверка разрешений
@@ -87,4 +63,5 @@ watch(
     }
   }
 )
+
 </script>

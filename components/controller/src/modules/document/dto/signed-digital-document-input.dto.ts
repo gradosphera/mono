@@ -5,7 +5,6 @@ import type { Cooperative } from 'cooptypes';
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 import type { ISignatureInfoDomainInterface } from '~/domain/document/interfaces/signature-info-domain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
-import GraphQLJSON from 'graphql-type-json';
 
 @InputType('SignatureInfoInput')
 export class SignatureInfoDTO implements ISignatureInfoDomainInterface {
@@ -33,9 +32,9 @@ export class SignatureInfoDTO implements ISignatureInfoDomainInterface {
   @IsString()
   public readonly signed_hash!: string;
 
-  @Field(() => GraphQLJSON, { description: 'Мета-данные подписи' })
-  @IsObject()
-  public readonly meta!: any;
+  @Field(() => String, { description: 'Мета-данные подписи' })
+  @IsString()
+  public readonly meta!: string;
 }
 
 @InputType('SignedDigitalDocumentInput')

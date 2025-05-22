@@ -68,7 +68,7 @@ export class SignedDigitalDocumentDTO implements ExtendedSignedDocumentDomainInt
   @Type(() => SignatureInfoDTO)
   public readonly signatures!: SignatureInfoDTO[];
 
-  constructor(data: SignedDocumentDomainEntity) {
+  constructor(data: ExtendedSignedDocumentDomainInterface) {
     this.version = data.version;
     this.hash = data.hash;
     this.doc_hash = data.doc_hash;

@@ -1,8 +1,8 @@
 <template lang="pug">
-q-card(flat class="card-container q-pa-md")
-  div.text-h6.q-mb-md Вопросы повестки
+div(flat).q-pa-md
+  div.text-center.text-h5.q-mb-md Повестка
 
-  div.row.q-col-gutter-md
+  div.row.q-col-gutter-md.justify-center
     div.col-12.col-md-6(v-for="(item, index) in meetAgendaItems" :key="index")
       q-card(flat bordered)
         q-card-section
@@ -26,4 +26,4 @@ const meetAgendaItems = computed(() => {
   if (!props.meet) return []
   return props.meet.processing?.questions || []
 })
-</script> 
+</script>

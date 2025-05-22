@@ -10,7 +10,7 @@ import { LogExtensionEntity } from './entities/log-extension.entity';
 import { LOG_EXTENSION_REPOSITORY } from '~/domain/extension/repositories/log-extension-domain.repository';
 import { TypeOrmLogExtensionDomainRepository } from './repositories/typeorm-log-extension.repository';
 import { MeetPreEntity } from './entities/meet-pre.entity';
-import { MEET_REPOSITORY } from '~/domain/meet/repositories/meet.repository';
+import { MEET_REPOSITORY } from '~/domain/meet/repositories/meet-pre.repository';
 import { TypeOrmMeetRepository } from './repositories/typeorm-meet.repository';
 import { MigrationEntity } from './entities/migration.entity';
 import { MIGRATION_REPOSITORY } from '~/domain/system/repositories/migration-domain.repository';
@@ -18,6 +18,9 @@ import { TypeOrmMigrationRepository } from './repositories/typeorm-migration.rep
 import { CandidateEntity } from './entities/candidate.entity';
 import { CANDIDATE_REPOSITORY } from '~/domain/account/repository/candidate.repository';
 import { TypeOrmCandidateRepository } from './repositories/typeorm-candidate.repository';
+import { MeetProcessedEntity } from './entities/meet-processed.entity';
+import { MEET_PROCESSED_REPOSITORY } from '~/domain/meet/repositories/meet-processed.repository';
+import { TypeOrmMeetProcessedRepository } from './repositories/typeorm-meet-processed.repository';
 
 @Global()
 @Module({
@@ -33,7 +36,14 @@ import { TypeOrmCandidateRepository } from './repositories/typeorm-candidate.rep
       synchronize: true, // Отключите в продакшене
       logging: false,
     }),
-    NestTypeOrmModule.forFeature([ExtensionEntity, LogExtensionEntity, MeetPreEntity, MigrationEntity, CandidateEntity]),
+    NestTypeOrmModule.forFeature([
+      ExtensionEntity,
+      LogExtensionEntity,
+      MeetPreEntity,
+      MeetProcessedEntity,
+      MigrationEntity,
+      CandidateEntity,
+    ]),
   ],
   providers: [
     {
@@ -49,6 +59,10 @@ import { TypeOrmCandidateRepository } from './repositories/typeorm-candidate.rep
       useClass: TypeOrmMeetRepository,
     },
     {
+      provide: MEET_PROCESSED_REPOSITORY,
+      useClass: TypeOrmMeetProcessedRepository,
+    },
+    {
       provide: MIGRATION_REPOSITORY,
       useClass: TypeOrmMigrationRepository,
     },
@@ -62,6 +76,7 @@ import { TypeOrmCandidateRepository } from './repositories/typeorm-candidate.rep
     EXTENSION_REPOSITORY,
     LOG_EXTENSION_REPOSITORY,
     MEET_REPOSITORY,
+    MEET_PROCESSED_REPOSITORY,
     MIGRATION_REPOSITORY,
     CANDIDATE_REPOSITORY,
   ],

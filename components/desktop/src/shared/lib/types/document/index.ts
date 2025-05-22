@@ -1,4 +1,4 @@
-import type { Zeus } from '@coopenomics/sdk/index';
+import type { Zeus } from '@coopenomics/sdk'
 
 // Добавляю реэкспорты типов документов
 export type IChainDocument2 = Zeus.ModelTypes['SignedBlockchainDocument']
