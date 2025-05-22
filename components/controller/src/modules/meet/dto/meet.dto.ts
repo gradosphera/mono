@@ -1,10 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { ValidateNested } from 'class-validator';
-import type { MeetRowProcessingDomainInterface } from '~/domain/meet/interfaces/meet-row-processing-domain.interface';
 import { DocumentAggregateDTO } from '~/modules/document/dto/document-aggregate.dto';
 
 @ObjectType('Meet', { description: 'Данные о собрании кооператива' })
-export class MeetDTO implements MeetRowProcessingDomainInterface {
+export class MeetDTO {
   @Field(() => Number, { description: 'Уникальный идентификатор собрания' })
   id!: number;
 
@@ -53,9 +52,9 @@ export class MeetDTO implements MeetRowProcessingDomainInterface {
   @Field(() => Boolean, { description: 'Флаг достижения кворума' })
   quorum_passed!: boolean;
 
-  @Field(() => DocumentAggregateDTO, { description: 'Документ с повесткой собрания' })
+  @Field(() => DocumentAggregateDTO, { description: 'Документ с повесткой собрания', nullable: true })
   @ValidateNested()
-  proposal!: DocumentAggregateDTO;
+  proposal!: DocumentAggregateDTO | null;
 
   @Field(() => DocumentAggregateDTO, {
     description: 'Документ с решением совета о проведении собрания',
@@ -64,7 +63,21 @@ export class MeetDTO implements MeetRowProcessingDomainInterface {
   @ValidateNested()
   authorization?: DocumentAggregateDTO;
 
-  constructor(data: MeetDTO) {
+  @Field(() => DocumentAggregateDTO, {
+    description: 'Документ с решением секретаря',
+    nullable: true,
+  })
+  @ValidateNested()
+  decision1?: DocumentAggregateDTO;
+
+  @Field(() => DocumentAggregateDTO, {
+    description: 'Документ с решением председателя',
+    nullable: true,
+  })
+  @ValidateNested()
+  decision2?: DocumentAggregateDTO;
+
+  constructor(data: Partial<MeetDTO>) {
     Object.assign(this, data);
   }
 }

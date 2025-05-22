@@ -1,6 +1,14 @@
 import { client } from 'src/shared/api/client'
 import { useSignDocument } from 'src/shared/lib/document/model/entity'
-import { Mutations } from '@coopenomics/sdk'
+import { Mutations, Zeus } from '@coopenomics/sdk'
+import { computed, ref, type Ref } from 'vue'
+import { useMeetStore } from 'src/entities/Meet'
+import { useSessionStore } from 'src/entities/Session'
+import { FailAlert, SuccessAlert } from 'src/shared/api'
+import moment from 'moment-with-locales-es6'
+import { useSystemStore } from 'src/entities/System/model'
+
+moment.locale('ru')
 
 export type ISignBySecretaryResult = Mutations.Meet.SignBySecretaryOnAnnualGeneralMeet.IOutput[typeof Mutations.Meet.SignBySecretaryOnAnnualGeneralMeet.name]
 export type ISignByPresiderResult = Mutations.Meet.SignByPresiderOnAnnualGeneralMeet.IOutput[typeof Mutations.Meet.SignByPresiderOnAnnualGeneralMeet.name]
@@ -11,7 +19,7 @@ interface ICloseMeetWithDecisionInput {
   username: string
 }
 
-
+// Базовые функции API для работы с бэкендом
 export async function signBySecretaryOnAnnualGeneralMeetWithDecision(data: ICloseMeetWithDecisionInput): Promise<ISignBySecretaryResult> {
   const { signDocument } = useSignDocument()
 
@@ -80,6 +88,7 @@ export async function signByPresiderOnAnnualGeneralMeetWithDecision(data: IClose
       presider_decision: signedDocument
     }
   }
+
   // Закрываем собрание с подписанным решением председателя
   const { [Mutations.Meet.SignByPresiderOnAnnualGeneralMeet.name]: result } = await client.Mutation(
     Mutations.Meet.SignByPresiderOnAnnualGeneralMeet.mutation,
@@ -89,4 +98,83 @@ export async function signByPresiderOnAnnualGeneralMeetWithDecision(data: IClose
   )
 
   return result
+}
+
+// Композабл для использования в компонентах
+export const useCloseMeet = (
+  isProcessing?: Ref<boolean>
+) => {
+  const { info } = useSystemStore()
+
+  const localIsProcessing = ref(false)
+  const processingRef = isProcessing || localIsProcessing
+
+  const meetStore = useMeetStore()
+  const sessionStore = useSessionStore()
+
+  const canCloseBySecretary = computed(() => {
+    const meet = meetStore.currentMeet
+    if (!meet?.processing?.meet) return false
+
+    const now = moment()
+    const closeAt = moment(meet.processing.meet.close_at)
+
+    const isAfterCloseDate = now.isAfter(closeAt)
+    const isQuorumPassed = meet.processing.meet.quorum_passed === true
+    const isAuthorized = meet.processing.meet.status === Zeus.ExtendedMeetStatus.AUTHORIZED.toLowerCase()
+
+    return isAfterCloseDate && isQuorumPassed && isAuthorized
+  })
+
+  const canCloseByPresider = computed(() => {
+    const meet = meetStore.currentMeet
+    if (!meet?.processing?.meet) return false
+    console.log('meet.processing.meet.status:', meet.processing.meet.status)
+    return meet.processing.meet.status === Zeus.ExtendedMeetStatus.PRECLOSED.toLowerCase()
+  })
+
+  const closeMeetBySecretary = async () => {
+    if (!meetStore.currentMeet) return
+    processingRef.value = true
+    try {
+      await signBySecretaryOnAnnualGeneralMeetWithDecision({
+        coopname: info.coopname,
+        hash: meetStore.currentMeet.hash,
+        username: sessionStore.username,
+      })
+
+      await meetStore.loadMeet({ coopname: info.coopname, hash: meetStore.currentMeet.hash })
+      SuccessAlert('Собрание успешно закрыто')
+    } catch (error: any) {
+      FailAlert(error)
+    } finally {
+      processingRef.value = false
+    }
+  }
+
+  const closeMeetByPresider = async () => {
+    if (!meetStore.currentMeet) return
+    processingRef.value = true
+    try {
+      await signByPresiderOnAnnualGeneralMeetWithDecision({
+        coopname: info.coopname,
+        hash: meetStore.currentMeet.hash,
+        username: sessionStore.username,
+      })
+
+      await meetStore.loadMeet({ coopname: info.coopname, hash: meetStore.currentMeet.hash })
+      SuccessAlert('Собрание успешно закрыто')
+    } catch (error: any) {
+      FailAlert(error)
+    } finally {
+      processingRef.value = false
+    }
+  }
+
+  return {
+    canCloseBySecretary,
+    canCloseByPresider,
+    closeMeetBySecretary,
+    closeMeetByPresider
+  }
 }

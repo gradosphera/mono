@@ -95,7 +95,7 @@ export class Document {
       signature: digitalSignature.signature,
       signed_at,
       signed_hash,
-      meta: '',
+      meta: JSON.stringify({}),
     }
 
     return {

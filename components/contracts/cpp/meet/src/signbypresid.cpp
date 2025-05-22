@@ -19,11 +19,11 @@ void meet::signbypresid(name coopname, name username, checksum256 hash, document
     eosio::check(meet_record.quorum_passed == true, 
                  "Собрание не достигло кворума, не может быть закрыто с успехом.");
     
-    // Проверяем, что секретарь уже подписал протокол
-    eosio::check(meet_record.status == "preclose"_n, "Протокол должен быть сначала подписан секретарем собрания");
+    // Проверяем, что протокол уже подписан секретарем собрания
+    eosio::check(meet_record.status == "preclosed"_n, "Протокол должен быть сначала подписан секретарем собрания");
     
     // Проверяем документ
-    verify_document_or_fail(presider_decision);
+    verify_document_or_fail(presider_decision, {meet_record.secretary, meet_record.presider});
 
     // Сформируем данные об итогах голосования по каждому вопросу
     Meet::questions_index questions(_meet, coopname.value);
@@ -73,7 +73,8 @@ void meet::signbypresid(name coopname, name username, checksum256 hash, document
         results,
         meet_record.signed_ballots,
         meet_record.quorum_percent,
-        meet_record.quorum_passed
+        meet_record.quorum_passed,
+        meet_record.decision2
     );
 
     // После записи решения – удаляем все вопросы

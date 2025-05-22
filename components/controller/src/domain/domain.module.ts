@@ -16,6 +16,7 @@ import { AgendaDomainModule } from './agenda/agenda-domain.module';
 import { CooplaceDomainModule } from './cooplace/cooplace.module';
 import { DesktopDomainModule } from './desktop/desktop-domain.module';
 import { MeetDomainModule } from './meet/meet-domain.module';
+import { ControllerWsMeetModule } from './meet/controllers-ws-meet.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { MeetDomainModule } from './meet/meet-domain.module';
     ParticipantDomainModule,
     CooplaceDomainModule,
     MeetDomainModule,
+    ControllerWsMeetModule,
   ],
   exports: [
     AuthDomainModule,

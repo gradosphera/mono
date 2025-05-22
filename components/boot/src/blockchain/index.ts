@@ -607,10 +607,10 @@ export default class Blockchain {
   }
 
   async registerUser(
-    params: RegistratorContract.Actions.RegisterUser.IRegistrerUser,
+    params: RegistratorContract.Actions.RegisterUser.IRegisterUser,
   ) {
     await this.update_pass_instance()
-
+    console.dir(params, { depth: null })
     await this.api.transact(
       {
         actions: [
@@ -623,9 +623,7 @@ export default class Blockchain {
                 permission: 'active',
               },
             ],
-            data: {
-              ...params,
-            },
+            data: params,
           },
         ],
       },
@@ -640,7 +638,7 @@ export default class Blockchain {
 
   async transfer(params: TokenContract.Actions.Transfer.ITransfer) {
     await this.update_pass_instance()
-
+    console.dir(params, { depth: null })
     const result = await this.api.transact(
       {
         actions: [
@@ -748,7 +746,7 @@ export default class Blockchain {
             name: SovietContract.Actions.Decisions.VoteFor.actionName,
             authorization: [
               {
-                actor: params.member,
+                actor: params.username,
                 permission: 'active',
               },
             ],
@@ -833,7 +831,7 @@ export default class Blockchain {
   }
 
   async ConfirmPayment(
-    params: GatewayContract.Actions.CompleteIncome.ICompeteIncome,
+    params: GatewayContract.Actions.CompleteIncome.ICompleteIncome,
   ) {
     await this.update_pass_instance()
 
@@ -923,7 +921,7 @@ export default class Blockchain {
       },
     )
 
-    console.log('Шаблон создан: ', params)
+    console.log('Шаблон создан: ', params.registry_id)
   }
 
   async createTranslation(
@@ -955,7 +953,7 @@ export default class Blockchain {
       },
     )
 
-    console.log('Перевод создан: ', params)
+    console.log('Перевод создан: ', params.registry_id)
   }
 
   async createProgram(

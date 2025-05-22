@@ -1,8 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { IsArray, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MeetDTO } from './meet.dto';
 import { QuestionDTO } from './question.dto';
+import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
 
 @ObjectType('MeetProcessing', { description: 'Данные о собрании в процессе обработки' })
 export class MeetProcessingDTO {
@@ -19,6 +20,15 @@ export class MeetProcessingDTO {
   @ValidateNested({ each: true })
   @Type(() => QuestionDTO)
   questions!: QuestionDTO[];
+
+  @Field(() => Boolean, { description: 'Флаг указывающий, голосовал ли текущий пользователь' })
+  isVoted!: boolean;
+
+  @Field(() => ExtendedMeetStatus, {
+    description: 'Расширенный статус собрания на основе дат и состояния',
+  })
+  @IsEnum(ExtendedMeetStatus)
+  extendedStatus!: ExtendedMeetStatus;
 
   constructor(data: MeetProcessingDTO) {
     Object.assign(this, data);

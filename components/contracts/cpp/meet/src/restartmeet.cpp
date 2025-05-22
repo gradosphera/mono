@@ -31,6 +31,7 @@ void meet::restartmeet(name coopname, checksum256 hash, document2 newproposal, t
     document2 empty_document;
     
     genmeets.modify(meet_itr, coopname, [&](auto &m) {
+        m.status             = "onrestart"_n;
         m.proposal           = newproposal;
         m.authorization    = empty_document;
         m.open_at            = new_open_at;
@@ -87,8 +88,8 @@ void meet::restartmeet(name coopname, checksum256 hash, document2 newproposal, t
         get_valid_soviet_action("creategm"_n),
         hash,
         _meet,
-        "authagm"_n,
-        "declagm"_n,
+        "authmeet"_n,
+        "declmeet"_n,
         newproposal,
         std::string("")
     );

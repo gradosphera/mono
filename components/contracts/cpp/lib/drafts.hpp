@@ -42,13 +42,27 @@ struct document2 {
     std::vector<signature_info> signatures;
 };
 
-void verify_document_or_fail(const document2 &doc)
-{
+void verify_document_or_fail(
+    const document2 &doc,
+    const std::vector<eosio::name>& required_signers = {}
+) {
   for (const auto &sig : doc.signatures) {
     // Проверка завершится прерыванием, если восстановление подписи провалится
     assert_recover_key(sig.signed_hash, sig.signature, sig.public_key);
   }
-};
+  if (!required_signers.empty()) {
+    for (const auto& required : required_signers) {
+      bool found = false;
+      for (const auto& sig : doc.signatures) {
+        if (sig.signer == required) {
+          found = true;
+          break;
+        }
+      }
+      eosio::check(found, ("Не найдена подпись от обязательного подписанта: " + required.to_string()).c_str());
+    }
+  }
+}
 
 bool is_empty_document(const document2 &doc)
 {

@@ -1,3 +1,4 @@
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { MeetPreProcessingDomainInterface } from './meet-pre-domain.interface';
 import type { MeetProcessedDomainInterface } from './meet-processed-domain.interface';
 import type { MeetProcessingDomainInterface } from './meet-processing-domain.interface';

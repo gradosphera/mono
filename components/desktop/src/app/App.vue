@@ -15,6 +15,7 @@ div(v-if="isLoaded").breable-text
   import { SelectBranchOverlay } from 'src/features/Branch/SelectBranch'
   import { useSystemStore } from 'src/entities/System/model'
   import { useDesktopHealthWatcherProcess } from 'src/processes/watch-desktop-health'
+  import 'src/shared/ui/CardStyles/index.scss';
 
   const { info } = useSystemStore()
   const route = useRoute()

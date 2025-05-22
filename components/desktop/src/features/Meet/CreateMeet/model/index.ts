@@ -36,6 +36,7 @@ export async function createMeet(data: ICreateMeetInput): Promise<ICreateMeetRes
 }
 
 export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput): Promise<ICreateMeetResult> {
+
   const { signDocument } = useSignDocument()
   // Генерируем документ повестки
   const generatedDocument = await generateAgenda({

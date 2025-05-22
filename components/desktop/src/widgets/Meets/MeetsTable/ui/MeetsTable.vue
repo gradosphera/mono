@@ -1,57 +1,44 @@
 <template lang="pug">
+div.scroll-area(style="height: calc(100% - $toolbar-min-height); overflow-y: auto;")
+  q-table(
+    ref="tableRef"
+    flat
+    :grid="isMobile"
+    :rows="meets"
+    :columns="columns"
+    :pagination="pagination"
+    virtual-scroll
+    @virtual-scroll="onScroll"
+    :virtual-scroll-target="'.scroll-area'"
+    :virtual-scroll-item-size="48"
+    :virtual-scroll-sticky-size-start="48"
+    :rows-per-page-options="[0]"
+    :loading='loading'
+    :no-data-label="'Собрания не найдены'"
+  )
+    template(#header="props")
+      q-tr(:props="props")
+        q-th(
+          v-for="col in props.cols"
+          :key="col.name"
+          :props="props"
+        ) {{ col.label }}
 
-q-table(
-  ref="tableRef"
-  flat
-  :grid="isMobile"
-  :rows="meets"
-  :columns="columns"
-  :pagination="pagination"
-  virtual-scroll
-  :virtual-scroll-item-size="48"
-  :rows-per-page-options="[10]"
-  :loading='loading'
-  :no-data-label="'Собрания не найдены'"
-).full-height
-  template(#header="props")
-    q-tr(:props="props")
-      q-th(
-        v-for="col in props.cols"
-        :key="col.name"
-        :props="props"
-      ) {{ col.label }}
-
-  template(#body="props")
-    q-tr(:key="`m_${props.row?.hash}`" :props="props")
-      q-td {{ props.row.hash.substring(0, 10) }}
-      q-td {{ props.row.processing?.meet?.type }}
-      q-td {{ props.row.processing?.meet?.status }}
-      q-td {{ formatDate(props.row.processing?.meet?.open_at) }}
-      q-td {{ formatDate(props.row.processing?.meet?.close_at) }}
-      q-td
-        q-btn(
-          v-if="canVote(props.row)"
-          size="sm"
-          color="primary"
-          icon="fa-solid fa-check-to-slot"
-          flat
-          @click="() => $emit('vote', props.row)"
-        ) Голосовать
-        q-btn(
-          v-if="canVote(props.row)"
-          size="sm"
-          color="secondary"
-          icon="fa-solid fa-eye"
-          flat
-          @click="() => $emit('view', props.row)"
-        ) Участвовать
-        q-btn(
-          size="sm"
-          color="accent"
-          icon="fa-solid fa-arrow-right"
-          flat
-          @click="navigateToMeetDetails(props.row)"
-        ) Подробнее
+    template(#body="props")
+      q-tr(:key="`m_${props.row?.hash}`" :props="props")
+        q-td {{ props.row.hash.substring(0, 10) }}
+        q-td {{ props.row.processing?.meet?.type }}
+        q-td {{ props.row.processing?.meet?.status }}
+        q-td {{ formatDate(props.row.processing?.meet?.open_at) }}
+        q-td {{ formatDate(props.row.processing?.meet?.close_at) }}
+        q-td
+          q-btn(
+            size="sm"
+            color="accent"
+            icon="fa-solid fa-arrow-right"
+            flat
+            @click="navigateToMeetDetails(props.row)"
+          ) Подробнее
 </template>
 
 <script setup lang="ts">
@@ -63,14 +50,13 @@ import { useRouter } from 'vue-router'
 import { useWindowSize } from 'src/shared/hooks'
 import { useDesktopStore } from 'src/entities/Desktop/model'
 
-defineProps<{
+const props = defineProps<{
   meets: IMeet[],
   loading: boolean
 }>()
 
-defineEmits<{
-  (e: 'vote', meet: IMeet): void
-  (e: 'view', meet: IMeet): void
+const emit = defineEmits<{
+  (e: 'load'): void
 }>()
 
 const router = useRouter()
@@ -88,7 +74,7 @@ const columns: QTableColumn<IMeet>[] = [
 ]
 
 const tableRef = ref(null)
-const pagination = ref({ rowsPerPage: 10 })
+const pagination = ref({ rowsPerPage: 0 })
 
 // Форматирование даты
 const formatDate = (dateString: string) => {
@@ -96,23 +82,28 @@ const formatDate = (dateString: string) => {
   return date.formatDate(dateString, 'DD.MM.YYYY HH:mm')
 }
 
-const canVote = (meet: IMeet) => {
-  return meet.processing?.meet?.status === 'open'
+// Функция обработки виртуального скролла
+const onScroll = ({ to }) => {
+  const lastIndex = props.meets.length - 1
+  // Если достигли последнего элемента в списке, эмитим событие load
+  if (props.meets.length > 0 && to === lastIndex) {
+    emit('load')
+  }
 }
 
 // Определение текущего воркспейса и подходящего маршрута для деталей собрания
 const navigateToMeetDetails = (meet: IMeet) => {
   const currentWorkspace = desktop.activeWorkspaceName
   const isSoviet = currentWorkspace === 'soviet'
-  
+
   const routeName = isSoviet ? 'meet-details' : 'user-meet-details'
-  
-  router.push({ 
-    name: routeName, 
-    params: { 
+
+  router.push({
+    name: routeName,
+    params: {
       hash: meet.hash,
       coopname: router.currentRoute.value.params.coopname
-    } 
+    }
   })
 }
 </script>

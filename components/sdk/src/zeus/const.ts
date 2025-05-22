@@ -167,6 +167,7 @@ export const AllTypesProps: Record<string,any> = {
 	EntrepreneurDetailsInput:{
 
 	},
+	ExtendedMeetStatus: "enum" as const,
 	ExtensionInput:{
 		config:"JSON",
 		created_at:"DateTime",
@@ -620,7 +621,7 @@ export const AllTypesProps: Record<string,any> = {
 		secretary_decision:"AnnualGeneralMeetingDecisionSignedDocumentInput"
 	},
 	SignatureInfoInput:{
-		meta:"JSON"
+
 	},
 	SignedDigitalDocumentInput:{
 		meta:"MetaDocumentInput",
@@ -1034,6 +1035,8 @@ export const ReturnTypes: Record<string,any> = {
 		created_at:"DateTime",
 		current_quorum_percent:"Float",
 		cycle:"Float",
+		decision1:"DocumentAggregate",
+		decision2:"DocumentAggregate",
 		hash:"String",
 		id:"Float",
 		initiator:"String",
@@ -1065,13 +1068,31 @@ export const ReturnTypes: Record<string,any> = {
 		secretary:"String"
 	},
 	MeetProcessed:{
-		decision:"BlockchainAction",
-		hash:"String"
+		coopname:"String",
+		decision:"SignedBlockchainDocument",
+		decisionAggregate:"DocumentAggregate",
+		hash:"String",
+		quorum_passed:"Boolean",
+		quorum_percent:"Int",
+		results:"MeetQuestionResult",
+		signed_ballots:"Int"
 	},
 	MeetProcessing:{
+		extendedStatus:"ExtendedMeetStatus",
 		hash:"String",
+		isVoted:"Boolean",
 		meet:"Meet",
 		questions:"Question"
+	},
+	MeetQuestionResult:{
+		accepted:"Boolean",
+		context:"String",
+		decision:"String",
+		question_id:"Int",
+		title:"String",
+		votes_abstained:"Int",
+		votes_against:"Int",
+		votes_for:"Int"
 	},
 	MonoAccount:{
 		email:"String",

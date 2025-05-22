@@ -1,5 +1,5 @@
 <template lang="pug">
-div.scroll-area(style="height: 90vh; overflow-y: auto;")
+div.scroll-area(style="height: calc(100% - $toolbar-min-height); overflow-y: auto;")
   q-table(
     ref="tableRef"
     flat
@@ -71,7 +71,7 @@ div.scroll-area(style="height: 90vh; overflow-y: auto;")
             @click="onAuthorizeDecision(props.row)"
           ) утвердить
 
-      q-tr(v-if="expanded.get(props.row.table.id)" :key="`e_${props.row.table.id}`" :props="props" class="q-virtual-scroll--with-prev")
+      q-tr(no-hover v-if="expanded.get(props.row.table.id)" :key="`e_${props.row.table.id}`" :props="props" class="q-virtual-scroll--with-prev")
         q-td(colspan="100%")
           ComplexDocument(:documents="props.row.documents")
 </template>

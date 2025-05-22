@@ -22,4 +22,14 @@ export class GeneratedDocumentDTO implements GeneratedDocumentDomainInterface {
   @Field(() => String, { description: 'Бинарное содержимое документа (base64)' })
   @IsObject()
   binary!: string;
+
+  constructor(data?: GeneratedDocumentDomainInterface) {
+    if (data) {
+      this.full_title = data.full_title;
+      this.html = data.html;
+      this.hash = data.hash;
+      this.meta = data.meta;
+      this.binary = data.binary;
+    }
+  }
 }

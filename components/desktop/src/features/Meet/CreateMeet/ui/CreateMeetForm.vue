@@ -43,31 +43,43 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 
         div.text-h6.q-mt-md Повестка собрания
 
-        div(v-for="(point, index) in formData.agenda_points" :key="index")
-          div.row.q-mb-sm
-            div.col
-              q-input(
-                v-model="point.title"
-                label="Заголовок"
-                :rules="[val => !!val || 'Обязательное поле']"
-                dense
-              )
-            div.col
-              q-input(
-                v-model="point.context"
-                label="Описание"
-                :rules="[val => !!val || 'Обязательное поле']"
-                dense
-              )
-            div.col
-              q-input(
-                v-model="point.decision"
-                label="Решение"
-                :rules="[val => !!val || 'Обязательное поле']"
-                dense
-              )
+        q-card(flat bordered v-for="(point, index) in formData.agenda_points" :key="index").q-mb-lg.q-pa-sm
+          div.row.items-center.q-mb-sm
+            div.text-subtitle1.q-mr-md Вопрос № {{ index + 1 }}
             div.col-auto
-              q-btn(flat icon="delete" @click="removeAgendaPoint(index)")
+              q-btn(flat icon="delete" size="sm" color="grey" @click="removeAgendaPoint(index)") удалить
+
+          div.q-mb-sm
+            q-input(
+              v-model="point.title"
+              label="Заголовок"
+              :rules="[val => !!val || 'Обязательное поле']"
+              dense
+              type="textarea"
+              autogrow
+            )
+
+          div.q-mb-sm
+            q-input(
+              v-model="point.context"
+              label="Контекст"
+              :rules="[val => !!val || 'Обязательное поле']"
+              dense
+              type="textarea"
+              autogrow
+            )
+
+          div.q-mb-sm
+            q-input(
+              v-model="point.decision"
+              label="Решение"
+              :rules="[val => !!val || 'Обязательное поле']"
+              dense
+              type="textarea"
+              autogrow
+            )
+
+          q-separator(v-if="index < formData.agenda_points.length - 1")
 
         div.text-center.q-mb-md
           q-btn(outline label="Добавить пункт повестки" @click="addAgendaPoint")

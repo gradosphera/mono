@@ -1,35 +1,38 @@
 <template lang="pug">
-q-card(flat class="card-container q-pa-md" v-if="canManageMeet")
+div
   div.row.q-col-gutter-md
     div.col-12.col-md-auto(v-if="canCloseBySecretary")
       q-btn(
-        color="negative"
+        color="primary"
         icon="fa-solid fa-door-closed"
-        label="Закрыть собрание (Секретарь)"
+        label="Закрыть собрание"
         @click="closeMeetBySecretary"
         :loading="isProcessing"
       )
     div.col-12.col-md-auto(v-if="canCloseByPresider")
       q-btn(
-        color="negative"
-        icon="fa-solid fa-door-closed"
-        label="Закрыть собрание (Председатель)"
+        color="primary"
+        icon="fa-solid fa-check"
+        label="Утвердить собрание"
         @click="closeMeetByPresider"
         :loading="isProcessing"
       )
     div.col-12.col-md-auto(v-if="canRestartMeet")
       RestartMeet(
-        :meet="meet"
         show-button
         @restart="handleRestartMeet"
+        :loading="isProcessing"
       )
+
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useCloseMeet } from 'src/features/Meet/CloseMeetWithDecision/model'
+import { useRestartMeet } from 'src/features/Meet/RestartMeet/model'
 import { RestartMeet } from 'src/features/Meet/RestartMeet'
+import { useMeetStore } from 'src/entities/Meet'
 import type { IMeet } from 'src/entities/Meet'
-import { useMeetDetailsManagement } from 'src/features/Meet/MeetDetailsManagement'
 
 const props = defineProps<{
   meet: IMeet
@@ -38,14 +41,27 @@ const props = defineProps<{
 }>()
 
 const isProcessing = ref(false)
+const meetStore = useMeetStore()
+
+// Устанавливаем текущее собрание в store при монтировании и обновлении пропсов
+onMounted(() => {
+  meetStore.setCurrentMeet(props.meet)
+})
+
+watch(() => props.meet, (newMeet) => {
+  meetStore.setCurrentMeet(newMeet)
+}, { deep: true })
 
 const {
-  canManageMeet,
   canCloseBySecretary,
   canCloseByPresider,
-  canRestartMeet,
   closeMeetBySecretary,
-  closeMeetByPresider,
+  closeMeetByPresider
+} = useCloseMeet(isProcessing)
+
+const {
+  canRestartMeet,
   handleRestartMeet
-} = useMeetDetailsManagement(props.meet, props.coopname, props.meetHash, isProcessing)
-</script> 
+} = useRestartMeet(isProcessing)
+
+</script>

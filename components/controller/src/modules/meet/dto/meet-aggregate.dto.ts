@@ -6,9 +6,16 @@ import { MeetPreProcessingDTO } from './meet-pre.dto';
 import { MeetProcessingDTO } from './meet-processing.dto';
 import { MeetProcessedDTO } from './meet-processed.dto';
 import type { MeetDomainAggregate } from '~/domain/meet/interfaces/meet-aggregate.interface';
+import { DocumentAggregateDTO } from '~/modules/document/dto/document-aggregate.dto';
+import { MeetAggregate } from '~/domain/meet/aggregates/meet-domain.aggregate';
+import { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
+import { DocumentDomainAggregate } from '~/domain/document/aggregates/document-domain.aggregate';
+import { MeetDTO } from './meet.dto';
+import { QuestionDTO } from './question.dto';
+import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
 
 @ObjectType('MeetAggregate', { description: 'Агрегат данных о собрании, содержащий информацию о разных этапах' })
-export class MeetAggregateDTO implements MeetDomainAggregate {
+export class MeetAggregateDTO {
   @Field(() => String, { description: 'Хеш собрания' })
   @IsNotEmpty()
   @IsString()
@@ -32,7 +39,74 @@ export class MeetAggregateDTO implements MeetDomainAggregate {
   @Type(() => MeetProcessedDTO)
   processed?: MeetProcessedDTO | null;
 
-  constructor(data: MeetAggregateDTO) {
-    Object.assign(this, data);
+  constructor(
+    data: MeetAggregate,
+    decisionAggregate?: DocumentAggregateDomainInterface | null,
+    processingDocuments?: {
+      proposalAggregate?: DocumentDomainAggregate | null;
+      authorizationAggregate?: DocumentDomainAggregate | null;
+      decision1Aggregate?: DocumentDomainAggregate | null;
+      decision2Aggregate?: DocumentDomainAggregate | null;
+    }
+  ) {
+    this.hash = data.hash;
+    this.pre = data.pre ? new MeetPreProcessingDTO(data.pre) : null;
+
+    // Создаем processed с передачей decisionAggregate, если есть
+    if (data.processed) {
+      this.processed = new MeetProcessedDTO(data.processed, decisionAggregate);
+    } else {
+      this.processed = null;
+    }
+
+    // Создаем processing DTO с обогащенными данными, если они предоставлены
+    if (data.processing && processingDocuments) {
+      // Создаем объект MeetDTO с документами
+      const meetDTO = new MeetDTO({
+        id: data.processing.meet.id,
+        hash: data.processing.meet.hash,
+        coopname: data.processing.meet.coopname,
+        type: data.processing.meet.type,
+        initiator: data.processing.meet.initiator,
+        presider: data.processing.meet.presider,
+        secretary: data.processing.meet.secretary,
+        status: data.processing.meet.status,
+        created_at: data.processing.meet.created_at,
+        open_at: data.processing.meet.open_at,
+        close_at: data.processing.meet.close_at,
+        quorum_percent: data.processing.meet.quorum_percent,
+        signed_ballots: data.processing.meet.signed_ballots,
+        current_quorum_percent: data.processing.meet.current_quorum_percent,
+        cycle: data.processing.meet.cycle,
+        quorum_passed: data.processing.meet.quorum_passed,
+        // Устанавливаем обогащенные документы или null/undefined
+        proposal: processingDocuments.proposalAggregate
+          ? new DocumentAggregateDTO(processingDocuments.proposalAggregate)
+          : null,
+        authorization: processingDocuments.authorizationAggregate
+          ? new DocumentAggregateDTO(processingDocuments.authorizationAggregate)
+          : undefined,
+        decision1: processingDocuments.decision1Aggregate
+          ? new DocumentAggregateDTO(processingDocuments.decision1Aggregate)
+          : undefined,
+        decision2: processingDocuments.decision2Aggregate
+          ? new DocumentAggregateDTO(processingDocuments.decision2Aggregate)
+          : undefined,
+      });
+
+      // Преобразуем вопросы в DTO
+      const questionsDTO = data.processing.questions.map((q) => new QuestionDTO(q));
+
+      // Создаем MeetProcessingDTO
+      this.processing = new MeetProcessingDTO({
+        hash: data.processing.hash,
+        meet: meetDTO,
+        questions: questionsDTO,
+        isVoted: data.processing.isVoted,
+        extendedStatus: data.processing.extendedStatus as ExtendedMeetStatus,
+      });
+    } else {
+      this.processing = null;
+    }
   }
 }

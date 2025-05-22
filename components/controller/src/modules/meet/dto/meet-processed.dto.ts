@@ -1,20 +1,45 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-import { IsOptional } from 'class-validator';
-import { BlockchainActionDTO } from '~/modules/common/dto/blockchain-action.dto';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { MeetQuestionResultDTO } from './meet-question-result.dto';
+import { DocumentAggregateDTO } from '~/modules/document/dto/document-aggregate.dto';
+import { Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
+import { MeetProcessedDomainInterface } from '~/domain/meet/interfaces/meet-processed-domain.interface';
+import { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
+import { SignedDigitalDocumentDTO } from '~/modules/document/dto/signed-digital-document.dto';
 
 @ObjectType('MeetProcessed', { description: 'Данные о собрании после обработки' })
 export class MeetProcessedDTO {
+  @Field(() => String, { description: 'Имя кооператива' })
+  coopname!: string;
+
   @Field(() => String, { description: 'Хеш собрания' })
   hash!: string;
 
-  @Field(() => BlockchainActionDTO, { description: 'Решение по собранию в формате блокчейн-действия' })
-  decision!: BlockchainActionDTO; //TODO: занести генератор DTO сюда чтобы получить типизированный результат по полям действия
+  @Field(() => [MeetQuestionResultDTO], { description: 'Результаты голосования по вопросам' })
+  results!: MeetQuestionResultDTO[];
 
-  // @Field(() => Object, { nullable: true })
-  // @IsOptional()
-  // documents?: object[];
+  @Field(() => Int, { description: 'Количество подписанных бюллетеней' })
+  signed_ballots!: number;
 
-  constructor(data: MeetProcessedDTO) {
-    Object.assign(this, data);
+  @Field(() => Int, { description: 'Процент кворума' })
+  quorum_percent!: number;
+
+  @Field(() => Boolean, { description: 'Пройден ли кворум' })
+  quorum_passed!: boolean;
+
+  @Field(() => SignedDigitalDocumentDTO, { description: 'Документ решения из блокчейна' })
+  decision!: SignedDigitalDocumentDTO;
+
+  @Field(() => DocumentAggregateDTO, { nullable: true, description: 'Агрегат документа решения' })
+  @ValidateNested()
+  @Type(() => DocumentAggregateDTO)
+  decisionAggregate!: DocumentAggregateDTO | null;
+
+  constructor(data: MeetProcessedDomainInterface, decisionAggregate?: DocumentAggregateDomainInterface | null) {
+    Object.assign(this, {
+      ...data,
+      results: data.results.map((result) => new MeetQuestionResultDTO(result)),
+      decisionAggregate: decisionAggregate || null,
+    });
   }
 }

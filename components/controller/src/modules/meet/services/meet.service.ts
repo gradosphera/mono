@@ -3,7 +3,7 @@ import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate
 import { type CreateAnnualGeneralMeetInputDTO } from '../dto/create-meet-agenda-input.dto';
 import type { AnnualGeneralMeetingAgendaGenerateDocumentInputDTO } from '../../document/documents-dto/annual-general-meeting-agenda-document.dto';
 import { MeetDomainInteractor } from '~/domain/meet/interactors/meet.interactor';
-import type { MeetAggregateDTO } from '../dto/meet-aggregate.dto';
+import { MeetAggregateDTO } from '../dto/meet-aggregate.dto';
 import { VoteOnAnnualGeneralMeetInputDTO } from '../dto/vote-on-annual-general-meet-input.dto';
 import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-meet-input.dto';
 import { Cooperative } from 'cooptypes';
@@ -16,10 +16,48 @@ import { AnnualGeneralMeetingVotingBallotGenerateDocumentInputDTO } from '~/modu
 import { AnnualGeneralMeetingSovietDecisionGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-soviet-decision-document.dto';
 import { AnnualGeneralMeetingDecisionGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-decision-document.dto';
 import { AnnualGeneralMeetingNotificationGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-notification-document.dto';
+import { MeetAggregate } from '~/domain/meet/aggregates/meet-domain.aggregate';
+import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
+import { DocumentDomainAggregate } from '~/domain/document/aggregates/document-domain.aggregate';
 
 @Injectable()
 export class MeetService {
-  constructor(private readonly meetDomainInteractor: MeetDomainInteractor) {}
+  constructor(
+    private readonly meetDomainInteractor: MeetDomainInteractor,
+    private readonly documentAggregationService: DocumentAggregationService
+  ) {}
+
+  /**
+   * Преобразует домен-объект в DTO с обогащением документов
+   */
+  private async toDTO(aggregate: MeetAggregate): Promise<MeetAggregateDTO> {
+    // Получаем агрегат документа решения для processed
+    let decisionAggregate: DocumentDomainAggregate | null = null;
+    if (aggregate.processed?.decision) {
+      decisionAggregate = await this.documentAggregationService.buildDocumentAggregate(aggregate.processed.decision);
+    }
+
+    // Получаем агрегаты документов для processing
+    const processingDocuments = aggregate.processing?.meet
+      ? {
+          proposalAggregate: aggregate.processing.meet.proposal
+            ? await this.documentAggregationService.buildDocumentAggregate(aggregate.processing.meet.proposal)
+            : null,
+          authorizationAggregate: aggregate.processing.meet.authorization
+            ? await this.documentAggregationService.buildDocumentAggregate(aggregate.processing.meet.authorization)
+            : null,
+          decision1Aggregate: aggregate.processing.meet.decision1
+            ? await this.documentAggregationService.buildDocumentAggregate(aggregate.processing.meet.decision1)
+            : null,
+          decision2Aggregate: aggregate.processing.meet.decision2
+            ? await this.documentAggregationService.buildDocumentAggregate(aggregate.processing.meet.decision2)
+            : null,
+        }
+      : undefined;
+
+    // Создаем DTO с обогащенными документами
+    return new MeetAggregateDTO(aggregate, decisionAggregate, processingDocuments);
+  }
 
   public async generateAnnualGeneralMeetAgendaDocument(
     data: AnnualGeneralMeetingAgendaGenerateDocumentInputDTO,
@@ -35,7 +73,7 @@ export class MeetService {
 
   public async createAnnualGeneralMeet(data: CreateAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
     const aggregate = await this.meetDomainInteractor.createAnnualGeneralMeet(data);
-    return aggregate;
+    return await this.toDTO(aggregate);
   }
 
   public async generateAnnualGeneralMeetDecisionDocument(
@@ -86,37 +124,37 @@ export class MeetService {
     return document as unknown as GeneratedDocumentDTO;
   }
 
-  public async getMeet(data: GetMeetInputDTO): Promise<MeetAggregateDTO> {
-    const aggregate = await this.meetDomainInteractor.getMeet(data);
-    return aggregate;
+  public async getMeet(data: GetMeetInputDTO, username?: string): Promise<MeetAggregateDTO> {
+    const aggregate = await this.meetDomainInteractor.getMeet(data, username);
+    return await this.toDTO(aggregate);
   }
 
-  public async getMeets(data: GetMeetsInputDTO): Promise<MeetAggregateDTO[]> {
-    const aggregates = await this.meetDomainInteractor.getMeets(data);
-    return aggregates;
+  public async getMeets(data: GetMeetsInputDTO, username?: string): Promise<MeetAggregateDTO[]> {
+    const aggregates = await this.meetDomainInteractor.getMeets(data, username);
+    return await Promise.all(aggregates.map((aggregate) => this.toDTO(aggregate)));
   }
 
   public async vote(data: VoteOnAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
     const aggregate = await this.meetDomainInteractor.vote(data);
-    return aggregate;
+    return await this.toDTO(aggregate);
   }
 
   public async restartMeet(data: RestartAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
     const aggregate = await this.meetDomainInteractor.restartMeet(data);
-    return aggregate;
+    return await this.toDTO(aggregate);
   }
 
   public async signBySecretaryOnAnnualGeneralMeet(
     data: SignBySecretaryOnAnnualGeneralMeetInputDTO
   ): Promise<MeetAggregateDTO> {
     const aggregate = await this.meetDomainInteractor.signBySecretaryOnAnnualGeneralMeet(data);
-    return aggregate;
+    return await this.toDTO(aggregate);
   }
 
   public async signByPresiderOnAnnualGeneralMeet(
     data: SignByPresiderOnAnnualGeneralMeetInputDTO
   ): Promise<MeetAggregateDTO> {
     const aggregate = await this.meetDomainInteractor.signByPresiderOnAnnualGeneralMeet(data);
-    return aggregate;
+    return await this.toDTO(aggregate);
   }
 }

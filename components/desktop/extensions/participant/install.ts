@@ -4,8 +4,8 @@ import { WalletPage } from 'src/pages/User/WalletPage'
 import { ConnectionAgreementPage } from 'src/pages/Union/ConnectionAgreement'
 import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage'
 import { ContactsPage } from 'src/pages/Contacts'
-// import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
-// import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
+import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
+import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
 import { UserDocumentsPage } from 'src/pages/User/DocumentsPage'
 import { UserPaymentsPage } from 'src/pages/User/PaymentsPage'
 import { agreementsBase } from 'src/shared/lib/consts/workspaces'
@@ -88,26 +88,26 @@ export default async function () {
             name: 'user-payments',
             component: markRaw(UserPaymentsPage),
           },
-          // {
-          //   meta: {
-          //     title: 'Мои Собрания',
-          //     icon: 'fa-solid fa-users-between-lines',
-          //     roles: ['user', 'member', 'chairman'],
-          //   },
-          //   path: 'meets',
-          //   name: 'user-meets',
-          //   component: markRaw(ListOfMeetsPage),
-          //   children: [
-          //     {
-          //       path: ':hash',
-          //       name: 'user-meet-details',
-          //       component: markRaw(MeetDetailsPage),
-          //       meta: {
-          //         test: true
-          //       }
-          //     },
-          //   ],
-          // },
+          {
+            meta: {
+              title: 'Мои Собрания',
+              icon: 'fa-solid fa-users-between-lines',
+              roles: ['user', 'member', 'chairman'],
+            },
+            path: 'meets',
+            name: 'user-meets',
+            component: markRaw(ListOfMeetsPage),
+            children: [
+              {
+                path: ':hash',
+                name: 'user-meet-details',
+                component: markRaw(MeetDetailsPage),
+                meta: {
+                  test: true
+                }
+              },
+            ],
+          },
           {
             path: '/:coopname/contacts',
             name: 'contacts',

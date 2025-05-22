@@ -1,11 +1,7 @@
-import axios from 'axios'
-import { describe, expect, it } from 'vitest'
-import { Registry } from '@coopenomics/factory'
-import { Cooperative as TCooperative } from 'cooptypes'
-import type { Account, Contract, Keys } from '../types'
+import type { Cooperative } from 'cooptypes'
+import type { Keys } from '../types'
 import config, { GOVERN_SYMBOL, SYMBOL } from '../configs'
 import Blockchain from '../blockchain'
-import { sendPostToCoopbackWithSecret, sleep } from '../utils'
 import { generateRandomSHA256 } from '../utils/randomHash'
 
 const test_hash
@@ -15,11 +11,23 @@ const test_sign
 const test_pkey = 'EOS5JhMfxbsNebajHcTEK8yC9uNN9Dit9hEmzE8ri8yMhhzxrLg3J'
 const test_meta = JSON.stringify({})
 
-const document = {
+const document: Cooperative.Document.ISignedDocument2 = {
   hash: test_hash,
-  signature: test_sign,
-  public_key: test_pkey,
+  signatures: [
+    {
+      id: 1,
+      signed_hash: test_hash,
+      public_key: test_pkey,
+      signed_at: '2025-05-14T12:22:26',
+      meta: test_meta,
+      signer: 'cooperative1',
+      signature: test_sign,
+    },
+  ],
   meta: test_meta,
+  version: '1.0.0',
+  doc_hash: test_hash,
+  meta_hash: test_hash,
 }
 
 export class CooperativeClass {
@@ -85,8 +93,13 @@ export class CooperativeClass {
     console.log('Голосуем по решению в провайдере')
 
     await this.blockchain.votefor({
+      version: '1.0.0',
+      signed_at: '2025-05-14T12:22:26',
+      signed_hash: test_hash,
+      signature: test_sign,
+      public_key: test_pkey,
       coopname: config.provider,
-      member: config.provider_chairman,
+      username: config.provider_chairman,
       decision_id: 1,
     })
 
@@ -114,12 +127,7 @@ export class CooperativeClass {
       administrator: config.provider,
       username: username!,
       agreement_type: 'wallet',
-      document: { // отправляем произвольный документ с валидной подписью
-        hash: '157192B276DA23CC84AB078FC8755C051C5F0430BF4802E55718221E6B76C777',
-        public_key: 'PUB_K1_5JhMfxbsNebajHcTEK8yC9uNN9Dit9hEmzE8ri8yMhhzzEtUA4',
-        signature: 'SIG_K1_KmKWPBC8dZGGDGhbKEoZEzPr3h5crRrR2uLdGRF5DJbeibY1MY1bZ9sPwHsgmPfiGFv9psfoCVsXFh9TekcLuvaeuxRKA8',
-        meta: '{}',
-      },
+      document,
     })
 
     console.log('Переводим аккаунт в кооператив')
@@ -141,7 +149,7 @@ export class CooperativeClass {
     })
 
     console.log('Переводим инициализационные токены')
-    await this.blockchain.transfer({ from: 'eosio', to: username, quantity: `100.0000 ${SYMBOL}`, memo: '' })
+    await this.blockchain.transfer({ from: 'eosio', to: account.username, quantity: `100.0000 ${SYMBOL}`, memo: '' })
 
     console.log(`Арендуем ресурсы кооперативу`)
 

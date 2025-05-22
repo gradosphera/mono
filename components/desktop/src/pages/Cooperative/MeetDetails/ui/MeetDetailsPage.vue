@@ -1,5 +1,5 @@
 <template lang="pug">
-div.q-pa-md
+q-card(flat).card-container.q-pa-md
   div(v-if="loading")
     q-skeleton(type="rect" height="200px" class="q-mb-md")
     q-skeleton(type="rect" height="100px" v-for="i in 3" :key="i" class="q-mb-md")
@@ -8,38 +8,48 @@ div.q-pa-md
     div.text-h5.text-center Собрание не найдено
 
   div(v-else)
-    MeetDetailsHeader(:meet="meet")
-    
-    MeetDetailsActions(
-      :meet="meet"
-      :coopname="coopname"
-      :meet-hash="meetHash"
-      class="q-mt-md"
-    )
-    
-    MeetDetailsAgenda(
-      :meet="meet"
-      class="q-mt-md"
-    )
-    
-    MeetDetailsVoting(
-      :meet="meet"
-      :coopname="coopname"
-      :meet-hash="meetHash"
-      class="q-mt-md"
-    )
+    div.row.q-col-gutter-md.justify-center
+      div.col-12.col-md-12
+        q-card(flat).info-card.hover
+          MeetDetailsInfo(:meet="meet")
+
+          MeetDetailsActions(
+            :meet="meet"
+            :coopname="coopname"
+            :meet-hash="meetHash"
+          )
+
+        // Показываем результаты собрания, если оно завершено
+        template(v-if="isProcessed")
+          q-card(flat).info-card.q-mt-lg
+            MeetDetailsResults(
+              :meet="meet"
+            )
+
+        // Показываем повестку и голосование, если собрание еще не завершено
+        template(v-else)
+          q-card(flat).info-card.q-mt-lg
+            MeetDetailsAgenda(
+              :meet="meet"
+            )
+
+            MeetDetailsVoting(
+              :meet="meet"
+              :coopname="coopname"
+              :meet-hash="meetHash"
+            )
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { MeetDetailsHeader } from 'src/widgets/Meets/MeetDetailsHeader'
+import { MeetDetailsInfo } from 'src/widgets/Meets/MeetDetailsInfo'
 import { MeetDetailsActions } from 'src/widgets/Meets/MeetDetailsActions'
 import { MeetDetailsAgenda } from 'src/widgets/Meets/MeetDetailsAgenda'
 import { MeetDetailsVoting } from 'src/widgets/Meets/MeetDetailsVoting'
+import { MeetDetailsResults } from 'src/widgets/Meets/MeetDetailsResults'
 import { useMeetStore } from 'src/entities/Meet'
 import { FailAlert } from 'src/shared/api'
-import type { IMeet } from 'src/entities/Meet'
 import { useDesktopStore } from 'src/entities/Desktop/model'
 import { useBackButton } from 'src/shared/lib/navigation'
 
@@ -50,17 +60,23 @@ const desktopStore = useDesktopStore()
 const coopname = computed(() => route.params.coopname as string)
 const meetHash = computed(() => route.params.hash as string)
 
-const meet = ref<IMeet | null>(null)
+const meet = computed(() => meetStore.currentMeet)
 const loading = ref(true)
 
+// Проверяем, завершено ли собрание
+const isProcessed = computed(() => {
+  return !!meet.value?.processed
+})
+
+let intervalId: ReturnType<typeof setInterval> | null = null
+
 const loadMeetDetails = async () => {
-  loading.value = true
   try {
-    const result = await meetStore.loadMeet({
+    await meetStore.loadMeet({
       coopname: coopname.value,
       hash: meetHash.value
     })
-    meet.value = result
+
   } catch (error: any) {
     FailAlert(error)
   } finally {
@@ -83,6 +99,17 @@ useBackButton({
 
 // Загрузка деталей собрания
 onMounted(() => {
+  loading.value = true
   loadMeetDetails()
+  intervalId = setInterval(() => {
+    loadMeetDetails()
+  }, 15000)
+})
+
+onUnmounted(() => {
+  if (intervalId) {
+    clearInterval(intervalId)
+    intervalId = null
+  }
 })
 </script>

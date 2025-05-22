@@ -6,10 +6,13 @@ import { generator } from '~/services/document.service';
 
 @Injectable()
 export class DocumentRepositoryImplementation implements DocumentRepository {
-  async findByHash(hash: string): Promise<DocumentDomainEntity | null> {
+  async findByHash(hash: string | null): Promise<DocumentDomainEntity | null> {
     // Используем генератор для извлечения данных из базы
-    const document = await generator.getDocument({ hash: hash.toUpperCase() });
-    if (document) return new DocumentDomainEntity(document);
+    if (hash) {
+      const document = await generator.getDocument({ hash: hash.toUpperCase() });
+      if (document) return new DocumentDomainEntity(document);
+      return null;
+    }
     return null;
   }
 }
