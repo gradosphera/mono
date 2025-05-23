@@ -69,6 +69,8 @@ void meet::signbypresid(name coopname, name username, checksum256 hash, document
         "newgdecision"_n,  // имя экшена
         _meet,             // актор (permission_level{get_self(),"active"})
         coopname,
+        meet_record.presider,
+        meet_record.secretary,
         hash,
         results,
         meet_record.signed_ballots,

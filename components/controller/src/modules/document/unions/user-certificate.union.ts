@@ -1,9 +1,7 @@
 import { createUnionType } from '@nestjs/graphql';
-import {
-  EntrepreneurCertificateDTO,
-  IndividualCertificateDTO,
-  OrganizationCertificateDTO,
-} from '~/modules/common/dto/user-certificate.dto';
+import { EntrepreneurCertificateDTO } from '~/modules/common/dto/entrepreneur-certificate.dto';
+import { IndividualCertificateDTO } from '~/modules/common/dto/individual-certificate.dto';
+import { OrganizationCertificateDTO } from '~/modules/common/dto/organization-certificate.dto';
 
 export const UserCertificateUnion = createUnionType({
   name: 'UserCertificateUnion',

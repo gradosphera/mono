@@ -14,6 +14,8 @@ export interface MeetQuestionResultDomainInterface {
 export interface MeetDecisionDomainInterface {
   coopname: string;
   hash: string;
+  presider: string;
+  secretary: string;
   results: MeetQuestionResultDomainInterface[];
   signed_ballots: number;
   quorum_percent: number;

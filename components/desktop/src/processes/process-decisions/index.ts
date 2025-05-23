@@ -11,6 +11,8 @@ import { computed } from 'vue'
 import { useAgendaStore } from 'src/entities/Agenda/model'
 import type { IAgenda } from 'src/entities/Agenda/model'
 import { DigitalDocument } from 'src/shared/lib/document'
+import type { IUserCertificateUnion } from 'src/shared/lib/types/certificate'
+import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate'
 
 /**
  * Процесс обработки решений
@@ -28,14 +30,11 @@ export function useDecisionProcessor() {
   /**
    * Форматирует заголовок вопроса
    */
-  function formatDecisionTitle(title: string, user: any) {
+  function formatDecisionTitle(title: string, cert: IUserCertificateUnion) {
     let result = 'Вопрос на голосование'
 
-    if (user.first_name) {
-      result = `${title} от ${user.last_name} ${user.first_name} ${user.middle_name}`
-    } else {
-      result = `${title} от ${user.short_name}`
-    }
+    const name = getNameFromCertificate(cert)
+    result = `${title} от ${name}`
 
     return result
   }

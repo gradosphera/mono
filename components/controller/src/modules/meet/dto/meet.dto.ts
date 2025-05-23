@@ -1,6 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { ValidateNested } from 'class-validator';
 import { DocumentAggregateDTO } from '~/modules/document/dto/document-aggregate.dto';
+import { UserCertificateUnion } from '~/modules/document/unions/user-certificate.union';
+import { IndividualCertificateDTO } from '~/modules/common/dto/individual-certificate.dto';
+import { EntrepreneurCertificateDTO } from '~/modules/common/dto/entrepreneur-certificate.dto';
+import { OrganizationCertificateDTO } from '~/modules/common/dto/organization-certificate.dto';
 
 @ObjectType('Meet', { description: 'Данные о собрании кооператива' })
 export class MeetDTO {
@@ -19,11 +23,29 @@ export class MeetDTO {
   @Field(() => String, { description: 'Инициатор собрания' })
   initiator!: string;
 
+  @Field(() => UserCertificateUnion, {
+    nullable: true,
+    description: 'Сертификат инициатора собрания',
+  })
+  initiator_certificate?: IndividualCertificateDTO | EntrepreneurCertificateDTO | OrganizationCertificateDTO | null;
+
   @Field(() => String, { description: 'Председатель собрания' })
   presider!: string;
 
+  @Field(() => UserCertificateUnion, {
+    nullable: true,
+    description: 'Сертификат председателя собрания',
+  })
+  presider_certificate?: IndividualCertificateDTO | EntrepreneurCertificateDTO | OrganizationCertificateDTO | null;
+
   @Field(() => String, { description: 'Секретарь собрания' })
   secretary!: string;
+
+  @Field(() => UserCertificateUnion, {
+    nullable: true,
+    description: 'Сертификат секретаря собрания',
+  })
+  secretary_certificate?: IndividualCertificateDTO | EntrepreneurCertificateDTO | OrganizationCertificateDTO | null;
 
   @Field(() => String, { description: 'Статус собрания' })
   status!: string;

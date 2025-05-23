@@ -976,6 +976,7 @@ export const ReturnTypes: Record<string,any> = {
 		account:"String",
 		account_ram_deltas:"AccountRamDelta",
 		action_ordinal:"Int",
+		actor_certificate:"UserCertificateUnion",
 		authorization:"ActionAuthorization",
 		block_id:"String",
 		block_num:"Int",
@@ -989,8 +990,7 @@ export const ReturnTypes: Record<string,any> = {
 		name:"String",
 		receipt:"ActionReceipt",
 		receiver:"String",
-		transaction_id:"String",
-		user:"UserDataUnion"
+		transaction_id:"String"
 	},
 	Extension:{
 		config:"JSON",
@@ -1055,12 +1055,15 @@ export const ReturnTypes: Record<string,any> = {
 		hash:"String",
 		id:"Float",
 		initiator:"String",
+		initiator_certificate:"UserCertificateUnion",
 		open_at:"DateTime",
 		presider:"String",
+		presider_certificate:"UserCertificateUnion",
 		proposal:"DocumentAggregate",
 		quorum_passed:"Boolean",
 		quorum_percent:"Float",
 		secretary:"String",
+		secretary_certificate:"UserCertificateUnion",
 		signed_ballots:"Float",
 		status:"String",
 		type:"String"
@@ -1077,19 +1080,26 @@ export const ReturnTypes: Record<string,any> = {
 		coopname:"String",
 		hash:"String",
 		initiator:"String",
+		initiator_certificate:"UserCertificateUnion",
 		open_at:"DateTime",
 		presider:"String",
+		presider_certificate:"UserCertificateUnion",
 		proposal:"DocumentAggregate",
-		secretary:"String"
+		secretary:"String",
+		secretary_certificate:"UserCertificateUnion"
 	},
 	MeetProcessed:{
 		coopname:"String",
 		decision:"SignedDigitalDocument",
 		decisionAggregate:"DocumentAggregate",
 		hash:"String",
+		presider:"String",
+		presider_certificate:"UserCertificateUnion",
 		quorum_passed:"Boolean",
 		quorum_percent:"Int",
 		results:"MeetQuestionResult",
+		secretary:"String",
+		secretary_certificate:"UserCertificateUnion",
 		signed_ballots:"Int"
 	},
 	MeetProcessing:{
@@ -1460,11 +1470,6 @@ export const ReturnTypes: Record<string,any> = {
 		"...on EntrepreneurCertificate":"EntrepreneurCertificate",
 		"...on IndividualCertificate":"IndividualCertificate",
 		"...on OrganizationCertificate":"OrganizationCertificate"
-	},
-	UserDataUnion:{
-		"...on Entrepreneur":"Entrepreneur",
-		"...on Individual":"Individual",
-		"...on Organization":"Organization"
 	},
 	Vars:{
 		confidential_email:"String",

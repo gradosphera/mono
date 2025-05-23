@@ -5,7 +5,6 @@ import { Type } from 'class-transformer';
 import { MeetPreProcessingDTO } from './meet-pre.dto';
 import { MeetProcessingDTO } from './meet-processing.dto';
 import { MeetProcessedDTO } from './meet-processed.dto';
-import type { MeetDomainAggregate } from '~/domain/meet/interfaces/meet-aggregate.interface';
 import { DocumentAggregateDTO } from '~/modules/document/dto/document-aggregate.dto';
 import { MeetAggregate } from '~/domain/meet/aggregates/meet-domain.aggregate';
 import { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
@@ -13,6 +12,11 @@ import { DocumentDomainAggregate } from '~/domain/document/aggregates/document-d
 import { MeetDTO } from './meet.dto';
 import { QuestionDTO } from './question.dto';
 import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
+import { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import { AccountType } from '~/modules/account/enum/account-type.enum';
+import { IndividualCertificateDTO } from '~/modules/common/dto/individual-certificate.dto';
+import { EntrepreneurCertificateDTO } from '~/modules/common/dto/entrepreneur-certificate.dto';
+import { OrganizationCertificateDTO } from '~/modules/common/dto/organization-certificate.dto';
 
 @ObjectType('MeetAggregate', { description: 'Агрегат данных о собрании, содержащий информацию о разных этапах' })
 export class MeetAggregateDTO {
@@ -47,20 +51,50 @@ export class MeetAggregateDTO {
       authorizationAggregate?: DocumentDomainAggregate | null;
       decision1Aggregate?: DocumentDomainAggregate | null;
       decision2Aggregate?: DocumentDomainAggregate | null;
-    }
+    },
+    presiderCertificate?: UserCertificateDomainInterface | null,
+    secretaryCertificate?: UserCertificateDomainInterface | null,
+    initiatorCertificate?: UserCertificateDomainInterface | null,
+    processedPresiderCertificate?: UserCertificateDomainInterface | null,
+    processedSecretaryCertificate?: UserCertificateDomainInterface | null
   ) {
     this.hash = data.hash;
-    this.pre = data.pre ? new MeetPreProcessingDTO(data.pre) : null;
+    this.pre = data.pre
+      ? new MeetPreProcessingDTO(data.pre, presiderCertificate, secretaryCertificate, initiatorCertificate)
+      : null;
 
-    // Создаем processed с передачей decisionAggregate, если есть
+    // Создаем processed с передачей decisionAggregate и сертификатов, если есть
     if (data.processed) {
-      this.processed = new MeetProcessedDTO(data.processed, decisionAggregate);
+      this.processed = new MeetProcessedDTO(
+        data.processed,
+        decisionAggregate,
+        processedPresiderCertificate,
+        processedSecretaryCertificate
+      );
     } else {
       this.processed = null;
     }
 
     // Создаем processing DTO с обогащенными данными, если они предоставлены
     if (data.processing && processingDocuments) {
+      // Вспомогательная функция для создания сертификата DTO
+      const createCertificateDTO = (
+        certificate: UserCertificateDomainInterface | null
+      ): IndividualCertificateDTO | EntrepreneurCertificateDTO | OrganizationCertificateDTO | null => {
+        if (!certificate) return null;
+
+        switch (certificate.type) {
+          case AccountType.individual:
+            return new IndividualCertificateDTO(certificate);
+          case AccountType.entrepreneur:
+            return new EntrepreneurCertificateDTO(certificate);
+          case AccountType.organization:
+            return new OrganizationCertificateDTO(certificate);
+          default:
+            return null;
+        }
+      };
+
       // Создаем объект MeetDTO с документами
       const meetDTO = new MeetDTO({
         id: data.processing.meet.id,
@@ -68,8 +102,11 @@ export class MeetAggregateDTO {
         coopname: data.processing.meet.coopname,
         type: data.processing.meet.type,
         initiator: data.processing.meet.initiator,
+        initiator_certificate: createCertificateDTO(initiatorCertificate || null),
         presider: data.processing.meet.presider,
+        presider_certificate: createCertificateDTO(presiderCertificate || null),
         secretary: data.processing.meet.secretary,
+        secretary_certificate: createCertificateDTO(secretaryCertificate || null),
         status: data.processing.meet.status,
         created_at: data.processing.meet.created_at,
         open_at: data.processing.meet.open_at,

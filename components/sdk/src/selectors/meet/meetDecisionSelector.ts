@@ -1,5 +1,6 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
+import { rawUserCertificateUnionSelector } from '../common/userCertificateUnionSelector'
 import { rawDocumentAggregateSelector } from '../documents/documentAggregateSelector'
 import { rawSignedBlockchainDocumentSelector } from '../documents/signedBlockchainDocumentSelector'
 
@@ -20,10 +21,14 @@ const rawMeetQuestionResultSelector = {
   const _validate: MakeAllFieldsRequired<ValueTypes['MeetQuestionResult']> = rawMeetQuestionResultSelector
 }
 
-// Селектор для MeetDecision
+// Селектор для MeetProcessed
 const rawMeetProcessedSelector = {
   coopname: true,
   hash: true,
+  presider: true,
+  secretary: true,
+  presider_certificate: rawUserCertificateUnionSelector,
+  secretary_certificate: rawUserCertificateUnionSelector,
   results: rawMeetQuestionResultSelector,
   signed_ballots: true,
   quorum_percent: true,

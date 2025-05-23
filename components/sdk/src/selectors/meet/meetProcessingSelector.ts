@@ -1,5 +1,6 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
+import { rawUserCertificateUnionSelector } from '../common/userCertificateUnionSelector'
 import { rawDocumentAggregateSelector } from '../documents/documentAggregateSelector'
 
 // Селектор для Question
@@ -26,8 +27,11 @@ const rawMeetSelector = {
   coopname: true,
   type: true,
   initiator: true,
+  initiator_certificate: rawUserCertificateUnionSelector,
   presider: true,
+  presider_certificate: rawUserCertificateUnionSelector,
   secretary: true,
+  secretary_certificate: rawUserCertificateUnionSelector,
   status: true,
   created_at: true,
   open_at: true,

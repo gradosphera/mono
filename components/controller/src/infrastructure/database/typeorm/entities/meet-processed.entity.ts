@@ -10,6 +10,12 @@ export class MeetProcessedEntity {
   @Column({ type: 'jsonb', nullable: false })
   coopname!: string;
 
+  @Column({ nullable: false })
+  presider!: string;
+
+  @Column({ nullable: false })
+  secretary!: string;
+
   @Column({ type: 'jsonb', nullable: false })
   results!: MeetQuestionResultDomainInterface[];
 
