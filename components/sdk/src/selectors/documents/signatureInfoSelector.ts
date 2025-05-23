@@ -1,5 +1,7 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
-import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
+import type { ModelTypes, ValueTypes } from '../../zeus/index'
+import { Selector } from '../../zeus/index'
+import { rawUserCertificateUnionSelector } from '../common/userCertificateUnionSelector'
 import { rawUserUnionSelector } from '../common/userUnionSelector'
 
 export const rawSignatureInfoSelector = {
@@ -9,7 +11,7 @@ export const rawSignatureInfoSelector = {
   signature: true,
   signed_at: true,
   is_valid: true,
-  signer_info: rawUserUnionSelector,
+  signer_certificate: rawUserCertificateUnionSelector,
   signed_hash: true,
   meta: true,
 }

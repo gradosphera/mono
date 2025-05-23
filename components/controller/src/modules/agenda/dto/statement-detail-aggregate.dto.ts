@@ -13,4 +13,11 @@ export class StatementDetailAggregateDTO implements StatementDetailAggregateDoma
 
   @Field(() => DocumentAggregateDTO)
   documentAggregate!: DocumentAggregateDTO;
+
+  constructor(data?: StatementDetailAggregateDomainInterface) {
+    if (data) {
+      this.action = new ExtendedBlockchainActionDTO(data.action);
+      this.documentAggregate = new DocumentAggregateDTO(data.documentAggregate);
+    }
+  }
 }

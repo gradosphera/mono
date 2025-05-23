@@ -17,6 +17,7 @@ import { CooplaceDomainModule } from './cooplace/cooplace.module';
 import { DesktopDomainModule } from './desktop/desktop-domain.module';
 import { MeetDomainModule } from './meet/meet-domain.module';
 import { ControllerWsMeetModule } from './meet/controllers-ws-meet.module';
+import { UserCertificateDomainModule } from './user-certificate/user-certificate.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ControllerWsMeetModule } from './meet/controllers-ws-meet.module';
     CooplaceDomainModule,
     MeetDomainModule,
     ControllerWsMeetModule,
+    UserCertificateDomainModule,
   ],
   exports: [
     AuthDomainModule,
@@ -55,6 +57,7 @@ import { ControllerWsMeetModule } from './meet/controllers-ws-meet.module';
     ParticipantDomainModule,
     CooplaceDomainModule,
     MeetDomainModule,
+    UserCertificateDomainModule,
   ],
 })
 export class DomainModule {}

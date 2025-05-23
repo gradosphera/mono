@@ -22,8 +22,8 @@ export class AgendaWithDocumentsDTO implements AgendaWithDocumentsDomainInterfac
   documents!: DocumentPackageAggregateDTO;
 
   constructor(data: AgendaWithDocumentsDomainInterface) {
-    this.table = data.table;
-    this.action = data.action;
-    this.documents = data.documents;
+    this.table = new BlockchainDecisionDTO(data.table);
+    this.action = new BlockchainActionDTO(data.action);
+    this.documents = new DocumentPackageAggregateDTO(data.documents);
   }
 }

@@ -1713,6 +1713,26 @@ type Entrepreneur {
   username: String!
 }
 
+type EntrepreneurCertificate {
+  """Имя"""
+  first_name: String!
+
+  """ИНН"""
+  inn: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String
+
+  """Тип аккаунта"""
+  type: AccountType!
+
+  """Имя аккаунта"""
+  username: String!
+}
+
 type EntrepreneurDetails {
   """ИНН"""
   inn: String!
@@ -2073,6 +2093,23 @@ type Individual {
   username: String!
 }
 
+type IndividualCertificate {
+  """Имя"""
+  first_name: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String
+
+  """Тип аккаунта"""
+  type: AccountType!
+
+  """Имя аккаунта"""
+  username: String!
+}
+
 input Init {
   """
   Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO
@@ -2241,7 +2278,7 @@ type MeetProcessed {
   coopname: String!
 
   """Документ решения из блокчейна"""
-  decision: SignedBlockchainDocument!
+  decision: SignedDigitalDocument!
 
   """Агрегат документа решения"""
   decisionAggregate: DocumentAggregate
@@ -2689,6 +2726,26 @@ type Organization {
   type: String!
 
   """Имя аккаунта организации"""
+  username: String!
+}
+
+type OrganizationCertificate {
+  """ИНН"""
+  inn: String!
+
+  """ОГРН"""
+  ogrn: String!
+
+  """Данные представителя"""
+  represented_by: RepresentedByCertificate!
+
+  """Короткое название организации"""
+  short_name: String!
+
+  """Тип аккаунта"""
+  type: AccountType!
+
+  """Имя аккаунта"""
   username: String!
 }
 
@@ -3451,6 +3508,20 @@ type RepresentedBy {
   position: String!
 }
 
+type RepresentedByCertificate {
+  """Имя"""
+  first_name: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String!
+
+  """Должность"""
+  position: String!
+}
+
 input RepresentedByInput {
   based_on: String!
   first_name: String!
@@ -3931,7 +4002,9 @@ type SignatureInfo {
   signed_at: String!
   signed_hash: String!
   signer: String!
-  signer_info: UserDataUnion
+
+  """Сертификат подписанта (сокращенная информация)"""
+  signer_certificate: UserCertificateUnion
 }
 
 input SignatureInfoInput {
@@ -4328,6 +4401,9 @@ type UserAccount {
   """Дата регистрации"""
   verifications: [Verification!]!
 }
+
+"""Объединение сертификатов пользователей (сокращенная информация)"""
+union UserCertificateUnion = EntrepreneurCertificate | IndividualCertificate | OrganizationCertificate
 
 """Объединение информации о пользователях"""
 union UserDataUnion = Entrepreneur | Individual | Organization

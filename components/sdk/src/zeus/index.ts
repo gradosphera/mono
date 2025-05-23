@@ -920,7 +920,7 @@ export type ScalarCoders = {
 	JSON?: ScalarResolver;
 	JSONObject?: ScalarResolver;
 }
-type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"] | GraphQLTypes["UserDataUnion"]
+type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"] | GraphQLTypes["UserCertificateUnion"] | GraphQLTypes["UserDataUnion"]
 
 export type ValueTypes = {
     ["AcceptChildOrderInput"]: {
@@ -2134,6 +2134,21 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["EntrepreneurCertificate"]: AliasType<{
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** ИНН */
+	inn?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Тип аккаунта */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["EntrepreneurDetails"]: AliasType<{
 	/** ИНН */
 	inn?:boolean | `@${string}`,
@@ -2376,6 +2391,19 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["IndividualCertificate"]: AliasType<{
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Тип аккаунта */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Init"]: {
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: ValueTypes["CreateOrganizationDataInput"] | Variable<any, string>,
@@ -2494,7 +2522,7 @@ export type ValueTypes = {
 	/** Имя кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Документ решения из блокчейна */
-	decision?:ValueTypes["SignedBlockchainDocument"],
+	decision?:ValueTypes["SignedDigitalDocument"],
 	/** Агрегат документа решения */
 	decisionAggregate?:ValueTypes["DocumentAggregate"],
 	/** Хеш собрания */
@@ -2703,6 +2731,21 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	/** Тип организации */
 	type?:boolean | `@${string}`,
 	/** Имя аккаунта организации */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["OrganizationCertificate"]: AliasType<{
+	/** ИНН */
+	inn?:boolean | `@${string}`,
+	/** ОГРН */
+	ogrn?:boolean | `@${string}`,
+	/** Данные представителя */
+	represented_by?:ValueTypes["RepresentedByCertificate"],
+	/** Короткое название организации */
+	short_name?:boolean | `@${string}`,
+	/** Тип аккаунта */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта */
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
@@ -3225,6 +3268,17 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	position?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["RepresentedByCertificate"]: AliasType<{
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Должность */
+	position?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["RepresentedByInput"]: {
 	based_on: string | Variable<any, string>,
 	first_name: string | Variable<any, string>,
@@ -3567,7 +3621,8 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	signed_at?:boolean | `@${string}`,
 	signed_hash?:boolean | `@${string}`,
 	signer?:boolean | `@${string}`,
-	signer_info?:ValueTypes["UserDataUnion"],
+	/** Сертификат подписанта (сокращенная информация) */
+	signer_certificate?:ValueTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
 	["SignatureInfoInput"]: {
@@ -3849,6 +3904,12 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	username?:boolean | `@${string}`,
 	/** Дата регистрации */
 	verifications?:ValueTypes["Verification"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Объединение сертификатов пользователей (сокращенная информация) */
+["UserCertificateUnion"]: AliasType<{		["...on EntrepreneurCertificate"]?: ValueTypes["EntrepreneurCertificate"],
+		["...on IndividualCertificate"]?: ValueTypes["IndividualCertificate"],
+		["...on OrganizationCertificate"]?: ValueTypes["OrganizationCertificate"]
 		__typename?: boolean | `@${string}`
 }>;
 	/** Объединение информации о пользователях */
@@ -5154,6 +5215,21 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["EntrepreneurCertificate"]: AliasType<{
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** ИНН */
+	inn?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Тип аккаунта */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["EntrepreneurDetails"]: AliasType<{
 	/** ИНН */
 	inn?:boolean | `@${string}`,
@@ -5396,6 +5472,19 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["IndividualCertificate"]: AliasType<{
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Тип аккаунта */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Init"]: {
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: ResolverInputTypes["CreateOrganizationDataInput"],
@@ -5514,7 +5603,7 @@ export type ResolverInputTypes = {
 	/** Имя кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Документ решения из блокчейна */
-	decision?:ResolverInputTypes["SignedBlockchainDocument"],
+	decision?:ResolverInputTypes["SignedDigitalDocument"],
 	/** Агрегат документа решения */
 	decisionAggregate?:ResolverInputTypes["DocumentAggregate"],
 	/** Хеш собрания */
@@ -5723,6 +5812,21 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	/** Тип организации */
 	type?:boolean | `@${string}`,
 	/** Имя аккаунта организации */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["OrganizationCertificate"]: AliasType<{
+	/** ИНН */
+	inn?:boolean | `@${string}`,
+	/** ОГРН */
+	ogrn?:boolean | `@${string}`,
+	/** Данные представителя */
+	represented_by?:ResolverInputTypes["RepresentedByCertificate"],
+	/** Короткое название организации */
+	short_name?:boolean | `@${string}`,
+	/** Тип аккаунта */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта */
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
@@ -6246,6 +6350,17 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	position?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["RepresentedByCertificate"]: AliasType<{
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Должность */
+	position?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["RepresentedByInput"]: {
 	based_on: string,
 	first_name: string,
@@ -6588,7 +6703,8 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	signed_at?:boolean | `@${string}`,
 	signed_hash?:boolean | `@${string}`,
 	signer?:boolean | `@${string}`,
-	signer_info?:ResolverInputTypes["UserDataUnion"],
+	/** Сертификат подписанта (сокращенная информация) */
+	signer_certificate?:ResolverInputTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
 	["SignatureInfoInput"]: {
@@ -6870,6 +6986,13 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	username?:boolean | `@${string}`,
 	/** Дата регистрации */
 	verifications?:ResolverInputTypes["Verification"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Объединение сертификатов пользователей (сокращенная информация) */
+["UserCertificateUnion"]: AliasType<{
+	EntrepreneurCertificate?:ResolverInputTypes["EntrepreneurCertificate"],
+	IndividualCertificate?:ResolverInputTypes["IndividualCertificate"],
+	OrganizationCertificate?:ResolverInputTypes["OrganizationCertificate"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Объединение информации о пользователях */
@@ -8149,6 +8272,20 @@ export type ModelTypes = {
 	/** Имя аккаунта */
 	username: string
 };
+	["EntrepreneurCertificate"]: {
+		/** Имя */
+	first_name: string,
+	/** ИНН */
+	inn: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name?: string | undefined | null,
+	/** Тип аккаунта */
+	type: ModelTypes["AccountType"],
+	/** Имя аккаунта */
+	username: string
+};
 	["EntrepreneurDetails"]: {
 		/** ИНН */
 	inn: string,
@@ -8385,6 +8522,18 @@ export type ModelTypes = {
 	/** Имя аккаунта */
 	username: string
 };
+	["IndividualCertificate"]: {
+		/** Имя */
+	first_name: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name?: string | undefined | null,
+	/** Тип аккаунта */
+	type: ModelTypes["AccountType"],
+	/** Имя аккаунта */
+	username: string
+};
 	["Init"]: {
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: ModelTypes["CreateOrganizationDataInput"],
@@ -8499,7 +8648,7 @@ export type ModelTypes = {
 		/** Имя кооператива */
 	coopname: string,
 	/** Документ решения из блокчейна */
-	decision: ModelTypes["SignedBlockchainDocument"],
+	decision: ModelTypes["SignedDigitalDocument"],
 	/** Агрегат документа решения */
 	decisionAggregate?: ModelTypes["DocumentAggregate"] | undefined | null,
 	/** Хеш собрания */
@@ -8775,6 +8924,20 @@ export type ModelTypes = {
 	/** Тип организации */
 	type: string,
 	/** Имя аккаунта организации */
+	username: string
+};
+	["OrganizationCertificate"]: {
+		/** ИНН */
+	inn: string,
+	/** ОГРН */
+	ogrn: string,
+	/** Данные представителя */
+	represented_by: ModelTypes["RepresentedByCertificate"],
+	/** Короткое название организации */
+	short_name: string,
+	/** Тип аккаунта */
+	type: ModelTypes["AccountType"],
+	/** Имя аккаунта */
 	username: string
 };
 	["OrganizationDetails"]: {
@@ -9281,6 +9444,16 @@ export type ModelTypes = {
 	/** Должность */
 	position: string
 };
+	["RepresentedByCertificate"]: {
+		/** Имя */
+	first_name: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Должность */
+	position: string
+};
 	["RepresentedByInput"]: {
 	based_on: string,
 	first_name: string,
@@ -9620,7 +9793,8 @@ export type ModelTypes = {
 	signed_at: string,
 	signed_hash: string,
 	signer: string,
-	signer_info?: ModelTypes["UserDataUnion"] | undefined | null
+	/** Сертификат подписанта (сокращенная информация) */
+	signer_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null
 };
 	["SignatureInfoInput"]: {
 	/** Идентификатор номера подписи */
@@ -9894,6 +10068,8 @@ export type ModelTypes = {
 	/** Дата регистрации */
 	verifications: Array<ModelTypes["Verification"]>
 };
+	/** Объединение сертификатов пользователей (сокращенная информация) */
+["UserCertificateUnion"]:ModelTypes["EntrepreneurCertificate"] | ModelTypes["IndividualCertificate"] | ModelTypes["OrganizationCertificate"];
 	/** Объединение информации о пользователях */
 ["UserDataUnion"]:ModelTypes["Entrepreneur"] | ModelTypes["Individual"] | ModelTypes["Organization"];
 	["UserStatus"]:UserStatus;
@@ -11196,6 +11372,21 @@ export type GraphQLTypes = {
 	/** Имя аккаунта */
 	username: string
 };
+	["EntrepreneurCertificate"]: {
+	__typename: "EntrepreneurCertificate",
+	/** Имя */
+	first_name: string,
+	/** ИНН */
+	inn: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name?: string | undefined | null,
+	/** Тип аккаунта */
+	type: GraphQLTypes["AccountType"],
+	/** Имя аккаунта */
+	username: string
+};
 	["EntrepreneurDetails"]: {
 	__typename: "EntrepreneurDetails",
 	/** ИНН */
@@ -11438,6 +11629,19 @@ export type GraphQLTypes = {
 	/** Имя аккаунта */
 	username: string
 };
+	["IndividualCertificate"]: {
+	__typename: "IndividualCertificate",
+	/** Имя */
+	first_name: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name?: string | undefined | null,
+	/** Тип аккаунта */
+	type: GraphQLTypes["AccountType"],
+	/** Имя аккаунта */
+	username: string
+};
 	["Init"]: {
 		/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: GraphQLTypes["CreateOrganizationDataInput"],
@@ -11557,7 +11761,7 @@ export type GraphQLTypes = {
 	/** Имя кооператива */
 	coopname: string,
 	/** Документ решения из блокчейна */
-	decision: GraphQLTypes["SignedBlockchainDocument"],
+	decision: GraphQLTypes["SignedDigitalDocument"],
 	/** Агрегат документа решения */
 	decisionAggregate?: GraphQLTypes["DocumentAggregate"] | undefined | null,
 	/** Хеш собрания */
@@ -11838,6 +12042,21 @@ export type GraphQLTypes = {
 	/** Тип организации */
 	type: string,
 	/** Имя аккаунта организации */
+	username: string
+};
+	["OrganizationCertificate"]: {
+	__typename: "OrganizationCertificate",
+	/** ИНН */
+	inn: string,
+	/** ОГРН */
+	ogrn: string,
+	/** Данные представителя */
+	represented_by: GraphQLTypes["RepresentedByCertificate"],
+	/** Короткое название организации */
+	short_name: string,
+	/** Тип аккаунта */
+	type: GraphQLTypes["AccountType"],
+	/** Имя аккаунта */
 	username: string
 };
 	["OrganizationDetails"]: {
@@ -12368,6 +12587,17 @@ export type GraphQLTypes = {
 	/** Должность */
 	position: string
 };
+	["RepresentedByCertificate"]: {
+	__typename: "RepresentedByCertificate",
+	/** Имя */
+	first_name: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Должность */
+	position: string
+};
 	["RepresentedByInput"]: {
 		based_on: string,
 	first_name: string,
@@ -12711,7 +12941,8 @@ export type GraphQLTypes = {
 	signed_at: string,
 	signed_hash: string,
 	signer: string,
-	signer_info?: GraphQLTypes["UserDataUnion"] | undefined | null
+	/** Сертификат подписанта (сокращенная информация) */
+	signer_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null
 };
 	["SignatureInfoInput"]: {
 		/** Идентификатор номера подписи */
@@ -12993,6 +13224,13 @@ export type GraphQLTypes = {
 	username: string,
 	/** Дата регистрации */
 	verifications: Array<GraphQLTypes["Verification"]>
+};
+	/** Объединение сертификатов пользователей (сокращенная информация) */
+["UserCertificateUnion"]:{
+        	__typename:"EntrepreneurCertificate" | "IndividualCertificate" | "OrganizationCertificate"
+        	['...on EntrepreneurCertificate']: '__union' & GraphQLTypes["EntrepreneurCertificate"];
+	['...on IndividualCertificate']: '__union' & GraphQLTypes["IndividualCertificate"];
+	['...on OrganizationCertificate']: '__union' & GraphQLTypes["OrganizationCertificate"];
 };
 	/** Объединение информации о пользователях */
 ["UserDataUnion"]:{

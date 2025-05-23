@@ -960,6 +960,14 @@ export const ReturnTypes: Record<string,any> = {
 		phone:"String",
 		username:"String"
 	},
+	EntrepreneurCertificate:{
+		first_name:"String",
+		inn:"String",
+		last_name:"String",
+		middle_name:"String",
+		type:"AccountType",
+		username:"String"
+	},
 	EntrepreneurDetails:{
 		inn:"String",
 		ogrn:"String"
@@ -1022,6 +1030,13 @@ export const ReturnTypes: Record<string,any> = {
 		phone:"String",
 		username:"String"
 	},
+	IndividualCertificate:{
+		first_name:"String",
+		last_name:"String",
+		middle_name:"String",
+		type:"AccountType",
+		username:"String"
+	},
 	JSON: `scalar.JSON` as const,
 	JSONObject: `scalar.JSONObject` as const,
 	KeyWeight:{
@@ -1069,7 +1084,7 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	MeetProcessed:{
 		coopname:"String",
-		decision:"SignedBlockchainDocument",
+		decision:"SignedDigitalDocument",
 		decisionAggregate:"DocumentAggregate",
 		hash:"String",
 		quorum_passed:"Boolean",
@@ -1194,6 +1209,14 @@ export const ReturnTypes: Record<string,any> = {
 		represented_by:"RepresentedBy",
 		short_name:"String",
 		type:"String",
+		username:"String"
+	},
+	OrganizationCertificate:{
+		inn:"String",
+		ogrn:"String",
+		represented_by:"RepresentedByCertificate",
+		short_name:"String",
+		type:"AccountType",
 		username:"String"
 	},
 	OrganizationDetails:{
@@ -1342,6 +1365,12 @@ export const ReturnTypes: Record<string,any> = {
 		middle_name:"String",
 		position:"String"
 	},
+	RepresentedByCertificate:{
+		first_name:"String",
+		last_name:"String",
+		middle_name:"String",
+		position:"String"
+	},
 	ResourceDelegationDTO:{
 		cpu_weight:"String",
 		from:"String",
@@ -1366,7 +1395,7 @@ export const ReturnTypes: Record<string,any> = {
 		signed_at:"String",
 		signed_hash:"String",
 		signer:"String",
-		signer_info:"UserDataUnion"
+		signer_certificate:"UserCertificateUnion"
 	},
 	SignedBlockchainDocument:{
 		doc_hash:"String",
@@ -1426,6 +1455,11 @@ export const ReturnTypes: Record<string,any> = {
 		type:"String",
 		username:"String",
 		verifications:"Verification"
+	},
+	UserCertificateUnion:{
+		"...on EntrepreneurCertificate":"EntrepreneurCertificate",
+		"...on IndividualCertificate":"IndividualCertificate",
+		"...on OrganizationCertificate":"OrganizationCertificate"
 	},
 	UserDataUnion:{
 		"...on Entrepreneur":"Entrepreneur",

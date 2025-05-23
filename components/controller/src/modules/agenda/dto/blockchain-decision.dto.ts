@@ -65,4 +65,10 @@ export class BlockchainDecisionDTO implements SovietContract.Tables.Decisions.ID
 
   @Field(() => String, { nullable: true })
   hash!: string;
+
+  constructor(data?: any) {
+    if (data) {
+      Object.assign(this, data);
+    }
+  }
 }

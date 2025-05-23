@@ -109,4 +109,10 @@ export class BlockchainActionDTO {
 
   @Field(() => Int)
   elapsed!: number;
+
+  constructor(data?: any) {
+    if (data) {
+      Object.assign(this, data);
+    }
+  }
 }

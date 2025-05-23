@@ -19,7 +19,9 @@ export class AgendaMeetPointDTO implements AgendaMeetPointInputDomainInterface {
   @IsString()
   decision!: string;
 
-  constructor(data: AgendaMeetPointDTO) {
-    Object.assign(this, data);
+  constructor(data: AgendaMeetPointInputDomainInterface) {
+    if (data) {
+      Object.assign(this, data);
+    }
   }
 }

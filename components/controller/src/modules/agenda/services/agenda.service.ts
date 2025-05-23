@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { type AgendaWithDocumentsDTO } from '../dto/agenda-with-documents.dto';
+import { AgendaWithDocumentsDTO } from '../dto/agenda-with-documents.dto';
 import { AgendaDomainInteractor } from '~/domain/agenda/interactors/agenda-domain.interactor';
 
 @Injectable()
@@ -8,6 +8,6 @@ export class AgendaService {
 
   public async getAgenda(): Promise<AgendaWithDocumentsDTO[]> {
     const agenda = await this.agendaDomainInteractor.getAgenda();
-    return agenda;
+    return agenda.map((item) => new AgendaWithDocumentsDTO(item));
   }
 }

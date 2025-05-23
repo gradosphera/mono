@@ -19,4 +19,16 @@ export class DecisionDetailAggregateDTO implements DecisionDetailAggregateDomain
 
   @Field(() => [ExtendedBlockchainActionDTO])
   votes_against!: ExtendedBlockchainActionDTO[];
+
+  constructor(data?: DecisionDetailAggregateDomainInterface) {
+    if (data) {
+      this.action = new ExtendedBlockchainActionDTO(data.action);
+      this.documentAggregate = new DocumentAggregateDTO(data.documentAggregate);
+      this.votes_for = data.votes_for?.map((vote) => new ExtendedBlockchainActionDTO(vote)) || [];
+      this.votes_against = data.votes_against?.map((vote) => new ExtendedBlockchainActionDTO(vote)) || [];
+    } else {
+      this.votes_for = [];
+      this.votes_against = [];
+    }
+  }
 }
