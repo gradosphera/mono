@@ -1,0 +1,48 @@
+<template lang="pug">
+q-card(flat).expandable-document.q-mb-md
+  q-expansion-item(
+    switch-toggle-side
+    :label="title || 'Электронный документ'"
+    icon="article"
+    header-class="document-header"
+    expand-icon-class="text-primary"
+  )
+    q-card
+      q-card-section
+        BaseDocument(
+          :documentAggregate="documentAggregate"
+        )
+</template>
+
+<script setup lang="ts">
+import { BaseDocument } from '../BaseDocument'
+import type { IDocumentAggregate } from 'src/entities/Document/model'
+
+defineProps({
+  documentAggregate: {
+    type: Object as () => IDocumentAggregate,
+    required: true
+  },
+  title: {
+    type: String,
+    default: 'Документ собрания'
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.expandable-document {
+  width: 100%;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+
+  :deep(.document-header) {
+    font-weight: 500;
+    border-radius: 8px;
+
+    .q-icon {
+      color: var(--q-primary);
+    }
+  }
+}
+</style>

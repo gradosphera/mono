@@ -21,10 +21,18 @@ q-card(flat).card-container.q-pa-md
 
         // Показываем результаты собрания, если оно завершено
         template(v-if="isProcessed")
+          // Отображаем документ собрания, если он есть
+          ExpandableDocument(
+            v-if="!!meet?.processed?.decisionAggregate"
+            :documentAggregate="meet.processed.decisionAggregate"
+            title="Протокол решения общего собрания пайщиков"
+          ).q-mt-lg
+
           q-card(flat).info-card.q-mt-lg
             MeetDetailsResults(
               :meet="meet"
             )
+
 
         // Показываем повестку и голосование, если собрание еще не завершено
         template(v-else)
@@ -38,6 +46,8 @@ q-card(flat).card-container.q-pa-md
               :coopname="coopname"
               :meet-hash="meetHash"
             )
+
+
 </template>
 
 <script setup lang="ts">
@@ -48,6 +58,7 @@ import { MeetDetailsActions } from 'src/widgets/Meets/MeetDetailsActions'
 import { MeetDetailsAgenda } from 'src/widgets/Meets/MeetDetailsAgenda'
 import { MeetDetailsVoting } from 'src/widgets/Meets/MeetDetailsVoting'
 import { MeetDetailsResults } from 'src/widgets/Meets/MeetDetailsResults'
+import { ExpandableDocument } from 'src/shared/ui'
 import { useMeetStore } from 'src/entities/Meet'
 import { FailAlert } from 'src/shared/api'
 import { useDesktopStore } from 'src/entities/Desktop/model'
