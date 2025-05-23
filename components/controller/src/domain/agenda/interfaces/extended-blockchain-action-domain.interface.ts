@@ -1,10 +1,6 @@
 import type { BlockchainActionDomainInterface } from '../../common/interfaces/blockchain-action-domain.interface';
-import type { Cooperative } from 'cooptypes';
+import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 
 export interface ExtendedBlockchainActionDomainInterface extends BlockchainActionDomainInterface {
-  user?:
-    | Cooperative.Users.IIndividualData
-    | Cooperative.Users.IEntrepreneurData
-    | Cooperative.Users.IOrganizationData
-    | null;
+  actor_certificate?: UserCertificateDomainInterface | null;
 }

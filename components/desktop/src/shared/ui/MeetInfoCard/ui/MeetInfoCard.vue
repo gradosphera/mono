@@ -5,12 +5,11 @@ div
 
       div.row.q-mb-sm
         div.col-5.card-label Председатель:
-        div.col-7.card-value {{ meet.processing?.meet?.presider }}
-
+        div.col-7.card-value {{ getNameFromCertificate(meet.processing?.meet?.presider_certificate) }}
 
       div.row.q-mb-sm
         div.col-5.card-label Секретарь:
-        div.col-7.card-value {{ meet.processing?.meet?.secretary }}
+        div.col-7.card-value {{ getNameFromCertificate(meet.processing?.meet?.secretary_certificate) }}
 
       div.row.q-mb-sm
         div.col-5.card-label Открытие:
@@ -62,6 +61,8 @@ div
 import type { IMeet } from 'src/entities/Meet'
 import { useMeetStatus } from 'src/shared/lib/composables'
 import { MeetStatusBanner } from 'src/shared/ui/MeetStatusBanner'
+import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate'
+
 const props = defineProps<{
   meet: IMeet
 }>()

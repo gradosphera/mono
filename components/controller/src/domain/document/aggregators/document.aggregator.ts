@@ -19,6 +19,7 @@ export class DocumentAggregator {
     private readonly accountDomainService: AccountDomainService,
     private readonly userCertificateService: UserCertificateDomainService
   ) {}
+  private readonly EMPTY_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
 
   /**
    * Создает агрегатор документов на основе полного документа и подписанного документа
@@ -28,6 +29,8 @@ export class DocumentAggregator {
    */
   public async buildDocumentAggregate(signedDoc: ISignedDocumentDomainInterface): Promise<DocumentDomainAggregate | null> {
     // Получаем полный документ по хешу
+    if (signedDoc.doc_hash === this.EMPTY_HASH) return null;
+
     const document = await this.getDocumentByHash(signedDoc.doc_hash);
 
     // Проверяем, что в метаданных документа есть username

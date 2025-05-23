@@ -84,6 +84,7 @@ import { formatToFromNow } from 'src/shared/lib/utils/dates/formatToFromNow'
 import { QuestionCard } from '../QuestionCard'
 import { VotingButtons } from '../VotingButtons'
 import { useWindowSize } from 'src/shared/hooks'
+import type { IAgenda } from 'src/entities/Agenda/model'
 
 const props = defineProps({
   decisions: {
@@ -125,12 +126,14 @@ const emit = defineEmits(['authorize', 'vote-for', 'vote-against'])
 const { isMobile } = useWindowSize()
 
 // Получение заголовка для решения с поддержкой агрегатов документов
-function getDecisionTitle(row: any) {
+function getDecisionTitle(row: IAgenda) {
+  console.log('agenda', row)
   // Используем только агрегаты документа
-  if (row.documents?.statement?.documentAggregate?.rawDocument?.meta?.title) {
-    const title = row.documents.statement.documentAggregate.rawDocument.meta.title
-    const user = row.documents.statement.action.user
-    return props.formatDecisionTitle(title, user)
+  const title = (row.documents?.statement?.documentAggregate?.rawDocument?.meta as any)?.title
+
+  if (title) {
+    const actor_certificate = row.documents?.statement?.action?.actor_certificate
+    return props.formatDecisionTitle(title, actor_certificate)
   }
 
   // Запасной вариант

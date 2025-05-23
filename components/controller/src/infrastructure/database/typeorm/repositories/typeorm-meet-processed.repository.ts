@@ -25,6 +25,8 @@ export class TypeOrmMeetProcessedRepository implements MeetProcessedRepository {
     return new MeetProcessedDomainEntity({
       hash: entity.hash,
       coopname: entity.coopname,
+      presider: entity.presider,
+      secretary: entity.secretary,
       results: entity.results,
       signed_ballots: entity.signed_ballots,
       quorum_percent: entity.quorum_percent,
@@ -38,6 +40,8 @@ export class TypeOrmMeetProcessedRepository implements MeetProcessedRepository {
     const entity = this.meetProcessedRepository.create({
       hash: data.hash.toUpperCase(),
       coopname: data.coopname,
+      presider: data.presider,
+      secretary: data.secretary,
       results: data.results,
       signed_ballots: data.signed_ballots,
       quorum_percent: data.quorum_percent,

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DocumentAggregator } from './document.aggregator';
 import { DocumentPackageUtils } from './document-package-utils.aggregator';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
+import { UserCertificateDomainService } from '~/domain/user-certificate/services/user-certificate-domain.service';
 import { Cooperative, SovietContract } from 'cooptypes';
 import { getActions } from '~/utils/getFetch';
 import type { DocumentPackageAggregateDomainInterface } from '../interfaces/document-package-aggregate-domain.interface';
@@ -9,13 +10,15 @@ import type { StatementDetailAggregateDomainInterface } from '../interfaces/stat
 import type { DecisionDetailAggregateDomainInterface } from '../interfaces/decision-detail-aggregate-domain.interface';
 import type { DocumentDomainAggregate } from '../aggregates/document-domain.aggregate';
 import type { ISignedDocumentDomainInterface } from '../interfaces/signed-document-domain.interface';
+import type { ExtendedBlockchainActionDomainInterface } from '~/domain/agenda/interfaces/extended-blockchain-action-domain.interface';
 
 @Injectable()
 export class DocumentPackageV0Aggregator {
   constructor(
     private readonly documentAggregator: DocumentAggregator,
     private readonly documentPackageUtils: DocumentPackageUtils,
-    private readonly accountDomainService: AccountDomainService
+    private readonly accountDomainService: AccountDomainService,
+    private readonly userCertificateService: UserCertificateDomainService
   ) {}
 
   /**
@@ -93,9 +96,11 @@ export class DocumentPackageV0Aggregator {
 
     const account = await this.accountDomainService.getPrivateAccount(rawData.username);
     if (account && mainDocument) {
-      const extendedAction: Cooperative.Blockchain.IExtendedAction = {
+      const actor_certificate = this.userCertificateService.createCertificateFromUserData(account);
+
+      const extendedAction: ExtendedBlockchainActionDomainInterface = {
         ...rawAction,
-        user: account,
+        actor_certificate,
       };
 
       const signedMainDoc: ISignedDocumentDomainInterface = {
@@ -156,9 +161,11 @@ export class DocumentPackageV0Aggregator {
     const account = await this.accountDomainService.getPrivateAccount(decisionAction.data?.username);
     if (!account) return null;
 
-    const extendedDecisionAction: Cooperative.Blockchain.IExtendedAction = {
+    const actor_certificate = this.userCertificateService.createCertificateFromUserData(account);
+
+    const extendedDecisionAction: ExtendedBlockchainActionDomainInterface = {
       ...decisionAction,
-      user: account,
+      actor_certificate,
     };
 
     const decisionDocument = await this.documentPackageUtils.getDocumentByHash(decisionAction?.data?.document?.hash);

@@ -5,11 +5,9 @@ import { UserCertificateUnion } from '../unions/user-certificate.union';
 import GraphQLJSON from 'graphql-type-json';
 import { IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-  IndividualCertificateDTO,
-  EntrepreneurCertificateDTO,
-  OrganizationCertificateDTO,
-} from '~/modules/common/dto/user-certificate.dto';
+import { IndividualCertificateDTO } from '~/modules/common/dto/individual-certificate.dto';
+import { EntrepreneurCertificateDTO } from '~/modules/common/dto/entrepreneur-certificate.dto';
+import { OrganizationCertificateDTO } from '~/modules/common/dto/organization-certificate.dto';
 import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 
 @ObjectType('SignatureInfo')

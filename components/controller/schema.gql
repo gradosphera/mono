@@ -1750,12 +1750,15 @@ input EntrepreneurDetailsInput {
 }
 
 """
-Расширенное действие блокчейна с персональными данными пользователя, совершившего его.
+Расширенное действие блокчейна с сертификатом пользователя, совершившего его.
 """
 type ExtendedBlockchainAction {
   account: String!
   account_ram_deltas: [AccountRamDelta!]!
   action_ordinal: Int!
+
+  """Сертификат пользователя (сокращенная информация)"""
+  actor_certificate: UserCertificateUnion
   authorization: [ActionAuthorization!]!
   block_id: String!
   block_num: Int!
@@ -1772,9 +1775,6 @@ type ExtendedBlockchainAction {
   receipt: ActionReceipt!
   receiver: String!
   transaction_id: String!
-
-  """Доп. данные о пользователе (физ/ИП/организация)"""
-  user: UserDataUnion
 }
 
 """Расширенный статус собрания на основе дат и состояния"""
@@ -2199,11 +2199,17 @@ type Meet {
   """Инициатор собрания"""
   initiator: String!
 
+  """Сертификат инициатора собрания"""
+  initiator_certificate: UserCertificateUnion
+
   """Дата открытия собрания"""
   open_at: DateTime!
 
   """Председатель собрания"""
   presider: String!
+
+  """Сертификат председателя собрания"""
+  presider_certificate: UserCertificateUnion
 
   """Документ с повесткой собрания"""
   proposal: DocumentAggregate
@@ -2216,6 +2222,9 @@ type Meet {
 
   """Секретарь собрания"""
   secretary: String!
+
+  """Сертификат секретаря собрания"""
+  secretary_certificate: UserCertificateUnion
 
   """Количество подписанных бюллетеней"""
   signed_ballots: Float!
@@ -2259,17 +2268,26 @@ type MeetPreProcessing {
   """Инициатор собрания"""
   initiator: String!
 
+  """Сертификат инициатора собрания"""
+  initiator_certificate: UserCertificateUnion
+
   """Дата открытия собрания"""
   open_at: DateTime!
 
   """Председатель собрания"""
   presider: String!
 
+  """Сертификат председателя собрания"""
+  presider_certificate: UserCertificateUnion
+
   """Документ с предложением повестки собрания"""
   proposal: DocumentAggregate
 
   """Секретарь собрания"""
   secretary: String!
+
+  """Сертификат секретаря собрания"""
+  secretary_certificate: UserCertificateUnion
 }
 
 """Данные о собрании после обработки"""
@@ -2286,6 +2304,12 @@ type MeetProcessed {
   """Хеш собрания"""
   hash: String!
 
+  """Председатель собрания"""
+  presider: String!
+
+  """Сертификат председателя собрания"""
+  presider_certificate: UserCertificateUnion
+
   """Пройден ли кворум"""
   quorum_passed: Boolean!
 
@@ -2294,6 +2318,12 @@ type MeetProcessed {
 
   """Результаты голосования по вопросам"""
   results: [MeetQuestionResult!]!
+
+  """Секретарь собрания"""
+  secretary: String!
+
+  """Сертификат секретаря собрания"""
+  secretary_certificate: UserCertificateUnion
 
   """Количество подписанных бюллетеней"""
   signed_ballots: Int!
@@ -4404,9 +4434,6 @@ type UserAccount {
 
 """Объединение сертификатов пользователей (сокращенная информация)"""
 union UserCertificateUnion = EntrepreneurCertificate | IndividualCertificate | OrganizationCertificate
-
-"""Объединение информации о пользователях"""
-union UserDataUnion = Entrepreneur | Individual | Organization
 
 """Статус пользователя"""
 enum UserStatus {

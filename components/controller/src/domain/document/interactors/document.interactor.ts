@@ -9,13 +9,17 @@ import { toDotNotation } from '~/utils/toDotNotation';
 import { getActions } from '~/utils/getFetch';
 import { SovietContract } from 'cooptypes';
 import { DocumentPackageAggregator } from '../aggregators/document-package.aggregator';
+import { DocumentAggregator } from '../aggregators/document.aggregator';
+import type { DocumentAggregateDomainInterface } from '../interfaces/document-domain-aggregate.interface';
+import type { ISignedDocumentDomainInterface } from '../interfaces/signed-document-domain.interface';
 
 @Injectable()
 export class DocumentDomainInteractor {
   constructor(
     private readonly documentDomainService: DocumentDomainService,
     @Inject(forwardRef(() => DocumentPackageAggregator))
-    private readonly documentPackageAggregator: DocumentPackageAggregator
+    private readonly documentPackageAggregator: DocumentPackageAggregator,
+    private readonly documentAggregator: DocumentAggregator
   ) {}
 
   public async generateDocument(data: GenerateDocumentDomainInterfaceWithOptions): Promise<DocumentDomainEntity> {
@@ -45,5 +49,18 @@ export class DocumentDomainInteractor {
     }
 
     return response;
+  }
+
+  /**
+   * Строит агрегат документа
+   * @param signedDocument Подписанный документ
+   * @returns Агрегат документа или null
+   */
+  async buildDocumentAggregate(
+    signedDocument: ISignedDocumentDomainInterface | null | undefined
+  ): Promise<DocumentAggregateDomainInterface | null> {
+    if (!signedDocument) return null;
+
+    return await this.documentAggregator.buildDocumentAggregate(signedDocument);
   }
 }

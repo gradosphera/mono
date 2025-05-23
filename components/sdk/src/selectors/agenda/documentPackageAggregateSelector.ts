@@ -1,22 +1,7 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
-import { rawBlockchainActionSelector } from '../common/blockchainActionSelector'
-import { rawEntrepreneurSelector } from '../common/entrepreneurSelector'
-import { rawIndividualSelector } from '../common/individualSelector'
-import { rawOrganizationSelector } from '../common/organizationSelector'
+import { rawExtendedBlockchainActionSelector } from '../common/rawExtendedBlockchainActionSelector'
 import { rawDocumentAggregateSelector } from '../documents/documentAggregateSelector'
-
-/**
- * Расширенные действия в блокчейне, общие для Act / Decision / Statement.
- */
-export const rawExtendedBlockchainActionSelector = {
-  ...rawBlockchainActionSelector,
-  user: {
-    '...on Entrepreneur': rawEntrepreneurSelector,
-    '...on Individual': rawIndividualSelector,
-    '...on Organization': rawOrganizationSelector,
-  },
-}
 
 /** ActDetailAggregate — Аггрегат c документом для акта */
 export const rawActDetailAggregateSelector = {

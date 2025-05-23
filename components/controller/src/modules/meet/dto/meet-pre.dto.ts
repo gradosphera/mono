@@ -4,6 +4,12 @@ import { Type } from 'class-transformer';
 import { AgendaMeetPointDTO } from './agenda-meet-point.dto';
 import type { MeetPreProcessingDomainInterface } from '~/domain/meet/interfaces/meet-pre-domain.interface';
 import { DocumentAggregateDTO } from '~/modules/document/dto/document-aggregate.dto';
+import { UserCertificateUnion } from '~/modules/document/unions/user-certificate.union';
+import { IndividualCertificateDTO } from '~/modules/common/dto/individual-certificate.dto';
+import { EntrepreneurCertificateDTO } from '~/modules/common/dto/entrepreneur-certificate.dto';
+import { OrganizationCertificateDTO } from '~/modules/common/dto/organization-certificate.dto';
+import { AccountType } from '~/modules/account/enum/account-type.enum';
+import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 
 @ObjectType('MeetPreProcessing', { description: 'Предварительные данные собрания перед обработкой' })
 export class MeetPreProcessingDTO implements MeetPreProcessingDomainInterface {
@@ -16,11 +22,29 @@ export class MeetPreProcessingDTO implements MeetPreProcessingDomainInterface {
   @Field(() => String, { description: 'Инициатор собрания' })
   initiator!: string;
 
+  @Field(() => UserCertificateUnion, {
+    nullable: true,
+    description: 'Сертификат инициатора собрания',
+  })
+  initiator_certificate?: IndividualCertificateDTO | EntrepreneurCertificateDTO | OrganizationCertificateDTO | null;
+
   @Field(() => String, { description: 'Председатель собрания' })
   presider!: string;
 
   @Field(() => String, { description: 'Секретарь собрания' })
   secretary!: string;
+
+  @Field(() => UserCertificateUnion, {
+    nullable: true,
+    description: 'Сертификат председателя собрания',
+  })
+  presider_certificate?: IndividualCertificateDTO | EntrepreneurCertificateDTO | OrganizationCertificateDTO | null;
+
+  @Field(() => UserCertificateUnion, {
+    nullable: true,
+    description: 'Сертификат секретаря собрания',
+  })
+  secretary_certificate?: IndividualCertificateDTO | EntrepreneurCertificateDTO | OrganizationCertificateDTO | null;
 
   @Field(() => [AgendaMeetPointDTO], { description: 'Повестка собрания' })
   @IsArray()
@@ -41,21 +65,77 @@ export class MeetPreProcessingDTO implements MeetPreProcessingDomainInterface {
   @IsOptional()
   proposal?: DocumentAggregateDTO;
 
-  constructor(data: MeetPreProcessingDomainInterface) {
-    if (data) {
-      this.coopname = data.coopname;
-      this.hash = data.hash;
-      this.initiator = data.initiator;
-      this.presider = data.presider;
-      this.secretary = data.secretary;
-      this.agenda = data.agenda.map((item) => new AgendaMeetPointDTO(item));
-      this.open_at = data.open_at;
-      this.close_at = data.close_at;
+  constructor(
+    data: MeetPreProcessingDomainInterface,
+    presiderCertificate?: UserCertificateDomainInterface | null,
+    secretaryCertificate?: UserCertificateDomainInterface | null,
+    initiatorCertificate?: UserCertificateDomainInterface | null
+  ) {
+    this.coopname = data.coopname;
+    this.hash = data.hash;
+    this.initiator = data.initiator;
+    this.presider = data.presider;
+    this.secretary = data.secretary;
+    this.agenda = data.agenda.map((point) => new AgendaMeetPointDTO(point));
+    this.open_at = data.open_at;
+    this.close_at = data.close_at;
+    this.proposal = data.proposal ? new DocumentAggregateDTO(data.proposal) : undefined;
 
-      // Если есть предложение, преобразуем его в DTO
-      if (data.proposal) {
-        this.proposal = new DocumentAggregateDTO(data.proposal);
+    // Обрабатываем сертификат инициатора
+    if (initiatorCertificate) {
+      switch (initiatorCertificate.type) {
+        case AccountType.individual:
+          this.initiator_certificate = new IndividualCertificateDTO(initiatorCertificate);
+          break;
+        case AccountType.entrepreneur:
+          this.initiator_certificate = new EntrepreneurCertificateDTO(initiatorCertificate);
+          break;
+        case AccountType.organization:
+          this.initiator_certificate = new OrganizationCertificateDTO(initiatorCertificate);
+          break;
+        default:
+          this.initiator_certificate = null;
       }
+    } else {
+      this.initiator_certificate = null;
+    }
+
+    // Обрабатываем сертификат председателя
+    if (presiderCertificate) {
+      switch (presiderCertificate.type) {
+        case AccountType.individual:
+          this.presider_certificate = new IndividualCertificateDTO(presiderCertificate);
+          break;
+        case AccountType.entrepreneur:
+          this.presider_certificate = new EntrepreneurCertificateDTO(presiderCertificate);
+          break;
+        case AccountType.organization:
+          this.presider_certificate = new OrganizationCertificateDTO(presiderCertificate);
+          break;
+        default:
+          this.presider_certificate = null;
+      }
+    } else {
+      this.presider_certificate = null;
+    }
+
+    // Обрабатываем сертификат секретаря
+    if (secretaryCertificate) {
+      switch (secretaryCertificate.type) {
+        case AccountType.individual:
+          this.secretary_certificate = new IndividualCertificateDTO(secretaryCertificate);
+          break;
+        case AccountType.entrepreneur:
+          this.secretary_certificate = new EntrepreneurCertificateDTO(secretaryCertificate);
+          break;
+        case AccountType.organization:
+          this.secretary_certificate = new OrganizationCertificateDTO(secretaryCertificate);
+          break;
+        default:
+          this.secretary_certificate = null;
+      }
+    } else {
+      this.secretary_certificate = null;
     }
   }
 }

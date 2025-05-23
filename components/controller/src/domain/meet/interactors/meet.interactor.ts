@@ -47,7 +47,11 @@ export class MeetDomainInteractor {
   async createAnnualGeneralMeet(data: CreateAnnualGeneralMeetInputDomainInterface): Promise<MeetAggregate> {
     // Создаем агрегатор документов с помощью агрегатора документов
     const documentAggregate = await this.documentAggregator.buildDocumentAggregate(data.proposal);
-    const preProcessing = new MeetPreProcessingDomainEntity({ ...data, proposal: documentAggregate });
+
+    // Преобразуем null в undefined для соответствия доменному интерфейсу
+    const proposalAggregate = documentAggregate || undefined;
+
+    const preProcessing = new MeetPreProcessingDomainEntity({ ...data, proposal: proposalAggregate });
 
     // Сохраняем данные в репозиторий
     await this.meetPreRepository.create(preProcessing);

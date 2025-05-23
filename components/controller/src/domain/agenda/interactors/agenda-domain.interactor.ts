@@ -71,6 +71,10 @@ export class AgendaDomainInteractor {
       });
 
       const action = actionResponse?.results?.[0];
+
+      // if (action)
+      //TODO: здесь нужно добавить в action actor_certificate
+
       if (action) {
         agenda.push({
           table: decision,

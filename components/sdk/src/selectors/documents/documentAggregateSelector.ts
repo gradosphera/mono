@@ -1,7 +1,6 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { Selector, type ValueTypes } from '../../zeus/index'
 import { rawUserCertificateUnionSelector } from '../common/userCertificateUnionSelector'
-import { rawUserUnionSelector } from '../common/userUnionSelector'
 
 // Селектор для сырого документа
 export const rawGeneratedDocumentSelector = {

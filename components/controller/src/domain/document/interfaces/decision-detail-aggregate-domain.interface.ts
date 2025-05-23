@@ -1,9 +1,9 @@
-import type { Cooperative } from 'cooptypes';
+import type { ExtendedBlockchainActionDomainInterface } from '~/domain/agenda/interfaces/extended-blockchain-action-domain.interface';
 import type { DocumentAggregateDomainInterface } from './document-domain-aggregate.interface';
 
 export interface DecisionDetailAggregateDomainInterface {
-  action: Cooperative.Blockchain.IExtendedAction;
+  action: ExtendedBlockchainActionDomainInterface;
   documentAggregate: DocumentAggregateDomainInterface;
-  votes_for: Cooperative.Blockchain.IExtendedAction[];
-  votes_against: Cooperative.Blockchain.IExtendedAction[];
+  votes_for: ExtendedBlockchainActionDomainInterface[];
+  votes_against: ExtendedBlockchainActionDomainInterface[];
 }

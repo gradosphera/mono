@@ -920,7 +920,7 @@ export type ScalarCoders = {
 	JSON?: ScalarResolver;
 	JSONObject?: ScalarResolver;
 }
-type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"] | GraphQLTypes["UserCertificateUnion"] | GraphQLTypes["UserDataUnion"]
+type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"] | GraphQLTypes["UserCertificateUnion"]
 
 export type ValueTypes = {
     ["AcceptChildOrderInput"]: {
@@ -2162,11 +2162,13 @@ export type ValueTypes = {
 	/** ОГРН */
 	ogrn: string | Variable<any, string>
 };
-	/** Расширенное действие блокчейна с персональными данными пользователя, совершившего его. */
+	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
 ["ExtendedBlockchainAction"]: AliasType<{
 	account?:boolean | `@${string}`,
 	account_ram_deltas?:ValueTypes["AccountRamDelta"],
 	action_ordinal?:boolean | `@${string}`,
+	/** Сертификат пользователя (сокращенная информация) */
+	actor_certificate?:ValueTypes["UserCertificateUnion"],
 	authorization?:ValueTypes["ActionAuthorization"],
 	block_id?:boolean | `@${string}`,
 	block_num?:boolean | `@${string}`,
@@ -2182,8 +2184,6 @@ export type ValueTypes = {
 	receipt?:ValueTypes["ActionReceipt"],
 	receiver?:boolean | `@${string}`,
 	transaction_id?:boolean | `@${string}`,
-	/** Доп. данные о пользователе (физ/ИП/организация) */
-	user?:ValueTypes["UserDataUnion"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Расширенный статус собрания на основе дат и состояния */
@@ -2463,10 +2463,14 @@ export type ValueTypes = {
 	id?:boolean | `@${string}`,
 	/** Инициатор собрания */
 	initiator?:boolean | `@${string}`,
+	/** Сертификат инициатора собрания */
+	initiator_certificate?:ValueTypes["UserCertificateUnion"],
 	/** Дата открытия собрания */
 	open_at?:boolean | `@${string}`,
 	/** Председатель собрания */
 	presider?:boolean | `@${string}`,
+	/** Сертификат председателя собрания */
+	presider_certificate?:ValueTypes["UserCertificateUnion"],
 	/** Документ с повесткой собрания */
 	proposal?:ValueTypes["DocumentAggregate"],
 	/** Флаг достижения кворума */
@@ -2475,6 +2479,8 @@ export type ValueTypes = {
 	quorum_percent?:boolean | `@${string}`,
 	/** Секретарь собрания */
 	secretary?:boolean | `@${string}`,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?:ValueTypes["UserCertificateUnion"],
 	/** Количество подписанных бюллетеней */
 	signed_ballots?:boolean | `@${string}`,
 	/** Статус собрания */
@@ -2507,14 +2513,20 @@ export type ValueTypes = {
 	hash?:boolean | `@${string}`,
 	/** Инициатор собрания */
 	initiator?:boolean | `@${string}`,
+	/** Сертификат инициатора собрания */
+	initiator_certificate?:ValueTypes["UserCertificateUnion"],
 	/** Дата открытия собрания */
 	open_at?:boolean | `@${string}`,
 	/** Председатель собрания */
 	presider?:boolean | `@${string}`,
+	/** Сертификат председателя собрания */
+	presider_certificate?:ValueTypes["UserCertificateUnion"],
 	/** Документ с предложением повестки собрания */
 	proposal?:ValueTypes["DocumentAggregate"],
 	/** Секретарь собрания */
 	secretary?:boolean | `@${string}`,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?:ValueTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Данные о собрании после обработки */
@@ -2527,12 +2539,20 @@ export type ValueTypes = {
 	decisionAggregate?:ValueTypes["DocumentAggregate"],
 	/** Хеш собрания */
 	hash?:boolean | `@${string}`,
+	/** Председатель собрания */
+	presider?:boolean | `@${string}`,
+	/** Сертификат председателя собрания */
+	presider_certificate?:ValueTypes["UserCertificateUnion"],
 	/** Пройден ли кворум */
 	quorum_passed?:boolean | `@${string}`,
 	/** Процент кворума */
 	quorum_percent?:boolean | `@${string}`,
 	/** Результаты голосования по вопросам */
 	results?:ValueTypes["MeetQuestionResult"],
+	/** Секретарь собрания */
+	secretary?:boolean | `@${string}`,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?:ValueTypes["UserCertificateUnion"],
 	/** Количество подписанных бюллетеней */
 	signed_ballots?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -3912,12 +3932,6 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 		["...on OrganizationCertificate"]?: ValueTypes["OrganizationCertificate"]
 		__typename?: boolean | `@${string}`
 }>;
-	/** Объединение информации о пользователях */
-["UserDataUnion"]: AliasType<{		["...on Entrepreneur"]?: ValueTypes["Entrepreneur"],
-		["...on Individual"]?: ValueTypes["Individual"],
-		["...on Organization"]?: ValueTypes["Organization"]
-		__typename?: boolean | `@${string}`
-}>;
 	/** Статус пользователя */
 ["UserStatus"]:UserStatus;
 	["Vars"]: AliasType<{
@@ -5243,11 +5257,13 @@ export type ResolverInputTypes = {
 	/** ОГРН */
 	ogrn: string
 };
-	/** Расширенное действие блокчейна с персональными данными пользователя, совершившего его. */
+	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
 ["ExtendedBlockchainAction"]: AliasType<{
 	account?:boolean | `@${string}`,
 	account_ram_deltas?:ResolverInputTypes["AccountRamDelta"],
 	action_ordinal?:boolean | `@${string}`,
+	/** Сертификат пользователя (сокращенная информация) */
+	actor_certificate?:ResolverInputTypes["UserCertificateUnion"],
 	authorization?:ResolverInputTypes["ActionAuthorization"],
 	block_id?:boolean | `@${string}`,
 	block_num?:boolean | `@${string}`,
@@ -5263,8 +5279,6 @@ export type ResolverInputTypes = {
 	receipt?:ResolverInputTypes["ActionReceipt"],
 	receiver?:boolean | `@${string}`,
 	transaction_id?:boolean | `@${string}`,
-	/** Доп. данные о пользователе (физ/ИП/организация) */
-	user?:ResolverInputTypes["UserDataUnion"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Расширенный статус собрания на основе дат и состояния */
@@ -5544,10 +5558,14 @@ export type ResolverInputTypes = {
 	id?:boolean | `@${string}`,
 	/** Инициатор собрания */
 	initiator?:boolean | `@${string}`,
+	/** Сертификат инициатора собрания */
+	initiator_certificate?:ResolverInputTypes["UserCertificateUnion"],
 	/** Дата открытия собрания */
 	open_at?:boolean | `@${string}`,
 	/** Председатель собрания */
 	presider?:boolean | `@${string}`,
+	/** Сертификат председателя собрания */
+	presider_certificate?:ResolverInputTypes["UserCertificateUnion"],
 	/** Документ с повесткой собрания */
 	proposal?:ResolverInputTypes["DocumentAggregate"],
 	/** Флаг достижения кворума */
@@ -5556,6 +5574,8 @@ export type ResolverInputTypes = {
 	quorum_percent?:boolean | `@${string}`,
 	/** Секретарь собрания */
 	secretary?:boolean | `@${string}`,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?:ResolverInputTypes["UserCertificateUnion"],
 	/** Количество подписанных бюллетеней */
 	signed_ballots?:boolean | `@${string}`,
 	/** Статус собрания */
@@ -5588,14 +5608,20 @@ export type ResolverInputTypes = {
 	hash?:boolean | `@${string}`,
 	/** Инициатор собрания */
 	initiator?:boolean | `@${string}`,
+	/** Сертификат инициатора собрания */
+	initiator_certificate?:ResolverInputTypes["UserCertificateUnion"],
 	/** Дата открытия собрания */
 	open_at?:boolean | `@${string}`,
 	/** Председатель собрания */
 	presider?:boolean | `@${string}`,
+	/** Сертификат председателя собрания */
+	presider_certificate?:ResolverInputTypes["UserCertificateUnion"],
 	/** Документ с предложением повестки собрания */
 	proposal?:ResolverInputTypes["DocumentAggregate"],
 	/** Секретарь собрания */
 	secretary?:boolean | `@${string}`,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?:ResolverInputTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Данные о собрании после обработки */
@@ -5608,12 +5634,20 @@ export type ResolverInputTypes = {
 	decisionAggregate?:ResolverInputTypes["DocumentAggregate"],
 	/** Хеш собрания */
 	hash?:boolean | `@${string}`,
+	/** Председатель собрания */
+	presider?:boolean | `@${string}`,
+	/** Сертификат председателя собрания */
+	presider_certificate?:ResolverInputTypes["UserCertificateUnion"],
 	/** Пройден ли кворум */
 	quorum_passed?:boolean | `@${string}`,
 	/** Процент кворума */
 	quorum_percent?:boolean | `@${string}`,
 	/** Результаты голосования по вопросам */
 	results?:ResolverInputTypes["MeetQuestionResult"],
+	/** Секретарь собрания */
+	secretary?:boolean | `@${string}`,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?:ResolverInputTypes["UserCertificateUnion"],
 	/** Количество подписанных бюллетеней */
 	signed_ballots?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -6995,13 +7029,6 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	OrganizationCertificate?:ResolverInputTypes["OrganizationCertificate"],
 		__typename?: boolean | `@${string}`
 }>;
-	/** Объединение информации о пользователях */
-["UserDataUnion"]: AliasType<{
-	Entrepreneur?:ResolverInputTypes["Entrepreneur"],
-	Individual?:ResolverInputTypes["Individual"],
-	Organization?:ResolverInputTypes["Organization"],
-		__typename?: boolean | `@${string}`
-}>;
 	/** Статус пользователя */
 ["UserStatus"]:UserStatus;
 	["Vars"]: AliasType<{
@@ -8298,11 +8325,13 @@ export type ModelTypes = {
 	/** ОГРН */
 	ogrn: string
 };
-	/** Расширенное действие блокчейна с персональными данными пользователя, совершившего его. */
+	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
 ["ExtendedBlockchainAction"]: {
 		account: string,
 	account_ram_deltas: Array<ModelTypes["AccountRamDelta"]>,
 	action_ordinal: number,
+	/** Сертификат пользователя (сокращенная информация) */
+	actor_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
 	authorization: Array<ModelTypes["ActionAuthorization"]>,
 	block_id: string,
 	block_num: number,
@@ -8317,9 +8346,7 @@ export type ModelTypes = {
 	name: string,
 	receipt: ModelTypes["ActionReceipt"],
 	receiver: string,
-	transaction_id: string,
-	/** Доп. данные о пользователе (физ/ИП/организация) */
-	user?: ModelTypes["UserDataUnion"] | undefined | null
+	transaction_id: string
 };
 	["ExtendedMeetStatus"]:ExtendedMeetStatus;
 	["Extension"]: {
@@ -8592,10 +8619,14 @@ export type ModelTypes = {
 	id: number,
 	/** Инициатор собрания */
 	initiator: string,
+	/** Сертификат инициатора собрания */
+	initiator_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
 	/** Дата открытия собрания */
 	open_at: ModelTypes["DateTime"],
 	/** Председатель собрания */
 	presider: string,
+	/** Сертификат председателя собрания */
+	presider_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
 	/** Документ с повесткой собрания */
 	proposal?: ModelTypes["DocumentAggregate"] | undefined | null,
 	/** Флаг достижения кворума */
@@ -8604,6 +8635,8 @@ export type ModelTypes = {
 	quorum_percent: number,
 	/** Секретарь собрания */
 	secretary: string,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
 	/** Количество подписанных бюллетеней */
 	signed_ballots: number,
 	/** Статус собрания */
@@ -8634,14 +8667,20 @@ export type ModelTypes = {
 	hash: string,
 	/** Инициатор собрания */
 	initiator: string,
+	/** Сертификат инициатора собрания */
+	initiator_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
 	/** Дата открытия собрания */
 	open_at: ModelTypes["DateTime"],
 	/** Председатель собрания */
 	presider: string,
+	/** Сертификат председателя собрания */
+	presider_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
 	/** Документ с предложением повестки собрания */
 	proposal?: ModelTypes["DocumentAggregate"] | undefined | null,
 	/** Секретарь собрания */
-	secretary: string
+	secretary: string,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null
 };
 	/** Данные о собрании после обработки */
 ["MeetProcessed"]: {
@@ -8653,12 +8692,20 @@ export type ModelTypes = {
 	decisionAggregate?: ModelTypes["DocumentAggregate"] | undefined | null,
 	/** Хеш собрания */
 	hash: string,
+	/** Председатель собрания */
+	presider: string,
+	/** Сертификат председателя собрания */
+	presider_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
 	/** Пройден ли кворум */
 	quorum_passed: boolean,
 	/** Процент кворума */
 	quorum_percent: number,
 	/** Результаты голосования по вопросам */
 	results: Array<ModelTypes["MeetQuestionResult"]>,
+	/** Секретарь собрания */
+	secretary: string,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
 	/** Количество подписанных бюллетеней */
 	signed_ballots: number
 };
@@ -10070,8 +10117,6 @@ export type ModelTypes = {
 };
 	/** Объединение сертификатов пользователей (сокращенная информация) */
 ["UserCertificateUnion"]:ModelTypes["EntrepreneurCertificate"] | ModelTypes["IndividualCertificate"] | ModelTypes["OrganizationCertificate"];
-	/** Объединение информации о пользователях */
-["UserDataUnion"]:ModelTypes["Entrepreneur"] | ModelTypes["Individual"] | ModelTypes["Organization"];
 	["UserStatus"]:UserStatus;
 	["Vars"]: {
 		confidential_email: string,
@@ -11400,12 +11445,14 @@ export type GraphQLTypes = {
 	/** ОГРН */
 	ogrn: string
 };
-	/** Расширенное действие блокчейна с персональными данными пользователя, совершившего его. */
+	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
 ["ExtendedBlockchainAction"]: {
 	__typename: "ExtendedBlockchainAction",
 	account: string,
 	account_ram_deltas: Array<GraphQLTypes["AccountRamDelta"]>,
 	action_ordinal: number,
+	/** Сертификат пользователя (сокращенная информация) */
+	actor_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
 	authorization: Array<GraphQLTypes["ActionAuthorization"]>,
 	block_id: string,
 	block_num: number,
@@ -11420,9 +11467,7 @@ export type GraphQLTypes = {
 	name: string,
 	receipt: GraphQLTypes["ActionReceipt"],
 	receiver: string,
-	transaction_id: string,
-	/** Доп. данные о пользователе (физ/ИП/организация) */
-	user?: GraphQLTypes["UserDataUnion"] | undefined | null
+	transaction_id: string
 };
 	/** Расширенный статус собрания на основе дат и состояния */
 ["ExtendedMeetStatus"]: ExtendedMeetStatus;
@@ -11702,10 +11747,14 @@ export type GraphQLTypes = {
 	id: number,
 	/** Инициатор собрания */
 	initiator: string,
+	/** Сертификат инициатора собрания */
+	initiator_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
 	/** Дата открытия собрания */
 	open_at: GraphQLTypes["DateTime"],
 	/** Председатель собрания */
 	presider: string,
+	/** Сертификат председателя собрания */
+	presider_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
 	/** Документ с повесткой собрания */
 	proposal?: GraphQLTypes["DocumentAggregate"] | undefined | null,
 	/** Флаг достижения кворума */
@@ -11714,6 +11763,8 @@ export type GraphQLTypes = {
 	quorum_percent: number,
 	/** Секретарь собрания */
 	secretary: string,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
 	/** Количество подписанных бюллетеней */
 	signed_ballots: number,
 	/** Статус собрания */
@@ -11746,14 +11797,20 @@ export type GraphQLTypes = {
 	hash: string,
 	/** Инициатор собрания */
 	initiator: string,
+	/** Сертификат инициатора собрания */
+	initiator_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
 	/** Дата открытия собрания */
 	open_at: GraphQLTypes["DateTime"],
 	/** Председатель собрания */
 	presider: string,
+	/** Сертификат председателя собрания */
+	presider_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
 	/** Документ с предложением повестки собрания */
 	proposal?: GraphQLTypes["DocumentAggregate"] | undefined | null,
 	/** Секретарь собрания */
-	secretary: string
+	secretary: string,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null
 };
 	/** Данные о собрании после обработки */
 ["MeetProcessed"]: {
@@ -11766,12 +11823,20 @@ export type GraphQLTypes = {
 	decisionAggregate?: GraphQLTypes["DocumentAggregate"] | undefined | null,
 	/** Хеш собрания */
 	hash: string,
+	/** Председатель собрания */
+	presider: string,
+	/** Сертификат председателя собрания */
+	presider_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
 	/** Пройден ли кворум */
 	quorum_passed: boolean,
 	/** Процент кворума */
 	quorum_percent: number,
 	/** Результаты голосования по вопросам */
 	results: Array<GraphQLTypes["MeetQuestionResult"]>,
+	/** Секретарь собрания */
+	secretary: string,
+	/** Сертификат секретаря собрания */
+	secretary_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
 	/** Количество подписанных бюллетеней */
 	signed_ballots: number
 };
@@ -13231,13 +13296,6 @@ export type GraphQLTypes = {
         	['...on EntrepreneurCertificate']: '__union' & GraphQLTypes["EntrepreneurCertificate"];
 	['...on IndividualCertificate']: '__union' & GraphQLTypes["IndividualCertificate"];
 	['...on OrganizationCertificate']: '__union' & GraphQLTypes["OrganizationCertificate"];
-};
-	/** Объединение информации о пользователях */
-["UserDataUnion"]:{
-        	__typename:"Entrepreneur" | "Individual" | "Organization"
-        	['...on Entrepreneur']: '__union' & GraphQLTypes["Entrepreneur"];
-	['...on Individual']: '__union' & GraphQLTypes["Individual"];
-	['...on Organization']: '__union' & GraphQLTypes["Organization"];
 };
 	/** Статус пользователя */
 ["UserStatus"]: UserStatus;

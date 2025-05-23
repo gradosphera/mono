@@ -2,7 +2,6 @@ import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import type { ModelTypes, ValueTypes } from '../../zeus/index'
 import { Selector } from '../../zeus/index'
 import { rawUserCertificateUnionSelector } from '../common/userCertificateUnionSelector'
-import { rawUserUnionSelector } from '../common/userUnionSelector'
 
 export const rawSignatureInfoSelector = {
   id: true,

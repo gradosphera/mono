@@ -17,14 +17,17 @@ import { AnnualGeneralMeetingSovietDecisionGenerateDocumentInputDTO } from '~/mo
 import { AnnualGeneralMeetingDecisionGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-decision-document.dto';
 import { AnnualGeneralMeetingNotificationGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-notification-document.dto';
 import { MeetAggregate } from '~/domain/meet/aggregates/meet-domain.aggregate';
-import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
+import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
 import { DocumentDomainAggregate } from '~/domain/document/aggregates/document-domain.aggregate';
+import { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 
 @Injectable()
 export class MeetService {
   constructor(
     private readonly meetDomainInteractor: MeetDomainInteractor,
-    private readonly documentAggregationService: DocumentAggregationService
+    private readonly documentInteractor: DocumentDomainInteractor,
+    private readonly userCertificateInteractor: UserCertificateInteractor
   ) {}
 
   /**
@@ -34,29 +37,75 @@ export class MeetService {
     // Получаем агрегат документа решения для processed
     let decisionAggregate: DocumentDomainAggregate | null = null;
     if (aggregate.processed?.decision) {
-      decisionAggregate = await this.documentAggregationService.buildDocumentAggregate(aggregate.processed.decision);
+      decisionAggregate = await this.documentInteractor.buildDocumentAggregate(aggregate.processed.decision);
+    }
+
+    // Получаем сертификаты инициатора, председателя и секретаря для pre и processing
+    let initiatorCertificate: UserCertificateDomainInterface | null = null;
+    let presiderCertificate: UserCertificateDomainInterface | null = null;
+    let secretaryCertificate: UserCertificateDomainInterface | null = null;
+
+    if (aggregate.pre) {
+      initiatorCertificate = await this.userCertificateInteractor.getCertificateByUsername(aggregate.pre.initiator);
+      presiderCertificate = await this.userCertificateInteractor.getCertificateByUsername(aggregate.pre.presider);
+      secretaryCertificate = await this.userCertificateInteractor.getCertificateByUsername(aggregate.pre.secretary);
+    }
+
+    if (aggregate.processing?.meet) {
+      // Если нет pre, но есть processing, получаем сертификаты из processing.meet
+      initiatorCertificate = await this.userCertificateInteractor.getCertificateByUsername(
+        aggregate.processing.meet.initiator
+      );
+      presiderCertificate = await this.userCertificateInteractor.getCertificateByUsername(
+        aggregate.processing.meet.presider
+      );
+      secretaryCertificate = await this.userCertificateInteractor.getCertificateByUsername(
+        aggregate.processing.meet.secretary
+      );
+    }
+
+    // Получаем сертификаты для processed, если есть processed данные
+    let processedPresiderCertificate: UserCertificateDomainInterface | null = null;
+    let processedSecretaryCertificate: UserCertificateDomainInterface | null = null;
+
+    if (aggregate.processed) {
+      processedPresiderCertificate = await this.userCertificateInteractor.getCertificateByUsername(
+        aggregate.processed.presider
+      );
+      processedSecretaryCertificate = await this.userCertificateInteractor.getCertificateByUsername(
+        aggregate.processed.secretary
+      );
     }
 
     // Получаем агрегаты документов для processing
     const processingDocuments = aggregate.processing?.meet
       ? {
           proposalAggregate: aggregate.processing.meet.proposal
-            ? await this.documentAggregationService.buildDocumentAggregate(aggregate.processing.meet.proposal)
+            ? await this.documentInteractor.buildDocumentAggregate(aggregate.processing.meet.proposal)
             : null,
           authorizationAggregate: aggregate.processing.meet.authorization
-            ? await this.documentAggregationService.buildDocumentAggregate(aggregate.processing.meet.authorization)
+            ? await this.documentInteractor.buildDocumentAggregate(aggregate.processing.meet.authorization)
             : null,
           decision1Aggregate: aggregate.processing.meet.decision1
-            ? await this.documentAggregationService.buildDocumentAggregate(aggregate.processing.meet.decision1)
+            ? await this.documentInteractor.buildDocumentAggregate(aggregate.processing.meet.decision1)
             : null,
           decision2Aggregate: aggregate.processing.meet.decision2
-            ? await this.documentAggregationService.buildDocumentAggregate(aggregate.processing.meet.decision2)
+            ? await this.documentInteractor.buildDocumentAggregate(aggregate.processing.meet.decision2)
             : null,
         }
       : undefined;
 
-    // Создаем DTO с обогащенными документами
-    return new MeetAggregateDTO(aggregate, decisionAggregate, processingDocuments);
+    // Создаем DTO с обогащенными документами и сертификатами
+    return new MeetAggregateDTO(
+      aggregate,
+      decisionAggregate,
+      processingDocuments,
+      presiderCertificate,
+      secretaryCertificate,
+      initiatorCertificate,
+      processedPresiderCertificate,
+      processedSecretaryCertificate
+    );
   }
 
   public async generateAnnualGeneralMeetAgendaDocument(
