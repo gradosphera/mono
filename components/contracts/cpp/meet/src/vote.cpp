@@ -1,7 +1,10 @@
 // Заглушка для получения числа пайщиков кооператива.
 uint64_t get_total_participants(eosio::name coopname) {
     // Здесь можно реализовать получение актуальных данных, например, через inline action или вызов другого контракта.
-    return 2; // Пример: 100 пайщиков
+    if (meet::TEST_MODE) {
+        return 1;
+    }
+    return 100; // перевести на факт
 }
 
 void meet::vote(name coopname, checksum256 hash, name username, document2 ballot, std::vector<vote_point> votes) {

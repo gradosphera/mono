@@ -74,7 +74,7 @@ void meet::signbypresid(name coopname, name username, checksum256 hash, document
         meet_record.signed_ballots,
         meet_record.quorum_percent,
         meet_record.quorum_passed,
-        meet_record.decision2
+        presider_decision
     );
 
     // После записи решения – удаляем все вопросы

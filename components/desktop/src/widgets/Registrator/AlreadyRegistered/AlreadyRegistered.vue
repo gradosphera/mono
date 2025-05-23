@@ -7,7 +7,7 @@ q-card(flat bordered).q-pa-md.q-mt-lg
       div(class="text-h5").q-mt-md Вы успешно зарегистрированы и авторизованы
 
   q-card-actions(align="center")
-    q-btn(label="На главную" color="secondary" icon="fa fa-arrow-left" @click="goBack")
+    q-btn(label="На главную" color="primary" icon="fa fa-arrow-left" @click="goBack")
   </template>
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'

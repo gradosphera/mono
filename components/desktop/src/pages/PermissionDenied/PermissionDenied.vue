@@ -8,7 +8,7 @@ div.row.justify-center
       div(class="text-h4") Недостаточно прав доступа
 
     q-card-actions(align="center")
-      q-btn(label="Вернуться" color="secondary" icon="fa fa-arrow-left" @click="goBack")
+      q-btn(label="Вернуться" color="primary" icon="fa fa-arrow-left" @click="goBack")
 </template>
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'

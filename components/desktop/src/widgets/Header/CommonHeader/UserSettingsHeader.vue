@@ -11,7 +11,7 @@ q-header(bordered).flex.bg-gradient-dark
       active-class="bg-teal"
       active-bg-color="teal"
       active-color="white"
-      indicator-color="secondary"
+      indicator-color="primary"
       class="header-tab-container"
     )
       q-route-tab(name="Реквизиты" label="Реквизиты" :to="{name: 'user-payment-methods'}" )
