@@ -41,7 +41,21 @@ export class MeetPreProcessingDTO implements MeetPreProcessingDomainInterface {
   @IsOptional()
   proposal?: DocumentAggregateDTO;
 
-  constructor(data: MeetPreProcessingDTO) {
-    Object.assign(this, data);
+  constructor(data: MeetPreProcessingDomainInterface) {
+    if (data) {
+      this.coopname = data.coopname;
+      this.hash = data.hash;
+      this.initiator = data.initiator;
+      this.presider = data.presider;
+      this.secretary = data.secretary;
+      this.agenda = data.agenda.map((item) => new AgendaMeetPointDTO(item));
+      this.open_at = data.open_at;
+      this.close_at = data.close_at;
+
+      // Если есть предложение, преобразуем его в DTO
+      if (data.proposal) {
+        this.proposal = new DocumentAggregateDTO(data.proposal);
+      }
+    }
   }
 }

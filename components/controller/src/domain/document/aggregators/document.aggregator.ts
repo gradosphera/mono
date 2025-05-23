@@ -3,18 +3,21 @@ import { DOCUMENT_REPOSITORY, DocumentRepository } from '../repository/document.
 import { DocumentDomainAggregate } from '../aggregates/document-domain.aggregate';
 import { DocumentDomainEntity } from '../entity/document-domain.entity';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
-import type { DocumentMetaDomainInterface } from '../interfaces/document-meta-domain.interface';
+
 import {
   ExtendedSignedDocumentDomainInterface,
   SignatureInfoDomainInterface,
 } from '../interfaces/extended-signed-document-domain.interface';
 import type { ISignedDocumentDomainInterface } from '../interfaces/signed-document-domain.interface';
 import { Classes } from '@coopenomics/sdk';
+import { UserCertificateDomainService } from '~/domain/user-certificate/services/user-certificate-domain.service';
+
 @Injectable()
 export class DocumentAggregator {
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documentRepository: DocumentRepository,
-    private readonly accountDomainService: AccountDomainService
+    private readonly accountDomainService: AccountDomainService,
+    private readonly userCertificateService: UserCertificateDomainService
   ) {}
 
   /**
@@ -41,6 +44,9 @@ export class DocumentAggregator {
         // Получаем данные подписанта на основе signer из подписи
         const signer = await this.accountDomainService.getPrivateAccount(signature.signer);
 
+        // Создаем сертификат подписанта из полной информации
+        const signerCertificate = this.userCertificateService.createCertificateFromUserData(signer);
+
         // Формируем объект информации о подписи
         const signatureInfo: SignatureInfoDomainInterface = {
           id: signature.id,
@@ -50,7 +56,7 @@ export class DocumentAggregator {
           signature: signature.signature,
           signed_at: signature.signed_at,
           is_valid: Classes.Document.validateSignature(signature),
-          signer_info: signer,
+          signer_certificate: signerCertificate,
           meta: signature.meta,
         };
 

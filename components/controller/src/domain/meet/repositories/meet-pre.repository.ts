@@ -17,5 +17,5 @@ export interface MeetPreProcessingRepository {
 export const MEET_PRE_PROCESSING_REPOSITORY = Symbol('MeetPreProcessingRepository');
 
 // Для обратной совместимости
-export interface MeetRepository extends MeetPreProcessingRepository {}
+export type MeetRepository = MeetPreProcessingRepository;
 export const MEET_REPOSITORY = MEET_PRE_PROCESSING_REPOSITORY;

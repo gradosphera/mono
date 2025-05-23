@@ -14,7 +14,9 @@ export class GetMeetInputDTO implements GetMeetInputDomainInterface {
   @IsString()
   hash!: string;
 
-  constructor(data: GetMeetInputDTO) {
-    Object.assign(this, data);
+  constructor(data: GetMeetInputDomainInterface) {
+    if (data) {
+      Object.assign(this, data);
+    }
   }
 }

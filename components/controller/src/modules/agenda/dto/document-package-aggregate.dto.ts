@@ -31,4 +31,25 @@ export class DocumentPackageAggregateDTO implements DocumentPackageAggregateDoma
     description: 'Массив связанных документов с агрегатами, извлечённых из мета-данных',
   })
   links!: DocumentAggregateDTO[];
+
+  constructor(data?: DocumentPackageAggregateDomainInterface) {
+    if (data) {
+      // Маппинг Statement
+      this.statement = data.statement ? new StatementDetailAggregateDTO(data.statement) : null;
+
+      // Маппинг Decision
+      this.decision = data.decision ? new DecisionDetailAggregateDTO(data.decision) : null;
+
+      // Маппинг Acts
+      this.acts = data.acts.map((act) => new ActDetailAggregateDTO(act));
+
+      // Маппинг Links
+      this.links = data.links.map((link) => new DocumentAggregateDTO(link));
+    } else {
+      this.statement = null;
+      this.decision = null;
+      this.acts = [];
+      this.links = [];
+    }
+  }
 }

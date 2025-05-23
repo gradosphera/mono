@@ -9,9 +9,10 @@ import { DocumentPackageUtils } from './aggregators/document-package-utils.aggre
 import { DocumentPackageV0Aggregator } from './aggregators/document-package-v0.aggregator';
 import { DocumentPackageV1Aggregator } from './aggregators/document-package-v1.aggregator';
 import { DocumentAggregationService } from './services/document-aggregation.service';
+import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
 
 @Module({
-  imports: [InfrastructureModule, forwardRef(() => AccountDomainModule)],
+  imports: [InfrastructureModule, forwardRef(() => AccountDomainModule), UserCertificateDomainModule],
   providers: [
     DocumentDomainInteractor,
     DocumentDomainService,

@@ -13,4 +13,11 @@ export class ActDetailAggregateDTO implements ActDetailAggregateDomainInterface 
 
   @Field(() => DocumentAggregateDTO, { nullable: true })
   documentAggregate!: DocumentAggregateDTO;
+
+  constructor(data?: ActDetailAggregateDomainInterface) {
+    if (data) {
+      this.action = data.action ? new ExtendedBlockchainActionDTO(data.action) : (null as any);
+      this.documentAggregate = data.documentAggregate ? new DocumentAggregateDTO(data.documentAggregate) : (null as any);
+    }
+  }
 }

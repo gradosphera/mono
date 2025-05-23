@@ -1,5 +1,6 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { Selector, type ValueTypes } from '../../zeus/index'
+import { rawUserCertificateUnionSelector } from '../common/userCertificateUnionSelector'
 import { rawUserUnionSelector } from '../common/userUnionSelector'
 
 // Селектор для сырого документа
@@ -21,9 +22,9 @@ export const rawSignatureInfoSelector = {
   signature: true,
   signed_at: true,
   is_valid: true,
-  signer_info: rawUserUnionSelector,
   signed_hash: true,
   meta: true,
+  signer_certificate: rawUserCertificateUnionSelector,
 }
 
 // Проверка валидности селектора документа на первом попавшемся типе т.к. абстрактные типы zeus в документацию не затягивает

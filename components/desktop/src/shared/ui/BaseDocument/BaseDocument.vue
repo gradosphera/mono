@@ -29,7 +29,7 @@ q-card(:flat="isMobile" style="word-break: break-all !important; white-space: no
             q-expansion-item(
               v-for="(signature, index) in documentAggregate.document.signatures"
               :key="index"
-              :label="`Подпись ${index + 1}: ${getSignerName(signature.signer_info)}`"
+              :label="`Подпись ${index + 1}: ${getSignerName(signature.signer_certificate)}`"
               header-class="signature-header"
               dense
             )
@@ -38,7 +38,7 @@ q-card(:flat="isMobile" style="word-break: break-all !important; white-space: no
                   div.q-mb-sm
                     q-badge(:color="signature.is_valid ? 'teal' : 'red'").text-center.q-pa-xs
                       span Подписант
-                    p.q-mt-sm.q-ml-lg {{ getSignerName(signature.signer_info) }}
+                    p.q-mt-sm.q-ml-lg {{ getSignerName(signature.signer_certificate) }}
 
                   div(v-if="signature.public_key").q-mb-sm
                     q-badge(:color="signature.is_valid ? 'teal' : 'red'").text-center.q-pa-xs
@@ -68,9 +68,9 @@ import { useGlobalStore } from 'src/shared/store';
 import DOMPurify from 'dompurify';
 import { DigitalDocument } from 'src/shared/lib/document';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
 import { useWindowSize } from 'src/shared/hooks';
 import type { IDocumentAggregate } from 'src/entities/Document/model';
+import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 
 const props = defineProps({
   documentAggregate: {
@@ -131,10 +131,10 @@ const hashBuffer = async () => {
   }
 }
 
-// Получение ФИО подписанта
-const getSignerName = (signer: any) => {
-  if (!signer) return 'Неизвестный подписант';
-  return getNameFromUserData(signer) || signer;
+// Получение ФИО/названия подписанта по сертификату
+const getSignerName = (signer_certificate: any) => {
+  if (!signer_certificate) return 'Неизвестный подписант';
+  return getNameFromCertificate(signer_certificate) || 'Неизвестный подписант';
 }
 
 // Верификация всех подписей из агрегата
