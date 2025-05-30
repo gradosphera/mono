@@ -833,9 +833,12 @@ export const ReturnTypes: Record<string,any> = {
 		statement:"SignedBlockchainDocument",
 		type:"String",
 		username:"String",
+		username_certificate:"UserCertificateUnion",
 		validated:"Boolean",
 		votes_against:"String",
-		votes_for:"String"
+		votes_against_certificates:"UserCertificateUnion",
+		votes_for:"String",
+		votes_for_certificates:"UserCertificateUnion"
 	},
 	BlockchainInfoDTO:{
 		block_cpu_limit:"Int",
@@ -1113,6 +1116,7 @@ export const ReturnTypes: Record<string,any> = {
 		accepted:"Boolean",
 		context:"String",
 		decision:"String",
+		number:"Int",
 		question_id:"Int",
 		title:"String",
 		votes_abstained:"Int",

@@ -46,10 +46,17 @@ div.scroll-area(style="height: calc(100% - $toolbar-min-height); overflow-y: aut
     template(#body="props")
       q-tr(:key="`m_${props.row.table.id}`" :props="props")
         q-td(auto-width)
-          q-btn(size="sm" color="primary" dense :icon="expanded.get(props.row.table.id) ? 'remove' : 'add'" round @click="toggleExpand(props.row.table.id)")
+          q-btn(
+            size="sm"
+            color="primary"
+            dense
+            :icon="expanded.get(props.row.table.id) ? 'expand_more' : 'chevron_right'"
+            round
+            @click="toggleExpand(props.row.table.id)"
+          )
 
         q-td {{ props.row.table.id }}
-        q-td {{ props.row.table.username }}
+        q-td {{ getShortNameFromCertificate(props.row.table.username_certificate) || props.row.table.username }}
         q-td(style="max-width: 200px; word-wrap: break-word; white-space: normal;") {{ getDecisionTitle(props.row) }}
 
         q-td {{formatToFromNow(props.row.table.expired_at)}}
@@ -66,6 +73,7 @@ div.scroll-area(style="height: calc(100% - $toolbar-min-height); overflow-y: aut
           q-btn(
             size="sm"
             color="teal"
+            push
             v-if="isChairman"
             :loading="isProcessing(props.row.table.id)"
             @click="onAuthorizeDecision(props.row)"
@@ -85,6 +93,7 @@ import { QuestionCard } from '../QuestionCard'
 import { VotingButtons } from '../VotingButtons'
 import { useWindowSize } from 'src/shared/hooks'
 import type { IAgenda } from 'src/entities/Agenda/model'
+import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate'
 
 const props = defineProps({
   decisions: {
@@ -143,7 +152,7 @@ function getDecisionTitle(row: IAgenda) {
 // Настройка таблицы
 const columns = [
   { name: 'id', align: 'left', label: '№', field: row => row.table.id, sortable: true },
-  { name: 'username', align: 'left', label: 'Аккаунт', field: row => row.table.username, sortable: true },
+  { name: 'username', align: 'left', label: 'Заявитель', field: row => row.table.username, sortable: true },
   { name: 'caption', align: 'left', label: 'Пункт', field: row => getDecisionTitle(row), sortable: true },
   { name: 'expired_at', align: 'left', label: 'Истекает', field: row => row.table.expired_at, format: val => formatToFromNow(val), sortable: false },
   { name: 'approved', align: 'left', label: 'Голосование', field: row => row.table.approved, sortable: true },

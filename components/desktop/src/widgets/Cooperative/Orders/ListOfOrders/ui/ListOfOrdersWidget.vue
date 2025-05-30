@@ -48,7 +48,7 @@
                   color="primary"
                   round
                   dense
-                  :icon="expanded.get(props.row.id) ? 'remove' : 'add'"
+                  :icon="expanded.get(props.row.id) ? 'expand_more' : 'chevron_right'"
                   @click="toggleExpand(props.row.id)"
                 )
               q-td {{props.row.id}}

@@ -6,6 +6,9 @@ export class MeetQuestionResultDTO implements MeetQuestionResultDomainInterface 
   @Field(() => Int, { description: 'Идентификатор вопроса' })
   question_id!: number;
 
+  @Field(() => Int, { description: 'Порядковый номер вопроса' })
+  number!: number;
+
   @Field(() => String, { description: 'Заголовок вопроса' })
   title!: string;
 

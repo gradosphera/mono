@@ -1,5 +1,10 @@
 <template lang="pug">
 div
+  div.row.q-mb-sm
+    div.col-12
+      div.text-h5.q-mb-xs.full-width.text-center Общее собрание № {{ meet.processing?.meet?.id }}
+
+
   div.row.justify-around.q-mt-md
     div.col-xs-12.col-md-5
 
@@ -15,53 +20,30 @@ div
         div.col-5.card-label Открытие:
         div.col-7.card-value {{ meetStatus.formattedOpenDate }}
 
-
     div.col-xs-12.col-md-5
       div.row.q-mb-sm
         div.col-5.card-label Кворум:
         div.col-7.card-value {{ meet.processing?.meet?.quorum_percent }}%
 
-
       div.row.q-mb-sm
-        div.col-5.card-label Кворум достигнут:
-        div.col-7.card-value
-          q-badge(
-            :color="meet.processing?.meet?.quorum_passed ? 'positive' : 'red'"
-            :label="meet.processing?.meet?.quorum_passed ? 'Да' : 'Нет'"
-            outline
-          )
+        div.col-5.card-label Явка:
+        div.col-7.card-value {{ meet.processing?.meet?.current_quorum_percent }}%
+
+
       div.row.q-mb-sm
         div.col-5.card-label Закрытие:
         div.col-7.card-value {{ meetStatus.formattedCloseDate }}
 
-  div.row.q-mb-sm.q-mt-md
-    div.col-12
-
-      q-linear-progress(
-        :value="(meet.processing?.meet?.current_quorum_percent ?? 0) / 100"
-        :buffer="(meet.processing?.meet?.quorum_percent ?? 0) / 100"
-        track-color="lime"
-        size="40px"
-        rounded
-      ).bg-grey
-        div.absolute-full.flex.flex-center.q-gutter-sm
-          q-badge(
-            style="font-size: 16px;"
-            color="white"
-            text-color="black"
-          )
-            | Явка: {{ meet.processing?.meet?.current_quorum_percent ?? 0 }}%
-            //-  | Кворум: {{ meet.processing?.meet?.quorum_percent ?? 0 }}%
-
-      MeetStatusBanner(:meet="meet")
+  div.row.justify-around
+    MeetStatusBanner(:meet="meet")
 
 </template>
 
 <script setup lang="ts">
 import type { IMeet } from 'src/entities/Meet'
 import { useMeetStatus } from 'src/shared/lib/composables'
-import { MeetStatusBanner } from 'src/shared/ui/MeetStatusBanner'
 import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate'
+import { MeetStatusBanner } from 'src/shared/ui/MeetStatusBanner'
 
 const props = defineProps<{
   meet: IMeet

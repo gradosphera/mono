@@ -41,6 +41,7 @@ void meet::signbypresid(name coopname, name username, checksum256 hash, document
         
         results.push_back(question_result{
             qitr->id,
+            qitr->number,
             qitr->title,
             qitr->decision,
             qitr->context,

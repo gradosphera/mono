@@ -978,9 +978,22 @@ type BlockchainDecision {
   statement: SignedBlockchainDocument!
   type: String!
   username: String!
+
+  """Сертификат пользователя, создавшего решение"""
+  username_certificate: UserCertificateUnion
   validated: Boolean!
   votes_against: [String!]!
+
+  """
+  Сертификаты пользователей, голосовавших "против"
+  """
+  votes_against_certificates: [UserCertificateUnion!]!
   votes_for: [String!]!
+
+  """
+  Сертификаты пользователей, голосовавших "за"
+  """
+  votes_for_certificates: [UserCertificateUnion!]!
 }
 
 """Информация о состоянии блокчейна"""
@@ -2357,6 +2370,9 @@ type MeetQuestionResult {
 
   """Принятое решение"""
   decision: String!
+
+  """Порядковый номер вопроса"""
+  number: Int!
 
   """Идентификатор вопроса"""
   question_id: Int!

@@ -45,7 +45,7 @@ div.scroll-area(style="height: calc(100% - $toolbar-min-height); overflow-y: aut
             color="primary"
             round
             dense
-            :icon="expanded.get(props.row?.id || props.row?.statement?.action?.global_sequence) ? 'remove' : 'add'"
+            :icon="expanded.get(props.row?.id || props.row?.statement?.action?.global_sequence) ? 'expand_more' : 'chevron_right'"
             @click="toggleExpand(props.row?.id || props.row?.statement?.action?.global_sequence)"
           )
 

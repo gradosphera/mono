@@ -1,4 +1,4 @@
-import type { IGeneratedDocument, ISignatureInfo, ISignedChainDocument, ISignedDocument } from '../../types/document'
+import type { IGeneratedDocument, ISignatureInfo, ISignatureInfoInput, ISignedChainDocument, ISignedDocument } from '../../types/document'
 import { PrivateKey, PublicKey, Signature } from '@wharfkit/antelope'
 import { Crypto } from '../crypto'
 
@@ -55,6 +55,7 @@ export class Document {
       const signed_hash = await Crypto.sha256(hash + signed_at)
       return { meta_hash, hash, signed_hash }
     }
+
     // Здесь можно добавить другие версии расчёта
     // Например:
     // if (version === '2') { ... }
@@ -66,13 +67,15 @@ export class Document {
    * @param document Сгенерированный документ для подписи.
    * @param account Имя аккаунта подписывающего (signer)
    * @param signatureId ID подписи (обычно 1 для первой подписи)
+   * @param existingSignedDocuments Массив уже подписанных документов для объединения подписей
    * @returns Подписанный документ.
    */
-  public async signDocument<T>(
-    document: IGeneratedDocument<T>,
+  public async signDocument(
+    document: IGeneratedDocument,
     account: string,
     signatureId: number = 1,
-  ): Promise<ISignedDocument<T>> {
+    existingSignedDocuments?: ISignedDocument[],
+  ): Promise<ISignedDocument> {
     const version = '1.0.0'
 
     if (!this.wif)
@@ -84,11 +87,48 @@ export class Document {
 
     // Вычисляем все хэши через отдельную функцию, передавая версию
     const { meta_hash, hash, signed_hash } = await this.calculateHashes({ meta: document.meta, documentHash: document.hash, signed_at, version })
+
+    // Собираем все существующие подписи из переданных документов
+    const allSignatures: ISignatureInfoInput[] = []
+
+    if (existingSignedDocuments && existingSignedDocuments.length > 0) {
+      for (const existingDoc of existingSignedDocuments) {
+        // Проверяем совместимость хэшей
+        if (existingDoc.doc_hash.toUpperCase() !== document.hash.toUpperCase()) {
+          throw new Error(`Хэш документа не совпадает с существующим подписанным документом: ${existingDoc.doc_hash.toUpperCase()} !== ${document.hash.toUpperCase()}`)
+        }
+
+        if (existingDoc.meta_hash.toUpperCase() !== meta_hash.toUpperCase()) {
+          throw new Error(`Хэш метаданных не совпадает с существующим подписанным документом: ${existingDoc.meta_hash.toUpperCase()} !== ${meta_hash.toUpperCase()}`)
+        }
+
+        // Верифицируем существующие подписи
+        for (const existingSignature of existingDoc.signatures) {
+          if (!Document.validateSignature(existingSignature)) {
+            throw new Error(`Недействительная подпись от ${existingSignature.signer} с ID ${existingSignature.id}`)
+          }
+        }
+
+        // Добавляем подписи к общему массиву
+        allSignatures.push(...existingDoc.signatures.map((sig) => {
+          // Исключаем лишние поля, которые не нужны для SignatureInfoInput
+          const { is_valid, signer_certificate, ...cleanedSig } = sig
+          return cleanedSig as ISignatureInfo
+        }))
+      }
+    }
+
+    // Проверяем, что signatureId не дублируется
+    const existingIds = allSignatures.map(sig => sig.id)
+    if (existingIds.includes(signatureId)) {
+      throw new Error(`Подпись с ID ${signatureId} уже существует`)
+    }
+
     // Подпись хэша документа
     const digitalSignature = this.signDigest(signed_hash)
 
-    // Создаем информацию о подписи
-    const signatureInfo: ISignatureInfo = {
+    // Создаем информацию о новой подписи
+    const newSignatureInfo: ISignatureInfoInput = {
       id: signatureId,
       signer: account,
       public_key: digitalSignature.public_key,
@@ -98,13 +138,19 @@ export class Document {
       meta: JSON.stringify({}),
     }
 
+    // Добавляем новую подпись к существующим
+    allSignatures.push(newSignatureInfo)
+
+    // Сортируем подписи по ID
+    allSignatures.sort((a, b) => a.id - b.id)
+
     return {
       version,
       hash,
-      doc_hash: document.hash, // TODO: после миграции фабрики заменить здесь на doc_hash
+      doc_hash: document.hash, // TODO: после миграции фабрики заменить здесь на doc_hash взятый из фабрики
       meta_hash,
       meta: document.meta,
-      signatures: [signatureInfo],
+      signatures: allSignatures,
     }
   }
 
@@ -140,7 +186,7 @@ export class Document {
    * @param document Подписанный документ для проверки
    * @returns true если документ валиден, иначе false
    */
-  public static validateDocument<T = any>(document: ISignedDocument<T>): boolean {
+  public static validateDocument(document: ISignedDocument): boolean {
     try {
       const { signatures } = document
 
@@ -187,7 +233,7 @@ export class Document {
    * @param document Подписанный документ для финализации
    * @returns Документ в формате для отправки в блокчейн
    */
-  public static finalize<T = any>(document: ISignedDocument<T>): ISignedChainDocument {
+  public static finalize(document: ISignedDocument): ISignedChainDocument {
     // Преобразуем meta документа в строку JSON
     const stringifiedMeta = JSON.stringify(document.meta)
 
@@ -214,7 +260,7 @@ export class Document {
    * @param document Документ в формате блокчейна
    * @returns Стандартный подписанный документ
    */
-  public static parse<T = any>(document: ISignedChainDocument): ISignedDocument<T> {
+  public static parse(document: ISignedChainDocument): ISignedDocument {
     // Преобразуем строку meta документа в объект
     const parsedMeta = typeof document.meta === 'string' ? JSON.parse(document.meta) : document.meta
 

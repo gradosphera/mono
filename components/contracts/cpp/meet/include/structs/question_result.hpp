@@ -1,6 +1,7 @@
 // Например, во внешем header можно объявить структуру:
 struct question_result {
     uint64_t question_id;
+    uint64_t number;
     std::string title;
     std::string decision;
     std::string context;

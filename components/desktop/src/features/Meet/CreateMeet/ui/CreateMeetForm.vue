@@ -45,14 +45,14 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 
         q-card(flat bordered v-for="(point, index) in formData.agenda_points" :key="index").q-mb-lg.q-pa-sm
           div.row.items-center.q-mb-sm
-            div.text-subtitle1.q-mr-md Вопрос № {{ index + 1 }}
+            div.text-subtitle1.q-mr-md № {{ index + 1 }}
             div.col-auto
-              q-btn(flat icon="delete" size="sm" color="grey" @click="removeAgendaPoint(index)") удалить
+              q-btn(flat icon="delete" size="sm" color="grey" @click="removeAgendaPoint(index)")
 
           div.q-mb-sm
             q-input(
               v-model="point.title"
-              label="Заголовок"
+              label="Вопрос"
               :rules="[val => !!val || 'Обязательное поле']"
               dense
               type="textarea"
@@ -72,7 +72,7 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
           div.q-mb-sm
             q-input(
               v-model="point.decision"
-              label="Решение"
+              label="Проект Решения"
               :rules="[val => !!val || 'Обязательное поле']"
               dense
               type="textarea"

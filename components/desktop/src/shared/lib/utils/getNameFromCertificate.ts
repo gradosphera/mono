@@ -25,6 +25,26 @@ export function getNameFromCertificate(
 }
 
 /**
+ * Определяет тип сертификата и возвращает сокращенное имя (Фамилия И.О.)
+ */
+export function getShortNameFromCertificate(
+  certificate: IIndividualCertificate | IEntrepreneurCertificate | IOrganizationCertificate | null | undefined
+): string {
+  if (!certificate) return ''
+
+  // Определение типа сертификата
+  if (isOrganizationCertificate(certificate)) {
+    // Для организаций возвращаем короткое имя
+    return certificate.short_name
+  } else if (isIndividualCertificate(certificate) || isEntrepreneurCertificate(certificate)) {
+    // Для физ. лиц и ИП возвращаем сокращенное ФИО
+    return formatShortName(certificate)
+  }
+
+  return ''
+}
+
+/**
  * Проверяет, является ли сертификат сертификатом физического лица
  */
 function isIndividualCertificate(
@@ -70,4 +90,19 @@ function formatFullName(
   }
 
   return `${last_name} ${first_name}`
+}
+
+/**
+ * Форматирует сокращенное ФИО из объекта с полями first_name, last_name и middle_name
+ * Возвращает "Фамилия И.О."
+ */
+function formatShortName(
+  data: { first_name: string; last_name: string; middle_name?: string | null }
+): string {
+  const { last_name, first_name, middle_name } = data
+
+  const firstInitial = first_name.charAt(0).toUpperCase()
+  const middleInitial = middle_name ? middle_name.charAt(0).toUpperCase() + '.' : ''
+
+  return `${last_name} ${firstInitial}.${middleInitial}`
 }

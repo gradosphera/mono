@@ -5,7 +5,7 @@ div
       q-btn(
         color="primary"
         icon="fa-solid fa-door-closed"
-        label="Закрыть собрание"
+        label="Подписать протокол"
         @click="closeMeetBySecretary"
         :loading="isProcessing"
       )
@@ -13,7 +13,7 @@ div
       q-btn(
         color="primary"
         icon="fa-solid fa-check"
-        label="Утвердить собрание"
+        label="Утвердить протокол"
         @click="closeMeetByPresider"
         :loading="isProcessing"
       )

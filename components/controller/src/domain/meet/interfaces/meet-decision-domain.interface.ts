@@ -2,6 +2,7 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 
 export interface MeetQuestionResultDomainInterface {
   question_id: number;
+  number: number;
   title: string;
   decision: string;
   context: string;

@@ -1,13 +1,14 @@
 <template lang="pug">
 // Баннер с информацией о статусе собрания
 div
-  q-card(
-    flat
-    bordered
-    rounded
-    v-if="extendedStatus"
-  )
-    div.text-center.text-subtitle1 {{ statusText }} {{ timeText }}
+  div.text-center.q-mt-md(v-if="extendedStatus && extendedStatus !== 'NONE'")
+    q-badge(
+      :color="bannerConfig.color"
+      :label="`${statusText} ${timeText}`"
+      :outline="bannerConfig.outline"
+      rounded
+      style="font-size: 16px;"
+    ).q-pa-sm
 </template>
 
 <script setup lang="ts">
