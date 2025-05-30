@@ -10,7 +10,7 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
         div.text-subtitle1.q-mb-sm Выберите новые даты для собрания
         q-input(
           v-model="formData.new_open_at"
-          label="Новая дата и время открытия, UTC"
+          :label="`Новая дата и время открытия (${timezoneLabel})`"
           type="datetime-local"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
@@ -18,7 +18,7 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
         )
         q-input(
           v-model="formData.new_close_at"
-          label="Новая дата и время закрытия, UTC"
+          :label="`Новая дата и время закрытия (${timezoneLabel})`"
           type="datetime-local"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
@@ -50,6 +50,7 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
 import { useMeetStore } from 'src/entities/Meet'
+import { getCurrentLocalDateForForm, convertLocalDateToUTC, getTimezoneLabel } from 'src/shared/lib/utils/dates/timezone'
 
 const props = defineProps<{
   modelValue: boolean,
@@ -63,18 +64,20 @@ const emit = defineEmits<{
 
 const meetStore = useMeetStore()
 
+// Название часового пояса для отображения в лейблах
+const timezoneLabel = getTimezoneLabel()
+
 // Форма для перезапуска собрания
 const formData = reactive({
-  new_open_at: new Date(Date.now() + 10000).toISOString().slice(0, 16),
-  new_close_at: new Date(Date.now() + 60000).toISOString().slice(0, 16),
+  new_open_at: getCurrentLocalDateForForm(0.17),  // ~10 секунд от текущего времени
+  new_close_at: getCurrentLocalDateForForm(1), // 1 минута от текущего времени
 })
-
 
 // Сброс формы при открытии диалога
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
-    formData.new_open_at = new Date(Date.now() + 10000).toISOString().slice(0, 16)
-    formData.new_close_at = new Date(Date.now() + 60000).toISOString().slice(0, 16)
+    formData.new_open_at = getCurrentLocalDateForForm(0.17)
+    formData.new_close_at = getCurrentLocalDateForForm(1)
   }
 })
 
@@ -87,13 +90,17 @@ const handleSubmit = () => {
     return
   }
 
-  emit('restart', {
-    ...formData,
+  // Конвертируем локальные даты в UTC для отправки в блокчейн
+  const dataToSend = {
+    new_open_at: convertLocalDateToUTC(formData.new_open_at),
+    new_close_at: convertLocalDateToUTC(formData.new_close_at),
     agenda_points: meet.processing.questions.map(q => ({
       title: q.title,
       context: q.context,
       decision: q.decision
     }))
-  })
+  }
+
+  emit('restart', dataToSend)
 }
 </script>

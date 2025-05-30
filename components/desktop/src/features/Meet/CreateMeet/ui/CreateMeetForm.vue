@@ -28,14 +28,14 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
         )
         q-input(
           v-model="formData.open_at"
-          label="Дата и время открытия, UTC"
+          :label="`Дата и время открытия (${timezoneLabel})`"
           type="datetime-local"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
         )
         q-input(
           v-model="formData.close_at"
-          label="Дата и время закрытия, UTC"
+          :label="`Дата и время закрытия (${timezoneLabel})`"
           type="datetime-local"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
@@ -95,6 +95,7 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { useAgendaPoints } from 'src/shared/hooks/useAgendaPoints'
+import { getCurrentLocalDateForForm, convertLocalDateToUTC, getTimezoneLabel } from 'src/shared/lib/utils/dates/timezone'
 
 defineProps<{
   modelValue: boolean,
@@ -106,16 +107,18 @@ const emit = defineEmits<{
   (e: 'create', data: any): void
 }>()
 
-// Форма для создания собрания
+// Название часового пояса для отображения в лейблах
+const timezoneLabel = getTimezoneLabel()
 
+// Форма для создания собрания
 const formData = reactive(
   {
     'coopname': 'voskhod',
     'initiator': 'ant',
     'presider': 'ant',
     'secretary': 'ant',
-    'open_at': new Date(Date.now() + 10000).toISOString().slice(0, 16),
-    'close_at': new Date(Date.now() + 120000).toISOString().slice(0, 16),
+    'open_at': getCurrentLocalDateForForm(0.17), // ~10 секунд от текущего времени
+    'close_at': getCurrentLocalDateForForm(2), // 2 минуты от текущего времени
     'username': 'ant',
     'agenda_points': [
         {
@@ -143,6 +146,13 @@ const formData = reactive(
 const { addAgendaPoint, removeAgendaPoint } = useAgendaPoints(formData.agenda_points)
 
 const handleSubmit = () => {
-  emit('create', formData)
+  // Конвертируем локальные даты в UTC для отправки в блокчейн
+  const dataToSend = {
+    ...formData,
+    open_at: convertLocalDateToUTC(formData.open_at),
+    close_at: convertLocalDateToUTC(formData.close_at)
+  }
+
+  emit('create', dataToSend)
 }
 </script>

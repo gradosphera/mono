@@ -10,6 +10,7 @@ export interface EnvVars {
   SITE_IMAGE?: string;
   STORAGE_URL?: string;
   UPLOAD_URL?: string;
+  TIMEZONE?: string;
   CLIENT?: boolean;
   SERVER?: boolean;
   VUE_ROUTER_MODE?: string;
@@ -47,6 +48,7 @@ function getEnv(): EnvVars {
       SITE_IMAGE: process.env.SITE_IMAGE,
       STORAGE_URL: process.env.STORAGE_URL,
       UPLOAD_URL: process.env.UPLOAD_URL,
+      TIMEZONE: process.env.TIMEZONE || 'Europe/Moscow',
       CLIENT: process.env.CLIENT as unknown as boolean,
       SERVER: process.env.SERVER as unknown as boolean,
       VUE_ROUTER_MODE: process.env.VUE_ROUTER_MODE,

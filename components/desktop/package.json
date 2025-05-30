@@ -59,6 +59,7 @@
     "idb": "^8.0.0",
     "isomorphic-ws": "^5.0.0",
     "lodash": "^4.17.21",
+    "moment-timezone": "^0.5.45",
     "moment-with-locales-es6": "^1.0.1",
     "pinia": "^2.0.11",
     "pinia-plugin-persistedstate": "^3.2.1",

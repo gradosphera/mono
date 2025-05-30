@@ -5,6 +5,7 @@ import moment from 'moment-with-locales-es6'
 import { useMeetStore } from 'src/entities/Meet'
 import type { IMeet } from 'src/entities/Meet'
 import type { IVoteOnMeetInput, IVoteOnMeetResult } from './types'
+import { formatDateToLocalTimezone } from 'src/shared/lib/utils/dates/timezone'
 
 moment.locale('ru')
 
@@ -56,12 +57,12 @@ export function useVoteOnMeet() {
 
   const formattedOpenDate = computed(() => {
     if (!activeMeet.value?.processing?.meet?.open_at) return ''
-    return moment(activeMeet.value.processing.meet.open_at).format('DD.MM.YYYY HH:mm')
+    return formatDateToLocalTimezone(activeMeet.value.processing.meet.open_at)
   })
 
   const formattedCloseDate = computed(() => {
     if (!activeMeet.value?.processing?.meet?.close_at) return ''
-    return moment(activeMeet.value.processing.meet.close_at).format('DD.MM.YYYY HH:mm')
+    return formatDateToLocalTimezone(activeMeet.value.processing.meet.close_at)
   })
 
   // Экшены
