@@ -38,7 +38,7 @@ export async function signBySecretaryOnAnnualGeneralMeetWithDecision(data: IClos
     }
   )
 
-  // Подписываем документ
+  // Подписываем документ первой подписью секретаря (signatureId = 1 по умолчанию)
   const signedDocument = await signDocument(generatedDocument, data.username)
 
   const variables2: Mutations.Meet.SignBySecretaryOnAnnualGeneralMeet.IInput = {
@@ -62,23 +62,35 @@ export async function signBySecretaryOnAnnualGeneralMeetWithDecision(data: IClos
 
 export async function signByPresiderOnAnnualGeneralMeetWithDecision(data: ICloseMeetWithDecisionInput): Promise<ISignByPresiderResult> {
   const { signDocument } = useSignDocument()
+  const meetStore = useMeetStore()
 
-  const variables: Mutations.Meet.GenerateAnnualGeneralMeetDecisionDocument.IInput = {
-    data: {
-      coopname: data.coopname,
-      username: data.username,
-    }
+  // Получаем текущее собрание из store
+  const currentMeet = meetStore.currentMeet
+  if (!currentMeet?.processing?.meet) {
+    throw new Error('Собрание не найдено в store')
   }
-  // Генерируем документ решения
-  const { [Mutations.Meet.GenerateAnnualGeneralMeetDecisionDocument.name]: generatedDocument } = await client.Mutation(
-    Mutations.Meet.GenerateAnnualGeneralMeetDecisionDocument.mutation,
-    {
-      variables
-    }
-  )
 
-  // Подписываем документ
-  const signedDocument = await signDocument(generatedDocument, data.username)
+  if (!currentMeet.processing.meet.decision1) {
+    throw new Error('Документ решения секретаря (decision1) не найден')
+  }
+
+  if (!currentMeet.processing.meet.decision1.rawDocument) {
+    throw new Error('Сырой документ решения секретаря (rawDocument) не найден')
+  }
+
+  if (!currentMeet.processing.meet.decision1.document) {
+    throw new Error('Подписанный документ решения секретаря (document) не найден')
+  }
+
+  // Используем существующий rawDocument из decision1 (созданный секретарем)
+  // и объединяем подпись секретаря с новой подписью председателя (signatureId = 2)
+  // В результате получается единый документ с обеими подписями
+  const signedDocument = await signDocument(
+    currentMeet.processing.meet.decision1.rawDocument,
+    data.username,
+    2,
+    [currentMeet.processing.meet.decision1.document]
+  )
 
   const variables2: Mutations.Meet.SignByPresiderOnAnnualGeneralMeet.IInput = {
     data: {

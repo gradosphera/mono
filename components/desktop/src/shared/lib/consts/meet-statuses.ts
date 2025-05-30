@@ -32,15 +32,15 @@ export const SPECIAL_STATUSES: Zeus.ExtendedMeetStatus[] = [
 ]
 
 // Конфигурация для отображения статусов баннером
-export const STATUS_BANNER_CONFIG: Record<Zeus.ExtendedMeetStatus, { class: string, needTime: boolean }> = {
-  'NONE': { class: 'bg-grey-2 text-grey-8', needTime: false },
-  'CREATED': { class: 'bg-grey-1 text-grey-8', needTime: false },
-  'AUTHORIZED': { class: 'bg-grey-1 text-grey-8', needTime: false },
-  'ONRESTART': { class: 'bg-orange-1 text-orange-8', needTime: false },
-  'PRECLOSED': { class: 'bg-light-green-1 text-light-green-8', needTime: false },
-  'CLOSED': { class: 'bg-green-2 text-green-10', needTime: false },
-  'WAITING_FOR_OPENING': { class: 'bg-blue-1 text-blue-8', needTime: true },
-  'VOTING_IN_PROGRESS': { class: 'bg-green-1 text-green-8', needTime: true },
-  'EXPIRED_NO_QUORUM': { class: 'bg-amber-1 text-amber-8', needTime: false },
-  'VOTING_COMPLETED': { class: 'bg-indigo-1 text-indigo-8', needTime: false }
+export const STATUS_BANNER_CONFIG: Record<Zeus.ExtendedMeetStatus, { class: string, needTime: boolean, color: string, outline: boolean }> = {
+  'NONE': { class: 'bg-grey-2 text-grey-8', needTime: false, color: 'grey-6', outline: true },
+  'CREATED': { class: 'bg-grey-1 text-grey-8', needTime: false, color: 'grey-7', outline: true },
+  'AUTHORIZED': { class: 'bg-grey-1 text-grey-8', needTime: false, color: 'grey-7', outline: true },
+  'ONRESTART': { class: 'bg-orange-1 text-orange-8', needTime: false, color: 'orange', outline: true },
+  'PRECLOSED': { class: 'bg-light-green-1 text-light-green-8', needTime: false, color: 'light-green', outline: true },
+  'CLOSED': { class: 'bg-teal text-teal-10', needTime: false, color: 'teal', outline: false },
+  'WAITING_FOR_OPENING': { class: 'bg-blue-1 text-blue-8', needTime: true, color: 'primary', outline: true },
+  'VOTING_IN_PROGRESS': { class: 'bg-green-1 text-green-8', needTime: true, color: 'positive', outline: true },
+  'EXPIRED_NO_QUORUM': { class: 'bg-amber-1 text-amber-8', needTime: false, color: 'amber', outline: true },
+  'VOTING_COMPLETED': { class: 'bg-indigo-1 text-indigo-8', needTime: false, color: 'indigo', outline: true }
 }

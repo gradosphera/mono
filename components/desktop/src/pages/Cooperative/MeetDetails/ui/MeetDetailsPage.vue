@@ -10,42 +10,42 @@ q-card(flat).card-container.q-pa-md
   div(v-else)
     div.row.q-col-gutter-md.justify-center
       div.col-12.col-md-12
-        q-card(flat).info-card.hover
+        div.info-card.hover
           MeetDetailsInfo(:meet="meet")
+            template(#actions)
+              MeetDetailsActions(
+                :meet="meet"
+                :coopname="coopname"
+                :meet-hash="meetHash"
+              )
 
-          MeetDetailsActions(
-            :meet="meet"
-            :coopname="coopname"
-            :meet-hash="meetHash"
-          )
+        // Индикатор явки и статус собрания
+        q-card(flat).info-card.hover.q-mt-lg
+          MeetQuorumIndicator(:meet="meet")
 
         // Показываем результаты собрания, если оно завершено
         template(v-if="isProcessed")
-          // Отображаем документ собрания, если он есть
-          ExpandableDocument(
-            v-if="!!meet?.processed?.decisionAggregate"
-            :documentAggregate="meet.processed.decisionAggregate"
-            title="Протокол решения общего собрания пайщиков"
-          ).q-mt-lg
-
-          q-card(flat).info-card.q-mt-lg
+          q-card(flat).info-card.hover.q-mt-lg
             MeetDetailsResults(
               :meet="meet"
             )
 
-
         // Показываем повестку и голосование, если собрание еще не завершено
         template(v-else)
-          q-card(flat).info-card.q-mt-lg
-            MeetDetailsAgenda(
-              :meet="meet"
-            )
+          q-card(flat).info-card.hover.q-mt-lg
+            // Показываем повестку, если голосование еще не началось
+            template(v-if="!isVotingNow")
+              MeetDetailsAgenda(
+                :meet="meet"
+              )
 
-            MeetDetailsVoting(
-              :meet="meet"
-              :coopname="coopname"
-              :meet-hash="meetHash"
-            )
+            // Показываем голосование, если оно началось
+            template(v-else)
+              MeetDetailsVoting(
+                :meet="meet"
+                :coopname="coopname"
+                :meet-hash="meetHash"
+              )
 
 
 </template>
@@ -58,11 +58,12 @@ import { MeetDetailsActions } from 'src/widgets/Meets/MeetDetailsActions'
 import { MeetDetailsAgenda } from 'src/widgets/Meets/MeetDetailsAgenda'
 import { MeetDetailsVoting } from 'src/widgets/Meets/MeetDetailsVoting'
 import { MeetDetailsResults } from 'src/widgets/Meets/MeetDetailsResults'
-import { ExpandableDocument } from 'src/shared/ui'
 import { useMeetStore } from 'src/entities/Meet'
 import { FailAlert } from 'src/shared/api'
 import { useDesktopStore } from 'src/entities/Desktop/model'
 import { useBackButton } from 'src/shared/lib/navigation'
+import { useVoteOnMeet } from 'src/features/Meet/VoteOnMeet'
+import { MeetQuorumIndicator } from 'src/widgets/Meets/MeetQuorumIndicator'
 
 const route = useRoute()
 const meetStore = useMeetStore()
@@ -79,6 +80,9 @@ const isProcessed = computed(() => {
   return !!meet.value?.processed
 })
 
+// Используем хук для управления голосованием
+const { isVotingNow, setMeet } = useVoteOnMeet()
+
 let intervalId: ReturnType<typeof setInterval> | null = null
 
 const loadMeetDetails = async () => {
@@ -87,6 +91,11 @@ const loadMeetDetails = async () => {
       coopname: coopname.value,
       hash: meetHash.value
     })
+
+    // Устанавливаем собрание в композабл после загрузки
+    if (meet.value) {
+      setMeet(meet.value)
+    }
 
   } catch (error: any) {
     FailAlert(error)

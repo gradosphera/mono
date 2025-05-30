@@ -97,6 +97,7 @@ export interface IQuestion {
 
 export interface IQuestionResult {
   question_id: IUint64
+  number: IUint64
   title: string
   decision: string
   context: string

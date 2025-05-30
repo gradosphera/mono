@@ -3,6 +3,7 @@ import type { AgendaWithDocumentsDomainInterface } from '~/domain/agenda/interfa
 import { BlockchainActionDTO } from '../../common/dto/blockchain-action.dto';
 import { BlockchainDecisionDTO } from './blockchain-decision.dto';
 import { DocumentPackageAggregateDTO } from './document-package-aggregate.dto';
+import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 
 @ObjectType('AgendaWithDocuments')
 export class AgendaWithDocumentsDTO implements AgendaWithDocumentsDomainInterface {
@@ -21,8 +22,13 @@ export class AgendaWithDocumentsDTO implements AgendaWithDocumentsDomainInterfac
   })
   documents!: DocumentPackageAggregateDTO;
 
-  constructor(data: AgendaWithDocumentsDomainInterface) {
-    this.table = new BlockchainDecisionDTO(data.table);
+  constructor(
+    data: AgendaWithDocumentsDomainInterface,
+    usernameCertificate?: UserCertificateDomainInterface | null,
+    votesForCertificates?: UserCertificateDomainInterface[],
+    votesAgainstCertificates?: UserCertificateDomainInterface[]
+  ) {
+    this.table = new BlockchainDecisionDTO(data.table, usernameCertificate, votesForCertificates, votesAgainstCertificates);
     this.action = new BlockchainActionDTO(data.action);
     this.documents = new DocumentPackageAggregateDTO(data.documents);
   }

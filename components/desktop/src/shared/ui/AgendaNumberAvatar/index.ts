@@ -1,0 +1,1 @@
+export { default as AgendaNumberAvatar } from './AgendaNumberAvatar.vue';

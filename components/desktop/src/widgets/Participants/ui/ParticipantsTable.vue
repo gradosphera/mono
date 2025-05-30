@@ -28,7 +28,7 @@ q-table(
           color="primary"
           round
           dense
-          :icon="expanded.get(props.row.username) ? 'remove' : 'add'"
+          :icon="expanded.get(props.row.username) ? 'expand_more' : 'chevron_right'"
           @click="onToggleExpand(props.row.username)"
         )
 

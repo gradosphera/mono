@@ -6,8 +6,7 @@ div
       div.col-12
         div.row.q-pa-md(v-if="canCreateMeet")
           CreateMeet
-
-        MeetsTable(
+        MeetCardsList(
           :meets="meets"
           :loading="loading"
         )
@@ -17,7 +16,7 @@ div
 <script setup lang="ts">
 import { onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { MeetsTable } from 'src/widgets/Meets/MeetsTable'
+import { MeetCardsList } from 'src/widgets/Meets/MeetCardsList'
 import { CreateMeet } from 'src/features/Meet/CreateMeet'
 import { useMeetStore } from 'src/entities/Meet'
 import { useCurrentUserStore } from 'src/entities/User'

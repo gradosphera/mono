@@ -1,10 +1,21 @@
 <template lang="pug">
 div
   div.text-h5.q-mb-md.text-center Голосование
+
+  // Баннер для уже проголосовавших пользователей
+  q-banner.q-mb-md(
+    v-if="meet?.processing?.isVoted"
+    rounded
+    color="positive"
+    text-color="white"
+  )
+    template(#avatar)
+      q-icon(name="how_to_vote" color="primary" size="50px" class="q-mt-md q-mb-md")
+    div.text-body1.text-weight-medium Вы уже приняли участие в голосовании
+    div.text-caption Ваш голос принят и учтен
+
   div
-    div(flat class="card-container q-pa-md" v-if="isVotingNow")
-
-
+    div(flat class="card-container q-pa-md" v-if="!meet?.processing?.isVoted")
       div.row.q-col-gutter-md
         div.col-12.col-md-12(v-for="(item, index) in meetAgendaItems" :key="index")
           q-card(flat bordered)
@@ -67,7 +78,6 @@ const props = defineProps<{
 const {
   votes,
   meetAgendaItems,
-  isVotingNow,
   allVotesSelected,
   setMeet,
   voteOnMeet,
@@ -95,7 +105,7 @@ onUnmounted(() => {
 })
 
 const submitVote = async () => {
-  if (!isVotingNow.value || !allVotesSelected.value) return
+  if (!allVotesSelected.value) return
 
   isVoting.value = true
   try {

@@ -1,5 +1,6 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
+import { rawUserCertificateUnionSelector } from '../common/userCertificateUnionSelector'
 import { rawSignedBlockchainDocumentSelector } from '../documents/signedBlockchainDocumentSelector'
 
 export const rawBlockchainDecisionSelector = {
@@ -23,6 +24,9 @@ export const rawBlockchainDecisionSelector = {
   confirm_callback: true,
   decline_callback: true,
   hash: true,
+  username_certificate: rawUserCertificateUnionSelector,
+  votes_for_certificates: rawUserCertificateUnionSelector,
+  votes_against_certificates: rawUserCertificateUnionSelector,
 }
 
 // Проверка валидности

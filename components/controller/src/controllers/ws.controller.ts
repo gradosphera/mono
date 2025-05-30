@@ -65,6 +65,7 @@ async function processEvent(event: IAction) {
           results: event.data.results.map((item) => ({
             ...item,
             question_id: Number(item.question_id),
+            number: Number(item.number),
             votes_for: Number(item.votes_for),
             votes_against: Number(item.votes_against),
             votes_abstained: Number(item.votes_abstained),

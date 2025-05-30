@@ -1,10 +1,10 @@
 <template lang="pug">
-div.info-card
-  div.row
-    div.col-12
-      div.text-h5.q-mb-xs Общее собрание № {{ meet.processing?.meet?.id }}
-  MeetInfoCard(:meet="meet").q-mt-lg
-
+div
+  q-card(flat bordered).q-pa-md
+    MeetInfoCard(:meet="meet")
+    // Слот для действий (кнопки)
+    div.q-mt-md(v-if="$slots.actions")
+      slot(name="actions")
 </template>
 
 <script setup lang="ts">

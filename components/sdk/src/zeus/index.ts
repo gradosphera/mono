@@ -1618,9 +1618,15 @@ export type ValueTypes = {
 	statement?:ValueTypes["SignedBlockchainDocument"],
 	type?:boolean | `@${string}`,
 	username?:boolean | `@${string}`,
+	/** Сертификат пользователя, создавшего решение */
+	username_certificate?:ValueTypes["UserCertificateUnion"],
 	validated?:boolean | `@${string}`,
 	votes_against?:boolean | `@${string}`,
+	/** Сертификаты пользователей, голосовавших "против" */
+	votes_against_certificates?:ValueTypes["UserCertificateUnion"],
 	votes_for?:boolean | `@${string}`,
+	/** Сертификаты пользователей, голосовавших "за" */
+	votes_for_certificates?:ValueTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Информация о состоянии блокчейна */
@@ -2579,6 +2585,8 @@ export type ValueTypes = {
 	context?:boolean | `@${string}`,
 	/** Принятое решение */
 	decision?:boolean | `@${string}`,
+	/** Порядковый номер вопроса */
+	number?:boolean | `@${string}`,
 	/** Идентификатор вопроса */
 	question_id?:boolean | `@${string}`,
 	/** Заголовок вопроса */
@@ -4713,9 +4721,15 @@ export type ResolverInputTypes = {
 	statement?:ResolverInputTypes["SignedBlockchainDocument"],
 	type?:boolean | `@${string}`,
 	username?:boolean | `@${string}`,
+	/** Сертификат пользователя, создавшего решение */
+	username_certificate?:ResolverInputTypes["UserCertificateUnion"],
 	validated?:boolean | `@${string}`,
 	votes_against?:boolean | `@${string}`,
+	/** Сертификаты пользователей, голосовавших "против" */
+	votes_against_certificates?:ResolverInputTypes["UserCertificateUnion"],
 	votes_for?:boolean | `@${string}`,
+	/** Сертификаты пользователей, голосовавших "за" */
+	votes_for_certificates?:ResolverInputTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Информация о состоянии блокчейна */
@@ -5674,6 +5688,8 @@ export type ResolverInputTypes = {
 	context?:boolean | `@${string}`,
 	/** Принятое решение */
 	decision?:boolean | `@${string}`,
+	/** Порядковый номер вопроса */
+	number?:boolean | `@${string}`,
 	/** Идентификатор вопроса */
 	question_id?:boolean | `@${string}`,
 	/** Заголовок вопроса */
@@ -7797,9 +7813,15 @@ export type ModelTypes = {
 	statement: ModelTypes["SignedBlockchainDocument"],
 	type: string,
 	username: string,
+	/** Сертификат пользователя, создавшего решение */
+	username_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
 	validated: boolean,
 	votes_against: Array<string>,
-	votes_for: Array<string>
+	/** Сертификаты пользователей, голосовавших "против" */
+	votes_against_certificates: Array<ModelTypes["UserCertificateUnion"]>,
+	votes_for: Array<string>,
+	/** Сертификаты пользователей, голосовавших "за" */
+	votes_for_certificates: Array<ModelTypes["UserCertificateUnion"]>
 };
 	/** Информация о состоянии блокчейна */
 ["BlockchainInfoDTO"]: {
@@ -8730,6 +8752,8 @@ export type ModelTypes = {
 	context: string,
 	/** Принятое решение */
 	decision: string,
+	/** Порядковый номер вопроса */
+	number: number,
 	/** Идентификатор вопроса */
 	question_id: number,
 	/** Заголовок вопроса */
@@ -10902,9 +10926,15 @@ export type GraphQLTypes = {
 	statement: GraphQLTypes["SignedBlockchainDocument"],
 	type: string,
 	username: string,
+	/** Сертификат пользователя, создавшего решение */
+	username_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
 	validated: boolean,
 	votes_against: Array<string>,
-	votes_for: Array<string>
+	/** Сертификаты пользователей, голосовавших "против" */
+	votes_against_certificates: Array<GraphQLTypes["UserCertificateUnion"]>,
+	votes_for: Array<string>,
+	/** Сертификаты пользователей, голосовавших "за" */
+	votes_for_certificates: Array<GraphQLTypes["UserCertificateUnion"]>
 };
 	/** Информация о состоянии блокчейна */
 ["BlockchainInfoDTO"]: {
@@ -11863,6 +11893,8 @@ export type GraphQLTypes = {
 	context: string,
 	/** Принятое решение */
 	decision: string,
+	/** Порядковый номер вопроса */
+	number: number,
 	/** Идентификатор вопроса */
 	question_id: number,
 	/** Заголовок вопроса */

@@ -7,6 +7,7 @@ import { rawSignedBlockchainDocumentSelector } from '../documents/signedBlockcha
 // Селектор для MeetQuestionResult
 const rawMeetQuestionResultSelector = {
   question_id: true,
+  number: true,
   title: true,
   decision: true,
   context: true,

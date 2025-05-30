@@ -1,5 +1,5 @@
 import type { Cooperative } from 'cooptypes'
-
+import type { Zeus } from '../..'
 /**
  * Интерфейс для метаданных документа.
  */
@@ -13,13 +13,14 @@ export type IGeneratedDocument<T = any> = Cooperative.Document.ZGeneratedDocumen
 /**
  * Интерфейс для информации о подписи в документе.
  */
-export type ISignatureInfo = Cooperative.Document.ISignatureInfo
+export type ISignatureInfoInput = Zeus.ModelTypes['SignatureInfoInput']
+export type ISignatureInfo = Zeus.ModelTypes['SignatureInfo']
 
 /**
  * Интерфейс для подписанного документа.
  */
-export type ISignedDocument<T = any> = Cooperative.Document.ISignedDocument2<T>
-
+export type ISignedDocument = Zeus.ModelTypes['SignedDigitalDocument']
+export type ISignedDocumentInput = Zeus.ModelTypes['SignedDigitalDocumentInput']
 /**
  * Интерфейс для подписанного документа.
  */
