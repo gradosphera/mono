@@ -20,6 +20,7 @@ export default ssrMiddleware(({ app }) => {
       SITE_IMAGE: process.env.SITE_IMAGE,
       STORAGE_URL: process.env.STORAGE_URL,
       UPLOAD_URL: process.env.UPLOAD_URL,
+      TIMEZONE: process.env.TIMEZONE,
       VUE_ROUTER_MODE: process.env.VUE_ROUTER_MODE,
       VUE_ROUTER_BASE: process.env.VUE_ROUTER_BASE
     };

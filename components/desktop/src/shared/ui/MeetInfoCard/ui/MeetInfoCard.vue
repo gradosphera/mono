@@ -18,7 +18,7 @@ div
 
       div.row.q-mb-sm
         div.col-5.card-label Открытие:
-        div.col-7.card-value {{ meetStatus.formattedOpenDate }}
+        div.col-7.card-value {{ meetStatus.formattedOpenDate }} ({{ timezoneLabel }})
 
     div.col-xs-12.col-md-5
       div.row.q-mb-sm
@@ -32,10 +32,11 @@ div
 
       div.row.q-mb-sm
         div.col-5.card-label Закрытие:
-        div.col-7.card-value {{ meetStatus.formattedCloseDate }}
+        div.col-7.card-value {{ meetStatus.formattedCloseDate }} ({{ timezoneLabel }})
 
   div.row.justify-around
     MeetStatusBanner(:meet="meet")
+
 
 </template>
 
@@ -44,10 +45,14 @@ import type { IMeet } from 'src/entities/Meet'
 import { useMeetStatus } from 'src/shared/lib/composables'
 import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate'
 import { MeetStatusBanner } from 'src/shared/ui/MeetStatusBanner'
+import { getTimezoneLabel } from 'src/shared/lib/utils/dates/timezone'
 
 const props = defineProps<{
   meet: IMeet
 }>()
+
+// Название часового пояса для отображения в лейблах
+const timezoneLabel = getTimezoneLabel()
 
 const meetStatus = useMeetStatus(props.meet)
 </script>

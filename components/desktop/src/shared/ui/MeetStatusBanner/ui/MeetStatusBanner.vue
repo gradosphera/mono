@@ -9,13 +9,14 @@ div
       rounded
       style="font-size: 16px;"
     ).q-pa-sm
+
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { IMeet } from 'src/entities/Meet'
-import moment from 'moment-with-locales-es6'
 import { EXTENDED_STATUS_MAP, STATUS_BANNER_CONFIG } from 'src/shared/lib/consts'
+import { formatDateFromNow } from 'src/shared/lib/utils/dates/timezone'
 
 const props = defineProps<{
   meet: IMeet
@@ -40,20 +41,20 @@ const bannerConfig = computed(() => {
   return STATUS_BANNER_CONFIG[props.meet.processing.extendedStatus] || STATUS_BANNER_CONFIG['NONE']
 })
 
-// Форматированное время до открытия/закрытия
+// Форматированное время до открытия/закрытия с учетом часового пояса
 const timeText = computed(() => {
   if (!bannerConfig.value.needTime) return ''
 
   // Для статуса WAITING_FOR_OPENING
   if (props.meet?.processing?.extendedStatus === 'WAITING_FOR_OPENING') {
     if (!props.meet?.processing?.meet?.open_at) return ''
-    return moment(props.meet.processing.meet.open_at).fromNow()
+    return formatDateFromNow(props.meet.processing.meet.open_at)
   }
 
   // Для статуса VOTING_IN_PROGRESS
   if (props.meet?.processing?.extendedStatus === 'VOTING_IN_PROGRESS') {
     if (!props.meet?.processing?.meet?.close_at) return ''
-    return moment(props.meet.processing.meet.close_at).fromNow()
+    return formatDateFromNow(props.meet.processing.meet.close_at)
   }
 
   return ''
