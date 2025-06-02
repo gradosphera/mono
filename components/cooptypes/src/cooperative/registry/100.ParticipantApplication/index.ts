@@ -77,3 +77,43 @@ export const translations = {
   },
   // ... другие переводы
 }
+
+// Пример данных для редактора шаблонов
+export const exampleData = {
+  type: 'individual',
+  coop: {
+    short_name: 'ВОСХОД',
+    full_name: 'Потребительский кооператив "ВОСХОД"',
+    city: 'Москва',
+    is_branched: false,
+  },
+  individual: {
+    last_name: 'Иванов',
+    first_name: 'Петр',
+    middle_name: 'Сидорович',
+    birthdate: '01.01.1980',
+    full_address: 'г. Москва, ул. Примерная, д. 1, кв. 1',
+    phone: '+7 (999) 123-45-67',
+    email: 'petrov@example.com',
+    passport: {
+      series: '1234',
+      number: '567890',
+      code: '123-456',
+      issued_by: 'ОУФМС России по г. Москве',
+      issued_at: '01.01.2010',
+    },
+  },
+  meta: {
+    created_at: '15.02.2024',
+  },
+  vars: {
+    participant_application: {
+      protocol_number: '15',
+      protocol_day_month_year: '15 февраля 2024 г.',
+    },
+    passport_request: 'yes',
+  },
+  initial: '1000 рублей',
+  minimum: '10000 рублей',
+  signature: '/api/signature.png',
+}

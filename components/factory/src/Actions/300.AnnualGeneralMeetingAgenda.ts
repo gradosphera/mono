@@ -24,19 +24,30 @@ export class Factory extends DocFactory<AnnualGeneralMeetingAgenda.Action> {
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data })
     const coop = await super.getCooperative(data.coopname, data.block_num)
     const vars = await super.getVars(data.coopname, data.block_num)
-    const user = await super.getUser(data.username, data.block_num)
+
+    // Используем данные напрямую из Action, так как собрание еще не создано в блокчейне
+    const { meet, questions } = data
 
     const combinedData: AnnualGeneralMeetingAgenda.Model = {
       meta,
       coop,
       vars,
+      meet,
+      questions,
     }
 
     await super.validate(combinedData, template.model)
 
     const translation = template.translations[meta.lang]
 
-    const document: IGeneratedDocument = await super.generatePDF(user.data, template.context, combinedData, translation, meta, options?.skip_save)
+    const document: IGeneratedDocument = await super.generatePDF(
+      `${meet.presider_last_name} ${meet.presider_first_name} ${meet.presider_middle_name}`,
+      template.context,
+      combinedData,
+      translation,
+      meta,
+      options?.skip_save,
+    )
 
     return document
   }

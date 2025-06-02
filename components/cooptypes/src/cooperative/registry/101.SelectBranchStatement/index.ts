@@ -44,3 +44,32 @@ export const translations = {
     ip: 'ИП',
   },
 }
+
+// Пример данных для редактора шаблонов
+export const exampleData = {
+  type: 'individual',
+  coop: {
+    short_name: 'ВОСХОД',
+    full_name: 'Потребительский кооператив "ВОСХОД"',
+    city: 'Москва',
+  },
+  individual: {
+    last_name: 'Иванов',
+    first_name: 'Петр',
+    middle_name: 'Сидорович',
+  },
+  branch: {
+    short_name: 'Северный участок',
+  },
+  meta: {
+    created_at: '15.02.2024',
+  },
+  vars: {
+    participant_application: {
+      protocol_number: '15',
+      protocol_day_month_year: '15 февраля 2024 г.',
+    },
+    full_abbr_genitive: 'ПК',
+    name: 'ВОСХОД',
+  },
+}

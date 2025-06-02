@@ -1,6 +1,6 @@
 import type { JSONSchemaType } from 'ajv'
 import moment from 'moment-timezone'
-import type { Cooperative } from 'cooptypes'
+import type { Cooperative, Interfaces, MeetContract } from 'cooptypes'
 import { DraftContract, SovietContract } from 'cooptypes'
 import type { IBankAccount, ICombinedData, IGeneratedDocument, IMetaDocument, IMetaDocumentPartial, IPaymentData, ITemplate, ITranslations, externalDataTypes } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
@@ -142,6 +142,33 @@ export abstract class DocFactory<T extends IGenerate> {
     }
   }
 
+  async getGeneralMeetingDecision(meet: Interfaces.Meet.IMeet, created_at: string): Promise<Cooperative.Document.IDecisionData> {
+    /**
+     * Создаем данные решения общего собрания на основе данных собрания.
+     * В отличие от getDecision (для решений совета), здесь используются данные кворума из IMeet.
+     */
+
+    const quorum_percent = Number(meet.current_quorum_percent) // Текущий процент кворума
+
+    // Для общего собрания у нас есть общая информация о кворуме,
+    // но конкретные голоса "за/против" есть в каждом вопросе отдельно
+    const votes_for = 0 // Будет заполнено в questions
+    const votes_against = 0 // Будет заполнено в questions
+    const votes_abstained = 0 // Будет заполнено в questions
+
+    const [date, time] = created_at.split(' ')
+
+    return {
+      id: Number(meet.id),
+      date,
+      time,
+      votes_for,
+      votes_against,
+      votes_abstained,
+      voters_percent: quorum_percent,
+    }
+  }
+
   async getDecision(coop: CooperativeData, coopname: string, decision_id: number, created_at: string): Promise<Cooperative.Document.IDecisionData> {
     /**
      * Мы здесь извлекаем голоса из действий, а не из дельт таблиц т.к. в случае использования дельт возможна исключительная ситуация,
@@ -207,6 +234,46 @@ export abstract class DocFactory<T extends IGenerate> {
       voters_percent,
       // decision,
     }
+  }
+
+  async getMeet(coopname: string, meet_hash: string, block_num?: number): Promise<MeetContract.Tables.Meets.IOutput> {
+    const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
+
+    const meetResponse = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
+      filter: JSON.stringify({
+        'code': 'meet',
+        'scope': coopname,
+        'table': 'meets',
+        'value.hash': meet_hash,
+        ...block_filter,
+      }),
+      limit: String(1),
+    }))
+
+    const meet = meetResponse.results[0]?.value as MeetContract.Tables.Meets.IOutput
+
+    if (!meet)
+      throw new Error('Собрание не найдено')
+
+    return meet
+  }
+
+  async getMeetQuestions(coopname: string, meet_id: number, block_num?: number): Promise<MeetContract.Tables.Questions.IOutput[]> {
+    const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
+
+    const questionsResponse = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
+      filter: JSON.stringify({
+        'code': 'meet',
+        'scope': coopname,
+        'table': 'questions',
+        'value.meet_id': String(meet_id),
+        ...block_filter,
+      }),
+    }))
+
+    const questions = questionsResponse.results?.map((result: any) => result.value) as MeetContract.Tables.Questions.IOutput[] || []
+
+    return questions
   }
 
   async getTemplate<T>(scope: string, registry_id: number, block_num?: number): Promise<ITemplate<T>> {
@@ -332,7 +399,7 @@ export abstract class DocFactory<T extends IGenerate> {
   extractOrganizationName(input: ExternalOrganizationData): string {
     // Регулярное выражение для извлечения названия организации
     // eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/no-obscure-range
-    const regex = /^\s*(?:[А-ЯЁA-Za-z]{2,4}\s+)?["'«»“”]?([А-ЯЁа-яёA-Za-z0-9\- ]+(?:\s[А-ЯЁа-яёA-Za-z0-9\- ]+)*)["'«»“”]?\s*$/
+    const regex = /^\s*(?:[А-ЯЁA-Za-z]{2,4}\s+)?["'«»]?([А-ЯЁа-яёA-Za-z0-9\- ]+(?:\s[А-ЯЁа-яёA-Za-z0-9\- ]+)*)["'«»]?\s*$/
 
     const match = input.short_name.match(regex)
 

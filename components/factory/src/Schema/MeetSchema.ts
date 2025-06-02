@@ -1,0 +1,100 @@
+import type { JSONSchemaType } from 'ajv'
+import type { Interfaces } from 'cooptypes'
+
+// Схема для базового IMeetPoint
+export const MeetPointSchema: JSONSchemaType<Interfaces.Meet.IMeetPoint> = {
+  type: 'object',
+  properties: {
+    context: { type: 'string' },
+    title: { type: 'string' },
+    decision: { type: 'string' },
+  },
+  required: ['context', 'title', 'decision'],
+  additionalProperties: true,
+}
+
+// Схема для расширенного IQuestion (используется в 304 документе)
+export const QuestionSchema: JSONSchemaType<Interfaces.Meet.IQuestion> = {
+  type: 'object',
+  properties: {
+    id: { type: 'string' },
+    number: { type: 'string' },
+    coopname: { type: 'string' },
+    meet_id: { type: 'string' },
+    title: { type: 'string' },
+    context: { type: 'string' },
+    decision: { type: 'string' },
+    counter_votes_for: { type: 'string' },
+    counter_votes_against: { type: 'string' },
+    counter_votes_abstained: { type: 'string' },
+    voters_for: { type: 'array', items: { type: 'string' } },
+    voters_against: { type: 'array', items: { type: 'string' } },
+    voters_abstained: { type: 'array', items: { type: 'string' } },
+  },
+  required: [
+    'id',
+    'number',
+    'coopname',
+    'meet_id',
+    'title',
+    'context',
+    'decision',
+    'counter_votes_for',
+    'counter_votes_against',
+    'counter_votes_abstained',
+    'voters_for',
+    'voters_against',
+    'voters_abstained',
+  ],
+  additionalProperties: true,
+}
+
+// Упрощенная схема для IMeet
+export const MeetSchema: JSONSchemaType<Interfaces.Meet.IMeet> = {
+  type: 'object',
+  properties: {
+    id: { type: 'string' },
+    hash: { type: 'string' },
+    coopname: { type: 'string' },
+    type: { type: 'string' },
+    initiator: { type: 'string' },
+    presider: { type: 'string' },
+    secretary: { type: 'string' },
+    status: { type: 'string' },
+    created_at: { type: 'string' },
+    open_at: { type: 'string' },
+    close_at: { type: 'string' },
+    quorum_percent: { type: 'string' },
+    signed_ballots: { type: 'string' },
+    current_quorum_percent: { type: 'string' },
+    cycle: { type: 'string' },
+    quorum_passed: { type: 'boolean' },
+    proposal: {} as any,
+    authorization: {} as any,
+    decision1: {} as any,
+    decision2: {} as any,
+  },
+  required: [
+    'id',
+    'hash',
+    'coopname',
+    'type',
+    'initiator',
+    'presider',
+    'secretary',
+    'status',
+    'created_at',
+    'open_at',
+    'close_at',
+    'quorum_percent',
+    'signed_ballots',
+    'current_quorum_percent',
+    'cycle',
+    'quorum_passed',
+    'proposal',
+    'authorization',
+    'decision1',
+    'decision2',
+  ],
+  additionalProperties: true,
+}

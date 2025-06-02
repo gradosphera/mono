@@ -40,3 +40,32 @@ export const translations = {
   },
   // ... другие переводы
 }
+
+// Пример данных для редактора шаблонов
+export const exampleData = {
+  coop: {
+    short_name: 'ВОСХОД',
+    city: 'Москва',
+    chairman: {
+      last_name: 'Петров',
+      first_name: 'Иван',
+      middle_name: 'Сергеевич',
+    },
+  },
+  user: {
+    full_name: 'Иванов Петр Сидорович',
+  },
+  vars: {
+    full_abbr: 'Потребительский кооператив',
+    full_abbr_genitive: 'Потребительского кооператива',
+    name: 'ВОСХОД',
+    website: 'https://example.com',
+    user_agreement: {
+      protocol_number: '12',
+      protocol_day_month_year: '12 февраля 2024 г.',
+    },
+  },
+  meta: {
+    created_at: '15.02.2024',
+  },
+}

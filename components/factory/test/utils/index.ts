@@ -181,7 +181,7 @@ export async function preLoading() {
         present: true,
         code: 'registrator',
         scope: 'registrator',
-        table: 'orgs',
+        table: 'coops',
         primary_key: '1',
         value: {
           username: 'voskhod',
@@ -269,7 +269,7 @@ export async function preLoading() {
 - Паевой взнос - безусловно возвратный имущественный взнос в паевой фонд Общества за вычетом Членского взноса Пайщика в Общество денежными средствами и/или Имуществом в соответствии с условиями настоящего Договора.
 - Фонды – Имущество Общества, утвержденное общим собранием пайщиков для целевого использования на содержание и уставной деятельности Общества.
 - Лицевой счет (ЛС) - баланс операций Пайщика по внесению и возврату Паевых взносов в Общество, а также Членских взносов, учитываемых Обществом.`,
-      subject: `2.1. Стороны осуществляют хозяйственную деятельность по проектированию, разработке, прототипированию и эксплуатации цифровых информационно-технологических решений и программного обеспечения, направленного на создание информационной экосистемы взаимодействия физических и юридических лиц, включая нерезидентов различных юрисдикций и организационно-правовых форм, на основе международных кооперативных принципов и законодательства Российской Федерации в отношении кооперативов и потребительских обществ (далее “Платформа”), с целью консолидации и интеграции в социально-экономическую среду Российской Федерации.
+      subject: `2.1. Стороны осуществляют хозяйственную деятельность по проектированию, разработке, прототипированию и эксплуатации цифровых информационно-технологических решений и программного обеспечения, направленного на создание информационной экосистемы взаимодействия физических и юридических лиц, включая нерезидентов различных юрисдикций и организационно-правовых форм, на основе международных кооперативных принципов и законодательства Российской Федерации в отношении кооперативов и потребительских обществ (далее "Платформа"), с целью консолидации и интеграции в социально-экономическую среду Российской Федерации.
 2.2. Пайщик участвует в хозяйственной деятельности Общества путем внесения целевых паевых взносов в паевой фонд Общества Имуществом и Денежными Средствами, в рамках исполнения Предмета настоящего Договора в соответствии с п.2.1. и Приложениями к настоящему Договору, являющихся его неотъемлемыми частями.`,
     },
   }
@@ -502,6 +502,158 @@ export async function preLoading() {
   }
 
   await generator.save('paymentMethod', paymentData4)
+
+  // Добавляем данные для тестирования собраний
+  const testMeetHash = 'test_meet_hash_12345'
+  const testMeetId = '1'
+
+  // Добавляем данные собрания в таблицу meets
+  await deltas.insertOne({
+    block_num: 0,
+    present: true,
+    code: 'meet',
+    scope: 'voskhod',
+    table: 'meets',
+    primary_key: testMeetId,
+    value: {
+      id: testMeetId,
+      hash: testMeetHash,
+      coopname: 'voskhod',
+      type: 'regular',
+      initiator: 'individual',
+      presider: 'individual',
+      secretary: 'ant',
+      status: 'active',
+      created_at: '2024-12-15T00:00:00.000',
+      open_at: '2024-12-20T10:00:00.000',
+      close_at: '2024-12-21T18:00:00.000',
+      quorum_percent: '51',
+      signed_ballots: '0',
+      current_quorum_percent: '0',
+      cycle: '1',
+      quorum_passed: false,
+      proposal: {
+        version: '1.0.0',
+        hash: 'proposal_hash',
+        doc_hash: 'doc_hash',
+        meta_hash: 'meta_hash',
+        meta: '{}',
+        signatures: [],
+      },
+      authorization: {
+        version: '1.0.0',
+        hash: 'auth_hash',
+        doc_hash: 'auth_doc_hash',
+        meta_hash: 'auth_meta_hash',
+        meta: '{}',
+        signatures: [],
+      },
+      decision1: {
+        version: '1.0.0',
+        hash: 'decision1_hash',
+        doc_hash: 'decision1_doc_hash',
+        meta_hash: 'decision1_meta_hash',
+        meta: '{}',
+        signatures: [],
+      },
+      decision2: {
+        version: '1.0.0',
+        hash: 'decision2_hash',
+        doc_hash: 'decision2_doc_hash',
+        meta_hash: 'decision2_meta_hash',
+        meta: '{}',
+        signatures: [],
+      },
+    },
+  })
+
+  // Добавляем вопросы собрания в таблицу questions
+  await deltas.insertOne({
+    block_num: 0,
+    present: true,
+    code: 'meet',
+    scope: 'voskhod',
+    table: 'questions',
+    primary_key: '1',
+    value: {
+      id: '1',
+      number: '1',
+      coopname: 'voskhod',
+      meet_id: testMeetId,
+      title: 'Утверждение годового отчёта',
+      context: 'О деятельности кооператива за 2024 год',
+      decision: 'Утвердить годовой отчёт кооператива за 2024 год',
+      counter_votes_for: '0',
+      counter_votes_against: '0',
+      counter_votes_abstained: '0',
+      voters_for: [],
+      voters_against: [],
+      voters_abstained: [],
+    },
+  })
+
+  await deltas.insertOne({
+    block_num: 0,
+    present: true,
+    code: 'meet',
+    scope: 'voskhod',
+    table: 'questions',
+    primary_key: '2',
+    value: {
+      id: '2',
+      number: '2',
+      coopname: 'voskhod',
+      meet_id: testMeetId,
+      title: 'Избрание совета кооператива',
+      context: '',
+      decision: 'Избрать новый состав совета кооператива',
+      counter_votes_for: '0',
+      counter_votes_against: '0',
+      counter_votes_abstained: '0',
+      voters_for: [],
+      voters_against: [],
+      voters_abstained: [],
+    },
+  })
+
+  // Добавляем данные решения совета в таблицу decisions для тестирования документов 301 и 304
+  await deltas.insertOne({
+    block_num: 0,
+    present: true,
+    code: 'soviet',
+    scope: 'voskhod',
+    table: 'decisions',
+    primary_key: '1',
+    value: {
+      id: '1',
+      coopname: 'voskhod',
+      type: 'general_meeting',
+      title: 'О созыве очередного общего собрания пайщиков',
+      description: 'Решение о созыве очередного общего собрания пайщиков кооператива ВОСХОД',
+      statement: {
+        version: '1.0.0',
+        hash: 'statement_hash',
+        doc_hash: 'statement_doc_hash',
+        meta_hash: 'statement_meta_hash',
+        meta: '{}',
+        signatures: [],
+      },
+      decision: {
+        version: '1.0.0',
+        hash: 'decision_hash',
+        doc_hash: 'decision_doc_hash',
+        meta_hash: 'decision_meta_hash',
+        meta: '{}',
+        signatures: [],
+      },
+      batch_id: '0',
+      expiration: '2024-12-31T23:59:59.000',
+      created_at: '2024-12-15T00:00:00.000',
+      created_by: 'ant',
+      question_type: 'general_meeting',
+      status: 'active',
+    },
+  })
 
   await storage.disconnect()
   await generator.disconnect()
