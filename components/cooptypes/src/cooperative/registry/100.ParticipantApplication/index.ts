@@ -75,45 +75,97 @@ export const translations = {
     passport_from: 'от',
     fact_address: 'фактический адрес',
   },
-  // ... другие переводы
 }
 
-// Пример данных для редактора шаблонов
 export const exampleData = {
-  type: 'individual',
   coop: {
-    short_name: 'ВОСХОД',
-    full_name: 'Потребительский кооператив "ВОСХОД"',
+    short_name: 'ПК "ВОСХОД"',
+    full_name: 'потребительский кооператив "Восход"',
     city: 'Москва',
-    is_branched: false,
-  },
-  individual: {
-    last_name: 'Иванов',
-    first_name: 'Петр',
-    middle_name: 'Сидорович',
-    birthdate: '01.01.1980',
-    full_address: 'г. Москва, ул. Примерная, д. 1, кв. 1',
-    phone: '+7 (999) 123-45-67',
-    email: 'petrov@example.com',
-    passport: {
-      series: '1234',
-      number: '567890',
-      code: '123-456',
-      issued_by: 'ОУФМС России по г. Москве',
-      issued_at: '01.01.2010',
-    },
+    is_branched: true,
   },
   meta: {
-    created_at: '15.02.2024',
+    created_at: '04.03.2024 10:54',
   },
+  individual: {
+    last_name: 'Муравьев',
+    first_name: 'Алексей',
+    middle_name: 'Николаевич',
+    birthdate: '04.03.1990',
+    phone: '790343432423',
+    email: 'email@gmail.com',
+    full_address: 'Советов 3-84',
+    passport: {
+      series: '7712',
+      number: '122112',
+      issued_by: 'отделом УФМС г. Москва',
+      issued_at: '10.05.2010',
+      code: '220-220',
+    },
+  },
+  entrepreneur: {
+    last_name: 'Муравьев',
+    first_name: 'Алексей',
+    middle_name: 'Николаевич',
+    birthdate: '04.03.1990',
+    full_address: 'Советов 3-84',
+    details: {
+      inn: '34534534534',
+      ogrn: '345345345',
+    },
+    bank_account: {
+      account_number: '234234234234',
+      details: {
+        kpp: '23423423423',
+        corr: '234234234234234',
+        bik: '234234234234',
+      },
+      bank_name: 'ПАО СБЕРБАНК',
+    },
+    phone: '+734534534534',
+    email: 'email@gmail.com',
+  },
+  organization: {
+    full_name: 'ООО РОМАШКА',
+    full_address: 'Советов 3-84',
+    represented_by: {
+      last_name: 'Муравьев',
+      first_name: 'Алексей',
+      middle_name: 'Николаевич',
+      position: 'директор',
+      based_on: 'решения учредителей №1 от 05.03.2024',
+    },
+    details: {
+      inn: '234234234',
+      ogrn: '234234234234',
+    },
+    bank_account: {
+      account_number: '23423423423423',
+      details: {
+        kpp: '234234234234',
+        corr: '234234234234',
+        bik: '234234234234',
+      },
+      bank_name: 'ПАО СБЕРБАНК',
+    },
+    phone: '+35345345345',
+    email: 'an.mddf@gmail.com',
+    fact_address: 'Советов 3-84',
+  },
+  type: 'individual',
+  signature: '',
   vars: {
     participant_application: {
-      protocol_number: '15',
-      protocol_day_month_year: '15 февраля 2024 г.',
+      protocol_number: '10-04-2024',
+      protocol_day_month_year: '10 апреля 2024 г.',
     },
     passport_request: 'yes',
   },
-  initial: '1000 рублей',
-  minimum: '10000 рублей',
-  signature: '/api/signature.png',
+  branch: {
+    short_name: 'РОМАШКА',
+  },
+  initial: '100.00 RUB',
+  minimum: '300.00 RUB',
+  org_initial: '1000.00 RUB',
+  org_minimum: '3000.00 RUB',
 }
