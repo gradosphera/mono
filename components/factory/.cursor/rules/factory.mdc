@@ -1,0 +1,261 @@
+---
+description: 
+globs: src/**/*.ts
+alwaysApply: false
+---
+# Фабрика Документов Кооперативов
+
+## Общая Архитектура
+
+Фабрика документов — это система генерации PDF документов для кооперативов, построенная на TypeScript с использованием MongoDB для хранения данных. Система состоит из трех основных частей:
+
+1. **registry/** — JSON-шаблоны документов (статические данные)
+2. **factory/** — основная фабрика с логикой генерации
+3. **cooptypes/** — типы данных и интерфейсы
+
+## Структура Registry
+
+В корневой папке `registry/` находятся JSON файлы с номерными названиями, представляющие шаблоны документов:
+
+### Основные документы:
+- `1.walletProgramAgreement.json` — соглашение о кошельке
+- `2.regulationElectronicSignature.json` — регламент электронной подписи
+- `3.privacyPolicy.json` — политика конфиденциальности
+- `4.userAgreement.json` — пользовательское соглашение
+- `50.CoopenomicsAgreement.json` — соглашение с партнерами
+- `100.participantApplication.json` — заявление участника
+- `101.selectBranchStatement.json` — заявление о выборе филиала
+
+### Документы общих собраний (300-304):
+- `300.annualGeneralMeetingAgenda.json` — предложение повестки дня
+- `301.annualGeneralMeetingSovietDecision.json` — протокол заседания совета
+- `302.annualGeneralMeetingNotification.json` — уведомление о собрании
+- `303.annualGeneralMeetingVotingBallot.json` — бюллетень для голосования
+- `304.annualGeneralMeetingDecision.json` — протокол общего собрания
+
+### Инвестиционные документы (1000+):
+- `1000.investAgreement.json` — инвестиционное соглашение
+- `1001.investByResultStatement.json` — заявление о зачете по результатам
+- `1002.investByResultAct.json` — акт зачета по результатам
+- `1005.investByMoneyStatement.json` — заявление о зачете денежных средств
+
+### Структура JSON-шаблона:
+```json
+{
+  "context": "<div>...HTML шаблон с переменными...</div>",
+  "model": {...данные для примера...},
+  "translation": {...переводы ключей...},
+  "object_model": {...схема объектной модели...}
+}
+```
+
+## Фабрика (factory/)
+
+### Основные компоненты:
+
+#### src/index.ts — Главный класс Generator
+```typescript
+export class Generator implements IGenerator {
+  // Хранилище фабрик для каждого типа документа
+  factories: { [K in Numbers]: DocFactory<IGenerate> }
+  
+  // MongoDB коннектор
+  public storage: MongoDBConnector
+  
+  // Основной метод генерации
+  async generate(data: IGenerate, options?: IGenerationOptions): Promise<IGeneratedDocument>
+}
+```
+
+#### Архитектура Factory Pattern:
+- Базовый класс `DocFactory<T>` в `src/Factory/index.ts`
+- Каждый документ имеет свою фабрику в `src/Actions/`
+- Фабрики наследуются от `DocFactory` и реализуют метод `generateDocument()`
+
+### Сервисы:
+
+#### Services/Generator/ — PDF генерация
+- `PDFService` — конвертирует HTML в PDF через WeasyPrint
+- Использует шрифт Arial (base64)
+- Добавляет метаданные в PDF
+- Вычисляет SHA-256 хеш документа
+
+#### Services/Templator/ — Шаблонизация
+- Основан на Nunjucks
+- Поддерживает кастомное расширение `{% trans %}` для переводов
+- Рендерит HTML из шаблона с подстановкой переменных
+
+#### Services/Validator/ — Валидация
+- Использует AJV для JSON Schema валидации
+- Поддерживает кастомные форматы (телефон)
+- Локализация ошибок на русском языке
+
+#### Services/Databazor/ — База данных
+- `MongoDBConnector` — работа с MongoDB
+- `DataService` — абстракция над данными
+- Коллекции: `deltas`, `actions`, `documents`, и другие
+
+### Модели данных (src/Models/):
+
+#### Основные типы пользователей:
+- `Individual` — физические лица (ФИО, паспорт, адрес)
+- `Organization` — организации (ИНН, ОГРН, представитель)
+- `Entrepreneur` — ИП (ФИО + ИНН/ОГРН)
+
+#### Кооперативные данные:
+- `Cooperative` — данные кооператива
+- `PaymentMethod` — платежные методы
+- `Vars` — переменные кооператива
+- `Project` — проекты
+
+### Система Action-ов:
+
+Каждый документ имеет Action класс в `src/Actions/` с методом `generateDocument()`:
+
+1. **Получение шаблона** — из локального Registry или MongoDB
+2. **Сбор данных** — пользователь, кооператив, переменные, специфичные данные
+3. **Валидация** — проверка по JSON схеме
+4. **Рендеринг** — HTML из шаблона + данные
+5. **PDF генерация** — HTML → PDF с метаданными
+6. **Сохранение** — в MongoDB (если не skip_save)
+
+## Система типов (cooptypes/)
+
+### cooperative/registry/ — Типы документов
+Каждый документ имеет папку с интерфейсами:
+- `Action` — входные данные для генерации
+- `Model` — модель данных для шаблона
+- `Template` — структура шаблона
+
+### contracts/ — Блокчейн контракты
+- `registrator/` — регистрация кооперативов
+- `soviet/` — управление советом
+- `meet/` — общие собрания
+- `wallet/`, `capital/`, `fund/` — финансовые операции
+
+## База данных MongoDB
+
+### Основные коллекции:
+
+#### deltas — Состояние блокчейна
+```javascript
+{
+  block_num: number,
+  present: boolean,
+  code: string,    // название контракта
+  scope: string,   // область действия
+  table: string,   // имя таблицы
+  primary_key: string,
+  value: {...}     // данные записи
+}
+```
+
+#### actions — Действия блокчейна
+```javascript
+{
+  block_num: number,
+  account: string,
+  name: string,     // имя действия
+  receiver: string,
+  data: {...}       // данные действия
+}
+```
+
+#### documents — Сгенерированные документы
+```javascript
+{
+  hash: string,           // SHA-256 хеш
+  binary: Uint8Array,     // PDF данные
+  html: string,           // HTML исходник
+  meta: {                 // метаданные
+    title: string,
+    created_at: string,
+    lang: string
+  }
+}
+```
+
+### Таблицы данных:
+- `coops` — кооперативы
+- `meets` — собрания
+- `questions` — вопросы собраний
+- `decisions` — решения совета
+- `individuals` — физические лица
+- `organizations` — организации
+- `entrepreneurs` — ИП
+- `paymentMethods` — платежные методы
+- `vars` — переменные кооперативов
+
+## Генерация документов
+
+### Процесс генерации:
+1. **Вызов** `generator.generate(action, options)`
+2. **Поиск фабрики** по `registry_id`
+3. **Загрузка шаблона** (локально или из БД)
+4. **Сбор данных** из MongoDB по `coopname`, `username`, `block_num`
+5. **Создание модели** — объединение всех данных
+6. **Валидация** модели по JSON схеме
+7. **Рендеринг HTML** через Nunjucks
+8. **Генерация PDF** через WeasyPrint
+9. **Добавление метаданных** в PDF
+10. **Вычисление хеша** SHA-256
+11. **Сохранение** в MongoDB
+
+### Пример использования:
+```typescript
+const generator = new Generator()
+await generator.connect(mongoUri)
+
+const document = await generator.generate({
+  registry_id: '300',
+  coopname: 'voskhod',
+  username: 'ant',
+  block_num: 0,
+  meet: {...},
+  questions: [...]
+})
+```
+
+## Особенности реализации
+
+### Шаблонизация:
+- HTML шаблоны с CSS стилями
+- Переменные в формате `{{variable.field}}`
+- Условная логика `{% if condition %}`
+- Циклы `{% for item in array %}`
+- Переводы `{% trans 'KEY', var1, var2 %}`
+
+### Подписи:
+- Цифровые подписи вместо физических
+- Текст "Подписано электронной подписью"
+- Убраны подчеркивания для подписей
+
+### Типы собраний:
+- `regular` — очередное
+- `extraordinary` — внеочередное
+- Условная логика в шаблонах
+
+### Филиалы:
+- `coop.is_branched` — проверка на наличие филиалов
+- "пайщиков" vs "уполномоченных" в зависимости от типа
+
+### Форматирование дат:
+- Формат: "г. Москва, 15 декабря 2024 г."
+- Без кавычек вокруг дат
+- Запятая после города
+
+## Тестирование
+
+### test/utils/index.ts — Тестовые утилиты:
+- `preLoading()` — инициализация тестовых данных
+- Создание кооператива, пользователей, платежных методов
+- Настройка данных собраний и решений
+- Очистка временных файлов
+
+### Тестовые данные:
+- Кооператив "ВОСХОД"
+- Пользователи: ant, individual, entrepreneur
+- Организации: voskhod, branch, exampleorg
+- Собрания с вопросами и решениями
+
+Фабрика поддерживает полный цикл создания документов кооператива от заявлений до протоколов собраний с возможностью кастомизации под разные типы кооперативов и требования.

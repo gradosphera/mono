@@ -2,7 +2,7 @@ import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
-import { CooperativeSchema, VarsSchema } from '../Schema'
+import { CooperativeSchema, MeetPointSchema, MeetSchema, VarsSchema, decisionSchema } from '../Schema'
 
 export const registry_id = Cooperative.Registry.AnnualGeneralMeetingSovietDecision.registry_id
 
@@ -19,8 +19,14 @@ export const Schema: JSONSchemaType<Model> = {
     meta: IMetaJSONSchema,
     coop: CooperativeSchema,
     vars: VarsSchema,
+    decision: decisionSchema,
+    meet: MeetSchema,
+    questions: {
+      type: 'array',
+      items: MeetPointSchema,
+    },
   },
-  required: ['meta', 'coop', 'vars'],
+  required: ['meta', 'coop', 'vars', 'decision', 'meet', 'questions'],
   additionalProperties: true,
 }
 
