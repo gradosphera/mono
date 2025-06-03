@@ -61,3 +61,61 @@ export const translations = {
     chairman_council_signature: 'Председатель Совета',
   },
 }
+
+export const exampleData = {
+  coop: {
+    city: 'Москва',
+    is_branched: false,
+    chairman: {
+      last_name: 'Муравьев',
+      first_name: 'Алексей',
+      middle_name: 'Николаевич',
+    },
+    members: [
+      {
+        is_chairman: true,
+        last_name: 'Иванов',
+        first_name: 'Петр',
+        middle_name: 'Сидорович',
+      },
+      {
+        is_chairman: false,
+        last_name: 'Петров',
+        first_name: 'Сидор',
+        middle_name: 'Иванович',
+      },
+    ],
+  },
+  decision: {
+    id: 'СС-12-02-2024',
+    day: '12',
+    month: 'февраля',
+    year: '2024',
+    open_time: '10 часов 00 минут',
+    close_time: '10 часов 30 минут',
+    quorum_percent: '100',
+    votes_for: '3',
+    votes_against: '0',
+    votes_abstained: '0',
+  },
+  meet: {
+    type: 'regular',
+    close_at_date: '15 марта 2024',
+  },
+  questions: [
+    {
+      number: '1',
+      title: 'Отчет Председателя Потребительского Кооператива о проделанной работе за период с 01.01.2023 г. по 31.12.2023 г.',
+      context: 'Подробная информация о вопросе...',
+    },
+    {
+      number: '2',
+      title: 'Утверждение Заключения Ревизионной Комиссии о ревизии деятельности за период с 01.01.2023 г. по 31.12.2023 г.',
+      context: 'Дополнительная информация о ревизии...',
+    },
+  ],
+  vars: {
+    full_abbr_genitive: 'Потребительского кооператива',
+    name: 'ВОСХОД',
+  },
+}

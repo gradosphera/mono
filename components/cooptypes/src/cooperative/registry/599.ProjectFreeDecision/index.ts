@@ -35,3 +35,21 @@ export const translations = {
   },
   // ... другие переводы
 }
+
+export const exampleData = {
+  meta: {
+    created_at: '12.02.2024 00:01',
+  },
+  coop: {
+    city: 'Москва',
+  },
+  project: {
+    decision: 'Решили то да сё',
+    question: 'Решить то да сё',
+  },
+  suggester_name: 'Муравьев Алексей Николаевич',
+  vars: {
+    full_abbr_genitive: 'Потребительского Кооператива',
+    name: 'ВОСХОД',
+  },
+}

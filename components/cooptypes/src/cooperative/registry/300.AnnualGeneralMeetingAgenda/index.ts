@@ -73,7 +73,7 @@ export const exampleData = {
     city: 'Москва',
   },
   meet: {
-    type: 'regular' as const,
+    type: 'regular',
     created_at_day: '12',
     created_at_month: 'февраля',
     created_at_year: '2024',

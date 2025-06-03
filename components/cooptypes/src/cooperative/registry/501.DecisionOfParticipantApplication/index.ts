@@ -67,3 +67,63 @@ export const translations = {
   },
   // ... другие переводы
 }
+
+export const exampleData = {
+  meta: {
+    created_at: '12.02.2024 00:01',
+  },
+  coop: {
+    city: 'Москва',
+    full_address: 'Смольная 3-84',
+    chairman: {
+      last_name: 'Муравьев',
+      first_name: 'Алексей',
+      middle_name: 'Николаевич',
+    },
+    short_name: 'ПК "Восход"',
+  },
+  decision: {
+    time: '00:01',
+    date: '12.02.2024',
+    votes_for: '3',
+    votes_against: '0',
+    votes_abstained: '0',
+    voters_percent: '100',
+    id: '1',
+  },
+  member: {
+    is_chairman: true,
+    last_name: 'Муравьев',
+    first_name: 'Алексей',
+    middle_name: 'Николаевич',
+  },
+  organization: {
+    details: {
+      ogrn: '2222222222',
+    },
+    short_name: 'ООО "Ромашка"',
+  },
+  type: 'organization',
+  individual: {
+    last_name: 'Мартин',
+    first_name: 'Роберт',
+    middle: {
+      name: 'Иванович',
+    },
+    birthdate: '04.04.2000',
+  },
+  entrepreneur: {
+    last_name: 'Мартин',
+    first_name: 'Роберт',
+    middle: {
+      name: 'Иванович',
+    },
+    details: {
+      ogrn: '11111111111',
+    },
+  },
+  vars: {
+    full_abbr_genitive: 'Потребительского Кооператива',
+    name: 'ВОСХОД',
+  },
+}

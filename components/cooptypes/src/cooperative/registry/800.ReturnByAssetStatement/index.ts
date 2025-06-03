@@ -42,3 +42,27 @@ export const translations = {
   },
   // ... другие переводы
 }
+export const exampleData = {
+  vars: {
+    name: 'Восход',
+    full_abbr_genitive: 'потребительского кооператива',
+  },
+  user: {
+    full_name_or_short_name: 'Иванов Иван Иванович',
+  },
+  coop: {
+    short_name: 'ПК ВОСХОД',
+  },
+  meta: {
+    created_at: '21.01.2025 12:13',
+  },
+  request: {
+    hash: '123',
+    title: 'Молоко "Бурёнка"',
+    unit_of_measurement: 'Литр',
+    units: '10',
+    unit_cost: '100',
+    total_cost: '1000',
+    currency: 'RUB',
+  },
+}

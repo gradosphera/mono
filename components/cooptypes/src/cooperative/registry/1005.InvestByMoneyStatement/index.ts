@@ -37,3 +37,19 @@ export const translations = {
   },
   // ... другие переводы
 }
+export const exampleData = {
+  coop: {
+    full_name: 'Потребительский Кооператив «ВОСХОД»',
+  },
+  user: {
+    full_name: 'Сидоров Иван Петрович',
+  },
+  uhdContract: {
+    number: '05-02-24-АНМ',
+    date: '05.02.2024',
+  },
+  contribution: {
+    amount: '100000',
+    currency: 'RUB',
+  },
+}
