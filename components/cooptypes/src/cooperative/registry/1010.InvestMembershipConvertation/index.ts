@@ -46,3 +46,25 @@ export const translations = {
   },
   // ... другие переводы
 }
+export const exampleData = {
+  appendix: {
+    number: '5',
+  },
+  coop: {
+    full_name: 'Потребительский Кооператив «ВОСХОД»',
+    short_name: 'ПК "ВОСХОД"',
+    chairman_full_name: 'А.Н. Муравьев',
+  },
+  contribution: {
+    words: 'сто тысяч',
+    amount: '100000',
+    currency: 'RUB',
+  },
+  user: {
+    full_name: 'Сидоров Иван Петрович',
+  },
+  uhdContract: {
+    number: '05-02-24-АНМ',
+    date: '05.02.2024 г.',
+  },
+}

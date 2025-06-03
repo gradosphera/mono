@@ -50,3 +50,35 @@ export const translations = {
     AUTHORIZED_SIGNATURE_LABEL: 'Уполномоченный',
   },
 }
+
+export const exampleData = {
+  coop: {
+    is_branched: false,
+  },
+  meet: {
+    type: 'regular',
+    open_at_date: '15.03.2024',
+  },
+  user: {
+    full_name_or_short_name: 'Сидоров Иван Петрович',
+    last_name: 'Сидоров',
+    first_name: 'Иван',
+    middle_name: 'Петрович',
+  },
+  questions: [
+    {
+      number: 'первому',
+      decision: 'Принять Отчет Председателя Совета Потребительского Кооператива и признать результаты деятельности удовлетворительными',
+      context: 'Подробная информация о вопросе...',
+    },
+    {
+      number: 'второму',
+      decision: 'Утвердить Заключение Ревизионной Комиссии о ревизии деятельности',
+      context: 'Дополнительная информация о ревизии...',
+    },
+  ],
+  vars: {
+    full_abbr_genitive: 'Потребительского Кооператива',
+    name: 'ВОСХОД',
+  },
+}

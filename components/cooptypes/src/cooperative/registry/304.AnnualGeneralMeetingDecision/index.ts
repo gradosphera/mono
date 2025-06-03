@@ -54,3 +54,54 @@ export const translations = {
     secretary_meeting_signature: 'Секретарь Собрания',
   },
 }
+
+export const exampleData = {
+  coop: {
+    city: 'Москва',
+    is_branched: false,
+  },
+  decision: {
+    id: 'ОС-15-03-2024',
+    day: '15',
+    month: 'марта',
+    year: '2024',
+    close_time: '15 часов 00 минут',
+  },
+  meet: {
+    type: 'regular',
+    open_at_date: '15.03.2024',
+    open_at_time: '10:00',
+    registration_datetime: '15.03.2024, 09:30',
+    close_at_datetime: '18.03.2024',
+    presider_last_name: 'Иванов',
+    presider_first_name: 'Петр',
+    presider_middle_name: 'Сидорович',
+    secretary_last_name: 'Петрова',
+    secretary_first_name: 'Анна',
+    secretary_middle_name: 'Викторовна',
+  },
+  questions: [
+    {
+      number: '1',
+      title: 'Отчет Председателя Потребительского Кооператива о проделанной работе за период с 01.01.2023 г. по 31.12.2023 г.',
+      context: 'Подробная информация о вопросе...',
+      decision: 'Принять Отчет Председателя Совета и признать результаты деятельности удовлетворительными',
+      counter_votes_for: '15',
+      counter_votes_against: '0',
+      counter_votes_abstained: '0',
+    },
+    {
+      number: '2',
+      title: 'Утверждение Заключения Ревизионной Комиссии о ревизии деятельности за период с 01.01.2023 г. по 31.12.2023 г.',
+      context: 'Дополнительная информация о ревизии...',
+      decision: 'Утвердить Заключение Ревизионной Комиссии о ревизии деятельности',
+      counter_votes_for: '15',
+      counter_votes_against: '0',
+      counter_votes_abstained: '0',
+    },
+  ],
+  vars: {
+    full_abbr_genitive: 'Потребительского кооператива',
+    name: 'ВОСХОД',
+  },
+}

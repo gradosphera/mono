@@ -45,31 +45,44 @@ export const translations = {
   },
 }
 
-// Пример данных для редактора шаблонов
 export const exampleData = {
-  type: 'individual',
+  meta: {
+    created_at: '04.03.2024 10:54',
+  },
   coop: {
-    short_name: 'ВОСХОД',
-    full_name: 'Потребительский кооператив "ВОСХОД"',
     city: 'Москва',
+    short_name: 'ПК "ВОСХОД"',
   },
   individual: {
-    last_name: 'Иванов',
-    first_name: 'Петр',
-    middle_name: 'Сидорович',
+    last_name: 'Муравьев',
+    first_name: 'Алексей',
+    middle_name: 'Николаевич',
   },
-  branch: {
-    short_name: 'Северный участок',
+  entrepreneur: {
+    last_name: 'Муравьев',
+    first_name: 'Алексей',
+    middle_name: 'Николаевич',
   },
-  meta: {
-    created_at: '15.02.2024',
+  organization: {
+    represented_by: {
+      last_name: 'Муравьев',
+      first_name: 'Алексей',
+      middle_name: 'Николаевич',
+      position: 'директор',
+      based_on: 'решения учредителей №1 от 05.03.2024',
+    },
+    short_name: 'ООО РОМАШКА',
   },
+  type: 'individual',
   vars: {
     participant_application: {
-      protocol_number: '15',
-      protocol_day_month_year: '15 февраля 2024 г.',
+      protocol_number: '10-04-2024',
+      protocol_day_month_year: '10 апреля 2024 г.',
     },
-    full_abbr_genitive: 'ПК',
+    full_abbr_genitive: 'потребительского кооператива',
     name: 'ВОСХОД',
+  },
+  branch: {
+    short_name: 'РОМАШКА',
   },
 }

@@ -59,3 +59,34 @@ export const translations = {
   },
   // ... другие переводы
 }
+export const exampleData = {
+  vars: {
+    coop_name: 'ВОСХОД',
+  },
+  user: {
+    full_name: 'Иванов Петр Сидорович',
+  },
+  meta: {
+    created_at: '12.02.2024',
+  },
+  result: {
+    quantity: '1',
+    name: 'сервис автоматического тестирования',
+    currency: 'RUB',
+    unit_price: '100000',
+    total_price: '100000',
+    description: 'Сервис основан на фреймворке auto-test и совершает полный цикл автоматизированного тестирования перед поставкой ПО в продакшн.',
+  },
+  coop: {
+    short_name: 'ПК "ВОСХОД"',
+    chairman: {
+      last_name: 'Витязь',
+      first_name: 'Иван',
+      middle_name: 'Иванович',
+    },
+  },
+  uhdContract: {
+    number: 'УХД-01-02-24-МАН',
+    date: '01.02.2024',
+  },
+}

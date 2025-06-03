@@ -59,3 +59,46 @@ export const translations = {
   },
   // ... другие переводы
 }
+export const exampleData = {
+  meta: {
+    created_at: '12.02.2024 00:01',
+  },
+  coop: {
+    city: 'Москва',
+    is_branched: false,
+  },
+  user: {
+    full_name_or_short_name: 'ООО "РОМАШКА"',
+  },
+  request: {
+    unit_of_measurement: 'Литры',
+    hash: 'hash123',
+    title: 'Молоко "Бурёнка"',
+    units: '10',
+    unit_cost: '100',
+    total_cost: '1000',
+    total_cost_string: 'одна тысяча рублей 00 копеек',
+    currency: 'RUB',
+  },
+  program: {
+    name: 'СОСЕДИ',
+  },
+  branch: {
+    short_name: 'РОМАШКА',
+  },
+  vars: {
+    full_abbr_genitive: 'Потребительского Кооператива',
+    name: 'ВОСХОД',
+    full_abbr: 'Потребительский Кооператив',
+  },
+  transmitter: {
+    last_name: 'Иванов',
+    first_name: 'Иван',
+    middle_name: 'Иванович',
+  },
+  order_date: '01.01.2025',
+  act_id: '123',
+  decision: {
+    id: '24',
+  },
+}

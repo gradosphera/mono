@@ -53,3 +53,19 @@ export const translations = {
 
   // ... другие переводы
 }
+
+export const exampleData = {
+  vars: {
+    full_abbr_genitive: 'потребительского кооператива',
+    short_abbr: 'ПК',
+    website: 'цифровой-кооператив.рф',
+    name: 'Восход',
+    signature_agreement: {
+      protocol_number: '10-04-2024',
+      protocol_day_month_year: '10 апреля 2024 г.',
+    },
+  },
+  coop: {
+    short_name: 'ПК "ВОСХОД"',
+  },
+}

@@ -19,7 +19,76 @@ export interface Model {
 
 export const title = 'Согласие с условиями ЦПП «ЦИФРОВОЙ КОШЕЛЕК»'
 export const description = 'Форма присоединения к целевой потребительской программе «ЦИФРОВОЙ КОШЕЛЕК»'
-export const context = '<div class="digital-document"><div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'APPROVED\' %}</p>\n<p style="margin: 0px !important">{% trans \'protocol\' %} {{ vars.wallet_agreement.protocol_number }}</p>\n<p style="margin: 0px !important">{{ coop.short_name }} </p>\n<p style="margin: 0px !important">{% trans \'from\' %} {{ vars.wallet_agreement.protocol_day_month_year }}</p>\n</div>\n<div style="text-align: center">\n<h1 class="header"> {% trans \'PROVISION\' %}</h1>\n<p class="subheader"> {% trans \'consumer_program_title\' %}</p>\n</div>\n<p>{% trans \'consumer_program_provision_intro\' %} {{ coop.short_name }} {% trans \'cooperative_hereto\' %}</p>\n<p>{% trans \'legal_basis\' %}</p>\n<p>{% trans \'program_duration\' %}</p>\n<p>{% trans \'program_provision_status\' %}</p>\n<div style="text-align: center">\n<h3>{% trans \'terms_program\' %}</h3>\n</div>\n<p>{% trans \'consumer_program_terms\' %}</p>\n<div style="text-align: center">\n<h3>{% trans \'program_goals\' %}</h3>\n</div>\n<p>{% trans \'goal_efficiency\' %}</p>\n<p>{% trans \'goal_transparency\' %}</p>\n<div style="text-align: center"><h3>{% trans \'program_participation_procedure\' %}</h3></div>\n<p>{% trans \'program_participation_terms\' %}</p>\n<p>{% trans \'offer_acceptance\' %}</p>\n<p>{% trans \'procedure_participation\' %}</p>\n<div style="text-align: center"><h3>{% trans \'user_cabinet\' %}</h3></div>\n<p>{% trans \'site_access\' %}</p>\n<p>{% trans \'unique_code\' %}</p>\n<p>{% trans \'digital_signature\' %}</p>\n<p>{% trans \'identification\' %}</p>\n<p>{% trans \'information_security\' %}</p>\n<div style="text-align: center"><h3>{% trans \'program_interaction_mechanism\' %}</h3></div>\n<p>{% trans \'program_share_contribution\' %}</p>\n<p>{% trans \'share_contribution_procedure\' %}</p>\n<p>{% trans \'fund_management\' %}</p>\n<p>{% trans \'application_to_council\' %}</p>\n<p>{% trans \'share_contribution_return\' %}</p>\n<p>{% trans \'claim_return\' %}</p>\n<p>{% trans \'payment_confirmation\' %}</p>\n<p>{% trans \'novation_agreement\' %}</p>\n<p>{% trans \'novation_agreement_terms\' %}</p>\n<div style="text-align: center"><h3>{% trans \'program_rights_obligations\' %}</h3></div>\n<p>{% trans \'participant_rights\' %}</p>\n<p>{% trans \'participant_obligations\' %}</p>\n<p>{% trans \'cooperative_obligations\' %}</p>\n<p>{% trans \'cooperative_rights\' %}</p>\n<div style="text-align: center"><h3>{% trans \'force_majeure\' %}</h3></div>\n<p>{% trans \'legal_changes\' %}</p>\n<p>{% trans \'program_modification\' %}</p>\n<p>{% trans \'force_majeure_cases\' %}</p>\n<div style="text-align: center"><h3>{% trans \'program_communication\' %}</h3></div>\n<p>{% trans \'communication_channels\' %}</p>\n<p>{% trans \'alternative_methods\' %}</p>\n<p>{% trans \'program_additional_conditions\' %}</p>\n<p>{% trans \'governing_documents\' %}</p>\n<p>{% trans \'changes_amendments\' %}</p>\n<div class="digital-signature">\n{% trans \'acceptance_agreement\' %}</div></div>\n\n<style>\n.digital-document {\npadding: 20px;\nwhite-space: pre-wrap;\n}\n.subheader{\npadding-bottom: 20px;\n}\n</style>'
+export const context = `<div class="digital-document"><div style="text-align: right; margin:">
+<p style="margin: 0px !important">{% trans 'APPROVED' %}</p>
+<p style="margin: 0px !important">{% trans 'protocol' %} {{ vars.wallet_agreement.protocol_number }}</p>
+<p style="margin: 0px !important">{{ coop.short_name }} </p>
+<p style="margin: 0px !important">{% trans 'from' %} {{ vars.wallet_agreement.protocol_day_month_year }}</p>
+</div>
+<div style="text-align: center">
+<h1 class="header"> {% trans 'PROVISION' %}</h1>
+<p class="subheader"> {% trans 'consumer_program_title' %}</p>
+</div>
+<p>{% trans 'consumer_program_provision_intro' %} {{ coop.short_name }} {% trans 'cooperative_hereto' %}</p>
+<p>{% trans 'legal_basis' %}</p>
+<p>{% trans 'program_duration' %}</p>
+<p>{% trans 'program_provision_status' %}</p>
+<div style="text-align: center">
+<h3>{% trans 'terms_program' %}</h3>
+</div>
+<p>{% trans 'consumer_program_terms' %}</p>
+<div style="text-align: center">
+<h3>{% trans 'program_goals' %}</h3>
+</div>
+<p>{% trans 'goal_efficiency' %}</p>
+<p>{% trans 'goal_transparency' %}</p>
+<div style="text-align: center"><h3>{% trans 'program_participation_procedure' %}</h3></div>
+<p>{% trans 'program_participation_terms' %}</p>
+<p>{% trans 'offer_acceptance' %}</p>
+<p>{% trans 'procedure_participation' %}</p>
+<div style="text-align: center"><h3>{% trans 'user_cabinet' %}</h3></div>
+<p>{% trans 'site_access' %}</p>
+<p>{% trans 'unique_code' %}</p>
+<p>{% trans 'digital_signature' %}</p>
+<p>{% trans 'identification' %}</p>
+<p>{% trans 'information_security' %}</p>
+<div style="text-align: center"><h3>{% trans 'program_interaction_mechanism' %}</h3></div>
+<p>{% trans 'program_share_contribution' %}</p>
+<p>{% trans 'share_contribution_procedure' %}</p>
+<p>{% trans 'fund_management' %}</p>
+<p>{% trans 'application_to_council' %}</p>
+<p>{% trans 'share_contribution_return' %}</p>
+<p>{% trans 'claim_return' %}</p>
+<p>{% trans 'payment_confirmation' %}</p>
+<p>{% trans 'novation_agreement' %}</p>
+<p>{% trans 'novation_agreement_terms' %}</p>
+<div style="text-align: center"><h3>{% trans 'program_rights_obligations' %}</h3></div>
+<p>{% trans 'participant_rights' %}</p>
+<p>{% trans 'participant_obligations' %}</p>
+<p>{% trans 'cooperative_obligations' %}</p>
+<p>{% trans 'cooperative_rights' %}</p>
+<div style="text-align: center"><h3>{% trans 'force_majeure' %}</h3></div>
+<p>{% trans 'legal_changes' %}</p>
+<p>{% trans 'program_modification' %}</p>
+<p>{% trans 'force_majeure_cases' %}</p>
+<div style="text-align: center"><h3>{% trans 'program_communication' %}</h3></div>
+<p>{% trans 'communication_channels' %}</p>
+<p>{% trans 'alternative_methods' %}</p>
+<p>{% trans 'program_additional_conditions' %}</p>
+<p>{% trans 'governing_documents' %}</p>
+<p>{% trans 'changes_amendments' %}</p>
+<div class="digital-signature">
+{% trans 'acceptance_agreement' %}</div></div>
+
+<style>
+.digital-document {
+padding: 20px;
+white-space: pre-wrap;
+}
+.subheader{
+padding-bottom: 20px;
+}
+</style>'digital-document"><div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'APPROVED\' %}</p>\n<p style="margin: 0px !important">{% trans \'protocol\' %} {{ vars.wallet_agreement.protocol_number }}</p>\n<p style="margin: 0px !important">{{ coop.short_name }} </p>\n<p style="margin: 0px !important">{% trans \'from\' %} {{ vars.wallet_agreement.protocol_day_month_year }}</p>\n</div>\n<div style="text-align: center">\n<h1 class="header"> {% trans \'PROVISION\' %}</h1>\n<p class="subheader"> {% trans \'consumer_program_title\' %}</p>\n</div>\n<p>{% trans \'consumer_program_provision_intro\' %} {{ coop.short_name }} {% trans \'cooperative_hereto\' %}</p>\n<p>{% trans \'legal_basis\' %}</p>\n<p>{% trans \'program_duration\' %}</p>\n<p>{% trans \'program_provision_status\' %}</p>\n<div style="text-align: center">\n<h3>{% trans \'terms_program\' %}</h3>\n</div>\n<p>{% trans \'consumer_program_terms\' %}</p>\n<div style="text-align: center">\n<h3>{% trans \'program_goals\' %}</h3>\n</div>\n<p>{% trans \'goal_efficiency\' %}</p>\n<p>{% trans \'goal_transparency\' %}</p>\n<div style="text-align: center"><h3>{% trans \'program_participation_procedure\' %}</h3></div>\n<p>{% trans \'program_participation_terms\' %}</p>\n<p>{% trans \'offer_acceptance\' %}</p>\n<p>{% trans \'procedure_participation\' %}</p>\n<div style="text-align: center"><h3>{% trans \'user_cabinet\' %}</h3></div>\n<p>{% trans \'site_access\' %}</p>\n<p>{% trans \'unique_code\' %}</p>\n<p>{% trans \'digital_signature\' %}</p>\n<p>{% trans \'identification\' %}</p>\n<p>{% trans \'information_security\' %}</p>\n<div style="text-align: center"><h3>{% trans \'program_interaction_mechanism\' %}</h3></div>\n<p>{% trans \'program_share_contribution\' %}</p>\n<p>{% trans \'share_contribution_procedure\' %}</p>\n<p>{% trans \'fund_management\' %}</p>\n<p>{% trans \'application_to_council\' %}</p>\n<p>{% trans \'share_contribution_return\' %}</p>\n<p>{% trans \'claim_return\' %}</p>\n<p>{% trans \'payment_confirmation\' %}</p>\n<p>{% trans \'novation_agreement\' %}</p>\n<p>{% trans \'novation_agreement_terms\' %}</p>\n<div style="text-align: center"><h3>{% trans \'program_rights_obligations\' %}</h3></div>\n<p>{% trans \'participant_rights\' %}</p>\n<p>{% trans \'participant_obligations\' %}</p>\n<p>{% trans \'cooperative_obligations\' %}</p>\n<p>{% trans \'cooperative_rights\' %}</p>\n<div style="text-align: center"><h3>{% trans \'force_majeure\' %}</h3></div>\n<p>{% trans \'legal_changes\' %}</p>\n<p>{% trans \'program_modification\' %}</p>\n<p>{% trans \'force_majeure_cases\' %}</p>\n<div style="text-align: center"><h3>{% trans \'program_communication\' %}</h3></div>\n<p>{% trans \'communication_channels\' %}</p>\n<p>{% trans \'alternative_methods\' %}</p>\n<p>{% trans \'program_additional_conditions\' %}</p>\n<p>{% trans \'governing_documents\' %}</p>\n<p>{% trans \'changes_amendments\' %}</p>\n<div class="digital-signature">\n{% trans \'acceptance_agreement\' %}</div></div>\n\n<style>\n.digital-document {\npadding: 20px;\nwhite-space: pre-wrap;\n}\n.subheader{\npadding-bottom: 20px;\n}\n</style>`
 
 export const translations = {
   ru: {
@@ -75,7 +144,6 @@ export const translations = {
     changes_amendments: '8.5. Изменения и дополнения вносятся в настоящее положение решением Совета Кооператива с учетом соблюдения прав ранее принявших его условия Участников. При этом изменения условий ЦПП, принятые решениями Совета Кооператива и, возможность внесения которых прямо предусмотрена настоящим положением, ущемляющими  права Участников в ЦПП изменениями не считаются и основанием для предъявления претензий Кооператива быть не могут. Участники ранее принявшие условия ЦПП, обязаны принять условия нового положения о ЦПП, либо отказаться от участия в ЦПП.',
     acceptance_agreement: 'СОГЛАСЕН',
   },
-  // ... другие переводы
 }
 
 export const exampleData = {

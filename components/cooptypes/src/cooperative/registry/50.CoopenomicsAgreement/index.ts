@@ -53,3 +53,29 @@ export const translations = {
   },
   // ... другие переводы
 }
+
+export const exampleData = {
+  coop: {
+    chairman: {
+      last_name: 'Муравьев',
+      first_name: 'Алексей',
+      middle_name: 'Николаевич',
+    },
+    short_name: 'ПК "ВОСХОД"',
+  },
+  vars: {
+    contact_email: 'contact@email.ru',
+    coopenomics_agreement: {
+      protocol_day_month_year: '10 апреля 2024',
+      protocol_number: '10-04-2024',
+    },
+  },
+  partner: {
+    short_name: 'ПК "Лаурус"',
+    represented_by: {
+      last_name: 'Иванов',
+      first_name: 'Иван',
+      middle_name: 'Иванович',
+    },
+  },
+}

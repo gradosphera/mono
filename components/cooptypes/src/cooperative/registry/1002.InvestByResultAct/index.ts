@@ -56,3 +56,40 @@ export const translations = {
   },
   // ... другие переводы
 }
+export const exampleData = {
+  coop: {
+    chairman_full_name: 'Муравьев Алексей Николаевич',
+    city: 'Москва',
+    full_name: 'Потребительский Кооператив "ВОСХОД"',
+    short_name: 'ПК "ВОСХОД"',
+    chairman: {
+      last_name: 'Иванов',
+      first_name: 'Марк',
+      middle_name: 'Александрович',
+    },
+  },
+  meta: {
+    created_at: '02.05.2025',
+  },
+  result: {
+    quantity: '1',
+    unit_price: '100000',
+    total_price: '100000',
+    currency: 'RUB',
+    name: 'сервис автоматического тестирования',
+  },
+  uhdContract: {
+    number: '05-02-24-АНМ',
+    date: '05.02.2024',
+  },
+  user: {
+    full_name: 'Сидоров Иван Петрович',
+  },
+  decision: {
+    id: '123',
+    created_at: '05.04.2024',
+  },
+  act: {
+    number: '01-02-24-АНМ',
+  },
+}

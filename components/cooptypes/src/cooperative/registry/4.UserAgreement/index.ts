@@ -43,29 +43,28 @@ export const translations = {
 
 // Пример данных для редактора шаблонов
 export const exampleData = {
-  coop: {
-    short_name: 'ВОСХОД',
-    city: 'Москва',
-    chairman: {
-      last_name: 'Петров',
-      first_name: 'Иван',
-      middle_name: 'Сергеевич',
+  meta: {
+    created_at: '11.01.2024 20:24',
+  },
+  vars: {
+    name: 'Восход',
+    full_abbr_genitive: 'потребительского кооператива',
+    full_abbr: 'Потребительский Кооператив',
+    website: 'https://website.com',
+    user_agreement: {
+      protocol_number: '10-04-2024',
+      protocol_day_month_year: '10 апреля 2024 г.',
     },
   },
   user: {
-    full_name: 'Иванов Петр Сидорович',
+    full_name: 'Иванов Иван Иванович',
   },
-  vars: {
-    full_abbr: 'Потребительский кооператив',
-    full_abbr_genitive: 'Потребительского кооператива',
-    name: 'ВОСХОД',
-    website: 'https://example.com',
-    user_agreement: {
-      protocol_number: '12',
-      protocol_day_month_year: '12 февраля 2024 г.',
+  coop: {
+    chairman: {
+      last_name: 'Муравьев',
+      middle_name: 'Николаевич',
+      first_name: 'Алексей',
     },
-  },
-  meta: {
-    created_at: '15.02.2024',
+    short_name: 'ПК "ВОСХОД"',
   },
 }
