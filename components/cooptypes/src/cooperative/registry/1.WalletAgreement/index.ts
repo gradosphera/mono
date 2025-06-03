@@ -79,15 +79,13 @@ export const translations = {
 }
 
 export const exampleData = {
-  object_model: {
-    coop: {
-      short_name: 'ПК "ВОСХОД"',
-    },
-    vars: {
-      wallet_agreement: {
-        protocol_number: '10-04-2024',
-        protocol_day_month_year: '10 апреля 2024 г.',
-      },
+  coop: {
+    short_name: 'ПК "ВОСХОД"',
+  },
+  vars: {
+    wallet_agreement: {
+      protocol_number: '10-04-2024',
+      protocol_day_month_year: '10 апреля 2024 г.',
     },
   },
 }
