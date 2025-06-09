@@ -17,6 +17,12 @@ export * as NewResolved from './newresolved'
 export * as NewAct from './newact'
 
 /**
+ * Действие фиксирует в реестре связанные документы.
+ * @private
+ */
+export * as NewLink from './newlink'
+
+/**
  * Действие фиксирует в реестре принятое решение советом.
  * @private
  */

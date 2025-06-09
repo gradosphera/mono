@@ -1,42 +1,36 @@
 import type { JSONSchemaType } from 'ajv'
 import type { Cooperative } from 'cooptypes'
 
-// Извлекаем типы из Model документа 300
-type AgendaMeet = Cooperative.Registry.AnnualGeneralMeetingAgenda.Model['meet']
-type AgendaQuestion = Cooperative.Registry.AnnualGeneralMeetingAgenda.Model['questions'][0]
+// Объявляем свои интерфейсы, которые соответствуют типам из cooptypes
+interface IAgendaMeet {
+  type: 'regular' | 'extra'
+  open_at_datetime: string
+  close_at_datetime: string
+}
 
-export const AgendaMeetSchema: JSONSchemaType<AgendaMeet> = {
+interface IAgendaQuestion {
+  number: string
+  title: string
+  context?: string
+  decision: string
+}
+
+export const AgendaMeetSchema: JSONSchemaType<IAgendaMeet> = {
   type: 'object',
   properties: {
-    type: { type: 'string', enum: ['regular', 'extraordinary'] },
-    created_at_day: { type: 'string' },
-    created_at_month: { type: 'string' },
-    created_at_year: { type: 'string' },
-    open_at_date: { type: 'string' },
-    open_at_time: { type: 'string' },
-    registration_datetime: { type: 'string' },
+    type: { type: 'string', enum: ['regular', 'extra'] },
+    open_at_datetime: { type: 'string' },
     close_at_datetime: { type: 'string' },
-    presider_last_name: { type: 'string' },
-    presider_first_name: { type: 'string' },
-    presider_middle_name: { type: 'string' },
   },
   required: [
     'type',
-    'created_at_day',
-    'created_at_month',
-    'created_at_year',
-    'open_at_date',
-    'open_at_time',
-    'registration_datetime',
+    'open_at_datetime',
     'close_at_datetime',
-    'presider_last_name',
-    'presider_first_name',
-    'presider_middle_name',
   ],
   additionalProperties: true,
 }
 
-export const AgendaQuestionSchema: JSONSchemaType<AgendaQuestion> = {
+export const AgendaQuestionSchema: JSONSchemaType<IAgendaQuestion> = {
   type: 'object',
   properties: {
     number: { type: 'string' },

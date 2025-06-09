@@ -1,4 +1,4 @@
-import { DraftContract } from 'cooptypes'
+import { type Cooperative, DraftContract } from 'cooptypes'
 import { AnnualGeneralMeetingVotingBallot } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
@@ -33,13 +33,28 @@ export class Factory extends DocFactory<AnnualGeneralMeetingVotingBallot.Action>
     const meet = await super.getMeet(data.coopname, data.meet_hash, data.block_num)
     const questions = await super.getMeetQuestions(data.coopname, Number(meet.id), data.block_num)
 
+    // Преобразуем вопросы в ответы с голосованием
+    const answers: Cooperative.Registry.AnnualGeneralMeetingVotingBallot.IAnswer[] = questions.map((question) => {
+      // Определяем как пользователь проголосовал по этому вопросу
+      const vote = this.getUserVote(question, data.username)
+
+      return {
+        id: question.id.toString(),
+        number: question.number.toString(),
+        title: question.title,
+        context: question.context,
+        decision: question.decision,
+        vote,
+      }
+    })
+
     const combinedData: AnnualGeneralMeetingVotingBallot.Model = {
       meta,
       coop,
       vars,
       user,
       meet,
-      questions,
+      answers,
     }
 
     await super.validate(combinedData, template.model)

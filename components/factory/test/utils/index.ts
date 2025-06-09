@@ -48,6 +48,8 @@ export async function preLoading() {
     'organizations',
     'entrepreneurs',
     'projects',
+    'deltas',
+    'actions',
   ]
 
   for (const collectionName of collectionsToClear) {
@@ -584,10 +586,10 @@ export async function preLoading() {
       context: 'О деятельности кооператива за 2024 год',
       decision: 'Утвердить годовой отчёт кооператива за 2024 год',
       counter_votes_for: '0',
-      counter_votes_against: '0',
+      counter_votes_against: '1',
       counter_votes_abstained: '0',
       voters_for: [],
-      voters_against: [],
+      voters_against: ['individual'],
       voters_abstained: [],
     },
   })
@@ -607,10 +609,10 @@ export async function preLoading() {
       title: 'Избрание совета кооператива',
       context: '',
       decision: 'Избрать новый состав совета кооператива',
-      counter_votes_for: '0',
+      counter_votes_for: '1',
       counter_votes_against: '0',
       counter_votes_abstained: '0',
-      voters_for: [],
+      voters_for: ['individual'],
       voters_against: [],
       voters_abstained: [],
     },

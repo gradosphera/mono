@@ -1,10 +1,13 @@
-void meet::restartmeet(name coopname, checksum256 hash, document2 newproposal, time_point_sec new_open_at, time_point_sec new_close_at) {
+void meet::restartmeet(name coopname, checksum256 hash, checksum256 new_hash, document2 newproposal, time_point_sec new_open_at, time_point_sec new_close_at) {
     require_auth(coopname);
 
     // Получаем объект собрания
     auto meet_opt = get_meet(coopname, hash);
     eosio::check(meet_opt.has_value(), "Собрание не найдено");
     auto meet_record = meet_opt.value();
+
+    // Проверяем, что новый хэш отличается от старого
+    eosio::check(hash != new_hash, "Новый хэш должен отличаться от старого");
 
     // Проверяем, что собрание закрыто и кворум не пройден
     auto now = current_time_point();
@@ -26,19 +29,20 @@ void meet::restartmeet(name coopname, checksum256 hash, document2 newproposal, t
     eosio::check(meet_itr != genmeets.end(), "Собрание не найдено при обновлении");
 
     uint64_t old_cycle = meet_itr->cycle;
-    uint64_t old_quorum = meet_itr->quorum_percent;
+    double old_quorum = meet_itr->quorum_percent;
     
     document2 empty_document;
     
     genmeets.modify(meet_itr, coopname, [&](auto &m) {
-        m.status             = "onrestart"_n;
-        m.proposal           = newproposal;
-        m.authorization    = empty_document;
-        m.open_at            = new_open_at;
-        m.close_at           = new_close_at;
-        m.signed_ballots     = 0;
-        m.current_quorum_percent = 0;
-        m.quorum_passed      = false;
+        m.hash              = new_hash;  // Заменяем старый хэш на новый
+        m.status            = "onrestart"_n;
+        m.proposal          = newproposal;
+        m.authorization     = empty_document;
+        m.open_at           = new_open_at;
+        m.close_at          = new_close_at;
+        m.signed_ballots    = 0;
+        m.current_quorum_percent = 0.0;
+        m.quorum_passed     = false;
       
         m.cycle++; // переходим к следующему циклу
         
@@ -47,14 +51,15 @@ void meet::restartmeet(name coopname, checksum256 hash, document2 newproposal, t
         //  2) при cycle=3 -> 25%
         //  3) при cycle >=4 -> делим текущее вдвое
         if (old_cycle == 1) {
-            m.quorum_percent = 50;
+            m.quorum_percent = 50.0;
         } else if (old_cycle == 2) {
-            m.quorum_percent = 25;
+            m.quorum_percent = 25.0;
         } else {
             // при cycle>=3 (т.е. после третьего запуска)
             // каждый раз делим предыдущее значение на 2
-            m.quorum_percent = old_quorum / 2;
+            m.quorum_percent = old_quorum / 2.0;
         }
+        m.notified_users.clear(); // Очищаем уведомления
     });
 
     // Обнуляем состояние голосования по всем вопросам данного собрания
@@ -86,7 +91,7 @@ void meet::restartmeet(name coopname, checksum256 hash, document2 newproposal, t
         coopname,
         meet_record.initiator,
         get_valid_soviet_action("creategm"_n),
-        hash,
+        new_hash,  // Используем новый хэш
         _meet,
         "authmeet"_n,
         "declmeet"_n,

@@ -4,8 +4,10 @@ q-card(flat).card-container.q-pa-md
     q-skeleton(type="rect" height="200px" class="q-mb-md")
     q-skeleton(type="rect" height="100px" v-for="i in 3" :key="i" class="q-mb-md")
 
+
   div(v-else-if="!meet")
     div.text-h5.text-center Собрание не найдено
+
 
   div(v-else)
     div.row.q-col-gutter-md.justify-center
@@ -20,7 +22,7 @@ q-card(flat).card-container.q-pa-md
               )
 
         // Индикатор явки и статус собрания
-        q-card(flat).info-card.hover.q-mt-lg
+        q-card(v-if="showQuorumIndicator" flat).info-card.hover.q-mt-lg
           MeetQuorumIndicator(:meet="meet")
 
         // Показываем результаты собрания, если оно завершено
@@ -32,15 +34,17 @@ q-card(flat).card-container.q-pa-md
 
         // Показываем повестку и голосование, если собрание еще не завершено
         template(v-else)
-          q-card(flat).info-card.hover.q-mt-lg
+          q-card(v-if="showAgenda || isVotingNow" flat).info-card.hover.q-mt-lg
             // Показываем повестку, если голосование еще не началось
-            template(v-if="!isVotingNow")
+            template(v-if="showAgenda")
               MeetDetailsAgenda(
                 :meet="meet"
+                :coopname="coopname"
+                :meet-hash="meetHash"
               )
 
             // Показываем голосование, если оно началось
-            template(v-else)
+            template(v-if="isVotingNow")
               MeetDetailsVoting(
                 :meet="meet"
                 :coopname="coopname"
@@ -64,6 +68,7 @@ import { useDesktopStore } from 'src/entities/Desktop/model'
 import { useBackButton } from 'src/shared/lib/navigation'
 import { useVoteOnMeet } from 'src/features/Meet/VoteOnMeet'
 import { MeetQuorumIndicator } from 'src/widgets/Meets/MeetQuorumIndicator'
+import { Zeus } from '@coopenomics/sdk'
 
 const route = useRoute()
 const meetStore = useMeetStore()
@@ -80,8 +85,12 @@ const isProcessed = computed(() => {
   return !!meet.value?.processed
 })
 
+const showAgenda = computed(() => {
+  return meet.value?.processing?.extendedStatus === Zeus.ExtendedMeetStatus.WAITING_FOR_OPENING
+})
+
 // Используем хук для управления голосованием
-const { isVotingNow, setMeet } = useVoteOnMeet()
+const { isVotingNow, setMeet, showQuorumIndicator } = useVoteOnMeet()
 
 let intervalId: ReturnType<typeof setInterval> | null = null
 

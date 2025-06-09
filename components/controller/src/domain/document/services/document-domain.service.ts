@@ -59,6 +59,7 @@ export class DocumentDomainService {
       page,
       limit,
     });
+
     return response;
   }
 }

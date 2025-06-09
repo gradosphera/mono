@@ -1030,6 +1030,35 @@ export type ValueTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string | Variable<any, string>
 };
+	/** Пункт повестки общего собрания (для ввода) */
+["AgendaGeneralMeetPointInput"]: {
+	/** Контекст или дополнительная информация по пункту повестки */
+	context: string | Variable<any, string>,
+	/** Предлагаемое решение по пункту повестки */
+	decision: string | Variable<any, string>,
+	/** Заголовок пункта повестки */
+	title: string | Variable<any, string>
+};
+	/** Вопрос повестки общего собрания */
+["AgendaGeneralMeetQuestion"]: {
+	/** Контекст или дополнительная информация по вопросу */
+	context?: string | undefined | null | Variable<any, string>,
+	/** Предлагаемое решение по вопросу повестки */
+	decision: string | Variable<any, string>,
+	/** Номер вопроса в повестке */
+	number: string | Variable<any, string>,
+	/** Заголовок вопроса повестки */
+	title: string | Variable<any, string>
+};
+	/** Данные собрания для повестки */
+["AgendaMeet"]: {
+	/** Дата и время окончания собрания */
+	close_at_datetime: string | Variable<any, string>,
+	/** Дата и время начала собрания */
+	open_at_datetime: string | Variable<any, string>,
+	/** Тип собрания (очередное или внеочередное) */
+	type: string | Variable<any, string>
+};
 	/** Пункт повестки собрания */
 ["AgendaMeetPoint"]: AliasType<{
 	/** Контекст или дополнительная информация по пункту повестки */
@@ -1040,15 +1069,6 @@ export type ValueTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Пункт повестки собрания (для ввода) */
-["AgendaMeetPointInput"]: {
-	/** Контекст или дополнительная информация по пункту повестки */
-	context: string | Variable<any, string>,
-	/** Предлагаемое решение по пункту повестки */
-	decision: string | Variable<any, string>,
-	/** Заголовок пункта повестки */
-	title: string | Variable<any, string>
-};
 	["AgendaWithDocuments"]: AliasType<{
 	/** Действие, которое привело к появлению вопроса на голосовании */
 	action?:ValueTypes["BlockchainAction"],
@@ -1080,6 +1100,8 @@ export type ValueTypes = {
 	lang?: string | undefined | null | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null | Variable<any, string>,
+	meet: ValueTypes["AgendaMeet"] | Variable<any, string>,
+	questions: Array<ValueTypes["AgendaGeneralMeetQuestion"]> | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null | Variable<any, string>,
 	/** Название документа */
@@ -1116,6 +1138,8 @@ export type ValueTypes = {
 	lang: string | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links: Array<string> | Variable<any, string>,
+	meet: ValueTypes["AgendaMeet"] | Variable<any, string>,
+	questions: Array<ValueTypes["AgendaGeneralMeetQuestion"]> | Variable<any, string>,
 	/** ID документа в реестре */
 	registry_id: number | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
@@ -1140,6 +1164,8 @@ export type ValueTypes = {
 	lang?: string | undefined | null | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Хеш собрания */
+	meet_hash: string | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null | Variable<any, string>,
 	/** Название документа */
@@ -1176,6 +1202,8 @@ export type ValueTypes = {
 	lang: string | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links: Array<string> | Variable<any, string>,
+	/** Хеш собрания */
+	meet_hash: string | Variable<any, string>,
 	/** ID документа в реестре */
 	registry_id: number | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
@@ -1200,6 +1228,8 @@ export type ValueTypes = {
 	lang?: string | undefined | null | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Хеш собрания */
+	meet_hash: string | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null | Variable<any, string>,
 	/** Название документа */
@@ -1209,6 +1239,46 @@ export type ValueTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null | Variable<any, string>
 };
+	["AnnualGeneralMeetingNotificationSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string | Variable<any, string>,
+	/** Метаинформация */
+	meta: ValueTypes["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
+};
+	["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** Хеш собрания */
+	meet_hash: string | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
 	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -1216,12 +1286,16 @@ export type ValueTypes = {
 	coopname: string | Variable<any, string>,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null | Variable<any, string>,
+	/** ID решения совета */
+	decision_id: number | Variable<any, string>,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null | Variable<any, string>,
 	/** Язык документа */
 	lang?: string | undefined | null | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Хеш собрания */
+	meet_hash: string | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null | Variable<any, string>,
 	/** Название документа */
@@ -1244,11 +1318,13 @@ export type ValueTypes = {
 	lang?: string | undefined | null | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Хеш собрания */
+	meet_hash: string | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null | Variable<any, string>,
 	/** Название документа */
 	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
+	/** Имя пользователя голосующего */
 	username: string | Variable<any, string>,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null | Variable<any, string>
@@ -1280,13 +1356,15 @@ export type ValueTypes = {
 	lang: string | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links: Array<string> | Variable<any, string>,
+	/** Хеш собрания */
+	meet_hash: string | Variable<any, string>,
 	/** ID документа в реестре */
 	registry_id: number | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone: string | Variable<any, string>,
 	/** Название документа */
 	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
+	/** Имя пользователя голосующего */
 	username: string | Variable<any, string>,
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
@@ -1759,6 +1837,8 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["CooperativeOperatorAccount"]: AliasType<{
+	/** Количество активных участников */
+	active_participants_count?:boolean | `@${string}`,
 	/** Объявление кооператива */
 	announce?:boolean | `@${string}`,
 	/** Тип кооператива */
@@ -1813,13 +1893,11 @@ export type ValueTypes = {
 ["Country"]:Country;
 	["CreateAnnualGeneralMeetInput"]: {
 	/** Повестка собрания */
-	agenda: Array<ValueTypes["AgendaMeetPointInput"]> | Variable<any, string>,
+	agenda: Array<ValueTypes["AgendaGeneralMeetPointInput"]> | Variable<any, string>,
 	/** Время закрытия собрания */
 	close_at: ValueTypes["DateTime"] | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Хеш */
-	hash: string | Variable<any, string>,
 	/** Имя аккаунта инициатора */
 	initiator: string | Variable<any, string>,
 	/** Время открытия собрания */
@@ -2471,6 +2549,8 @@ export type ValueTypes = {
 	initiator?:boolean | `@${string}`,
 	/** Сертификат инициатора собрания */
 	initiator_certificate?:ValueTypes["UserCertificateUnion"],
+	/** Список пользователей, которые подписали уведомление */
+	notified_users?:boolean | `@${string}`,
 	/** Дата открытия собрания */
 	open_at?:boolean | `@${string}`,
 	/** Председатель собрания */
@@ -2709,6 +2789,7 @@ installSystem?: [{	data: ValueTypes["Install"] | Variable<any, string>},ValueTyp
 login?: [{	data: ValueTypes["LoginInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 logout?: [{	data: ValueTypes["LogoutInput"] | Variable<any, string>},boolean | `@${string}`],
 moderateRequest?: [{	data: ValueTypes["ModerateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+notifyOnAnnualGeneralMeet?: [{	data: ValueTypes["NotifyOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 prohibitRequest?: [{	data: ValueTypes["ProhibitRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},boolean | `@${string}`],
 publishRequest?: [{	data: ValueTypes["PublishRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -2735,6 +2816,12 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
 }>;
+	["NotifyOnAnnualGeneralMeetInput"]: {
+	coopname: string | Variable<any, string>,
+	meet_hash: string | Variable<any, string>,
+	notification: ValueTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"] | Variable<any, string>,
+	username: string | Variable<any, string>
+};
 	["Organization"]: AliasType<{
 	/** Город */
 	city?:boolean | `@${string}`,
@@ -4133,6 +4220,35 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
+	/** Пункт повестки общего собрания (для ввода) */
+["AgendaGeneralMeetPointInput"]: {
+	/** Контекст или дополнительная информация по пункту повестки */
+	context: string,
+	/** Предлагаемое решение по пункту повестки */
+	decision: string,
+	/** Заголовок пункта повестки */
+	title: string
+};
+	/** Вопрос повестки общего собрания */
+["AgendaGeneralMeetQuestion"]: {
+	/** Контекст или дополнительная информация по вопросу */
+	context?: string | undefined | null,
+	/** Предлагаемое решение по вопросу повестки */
+	decision: string,
+	/** Номер вопроса в повестке */
+	number: string,
+	/** Заголовок вопроса повестки */
+	title: string
+};
+	/** Данные собрания для повестки */
+["AgendaMeet"]: {
+	/** Дата и время окончания собрания */
+	close_at_datetime: string,
+	/** Дата и время начала собрания */
+	open_at_datetime: string,
+	/** Тип собрания (очередное или внеочередное) */
+	type: string
+};
 	/** Пункт повестки собрания */
 ["AgendaMeetPoint"]: AliasType<{
 	/** Контекст или дополнительная информация по пункту повестки */
@@ -4143,15 +4259,6 @@ export type ResolverInputTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Пункт повестки собрания (для ввода) */
-["AgendaMeetPointInput"]: {
-	/** Контекст или дополнительная информация по пункту повестки */
-	context: string,
-	/** Предлагаемое решение по пункту повестки */
-	decision: string,
-	/** Заголовок пункта повестки */
-	title: string
-};
 	["AgendaWithDocuments"]: AliasType<{
 	/** Действие, которое привело к появлению вопроса на голосовании */
 	action?:ResolverInputTypes["BlockchainAction"],
@@ -4183,6 +4290,8 @@ export type ResolverInputTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	meet: ResolverInputTypes["AgendaMeet"],
+	questions: Array<ResolverInputTypes["AgendaGeneralMeetQuestion"]>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -4219,6 +4328,8 @@ export type ResolverInputTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	meet: ResolverInputTypes["AgendaMeet"],
+	questions: Array<ResolverInputTypes["AgendaGeneralMeetQuestion"]>,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
@@ -4243,6 +4354,8 @@ export type ResolverInputTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -4279,6 +4392,8 @@ export type ResolverInputTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
@@ -4303,6 +4418,8 @@ export type ResolverInputTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -4312,6 +4429,46 @@ export type ResolverInputTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
+	["AnnualGeneralMeetingNotificationSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация */
+	meta: ResolverInputTypes["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш собрания */
+	meet_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -4319,12 +4476,16 @@ export type ResolverInputTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null,
+	/** ID решения совета */
+	decision_id: number,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -4347,11 +4508,13 @@ export type ResolverInputTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
 	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
+	/** Имя пользователя голосующего */
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
@@ -4383,13 +4546,15 @@ export type ResolverInputTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
 	timezone: string,
 	/** Название документа */
 	title: string,
-	/** Имя пользователя, создавшего документ */
+	/** Имя пользователя голосующего */
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
@@ -4862,6 +5027,8 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["CooperativeOperatorAccount"]: AliasType<{
+	/** Количество активных участников */
+	active_participants_count?:boolean | `@${string}`,
 	/** Объявление кооператива */
 	announce?:boolean | `@${string}`,
 	/** Тип кооператива */
@@ -4916,13 +5083,11 @@ export type ResolverInputTypes = {
 ["Country"]:Country;
 	["CreateAnnualGeneralMeetInput"]: {
 	/** Повестка собрания */
-	agenda: Array<ResolverInputTypes["AgendaMeetPointInput"]>,
+	agenda: Array<ResolverInputTypes["AgendaGeneralMeetPointInput"]>,
 	/** Время закрытия собрания */
 	close_at: ResolverInputTypes["DateTime"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Хеш */
-	hash: string,
 	/** Имя аккаунта инициатора */
 	initiator: string,
 	/** Время открытия собрания */
@@ -5574,6 +5739,8 @@ export type ResolverInputTypes = {
 	initiator?:boolean | `@${string}`,
 	/** Сертификат инициатора собрания */
 	initiator_certificate?:ResolverInputTypes["UserCertificateUnion"],
+	/** Список пользователей, которые подписали уведомление */
+	notified_users?:boolean | `@${string}`,
 	/** Дата открытия собрания */
 	open_at?:boolean | `@${string}`,
 	/** Председатель собрания */
@@ -5812,6 +5979,7 @@ installSystem?: [{	data: ResolverInputTypes["Install"]},ResolverInputTypes["Syst
 login?: [{	data: ResolverInputTypes["LoginInput"]},ResolverInputTypes["RegisteredAccount"]],
 logout?: [{	data: ResolverInputTypes["LogoutInput"]},boolean | `@${string}`],
 moderateRequest?: [{	data: ResolverInputTypes["ModerateRequestInput"]},ResolverInputTypes["Transaction"]],
+notifyOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["NotifyOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 prohibitRequest?: [{	data: ResolverInputTypes["ProhibitRequestInput"]},ResolverInputTypes["Transaction"]],
 publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},boolean | `@${string}`],
 publishRequest?: [{	data: ResolverInputTypes["PublishRequestInput"]},ResolverInputTypes["Transaction"]],
@@ -5838,6 +6006,12 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
 }>;
+	["NotifyOnAnnualGeneralMeetInput"]: {
+	coopname: string,
+	meet_hash: string,
+	notification: ResolverInputTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
+	username: string
+};
 	["Organization"]: AliasType<{
 	/** Город */
 	city?:boolean | `@${string}`,
@@ -7235,18 +7409,38 @@ export type ModelTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
-	/** Пункт повестки собрания */
-["AgendaMeetPoint"]: {
-		/** Контекст или дополнительная информация по пункту повестки */
+	/** Пункт повестки общего собрания (для ввода) */
+["AgendaGeneralMeetPointInput"]: {
+	/** Контекст или дополнительная информация по пункту повестки */
 	context: string,
 	/** Предлагаемое решение по пункту повестки */
 	decision: string,
 	/** Заголовок пункта повестки */
 	title: string
 };
-	/** Пункт повестки собрания (для ввода) */
-["AgendaMeetPointInput"]: {
-	/** Контекст или дополнительная информация по пункту повестки */
+	/** Вопрос повестки общего собрания */
+["AgendaGeneralMeetQuestion"]: {
+	/** Контекст или дополнительная информация по вопросу */
+	context?: string | undefined | null,
+	/** Предлагаемое решение по вопросу повестки */
+	decision: string,
+	/** Номер вопроса в повестке */
+	number: string,
+	/** Заголовок вопроса повестки */
+	title: string
+};
+	/** Данные собрания для повестки */
+["AgendaMeet"]: {
+	/** Дата и время окончания собрания */
+	close_at_datetime: string,
+	/** Дата и время начала собрания */
+	open_at_datetime: string,
+	/** Тип собрания (очередное или внеочередное) */
+	type: string
+};
+	/** Пункт повестки собрания */
+["AgendaMeetPoint"]: {
+		/** Контекст или дополнительная информация по пункту повестки */
 	context: string,
 	/** Предлагаемое решение по пункту повестки */
 	decision: string,
@@ -7282,6 +7476,8 @@ export type ModelTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	meet: ModelTypes["AgendaMeet"],
+	questions: Array<ModelTypes["AgendaGeneralMeetQuestion"]>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -7318,6 +7514,8 @@ export type ModelTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	meet: ModelTypes["AgendaMeet"],
+	questions: Array<ModelTypes["AgendaGeneralMeetQuestion"]>,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
@@ -7342,6 +7540,8 @@ export type ModelTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -7378,6 +7578,8 @@ export type ModelTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
@@ -7402,6 +7604,8 @@ export type ModelTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -7411,6 +7615,46 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
+	["AnnualGeneralMeetingNotificationSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация */
+	meta: ModelTypes["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш собрания */
+	meet_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -7418,12 +7662,16 @@ export type ModelTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null,
+	/** ID решения совета */
+	decision_id: number,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -7446,11 +7694,13 @@ export type ModelTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
 	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
+	/** Имя пользователя голосующего */
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
@@ -7482,13 +7732,15 @@ export type ModelTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
 	timezone: string,
 	/** Название документа */
 	title: string,
-	/** Имя пользователя, создавшего документ */
+	/** Имя пользователя голосующего */
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
@@ -7950,7 +8202,9 @@ export type ModelTypes = {
 	phone: string
 };
 	["CooperativeOperatorAccount"]: {
-		/** Объявление кооператива */
+		/** Количество активных участников */
+	active_participants_count: number,
+	/** Объявление кооператива */
 	announce: string,
 	/** Тип кооператива */
 	coop_type: string,
@@ -8002,13 +8256,11 @@ export type ModelTypes = {
 	["Country"]:Country;
 	["CreateAnnualGeneralMeetInput"]: {
 	/** Повестка собрания */
-	agenda: Array<ModelTypes["AgendaMeetPointInput"]>,
+	agenda: Array<ModelTypes["AgendaGeneralMeetPointInput"]>,
 	/** Время закрытия собрания */
 	close_at: ModelTypes["DateTime"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Хеш */
-	hash: string,
 	/** Имя аккаунта инициатора */
 	initiator: string,
 	/** Время открытия собрания */
@@ -8643,6 +8895,8 @@ export type ModelTypes = {
 	initiator: string,
 	/** Сертификат инициатора собрания */
 	initiator_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
+	/** Список пользователей, которые подписали уведомление */
+	notified_users: Array<string>,
 	/** Дата открытия собрания */
 	open_at: ModelTypes["DateTime"],
 	/** Председатель собрания */
@@ -8922,6 +9176,8 @@ export type ModelTypes = {
 	logout: boolean,
 	/** Модерировать заявку */
 	moderateRequest: ModelTypes["Transaction"],
+	/** Уведомление о проведении общего собрания пайщиков */
+	notifyOnAnnualGeneralMeet: ModelTypes["MeetAggregate"],
 	/** Отклонить модерацию по заявке */
 	prohibitRequest: ModelTypes["Transaction"],
 	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему */
@@ -8970,6 +9226,12 @@ export type ModelTypes = {
 	updateSystem: ModelTypes["SystemInfo"],
 	/** Голосование на общем собрании пайщиков */
 	voteOnAnnualGeneralMeet: ModelTypes["MeetAggregate"]
+};
+	["NotifyOnAnnualGeneralMeetInput"]: {
+	coopname: string,
+	meet_hash: string,
+	notification: ModelTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
+	username: string
 };
 	["Organization"]: {
 		/** Город */
@@ -10337,19 +10599,39 @@ export type GraphQLTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
-	/** Пункт повестки собрания */
-["AgendaMeetPoint"]: {
-	__typename: "AgendaMeetPoint",
-	/** Контекст или дополнительная информация по пункту повестки */
+	/** Пункт повестки общего собрания (для ввода) */
+["AgendaGeneralMeetPointInput"]: {
+		/** Контекст или дополнительная информация по пункту повестки */
 	context: string,
 	/** Предлагаемое решение по пункту повестки */
 	decision: string,
 	/** Заголовок пункта повестки */
 	title: string
 };
-	/** Пункт повестки собрания (для ввода) */
-["AgendaMeetPointInput"]: {
-		/** Контекст или дополнительная информация по пункту повестки */
+	/** Вопрос повестки общего собрания */
+["AgendaGeneralMeetQuestion"]: {
+		/** Контекст или дополнительная информация по вопросу */
+	context?: string | undefined | null,
+	/** Предлагаемое решение по вопросу повестки */
+	decision: string,
+	/** Номер вопроса в повестке */
+	number: string,
+	/** Заголовок вопроса повестки */
+	title: string
+};
+	/** Данные собрания для повестки */
+["AgendaMeet"]: {
+		/** Дата и время окончания собрания */
+	close_at_datetime: string,
+	/** Дата и время начала собрания */
+	open_at_datetime: string,
+	/** Тип собрания (очередное или внеочередное) */
+	type: string
+};
+	/** Пункт повестки собрания */
+["AgendaMeetPoint"]: {
+	__typename: "AgendaMeetPoint",
+	/** Контекст или дополнительная информация по пункту повестки */
 	context: string,
 	/** Предлагаемое решение по пункту повестки */
 	decision: string,
@@ -10387,6 +10669,8 @@ export type GraphQLTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	meet: GraphQLTypes["AgendaMeet"],
+	questions: Array<GraphQLTypes["AgendaGeneralMeetQuestion"]>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -10423,6 +10707,8 @@ export type GraphQLTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	meet: GraphQLTypes["AgendaMeet"],
+	questions: Array<GraphQLTypes["AgendaGeneralMeetQuestion"]>,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
@@ -10447,6 +10733,8 @@ export type GraphQLTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -10483,6 +10771,8 @@ export type GraphQLTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
@@ -10507,6 +10797,8 @@ export type GraphQLTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -10516,6 +10808,46 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
+	["AnnualGeneralMeetingNotificationSignedDocumentInput"]: {
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация */
+	meta: GraphQLTypes["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш собрания */
+	meet_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -10523,12 +10855,16 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null,
+	/** ID решения совета */
+	decision_id: number,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -10551,11 +10887,13 @@ export type GraphQLTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
 	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
+	/** Имя пользователя голосующего */
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
@@ -10587,13 +10925,15 @@ export type GraphQLTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	/** Хеш собрания */
+	meet_hash: string,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
 	timezone: string,
 	/** Название документа */
 	title: string,
-	/** Имя пользователя, создавшего документ */
+	/** Имя пользователя голосующего */
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
@@ -11067,6 +11407,8 @@ export type GraphQLTypes = {
 };
 	["CooperativeOperatorAccount"]: {
 	__typename: "CooperativeOperatorAccount",
+	/** Количество активных участников */
+	active_participants_count: number,
 	/** Объявление кооператива */
 	announce: string,
 	/** Тип кооператива */
@@ -11120,13 +11462,11 @@ export type GraphQLTypes = {
 ["Country"]: Country;
 	["CreateAnnualGeneralMeetInput"]: {
 		/** Повестка собрания */
-	agenda: Array<GraphQLTypes["AgendaMeetPointInput"]>,
+	agenda: Array<GraphQLTypes["AgendaGeneralMeetPointInput"]>,
 	/** Время закрытия собрания */
 	close_at: GraphQLTypes["DateTime"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Хеш */
-	hash: string,
 	/** Имя аккаунта инициатора */
 	initiator: string,
 	/** Время открытия собрания */
@@ -11779,6 +12119,8 @@ export type GraphQLTypes = {
 	initiator: string,
 	/** Сертификат инициатора собрания */
 	initiator_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
+	/** Список пользователей, которые подписали уведомление */
+	notified_users: Array<string>,
 	/** Дата открытия собрания */
 	open_at: GraphQLTypes["DateTime"],
 	/** Председатель собрания */
@@ -12065,6 +12407,8 @@ export type GraphQLTypes = {
 	logout: boolean,
 	/** Модерировать заявку */
 	moderateRequest: GraphQLTypes["Transaction"],
+	/** Уведомление о проведении общего собрания пайщиков */
+	notifyOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
 	/** Отклонить модерацию по заявке */
 	prohibitRequest: GraphQLTypes["Transaction"],
 	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему */
@@ -12113,6 +12457,12 @@ export type GraphQLTypes = {
 	updateSystem: GraphQLTypes["SystemInfo"],
 	/** Голосование на общем собрании пайщиков */
 	voteOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"]
+};
+	["NotifyOnAnnualGeneralMeetInput"]: {
+		coopname: string,
+	meet_hash: string,
+	notification: GraphQLTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
+	username: string
 };
 	["Organization"]: {
 	__typename: "Organization",
@@ -13478,7 +13828,9 @@ type ZEUS_VARIABLES = {
 	["AccountType"]: ValueTypes["AccountType"];
 	["AddParticipantInput"]: ValueTypes["AddParticipantInput"];
 	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
-	["AgendaMeetPointInput"]: ValueTypes["AgendaMeetPointInput"];
+	["AgendaGeneralMeetPointInput"]: ValueTypes["AgendaGeneralMeetPointInput"];
+	["AgendaGeneralMeetQuestion"]: ValueTypes["AgendaGeneralMeetQuestion"];
+	["AgendaMeet"]: ValueTypes["AgendaMeet"];
 	["AgreementInput"]: ValueTypes["AgreementInput"];
 	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"];
 	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"];
@@ -13487,6 +13839,8 @@ type ZEUS_VARIABLES = {
 	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"];
 	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"];
 	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingNotificationGenerateDocumentInput"];
+	["AnnualGeneralMeetingNotificationSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"];
+	["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"];
 	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"];
 	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"];
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedDocumentInput"];
@@ -13548,6 +13902,7 @@ type ZEUS_VARIABLES = {
 	["LogoutInput"]: ValueTypes["LogoutInput"];
 	["MetaDocumentInput"]: ValueTypes["MetaDocumentInput"];
 	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
+	["NotifyOnAnnualGeneralMeetInput"]: ValueTypes["NotifyOnAnnualGeneralMeetInput"];
 	["OrganizationDetailsInput"]: ValueTypes["OrganizationDetailsInput"];
 	["OrganizationType"]: ValueTypes["OrganizationType"];
 	["PaginationInput"]: ValueTypes["PaginationInput"];

@@ -8,6 +8,7 @@ import { GetMeetsInputDomainInterface } from '../interfaces/get-meets-input-doma
 import { MeetProcessingDomainEntity } from '../entities/meet-processing-domain.entity';
 import { SignBySecretaryOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/sign-by-secretary-on-annual-general-meet-input-domain.interface';
 import { SignByPresiderOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/sign-by-presider-on-annual-general-meet-input-domain.interface';
+import { NotifyOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/notify-on-annual-general-meet-input-domain.interface';
 
 export interface MeetBlockchainPort {
   getMeet(data: GetMeetInputDomainInterface): Promise<MeetProcessingDomainEntity | null>;
@@ -21,6 +22,7 @@ export interface MeetBlockchainPort {
     data: SignBySecretaryOnAnnualGeneralMeetInputDomainInterface
   ): Promise<TransactionResult>;
   signByPresiderOnAnnualGeneralMeet(data: SignByPresiderOnAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult>;
+  notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult>;
 }
 
 export const MEET_BLOCKCHAIN_PORT = Symbol('MeetBlockchainPort');

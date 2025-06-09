@@ -1,5 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { IsString, IsBoolean, IsArray } from 'class-validator';
+import { IsString, IsBoolean, IsArray, IsNumber } from 'class-validator';
 import { SignedBlockchainDocumentDTO } from '../../document/dto/signed-blockchain-document.dto';
 import type { RegistratorContract } from 'cooptypes';
 import { VerificationDTO } from './verification.dto';
@@ -103,6 +103,10 @@ export class CooperativeOperatorAccountDTO
   @Field(() => [VerificationDTO], { description: 'Дата регистрации' })
   @IsString()
   public readonly verifications!: VerificationDTO[];
+
+  @Field(() => Number, { description: 'Количество активных участников' })
+  @IsNumber()
+  public readonly active_participants_count!: number;
 
   constructor(data: CooperativeOperatorAccountDTO | null) {
     Object.assign(this, data);

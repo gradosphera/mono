@@ -2,7 +2,22 @@ import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
-import { CommonUserSchema, CooperativeSchema, MeetPointSchema, MeetSchema, VarsSchema } from '../Schema'
+import { CommonUserSchema, CooperativeSchema, MeetSchema, VarsSchema } from '../Schema'
+
+// Расширенная схема для объекта ответа с голосованием
+const AnswerSchema: JSONSchemaType<Cooperative.Registry.AnnualGeneralMeetingVotingBallot.IAnswer> = {
+  type: 'object',
+  properties: {
+    id: { type: 'string' },
+    number: { type: 'string' },
+    title: { type: 'string' },
+    context: { type: 'string' },
+    decision: { type: 'string' },
+    vote: { type: 'string', enum: ['for', 'against', 'abstained'] }
+  },
+  required: ['id', 'number', 'title', 'context', 'decision', 'vote'],
+  additionalProperties: true,
+}
 
 export const registry_id = Cooperative.Registry.AnnualGeneralMeetingVotingBallot.registry_id
 
@@ -21,12 +36,12 @@ export const Schema: JSONSchemaType<Model> = {
     vars: VarsSchema,
     meet: MeetSchema,
     user: CommonUserSchema,
-    questions: {
+    answers: {
       type: 'array',
-      items: MeetPointSchema,
+      items: AnswerSchema,
     },
   },
-  required: ['meta', 'coop', 'vars', 'meet', 'user', 'questions'],
+  required: ['meta', 'coop', 'vars', 'meet', 'user', 'answers'],
   additionalProperties: true,
 }
 

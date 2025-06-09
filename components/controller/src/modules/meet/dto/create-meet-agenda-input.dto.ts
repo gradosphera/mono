@@ -2,7 +2,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { CreateAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/create-annual-meet-input-domain.interface';
-import { AgendaMeetPointInputDTO } from './agenda-meet-point-input.dto';
+import { AgendaGeneralMeetPointInputDTO } from './agenda-meet-point-input.dto';
 import { AnnualGeneralMeetingAgendaSignedDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-agenda-document.dto';
 
 @InputType('CreateAnnualGeneralMeetInput')
@@ -11,11 +11,6 @@ export class CreateAnnualGeneralMeetInputDTO implements CreateAnnualGeneralMeetI
   @IsNotEmpty({ message: 'Имя аккаунта кооператива не должно быть пустым' })
   @IsString({ message: 'Имя аккаунта кооператива должно быть строкой' })
   coopname!: string;
-
-  @Field(() => String, { description: 'Хеш' })
-  @IsNotEmpty({ message: 'Хеш не должен быть пустым' })
-  @IsString({ message: 'Хеш должен быть строкой' })
-  hash!: string;
 
   @Field(() => String, { description: 'Имя аккаунта инициатора' })
   @IsNotEmpty({ message: 'Имя аккаунта инициатора не должно быть пустым' })
@@ -32,11 +27,11 @@ export class CreateAnnualGeneralMeetInputDTO implements CreateAnnualGeneralMeetI
   @IsString({ message: 'Имя аккаунта секретаря должно быть строкой' })
   secretary!: string;
 
-  @Field(() => [AgendaMeetPointInputDTO], { description: 'Повестка собрания' })
+  @Field(() => [AgendaGeneralMeetPointInputDTO], { description: 'Повестка собрания' })
   @IsArray({ message: 'Повестка должна быть массивом' })
   @ValidateNested({ each: true })
-  @Type(() => AgendaMeetPointInputDTO)
-  agenda!: AgendaMeetPointInputDTO[];
+  @Type(() => AgendaGeneralMeetPointInputDTO)
+  agenda!: AgendaGeneralMeetPointInputDTO[];
 
   @Field(() => Date, { description: 'Время открытия собрания' })
   @IsNotEmpty({ message: 'Время открытия собрания не должно быть пустым' })

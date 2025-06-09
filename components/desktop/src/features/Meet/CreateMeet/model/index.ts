@@ -1,11 +1,13 @@
 import { client } from 'src/shared/api/client'
 import { Mutations } from '@coopenomics/sdk'
-import { generateAgenda } from 'src/features/Meet/GenerateAgenda/model'
 import { useSignDocument } from 'src/shared/lib/document/model/entity'
-import { hashSHA256 } from 'src/shared/api/crypto'
+import moment from 'moment-with-locales-es6'
 
 export type ICreateMeetInput = Mutations.Meet.CreateAnnualGeneralMeet.IInput['data']
 export type ICreateMeetResult = Mutations.Meet.CreateAnnualGeneralMeet.IOutput[typeof Mutations.Meet.CreateAnnualGeneralMeet.name]
+
+export type IGenerateAgendaInput = Mutations.Meet.GenerateAnnualGeneralMeetAgendaDocument.IInput['data']
+export type IGenerateAgendaResult = Mutations.Meet.GenerateAnnualGeneralMeetAgendaDocument.IOutput[typeof Mutations.Meet.GenerateAnnualGeneralMeetAgendaDocument.name]
 
 export interface ICreateMeetWithAgendaInput {
   coopname: string
@@ -20,6 +22,24 @@ export interface ICreateMeetWithAgendaInput {
     context: string
     decision: string
   }[]
+}
+
+/**
+ * Генерирует документ повестки собрания
+ * @private Внутренняя функция, не экспортируется
+ */
+async function generateAgenda(data: IGenerateAgendaInput, options?: any): Promise<IGenerateAgendaResult> {
+  const { [Mutations.Meet.GenerateAnnualGeneralMeetAgendaDocument.name]: generatedDocument } = await client.Mutation(
+    Mutations.Meet.GenerateAnnualGeneralMeetAgendaDocument.mutation,
+    {
+      variables: {
+        data,
+        options
+      }
+    }
+  );
+
+  return generatedDocument;
 }
 
 export async function createMeet(data: ICreateMeetInput): Promise<ICreateMeetResult> {
@@ -38,11 +58,32 @@ export async function createMeet(data: ICreateMeetInput): Promise<ICreateMeetRes
 export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput): Promise<ICreateMeetResult> {
 
   const { signDocument } = useSignDocument()
-  // Генерируем документ повестки
+
+  // Преобразуем формат даты для документа
+  const openAtFormatted = moment(data.open_at).format('DD.MM.YYYY HH:mm')
+  const closeAtFormatted = moment(data.close_at).format('DD.MM.YYYY HH:mm')
+
+  // Формируем вопросы повестки в требуемом формате
+  const questions = data.agenda_points.map((point, index) => ({
+    number: String(index + 1),
+    title: point.title,
+    decision: point.decision,
+    context: point.context || ''
+  }))
+
+  // Генерируем документ повестки с правильными параметрами согласно DTO
   const generatedDocument = await generateAgenda({
     coopname: data.coopname,
-    username: data.username
+    username: data.username,
+    meet: {
+      type: 'regular', // По умолчанию очередное собрание
+      open_at_datetime: openAtFormatted,
+      close_at_datetime: closeAtFormatted
+    },
+    questions: questions
   })
+
+
   // Подписываем документ
   const signedDocument = await signDocument(generatedDocument, data.username)
 
@@ -55,11 +96,6 @@ export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput): Pr
     secretary: data.secretary,
     open_at: data.open_at,
     close_at: data.close_at,
-    hash: await hashSHA256(JSON.stringify({
-      coopname: data.coopname,
-      initiator: data.initiator,
-      timestamp: Date.now()
-    })),
     proposal: signedDocument
   })
   return result

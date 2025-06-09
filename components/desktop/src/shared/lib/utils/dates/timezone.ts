@@ -1,4 +1,4 @@
-import moment from 'moment-timezone'
+import moment from './moment'
 import { env } from 'src/shared/config/Environment'
 
 // Дефолтный часовой пояс - московский

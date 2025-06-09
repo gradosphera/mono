@@ -22,8 +22,8 @@ import { MEET_PROCESSED_REPOSITORY, MeetProcessedRepository } from '../repositor
 import { ProcessMeetDecisionInputDomainInterface } from '../interfaces/process-meet-decision-input-domain.interface';
 import { MeetProcessedDomainEntity } from '../entities/meet-processed-domain.entity';
 import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
-import type { MeetProcessedDomainInterface } from '../interfaces/meet-processed-domain.interface';
-import { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
+import { NotifyOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/notify-on-annual-general-meet-input-domain.interface';
+import { generateUniqueHash } from '~/utils/generate-hash.util';
 
 @Injectable()
 export class MeetDomainInteractor {
@@ -51,13 +51,20 @@ export class MeetDomainInteractor {
     // Преобразуем null в undefined для соответствия доменному интерфейсу
     const proposalAggregate = documentAggregate || undefined;
 
-    const preProcessing = new MeetPreProcessingDomainEntity({ ...data, proposal: proposalAggregate });
+    // Генерируем уникальный хэш для собрания
+    const hash = generateUniqueHash();
+
+    const preProcessing = new MeetPreProcessingDomainEntity({
+      ...data,
+      hash,
+      proposal: proposalAggregate,
+    });
 
     // Сохраняем данные в репозиторий
     await this.meetPreRepository.create(preProcessing);
 
     // Вызов блокчейн порта для создания собрания
-    await this.meetBlockchainPort.createMeet(data);
+    await this.meetBlockchainPort.createMeet({ ...data, hash });
 
     // Получаем обновленные данные из блокчейна
     const processingData = await this.meetBlockchainPort.getMeet({
@@ -231,5 +238,28 @@ export class MeetDomainInteractor {
 
     // Сохраняем данные в репозиторий
     await this.meetProcessedRepository.save(processedEntity);
+  }
+
+  /**
+   * Уведомление о собрании
+   * @param data Данные уведомления
+   */
+  async notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInputDomainInterface): Promise<MeetAggregate> {
+    // Вызов блокчейн порта для отправки уведомления
+    await this.meetBlockchainPort.notifyOnAnnualGeneralMeet(data);
+
+    // Получаем обновленные данные из блокчейна
+    const processingData = await this.meetBlockchainPort.getMeet({
+      coopname: data.coopname,
+      hash: data.meet_hash,
+      username: data.username,
+    });
+
+    // Получаем данные из репозитория
+    const preMeet = await this.meetPreRepository.findByHash(data.meet_hash);
+    const processedMeetEntity = await this.meetProcessedRepository.findByHash(data.meet_hash);
+
+    // Создаем агрегат из обоих источников данных
+    return new MeetAggregate(preMeet, processingData, processedMeetEntity);
   }
 }

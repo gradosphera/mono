@@ -41,11 +41,19 @@ export interface IDocument2 {
   signatures: ISignatureInfo[]
 }
 
+export interface IGmnotify {
+  coopname: IName
+  hash: IChecksum256
+  username: IName
+  notification: IDocument2
+}
+
 export interface IMeet {
   id: IUint64
   hash: IChecksum256
   coopname: IName
   type: IName
+  level: IName
   initiator: IName
   presider: IName
   secretary: IName
@@ -62,6 +70,7 @@ export interface IMeet {
   authorization: IDocument2
   decision1: IDocument2
   decision2: IDocument2
+  notified_users: IName[]
 }
 
 export interface IMeetPoint {
@@ -110,6 +119,7 @@ export interface IQuestionResult {
 export interface IRestartmeet {
   coopname: IName
   hash: IChecksum256
+  new_hash: IChecksum256
   newproposal: IDocument2
   new_open_at: ITimePointSec
   new_close_at: ITimePointSec

@@ -21,6 +21,7 @@ import { DocumentDomainInteractor } from '~/domain/document/interactors/document
 import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
 import { DocumentDomainAggregate } from '~/domain/document/aggregates/document-domain.aggregate';
 import { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import { NotifyOnAnnualGeneralMeetInputDTO } from '../dto/notify-on-annual-general-meet-input.dto';
 
 @Injectable()
 export class MeetService {
@@ -204,6 +205,15 @@ export class MeetService {
     data: SignByPresiderOnAnnualGeneralMeetInputDTO
   ): Promise<MeetAggregateDTO> {
     const aggregate = await this.meetDomainInteractor.signByPresiderOnAnnualGeneralMeet(data);
+    return await this.toDTO(aggregate);
+  }
+
+  /**
+   * Уведомление о проведении собрания
+   * @param data Данные уведомления
+   */
+  public async notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
+    const aggregate = await this.meetDomainInteractor.notifyOnAnnualGeneralMeet(data);
     return await this.toDTO(aggregate);
   }
 }

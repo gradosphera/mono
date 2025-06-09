@@ -48,6 +48,10 @@ export class SystemInfoDTO {
     this.blockchain_info = new BlockchainInfoDTO(entity.blockchain_info);
     this.system_status = entity.system_status as SystemStatus;
     this.blockchain_account = entity.blockchain_account;
-    this.cooperator_account = new CooperativeOperatorAccountDTO({ ...entity.cooperator_account, ...entity.user_account });
+    this.cooperator_account = new CooperativeOperatorAccountDTO({
+      ...entity.cooperator_account,
+      ...entity.user_account,
+      active_participants_count: Number(entity.cooperator_account.active_participants_count),
+    });
   }
 }

@@ -9,9 +9,10 @@ q-card(flat).expandable-document.q-mb-md
   )
     q-card
       q-card-section
-        BaseDocument(
-          :documentAggregate="documentAggregate"
-        )
+        div.row.justify-center
+          BaseDocument(
+            :documentAggregate="documentAggregate"
+          ).col-xs-12.col-md-10
 </template>
 
 <script setup lang="ts">

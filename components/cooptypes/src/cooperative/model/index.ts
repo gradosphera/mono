@@ -1,5 +1,6 @@
 import type { SovietContract } from '../../contracts'
 import type { ICooperative } from '../../contracts/registrator/tables/cooperatives'
+import type { IMeet, IQuestion } from '../../interfaces/meet'
 import type { IIndividualData, IOrganizationData } from '../users'
 
 export interface ICooperativeData extends IOrganizationData, ICooperative {
@@ -106,4 +107,25 @@ export interface IFirstLastMiddleName {
 
 export interface ICommonProgram {
   name: string
+}
+
+/**
+ * Расширенный интерфейс IMeet с полями для форматированных дат
+ */
+export interface IMeetExtended extends IMeet {
+  close_at_datetime: string
+  open_at_datetime: string
+  presider_full_name: string
+  secretary_full_name: string
+}
+
+/**
+ * Расширенный интерфейс IQuestion с вычисленными результатами
+ */
+export interface IQuestionExtended extends IQuestion {
+  votes_total?: number
+  votes_for_percent?: number
+  votes_against_percent?: number
+  votes_abstained_percent?: number
+  is_accepted?: boolean
 }

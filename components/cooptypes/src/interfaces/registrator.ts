@@ -7,6 +7,7 @@ export type IPublicKey = string
 export type ISignature = string
 export type ITimePointSec = string
 export type IUint32 = number
+export type IUint64 = number | string
 
 export interface IAccount {
   username: IName
@@ -100,6 +101,7 @@ export interface ICooperative2 {
   status: IName
   created_at: ITimePointSec
   document: IDocument2
+  active_participants_count: IUint64
 }
 
 export interface ICreatebranch {

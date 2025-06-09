@@ -35,6 +35,7 @@ export const rawCooperatorAccountSelector = {
     procedure: true,
     verificator: true,
   },
+  active_participants_count: true
 }
 
 // Проверка валидности

@@ -49,6 +49,20 @@ void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash
     std::make_tuple(coopname, candidate -> initial)
   ).send();
   
+  // Увеличиваем счетчик активных пайщиков
+  cooperatives2_index cooperatives(_registrator, _registrator.value);
+  auto coop_itr = cooperatives.find(coopname.value);
+  
+  if (coop_itr != cooperatives.end() && coop_itr->is_cooperative) {
+    cooperatives.modify(coop_itr, _registrator, [&](auto &coop) {
+      if (coop.active_participants_count.has_value()) {
+        coop.active_participants_count = coop.active_participants_count.value() + 1;
+      } else {
+        coop.active_participants_count = 1;
+      }
+    });
+  }
+  
   Registrator::candidates_index candidates(_registrator, coopname.value);
   auto it = candidates.find(candidate -> username.value);
   candidates.erase(it);

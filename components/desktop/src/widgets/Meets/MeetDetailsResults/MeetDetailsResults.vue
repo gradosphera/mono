@@ -10,13 +10,22 @@ div(flat)
       title="Протокол решения общего собрания пайщиков"
     )
     div.col-12.col-md-12(v-for="(item, index) in meetAgendaItems" :key="index")
-      q-card(flat bordered)
+      q-card(flat bordered).q-mb-md
         q-card-section
           div.row
             div.col-12.col-md-auto.flex.justify-center.q-pa-md
               AgendaNumberAvatar(:number="item.number")
             div.col-12.col-md
-              div.text-h6 {{ item.title }}
+
+              div.row.justify-between.items-center
+                div.text-h6 {{ item.title }}
+                q-badge(
+                  :color="getResultBadgeColor(item)"
+                  :label="getResultText(item)"
+                  :icon="getResultIcon(item)"
+                  floating
+                  class="text-weight-bold"
+                )
 
               q-separator.q-my-sm
               div.text-body1 {{ item.context }}
@@ -41,22 +50,13 @@ div(flat)
                       div(:class="'text-weight-bold q-mt-sm text-' + getCardSemanticColor('against')") ПРОТИВ
                       div(:class="'text-h5 q-mt-xs text-' + getCardSemanticColor('against')") {{ item.votes_against }}
 
+
                 div.col-12.col-md-4
                   q-card(flat bordered :class="'q-pa-md q-mb-sm shadow-2 flex flex-center ' + getCardClass('abstained')")
                     q-card-section(class="text-center")
                       q-icon(name="pan_tool" :color="getCardSemanticColor('abstained')" size="32px")
                       div(:class="'text-weight-bold q-mt-sm text-' + getCardSemanticColor('abstained')") ВОЗДЕРЖАЛИСЬ
                       div(:class="'text-h5 q-mt-xs text-' + getCardSemanticColor('abstained')") {{ item.votes_abstained }}
-
-
-              q-card(flat class="q-pa-md q-mt-sm flex flex-center" :class="getResultClass(item)")
-                q-card-section(class="text-center")
-                  q-icon(
-                    :name="getResultIcon(item)"
-                    :color="getResultColor(item)"
-                    size="32px"
-                  )
-                  div.text-h6.q-mt-sm {{ getResultText(item) }}
 </template>
 
 <script setup lang="ts">
@@ -108,20 +108,14 @@ const getResultText = (question: any) => {
   return question.accepted ? 'ПРИНЯТО' : 'ОТКЛОНЕНО'
 }
 
-// Получение класса для результата
-const getResultClass = (question: any) => {
-  if (question.accepted === undefined) return ''
-  return question.accepted ? 'text-positive' : 'text-negative'
-}
-
 // Добавляю функции для иконки и цвета результата
 const getResultIcon = (question: any) => {
   if (question.accepted === undefined) return 'help_outline'
   return question.accepted ? 'check_circle' : 'cancel'
 }
 
-const getResultColor = (question: any) => {
-  if (question.accepted === undefined) return 'grey'
+const getResultBadgeColor = (question: any) => {
+  if (question.accepted === undefined) return 'grey-5'
   return question.accepted ? 'positive' : 'negative'
 }
 </script>

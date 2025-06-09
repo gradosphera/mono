@@ -1,14 +1,16 @@
 <template lang="pug">
 // Баннер с информацией о статусе собрания
-div
-  div.text-center.q-mt-md(v-if="extendedStatus && extendedStatus !== 'NONE'")
-    q-badge(
-      :color="bannerConfig.color"
-      :label="`${statusText} ${timeText}`"
-      :outline="bannerConfig.outline"
-      rounded
-      style="font-size: 16px;"
-    ).q-pa-sm
+div.full-width
+  q-banner(
+    v-if="extendedStatus && extendedStatus !== 'NONE'",
+    rounded,
+    :class="bannerClasses"
+    :style="bannerStyle"
+  ).q-pa-md
+    template(v-slot:avatar)
+      q-icon(:name="bannerConfig.icon" :color="iconColor")
+    div {{ statusText }} {{ timeText }}
+
 
 </template>
 
@@ -38,7 +40,30 @@ const bannerConfig = computed(() => {
   if (!props.meet?.processing?.extendedStatus) {
     return STATUS_BANNER_CONFIG['NONE']
   }
-  return STATUS_BANNER_CONFIG[props.meet.processing.extendedStatus] || STATUS_BANNER_CONFIG['NONE']
+  return (
+    STATUS_BANNER_CONFIG[props.meet.processing.extendedStatus] || STATUS_BANNER_CONFIG['NONE']
+  )
+})
+
+const bannerClasses = computed(() => {
+  const config = bannerConfig.value
+  if (config.outline) {
+    return 'bg-grey-1 outlined-banner'
+  }
+  return `bg-${config.color} text-white`
+})
+
+const bannerStyle = computed(() => {
+  const config = bannerConfig.value
+  if (config.outline) {
+    return { borderColor: `var(--q-color-${config.color})` }
+  }
+  return {}
+})
+
+const iconColor = computed(() => {
+  const config = bannerConfig.value
+  return config.outline ? config.color : 'white'
 })
 
 // Форматированное время до открытия/закрытия с учетом часового пояса
@@ -62,4 +87,8 @@ const timeText = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+.outlined-banner {
+  border-width: 1px;
+  border-style: solid;
+}
 </style>

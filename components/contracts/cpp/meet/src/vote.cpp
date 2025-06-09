@@ -1,10 +1,10 @@
 // Заглушка для получения числа пайщиков кооператива.
 uint64_t get_total_participants(eosio::name coopname) {
-    // Здесь можно реализовать получение актуальных данных, например, через inline action или вызов другого контракта.
+    // Используем метод из shared_registrator для получения актуального количества активных пайщиков
     if (meet::TEST_MODE) {
         return 1;
     }
-    return 100; // перевести на факт
+    return Registrator::get_active_participants_count(coopname);
 }
 
 void meet::vote(name coopname, checksum256 hash, name username, document2 ballot, std::vector<vote_point> votes) {
@@ -86,7 +86,7 @@ void meet::vote(name coopname, checksum256 hash, name username, document2 ballot
     genmeets.modify(meet_itr, coopname, [&](auto &m) {
         m.signed_ballots++; // регистрируем принятый бюллетень
         uint64_t total_participants = get_total_participants(coopname);
-        m.current_quorum_percent = (m.signed_ballots * 100) / total_participants;
+        m.current_quorum_percent = (static_cast<double>(m.signed_ballots) * 100.0) / static_cast<double>(total_participants);
         if (m.current_quorum_percent > m.quorum_percent) {
             m.quorum_passed = true;
         }
@@ -103,4 +103,15 @@ void meet::vote(name coopname, checksum256 hash, name username, document2 ballot
             // Здесь можно при необходимости обновить поле решения, логирование или вызвать inline action.
         }
     }
+    
+    Action::send<newlink_interface>(
+      _soviet,
+      "newlink"_n,
+      _meet,
+      coopname,
+      username,
+      get_valid_soviet_action("ballot"_n),
+      hash,
+      ballot
+    );
 }

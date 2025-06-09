@@ -29,20 +29,25 @@ export class Factory extends DocFactory<AnnualGeneralMeetingNotification.Action>
     const meet = await super.getMeet(data.coopname, data.meet_hash, data.block_num)
     const questions = await super.getMeetQuestions(data.coopname, Number(meet.id), data.block_num)
 
+    // Извлекаем данные пользователя (председателя) и преобразуем в общий формат
+    const userData = await super.getUser(meet.presider, data.block_num)
+    const user = super.getCommonUser(userData)
+
     const combinedData: AnnualGeneralMeetingNotification.Model = {
       meta,
       coop,
       vars,
       meet,
       questions,
+      user,
     }
-
+    console.log(combinedData)
     await super.validate(combinedData, template.model)
 
     const translation = template.translations[meta.lang]
 
     const document: IGeneratedDocument = await super.generatePDF(
-      meet.presider,
+      user.full_name_or_short_name,
       template.context,
       combinedData,
       translation,

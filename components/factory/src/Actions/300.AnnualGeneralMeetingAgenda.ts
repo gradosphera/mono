@@ -25,6 +25,10 @@ export class Factory extends DocFactory<AnnualGeneralMeetingAgenda.Action> {
     const coop = await super.getCooperative(data.coopname, data.block_num)
     const vars = await super.getVars(data.coopname, data.block_num)
 
+    // Извлекаем данные пользователя и преобразуем в общий формат
+    const userData = await super.getUser(data.username, data.block_num)
+    const user = super.getCommonUser(userData)
+
     // Используем данные напрямую из Action, так как собрание еще не создано в блокчейне
     const { meet, questions } = data
 
@@ -34,6 +38,7 @@ export class Factory extends DocFactory<AnnualGeneralMeetingAgenda.Action> {
       vars,
       meet,
       questions,
+      user,
     }
 
     await super.validate(combinedData, template.model)
@@ -41,7 +46,7 @@ export class Factory extends DocFactory<AnnualGeneralMeetingAgenda.Action> {
     const translation = template.translations[meta.lang]
 
     const document: IGeneratedDocument = await super.generatePDF(
-      `${meet.presider_last_name} ${meet.presider_first_name} ${meet.presider_middle_name}`,
+      user.full_name_or_short_name,
       template.context,
       combinedData,
       translation,

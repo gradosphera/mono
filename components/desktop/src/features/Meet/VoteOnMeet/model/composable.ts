@@ -9,6 +9,27 @@ import { formatDateToLocalTimezone } from 'src/shared/lib/utils/dates/timezone'
 
 moment.locale('ru')
 
+export type IGenerateBallotInput = Mutations.Meet.GenerateBallotForAnnualGeneralMeetDocument.IInput['data'];
+export type IGenerateBallotResult = Mutations.Meet.GenerateBallotForAnnualGeneralMeetDocument.IOutput[typeof Mutations.Meet.GenerateBallotForAnnualGeneralMeetDocument.name];
+
+/**
+ * Генерирует бюллетень для голосования
+ * @private Внутренняя функция, не экспортируется
+ */
+async function generateBallot(data: IGenerateBallotInput, options?: any): Promise<IGenerateBallotResult> {
+  const { [Mutations.Meet.GenerateBallotForAnnualGeneralMeetDocument.name]: generatedDocument } = await client.Mutation(
+    Mutations.Meet.GenerateBallotForAnnualGeneralMeetDocument.mutation,
+    {
+      variables: {
+        data,
+        options
+      }
+    }
+  );
+
+  return generatedDocument;
+}
+
 export function useVoteOnMeet() {
   // Стор встреч для доступа к данным и методам загрузки
   const meetStore = useMeetStore()
@@ -53,6 +74,12 @@ export function useVoteOnMeet() {
   const isVotingEnded = computed(() => {
     if (activeMeet.value?.processing?.extendedStatus === Zeus.ExtendedMeetStatus.VOTING_COMPLETED) return true
     else return false
+  })
+
+  const showQuorumIndicator = computed(() => {
+    if (!activeMeet.value) return false
+    const status = activeMeet.value?.processing?.extendedStatus
+    return status === Zeus.ExtendedMeetStatus.VOTING_IN_PROGRESS || status === Zeus.ExtendedMeetStatus.VOTING_COMPLETED
   })
 
   const formattedOpenDate = computed(() => {
@@ -112,12 +139,14 @@ export function useVoteOnMeet() {
     allVotesSelected,
     isVotingNotStarted,
     isVotingEnded,
+    showQuorumIndicator,
     formattedOpenDate,
     formattedCloseDate,
 
     // actions
     setMeet,
     voteOnMeet,
-    resetVotes
+    resetVotes,
+    generateBallot
   }
 }

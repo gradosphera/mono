@@ -106,7 +106,10 @@ const regenerate = async() => {
 
 // Функция для декодирования и очистки HTML
 function sanitizeHtml(html: string) {
-  return DOMPurify.sanitize(html);
+  return DOMPurify.sanitize(html, {
+    ADD_TAGS: ['style'],
+    ADD_ATTR: ['class', 'id']
+  });
 }
 
 const safeHtml = computed(() => sanitizeHtml(doc.value?.html ?? ''));
@@ -227,5 +230,31 @@ const hasInvalidSignature = computed(() => props.documentAggregate?.document?.si
   .dynamic-padding {
     padding: 10px !important;
   }
+}
+/*
+/* Стили для таблиц внутри документа */
+.description table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.description th,
+.description td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.description th {
+  background-color: #f4f4f4;
+  width: 30% !important;
+  max-width: 30% !important;
+  word-break: break-word !important;
+}
+.q-table--no-wrap th, .q-table--no-wrap td {
+  white-space: break-spaces !important;
+  word-break: break-word !important;
 }
 </style>

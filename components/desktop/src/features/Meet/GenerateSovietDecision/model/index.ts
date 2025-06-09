@@ -5,17 +5,18 @@ import { useSystemStore } from 'src/entities/System/model'
 export type IGenerateSovietDecisionInput = Mutations.Meet.GenerateSovietDecisionOnAnnualMeetDocument.IInput['data'];
 export type IGenerateSovietDecisionResult = Mutations.Meet.GenerateSovietDecisionOnAnnualMeetDocument.IOutput[typeof Mutations.Meet.GenerateSovietDecisionOnAnnualMeetDocument.name];
 
-export async function generateSovietDecision(data: IGenerateSovietDecisionInput): Promise<IGenerateSovietDecisionResult> {
-  const { [Mutations.Meet.GenerateSovietDecisionOnAnnualMeetDocument.name]: result } = await client.Mutation(
+export async function generateSovietDecision(data: IGenerateSovietDecisionInput, options?: any): Promise<IGenerateSovietDecisionResult> {
+  const { [Mutations.Meet.GenerateSovietDecisionOnAnnualMeetDocument.name]: generatedDocument } = await client.Mutation(
     Mutations.Meet.GenerateSovietDecisionOnAnnualMeetDocument.mutation,
     {
       variables: {
-        data
+        data,
+        options
       }
     }
   );
 
-  return result;
+  return generatedDocument;
 }
 
 export function useGenerateSovietDecisionOnAnnualMeet() {
@@ -27,6 +28,15 @@ export function useGenerateSovietDecisionOnAnnualMeet() {
   async function generateSovietDecisionOnAnnualMeet(
     data: Omit<IGenerateSovietDecisionInput, 'coopname'>
   ): Promise<IGenerateSovietDecisionResult> {
+    // Здесь необходимо убедиться, что переданы все обязательные параметры согласно DTO
+    if (!data.decision_id) {
+      throw new Error('Необходимо указать ID решения совета (decision_id)')
+    }
+
+    if (!data.meet_hash) {
+      throw new Error('Необходимо указать хеш собрания (meet_hash)')
+    }
+
     const { [Mutations.Meet.GenerateSovietDecisionOnAnnualMeetDocument.name]: result } = await client.Mutation(
       Mutations.Meet.GenerateSovietDecisionOnAnnualMeetDocument.mutation,
       {

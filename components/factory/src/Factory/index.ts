@@ -16,6 +16,7 @@ import { getFetch } from '../Utils/getFetch'
 import { getEnvVar } from '../config'
 import { getCurrentBlock } from '../Utils/getCurrentBlock'
 import type { IEntrepreneurData, IIndividualData, IOrganizationData } from '..'
+import { formatDateTime } from '../Utils'
 
 const packageVersion = packageJson.version
 
@@ -236,7 +237,7 @@ export abstract class DocFactory<T extends IGenerate> {
     }
   }
 
-  async getMeet(coopname: string, meet_hash: string, block_num?: number): Promise<MeetContract.Tables.Meets.IOutput> {
+  async getMeet(coopname: string, meet_hash: string, block_num?: number): Promise<Cooperative.Model.IMeetExtended> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
     const meetResponse = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
@@ -244,21 +245,38 @@ export abstract class DocFactory<T extends IGenerate> {
         'code': 'meet',
         'scope': coopname,
         'table': 'meets',
-        'value.hash': meet_hash,
+        'value.hash': meet_hash.toUpperCase(),
         ...block_filter,
       }),
       limit: String(1),
     }))
 
     const meet = meetResponse.results[0]?.value as MeetContract.Tables.Meets.IOutput
-
+    console.log('meet', meet, meet_hash, block_num, coopname)
     if (!meet)
       throw new Error('Собрание не найдено')
 
-    return meet
+    // Получаем данные о председателе и секретаре собрания
+    const presiderData = await this.getUser(meet.presider, block_num)
+    const secretaryData = await this.getUser(meet.secretary, block_num)
+
+    // Получаем полные имена
+    const presiderFullName = this.getFullParticipantName(presiderData.data)
+    const secretaryFullName = this.getFullParticipantName(secretaryData.data)
+
+    // Преобразуем формат даты для шаблона
+    const meetExtended: Cooperative.Model.IMeetExtended = {
+      ...meet,
+      close_at_datetime: formatDateTime(meet.close_at),
+      open_at_datetime: formatDateTime(meet.open_at),
+      presider_full_name: presiderFullName,
+      secretary_full_name: secretaryFullName,
+    }
+
+    return meetExtended
   }
 
-  async getMeetQuestions(coopname: string, meet_id: number, block_num?: number): Promise<MeetContract.Tables.Questions.IOutput[]> {
+  async getMeetQuestions(coopname: string, meet_id: number, block_num?: number): Promise<Cooperative.Model.IQuestionExtended[]> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
     const questionsResponse = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
@@ -273,7 +291,72 @@ export abstract class DocFactory<T extends IGenerate> {
 
     const questions = questionsResponse.results?.map((result: any) => result.value) as MeetContract.Tables.Questions.IOutput[] || []
 
-    return questions
+    // Сортировка вопросов по номеру (с учетом, что number может быть строкой)
+    questions.sort((a, b) => {
+      // Преобразуем в числа для корректного сравнения
+      const numA = Number.parseInt(a.number.toString(), 10)
+      const numB = Number.parseInt(b.number.toString(), 10)
+      return numA - numB
+    })
+
+    // Преобразуем вопросы в расширенную модель с вычисленными результатами
+    const extendedQuestions = questions.map((question) => {
+      // Преобразуем значения голосов в числа
+      const votesFor = Number(question.counter_votes_for)
+      const votesAgainst = Number(question.counter_votes_against)
+      const votesAbstained = Number(question.counter_votes_abstained)
+
+      // Вычисляем общее количество голосов
+      const votesTotal = votesFor + votesAgainst + votesAbstained
+
+      // Вычисляем проценты (защита от деления на ноль)
+      const calculatePercent = (value: number): number => {
+        if (votesTotal === 0)
+          return 0
+        return Math.round((value / votesTotal) * 100)
+      }
+
+      // Определяем, принято ли решение (более 50% голосов "за")
+      const isAccepted = votesTotal > 0 && votesFor > votesTotal / 2
+      // Возвращаем расширенный объект вопроса
+      return {
+        ...question,
+        votes_total: votesTotal,
+        votes_for_percent: calculatePercent(votesFor),
+        votes_against_percent: calculatePercent(votesAgainst),
+        votes_abstained_percent: calculatePercent(votesAbstained),
+        is_accepted: isAccepted,
+      } as Cooperative.Model.IQuestionExtended
+    })
+
+    return extendedQuestions
+  }
+
+  /**
+   * Определяет как пользователь проголосовал по конкретному вопросу
+   * @param question Вопрос голосования
+   * @param username Имя пользователя
+   * @returns 'for', 'against' или 'abstained'
+   */
+  getUserVote(question: MeetContract.Tables.Questions.IOutput, username: string): 'for' | 'against' | 'abstained' {
+    console.log(question, username)
+    // Проверяем, есть ли пользователь в списке проголосовавших "За"
+    if (question.voters_for && question.voters_for.includes(username)) {
+      return 'for'
+    }
+
+    // Проверяем, есть ли пользователь в списке проголосовавших "Против"
+    if (question.voters_against && question.voters_against.includes(username)) {
+      return 'against'
+    }
+
+    // Проверяем, есть ли пользователь в списке воздержавшихся
+    if (question.voters_abstained && question.voters_abstained.includes(username)) {
+      return 'abstained'
+    }
+
+    // Если пользователь не найден ни в одном из списков, считаем, что он воздержался
+    return 'abstained'
   }
 
   async getTemplate<T>(scope: string, registry_id: number, block_num?: number): Promise<ITemplate<T>> {

@@ -4,13 +4,17 @@ import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-me
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import type { ExcludeCommonProps } from '~/modules/document/types';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.AnnualGeneralMeetingNotification.Action;
 
 @InputType(`BaseAnnualGeneralMeetingNotificationDocumentInput`)
 class BaseAnnualGeneralMeetingNotificationDocumentInputDTO implements ExcludeCommonProps<action> {
-  // Мета пока не содержит дополнительных полей
+  @Field(() => String, { description: 'Хеш собрания' })
+  @IsString()
+  @IsNotEmpty()
+  meet_hash!: string;
 }
 @InputType(`AnnualGeneralMeetingNotificationGenerateDocumentInput`)
 export class AnnualGeneralMeetingNotificationGenerateDocumentInputDTO

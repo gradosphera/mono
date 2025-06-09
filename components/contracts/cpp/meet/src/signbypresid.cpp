@@ -86,16 +86,15 @@ void meet::signbypresid(name coopname, name username, checksum256 hash, document
         qitr = by_meet.erase(qitr);
     }
       
-  // отправляем документ в принятый реестр
-  
-  Action::send<newresolved_interface>(
-    _soviet,
-    "newresolved"_n,
-    _meet,
-    coopname,
-    username,
-    get_valid_soviet_action("completegm"_n),
-    hash,
-    presider_decision
-  );
+    Action::send<newlink_interface>(
+      _soviet,
+      "newlink"_n,
+      _meet,
+      coopname,
+      username,
+      get_valid_soviet_action("completegm"_n),
+      hash,
+      presider_decision
+    );
+
 } 

@@ -23,7 +23,7 @@ export const useMeetStore = defineStore(namespace, (): IMeetStore => {
     loading.value = true
     try {
       const result = await api.loadMeets(data);
-      meets.value = result;
+      meets.value = result.slice().sort((a, b) => new Date(b.processing?.meet.created_at as string).getTime() - new Date(a.processing?.meet.created_at as string).getTime());
       return result;
     } finally {
       loading.value = false

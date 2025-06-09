@@ -27,6 +27,7 @@ export async function signBySecretaryOnAnnualGeneralMeetWithDecision(data: IClos
     data: {
       coopname: data.coopname,
       username: data.username,
+      meet_hash: data.hash
     }
   }
 
@@ -141,7 +142,6 @@ export const useCloseMeet = (
   const canCloseByPresider = computed(() => {
     const meet = meetStore.currentMeet
     if (!meet?.processing?.meet) return false
-    console.log('meet.processing.meet.status:', meet.processing.meet.status)
     return meet.processing.meet.status === Zeus.ExtendedMeetStatus.PRECLOSED.toLowerCase()
   })
 

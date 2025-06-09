@@ -50,6 +50,7 @@ public:
   [[eosio::action]] void newpackage(NEWPACKAGE_SIGNATURE);
 
   [[eosio::action]] void newact(NEWACT_SIGNATURE);
+  [[eosio::action]] void newlink(NEWLINK_SIGNATURE);
   [[eosio::action]] void newdeclined(NEWDECLINED_SIGNATURE);
 
   [[eosio::action]] void declinedoc(eosio::name coopname, eosio::name username, checksum256 hash, document2 document);
