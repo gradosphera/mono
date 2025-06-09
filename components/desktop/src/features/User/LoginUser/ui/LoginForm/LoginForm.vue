@@ -41,6 +41,7 @@ import { useLoginUser } from 'src/features/User/LoginUser';
 import { FailAlert } from 'src/shared/api';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useDesktopStore } from 'src/entities/Desktop/model';
 
 const router = useRouter()
 
@@ -59,7 +60,9 @@ const submit = async () => {
     if (!currentUser.isRegistrationComplete) {
       router.push({ name: 'signup' })
     } else {
-      router.push({ name: 'index' })
+      const desktops = useDesktopStore()
+      desktops.selectDefaultWorkspace()
+      desktops.goToDefaultPage(router)
     }
 
     loading.value = false

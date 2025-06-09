@@ -5,10 +5,13 @@ import { ListOfDocumentsPage } from 'src/pages/Cooperative/ListOfDocuments'
 import { PaymentsPage } from 'src/pages/Cooperative/Payments'
 import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
 import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
+import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace'
 
-export default async function () {
+export default async function (): Promise<IWorkspaceConfig> {
   return {
     workspace: 'soviet',
+    title: 'Стол совета',
+    defaultRoute: 'agenda', // Маршрут по умолчанию для рабочего стола совета
     routes: [
       {
         meta: {

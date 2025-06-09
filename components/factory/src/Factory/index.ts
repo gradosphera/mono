@@ -252,7 +252,7 @@ export abstract class DocFactory<T extends IGenerate> {
     }))
 
     const meet = meetResponse.results[0]?.value as MeetContract.Tables.Meets.IOutput
-    console.log('meet', meet, meet_hash, block_num, coopname)
+
     if (!meet)
       throw new Error('Собрание не найдено')
 
