@@ -53,99 +53,91 @@ div
             div.btn-font.text-center {{ item.title }}
 </template>
 
-  <script setup lang="ts">
-  import { ref, computed, onMounted, watch } from 'vue'
-  import { useRouter } from 'vue-router'
-  import { useSystemStore } from 'src/entities/System/model'
-  import { useCurrentUserStore } from 'src/entities/User'
-  import { useDesktopStore } from 'src/entities/Desktop/model'
-  import { useSessionStore } from 'src/entities/Session'
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useCurrentUserStore } from 'src/entities/User'
+import { useDesktopStore } from 'src/entities/Desktop/model'
 
-  const router = useRouter()
-  const system = useSystemStore()
-  const user = useCurrentUserStore()
-  const session = useSessionStore()
-  const desktop = useDesktopStore()
-  const { info } = system
+const router = useRouter()
+const user = useCurrentUserStore()
+const desktop = useDesktopStore()
 
-  const slideIndex = ref(0)
-  const showDialog = ref(false)
+const slideIndex = ref(0)
+const showDialog = ref(false)
 
-  // workspaceMenus – список рабочих столов из store
-  const workspaceMenus = computed(() => desktop.workspaceMenus)
+// workspaceMenus – список рабочих столов из store
+const workspaceMenus = computed(() => desktop.workspaceMenus)
 
-  // Фильтрация по ролям (если требуется)
-  const menuWorkspaces = computed(() => {
-    const userRole = user.userAccount?.role || 'user'
-    return workspaceMenus.value.filter(item =>
-      item.meta.roles?.includes(userRole) || !item.meta.roles || item.meta.roles.length === 0
-    )
-  })
+// Фильтрация по ролям (если требуется)
+const menuWorkspaces = computed(() => {
+  const userRole = user.userAccount?.role || 'user'
+  return workspaceMenus.value.filter(item =>
+    item.meta.roles?.includes(userRole) || !item.meta.roles || item.meta.roles.length === 0
+  )
+})
 
-  const headerClass = (item: any) => {
-    return desktop?.activeWorkspaceName === item.workspaceName ? 'text-white bg-teal' : ''
-  }
+const headerClass = (item: any) => {
+  return desktop?.activeWorkspaceName === item.workspaceName ? 'text-white bg-teal' : ''
+}
 
-
-  // Функция навигации: переходим в рамках маршрутов рабочего стола
-  const open = (route: any) => {
-    if (route && route.children && route.children.length)
-      router.push({ name: route.children[0].name, params: { coopname: info.coopname } })
-    else if (route)
-      router.push({ name: route.name, params: { coopname: info.coopname } })
-  }
-
-  const handleClick = (item: any, index: number) => {
-    if (slideIndex.value === index) {
-      showDialog.value = true
-    } else {
-      slideIndex.value = index
-      // Обновляем активный рабочий стол
-      desktop.selectWorkspace(item.workspaceName)
-      if (item.mainRoute) open(item.mainRoute)
-    }
-  }
-
-  const selectFromDialog = (index: number) => {
-    showDialog.value = false
+const handleClick = (item: any, index: number) => {
+  if (slideIndex.value === index) {
+    showDialog.value = true
+  } else {
     slideIndex.value = index
-    const item = menuWorkspaces.value[index]
+    // Обновляем активный рабочий стол
     desktop.selectWorkspace(item.workspaceName)
-    if (item.mainRoute) open(item.mainRoute)
+    // Переходим на маршрут по умолчанию для выбранного рабочего стола
+    desktop.goToDefaultPage(router)
   }
+}
 
-  onMounted(() => {
-    if (menuWorkspaces.value.length > 0 && session.isAuth && user.isRegistrationComplete) {
-      slideIndex.value = 0
-      const firstItem = menuWorkspaces.value[0]
-      desktop.selectWorkspace(firstItem.workspaceName)
-      if (firstItem.mainRoute) open(firstItem.mainRoute)
+const selectFromDialog = (index: number) => {
+  showDialog.value = false
+  slideIndex.value = index
+  const item = menuWorkspaces.value[index]
+  desktop.selectWorkspace(item.workspaceName)
+  // Переходим на маршрут по умолчанию для выбранного рабочего стола
+  desktop.goToDefaultPage(router)
+}
+
+onMounted(() => {
+  // Находим индекс активного рабочего стола
+  const activeWorkspaceName = desktop.activeWorkspaceName
+  if (activeWorkspaceName) {
+    const activeIndex = menuWorkspaces.value.findIndex(
+      item => item.workspaceName === activeWorkspaceName
+    )
+    if (activeIndex !== -1) {
+      slideIndex.value = activeIndex
     }
-  })
+  }
+})
 
-  // При изменении slideIndex обновляем активный рабочий стол
-  watch(slideIndex, (newIndex) => {
-    const item = menuWorkspaces.value[newIndex]
-    if (item) {
-      desktop.selectWorkspace(item.workspaceName)
-      if (item.mainRoute) open(item.mainRoute)
-    }
-  })
-  </script>
+// При изменении slideIndex обновляем активный рабочий стол
+watch(slideIndex, (newIndex) => {
+  const item = menuWorkspaces.value[newIndex]
+  if (item) {
+    desktop.selectWorkspace(item.workspaceName)
+    desktop.goToDefaultPage(router)
+  }
+})
+</script>
 
-  <style lang="scss">
-  .btn-menu {
-    height: 100px;
-    width: 100px;
-    border-radius: 0 !important;
-  }
-  .btn-icon {
-    font-size: 20px !important;
-  }
-  .btn-font {
-    font-size: 8px !important;
-  }
-  .workspace-menu .q-carousel__slide {
-    padding: 0px !important;
-  }
-  </style>
+<style lang="scss">
+.btn-menu {
+  height: 100px;
+  width: 100px;
+  border-radius: 0 !important;
+}
+.btn-icon {
+  font-size: 20px !important;
+}
+.btn-font {
+  font-size: 8px !important;
+}
+.workspace-menu .q-carousel__slide {
+  padding: 0px !important;
+}
+</style>

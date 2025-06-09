@@ -1,6 +1,13 @@
 import type { Queries } from '@coopenomics/sdk';
 
 export type IDesktop = Queries.Desktop.GetDesktop.IOutput[typeof Queries.Desktop.GetDesktop.name]
+
+export interface IWorkspace {
+  name: string;
+  title: string;
+  defaultRoute?: string; // Маршрут по умолчанию для этого рабочего стола
+}
+
 export interface ILegacyDesktop {
   name: string;
   hash: string;

@@ -26,13 +26,22 @@ export function setupNavigationGuard(router: Router) {
 
     // редирект с index
     if (to.name === 'index') {
-      const homePage =
-        session.isAuth && currentUser.isRegistrationComplete
-          ? desktops.currentDesktop?.authorizedHome
-          : desktops.currentDesktop?.nonAuthorizedHome
+      // Убеждаемся, что правильный рабочий стол выбран
+      if (session.isAuth && currentUser.isRegistrationComplete) {
+        // Если рабочий стол не выбран - выбираем по правам пользователя
+        if (!desktops.activeWorkspaceName) {
+          desktops.selectDefaultWorkspace()
+        }
 
-      next({ name: homePage, params: { coopname: info.coopname } })
-      return
+        // Переходим на маршрут по умолчанию для выбранного рабочего стола
+        desktops.goToDefaultPage(router)
+        return
+      } else {
+        // Если пользователь не авторизован, используем nonAuthorizedHome
+        const homePage = desktops.currentDesktop?.nonAuthorizedHome
+        next({ name: homePage, params: { coopname: info.coopname } })
+        return
+      }
     }
 
     // проверка по ролям

@@ -9,10 +9,13 @@ import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
 import { UserDocumentsPage } from 'src/pages/User/DocumentsPage'
 import { UserPaymentsPage } from 'src/pages/User/PaymentsPage'
 import { agreementsBase } from 'src/shared/lib/consts/workspaces'
+import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace'
 
-export default async function () {
+export default async function (): Promise<IWorkspaceConfig> {
   return {
     workspace: 'participant',
+    title: 'Стол пайщика',
+    defaultRoute: 'profile', // Маршрут по умолчанию для рабочего стола пайщика
     routes: [
       {
         meta: {
@@ -102,9 +105,6 @@ export default async function () {
                 path: ':hash',
                 name: 'user-meet-details',
                 component: markRaw(MeetDetailsPage),
-                meta: {
-                  test: true
-                }
               },
             ],
           },
