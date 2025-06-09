@@ -1,7 +1,5 @@
 <template lang="pug">
 div
-  div.text-h5.q-mb-md.text-center Голосование
-
   // Баннер для уже проголосовавших пользователей
   q-banner.q-mb-md(
     v-if="meet?.processing?.isVoted"
@@ -14,58 +12,63 @@ div
     div.text-body1.text-weight-medium Вы уже приняли участие в голосовании
     div.text-caption Ваш голос принят и учтен
 
-  div
-    div(flat class="card-container q-pa-md" v-if="!meet?.processing?.isVoted")
-      div.row.q-col-gutter-md
-        div.col-12.col-md-12(v-for="(item, index) in meetAgendaItems" :key="index")
-          q-card(flat bordered)
-            q-card-section
-              div.text-h6 {{ item.title }}
-              div.text-body1 {{ item.context }}
-              q-separator.q-my-sm
-              div.text-body1 {{ item.decision }}
-              q-separator.q-my-sm
-              div.text-subtitle1.q-mb-sm Ваш голос:
-              div.row.q-col-gutter-sm
-                div.col-4
-                  q-radio(
-                    v-model="votes[index]"
-                    val="for"
-                    label="ЗА"
-                    color="positive"
-                  )
-                div.col-4
-                  q-radio(
-                    v-model="votes[index]"
-                    val="against"
-                    label="ПРОТИВ"
-                    color="negative"
-                  )
-                div.col-4
-                  q-radio(
-                    v-model="votes[index]"
-                    val="abstained"
-                    label="ВОЗДЕРЖАЛСЯ"
-                    color="grey"
-                  )
+  q-card(v-if="!meet?.processing?.isVoted", flat)
+    q-card-section.text-center
+      .text-h6 Голосование
+    div(v-for="(item, index) in meetAgendaItems", :key="index")
+      q-separator
 
-      div.row.justify-center.q-mt-lg
-        q-btn.q-px-xl(
-          color="primary"
-          label="ГОЛОСОВАТЬ"
-          size="lg"
-          :loading="isVoting"
-          @click="submitVote"
-          :disable="!allVotesSelected"
-        )
+      q-card-section
+        .row.items-start.q-col-gutter-md
+          .col-auto
+            AgendaNumberAvatar(:number="item.number")
+          .col
+            .text-h6.q-mb-sm {{ item.title }}
+            .text-body1.q-mb-sm {{ item.context }}
+            q-separator.q-my-md
+            .text-body1.q-mb-sm {{ item.decision }}
+            q-separator.q-my-md
+            .text-subtitle1.q-mb-sm Ваш голос:
+            .row.q-col-gutter-sm
+              .col-12.col-md-4
+                q-radio(
+                  v-model="votes[index]",
+                  val="for",
+                  label="ЗА",
+                  color="positive"
+                )
+              .col-12.col-md-4
+                q-radio(
+                  v-model="votes[index]",
+                  val="against",
+                  label="ПРОТИВ",
+                  color="negative"
+                )
+              .col-12.col-md-4
+                q-radio(
+                  v-model="votes[index]",
+                  val="abstained",
+                  label="ВОЗДЕРЖАЛСЯ",
+                  color="grey"
+                )
+    q-separator
+    q-card-actions(align="center").q-pa-md
+      q-btn.q-px-xl(
+        color="primary",
+        label="ГОЛОСОВАТЬ",
+        size="lg",
+        :loading="isVoting",
+        @click="submitVote",
+        :disable="!allVotesSelected"
+      )
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { AgendaNumberAvatar } from 'src/shared/ui/AgendaNumberAvatar'
 import type { IMeet } from 'src/entities/Meet'
 import { useSessionStore } from 'src/entities/Session'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
-import { generateBallot } from 'src/features/Meet/GenerateBallot'
 import { useSignDocument } from 'src/shared/lib/document'
 import { useVoteOnMeet, type IVoteOnMeetInput } from 'src/features/Meet/VoteOnMeet'
 
@@ -81,7 +84,8 @@ const {
   allVotesSelected,
   setMeet,
   voteOnMeet,
-  resetVotes
+  resetVotes,
+  generateBallot
 } = useVoteOnMeet()
 
 const sessionStore = useSessionStore()
@@ -117,6 +121,7 @@ const submitVote = async () => {
     const generatedBallot = await generateBallot({
       coopname: props.coopname,
       username: sessionStore.username,
+      meet_hash: props.meetHash
     })
 
     const signedBallot = await signDocument(generatedBallot, sessionStore.username)

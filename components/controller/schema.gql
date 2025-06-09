@@ -159,8 +159,8 @@ input AddTrustedAccountInput {
   trusted: String!
 }
 
-"""Пункт повестки собрания"""
-type AgendaMeetPoint {
+"""Пункт повестки общего собрания (для ввода)"""
+input AgendaGeneralMeetPointInput {
   """Контекст или дополнительная информация по пункту повестки"""
   context: String!
 
@@ -171,8 +171,35 @@ type AgendaMeetPoint {
   title: String!
 }
 
-"""Пункт повестки собрания (для ввода)"""
-input AgendaMeetPointInput {
+"""Вопрос повестки общего собрания"""
+input AgendaGeneralMeetQuestion {
+  """Контекст или дополнительная информация по вопросу"""
+  context: String
+
+  """Предлагаемое решение по вопросу повестки"""
+  decision: String!
+
+  """Номер вопроса в повестке"""
+  number: String!
+
+  """Заголовок вопроса повестки"""
+  title: String!
+}
+
+"""Данные собрания для повестки"""
+input AgendaMeet {
+  """Дата и время окончания собрания"""
+  close_at_datetime: String!
+
+  """Дата и время начала собрания"""
+  open_at_datetime: String!
+
+  """Тип собрания (очередное или внеочередное)"""
+  type: String!
+}
+
+"""Пункт повестки собрания"""
+type AgendaMeetPoint {
   """Контекст или дополнительная информация по пункту повестки"""
   context: String!
 
@@ -222,6 +249,8 @@ input AnnualGeneralMeetingAgendaGenerateDocumentInput {
 
   """Ссылки, связанные с документом"""
   links: [String!]
+  meet: AgendaMeet!
+  questions: [AgendaGeneralMeetQuestion!]!
 
   """Часовой пояс, в котором был создан документ"""
   timezone: String
@@ -274,6 +303,8 @@ input AnnualGeneralMeetingAgendaSignedMetaDocumentInput {
 
   """Ссылки, связанные с документом"""
   links: [String!]!
+  meet: AgendaMeet!
+  questions: [AgendaGeneralMeetQuestion!]!
 
   """ID документа в реестре"""
   registry_id: Int!
@@ -309,6 +340,9 @@ input AnnualGeneralMeetingDecisionGenerateDocumentInput {
 
   """Ссылки, связанные с документом"""
   links: [String!]
+
+  """Хеш собрания"""
+  meet_hash: String!
 
   """Часовой пояс, в котором был создан документ"""
   timezone: String
@@ -362,6 +396,9 @@ input AnnualGeneralMeetingDecisionSignedMetaDocumentInput {
   """Ссылки, связанные с документом"""
   links: [String!]!
 
+  """Хеш собрания"""
+  meet_hash: String!
+
   """ID документа в реестре"""
   registry_id: Int!
 
@@ -397,6 +434,9 @@ input AnnualGeneralMeetingNotificationGenerateDocumentInput {
   """Ссылки, связанные с документом"""
   links: [String!]
 
+  """Хеш собрания"""
+  meet_hash: String!
+
   """Часовой пояс, в котором был создан документ"""
   timezone: String
 
@@ -410,6 +450,64 @@ input AnnualGeneralMeetingNotificationGenerateDocumentInput {
   version: String
 }
 
+input AnnualGeneralMeetingNotificationSignedDocumentInput {
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
+  hash: String!
+
+  """Метаинформация"""
+  meta: AnnualGeneralMeetingNotificationSignedMetaDocumentInput!
+
+  """Хэш мета-данных"""
+  meta_hash: String!
+
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
+}
+
+input AnnualGeneralMeetingNotificationSignedMetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """Хеш собрания"""
+  meet_hash: String!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
 input AnnualGeneralMeetingSovietDecisionGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -420,6 +518,9 @@ input AnnualGeneralMeetingSovietDecisionGenerateDocumentInput {
   """Дата и время создания документа"""
   created_at: String
 
+  """ID решения совета"""
+  decision_id: Float!
+
   """Имя генератора, использованного для создания документа"""
   generator: String
 
@@ -428,6 +529,9 @@ input AnnualGeneralMeetingSovietDecisionGenerateDocumentInput {
 
   """Ссылки, связанные с документом"""
   links: [String!]
+
+  """Хеш собрания"""
+  meet_hash: String!
 
   """Часовой пояс, в котором был создан документ"""
   timezone: String
@@ -461,13 +565,16 @@ input AnnualGeneralMeetingVotingBallotGenerateDocumentInput {
   """Ссылки, связанные с документом"""
   links: [String!]
 
+  """Хеш собрания"""
+  meet_hash: String!
+
   """Часовой пояс, в котором был создан документ"""
   timezone: String
 
   """Название документа"""
   title: String
 
-  """Имя пользователя, создавшего документ"""
+  """Имя пользователя голосующего"""
   username: String!
 
   """Версия генератора, использованного для создания документа"""
@@ -513,6 +620,9 @@ input AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput {
   """Ссылки, связанные с документом"""
   links: [String!]!
 
+  """Хеш собрания"""
+  meet_hash: String!
+
   """ID документа в реестре"""
   registry_id: Int!
 
@@ -522,7 +632,7 @@ input AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput {
   """Название документа"""
   title: String!
 
-  """Имя пользователя, создавшего документ"""
+  """Имя пользователя голосующего"""
   username: String!
 
   """Версия генератора, использованного для создания документа"""
@@ -1177,6 +1287,9 @@ type ContactsDTO {
 }
 
 type CooperativeOperatorAccount {
+  """Количество активных участников"""
+  active_participants_count: Float!
+
   """Объявление кооператива"""
   announce: String!
 
@@ -1257,16 +1370,13 @@ enum Country {
 
 input CreateAnnualGeneralMeetInput {
   """Повестка собрания"""
-  agenda: [AgendaMeetPointInput!]!
+  agenda: [AgendaGeneralMeetPointInput!]!
 
   """Время закрытия собрания"""
   close_at: DateTime!
 
   """Имя аккаунта кооператива"""
   coopname: String!
-
-  """Хеш"""
-  hash: String!
 
   """Имя аккаунта инициатора"""
   initiator: String!
@@ -2215,6 +2325,9 @@ type Meet {
   """Сертификат инициатора собрания"""
   initiator_certificate: UserCertificateUnion
 
+  """Список пользователей, которые подписали уведомление"""
+  notified_users: [String!]!
+
   """Дата открытия собрания"""
   open_at: DateTime!
 
@@ -2650,6 +2763,9 @@ type Mutation {
   """Модерировать заявку"""
   moderateRequest(data: ModerateRequestInput!): Transaction!
 
+  """Уведомление о проведении общего собрания пайщиков"""
+  notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInput!): MeetAggregate!
+
   """Отклонить модерацию по заявке"""
   prohibitRequest(data: ProhibitRequestInput!): Transaction!
 
@@ -2735,6 +2851,13 @@ type Mutation {
 
   """Голосование на общем собрании пайщиков"""
   voteOnAnnualGeneralMeet(data: VoteOnAnnualGeneralMeetInput!): MeetAggregate!
+}
+
+input NotifyOnAnnualGeneralMeetInput {
+  coopname: String!
+  meet_hash: String!
+  notification: AnnualGeneralMeetingNotificationSignedDocumentInput!
+  username: String!
 }
 
 type Organization {

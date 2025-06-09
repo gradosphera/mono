@@ -8,33 +8,33 @@ div
   div.row.justify-around.q-mt-md
     div.col-xs-12.col-md-5
 
-      div.row.q-mb-sm
-        div.col-5.card-label Председатель:
-        div.col-7.card-value {{ getNameFromCertificate(meet.processing?.meet?.presider_certificate) }}
+      div.row.q-mb-sm.items-baseline
+        div.col-xs-12.col-sm-5.card-label Председатель:
+        div.col-xs-12.col-sm-7.card-value {{ getNameFromCertificate(meet.processing?.meet?.presider_certificate) }}
 
-      div.row.q-mb-sm
-        div.col-5.card-label Секретарь:
-        div.col-7.card-value {{ getNameFromCertificate(meet.processing?.meet?.secretary_certificate) }}
+      div.row.q-mb-sm.items-baseline
+        div.col-xs-12.col-sm-5.card-label Секретарь:
+        div.col-xs-12.col-sm-7.card-value {{ getNameFromCertificate(meet.processing?.meet?.secretary_certificate) }}
 
-      div.row.q-mb-sm
-        div.col-5.card-label Открытие:
-        div.col-7.card-value {{ meetStatus.formattedOpenDate }} ({{ timezoneLabel }})
+      div.row.q-mb-sm.items-baseline
+        div.col-xs-12.col-sm-5.card-label Открытие:
+        div.col-xs-12.col-sm-7.card-value {{ meetStatus.formattedOpenDate }} ({{ timezoneLabel }})
 
     div.col-xs-12.col-md-5
-      div.row.q-mb-sm
-        div.col-5.card-label Кворум:
-        div.col-7.card-value {{ meet.processing?.meet?.quorum_percent }}%
+      div.row.q-mb-sm.items-baseline
+        div.col-xs-12.col-sm-5.card-label Кворум:
+        div.col-xs-12.col-sm-7.card-value {{ meet.processing?.meet?.quorum_percent }}%
 
-      div.row.q-mb-sm
-        div.col-5.card-label Явка:
-        div.col-7.card-value {{ meet.processing?.meet?.current_quorum_percent }}%
+      div.row.q-mb-sm.items-baseline
+        div.col-xs-12.col-sm-5.card-label Явка:
+        div.col-xs-12.col-sm-7.card-value {{ meet.processing?.meet?.current_quorum_percent }}%
 
 
-      div.row.q-mb-sm
-        div.col-5.card-label Закрытие:
-        div.col-7.card-value {{ meetStatus.formattedCloseDate }} ({{ timezoneLabel }})
+      div.row.q-mb-sm.items-baseline
+        div.col-xs-12.col-sm-5.card-label Закрытие:
+        div.col-xs-12.col-sm-7.card-value {{ meetStatus.formattedCloseDate }} ({{ timezoneLabel }})
 
-  div.row.justify-around
+  div.row.justify-around.q-mt-lg
     MeetStatusBanner(:meet="meet")
 
 

@@ -28,8 +28,6 @@ export class DocumentPackageAggregator {
   async buildDocumentPackageAggregate(
     rawAction: Cooperative.Blockchain.IAction
   ): Promise<DocumentPackageAggregateDomainInterface> {
-    console.log('rawAction', rawAction);
-
     // Определяем версию документа
     const docVersion = this.determineDocumentVersion(rawAction);
 

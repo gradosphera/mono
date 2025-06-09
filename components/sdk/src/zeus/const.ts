@@ -14,21 +14,29 @@ export const AllTypesProps: Record<string,any> = {
 	AddTrustedAccountInput:{
 
 	},
-	AgendaMeetPointInput:{
+	AgendaGeneralMeetPointInput:{
+
+	},
+	AgendaGeneralMeetQuestion:{
+
+	},
+	AgendaMeet:{
 
 	},
 	AgreementInput:{
 
 	},
 	AnnualGeneralMeetingAgendaGenerateDocumentInput:{
-
+		meet:"AgendaMeet",
+		questions:"AgendaGeneralMeetQuestion"
 	},
 	AnnualGeneralMeetingAgendaSignedDocumentInput:{
 		meta:"AnnualGeneralMeetingAgendaSignedMetaDocumentInput",
 		signatures:"SignatureInfoInput"
 	},
 	AnnualGeneralMeetingAgendaSignedMetaDocumentInput:{
-
+		meet:"AgendaMeet",
+		questions:"AgendaGeneralMeetQuestion"
 	},
 	AnnualGeneralMeetingDecisionGenerateDocumentInput:{
 
@@ -41,6 +49,13 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	AnnualGeneralMeetingNotificationGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingNotificationSignedDocumentInput:{
+		meta:"AnnualGeneralMeetingNotificationSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	AnnualGeneralMeetingNotificationSignedMetaDocumentInput:{
 
 	},
 	AnnualGeneralMeetingSovietDecisionGenerateDocumentInput:{
@@ -102,7 +117,7 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	Country: "enum" as const,
 	CreateAnnualGeneralMeetInput:{
-		agenda:"AgendaMeetPointInput",
+		agenda:"AgendaGeneralMeetPointInput",
 		close_at:"DateTime",
 		open_at:"DateTime",
 		proposal:"AnnualGeneralMeetingAgendaSignedDocumentInput"
@@ -395,6 +410,9 @@ export const AllTypesProps: Record<string,any> = {
 		moderateRequest:{
 			data:"ModerateRequestInput"
 		},
+		notifyOnAnnualGeneralMeet:{
+			data:"NotifyOnAnnualGeneralMeetInput"
+		},
 		prohibitRequest:{
 			data:"ProhibitRequestInput"
 		},
@@ -467,6 +485,9 @@ export const AllTypesProps: Record<string,any> = {
 		voteOnAnnualGeneralMeet:{
 			data:"VoteOnAnnualGeneralMeetInput"
 		}
+	},
+	NotifyOnAnnualGeneralMeetInput:{
+		notification:"AnnualGeneralMeetingNotificationSignedDocumentInput"
 	},
 	OrganizationDetailsInput:{
 
@@ -885,6 +906,7 @@ export const ReturnTypes: Record<string,any> = {
 		phone:"String"
 	},
 	CooperativeOperatorAccount:{
+		active_participants_count:"Float",
 		announce:"String",
 		coop_type:"String",
 		created_at:"String",
@@ -1059,6 +1081,7 @@ export const ReturnTypes: Record<string,any> = {
 		id:"Float",
 		initiator:"String",
 		initiator_certificate:"UserCertificateUnion",
+		notified_users:"String",
 		open_at:"DateTime",
 		presider:"String",
 		presider_certificate:"UserCertificateUnion",
@@ -1186,6 +1209,7 @@ export const ReturnTypes: Record<string,any> = {
 		login:"RegisteredAccount",
 		logout:"Boolean",
 		moderateRequest:"Transaction",
+		notifyOnAnnualGeneralMeet:"MeetAggregate",
 		prohibitRequest:"Transaction",
 		publishProjectOfFreeDecision:"Boolean",
 		publishRequest:"Transaction",

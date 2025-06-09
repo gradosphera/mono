@@ -10,10 +10,25 @@ void soviet::block(eosio::name coopname, eosio::name admin, eosio::name username
   participants_index participants(_soviet, coopname.value);
   auto participant = participants.find(username.value);
   
+  // Сохраняем текущие значения статуса и права голоса
+  bool had_vote = participant->has_vote;
+  bool was_active = participant->status == "accepted"_n;
+  
   participants.modify(participant, _soviet, [&](auto &row){
       row.status = "blocked"_n;
       row.is_initial = false;
       row.is_minimum = false;
       row.has_vote = false;    
   });
+  
+  // Если участник был активен и имел право голоса, уменьшаем счетчик активных пайщиков
+  if (was_active && had_vote) {
+    // Отправляем уведомление в registrator для уменьшения счетчика
+    action(
+      permission_level{_soviet, "active"_n},
+      _registrator,
+      "decparticpnt"_n,
+      std::make_tuple(coopname, username)
+    ).send();
+  }
 }

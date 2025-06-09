@@ -33,11 +33,6 @@ export class DocumentAggregator {
 
     const document = await this.getDocumentByHash(signedDoc.doc_hash);
 
-    // Проверяем, что в метаданных документа есть username
-    if (!signedDoc.meta || !signedDoc.meta.username) {
-      throw new BadRequestException('В документе отсутствует информация о пользователе (username)');
-    }
-
     // Массив для хранения информации о подписантах
     const signatureInfos: SignatureInfoDomainInterface[] = [];
 

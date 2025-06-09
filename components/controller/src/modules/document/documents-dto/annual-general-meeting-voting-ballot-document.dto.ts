@@ -4,13 +4,22 @@ import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-me
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import type { ExcludeCommonProps } from '~/modules/document/types';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.AnnualGeneralMeetingVotingBallot.Action;
 
 @InputType(`BaseAnnualGeneralMeetingVotingBallotMetaDocumentInput`)
 class BaseAnnualGeneralMeetingVotingBallotMetaDocumentInputDTO implements ExcludeCommonProps<action> {
-  // Мета пока не содержит дополнительных полей
+  @Field(() => String, { description: 'Хеш собрания' })
+  @IsString()
+  @IsNotEmpty()
+  meet_hash!: string;
+
+  @Field(() => String, { description: 'Имя пользователя голосующего' })
+  @IsString()
+  @IsNotEmpty()
+  username!: string;
 }
 
 @InputType(`AnnualGeneralMeetingVotingBallotGenerateDocumentInput`)
@@ -22,6 +31,15 @@ export class AnnualGeneralMeetingVotingBallotGenerateDocumentInputDTO
   implements action
 {
   registry_id!: number;
+  @Field(() => String, { description: 'Хеш собрания' })
+  @IsString()
+  @IsNotEmpty()
+  meet_hash!: string;
+
+  @Field(() => String, { description: 'Имя пользователя голосующего' })
+  @IsString()
+  @IsNotEmpty()
+  username!: string;
 }
 
 @InputType(`AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput`)

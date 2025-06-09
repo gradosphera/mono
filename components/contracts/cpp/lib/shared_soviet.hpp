@@ -24,6 +24,9 @@ using newdeclined_interface = void(NEWDECLINED_SIGNATURE);
 #define NEWACT_SIGNATURE name coopname, name username, name action, checksum256 package, document2 document
 using newact_interface = void(NEWACT_SIGNATURE);
 
+#define NEWLINK_SIGNATURE name coopname, name username, name action, checksum256 package, document2 document
+using newlink_interface = void(NEWLINK_SIGNATURE);
+
 #define NEWAGREEMENT_SIGNATURE name coopname, name username, name type, document2 document
 using newagreement_interface = void(NEWAGREEMENT_SIGNATURE);
 

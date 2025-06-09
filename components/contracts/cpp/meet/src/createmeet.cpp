@@ -27,7 +27,8 @@ void meet::createmeet(name coopname, checksum256 hash, eosio::name initiator, na
     g.id = meet_id;
     g.hash = hash;
     g.coopname = coopname;
-    g.type = "annual"_n;
+    g.type = "regular"_n;
+    g.level = "cooperative"_n;
     g.initiator = initiator;
     g.presider = presider;
     g.secretary = secretary;

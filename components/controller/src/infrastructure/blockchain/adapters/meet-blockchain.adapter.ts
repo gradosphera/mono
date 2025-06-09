@@ -19,6 +19,8 @@ import { QuestionRowProcessingDomainInterface } from '~/domain/meet/interfaces/q
 import { DocumentAggregator } from '~/domain/document/aggregators/document.aggregator';
 import { SignBySecretaryOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/sign-by-secretary-on-annual-general-meet-input-domain.interface';
 import { SignByPresiderOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/sign-by-presider-on-annual-general-meet-input-domain.interface';
+import { NotifyOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/notify-on-annual-general-meet-input-domain.interface';
+import { generateUniqueHash } from '~/utils/generate-hash.util';
 
 @Injectable()
 export class MeetBlockchainAdapter implements MeetBlockchainPort {
@@ -147,6 +149,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
       authorization: authorization,
       decision1: decision1,
       decision2: decision2,
+      notified_users: meetData.notified_users,
     };
   }
 
@@ -180,6 +183,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
     // Преобразуем доменный объект в инфраструктурный тип
     const blockchainData: MeetContract.Actions.CreateMeet.IInput = {
       ...data,
+      hash: data.hash || generateUniqueHash(),
       proposal: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.proposal),
       open_at: this.domainToBlockchainUtils.convertDateToBlockchainFormat(data.open_at),
       close_at: this.domainToBlockchainUtils.convertDateToBlockchainFormat(data.close_at),
@@ -226,10 +230,14 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
 
     this.blockchainService.initialize(data.coopname, wif);
 
+    // Генерируем новый уникальный хэш для собрания
+    const new_hash = generateUniqueHash();
+
     // Преобразуем доменный объект в инфраструктурный тип
     const blockchainData: MeetContract.Actions.RestartMeet.IInput = {
       coopname: data.coopname,
       hash: data.hash,
+      new_hash, // Используем сгенерированный новый хэш
       newproposal: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.newproposal),
       new_open_at: this.domainToBlockchainUtils.convertDateToBlockchainFormat(data.new_open_at),
       new_close_at: this.domainToBlockchainUtils.convertDateToBlockchainFormat(data.new_close_at),
@@ -288,6 +296,30 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
     const result = (await this.blockchainService.transact({
       account: MeetContract.contractName.production,
       name: MeetContract.Actions.SignByPresider.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data: blockchainData,
+    })) as TransactResult;
+
+    return result;
+  }
+
+  async notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    // Преобразуем доменный объект в инфраструктурный тип
+    const blockchainData: MeetContract.Actions.GmNotify.IInput = {
+      coopname: data.coopname,
+      hash: data.meet_hash,
+      username: data.username,
+      notification: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.notification),
+    };
+
+    const result = (await this.blockchainService.transact({
+      account: MeetContract.contractName.production,
+      name: MeetContract.Actions.GmNotify.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data: blockchainData,
     })) as TransactResult;

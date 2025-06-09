@@ -456,6 +456,14 @@ export interface INewact {
   document: IDocument2
 }
 
+export interface INewlink {
+  coopname: IName
+  username: IName
+  action: IName
+  package: IChecksum256
+  document: IDocument2
+}
+
 export interface INewdecision {
   coopname: IName
   username: IName

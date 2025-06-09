@@ -1,6 +1,5 @@
 import type { IDecisionData, IGenerate, IMetaDocument } from '../../document'
-import type { ICooperativeData, IVars } from '../../model'
-import type { IMeet, IQuestion } from '../../../interfaces/meet'
+import type { ICooperativeData, IMeetExtended, IQuestionExtended, IVars } from '../../model'
 
 export const registry_id = 304
 
@@ -18,24 +17,24 @@ export interface Model {
   meta: IMetaDocument
   coop: ICooperativeData
   decision: IDecisionData
-  meet: IMeet
-  questions: IQuestion[]
+  meet: IMeetExtended
+  questions: IQuestionExtended[]
   vars: IVars
 }
 
 export const title = 'Протокол решения общего собрания пайщиков'
 export const description = 'Форма протокола решения очередного/внеочередного общего собрания пайщиков потребительского кооператива'
-export const context = '<style> \nh1 {\nmargin: 0px; \ntext-align:center;\n}\nh3{\nmargin: 0px;\npadding-top: 15px;\n}\n.about {\npadding: 20px;\n}\n.digital-document {\npadding: 20px;\nwhite-space: pre-wrap;\n}\n.subheader {\npadding-bottom: 20px; \n}\ntable {\n  width: 100%;\n  border-collapse: collapse;\n}\nth, td {\n  border: 1px solid #ccc;\n  padding: 8px;\n  text-align: left;\n  word-wrap: break-word; \n  overflow-wrap: break-word; \n}\nth {\n  background-color: #f4f4f4;\n  width: 30%;\n}\n</style>\n\n<div class="digital-document">\n  <h1 class="header">{% trans \'protocol_number\', decision.id %}</h1>\n  <p style="text-align:center" class="subheader">{% if meet.type == \'regular\' %}{% trans \'annual_regular\' %}{% else %}{% trans \'annual_extraordinary\' %}{% endif %} {% if coop.is_branched %}{% trans \'general_meeting_name_branched\' %}{% else %}{% trans \'general_meeting_name\' %}{% endif %}</p>\n  <p style="text-align:center">{{vars.full_abbr_genitive}} «{{vars.name}}»</p>\n  <p style="text-align: right"> {{ coop.city }}, {{ decision.day }} {{ decision.month }} {{ decision.year }} г.</p>\n  <table class="about">\n    <tbody>\n      <tr>\n        <th>{% trans \'meeting_date\' %}</th>\n        <td>{{ meet.open_at_date }}</td>\n      </tr>\n      <tr>\n        <th>{% trans \'meeting_time\' %}</th>\n        <td>{{ meet.open_at_time }}</td>\n      </tr>\n      <tr>\n        <th>{% trans \'meeting_format\' %}</th>\n        <td>{% trans \'meeting_format_value\' %}</td>\n      </tr>\n      <tr>\n        <th>{% trans \'registration_datetime\' %}</th>\n        <td>{{ meet.registration_datetime }}</td>\n      </tr>\n      <tr>\n        <th>{% trans \'voting_deadline\' %}</th>\n        <td>{% trans \'no_later_than\' %} {{ meet.close_at_datetime }}</td>\n      </tr>\n    </tbody>\n  </table>\n  <p>{% trans \'quorum_available\' %} {% if coop.is_branched %}{% trans \'meeting_legal_for_decisions_branched\' %}{% else %}{% trans \'meeting_legal_for_decisions\' %}{% endif %}</p>\n  <h3>{% trans \'agenda\' %}</h3>\n  {% for question in questions %}\n  <p>{{ question.number }}. {{ question.title }}</p>\n  {% if question.context %}<p><em>{{ question.context }}</em></p>{% endif %}\n  {% endfor %}\n  {% for question in questions %}\n  <h3>{% trans \'decided_by_question\', question.number %}:</h3>\n  <p>{{ question.decision }}</p>\n  <table>\n    <tbody>\n      <tr>\n        <th>{% trans \'votes_for\' %}</th>\n        <td>{{ question.counter_votes_for }}</td>\n      </tr>\n      <tr>\n        <th>{% trans \'votes_against\' %}</th>\n        <td>{{ question.counter_votes_against }}</td>\n      </tr>\n      <tr>\n        <th>{% trans \'votes_abstained\' %}</th>\n        <td>{{ question.counter_votes_abstained }}</td>\n      </tr>\n    </tbody>\n  </table>\n  {% endfor %}\n  <p>{% trans \'closing_time\', decision.close_time %}</p>\n  <div class="signature">\n    <p>{% trans \'chairman_meeting_signature\' %} {{ meet.presider_last_name }} {{ meet.presider_first_name }} {{ meet.presider_middle_name }}</p>\n    <p>{% trans \'secretary_meeting_signature\' %} {{ meet.secretary_last_name }} {{ meet.secretary_first_name }} {{ meet.secretary_middle_name }}</p>\n  </div>\n</div>'
+export const context = `<style> h1 {margin: 0px; text-align:center;}h3{margin: 0px;padding-top: 15px;text-align: center;}.about {padding: 20px;}.digital-document {padding: 20px;white-space: pre-wrap;}.subheader {padding-bottom: 20px; }table {width: 100%;border-collapse: collapse;margin-bottom: 20px;}th, td {border: 1px solid #ccc;padding: 8px;text-align: left;word-wrap: break-word; overflow-wrap: break-word; }th {background-color: #f4f4f4;width: 30% !important;max-width: 30% !important;}</style><div class="digital-document"><h1 class="header" style="text-align:center;">{% if coop.is_branched %}{% trans 'protocol_number_authorized', decision.id %}{% else %}{% trans 'protocol_number_regular', decision.id %}{% endif %}</h1><p style="text-align:center" class="subheader">{% if meet.type == 'regular' %}{% trans 'annual_regular' %}{% else %}{% trans 'annual_extra' %}{% endif %} {% if coop.is_branched %}{% trans 'general_meeting_name_branched' %}{% else %}{% trans 'general_meeting_name' %}{% endif %}</p><p style="text-align:center">{{vars.full_abbr_genitive}} «{{vars.name}}»</p><p style="text-align: right"> {{ coop.city }}, {{ meta.created_at }}</p><table class="about"><tbody><tr><th>{% trans 'meeting_datetime' %}</th><td>{{ meet.open_at_datetime }}</td></tr><tr><th>{% trans 'meeting_format' %}</th><td>{% trans 'meeting_format_value' %}</td></tr><tr><th>{% trans 'registration_datetime' %}</th><td>{{ meet.open_at_datetime }}</td></tr><tr><th>{% trans 'voting_deadline' %}</th><td>{% trans 'no_later_than' %} {{ meet.close_at_datetime }}</td></tr></tbody></table><p>{% trans 'quorum_available' %} {% if coop.is_branched %}{% trans 'meeting_legal_for_decisions_branched' %}{% else %}{% trans 'meeting_legal_for_decisions' %}{% endif %}</p><p>{% trans 'quorum_percent' %} {{ meet.current_quorum_percent }}% {% if coop.is_branched %}{% trans 'from_total_authorized' %}{% else %}{% trans 'from_total_participants' %}{% endif %}.</p><h3 style="padding-top: 20px; padding-bottom: 10px; text-align: center;">{% trans 'agenda' %}</h3><table><tbody>{% for question in questions %}<tr><th>{{ question.number }}</th><td>{{ question.title }}</td></tr>{% if question.context %}<tr><th></th><td><em>{{ question.context }}</em></td></tr>{% endif %}{% endfor %}</tbody></table>{% for question in questions %}<h3 style="padding-top: 30px; padding-bottom: 10px; text-align: center;">{% trans 'decided_by_question', question.number %}:</h3><p>{{ question.decision }}</p><table><tbody><tr><th>{% trans 'votes_for' %}</th><td>{{ question.counter_votes_for }} ({{ question.votes_for_percent }}%)</td></tr><tr><th>{% trans 'votes_against' %}</th><td>{{ question.counter_votes_against }} ({{ question.votes_against_percent }}%)</td></tr><tr><th>{% trans 'votes_abstained' %}</th><td>{{ question.counter_votes_abstained }} ({{ question.votes_abstained_percent }}%)</td></tr><tr><th>{% trans 'decision_status' %}</th><td>{% if question.is_accepted %}{% trans 'decision_accepted' %}{% else %}{% trans 'decision_rejected' %}{% endif %}</td></tr></tbody></table>{% endfor %}<p style="padding-top: 20px;">{% trans 'closing_time', meet.close_at_datetime %}</p><div class="signature" style="padding-top: 30px;"><p>{% trans 'chairman_meeting_signature' %} {{ meet.presider_full_name }}</p><p>{% trans 'signed_digitally' %}</p><p>{% trans 'secretary_meeting_signature' %} {{ meet.secretary_full_name }}</p><p>{% trans 'signed_digitally' %}</p></div></div>`
 
 export const translations = {
   ru: {
-    protocol_number: 'Протокол № {0}',
+    protocol_number_regular: 'Протокол № ОС-{0}',
+    protocol_number_authorized: 'Протокол № ОСУ-{0}',
     annual_regular: 'очередного',
-    annual_extraordinary: 'внеочередного',
+    annual_extra: 'внеочередного',
     general_meeting_name: 'Общего собрания пайщиков',
     general_meeting_name_branched: 'Общего собрания уполномоченных',
-    meeting_date: 'Дата проведения Собрания',
-    meeting_time: 'Время проведения Собрания',
+    meeting_datetime: 'Дата и время проведения Собрания',
     meeting_format: 'Форма проведения собрания',
     meeting_format_value: 'заочное',
     registration_datetime: 'Дата и время регистрации участников Собрания',
@@ -46,12 +45,20 @@ export const translations = {
     meeting_legal_for_decisions_branched: 'Общее собрание уполномоченных правомочно для проведения и принятия решений по вопросам повестки дня.',
     agenda: 'Повестка дня',
     decided_by_question: 'РЕШИЛИ по {0} вопросу',
-    votes_for: '● "За"',
-    votes_against: '● "Против"',
-    votes_abstained: '● "Воздержался"',
+    votes_for: '"За"',
+    votes_against: '"Против"',
+    votes_abstained: '"Воздержался"',
+    votes_total: 'Всего голосов',
+    decision_status: 'Статус решения',
+    decision_accepted: 'ПРИНЯТО',
+    decision_rejected: 'ОТКЛОНЕНО',
     closing_time: 'Время закрытия собрания: {0}',
     chairman_meeting_signature: 'Председатель Собрания',
     secretary_meeting_signature: 'Секретарь Собрания',
+    signed_digitally: 'подписано электронной подписью',
+    quorum_percent: 'Кворум составляет',
+    from_total_participants: 'от общего числа пайщиков',
+    from_total_authorized: 'от общего числа уполномоченных',
   },
 }
 
@@ -60,25 +67,19 @@ export const exampleData = {
     city: 'Москва',
     is_branched: false,
   },
+  meta: {
+    created_at: '15.03.2024 15:00',
+  },
   decision: {
     id: 'ОС-15-03-2024',
-    day: '15',
-    month: 'марта',
-    year: '2024',
-    close_time: '15 часов 00 минут',
   },
   meet: {
     type: 'regular',
-    open_at_date: '15.03.2024',
-    open_at_time: '10:00',
-    registration_datetime: '15.03.2024, 09:30',
-    close_at_datetime: '18.03.2024',
-    presider_last_name: 'Иванов',
-    presider_first_name: 'Петр',
-    presider_middle_name: 'Сидорович',
-    secretary_last_name: 'Петрова',
-    secretary_first_name: 'Анна',
-    secretary_middle_name: 'Викторовна',
+    open_at_datetime: '15.03.2024 10:00',
+    close_at_datetime: '18.03.2024 15:00',
+    presider_full_name: 'Иванов Петр Сидорович',
+    secretary_full_name: 'Петрова Анна Викторовна',
+    current_quorum_percent: 71,
   },
   questions: [
     {
@@ -89,6 +90,11 @@ export const exampleData = {
       counter_votes_for: '15',
       counter_votes_against: '0',
       counter_votes_abstained: '0',
+      votes_total: 15,
+      votes_for_percent: 100,
+      votes_against_percent: 0,
+      votes_abstained_percent: 0,
+      is_accepted: true,
     },
     {
       number: '2',
@@ -98,6 +104,11 @@ export const exampleData = {
       counter_votes_for: '15',
       counter_votes_against: '0',
       counter_votes_abstained: '0',
+      votes_total: 15,
+      votes_for_percent: 100,
+      votes_against_percent: 0,
+      votes_abstained_percent: 0,
+      is_accepted: true,
     },
   ],
   vars: {

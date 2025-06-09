@@ -3,9 +3,10 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 
 export type CreateAnnualGeneralMeetInputDomainInterface = Omit<
   MeetContract.Actions.CreateMeet.IInput,
-  'proposal' | 'open_at' | 'close_at'
+  'proposal' | 'open_at' | 'close_at' | 'hash'
 > & {
   proposal: ISignedDocumentDomainInterface;
   open_at: Date;
   close_at: Date;
+  hash?: string;
 };

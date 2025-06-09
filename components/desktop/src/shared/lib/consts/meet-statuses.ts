@@ -31,16 +31,84 @@ export const SPECIAL_STATUSES: Zeus.ExtendedMeetStatus[] = [
   Zeus.ExtendedMeetStatus.CREATED
 ]
 
-// Конфигурация для отображения статусов баннером
-export const STATUS_BANNER_CONFIG: Record<Zeus.ExtendedMeetStatus, { class: string, needTime: boolean, color: string, outline: boolean }> = {
-  'NONE': { class: 'bg-grey-2 text-grey-8', needTime: false, color: 'grey-6', outline: true },
-  'CREATED': { class: 'bg-grey-1 text-grey-8', needTime: false, color: 'grey-7', outline: true },
-  'AUTHORIZED': { class: 'bg-grey-1 text-grey-8', needTime: false, color: 'grey-7', outline: true },
-  'ONRESTART': { class: 'bg-orange-1 text-orange-8', needTime: false, color: 'orange', outline: true },
-  'PRECLOSED': { class: 'bg-light-green-1 text-light-green-8', needTime: false, color: 'light-green', outline: true },
-  'CLOSED': { class: 'bg-teal text-teal-10', needTime: false, color: 'teal', outline: false },
-  'WAITING_FOR_OPENING': { class: 'bg-blue-1 text-blue-8', needTime: true, color: 'primary', outline: true },
-  'VOTING_IN_PROGRESS': { class: 'bg-green-1 text-green-8', needTime: true, color: 'positive', outline: true },
-  'EXPIRED_NO_QUORUM': { class: 'bg-amber-1 text-amber-8', needTime: false, color: 'amber', outline: true },
-  'VOTING_COMPLETED': { class: 'bg-indigo-1 text-indigo-8', needTime: false, color: 'indigo', outline: true }
+// Конфигурация для баннеров статусов собраний
+// @property {string} class - CSS-класс для стилизации
+// @property {boolean} needTime - Нужно ли отображать время
+// @property {string} color - Цвет баннера
+// @property {boolean} outline - Использовать ли контурный стиль
+// @property {string} icon - иконка
+export const STATUS_BANNER_CONFIG: Record<
+  Zeus.ExtendedMeetStatus,
+  { class: string; needTime: boolean; color: string; outline: boolean; icon: string }
+> = {
+  NONE: {
+    class: 'text-grey-8',
+    needTime: false,
+    color: 'grey-4',
+    outline: true,
+    icon: 'help_outline'
+  },
+  WAITING_FOR_OPENING: {
+    class: 'text-grey-8',
+    needTime: true,
+    color: 'grey-4',
+    outline: true,
+    icon: 'hourglass_empty'
+  },
+  VOTING_IN_PROGRESS: {
+    class: 'text-primary',
+    needTime: true,
+    color: 'primary',
+    outline: true,
+    icon: 'how_to_vote'
+  },
+  VOTING_COMPLETED: {
+    class: 'text-primary',
+    needTime: false,
+    color: 'primary',
+    outline: true,
+    icon: 'hourglass_bottom'
+  },
+  CLOSED: {
+    class: 'text-primary',
+    needTime: false,
+    color: 'primary',
+    outline: true,
+    icon: 'check_circle'
+  },
+  CREATED: {
+    class: 'text-primary',
+    needTime: false,
+    color: 'primary',
+    outline: true,
+    icon: 'fiber_new'
+  },
+  AUTHORIZED: {
+    class: 'text-primary',
+    needTime: false,
+    color: 'primary',
+    outline: true,
+    icon: 'verified_user'
+  },
+  ONRESTART: {
+    class: 'text-primary',
+    needTime: false,
+    color: 'primary',
+    outline: true,
+    icon: 'sync_problem'
+  },
+  PRECLOSED: {
+    class: 'text-primary',
+    needTime: false,
+    color: 'primary',
+    outline: true,
+    icon: 'schedule'
+  },
+  EXPIRED_NO_QUORUM: {
+    class: 'text-primary',
+    needTime: false,
+    color: 'primary',
+    outline: true,
+    icon: 'group_off'
+  }
 }

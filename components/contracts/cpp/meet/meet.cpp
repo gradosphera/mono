@@ -8,6 +8,7 @@
 #include "src/signbysecr.cpp"
 #include "src/signbypresid.cpp"
 #include "src/newgdecision.cpp"
+#include "src/gmnotify.cpp"
 
 #include <optional>
 

@@ -99,7 +99,12 @@ export class MeetDTO {
   @ValidateNested()
   decision2?: DocumentAggregateDTO;
 
-  constructor(data: Partial<MeetDTO>) {
+  @Field(() => [String], {
+    description: 'Список пользователей, которые подписали уведомление',
+  })
+  notified_users!: string[];
+
+  constructor(data: MeetDTO) {
     Object.assign(this, data);
   }
 }

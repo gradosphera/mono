@@ -67,5 +67,8 @@ public:
   
   [[eosio::action]] void enabranches(eosio::name coopname);
   [[eosio::action]] void disbranches(eosio::name coopname);
+  
+  // Уменьшение счетчика активных пайщиков при блокировке
+  [[eosio::action]] void decparticpnt(eosio::name coopname, eosio::name username);
 
 };

@@ -3,7 +3,7 @@ import { MeetPreProcessingDomainEntity } from '~/domain/meet/entities/meet-pre-d
 import type { MeetPreProcessingDomainInterface } from '~/domain/meet/interfaces/meet-pre-domain.interface';
 import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { Cooperative } from 'cooptypes';
-import type { AgendaMeetPointInputDomainInterface } from '~/domain/meet/interfaces/agenda-meet-point-input-domain.interface';
+import type { AgendaGeneralMeetPointInputDomainInterface } from '~/domain/meet/interfaces/agenda-meet-point-input-domain.interface';
 
 @Entity('meet_pre')
 export class MeetPreEntity implements MeetPreProcessingDomainInterface {
@@ -23,7 +23,7 @@ export class MeetPreEntity implements MeetPreProcessingDomainInterface {
   secretary!: string;
 
   @Column('jsonb')
-  agenda!: AgendaMeetPointInputDomainInterface[];
+  agenda!: AgendaGeneralMeetPointInputDomainInterface[];
 
   @Column('timestamp')
   open_at!: Date;

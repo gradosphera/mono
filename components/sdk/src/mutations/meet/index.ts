@@ -16,6 +16,9 @@ export * as GenerateBallotForAnnualGeneralMeetDocument from './generateBallotFor
 /** Сгенерировать документ решения Совета по проведению общего собрания пайщиков */
 export * as GenerateSovietDecisionOnAnnualMeetDocument from './generateSovietDecisionOnAnnualMeetDocument'
 
+/** Уведомление о проведении общего собрания пайщиков */
+export * as NotifyOnAnnualGeneralMeet from './notifyOnAnnualGeneralMeet'
+
 /** Перезапуск общего собрания пайщиков */
 export * as RestartAnnualGeneralMeet from './restartAnnualGeneralMeet'
 

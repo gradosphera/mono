@@ -23,6 +23,7 @@ export interface MeetRowProcessingDomainInterface {
   authorization?: ISignedDocumentDomainInterface;
   decision1?: ISignedDocumentDomainInterface;
   decision2?: ISignedDocumentDomainInterface;
+  notified_users: string[];
 }
 
 assertType<AssertKeysMatch<MeetContract.Tables.Meets.IOutput, MeetRowProcessingDomainInterface>>();

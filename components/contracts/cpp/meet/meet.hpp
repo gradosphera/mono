@@ -26,12 +26,15 @@ public:
     void authmeet(eosio::name coopname, checksum256 hash, document2 authorization);
     [[eosio::action]]
     void declmeet(name coopname, checksum256 hash, std::string reason);
-
+    
+    [[eosio::action]]
+    void gmnotify(name coopname, checksum256 hash, name username, document2 notification);
+    
     [[eosio::action]]
     void vote(name coopname, checksum256 hash, name username, document2 ballot, std::vector<vote_point> votes);
     
     [[eosio::action]]
-    void restartmeet(name coopname, checksum256 hash, document2 newproposal, time_point_sec new_open_at, time_point_sec new_close_at);
+    void restartmeet(name coopname, checksum256 hash, checksum256 new_hash, document2 newproposal, time_point_sec new_open_at, time_point_sec new_close_at);
 
     [[eosio::action]]
     void signbysecr(name coopname, name username, checksum256 hash, document2 secretary_decision);

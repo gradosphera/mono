@@ -2,7 +2,7 @@
 
 import type { MeetContract } from 'cooptypes';
 import { assertType, type AssertKeysMatch } from '~/shared/asserts/blockchain-type.assert';
-import type { AgendaMeetPointInputDomainInterface } from './agenda-meet-point-input-domain.interface';
+import type { AgendaGeneralMeetPointInputDomainInterface } from './agenda-meet-point-input-domain.interface';
 import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 
@@ -17,7 +17,7 @@ export interface MeetPreProcessingDomainInterface {
   secretary: string;
   presider_certificate?: UserCertificateDomainInterface | null;
   secretary_certificate?: UserCertificateDomainInterface | null;
-  agenda: AgendaMeetPointInputDomainInterface[];
+  agenda: AgendaGeneralMeetPointInputDomainInterface[];
   open_at: Date;
   close_at: Date;
   proposal?: DocumentAggregateDomainInterface;

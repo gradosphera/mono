@@ -4,13 +4,27 @@ import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-me
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import type { ExcludeCommonProps } from '~/modules/document/types';
+import { Type } from 'class-transformer';
+import { IsArray, IsObject, ValidateNested } from 'class-validator';
+import { AgendaMeetDTO } from '~/modules/meet/dto/agenda-meet.dto';
+import { AgendaGeneralMeetQuestionDTO } from '~/modules/meet/dto/agenda-general-meet-question.dto';
 
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.AnnualGeneralMeetingAgenda.Action;
 
 @InputType(`BaseAnnualGeneralMeetingAgendaMetaDocumentInput`)
 class BaseAnnualGeneralMeetingAgendaMetaDocumentInputDTO implements ExcludeCommonProps<action> {
-  // Мета пока не содержит дополнительных полей
+  @Field(() => AgendaMeetDTO)
+  @IsObject()
+  @ValidateNested()
+  @Type(() => AgendaMeetDTO)
+  meet!: AgendaMeetDTO;
+
+  @Field(() => [AgendaGeneralMeetQuestionDTO])
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AgendaGeneralMeetQuestionDTO)
+  questions!: AgendaGeneralMeetQuestionDTO[];
 }
 
 @InputType(`AnnualGeneralMeetingAgendaGenerateDocumentInput`)

@@ -26,6 +26,10 @@ export const subsribedTables: IDeltaConfig[] = [
   { code: 'draft', table: 'drafts' },
   { code: 'draft', table: 'translations' },
 
+  // meet
+  { code: 'meet', table: 'meets' },
+  { code: 'meet', table: 'questions' },
+
   // совет
   { code: 'soviet', table: 'decisions' },
   { code: 'soviet', table: 'boards' },
@@ -50,6 +54,7 @@ export const subsribedActions: IActionConfig[] = [
   { code: 'soviet', action: 'newdecision' },
   { code: 'soviet', action: 'newpackage' },
   { code: 'soviet', action: 'newact' },
+  { code: 'soviet', action: 'newlink' },
   { code: 'soviet', action: 'newagreement' },
   { code: 'soviet', action: 'newdeclined' },
   // // registrator.joincoop

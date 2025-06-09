@@ -1,21 +1,13 @@
 import type { IGenerate, IMetaDocument } from '../../document'
-import type { ICooperativeData, IVars } from '../../model'
+import type { ICommonUser, ICooperativeData, IVars } from '../../model'
 
 export const registry_id = 300
 
 // Локальные интерфейсы для данных собрания (берутся из ICreateMeet)
 interface IAgendaMeet {
-  type: 'regular' | 'extraordinary'
-  created_at_day: string
-  created_at_month: string
-  created_at_year: string
-  open_at_date: string
-  open_at_time: string
-  registration_datetime: string
+  type: 'regular' | 'extra'
+  open_at_datetime: string
   close_at_datetime: string
-  presider_last_name: string
-  presider_first_name: string
-  presider_middle_name: string
 }
 
 interface IAgendaQuestion {
@@ -41,21 +33,21 @@ export interface Model {
   coop: ICooperativeData
   meet: IAgendaMeet
   questions: IAgendaQuestion[]
+  user: ICommonUser
   vars: IVars
 }
 
 export const title = 'Предложение повестки дня общего собрания пайщиков'
 export const description = 'Форма предложения повестки дня очередного/внеочередного общего собрания пайщиков потребительского кооператива'
-export const context = '<div class="digital-document"><p style="text-align: center;"><h3>{% trans \'AGENDA_PROPOSAL_TITLE\' %}</h3></p><p style="text-align: center;">{% if meet.type == \'regular\' %}{% trans \'ANNUAL_REGULAR\' %}{% else %}{% trans \'ANNUAL_EXTRAORDINARY\' %}{% endif %} {% trans \'GENERAL_MEETING_SHAREHOLDERS\' %}</p><p style="text-align: center;">{{vars.full_abbr_genitive}} «{{vars.name}}»</p><p style="text-align: right;">{{ coop.city }}, {{ meet.created_at_day }} {{ meet.created_at_month }} {{ meet.created_at_year }} г.</p><p>{% trans \'MEETING_DATE_LABEL\' %}: {{ meet.open_at_date }}</p><p>{% trans \'MEETING_TIME_LABEL\' %}: {{ meet.open_at_time }}</p><p>{% trans \'MEETING_FORMAT_LABEL\' %}: {% trans \'MEETING_FORMAT_VALUE\' %}</p><p>{% trans \'REGISTRATION_DATETIME\' %}: {{ meet.registration_datetime }}</p><p>{% trans \'VOTING_DEADLINE\' %}: {% trans \'NO_LATER_THAN\' %} {{ meet.close_at_datetime }}</p><h3>{% trans \'AGENDA_QUESTIONS\' %}:</h3>{% for question in questions %}<p>{{ question.number }}. {{ question.title }}</p>{% if question.context %}<p>{{ question.context }}</p>{% endif %}{% endfor %}<h3>{% trans \'PROJECT_DECISIONS\' %}:</h3>{% for question in questions %}<p>{% trans \'PROJECT_DECISION_LABEL\' %} {{ question.number }}: {{ question.decision }}</p>{% endfor %}<p>{{ meet.presider_last_name }} {{ meet.presider_first_name }} {{ meet.presider_middle_name }}</p></div>\n\n<style>\n  .digital-document {\n    padding: 20px;\n    white-space: pre-wrap;\n  }\n</style>'
+export const context = `<style> h1 {margin: 0px; text-align:center;}h3{margin: 0px;padding-top: 15px;text-align: center;}.about {padding: 20px;}.digital-document {padding: 20px;white-space: pre-wrap;}.subheader {padding-bottom: 20px; }table {width: 100%;border-collapse: collapse;}th, td {border: 1px solid #ccc;padding: 8px;text-align: left;word-wrap: break-word; overflow-wrap: break-word; }th {background-color: #f4f4f4;width: 30% !important;max-width: 30% !important;}</style><div class="digital-document"><div style="padding-bottom: 30px;"><h1 style="text-align:center">{% trans 'AGENDA_PROPOSAL_TITLE' %}</h1><p style="text-align:center">{% if meet.type == 'regular' %}{% trans 'ANNUAL_REGULAR' %}{% else %}{% trans 'ANNUAL_extra' %}{% endif %} {% trans 'GENERAL_MEETING_SHAREHOLDERS' %}</p><p style="text-align:center">{{vars.full_abbr_genitive}} «{{vars.name}}»</p><p style="text-align: right; padding-top: 20px">{{ coop.city }}, {{ meta.created_at }}</p></div><table class="about"><tbody><tr><th>{% trans 'MEETING_DATETIME_LABEL' %}</th><td>{{ meet.open_at_datetime }}</td></tr><tr><th>{% trans 'MEETING_FORMAT_LABEL' %}</th><td>{% trans 'MEETING_FORMAT_VALUE' %}</td></tr><tr><th>{% trans 'REGISTRATION_DATETIME' %}</th><td>{{ meet.open_at_datetime }}</td></tr><tr><th>{% trans 'VOTING_DEADLINE' %}</th><td>{% trans 'NO_LATER_THAN' %} {{ meet.close_at_datetime }}</td></tr></tbody></table><h3 style="padding-top: 30px; padding-bottom: 10px;">{% trans 'AGENDA_QUESTIONS' %}</h3><table><tbody>{% for question in questions %}<tr><th>{{ question.number }}.</th><td>{{ question.title }}</td></tr>{% if question.context %}<tr><th></th><td><em>{{ question.context }}</em></td></tr>{% endif %}{% endfor %}</tbody></table><h3 style="padding-top: 30px; padding-bottom: 10px;">{% trans 'PROJECT_DECISIONS' %}</h3><table><tbody>{% for question in questions %}<tr><th>{% trans 'PROJECT_DECISION_LABEL' %} {{ question.number }}</th><td>{{ question.decision }}</td></tr>{% endfor %}</tbody></table><div class="signature"><div style="padding-top: 20px;"><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'SIGNED_DIGITALLY' %}</p></div></div></div>`
 
 export const translations = {
   ru: {
     AGENDA_PROPOSAL_TITLE: 'ПРЕДЛОЖЕНИЕ ПОВЕСТКИ',
     ANNUAL_REGULAR: 'ОЧЕРЕДНОГО',
-    ANNUAL_EXTRAORDINARY: 'ВНЕОЧЕРЕДНОГО',
+    ANNUAL_extra: 'ВНЕОЧЕРЕДНОГО',
     GENERAL_MEETING_SHAREHOLDERS: 'СОБРАНИЯ ПАЙЩИКОВ',
-    MEETING_DATE_LABEL: 'Дата проведения Собрания',
-    MEETING_TIME_LABEL: 'Время проведения Собрания',
+    MEETING_DATETIME_LABEL: 'Дата и время проведения Собрания',
     MEETING_FORMAT_LABEL: 'Форма проведения собрания',
     MEETING_FORMAT_VALUE: 'заочное',
     REGISTRATION_DATETIME: 'Дата и время регистрации участников Собрания',
@@ -64,6 +56,7 @@ export const translations = {
     AGENDA_QUESTIONS: 'ВОПРОСЫ ПОВЕСТКИ ДНЯ',
     PROJECT_DECISIONS: 'ПРОЕКТЫ РЕШЕНИЙ',
     PROJECT_DECISION_LABEL: 'ПРОЕКТ РЕШЕНИЯ по вопросу',
+    SIGNED_DIGITALLY: 'подписано электронной подписью',
   },
 }
 
@@ -72,18 +65,16 @@ export const exampleData = {
   coop: {
     city: 'Москва',
   },
+  meta: {
+    created_at: '12.02.2024 10:30',
+  },
   meet: {
     type: 'regular',
-    created_at_day: '12',
-    created_at_month: 'февраля',
-    created_at_year: '2024',
-    open_at_date: '12.03.2024',
-    open_at_time: '10:00',
-    registration_datetime: '12.03.2024, 09:30',
-    close_at_datetime: '15.03.2024',
-    presider_last_name: 'Иванов',
-    presider_first_name: 'Петр',
-    presider_middle_name: 'Сидорович',
+    open_at_datetime: '12.03.2024 10:00 (Мск)',
+    close_at_datetime: '15.03.2024 10:00 (Мск)',
+  },
+  user: {
+    full_name_or_short_name: 'Иванов Петр Сидорович',
   },
   questions: [
     {

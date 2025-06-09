@@ -129,6 +129,7 @@ export class MeetAggregateDTO {
         decision2: processingDocuments.decision2Aggregate
           ? new DocumentAggregateDTO(processingDocuments.decision2Aggregate)
           : undefined,
+        notified_users: data.processing.meet.notified_users,
       });
 
       // Преобразуем вопросы в DTO

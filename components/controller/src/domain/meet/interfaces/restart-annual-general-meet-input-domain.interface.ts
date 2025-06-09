@@ -1,5 +1,4 @@
-import type { Cooperative } from 'cooptypes';
-import type { SignedDocumentDomainInterface } from '~/domain/document/interfaces/extended-signed-document-domain.interface';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 /**
  * Доменный интерфейс для перезапуска собрания
@@ -7,7 +6,7 @@ import type { SignedDocumentDomainInterface } from '~/domain/document/interfaces
 export interface RestartAnnualGeneralMeetInputDomainInterface {
   coopname: string;
   hash: string;
-  newproposal: SignedDocumentDomainInterface<Cooperative.Registry.AnnualGeneralMeetingAgenda.Meta>;
+  newproposal: ISignedDocumentDomainInterface;
   new_open_at: Date;
   new_close_at: Date;
 }

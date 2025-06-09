@@ -51,4 +51,29 @@ namespace Registrator {
 
     return *itr;
 }  
+
+  /**
+   * @brief Получает количество активных пайщиков кооператива
+   * @param coopname Имя кооператива
+   * @return uint64_t Количество активных пайщиков
+   */
+  inline uint64_t get_active_participants_count(eosio::name coopname) {
+    using namespace eosio;
+    
+    // Получаем информацию о кооперативе
+    multi_index<"orgs2"_n, cooperative2> cooperatives(_registrator, _registrator.value);
+    auto coop_itr = cooperatives.find(coopname.value);
+    
+    if (coop_itr == cooperatives.end() || !coop_itr->is_cooperative) {
+      return 0; // Кооператив не найден или организация не является кооперативом
+    }
+    
+    // Если у кооператива уже есть счетчик активных пайщиков, используем его
+    if (coop_itr->active_participants_count.has_value()) {
+      return coop_itr->active_participants_count.value();
+    } else {
+      // Если счетчика нет, возвращаем 0 (обновление произойдет при следующем добавлении/блокировке пайщика)
+      return 0;
+    }
+  }
 }

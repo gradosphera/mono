@@ -1,6 +1,5 @@
 import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
-import { generateAgenda } from 'src/features/Meet/GenerateAgenda/model'
 import { DigitalDocument } from 'src/shared/lib/document'
 import { useSessionStore } from 'src/entities/Session';
 import type { Cooperative } from 'cooptypes';
@@ -9,6 +8,7 @@ import { useMeetStore } from 'src/entities/Meet'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import moment from 'moment-with-locales-es6'
 import { useSystemStore } from 'src/entities/System/model';
+import { IGenerateAgendaInput, IGenerateAgendaResult } from 'src/features/Meet/CreateMeet/model'
 
 moment.locale('ru')
 
@@ -28,6 +28,24 @@ export interface IRestartMeetWithProposalInput {
   }[]
 }
 
+/**
+ * Генерирует документ повестки собрания
+ * @private Внутренняя функция, не экспортируется
+ */
+async function generateAgenda(data: IGenerateAgendaInput, options?: any): Promise<IGenerateAgendaResult> {
+  const { [Mutations.Meet.GenerateAnnualGeneralMeetAgendaDocument.name]: generatedDocument } = await client.Mutation(
+    Mutations.Meet.GenerateAnnualGeneralMeetAgendaDocument.mutation,
+    {
+      variables: {
+        data,
+        options
+      }
+    }
+  );
+
+  return generatedDocument;
+}
+
 // Базовые функции для работы с API
 export async function restartMeet(data: IRestartMeetInput): Promise<IRestartMeetResult> {
   const { [Mutations.Meet.RestartAnnualGeneralMeet.name]: result } = await client.Mutation(
@@ -44,11 +62,31 @@ export async function restartMeet(data: IRestartMeetInput): Promise<IRestartMeet
 
 export async function restartMeetWithProposal(data: IRestartMeetWithProposalInput): Promise<IRestartMeetResult> {
   const { username } = useSessionStore()
-  // Генерируем документ повестки
+
+  // Преобразуем формат даты для документа
+  const openAtFormatted = moment(data.new_open_at).format('DD.MM.YYYY HH:mm')
+  const closeAtFormatted = moment(data.new_close_at).format('DD.MM.YYYY HH:mm')
+
+  // Формируем вопросы повестки в требуемом формате
+  const questions = data.agenda_points.map((point, index) => ({
+    number: String(index + 1),
+    title: point.title,
+    decision: point.decision,
+    context: point.context || ''
+  }))
+
+  // Генерируем документ повестки с правильными параметрами согласно DTO
   const generatedDocument = await generateAgenda({
     coopname: data.coopname,
-    username: data.username
+    username: data.username,
+    meet: {
+      type: 'regular', // По умолчанию очередное собрание
+      open_at_datetime: openAtFormatted,
+      close_at_datetime: closeAtFormatted
+    },
+    questions: questions
   })
+
   // Подписываем документ
   const rawDocument = new DigitalDocument(generatedDocument)
   const signedDocument = await rawDocument.sign<Cooperative.Registry.AnnualGeneralMeetingAgenda.Meta>(username)
@@ -63,6 +101,7 @@ export async function restartMeetWithProposal(data: IRestartMeetWithProposalInpu
   })
   return result
 }
+
 
 // Композабл для использования в компонентах
 export const useRestartMeet = (

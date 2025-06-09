@@ -312,6 +312,7 @@ struct [[eosio::table, eosio::contract(REGISTRATOR)]] cooperative2 {
   eosio::binary_extension<eosio::name> status; ///< Статус процесса подключения
   eosio::binary_extension<eosio::time_point_sec> created_at; ///< Дата поступления заявки на подключение (pending | ... | active | blocked)
   eosio::binary_extension<document2> document; ///< Подписанный документ соглашения на подключение
+  eosio::binary_extension<uint64_t> active_participants_count; ///< Счетчик активных пайщиков в кооперативе
   
   
   /**

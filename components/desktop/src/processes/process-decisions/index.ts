@@ -137,6 +137,8 @@ export function useDecisionProcessor() {
       const { generateSovietDecisionOnAnnualMeet } = useGenerateSovietDecisionOnAnnualMeet()
       document = await generateSovietDecisionOnAnnualMeet({
         username: username,
+        decision_id: decision_id,
+        meet_hash: row.table.hash as string
       })
     }
     else {
