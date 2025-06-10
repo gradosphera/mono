@@ -4,8 +4,20 @@ import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { CommonUserSchema, CooperativeSchema, MeetSchema, VarsSchema } from '../Schema'
 
-// Расширенная схема для объекта ответа с голосованием
+// Схема для объекта ответа с голосованием (упрощенная версия)
 const AnswerSchema: JSONSchemaType<Cooperative.Registry.AnnualGeneralMeetingVotingBallot.IAnswer> = {
+  type: 'object',
+  properties: {
+    id: { type: 'string' },
+    number: { type: 'string' },
+    vote: { type: 'string', enum: ['for', 'against', 'abstained'] },
+  },
+  required: ['id', 'number', 'vote'],
+  additionalProperties: true,
+}
+
+// Схема для объекта вопроса
+const QuestionSchema: JSONSchemaType<Cooperative.Registry.AnnualGeneralMeetingVotingBallot.IQuestion> = {
   type: 'object',
   properties: {
     id: { type: 'string' },
@@ -13,9 +25,8 @@ const AnswerSchema: JSONSchemaType<Cooperative.Registry.AnnualGeneralMeetingVoti
     title: { type: 'string' },
     context: { type: 'string' },
     decision: { type: 'string' },
-    vote: { type: 'string', enum: ['for', 'against', 'abstained'] }
   },
-  required: ['id', 'number', 'title', 'context', 'decision', 'vote'],
+  required: ['id', 'number', 'title', 'context', 'decision'],
   additionalProperties: true,
 }
 
@@ -39,9 +50,15 @@ export const Schema: JSONSchemaType<Model> = {
     answers: {
       type: 'array',
       items: AnswerSchema,
+      minItems: 1,
+    },
+    questions: {
+      type: 'array',
+      items: QuestionSchema,
+      minItems: 1,
     },
   },
-  required: ['meta', 'coop', 'vars', 'meet', 'user', 'answers'],
+  required: ['meta', 'coop', 'vars', 'meet', 'user', 'answers', 'questions'],
   additionalProperties: true,
 }
 

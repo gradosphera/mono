@@ -1,7 +1,8 @@
 import { client } from 'src/shared/api/client'
 import { Mutations } from '@coopenomics/sdk'
 import { useSignDocument } from 'src/shared/lib/document/model/entity'
-import moment from 'moment-with-locales-es6'
+import { getTimezone } from 'src/shared/lib/utils/dates/timezone'
+import moment from 'moment-timezone'
 
 export type ICreateMeetInput = Mutations.Meet.CreateAnnualGeneralMeet.IInput['data']
 export type ICreateMeetResult = Mutations.Meet.CreateAnnualGeneralMeet.IOutput[typeof Mutations.Meet.CreateAnnualGeneralMeet.name]
@@ -59,9 +60,13 @@ export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput): Pr
 
   const { signDocument } = useSignDocument()
 
-  // Преобразуем формат даты для документа
-  const openAtFormatted = moment(data.open_at).format('DD.MM.YYYY HH:mm')
-  const closeAtFormatted = moment(data.close_at).format('DD.MM.YYYY HH:mm')
+  // Получаем московский часовой пояс для форматирования
+  const timezone = getTimezone()
+
+  // Преобразуем формат даты для документа, явно указывая московский часовой пояс
+  // Добавляем маркер '(Мск)' к датам, так как в шаблоне документа этот маркер не добавляется автоматически
+  const openAtFormatted = `${moment(data.open_at).tz(timezone).format('DD.MM.YYYY HH:mm')} (Мск)`
+  const closeAtFormatted = `${moment(data.close_at).tz(timezone).format('DD.MM.YYYY HH:mm')} (Мск)`
 
   // Формируем вопросы повестки в требуемом формате
   const questions = data.agenda_points.map((point, index) => ({

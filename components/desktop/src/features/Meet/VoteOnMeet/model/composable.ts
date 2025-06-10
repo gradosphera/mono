@@ -17,11 +17,39 @@ export type IGenerateBallotResult = Mutations.Meet.GenerateBallotForAnnualGenera
  * @private Внутренняя функция, не экспортируется
  */
 async function generateBallot(data: IGenerateBallotInput, options?: any): Promise<IGenerateBallotResult> {
+  const { answers: answersFromInput, ...restData } = data
+
+  // Подготавливаем массив ответов из голосов
+  const meetStore = useMeetStore()
+  const meet = await meetStore.loadMeet({
+    coopname: data.coopname,
+    hash: data.meet_hash
+  })
+
+  if (!meet?.processing?.questions?.length) {
+    throw new Error('Не удалось получить вопросы собрания')
+  }
+
+  // Создаем массив ответов на основе вопросов и голосов
+  const answers = meet.processing.questions.map((question, index) => {
+    const questionId = typeof question.id === 'number' ? question.id.toString() : question.id
+    const questionNumber = typeof question.number === 'number' ? question.number.toString() : question.number
+
+    return {
+      id: questionId,
+      number: questionNumber,
+      vote: answersFromInput[index].vote
+    }
+  })
+
   const { [Mutations.Meet.GenerateBallotForAnnualGeneralMeetDocument.name]: generatedDocument } = await client.Mutation(
     Mutations.Meet.GenerateBallotForAnnualGeneralMeetDocument.mutation,
     {
       variables: {
-        data,
+        data: {
+          ...restData,
+          answers
+        },
         options
       }
     }

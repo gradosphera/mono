@@ -113,15 +113,15 @@ const submitVote = async () => {
 
   isVoting.value = true
   try {
-    const votesData = meetAgendaItems.value.map((item, index) => ({
-      question_id: item.id,
-      vote: votes.value[index]
-    }))
-
     const generatedBallot = await generateBallot({
       coopname: props.coopname,
       username: sessionStore.username,
-      meet_hash: props.meetHash
+      meet_hash: props.meetHash,
+      answers: meetAgendaItems.value.map((question, index) => ({
+        id: question.id.toString(),
+        number: question.number.toString(),
+        vote: votes.value[index]
+      }))
     })
 
     const signedBallot = await signDocument(generatedBallot, sessionStore.username)
@@ -131,12 +131,16 @@ const submitVote = async () => {
       hash: props.meetHash,
       ballot: signedBallot,
       username: sessionStore.username,
-      votes: votesData
+      votes: meetAgendaItems.value.map((item, index) => ({
+        question_id: item.id,
+        vote: votes.value[index]
+      }))
     }
 
     await voteOnMeet(vote)
     SuccessAlert('Ваш голос успешно отправлен')
   } catch (error: any) {
+    console.error(error)
     FailAlert(error)
   } finally {
     isVoting.value = false

@@ -4,10 +4,30 @@ import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-me
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import type { ExcludeCommonProps } from '~/modules/document/types';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.AnnualGeneralMeetingVotingBallot.Action;
+
+// Упрощенный DTO для ответов, только необходимые поля
+@InputType('AnswerInput')
+export class AnswerInputDTO {
+  @Field(() => String, { description: 'ID вопроса' })
+  @IsString()
+  @IsNotEmpty()
+  id!: string;
+
+  @Field(() => String, { description: 'Номер вопроса' })
+  @IsString()
+  @IsNotEmpty()
+  number!: string;
+
+  @Field(() => String, { description: 'Голос (за/против/воздержался)' })
+  @IsString()
+  @IsNotEmpty()
+  vote!: 'for' | 'against' | 'abstained';
+}
 
 @InputType(`BaseAnnualGeneralMeetingVotingBallotMetaDocumentInput`)
 class BaseAnnualGeneralMeetingVotingBallotMetaDocumentInputDTO implements ExcludeCommonProps<action> {
@@ -20,6 +40,13 @@ class BaseAnnualGeneralMeetingVotingBallotMetaDocumentInputDTO implements Exclud
   @IsString()
   @IsNotEmpty()
   username!: string;
+
+  @Field(() => [AnswerInputDTO], { description: 'Ответы голосования' })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AnswerInputDTO)
+  @IsNotEmpty()
+  answers!: AnswerInputDTO[];
 }
 
 @InputType(`AnnualGeneralMeetingVotingBallotGenerateDocumentInput`)
@@ -31,21 +58,14 @@ export class AnnualGeneralMeetingVotingBallotGenerateDocumentInputDTO
   implements action
 {
   registry_id!: number;
-  @Field(() => String, { description: 'Хеш собрания' })
-  @IsString()
-  @IsNotEmpty()
-  meet_hash!: string;
-
-  @Field(() => String, { description: 'Имя пользователя голосующего' })
-  @IsString()
-  @IsNotEmpty()
-  username!: string;
 }
 
 @InputType(`AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput`)
-export class AnnualGeneralMeetingVotingBallotSignedMetaDocumentInputDTO
-  extends IntersectionType(BaseAnnualGeneralMeetingVotingBallotMetaDocumentInputDTO, MetaDocumentInputDTO)
-  implements action {}
+// implements action - здесь мы убираем имплементацию т.к. обогащае данными на уровне фабрики документов в дальнейшем
+export class AnnualGeneralMeetingVotingBallotSignedMetaDocumentInputDTO extends IntersectionType(
+  BaseAnnualGeneralMeetingVotingBallotMetaDocumentInputDTO,
+  MetaDocumentInputDTO
+) {}
 
 @InputType(`AnnualGeneralMeetingVotingBallotSignedDocumentInput`)
 export class AnnualGeneralMeetingVotingBallotSignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {

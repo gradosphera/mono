@@ -13,6 +13,7 @@ export class MeetAggregate implements MeetDomainAggregate {
     public readonly processing?: MeetProcessingDomainEntity | null,
     public readonly processed?: MeetProcessedDomainEntity | null
   ) {
+    console.log('hash: ', pre?.hash, processing, processed?.hash);
     this.hash = assertSingleHash(pre?.hash, processing?.hash, processed?.hash);
   }
 

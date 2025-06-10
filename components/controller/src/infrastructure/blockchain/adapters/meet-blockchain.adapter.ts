@@ -224,7 +224,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
     return result;
   }
 
-  async restartMeet(data: RestartAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult> {
+  async restartMeet(data: RestartAnnualGeneralMeetInputDomainInterface): Promise<string> {
     const wif = await Vault.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
@@ -243,14 +243,14 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
       new_close_at: this.domainToBlockchainUtils.convertDateToBlockchainFormat(data.new_close_at),
     };
 
-    const result = (await this.blockchainService.transact({
+    (await this.blockchainService.transact({
       account: MeetContract.contractName.production,
       name: MeetContract.Actions.RestartMeet.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data: blockchainData,
     })) as TransactResult;
 
-    return result;
+    return new_hash;
   }
 
   async signBySecretaryOnAnnualGeneralMeet(

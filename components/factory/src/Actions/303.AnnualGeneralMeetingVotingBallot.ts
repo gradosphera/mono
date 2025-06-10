@@ -1,4 +1,5 @@
 import { type Cooperative, DraftContract } from 'cooptypes'
+import moment from 'moment-timezone'
 import { AnnualGeneralMeetingVotingBallot } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
@@ -31,23 +32,27 @@ export class Factory extends DocFactory<AnnualGeneralMeetingVotingBallot.Action>
 
     // Извлекаем данные собрания из блокчейна по хэшу
     const meet = await super.getMeet(data.coopname, data.meet_hash, data.block_num)
-    const questions = await super.getMeetQuestions(data.coopname, Number(meet.id), data.block_num)
 
-    // Преобразуем вопросы в ответы с голосованием
-    const answers: Cooperative.Registry.AnnualGeneralMeetingVotingBallot.IAnswer[] = questions.map((question) => {
-      // Определяем как пользователь проголосовал по этому вопросу
-      const vote = this.getUserVote(question, data.username)
+    // Данные уже приходят отформатированными из метода getMeet,
+    // дополнительная обработка времени не требуется
 
-      return {
-        id: question.id.toString(),
-        number: question.number.toString(),
-        title: question.title,
-        context: question.context,
-        decision: question.decision,
-        vote,
-      }
-    })
+    // Получаем вопросы из блокчейна
+    const meetQuestions = await super.getMeetQuestions(data.coopname, Number(meet.id), data.block_num)
+    console.log('meetQuestions', meetQuestions)
 
+    // Преобразуем вопросы из блокчейна в формат, нужный для модели
+    const questions = meetQuestions.map(question => ({
+      id: question.id.toString(),
+      number: question.number.toString(),
+      title: question.title,
+      context: question.context || '',
+      decision: question.decision,
+    }))
+
+    // Получаем ответы из входных данных
+    const { answers } = data
+
+    // Создаем модель для генерации документа
     const combinedData: AnnualGeneralMeetingVotingBallot.Model = {
       meta,
       coop,
@@ -55,7 +60,10 @@ export class Factory extends DocFactory<AnnualGeneralMeetingVotingBallot.Action>
       user,
       meet,
       answers,
-    }
+      questions,
+    } as AnnualGeneralMeetingVotingBallot.Model // Используем приведение типов для решения проблемы совместимости
+
+    console.dir(combinedData, { depth: null })
 
     await super.validate(combinedData, template.model)
 

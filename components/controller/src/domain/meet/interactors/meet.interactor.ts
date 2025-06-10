@@ -3,11 +3,7 @@ import { DocumentDomainService } from '~/domain/document/services/document-domai
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import { Inject, Injectable } from '@nestjs/common';
 import { MEET_BLOCKCHAIN_PORT, MeetBlockchainPort } from '../ports/meet-blockchain.port';
-import {
-  MEET_PRE_PROCESSING_REPOSITORY,
-  MeetPreProcessingRepository,
-  MEET_REPOSITORY,
-} from '../repositories/meet-pre.repository';
+import { MeetPreProcessingRepository, MEET_REPOSITORY } from '../repositories/meet-pre.repository';
 import { MeetAggregate } from '../aggregates/meet-domain.aggregate';
 import type { CreateAnnualGeneralMeetInputDomainInterface } from '../interfaces/create-annual-meet-input-domain.interface';
 import { DocumentAggregator } from '~/domain/document/aggregators/document.aggregator';
@@ -181,16 +177,16 @@ export class MeetDomainInteractor {
 
   async restartMeet(data: RestartAnnualGeneralMeetInputDomainInterface): Promise<MeetAggregate> {
     // Вызов блокчейн порта для перезапуска собрания
-    await this.meetBlockchainPort.restartMeet(data);
+    const new_hash = await this.meetBlockchainPort.restartMeet(data);
 
     // Получаем обновленные данные из обоих источников
     const processingData = await this.meetBlockchainPort.getMeet({
       coopname: data.coopname,
-      hash: data.hash,
+      hash: new_hash,
     });
 
-    const preMeet = await this.meetPreRepository.findByHash(data.hash);
-    const processedMeetEntity = await this.meetProcessedRepository.findByHash(data.hash);
+    const preMeet = await this.meetPreRepository.findByHash(new_hash);
+    const processedMeetEntity = await this.meetProcessedRepository.findByHash(new_hash);
 
     // Создаем агрегат из обоих источников данных
     return new MeetAggregate(preMeet, processingData, processedMeetEntity);

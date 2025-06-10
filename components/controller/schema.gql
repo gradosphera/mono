@@ -547,6 +547,9 @@ input AnnualGeneralMeetingSovietDecisionGenerateDocumentInput {
 }
 
 input AnnualGeneralMeetingVotingBallotGenerateDocumentInput {
+  """Ответы голосования"""
+  answers: [AnswerInput!]!
+
   """Номер блока, на котором был создан документ"""
   block_num: Int
 
@@ -602,6 +605,9 @@ input AnnualGeneralMeetingVotingBallotSignedDocumentInput {
 }
 
 input AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput {
+  """Ответы голосования"""
+  answers: [AnswerInput!]!
+
   """Номер блока, на котором был создан документ"""
   block_num: Int!
 
@@ -637,6 +643,17 @@ input AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
+}
+
+input AnswerInput {
+  """ID вопроса"""
+  id: String!
+
+  """Номер вопроса"""
+  number: String!
+
+  """Голос (за/против/воздержался)"""
+  vote: String!
 }
 
 input AssetContributionActGenerateDocumentInput {
