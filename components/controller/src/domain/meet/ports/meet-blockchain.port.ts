@@ -17,7 +17,7 @@ export interface MeetBlockchainPort {
 
   createMeet(data: CreateAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult>;
   vote(data: VoteOnAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult>;
-  restartMeet(data: RestartAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult>;
+  restartMeet(data: RestartAnnualGeneralMeetInputDomainInterface): Promise<string>;
   signBySecretaryOnAnnualGeneralMeet(
     data: SignBySecretaryOnAnnualGeneralMeetInputDomainInterface
   ): Promise<TransactionResult>;

@@ -3,23 +3,28 @@
  * @param timestamp Строка с временной меткой eosio::time_point_sec
  * @returns Отформатированная строка даты и времени
  */
+import moment from 'moment-timezone'
+
 export function formatDateTime(timestamp: string): string {
   if (!timestamp)
     return ''
 
-  // Преобразование timestamp в объект Date
-  let date: Date
+  // Устанавливаем московский часовой пояс для форматирования
+  const timezone = 'Europe/Moscow'
+
+  // Преобразование timestamp в момент с учетом часового пояса
+  let moscowDate
   if (timestamp.includes('T')) {
-    // Формат ISO строки
-    date = new Date(timestamp)
+    // Формат ISO строки - используем moment с указанием UTC для правильной интерпретации
+    moscowDate = moment.utc(timestamp).tz(timezone)
   }
   else if (!Number.isNaN(Number(timestamp))) {
     // Формат UNIX timestamp в секундах
-    date = new Date(Number(timestamp) * 1000)
+    moscowDate = moment.unix(Number(timestamp)).tz(timezone)
   }
   else {
-    // Пытаемся разобрать строку как есть
-    date = new Date(timestamp)
+    // Для других форматов пытаемся определить автоматически
+    moscowDate = moment(timestamp).tz(timezone)
   }
 
   // Месяцы на русском языке
@@ -39,11 +44,11 @@ export function formatDateTime(timestamp: string): string {
   ]
 
   // Форматирование: "15 марта 2024 10:00 (Мск)"
-  const day = date.getDate()
-  const month = months[date.getMonth()]
-  const year = date.getFullYear()
-  const hours = date.getHours().toString().padStart(2, '0')
-  const minutes = date.getMinutes().toString().padStart(2, '0')
+  const day = moscowDate.date()
+  const month = months[moscowDate.month()]
+  const year = moscowDate.year()
+  const hours = moscowDate.format('HH')
+  const minutes = moscowDate.format('mm')
 
   return `${day} ${month} ${year} ${hours}:${minutes} (Мск)`
 }

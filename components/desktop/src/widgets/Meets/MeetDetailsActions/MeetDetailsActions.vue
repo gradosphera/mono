@@ -28,6 +28,7 @@ div
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCloseMeet } from 'src/features/Meet/CloseMeetWithDecision/model'
 import { useRestartMeet } from 'src/features/Meet/RestartMeet/model'
 import { RestartMeet } from 'src/features/Meet/RestartMeet'
@@ -42,6 +43,7 @@ const props = defineProps<{
 
 const isProcessing = ref(false)
 const meetStore = useMeetStore()
+const router = useRouter()
 
 // Устанавливаем текущее собрание в store при монтировании и обновлении пропсов
 onMounted(() => {
@@ -62,6 +64,6 @@ const {
 const {
   canRestartMeet,
   handleRestartMeet
-} = useRestartMeet(isProcessing)
+} = useRestartMeet(router, isProcessing)
 
 </script>

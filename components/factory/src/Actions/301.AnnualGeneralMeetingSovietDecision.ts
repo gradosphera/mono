@@ -1,4 +1,5 @@
 import { DraftContract } from 'cooptypes'
+import moment from 'moment-timezone'
 import { AnnualGeneralMeetingSovietDecision } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
@@ -31,6 +32,9 @@ export class Factory extends DocFactory<AnnualGeneralMeetingSovietDecision.Actio
     // Извлекаем данные собрания из блокчейна по хэшу
     const meet = await super.getMeet(data.coopname, data.meet_hash, data.block_num)
     const questions = await super.getMeetQuestions(data.coopname, Number(meet.id), data.block_num)
+
+    // Данные уже приходят отформатированными из метода getMeet,
+    // дополнительная обработка времени не требуется
 
     const combinedData: AnnualGeneralMeetingSovietDecision.Model = {
       meta,

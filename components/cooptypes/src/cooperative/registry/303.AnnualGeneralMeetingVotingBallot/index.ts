@@ -7,10 +7,18 @@ export const registry_id = 303
 /**
  * Интерфейс ответа с голосованием
  */
-export interface IAnswer extends IMeetPoint {
+export interface IAnswer {
   number: string
   id: string
   vote: 'for' | 'against' | 'abstained'
+}
+
+/**
+ * Интерфейс вопроса собрания
+ */
+export interface IQuestion extends IMeetPoint {
+  id: string
+  number: string
 }
 
 /**
@@ -19,6 +27,7 @@ export interface IAnswer extends IMeetPoint {
 export interface Action extends IGenerate {
   meet_hash: string
   username: string
+  answers: IAnswer[]
 }
 
 export type Meta = IMetaDocument & Action
@@ -30,12 +39,13 @@ export interface Model {
   meet: IMeetExtended
   user: ICommonUser
   answers: IAnswer[]
+  questions: IQuestion[]
   vars: IVars
 }
 
 export const title = 'Заявление с бюллетенем для голосования на общем собрании'
 export const description = 'Форма заявления пайщика с бюллетенем для голосования на очередном/внеочередном общем собрании пайщиков потребительского кооператива'
-export const context = `<style> h1 {margin: 0px; text-align:center;}h3{margin: 0px;padding-top: 15px;text-align: center;}.about {padding: 20px;}.digital-document {padding: 20px;white-space: pre-wrap;}.subheader {padding-bottom: 20px; }table {width: 100%;border-collapse: collapse;}th, td {border: 1px solid #ccc;padding: 8px;text-align: left;word-wrap: break-word; overflow-wrap: break-word; }th {background-color: #f4f4f4;width: 30% !important;max-width: 30% !important;}ul {list-style: none;padding: 0;}li {margin: 5px 0;}</style><div class="digital-document"><div style="text-align: right; font-weight: bold;">{% if meet.type == 'regular' %}{% trans 'annual_regular_label' %}{% else %}{% trans 'annual_extra_label' %}{% endif %} {% if coop.is_branched %}{% trans 'GENERAL_MEETING_LABEL_BRANCHED' %}{% else %}{% trans 'GENERAL_MEETING_LABEL' %}{% endif %}</div><div style="text-align: right; font-weight: bold;">{{vars.full_abbr_genitive}} «{{vars.name}}»</div><div style="text-align: right;">{% if coop.is_branched %}{% trans 'FROM_AUTHORIZED_LABEL' %}{% else %}{% trans 'FROM_PARTICIPANT_LABEL' %}{% endif %} {{ user.full_name_or_short_name }}</div><div style="text-align: right; padding-bottom: 20px;">{{ coop.city }}, {{ meta.created_at }}</div><h1 style="text-align:center; margin: 0px; padding-top: 15px;">{% trans 'APPLICATION_TITLE' %}</h1><p>{% trans 'REQUEST_VOTE_COUNT_START' %} {% if meet.type == 'regular' %}{% trans 'annual_regular_word' %}{% else %}{% trans 'annual_extra_word' %}{% endif %} {% trans 'GENERAL_MEETING_TEXT' %} {% if coop.is_branched %}{% trans 'AUTHORIZED_WORD' %}{% else %}{% trans 'PARTICIPANT_WORD' %}{% endif %} {{vars.full_abbr_genitive}} «{{vars.name}}» {{meet.open_at_datetime}}, {% trans 'namely_text' %}:</p>{% for answer in answers %}<h3 style="padding-top: 30px; padding-bottom: 10px; text-align: center;">{% trans 'DECISION_BY_QUESTION', answer.number %}</h3><table><tbody><tr><th>{% trans 'decision_text' %}</th><td>{{ answer.decision }}</td></tr>{% if answer.context %}<tr><th>{% trans 'context_label' %}</th><td><em>{{ answer.context }}</em></td></tr>{% endif %}<tr><th></th><td><table cellpadding="0" cellspacing="0" border="0" style="width: 100%; border: none; margin-top: 10px;"><tr><td style="border: none; width: 80px; padding: 5px;"><span style="font-size: 34px; margin-right: 8px;">{% if answer.vote == 'for' %}<span style="font-weight: bold;">☒</span>{% else %}☐{% endif %}</span><span>{% trans 'vote_for' %}</span></td><td style="border: none; width: 120px; padding: 5px;"><span style="font-size: 34px; margin-right: 8px;">{% if answer.vote == 'against' %}<span style="font-weight: bold;">☒</span>{% else %}☐{% endif %}</span><span>{% trans 'vote_against' %}</span></td><td style="border: none; width: 150px; padding: 5px;"><span style="font-size: 34px; margin-right: 8px;">{% if answer.vote == 'abstained' %}<span style="font-weight: bold;">☒</span>{% else %}☐{% endif %}</span><span>{% trans 'vote_abstained' %}</span></td><td style="border: none;"></td></tr></table></td></tr></tbody></table>{% endfor %}<div class="signature" style="padding-top: 30px;"><p>{% if coop.is_branched %}{% trans 'AUTHORIZED_SIGNATURE_LABEL' %}{% else %}{% trans 'PARTICIPANT_SIGNATURE_LABEL' %}{% endif %} {{ user.full_name_or_short_name }}</p><p>{% trans 'SIGNED_DIGITALLY' %}</p></div></div>`
+export const context = `<style> h1 {margin: 0px; text-align:center;}h3{margin: 0px;padding-top: 15px;text-align: center;}.about {padding: 20px;}.digital-document {padding: 20px;white-space: pre-wrap;}.subheader {padding-bottom: 20px; }table {width: 100%;border-collapse: collapse;}th, td {border: 1px solid #ccc;padding: 8px;text-align: left;word-wrap: break-word; overflow-wrap: break-word; }th {background-color: #f4f4f4;width: 30% !important;max-width: 30% !important;}ul {list-style: none;padding: 0;}li {margin: 5px 0;}</style><div class="digital-document"><div style="text-align: right; font-weight: bold;">{% if meet.type == 'regular' %}{% trans 'annual_regular_label' %}{% else %}{% trans 'annual_extra_label' %}{% endif %} {% if coop.is_branched %}{% trans 'GENERAL_MEETING_LABEL_BRANCHED' %}{% else %}{% trans 'GENERAL_MEETING_LABEL' %}{% endif %}</div><div style="text-align: right; font-weight: bold;">{{vars.full_abbr_genitive}} «{{vars.name}}»</div><div style="text-align: right;">{% if coop.is_branched %}{% trans 'FROM_AUTHORIZED_LABEL' %}{% else %}{% trans 'FROM_PARTICIPANT_LABEL' %}{% endif %} {{ user.full_name_or_short_name }}</div><div style="text-align: right; padding-bottom: 20px;">{{ coop.city }}, {{ meta.created_at }}</div><h1 style="text-align:center; margin: 0px; padding-top: 15px;">{% trans 'APPLICATION_TITLE' %}</h1><p>{% trans 'REQUEST_VOTE_COUNT_START' %} {% if meet.type == 'regular' %}{% trans 'annual_regular_word' %}{% else %}{% trans 'annual_extra_word' %}{% endif %} {% trans 'GENERAL_MEETING_TEXT' %} {% if coop.is_branched %}{% trans 'AUTHORIZED_WORD' %}{% else %}{% trans 'PARTICIPANT_WORD' %}{% endif %} {{vars.full_abbr_genitive}} «{{vars.name}}» {{meet.open_at_datetime}}, {% trans 'namely_text' %}:</p>{% for question in questions %}{% for answer in answers %}{% if answer.id == question.id %}<h3 style="padding-top: 30px; padding-bottom: 10px; text-align: center;">{% trans 'DECISION_BY_QUESTION', question.number %}</h3><table><tbody><tr><th>{% trans 'decision_text' %}</th><td>{{ question.decision }}</td></tr>{% if question.context %}<tr><th>{% trans 'context_label' %}</th><td><em>{{ question.context }}</em></td></tr>{% endif %}<tr><th></th><td><table cellpadding="0" cellspacing="0" border="0" style="width: 100%; border: none; margin-top: 10px;"><tr><td style="border: none; width: 80px; padding: 5px;"><span style="font-size: 34px; margin-right: 8px;">{% if answer.vote == 'for' %}<span style="font-weight: bold;">☒</span>{% else %}☐{% endif %}</span><span>{% trans 'vote_for' %}</span></td><td style="border: none; width: 120px; padding: 5px;"><span style="font-size: 34px; margin-right: 8px;">{% if answer.vote == 'against' %}<span style="font-weight: bold;">☒</span>{% else %}☐{% endif %}</span><span>{% trans 'vote_against' %}</span></td><td style="border: none; width: 150px; padding: 5px;"><span style="font-size: 34px; margin-right: 8px;">{% if answer.vote == 'abstained' %}<span style="font-weight: bold;">☒</span>{% else %}☐{% endif %}</span><span>{% trans 'vote_abstained' %}</span></td><td style="border: none;"></td></tr></table></td></tr></tbody></table>{% endif %}{% endfor %}{% endfor %}<div class="signature" style="padding-top: 30px;"><p>{% if coop.is_branched %}{% trans 'AUTHORIZED_SIGNATURE_LABEL' %}{% else %}{% trans 'PARTICIPANT_SIGNATURE_LABEL' %}{% endif %} {{ user.full_name_or_short_name }}</p><p>{% trans 'SIGNED_DIGITALLY' %}</p></div></div>`
 
 export const translations = {
   ru: {
@@ -88,10 +98,21 @@ export const exampleData = {
     {
       id: '1',
       number: '1',
+      vote: 'for',
+    },
+    {
+      id: '2',
+      number: '2',
+      vote: 'against',
+    },
+  ],
+  questions: [
+    {
+      id: '1',
+      number: '1',
       title: 'Отчет Председателя Совета Потребительского Кооператива и признать результаты деятельности удовлетворительными',
       context: 'Подробная информация о вопросе...',
       decision: 'Принять Отчет Председателя Совета Потребительского Кооператива и признать результаты деятельности удовлетворительными',
-      vote: 'for',
     },
     {
       id: '2',
@@ -99,7 +120,6 @@ export const exampleData = {
       title: 'Утверждение Заключения Ревизионной Комиссии о ревизии деятельности',
       context: 'Дополнительная информация о ревизии...',
       decision: 'Утвердить Заключение Ревизионной Комиссии о ревизии деятельности',
-      vote: 'against',
     },
   ],
   vars: {

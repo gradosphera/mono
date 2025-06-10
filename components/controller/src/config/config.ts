@@ -43,6 +43,7 @@ const envVarsSchema = z.object({
   SMTP_PASSWORD: z.string().default(''), // Пустая строка для необязательного значения
   EMAIL_FROM: z.string().default(''), // Пустая строка для необязательного значения
   COOPNAME: z.string().default('default_coopname'), // Задаём дефолтное значение
+  TIMEZONE: z.string().default('Europe/Moscow'),
   GRAPHQL_SERVICE: z.string().default('http://localhost:4090').describe('адрес сервиса GRAPHQL'),
 
   // Новые переменные для PostgreSQL
@@ -86,6 +87,7 @@ export default {
   base_url: envVars.data.BASE_URL,
   port: envVars.data.PORT,
   server_secret: envVars.data.SERVER_SECRET,
+  timezone: envVars.data.TIMEZONE,
   blockchain: {
     url: envVars.data.BLOCKCHAIN_RPC,
     id: envVars.data.CHAIN_ID,

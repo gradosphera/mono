@@ -1,4 +1,5 @@
 import { DraftContract } from 'cooptypes'
+import moment from 'moment-timezone'
 import { AnnualGeneralMeetingAgenda } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
@@ -30,7 +31,12 @@ export class Factory extends DocFactory<AnnualGeneralMeetingAgenda.Action> {
     const user = super.getCommonUser(userData)
 
     // Используем данные напрямую из Action, так как собрание еще не создано в блокчейне
-    const { meet, questions } = data
+    // Создаем копию данных, чтобы не изменять исходные
+    const meet = { ...data.meet }
+    const questions = [...data.questions]
+
+    // Предполагается, что даты уже приходят в московском формате с фронтенда
+    // Сохраняем их как есть, без дополнительного преобразования или добавления суффикса
 
     const combinedData: AnnualGeneralMeetingAgenda.Model = {
       meta,

@@ -75,6 +75,18 @@ describe('тест генератора документов общих собр
       coopname: 'voskhod',
       username: 'individual',
       meet_hash: _testMeetHash,
+      answers: [
+        {
+          id: '1',
+          number: '1',
+          vote: 'for',
+        },
+        {
+          id: '2',
+          number: '2',
+          vote: 'against',
+        },
+      ],
     })
   })
 

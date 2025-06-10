@@ -9,6 +9,7 @@ import { FailAlert, SuccessAlert } from 'src/shared/api'
 import moment from 'moment-with-locales-es6'
 import { useSystemStore } from 'src/entities/System/model';
 import { IGenerateAgendaInput, IGenerateAgendaResult } from 'src/features/Meet/CreateMeet/model'
+import { type Router } from 'vue-router';
 
 moment.locale('ru')
 
@@ -99,12 +100,16 @@ export async function restartMeetWithProposal(data: IRestartMeetWithProposalInpu
     new_close_at: data.new_close_at,
     newproposal: signedDocument
   })
+
+  console.log('on result', result)
+
   return result
 }
 
 
 // Композабл для использования в компонентах
 export const useRestartMeet = (
+  router: Router,
   isProcessing?: Ref<boolean>
 ) => {
   const localIsProcessing = ref(false)
@@ -140,7 +145,7 @@ export const useRestartMeet = (
     if (!meetStore.currentMeet) return false
     processingRef.value = true
     try {
-      await restartMeetWithProposal({
+      const result = await restartMeetWithProposal({
         coopname: info.coopname,
         hash: meetStore.currentMeet.hash,
         username: sessionStore.username,
@@ -149,7 +154,10 @@ export const useRestartMeet = (
         agenda_points: data.agenda_points
       })
 
-      await meetStore.loadMeet({ coopname: info.coopname, hash: meetStore.currentMeet.hash })
+      await meetStore.loadMeet({ coopname: info.coopname, hash: result.processing?.hash as string})
+      console.log('router on push', router)
+      router.push({params: {hash: result.processing?.hash as string}})
+
       SuccessAlert('Собрание успешно перезапущено')
       return true
     } catch (error: any) {

@@ -1306,6 +1306,8 @@ export type ValueTypes = {
 	version?: string | undefined | null | Variable<any, string>
 };
 	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
+	/** Ответы голосования */
+	answers: Array<ValueTypes["AnswerInput"]> | Variable<any, string>,
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
 	/** Название кооператива, связанное с документом */
@@ -1344,6 +1346,8 @@ export type ValueTypes = {
 	version: string | Variable<any, string>
 };
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
+	/** Ответы голосования */
+	answers: Array<ValueTypes["AnswerInput"]> | Variable<any, string>,
 	/** Номер блока, на котором был создан документ */
 	block_num: number | Variable<any, string>,
 	/** Название кооператива, связанное с документом */
@@ -1368,6 +1372,14 @@ export type ValueTypes = {
 	username: string | Variable<any, string>,
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
+};
+	["AnswerInput"]: {
+	/** ID вопроса */
+	id: string | Variable<any, string>,
+	/** Номер вопроса */
+	number: string | Variable<any, string>,
+	/** Голос (за/против/воздержался) */
+	vote: string | Variable<any, string>
 };
 	["AssetContributionActGenerateDocumentInput"]: {
 	/** Идентификатор акта */
@@ -4496,6 +4508,8 @@ export type ResolverInputTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
+	/** Ответы голосования */
+	answers: Array<ResolverInputTypes["AnswerInput"]>,
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Название кооператива, связанное с документом */
@@ -4534,6 +4548,8 @@ export type ResolverInputTypes = {
 	version: string
 };
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
+	/** Ответы голосования */
+	answers: Array<ResolverInputTypes["AnswerInput"]>,
 	/** Номер блока, на котором был создан документ */
 	block_num: number,
 	/** Название кооператива, связанное с документом */
@@ -4558,6 +4574,14 @@ export type ResolverInputTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["AnswerInput"]: {
+	/** ID вопроса */
+	id: string,
+	/** Номер вопроса */
+	number: string,
+	/** Голос (за/против/воздержался) */
+	vote: string
 };
 	["AssetContributionActGenerateDocumentInput"]: {
 	/** Идентификатор акта */
@@ -7682,6 +7706,8 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
+	/** Ответы голосования */
+	answers: Array<ModelTypes["AnswerInput"]>,
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Название кооператива, связанное с документом */
@@ -7720,6 +7746,8 @@ export type ModelTypes = {
 	version: string
 };
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
+	/** Ответы голосования */
+	answers: Array<ModelTypes["AnswerInput"]>,
 	/** Номер блока, на котором был создан документ */
 	block_num: number,
 	/** Название кооператива, связанное с документом */
@@ -7744,6 +7772,14 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["AnswerInput"]: {
+	/** ID вопроса */
+	id: string,
+	/** Номер вопроса */
+	number: string,
+	/** Голос (за/против/воздержался) */
+	vote: string
 };
 	["AssetContributionActGenerateDocumentInput"]: {
 	/** Идентификатор акта */
@@ -10875,7 +10911,9 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
+		/** Ответы голосования */
+	answers: Array<GraphQLTypes["AnswerInput"]>,
+	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
@@ -10913,7 +10951,9 @@ export type GraphQLTypes = {
 	version: string
 };
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
+		/** Ответы голосования */
+	answers: Array<GraphQLTypes["AnswerInput"]>,
+	/** Номер блока, на котором был создан документ */
 	block_num: number,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
@@ -10937,6 +10977,14 @@ export type GraphQLTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["AnswerInput"]: {
+		/** ID вопроса */
+	id: string,
+	/** Номер вопроса */
+	number: string,
+	/** Голос (за/против/воздержался) */
+	vote: string
 };
 	["AssetContributionActGenerateDocumentInput"]: {
 		/** Идентификатор акта */
@@ -13845,6 +13893,7 @@ type ZEUS_VARIABLES = {
 	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"];
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedDocumentInput"];
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"];
+	["AnswerInput"]: ValueTypes["AnswerInput"];
 	["AssetContributionActGenerateDocumentInput"]: ValueTypes["AssetContributionActGenerateDocumentInput"];
 	["AssetContributionActSignedDocumentInput"]: ValueTypes["AssetContributionActSignedDocumentInput"];
 	["AssetContributionActSignedMetaDocumentInput"]: ValueTypes["AssetContributionActSignedMetaDocumentInput"];

@@ -62,13 +62,16 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	AnnualGeneralMeetingVotingBallotGenerateDocumentInput:{
-
+		answers:"AnswerInput"
 	},
 	AnnualGeneralMeetingVotingBallotSignedDocumentInput:{
 		meta:"AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput",
 		signatures:"SignatureInfoInput"
 	},
 	AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput:{
+		answers:"AnswerInput"
+	},
+	AnswerInput:{
 
 	},
 	AssetContributionActGenerateDocumentInput:{
