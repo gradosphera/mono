@@ -27,5 +27,6 @@ declare module 'vue-router' {
     agreements?: string[]
     title: string
     icon: string
+    requiresAuth?: boolean
   }
 }

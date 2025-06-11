@@ -39,7 +39,25 @@ export class AccountDomainInteractor {
   private readonly logger = new Logger(AccountDomainInteractor.name);
 
   async updateAccount(data: UpdateAccountDomainInterface): Promise<AccountDomainEntity> {
-    const user = await userService.updateUserByUsername(data.username, data);
+    console.log('data on update', data);
+
+    let user;
+    if (data.individual_data) {
+      const email = data.individual_data.email;
+      user = await userService.updateUserByUsername(data.username, { email });
+      this.individualRepository.create({ ...data.individual_data, username: data.username });
+    } else if (data.organization_data) {
+      const email = data.organization_data.email;
+      user = await userService.updateUserByUsername(data.username, { email });
+      this.organizationRepository.create({ ...data.organization_data, username: data.username });
+    } else if (data.entrepreneur_data) {
+      const email = data.entrepreneur_data.email;
+      user = await userService.updateUserByUsername(data.username, { email });
+      this.entrepreneurRepository.create({ ...data.entrepreneur_data, username: data.username });
+    } else {
+      throw new Error('Не получены входные данные для обновления');
+    }
+
     const account = await this.getAccount(user.username);
 
     const result = new AccountDomainEntity(account);
@@ -56,11 +74,11 @@ export class AccountDomainInteractor {
   ): Promise<IndividualDomainEntity | OrganizationDomainEntity | EntrepreneurDomainEntity> {
     switch (accountType) {
       case AccountType.individual:
-        return this.individualRepository.findByUsername(username);
+        return new IndividualDomainEntity(await this.individualRepository.findByUsername(username));
       case AccountType.organization:
-        return this.organizationRepository.findByUsername(username);
+        return new OrganizationDomainEntity(await this.organizationRepository.findByUsername(username));
       case AccountType.entrepreneur:
-        return this.entrepreneurRepository.findByUsername(username);
+        return new EntrepreneurDomainEntity(await this.entrepreneurRepository.findByUsername(username));
       default:
         throw new Error(`Неизвестный тип аккаунта: ${accountType}`);
     }

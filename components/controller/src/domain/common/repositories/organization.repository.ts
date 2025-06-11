@@ -1,12 +1,12 @@
-import type { OrganizationDomainEntity } from '~/domain/branch/entities/organization-domain.entity';
+import type { OrganizationDomainInterface } from '../interfaces/organization-domain.interface';
 
 export interface OrganizationRepository {
   /**
    * Получить данные об организации по имени кооператива
    * @param username Имя кооператива
    */
-  findByUsername(username: string): Promise<OrganizationDomainEntity>;
-  create(data: OrganizationDomainEntity);
+  findByUsername(username: string): Promise<OrganizationDomainInterface>;
+  create(data: OrganizationDomainInterface): Promise<void>;
 }
 
 export const ORGANIZATION_REPOSITORY = Symbol('OrganizationRepository'); // Создаем уникальный токен

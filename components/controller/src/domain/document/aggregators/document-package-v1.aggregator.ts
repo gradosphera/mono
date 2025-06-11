@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { DocumentAggregator } from './document.aggregator';
 import { DocumentPackageUtils } from './document-package-utils.aggregator';
-import { AccountDomainService } from '~/domain/account/services/account-domain.service';
-import { UserCertificateDomainService } from '~/domain/user-certificate/services/user-certificate-domain.service';
+import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
+import {
+  UserCertificateDomainService,
+  USER_CERTIFICATE_DOMAIN_SERVICE,
+} from '~/domain/user-certificate/services/user-certificate-domain.service';
 import { Cooperative, SovietContract } from 'cooptypes';
 import { getActions } from '~/utils/getFetch';
 import type { DocumentPackageAggregateDomainInterface } from '../interfaces/document-package-aggregate-domain.interface';
@@ -17,8 +20,8 @@ export class DocumentPackageV1Aggregator {
   constructor(
     private readonly documentAggregator: DocumentAggregator,
     private readonly documentPackageUtils: DocumentPackageUtils,
-    private readonly accountDomainService: AccountDomainService,
-    private readonly userCertificateService: UserCertificateDomainService
+    @Inject(forwardRef(() => ACCOUNT_DOMAIN_SERVICE)) private readonly accountDomainService: AccountDomainService,
+    @Inject(USER_CERTIFICATE_DOMAIN_SERVICE) private readonly userCertificateService: UserCertificateDomainService
   ) {}
 
   /**

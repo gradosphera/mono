@@ -9,7 +9,6 @@ import { RolesGuard } from '~/modules/auth/guards/roles.guard';
 import { createPaginationResult, PaginationInputDTO } from '~/modules/common/dto/pagination.dto';
 import { GetAccountsInputDTO } from '../dto/get-accounts-input.dto';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
-import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 import { RegisterAccountInputDTO } from '../dto/register-account-input.dto';
 import { RegisteredAccountDTO } from '../dto/registered-account.dto';
 import { UpdateAccountInputDTO } from '../dto/update-account-input.dto';

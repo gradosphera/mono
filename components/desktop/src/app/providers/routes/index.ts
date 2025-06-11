@@ -18,6 +18,7 @@ import { ExtensionsShowcase } from 'src/pages/ExtensionStore/ExtensionsShowcase'
 import { ExtensionPage } from 'src/pages/ExtensionStore/ExtensionPage';
 import { MemberBranchList } from 'src/pages/Cooperative/MemberBranchList';
 import { ExtensionStoreBase } from 'src/pages/ExtensionStore/BaseRoute';
+import { LoginRedirectPage } from 'src/features/User/LoginRedirect'
 
 
 const baseRoutes = [
@@ -70,6 +71,17 @@ const baseRoutes = [
         name: 'signup',
         component: SignUpPage,
         children: [],
+      },
+      {
+        path: ':coopname/auth/login-redirect',
+        name: 'login-redirect',
+        component: LoginRedirectPage,
+        meta: {
+          layout: 'default',
+          title: 'Вход для доступа к содержимому',
+          icon: 'fa-solid fa-lock',
+          roles: []
+        },
       },
       {
         path: 'settings/cooperative',

@@ -1,14 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { AgendaWithDocumentsDTO } from '../dto/agenda-with-documents.dto';
 import { AgendaDomainInteractor } from '~/domain/agenda/interactors/agenda-domain.interactor';
-import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
+import {
+  UserCertificateInteractor,
+  USER_CERTIFICATE_INTERACTOR,
+} from '~/domain/user-certificate/interactors/user-certificate.interactor';
 import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 
 @Injectable()
 export class AgendaService {
   constructor(
     private readonly agendaDomainInteractor: AgendaDomainInteractor,
-    private readonly userCertificateInteractor: UserCertificateInteractor
+    @Inject(USER_CERTIFICATE_INTERACTOR) private readonly userCertificateInteractor: UserCertificateInteractor
   ) {}
 
   public async getAgenda(): Promise<AgendaWithDocumentsDTO[]> {

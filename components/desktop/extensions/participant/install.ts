@@ -43,7 +43,8 @@ export default async function (): Promise<IWorkspaceConfig> {
               title: 'Мой Кошелёк',
               icon: 'fa-solid fa-wallet',
               roles: [],
-              agreements: agreementsBase
+              agreements: agreementsBase,
+              requiresAuth: true
             },
             path: 'wallet',
             name: 'wallet',
@@ -56,6 +57,7 @@ export default async function (): Promise<IWorkspaceConfig> {
               icon: 'fas fa-link',
               roles: ['user'],
               conditions: 'isCoop === true && coopname === "voskhod"',
+              requiresAuth: true
             },
             path: '/:coopname/connect',
             name: 'connect',
@@ -65,7 +67,8 @@ export default async function (): Promise<IWorkspaceConfig> {
             meta: {
               title: 'Мои Реквизиты',
               icon: 'fas fa-link',
-              roles: ['user', 'member', 'chairman']
+              roles: ['user', 'member', 'chairman'],
+              requiresAuth: true
             },
             path: '/:coopname/connect',
             name: 'payment-methods',
@@ -76,6 +79,7 @@ export default async function (): Promise<IWorkspaceConfig> {
               title: 'Мои Документы',
               icon: 'fa-solid fa-file-invoice',
               roles: ['user', 'member', 'chairman'],
+              requiresAuth: true
             },
             path: 'documents',
             name: 'user-documents',
@@ -86,6 +90,7 @@ export default async function (): Promise<IWorkspaceConfig> {
               title: 'Мои Платежи',
               icon: 'fa-solid fa-money-bill-transfer',
               roles: ['user', 'member', 'chairman'],
+              requiresAuth: true
             },
             path: 'payments',
             name: 'user-payments',
@@ -96,6 +101,7 @@ export default async function (): Promise<IWorkspaceConfig> {
               title: 'Мои Собрания',
               icon: 'fa-solid fa-users-between-lines',
               roles: ['user', 'member', 'chairman'],
+              requiresAuth: true
             },
             path: 'meets',
             name: 'user-meets',
@@ -105,6 +111,12 @@ export default async function (): Promise<IWorkspaceConfig> {
                 path: ':hash',
                 name: 'user-meet-details',
                 component: markRaw(MeetDetailsPage),
+                meta: {
+                  title: 'Детали собрания',
+                  icon: 'fa-solid fa-users-between-lines',
+                  roles: ['user', 'member', 'chairman'],
+                  requiresAuth: true
+                }
               },
             ],
           },

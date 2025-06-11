@@ -1,8 +1,8 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { DOCUMENT_REPOSITORY, DocumentRepository } from '../repository/document.repository';
 import { DocumentDomainAggregate } from '../aggregates/document-domain.aggregate';
 import { DocumentDomainEntity } from '../entity/document-domain.entity';
-import { AccountDomainService } from '~/domain/account/services/account-domain.service';
+import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 
 import {
   ExtendedSignedDocumentDomainInterface,
@@ -10,14 +10,17 @@ import {
 } from '../interfaces/extended-signed-document-domain.interface';
 import type { ISignedDocumentDomainInterface } from '../interfaces/signed-document-domain.interface';
 import { Classes } from '@coopenomics/sdk';
-import { UserCertificateDomainService } from '~/domain/user-certificate/services/user-certificate-domain.service';
+import {
+  UserCertificateDomainService,
+  USER_CERTIFICATE_DOMAIN_SERVICE,
+} from '~/domain/user-certificate/services/user-certificate-domain.service';
 
 @Injectable()
 export class DocumentAggregator {
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documentRepository: DocumentRepository,
-    private readonly accountDomainService: AccountDomainService,
-    private readonly userCertificateService: UserCertificateDomainService
+    @Inject(forwardRef(() => ACCOUNT_DOMAIN_SERVICE)) private readonly accountDomainService: AccountDomainService,
+    @Inject(USER_CERTIFICATE_DOMAIN_SERVICE) private readonly userCertificateService: UserCertificateDomainService
   ) {}
   private readonly EMPTY_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
 

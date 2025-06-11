@@ -3,9 +3,9 @@ import type { MeetPreProcessingDomainEntity } from '../entities/meet-pre-domain.
 import type { MeetProcessedDomainEntity } from '../entities/meet-processed-domain.entity';
 import type { MeetProcessingDomainEntity } from '../entities/meet-processing-domain.entity';
 import { assertSingleHash } from '~/shared/asserts/single-hash.assert';
-import type { MeetDomainAggregate } from '../interfaces/meet-aggregate.interface';
+import type { MeetDomainAggregateDomainInterface } from '../interfaces/meet-aggregate.interface';
 
-export class MeetAggregate implements MeetDomainAggregate {
+export class MeetAggregate implements MeetDomainAggregateDomainInterface {
   public readonly hash: string;
 
   constructor(
@@ -13,7 +13,6 @@ export class MeetAggregate implements MeetDomainAggregate {
     public readonly processing?: MeetProcessingDomainEntity | null,
     public readonly processed?: MeetProcessedDomainEntity | null
   ) {
-    console.log('hash: ', pre?.hash, processing, processed?.hash);
     this.hash = assertSingleHash(pre?.hash, processing?.hash, processed?.hash);
   }
 

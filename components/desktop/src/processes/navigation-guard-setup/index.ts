@@ -3,6 +3,7 @@ import { useSessionStore } from 'src/entities/Session'
 import { useCurrentUserStore } from 'src/entities/User'
 import { useDesktopStore } from 'src/entities/Desktop/model'
 import { useSystemStore } from 'src/entities/System/model'
+import { LocalStorage } from 'quasar'
 
 function hasAccess(to, userAccount) {
   if (!to.meta?.roles || to.meta?.roles.length === 0) return true
@@ -35,6 +36,7 @@ export function setupNavigationGuard(router: Router) {
 
         // Переходим на маршрут по умолчанию для выбранного рабочего стола
         desktops.goToDefaultPage(router)
+        // next(false)
         return
       } else {
         // Если пользователь не авторизован, используем nonAuthorizedHome
@@ -42,6 +44,20 @@ export function setupNavigationGuard(router: Router) {
         next({ name: homePage, params: { coopname: info.coopname } })
         return
       }
+    }
+
+    console.log('to.meta?.requiresAuth && !session.isAuth', to.name, to.meta?.requiresAuth, session.isAuth)
+    // Проверка авторизации для маршрутов, требующих входа
+    if (to.meta?.requiresAuth && !session.isAuth) {
+      // Сохраняем целевой URL для редиректа после входа
+
+      if (process.env.CLIENT) {
+        console.log('on inside', window.location.href)
+        LocalStorage.set('redirectAfterLogin', window.location.href)
+      }
+      // Перенаправляем на страницу входа
+      next({ name: 'login-redirect', params: { coopname: info.coopname } })
+      return
     }
 
     // проверка по ролям

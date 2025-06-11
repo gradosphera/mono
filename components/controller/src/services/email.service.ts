@@ -22,6 +22,8 @@ if (env !== 'test') {
  * @returns {Promise}
  */
 export const sendEmail = async (to, subject, text) => {
+  console.log('send email', { from: email.from, to, subject, text });
+
   const msg = { from: email.from, to, subject, text };
   await transport.sendMail(msg);
 };

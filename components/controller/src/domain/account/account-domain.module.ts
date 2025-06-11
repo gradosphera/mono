@@ -1,13 +1,21 @@
 // domain/account/account-domain.module.ts
 
-import { forwardRef, Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AccountDomainInteractor } from './interactors/account.interactor';
-import { AccountDomainService } from '~/domain/account/services/account-domain.service';
-import { DocumentDomainModule } from '../document/document.module';
+import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from './services/account-domain.service';
+import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
 
+@Global()
 @Module({
-  imports: [forwardRef(() => DocumentDomainModule)],
-  providers: [AccountDomainService, AccountDomainInteractor],
-  exports: [AccountDomainInteractor, AccountDomainService],
+  imports: [InfrastructureModule],
+  providers: [
+    AccountDomainInteractor,
+    AccountDomainService,
+    {
+      provide: ACCOUNT_DOMAIN_SERVICE,
+      useExisting: AccountDomainService,
+    },
+  ],
+  exports: [AccountDomainInteractor, AccountDomainService, ACCOUNT_DOMAIN_SERVICE],
 })
 export class AccountDomainModule {}
