@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 import { type CreateAnnualGeneralMeetInputDTO } from '../dto/create-meet-agenda-input.dto';
 import type { AnnualGeneralMeetingAgendaGenerateDocumentInputDTO } from '../../document/documents-dto/annual-general-meeting-agenda-document.dto';
@@ -18,7 +18,10 @@ import { AnnualGeneralMeetingDecisionGenerateDocumentInputDTO } from '~/modules/
 import { AnnualGeneralMeetingNotificationGenerateDocumentInputDTO } from '~/modules/document/documents-dto/annual-general-meeting-notification-document.dto';
 import { MeetAggregate } from '~/domain/meet/aggregates/meet-domain.aggregate';
 import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
-import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
+import {
+  UserCertificateInteractor,
+  USER_CERTIFICATE_INTERACTOR,
+} from '~/domain/user-certificate/interactors/user-certificate.interactor';
 import { DocumentDomainAggregate } from '~/domain/document/aggregates/document-domain.aggregate';
 import { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 import { NotifyOnAnnualGeneralMeetInputDTO } from '../dto/notify-on-annual-general-meet-input.dto';
@@ -28,7 +31,7 @@ export class MeetService {
   constructor(
     private readonly meetDomainInteractor: MeetDomainInteractor,
     private readonly documentInteractor: DocumentDomainInteractor,
-    private readonly userCertificateInteractor: UserCertificateInteractor
+    @Inject(USER_CERTIFICATE_INTERACTOR) private readonly userCertificateInteractor: UserCertificateInteractor
   ) {}
 
   /**

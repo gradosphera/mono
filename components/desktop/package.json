@@ -34,6 +34,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@headlessui/vue": "^1.7.22",
+    "@novu/js": "^3.5.0",
     "@openreplay/tracker": "^14.0.9",
     "@openreplay/tracker-assist": "^9.0.1",
     "@productdevbook/chatwoot": "^1.5.0",

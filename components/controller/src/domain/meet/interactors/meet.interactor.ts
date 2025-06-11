@@ -17,7 +17,6 @@ import { SignByPresiderOnAnnualGeneralMeetInputDomainInterface } from '../interf
 import { MEET_PROCESSED_REPOSITORY, MeetProcessedRepository } from '../repositories/meet-processed.repository';
 import { ProcessMeetDecisionInputDomainInterface } from '../interfaces/process-meet-decision-input-domain.interface';
 import { MeetProcessedDomainEntity } from '../entities/meet-processed-domain.entity';
-import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
 import { NotifyOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/notify-on-annual-general-meet-input-domain.interface';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
 
@@ -25,7 +24,6 @@ import { generateUniqueHash } from '~/utils/generate-hash.util';
 export class MeetDomainInteractor {
   constructor(
     private readonly documentDomainService: DocumentDomainService,
-    private readonly documentAggregationService: DocumentAggregationService,
     @Inject(MEET_REPOSITORY) private readonly meetPreRepository: MeetPreProcessingRepository,
     @Inject(MEET_PROCESSED_REPOSITORY) private readonly meetProcessedRepository: MeetProcessedRepository,
     @Inject(MEET_BLOCKCHAIN_PORT) private readonly meetBlockchainPort: MeetBlockchainPort,

@@ -6,6 +6,9 @@ q-header(bordered :class="headerClass").header
     BackButton(v-if="loggedIn")
     q-toolbar-title()
 
+    // Добавляем компонент уведомлений, если пользователь авторизован
+    NotificationCenter(v-if="loggedIn && isClient")
+
     SettingsDropdown(:isMobile="isMobile" :isChairman="isChairman" :isMember="isMember")
 
     template(v-if="!loggedIn")
@@ -40,6 +43,7 @@ import config from 'src/app/config'
 import { useWindowSize } from 'src/shared/hooks'
 import { SettingsDropdown } from 'src/widgets/Header/SettingsDropdown'
 import { BackButton } from 'src/widgets/Header/BackButton'
+import { NotificationCenter } from 'src/widgets/NotificationCenter'
 import './HeaderStyles.scss'
 // import { env } from 'src/shared/config'
 
@@ -49,6 +53,8 @@ const $q = useQuasar()
 const session = useSessionStore()
 const { isMobile } = useWindowSize()
 const emit = defineEmits(['toggle-left-drawer'])
+
+const isClient = computed(() => typeof process !== 'undefined' && process.env.CLIENT)
 
 // Получаем информацию для навигации назад
 // const coopTitle = computed(() => env.COOP_SHORT_NAME)

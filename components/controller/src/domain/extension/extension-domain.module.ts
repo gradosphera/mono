@@ -9,10 +9,12 @@ import { ExtensionDomainListingInteractor } from './interactors/extension-listin
 
 import { ExtensionsModule } from '~/extensions/extensions.module';
 import { nestApp } from '~/index';
+import { ExtensionPortsModule } from './extension-ports.module';
 
 @Module({
   imports: [
-    ExtensionsModule.register(), // Регистрируем модуль расширений с доступом ко всем плагинам
+    ExtensionsModule.register(), // Регистрируем модуль расширений
+    ExtensionPortsModule, // Импортируем модуль с портами
   ],
   providers: [
     ExtensionDomainInteractor,
@@ -27,6 +29,7 @@ import { nestApp } from '~/index';
     ExtensionDomainService,
     ExtensionDomainListingService,
     ExtensionDomainListingInteractor,
+    ExtensionPortsModule, // Экспортируем модуль с портами
   ], // Экспортируем интерактор и сервис для использования в других модулях
 })
 export class ExtensionDomainModule {

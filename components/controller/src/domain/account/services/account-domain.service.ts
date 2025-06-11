@@ -130,3 +130,5 @@ export class AccountDomainService {
     return null;
   }
 }
+
+export const ACCOUNT_DOMAIN_SERVICE = Symbol('ACCOUNT_DOMAIN_SERVICE');

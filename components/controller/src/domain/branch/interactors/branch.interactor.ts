@@ -48,7 +48,7 @@ export class BranchDomainInteractor {
 
     for (const trusted of branch.trusted) {
       const tr = await this.individualRepository.findByUsername(trusted);
-      trustedData.push(tr);
+      trustedData.push(new IndividualDomainEntity(tr));
     }
 
     const bankAccount = new BankPaymentMethodDTO(

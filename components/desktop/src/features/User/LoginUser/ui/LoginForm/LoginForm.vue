@@ -42,6 +42,7 @@ import { FailAlert } from 'src/shared/api';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDesktopStore } from 'src/entities/Desktop/model';
+import { LocalStorage } from 'quasar';
 
 const router = useRouter()
 
@@ -60,9 +61,27 @@ const submit = async () => {
     if (!currentUser.isRegistrationComplete) {
       router.push({ name: 'signup' })
     } else {
-      const desktops = useDesktopStore()
-      desktops.selectDefaultWorkspace()
-      desktops.goToDefaultPage(router)
+      if (process.env.CLIENT) {
+        // Проверяем наличие сохраненного URL для редиректа
+        const redirectUrl = LocalStorage.getItem('redirectAfterLogin') as string
+        console.log('login form redirect url', redirectUrl)
+        if (redirectUrl) {
+          // Удаляем сохраненный URL
+          LocalStorage.remove('redirectAfterLogin')
+          // Переходим по сохраненному URL
+          window.location.href = redirectUrl
+        } else {
+          // Если нет сохраненного URL, переходим на страницу по умолчанию
+          const desktops = useDesktopStore()
+          desktops.selectDefaultWorkspace()
+          desktops.goToDefaultPage(router)
+        }
+      } else {
+        // Если мы на сервере, просто переходим на страницу по умолчанию
+        const desktops = useDesktopStore()
+        desktops.selectDefaultWorkspace()
+        desktops.goToDefaultPage(router)
+      }
     }
 
     loading.value = false

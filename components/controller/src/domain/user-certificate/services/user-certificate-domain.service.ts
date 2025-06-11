@@ -78,3 +78,5 @@ export class UserCertificateDomainService implements UserCertificateServiceInter
     }
   }
 }
+
+export const USER_CERTIFICATE_DOMAIN_SERVICE = Symbol('USER_CERTIFICATE_DOMAIN_SERVICE');

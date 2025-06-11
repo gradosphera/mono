@@ -8,7 +8,8 @@ import { QrPayPluginModule, Schema as QRPaySchema } from './qrpay/qrpay-extensio
 import path from 'path';
 import { BuiltinPluginModule, Schema as BuiltinSchema } from './builtin/builtin-extension.module';
 import { ChairmanPluginModule, Schema as ChairmanSchema } from './chairman/chairman-extension.module';
-
+import { ParticipantPluginModule } from './participant/participant-extension.module';
+import { Schema as ParticipantSchema } from './participant/types';
 /**
  * Основной интерфейс для описания расширения в реестре.
  * Обрати внимание: сохраняем его тут, а не в домене, чтобы не тянуть поля readme, instructions и т.д. в домен.
@@ -108,13 +109,13 @@ export const AppRegistry: INamedExtension = {
     is_available: true,
     is_desktop: true,
     title: 'Стол Пайщика',
-    description: 'Расширение для управления персональным членством пайщика в кооперативе.',
+    description: 'Расширение для управления персональным членством пайщика в кооперативе и отслеживания общих собраний.',
     image: 'https://i.ibb.co/gFHMX4s9/Chat-GPT-Image-11-2025-18-17-27.png',
-    class: BuiltinPluginModule,
-    schema: BuiltinSchema,
-    tags: ['стол', 'управление'],
-    readme: getReadmeContent('./yookassa'),
-    instructions: getInstructionsContent('./yookassa'),
+    class: ParticipantPluginModule,
+    schema: ParticipantSchema,
+    tags: ['стол', 'управление', 'уведомления'],
+    readme: getReadmeContent('./participant'),
+    instructions: getInstructionsContent('./participant'),
   },
   powerup: {
     is_builtin: false,
