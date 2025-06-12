@@ -76,7 +76,7 @@ export class MeetTrackerService {
           previous: null,
         });
       }
-      console.log('closedIds: ', closedMeetIds);
+
       for (const meet of meets) {
         const meetProcessing = meet.processing;
         if (!meetProcessing) continue;
@@ -98,11 +98,9 @@ export class MeetTrackerService {
         }
         const trackedMeetIndex = this.pluginConfig.config.trackedMeets.findIndex((tm) => tm.hash === meetHash);
         const isTracked = trackedMeetIndex !== -1;
-        console.log('checkMeetId: ', meetData.id, extendedStatus, isTracked);
 
         // Если собрание в статусе CLOSED, обрабатываем его и удаляем из списка отслеживаемых
         if (extendedStatus === ExtendedMeetStatus.CLOSED && isTracked) {
-          console.log('on close');
           let trackedMeet = this.pluginConfig.config.trackedMeets[trackedMeetIndex];
           trackedMeet = this.getUpdatedTrackedMeet(trackedMeet, meetData, extendedStatus);
 
@@ -164,19 +162,14 @@ export class MeetTrackerService {
 
           // Проверяем, является ли это рестартом существующего собрания
           const isRestart = existingMeet.previous !== null;
-          console.log('isRestart', isRestart);
+
           // Добавляем в список отслеживаемых и обновляем словарь
           this.pluginConfig.config.trackedMeets.push(newTrackedMeet);
           existingMeet.current = newTrackedMeet;
           meetsByID.set(meetID, existingMeet);
-          console.log(
-            'extendedStatus === ExtendedMeetStatus.WAITING_FOR_OPENING',
-            extendedStatus,
-            ExtendedMeetStatus.WAITING_FOR_OPENING
-          );
+
           // Обрабатываем собрание в зависимости от статуса и от того, является ли оно рестартом
           if (extendedStatus === ExtendedMeetStatus.WAITING_FOR_OPENING) {
-            console.log('on waiting for openoing', isRestart);
             if (isRestart) {
               // Это рестарт собрания, отправляем уведомление о новой дате
               this.logger.info(`Обнаружен рестарт собрания №${meetID}, новый hash: ${meetHash}`);
@@ -246,7 +239,7 @@ export class MeetTrackerService {
 
           // Проверяем, наступило ли время отправки уведомления
           if (now >= notificationTime) {
-            await this.notificationSender.sendThreeDaysBeforeStartNotification(trackedMeet, minutesBeforeStart);
+            await this.notificationSender.sendThreeDaysBeforeStartNotification(trackedMeet);
             trackedMeet.notifications.threeDaysBeforeStart = true;
           }
         }
@@ -260,7 +253,7 @@ export class MeetTrackerService {
 
           // Проверяем, наступило ли время отправки уведомления
           if (now >= notificationTime) {
-            await this.notificationSender.sendOneDayBeforeEndNotification(trackedMeet, minutesBeforeEnd);
+            await this.notificationSender.sendOneDayBeforeEndNotification(trackedMeet);
             trackedMeet.notifications.oneDayBeforeEnd = true;
           }
         }
