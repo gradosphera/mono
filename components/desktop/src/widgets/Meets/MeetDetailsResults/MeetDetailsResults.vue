@@ -28,7 +28,7 @@ div(flat)
                 )
 
               q-separator.q-my-sm
-              div.text-body1 {{ item.context }}
+              div.text-body1(v-html="parseLinks(item.context)")
               q-separator.q-my-sm
 
               //- div.text-subtitle1.text-weight-bold Решение
@@ -65,6 +65,7 @@ import { computed } from 'vue'
 import { ExpandableDocument } from 'src/shared/ui'
 import { AgendaNumberAvatar } from 'src/shared/ui/AgendaNumberAvatar'
 import { useQuasar } from 'quasar'
+import { parseLinks } from 'src/shared/lib/utils'
 
 const $q = useQuasar()
 const isDark = computed(() => $q.dark.isActive)

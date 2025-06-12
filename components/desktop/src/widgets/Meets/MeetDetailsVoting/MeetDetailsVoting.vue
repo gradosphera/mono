@@ -24,9 +24,9 @@ div
             AgendaNumberAvatar(:number="item.number")
           .col
             .text-h6.q-mb-sm {{ item.title }}
-            .text-body1.q-mb-sm {{ item.context }}
+            .text-body1.q-mb-sm(v-html="parseLinks(item.context)")
             q-separator.q-my-md
-            .text-body1.q-mb-sm {{ item.decision }}
+            .text-body1.q-mb-sm(v-html="parseLinks(item.decision)")
             q-separator.q-my-md
             .text-subtitle1.q-mb-sm Ваш голос:
             .row.q-col-gutter-sm
@@ -71,6 +71,7 @@ import { useSessionStore } from 'src/entities/Session'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { useSignDocument } from 'src/shared/lib/document'
 import { useVoteOnMeet, type IVoteOnMeetInput } from 'src/features/Meet/VoteOnMeet'
+import { parseLinks } from 'src/shared/lib/utils'
 
 const props = defineProps<{
   meet: IMeet

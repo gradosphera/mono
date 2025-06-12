@@ -27,6 +27,7 @@ import { computed } from 'vue'
 import type { IMeet } from 'src/entities/Meet'
 import { AgendaNumberAvatar } from 'src/shared/ui/AgendaNumberAvatar'
 import { SignNotificationButton } from 'src/features/Meet/SignNotification/ui'
+import { parseLinks } from 'src/shared/lib/utils'
 
 const props = defineProps<{
   meet: IMeet,
@@ -41,14 +42,4 @@ const meetAgendaItems = computed(() => {
   if (!props.meet) return []
   return props.meet.processing?.questions || []
 })
-
-function parseLinks(text = ''): string {
-  if (!text) return ''
-  // Ищем ссылки вида @https://... или https://... или http://...
-  return text.replace(/@?(https?:\/\/[^\s]+)/g, (match, url) => {
-    // убираем @ если есть
-    const cleanUrl = url.startsWith('http') ? url : url.slice(1)
-    return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`
-  })
-}
 </script>
