@@ -6,6 +6,7 @@ import type { SovietContract } from 'cooptypes';
 export default {
   name: 'Синхронизация данных из блокчейна',
   isTest: false, // Включаем тестовый режим - миграция не будет сохранена в БД
+  validUntil: new Date(), // Текущая дата, миграция больше не будет применяться
 
   async up({ blockchain }: { blockchain: BlockchainService }): Promise<boolean> {
     console.log('Выполнение миграции: Синхронизация данных из блокчейна');

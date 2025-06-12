@@ -10,6 +10,7 @@ import { WinstonLoggerService } from '../modules/logger/logger-app.service';
 export interface Migration {
   name: string;
   isTest?: boolean; // Если true, то миграция запускается в тестовом режиме (без сохранения в БД)
+  validUntil?: Date; // Дата в UTC, до которой миграция должна применяться. Если не указана или null, миграция применяется всегда
   up: (services: { blockchain: BlockchainService }) => Promise<boolean>;
 }
 
@@ -196,6 +197,7 @@ export class MigrationManager {
       logger.info(`В базе данных найдено ${appliedMigrations.length} примененных миграций`);
 
       const appliedVersions = new Set(appliedMigrations.map((m) => m.version));
+      const currentDate = new Date();
 
       for (const { filename, version, description } of migrationFiles) {
         const result = await this.loadMigration(filename);
@@ -210,6 +212,14 @@ export class MigrationManager {
         // Проверяем, была ли миграция уже применена успешно (для не тестовых миграций)
         if (!isTest && appliedVersions.has(version)) {
           logger.info(`Миграция ${version} (${description}) уже применена, пропускаем`);
+          continue;
+        }
+
+        // Проверяем дату валидности миграции
+        if (migration.validUntil && currentDate > migration.validUntil) {
+          logger.info(
+            `Миграция ${version} (${description}) не будет применена, так как дата валидности истекла (${migration.validUntil.toISOString()})`
+          );
           continue;
         }
 

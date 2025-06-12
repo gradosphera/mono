@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 export default {
   name: 'Преобразование числовых method_id в строковые',
+  validUntil: new Date(), // Текущая дата, миграция больше не будет применяться
 
   async up() {
     console.log('Выполнение миграции: Преобразование числовых method_id в строковые');
