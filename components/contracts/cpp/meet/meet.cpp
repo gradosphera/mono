@@ -14,7 +14,7 @@
 
 [[eosio::action]]
 void meet::migrate(){
-  require_auth(_loan);
+  require_auth(_meet);
 };
 
 std::optional<Meet::meet> meet::get_meet(eosio::name coopname, const checksum256 &hash) {
