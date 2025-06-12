@@ -13,7 +13,7 @@
 #include <optional>
 
 [[eosio::action]]
-void loan::migrate(){
+void meet::migrate(){
   require_auth(_loan);
 };
 

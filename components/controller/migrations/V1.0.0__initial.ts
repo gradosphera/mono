@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 export default {
   name: 'Добавление поля fact_address для организаций',
+  validUntil: new Date(), // Текущая дата, миграция больше не будет применяться
 
   async up() {
     console.log('Выполнение миграции: Добавление поля fact_address для организаций');
