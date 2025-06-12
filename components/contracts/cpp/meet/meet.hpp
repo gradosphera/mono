@@ -42,6 +42,8 @@ public:
     [[eosio::action]]
     void signbypresid(name coopname, name username, checksum256 hash, document2 presider_decision);
     
+    [[eosio::action]] void migrate();
+
     // Сервисное действие:
     [[eosio::action]] void newgdecision(NEWGDECISION_SIGNATURE);
 private:

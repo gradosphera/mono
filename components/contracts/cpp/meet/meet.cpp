@@ -12,6 +12,11 @@
 
 #include <optional>
 
+[[eosio::action]]
+void loan::migrate(){
+  require_auth(_loan);
+};
+
 std::optional<Meet::meet> meet::get_meet(eosio::name coopname, const checksum256 &hash) {
     Meet::meets_index genmeets(_meet, coopname.value);
     auto hash_index = genmeets.get_index<"byhash"_n>();
