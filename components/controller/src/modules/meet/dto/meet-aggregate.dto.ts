@@ -114,6 +114,7 @@ export class MeetAggregateDTO {
         quorum_percent: data.processing.meet.quorum_percent,
         signed_ballots: data.processing.meet.signed_ballots,
         current_quorum_percent: data.processing.meet.current_quorum_percent,
+        level: data.processing.meet.level,
         cycle: data.processing.meet.cycle,
         quorum_passed: data.processing.meet.quorum_passed,
         // Устанавливаем обогащенные документы или null/undefined

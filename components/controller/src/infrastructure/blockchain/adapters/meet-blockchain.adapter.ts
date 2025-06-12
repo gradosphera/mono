@@ -143,6 +143,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
       quorum_percent: Number(meetData.quorum_percent),
       signed_ballots: Number(meetData.signed_ballots),
       current_quorum_percent: Number(meetData.current_quorum_percent),
+      level: meetData.level,
       cycle: Number(meetData.cycle),
       quorum_passed: meetData.quorum_passed,
       proposal: proposal,

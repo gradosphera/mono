@@ -1,4 +1,4 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ObjectType } from '@nestjs/graphql';
 import { ValidateNested } from 'class-validator';
 import { DocumentAggregateDTO } from '~/modules/document/dto/document-aggregate.dto';
 import { UserCertificateUnion } from '~/modules/document/unions/user-certificate.union';
@@ -19,6 +19,9 @@ export class MeetDTO {
 
   @Field(() => String, { description: 'Тип собрания' })
   type!: string;
+
+  @Field(() => String, { description: 'Уровень собрания' })
+  level!: string;
 
   @Field(() => String, { description: 'Инициатор собрания' })
   initiator!: string;
@@ -59,13 +62,13 @@ export class MeetDTO {
   @Field(() => Date, { description: 'Дата закрытия собрания' })
   close_at!: Date;
 
-  @Field(() => Number, { description: 'Процент необходимого кворума' })
+  @Field(() => Float, { description: 'Процент необходимого кворума' })
   quorum_percent!: number;
 
   @Field(() => Number, { description: 'Количество подписанных бюллетеней' })
   signed_ballots!: number;
 
-  @Field(() => Number, { description: 'Текущий процент кворума' })
+  @Field(() => Float, { description: 'Текущий процент кворума' })
   current_quorum_percent!: number;
 
   @Field(() => Number, { description: 'Цикл собрания' })
