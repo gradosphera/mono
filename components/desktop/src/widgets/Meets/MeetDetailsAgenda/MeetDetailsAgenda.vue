@@ -7,9 +7,10 @@ div
       :meetHash="meetHash"
     )
   div.row.justify-center
+    div.text-h6.q-mt-md.full-width.text-center Повестка
+
     div.col-12.col-md-12(v-for="(item, index) in meetAgendaItems" :key="index")
       q-card(flat bordered)
-        div.text-h6.q-mt-md.full-width.text-center Повестка
 
         q-card-section
           div.row.items-center
@@ -17,7 +18,7 @@ div
               AgendaNumberAvatar(:number="item.number")
             div.col
               div.text-h6 {{ item.title }}
-              div.text-body1 {{ item.context }}
+              div.text-body1(v-html="parseLinks(item.context)")
 
 </template>
 
@@ -40,4 +41,14 @@ const meetAgendaItems = computed(() => {
   if (!props.meet) return []
   return props.meet.processing?.questions || []
 })
+
+function parseLinks(text = ''): string {
+  if (!text) return ''
+  // Ищем ссылки вида @https://... или https://... или http://...
+  return text.replace(/@?(https?:\/\/[^\s]+)/g, (match, url) => {
+    // убираем @ если есть
+    const cleanUrl = url.startsWith('http') ? url : url.slice(1)
+    return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`
+  })
+}
 </script>
