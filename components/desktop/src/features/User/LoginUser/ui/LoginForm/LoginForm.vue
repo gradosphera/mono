@@ -51,6 +51,35 @@ const privateKey = ref('')
 const loading = ref(false)
 const currentUser = useCurrentUserStore()
 
+/**
+ * Функция для перехода по сохраненному URL после успешного входа
+ */
+function navigateToSavedUrl() {
+  if (process.env.CLIENT) {
+    // Проверяем наличие сохраненного URL для редиректа
+    const redirectUrl = LocalStorage.getItem('redirectAfterLogin') as string
+    console.log('login form redirect url', redirectUrl)
+
+    if (redirectUrl) {
+      // Удаляем сохраненный URL
+      LocalStorage.remove('redirectAfterLogin')
+
+      try {
+        // Пытаемся использовать router для навигации
+        const url = new URL(redirectUrl)
+        const path = url.pathname + url.search
+        console.log('Navigating with router to', path)
+        router.push(path)
+      } catch (e) {
+        console.error('Error parsing URL, using direct navigation', e)
+        window.location.href = redirectUrl
+      }
+
+      return true
+    }
+  }
+  return false
+}
 
 const submit = async () => {
   loading.value = true
@@ -61,23 +90,9 @@ const submit = async () => {
     if (!currentUser.isRegistrationComplete) {
       router.push({ name: 'signup' })
     } else {
-      if (process.env.CLIENT) {
-        // Проверяем наличие сохраненного URL для редиректа
-        const redirectUrl = LocalStorage.getItem('redirectAfterLogin') as string
-        console.log('login form redirect url', redirectUrl)
-        if (redirectUrl) {
-          // Удаляем сохраненный URL
-          LocalStorage.remove('redirectAfterLogin')
-          // Переходим по сохраненному URL
-          window.location.href = redirectUrl
-        } else {
-          // Если нет сохраненного URL, переходим на страницу по умолчанию
-          const desktops = useDesktopStore()
-          desktops.selectDefaultWorkspace()
-          desktops.goToDefaultPage(router)
-        }
-      } else {
-        // Если мы на сервере, просто переходим на страницу по умолчанию
+      // Пробуем перейти по сохраненному URL
+      if (!navigateToSavedUrl()) {
+        // Если сохраненного URL нет, переходим на страницу по умолчанию
         const desktops = useDesktopStore()
         desktops.selectDefaultWorkspace()
         desktops.goToDefaultPage(router)

@@ -10,6 +10,14 @@ function hasAccess(to, userAccount) {
   return userAccount && to.meta?.roles.includes(userAccount.role)
 }
 
+// Функция для получения URL для редиректа
+function getRedirectUrl(router: Router, to: any): string {
+  if (process.env.CLIENT) {
+    return router.resolve(to).href
+  }
+  return ''
+}
+
 export function setupNavigationGuard(router: Router) {
   const desktops = useDesktopStore()
   const session = useSessionStore()
@@ -46,14 +54,13 @@ export function setupNavigationGuard(router: Router) {
       }
     }
 
-    console.log('to.meta?.requiresAuth && !session.isAuth', to.name, to.meta?.requiresAuth, session.isAuth)
     // Проверка авторизации для маршрутов, требующих входа
     if (to.meta?.requiresAuth && !session.isAuth) {
       // Сохраняем целевой URL для редиректа после входа
-
       if (process.env.CLIENT) {
-        console.log('on inside', window.location.href)
-        LocalStorage.set('redirectAfterLogin', window.location.href)
+        // Получаем URL для редиректа
+        const redirectUrl = getRedirectUrl(router, to)
+        LocalStorage.set('redirectAfterLogin', redirectUrl)
       }
       // Перенаправляем на страницу входа
       next({ name: 'login-redirect', params: { coopname: info.coopname } })

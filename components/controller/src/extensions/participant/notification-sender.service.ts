@@ -57,7 +57,7 @@ export class NotificationSenderService {
 
   // Формирование URL для уведомлений
   private getNotificationUrl(meet: TrackedMeet): string {
-    return `${config.base_url}/#/${meet.coopname}/user/meets/${meet.hash.toUpperCase()}`;
+    return `${config.base_url}/${meet.coopname}/user/meets/${meet.hash.toUpperCase()}`;
   }
 
   // Форматирование сообщения о часовом поясе
@@ -104,13 +104,18 @@ ${notificationUrl}
   }
 
   // 2. Уведомление за N дней до начала собрания
-  async sendThreeDaysBeforeStartNotification(meet: TrackedMeet, minutesBeforeStart: number): Promise<void> {
+  async sendThreeDaysBeforeStartNotification(meet: TrackedMeet): Promise<void> {
     const emails = await this.getAllUserEmails();
     if (emails.length === 0) return;
 
     const meetDate = DateUtils.formatLocalDate(meet.open_at);
     const meetTime = DateUtils.formatLocalTime(meet.open_at);
-    const timeDescription = DateUtils.formatDurationHumanizeRu(minutesBeforeStart);
+
+    // Рассчитываем реальную разницу между текущим временем и временем начала собрания с учетом часового пояса
+    const now = new Date();
+    const openAtDate = DateUtils.convertUtcToLocalTime(meet.open_at);
+    const diffMinutes = Math.floor((openAtDate.getTime() - now.getTime()) / (1000 * 60));
+    const timeDescription = DateUtils.formatDurationHumanizeRu(diffMinutes);
 
     const subject = `Напоминание о предстоящем общем собрании №${meet.id}`;
     const notificationUrl = this.getNotificationUrl(meet);
@@ -168,13 +173,19 @@ ${notificationUrl}
   }
 
   // 4. Уведомление за N дней до окончания собрания
-  async sendOneDayBeforeEndNotification(meet: TrackedMeet, minutesBeforeEnd: number): Promise<void> {
+  async sendOneDayBeforeEndNotification(meet: TrackedMeet): Promise<void> {
     const emails = await this.getAllUserEmails();
     if (emails.length === 0) return;
 
     const meetEndDate = DateUtils.formatLocalDate(meet.close_at);
     const meetEndTime = DateUtils.formatLocalTime(meet.close_at);
-    const timeDescription = DateUtils.formatDurationHumanizeRu(minutesBeforeEnd);
+
+    // Рассчитываем реальную разницу между текущим временем и временем окончания собрания с учетом часового пояса
+    const now = new Date();
+    const closeAtDate = DateUtils.convertUtcToLocalTime(meet.close_at);
+    const diffMinutes = Math.floor((closeAtDate.getTime() - now.getTime()) / (1000 * 60));
+    const timeDescription = DateUtils.formatDurationHumanizeRu(diffMinutes);
+
     const timezone = this.getTimezoneDisplay();
 
     const subject = `Напоминание о завершении собрания пайщиков №${meet.id}`;
@@ -222,7 +233,7 @@ ${notificationUrl}
 Дата и время завершения: ${meetEndDate} в ${meetEndTime} (${timezone})
 
 Повестка собрания остается прежней.
-Для ознакомления с повесткой, пожалуйста, перейдите по ссылке:
+Для ознакомления с повесткой и подписи уведомления, пожалуйста, перейдите по ссылке:
 ${notificationUrl}
 
 С уважением, Совет.`;
