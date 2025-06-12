@@ -1,9 +1,6 @@
 // Заглушка для получения числа пайщиков кооператива.
 uint64_t get_total_participants(eosio::name coopname) {
     // Используем метод из shared_registrator для получения актуального количества активных пайщиков
-    if (meet::TEST_MODE) {
-        return 1;
-    }
     return Registrator::get_active_participants_count(coopname);
 }
 
