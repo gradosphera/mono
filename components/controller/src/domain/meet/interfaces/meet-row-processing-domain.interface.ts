@@ -7,6 +7,7 @@ export interface MeetRowProcessingDomainInterface {
   hash: string;
   coopname: string;
   type: string;
+  level: string;
   initiator: string;
   presider: string;
   secretary: string;
