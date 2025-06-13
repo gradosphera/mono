@@ -267,6 +267,7 @@ export abstract class DocFactory<T extends IGenerate> {
     // Преобразуем формат даты для шаблона
     const meetExtended: Cooperative.Model.IMeetExtended = {
       ...meet,
+      current_quorum_percent: Number(Number(meet.current_quorum_percent).toFixed(1)),
       close_at_datetime: formatDateTime(meet.close_at),
       open_at_datetime: formatDateTime(meet.open_at),
       presider_full_name: presiderFullName,

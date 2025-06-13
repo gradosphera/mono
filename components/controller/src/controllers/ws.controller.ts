@@ -42,7 +42,6 @@ export const closeSocketConnection = (): void => {
 
 async function processEvent(event: IAction) {
   if (event.receiver === config.coopname) {
-    console.log('event:', event);
     if (event.name === 'updateboard') {
       wsService.updateBoard(event.data);
     }

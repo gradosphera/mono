@@ -42,28 +42,32 @@ const envVarsSchema = z.object({
   SMTP_USERNAME: z.string().default(''), // Пустая строка для необязательного значения
   SMTP_PASSWORD: z.string().default(''), // Пустая строка для необязательного значения
   EMAIL_FROM: z.string().default(''), // Пустая строка для необязательного значения
-  COOPNAME: z.string().default('default_coopname'), // Задаём дефолтное значение
-  TIMEZONE: z.string().default('Europe/Moscow'),
-  GRAPHQL_SERVICE: z.string().default('http://localhost:4090').describe('адрес сервиса GRAPHQL'),
+  COOPNAME: z.string().min(1, { message: 'Не должно быть пустым' }).default('voskhod'), // Задаём дефолтное значение, пустая строка невалидна
+  TIMEZONE: z.string().min(1, { message: 'Не должно быть пустым' }).default('Europe/Moscow'), // Пустая строка невалидна
+  GRAPHQL_SERVICE: z
+    .string()
+    .min(1, { message: 'Не должно быть пустым' })
+    .default('http://localhost:4090')
+    .describe('адрес сервиса GRAPHQL'),
 
   // Новые переменные для PostgreSQL
-  POSTGRES_HOST: z.string().default('127.0.0.1'),
+  POSTGRES_HOST: z.string().min(1, { message: 'Не должно быть пустым' }).default('127.0.0.1'),
   POSTGRES_PORT: z
     .string()
     .default('5432')
     .transform((val) => parseInt(val, 10)),
-  POSTGRES_USERNAME: z.string(),
-  POSTGRES_PASSWORD: z.string(),
-  POSTGRES_DATABASE: z.string(),
+  POSTGRES_USERNAME: z.string().min(1, { message: 'Не должно быть пустым' }),
+  POSTGRES_PASSWORD: z.string().min(1, { message: 'Не должно быть пустым' }),
+  POSTGRES_DATABASE: z.string().min(1, { message: 'Не должно быть пустым' }),
 
-  REDIS_HOST: z.string(),
+  REDIS_HOST: z.string().min(1, { message: 'Не должно быть пустым' }),
   REDIS_PORT: z
     .string()
     .default('6379')
     .transform((val) => parseInt(val, 10)),
   REDIS_PASSWORD: z.string(),
-  BLOCKCHAIN_RPC: z.string(),
-  CHAIN_ID: z.string(),
+  BLOCKCHAIN_RPC: z.string().min(1, { message: 'Не должно быть пустым' }),
+  CHAIN_ID: z.string().min(1, { message: 'Не должно быть пустым' }),
 });
 
 // Валидация переменных окружения
