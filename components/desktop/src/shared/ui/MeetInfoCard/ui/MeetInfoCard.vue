@@ -27,7 +27,7 @@ div
 
       div.row.q-mb-sm.items-baseline
         div.col-xs-12.col-sm-5.card-label Явка:
-        div.col-xs-12.col-sm-7.card-value {{ meet.processing?.meet?.current_quorum_percent }}%
+        div.col-xs-12.col-sm-7.card-value {{ (Math.round((meet.processing?.meet?.current_quorum_percent ?? 0) * 10) / 10).toFixed(1) }}%
 
 
       div.row.q-mb-sm.items-baseline

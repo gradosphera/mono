@@ -15,7 +15,7 @@ div(flat bordered).info-card.hover
           div.absolute-full.flex.flex-center
             div.text-center
               div.text-white.text-weight-medium(style="font-size: 22px; line-height: 1.2;")
-                | {{ meet.processing?.meet?.current_quorum_percent ?? 0 }}%
+                | {{ (Math.round((meet.processing?.meet?.current_quorum_percent ?? 0) * 10) / 10).toFixed(1) }}%
         div.q-mt-xs.full-width.text-center.text-caption.text-grey-7
           | Собрание состоится при явке не менее {{ meet.processing?.meet?.quorum_percent ?? 0 }}% участников
 

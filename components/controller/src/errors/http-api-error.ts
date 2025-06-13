@@ -15,7 +15,7 @@ export class HttpApiError extends HttpException {
     super(message, statusCode);
     this.isOperational = isOperational;
     this.subcode = subcode;
-    console.log('on http exteptoipn?!?!');
+
     // Захватываем стек, если он передан, иначе используем стандартный метод
     if (stack) {
       this.stack = stack;

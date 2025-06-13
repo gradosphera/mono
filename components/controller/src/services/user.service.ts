@@ -156,13 +156,12 @@ export const updateUserByUsername = async (username, updateBody) => {
   if (!user) {
     throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
   }
-  console.log('on update2 body: ', updateBody);
-  console.log('exist user: ', user);
+
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, username))) {
     throw new ApiError(http.BAD_REQUEST, 'Email уже занят');
   }
   Object.assign(user, updateBody);
-  console.log('result: ', user);
+
   await user.save();
   return user;
 };

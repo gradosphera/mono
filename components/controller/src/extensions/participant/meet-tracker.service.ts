@@ -199,10 +199,9 @@ export class MeetTrackerService {
         const oldStatus = trackedMeet.extendedStatus;
         trackedMeet.status = meetData.status;
         trackedMeet.extendedStatus = extendedStatus;
-        console.log('meetData', meetData);
+
         trackedMeet.open_at = meetData.open_at.toISOString();
         trackedMeet.close_at = meetData.close_at.toISOString();
-        console.log('tracked meet: ', trackedMeet);
         // Проверяем изменение статуса
         const statusChanged = oldStatus !== extendedStatus;
 
