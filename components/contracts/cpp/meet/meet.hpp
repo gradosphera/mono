@@ -18,7 +18,7 @@ public:
     using contract::contract;
 
     static constexpr uint32_t MIN_OPEN_AGM_DELAY_SEC = 60 * 60 * 24 * 15; // 15 дней
-    static constexpr bool TEST_MODE = false; // Флаг тестового режима
+    static constexpr bool TEST_MODE = true; // Флаг тестового режима
 
     [[eosio::action]]
     void createmeet(name coopname, checksum256 hash, eosio::name initiator, name presider, name secretary, std::vector<meet_point> agenda, document2 proposal, time_point_sec open_at, time_point_sec close_at);
