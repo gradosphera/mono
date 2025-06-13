@@ -4,7 +4,7 @@ div
     div.col-12.col-md-auto(v-if="canCloseBySecretary")
       q-btn(
         color="primary"
-        icon="fa-solid fa-door-closed"
+        icon="fa-solid fa-signature"
         label="Подписать протокол"
         @click="closeMeetBySecretary"
         :loading="isProcessing"
@@ -12,7 +12,7 @@ div
     div.col-12.col-md-auto(v-if="canCloseByPresider")
       q-btn(
         color="primary"
-        icon="fa-solid fa-check"
+        icon="fa-solid fa-stamp"
         label="Утвердить протокол"
         @click="closeMeetByPresider"
         :loading="isProcessing"

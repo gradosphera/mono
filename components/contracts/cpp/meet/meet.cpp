@@ -17,6 +17,18 @@ void meet::migrate(){
   require_auth(_meet);
 };
 
+[[eosio::action]]
+void meet::delmeet(eosio::name coopname, uint64_t meet_id) {
+  require_auth(_meet);
+  
+  Meet::meets_index genmeets(_meet, coopname.value);
+  auto meet = genmeets.find(meet_id);
+  
+  eosio::check(genmeets.end() != meet, "Собрание не найдено");
+  
+  genmeets.erase(meet);
+};
+
 std::optional<Meet::meet> meet::get_meet(eosio::name coopname, const checksum256 &hash) {
     Meet::meets_index genmeets(_meet, coopname.value);
     auto hash_index = genmeets.get_index<"byhash"_n>();

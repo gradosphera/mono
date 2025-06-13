@@ -8,6 +8,8 @@ export interface AccountExtensionPort {
     data: GetAccountsInputDomainInterface,
     options?: PaginationInputDTO
   ): Promise<PaginationResultDomainInterface<AccountDomainEntity>>;
+
+  getAccount(username: string): Promise<AccountDomainEntity>;
 }
 
 export const ACCOUNT_EXTENSION_PORT = Symbol('AccountExtensionPort');

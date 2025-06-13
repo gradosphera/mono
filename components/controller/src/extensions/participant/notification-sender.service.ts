@@ -9,18 +9,23 @@ import {
   LogExtensionDomainRepository,
 } from '~/domain/extension/repositories/log-extension-domain.repository';
 import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
+import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
 
 @Injectable()
 export class NotificationSenderService {
   constructor(
     private readonly logger: WinstonLoggerService,
-    @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>
+    @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>,
+    @Inject(ACCOUNT_EXTENSION_PORT) private readonly accountPort: AccountExtensionPort
   ) {
     this.logger.setContext(NotificationSenderService.name);
   }
 
   // Сервисное имя для логирования
   private readonly extensionName = 'participant';
+
+  // Кэшированное краткое название кооператива
+  private coopShortName: string | null = null;
 
   // Функция для получения адресов - будет заменена на реальную в ParticipantPlugin
   private _getUserEmailsFunction: (() => Promise<string[]>) | null = null;
@@ -42,6 +47,20 @@ export class NotificationSenderService {
       this.logger.error(`Ошибка при получении email пользователей: ${error.message}`, error.stack);
       return [];
     }
+  }
+
+  // Получение краткого названия кооператива
+  private async getCoopShortName(): Promise<string> {
+    if (this.coopShortName) {
+      return this.coopShortName;
+    }
+
+    const account = await this.accountPort.getAccount(config.coopname);
+
+    const shortName = account.private_account?.organization_data?.short_name;
+
+    this.coopShortName = shortName ?? '';
+    return this.coopShortName;
   }
 
   // Логирование отправки уведомлений
@@ -72,13 +91,14 @@ export class NotificationSenderService {
     const emails = await this.getAllUserEmails();
     if (emails.length === 0) return;
 
+    const coopShortName = await this.getCoopShortName();
     const meetDate = DateUtils.formatLocalDate(meet.open_at);
     const meetTime = DateUtils.formatLocalTime(meet.open_at);
     const meetEndDate = DateUtils.formatLocalDate(meet.close_at);
     const meetEndTime = DateUtils.formatLocalTime(meet.close_at);
     const timezone = this.getTimezoneDisplay();
 
-    const subject = `Уведомление о общем собрании пайщиков №${meet.id}`;
+    const subject = `Уведомление о общем собрании пайщиков №${meet.id} в ${coopShortName}`;
     const notificationUrl = this.getNotificationUrl(meet);
 
     const text = `Уважаемый пайщик!
@@ -91,7 +111,7 @@ export class NotificationSenderService {
 Для ознакомления с повесткой, пожалуйста, перейдите по ссылке:
 ${notificationUrl}
 
-С уважением, Совет.`;
+С уважением, Совет ${coopShortName}.`;
 
     for (const email of emails) {
       await sendEmail(email, subject, text);
@@ -108,6 +128,7 @@ ${notificationUrl}
     const emails = await this.getAllUserEmails();
     if (emails.length === 0) return;
 
+    const coopShortName = await this.getCoopShortName();
     const meetDate = DateUtils.formatLocalDate(meet.open_at);
     const meetTime = DateUtils.formatLocalTime(meet.open_at);
 
@@ -117,7 +138,7 @@ ${notificationUrl}
     const diffMinutes = Math.floor((openAtDate.getTime() - now.getTime()) / (1000 * 60));
     const timeDescription = DateUtils.formatDurationHumanizeRu(diffMinutes);
 
-    const subject = `Напоминание о предстоящем общем собрании №${meet.id}`;
+    const subject = `Напоминание о предстоящем общем собрании №${meet.id} в ${coopShortName}`;
     const notificationUrl = this.getNotificationUrl(meet);
 
     const text = `Уважаемый пайщик!
@@ -127,7 +148,7 @@ ${notificationUrl}
 Для ознакомления с повесткой и подписи уведомления, пожалуйста, перейдите по ссылке:
 ${notificationUrl}
 
-С уважением, Совет.`;
+С уважением, Совет ${coopShortName}.`;
 
     for (const email of emails) {
       await sendEmail(email, subject, text);
@@ -144,11 +165,12 @@ ${notificationUrl}
     const emails = await this.getAllUserEmails();
     if (emails.length === 0) return;
 
+    const coopShortName = await this.getCoopShortName();
     const meetEndDate = DateUtils.formatLocalDate(meet.close_at);
     const meetEndTime = DateUtils.formatLocalTime(meet.close_at);
     const timezone = this.getTimezoneDisplay();
 
-    const subject = `Собрание пайщиков №${meet.id} началось`;
+    const subject = `Собрание пайщиков №${meet.id} в ${coopShortName} началось`;
     const notificationUrl = this.getNotificationUrl(meet);
 
     const text = `Уважаемый пайщик!
@@ -160,7 +182,7 @@ ${notificationUrl}
 Для голосования перейдите по ссылке:
 ${notificationUrl}
 
-С уважением, Совет.`;
+С уважением, Совет ${coopShortName}.`;
 
     for (const email of emails) {
       await sendEmail(email, subject, text);
@@ -177,6 +199,7 @@ ${notificationUrl}
     const emails = await this.getAllUserEmails();
     if (emails.length === 0) return;
 
+    const coopShortName = await this.getCoopShortName();
     const meetEndDate = DateUtils.formatLocalDate(meet.close_at);
     const meetEndTime = DateUtils.formatLocalTime(meet.close_at);
 
@@ -188,7 +211,7 @@ ${notificationUrl}
 
     const timezone = this.getTimezoneDisplay();
 
-    const subject = `Напоминание о завершении собрания пайщиков №${meet.id}`;
+    const subject = `Напоминание о завершении собрания пайщиков №${meet.id} в ${coopShortName}`;
     const notificationUrl = this.getNotificationUrl(meet);
 
     const text = `Уважаемый пайщик!
@@ -199,7 +222,7 @@ ${notificationUrl}
 Для голосования перейдите по ссылке:
 ${notificationUrl}
 
-С уважением, Совет.`;
+С уважением, Совет ${coopShortName}.`;
 
     for (const email of emails) {
       await sendEmail(email, subject, text);
@@ -216,13 +239,14 @@ ${notificationUrl}
     const emails = await this.getAllUserEmails();
     if (emails.length === 0) return;
 
+    const coopShortName = await this.getCoopShortName();
     const meetDate = DateUtils.formatLocalDate(meet.open_at);
     const meetTime = DateUtils.formatLocalTime(meet.open_at);
     const meetEndDate = DateUtils.formatLocalDate(meet.close_at);
     const meetEndTime = DateUtils.formatLocalTime(meet.close_at);
     const timezone = this.getTimezoneDisplay();
 
-    const subject = `Назначена новая дата повторного собрания №${meet.id}`;
+    const subject = `Назначена новая дата повторного собрания №${meet.id} в ${coopShortName}`;
     const notificationUrl = this.getNotificationUrl(meet);
 
     const text = `Уважаемый пайщик!
@@ -236,7 +260,7 @@ ${notificationUrl}
 Для ознакомления с повесткой и подписи уведомления, пожалуйста, перейдите по ссылке:
 ${notificationUrl}
 
-С уважением, Совет.`;
+С уважением, Совет ${coopShortName}.`;
 
     for (const email of emails) {
       await sendEmail(email, subject, text);
@@ -253,24 +277,25 @@ ${notificationUrl}
     const emails = await this.getAllUserEmails();
     if (emails.length === 0) return;
 
+    const coopShortName = await this.getCoopShortName();
     const notificationUrl = this.getNotificationUrl(meet);
     let subject = '';
     let text = '';
 
     switch (meet.extendedStatus) {
       case ExtendedMeetStatus.EXPIRED_NO_QUORUM:
-        subject = `Кворум общего собрания №${meet.id} не собран`;
+        subject = `Кворум общего собрания №${meet.id} в ${coopShortName} не собран`;
         text = `Уважаемый пайщик!
 
 Кворум общего собрания №${meet.id} не собран. В ближайшее время будет назначена новая дата собрания с прежней повесткой.
 
 Следите за обновлениями.
 
-С уважением, Совет.`;
+С уважением, Совет ${coopShortName}.`;
         break;
 
       case ExtendedMeetStatus.VOTING_COMPLETED:
-        subject = `Голосование по собранию №${meet.id} завершено`;
+        subject = `Голосование по собранию №${meet.id} в ${coopShortName} завершено`;
         text = `Уважаемый пайщик!
 
 Голосование по собранию №${meet.id} завершено. Ожидаем утверждения протокола собрания советом.
@@ -278,11 +303,11 @@ ${notificationUrl}
 Для просмотра результатов голосования перейдите по ссылке:
 ${notificationUrl}
 
-С уважением, Совет.`;
+С уважением, Совет ${coopShortName}.`;
         break;
 
       case ExtendedMeetStatus.CLOSED:
-        subject = `Общее собрание №${meet.id} завершено`;
+        subject = `Общее собрание №${meet.id} в ${coopShortName} завершено`;
         text = `Уважаемый пайщик!
 
 Общее собрание пайщиков №${meet.id} успешно завершено. Протокол собрания утвержден.
@@ -290,7 +315,7 @@ ${notificationUrl}
 Для просмотра результатов собрания перейдите по ссылке:
 ${notificationUrl}
 
-С уважением, Совет.`;
+С уважением, Совет ${coopShortName}.`;
         break;
     }
 

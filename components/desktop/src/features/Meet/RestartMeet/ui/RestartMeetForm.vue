@@ -10,7 +10,7 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
         div.text-subtitle1.q-mb-sm Выберите новые даты для собрания
         q-input(
           v-model="formData.new_open_at"
-          :label="`Новая дата и время открытия (${timezoneLabel})`"
+          :label="env.NODE_ENV === 'development' ? `Новая дата и время открытия (мин. через 1 минуту, ${timezoneLabel})` : `Новая дата и время открытия (мин. через 15 дней, ${timezoneLabel})`"
           type="datetime-local"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
@@ -27,10 +27,18 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 
         div.text-subtitle1.q-mb-sm При перезапуске собрания будут использованы существующие пункты повестки:
 
-        q-card(bordered flat v-if="meetStore.currentMeet?.processing?.questions?.length").q-pa-sm.q-my-sm.rounded-borders
-          div.q-mb-md(v-for="(question, index) in meetStore.currentMeet.processing.questions" :key="index")
-            div.text-caption.text-grey-6 {{ index + 1 }}. {{ question.title }}
-            div.text-caption {{ question.context }}
+        q-card(bordered flat v-if="meetStore.currentMeet?.processing?.questions?.length").q-pa-xs.q-my-sm.rounded-borders.bg-grey-1
+          div.q-mb-xs.flex.items-start(v-for="(question, index) in meetStore.currentMeet.processing.questions" :key="index").q-mb-lg.q-pa-xs
+            AgendaNumberAvatar(:number="index + 1" size="22px" class="q-mr-xs")
+            div.col
+              div.text-body2.text-weight-medium.q-mb-2 {{ question.title }}
+              div.text-caption.q-mb-1.q-mt-md
+                span.text-weight-bold.text-black Проект решения:
+                span.text-black.q-ml-xs {{question.decision }}
+              div.text-caption.q-mt-md
+                span.text-weight-bold.text-black Приложения:
+                span.text-black(v-if="question.context" v-html="parseLinks(question.context)").q-ml-xs
+                span.text-black(v-else) —
 
         div.q-pa-sm.q-my-sm.bg-red-1.text-red-8.rounded-borders(v-else)
           div.text-center Вопросы повестки не найдены
@@ -50,8 +58,10 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
 import { useMeetStore } from 'src/entities/Meet'
-import { getCurrentLocalDateForForm, convertLocalDateToUTC, getTimezoneLabel } from 'src/shared/lib/utils/dates/timezone'
-
+import { getCurrentLocalDateForForm, convertLocalDateToUTC, getTimezoneLabel, getFutureDateForForm } from 'src/shared/lib/utils/dates/timezone'
+import { env } from 'src/shared/config/Environment'
+import { AgendaNumberAvatar } from 'src/shared/ui/AgendaNumberAvatar'
+import { parseLinks } from 'src/shared/lib/utils'
 const props = defineProps<{
   modelValue: boolean,
   loading?: boolean
@@ -68,16 +78,28 @@ const meetStore = useMeetStore()
 const timezoneLabel = getTimezoneLabel()
 
 // Форма для перезапуска собрания
-const formData = reactive({
-  new_open_at: getCurrentLocalDateForForm(0.17),  // ~10 секунд от текущего времени
-  new_close_at: getCurrentLocalDateForForm(1), // 1 минута от текущего времени
-})
+const formData = reactive(
+  env.NODE_ENV === 'development'
+    ? {
+        new_open_at: getCurrentLocalDateForForm(0.17),
+        new_close_at: getCurrentLocalDateForForm(1),
+      }
+    : {
+        new_open_at: getFutureDateForForm(15, 6, 0),
+        new_close_at: getFutureDateForForm(18, 12, 0),
+      }
+)
 
 // Сброс формы при открытии диалога
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
-    formData.new_open_at = getCurrentLocalDateForForm(0.17)
-    formData.new_close_at = getCurrentLocalDateForForm(1)
+    if (env.NODE_ENV === 'development') {
+      formData.new_open_at = getCurrentLocalDateForForm(0.17)
+      formData.new_close_at = getCurrentLocalDateForForm(1)
+    } else {
+      formData.new_open_at = getFutureDateForForm(15, 6, 0)
+      formData.new_close_at = getFutureDateForForm(18, 12, 0)
+    }
   }
 })
 

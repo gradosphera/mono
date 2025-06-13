@@ -23,9 +23,9 @@ struct [[eosio::table, eosio::contract(MEET)]] meet {
     
     double quorum_percent = 75.0;                 /// Цель по кворуму, чтобы собрание считалось состоявшимся
     uint64_t signed_ballots;                     /// Общее количество подписанных бюллетеней
-    double current_quorum_percent;             /// Текущий процент кворума
+    double current_quorum_percent = 0;             /// Текущий процент кворума
     uint64_t cycle = 1;                          /// Цикл общего собрания, который указывает на то, что были предыдущие собрания, которые не состоялись по кворуму
-    bool quorum_passed;                          /// Флаг пройденного кворума
+    bool quorum_passed = false;                          /// Флаг пройденного кворума
     
     document2 proposal;                         ///< Предложение
     document2 authorization;                    ///< Решение совета
