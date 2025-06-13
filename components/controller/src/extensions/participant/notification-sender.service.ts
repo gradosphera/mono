@@ -76,7 +76,7 @@ export class NotificationSenderService {
 
   // Формирование URL для уведомлений
   private getNotificationUrl(meet: TrackedMeet): string {
-    return `${config.base_url}/#/${meet.coopname}/user/meets/${meet.hash.toUpperCase()}`;
+    return `${config.base_url}/${meet.coopname}/user/meets/${meet.hash.toUpperCase()}`;
   }
 
   // Форматирование сообщения о часовом поясе
