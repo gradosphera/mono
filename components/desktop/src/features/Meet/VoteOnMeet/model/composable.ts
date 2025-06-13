@@ -107,7 +107,7 @@ export function useVoteOnMeet() {
   const showQuorumIndicator = computed(() => {
     if (!activeMeet.value) return false
     const status = activeMeet.value?.processing?.extendedStatus
-    return status === Zeus.ExtendedMeetStatus.VOTING_IN_PROGRESS || status === Zeus.ExtendedMeetStatus.VOTING_COMPLETED
+    return status === Zeus.ExtendedMeetStatus.VOTING_IN_PROGRESS
   })
 
   const formattedOpenDate = computed(() => {

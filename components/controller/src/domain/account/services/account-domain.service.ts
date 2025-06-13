@@ -12,7 +12,7 @@ import { ENTREPRENEUR_REPOSITORY, EntrepreneurRepository } from '~/domain/common
 import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { INDIVIDUAL_REPOSITORY, IndividualRepository } from '~/domain/common/repositories/individual.repository';
 import type { PrivateAccountDomainInterface } from '../interfaces/private-account-domain.interface';
-import type { AccountType } from '~/modules/account/enum/account-type.enum';
+import { AccountType } from '~/modules/account/enum/account-type.enum';
 import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
 import type { EntrepreneurDomainInterface } from '~/domain/common/interfaces/entrepreneur-domain.interface';
@@ -48,6 +48,29 @@ export class AccountDomainService {
   }
 
   async getAccount(username: string): Promise<AccountDomainEntity> {
+    // Исключение для организации-кооператива
+    // Очень плохие решения из за того что мы содержим ТРИ разных репозитория под приватные данные и не знаем наверняка в каком искать данные заранее!
+    if (config.coopname === username) {
+      const user_account = await this.getUserAccount(username);
+      const blockchain_account = await this.getBlockchainAccount(username);
+      const participant_account = await this.getParticipantAccount(config.coopname, username);
+      const organization_data = await this.organizationRepository.findByUsername(username);
+      const private_account: PrivateAccountDomainInterface = {
+        type: AccountType.organization,
+        individual_data: undefined,
+        organization_data,
+        entrepreneur_data: undefined,
+      };
+      return new AccountDomainEntity({
+        username,
+        user_account,
+        blockchain_account,
+        provider_account: null,
+        participant_account,
+        private_account,
+      });
+    }
+
     const user_account = await this.getUserAccount(username);
     const blockchain_account = await this.getBlockchainAccount(username);
     const participant_account = await this.getParticipantAccount(config.coopname, username);

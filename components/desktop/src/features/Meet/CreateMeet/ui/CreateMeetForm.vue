@@ -9,26 +9,20 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
     q-card-section
       q-form(@submit="handleSubmit")
         q-input(
-          v-model="formData.initiator"
-          label="Инициатор"
-          :rules="[val => !!val || 'Обязательное поле']"
-          dense
-        )
-        q-input(
           v-model="formData.presider"
-          label="Председатель"
+          label="Имя аккаунта председателя собрания"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
         )
         q-input(
           v-model="formData.secretary"
-          label="Секретарь"
+          label="Имя аккаунта секретаря собрания"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
         )
         q-input(
           v-model="formData.open_at"
-          :label="`Дата и время открытия (${timezoneLabel})`"
+          :label="env.NODE_ENV === 'development' ? `Дата и время открытия (мин. через 1 минуту, ${timezoneLabel})` : `Дата и время открытия (мин. через 15 дней, ${timezoneLabel})`"
           type="datetime-local"
           :rules="[val => !!val || 'Обязательное поле']"
           dense
@@ -40,6 +34,7 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
           :rules="[val => !!val || 'Обязательное поле']"
           dense
         )
+
 
         div.text-h6.q-mt-md Повестка собрания
 
@@ -61,8 +56,8 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 
           div.q-mb-sm
             q-input(
-              v-model="point.context"
-              label="Контекст"
+              v-model="point.decision"
+              label="Проект Решения"
               :rules="[val => !!val || 'Обязательное поле']"
               dense
               type="textarea"
@@ -71,8 +66,8 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 
           div.q-mb-sm
             q-input(
-              v-model="point.decision"
-              label="Проект Решения"
+              v-model="point.context"
+              label="Приложения"
               :rules="[val => !!val || 'Обязательное поле']"
               dense
               type="textarea"
@@ -95,7 +90,10 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { useAgendaPoints } from 'src/shared/hooks/useAgendaPoints'
-import { getCurrentLocalDateForForm, convertLocalDateToUTC, getTimezoneLabel } from 'src/shared/lib/utils/dates/timezone'
+import { getCurrentLocalDateForForm, convertLocalDateToUTC, getTimezoneLabel, getFutureDateForForm } from 'src/shared/lib/utils/dates/timezone'
+import { env } from 'src/shared/config/Environment'
+import { useSessionStore } from 'src/entities/Session';
+import { useSystemStore } from 'src/entities/System/model';
 
 defineProps<{
   modelValue: boolean,
@@ -109,38 +107,40 @@ const emit = defineEmits<{
 
 // Название часового пояса для отображения в лейблах
 const timezoneLabel = getTimezoneLabel()
+const session = useSessionStore()
+const system = useSystemStore()
 
 // Форма для создания собрания
 const formData = reactive(
-  {
-    'coopname': 'voskhod',
-    'initiator': 'ant',
-    'presider': 'ant',
-    'secretary': 'ant',
-    'open_at': getCurrentLocalDateForForm(0.17), // ~10 секунд от текущего времени
-    'close_at': getCurrentLocalDateForForm(2), // 2 минуты от текущего времени
-    'username': 'ant',
-    'agenda_points': [
-        {
-            'title': 'test',
-            'context': 'testt',
-            'decision': 'testtt'
-        }
-    ]
-}
-// {
-//   initiator: '',
-//   presider: '',
-//   secretary: '',
-//   open_at: '',
-//   close_at: '',
-//   agenda_points: [{
-//     title: '',
-//     context: '',
-//     decision: ''
-//   }
-// ]
-// }
+  env.NODE_ENV === 'development'
+    ? {
+        coopname: system.info.coopname,
+        initiator: session.username,
+        presider: session.username,
+        secretary: session.username,
+        open_at: getCurrentLocalDateForForm(0.17), // ~10 секунд от текущего времени
+        close_at: getCurrentLocalDateForForm(2), // 2 минуты от текущего времени
+        username: session.username,
+        agenda_points: [
+          {
+            title: 'Тестовый вопрос',
+            context: 'Тут приложения к вопросу',
+            decision: 'Тут проект решения по вопросу',
+          },
+        ],
+      }
+    : {
+        coopname: system.info.coopname,
+        initiator: session.username,
+        presider: '',
+        secretary: '',
+        open_at: getFutureDateForForm(15, 6, 0), // через 15 дней, 6:00
+        close_at: getFutureDateForForm(18, 12, 0), // через 18 дней, 12:00
+        username: session.username,
+        agenda_points: [
+          // пустой массив, либо можно добавить пустой объект для вёрстки
+        ],
+      }
 )
 
 const { addAgendaPoint, removeAgendaPoint } = useAgendaPoints(formData.agenda_points)

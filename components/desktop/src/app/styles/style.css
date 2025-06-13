@@ -390,3 +390,14 @@ pre {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   }
 }
+
+/* Глобальный стиль ссылок для светлой и тёмной темы */
+a {
+  color: #1c64f2;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+.body--dark a,
+.q-dark a {
+  color: #90caf9;
+}

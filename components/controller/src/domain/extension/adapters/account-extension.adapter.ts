@@ -18,4 +18,8 @@ export class AccountExtensionAdapter implements AccountExtensionPort {
   ): Promise<PaginationResultDomainInterface<AccountDomainEntity>> {
     return this.accountInteractor.getAccounts(data, options);
   }
+
+  async getAccount(username: string): Promise<AccountDomainEntity> {
+    return this.accountInteractor.getAccount(username);
+  }
 }

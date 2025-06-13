@@ -62,3 +62,14 @@ export function formatDateFromNow(utcDate: string | Date | unknown): string {
   const timezone = getTimezone()
   return moment.utc(utcDate).tz(timezone).fromNow()
 }
+
+/**
+ * Получает дату в локальном часовом поясе для форм (формат datetime-local) с заданным смещением в днях и временем
+ * @param offsetDays - смещение от текущей даты в днях
+ * @param hour - час (0-23)
+ * @param minute - минута (0-59)
+ */
+export function getFutureDateForForm(offsetDays = 0, hour = 0, minute = 0): string {
+  const timezone = getTimezone()
+  return moment().tz(timezone).add(offsetDays, 'days').set({ hour, minute, second: 0, millisecond: 0 }).format('YYYY-MM-DDTHH:mm')
+}

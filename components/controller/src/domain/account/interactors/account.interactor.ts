@@ -39,8 +39,6 @@ export class AccountDomainInteractor {
   private readonly logger = new Logger(AccountDomainInteractor.name);
 
   async updateAccount(data: UpdateAccountDomainInterface): Promise<AccountDomainEntity> {
-    console.log('data on update', data);
-
     let user;
     if (data.individual_data) {
       const email = data.individual_data.email;

@@ -22,7 +22,7 @@ q-card(flat).card-container.q-pa-md
               )
 
         // Индикатор явки и статус собрания
-        q-card(v-if="showQuorumIndicator" flat).info-card.hover.q-mt-lg
+        q-card(v-if="showQuorumIndicator" flat).q-mt-lg
           MeetQuorumIndicator(:meet="meet")
 
         // Показываем результаты собрания, если оно завершено

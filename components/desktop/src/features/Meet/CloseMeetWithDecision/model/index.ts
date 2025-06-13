@@ -134,15 +134,17 @@ export const useCloseMeet = (
 
     const isAfterCloseDate = now.isAfter(closeAt)
     const isQuorumPassed = meet.processing.meet.quorum_passed === true
-    const isAuthorized = meet.processing.meet.status === Zeus.ExtendedMeetStatus.AUTHORIZED.toLowerCase()
+    const isAuthorized = meet.processing.extendedStatus === Zeus.ExtendedMeetStatus.VOTING_COMPLETED
+    const isSecretary = meet.processing.meet.secretary === sessionStore.username
 
-    return isAfterCloseDate && isQuorumPassed && isAuthorized
+    return isAfterCloseDate && isQuorumPassed && isAuthorized && isSecretary
   })
 
   const canCloseByPresider = computed(() => {
     const meet = meetStore.currentMeet
     if (!meet?.processing?.meet) return false
-    return meet.processing.meet.status === Zeus.ExtendedMeetStatus.PRECLOSED.toLowerCase()
+    const isPresider = meet.processing.meet.presider === sessionStore.username
+    return meet.processing.extendedStatus === Zeus.ExtendedMeetStatus.PRECLOSED && isPresider
   })
 
   const closeMeetBySecretary = async () => {
