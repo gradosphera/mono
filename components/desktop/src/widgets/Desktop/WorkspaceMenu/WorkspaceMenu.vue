@@ -58,12 +58,10 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCurrentUserStore } from 'src/entities/User'
 import { useDesktopStore } from 'src/entities/Desktop/model'
-import { useSystemStore } from 'src/entities/System/model'
 
 const router = useRouter()
 const user = useCurrentUserStore()
 const desktop = useDesktopStore()
-const { info } = useSystemStore()
 
 const slideIndex = ref(0)
 const showDialog = ref(false)
@@ -83,19 +81,6 @@ const headerClass = (item: any) => {
   return desktop?.activeWorkspaceName === item.workspaceName ? 'text-white bg-teal' : ''
 }
 
-// Функция для навигации на первый маршрут рабочего стола
-function navigateToWorkspace(workspaceName: string) {
-  const ws = workspaceMenus.value.find(menu => menu.workspaceName === workspaceName)
-
-  if (ws && ws.mainRoute && ws.mainRoute.children && ws.mainRoute.children.length > 0) {
-    const firstChild = ws.mainRoute.children[0]
-    router.push({
-      name: firstChild.name as string,
-      params: { coopname: info.coopname }
-    })
-  }
-}
-
 const handleClick = (item: any, index: number) => {
   if (slideIndex.value === index) {
     showDialog.value = true
@@ -103,8 +88,8 @@ const handleClick = (item: any, index: number) => {
     slideIndex.value = index
     // Обновляем активный рабочий стол
     desktop.selectWorkspace(item.workspaceName)
-    // Переходим на первый маршрут для выбранного рабочего стола
-    navigateToWorkspace(item.workspaceName)
+    // Переходим на маршрут по умолчанию для выбранного рабочего стола
+    desktop.goToDefaultPage(router)
   }
 }
 
@@ -113,8 +98,8 @@ const selectFromDialog = (index: number) => {
   slideIndex.value = index
   const item = menuWorkspaces.value[index]
   desktop.selectWorkspace(item.workspaceName)
-  // Переходим на первый маршрут для выбранного рабочего стола
-  navigateToWorkspace(item.workspaceName)
+  // Переходим на маршрут по умолчанию для выбранного рабочего стола
+  desktop.goToDefaultPage(router)
 }
 
 onMounted(() => {
@@ -135,7 +120,7 @@ watch(slideIndex, (newIndex) => {
   const item = menuWorkspaces.value[newIndex]
   if (item) {
     desktop.selectWorkspace(item.workspaceName)
-    navigateToWorkspace(item.workspaceName)
+    desktop.goToDefaultPage(router)
   }
 })
 </script>

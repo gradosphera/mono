@@ -10,6 +10,8 @@ import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace'
 export default async function (): Promise<IWorkspaceConfig> {
   return {
     workspace: 'soviet',
+    title: 'Стол совета',
+    defaultRoute: 'agenda', // Маршрут по умолчанию для рабочего стола совета
     routes: [
       {
         meta: {
