@@ -3,8 +3,6 @@ import { computed, ref } from 'vue'
 import { RouteRecordRaw, type RouteMeta, type Router } from 'vue-router'
 import type { IHealthResponse, IBackNavigationButton, IDesktopWithNavigation } from './types'
 import { api } from '../api'
-import { useCurrentUserStore } from 'src/entities/User/model'
-import { useSystemStore } from 'src/entities/System/model'
 
 interface WorkspaceMenuItem {
   workspaceName: string
@@ -15,7 +13,6 @@ interface WorkspaceMenuItem {
 }
 
 const namespace = 'desktops'
-const STORAGE_KEY_WORKSPACE = 'monocoop-active-workspace'
 
 export const useDesktopStore = defineStore(namespace, () => {
   const currentDesktop = ref<IDesktopWithNavigation>()
@@ -81,34 +78,6 @@ export const useDesktopStore = defineStore(namespace, () => {
 
   function selectWorkspace(name: string) {
     activeWorkspaceName.value = name;
-    // Сохраняем выбранный рабочий стол в localStorage
-    localStorage.setItem(STORAGE_KEY_WORKSPACE, name);
-  }
-
-  // Функция для определения и выбора дефолтного рабочего стола
-  function selectDefaultWorkspace() {
-    // Проверяем, был ли ранее сохранен рабочий стол
-    const savedWorkspace = localStorage.getItem(STORAGE_KEY_WORKSPACE);
-
-    if (savedWorkspace && currentDesktop.value?.workspaces.some(ws => ws.name === savedWorkspace)) {
-      selectWorkspace(savedWorkspace);
-      return;
-    }
-
-    // Если нет сохраненного рабочего стола, определяем по правам пользователя
-    const userStore = useCurrentUserStore();
-
-    if (userStore.isMember || userStore.isChairman) {
-      // Для членов совета или председателя устанавливаем soviet
-      const hasSoviet = currentDesktop.value?.workspaces.some(ws => ws.name === 'soviet');
-      if (hasSoviet) {
-        selectWorkspace('soviet');
-        return;
-      }
-    }
-
-    // В остальных случаях устанавливаем participant
-    selectWorkspace('participant');
   }
 
   const activeSecondLevelRoutes = computed((): RouteRecordRaw[] => {
@@ -152,40 +121,6 @@ export const useDesktopStore = defineStore(namespace, () => {
 
   const backNavigationButton = computed(() => currentDesktop.value?.backNavigationButton)
 
-  // Новый метод: перейти на маршрут по умолчанию для текущего рабочего стола
-  function goToDefaultPage(router: Router): void {
-    const { info } = useSystemStore()
-
-    if (!currentDesktop.value || !activeWorkspaceName.value) return
-
-    // Найти текущий рабочий стол
-    const currentWorkspace = currentDesktop.value.workspaces.find(
-      ws => ws.name === activeWorkspaceName.value
-    )
-
-    if (!currentWorkspace) return
-
-    // Проверяем наличие defaultRoute
-    if ((currentWorkspace as any).defaultRoute) {
-      // Если есть defaultRoute, переходим на него
-      router.push({
-        name: (currentWorkspace as any).defaultRoute,
-        params: { coopname: info.coopname }
-      })
-      return
-    }
-
-    // Если нет defaultRoute, ищем первый маршрут в детях основного маршрута
-    const ws = workspaceMenus.value.find(menu => menu.workspaceName === activeWorkspaceName.value)
-    if (ws && ws.mainRoute && ws.mainRoute.children && ws.mainRoute.children.length > 0) {
-      const firstChild = ws.mainRoute.children[0]
-      router.push({
-        name: firstChild.name as string,
-        params: { coopname: info.coopname }
-      })
-    }
-  }
-
   return {
     currentDesktop,
     health,
@@ -196,12 +131,9 @@ export const useDesktopStore = defineStore(namespace, () => {
     workspaceMenus,
     activeWorkspaceName,
     selectWorkspace,
-    selectDefaultWorkspace,
     activeSecondLevelRoutes,
     registerWorkspaceMenus,
     removeWorkspace,
-    goToDefaultPage,
-    // Новые методы
     setBackNavigationButton,
     removeBackNavigationButton,
     backNavigationButton

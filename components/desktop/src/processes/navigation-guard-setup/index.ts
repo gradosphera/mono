@@ -35,23 +35,13 @@ export function setupNavigationGuard(router: Router) {
 
     // редирект с index
     if (to.name === 'index') {
-      // Убеждаемся, что правильный рабочий стол выбран
-      if (session.isAuth && currentUser.isRegistrationComplete) {
-        // Если рабочий стол не выбран - выбираем по правам пользователя
-        if (!desktops.activeWorkspaceName) {
-          desktops.selectDefaultWorkspace()
-        }
+      const homePage =
+        session.isAuth && currentUser.isRegistrationComplete
+          ? desktops.currentDesktop?.authorizedHome
+          : desktops.currentDesktop?.nonAuthorizedHome
 
-        // Переходим на маршрут по умолчанию для выбранного рабочего стола
-        desktops.goToDefaultPage(router)
-        // next(false)
-        return
-      } else {
-        // Если пользователь не авторизован, используем nonAuthorizedHome
-        const homePage = desktops.currentDesktop?.nonAuthorizedHome
-        next({ name: homePage, params: { coopname: info.coopname } })
-        return
-      }
+      next({ name: homePage, params: { coopname: info.coopname } })
+      return
     }
 
     // Проверка авторизации для маршрутов, требующих входа
