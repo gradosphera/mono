@@ -21,8 +21,6 @@ export default ssrMiddleware(({ app }) => {
       STORAGE_URL: process.env.STORAGE_URL,
       UPLOAD_URL: process.env.UPLOAD_URL,
       TIMEZONE: process.env.TIMEZONE || 'Europe/Moscow',
-      CLIENT: process.env.CLIENT as unknown as boolean,
-      SERVER: process.env.SERVER as unknown as boolean,
       VUE_ROUTER_MODE: process.env.VUE_ROUTER_MODE,
       VUE_ROUTER_BASE: process.env.VUE_ROUTER_BASE,
       NOVU_APP_ID: process.env.NOVU_APP_ID,
