@@ -94,7 +94,8 @@ const submit = async () => {
       if (!navigateToSavedUrl()) {
         // Если сохраненного URL нет, переходим на страницу по умолчанию
         const desktops = useDesktopStore()
-        desktops.selectWorkspace('participant')
+        desktops.selectDefaultWorkspace()
+        desktops.goToDefaultPage(router)
       }
     }
 
