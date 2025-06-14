@@ -14,8 +14,6 @@ import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace'
 export default async function (): Promise<IWorkspaceConfig> {
   return {
     workspace: 'participant',
-    title: 'Стол пайщика',
-    defaultRoute: 'profile', // Маршрут по умолчанию для рабочего стола пайщика
     routes: [
       {
         meta: {

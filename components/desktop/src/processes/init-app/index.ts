@@ -6,7 +6,6 @@ import { useBranchOverlayProcess } from '../watch-branch-overlay'
 import { setupNavigationGuard } from '../navigation-guard-setup'
 import { useInitExtensionsProcess } from 'src/processes/init-installed-extensions'
 import { applyThemeFromStorage } from 'src/shared/lib/utils'
-import { useSessionStore } from 'src/entities/Session'
 
 export async function useInitAppProcess(router: Router) {
   applyThemeFromStorage()
@@ -17,19 +16,14 @@ export async function useInitAppProcess(router: Router) {
   await desktops.healthCheck()
   await desktops.loadDesktop()
 
-  // Регистрируем маршруты рабочего стола до выбора активного рабочего стола
-  desktops.registerWorkspaceMenus(router)
-
-  await useInitWalletProcess().run()
-
-  // Выбираем рабочий стол на основе прав пользователя или сохраненного выбора
-  // только если пользователь авторизован
-  const session = useSessionStore()
-  if (session.isAuth) {
-    desktops.selectDefaultWorkspace()
-  }
+  // Выбираем активный рабочий стол (например, participant)
+  desktops.selectWorkspace('participant')
 
   useBranchOverlayProcess()
+  await useInitWalletProcess().run()
+
+  // Регистрируем маршруты рабочего стола
+  desktops.registerWorkspaceMenus(router)
 
   setupNavigationGuard(router)
 
