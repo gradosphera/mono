@@ -81,13 +81,18 @@ jobs:
       - name: Trigger deployment webhook
         if: ${{ success() }}
         run: |
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
+          if [[ $GITHUB_REF == refs/tags/latest ]]; then
+            # Хук для тестнета
+            curl -X POST ${{ vars.TESTNET_WEBHOOK_URL }} \
+              -H 'Content-Type: application/json' \
+              -d '${{ env.DOCKER_TAG }}'
+          elif [[ $GITHUB_REF == refs/tags/* ]]; then
             # Хук для продакшена
             curl -X POST ${{ vars.PRODUCTION_WEBHOOK_URL }} \
               -H 'Content-Type: application/json' \
               -d '${{ env.DOCKER_TAG }}'
           else
-            # Хук для тестнета
+            # Хук для тестнета (обычная ветка)
             curl -X POST ${{ vars.TESTNET_WEBHOOK_URL }} \
               -H 'Content-Type: application/json' \
               -d '${{ env.DOCKER_TAG }}'
