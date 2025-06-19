@@ -27,8 +27,7 @@ async function loadPublicBranches(data: IGetBranchesInput): Promise<IPublicBranc
   return output;
 }
 
-
-export const api ={
+export const api = {
   loadBranches,
   loadPublicBranches
 }
