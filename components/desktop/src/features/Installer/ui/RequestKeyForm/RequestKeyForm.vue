@@ -52,7 +52,7 @@ form(@submit.prevent="submit").full-width
 
     } catch (e: any) {
       loading.value = false
-      FailAlert(e.message)
+      FailAlert(e)
     }
 
   }

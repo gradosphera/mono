@@ -59,7 +59,7 @@ const next = async () => {
 
     SuccessAlert('Установка произведена успешно')
   } catch(e: any){
-    FailAlert(e.message)
+    FailAlert(e)
     loading.value = false
   }
 

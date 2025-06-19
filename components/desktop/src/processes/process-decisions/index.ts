@@ -135,10 +135,15 @@ export function useDecisionProcessor() {
     }
     else if (registry_id === Cooperative.Registry.AnnualGeneralMeetingSovietDecision.registry_id) {
       const { generateSovietDecisionOnAnnualMeet } = useGenerateSovietDecisionOnAnnualMeet()
+      const unparsedDocumentMeta = row.table.statement.meta == '' ? '{}' : row.table.statement.meta
+      const parsedDocumentMeta = JSON.parse(unparsedDocumentMeta) as Cooperative.Registry.AnnualGeneralMeetingAgenda.Action
+      const is_repeated = parsedDocumentMeta.is_repeated || false
+
       document = await generateSovietDecisionOnAnnualMeet({
         username: username,
         decision_id: decision_id,
-        meet_hash: row.table.hash as string
+        meet_hash: row.table.hash as string,
+        is_repeated
       })
     }
     else {

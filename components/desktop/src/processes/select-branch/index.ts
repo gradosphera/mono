@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useSelectBranch } from 'src/features/Branch/SelectBranch'
 import { useSystemStore } from 'src/entities/System/model'
 import { useSessionStore } from 'src/entities/Session'
@@ -24,9 +24,16 @@ export function useSelectBranchProcess() {
 
   const branches = computed(() => branchStore.publicBranches)
 
-  if (session.isAuth) {
-    branchStore.loadPublicBranches({ coopname: system.info.coopname })
-  }
+  // Вотчер на авторизацию
+  watch(
+    () => session.isAuth,
+    (isAuth, wasAuth) => {
+      if (isAuth && !wasAuth) {
+        branchStore.loadPublicBranches({ coopname: system.info.coopname })
+      }
+    },
+    { immediate: true }
+  )
 
   const next = async () => {
     isLoading.value = true

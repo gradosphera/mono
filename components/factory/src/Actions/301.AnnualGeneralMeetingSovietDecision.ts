@@ -21,7 +21,7 @@ export class Factory extends DocFactory<AnnualGeneralMeetingSovietDecision.Actio
     else {
       template = await this.getTemplate(DraftContract.contractName.production, AnnualGeneralMeetingSovietDecision.registry_id, data.block_num)
     }
-
+    console.log('data on gerate soviet decision', data)
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data })
     const coop = await super.getCooperative(data.coopname, data.block_num)
     const vars = await super.getVars(data.coopname, data.block_num)
@@ -43,6 +43,7 @@ export class Factory extends DocFactory<AnnualGeneralMeetingSovietDecision.Actio
       decision,
       meet,
       questions,
+      is_repeated: data.is_repeated,
     }
 
     await super.validate(combinedData, template.model)

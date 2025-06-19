@@ -55,7 +55,7 @@ const submit = async () => {
     loading.value = false
   } catch (e: any) {
     loading.value = false
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 

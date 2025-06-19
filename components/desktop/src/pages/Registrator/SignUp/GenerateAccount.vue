@@ -77,7 +77,7 @@ const setAccount = async () => {
   } catch (e: any) {
     store.goTo('SetUserData')
     console.error(e)
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 </script>

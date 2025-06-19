@@ -15,13 +15,14 @@ export function createBlockchainGetError(name: string) {
 
 export function handleException(e: unknown): void {
   if (e instanceof Error) {
-    FailAlert(e.message);
+    FailAlert(e);
   } else {
     FailAlert('Произошла неизвестная ошибка');
   }
 }
 
 export function extractGraphQLErrorMessages(error: unknown): string {
+  if (typeof error === 'string') return error;
   if (!error || typeof error !== 'object') return 'Unknown error';
 
   // Проверяем, если ошибка уже является массивом

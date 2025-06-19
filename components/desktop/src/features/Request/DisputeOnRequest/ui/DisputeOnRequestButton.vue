@@ -31,7 +31,7 @@ q-btn(color="red" @click="dispute") вернуть по гарантии
 
       SuccessAlert('Спор открыт')
     } catch (e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 </script>

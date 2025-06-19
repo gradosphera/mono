@@ -30,7 +30,7 @@ q-btn(color="red" @click="cancel") отменить поставку
       } as ICancelRequest)
       SuccessAlert('Заявка отменена')
     } catch (e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 </script>

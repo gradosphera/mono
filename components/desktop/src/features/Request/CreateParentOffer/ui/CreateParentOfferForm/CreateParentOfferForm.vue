@@ -63,7 +63,7 @@ const handlerSubmit = async () => {
     SuccessAlert('Объявление успешно создано')
   } catch (e: any) {
     console.log(e)
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 </script>

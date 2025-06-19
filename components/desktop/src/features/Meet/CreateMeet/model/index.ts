@@ -18,6 +18,7 @@ export interface ICreateMeetWithAgendaInput {
   open_at: string
   close_at: string
   username: string
+  type: 'regular' | 'extra'
   agenda_points: {
     title: string
     context: string
@@ -81,11 +82,12 @@ export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput): Pr
     coopname: data.coopname,
     username: data.username,
     meet: {
-      type: 'regular', // По умолчанию очередное собрание
+      type: data.type,
       open_at_datetime: openAtFormatted,
       close_at_datetime: closeAtFormatted
     },
-    questions: questions
+    questions: questions,
+    is_repeated: false
   })
 
 

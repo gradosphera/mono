@@ -242,7 +242,7 @@ export class BranchDomainInteractor {
 
   async selectBranch(data: SelectBranchInputDomainInterface): Promise<boolean> {
     // TODO move it to separate document domain service for validate
-    const document = await this.documentRepository.findByHash(data.document.hash);
+    const document = await this.documentRepository.findByHash(data.document.doc_hash);
     if (!document) throw new BadRequestException('Документ не найден');
 
     if (data.document.meta.registry_id != Cooperative.Registry.SelectBranchStatement.registry_id)

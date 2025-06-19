@@ -4,7 +4,7 @@ import { GenerateMetaDocumentInputDTO } from '~/modules/document/dto/generate-me
 import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input.dto';
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import type { ExcludeCommonProps } from '~/modules/document/types';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.AnnualGeneralMeetingSovietDecision.Action;
@@ -20,6 +20,11 @@ class BaseAnnualGeneralMeetingSovietDecisionDocumentInputDTO implements ExcludeC
   @IsString()
   @IsNotEmpty()
   meet_hash!: string;
+
+  @Field(() => Boolean, { description: 'Флаг повторного собрания' })
+  @IsBoolean()
+  @IsNotEmpty()
+  is_repeated!: boolean;
 }
 
 @InputType(`AnnualGeneralMeetingSovietDecisionGenerateDocumentInput`)
@@ -31,16 +36,6 @@ export class AnnualGeneralMeetingSovietDecisionGenerateDocumentInputDTO
   implements action
 {
   registry_id!: number;
-
-  @Field(() => Number, { description: 'ID решения совета' })
-  @IsNumber()
-  @IsNotEmpty()
-  decision_id!: number;
-
-  @Field(() => String, { description: 'Хеш собрания' })
-  @IsString()
-  @IsNotEmpty()
-  meet_hash!: string;
 }
 
 @InputType(`AnnualGeneralMeetingSovietDecisionSignedMetaDocumentInput`)

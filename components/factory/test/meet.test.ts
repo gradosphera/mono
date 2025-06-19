@@ -47,6 +47,18 @@ describe('тест генератора документов общих собр
       username: 'individual',
       meet: testMeetData,
       questions: testQuestions,
+      is_repeated: false,
+    })
+  })
+
+  it('генерируем предложение повестки дня повторного собрания (300 с is_repeated)', async () => {
+    await testDocumentGeneration<Cooperative.Registry.AnnualGeneralMeetingAgenda.Action>({
+      registry_id: Cooperative.Registry.AnnualGeneralMeetingAgenda.registry_id,
+      coopname: 'voskhod',
+      username: 'individual',
+      meet: testMeetData,
+      questions: testQuestions,
+      is_repeated: true,
     })
   })
 
@@ -57,6 +69,18 @@ describe('тест генератора документов общих собр
       username: 'ant',
       decision_id: _testDecisionId,
       meet_hash: _testMeetHash,
+      is_repeated: false,
+    })
+  })
+
+  it('генерируем решение совета о повторном созыве собрания (301 с is_repeated)', async () => {
+    await testDocumentGeneration<Cooperative.Registry.AnnualGeneralMeetingSovietDecision.Action>({
+      registry_id: Cooperative.Registry.AnnualGeneralMeetingSovietDecision.registry_id,
+      coopname: 'voskhod',
+      username: 'ant',
+      decision_id: _testDecisionId,
+      meet_hash: _testMeetHash,
+      is_repeated: true,
     })
   })
 

@@ -5,9 +5,11 @@ div
     label="Создать общее собрание"
     @click="showCreateMeetDialog = true"
   )
+
   CreateMeetForm(
     v-model="showCreateMeetDialog"
     :loading="isCreating"
+    :is-chairman="isChairman"
     @create="handleCreate"
   )
 </template>
@@ -21,6 +23,11 @@ import { useMeetStore } from 'src/entities/Meet'
 import { useRoute } from 'vue-router'
 import { Notify } from 'quasar'
 import { FailAlert } from 'src/shared/api'
+
+// Определяем пропсы
+defineProps<{
+  isChairman: boolean
+}>()
 
 const route = useRoute()
 const sessionStore = useSessionStore()
@@ -40,6 +47,7 @@ const handleCreate = async (formData: any) => {
       open_at: formData.open_at,
       close_at: formData.close_at,
       username: sessionStore.username,
+      type: formData.type,
       agenda_points: formData.agenda_points
     })
 

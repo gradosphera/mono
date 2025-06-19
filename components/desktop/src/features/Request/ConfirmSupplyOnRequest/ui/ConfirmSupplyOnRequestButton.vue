@@ -32,7 +32,7 @@ q-btn(color="green" @click="supply") Подписать акт передачи
 
       SuccessAlert('Имущество принято в кооператив')
     } catch (e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 </script>

@@ -99,7 +99,7 @@
       loadCooperatives()
       SuccessAlert('Кооператив активирован')
     } catch(e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 
@@ -111,7 +111,7 @@
       loadCooperatives()
       SuccessAlert('Кооператив заблокирован')
     } catch(e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 

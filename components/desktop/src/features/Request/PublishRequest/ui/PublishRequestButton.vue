@@ -30,7 +30,7 @@ q-btn(@click="publish") опубликовать
       })
       SuccessAlert('Заявка опубликована')
     } catch (e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 </script>

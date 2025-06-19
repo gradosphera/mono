@@ -70,7 +70,7 @@ const loadStatement = async (): Promise<void> => {
     isLoading.value = false
   } catch (e: any) {
     isLoading.value = false
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 const back = () => {

@@ -30,7 +30,7 @@ q-btn(@click="unpublish") снять с публикации
       })
       SuccessAlert('Заявка снята с публикации')
     } catch (e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 </script>

@@ -244,6 +244,9 @@ input AnnualGeneralMeetingAgendaGenerateDocumentInput {
   """Имя генератора, использованного для создания документа"""
   generator: String
 
+  """Флаг повторного собрания"""
+  is_repeated: Boolean!
+
   """Язык документа"""
   lang: String
 
@@ -297,6 +300,9 @@ input AnnualGeneralMeetingAgendaSignedMetaDocumentInput {
 
   """Имя генератора, использованного для создания документа"""
   generator: String!
+
+  """Флаг повторного собрания"""
+  is_repeated: Boolean!
 
   """Язык документа"""
   lang: String!
@@ -523,6 +529,9 @@ input AnnualGeneralMeetingSovietDecisionGenerateDocumentInput {
 
   """Имя генератора, использованного для создания документа"""
   generator: String
+
+  """Флаг повторного собрания"""
+  is_repeated: Boolean!
 
   """Язык документа"""
   lang: String
@@ -2341,6 +2350,9 @@ type Meet {
 
   """Сертификат инициатора собрания"""
   initiator_certificate: UserCertificateUnion
+
+  """Уровень собрания"""
+  level: String!
 
   """Список пользователей, которые подписали уведомление"""
   notified_users: [String!]!

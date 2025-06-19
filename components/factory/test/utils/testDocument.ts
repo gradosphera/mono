@@ -10,14 +10,17 @@ export async function testDocumentGeneration<T extends IGenerate = IGenerate>(
 ) {
   const document: IGeneratedDocument = await generator.generate(params)
 
-  const filename1 = `${document.meta.title}-${document.meta.username}.pdf`
+  // Генерируем уникальный суффикс для имен файлов
+  const uniqueSuffix = Date.now().toString(36) + Math.random().toString(36).substring(2, 7)
+
+  const filename1 = `${document.meta.title}-${document.meta.username}-${uniqueSuffix}.pdf`
   await saveBufferToDisk(document.binary, filename1)
 
   const regenerated_document: IGeneratedDocument = await generator.generate({
     ...document.meta,
   })
 
-  const filename2 = `${document.meta.title}-${document.meta.username}-regenerated.pdf`
+  const filename2 = `${document.meta.title}-${document.meta.username}-regenerated-${uniqueSuffix}.pdf`
   await saveBufferToDisk(regenerated_document.binary, filename2)
 
   expect(document.meta).toEqual(regenerated_document.meta)

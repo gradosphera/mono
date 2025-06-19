@@ -77,7 +77,7 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
         }
       } catch (e: any) {
         console.error(e);
-        FailAlert(e.message);
+        FailAlert(e);
         close()
         globalStore.logout()
       }

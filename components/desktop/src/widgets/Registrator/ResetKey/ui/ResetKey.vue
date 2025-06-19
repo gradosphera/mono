@@ -82,7 +82,7 @@ const finish = async () => {
 
   } catch (e: any) {
     loading.value = false
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 
