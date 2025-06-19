@@ -2,30 +2,52 @@ import { Cooperative, DraftContract, SovietContract } from 'cooptypes';
 import { Registry } from '@coopenomics/factory';
 import type { Migration } from '../src/migration_interface';
 import { api } from '../src/eos';
-import { createDraft } from '../src/utils/createDraft';
+import { editDraft } from '../src/utils/editDraft';
+import { editTranslation } from '../src/utils/editTranslation';
 
 export class InitialMigration implements Migration {
   async run(): Promise<void> {
-    const ids = [300, 301, 302, 303, 304];
+    const ids = [300, 301]; 
+
     for (const id of ids) {
       try {
+        const drafts = await api.rpc.get_table_rows({
+          json: true,
+          code: 'draft',
+          scope: 'draft',
+          table: 'drafts',
+        });
+
+        const target = drafts.rows.find((draft) => draft.registry_id === id);
+        if (!target) {
+          console.warn(`Draft with registry_id ${id} not found.`);
+          continue;
+        }
+
         const template = Registry[id as unknown as keyof typeof Registry];
         if (!template) {
           console.warn(`Template for registry_id ${id} not found in Registry.`);
           continue;
         }
-        await createDraft({
+
+        await editDraft({
           scope: DraftContract.contractName.production,
           username: 'eosio',
           registry_id: id,
-          lang: 'ru',
           title: template.Template.title,
           description: template.Template.description,
           context: template.Template.context,
           model: JSON.stringify(template.Template.model),
-          translation_data: JSON.stringify(template.Template.translations.ru),
         });
-        console.log(`Draft for registry_id ${id} created successfully`);
+
+        await editTranslation({
+          scope: DraftContract.contractName.production,
+          username: 'eosio',
+          translate_id: target.default_translation_id,
+          data: JSON.stringify(template.Template.translations.ru),
+        });
+
+        console.log(`Update for registry_id ${id} successful`);
       } catch (error) {
         console.error(`Error during migration for registry_id ${id}:`, error);
       }

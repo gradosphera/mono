@@ -1084,6 +1084,7 @@ export const ReturnTypes: Record<string,any> = {
 		id:"Float",
 		initiator:"String",
 		initiator_certificate:"UserCertificateUnion",
+		level:"String",
 		notified_users:"String",
 		open_at:"DateTime",
 		presider:"String",

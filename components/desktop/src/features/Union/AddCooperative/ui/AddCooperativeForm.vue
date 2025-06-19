@@ -83,7 +83,7 @@ const addNow = async () => {
 
     clear()
   } catch(e: any){
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 

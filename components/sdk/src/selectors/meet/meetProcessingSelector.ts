@@ -46,6 +46,7 @@ const rawMeetSelector = {
   decision1: rawDocumentAggregateSelector,
   decision2: rawDocumentAggregateSelector,
   notified_users: true,
+  level: true,
 }
 
 // Селектор для MeetProcessing

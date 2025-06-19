@@ -2,12 +2,23 @@
 q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" persistent)
   q-card(style="min-width: 500px")
     q-card-section.row.items-center
-      div.text-h6 Создать общее собрание
+      div.text-h6 Создать общее собрание {{ isChairman ? '(Председатель)' : '(Член совета)' }}
       q-space
       q-btn(icon="close" flat round dense v-close-popup @click="$emit('update:modelValue', false)")
 
     q-card-section
       q-form(@submit="handleSubmit")
+        // Выбор типа собрания
+        q-select(
+          v-model="formData.type"
+          :options="meetTypeOptions"
+          label="Тип собрания"
+          emit-value
+          map-options
+          :rules="[val => !!val || 'Обязательное поле']"
+          dense
+        )
+
         q-input(
           v-model="formData.presider"
           label="Имя аккаунта председателя собрания"
@@ -88,17 +99,24 @@ q-dialog(:model-value="modelValue" @update:model-value="$emit('update:modelValue
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, computed, onMounted } from 'vue'
 import { useAgendaPoints } from 'src/shared/hooks/useAgendaPoints'
 import { getCurrentLocalDateForForm, convertLocalDateToUTC, getTimezoneLabel, getFutureDateForForm } from 'src/shared/lib/utils/dates/timezone'
 import { env } from 'src/shared/config/Environment'
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
 
-defineProps<{
+// Определяем пропсы один раз
+const props = defineProps<{
   modelValue: boolean,
-  loading?: boolean
+  loading?: boolean,
+  isChairman: boolean
 }>()
+
+// Отладочная информация при монтировании
+onMounted(() => {
+  console.log('CreateMeetForm mounted, isChairman:', props.isChairman)
+})
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
@@ -109,6 +127,30 @@ const emit = defineEmits<{
 const timezoneLabel = getTimezoneLabel()
 const session = useSessionStore()
 const system = useSystemStore()
+
+// Делаем isChairman доступным в шаблоне напрямую для отладки
+const isChairman = computed(() => {
+  console.log('Вычисляемое свойство isChairman:', props.isChairman)
+  return props.isChairman
+})
+
+// Опции для выбора типа собрания в зависимости от роли
+const meetTypeOptions = computed(() => {
+  // Выведем отладочную информацию, чтобы увидеть значение флага
+  console.log('isChairman в форме для опций:', props.isChairman)
+
+  // Председатель может выбирать любой тип
+  if (props.isChairman) {
+    return [
+      { label: 'Очередное собрание', value: 'regular' },
+      { label: 'Внеочередное собрание', value: 'extra' }
+    ]
+  }
+  // Члены совета могут создавать только внеочередное
+  return [
+    { label: 'Внеочередное собрание', value: 'extra' }
+  ]
+})
 
 // Форма для создания собрания
 const formData = reactive(
@@ -121,6 +163,7 @@ const formData = reactive(
         open_at: getCurrentLocalDateForForm(0.17), // ~10 секунд от текущего времени
         close_at: getCurrentLocalDateForForm(2), // 2 минуты от текущего времени
         username: session.username,
+        type: props.isChairman ? 'regular' : 'extra', // Тип по умолчанию в зависимости от роли
         agenda_points: [
           {
             title: 'Тестовый вопрос',
@@ -137,6 +180,7 @@ const formData = reactive(
         open_at: getFutureDateForForm(15, 6, 0), // через 15 дней, 6:00
         close_at: getFutureDateForForm(18, 12, 0), // через 18 дней, 12:00
         username: session.username,
+        type: props.isChairman ? 'regular' : 'extra', // Тип по умолчанию в зависимости от роли
         agenda_points: [
           // пустой массив, либо можно добавить пустой объект для вёрстки
         ],

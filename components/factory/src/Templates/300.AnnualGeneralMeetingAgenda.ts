@@ -25,8 +25,9 @@ export const Schema: JSONSchemaType<Model> = {
       type: 'array',
       items: AgendaQuestionSchema,
     },
+    is_repeated: { type: 'boolean' },
   },
-  required: ['meta', 'coop', 'vars', 'meet', 'user', 'questions'],
+  required: ['meta', 'coop', 'vars', 'meet', 'user', 'questions', 'is_repeated'],
   additionalProperties: true,
 }
 

@@ -5,7 +5,7 @@ import { MetaDocumentInputDTO } from '~/modules/document/dto/meta-document-input
 import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import type { ExcludeCommonProps } from '~/modules/document/types';
 import { Type } from 'class-transformer';
-import { IsArray, IsObject, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsNotEmpty, IsObject, ValidateNested } from 'class-validator';
 import { AgendaMeetDTO } from '~/modules/meet/dto/agenda-meet.dto';
 import { AgendaGeneralMeetQuestionDTO } from '~/modules/meet/dto/agenda-general-meet-question.dto';
 
@@ -25,6 +25,11 @@ class BaseAnnualGeneralMeetingAgendaMetaDocumentInputDTO implements ExcludeCommo
   @ValidateNested({ each: true })
   @Type(() => AgendaGeneralMeetQuestionDTO)
   questions!: AgendaGeneralMeetQuestionDTO[];
+
+  @Field(() => Boolean, { description: 'Флаг повторного собрания' })
+  @IsBoolean()
+  @IsNotEmpty()
+  is_repeated!: boolean;
 }
 
 @InputType(`AnnualGeneralMeetingAgendaGenerateDocumentInput`)

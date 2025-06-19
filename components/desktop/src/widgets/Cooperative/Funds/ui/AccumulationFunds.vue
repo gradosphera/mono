@@ -16,7 +16,7 @@ const loadFunds = async () => {
   try {
     await coop.loadFunds(info.coopname)
   } catch(e: any){
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 
@@ -48,7 +48,7 @@ const delFund = async(fund: FundContract.Tables.AccumulatedFunds.IAccumulatedFun
     SuccessAlert('Фонд успешно удалён')
 
   } catch (e: any){
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 
@@ -74,7 +74,7 @@ const saveFund = async (fund: FundContract.Tables.AccumulatedFunds.IAccumulatedF
 
       SuccessAlert('Фонд успешно обновлён')
     } catch(e: any){
-      FailAlert(e.message)
+      FailAlert(e)
       await coop.loadFunds(info.coopname)
     }
 

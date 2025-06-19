@@ -31,7 +31,7 @@ q-btn(color="green" @click="supply") Подписать акт приёма
       } as ISupplyOnRequest)
       SuccessAlert('Ваша подпись принята')
     } catch (e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 </script>

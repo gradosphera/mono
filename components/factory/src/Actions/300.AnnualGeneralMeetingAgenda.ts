@@ -45,6 +45,7 @@ export class Factory extends DocFactory<AnnualGeneralMeetingAgenda.Action> {
       meet,
       questions,
       user,
+      is_repeated: data.is_repeated,
     }
 
     await super.validate(combinedData, template.model)

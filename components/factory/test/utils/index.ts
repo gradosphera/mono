@@ -506,7 +506,7 @@ export async function preLoading() {
   await generator.save('paymentMethod', paymentData4)
 
   // Добавляем данные для тестирования собраний
-  const testMeetHash = 'test_meet_hash_12345'
+  const testMeetHash = ('test_meet_hash_12345').toUpperCase()
   const testMeetId = '1'
 
   // Добавляем данные собрания в таблицу meets
@@ -529,7 +529,7 @@ export async function preLoading() {
       created_at: '2024-12-15T00:00:00.000',
       open_at: '2024-12-20T10:00:00.000',
       close_at: '2024-12-21T18:00:00.000',
-      quorum_percent: '51',
+      quorum_percent: 51,
       signed_ballots: '0',
       current_quorum_percent: '0',
       cycle: '1',

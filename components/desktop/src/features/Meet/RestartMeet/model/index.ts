@@ -27,6 +27,7 @@ export interface IRestartMeetWithProposalInput {
     context: string
     decision: string
   }[]
+  type: string
 }
 
 /**
@@ -81,11 +82,12 @@ export async function restartMeetWithProposal(data: IRestartMeetWithProposalInpu
     coopname: data.coopname,
     username: data.username,
     meet: {
-      type: 'regular', // По умолчанию очередное собрание
+      type: data.type,
       open_at_datetime: openAtFormatted,
       close_at_datetime: closeAtFormatted
     },
-    questions: questions
+    questions: questions,
+    is_repeated: true
   })
 
   // Подписываем документ
@@ -145,13 +147,24 @@ export const useRestartMeet = (
     if (!meetStore.currentMeet) return false
     processingRef.value = true
     try {
+      // Выводим полную структуру для отладки
+      console.log('Полные данные о собрании:', meetStore.currentMeet)
+
+      // Получаем тип собрания из текущего объекта meet
+      // По умолчанию используем 'regular' если тип не найден
+      const originalMeetType = (meetStore.currentMeet.processing?.meet.proposal?.document.meta as any).meet.type
+
+      // Выводим для отладки
+      console.log('Тип собрания для перезапуска:', originalMeetType)
+
       const result = await restartMeetWithProposal({
         coopname: info.coopname,
         hash: meetStore.currentMeet.hash,
         username: sessionStore.username,
         new_open_at: data.new_open_at,
         new_close_at: data.new_close_at,
-        agenda_points: data.agenda_points
+        agenda_points: data.agenda_points,
+        type: originalMeetType // Передаем оригинальный тип собрания
       })
 
       await meetStore.loadMeet({ coopname: info.coopname, hash: result.processing?.hash as string})

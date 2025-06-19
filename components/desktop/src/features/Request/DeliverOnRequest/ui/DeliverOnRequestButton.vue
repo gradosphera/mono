@@ -32,7 +32,7 @@ q-btn(color="green" @click="delivered") Подтвердить доставку
 
       SuccessAlert('Подтверждение принято')
     } catch (e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 </script>

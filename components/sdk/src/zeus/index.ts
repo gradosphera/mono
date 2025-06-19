@@ -1096,6 +1096,8 @@ export type ValueTypes = {
 	created_at?: string | undefined | null | Variable<any, string>,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null | Variable<any, string>,
+	/** Флаг повторного собрания */
+	is_repeated: boolean | Variable<any, string>,
 	/** Язык документа */
 	lang?: string | undefined | null | Variable<any, string>,
 	/** Ссылки, связанные с документом */
@@ -1134,6 +1136,8 @@ export type ValueTypes = {
 	created_at: string | Variable<any, string>,
 	/** Имя генератора, использованного для создания документа */
 	generator: string | Variable<any, string>,
+	/** Флаг повторного собрания */
+	is_repeated: boolean | Variable<any, string>,
 	/** Язык документа */
 	lang: string | Variable<any, string>,
 	/** Ссылки, связанные с документом */
@@ -1290,6 +1294,8 @@ export type ValueTypes = {
 	decision_id: number | Variable<any, string>,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null | Variable<any, string>,
+	/** Флаг повторного собрания */
+	is_repeated: boolean | Variable<any, string>,
 	/** Язык документа */
 	lang?: string | undefined | null | Variable<any, string>,
 	/** Ссылки, связанные с документом */
@@ -2561,6 +2567,8 @@ export type ValueTypes = {
 	initiator?:boolean | `@${string}`,
 	/** Сертификат инициатора собрания */
 	initiator_certificate?:ValueTypes["UserCertificateUnion"],
+	/** Уровень собрания */
+	level?:boolean | `@${string}`,
 	/** Список пользователей, которые подписали уведомление */
 	notified_users?:boolean | `@${string}`,
 	/** Дата открытия собрания */
@@ -4298,6 +4306,8 @@ export type ResolverInputTypes = {
 	created_at?: string | undefined | null,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
+	/** Флаг повторного собрания */
+	is_repeated: boolean,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
@@ -4336,6 +4346,8 @@ export type ResolverInputTypes = {
 	created_at: string,
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
+	/** Флаг повторного собрания */
+	is_repeated: boolean,
 	/** Язык документа */
 	lang: string,
 	/** Ссылки, связанные с документом */
@@ -4492,6 +4504,8 @@ export type ResolverInputTypes = {
 	decision_id: number,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
+	/** Флаг повторного собрания */
+	is_repeated: boolean,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
@@ -5763,6 +5777,8 @@ export type ResolverInputTypes = {
 	initiator?:boolean | `@${string}`,
 	/** Сертификат инициатора собрания */
 	initiator_certificate?:ResolverInputTypes["UserCertificateUnion"],
+	/** Уровень собрания */
+	level?:boolean | `@${string}`,
 	/** Список пользователей, которые подписали уведомление */
 	notified_users?:boolean | `@${string}`,
 	/** Дата открытия собрания */
@@ -7496,6 +7512,8 @@ export type ModelTypes = {
 	created_at?: string | undefined | null,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
+	/** Флаг повторного собрания */
+	is_repeated: boolean,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
@@ -7534,6 +7552,8 @@ export type ModelTypes = {
 	created_at: string,
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
+	/** Флаг повторного собрания */
+	is_repeated: boolean,
 	/** Язык документа */
 	lang: string,
 	/** Ссылки, связанные с документом */
@@ -7690,6 +7710,8 @@ export type ModelTypes = {
 	decision_id: number,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
+	/** Флаг повторного собрания */
+	is_repeated: boolean,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
@@ -8931,6 +8953,8 @@ export type ModelTypes = {
 	initiator: string,
 	/** Сертификат инициатора собрания */
 	initiator_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null,
+	/** Уровень собрания */
+	level: string,
 	/** Список пользователей, которые подписали уведомление */
 	notified_users: Array<string>,
 	/** Дата открытия собрания */
@@ -10701,6 +10725,8 @@ export type GraphQLTypes = {
 	created_at?: string | undefined | null,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
+	/** Флаг повторного собрания */
+	is_repeated: boolean,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
@@ -10739,6 +10765,8 @@ export type GraphQLTypes = {
 	created_at: string,
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
+	/** Флаг повторного собрания */
+	is_repeated: boolean,
 	/** Язык документа */
 	lang: string,
 	/** Ссылки, связанные с документом */
@@ -10895,6 +10923,8 @@ export type GraphQLTypes = {
 	decision_id: number,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
+	/** Флаг повторного собрания */
+	is_repeated: boolean,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
@@ -12167,6 +12197,8 @@ export type GraphQLTypes = {
 	initiator: string,
 	/** Сертификат инициатора собрания */
 	initiator_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
+	/** Уровень собрания */
+	level: string,
 	/** Список пользователей, которые подписали уведомление */
 	notified_users: Array<string>,
 	/** Дата открытия собрания */

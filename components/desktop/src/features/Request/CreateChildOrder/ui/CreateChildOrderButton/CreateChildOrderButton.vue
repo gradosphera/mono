@@ -50,7 +50,7 @@
       SuccessAlert('Заказ НЕ создан')
       router.push({ name: 'marketplace-user-supplies' }) //TODO роутинг
     } catch (e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 </script>

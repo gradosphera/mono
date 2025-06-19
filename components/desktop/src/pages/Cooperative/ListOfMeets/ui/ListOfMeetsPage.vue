@@ -5,7 +5,7 @@ div
     div.row.justify-center
       div.col-12
         div.row.q-pa-md(v-if="canCreateMeet")
-          CreateMeet
+          CreateMeet(:is-chairman="isChairman")
         MeetCardsList(
           :meets="meets"
           :loading="loading"

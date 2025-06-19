@@ -159,7 +159,7 @@ const handlerSubmit = async (): Promise<void> => {
   } catch (e: any) {
     showDialog.value = false
     isSubmitting.value = false
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 

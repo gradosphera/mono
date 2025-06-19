@@ -62,7 +62,7 @@ const handlerSubmit = async (): Promise<void> => {
   } catch (e: any) {
     console.log('e.message', e.message)
     isSubmitting.value = false
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 

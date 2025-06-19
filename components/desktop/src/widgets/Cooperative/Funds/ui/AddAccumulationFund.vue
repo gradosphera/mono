@@ -47,7 +47,7 @@ const addFund = async() => {
     SuccessAlert('Фонд успешно создан')
   } catch(e: any){
     localShowAdd.value = false
-    FailAlert(e.message)
+    FailAlert(e)
   }
 
 }

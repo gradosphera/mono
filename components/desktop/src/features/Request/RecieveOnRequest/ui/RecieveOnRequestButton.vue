@@ -31,7 +31,7 @@ q-btn(color="green" @click="recieve") получил имущество
 
       SuccessAlert('Подтверждение принято')
     } catch (e: any) {
-      FailAlert(e.message)
+      FailAlert(e)
     }
   }
 </script>

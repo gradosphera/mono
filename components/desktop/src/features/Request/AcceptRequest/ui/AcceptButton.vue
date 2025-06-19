@@ -31,7 +31,7 @@ const accept = async () => {
 
     SuccessAlert('Заявка принята')
   } catch (e: any) {
-    FailAlert(e.message)
+    FailAlert(e)
   }
 }
 </script>

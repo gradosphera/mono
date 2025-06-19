@@ -25,8 +25,9 @@ export const Schema: JSONSchemaType<Model> = {
       type: 'array',
       items: MeetPointSchema,
     },
+    is_repeated: { type: 'boolean' },
   },
-  required: ['meta', 'coop', 'vars', 'decision', 'meet', 'questions'],
+  required: ['meta', 'coop', 'vars', 'decision', 'meet', 'questions', 'is_repeated'],
   additionalProperties: true,
 }
 
