@@ -1,6 +1,14 @@
 // Заглушка для получения числа пайщиков кооператива.
 uint64_t get_total_participants(eosio::name coopname) {
-    // Используем метод из shared_registrator для получения актуального количества активных пайщиков
+    // Получаем кооператив и проверяем режим участков
+    auto cooperative = get_cooperative_or_fail(coopname);
+    
+    // Если включен режим кооперативных участков, используем количество участков
+    if (cooperative.is_branched) {
+        return Branch::get_branch_count(coopname);
+    }
+    
+    // Иначе используем обычный подсчет активных пайщиков
     return Registrator::get_active_participants_count(coopname);
 }
 
@@ -13,6 +21,14 @@ void meet::vote(name coopname, checksum256 hash, name username, document2 ballot
     auto meet_opt = get_meet(coopname, hash);
     eosio::check(meet_opt.has_value(), "Собрание не найдено");
     auto meet_record = meet_opt.value();
+
+    // Получаем кооператив для проверки режима участков
+    auto cooperative = get_cooperative_or_fail(coopname);
+    
+    // Если включен режим кооперативных участков, проверяем что голосующий является уполномоченным
+    if (cooperative.is_branched) {
+        eosio::check(Branch::is_trustee(coopname, username), "Только уполномоченные кооперативных участков могут голосовать при режиме участков");
+    }
 
     // Проверяем статус собрания и временное окно голосования
     eosio::check(meet_record.status == "authorized"_n, "Собрание не авторизовано для голосования");

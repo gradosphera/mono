@@ -7,7 +7,7 @@ import { editTranslation } from '../src/utils/editTranslation';
 
 export class InitialMigration implements Migration {
   async run(): Promise<void> {
-    const ids = [300, 301]; 
+    const ids = [300, 301, 302, 303, 304]; 
 
     for (const id of ids) {
       try {
@@ -16,8 +16,9 @@ export class InitialMigration implements Migration {
           code: 'draft',
           scope: 'draft',
           table: 'drafts',
+          limit: 1000,
         });
-
+        
         const target = drafts.rows.find((draft) => draft.registry_id === id);
         if (!target) {
           console.warn(`Draft with registry_id ${id} not found.`);

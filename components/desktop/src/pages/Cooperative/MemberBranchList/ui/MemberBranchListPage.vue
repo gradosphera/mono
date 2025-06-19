@@ -56,6 +56,8 @@ div
               EditableIndividualCard(:participantData="props.row.trustee" :readonly="true").q-mt-sm
               div.text-wrap
                 p.text-grey для замены председателя участка - измените его имя аккаунта в карточке участка на аккаунт одного из пайщиков.
+              div.q-mt-md.flex.justify-center
+                DeleteBranchButton(:branch="props.row")
 </template>
 
 <script lang="ts" setup>
@@ -63,6 +65,7 @@ import { computed, ref } from 'vue';
 import { useBranchStore } from 'src/entities/Branch/model';
 import { useEditableTableRows } from 'src/shared/lib/composables/useEditableTableRows';
 import { CreateBranchButton } from 'src/features/Branch/CreateBranch';
+import { DeleteBranchButton } from 'src/features/Branch/DeleteBranch';
 import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
 import { BranchCard } from 'src/widgets/BranchCard';
 import { EditableIndividualCard } from 'src/shared/ui/EditableIndividualCard';

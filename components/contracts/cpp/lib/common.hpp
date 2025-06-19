@@ -21,5 +21,6 @@
 #include "shared_approver.hpp"
 #include "shared_registrator.hpp"
 #include "shared_loan.hpp"
+#include "shared_branch.hpp"
 #include "approves.hpp"
 #include "debts.hpp"
