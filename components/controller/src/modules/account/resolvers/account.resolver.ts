@@ -12,6 +12,8 @@ import type { PaginationResultDomainInterface } from '~/domain/common/interfaces
 import { RegisterAccountInputDTO } from '../dto/register-account-input.dto';
 import { RegisteredAccountDTO } from '../dto/registered-account.dto';
 import { UpdateAccountInputDTO } from '../dto/update-account-input.dto';
+import { SearchPrivateAccountsInputDTO } from '../dto/search-private-accounts-input.dto';
+import { PrivateAccountSearchResultDTO } from '../dto/search-private-accounts-result.dto';
 
 export const AccountsPaginationResult = createPaginationResult(AccountDTO, 'Accounts');
 
@@ -38,6 +40,19 @@ export class AccountResolver {
     @Args('options', { type: () => PaginationInputDTO, nullable: true }) options?: PaginationInputDTO
   ): Promise<PaginationResultDomainInterface<AccountDTO>> {
     return await this.accountService.getAccounts(data, options);
+  }
+
+  @Query(() => [PrivateAccountSearchResultDTO], {
+    name: 'searchPrivateAccounts',
+    description:
+      'Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async searchPrivateAccounts(
+    @Args('data', { type: () => SearchPrivateAccountsInputDTO }) data: SearchPrivateAccountsInputDTO
+  ): Promise<PrivateAccountSearchResultDTO[]> {
+    return this.accountService.searchPrivateAccounts(data);
   }
 
   @Mutation(() => RegisteredAccountDTO, {

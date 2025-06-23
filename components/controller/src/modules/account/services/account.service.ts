@@ -8,6 +8,8 @@ import type { RegisterAccountInputDTO } from '../dto/register-account-input.dto'
 import { RegisteredAccountDTO } from '../dto/registered-account.dto';
 import type { DeleteAccountInputDTO } from '../dto/delete-account-input.dto';
 import type { UpdateAccountInputDTO } from '../dto/update-account-input.dto';
+import type { SearchPrivateAccountsInputDTO } from '../dto/search-private-accounts-input.dto';
+import { PrivateAccountSearchResultDTO } from '../dto/search-private-accounts-result.dto';
 
 @Injectable()
 export class AccountService {
@@ -43,5 +45,16 @@ export class AccountService {
   public async registerAccount(data: RegisterAccountInputDTO): Promise<RegisteredAccountDTO> {
     const result = await this.accountDomainInteractor.registerAccount(data);
     return new RegisteredAccountDTO(result);
+  }
+
+  /**
+   * Поиск приватных аккаунтов
+   * @param data Входные данные для поиска
+   * @returns Массив результатов поиска
+   */
+  public async searchPrivateAccounts(data: SearchPrivateAccountsInputDTO): Promise<PrivateAccountSearchResultDTO[]> {
+    const results = await this.accountDomainInteractor.searchPrivateAccounts(data);
+
+    return results.map((result) => new PrivateAccountSearchResultDTO(result));
   }
 }

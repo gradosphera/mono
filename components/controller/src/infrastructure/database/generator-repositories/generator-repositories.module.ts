@@ -14,6 +14,8 @@ import { PROJECT_FREE_DECISION_REPOSITORY } from '~/domain/common/repositories/p
 import { ProjectFreeDecisionRepositoryImplementation } from './repositories/project-free-decision-generator.repository';
 import { VARS_REPOSITORY } from '~/domain/common/repositories/vars.repository';
 import { VarsRepositoryImplementation } from './repositories/vars-generator.repository';
+import { SEARCH_PRIVATE_ACCOUNTS_REPOSITORY } from '~/domain/common/repositories/search-private-accounts.repository';
+import { SearchPrivateAccountsRepositoryImplementation } from './repositories/search-private-accounts-generator.repository';
 
 @Global()
 @Module({
@@ -46,6 +48,10 @@ import { VarsRepositoryImplementation } from './repositories/vars-generator.repo
       provide: VARS_REPOSITORY,
       useClass: VarsRepositoryImplementation,
     },
+    {
+      provide: SEARCH_PRIVATE_ACCOUNTS_REPOSITORY,
+      useClass: SearchPrivateAccountsRepositoryImplementation,
+    },
   ],
   exports: [
     ORGANIZATION_REPOSITORY,
@@ -55,6 +61,7 @@ import { VarsRepositoryImplementation } from './repositories/vars-generator.repo
     DOCUMENT_REPOSITORY,
     PROJECT_FREE_DECISION_REPOSITORY,
     VARS_REPOSITORY,
+    SEARCH_PRIVATE_ACCOUNTS_REPOSITORY,
   ],
 })
 export class GeneratorRepositoriesModule {}
