@@ -44,7 +44,7 @@ export function setupNavigationGuard(router: Router) {
 
         // Переходим на маршрут по умолчанию для выбранного рабочего стола
         desktops.goToDefaultPage(router)
-        // next(false)
+        next(false)
         return
       } else {
         // Если пользователь не авторизован, используем nonAuthorizedHome

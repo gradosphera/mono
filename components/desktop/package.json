@@ -80,7 +80,7 @@
   },
   "devDependencies": {
     "@intlify/vite-plugin-vue-i18n": "^3.3.1",
-    "@prettier/plugin-pug": "^3.0.0",
+    "@prettier/plugin-pug": "^3.2.0",
     "@quasar/app-vite": "^1.9.3",
     "@types/node": "^12.20.21",
     "@typescript-eslint/eslint-plugin": "^5.10.0",
@@ -93,7 +93,7 @@
     "eslint-plugin-pug": "^1.2.5",
     "eslint-plugin-vue": "^9.26.0",
     "eslint-plugin-vue-pug": "^0.6.2",
-    "prettier": "^2.8.8",
+    "prettier": "^3.6.0",
     "typescript": "^4.5.4",
     "vite-plugin-checker": "^0.6.4",
     "vue-tsc": "^1.8.22"
