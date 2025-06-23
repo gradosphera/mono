@@ -564,6 +564,9 @@ export const AllTypesProps: Record<string,any> = {
 		getPayments:{
 			data:"GetPaymentsInput",
 			options:"PaginationInput"
+		},
+		searchPrivateAccounts:{
+			data:"SearchPrivateAccountsInput"
 		}
 	},
 	ReceiveOnRequestInput:{
@@ -618,6 +621,9 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	ReturnByAssetStatementSignedMetaDocumentInput:{
 		request:"CommonRequestInput"
+	},
+	SearchPrivateAccountsInput:{
+
 	},
 	SelectBranchGenerateDocumentInput:{
 
@@ -1356,6 +1362,17 @@ export const ReturnTypes: Record<string,any> = {
 		organization_data:"Organization",
 		type:"AccountType"
 	},
+	PrivateAccountSearchData:{
+		"...on Entrepreneur":"Entrepreneur",
+		"...on Individual":"Individual",
+		"...on Organization":"Organization"
+	},
+	PrivateAccountSearchResult:{
+		data:"PrivateAccountSearchData",
+		highlightedFields:"String",
+		score:"Float",
+		type:"String"
+	},
 	PublicChairman:{
 		first_name:"String",
 		last_name:"String",
@@ -1373,7 +1390,8 @@ export const ReturnTypes: Record<string,any> = {
 		getMeets:"MeetAggregate",
 		getPaymentMethods:"PaymentMethodPaginationResult",
 		getPayments:"PaymentPaginationResult",
-		getSystemInfo:"SystemInfo"
+		getSystemInfo:"SystemInfo",
+		searchPrivateAccounts:"PrivateAccountSearchResult"
 	},
 	Question:{
 		context:"String",

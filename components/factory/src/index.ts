@@ -8,8 +8,7 @@ import type { IFilterDocuments, IGeneratedDocument, Numbers, externalDataTypes, 
 import type { IGenerate, IGenerationOptions } from './Interfaces/Documents'
 import * as Actions from './Actions'
 
-
-import { MongoDBConnector } from './Services/Databazor'
+import { type ISearchResult, MongoDBConnector, SearchService } from './Services/Databazor'
 import type { ExternalIndividualData } from './Models/Individual'
 import { Individual } from './Models/Individual'
 import type { ExternalEntrepreneurData, ExternalOrganizationData, IVars } from './Models'
@@ -29,6 +28,9 @@ export type { ExternalEntrepreneurData as IEntrepreneurData } from './Models'
 export type { CooperativeData as ICooperativeData } from './Models'
 export type { ExternalProjectData as IExternalProjectData } from './Models'
 
+// Экспортируем интерфейс результатов поиска
+export type { ISearchResult } from './Services/Databazor'
+
 export interface IGenerator {
   connect: (mongoUri: string) => Promise<void>
   disconnect: () => Promise<void>
@@ -43,6 +45,9 @@ export interface IGenerator {
   list: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<CooperativeModel.Document.IGetResponse<internalFilterTypes>>
 
   getHistory: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypesArrays>
+
+  // Новый метод поиска
+  search: (query: string) => Promise<ISearchResult[]>
 }
 
 export class Generator implements IGenerator {
@@ -54,9 +59,15 @@ export class Generator implements IGenerator {
   // Определение хранилища
   public storage!: MongoDBConnector
 
+  // Сервис поиска
+  private searchService!: SearchService
+
   // Метод подключения к хранилищу
   async connect(mongoUri: string): Promise<void> {
     this.storage = new MongoDBConnector(mongoUri)
+
+    // Инициализация сервиса поиска
+    this.searchService = new SearchService(this.storage)
 
     // Инициализация фабрик документов
     this.factories = {
@@ -176,5 +187,10 @@ export class Generator implements IGenerator {
 
   async constructCooperative(username: string, block_num?: number): Promise<CooperativeData | null> {
     return new Cooperative(this.storage).getOne(username, block_num)
+  }
+
+  // Новый метод поиска
+  async search(query: string): Promise<ISearchResult[]> {
+    return this.searchService.search(query)
   }
 }

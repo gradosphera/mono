@@ -3364,6 +3364,22 @@ type PrivateAccount {
   type: AccountType!
 }
 
+union PrivateAccountSearchData = Entrepreneur | Individual | Organization
+
+type PrivateAccountSearchResult {
+  """Данные найденного аккаунта"""
+  data: PrivateAccountSearchData!
+
+  """Поля, в которых найдены совпадения"""
+  highlightedFields: [String!]
+
+  """Оценка релевантности результата"""
+  score: Float
+
+  """Тип аккаунта"""
+  type: String!
+}
+
 input ProhibitRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -3536,6 +3552,11 @@ type Query {
 
   """Получить сводную публичную информацию о системе"""
   getSystemInfo: SystemInfo!
+
+  """
+  Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.
+  """
+  searchPrivateAccounts(data: SearchPrivateAccountsInput!): [PrivateAccountSearchResult!]!
 }
 
 """Вопрос повестки собрания с результатами голосования"""
@@ -4033,6 +4054,11 @@ input ReturnByAssetStatementSignedMetaDocumentInput {
 type SbpAccount {
   """Мобильный телефон получателя"""
   phone: String!
+}
+
+input SearchPrivateAccountsInput {
+  """Поисковый запрос для поиска приватных аккаунтов"""
+  query: String!
 }
 
 input SelectBranchGenerateDocumentInput {

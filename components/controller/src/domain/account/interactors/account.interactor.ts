@@ -17,6 +17,10 @@ import { AccountType } from '~/modules/account/enum/account-type.enum';
 import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { INDIVIDUAL_REPOSITORY, IndividualRepository } from '~/domain/common/repositories/individual.repository';
 import { ENTREPRENEUR_REPOSITORY, EntrepreneurRepository } from '~/domain/common/repositories/entrepreneur.repository';
+import {
+  SEARCH_PRIVATE_ACCOUNTS_REPOSITORY,
+  SearchPrivateAccountsRepository,
+} from '~/domain/common/repositories/search-private-accounts.repository';
 import { IndividualDomainEntity } from '~/domain/branch/entities/individual-domain.entity';
 import { OrganizationDomainEntity } from '~/domain/branch/entities/organization-domain.entity';
 import { EntrepreneurDomainEntity } from '~/domain/branch/entities/entrepreneur-domain.entity';
@@ -24,6 +28,10 @@ import { ACCOUNT_BLOCKCHAIN_PORT, AccountBlockchainPort } from '../interfaces/ac
 import { CANDIDATE_REPOSITORY, CandidateRepository } from '../repository/candidate.repository';
 import { userStatus } from '~/types/user.types';
 import { sha256 } from '~/utils/sha256';
+import type {
+  SearchPrivateAccountsInputDomainInterface,
+  PrivateAccountSearchResultDomainInterface,
+} from '~/domain/common/interfaces/search-private-accounts-domain.interface';
 
 @Injectable()
 export class AccountDomainInteractor {
@@ -32,6 +40,8 @@ export class AccountDomainInteractor {
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
     @Inject(INDIVIDUAL_REPOSITORY) private readonly individualRepository: IndividualRepository,
     @Inject(ENTREPRENEUR_REPOSITORY) private readonly entrepreneurRepository: EntrepreneurRepository,
+    @Inject(SEARCH_PRIVATE_ACCOUNTS_REPOSITORY)
+    private readonly searchPrivateAccountsRepository: SearchPrivateAccountsRepository,
     @Inject(ACCOUNT_BLOCKCHAIN_PORT) private readonly accountBlockchainPort: AccountBlockchainPort,
     @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository
   ) {}
@@ -175,5 +185,22 @@ export class AccountDomainInteractor {
       this.logger.error(`Ошибка при регистрации аккаунта ${username} в блокчейне: ${error.message}`, error.stack);
       throw new HttpException(`Ошибка при регистрации в блокчейне: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  /**
+   * Поиск приватных аккаунтов по запросу
+   * @param input Входные данные для поиска
+   * @returns Массив результатов поиска
+   */
+  async searchPrivateAccounts(
+    input: SearchPrivateAccountsInputDomainInterface
+  ): Promise<PrivateAccountSearchResultDomainInterface[]> {
+    this.logger.log(`Поиск приватных аккаунтов по запросу: "${input.query}"`);
+
+    const results = await this.searchPrivateAccountsRepository.searchPrivateAccounts(input);
+
+    this.logger.log(`Найдено ${results.length} приватных аккаунтов`);
+
+    return results;
   }
 }

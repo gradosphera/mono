@@ -920,7 +920,7 @@ export type ScalarCoders = {
 	JSON?: ScalarResolver;
 	JSONObject?: ScalarResolver;
 }
-type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"] | GraphQLTypes["UserCertificateUnion"]
+type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"] | GraphQLTypes["PrivateAccountSearchData"] | GraphQLTypes["UserCertificateUnion"]
 
 export type ValueTypes = {
     ["AcceptChildOrderInput"]: {
@@ -3176,6 +3176,22 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PrivateAccountSearchData"]: AliasType<{		["...on Entrepreneur"]?: ValueTypes["Entrepreneur"],
+		["...on Individual"]?: ValueTypes["Individual"],
+		["...on Organization"]?: ValueTypes["Organization"]
+		__typename?: boolean | `@${string}`
+}>;
+	["PrivateAccountSearchResult"]: AliasType<{
+	/** Данные найденного аккаунта */
+	data?:ValueTypes["PrivateAccountSearchData"],
+	/** Поля, в которых найдены совпадения */
+	highlightedFields?:boolean | `@${string}`,
+	/** Оценка релевантности результата */
+	score?:boolean | `@${string}`,
+	/** Тип аккаунта */
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -3290,6 +3306,7 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentPaginationResult"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
+searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Variable<any, string>},ValueTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Вопрос повестки собрания с результатами голосования */
@@ -3637,6 +3654,10 @@ getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Vari
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SearchPrivateAccountsInput"]: {
+	/** Поисковый запрос для поиска приватных аккаунтов */
+	query: string | Variable<any, string>
+};
 	["SelectBranchGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -6387,6 +6408,23 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PrivateAccountSearchData"]: AliasType<{
+	Entrepreneur?:ResolverInputTypes["Entrepreneur"],
+	Individual?:ResolverInputTypes["Individual"],
+	Organization?:ResolverInputTypes["Organization"],
+		__typename?: boolean | `@${string}`
+}>;
+	["PrivateAccountSearchResult"]: AliasType<{
+	/** Данные найденного аккаунта */
+	data?:ResolverInputTypes["PrivateAccountSearchData"],
+	/** Поля, в которых найдены совпадения */
+	highlightedFields?:boolean | `@${string}`,
+	/** Оценка релевантности результата */
+	score?:boolean | `@${string}`,
+	/** Тип аккаунта */
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -6501,6 +6539,7 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaymentPaginationResult"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
+searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"]},ResolverInputTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Вопрос повестки собрания с результатами голосования */
@@ -6848,6 +6887,10 @@ getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | nul
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SearchPrivateAccountsInput"]: {
+	/** Поисковый запрос для поиска приватных аккаунтов */
+	query: string
+};
 	["SelectBranchGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -9608,6 +9651,17 @@ export type ModelTypes = {
 	/** Тип аккаунта */
 	type: ModelTypes["AccountType"]
 };
+	["PrivateAccountSearchData"]:ModelTypes["Entrepreneur"] | ModelTypes["Individual"] | ModelTypes["Organization"];
+	["PrivateAccountSearchResult"]: {
+		/** Данные найденного аккаунта */
+	data: ModelTypes["PrivateAccountSearchData"],
+	/** Поля, в которых найдены совпадения */
+	highlightedFields?: Array<string> | undefined | null,
+	/** Оценка релевантности результата */
+	score?: number | undefined | null,
+	/** Тип аккаунта */
+	type: string
+};
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -9728,7 +9782,9 @@ export type ModelTypes = {
 	/** Получить список платежей */
 	getPayments: ModelTypes["PaymentPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
-	getSystemInfo: ModelTypes["SystemInfo"]
+	getSystemInfo: ModelTypes["SystemInfo"],
+	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
+	searchPrivateAccounts: Array<ModelTypes["PrivateAccountSearchResult"]>
 };
 	/** Вопрос повестки собрания с результатами голосования */
 ["Question"]: {
@@ -10066,6 +10122,10 @@ export type ModelTypes = {
 	["SbpAccount"]: {
 		/** Мобильный телефон получателя */
 	phone: string
+};
+	["SearchPrivateAccountsInput"]: {
+	/** Поисковый запрос для поиска приватных аккаунтов */
+	query: string
 };
 	["SelectBranchGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -12879,6 +12939,23 @@ export type GraphQLTypes = {
 	/** Тип аккаунта */
 	type: GraphQLTypes["AccountType"]
 };
+	["PrivateAccountSearchData"]:{
+        	__typename:"Entrepreneur" | "Individual" | "Organization"
+        	['...on Entrepreneur']: '__union' & GraphQLTypes["Entrepreneur"];
+	['...on Individual']: '__union' & GraphQLTypes["Individual"];
+	['...on Organization']: '__union' & GraphQLTypes["Organization"];
+};
+	["PrivateAccountSearchResult"]: {
+	__typename: "PrivateAccountSearchResult",
+	/** Данные найденного аккаунта */
+	data: GraphQLTypes["PrivateAccountSearchData"],
+	/** Поля, в которых найдены совпадения */
+	highlightedFields?: Array<string> | undefined | null,
+	/** Оценка релевантности результата */
+	score?: number | undefined | null,
+	/** Тип аккаунта */
+	type: string
+};
 	["ProhibitRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -13001,7 +13078,9 @@ export type GraphQLTypes = {
 	/** Получить список платежей */
 	getPayments: GraphQLTypes["PaymentPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
-	getSystemInfo: GraphQLTypes["SystemInfo"]
+	getSystemInfo: GraphQLTypes["SystemInfo"],
+	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
+	searchPrivateAccounts: Array<GraphQLTypes["PrivateAccountSearchResult"]>
 };
 	/** Вопрос повестки собрания с результатами голосования */
 ["Question"]: {
@@ -13347,6 +13426,10 @@ export type GraphQLTypes = {
 	__typename: "SbpAccount",
 	/** Мобильный телефон получателя */
 	phone: string
+};
+	["SearchPrivateAccountsInput"]: {
+		/** Поисковый запрос для поиска приватных аккаунтов */
+	query: string
 };
 	["SelectBranchGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -14013,6 +14096,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByAssetStatementGenerateDocumentInput"]: ValueTypes["ReturnByAssetStatementGenerateDocumentInput"];
 	["ReturnByAssetStatementSignedDocumentInput"]: ValueTypes["ReturnByAssetStatementSignedDocumentInput"];
 	["ReturnByAssetStatementSignedMetaDocumentInput"]: ValueTypes["ReturnByAssetStatementSignedMetaDocumentInput"];
+	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
 	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];
 	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];
 	["SelectBranchSignedDocumentInput"]: ValueTypes["SelectBranchSignedDocumentInput"];
