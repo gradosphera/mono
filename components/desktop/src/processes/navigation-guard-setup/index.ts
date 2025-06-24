@@ -43,6 +43,7 @@ export function setupNavigationGuard(router: Router) {
         }
 
         // Переходим на маршрут по умолчанию для выбранного рабочего стола
+        next();
         desktops.goToDefaultPage(router);
 
         return;

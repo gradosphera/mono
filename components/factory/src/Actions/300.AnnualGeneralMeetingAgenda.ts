@@ -37,7 +37,6 @@ export class Factory extends DocFactory<AnnualGeneralMeetingAgenda.Action> {
 
     // Предполагается, что даты уже приходят в московском формате с фронтенда
     // Сохраняем их как есть, без дополнительного преобразования или добавления суффикса
-    console.log('coop os: ', coop)
     const combinedData: AnnualGeneralMeetingAgenda.Model = {
       meta,
       coop,

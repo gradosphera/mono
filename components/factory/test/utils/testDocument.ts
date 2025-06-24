@@ -1,3 +1,5 @@
+import { promises as fs } from 'node:fs'
+import * as path from 'node:path'
 import { expect } from 'vitest'
 import { loadBufferFromDisk } from '../../src/Utils/loadBufferFromDisk'
 import { saveBufferToDisk } from '../../src/Utils/saveBufferToDisk'
@@ -13,14 +15,17 @@ export async function testDocumentGeneration<T extends IGenerate = IGenerate>(
   // Генерируем уникальный суффикс для имен файлов
   const uniqueSuffix = Date.now().toString(36) + Math.random().toString(36).substring(2, 7)
 
-  const filename1 = `${document.meta.title}-${document.meta.username}-${uniqueSuffix}.pdf`
+  const filename1 = `${params.registry_id}.${document.meta.title}-${document.meta.username}-${uniqueSuffix}.pdf`
   await saveBufferToDisk(document.binary, filename1)
+  // Сохраняем копию в уникальную директорию без uniqueSuffix
+  const uniqueDocFilename = path.join('__unique_docs__', `${params.registry_id}.${document.meta.title}-${document.meta.username}.pdf`)
+  await saveBufferToDisk(document.binary, uniqueDocFilename)
 
   const regenerated_document: IGeneratedDocument = await generator.generate({
     ...document.meta,
   })
 
-  const filename2 = `${document.meta.title}-${document.meta.username}-regenerated-${uniqueSuffix}.pdf`
+  const filename2 = `${params.registry_id}.${document.meta.title}-${document.meta.username}-regenerated-${uniqueSuffix}.pdf`
   await saveBufferToDisk(regenerated_document.binary, filename2)
 
   expect(document.meta).toEqual(regenerated_document.meta)

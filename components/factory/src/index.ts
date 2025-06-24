@@ -96,6 +96,7 @@ export class Generator implements IGenerator {
       [Actions.ReturnByAssetStatement.Template.registry_id]: new Actions.ReturnByAssetStatement.Factory(this.storage), // 800
       [Actions.ReturnByAssetDecision.Template.registry_id]: new Actions.ReturnByAssetDecision.Factory(this.storage), // 801
       [Actions.ReturnByAssetAct.Template.registry_id]: new Actions.ReturnByAssetAct.Factory(this.storage), // 802
+      [Actions.ReturnByMoney.Template.registry_id]: new Actions.ReturnByMoney.Factory(this.storage), // 900
       [Actions.AssetContributionDecision.Template.registry_id]: new Actions.AssetContributionDecision.Factory(this.storage), // 701
       [Actions.AssetContributionAct.Template.registry_id]: new Actions.AssetContributionAct.Factory(this.storage), // 702
       [Actions.InvestmentAgreement.Template.registry_id]: new Actions.InvestmentAgreement.Factory(this.storage), // 1000

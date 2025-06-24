@@ -280,9 +280,9 @@ export async function preLoading() {
 
   const userData: ExternalIndividualData = {
     username: 'ant',
-    first_name: 'Алексей',
-    last_name: 'Муравьев',
-    middle_name: 'Николаевич',
+    first_name: 'Иван',
+    last_name: 'Иванов',
+    middle_name: 'Иванович',
     birthdate: '2023-04-01',
     phone: '+71234567890',
     email: 'john.doe@example.com',
@@ -324,9 +324,9 @@ export async function preLoading() {
     short_name: '"ПК Восход"',
     full_name: 'Потребительский Кооператив "ВОСХОД"',
     represented_by: {
-      first_name: 'Алексей',
-      last_name: 'Муравьев',
-      middle_name: 'Николаевич',
+      first_name: 'Иван',
+      last_name: 'Иванов',
+      middle_name: 'Иванович',
       position: 'Председатель',
       based_on: 'Решение общего собрания №1',
     },
