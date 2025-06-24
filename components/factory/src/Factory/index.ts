@@ -606,4 +606,19 @@ export abstract class DocFactory<T extends IGenerate> {
     const [, amount, symbol] = match
     return `${Number.parseFloat(amount).toFixed(precision)} ${symbol}`
   }
+
+  public formatPaymentDetails(paymentMethod: any, recipientName: string): string {
+    switch (paymentMethod.method_type) {
+      case 'bank_transfer': {
+        const bankData = paymentMethod.data as any // IBankAccount из cooptypes
+        return `№ счета получателя: ${bankData.account_number}\nБанк получателя: ${bankData.bank_name}\nКорр. счет банка: ${bankData.details?.corr || ''}\nБИК ${bankData.details?.bik || ''}\nПолучатель: ${recipientName}`
+      }
+      case 'sbp': {
+        const sbpData = paymentMethod.data as any // ISbpDetails из cooptypes
+        return `СБП\nТелефон получателя: ${sbpData.phone}`
+      }
+      default:
+        return JSON.stringify(paymentMethod.data)
+    }
+  }
 }

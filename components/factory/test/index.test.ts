@@ -223,9 +223,9 @@ describe('тест генератора документов', async () => {
       short_name: '"ПК Восход"',
       full_name: 'Потребительский Кооператив "ВОСХОД"',
       represented_by: {
-        first_name: 'Алексей',
-        last_name: 'Муравьев',
-        middle_name: 'Николаевич',
+        first_name: 'Иван',
+        last_name: 'Иванов',
+        middle_name: 'Иванович',
         position: 'Председатель',
         based_on: 'Решение общего собрания №1',
       },

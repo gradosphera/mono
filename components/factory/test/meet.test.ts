@@ -15,7 +15,7 @@ beforeEach(async () => {
 })
 
 describe('тест генератора документов общих собраний', async () => {
-  const _testMeetHash = 'test_meet_hash_12345'
+  const _testMeetHash = ('test_meet_hash_12345').toUpperCase()
   const _testDecisionId = 2
 
   // Тестовые данные для документа 300 (передаются напрямую)
