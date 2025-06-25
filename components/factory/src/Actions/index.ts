@@ -19,6 +19,7 @@ export * as AssetContributionAct from './702.AssetContributionAct'
 export * as ReturnByAssetDecision from './801.ReturnByAssetDecision'
 export * as ReturnByAssetAct from './802.ReturnByAssetAct'
 export * as ReturnByMoney from './900.ReturnByMoney'
+export * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 
 export * as InvestmentAgreement from './1000.InvestmentAgreement'
 export * as InvestByResultStatement from './1001.InvestByResultStatement'

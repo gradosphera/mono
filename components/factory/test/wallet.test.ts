@@ -45,4 +45,17 @@ describe('тестируем цифровой кошелёк', () => {
       },
     })
   })
+
+  it('генерация решения о возврате паевого взноса (ReturnByMoneyDecision)', async () => {
+    await testDocumentGeneration({
+      registry_id: Cooperative.Registry.ReturnByMoneyDecision.registry_id,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      decision_id: 9001,
+      payment_hash: 'abc123def456hash789',
+      amount: '50000',
+      currency: 'руб.',
+    })
+  })
 })

@@ -18,6 +18,8 @@ import { PaymentModule } from './payment/payment.module';
 import { CooplaceModule } from './cooplace/cooplace.module';
 import { DesktopModule } from './desktop/desktop.module';
 import { MeetModule } from './meet/meet.module';
+import { GatewayModule } from './gateway/gateway.module';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { MeetModule } from './meet/meet.module';
     ParticipantModule,
     CooplaceModule,
     MeetModule,
+    GatewayModule,
+    WalletModule,
   ],
   exports: [
     AccountModule,
@@ -59,6 +63,8 @@ import { MeetModule } from './meet/meet.module';
     ParticipantModule,
     CooplaceModule,
     MeetModule,
+    GatewayModule,
+    WalletModule,
   ],
 })
 export class ApplicationModule {}

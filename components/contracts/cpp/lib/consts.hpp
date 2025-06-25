@@ -114,6 +114,9 @@ static const std::set<eosio::name> soviet_actions = {
     "capwthdrprog"_n, //произвести возврат накопленных членских взносов по программе на капиталиста
     "capwthdrproj"_n, //произвести возврат накопленных членских взносов по проекту на актора
     "capwthdrres"_n, //произвести возврат из задания
+
+    //WALLET
+    "createwthd"_n, //создать заявление на возврат паевого взноса
 };
 
 static const std::set<eosio::name> gateway_income_actions = {

@@ -15,6 +15,10 @@ import { MEET_BLOCKCHAIN_PORT } from '~/domain/meet/ports/meet-blockchain.port';
 import { MeetBlockchainAdapter } from './adapters/meet-blockchain.adapter';
 import { DomainToBlockchainUtils } from './utils/domain-to-blockchain.utils';
 import { DomainModule } from '~/domain/domain.module';
+import { GatewayBlockchainAdapter } from './adapters/gateway-blockchain.adapter';
+import { WALLET_BLOCKCHAIN_PORT } from '~/domain/wallet/ports/wallet-blockchain.port';
+import { GATEWAY_BLOCKCHAIN_PORT } from '~/domain/gateway/ports/gateway-blockchain.port';
+import { WalletBlockchainAdapter } from './adapters/wallet-blockchain.adapter';
 
 @Global()
 @Module({
@@ -49,9 +53,20 @@ import { DomainModule } from '~/domain/domain.module';
       provide: MEET_BLOCKCHAIN_PORT,
       useClass: MeetBlockchainAdapter,
     },
+    // Провайдеры для gateway
+    {
+      provide: GATEWAY_BLOCKCHAIN_PORT,
+      useClass: GatewayBlockchainAdapter,
+    },
+    // Провайдеры для wallet
+    {
+      provide: WALLET_BLOCKCHAIN_PORT,
+      useClass: WalletBlockchainAdapter,
+    },
     DomainToBlockchainUtils,
   ],
   exports: [
+    BlockchainService,
     BLOCKCHAIN_PORT,
     BRANCH_BLOCKCHAIN_PORT,
     SYSTEM_BLOCKCHAIN_PORT,
@@ -59,6 +74,8 @@ import { DomainModule } from '~/domain/domain.module';
     SOVIET_BLOCKCHAIN_PORT,
     COOPLACE_BLOCKCHAIN_PORT,
     MEET_BLOCKCHAIN_PORT,
+    GATEWAY_BLOCKCHAIN_PORT,
+    WALLET_BLOCKCHAIN_PORT,
     DomainToBlockchainUtils,
   ],
 })

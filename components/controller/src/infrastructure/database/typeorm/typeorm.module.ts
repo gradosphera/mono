@@ -21,6 +21,9 @@ import { TypeOrmCandidateRepository } from './repositories/typeorm-candidate.rep
 import { MeetProcessedEntity } from './entities/meet-processed.entity';
 import { MEET_PROCESSED_REPOSITORY } from '~/domain/meet/repositories/meet-processed.repository';
 import { TypeOrmMeetProcessedRepository } from './repositories/typeorm-meet-processed.repository';
+import { PaymentEntity } from './entities/payment.entity';
+import { PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
+import { TypeOrmPaymentRepository } from './repositories/typeorm-payment.repository';
 
 @Global()
 @Module({
@@ -43,6 +46,7 @@ import { TypeOrmMeetProcessedRepository } from './repositories/typeorm-meet-proc
       MeetProcessedEntity,
       MigrationEntity,
       CandidateEntity,
+      PaymentEntity,
     ]),
   ],
   providers: [
@@ -70,6 +74,10 @@ import { TypeOrmMeetProcessedRepository } from './repositories/typeorm-meet-proc
       provide: CANDIDATE_REPOSITORY,
       useClass: TypeOrmCandidateRepository,
     },
+    {
+      provide: PAYMENT_REPOSITORY,
+      useClass: TypeOrmPaymentRepository,
+    },
   ],
   exports: [
     NestTypeOrmModule,
@@ -79,6 +87,7 @@ import { TypeOrmMeetProcessedRepository } from './repositories/typeorm-meet-proc
     MEET_PROCESSED_REPOSITORY,
     MIGRATION_REPOSITORY,
     CANDIDATE_REPOSITORY,
+    PAYMENT_REPOSITORY,
   ],
 })
 export class TypeOrmModule {}

@@ -99,7 +99,7 @@ describe('Проверка данных', () => {
         skip_save: false,
       };
 
-      let res = await request(app)
+      const res = await request(app)
         .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
@@ -135,7 +135,7 @@ describe('Проверка данных', () => {
         skip_save: false,
       };
 
-      let res = await request(app)
+      const res = await request(app)
         .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
@@ -147,7 +147,7 @@ describe('Проверка данных', () => {
       expect(res.body.html).toBeDefined();
       expect(res.body.hash).toBeDefined();
 
-      let res_regenerated = await request(app)
+      const res_regenerated = await request(app)
         .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(res.body.meta);
@@ -175,7 +175,7 @@ describe('Проверка данных', () => {
         signature: 'any imaged signature',
         skip_save: false,
       };
-      let res = await request(app)
+      const res = await request(app)
         .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
@@ -195,7 +195,7 @@ describe('Проверка данных', () => {
         statement: signedDocument,
       };
 
-      let joincoop_result = await request(app)
+      const joincoop_result = await request(app)
         .post('/v1/users/join-cooperative')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(joinCoopData);
@@ -220,7 +220,7 @@ describe('Проверка данных', () => {
         signature: 'any imaged signature',
         skip_save: false,
       };
-      let res = await request(app)
+      const res = await request(app)
         .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
@@ -246,7 +246,7 @@ describe('Проверка данных', () => {
         statement: signedDocument,
       };
 
-      let joincoop_result = await request(app)
+      const joincoop_result = await request(app)
         .post('/v1/users/join-cooperative')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(joinCoopData);
@@ -276,7 +276,7 @@ describe('Проверка данных', () => {
         skip_save: false,
       };
 
-      let res = await request(app)
+      const res = await request(app)
         .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(options);
@@ -288,7 +288,7 @@ describe('Проверка данных', () => {
       expect(res.body.html).toBeDefined();
       expect(res.body.hash).toBeDefined();
 
-      let res_regenerated = await request(app)
+      const res_regenerated = await request(app)
         .post('/v1/documents/generate')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(res.body.meta);
@@ -315,7 +315,7 @@ describe('Проверка данных', () => {
         statement: signedDocument,
       };
 
-      let joincoop_result = await request(app)
+      const joincoop_result = await request(app)
         .post('/v1/users/join-cooperative')
         .set('Authorization', `Bearer ${registeredUser.body.tokens.access.token}`)
         .send(joinCoopData);

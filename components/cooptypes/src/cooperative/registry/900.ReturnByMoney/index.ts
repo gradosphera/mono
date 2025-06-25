@@ -5,7 +5,7 @@ export const registry_id = 900
 
 // Интерфейс запроса без чувствительных данных
 export interface IMoneyReturnRequest {
-  method_id: string // ID платежного метода вместо банковских реквизитов
+  method_id: string // ID платежного метода
   amount: string
   currency: string
 }
@@ -33,7 +33,7 @@ export interface Model {
 
 export const title = 'Заявление на возврат паевого взноса денежными средствами'
 export const description = 'Форма заявления на возврат паевого взноса денежными средствами'
-export const context = '<div class="digital-document"><div style="text-align: right; margin:">\n<p style="margin: 0px !important">{% trans \'v_soviet\' %} {{ vars.full_abbr_genitive}} "{{vars.name}}"</p>\n<p style="margin: 0px !important">{% trans \'from_participant\' %}</p>\n<p style="margin: 0px !important">{{ user.full_name_or_short_name}}</p>\n</div>\n<div style="text-align: center">\n<h1 class="header">{% trans \'statement\' %}</h1>\n</div>\n<p>{% trans \'money_return_request\', coop.short_name %}</p>\n<table>\n<tbody>\n<tr>\n<th>{% trans \'asset_form\' %}</th>\n<td>{% trans \'money_assets\' %}</td>\n</tr>\n<tr>\n<th>{% trans \'name_requisites\' %}</th>\n<td>{% trans \'return_part_contribution\' %}</td>\n</tr>\n<tr>\n<th>№</th>\n<td>1</td>\n</tr>\n<tr>\n<th>{% trans \'payment_details_field\' %}</th>\n<td style="white-space: pre-line;">{{ request.payment_details }}</td>\n</tr>\n<tr>\n<th>{% trans \'article\' %}</th>\n<td>na</td>\n</tr>\n<tr>\n<th>{% trans \'unit_measurement\' %}</th>\n<td>{{ request.currency }}</td>\n</tr>\n<tr>\n<th>{% trans \'quantity\' %}</th>\n<td>{{ request.amount }}</td>\n</tr>\n<tr>\n<th>{% trans \'unit_cost\' %}</th>\n<td>na</td>\n</tr>\n<tr>\n<th>{% trans \'total_cost\' %}</th>\n<td>{{ request.amount }} {{ request.currency }}</td>\n</tr>\n</tbody>\n</table>\n<p>{% trans \'signature\' %}</p>\n<p>{{ user.full_name_or_short_name }}</p>\n<p>{{ meta.created_at }}</p>\n\n<style>\n.digital-document {\npadding: 20px;\nwhite-space: pre-wrap;\n};\ntable {\n  width: 100%;\n  border-collapse: collapse;\n}\nth, td {\n  border: 1px solid #ccc;\n  padding: 8px;\n  text-align: left;\n  word-wrap: break-word; \n  overflow-wrap: break-word; \n}\nth {\n  background-color: #f4f4f4;\n  width: 30%;\n}\n</style>\n\n'
+export const context = `<div class="digital-document"><div style="text-align: right; margin:"><p style="margin: 0px !important">{% trans 'v_soviet' %} {{ vars.full_abbr_genitive}} "{{vars.name}}"</p><p style="margin: 0px !important">{% trans 'from_participant' %}</p><p style="margin: 0px !important">{{ user.full_name_or_short_name}}</p></div><div style="text-align: center; padding-top: 20px; padding-bottom: 20px;"><h1 class="header">{% trans 'statement' %}</h1></div><p style="padding-bottom: 20px;">{% trans 'money_return_request', coop.short_name %}</p><table style="margin-bottom: 20px;"><tbody><tr><th>{% trans 'asset_form' %}</th><td>{% trans 'money_assets' %}</td></tr><tr><th>{% trans 'name_requisites' %}</th><td>{% trans 'return_part_contribution' %}</td></tr><tr><th>№</th><td>1</td></tr><tr><th>{% trans 'payment_details_field' %}</th><td style="white-space: pre-line;">{{ request.payment_details }}</td></tr><tr><th>{% trans 'article' %}</th><td>na</td></tr><tr><th>{% trans 'unit_measurement' %}</th><td>{{ request.currency }}</td></tr><tr><th>{% trans 'quantity' %}</th><td>{{ request.amount }}</td></tr><tr><th>{% trans 'unit_cost' %}</th><td>na</td></tr><tr><th>{% trans 'total_cost' %}</th><td>{{ request.amount }} {{ request.currency }}</td></tr></tbody></table><p style="padding-top: 20px;">{% trans 'signature' %}</p><p>{{ user.full_name_or_short_name }}</p><p>{{ meta.created_at }}</p><style>.digital-document {padding: 20px;white-space: pre-wrap;};table {width: 100%;border-collapse: collapse;}th, td {border: 1px solid #ccc;padding: 8px;text-align: left;word-wrap: break-word; overflow-wrap: break-word; }th {background-color: #f4f4f4;width: 30%;}</style>`
 
 export const translations = {
   ru: {
@@ -53,7 +53,6 @@ export const translations = {
     money_assets: 'Денежные средства',
     signature: 'Подписано электронной подписью.',
   },
-  // ... другие переводы
 }
 
 export const exampleData = {

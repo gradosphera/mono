@@ -1640,6 +1640,34 @@ input CreateProjectFreeDecisionInput {
   question: String!
 }
 
+input CreateWithdrawInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Дополнительная информация"""
+  memo: String
+
+  """ID метода платежа"""
+  method_id: String!
+
+  """Количество средств"""
+  quantity: String!
+
+  """Подписанное заявление на возврат средств"""
+  statement: SignedDigitalDocumentInput!
+
+  """Символ валюты"""
+  symbol: String!
+
+  """Имя пользователя"""
+  username: String!
+}
+
+type CreateWithdrawResponse {
+  """Хеш созданной заявки на вывод"""
+  withdraw_hash: String!
+}
+
 type CreatedProjectFreeDecision {
   """Проект решения, которое предлагается принять"""
   decision: String!
@@ -2070,6 +2098,68 @@ input FreeDecisionGenerateDocumentInput {
   version: String
 }
 
+type GatewayPayment {
+  """Данные из блокчейна"""
+  blockchain_data: JSON
+
+  """Может ли статус быть изменен"""
+  can_change_status: Boolean!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Дата создания"""
+  created_at: DateTime!
+
+  """Форматированная сумма"""
+  formatted_amount: String!
+
+  """Универсальный хеш платежа"""
+  hash: String!
+
+  """Уникальный идентификатор платежа"""
+  id: ID
+
+  """Хеш входящего платежа"""
+  income_hash: String
+
+  """Дополнительная информация"""
+  memo: String
+
+  """ID платежного метода"""
+  method_id: String!
+
+  """Хеш исходящего платежа"""
+  outcome_hash: String
+
+  """Детали платежа"""
+  payment_details: String
+
+  """Количество"""
+  quantity: String!
+
+  """Статус платежа"""
+  status: gatewayPaymentStatus!
+
+  """Человекочитаемый статус"""
+  status_label: String!
+
+  """Символ валюты"""
+  symbol: String!
+
+  """Тип платежа: входящий или исходящий"""
+  type: gatewayPaymentType!
+
+  """Человекочитаемый тип платежа"""
+  type_label: String!
+
+  """Дата последнего обновления"""
+  updated_at: DateTime
+
+  """Имя пользователя"""
+  username: String!
+}
+
 input GenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -2180,6 +2270,12 @@ input GetMeetInput {
 input GetMeetsInput {
   """Имя аккаунта кооператива"""
   coopname: String!
+}
+
+input GetOutgoingPaymentsInput {
+  coopname: String
+  status: String
+  username: String
 }
 
 input GetPaymentMethodsInput {
@@ -2681,6 +2777,9 @@ type Mutation {
   """
   createProjectOfFreeDecision(data: CreateProjectFreeDecisionInput!): CreatedProjectFreeDecision!
 
+  """Создать заявку на вывод средств"""
+  createWithdraw(input: CreateWithdrawInput!): CreateWithdrawResponse!
+
   """Отклонить заявку"""
   declineRequest(data: DeclineRequestInput!): Transaction!
 
@@ -2748,6 +2847,12 @@ type Mutation {
 
   """Сгенерировать документ заявления о возврате имущества."""
   generateReturnByAssetStatement(data: ReturnByAssetStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать документ решения совета о возврате паевого взноса"""
+  generateReturnByMoneyDecisionDocument(data: ReturnByMoneyDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать документ заявления на возврат паевого взноса"""
+  generateReturnByMoneyStatementDocument(data: ReturnByMoneyGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ, подтверждающий выбор кооперативного участка"""
   generateSelectBranchDocument(data: SelectBranchGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -2872,6 +2977,9 @@ type Mutation {
   """Обновить расширение"""
   updateExtension(data: ExtensionInput!): Extension!
 
+  """Обновить статус платежа."""
+  updatePaymentStatus(input: UpdatePaymentStatusInput!): OutgoingPayment!
+
   """Обновить заявку"""
   updateRequest(data: UpdateRequestInput!): Transaction!
 
@@ -2973,6 +3081,73 @@ enum OrganizationType {
   PAO
   PRODCOOP
   ZAO
+}
+
+type OutgoingPayment {
+  """Данные из блокчейна"""
+  blockchain_data: JSON
+
+  """Может ли статус быть изменен"""
+  can_change_status: Boolean!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Дата создания"""
+  created_at: DateTime!
+
+  """Форматированная сумма"""
+  formatted_amount: String!
+
+  """Хеш исходящего платежа"""
+  hash: String!
+
+  """Уникальный идентификатор платежа"""
+  id: ID
+
+  """Дополнительная информация"""
+  memo: String
+
+  """ID платежного метода"""
+  method_id: String!
+
+  """Детали платежа"""
+  payment_details: String
+
+  """Количество"""
+  quantity: String!
+
+  """Статус платежа"""
+  status: gatewayPaymentStatus!
+
+  """Человекочитаемый статус"""
+  status_label: String!
+
+  """Символ валюты"""
+  symbol: String!
+
+  """Тип платежа (всегда outgoing)"""
+  type: gatewayPaymentType!
+
+  """Дата последнего обновления"""
+  updated_at: DateTime
+
+  """Имя пользователя"""
+  username: String!
+}
+
+type PaginatedGatewayPaymentsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [GatewayPayment!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
 }
 
 input PaginationInput {
@@ -3538,6 +3713,11 @@ type Query {
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!
 
+  """
+  Получить список всех платежей (универсальный метод, поддержка входящих платежей в будущем).
+  """
+  getGatewayPayments(filters: GetOutgoingPaymentsInput!, options: PaginationInput!): PaginatedGatewayPaymentsPaginationResult!
+
   """Получить данные собрания по хешу"""
   getMeet(data: GetMeetInput!): MeetAggregate!
 
@@ -3747,6 +3927,17 @@ input RepresentedByInput {
   last_name: String!
   middle_name: String!
   position: String!
+}
+
+input RequestInput {
+  """Сумма к возврату"""
+  amount: String!
+
+  """Валюта"""
+  currency: String!
+
+  """ID платежного метода"""
+  method_id: String!
 }
 
 input ResetKeyInput {
@@ -4049,6 +4240,85 @@ input ReturnByAssetStatementSignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
+}
+
+input ReturnByMoneyDecisionGenerateDocumentInput {
+  """Сумма к возврату"""
+  amount: String!
+
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Валюта"""
+  currency: String!
+
+  """ID решения совета"""
+  decision_id: Float!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Хэш платежа"""
+  payment_hash: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+input ReturnByMoneyGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Данные запроса на возврат денежных средств"""
+  request: RequestInput!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
 }
 
 type SbpAccount {
@@ -4572,6 +4842,23 @@ input UpdateOrganizationDataInput {
   username: String!
 }
 
+input UpdatePaymentStatusInput {
+  """Название кооператива"""
+  coopname: String!
+
+  """Универсальный хеш платежа"""
+  hash: String!
+
+  """Причина изменения статуса (для статуса failed)"""
+  reason: String
+
+  """Новый статус платежа"""
+  status: String!
+
+  """Тип платежа"""
+  type: String!
+}
+
 input UpdateRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -4734,4 +5021,19 @@ type WaitWeight {
 
   """Вес"""
   weight: Int!
+}
+
+"""Статус платежа в системе Gateway"""
+enum gatewayPaymentStatus {
+  CANCELLED
+  COMPLETED
+  FAILED
+  PENDING
+  PROCESSING
+}
+
+"""Тип платежа в системе Gateway"""
+enum gatewayPaymentType {
+  INCOMING
+  OUTGOING
 }

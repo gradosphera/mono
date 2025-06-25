@@ -68,6 +68,18 @@ const envVarsSchema = z.object({
   REDIS_PASSWORD: z.string(),
   BLOCKCHAIN_RPC: z.string().min(1, { message: 'Не должно быть пустым' }),
   CHAIN_ID: z.string().min(1, { message: 'Не должно быть пустым' }),
+
+  // Параметры блокчейна
+  ROOT_SYMBOL: z.string().default('AXON'),
+  ROOT_GOVERN_SYMBOL: z.string().default('RUB'),
+  ROOT_PRECISION: z
+    .string()
+    .default('4')
+    .transform((val) => parseInt(val, 10)),
+  ROOT_GOVERN_PRECISION: z
+    .string()
+    .default('4')
+    .transform((val) => parseInt(val, 10)),
 });
 
 // Валидация переменных окружения
@@ -95,6 +107,10 @@ export default {
   blockchain: {
     url: envVars.data.BLOCKCHAIN_RPC,
     id: envVars.data.CHAIN_ID,
+    root_symbol: envVars.data.ROOT_SYMBOL,
+    root_govern_symbol: envVars.data.ROOT_GOVERN_SYMBOL,
+    root_precision: envVars.data.ROOT_PRECISION,
+    root_govern_precision: envVars.data.ROOT_GOVERN_PRECISION,
   },
   mongoose: {
     url: envVars.data.MONGODB_URL + (envVars.data.NODE_ENV === 'test' ? '-test' : ''),

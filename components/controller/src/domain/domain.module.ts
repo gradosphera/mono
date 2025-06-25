@@ -18,6 +18,8 @@ import { DesktopDomainModule } from './desktop/desktop-domain.module';
 import { MeetDomainModule } from './meet/meet-domain.module';
 import { ControllerWsMeetModule } from './meet/controllers-ws-meet.module';
 import { UserCertificateDomainModule } from './user-certificate/user-certificate.module';
+import { GatewayDomainModule } from './gateway/gateway-domain.module';
+import { WalletDomainModule } from './wallet/wallet-domain.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { UserCertificateDomainModule } from './user-certificate/user-certificate
     MeetDomainModule,
     ControllerWsMeetModule,
     UserCertificateDomainModule,
+    GatewayDomainModule,
+    WalletDomainModule,
   ],
   exports: [
     AuthDomainModule,
@@ -58,6 +62,8 @@ import { UserCertificateDomainModule } from './user-certificate/user-certificate
     CooplaceDomainModule,
     MeetDomainModule,
     UserCertificateDomainModule,
+    GatewayDomainModule,
+    WalletDomainModule,
   ],
 })
 export class DomainModule {}
