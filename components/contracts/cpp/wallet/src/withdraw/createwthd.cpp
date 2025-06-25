@@ -28,22 +28,20 @@ void wallet::createwthd(eosio::name coopname, eosio::name username, checksum256 
     d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
   });
 
-  //TODO: перевести approve на hash-идентификатор???
-  action(
-    permission_level{_capital, "active"_n}, // кто вызывает
+  Action::send<createagenda_interface>(
     _soviet,
-    "createapprv"_n,
-    std::make_tuple(
-      coopname,
-      username,
-      statement,
-      withdraw_hash, 
-      _wallet, // callback_contract (текущий контракт)
-      "approvewthd"_n, // callback_action_approve
-      "declinewthd"_n, // callback_action_decline
-      std::string("") 
-    )
-  ).send();
+    "createagenda"_n,
+    _wallet,
+    coopname,
+    username,
+    get_valid_soviet_action("createwthd"_n),
+    withdraw_hash,
+    _wallet, // callback_contract (текущий контракт)
+    "approvewthd"_n, // callback_action_approve
+    "declinewthd"_n, // callback_action_decline
+    statement,
+    std::string("")
+  );
   
   std::string memo_in = "Возврат части целевого паевого взноса по ЦПП 'Цифровой Кошелёк'";
   Wallet::block_funds(_wallet, coopname, username, quantity, _wallet_program, memo_in);

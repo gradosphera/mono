@@ -1,42 +1,42 @@
-import { Cooperative, SovietContract } from 'cooptypes'
-import { useGenerateFreeDecision } from 'src/features/FreeDecision/GenerateDecision'
-import { useGenerateParticipantApplicationDecision } from 'src/features/Decision/ParticipantApplication'
-import { useGenerateSovietDecisionOnAnnualMeet } from 'src/features/Meet/GenerateSovietDecision/model'
-import { useSystemStore } from 'src/entities/System/model'
-import { useSessionStore } from 'src/entities/Session'
-import { useGlobalStore } from 'src/shared/store'
-import { useVoteForDecision } from 'src/features/Decision/VoteForDecision'
-import { useVoteAgainstDecision } from 'src/features/Decision/VoteAgainstDecision'
-import { computed } from 'vue'
-import { useAgendaStore } from 'src/entities/Agenda/model'
-import type { IAgenda } from 'src/entities/Agenda/model'
-import { DigitalDocument } from 'src/shared/lib/document'
-import type { IUserCertificateUnion } from 'src/shared/lib/types/certificate'
-import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate'
+import { Cooperative, SovietContract } from 'cooptypes';
+import { useGenerateFreeDecision } from 'src/features/FreeDecision/GenerateDecision';
+import { useGenerateParticipantApplicationDecision } from 'src/features/Decision/ParticipantApplication';
+import { useGenerateSovietDecisionOnAnnualMeet } from 'src/features/Meet/GenerateSovietDecision/model';
+import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session';
+import { useGlobalStore } from 'src/shared/store';
+import { useVoteForDecision } from 'src/features/Decision/VoteForDecision';
+import { useVoteAgainstDecision } from 'src/features/Decision/VoteAgainstDecision';
+import { computed } from 'vue';
+import { useAgendaStore } from 'src/entities/Agenda/model';
+import type { IAgenda } from 'src/entities/Agenda/model';
+import { DigitalDocument } from 'src/shared/lib/document';
+import type { IUserCertificateUnion } from 'src/shared/lib/types/certificate';
+import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 
 /**
  * Процесс обработки решений
  * Координирует работу различных фич для генерации и обработки решений различных типов
  */
 export function useDecisionProcessor() {
-  const { info } = useSystemStore()
-  const session = useSessionStore()
-  const agendaStore = useAgendaStore()
+  const { info } = useSystemStore();
+  const session = useSessionStore();
+  const agendaStore = useAgendaStore();
 
   // Данные повестки и состояние загрузки
-  const decisions = computed(() => agendaStore.agenda)
-  const loading = computed(() => agendaStore.loading)
+  const decisions = computed(() => agendaStore.agenda);
+  const loading = computed(() => agendaStore.loading);
 
   /**
    * Форматирует заголовок вопроса
    */
   function formatDecisionTitle(title: string, cert: IUserCertificateUnion) {
-    let result = 'Вопрос на голосование'
+    let result = 'Вопрос на голосование';
 
-    const name = getNameFromCertificate(cert)
-    result = `${title} от ${name}`
+    const name = getNameFromCertificate(cert);
+    result = `${title} от ${name}`;
 
-    return result
+    return result;
   }
 
   /**
@@ -45,24 +45,27 @@ export function useDecisionProcessor() {
   function getDocumentTitle(row: IAgenda) {
     // Используем только агрегаты документов
     if (row.documents?.statement?.documentAggregate?.rawDocument?.full_title) {
-      return row.documents.statement.documentAggregate.rawDocument.full_title
+      return row.documents.statement.documentAggregate.rawDocument.full_title;
     }
 
     if (row.documents?.decision?.documentAggregate?.rawDocument?.full_title) {
-      return row.documents.decision.documentAggregate.rawDocument.full_title
+      return row.documents.decision.documentAggregate.rawDocument.full_title;
     }
 
     // Поддержка исходного формата для таблицы
-    if (row.table?.statement?.meta && typeof row.table.statement.meta === 'string') {
+    if (
+      row.table?.statement?.meta &&
+      typeof row.table.statement.meta === 'string'
+    ) {
       try {
-        const meta = JSON.parse(row.table.statement.meta)
-        if (meta.title) return meta.title
+        const meta = JSON.parse(row.table.statement.meta);
+        if (meta.title) return meta.title;
       } catch (e) {
         // Игнорируем ошибку парсинга JSON
       }
     }
 
-    return 'Вопрос без заголовка'
+    return 'Вопрос без заголовка';
   }
 
   /**
@@ -70,10 +73,10 @@ export function useDecisionProcessor() {
    */
   async function loadDecisions(coopname: string, hidden = false) {
     try {
-      const result = await agendaStore.loadAgenda({ coopname }, hidden)
-      return result
+      const result = await agendaStore.loadAgenda({ coopname }, hidden);
+      return result;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -83,19 +86,19 @@ export function useDecisionProcessor() {
   function getDocumentHash(row: IAgenda) {
     // Используем только агрегаты документов
     if (row.documents?.statement?.documentAggregate?.rawDocument?.hash) {
-      return row.documents.statement.documentAggregate.rawDocument.hash
+      return row.documents.statement.documentAggregate.rawDocument.hash;
     }
 
     if (row.documents?.decision?.documentAggregate?.rawDocument?.hash) {
-      return row.documents.decision.documentAggregate.rawDocument.hash
+      return row.documents.decision.documentAggregate.rawDocument.hash;
     }
 
     // Поддержка исходного формата для таблицы
     if (row.table?.statement?.hash) {
-      return row.table.statement.hash
+      return row.table.statement.hash;
     }
 
-    return null
+    return null;
   }
 
   /**
@@ -103,58 +106,76 @@ export function useDecisionProcessor() {
    */
   async function generateDecisionDocument(row: IAgenda) {
     if (!row.table?.id || !row.table?.username || !row.table?.type) {
-      throw new Error('Некорректные данные решения')
+      throw new Error('Некорректные данные решения');
     }
 
-    const decision_id = Number(row.table.id)
-    const username = row.table.username
-    const type = row.table.type
-    const registry_id = Cooperative.Document.decisionsRegistry[type]
+    const decision_id = Number(row.table.id);
+    const username = row.table.username;
+    const type = row.table.type;
+    const registry_id = Cooperative.Document.decisionsRegistry[type];
 
     // Генерация документа в зависимости от типа решения
-    let document
+    let document;
 
     if (registry_id === Cooperative.Registry.FreeDecision.registry_id) {
-      const unparsedDocumentMeta = row.table.statement.meta == '' ? '{}' : row.table.statement.meta
-      const parsedDocumentMeta = JSON.parse(unparsedDocumentMeta) as Cooperative.Registry.FreeDecision.Action
-      const project_id = parsedDocumentMeta.project_id
+      const unparsedDocumentMeta =
+        row.table.statement.meta == '' ? '{}' : row.table.statement.meta;
+      const parsedDocumentMeta = JSON.parse(
+        unparsedDocumentMeta,
+      ) as Cooperative.Registry.FreeDecision.Action;
+      const project_id = parsedDocumentMeta.project_id;
 
-      const { generateFreeDecision } = useGenerateFreeDecision()
+      const { generateFreeDecision } = useGenerateFreeDecision();
       document = await generateFreeDecision({
         username: username,
         decision_id: decision_id,
-        project_id: project_id
-      })
-    }
-    else if (registry_id === Cooperative.Registry.DecisionOfParticipantApplication.registry_id) {
-      const { generateParticipantApplicationDecision } = useGenerateParticipantApplicationDecision()
+        project_id: project_id,
+      });
+    } else if (
+      registry_id ===
+      Cooperative.Registry.DecisionOfParticipantApplication.registry_id
+    ) {
+      const { generateParticipantApplicationDecision } =
+        useGenerateParticipantApplicationDecision();
       document = await generateParticipantApplicationDecision({
         username: username,
-        decision_id: decision_id
-      })
-    }
-    else if (registry_id === Cooperative.Registry.AnnualGeneralMeetingSovietDecision.registry_id) {
-      const { generateSovietDecisionOnAnnualMeet } = useGenerateSovietDecisionOnAnnualMeet()
-      const unparsedDocumentMeta = row.table.statement.meta == '' ? '{}' : row.table.statement.meta
-      const parsedDocumentMeta = JSON.parse(unparsedDocumentMeta) as Cooperative.Registry.AnnualGeneralMeetingAgenda.Action
-      const is_repeated = parsedDocumentMeta.is_repeated || false
+        decision_id: decision_id,
+      });
+    } else if (
+      registry_id ===
+      Cooperative.Registry.AnnualGeneralMeetingSovietDecision.registry_id
+    ) {
+      const { generateSovietDecisionOnAnnualMeet } =
+        useGenerateSovietDecisionOnAnnualMeet();
+      const unparsedDocumentMeta =
+        row.table.statement.meta == '' ? '{}' : row.table.statement.meta;
+      const parsedDocumentMeta = JSON.parse(
+        unparsedDocumentMeta,
+      ) as Cooperative.Registry.AnnualGeneralMeetingAgenda.Action;
+      const is_repeated = parsedDocumentMeta.is_repeated || false;
 
       document = await generateSovietDecisionOnAnnualMeet({
         username: username,
         decision_id: decision_id,
         meet_hash: row.table.hash as string,
-        is_repeated
-      })
-    }
-    else {
-      throw new Error('Неизвестный тип решения')
+        is_repeated,
+      });
+    } else if (registry_id === Cooperative.Registry.ReturnByMoney.registry_id) {
+      // const { generateReturnByMoneyDecision } = useGenerateReturnByMoneyDecision()
+      // document = await generateReturnByMoneyDecision({
+      //   username: username,
+      //   decision_id: decision_id
+      // })
+    } else {
+      console.log('Неизвестный тип решения', registry_id);
+      throw new Error('Неизвестный тип решения');
     }
 
     if (!document) {
-      throw new Error('Ошибка при генерации документа решения')
+      throw new Error('Ошибка при генерации документа решения');
     }
 
-    return document
+    return document;
   }
 
   /**
@@ -162,31 +183,35 @@ export function useDecisionProcessor() {
    */
   async function authorizeAndExecuteDecision(row: IAgenda) {
     if (!row.table?.id) {
-      throw new Error('Некорректные данные решения')
+      throw new Error('Некорректные данные решения');
     }
 
-    const decision_id = Number(row.table.id)
+    const decision_id = Number(row.table.id);
 
     // Генерируем документ решения
-    const document = await generateDecisionDocument(row)
+    const document = await generateDecisionDocument(row);
 
     // Создаем экземпляр класса DigitalDocument и подписываем документ
-    const digitalDocument = new DigitalDocument(document)
-    const signedDocument = await digitalDocument.sign(session.username)
+    const digitalDocument = new DigitalDocument(document);
+    const signedDocument = await digitalDocument.sign(session.username);
 
     // Подготавливаем данные для транзакций
-    const authorizeData: SovietContract.Actions.Decisions.Authorize.IAuthorize = {
-      coopname: info.coopname,
-      chairman: session.username,
-      decision_id,
-      document: {...signedDocument, meta: JSON.stringify(signedDocument.meta)},
-    }
+    const authorizeData: SovietContract.Actions.Decisions.Authorize.IAuthorize =
+      {
+        coopname: info.coopname,
+        chairman: session.username,
+        decision_id,
+        document: {
+          ...signedDocument,
+          meta: JSON.stringify(signedDocument.meta),
+        },
+      };
 
     const execData: SovietContract.Actions.Decisions.Exec.IExec = {
       executer: session.username,
       coopname: info.coopname,
       decision_id: decision_id,
-    }
+    };
 
     // Выполняем транзакции
     await useGlobalStore().transact([
@@ -212,9 +237,9 @@ export function useDecisionProcessor() {
         ],
         data: execData,
       },
-    ])
+    ]);
 
-    return true
+    return true;
   }
 
   /**
@@ -249,21 +274,21 @@ export function useDecisionProcessor() {
    * Проверяет, проголосовал ли текущий пользователь "за" решение
    */
   function isVotedFor(decision: SovietContract.Tables.Decisions.IDecision) {
-    return decision.votes_for.includes(session.username)
+    return decision.votes_for.includes(session.username);
   }
 
   /**
    * Проверяет, проголосовал ли текущий пользователь "против" решения
    */
   function isVotedAgainst(decision: SovietContract.Tables.Decisions.IDecision) {
-    return decision.votes_against.includes(session.username)
+    return decision.votes_against.includes(session.username);
   }
 
   /**
    * Проверяет, проголосовал ли текущий пользователь за решение каким-либо образом
    */
   function isVotedAny(decision: SovietContract.Tables.Decisions.IDecision) {
-    return isVotedAgainst(decision) || isVotedFor(decision)
+    return isVotedAgainst(decision) || isVotedFor(decision);
   }
 
   return {
@@ -279,6 +304,6 @@ export function useDecisionProcessor() {
     isVotedAny,
     formatDecisionTitle,
     getDocumentTitle,
-    getDocumentHash
-  }
+    getDocumentHash,
+  };
 }
