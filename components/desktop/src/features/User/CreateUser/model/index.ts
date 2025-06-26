@@ -8,14 +8,16 @@ import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
 import { useSystemStore } from 'src/entities/System/model';
 
+import type { IInitialPaymentOrder } from 'src/shared/lib/types/payments';
+import { useCurrentUserStore } from 'src/entities/User';
+import { useRegistratorStore } from 'src/entities/Registrator';
 import {
-  ICreatedPayment,
-} from 'src/shared/lib/types/payments';
-import {
-  useCurrentUserStore,
-} from 'src/entities/User';
-import { useRegistratorStore } from 'src/entities/Registrator'
-import { IEntrepreneurData, IIndividualData, IOrganizationData, IUserData, type IRegisterAccount } from 'src/shared/lib/types/user/IUserData';
+  IEntrepreneurData,
+  IIndividualData,
+  IOrganizationData,
+  IUserData,
+  type IRegisterAccount,
+} from 'src/shared/lib/types/user/IUserData';
 import { client } from 'src/shared/api/client';
 import { Mutations, Zeus } from '@coopenomics/sdk';
 import { DigitalDocument } from 'src/shared/lib/document';
@@ -32,16 +34,16 @@ export interface ICreateUser {
   username: string;
 }
 
-
-export type ISendStatement = Mutations.Participants.RegisterParticipant.IInput['data'];
-export type ISendStatementResult = Mutations.Participants.RegisterParticipant.IOutput[typeof Mutations.Participants.RegisterParticipant.name];
-
+export type ISendStatement =
+  Mutations.Participants.RegisterParticipant.IInput['data'];
+export type ISendStatementResult =
+  Mutations.Participants.RegisterParticipant.IOutput[typeof Mutations.Participants.RegisterParticipant.name];
 
 export function useCreateUser() {
-  const store = useRegistratorStore().state
-  const { info } = useSystemStore()
+  const store = useRegistratorStore().state;
+  const { info } = useSystemStore();
 
-  async function createInitialPayment(): Promise<ICreatedPayment> {
+  async function createInitialPayment(): Promise<IInitialPaymentOrder> {
     const result = await api.createInitialPaymentOrder();
     store.payment = result;
 
@@ -56,28 +58,35 @@ export function useCreateUser() {
       wallet_agreement: store.walletAgreement,
       privacy_agreement: store.privacyAgreement,
       signature_agreement: store.signatureAgreement,
-      user_agreement: store.userAgreement
+      user_agreement: store.userAgreement,
     };
 
     await api.sendStatement(data);
   }
 
-
   async function signStatement(): Promise<IDocument> {
-    const variables: Mutations.Participants.GenerateParticipantApplication.IInput = {
-      data: {
-        signature: store.signature,
-        skip_save: false,
-        coopname: info.coopname,
-        username: store.account.username,
-        braname: store.selectedBranch,
-        links: [store.walletAgreement.doc_hash, store.privacyAgreement.doc_hash, store.signatureAgreement.doc_hash, store.userAgreement.doc_hash]
-      }
-    }
+    const variables: Mutations.Participants.GenerateParticipantApplication.IInput =
+      {
+        data: {
+          signature: store.signature,
+          skip_save: false,
+          coopname: info.coopname,
+          username: store.account.username,
+          braname: store.selectedBranch,
+          links: [
+            store.walletAgreement.doc_hash,
+            store.privacyAgreement.doc_hash,
+            store.signatureAgreement.doc_hash,
+            store.userAgreement.doc_hash,
+          ],
+        },
+      };
 
-    const { [Mutations.Participants.GenerateParticipantApplication.name]: result } = await client.Mutation(
+    const {
+      [Mutations.Participants.GenerateParticipantApplication.name]: result,
+    } = await client.Mutation(
       Mutations.Participants.GenerateParticipantApplication.mutation,
-      { variables }
+      { variables },
     );
 
     const digitalDocument = new DigitalDocument(result);
@@ -91,13 +100,14 @@ export function useCreateUser() {
       data: {
         coopname: info.coopname,
         username: store.account.username,
-      }
-    }
+      },
+    };
 
-    const { [Mutations.Agreements.GeneratePrivacyAgreement.name]: result } = await client.Mutation(
-      Mutations.Agreements.GeneratePrivacyAgreement.mutation,
-      { variables }
-    );
+    const { [Mutations.Agreements.GeneratePrivacyAgreement.name]: result } =
+      await client.Mutation(
+        Mutations.Agreements.GeneratePrivacyAgreement.mutation,
+        { variables },
+      );
 
     const digitalDocument = new DigitalDocument(result);
     store.privacyAgreement = await digitalDocument.sign(store.account.username);
@@ -110,33 +120,36 @@ export function useCreateUser() {
       data: {
         coopname: info.coopname,
         username: store.account.username,
-      }
-    }
+      },
+    };
 
-    const { [Mutations.Agreements.GenerateSignatureAgreement.name]: result } = await client.Mutation(
-      Mutations.Agreements.GenerateSignatureAgreement.mutation,
-      { variables }
-    );
+    const { [Mutations.Agreements.GenerateSignatureAgreement.name]: result } =
+      await client.Mutation(
+        Mutations.Agreements.GenerateSignatureAgreement.mutation,
+        { variables },
+      );
 
     const digitalDocument = new DigitalDocument(result);
-    store.signatureAgreement = await digitalDocument.sign(store.account.username);
+    store.signatureAgreement = await digitalDocument.sign(
+      store.account.username,
+    );
 
     return store.signatureAgreement;
   }
-
 
   async function signUserAgreement(): Promise<IDocument> {
     const variables: Mutations.Agreements.GenerateUserAgreement.IInput = {
       data: {
         coopname: info.coopname,
         username: store.account.username,
-      }
-    }
+      },
+    };
 
-    const { [Mutations.Agreements.GenerateUserAgreement.name]: result } = await client.Mutation(
-      Mutations.Agreements.GenerateUserAgreement.mutation,
-      { variables }
-    );
+    const { [Mutations.Agreements.GenerateUserAgreement.name]: result } =
+      await client.Mutation(
+        Mutations.Agreements.GenerateUserAgreement.mutation,
+        { variables },
+      );
 
     const digitalDocument = new DigitalDocument(result);
     store.userAgreement = await digitalDocument.sign(store.account.username);
@@ -144,21 +157,19 @@ export function useCreateUser() {
     return store.userAgreement;
   }
 
-
-
-
   async function signWalletAgreement(): Promise<IDocument> {
     const variables: Mutations.Agreements.GenerateWalletAgreement.IInput = {
       data: {
         coopname: info.coopname,
         username: store.account.username,
-      }
-    }
+      },
+    };
 
-    const { [Mutations.Agreements.GenerateWalletAgreement.name]: result } = await client.Mutation(
-      Mutations.Agreements.GenerateWalletAgreement.mutation,
-      { variables }
-    );
+    const { [Mutations.Agreements.GenerateWalletAgreement.name]: result } =
+      await client.Mutation(
+        Mutations.Agreements.GenerateWalletAgreement.mutation,
+        { variables },
+      );
 
     const digitalDocument = new DigitalDocument(result);
     store.walletAgreement = await digitalDocument.sign(store.account.username);
@@ -166,21 +177,23 @@ export function useCreateUser() {
     return store.walletAgreement;
   }
 
-
   async function generateStatementWithoutSignature() {
-    const variables: Mutations.Participants.GenerateParticipantApplication.IInput = {
-      data: {
-        signature: '',
-        skip_save: true,
-        coopname: info.coopname,
-        username: store.account.username,
-        braname: store.selectedBranch,
-      }
-    }
+    const variables: Mutations.Participants.GenerateParticipantApplication.IInput =
+      {
+        data: {
+          signature: '',
+          skip_save: true,
+          coopname: info.coopname,
+          username: store.account.username,
+          braname: store.selectedBranch,
+        },
+      };
 
-    const { [Mutations.Participants.GenerateParticipantApplication.name]: result } = await client.Mutation(
+    const {
+      [Mutations.Participants.GenerateParticipantApplication.name]: result,
+    } = await client.Mutation(
       Mutations.Participants.GenerateParticipantApplication.mutation,
-      { variables }
+      { variables },
     );
 
     return result;
@@ -189,9 +202,8 @@ export function useCreateUser() {
   async function createUser(
     email: string,
     userData: IUserData,
-    generatedAccount: IGeneratedAccount
+    generatedAccount: IGeneratedAccount,
   ): Promise<void> {
-
     const synthData = { type: userData.type } as any;
 
     if (synthData.type === Zeus.AccountType.individual) {
@@ -253,6 +265,6 @@ export function useCreateUser() {
     signWalletAgreement,
     signPrivacyAgreement,
     signUserAgreement,
-    signSignatureAgreement
+    signSignatureAgreement,
   };
 }

@@ -1,37 +1,38 @@
 import { PrivateKey } from '@wharfkit/antelope';
-import {
-  IKeyPair
-} from 'src/shared/lib/types/user';
-import { sendPOST } from 'src/shared/api';
-import type { ICreatedPayment } from '@coopenomics/controller';
+import { IKeyPair } from 'src/shared/lib/types/user';
 import { Mutations } from '@coopenomics/sdk';
 import { client } from 'src/shared/api/client';
-import type { IRegisterAccount, IRegisteredAccountResult } from 'src/shared/lib/types/user/IUserData';
+import type {
+  IRegisterAccount,
+  IRegisteredAccountResult,
+} from 'src/shared/lib/types/user/IUserData';
 import type { ISendStatement, ISendStatementResult } from '../model';
+import { useSessionStore } from 'src/entities/Session';
+import type { IInitialPaymentOrder } from 'src/shared/lib/types/payments';
 
-async function createUser(data: IRegisterAccount): Promise<IRegisteredAccountResult> {
-  const { [Mutations.Accounts.RegisterAccount.name]: result } = await client.Mutation(
-    Mutations.Accounts.RegisterAccount.mutation,
-    {
+async function createUser(
+  data: IRegisterAccount,
+): Promise<IRegisteredAccountResult> {
+  const { [Mutations.Accounts.RegisterAccount.name]: result } =
+    await client.Mutation(Mutations.Accounts.RegisterAccount.mutation, {
       variables: {
-        data
-      }
-    }
-  );
+        data,
+      },
+    });
   console.log('result: ', result, data);
   return result;
 }
 
-async function sendStatement(data: ISendStatement): Promise<ISendStatementResult> {
+async function sendStatement(
+  data: ISendStatement,
+): Promise<ISendStatementResult> {
   console.log('send statement: ', data);
-  const { [Mutations.Participants.RegisterParticipant.name]: result } = await client.Mutation(
-    Mutations.Participants.RegisterParticipant.mutation,
-    {
+  const { [Mutations.Participants.RegisterParticipant.name]: result } =
+    await client.Mutation(Mutations.Participants.RegisterParticipant.mutation, {
       variables: {
-        data
-      }
-    }
-  );
+        data,
+      },
+    });
 
   return result;
 }
@@ -65,13 +66,23 @@ const generateUsername = (): string => {
   return result;
 };
 
+async function createInitialPaymentOrder(): Promise<IInitialPaymentOrder> {
+  const session = useSessionStore();
 
-async function createInitialPaymentOrder(
-): Promise<ICreatedPayment> {
-  const response = await sendPOST('/v1/orders/initial', {});
-  return response;
+  const { [Mutations.Participants.CreateInitialPayment.name]: result } =
+    await client.Mutation(
+      Mutations.Participants.CreateInitialPayment.mutation,
+      {
+        variables: {
+          data: {
+            username: session.username as string,
+          },
+        },
+      },
+    );
+
+  return result;
 }
-
 
 export const api = {
   createUser,
@@ -79,5 +90,5 @@ export const api = {
   generateUsername,
   generateKeys,
   sendStatement,
-  createInitialPaymentOrder
+  createInitialPaymentOrder,
 };

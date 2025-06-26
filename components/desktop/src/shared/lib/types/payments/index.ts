@@ -1,23 +1,8 @@
-export interface PaymentDetails {
-  data: any
-}
+import type { Mutations } from '@coopenomics/sdk';
 
-export interface ICreatedPayment {
-  details: PaymentDetails
-}
+// Новые типы на основе SDK
+export type IPaymentOrder =
+  Mutations.Gateway.CreateDepositPayment.IOutput[typeof Mutations.Gateway.CreateDepositPayment.name];
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ICreateInitialPayment {
-
-}
-
-export interface ICreateDeposit {
-  quantity: string;
-}
-
-export interface IPaymentOrder {
-  provider: string; // Идентификатор банковского процессинга
-  details: {
-    data: string;
-  };
-}
+export type IInitialPaymentOrder =
+  Mutations.Participants.CreateInitialPayment.IOutput[typeof Mutations.Participants.CreateInitialPayment.name];

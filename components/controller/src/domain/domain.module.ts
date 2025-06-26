@@ -2,7 +2,6 @@
 import { Module } from '@nestjs/common';
 import { AccountDomainModule } from './account/account-domain.module';
 import { ExtensionDomainModule } from './extension/extension-domain.module';
-import { PaymentDomainModule } from './payment/payment.module';
 import { PaymentMethodDomainModule } from './payment-method/payment-method-domain.module';
 import { ProviderDomainModule } from './provider/provider.module';
 import { SystemDomainModule } from './system/system-domain.module';
@@ -29,7 +28,6 @@ import { WalletDomainModule } from './wallet/wallet-domain.module';
     AgreementDomainModule,
     DesktopDomainModule,
     ExtensionDomainModule,
-    PaymentDomainModule,
     PaymentMethodDomainModule,
     ProviderDomainModule,
     SystemDomainModule,
@@ -51,7 +49,6 @@ import { WalletDomainModule } from './wallet/wallet-domain.module';
     AgreementDomainModule,
     DesktopDomainModule,
     ExtensionDomainModule,
-    PaymentDomainModule,
     PaymentMethodDomainModule,
     ProviderDomainModule,
     SystemDomainModule,

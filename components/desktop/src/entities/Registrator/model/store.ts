@@ -7,6 +7,7 @@ import { useSystemStore } from 'src/entities/System/model';
 import type { IDocument, ISignatureInfo } from 'src/shared/lib/types/document';
 import { Zeus } from '@coopenomics/sdk';
 import { AccountTypes } from 'src/entities/Account/types';
+import type { IInitialPaymentOrder } from 'src/shared/lib/types/payments';
 
 const namespace = 'registrator';
 
@@ -14,7 +15,7 @@ const namespace = 'registrator';
 const initialAccountState: IGeneratedAccount = {
   username: '',
   private_key: '',
-  public_key: ''
+  public_key: '',
 };
 
 // Начальное состояние для userData
@@ -102,12 +103,7 @@ const initialDocumentState: IDocument = {
 };
 
 // Начальное состояние для payment
-const initialPaymentState = {
-  provider: '',
-  details: {
-    data: '',
-  },
-};
+const initialPaymentState: IInitialPaymentOrder | null = null;
 
 // Начальное состояние для agreements
 const initialAgreementsState = {
@@ -136,7 +132,7 @@ export const useRegistratorStore = defineStore(
       privacyAgreement: structuredClone(initialDocumentState),
       signatureAgreement: structuredClone(initialDocumentState),
       userAgreement: structuredClone(initialDocumentState),
-      payment: structuredClone(initialPaymentState),
+      payment: initialPaymentState as IInitialPaymentOrder | null,
       is_paid: false,
     });
 
@@ -154,16 +150,21 @@ export const useRegistratorStore = defineStore(
 
     type StepName = (typeof stepNames)[number];
 
-    const steps = stepNames.reduce((acc, step, index) => {
-      acc[step] = index + 1; // Индексы начинаются с 1
-      return acc;
-    }, {} as Record<StepName, number>);
+    const steps = stepNames.reduce(
+      (acc, step, index) => {
+        acc[step] = index + 1; // Индексы начинаются с 1
+        return acc;
+      },
+      {} as Record<StepName, number>,
+    );
 
     const system = useSystemStore();
-    const isBranched = computed(() => system.info?.cooperator_account.is_branched);
+    const isBranched = computed(
+      () => system.info?.cooperator_account.is_branched,
+    );
 
     const filteredSteps = computed(() =>
-      stepNames.filter(step => step !== 'SelectBranch' || isBranched.value)
+      stepNames.filter((step) => step !== 'SelectBranch' || isBranched.value),
     );
 
     const isStepDone = (stepName: StepName) => {
@@ -195,25 +196,26 @@ export const useRegistratorStore = defineStore(
       }
     };
 
-    const clearAddUserState = () => reactive({
-      spread_initial: false,
-      created_at: '',
-      initial: 0,
-      minimum: 0,
-      org_initial: 0,
-      org_minimum: 0,
-    });
+    const clearAddUserState = () =>
+      reactive({
+        spread_initial: false,
+        created_at: '',
+        initial: 0,
+        minimum: 0,
+        org_initial: 0,
+        org_minimum: 0,
+      });
 
     const addUserState = clearAddUserState();
 
     const clearUserData = () => {
       state.step = 1;
-      state.selectedBranch = ''
+      state.selectedBranch = '';
       state.email = '';
       state.account = structuredClone(initialAccountState);
       state.agreements = structuredClone(initialAgreementsState);
       state.userData = structuredClone(initialUserDataState);
-      state.payment = structuredClone(initialPaymentState);
+      state.payment = initialPaymentState;
       state.is_paid = false;
       state.statement = structuredClone(initialDocumentState);
       state.walletAgreement = structuredClone(initialDocumentState);
@@ -238,5 +240,5 @@ export const useRegistratorStore = defineStore(
   },
   {
     persist: true,
-  }
+  },
 );

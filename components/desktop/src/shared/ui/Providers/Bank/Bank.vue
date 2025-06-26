@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-import type { IPaymentOrder } from 'src/shared/lib/types/payments';
+import type {
+  IPaymentOrder,
+  IInitialPaymentOrder,
+} from 'src/shared/lib/types/payments';
 import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
 import QRCode from 'qrcode';
-import { useCooperativeStore } from 'src/entities/Cooperative';
 import { copyToClipboard, Notify } from 'quasar';
 
 // Определяем интерфейс для orderData
@@ -19,19 +21,22 @@ interface IOrderData {
 }
 
 const props = defineProps<{
-  paymentOrder: IPaymentOrder;
+  paymentOrder: IPaymentOrder | IInitialPaymentOrder;
 }>();
 
 const qrElement = ref<HTMLCanvasElement | null>(null);
-const coop = useCooperativeStore()
 
 const amount = computed(() => {
-  return orderData.value.sum ? `${(parseFloat(orderData.value.sum) / 100).toFixed(2)} ${coop.governSymbol}` : `0 ${coop.governSymbol}`;
+  return orderData.value.sum
+    ? `${(parseFloat(orderData.value.sum) / 100).toFixed(2)} ${
+        props.paymentOrder.symbol
+      }`
+    : `0 ${props.paymentOrder.symbol}`;
 });
 
 const orderData = computed(() => {
-  const dataString = props.paymentOrder.details.data;
-  const parsedDetails: IOrderData = {};  // Используем тип IOrderData
+  const dataString = (props.paymentOrder.payment_details?.data as string) || '';
+  const parsedDetails: IOrderData = {}; // Используем тип IOrderData
 
   // Разбираем строку на пары ключ=значение
   const parts = dataString.split('|');
@@ -44,7 +49,7 @@ const orderData = computed(() => {
   }
 
   return parsedDetails;
-})
+});
 
 onMounted(() => {
   qrElement.value = document.getElementById('qr') as HTMLCanvasElement | null;
@@ -61,12 +66,17 @@ onBeforeUnmount(() => {
 });
 
 const generateQRCode = () => {
-  if (qrElement.value) {
-    QRCode.toCanvas(qrElement.value, props.paymentOrder.details.data, {width: 400}, function (error) {
-      if (error) console.error(error);
-    });
+  if (qrElement.value && props.paymentOrder.payment_details?.data) {
+    QRCode.toCanvas(
+      qrElement.value,
+      props.paymentOrder.payment_details.data,
+      { width: 400 },
+      function (error) {
+        if (error) console.error(error);
+      },
+    );
   } else {
-    console.error('QR element not found');
+    console.error('QR element not found or payment data is missing');
   }
 };
 
@@ -88,9 +98,14 @@ const copyAll = () => {
 
 const copy = (data: any) => {
   copyToClipboard(data)
-    .then(() => Notify.create({ message: 'Реквизиты скопированы в буфер обмена', type: 'positive' }))
-    .catch(console.log)
-}
+    .then(() =>
+      Notify.create({
+        message: 'Реквизиты скопированы в буфер обмена',
+        type: 'positive',
+      }),
+    )
+    .catch(console.log);
+};
 
 const downloadQR = () => {
   if (qrElement.value) {
@@ -106,51 +121,80 @@ const downloadQR = () => {
 
 <template lang="pug">
 div
-  q-input(label="ИНН получателя" v-model="orderData.payeeinn" readonly)
+  q-input(label='ИНН получателя', v-model='orderData.payeeinn', readonly)
     template(v-slot:append)
-      q-btn(icon="fas fa-copy" @click="copy(orderData.payeeinn)" size="xs" flat)
+      q-btn(
+        icon='fas fa-copy',
+        @click='copy(orderData.payeeinn)',
+        size='xs',
+        flat
+      )
 
-  q-input(label="Получатель" v-model="orderData.name" readonly)
+  q-input(label='Получатель', v-model='orderData.name', readonly)
     template(v-slot:append)
-      q-btn(icon="fas fa-copy" @click="copy(orderData.name)" size="xs" flat)
+      q-btn(icon='fas fa-copy', @click='copy(orderData.name)', size='xs', flat)
 
-  q-input(label="БИК" v-model="orderData.bic" readonly)
+  q-input(label='БИК', v-model='orderData.bic', readonly)
     template(v-slot:append)
-      q-btn(icon="fas fa-copy" @click="copy(orderData.bic)" size="xs" flat)
+      q-btn(icon='fas fa-copy', @click='copy(orderData.bic)', size='xs', flat)
 
-  q-input(label="Банк получателя" v-model="orderData.bankname" readonly)
+  q-input(label='Банк получателя', v-model='orderData.bankname', readonly)
     template(v-slot:append)
-      q-btn(icon="fas fa-copy" @click="copy(orderData.bankname)" size="xs" flat)
+      q-btn(
+        icon='fas fa-copy',
+        @click='copy(orderData.bankname)',
+        size='xs',
+        flat
+      )
 
-  q-input(label="КПП" v-model="orderData.kpp" readonly)
+  q-input(label='КПП', v-model='orderData.kpp', readonly)
     template(v-slot:append)
-      q-btn(icon="fas fa-copy" @click="copy(orderData.kpp)" size="xs" flat)
+      q-btn(icon='fas fa-copy', @click='copy(orderData.kpp)', size='xs', flat)
 
-  q-input(label="Корреспондентский счёт" v-model="orderData.correspacc" readonly)
+  q-input(
+    label='Корреспондентский счёт',
+    v-model='orderData.correspacc',
+    readonly
+  )
     template(v-slot:append)
-      q-btn(icon="fas fa-copy" @click="copy(orderData.correspacc)" size="xs" flat)
+      q-btn(
+        icon='fas fa-copy',
+        @click='copy(orderData.correspacc)',
+        size='xs',
+        flat
+      )
 
-  q-input(label="Номер счёта" v-model="orderData.personalacc" readonly)
+  q-input(label='Номер счёта', v-model='orderData.personalacc', readonly)
     template(v-slot:append)
-      q-btn(icon="fas fa-copy" @click="copy(orderData.personalacc)" size="xs" flat)
+      q-btn(
+        icon='fas fa-copy',
+        @click='copy(orderData.personalacc)',
+        size='xs',
+        flat
+      )
 
-  q-input(label="Cумма платежа" v-model="amount" readonly)
+  q-input(label='Cумма платежа', v-model='amount', readonly)
     template(v-slot:append)
-      q-btn(icon="fas fa-copy" @click="copy(amount)" size="xs" flat)
+      q-btn(icon='fas fa-copy', @click='copy(amount)', size='xs', flat)
 
-  q-input(label="Назначение платежа" v-model="orderData.purpose" readonly)
+  q-input(label='Назначение платежа', v-model='orderData.purpose', readonly)
     template(v-slot:append)
-      q-btn(icon="fas fa-copy" @click="copy(orderData.purpose)" size="xs" flat)
+      q-btn(
+        icon='fas fa-copy',
+        @click='copy(orderData.purpose)',
+        size='xs',
+        flat
+      )
 
-  div.full-width.text-center
+  .full-width.text-center
     canvas#qr
-  div.full-width.text-center
-    q-btn(@click="copyAll" flat icon="fas fa-copy" size="sm") скопировать реквизиты
-    q-btn(@click="downloadQR" flat icon="download" size="sm") скачать QR
+  .full-width.text-center
+    q-btn(@click='copyAll', flat, icon='fas fa-copy', size='sm') скопировать реквизиты
+    q-btn(@click='downloadQR', flat, icon='download', size='sm') скачать QR
 </template>
 
 <style>
-#qr{
+#qr {
   width: 200px !important;
   height: 200px !important;
 }

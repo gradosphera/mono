@@ -50,8 +50,6 @@ export class MeetTrackerService {
   // Основная функция проверки собраний
   async checkMeets(): Promise<void> {
     try {
-      this.logger.info('Проверка собраний');
-
       // Получаем все собрания из блокчейна через порт
       const meets = await this.meetPort.getMeets({ coopname: config.coopname }, undefined);
       if (!meets || meets.length === 0) {

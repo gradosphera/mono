@@ -1,35 +1,55 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { Selector, type ValueTypes, type ModelTypes } from '../../zeus/index'
 
-// Сырой селектор для PaymentDTO
+// Селектор для PaymentDetailsDTO
+export const rawPaymentDetailsSelector = {
+  data: true,
+  amount_plus_fee: true,
+  amount_without_fee: true,
+  fee_amount: true,
+  fee_percent: true,
+  fact_fee_percent: true,
+  tolerance_percent: true,
+}
+
+// Сырой селектор для GatewayPaymentDTO
 export const rawPaymentSelector = {
   id: true,
+  hash: true,
   coopname: true,
   username: true,
-  hash: true,
-  outcome_hash: true,
-  income_hash: true,
   quantity: true,
   symbol: true,
-  method_id: true,
-  status: true,
   type: true,
+  direction: true,
+  status: true,
+  provider: true,
+  payment_method_id: true,
+  message: true,
+  memo: true,
+  expired_at: true,
   created_at: true,
   updated_at: true,
-  memo: true,
-  payment_details: true,
+  payment_details: rawPaymentDetailsSelector,
   blockchain_data: true,
+  statement: true,
+  // Поля для обратной совместимости
+  outcome_hash: true,
+  income_hash: true,
+  // Вычисляемые поля
   formatted_amount: true,
   status_label: true,
   type_label: true,
+  direction_label: true,
   can_change_status: true,
+  is_final: true,
 }
 
 // Валидация селектора
 const _validate: MakeAllFieldsRequired<ValueTypes['GatewayPayment']> = rawPaymentSelector
 
 /**
- * Селектор для универсального платежа
+ * Селектор для универсального платежа Gateway
  */
 export const paymentSelector = Selector('GatewayPayment')(rawPaymentSelector)
 

@@ -42,3 +42,6 @@ export * as GenerateParticipantApplicationDecision from './generateParticipantAp
 
 /** Зарегистрировать заявление и подписанные положения, подготовив пакет документов к отправке в совет на голосование после поступления оплаты. */
 export * as RegisterParticipant from './registerParticipant'
+
+/** Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
+export * as CreateInitialPayment from './createInitialPayment'

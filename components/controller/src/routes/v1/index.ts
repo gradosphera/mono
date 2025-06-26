@@ -2,7 +2,6 @@ import { Router } from 'express';
 import authRoute from './auth.route';
 import userRoute from './user.route';
 import docsRoute from './docs.route';
-import orderRoute from './order.route';
 import coopRoute from './coop.route';
 import monoRoute from './system.route';
 import dataRoute from './document.route';
@@ -34,10 +33,6 @@ const defaultRoutes = [
   {
     path: '/methods',
     route: methodRoute,
-  },
-  {
-    path: '/orders',
-    route: orderRoute,
   },
   {
     path: '/coop',

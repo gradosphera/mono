@@ -2,10 +2,10 @@
 import { Module } from '@nestjs/common';
 import { RedisNotificationHandler } from './redis-notification-app.handler';
 import { RedisModule } from '~/infrastructure/redis/redis.module';
-import { PaymentDomainModule } from '~/domain/payment/payment.module';
+import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
 
 @Module({
-  imports: [RedisModule, PaymentDomainModule],
+  imports: [RedisModule, GatewayDomainModule],
   providers: [RedisNotificationHandler],
   exports: [RedisNotificationHandler],
 })

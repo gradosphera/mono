@@ -11,10 +11,12 @@ import { ReturnByMoneyGenerateDocumentInputDTO } from '~/modules/document/docume
 import { ReturnByMoneyDecisionGenerateDocumentInputDTO } from '~/modules/document/documents-dto/return-by-money-decision.dto';
 import { CreateWithdrawInputDTO } from '../dto/create-withdraw-input.dto';
 import { CreateWithdrawResponseDTO } from '../dto/create-withdraw-response.dto';
+import { CreateDepositPaymentInputDTO } from '../../gateway/dto/create-deposit-payment-input.dto';
+import { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
 
 /**
  * GraphQL резолвер для wallet
- * Обеспечивает API для управления выводом средств и генерацией документов
+ * Обеспечивает API для управления паевыми взносами, их возвратами, и генерацией документов
  */
 @Resolver()
 export class WalletResolver {
@@ -69,5 +71,21 @@ export class WalletResolver {
   @AuthRoles(['chairman', 'member'])
   async createWithdraw(@Args('input') input: CreateWithdrawInputDTO): Promise<CreateWithdrawResponseDTO> {
     return this.walletService.createWithdraw(input);
+  }
+
+  /**
+   * Mutation: Создать депозитный платеж
+   */
+  @Mutation(() => GatewayPaymentDTO, {
+    name: 'createDepositPayment',
+    description:
+      'Создание объекта паевого платежа производится мутацией createDepositPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async createDepositPayment(
+    @Args('data', { type: () => CreateDepositPaymentInputDTO }) data: CreateDepositPaymentInputDTO
+  ): Promise<GatewayPaymentDTO> {
+    return await this.walletService.createDepositPayment(data);
   }
 }

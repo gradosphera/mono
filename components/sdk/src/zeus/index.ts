@@ -1979,7 +1979,9 @@ export type ValueTypes = {
 };
 	["CreateDepositPaymentInput"]: {
 	/** Сумма взноса */
-	quantity: string | Variable<any, string>,
+	quantity: number | Variable<any, string>,
+	/** Символ валюты */
+	symbol: string | Variable<any, string>,
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
@@ -2391,41 +2393,55 @@ export type ValueTypes = {
 	["GatewayPayment"]: AliasType<{
 	/** Данные из блокчейна */
 	blockchain_data?:boolean | `@${string}`,
-	/** Может ли статус быть изменен */
+	/** Можно ли изменить статус */
 	can_change_status?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
+	/** Направление платежа */
+	direction?:boolean | `@${string}`,
+	/** Человекочитаемое направление платежа */
+	direction_label?:boolean | `@${string}`,
+	/** Дата истечения */
+	expired_at?:boolean | `@${string}`,
 	/** Форматированная сумма */
 	formatted_amount?:boolean | `@${string}`,
-	/** Универсальный хеш платежа */
+	/** Хеш платежа */
 	hash?:boolean | `@${string}`,
 	/** Уникальный идентификатор платежа */
 	id?:boolean | `@${string}`,
-	/** Хеш входящего платежа */
+	/** Хеш входящего платежа (устарело) */
 	income_hash?:boolean | `@${string}`,
+	/** Завершен ли платеж окончательно */
+	is_final?:boolean | `@${string}`,
 	/** Дополнительная информация */
 	memo?:boolean | `@${string}`,
-	/** ID платежного метода */
-	method_id?:boolean | `@${string}`,
-	/** Хеш исходящего платежа */
+	/** Сообщение */
+	message?:boolean | `@${string}`,
+	/** Хеш исходящего платежа (устарело) */
 	outcome_hash?:boolean | `@${string}`,
 	/** Детали платежа */
-	payment_details?:boolean | `@${string}`,
-	/** Количество */
+	payment_details?:ValueTypes["PaymentDetails"],
+	/** ID платежного метода */
+	payment_method_id?:boolean | `@${string}`,
+	/** Провайдер платежа */
+	provider?:boolean | `@${string}`,
+	/** Количество/сумма */
 	quantity?:boolean | `@${string}`,
+	/** Подписанный документ заявления */
+	statement?:boolean | `@${string}`,
 	/** Статус платежа */
 	status?:boolean | `@${string}`,
 	/** Человекочитаемый статус */
 	status_label?:boolean | `@${string}`,
 	/** Символ валюты */
 	symbol?:boolean | `@${string}`,
-	/** Тип платежа: входящий или исходящий */
+	/** Тип платежа */
 	type?:boolean | `@${string}`,
 	/** Человекочитаемый тип платежа */
 	type_label?:boolean | `@${string}`,
-	/** Дата последнего обновления */
+	/** Дата обновления */
 	updated_at?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
@@ -2514,11 +2530,6 @@ export type ValueTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>
 };
-	["GetOutgoingPaymentsInput"]: {
-	coopname?: string | undefined | null | Variable<any, string>,
-	status?: string | undefined | null | Variable<any, string>,
-	username?: string | undefined | null | Variable<any, string>
-};
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
 	limit: number | Variable<any, string>,
@@ -2529,16 +2540,6 @@ export type ValueTypes = {
 	/** Направление сортировки ("ASC" или "DESC") */
 	sortOrder: string | Variable<any, string>,
 	/** Имя пользователя для фильтрации методов оплаты */
-	username?: string | undefined | null | Variable<any, string>
-};
-	["GetPaymentsInput"]: {
-	/** Идентификатор платежа в блокчейне */
-	blockchain_id?: string | undefined | null | Variable<any, string>,
-	/** Идентификатор платежа во внутренней системе */
-	id?: string | undefined | null | Variable<any, string>,
-	/** Статус платежа */
-	status?: ValueTypes["PaymentStatus"] | undefined | null | Variable<any, string>,
-	/** Имя пользователя для фильтрации платежей */
 	username?: string | undefined | null | Variable<any, string>
 };
 	["Individual"]: AliasType<{
@@ -2841,8 +2842,8 @@ createAnnualGeneralMeet?: [{	data: ValueTypes["CreateAnnualGeneralMeetInput"] | 
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
 createChildOrder?: [{	data: ValueTypes["CreateChildOrderInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-createDepositPayment?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
-createInitialPayment?: [{	data: ValueTypes["CreateInitialPaymentInput"] | Variable<any, string>},ValueTypes["Payment"]],
+createDepositPayment?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
+createInitialPayment?: [{	data: ValueTypes["CreateInitialPaymentInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
 createParentOffer?: [{	data: ValueTypes["CreateParentOfferInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["CreatedProjectFreeDecision"]],
 createWithdraw?: [{	input: ValueTypes["CreateWithdrawInput"] | Variable<any, string>},ValueTypes["CreateWithdrawResponse"]],
@@ -2892,7 +2893,7 @@ registerParticipant?: [{	data: ValueTypes["RegisterParticipantInput"] | Variable
 resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
 restartAnnualGeneralMeet?: [{	data: ValueTypes["RestartAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
-setPaymentStatus?: [{	data: ValueTypes["SetPaymentStatusInput"] | Variable<any, string>},ValueTypes["Payment"]],
+setPaymentStatus?: [{	data: ValueTypes["SetPaymentStatusInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
 setWif?: [{	data: ValueTypes["SetWifInput"] | Variable<any, string>},boolean | `@${string}`],
 signByPresiderOnAnnualGeneralMeet?: [{	data: ValueTypes["SignByPresiderOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 signBySecretaryOnAnnualGeneralMeet?: [{	data: ValueTypes["SignBySecretaryOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
@@ -2903,7 +2904,6 @@ unpublishRequest?: [{	data: ValueTypes["UnpublishRequestInput"] | Variable<any, 
 updateAccount?: [{	data: ValueTypes["UpdateAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
-updatePaymentStatus?: [{	input: ValueTypes["UpdatePaymentStatusInput"] | Variable<any, string>},ValueTypes["OutgoingPayment"]],
 updateRequest?: [{	data: ValueTypes["UpdateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes["SystemInfo"]],
 voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
@@ -2973,43 +2973,6 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 };
 	/** Тип юридического лица */
 ["OrganizationType"]:OrganizationType;
-	["OutgoingPayment"]: AliasType<{
-	/** Данные из блокчейна */
-	blockchain_data?:boolean | `@${string}`,
-	/** Может ли статус быть изменен */
-	can_change_status?:boolean | `@${string}`,
-	/** Название кооператива */
-	coopname?:boolean | `@${string}`,
-	/** Дата создания */
-	created_at?:boolean | `@${string}`,
-	/** Форматированная сумма */
-	formatted_amount?:boolean | `@${string}`,
-	/** Хеш исходящего платежа */
-	hash?:boolean | `@${string}`,
-	/** Уникальный идентификатор платежа */
-	id?:boolean | `@${string}`,
-	/** Дополнительная информация */
-	memo?:boolean | `@${string}`,
-	/** ID платежного метода */
-	method_id?:boolean | `@${string}`,
-	/** Детали платежа */
-	payment_details?:boolean | `@${string}`,
-	/** Количество */
-	quantity?:boolean | `@${string}`,
-	/** Статус платежа */
-	status?:boolean | `@${string}`,
-	/** Человекочитаемый статус */
-	status_label?:boolean | `@${string}`,
-	/** Символ валюты */
-	symbol?:boolean | `@${string}`,
-	/** Тип платежа (всегда outgoing) */
-	type?:boolean | `@${string}`,
-	/** Дата последнего обновления */
-	updated_at?:boolean | `@${string}`,
-	/** Имя пользователя */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["PaginatedGatewayPaymentsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -3173,43 +3136,12 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	number: number | Variable<any, string>,
 	series: number | Variable<any, string>
 };
-	["Payment"]: AliasType<{
-	/** Аккаунт пользователя, совершающего платеж */
-	account?:ValueTypes["Account"],
-	/** Сумма платежа */
-	amount?:boolean | `@${string}`,
-	/** Идентификационный номер платежа в блокчейне */
-	blockchain_id?:boolean | `@${string}`,
-	/** Дата создания платежа */
-	created_at?:boolean | `@${string}`,
-	/** Детали платежа */
-	details?:ValueTypes["PaymentDetails"],
-	/** Дата истечения срока давности платежа */
-	expired_at?:boolean | `@${string}`,
-	/** Идентификатор платежа во внутренней системе учёта */
-	id?:boolean | `@${string}`,
-	/** Содержит сервисное сообщение провайдера об ошибке обработки платежа */
-	message?:boolean | `@${string}`,
-	/** Идентификатор наименования провайдера платежа, ответственного за обработку */
-	provider?:boolean | `@${string}`,
-	/** Идентификатор номера платежа, который отображается пользователю в платежных документах */
-	status?:boolean | `@${string}`,
-	/** Символ тикера валюты платежа */
-	symbol?:boolean | `@${string}`,
-	/** Тип платежа (deposit или registration) */
-	type?:boolean | `@${string}`,
-	/** Дата обновления платежа */
-	updated_at?:boolean | `@${string}`,
-	/** Имя аккаунта пользователя, совершающего платеж */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["PaymentDetails"]: AliasType<{
 	/** Сумма платежа с учетом комиссии */
 	amount_plus_fee?:boolean | `@${string}`,
 	/** Сумма платежа без учета комиссии */
 	amount_without_fee?:boolean | `@${string}`,
-	/** Строка с данными платежа */
+	/** Данные платежа (QR-код, токен, реквизиты и т.д.) */
 	data?:boolean | `@${string}`,
 	/** Фактический процент комиссии */
 	fact_fee_percent?:boolean | `@${string}`,
@@ -3221,6 +3153,24 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	tolerance_percent?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Направление платежа */
+["PaymentDirection"]:PaymentDirection;
+	["PaymentFiltersInput"]: {
+	/** Название кооператива */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Направление платежа */
+	direction?: ValueTypes["PaymentDirection"] | undefined | null | Variable<any, string>,
+	/** Хэш платежа */
+	hash?: string | undefined | null | Variable<any, string>,
+	/** Провайдер платежа */
+	provider?: string | undefined | null | Variable<any, string>,
+	/** Статус платежа */
+	status?: ValueTypes["PaymentStatus"] | undefined | null | Variable<any, string>,
+	/** Тип платежа */
+	type?: ValueTypes["PaymentType"] | undefined | null | Variable<any, string>,
+	/** Имя пользователя */
+	username?: string | undefined | null | Variable<any, string>
+};
 	["PaymentMethod"]: AliasType<{
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
@@ -3253,19 +3203,10 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["PaymentPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["Payment"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Статус платежа */
 ["PaymentStatus"]:PaymentStatus;
+	/** Тип платежа по назначению */
+["PaymentType"]:PaymentType;
 	["Permission"]: AliasType<{
 	/** Родительское разрешение */
 	parent?:boolean | `@${string}`,
@@ -3421,11 +3362,10 @@ getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},V
 	getDesktop?:ValueTypes["Desktop"],
 getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>},ValueTypes["DocumentsAggregatePaginationResult"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
-getGatewayPayments?: [{	filters: ValueTypes["GetOutgoingPaymentsInput"] | Variable<any, string>,	options: ValueTypes["PaginationInput"] | Variable<any, string>},ValueTypes["PaginatedGatewayPaymentsPaginationResult"]],
 getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getMeets?: [{	data: ValueTypes["GetMeetsInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentMethodPaginationResult"]],
-getPayments?: [{	data?: ValueTypes["GetPaymentsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentPaginationResult"]],
+getPayments?: [{	data?: ValueTypes["PaymentFiltersInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedGatewayPaymentsPaginationResult"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
 searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Variable<any, string>},ValueTypes["PrivateAccountSearchResult"]],
@@ -4209,18 +4149,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
-	["UpdatePaymentStatusInput"]: {
-	/** Название кооператива */
-	coopname: string | Variable<any, string>,
-	/** Универсальный хеш платежа */
-	hash: string | Variable<any, string>,
-	/** Причина изменения статуса (для статуса failed) */
-	reason?: string | undefined | null | Variable<any, string>,
-	/** Новый статус платежа */
-	status: string | Variable<any, string>,
-	/** Тип платежа */
-	type: string | Variable<any, string>
-};
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -4346,11 +4274,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Вес */
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
-}>;
-	/** Статус платежа в системе Gateway */
-["gatewayPaymentStatus"]:gatewayPaymentStatus;
-	/** Тип платежа в системе Gateway */
-["gatewayPaymentType"]:gatewayPaymentType
+}>
   }
 
 export type ResolverInputTypes = {
@@ -5410,7 +5334,9 @@ export type ResolverInputTypes = {
 };
 	["CreateDepositPaymentInput"]: {
 	/** Сумма взноса */
-	quantity: string,
+	quantity: number,
+	/** Символ валюты */
+	symbol: string,
 	/** Имя аккаунта пользователя */
 	username: string
 };
@@ -5822,41 +5748,55 @@ export type ResolverInputTypes = {
 	["GatewayPayment"]: AliasType<{
 	/** Данные из блокчейна */
 	blockchain_data?:boolean | `@${string}`,
-	/** Может ли статус быть изменен */
+	/** Можно ли изменить статус */
 	can_change_status?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
+	/** Направление платежа */
+	direction?:boolean | `@${string}`,
+	/** Человекочитаемое направление платежа */
+	direction_label?:boolean | `@${string}`,
+	/** Дата истечения */
+	expired_at?:boolean | `@${string}`,
 	/** Форматированная сумма */
 	formatted_amount?:boolean | `@${string}`,
-	/** Универсальный хеш платежа */
+	/** Хеш платежа */
 	hash?:boolean | `@${string}`,
 	/** Уникальный идентификатор платежа */
 	id?:boolean | `@${string}`,
-	/** Хеш входящего платежа */
+	/** Хеш входящего платежа (устарело) */
 	income_hash?:boolean | `@${string}`,
+	/** Завершен ли платеж окончательно */
+	is_final?:boolean | `@${string}`,
 	/** Дополнительная информация */
 	memo?:boolean | `@${string}`,
-	/** ID платежного метода */
-	method_id?:boolean | `@${string}`,
-	/** Хеш исходящего платежа */
+	/** Сообщение */
+	message?:boolean | `@${string}`,
+	/** Хеш исходящего платежа (устарело) */
 	outcome_hash?:boolean | `@${string}`,
 	/** Детали платежа */
-	payment_details?:boolean | `@${string}`,
-	/** Количество */
+	payment_details?:ResolverInputTypes["PaymentDetails"],
+	/** ID платежного метода */
+	payment_method_id?:boolean | `@${string}`,
+	/** Провайдер платежа */
+	provider?:boolean | `@${string}`,
+	/** Количество/сумма */
 	quantity?:boolean | `@${string}`,
+	/** Подписанный документ заявления */
+	statement?:boolean | `@${string}`,
 	/** Статус платежа */
 	status?:boolean | `@${string}`,
 	/** Человекочитаемый статус */
 	status_label?:boolean | `@${string}`,
 	/** Символ валюты */
 	symbol?:boolean | `@${string}`,
-	/** Тип платежа: входящий или исходящий */
+	/** Тип платежа */
 	type?:boolean | `@${string}`,
 	/** Человекочитаемый тип платежа */
 	type_label?:boolean | `@${string}`,
-	/** Дата последнего обновления */
+	/** Дата обновления */
 	updated_at?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
@@ -5945,11 +5885,6 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	["GetOutgoingPaymentsInput"]: {
-	coopname?: string | undefined | null,
-	status?: string | undefined | null,
-	username?: string | undefined | null
-};
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
 	limit: number,
@@ -5960,16 +5895,6 @@ export type ResolverInputTypes = {
 	/** Направление сортировки ("ASC" или "DESC") */
 	sortOrder: string,
 	/** Имя пользователя для фильтрации методов оплаты */
-	username?: string | undefined | null
-};
-	["GetPaymentsInput"]: {
-	/** Идентификатор платежа в блокчейне */
-	blockchain_id?: string | undefined | null,
-	/** Идентификатор платежа во внутренней системе */
-	id?: string | undefined | null,
-	/** Статус платежа */
-	status?: ResolverInputTypes["PaymentStatus"] | undefined | null,
-	/** Имя пользователя для фильтрации платежей */
 	username?: string | undefined | null
 };
 	["Individual"]: AliasType<{
@@ -6272,8 +6197,8 @@ createAnnualGeneralMeet?: [{	data: ResolverInputTypes["CreateAnnualGeneralMeetIn
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
 createChildOrder?: [{	data: ResolverInputTypes["CreateChildOrderInput"]},ResolverInputTypes["Transaction"]],
-createDepositPayment?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]},ResolverInputTypes["Payment"]],
-createInitialPayment?: [{	data: ResolverInputTypes["CreateInitialPaymentInput"]},ResolverInputTypes["Payment"]],
+createDepositPayment?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]},ResolverInputTypes["GatewayPayment"]],
+createInitialPayment?: [{	data: ResolverInputTypes["CreateInitialPaymentInput"]},ResolverInputTypes["GatewayPayment"]],
 createParentOffer?: [{	data: ResolverInputTypes["CreateParentOfferInput"]},ResolverInputTypes["Transaction"]],
 createProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecisionInput"]},ResolverInputTypes["CreatedProjectFreeDecision"]],
 createWithdraw?: [{	input: ResolverInputTypes["CreateWithdrawInput"]},ResolverInputTypes["CreateWithdrawResponse"]],
@@ -6323,7 +6248,7 @@ registerParticipant?: [{	data: ResolverInputTypes["RegisterParticipantInput"]},R
 resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`],
 restartAnnualGeneralMeet?: [{	data: ResolverInputTypes["RestartAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
-setPaymentStatus?: [{	data: ResolverInputTypes["SetPaymentStatusInput"]},ResolverInputTypes["Payment"]],
+setPaymentStatus?: [{	data: ResolverInputTypes["SetPaymentStatusInput"]},ResolverInputTypes["GatewayPayment"]],
 setWif?: [{	data: ResolverInputTypes["SetWifInput"]},boolean | `@${string}`],
 signByPresiderOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignByPresiderOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 signBySecretaryOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignBySecretaryOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
@@ -6334,7 +6259,6 @@ unpublishRequest?: [{	data: ResolverInputTypes["UnpublishRequestInput"]},Resolve
 updateAccount?: [{	data: ResolverInputTypes["UpdateAccountInput"]},ResolverInputTypes["Account"]],
 updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
-updatePaymentStatus?: [{	input: ResolverInputTypes["UpdatePaymentStatusInput"]},ResolverInputTypes["OutgoingPayment"]],
 updateRequest?: [{	data: ResolverInputTypes["UpdateRequestInput"]},ResolverInputTypes["Transaction"]],
 updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["SystemInfo"]],
 voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
@@ -6404,43 +6328,6 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 };
 	/** Тип юридического лица */
 ["OrganizationType"]:OrganizationType;
-	["OutgoingPayment"]: AliasType<{
-	/** Данные из блокчейна */
-	blockchain_data?:boolean | `@${string}`,
-	/** Может ли статус быть изменен */
-	can_change_status?:boolean | `@${string}`,
-	/** Название кооператива */
-	coopname?:boolean | `@${string}`,
-	/** Дата создания */
-	created_at?:boolean | `@${string}`,
-	/** Форматированная сумма */
-	formatted_amount?:boolean | `@${string}`,
-	/** Хеш исходящего платежа */
-	hash?:boolean | `@${string}`,
-	/** Уникальный идентификатор платежа */
-	id?:boolean | `@${string}`,
-	/** Дополнительная информация */
-	memo?:boolean | `@${string}`,
-	/** ID платежного метода */
-	method_id?:boolean | `@${string}`,
-	/** Детали платежа */
-	payment_details?:boolean | `@${string}`,
-	/** Количество */
-	quantity?:boolean | `@${string}`,
-	/** Статус платежа */
-	status?:boolean | `@${string}`,
-	/** Человекочитаемый статус */
-	status_label?:boolean | `@${string}`,
-	/** Символ валюты */
-	symbol?:boolean | `@${string}`,
-	/** Тип платежа (всегда outgoing) */
-	type?:boolean | `@${string}`,
-	/** Дата последнего обновления */
-	updated_at?:boolean | `@${string}`,
-	/** Имя пользователя */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["PaginatedGatewayPaymentsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -6604,43 +6491,12 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	number: number,
 	series: number
 };
-	["Payment"]: AliasType<{
-	/** Аккаунт пользователя, совершающего платеж */
-	account?:ResolverInputTypes["Account"],
-	/** Сумма платежа */
-	amount?:boolean | `@${string}`,
-	/** Идентификационный номер платежа в блокчейне */
-	blockchain_id?:boolean | `@${string}`,
-	/** Дата создания платежа */
-	created_at?:boolean | `@${string}`,
-	/** Детали платежа */
-	details?:ResolverInputTypes["PaymentDetails"],
-	/** Дата истечения срока давности платежа */
-	expired_at?:boolean | `@${string}`,
-	/** Идентификатор платежа во внутренней системе учёта */
-	id?:boolean | `@${string}`,
-	/** Содержит сервисное сообщение провайдера об ошибке обработки платежа */
-	message?:boolean | `@${string}`,
-	/** Идентификатор наименования провайдера платежа, ответственного за обработку */
-	provider?:boolean | `@${string}`,
-	/** Идентификатор номера платежа, который отображается пользователю в платежных документах */
-	status?:boolean | `@${string}`,
-	/** Символ тикера валюты платежа */
-	symbol?:boolean | `@${string}`,
-	/** Тип платежа (deposit или registration) */
-	type?:boolean | `@${string}`,
-	/** Дата обновления платежа */
-	updated_at?:boolean | `@${string}`,
-	/** Имя аккаунта пользователя, совершающего платеж */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["PaymentDetails"]: AliasType<{
 	/** Сумма платежа с учетом комиссии */
 	amount_plus_fee?:boolean | `@${string}`,
 	/** Сумма платежа без учета комиссии */
 	amount_without_fee?:boolean | `@${string}`,
-	/** Строка с данными платежа */
+	/** Данные платежа (QR-код, токен, реквизиты и т.д.) */
 	data?:boolean | `@${string}`,
 	/** Фактический процент комиссии */
 	fact_fee_percent?:boolean | `@${string}`,
@@ -6652,6 +6508,24 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	tolerance_percent?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Направление платежа */
+["PaymentDirection"]:PaymentDirection;
+	["PaymentFiltersInput"]: {
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Направление платежа */
+	direction?: ResolverInputTypes["PaymentDirection"] | undefined | null,
+	/** Хэш платежа */
+	hash?: string | undefined | null,
+	/** Провайдер платежа */
+	provider?: string | undefined | null,
+	/** Статус платежа */
+	status?: ResolverInputTypes["PaymentStatus"] | undefined | null,
+	/** Тип платежа */
+	type?: ResolverInputTypes["PaymentType"] | undefined | null,
+	/** Имя пользователя */
+	username?: string | undefined | null
+};
 	["PaymentMethod"]: AliasType<{
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
@@ -6685,19 +6559,10 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["PaymentPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["Payment"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Статус платежа */
 ["PaymentStatus"]:PaymentStatus;
+	/** Тип платежа по назначению */
+["PaymentType"]:PaymentType;
 	["Permission"]: AliasType<{
 	/** Родительское разрешение */
 	parent?:boolean | `@${string}`,
@@ -6854,11 +6719,10 @@ getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputType
 	getDesktop?:ResolverInputTypes["Desktop"],
 getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTypes["DocumentsAggregatePaginationResult"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
-getGatewayPayments?: [{	filters: ResolverInputTypes["GetOutgoingPaymentsInput"],	options: ResolverInputTypes["PaginationInput"]},ResolverInputTypes["PaginatedGatewayPaymentsPaginationResult"]],
 getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 getMeets?: [{	data: ResolverInputTypes["GetMeetsInput"]},ResolverInputTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaymentMethodPaginationResult"]],
-getPayments?: [{	data?: ResolverInputTypes["GetPaymentsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaymentPaginationResult"]],
+getPayments?: [{	data?: ResolverInputTypes["PaymentFiltersInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedGatewayPaymentsPaginationResult"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
 searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"]},ResolverInputTypes["PrivateAccountSearchResult"]],
@@ -7642,18 +7506,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Имя пользователя */
 	username: string
 };
-	["UpdatePaymentStatusInput"]: {
-	/** Название кооператива */
-	coopname: string,
-	/** Универсальный хеш платежа */
-	hash: string,
-	/** Причина изменения статуса (для статуса failed) */
-	reason?: string | undefined | null,
-	/** Новый статус платежа */
-	status: string,
-	/** Тип платежа */
-	type: string
-};
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -7781,10 +7633,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Статус платежа в системе Gateway */
-["gatewayPaymentStatus"]:gatewayPaymentStatus;
-	/** Тип платежа в системе Gateway */
-["gatewayPaymentType"]:gatewayPaymentType;
 	["schema"]: AliasType<{
 	query?:ResolverInputTypes["Query"],
 	mutation?:ResolverInputTypes["Mutation"],
@@ -8825,7 +8673,9 @@ export type ModelTypes = {
 };
 	["CreateDepositPaymentInput"]: {
 	/** Сумма взноса */
-	quantity: string,
+	quantity: number,
+	/** Символ валюты */
+	symbol: string,
 	/** Имя аккаунта пользователя */
 	username: string
 };
@@ -9223,41 +9073,55 @@ export type ModelTypes = {
 	["GatewayPayment"]: {
 		/** Данные из блокчейна */
 	blockchain_data?: ModelTypes["JSON"] | undefined | null,
-	/** Может ли статус быть изменен */
+	/** Можно ли изменить статус */
 	can_change_status: boolean,
 	/** Название кооператива */
 	coopname: string,
 	/** Дата создания */
 	created_at: ModelTypes["DateTime"],
+	/** Направление платежа */
+	direction: ModelTypes["PaymentDirection"],
+	/** Человекочитаемое направление платежа */
+	direction_label: string,
+	/** Дата истечения */
+	expired_at?: ModelTypes["DateTime"] | undefined | null,
 	/** Форматированная сумма */
 	formatted_amount: string,
-	/** Универсальный хеш платежа */
-	hash: string,
+	/** Хеш платежа */
+	hash?: string | undefined | null,
 	/** Уникальный идентификатор платежа */
 	id?: string | undefined | null,
-	/** Хеш входящего платежа */
+	/** Хеш входящего платежа (устарело) */
 	income_hash?: string | undefined | null,
+	/** Завершен ли платеж окончательно */
+	is_final: boolean,
 	/** Дополнительная информация */
 	memo?: string | undefined | null,
-	/** ID платежного метода */
-	method_id: string,
-	/** Хеш исходящего платежа */
+	/** Сообщение */
+	message?: string | undefined | null,
+	/** Хеш исходящего платежа (устарело) */
 	outcome_hash?: string | undefined | null,
 	/** Детали платежа */
-	payment_details?: string | undefined | null,
-	/** Количество */
-	quantity: string,
+	payment_details?: ModelTypes["PaymentDetails"] | undefined | null,
+	/** ID платежного метода */
+	payment_method_id?: string | undefined | null,
+	/** Провайдер платежа */
+	provider?: string | undefined | null,
+	/** Количество/сумма */
+	quantity: number,
+	/** Подписанный документ заявления */
+	statement?: ModelTypes["JSON"] | undefined | null,
 	/** Статус платежа */
-	status: ModelTypes["gatewayPaymentStatus"],
+	status: ModelTypes["PaymentStatus"],
 	/** Человекочитаемый статус */
 	status_label: string,
 	/** Символ валюты */
 	symbol: string,
-	/** Тип платежа: входящий или исходящий */
-	type: ModelTypes["gatewayPaymentType"],
+	/** Тип платежа */
+	type: ModelTypes["PaymentType"],
 	/** Человекочитаемый тип платежа */
 	type_label: string,
-	/** Дата последнего обновления */
+	/** Дата обновления */
 	updated_at?: ModelTypes["DateTime"] | undefined | null,
 	/** Имя пользователя */
 	username: string
@@ -9344,11 +9208,6 @@ export type ModelTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	["GetOutgoingPaymentsInput"]: {
-	coopname?: string | undefined | null,
-	status?: string | undefined | null,
-	username?: string | undefined | null
-};
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
 	limit: number,
@@ -9359,16 +9218,6 @@ export type ModelTypes = {
 	/** Направление сортировки ("ASC" или "DESC") */
 	sortOrder: string,
 	/** Имя пользователя для фильтрации методов оплаты */
-	username?: string | undefined | null
-};
-	["GetPaymentsInput"]: {
-	/** Идентификатор платежа в блокчейне */
-	blockchain_id?: string | undefined | null,
-	/** Идентификатор платежа во внутренней системе */
-	id?: string | undefined | null,
-	/** Статус платежа */
-	status?: ModelTypes["PaymentStatus"] | undefined | null,
-	/** Имя пользователя для фильтрации платежей */
 	username?: string | undefined | null
 };
 	["Individual"]: {
@@ -9672,10 +9521,10 @@ export type ModelTypes = {
 	createBranch: ModelTypes["Branch"],
 	/** Создать заявку на поставку имущества по предложению Поставщика */
 	createChildOrder: ModelTypes["Transaction"],
-	/** Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
-	createDepositPayment: ModelTypes["Payment"],
-	/** Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
-	createInitialPayment: ModelTypes["Payment"],
+	/** Создание объекта паевого платежа производится мутацией createDepositPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
+	createDepositPayment: ModelTypes["GatewayPayment"],
+	/** Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
+	createInitialPayment: ModelTypes["GatewayPayment"],
 	/** Создать предложение на поставку имущества */
 	createParentOffer: ModelTypes["Transaction"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
@@ -9775,7 +9624,7 @@ export type ModelTypes = {
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
 	/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
-	setPaymentStatus: ModelTypes["Payment"],
+	setPaymentStatus: ModelTypes["GatewayPayment"],
 	/** Сохранить приватный ключ в зашифрованном серверном хранилище */
 	setWif: boolean,
 	/** Подписание решения председателем на общем собрании пайщиков */
@@ -9796,8 +9645,6 @@ export type ModelTypes = {
 	updateBankAccount: ModelTypes["PaymentMethod"],
 	/** Обновить расширение */
 	updateExtension: ModelTypes["Extension"],
-	/** Обновить статус платежа. */
-	updatePaymentStatus: ModelTypes["OutgoingPayment"],
 	/** Обновить заявку */
 	updateRequest: ModelTypes["Transaction"],
 	/** Обновить параметры системы */
@@ -9865,42 +9712,6 @@ export type ModelTypes = {
 	ogrn: string
 };
 	["OrganizationType"]:OrganizationType;
-	["OutgoingPayment"]: {
-		/** Данные из блокчейна */
-	blockchain_data?: ModelTypes["JSON"] | undefined | null,
-	/** Может ли статус быть изменен */
-	can_change_status: boolean,
-	/** Название кооператива */
-	coopname: string,
-	/** Дата создания */
-	created_at: ModelTypes["DateTime"],
-	/** Форматированная сумма */
-	formatted_amount: string,
-	/** Хеш исходящего платежа */
-	hash: string,
-	/** Уникальный идентификатор платежа */
-	id?: string | undefined | null,
-	/** Дополнительная информация */
-	memo?: string | undefined | null,
-	/** ID платежного метода */
-	method_id: string,
-	/** Детали платежа */
-	payment_details?: string | undefined | null,
-	/** Количество */
-	quantity: string,
-	/** Статус платежа */
-	status: ModelTypes["gatewayPaymentStatus"],
-	/** Человекочитаемый статус */
-	status_label: string,
-	/** Символ валюты */
-	symbol: string,
-	/** Тип платежа (всегда outgoing) */
-	type: ModelTypes["gatewayPaymentType"],
-	/** Дата последнего обновления */
-	updated_at?: ModelTypes["DateTime"] | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
 	["PaginatedGatewayPaymentsPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
@@ -10061,43 +9872,13 @@ export type ModelTypes = {
 	number: number,
 	series: number
 };
-	["Payment"]: {
-		/** Аккаунт пользователя, совершающего платеж */
-	account: ModelTypes["Account"],
-	/** Сумма платежа */
-	amount: number,
-	/** Идентификационный номер платежа в блокчейне */
-	blockchain_id: number,
-	/** Дата создания платежа */
-	created_at: ModelTypes["DateTime"],
-	/** Детали платежа */
-	details: ModelTypes["PaymentDetails"],
-	/** Дата истечения срока давности платежа */
-	expired_at: ModelTypes["DateTime"],
-	/** Идентификатор платежа во внутренней системе учёта */
-	id: string,
-	/** Содержит сервисное сообщение провайдера об ошибке обработки платежа */
-	message: string,
-	/** Идентификатор наименования провайдера платежа, ответственного за обработку */
-	provider: string,
-	/** Идентификатор номера платежа, который отображается пользователю в платежных документах */
-	status: ModelTypes["PaymentStatus"],
-	/** Символ тикера валюты платежа */
-	symbol: string,
-	/** Тип платежа (deposit или registration) */
-	type: string,
-	/** Дата обновления платежа */
-	updated_at: ModelTypes["DateTime"],
-	/** Имя аккаунта пользователя, совершающего платеж */
-	username: string
-};
 	["PaymentDetails"]: {
 		/** Сумма платежа с учетом комиссии */
 	amount_plus_fee: string,
 	/** Сумма платежа без учета комиссии */
 	amount_without_fee: string,
-	/** Строка с данными платежа */
-	data: string,
+	/** Данные платежа (QR-код, токен, реквизиты и т.д.) */
+	data: ModelTypes["JSON"],
 	/** Фактический процент комиссии */
 	fact_fee_percent: number,
 	/** Размер комиссии в абсолютных значениях */
@@ -10106,6 +9887,23 @@ export type ModelTypes = {
 	fee_percent: number,
 	/** Допустимый процент отклонения */
 	tolerance_percent: number
+};
+	["PaymentDirection"]:PaymentDirection;
+	["PaymentFiltersInput"]: {
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Направление платежа */
+	direction?: ModelTypes["PaymentDirection"] | undefined | null,
+	/** Хэш платежа */
+	hash?: string | undefined | null,
+	/** Провайдер платежа */
+	provider?: string | undefined | null,
+	/** Статус платежа */
+	status?: ModelTypes["PaymentStatus"] | undefined | null,
+	/** Тип платежа */
+	type?: ModelTypes["PaymentType"] | undefined | null,
+	/** Имя пользователя */
+	username?: string | undefined | null
 };
 	["PaymentMethod"]: {
 		/** Дата создания */
@@ -10134,17 +9932,8 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
-	["PaymentPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["Payment"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
 	["PaymentStatus"]:PaymentStatus;
+	["PaymentType"]:PaymentType;
 	["Permission"]: {
 		/** Родительское разрешение */
 	parent: string,
@@ -10294,16 +10083,14 @@ export type ModelTypes = {
 	getDocuments: ModelTypes["DocumentsAggregatePaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<ModelTypes["Extension"]>,
-	/** Получить список всех платежей (универсальный метод, поддержка входящих платежей в будущем). */
-	getGatewayPayments: ModelTypes["PaginatedGatewayPaymentsPaginationResult"],
 	/** Получить данные собрания по хешу */
 	getMeet: ModelTypes["MeetAggregate"],
 	/** Получить список всех собраний кооператива */
 	getMeets: Array<ModelTypes["MeetAggregate"]>,
 	/** Получить список методов оплаты */
 	getPaymentMethods: ModelTypes["PaymentMethodPaginationResult"],
-	/** Получить список платежей */
-	getPayments: ModelTypes["PaymentPaginationResult"],
+	/** Получить список платежей с возможностью фильтрации по типу, статусу и направлению. */
+	getPayments: ModelTypes["PaginatedGatewayPaymentsPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"],
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
@@ -11070,18 +10857,6 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	["UpdatePaymentStatusInput"]: {
-	/** Название кооператива */
-	coopname: string,
-	/** Универсальный хеш платежа */
-	hash: string,
-	/** Причина изменения статуса (для статуса failed) */
-	reason?: string | undefined | null,
-	/** Новый статус платежа */
-	status: string,
-	/** Тип платежа */
-	type: string
-};
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -11199,8 +10974,6 @@ export type ModelTypes = {
 	/** Вес */
 	weight: number
 };
-	["gatewayPaymentStatus"]:gatewayPaymentStatus;
-	["gatewayPaymentType"]:gatewayPaymentType;
 	["schema"]: {
 	query?: ModelTypes["Query"] | undefined | null,
 	mutation?: ModelTypes["Mutation"] | undefined | null
@@ -12267,7 +12040,9 @@ export type GraphQLTypes = {
 };
 	["CreateDepositPaymentInput"]: {
 		/** Сумма взноса */
-	quantity: string,
+	quantity: number,
+	/** Символ валюты */
+	symbol: string,
 	/** Имя аккаунта пользователя */
 	username: string
 };
@@ -12680,41 +12455,55 @@ export type GraphQLTypes = {
 	__typename: "GatewayPayment",
 	/** Данные из блокчейна */
 	blockchain_data?: GraphQLTypes["JSON"] | undefined | null,
-	/** Может ли статус быть изменен */
+	/** Можно ли изменить статус */
 	can_change_status: boolean,
 	/** Название кооператива */
 	coopname: string,
 	/** Дата создания */
 	created_at: GraphQLTypes["DateTime"],
+	/** Направление платежа */
+	direction: GraphQLTypes["PaymentDirection"],
+	/** Человекочитаемое направление платежа */
+	direction_label: string,
+	/** Дата истечения */
+	expired_at?: GraphQLTypes["DateTime"] | undefined | null,
 	/** Форматированная сумма */
 	formatted_amount: string,
-	/** Универсальный хеш платежа */
-	hash: string,
+	/** Хеш платежа */
+	hash?: string | undefined | null,
 	/** Уникальный идентификатор платежа */
 	id?: string | undefined | null,
-	/** Хеш входящего платежа */
+	/** Хеш входящего платежа (устарело) */
 	income_hash?: string | undefined | null,
+	/** Завершен ли платеж окончательно */
+	is_final: boolean,
 	/** Дополнительная информация */
 	memo?: string | undefined | null,
-	/** ID платежного метода */
-	method_id: string,
-	/** Хеш исходящего платежа */
+	/** Сообщение */
+	message?: string | undefined | null,
+	/** Хеш исходящего платежа (устарело) */
 	outcome_hash?: string | undefined | null,
 	/** Детали платежа */
-	payment_details?: string | undefined | null,
-	/** Количество */
-	quantity: string,
+	payment_details?: GraphQLTypes["PaymentDetails"] | undefined | null,
+	/** ID платежного метода */
+	payment_method_id?: string | undefined | null,
+	/** Провайдер платежа */
+	provider?: string | undefined | null,
+	/** Количество/сумма */
+	quantity: number,
+	/** Подписанный документ заявления */
+	statement?: GraphQLTypes["JSON"] | undefined | null,
 	/** Статус платежа */
-	status: GraphQLTypes["gatewayPaymentStatus"],
+	status: GraphQLTypes["PaymentStatus"],
 	/** Человекочитаемый статус */
 	status_label: string,
 	/** Символ валюты */
 	symbol: string,
-	/** Тип платежа: входящий или исходящий */
-	type: GraphQLTypes["gatewayPaymentType"],
+	/** Тип платежа */
+	type: GraphQLTypes["PaymentType"],
 	/** Человекочитаемый тип платежа */
 	type_label: string,
-	/** Дата последнего обновления */
+	/** Дата обновления */
 	updated_at?: GraphQLTypes["DateTime"] | undefined | null,
 	/** Имя пользователя */
 	username: string
@@ -12802,11 +12591,6 @@ export type GraphQLTypes = {
 		/** Имя аккаунта кооператива */
 	coopname: string
 };
-	["GetOutgoingPaymentsInput"]: {
-		coopname?: string | undefined | null,
-	status?: string | undefined | null,
-	username?: string | undefined | null
-};
 	["GetPaymentMethodsInput"]: {
 		/** Количество элементов на странице */
 	limit: number,
@@ -12817,16 +12601,6 @@ export type GraphQLTypes = {
 	/** Направление сортировки ("ASC" или "DESC") */
 	sortOrder: string,
 	/** Имя пользователя для фильтрации методов оплаты */
-	username?: string | undefined | null
-};
-	["GetPaymentsInput"]: {
-		/** Идентификатор платежа в блокчейне */
-	blockchain_id?: string | undefined | null,
-	/** Идентификатор платежа во внутренней системе */
-	id?: string | undefined | null,
-	/** Статус платежа */
-	status?: GraphQLTypes["PaymentStatus"] | undefined | null,
-	/** Имя пользователя для фильтрации платежей */
 	username?: string | undefined | null
 };
 	["Individual"]: {
@@ -13141,10 +12915,10 @@ export type GraphQLTypes = {
 	createBranch: GraphQLTypes["Branch"],
 	/** Создать заявку на поставку имущества по предложению Поставщика */
 	createChildOrder: GraphQLTypes["Transaction"],
-	/** Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
-	createDepositPayment: GraphQLTypes["Payment"],
-	/** Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
-	createInitialPayment: GraphQLTypes["Payment"],
+	/** Создание объекта паевого платежа производится мутацией createDepositPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
+	createDepositPayment: GraphQLTypes["GatewayPayment"],
+	/** Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
+	createInitialPayment: GraphQLTypes["GatewayPayment"],
 	/** Создать предложение на поставку имущества */
 	createParentOffer: GraphQLTypes["Transaction"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
@@ -13244,7 +13018,7 @@ export type GraphQLTypes = {
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
 	/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
-	setPaymentStatus: GraphQLTypes["Payment"],
+	setPaymentStatus: GraphQLTypes["GatewayPayment"],
 	/** Сохранить приватный ключ в зашифрованном серверном хранилище */
 	setWif: boolean,
 	/** Подписание решения председателем на общем собрании пайщиков */
@@ -13265,8 +13039,6 @@ export type GraphQLTypes = {
 	updateBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Обновить расширение */
 	updateExtension: GraphQLTypes["Extension"],
-	/** Обновить статус платежа. */
-	updatePaymentStatus: GraphQLTypes["OutgoingPayment"],
 	/** Обновить заявку */
 	updateRequest: GraphQLTypes["Transaction"],
 	/** Обновить параметры системы */
@@ -13338,43 +13110,6 @@ export type GraphQLTypes = {
 };
 	/** Тип юридического лица */
 ["OrganizationType"]: OrganizationType;
-	["OutgoingPayment"]: {
-	__typename: "OutgoingPayment",
-	/** Данные из блокчейна */
-	blockchain_data?: GraphQLTypes["JSON"] | undefined | null,
-	/** Может ли статус быть изменен */
-	can_change_status: boolean,
-	/** Название кооператива */
-	coopname: string,
-	/** Дата создания */
-	created_at: GraphQLTypes["DateTime"],
-	/** Форматированная сумма */
-	formatted_amount: string,
-	/** Хеш исходящего платежа */
-	hash: string,
-	/** Уникальный идентификатор платежа */
-	id?: string | undefined | null,
-	/** Дополнительная информация */
-	memo?: string | undefined | null,
-	/** ID платежного метода */
-	method_id: string,
-	/** Детали платежа */
-	payment_details?: string | undefined | null,
-	/** Количество */
-	quantity: string,
-	/** Статус платежа */
-	status: GraphQLTypes["gatewayPaymentStatus"],
-	/** Человекочитаемый статус */
-	status_label: string,
-	/** Символ валюты */
-	symbol: string,
-	/** Тип платежа (всегда outgoing) */
-	type: GraphQLTypes["gatewayPaymentType"],
-	/** Дата последнего обновления */
-	updated_at?: GraphQLTypes["DateTime"] | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
 	["PaginatedGatewayPaymentsPaginationResult"]: {
 	__typename: "PaginatedGatewayPaymentsPaginationResult",
 	/** Текущая страница */
@@ -13538,45 +13273,14 @@ export type GraphQLTypes = {
 	number: number,
 	series: number
 };
-	["Payment"]: {
-	__typename: "Payment",
-	/** Аккаунт пользователя, совершающего платеж */
-	account: GraphQLTypes["Account"],
-	/** Сумма платежа */
-	amount: number,
-	/** Идентификационный номер платежа в блокчейне */
-	blockchain_id: number,
-	/** Дата создания платежа */
-	created_at: GraphQLTypes["DateTime"],
-	/** Детали платежа */
-	details: GraphQLTypes["PaymentDetails"],
-	/** Дата истечения срока давности платежа */
-	expired_at: GraphQLTypes["DateTime"],
-	/** Идентификатор платежа во внутренней системе учёта */
-	id: string,
-	/** Содержит сервисное сообщение провайдера об ошибке обработки платежа */
-	message: string,
-	/** Идентификатор наименования провайдера платежа, ответственного за обработку */
-	provider: string,
-	/** Идентификатор номера платежа, который отображается пользователю в платежных документах */
-	status: GraphQLTypes["PaymentStatus"],
-	/** Символ тикера валюты платежа */
-	symbol: string,
-	/** Тип платежа (deposit или registration) */
-	type: string,
-	/** Дата обновления платежа */
-	updated_at: GraphQLTypes["DateTime"],
-	/** Имя аккаунта пользователя, совершающего платеж */
-	username: string
-};
 	["PaymentDetails"]: {
 	__typename: "PaymentDetails",
 	/** Сумма платежа с учетом комиссии */
 	amount_plus_fee: string,
 	/** Сумма платежа без учета комиссии */
 	amount_without_fee: string,
-	/** Строка с данными платежа */
-	data: string,
+	/** Данные платежа (QR-код, токен, реквизиты и т.д.) */
+	data: GraphQLTypes["JSON"],
 	/** Фактический процент комиссии */
 	fact_fee_percent: number,
 	/** Размер комиссии в абсолютных значениях */
@@ -13585,6 +13289,24 @@ export type GraphQLTypes = {
 	fee_percent: number,
 	/** Допустимый процент отклонения */
 	tolerance_percent: number
+};
+	/** Направление платежа */
+["PaymentDirection"]: PaymentDirection;
+	["PaymentFiltersInput"]: {
+		/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Направление платежа */
+	direction?: GraphQLTypes["PaymentDirection"] | undefined | null,
+	/** Хэш платежа */
+	hash?: string | undefined | null,
+	/** Провайдер платежа */
+	provider?: string | undefined | null,
+	/** Статус платежа */
+	status?: GraphQLTypes["PaymentStatus"] | undefined | null,
+	/** Тип платежа */
+	type?: GraphQLTypes["PaymentType"] | undefined | null,
+	/** Имя пользователя */
+	username?: string | undefined | null
 };
 	["PaymentMethod"]: {
 	__typename: "PaymentMethod",
@@ -13619,19 +13341,10 @@ export type GraphQLTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
-	["PaymentPaginationResult"]: {
-	__typename: "PaymentPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["Payment"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
 	/** Статус платежа */
 ["PaymentStatus"]: PaymentStatus;
+	/** Тип платежа по назначению */
+["PaymentType"]: PaymentType;
 	["Permission"]: {
 	__typename: "Permission",
 	/** Родительское разрешение */
@@ -13793,16 +13506,14 @@ export type GraphQLTypes = {
 	getDocuments: GraphQLTypes["DocumentsAggregatePaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<GraphQLTypes["Extension"]>,
-	/** Получить список всех платежей (универсальный метод, поддержка входящих платежей в будущем). */
-	getGatewayPayments: GraphQLTypes["PaginatedGatewayPaymentsPaginationResult"],
 	/** Получить данные собрания по хешу */
 	getMeet: GraphQLTypes["MeetAggregate"],
 	/** Получить список всех собраний кооператива */
 	getMeets: Array<GraphQLTypes["MeetAggregate"]>,
 	/** Получить список методов оплаты */
 	getPaymentMethods: GraphQLTypes["PaymentMethodPaginationResult"],
-	/** Получить список платежей */
-	getPayments: GraphQLTypes["PaymentPaginationResult"],
+	/** Получить список платежей с возможностью фильтрации по типу, статусу и направлению. */
+	getPayments: GraphQLTypes["PaginatedGatewayPaymentsPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"],
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
@@ -14586,18 +14297,6 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	["UpdatePaymentStatusInput"]: {
-		/** Название кооператива */
-	coopname: string,
-	/** Универсальный хеш платежа */
-	hash: string,
-	/** Причина изменения статуса (для статуса failed) */
-	reason?: string | undefined | null,
-	/** Новый статус платежа */
-	status: string,
-	/** Тип платежа */
-	type: string
-};
 	["UpdateRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -14724,11 +14423,7 @@ export type GraphQLTypes = {
 	wait_sec: number,
 	/** Вес */
 	weight: number
-};
-	/** Статус платежа в системе Gateway */
-["gatewayPaymentStatus"]: gatewayPaymentStatus;
-	/** Тип платежа в системе Gateway */
-["gatewayPaymentType"]: gatewayPaymentType
+}
     }
 /** Тип аккаунта пользователя в системе */
 export enum AccountType {
@@ -14763,14 +14458,27 @@ export enum OrganizationType {
 	PRODCOOP = "PRODCOOP",
 	ZAO = "ZAO"
 }
+/** Направление платежа */
+export enum PaymentDirection {
+	INCOMING = "INCOMING",
+	OUTGOING = "OUTGOING"
+}
 /** Статус платежа */
 export enum PaymentStatus {
+	CANCELLED = "CANCELLED",
 	COMPLETED = "COMPLETED",
 	EXPIRED = "EXPIRED",
 	FAILED = "FAILED",
 	PAID = "PAID",
 	PENDING = "PENDING",
+	PROCESSING = "PROCESSING",
 	REFUNDED = "REFUNDED"
+}
+/** Тип платежа по назначению */
+export enum PaymentType {
+	DEPOSIT = "DEPOSIT",
+	REGISTRATION = "REGISTRATION",
+	WITHDRAWAL = "WITHDRAWAL"
 }
 /** Состояние контроллера кооператива */
 export enum SystemStatus {
@@ -14788,19 +14496,6 @@ export enum UserStatus {
 	Payed = "Payed",
 	Refunded = "Refunded",
 	Registered = "Registered"
-}
-/** Статус платежа в системе Gateway */
-export enum gatewayPaymentStatus {
-	CANCELLED = "CANCELLED",
-	COMPLETED = "COMPLETED",
-	FAILED = "FAILED",
-	PENDING = "PENDING",
-	PROCESSING = "PROCESSING"
-}
-/** Тип платежа в системе Gateway */
-export enum gatewayPaymentType {
-	INCOMING = "INCOMING",
-	OUTGOING = "OUTGOING"
 }
 
 type ZEUS_VARIABLES = {
@@ -14874,9 +14569,7 @@ type ZEUS_VARIABLES = {
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
 	["GetMeetInput"]: ValueTypes["GetMeetInput"];
 	["GetMeetsInput"]: ValueTypes["GetMeetsInput"];
-	["GetOutgoingPaymentsInput"]: ValueTypes["GetOutgoingPaymentsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
-	["GetPaymentsInput"]: ValueTypes["GetPaymentsInput"];
 	["Init"]: ValueTypes["Init"];
 	["Install"]: ValueTypes["Install"];
 	["JSON"]: ValueTypes["JSON"];
@@ -14894,7 +14587,10 @@ type ZEUS_VARIABLES = {
 	["ParticipantApplicationSignedDocumentInput"]: ValueTypes["ParticipantApplicationSignedDocumentInput"];
 	["ParticipantApplicationSignedMetaDocumentInput"]: ValueTypes["ParticipantApplicationSignedMetaDocumentInput"];
 	["PassportInput"]: ValueTypes["PassportInput"];
+	["PaymentDirection"]: ValueTypes["PaymentDirection"];
+	["PaymentFiltersInput"]: ValueTypes["PaymentFiltersInput"];
 	["PaymentStatus"]: ValueTypes["PaymentStatus"];
+	["PaymentType"]: ValueTypes["PaymentType"];
 	["ProhibitRequestInput"]: ValueTypes["ProhibitRequestInput"];
 	["ProjectFreeDecisionGenerateDocumentInput"]: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"];
 	["ProjectFreeDecisionSignedDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedDocumentInput"];
@@ -14941,12 +14637,9 @@ type ZEUS_VARIABLES = {
 	["UpdateEntrepreneurDataInput"]: ValueTypes["UpdateEntrepreneurDataInput"];
 	["UpdateIndividualDataInput"]: ValueTypes["UpdateIndividualDataInput"];
 	["UpdateOrganizationDataInput"]: ValueTypes["UpdateOrganizationDataInput"];
-	["UpdatePaymentStatusInput"]: ValueTypes["UpdatePaymentStatusInput"];
 	["UpdateRequestInput"]: ValueTypes["UpdateRequestInput"];
 	["UserStatus"]: ValueTypes["UserStatus"];
 	["VarsInput"]: ValueTypes["VarsInput"];
 	["VoteItemInput"]: ValueTypes["VoteItemInput"];
 	["VoteOnAnnualGeneralMeetInput"]: ValueTypes["VoteOnAnnualGeneralMeetInput"];
-	["gatewayPaymentStatus"]: ValueTypes["gatewayPaymentStatus"];
-	["gatewayPaymentType"]: ValueTypes["gatewayPaymentType"];
 }

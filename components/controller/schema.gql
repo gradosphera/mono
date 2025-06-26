@@ -1500,7 +1500,10 @@ input CreateChildOrderInput {
 
 input CreateDepositPaymentInput {
   """Сумма взноса"""
-  quantity: String!
+  quantity: Float!
+
+  """Символ валюты"""
+  symbol: String!
 
   """Имя аккаунта пользователя"""
   username: String!
@@ -2102,7 +2105,7 @@ type GatewayPayment {
   """Данные из блокчейна"""
   blockchain_data: JSON
 
-  """Может ли статус быть изменен"""
+  """Можно ли изменить статус"""
   can_change_status: Boolean!
 
   """Название кооператива"""
@@ -2111,35 +2114,56 @@ type GatewayPayment {
   """Дата создания"""
   created_at: DateTime!
 
+  """Направление платежа"""
+  direction: PaymentDirection!
+
+  """Человекочитаемое направление платежа"""
+  direction_label: String!
+
+  """Дата истечения"""
+  expired_at: DateTime
+
   """Форматированная сумма"""
   formatted_amount: String!
 
-  """Универсальный хеш платежа"""
-  hash: String!
+  """Хеш платежа"""
+  hash: String
 
   """Уникальный идентификатор платежа"""
   id: ID
 
-  """Хеш входящего платежа"""
+  """Хеш входящего платежа (устарело)"""
   income_hash: String
+
+  """Завершен ли платеж окончательно"""
+  is_final: Boolean!
 
   """Дополнительная информация"""
   memo: String
 
-  """ID платежного метода"""
-  method_id: String!
+  """Сообщение"""
+  message: String
 
-  """Хеш исходящего платежа"""
+  """Хеш исходящего платежа (устарело)"""
   outcome_hash: String
 
   """Детали платежа"""
-  payment_details: String
+  payment_details: PaymentDetails
 
-  """Количество"""
-  quantity: String!
+  """ID платежного метода"""
+  payment_method_id: String
+
+  """Провайдер платежа"""
+  provider: String
+
+  """Количество/сумма"""
+  quantity: Float!
+
+  """Подписанный документ заявления"""
+  statement: JSON
 
   """Статус платежа"""
-  status: gatewayPaymentStatus!
+  status: PaymentStatus!
 
   """Человекочитаемый статус"""
   status_label: String!
@@ -2147,13 +2171,13 @@ type GatewayPayment {
   """Символ валюты"""
   symbol: String!
 
-  """Тип платежа: входящий или исходящий"""
-  type: gatewayPaymentType!
+  """Тип платежа"""
+  type: PaymentType!
 
   """Человекочитаемый тип платежа"""
   type_label: String!
 
-  """Дата последнего обновления"""
+  """Дата обновления"""
   updated_at: DateTime
 
   """Имя пользователя"""
@@ -2272,12 +2296,6 @@ input GetMeetsInput {
   coopname: String!
 }
 
-input GetOutgoingPaymentsInput {
-  coopname: String
-  status: String
-  username: String
-}
-
 input GetPaymentMethodsInput {
   """Количество элементов на странице"""
   limit: Int! = 10
@@ -2292,20 +2310,6 @@ input GetPaymentMethodsInput {
   sortOrder: String! = "ASC"
 
   """Имя пользователя для фильтрации методов оплаты"""
-  username: String
-}
-
-input GetPaymentsInput {
-  """Идентификатор платежа в блокчейне"""
-  blockchain_id: String
-
-  """Идентификатор платежа во внутренней системе"""
-  id: String
-
-  """Статус платежа"""
-  status: PaymentStatus
-
-  """Имя пользователя для фильтрации платежей"""
   username: String
 }
 
@@ -2760,14 +2764,14 @@ type Mutation {
   createChildOrder(data: CreateChildOrderInput!): Transaction!
 
   """
-  Создание объекта паевого платежа производится мутацией CreateDeposit. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
+  Создание объекта паевого платежа производится мутацией createDepositPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
   """
-  createDepositPayment(data: CreateDepositPaymentInput!): Payment!
+  createDepositPayment(data: CreateDepositPaymentInput!): GatewayPayment!
 
   """
-  Создание объекта регистрационного платежа производится мутацией CreateInitial. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
+  Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
   """
-  createInitialPayment(data: CreateInitialPaymentInput!): Payment!
+  createInitialPayment(data: CreateInitialPaymentInput!): GatewayPayment!
 
   """Создать предложение на поставку имущества"""
   createParentOffer(data: CreateParentOfferInput!): Transaction!
@@ -2939,7 +2943,7 @@ type Mutation {
   """
   Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне.
   """
-  setPaymentStatus(data: SetPaymentStatusInput!): Payment!
+  setPaymentStatus(data: SetPaymentStatusInput!): GatewayPayment!
 
   """Сохранить приватный ключ в зашифрованном серверном хранилище"""
   setWif(data: SetWifInput!): Boolean!
@@ -2976,9 +2980,6 @@ type Mutation {
 
   """Обновить расширение"""
   updateExtension(data: ExtensionInput!): Extension!
-
-  """Обновить статус платежа."""
-  updatePaymentStatus(input: UpdatePaymentStatusInput!): OutgoingPayment!
 
   """Обновить заявку"""
   updateRequest(data: UpdateRequestInput!): Transaction!
@@ -3081,59 +3082,6 @@ enum OrganizationType {
   PAO
   PRODCOOP
   ZAO
-}
-
-type OutgoingPayment {
-  """Данные из блокчейна"""
-  blockchain_data: JSON
-
-  """Может ли статус быть изменен"""
-  can_change_status: Boolean!
-
-  """Название кооператива"""
-  coopname: String!
-
-  """Дата создания"""
-  created_at: DateTime!
-
-  """Форматированная сумма"""
-  formatted_amount: String!
-
-  """Хеш исходящего платежа"""
-  hash: String!
-
-  """Уникальный идентификатор платежа"""
-  id: ID
-
-  """Дополнительная информация"""
-  memo: String
-
-  """ID платежного метода"""
-  method_id: String!
-
-  """Детали платежа"""
-  payment_details: String
-
-  """Количество"""
-  quantity: String!
-
-  """Статус платежа"""
-  status: gatewayPaymentStatus!
-
-  """Человекочитаемый статус"""
-  status_label: String!
-
-  """Символ валюты"""
-  symbol: String!
-
-  """Тип платежа (всегда outgoing)"""
-  type: gatewayPaymentType!
-
-  """Дата последнего обновления"""
-  updated_at: DateTime
-
-  """Имя пользователя"""
-  username: String!
 }
 
 type PaginatedGatewayPaymentsPaginationResult {
@@ -3369,54 +3317,6 @@ input PassportInput {
   series: Float!
 }
 
-type Payment {
-  """Аккаунт пользователя, совершающего платеж"""
-  account: Account!
-
-  """Сумма платежа"""
-  amount: Float!
-
-  """Идентификационный номер платежа в блокчейне"""
-  blockchain_id: Float!
-
-  """Дата создания платежа"""
-  created_at: DateTime!
-
-  """Детали платежа"""
-  details: PaymentDetails!
-
-  """Дата истечения срока давности платежа"""
-  expired_at: DateTime!
-
-  """Идентификатор платежа во внутренней системе учёта"""
-  id: String!
-
-  """Содержит сервисное сообщение провайдера об ошибке обработки платежа"""
-  message: String!
-
-  """
-  Идентификатор наименования провайдера платежа, ответственного за обработку
-  """
-  provider: String!
-
-  """
-  Идентификатор номера платежа, который отображается пользователю в платежных документах
-  """
-  status: PaymentStatus!
-
-  """Символ тикера валюты платежа"""
-  symbol: String!
-
-  """Тип платежа (deposit или registration)"""
-  type: String!
-
-  """Дата обновления платежа"""
-  updated_at: DateTime!
-
-  """Имя аккаунта пользователя, совершающего платеж"""
-  username: String!
-}
-
 type PaymentDetails {
   """Сумма платежа с учетом комиссии"""
   amount_plus_fee: String!
@@ -3424,8 +3324,8 @@ type PaymentDetails {
   """Сумма платежа без учета комиссии"""
   amount_without_fee: String!
 
-  """Строка с данными платежа"""
-  data: String!
+  """Данные платежа (QR-код, токен, реквизиты и т.д.)"""
+  data: JSON!
 
   """Фактический процент комиссии"""
   fact_fee_percent: Float!
@@ -3438,6 +3338,35 @@ type PaymentDetails {
 
   """Допустимый процент отклонения"""
   tolerance_percent: Float!
+}
+
+"""Направление платежа"""
+enum PaymentDirection {
+  INCOMING
+  OUTGOING
+}
+
+input PaymentFiltersInput {
+  """Название кооператива"""
+  coopname: String
+
+  """Направление платежа"""
+  direction: PaymentDirection
+
+  """Хэш платежа"""
+  hash: String
+
+  """Провайдер платежа"""
+  provider: String
+
+  """Статус платежа"""
+  status: PaymentStatus
+
+  """Тип платежа"""
+  type: PaymentType
+
+  """Имя пользователя"""
+  username: String
 }
 
 type PaymentMethod {
@@ -3479,28 +3408,23 @@ type PaymentMethodPaginationResult {
   totalPages: Int!
 }
 
-type PaymentPaginationResult {
-  """Текущая страница"""
-  currentPage: Int!
-
-  """Элементы текущей страницы"""
-  items: [Payment!]!
-
-  """Общее количество элементов"""
-  totalCount: Int!
-
-  """Общее количество страниц"""
-  totalPages: Int!
-}
-
 """Статус платежа"""
 enum PaymentStatus {
+  CANCELLED
   COMPLETED
   EXPIRED
   FAILED
   PAID
   PENDING
+  PROCESSING
   REFUNDED
+}
+
+"""Тип платежа по назначению"""
+enum PaymentType {
+  DEPOSIT
+  REGISTRATION
+  WITHDRAWAL
 }
 
 type Permission {
@@ -3713,11 +3637,6 @@ type Query {
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!
 
-  """
-  Получить список всех платежей (универсальный метод, поддержка входящих платежей в будущем).
-  """
-  getGatewayPayments(filters: GetOutgoingPaymentsInput!, options: PaginationInput!): PaginatedGatewayPaymentsPaginationResult!
-
   """Получить данные собрания по хешу"""
   getMeet(data: GetMeetInput!): MeetAggregate!
 
@@ -3727,8 +3646,10 @@ type Query {
   """Получить список методов оплаты"""
   getPaymentMethods(data: GetPaymentMethodsInput): PaymentMethodPaginationResult!
 
-  """Получить список платежей"""
-  getPayments(data: GetPaymentsInput, options: PaginationInput): PaymentPaginationResult!
+  """
+  Получить список платежей с возможностью фильтрации по типу, статусу и направлению.
+  """
+  getPayments(data: PaymentFiltersInput, options: PaginationInput): PaginatedGatewayPaymentsPaginationResult!
 
   """Получить сводную публичную информацию о системе"""
   getSystemInfo: SystemInfo!
@@ -4842,23 +4763,6 @@ input UpdateOrganizationDataInput {
   username: String!
 }
 
-input UpdatePaymentStatusInput {
-  """Название кооператива"""
-  coopname: String!
-
-  """Универсальный хеш платежа"""
-  hash: String!
-
-  """Причина изменения статуса (для статуса failed)"""
-  reason: String
-
-  """Новый статус платежа"""
-  status: String!
-
-  """Тип платежа"""
-  type: String!
-}
-
 input UpdateRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -5021,19 +4925,4 @@ type WaitWeight {
 
   """Вес"""
   weight: Int!
-}
-
-"""Статус платежа в системе Gateway"""
-enum gatewayPaymentStatus {
-  CANCELLED
-  COMPLETED
-  FAILED
-  PENDING
-  PROCESSING
-}
-
-"""Тип платежа в системе Gateway"""
-enum gatewayPaymentType {
-  INCOMING
-  OUTGOING
 }

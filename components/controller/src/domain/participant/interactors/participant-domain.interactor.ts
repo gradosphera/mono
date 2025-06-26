@@ -16,6 +16,9 @@ import http from 'http-status';
 import { PublicKey, Signature } from '@wharfkit/antelope';
 import { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import { Classes } from '@coopenomics/sdk';
+import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
+import type { CreateInitialPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-initial-payment-input-domain.interface';
+import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
 
 @Injectable()
 export class ParticipantDomainInteractor {
@@ -24,7 +27,8 @@ export class ParticipantDomainInteractor {
   constructor(
     private readonly documentDomainService: DocumentDomainService,
     private readonly accountDomainService: AccountDomainService,
-    @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository
+    @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository,
+    private readonly gatewayInteractor: GatewayInteractor
   ) {}
 
   async generateParticipantApplication(
@@ -166,5 +170,12 @@ export class ParticipantDomainInteractor {
     await emailService.sendInviteEmail(data.email, token);
 
     return this.accountDomainService.getAccount(data.username);
+  }
+
+  /**
+   * Создать регистрационный платеж
+   */
+  async createInitialPayment(data: CreateInitialPaymentInputDomainInterface): Promise<PaymentDomainEntity> {
+    return await this.gatewayInteractor.createInitialPayment(data);
   }
 }
