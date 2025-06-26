@@ -9,7 +9,6 @@ import { WinstonLoggerService } from '../modules/logger/logger-app.service';
 
 export interface Migration {
   name: string;
-  isTest?: boolean; // Если true, то миграция запускается в тестовом режиме (без сохранения в БД)
   validUntil?: Date; // Дата в UTC, до которой миграция должна применяться. Если не указана или null, миграция применяется всегда
   up: (services: { blockchain: BlockchainService }) => Promise<boolean>;
 }
@@ -147,7 +146,7 @@ export class MigrationManager {
   }
 
   async runMigration(migration: Migration, version: string, description: string): Promise<boolean> {
-    const isTest = migration.isTest === true;
+    const isTest = version.includes('__test');
 
     try {
       if (isTest) {
@@ -187,8 +186,8 @@ export class MigrationManager {
       // Вывод списка найденных миграций
       if (migrationFiles.length > 0) {
         logger.info('Список найденных миграций:');
-        migrationFiles.forEach(({ version, description }) => {
-          logger.info(`- ${version}: ${description}`);
+        migrationFiles.forEach(({ version, description, filename }) => {
+          logger.info(`- ${version}: ${description} (${filename})`);
         });
       }
 
@@ -200,6 +199,15 @@ export class MigrationManager {
       const currentDate = new Date();
 
       for (const { filename, version, description } of migrationFiles) {
+        const isTest = filename.includes('__test');
+
+        // Обычные миграции пропускаем, если уже применялись
+        if (!isTest && appliedVersions.has(version)) {
+          logger.info(`Миграция ${version} (${description}) уже применена, пропускаем`);
+          continue;
+        }
+
+        // Грузим файл миграции
         const result = await this.loadMigration(filename);
         if (!result) {
           logger.warn(`Не удалось загрузить миграцию из файла ${filename}`);
@@ -207,13 +215,6 @@ export class MigrationManager {
         }
 
         const { migration } = result;
-        const isTest = migration.isTest === true;
-
-        // Проверяем, была ли миграция уже применена успешно (для не тестовых миграций)
-        if (!isTest && appliedVersions.has(version)) {
-          logger.info(`Миграция ${version} (${description}) уже применена, пропускаем`);
-          continue;
-        }
 
         // Проверяем дату валидности миграции
         if (migration.validUntil && currentDate > migration.validUntil) {
@@ -225,7 +226,7 @@ export class MigrationManager {
 
         // Если это тестовая миграция, сообщаем об этом
         if (isTest) {
-          logger.info(`Миграция ${version} (${description}) запускается в ТЕСТОВОМ режиме`);
+          logger.info(`Миграция ${version} (${description}) запускается в ТЕСТОВОМ режиме (по имени файла)`);
         }
 
         // Запускаем миграцию

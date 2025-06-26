@@ -1,10 +1,15 @@
-import { SovietContract, GatewayContract } from 'cooptypes';
+import type { Mutations } from '@coopenomics/sdk';
+import { SovietContract, GatewayContract, Cooperative } from 'cooptypes';
+
+export type ICreateDeposit =
+  Mutations.Wallet.CreateDepositPayment.IInput['data'];
+export type ICreateInitialPayment =
+  Mutations.Participants.CreateInitialPayment.IInput['data'];
 
 export type IProgramWalletData =
   SovietContract.Tables.ProgramWallets.IProgramWallet;
 
-  export type ICoopProgramData =
-  SovietContract.Tables.Programs.IProgram;
+export type ICoopProgramData = SovietContract.Tables.Programs.IProgram;
 
 export type ExtendedProgramWalletData = IProgramWalletData & {
   program_type: string;
@@ -61,13 +66,12 @@ export interface ICreateWithdraw {
   quantity: string;
 }
 
-import { Cooperative } from 'cooptypes';
-
-export type IPaymentMethodData = Cooperative.Payments.IPaymentData
-export type IGetResponsePaymentMethodData = Cooperative.Document.IGetResponse<IPaymentMethodData>
+export type IPaymentMethodData = Cooperative.Payments.IPaymentData;
+export type IGetResponsePaymentMethodData =
+  Cooperative.Document.IGetResponse<IPaymentMethodData>;
 
 export interface IGetPaymentMethods {
-  username?: string
+  username?: string;
 }
 
 export interface IDeletePaymentMethod {

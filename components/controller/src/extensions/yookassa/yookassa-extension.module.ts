@@ -1,54 +1,53 @@
+import { Module, Inject } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { YooCheckout } from '@a2seven/yoo-checkout';
-import { Order } from '../../models';
-import { IPNProvider } from '../../services/payment/ipn/ipnProvider';
-
-import type { PaymentDetails } from '../../types';
-import IPN from '../../models/ipn.model';
-import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../services/order.service';
-import Settings from '../../models/settings.model';
-import config from '../../config/config';
-import { redisPublisher } from '../../services/redis.service';
-import Joi from 'joi';
+import { z } from 'zod';
 import { nestApp } from '~/index';
+import config from '~/config/config';
+import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { ProviderInteractor } from '~/domain/provider/provider.interactor';
-import { Inject, Module } from '@nestjs/common';
+import { IPNProvider } from '~/services/payment/ipn/ipnProvider';
+import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import { TypeOrmPaymentRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-payment.repository';
+import { PaymentEntity } from '~/infrastructure/database/typeorm/entities/payment.entity';
+import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
+import { PaymentDirectionEnum } from '~/domain/gateway/enums/payment-type.enum';
+import IPN from '~/models/ipn.model';
+import Settings from '~/models/settings.model';
+import type { PaymentDetails } from '~/types/order.types';
+import { PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
+import { redisPublisher } from '~/services/redis.service';
 import {
   EXTENSION_REPOSITORY,
   type ExtensionDomainRepository,
 } from '~/domain/extension/repositories/extension-domain.repository';
-import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
-import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
-import { z } from 'zod';
+import { TypeOrmExtensionDomainRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-extension.repository';
+import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '~/shared/utils/payments';
 
-// Дефолтные параметры конфигурации
-export const defaultConfig = {};
+export const Schema = z.object({
+  client: z.string(),
+  secret: z.string(),
+});
+
+export const defaultConfig = {
+  client: '',
+  secret: '',
+};
 
 interface IIpnRequest {
   event: string;
   object: {
-    /**
-     * Unknown Property
-     */
     [x: string]: unknown;
     amount: {
-      /**
-       * Unknown Property
-       */
       [x: string]: unknown;
       currency: string;
       value: string;
     };
     authorization_details?: {
-      /**
-       * Unknown Property
-       */
       [x: string]: unknown;
       auth_code?: string;
       rrn?: string;
       three_d_secure?: {
-        /**
-         * Unknown Property
-         */
         [x: string]: unknown;
         applied?: boolean;
       };
@@ -58,30 +57,18 @@ interface IIpnRequest {
     expires_at?: string;
     id: string;
     income_amount: {
-      /**
-       * Unknown Property
-       */
       [x: string]: unknown;
       currency: string;
       value: string;
     };
     metadata: {
       secret: string;
-      /**
-       * Unknown Property
-       */
       [x: string]: unknown;
     };
     paid: boolean;
     payment_method: {
-      /**
-       * Unknown Property
-       */
       [x: string]: unknown;
       card?: {
-        /**
-         * Unknown Property
-         */
         [x: string]: unknown;
         card_type?: string;
         expiry_month?: string;
@@ -98,9 +85,6 @@ interface IIpnRequest {
     };
     refundable?: boolean;
     refunded_amount: {
-      /**
-       * Unknown Property
-       */
       [x: string]: unknown;
       currency: string;
       value: string;
@@ -111,9 +95,6 @@ interface IIpnRequest {
   type: string;
 }
 
-export const Schema = z.object({});
-
-// Интерфейс для параметров конфигурации плагина
 export type IConfig = z.infer<typeof Schema>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -122,6 +103,7 @@ export interface ILog {}
 export class YookassaPlugin extends IPNProvider {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
+    @Inject(PAYMENT_REPOSITORY) private readonly paymentRepository: TypeOrmPaymentRepository,
     private readonly logger: WinstonLoggerService
   ) {
     super();
@@ -151,7 +133,7 @@ export class YookassaPlugin extends IPNProvider {
   public fee_percent = 3.5; ///%
 
   public async handleIPN(request: IIpnRequest): Promise<void> {
-    const { event, object } = request;
+    const { event } = request;
 
     const exist = (await IPN.findOne({ 'data.object.id': request.object.id }))?.data as IIpnRequest;
 
@@ -159,62 +141,93 @@ export class YookassaPlugin extends IPNProvider {
       await IPN.create({ provider: 'yookassa', data: request });
 
       const { secret } = request.object.metadata;
-      const order = await Order.findOne({ secret });
+      const payments = await this.paymentRepository.getAllPayments(
+        {
+          secret,
+          direction: PaymentDirectionEnum.INCOMING, // Ищем только входящие платежи
+        },
+        { limit: 1, page: 1, sortOrder: 'DESC' }
+      );
+      const payment = payments.items[0];
 
-      if (order) {
-        this.logger.info('Order found', { source: 'handleIPN', id: order.id });
+      if (payment) {
+        this.logger.info('Payment found', { source: 'handleIPN', id: payment.id });
 
         if (event === 'payment.succeeded') {
-          const [, symbol] = order.quantity.split(' ');
+          const symbol = payment.symbol;
 
           const symbol_result = checkPaymentSymbol(request.object.income_amount.currency, symbol);
 
           if (symbol_result.status == 'error') {
             this.logger.warn('Payment symbol verification failed', {
               source: 'handleIPN',
-              id: order.id,
+              id: payment.id,
               message: symbol_result.message,
             });
 
-            await Order.updateOne({ _id: order.id }, { status: 'failed', message: symbol_result.message });
-            redisPublisher.publish(
-              `${config.coopname}:orderStatusUpdate`,
-              JSON.stringify({ id: order.id, status: 'failed' })
-            );
+            if (payment.id) {
+              await this.paymentRepository.update(payment.id, {
+                status: PaymentStatusEnum.FAILED,
+                message: symbol_result.message,
+              });
+              redisPublisher.publish(
+                `${config.coopname}:orderStatusUpdate`,
+                JSON.stringify({ id: payment.id, status: PaymentStatusEnum.FAILED })
+              );
+            }
             return;
           }
 
-          const result = checkPaymentAmount(request.object.income_amount.value, order.quantity, this.tolerance_percent);
+          const result = checkPaymentAmount(
+            parseFloat(request.object.income_amount.value),
+            payment.quantity,
+            this.tolerance_percent
+          );
 
           if (result.status === 'success') {
             // Обработка успешного платежа
-            this.logger.info('Payment amount verified, updating order status to paid', {
+            this.logger.info('Payment amount verified, updating payment status to paid', {
               source: 'handleIPN',
-              id: order.id,
+              id: payment.id,
             });
 
-            await Order.updateOne({ _id: order.id }, { status: 'paid' });
-            redisPublisher.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status: 'paid' }));
+            if (payment.id) {
+              await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.PAID });
+              redisPublisher.publish(
+                `${config.coopname}:orderStatusUpdate`,
+                JSON.stringify({ id: payment.id, status: PaymentStatusEnum.PAID })
+              );
+            }
           } else {
             // Обработка неудачного платежа
             this.logger.warn('Payment amount verification failed', {
               source: 'handleIPN',
-              id: order.id,
+              id: payment.id,
               message: result.message,
             });
 
-            await Order.updateOne({ _id: order.id }, { status: 'failed', message: result.message });
-            redisPublisher.publish(
-              `${config.coopname}:orderStatusUpdate`,
-              JSON.stringify({ id: order.id, status: 'failed' })
-            );
+            if (payment.id) {
+              await this.paymentRepository.update(payment.id, {
+                status: PaymentStatusEnum.FAILED,
+                message: result.message,
+              });
+              redisPublisher.publish(
+                `${config.coopname}:orderStatusUpdate`,
+                JSON.stringify({ id: payment.id, status: PaymentStatusEnum.FAILED })
+              );
+            }
           }
         } else if (event === 'payment.failed') {
           // Обработка неудачного платежа
-          this.logger.warn('Payment failed event received', { source: 'handleIPN', id: order.id });
+          this.logger.warn('Payment failed event received', { source: 'handleIPN', id: payment.id });
 
-          await Order.updateOne({ _id: order.id }, { status: 'failed' });
-          redisPublisher.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status: 'failed' }));
+          if (payment.id) {
+            await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.FAILED });
+            redisPublisher.publish(
+              `${config.coopname}:orderStatusUpdate`,
+              JSON.stringify({ id: payment.id, status: PaymentStatusEnum.FAILED })
+            );
+          }
         }
       } else {
         //TODO платеж есть, а ордера на него нет. Что делаем?
@@ -228,13 +241,22 @@ export class YookassaPlugin extends IPNProvider {
     }
   }
 
-  public async createPayment(
-    amount: string,
-    symbol: string,
-    description: string,
-    order_num: number,
-    secret: string
-  ): Promise<PaymentDetails> {
+  public async createPayment(hash: string): Promise<PaymentDetails> {
+    // Получаем данные платежа по hash
+    const payment = await this.paymentRepository.findByHash(hash);
+
+    if (!payment) {
+      throw new Error(`Платеж с hash ${hash} не найден`);
+    }
+
+    // Используем QuantityUtils для парсинга quantity
+    const symbol = payment.symbol;
+    const amount = payment.quantity;
+
+    if (!payment.secret) {
+      throw new Error(`У платежа ${hash} отсутствует secret`);
+    }
+
     const settings = await Settings.getSettings();
 
     const checkout = new YooCheckout({
@@ -242,33 +264,36 @@ export class YookassaPlugin extends IPNProvider {
       secretKey: settings.provider.secret,
     });
 
-    const amount_plus_fee = getAmountPlusFee(parseFloat(amount), this.fee_percent).toFixed(2);
-    const fee_amount = (parseFloat(amount_plus_fee) - parseFloat(amount)).toFixed(2);
+    const amount_plus_fee = getAmountPlusFee(amount, this.fee_percent).toFixed(2);
+    const fee_amount = (parseFloat(amount_plus_fee) - amount).toFixed(2);
 
     // Фактический процент комиссии
-    const fact_fee_percent = Math.round((parseFloat(fee_amount) / parseFloat(amount)) * 100 * 100) / 100;
+    const fact_fee_percent = Math.round((parseFloat(fee_amount) / amount) * 100 * 100) / 100;
 
-    const payment = await checkout.createPayment(
+    const description = payment.memo || `Платеж для ${payment.username}`;
+
+    const payment_result = await checkout.createPayment(
       {
         description,
         amount: {
           value: amount_plus_fee,
-          currency: 'RUB',
+          currency: symbol,
         },
         confirmation: {
           type: 'embedded',
         },
         metadata: {
-          secret,
+          secret: payment.secret,
         },
         capture: true,
       },
-      secret
+      payment.secret
     );
+
     return {
-      data: payment?.confirmation?.confirmation_token || '',
+      data: payment_result?.confirmation?.confirmation_token || '',
       amount_plus_fee: `${amount_plus_fee} ${symbol}`,
-      amount_without_fee: amount,
+      amount_without_fee: `${amount} ${symbol}`,
       fee_amount: `${fee_amount} ${symbol}`,
       fee_percent: this.fee_percent,
       fact_fee_percent,
@@ -278,8 +303,19 @@ export class YookassaPlugin extends IPNProvider {
 }
 
 @Module({
-  providers: [YookassaPlugin], // Регистрируем SberpollPlugin как провайдер
-  exports: [YookassaPlugin], // Экспортируем его для доступа в других модулях
+  imports: [TypeOrmModule.forFeature([PaymentEntity])],
+  providers: [
+    YookassaPlugin,
+    {
+      provide: PAYMENT_REPOSITORY,
+      useClass: TypeOrmPaymentRepository,
+    },
+    {
+      provide: EXTENSION_REPOSITORY,
+      useClass: TypeOrmExtensionDomainRepository,
+    },
+  ],
+  exports: [YookassaPlugin],
 })
 export class YookassaPluginModule {
   constructor(private readonly yookassaPlugin: YookassaPlugin) {}

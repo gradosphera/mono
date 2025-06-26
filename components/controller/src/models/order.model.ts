@@ -1,10 +1,14 @@
 import mongoose, { Schema, model, type Model } from 'mongoose';
 import { toJSON, paginate } from './plugins/index';
 import AutoIncrementFactory from 'mongoose-sequence';
-import { generateOrderSecret } from '../services/order.service';
 import { type IOrder, orderStatus } from '../types/order.types';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
+
 const AutoIncrement = AutoIncrementFactory(mongoose);
+
+export function generateOrderSecret(length = 16): string {
+  return crypto.randomBytes(length).toString('hex'); // Генерирует случайный секрет в виде hex-строки
+}
 
 interface IOrderModel extends Model<IOrder> {
   isEmailTaken(email: string, excludeUsername?: mongoose.Types.ObjectId): Promise<boolean>;

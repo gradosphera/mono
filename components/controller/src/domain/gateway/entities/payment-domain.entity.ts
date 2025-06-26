@@ -1,4 +1,6 @@
-import type { PaymentDomainInterface } from '../interfaces/payment-domain.interface';
+import type { PaymentDomainInterface, PaymentDetailsDomainInterface } from '../interfaces/payment-domain.interface';
+import { PaymentStatusEnum } from '../enums/payment-status.enum';
+import { PaymentTypeEnum, PaymentDirectionEnum } from '../enums/payment-type.enum';
 
 /**
  * Универсальная доменная сущность платежа
@@ -9,16 +11,22 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
   coopname: string;
   username: string;
   hash: string;
-  quantity: string;
+  quantity: number;
   symbol: string;
-  method_id: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
-  type: 'incoming' | 'outgoing';
+  type: PaymentTypeEnum;
+  direction: PaymentDirectionEnum;
+  status: PaymentStatusEnum;
+  provider?: string;
+  payment_method_id?: string;
+  secret?: string;
+  message?: string;
+  memo?: string;
+  expired_at?: Date;
   created_at: Date;
   updated_at?: Date;
-  memo?: string;
-  payment_details?: string;
+  payment_details?: PaymentDetailsDomainInterface;
   blockchain_data?: any;
+  statement?: any;
 
   constructor(data: PaymentDomainInterface) {
     this.id = data.id;
@@ -27,14 +35,20 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
     this.hash = data.hash;
     this.quantity = data.quantity;
     this.symbol = data.symbol;
-    this.method_id = data.method_id;
-    this.status = data.status;
     this.type = data.type;
+    this.direction = data.direction;
+    this.status = data.status;
+    this.provider = data.provider;
+    this.payment_method_id = data.payment_method_id;
+    this.secret = data.secret;
+    this.message = data.message;
+    this.memo = data.memo;
+    this.expired_at = data.expired_at;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
-    this.memo = data.memo;
     this.payment_details = data.payment_details;
     this.blockchain_data = data.blockchain_data;
+    this.statement = data.statement;
   }
 
   /**
@@ -48,19 +62,26 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
    * Проверить, может ли статус быть изменен
    */
   canChangeStatus(): boolean {
-    return this.status !== 'completed' && this.status !== 'cancelled';
+    return (
+      this.status !== PaymentStatusEnum.COMPLETED &&
+      this.status !== PaymentStatusEnum.CANCELLED &&
+      this.status !== PaymentStatusEnum.REFUNDED
+    );
   }
 
   /**
    * Получить человекочитаемый статус
    */
   getStatusLabel(): string {
-    const statusLabels = {
-      pending: 'Ожидает обработки',
-      processing: 'В процессе',
-      completed: 'Завершен',
-      failed: 'Ошибка',
-      cancelled: 'Отменен',
+    const statusLabels: Record<PaymentStatusEnum, string> = {
+      [PaymentStatusEnum.PENDING]: 'Ожидает обработки',
+      [PaymentStatusEnum.PROCESSING]: 'В процессе',
+      [PaymentStatusEnum.PAID]: 'Оплачен',
+      [PaymentStatusEnum.COMPLETED]: 'Завершен',
+      [PaymentStatusEnum.FAILED]: 'Ошибка',
+      [PaymentStatusEnum.EXPIRED]: 'Истек',
+      [PaymentStatusEnum.CANCELLED]: 'Отменен',
+      [PaymentStatusEnum.REFUNDED]: 'Возвращен',
     };
     return statusLabels[this.status] || this.status;
   }
@@ -69,26 +90,39 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
    * Получить человекочитаемый тип платежа
    */
   getTypeLabel(): string {
-    const typeLabels = {
-      incoming: 'Входящий платеж',
-      outgoing: 'Исходящий платеж',
+    const typeLabels: Record<PaymentTypeEnum, string> = {
+      [PaymentTypeEnum.REGISTRATION]: 'Регистрационный взнос',
+      [PaymentTypeEnum.DEPOSIT]: 'Паевой взнос',
+      [PaymentTypeEnum.WITHDRAWAL]: 'Возврат средств',
     };
     return typeLabels[this.type] || this.type;
+  }
+
+  /**
+   * Получить человекочитаемое направление платежа
+   */
+  getDirectionLabel(): string {
+    const directionLabels: Record<PaymentDirectionEnum, string> = {
+      [PaymentDirectionEnum.INCOMING]: 'Входящий',
+      [PaymentDirectionEnum.OUTGOING]: 'Исходящий',
+    };
+    return directionLabels[this.direction] || this.direction;
   }
 
   /**
    * Получить соответствующий хеш для типа платежа
    */
   getSpecificHash(): { [key: string]: string } {
-    if (this.type === 'outgoing') {
-      return { outcome_hash: this.hash };
+    const hashValue = this.hash || '';
+    if (this.direction === PaymentDirectionEnum.OUTGOING) {
+      return { outcome_hash: hashValue };
     } else {
-      return { income_hash: this.hash };
+      return { income_hash: hashValue };
     }
   }
 
   /**
-   * Преобразовать в DTO для GraphQL
+   * Преобразовать в DTO для GraphQL (без sensitive данных)
    */
   toDTO(): any {
     return {
@@ -99,18 +133,25 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
       ...this.getSpecificHash(), // Добавляем конкретный хеш
       quantity: this.quantity,
       symbol: this.symbol,
-      method_id: this.method_id,
-      status: this.status,
       type: this.type,
+      direction: this.direction,
+      status: this.status,
+      provider: this.provider,
+      payment_method_id: this.payment_method_id,
+      message: this.message,
+      memo: this.memo,
+      expired_at: this.expired_at,
       created_at: this.created_at,
       updated_at: this.updated_at,
-      memo: this.memo,
       payment_details: this.payment_details,
       blockchain_data: this.blockchain_data,
+      statement: this.statement,
       formatted_amount: this.getFormattedAmount(),
       status_label: this.getStatusLabel(),
       type_label: this.getTypeLabel(),
+      direction_label: this.getDirectionLabel(),
       can_change_status: this.canChangeStatus(),
+      is_final: ![PaymentStatusEnum.PENDING, PaymentStatusEnum.PROCESSING].includes(this.status),
     };
   }
 }

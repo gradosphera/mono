@@ -4,11 +4,13 @@ import { DocumentDomainService } from '~/domain/document/services/document-domai
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import { WalletBlockchainPort, WALLET_BLOCKCHAIN_PORT } from '../ports/wallet-blockchain.port';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
-import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { CreateWithdrawInputDomainInterface } from '../interfaces/create-withdraw-input-domain.interface';
+import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
+import type { CreateDepositPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-deposit-payment-input-domain.interface';
+import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
 
 /**
- * Интерактор домена wallet для управления выводом средств и генерацией документов
+ * Интерактор домена wallet для управления паевыми взносами, их возвратами, и генерацией документов
  */
 @Injectable()
 export class WalletDomainInteractor {
@@ -17,8 +19,16 @@ export class WalletDomainInteractor {
   constructor(
     private readonly documentDomainService: DocumentDomainService,
     @Inject(WALLET_BLOCKCHAIN_PORT)
-    private readonly walletBlockchainPort: WalletBlockchainPort
+    private readonly walletBlockchainPort: WalletBlockchainPort,
+    private readonly gatewayInteractor: GatewayInteractor
   ) {}
+
+  /**
+   * Создать депозитный платеж
+   */
+  async createDepositPayment(data: CreateDepositPaymentInputDomainInterface): Promise<PaymentDomainEntity> {
+    return await this.gatewayInteractor.createDeposit(data);
+  }
 
   /**
    * Генерация документа заявления на возврат паевого взноса (900)
@@ -52,6 +62,7 @@ export class WalletDomainInteractor {
     const withdraw_hash = generateUniqueHash();
 
     try {
+      //TODO: создать исходящий платеж в gateway
       // Создаем withdraw в wallet контракте
       // wallet контракт автоматически создаст outcome в gateway контракте
       await this.walletBlockchainPort.createWithdraw({

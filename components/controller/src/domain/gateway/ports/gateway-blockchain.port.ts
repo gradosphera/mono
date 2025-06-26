@@ -1,19 +1,8 @@
 import type { TransactionResult } from '~/domain/blockchain/types/transaction-result.type';
 import type { GatewayContract } from 'cooptypes';
-
-/**
- * Доменные интерфейсы для управления gateway
- */
-export interface CompleteOutcomeDomainInterface {
-  coopname: string;
-  outcome_hash: string;
-}
-
-export interface DeclineOutcomeDomainInterface {
-  coopname: string;
-  outcome_hash: string;
-  reason: string;
-}
+import type { CompleteIncomeDomainInterface } from '../interfaces/complete-income-domain.interface';
+import type { CompleteOutcomeDomainInterface } from '../interfaces/complete-outcome-domain.interface';
+import type { DeclineOutcomeDomainInterface } from '../interfaces/decline-outcome-domain.interface';
 
 /**
  * Порт для взаимодействия с gateway блокчейном
@@ -31,6 +20,9 @@ export interface GatewayBlockchainPort {
 
   // Получение конкретного исходящего платежа
   getOutcome(coopname: string, outcome_hash: string): Promise<GatewayContract.Tables.Outcomes.IOutcome | null>;
+
+  // Завершение входящего платежа (депозита)
+  completeIncome(data: CompleteIncomeDomainInterface): Promise<TransactionResult>;
 }
 
 export const GATEWAY_BLOCKCHAIN_PORT = Symbol('GATEWAY_BLOCKCHAIN_PORT');

@@ -2,17 +2,18 @@ import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
 import type { IPayment } from 'src/entities/Payment/model';
 
-type ISetPaymentStatusInput = Mutations.Payments.SetPaymentStatus.IInput['data']
+export type ISetPaymentStatusInput =
+  Mutations.Gateway.SetPaymentStatus.IInput['data'];
 
-async function setPaymentStatus(data: ISetPaymentStatusInput): Promise<IPayment> {
-  const { [Mutations.Payments.SetPaymentStatus.name]: result } = await client.Mutation(
-    Mutations.Payments.SetPaymentStatus.mutation,
-    {
+async function setPaymentStatus(
+  data: ISetPaymentStatusInput,
+): Promise<IPayment> {
+  const { [Mutations.Gateway.SetPaymentStatus.name]: result } =
+    await client.Mutation(Mutations.Gateway.SetPaymentStatus.mutation, {
       variables: {
-        data
-      }
-    }
-  );
+        data,
+      },
+    });
 
   return result;
 }

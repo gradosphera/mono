@@ -41,11 +41,6 @@ export const RedisProvider: Provider = {
     logConnectionStatus(redisSubscriber, 'Subscriber');
     logConnectionStatus(redisPublisher, 'Publisher');
 
-    // await Promise.all([
-    //   redisSubscriber.connect().catch((error) => logger.error(`Subscriber connect error: ${error.message}`)),
-    //   redisPublisher.connect().catch((error) => logger.error(`Publisher connect error: ${error.message}`)),
-    // ]);
-
     return {
       subscriber: redisSubscriber,
       publisher: redisPublisher,

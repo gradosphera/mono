@@ -224,14 +224,8 @@ export const AllTypesProps: Record<string,any> = {
 	GetMeetsInput:{
 
 	},
-	GetOutgoingPaymentsInput:{
-
-	},
 	GetPaymentMethodsInput:{
 
-	},
-	GetPaymentsInput:{
-		status:"PaymentStatus"
 	},
 	Init:{
 		organization_data:"CreateOrganizationDataInput",
@@ -496,9 +490,6 @@ export const AllTypesProps: Record<string,any> = {
 		updateExtension:{
 			data:"ExtensionInput"
 		},
-		updatePaymentStatus:{
-			input:"UpdatePaymentStatusInput"
-		},
 		updateRequest:{
 			data:"UpdateRequestInput"
 		},
@@ -535,7 +526,14 @@ export const AllTypesProps: Record<string,any> = {
 	PassportInput:{
 
 	},
+	PaymentDirection: "enum" as const,
+	PaymentFiltersInput:{
+		direction:"PaymentDirection",
+		status:"PaymentStatus",
+		type:"PaymentType"
+	},
 	PaymentStatus: "enum" as const,
+	PaymentType: "enum" as const,
 	ProhibitRequestInput:{
 
 	},
@@ -572,10 +570,6 @@ export const AllTypesProps: Record<string,any> = {
 		getExtensions:{
 			data:"GetExtensionsInput"
 		},
-		getGatewayPayments:{
-			filters:"GetOutgoingPaymentsInput",
-			options:"PaginationInput"
-		},
 		getMeet:{
 			data:"GetMeetInput"
 		},
@@ -586,7 +580,7 @@ export const AllTypesProps: Record<string,any> = {
 			data:"GetPaymentMethodsInput"
 		},
 		getPayments:{
-			data:"GetPaymentsInput",
+			data:"PaymentFiltersInput",
 			options:"PaginationInput"
 		},
 		searchPrivateAccounts:{
@@ -729,9 +723,6 @@ export const AllTypesProps: Record<string,any> = {
 		details:"OrganizationDetailsInput",
 		represented_by:"RepresentedByInput"
 	},
-	UpdatePaymentStatusInput:{
-
-	},
 	UpdateRequestInput:{
 
 	},
@@ -750,9 +741,7 @@ export const AllTypesProps: Record<string,any> = {
 	VoteOnAnnualGeneralMeetInput:{
 		ballot:"AnnualGeneralMeetingVotingBallotSignedDocumentInput",
 		votes:"VoteItemInput"
-	},
-	gatewayPaymentStatus: "enum" as const,
-	gatewayPaymentType: "enum" as const
+	}
 }
 
 export const ReturnTypes: Record<string,any> = {
@@ -1092,19 +1081,26 @@ export const ReturnTypes: Record<string,any> = {
 		can_change_status:"Boolean",
 		coopname:"String",
 		created_at:"DateTime",
+		direction:"PaymentDirection",
+		direction_label:"String",
+		expired_at:"DateTime",
 		formatted_amount:"String",
 		hash:"String",
 		id:"ID",
 		income_hash:"String",
+		is_final:"Boolean",
 		memo:"String",
-		method_id:"String",
+		message:"String",
 		outcome_hash:"String",
-		payment_details:"String",
-		quantity:"String",
-		status:"gatewayPaymentStatus",
+		payment_details:"PaymentDetails",
+		payment_method_id:"String",
+		provider:"String",
+		quantity:"Float",
+		statement:"JSON",
+		status:"PaymentStatus",
 		status_label:"String",
 		symbol:"String",
-		type:"gatewayPaymentType",
+		type:"PaymentType",
 		type_label:"String",
 		updated_at:"DateTime",
 		username:"String"
@@ -1245,8 +1241,8 @@ export const ReturnTypes: Record<string,any> = {
 		createBankAccount:"PaymentMethod",
 		createBranch:"Branch",
 		createChildOrder:"Transaction",
-		createDepositPayment:"Payment",
-		createInitialPayment:"Payment",
+		createDepositPayment:"GatewayPayment",
+		createInitialPayment:"GatewayPayment",
 		createParentOffer:"Transaction",
 		createProjectOfFreeDecision:"CreatedProjectFreeDecision",
 		createWithdraw:"CreateWithdrawResponse",
@@ -1296,7 +1292,7 @@ export const ReturnTypes: Record<string,any> = {
 		resetKey:"Boolean",
 		restartAnnualGeneralMeet:"MeetAggregate",
 		selectBranch:"Boolean",
-		setPaymentStatus:"Payment",
+		setPaymentStatus:"GatewayPayment",
 		setWif:"Boolean",
 		signByPresiderOnAnnualGeneralMeet:"MeetAggregate",
 		signBySecretaryOnAnnualGeneralMeet:"MeetAggregate",
@@ -1307,7 +1303,6 @@ export const ReturnTypes: Record<string,any> = {
 		updateAccount:"Account",
 		updateBankAccount:"PaymentMethod",
 		updateExtension:"Extension",
-		updatePaymentStatus:"OutgoingPayment",
 		updateRequest:"Transaction",
 		updateSystem:"SystemInfo",
 		voteOnAnnualGeneralMeet:"MeetAggregate"
@@ -1339,25 +1334,6 @@ export const ReturnTypes: Record<string,any> = {
 		kpp:"String",
 		ogrn:"String"
 	},
-	OutgoingPayment:{
-		blockchain_data:"JSON",
-		can_change_status:"Boolean",
-		coopname:"String",
-		created_at:"DateTime",
-		formatted_amount:"String",
-		hash:"String",
-		id:"ID",
-		memo:"String",
-		method_id:"String",
-		payment_details:"String",
-		quantity:"String",
-		status:"gatewayPaymentStatus",
-		status_label:"String",
-		symbol:"String",
-		type:"gatewayPaymentType",
-		updated_at:"DateTime",
-		username:"String"
-	},
 	PaginatedGatewayPaymentsPaginationResult:{
 		currentPage:"Int",
 		items:"GatewayPayment",
@@ -1385,26 +1361,10 @@ export const ReturnTypes: Record<string,any> = {
 		number:"Int",
 		series:"Int"
 	},
-	Payment:{
-		account:"Account",
-		amount:"Float",
-		blockchain_id:"Float",
-		created_at:"DateTime",
-		details:"PaymentDetails",
-		expired_at:"DateTime",
-		id:"String",
-		message:"String",
-		provider:"String",
-		status:"PaymentStatus",
-		symbol:"String",
-		type:"String",
-		updated_at:"DateTime",
-		username:"String"
-	},
 	PaymentDetails:{
 		amount_plus_fee:"String",
 		amount_without_fee:"String",
-		data:"String",
+		data:"JSON",
 		fact_fee_percent:"Float",
 		fee_amount:"String",
 		fee_percent:"Float",
@@ -1426,12 +1386,6 @@ export const ReturnTypes: Record<string,any> = {
 	PaymentMethodPaginationResult:{
 		currentPage:"Int",
 		items:"PaymentMethod",
-		totalCount:"Int",
-		totalPages:"Int"
-	},
-	PaymentPaginationResult:{
-		currentPage:"Int",
-		items:"Payment",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -1478,11 +1432,10 @@ export const ReturnTypes: Record<string,any> = {
 		getDesktop:"Desktop",
 		getDocuments:"DocumentsAggregatePaginationResult",
 		getExtensions:"Extension",
-		getGatewayPayments:"PaginatedGatewayPaymentsPaginationResult",
 		getMeet:"MeetAggregate",
 		getMeets:"MeetAggregate",
 		getPaymentMethods:"PaymentMethodPaginationResult",
-		getPayments:"PaymentPaginationResult",
+		getPayments:"PaginatedGatewayPaymentsPaginationResult",
 		getSystemInfo:"SystemInfo",
 		searchPrivateAccounts:"PrivateAccountSearchResult"
 	},

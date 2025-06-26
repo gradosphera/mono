@@ -1,19 +1,19 @@
 import { $, Selector, type ModelTypes } from '../../zeus/index'
-import { outgoingPaymentSelector } from '../../selectors/gateway/outgoingPaymentSelector'
+import { paymentSelector } from '../../selectors/gateway/paymentSelector'
 
-export const name = 'updatePaymentStatus'
+export const name = 'setPaymentStatus'
 
 // Селектор мутации
 export const mutation = Selector('Mutation')({
-  [name]: [{ input: $('input', 'UpdatePaymentStatusInput!') }, outgoingPaymentSelector],
+  [name]: [{ data: $('data', 'SetPaymentStatusInput!') }, paymentSelector],
 })
 
 // Интерфейс для входных данных
 export interface IInput {
-  input: ModelTypes['UpdatePaymentStatusInput']
+  data: ModelTypes['SetPaymentStatusInput']
 }
 
 // Тип выходных данных
 export type IOutput = {
-  [name]: ModelTypes['OutgoingPayment']
+  [name]: ModelTypes['GatewayPayment']
 }

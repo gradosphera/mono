@@ -1,20 +1,50 @@
+import type { PaymentStatusEnum } from '../enums/payment-status.enum';
 import type { PaymentDomainInterface } from '../interfaces/payment-domain.interface';
-import type { OutgoingPaymentDomainInterface } from '../interfaces/outgoing-payment-domain.interface';
+import type { InternalPaymentFiltersDomainInterface } from '../interfaces/payment-filters-domain.interface';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
-import type { GetOutgoingPaymentsInputDomainInterface } from '../interfaces/get-outgoing-payments-input-domain.interface';
+import { PaymentTypeEnum } from '../enums/payment-type.enum';
 
 export interface PaymentRepository {
+  // Общие методы
+  findById(id: string): Promise<PaymentDomainInterface | null>;
   findByHash(hash: string): Promise<PaymentDomainInterface | null>;
   create(data: PaymentDomainInterface): Promise<PaymentDomainInterface>;
-  updatePaymentStatus(hash: string, status: string, reason?: string): Promise<PaymentDomainInterface | null>;
+  update(id: string, data: Partial<PaymentDomainInterface>): Promise<PaymentDomainInterface | null>;
+
+  // Методы для работы с платежами
   updatePaymentWithBlockchainData(hash: string, blockchain_data: any): Promise<PaymentDomainInterface | null>;
-  getOutgoingPayments(
-    filters: GetOutgoingPaymentsInputDomainInterface,
+  setPaymentStatus(id: string, status: PaymentStatusEnum): Promise<PaymentDomainInterface | null>;
+
+  // Универсальные методы
+  getAllPayments(
+    filters: InternalPaymentFiltersDomainInterface,
     options: PaginationInputDomainInterface
-  ): Promise<PaginationResultDomainInterface<OutgoingPaymentDomainInterface>>;
+  ): Promise<PaginationResultDomainInterface<PaymentDomainInterface>>;
+
+  // Новые методы для работы с истекшими платежами
+  /**
+   * Обновить все истекшие платежи в статус EXPIRED
+   * @returns количество обновленных платежей
+   */
+  expireOutdatedPayments(): Promise<number>;
+
+  /**
+   * Найти активный платеж того же типа для пользователя
+   * @param username имя пользователя
+   * @param type тип платежа
+   * @param quantity количество
+   * @param symbol символ валюты
+   * @returns активный платеж или null
+   */
+  findActivePendingPayment(
+    username: string,
+    type: PaymentTypeEnum,
+    quantity: number,
+    symbol: string
+  ): Promise<PaymentDomainInterface | null>;
 }
 
 export const PAYMENT_REPOSITORY = Symbol('PaymentRepository');

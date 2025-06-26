@@ -14,7 +14,6 @@ import { DecisionModule } from './free-decision/decision.module';
 import { AgreementModule } from './agreement/agreement.module';
 import { ParticipantModule } from './participant/participant.module';
 import { AgendaModule } from './agenda/agenda.module';
-import { PaymentModule } from './payment/payment.module';
 import { CooplaceModule } from './cooplace/cooplace.module';
 import { DesktopModule } from './desktop/desktop.module';
 import { MeetModule } from './meet/meet.module';
@@ -34,7 +33,6 @@ import { WalletModule } from './wallet/wallet.module';
     PaymentMethodModule,
     QueueModule,
     RedisAppModule,
-    PaymentModule,
     SystemModule,
     DocumentModule,
     DecisionModule,
@@ -54,7 +52,6 @@ import { WalletModule } from './wallet/wallet.module';
     DesktopModule,
     LoggerModule,
     PaymentMethodModule,
-    PaymentModule,
     QueueModule,
     RedisAppModule,
     SystemModule,

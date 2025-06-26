@@ -12,6 +12,8 @@ import { ParticipantApplicationDecisionGenerateDocumentInputDTO } from '../../do
 import { AccountDTO } from '~/modules/account/dto/account.dto';
 import { AddParticipantInputDTO } from '../dto/add-participant-input.dto';
 import { RegisterParticipantInputDTO } from '../dto/register-participant-input.dto';
+import { CreateInitialPaymentInputDTO } from '../../gateway/dto/create-initial-payment-input.dto';
+import { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
 
 @Resolver()
 export class ParticipantResolver {
@@ -75,5 +77,18 @@ export class ParticipantResolver {
     data: RegisterParticipantInputDTO
   ): Promise<AccountDTO> {
     return this.participantService.registerParticipant(data);
+  }
+
+  @Mutation(() => GatewayPaymentDTO, {
+    name: 'createInitialPayment',
+    description:
+      'Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async createInitialPayment(
+    @Args('data', { type: () => CreateInitialPaymentInputDTO }) data: CreateInitialPaymentInputDTO
+  ): Promise<GatewayPaymentDTO> {
+    return await this.participantService.createInitialPayment(data);
   }
 }

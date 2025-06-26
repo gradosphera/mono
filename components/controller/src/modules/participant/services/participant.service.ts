@@ -9,6 +9,8 @@ import { generateUsername } from '~/utils/generate-username';
 import { RegisterRole } from '~/modules/account/enum/account-role-on-register.enum';
 import type { RegisterParticipantInputDTO } from '../dto/register-participant-input.dto';
 import type { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
+import type { CreateInitialPaymentInputDTO } from '../../gateway/dto/create-initial-payment-input.dto';
+import type { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
 
 @Injectable()
 export class ParticipantService {
@@ -42,5 +44,13 @@ export class ParticipantService {
   public async registerParticipant(data: RegisterParticipantInputDTO): Promise<AccountDTO> {
     const result = await this.participantDomainInteractor.registerParticipant(data);
     return new AccountDTO(result);
+  }
+
+  /**
+   * Создать регистрационный платеж
+   */
+  public async createInitialPayment(data: CreateInitialPaymentInputDTO): Promise<GatewayPaymentDTO> {
+    const result = await this.participantDomainInteractor.createInitialPayment(data);
+    return result.toDTO();
   }
 }

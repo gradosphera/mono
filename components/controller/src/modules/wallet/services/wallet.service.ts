@@ -7,6 +7,8 @@ import { ReturnByMoneyDecisionGenerateDocumentInputDTO } from '~/modules/documen
 import { CreateWithdrawInputDTO } from '../dto/create-withdraw-input.dto';
 import { CreateWithdrawResponseDTO } from '../dto/create-withdraw-response.dto';
 import { Cooperative } from 'cooptypes';
+import type { CreateDepositPaymentInputDTO } from '../../gateway/dto/create-deposit-payment-input.dto';
+import type { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
 
 /**
  * Сервис для работы с wallet модулем
@@ -14,6 +16,14 @@ import { Cooperative } from 'cooptypes';
 @Injectable()
 export class WalletService {
   constructor(private readonly walletDomainInteractor: WalletDomainInteractor) {}
+
+  /**
+   * Создать депозитный платеж
+   */
+  public async createDepositPayment(data: CreateDepositPaymentInputDTO): Promise<GatewayPaymentDTO> {
+    const result = await this.walletDomainInteractor.createDepositPayment(data);
+    return result.toDTO();
+  }
 
   /**
    * Генерация документа заявления на возврат паевого взноса (900)

@@ -1,22 +1,25 @@
 import { PollingProvider } from '../../services/payment/polling/pollingProvider';
-import { Order } from '../../models';
 import type { PaymentDetails } from '../../types';
 import { generator } from '../../services/document.service';
 import { redisPublisher } from '../../services/redis.service';
 import { PaymentState } from '../../models/paymentState.model';
 import axios from 'axios';
-import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '../../services/order.service';
-import { orderStatus } from '../../types/order.types';
+import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '~/shared/utils/payments';
 import config from '../../config/config';
 import { Inject, Module } from '@nestjs/common';
 import {
   EXTENSION_REPOSITORY,
   type ExtensionDomainRepository,
 } from '~/domain/extension/repositories/extension-domain.repository';
+import { TypeOrmExtensionDomainRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-extension.repository';
 import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { z } from 'zod';
 import type { Cooperative } from 'cooptypes';
+import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
+import { PAYMENT_REPOSITORY, PaymentRepository } from '~/domain/gateway/repositories/payment.repository';
+import { TypeOrmPaymentRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-payment.repository';
+import { PaymentDirectionEnum } from '~/domain/gateway/enums/payment-type.enum';
 
 // Дефолтные параметры конфигурации
 export const defaultConfig = {};
@@ -75,6 +78,7 @@ export interface ILog {}
 export class SberpollPlugin extends PollingProvider {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
+    @Inject(PAYMENT_REPOSITORY) private readonly paymentRepository: PaymentRepository,
     private readonly logger: WinstonLoggerService
   ) {
     super();
@@ -100,18 +104,22 @@ export class SberpollPlugin extends PollingProvider {
     this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin);
   }
 
-  public async createPayment(
-    amount: string,
-    symbol: string,
-    description: string,
-    order_num: number,
-    secret: string
-  ): Promise<PaymentDetails> {
+  public async createPayment(hash: string): Promise<PaymentDetails> {
+    // Получаем данные платежа по hash
+    const payment = await this.paymentRepository.findByHash(hash);
+
+    if (!payment) {
+      throw new Error(`Платеж с hash ${hash} не найден`);
+    }
+
+    const amount = payment.quantity;
+    const symbol = payment.symbol;
+
     // eslint-disable-next-line prettier/prettier
     const cooperative = await generator.constructCooperative(config.coopname);
-    const amount_plus_fee = getAmountPlusFee(parseFloat(amount), this.fee_percent).toFixed(2);
-    const fee_amount = (parseFloat(amount_plus_fee) - parseFloat(amount)).toFixed(2);
-    const fact_fee_percent = Math.round((parseFloat(fee_amount) / parseFloat(amount)) * 100 * 100) / 100;
+    const amount_plus_fee = getAmountPlusFee(amount, this.fee_percent).toFixed(2);
+    const fee_amount = (parseFloat(amount_plus_fee) - amount).toFixed(2);
+    const fact_fee_percent = Math.round((parseFloat(fee_amount) / amount) * 100 * 100) / 100;
 
     const paymentMethod = (await generator.get('paymentMethod', {
       username: config.coopname,
@@ -121,16 +129,18 @@ export class SberpollPlugin extends PollingProvider {
 
     const bankAccount = paymentMethod.data as Cooperative.Payments.IBankAccount;
 
+    const description = payment.memo || `Платеж для ${payment.username}`;
+
     const invoice = `ST00012|Name=${cooperative?.full_name}|PersonalAcc=${bankAccount.account_number}|BankName=${
       bankAccount.bank_name
     }|BIC=${bankAccount.details.bik}|CorrespAcc=${bankAccount.details.corr}|Sum=${parseInt(
-      amount
+      amount_plus_fee
     )}00|Purpose=${description}. Без НДС.|PayeeINN=${cooperative?.details.inn}|KPP=${cooperative?.details.kpp}`;
 
     const result: PaymentDetails = {
       data: invoice,
       amount_plus_fee: `${amount_plus_fee} ${symbol}`,
-      amount_without_fee: amount,
+      amount_without_fee: `${amount} ${symbol}`,
       fee_amount: `${fee_amount} ${symbol}`,
       fee_percent: this.fee_percent,
       fact_fee_percent,
@@ -213,61 +223,88 @@ export class SberpollPlugin extends PollingProvider {
         const transactions = data.transactions || [];
 
         for (const transaction of transactions) {
-          // Извлечение номера заказа
+          // Извлечение номера заказа из назначения платежа
           const orderNumber = this.extractOrderNumber(transaction.paymentPurpose);
 
           if (!orderNumber) {
             this.logger.warn(
               `Не найден номер заказа в строке назначения платежа: ${transaction.paymentPurpose} транзакции ${transaction.id}`
             );
-            break; //прерываем цикл - в платеже не указан номер заказа
+            continue; // Переходим к следующей транзакции
           }
 
           this.logger.info(`Обработка транзакции ${transaction.id} с номером заказа ${orderNumber}`);
 
-          //TODO здесь нужно искать по ЧАСТИ _id а не по всему. Т.к. полного соответствия не будет.
-          const order = await Order.findOne({ _id: orderNumber });
+          // Ищем платеж по memo, который содержит номер заказа
+          // или по другому подходящему полю
+          const payments = await this.paymentRepository.getAllPayments(
+            {
+              direction: PaymentDirectionEnum.INCOMING,
+              status: PaymentStatusEnum.PENDING,
+            },
+            { limit: 100, page: 1, sortOrder: 'ASC' }
+          );
 
-          if (!order) {
-            this.logger.warn(`Не найден заказ с номером ${orderNumber} по транзакции ${transaction.id}`);
-            break;
+          // Ищем платеж, у которого в memo или id содержится номер заказа
+          const payment = payments.items.find(
+            (p) => p.memo?.includes(orderNumber) || p.id?.includes(orderNumber) || p.hash?.includes(orderNumber)
+          );
+
+          if (!payment) {
+            this.logger.warn(`Не найден платеж с номером заказа ${orderNumber} по транзакции ${transaction.id}`);
+            continue; // Переходим к следующей транзакции
           }
 
-          const [, symbol] = order.quantity.split(' ');
+          const symbol = payment.symbol;
           const symbol_check = checkPaymentSymbol(transaction.amountRub.currencyName, symbol);
 
           if (symbol_check.status === 'error') {
             this.logger.warn(symbol_check.message);
-            order.status = orderStatus.failed;
-            order.message = symbol_check.message;
-            await order.save();
-            redisPublisher.publish(
-              `${config.coopname}:orderStatusUpdate`,
-              JSON.stringify({ id: order.id, status: 'failed' })
-            );
-            break;
+            if (payment.id) {
+              await this.paymentRepository.update(payment.id, {
+                status: PaymentStatusEnum.FAILED,
+                message: symbol_check.message,
+              });
+              redisPublisher.publish(
+                `${config.coopname}:orderStatusUpdate`,
+                JSON.stringify({ id: payment.id, status: PaymentStatusEnum.FAILED })
+              );
+            }
+            continue; // Переходим к следующей транзакции
           }
 
-          //ордер найден, проверяем сумму платежа
-          const amount_check = checkPaymentAmount(transaction.amountRub.amount, order.quantity, this.tolerance_percent);
+          // Платеж найден, проверяем сумму платежа
+          const amount_check = checkPaymentAmount(
+            parseFloat(transaction.amountRub.amount),
+            payment.quantity,
+            this.tolerance_percent
+          );
 
           if (amount_check.status === 'error') {
             this.logger.warn(amount_check.message);
-            order.status = orderStatus.failed;
-            order.message = amount_check.message;
-            await order.save();
-            redisPublisher.publish(
-              `${config.coopname}:orderStatusUpdate`,
-              JSON.stringify({ id: order.id, status: 'failed' })
-            );
-            break;
+            if (payment.id) {
+              await this.paymentRepository.update(payment.id, {
+                status: PaymentStatusEnum.FAILED,
+                message: amount_check.message,
+              });
+              redisPublisher.publish(
+                `${config.coopname}:orderStatusUpdate`,
+                JSON.stringify({ id: payment.id, status: PaymentStatusEnum.FAILED })
+              );
+            }
+            continue; // Переходим к следующей транзакции
           }
 
-          //отмечаем ордер оплаченным если все проверки пройдены
-          order.status = orderStatus.paid;
-          await order.save();
+          // Отмечаем платеж оплаченным если все проверки пройдены
+          if (payment.id) {
+            await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.PAID });
+            redisPublisher.publish(
+              `${config.coopname}:orderStatusUpdate`,
+              JSON.stringify({ id: payment.id, status: PaymentStatusEnum.PAID })
+            );
+          }
 
-          redisPublisher.publish(`${config.coopname}:orderStatusUpdate`, JSON.stringify({ id: order.id, status: 'paid' }));
+          this.logger.info(`Платеж ${payment.id} успешно обработан и отмечен как оплаченный`);
         }
 
         // Обновление состояния после обработки текущей страницы
@@ -294,7 +331,17 @@ export class SberpollPlugin extends PollingProvider {
 }
 
 @Module({
-  providers: [SberpollPlugin], // Регистрируем SberpollPlugin как провайдер
+  providers: [
+    SberpollPlugin,
+    {
+      provide: EXTENSION_REPOSITORY,
+      useClass: TypeOrmExtensionDomainRepository,
+    },
+    {
+      provide: PAYMENT_REPOSITORY,
+      useClass: TypeOrmPaymentRepository,
+    },
+  ], // Регистрируем SberpollPlugin как провайдер
   exports: [SberpollPlugin], // Экспортируем его для доступа в других модулях
 })
 export class SberpollPluginModule {

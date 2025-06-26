@@ -3,21 +3,11 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';
 import fetch from 'isomorphic-fetch';
 import EosApi from 'eosjs-api';
 import getInternalAction from '../utils/getInternalAction';
-import {
-  GatewayContract,
-  RegistratorContract,
-  SovietContract,
-  WalletContract,
-  type Cooperative,
-  type SystemContract,
-} from 'cooptypes';
-import { IUser } from '../types/user.types';
+import { GatewayContract, RegistratorContract, SovietContract, WalletContract, type SystemContract } from 'cooptypes';
 import { GetAccountResult, GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
 import config from '../config/config';
-import TempDocument, { tempdocType } from '../models/tempDocument.model';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
-import type { IOrder } from '../types/order.types';
 import type { IBCAction } from '../types';
 import Vault from '../models/vault.model';
 import { sha256 } from '~/utils/sha256';
@@ -186,86 +176,6 @@ async function createOrder(data) {
   return order_num;
 }
 
-async function completeDeposit(order: IOrder) {
-  const eos = await getInstance(config.coopname);
-  const deposit_hash = sha256(order.order_num as number);
-
-  const createDeposit: WalletContract.Actions.CreateDeposit.ICreateDeposit = {
-    coopname: config.coopname,
-    username: order.username,
-    quantity: order.quantity,
-    deposit_hash,
-  };
-
-  const completeDeposit: GatewayContract.Actions.CompleteIncome.ICompleteIncome = {
-    coopname: config.coopname,
-    income_hash: deposit_hash,
-  };
-
-  const actions = [
-    {
-      account: WalletContract.contractName.production,
-      name: WalletContract.Actions.CreateDeposit.actionName,
-      authorization: [
-        {
-          actor: config.coopname,
-          permission: 'active',
-        },
-      ],
-      data: createDeposit,
-    },
-    {
-      account: GatewayContract.contractName.production,
-      name: GatewayContract.Actions.CompleteIncome.actionName,
-      authorization: [
-        {
-          actor: config.coopname,
-          permission: 'active',
-        },
-      ],
-      data: completeDeposit,
-    },
-  ];
-
-  await eos.transact(
-    {
-      actions,
-    },
-    {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    }
-  );
-}
-
-async function failOrder(data) {
-  const eos = await getInstance(config.coopname);
-
-  const actions = [
-    {
-      account: GatewayContract.contractName.production,
-      name: 'dpfail',
-      authorization: [
-        {
-          actor: process.env.COOPNAME as string,
-          permission: 'active',
-        },
-      ],
-      data,
-    },
-  ];
-
-  await eos.transact(
-    {
-      actions,
-    },
-    {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    }
-  );
-}
-
 export async function addUser(data: RegistratorContract.Actions.AddUser.IAddUser) {
   const eos = await getInstance(config.coopname);
 
@@ -370,31 +280,12 @@ export async function powerUp(username: string, quantity: string): Promise<void>
   }
 }
 
-async function getSoviet(coopname) {
-  const api = await getApi();
-
-  const soviet = (await lazyFetch(api, SovietContract.contractName.production, coopname, 'boards'))[0];
-
-  return soviet;
-}
-
-async function fetchAllParticipants() {
-  const api = await getApi();
-
-  const participants = await lazyFetch(api, SovietContract.contractName.production, process.env.COOPNAME, 'participants');
-  return participants;
-}
-
 export {
   getInstance,
   getApi,
   lazyFetch,
-  fetchAllParticipants,
   createOrder,
   getCooperative,
-  failOrder,
-  completeDeposit,
-  getSoviet,
   getBlockchainInfo,
   getBlockchainAccount,
   hasActiveKey,
