@@ -54,12 +54,19 @@ const meetStatus = useMeetStatus(props.meet);
   cursor: pointer;
   transition: all 0.3s ease;
 
+  // Дополнительная стилизация для темной темы
+  .q-dark & {
+    background-color: rgba(255, 255, 255, 0.07) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  }
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 
     .q-dark & {
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      background-color: rgba(255, 255, 255, 0.1) !important;
     }
 
     .balance-card {

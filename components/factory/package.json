@@ -43,7 +43,8 @@
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish",
     "test": "vitest --dir test --testTimeout=240000 --exclude documents --watch=false",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "setup-indexes": "tsx scripts/setup-indexes.ts"
   },
   "dependencies": {
     "ajv": "^8.13.0",

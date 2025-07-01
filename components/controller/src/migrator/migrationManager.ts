@@ -145,9 +145,7 @@ export class MigrationManager {
     });
   }
 
-  async runMigration(migration: Migration, version: string, description: string): Promise<boolean> {
-    const isTest = version.includes('__test');
-
+  async runMigration(migration: Migration, version: string, description: string, isTest: boolean): Promise<boolean> {
     try {
       if (isTest) {
         logger.info(`[ТЕСТОВАЯ МИГРАЦИЯ] Запуск миграции ${version} (${description}): ${migration.name}`);
@@ -157,7 +155,11 @@ export class MigrationManager {
 
       // Предоставляем блокчейн-сервис в миграцию
       const result = await migration.up({ blockchain: this.blockchainService });
-      await this.markMigrationAsApplied(version, migration.name, result, isTest);
+
+      // Отмечаем как примененную только если миграция успешна И не является тестовой
+      if (result && !isTest) {
+        await this.markMigrationAsApplied(version, migration.name, true, false);
+      }
 
       if (isTest) {
         logger.info(
@@ -170,7 +172,12 @@ export class MigrationManager {
       return result;
     } catch (error) {
       logger.error(`Ошибка при выполнении миграции ${version} (${description}):`, error);
-      await this.markMigrationAsApplied(version, migration.name, false, isTest);
+
+      // Отмечаем как неуспешную только если это НЕ тестовая миграция
+      if (!isTest) {
+        await this.markMigrationAsApplied(version, migration.name, false, false);
+      }
+
       return false;
     }
   }
@@ -230,9 +237,10 @@ export class MigrationManager {
         }
 
         // Запускаем миграцию
-        const success = await this.runMigration(migration, version, description);
+        const success = await this.runMigration(migration, version, description, isTest);
 
-        if (!success) {
+        // Останавливаем процесс только при ошибке в НЕ тестовых миграциях
+        if (!success && !isTest) {
           logger.error(`Миграция ${version} (${description}) завершена с ошибкой, останавливаем процесс`);
           break;
         }

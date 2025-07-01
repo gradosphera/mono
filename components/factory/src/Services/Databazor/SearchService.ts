@@ -17,6 +17,11 @@ export class SearchService {
     this.storage = storage
   }
 
+  // Экранирование специальных символов регулярных выражений
+  private escapeRegex(text: string): string {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  }
+
   async search(query: string): Promise<ISearchResult[]> {
     if (!query || query.trim().length === 0) {
       return []
@@ -25,35 +30,45 @@ export class SearchService {
     const results: ISearchResult[] = []
     const trimmedQuery = query.trim()
 
-    // Создаем регулярное выражение для поиска без учета регистра
-    const regex = new RegExp(trimmedQuery, 'i')
+    console.log(`[SearchService] Поиск по запросу: "${trimmedQuery}"`)
+
+    // Экранируем специальные символы для безопасного использования в regex
+    const escapedQuery = this.escapeRegex(trimmedQuery)
 
     // Разбиваем запрос на слова для поиска по полному ФИО
     const queryWords = trimmedQuery.split(/\s+/).filter(word => word.length > 0)
 
     try {
       // Поиск в коллекции individuals
-      const individualResults = await this.searchIndividuals(regex, queryWords)
+      console.log(`[SearchService] Поиск в individuals...`)
+      const individualResults = await this.searchIndividuals(escapedQuery, queryWords, trimmedQuery)
+      console.log(`[SearchService] Найдено individuals: ${individualResults.length}`)
       results.push(...individualResults)
 
       // Поиск в коллекции entrepreneurs
-      const entrepreneurResults = await this.searchEntrepreneurs(regex, queryWords)
+      console.log(`[SearchService] Поиск в entrepreneurs...`)
+      const entrepreneurResults = await this.searchEntrepreneurs(escapedQuery, queryWords, trimmedQuery)
+      console.log(`[SearchService] Найдено entrepreneurs: ${entrepreneurResults.length}`)
       results.push(...entrepreneurResults)
 
       // Поиск в коллекции organizations
-      const organizationResults = await this.searchOrganizations(regex)
+      console.log(`[SearchService] Поиск в organizations...`)
+      const organizationResults = await this.searchOrganizations(escapedQuery)
+      console.log(`[SearchService] Найдено organizations: ${organizationResults.length}`)
       results.push(...organizationResults)
+
+      console.log(`[SearchService] Общее количество результатов: ${results.length}`)
 
       // Ограничиваем общее количество результатов до 10
       return results.slice(0, 10)
     }
     catch (error) {
-      console.error('Error during search:', error)
+      console.error('[SearchService] Ошибка при поиске:', error)
       return []
     }
   }
 
-  private async searchIndividuals(regex: RegExp, queryWords: string[]): Promise<ISearchResult[]> {
+  private async searchIndividuals(regexPattern: string, queryWords: string[], originalQuery: string): Promise<ISearchResult[]> {
     const individualModel = new Individual(this.storage)
     const results: ISearchResult[] = []
 
@@ -66,16 +81,16 @@ export class SearchService {
         deleted: false,
         $or: [
           // Поиск по отдельным полям
-          { first_name: { $regex: regex } },
-          { last_name: { $regex: regex } },
-          { middle_name: { $regex: regex } },
+          { first_name: { $regex: regexPattern, $options: 'i' } },
+          { last_name: { $regex: regexPattern, $options: 'i' } },
+          { middle_name: { $regex: regexPattern, $options: 'i' } },
           // Поиск по полному ФИО (все слова должны быть найдены)
           {
             $and: queryWords.map(word => ({
               $or: [
-                { first_name: { $regex: new RegExp(word, 'i') } },
-                { last_name: { $regex: new RegExp(word, 'i') } },
-                { middle_name: { $regex: new RegExp(word, 'i') } },
+                { first_name: { $regex: this.escapeRegex(word), $options: 'i' } },
+                { last_name: { $regex: this.escapeRegex(word), $options: 'i' } },
+                { middle_name: { $regex: this.escapeRegex(word), $options: 'i' } },
               ],
             })),
           },
@@ -87,28 +102,40 @@ export class SearchService {
       filter = {
         deleted: false,
         $or: [
-          { first_name: { $regex: regex } },
-          { last_name: { $regex: regex } },
-          { middle_name: { $regex: regex } },
+          { first_name: { $regex: regexPattern, $options: 'i' } },
+          { last_name: { $regex: regexPattern, $options: 'i' } },
+          { middle_name: { $regex: regexPattern, $options: 'i' } },
         ],
       }
     }
 
+    console.log(`[SearchService] Фильтр для individuals:`, JSON.stringify(filter, null, 2))
+
     const individuals = await individualModel.getMany(filter)
+
+    console.log(`[SearchService] Результаты поиска individuals:`, {
+      total: individuals.totalResults,
+      found: individuals.results.length,
+      query: originalQuery,
+      names: individuals.results.map(ind => `${ind.last_name} ${ind.first_name} ${ind.middle_name || ''} (deleted: ${ind.deleted || false})`),
+    })
 
     for (const individual of individuals.results) {
       const highlightedFields = []
 
+      // Создаем RegExp для проверки подсветки
+      const testRegex = new RegExp(regexPattern, 'i')
+
       // Проверяем отдельные поля
-      if (regex.test(individual.first_name))
+      if (individual.first_name && testRegex.test(individual.first_name))
         highlightedFields.push('first_name')
-      if (regex.test(individual.last_name))
+      if (individual.last_name && testRegex.test(individual.last_name))
         highlightedFields.push('last_name')
-      if (regex.test(individual.middle_name))
+      if (individual.middle_name && testRegex.test(individual.middle_name))
         highlightedFields.push('middle_name')
 
       // Проверяем полное ФИО
-      const fullName = `${individual.last_name} ${individual.first_name} ${individual.middle_name}`.trim()
+      const fullName = `${individual.last_name || ''} ${individual.first_name || ''} ${individual.middle_name || ''}`.trim()
       if (this.matchesFullName(fullName, queryWords)) {
         highlightedFields.push('full_name')
       }
@@ -123,7 +150,7 @@ export class SearchService {
     return results
   }
 
-  private async searchEntrepreneurs(regex: RegExp, queryWords: string[]): Promise<ISearchResult[]> {
+  private async searchEntrepreneurs(regexPattern: string, queryWords: string[], originalQuery: string): Promise<ISearchResult[]> {
     const entrepreneurModel = new Entrepreneur(this.storage)
     const results: ISearchResult[] = []
 
@@ -136,18 +163,18 @@ export class SearchService {
         deleted: false,
         $or: [
           // Поиск по отдельным полям
-          { first_name: { $regex: regex } },
-          { last_name: { $regex: regex } },
-          { middle_name: { $regex: regex } },
-          { 'details.inn': { $regex: regex } },
-          { 'details.ogrn': { $regex: regex } },
+          { first_name: { $regex: regexPattern, $options: 'i' } },
+          { last_name: { $regex: regexPattern, $options: 'i' } },
+          { middle_name: { $regex: regexPattern, $options: 'i' } },
+          { 'details.inn': { $regex: regexPattern, $options: 'i' } },
+          { 'details.ogrn': { $regex: regexPattern, $options: 'i' } },
           // Поиск по полному ФИО
           {
             $and: queryWords.map(word => ({
               $or: [
-                { first_name: { $regex: new RegExp(word, 'i') } },
-                { last_name: { $regex: new RegExp(word, 'i') } },
-                { middle_name: { $regex: new RegExp(word, 'i') } },
+                { first_name: { $regex: this.escapeRegex(word), $options: 'i' } },
+                { last_name: { $regex: this.escapeRegex(word), $options: 'i' } },
+                { middle_name: { $regex: this.escapeRegex(word), $options: 'i' } },
               ],
             })),
           },
@@ -159,34 +186,46 @@ export class SearchService {
       filter = {
         deleted: false,
         $or: [
-          { first_name: { $regex: regex } },
-          { last_name: { $regex: regex } },
-          { middle_name: { $regex: regex } },
-          { 'details.inn': { $regex: regex } },
-          { 'details.ogrn': { $regex: regex } },
+          { first_name: { $regex: regexPattern, $options: 'i' } },
+          { last_name: { $regex: regexPattern, $options: 'i' } },
+          { middle_name: { $regex: regexPattern, $options: 'i' } },
+          { 'details.inn': { $regex: regexPattern, $options: 'i' } },
+          { 'details.ogrn': { $regex: regexPattern, $options: 'i' } },
         ],
       }
     }
 
+    console.log(`[SearchService] Фильтр для entrepreneurs:`, JSON.stringify(filter, null, 2))
+
     const entrepreneurs = await entrepreneurModel.getMany(filter)
+
+    console.log(`[SearchService] Результаты поиска entrepreneurs:`, {
+      total: entrepreneurs.totalResults,
+      found: entrepreneurs.results.length,
+      query: originalQuery,
+      names: entrepreneurs.results.map(ent => `${ent.last_name} ${ent.first_name} ${ent.middle_name || ''} (deleted: ${ent.deleted || false})`),
+    })
 
     for (const entrepreneur of entrepreneurs.results) {
       const highlightedFields = []
 
+      // Создаем RegExp для проверки подсветки
+      const testRegex = new RegExp(regexPattern, 'i')
+
       // Проверяем отдельные поля
-      if (regex.test(entrepreneur.first_name))
+      if (entrepreneur.first_name && testRegex.test(entrepreneur.first_name))
         highlightedFields.push('first_name')
-      if (regex.test(entrepreneur.last_name))
+      if (entrepreneur.last_name && testRegex.test(entrepreneur.last_name))
         highlightedFields.push('last_name')
-      if (regex.test(entrepreneur.middle_name))
+      if (entrepreneur.middle_name && testRegex.test(entrepreneur.middle_name))
         highlightedFields.push('middle_name')
-      if (entrepreneur.details?.inn && regex.test(entrepreneur.details.inn))
+      if (entrepreneur.details?.inn && testRegex.test(entrepreneur.details.inn))
         highlightedFields.push('details.inn')
-      if (entrepreneur.details?.ogrn && regex.test(entrepreneur.details.ogrn))
+      if (entrepreneur.details?.ogrn && testRegex.test(entrepreneur.details.ogrn))
         highlightedFields.push('details.ogrn')
 
       // Проверяем полное ФИО
-      const fullName = `${entrepreneur.last_name} ${entrepreneur.first_name} ${entrepreneur.middle_name}`.trim()
+      const fullName = `${entrepreneur.last_name || ''} ${entrepreneur.first_name || ''} ${entrepreneur.middle_name || ''}`.trim()
       if (this.matchesFullName(fullName, queryWords)) {
         highlightedFields.push('full_name')
       }
@@ -201,27 +240,30 @@ export class SearchService {
     return results
   }
 
-  private async searchOrganizations(regex: RegExp): Promise<ISearchResult[]> {
+  private async searchOrganizations(regexPattern: string): Promise<ISearchResult[]> {
     const organizationModel = new Organization(this.storage)
     const results: ISearchResult[] = []
 
     const organizations = await organizationModel.getMany({
       deleted: false,
       $or: [
-        { short_name: { $regex: regex } },
-        { 'details.inn': { $regex: regex } },
-        { 'details.ogrn': { $regex: regex } },
+        { short_name: { $regex: regexPattern, $options: 'i' } },
+        { 'details.inn': { $regex: regexPattern, $options: 'i' } },
+        { 'details.ogrn': { $regex: regexPattern, $options: 'i' } },
       ],
     })
 
     for (const organization of organizations.results) {
       const highlightedFields = []
 
-      if (regex.test(organization.short_name))
+      // Создаем RegExp для проверки подсветки
+      const testRegex = new RegExp(regexPattern, 'i')
+
+      if (testRegex.test(organization.short_name))
         highlightedFields.push('short_name')
-      if (organization.details?.inn && regex.test(organization.details.inn))
+      if (organization.details?.inn && testRegex.test(organization.details.inn))
         highlightedFields.push('details.inn')
-      if (organization.details?.ogrn && regex.test(organization.details.ogrn))
+      if (organization.details?.ogrn && testRegex.test(organization.details.ogrn))
         highlightedFields.push('details.ogrn')
 
       results.push({

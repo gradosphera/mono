@@ -172,7 +172,6 @@ const shadowStyles = computed(
   }
 
   th {
-    background-color: #f4f4f4;
     width: 30% !important;
     max-width: 30% !important;
     word-break: break-word !important;
@@ -219,7 +218,6 @@ const shadowStyles = computed(
   }
 
    th {
-    background-color: #f4f4f4;
     width: 30% !important;
     max-width: 30% !important;
     word-break: break-word !important;
