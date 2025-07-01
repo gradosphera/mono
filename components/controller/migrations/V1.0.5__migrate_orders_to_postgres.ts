@@ -7,16 +7,18 @@ import { PaymentStatusEnum } from '../src/domain/gateway/enums/payment-status.en
 import { PaymentTypeEnum, PaymentDirectionEnum, getPaymentDirection } from '../src/domain/gateway/enums/payment-type.enum';
 import type { PaymentDomainInterface } from '../src/domain/gateway/interfaces/payment-domain.interface';
 import { sha256 } from '../src/utils/sha256';
+import { generator } from '../src/services/document.service';
 
 export default {
   name: 'Миграция платежей из MongoDB в PostgreSQL (унифицированная модель)',
-  isTest: true, // Включаем тестовый режим
-  validUntil: new Date('2024-12-31'), // Действует до конца года
+  validUntil: new Date('2025-07-03'), // Действует до
 
   async up(): Promise<boolean> {
     console.log('Выполнение миграции: Перенос платежей из MongoDB в PostgreSQL (унифицированная модель)');
 
     try {
+      await generator.connect(config.mongoose.url);
+
       // Инициализируем подключение к PostgreSQL
       const dataSource = new DataSource({
         type: 'postgres',
@@ -36,7 +38,7 @@ export default {
       const paymentRepository = new TypeOrmPaymentRepository(dataSource.getRepository(PaymentEntity));
 
       // Получаем все заказы из MongoDB
-      const orders = await Order.find().populate('user');
+      const orders = await Order.find();
       console.log(`Найдено ${orders.length} заказов в MongoDB`);
 
       let migratedCount = 0;
