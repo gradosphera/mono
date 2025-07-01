@@ -8,7 +8,9 @@ div
     swipeable,
     control-type='flat',
     control-color='grey',
-    height='100px'
+    height='100px',
+    transition-prev='flip-left',
+    transition-next='flip-right'
   )
     q-carousel-slide.flex.flex-center(
       v-for='(item, index) in menuWorkspaces',
