@@ -98,7 +98,7 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
     const typeLabels: Record<PaymentTypeEnum, string> = {
       [PaymentTypeEnum.REGISTRATION]: 'Регистрационный взнос',
       [PaymentTypeEnum.DEPOSIT]: 'Паевой взнос',
-      [PaymentTypeEnum.WITHDRAWAL]: 'Возврат средств',
+      [PaymentTypeEnum.WITHDRAWAL]: 'Возврат взноса',
     };
     return typeLabels[this.type] || this.type;
   }
