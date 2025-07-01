@@ -1,28 +1,33 @@
 <template lang="pug">
-div.q-pa-md
-  div.row
-    div.col-md-12.col-xs-12
-      q-card(flat round class="cooperative-card" style="border-radius: 20px;")
-        div.q-pa-sm.row.items-center.q-pa-md
-          div.col-12.col-md-3.flex.justify-center
-            AutoAvatar(style="width: 60px; border-radius: 50%;" :username="currentUser.username")
-          div.col-12.col-md-9.q-mt-sm.q-mt-md-0
-            q-badge(color="primary" style="font-size: 12px; margin-bottom: 4px;") {{role}}
-            div.text-h6
-              span(v-if="isIP").q-mr-sm ИП
-              | {{displayName}}
-        div.row
+.q-pa-md
+  .row
+    .col-md-12.col-xs-12
+      q-card.cooperative-card(flat, round, style='border-radius: 20px')
+        .q-pa-sm.row.items-center.q-pa-md
+          .col-12.col-md-3.flex.justify-center
+            AutoAvatar(
+              style='width: 60px; border-radius: 50%',
+              :username='currentUser.username'
+            )
+          .col-12.col-md-9.q-mt-sm.q-mt-md-0
+            q-badge(
+              color='primary',
+              style='font-size: 12px; margin-bottom: 4px'
+            ) {{ role }}
+            .text-h6
+              span.q-mr-sm(v-if='isIP') ИП
+              | {{ displayName }}
+        .row
           DepositButton.col-6.border-left-radius-buttons
           WithdrawButton.col-6.border-right-radius-buttons
 
-          div.col-md-4.col-xs-12
+          .col-md-4.col-xs-12
 
-
-      q-list(flat).q-gutter-sm
+      q-list.q-gutter-sm(flat)
         q-item
           q-item-section
             q-item-label(caption) Имя аккаунта
-            q-item-label(style="font-size: 20px;").text-bold {{ currentUser.username }}
+            q-item-label.text-bold(style='font-size: 20px') {{ currentUser.username }}
 
         //- q-item
         //-   q-item-section
@@ -32,76 +37,68 @@ div.q-pa-md
         q-item
           q-item-section
             q-item-label(caption) Минимальный паевый счёт
-            q-item-label(style="font-size: 20px;").text-bold {{ currentUser.participantAccount?.minimum_amount }}
+            q-item-label.text-bold(style='font-size: 20px') {{ currentUser.participantAccount.value?.minimum_amount }}
 
         //- q-item
         //-   q-item-section
         //-     q-item-label(caption) Заблокировано в целевых программах
         //-     q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.blocked }}
 
-
-        q-item(v-for="program_wallet of walletStore.program_wallets" :key="program_wallet.id")
+        q-item(
+          v-for='program_wallet of walletStore.program_wallets',
+          :key='program_wallet.id'
+        )
           q-item-section
             q-item-label(caption) {{ program_wallet.program_details.title }}
 
-            q-item-label(style="font-size: 20px;").text-bold {{program_wallet.available}}
-
-
-
+            q-item-label.text-bold(style='font-size: 20px') {{ program_wallet.available }}
 
     //- div.col-md-6.col-xs-12.q-mt-lg
-
-
 </template>
 
 <script lang="ts" setup>
-
-import { DepositButton } from 'src/features/Wallet/DepositToWallet'
-import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet'
+import { DepositButton } from 'src/features/Wallet/DepositToWallet';
+import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet';
 import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
 import { useWalletStore } from 'src/entities/Wallet';
-const walletStore = useWalletStore()
+const walletStore = useWalletStore();
 
-import { useCurrentUserStore } from 'src/entities/User'
-import type { IEntrepreneurData, IIndividualData, IOrganizationData } from 'src/shared/lib/types/user/IUserData';
+import { useCurrentUser } from 'src/entities/Session';
 import { computed } from 'vue';
-const currentUser = useCurrentUserStore()
+const currentUser = useCurrentUser();
 
-const userType = computed(() => currentUser.userAccount?.type)
+const userType = computed(() => currentUser.privateAccount.value?.type);
 
-const isIP = computed(() => currentUser.userAccount?.type === 'entrepreneur')
-
+const isIP = computed(
+  () => currentUser.privateAccount.value?.type === 'entrepreneur',
+);
 
 const role = computed(() => {
-  if (currentUser.userAccount?.role === 'user')
-    return 'Пайщик'
-  else if (currentUser.userAccount?.role === 'member')
-    return 'Член совета'
-  else if (currentUser.userAccount?.role === 'chairman')
-    return 'Председатель совета'
-  else return ''
+  if (currentUser.isChairman) return 'Председатель совета';
+  else if (currentUser.isMember) return 'Член совета';
+  else return 'Пайщик';
 });
 
 const individualProfile = computed(() => {
   if (userType.value === 'individual') {
-    return currentUser.userAccount?.private_data as IIndividualData
+    return currentUser.privateAccount.value?.individual_data;
   }
-  return null
-})
+  return null;
+});
 
 const entrepreneurProfile = computed(() => {
   if (userType.value === 'entrepreneur') {
-    return currentUser.userAccount?.private_data as IEntrepreneurData
+    return currentUser.privateAccount.value?.entrepreneur_data;
   }
-  return null
-})
+  return null;
+});
 
 const organizationProfile = computed(() => {
   if (userType.value === 'organization') {
-    return currentUser.userAccount?.private_data as IOrganizationData
+    return currentUser.privateAccount.value?.organization_data;
   }
-  return null
-})
+  return null;
+});
 
 // const userProfile = computed(() => {
 //   if (userType.value === 'individual' || userType.value === 'entrepreneur') {
@@ -112,20 +109,19 @@ const organizationProfile = computed(() => {
 
 const displayName = computed(() => {
   if (userType.value === 'individual') {
-    return `${individualProfile.value?.last_name} ${individualProfile.value?.first_name} ${individualProfile.value?.middle_name}`
+    return `${individualProfile.value?.last_name} ${individualProfile.value?.first_name} ${individualProfile.value?.middle_name}`;
   } else if (userType.value === 'entrepreneur') {
-    return `${entrepreneurProfile.value?.last_name} ${entrepreneurProfile.value?.first_name} ${entrepreneurProfile.value?.middle_name}`
+    return `${entrepreneurProfile.value?.last_name} ${entrepreneurProfile.value?.first_name} ${entrepreneurProfile.value?.middle_name}`;
   } else {
-    return organizationProfile.value?.short_name
+    return organizationProfile.value?.short_name;
   }
-})
+});
 
 // const inn_ogrn = computed(() => {
 //   if (organizationProfile.value)
 //     return `${organizationProfile.value.details.inn} / ${organizationProfile.value.details.ogrn}`
 //   else return ''
 // })
-
 </script>
 <style lang="scss" scoped>
 .cooperative-card {

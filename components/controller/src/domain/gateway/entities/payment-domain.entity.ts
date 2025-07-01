@@ -1,6 +1,11 @@
 import type { PaymentDomainInterface, PaymentDetailsDomainInterface } from '../interfaces/payment-domain.interface';
 import { PaymentStatusEnum } from '../enums/payment-status.enum';
 import { PaymentTypeEnum, PaymentDirectionEnum } from '../enums/payment-type.enum';
+import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import { IndividualCertificateDTO } from '~/modules/common/dto/individual-certificate.dto';
+import { EntrepreneurCertificateDTO } from '~/modules/common/dto/entrepreneur-certificate.dto';
+import { OrganizationCertificateDTO } from '~/modules/common/dto/organization-certificate.dto';
+import { AccountType } from '~/modules/account/enum/account-type.enum';
 
 /**
  * Универсальная доменная сущность платежа
@@ -124,11 +129,30 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
   /**
    * Преобразовать в DTO для GraphQL (без sensitive данных)
    */
-  toDTO(): any {
+  toDTO(usernameCertificate?: UserCertificateDomainInterface | null): any {
+    // Вспомогательная функция для создания сертификата DTO
+    const createCertificateDTO = (
+      certificate: UserCertificateDomainInterface | null
+    ): IndividualCertificateDTO | EntrepreneurCertificateDTO | OrganizationCertificateDTO | null => {
+      if (!certificate) return null;
+
+      switch (certificate.type) {
+        case AccountType.individual:
+          return new IndividualCertificateDTO(certificate);
+        case AccountType.entrepreneur:
+          return new EntrepreneurCertificateDTO(certificate);
+        case AccountType.organization:
+          return new OrganizationCertificateDTO(certificate);
+        default:
+          return null;
+      }
+    };
+
     return {
       id: this.id,
       coopname: this.coopname,
       username: this.username,
+      username_certificate: createCertificateDTO(usernameCertificate || null),
       hash: this.hash,
       ...this.getSpecificHash(), // Добавляем конкретный хеш
       quantity: this.quantity,

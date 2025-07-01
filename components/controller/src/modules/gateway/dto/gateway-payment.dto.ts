@@ -4,6 +4,10 @@ import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
 import { PaymentTypeEnum, PaymentDirectionEnum } from '~/domain/gateway/enums/payment-type.enum';
 import type { PaymentDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 import { PaymentDetailsDTO } from './payment-details.dto';
+import { UserCertificateUnion } from '~/modules/document/unions/user-certificate.union';
+import { IndividualCertificateDTO } from '~/modules/common/dto/individual-certificate.dto';
+import { EntrepreneurCertificateDTO } from '~/modules/common/dto/entrepreneur-certificate.dto';
+import { OrganizationCertificateDTO } from '~/modules/common/dto/organization-certificate.dto';
 
 // Регистрируем enum'ы для GraphQL (основная регистрация)
 registerEnumType(PaymentStatusEnum, {
@@ -38,6 +42,12 @@ export class GatewayPaymentDTO implements PaymentDomainInterface {
 
   @Field(() => String, { description: 'Имя пользователя' })
   username!: string;
+
+  @Field(() => UserCertificateUnion, {
+    nullable: true,
+    description: 'Сертификат пользователя, создавшего платеж',
+  })
+  username_certificate?: IndividualCertificateDTO | EntrepreneurCertificateDTO | OrganizationCertificateDTO | null;
 
   @Field(() => Number, { description: 'Количество/сумма' })
   quantity!: number;

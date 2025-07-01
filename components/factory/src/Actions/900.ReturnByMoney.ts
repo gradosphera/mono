@@ -21,7 +21,7 @@ export class Factory extends DocFactory<ReturnByMoney.Action> {
     else {
       template = await this.getTemplate(DraftContract.contractName.production, ReturnByMoney.registry_id, data.block_num)
     }
-
+    console.log(data)
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
     const coop = await this.getCooperative(data.coopname, data.block_num)
     const vars = await this.getVars(data.coopname, data.block_num)
@@ -32,13 +32,13 @@ export class Factory extends DocFactory<ReturnByMoney.Action> {
     // Извлекаем платежные данные из хранилища по method_id
     const paymentMethodService = new PaymentMethod(this.storage)
     const paymentMethod = await paymentMethodService.getOne({
-      method_id: data.request.method_id,
+      method_id: data.method_id,
       username: data.username,
       deleted: false,
     })
 
     if (!paymentMethod) {
-      throw new Error(`Платежный метод с ID ${data.request.method_id} не найден для пользователя ${data.username}`)
+      throw new Error(`Платежный метод с ID ${data.method_id} не найден для пользователя ${data.username}`)
     }
 
     const combinedData: ReturnByMoney.Model = {
@@ -46,11 +46,10 @@ export class Factory extends DocFactory<ReturnByMoney.Action> {
       coop,
       vars,
       user: commonUser,
-      request: {
-        payment_details: this.formatPaymentDetails(paymentMethod, commonUser.full_name_or_short_name),
-        amount: data.request.amount,
-        currency: data.request.currency,
-      },
+      payment_details: this.formatPaymentDetails(paymentMethod, commonUser.full_name_or_short_name),
+      quantity: data.quantity,
+      currency: data.currency,
+      payment_hash: data.payment_hash,
     }
 
     await this.validate(combinedData, template.model)

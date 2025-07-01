@@ -1,0 +1,23 @@
+ WARN  Unsupported engine: wanted: {"node":"^20 || ^18 || ^16"} (current: {"node":"v23.11.0","pnpm":"8.8.0"})
+
+> @coopenomics/desktop@2025.6.24 dev /Users/darksun/dacom-code/foundation/monocoop/components/desktop
+> concurrently -n 'DESKTOP' -c 'bgRed.white' "quasar dev"
+
+/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/date-fns@2.30.0/node_modules/date-fns/isDate/index.js:8
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+               ^
+
+TypeError: _interopRequireDefault is not a function
+    at Object.<anonymous> (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/date-fns@2.30.0/node_modules/date-fns/isDate/index.js:8:16)
+    at Module._compile (node:internal/modules/cjs/loader:1734:14)
+    at Object..js (node:internal/modules/cjs/loader:1899:10)
+    at Module.load (node:internal/modules/cjs/loader:1469:32)
+    at Function._load (node:internal/modules/cjs/loader:1286:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1491:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (/Users/darksun/dacom-code/foundation/monocoop/node_modules/.pnpm/date-fns@2.30.0/node_modules/date-fns/isValid/index.js:8:37)
+
+Node.js v23.11.0
+ ELIFECYCLE  Command failed with exit code 1.

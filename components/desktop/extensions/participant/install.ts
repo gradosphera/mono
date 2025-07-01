@@ -1,21 +1,21 @@
-import { markRaw } from 'vue'
-import { ProfilePage } from 'src/pages/User/ProfilePage'
-import { WalletPage } from 'src/pages/User/WalletPage'
-import { ConnectionAgreementPage } from 'src/pages/Union/ConnectionAgreement'
-import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage'
-import { ContactsPage } from 'src/pages/Contacts'
-import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
-import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
-import { UserDocumentsPage } from 'src/pages/User/DocumentsPage'
-import { UserPaymentsPage } from 'src/pages/User/PaymentsPage'
-import { agreementsBase } from 'src/shared/lib/consts/workspaces'
-import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace'
+import { markRaw } from 'vue';
+import { ProfilePage } from 'src/pages/User/ProfilePage';
+import { WalletPage } from 'src/pages/User/WalletPage';
+import { ConnectionAgreementPage } from 'src/pages/Union/ConnectionAgreement';
+import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
+import { ContactsPage } from 'src/pages/Contacts';
+import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets';
+import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails';
+import { UserDocumentsPage } from 'src/pages/User/DocumentsPage';
+import { UserPaymentsPage } from 'src/pages/User/PaymentsPage';
+import { agreementsBase } from 'src/shared/lib/consts/workspaces';
+import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
 export default async function (): Promise<IWorkspaceConfig> {
   return {
     workspace: 'participant',
     title: 'Стол пайщика',
-    defaultRoute: 'profile', // Маршрут по умолчанию для рабочего стола пайщика
+    defaultRoute: 'wallet', // Маршрут по умолчанию для рабочего стола пайщика
     routes: [
       {
         meta: {
@@ -28,23 +28,11 @@ export default async function (): Promise<IWorkspaceConfig> {
         children: [
           {
             meta: {
-              title: 'Мой Профиль',
-              icon: 'fa-solid fa-user',
-              roles: [],
-              agreements: agreementsBase
-            },
-            path: 'profile',
-            name: 'profile',
-            component: markRaw(ProfilePage),
-            children: [],
-          },
-          {
-            meta: {
-              title: 'Мой Кошелёк',
+              title: 'Кошелёк',
               icon: 'fa-solid fa-wallet',
               roles: [],
               agreements: agreementsBase,
-              requiresAuth: true
+              requiresAuth: true,
             },
             path: 'wallet',
             name: 'wallet',
@@ -53,11 +41,23 @@ export default async function (): Promise<IWorkspaceConfig> {
           },
           {
             meta: {
-              title: 'Моё Подключение',
+              title: 'Профиль',
+              icon: 'fa-solid fa-user',
+              roles: [],
+              agreements: agreementsBase,
+            },
+            path: 'profile',
+            name: 'profile',
+            component: markRaw(ProfilePage),
+            children: [],
+          },
+          {
+            meta: {
+              title: 'Подключение',
               icon: 'fas fa-link',
               roles: ['user'],
               conditions: 'isCoop === true && coopname === "voskhod"',
-              requiresAuth: true
+              requiresAuth: true,
             },
             path: '/:coopname/connect',
             name: 'connect',
@@ -65,10 +65,10 @@ export default async function (): Promise<IWorkspaceConfig> {
           },
           {
             meta: {
-              title: 'Мои Реквизиты',
+              title: 'Реквизиты',
               icon: 'fas fa-link',
               roles: ['user', 'member', 'chairman'],
-              requiresAuth: true
+              requiresAuth: true,
             },
             path: '/:coopname/connect',
             name: 'payment-methods',
@@ -76,10 +76,10 @@ export default async function (): Promise<IWorkspaceConfig> {
           },
           {
             meta: {
-              title: 'Мои Документы',
+              title: 'Документы',
               icon: 'fa-solid fa-file-invoice',
               roles: ['user', 'member', 'chairman'],
-              requiresAuth: true
+              requiresAuth: true,
             },
             path: 'documents',
             name: 'user-documents',
@@ -87,10 +87,10 @@ export default async function (): Promise<IWorkspaceConfig> {
           },
           {
             meta: {
-              title: 'Мои Платежи',
+              title: 'Платежи',
               icon: 'fa-solid fa-money-bill-transfer',
               roles: ['user', 'member', 'chairman'],
-              requiresAuth: true
+              requiresAuth: true,
             },
             path: 'payments',
             name: 'user-payments',
@@ -98,10 +98,10 @@ export default async function (): Promise<IWorkspaceConfig> {
           },
           {
             meta: {
-              title: 'Мои Собрания',
+              title: 'Собрания',
               icon: 'fa-solid fa-users-between-lines',
               roles: ['user', 'member', 'chairman'],
-              requiresAuth: true
+              requiresAuth: true,
             },
             path: 'meets',
             name: 'user-meets',
@@ -115,8 +115,8 @@ export default async function (): Promise<IWorkspaceConfig> {
                   title: 'Детали собрания',
                   icon: 'fa-solid fa-users-between-lines',
                   roles: ['user', 'member', 'chairman'],
-                  requiresAuth: true
-                }
+                  requiresAuth: true,
+                },
               },
             ],
           },
@@ -125,13 +125,13 @@ export default async function (): Promise<IWorkspaceConfig> {
             name: 'contacts',
             component: markRaw(ContactsPage),
             meta: {
-              title: 'Наши Контакты',
+              title: 'Контакты',
               icon: 'fa-solid fa-info',
               roles: [],
             },
           },
-        ]
-      }
-    ]
-  }
+        ],
+      },
+    ],
+  };
 }

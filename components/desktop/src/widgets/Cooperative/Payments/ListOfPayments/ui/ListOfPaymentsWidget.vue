@@ -53,19 +53,22 @@
               )
             q-td(
               style='max-width: 150px; word-wrap: break-word; white-space: normal'
-            ) {{ props.row.username }}
+            ) {{ getShortNameFromCertificate(props.row.username_certificate) || props.row.username }}
 
             q-td {{ props.row.quantity }} {{ props.row.symbol }}
             q-td {{ props.row.type_label }}
-            q-td {{ props.row.direction_label }}
 
             q-td
-              q-badge(v-if='props.row.status === "COMPLETED"', color='teal') обработан
-              q-badge(v-if='props.row.status === "PENDING"', color='orange') ожидание оплаты
-              q-badge(v-if='props.row.status === "FAILED"', color='red') ошибка
-              q-badge(v-if='props.row.status === "PAID"', color='orange') оплачен
-              q-badge(v-if='props.row.status === "REFUNDED"', color='grey') отменён
-              q-badge(v-if='props.row.status === "EXPIRED"', color='grey') истёк
+              q-icon.q-mr-xs(
+                :name='getDirectionIcon(props.row.direction)',
+                :color='getDirectionColor(props.row.direction)',
+                size='sm'
+              )
+              span {{ props.row.direction_label }}
+
+            q-td
+              q-badge(:color='getStatusColor(props.row.status)') {{ props.row.status_label }}
+
             q-td
               SetOrderPaidStatusButton(
                 v-if='!hideActions && ["EXPIRED", "PENDING", "FAILED"].includes(props.row.status)',
@@ -74,15 +77,13 @@
               span.text-grey(v-else-if='!hideActions') нет доступных действий
 
           q-tr.q-virtual-scroll--with-prev(
+            no-hover,
             v-if='expanded.get(props.row.id)',
             :key='`e_${props.row.id}`',
             :props='props'
           )
             q-td(colspan='100%')
-              div(v-if='props.row.status == "FAILED"')
-                span Причина ошибки: {{ props.row.message ?? 'нет дополнительной информации' }}
-              div(v-else)
-                span нет дополнительной информации
+              PaymentDetails(:payment='props.row')
 </template>
 <script setup lang="ts">
 import { onMounted, ref, computed, reactive, nextTick } from 'vue';
@@ -90,8 +91,37 @@ import { Notify } from 'quasar';
 import { usePaymentStore } from 'src/entities/Payment/model';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
 import PaymentCard from './PaymentCard.vue';
+import { PaymentDetails } from 'src/shared/ui';
 import { useWindowSize } from 'src/shared/hooks';
+import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
+import { Zeus } from '@coopenomics/sdk';
 // import { getName } from 'src/shared/lib/utils';
+
+const statusColors: Record<string, string> = {
+  [Zeus.PaymentStatus.COMPLETED]: 'teal',
+  [Zeus.PaymentStatus.PENDING]: 'orange',
+  [Zeus.PaymentStatus.FAILED]: 'red',
+  [Zeus.PaymentStatus.PAID]: 'blue',
+  [Zeus.PaymentStatus.REFUNDED]: 'grey',
+  [Zeus.PaymentStatus.EXPIRED]: 'grey',
+};
+
+const getStatusColor = (status?: string | null) => {
+  if (!status) {
+    return 'grey';
+  }
+  return statusColors[status] || 'grey';
+};
+
+const getDirectionIcon = (direction?: string | null) => {
+  return direction === Zeus.PaymentDirection.INCOMING
+    ? 'fa-solid fa-arrow-down'
+    : 'fa-solid fa-arrow-up';
+};
+
+const getDirectionColor = (direction?: string | null) => {
+  return direction === Zeus.PaymentDirection.INCOMING ? 'positive' : 'negative';
+};
 
 const paymentStore = usePaymentStore();
 const payments = computed(() => paymentStore.payments);
@@ -203,7 +233,7 @@ const columns: any[] = [
   {
     name: 'username',
     align: 'left',
-    label: 'От кого',
+    label: 'Пайщик',
     field: 'username',
     sortable: true,
   },

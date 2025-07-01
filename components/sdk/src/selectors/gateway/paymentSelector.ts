@@ -1,5 +1,6 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { Selector, type ValueTypes, type ModelTypes } from '../../zeus/index'
+import { rawUserCertificateUnionSelector } from '../common'
 
 // Селектор для PaymentDetailsDTO
 export const rawPaymentDetailsSelector = {
@@ -18,6 +19,7 @@ export const rawPaymentSelector = {
   hash: true,
   coopname: true,
   username: true,
+  username_certificate: rawUserCertificateUnionSelector,
   quantity: true,
   symbol: true,
   type: true,

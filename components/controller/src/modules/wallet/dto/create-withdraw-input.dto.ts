@@ -1,8 +1,8 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsOptional, ValidateNested } from 'class-validator';
+import { IsString, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { SignedDigitalDocumentInputDTO } from '~/modules/document/dto/signed-digital-document-input.dto';
 import type { CreateWithdrawInputDomainInterface } from '~/domain/wallet/interfaces/create-withdraw-input-domain.interface';
+import { ReturnByMoneySignedDocumentInputDTO } from '~/modules/document/documents-dto/return-by-money-statement.dto';
 
 /**
  * DTO для создания заявки на вывод средств
@@ -17,9 +17,9 @@ export class CreateWithdrawInputDTO implements CreateWithdrawInputDomainInterfac
   @IsString()
   username!: string;
 
-  @Field(() => String, { description: 'Количество средств' })
-  @IsString()
-  quantity!: string;
+  @Field(() => Number, { description: 'Количество средств' })
+  @IsNumber()
+  quantity!: number;
 
   @Field(() => String, { description: 'Символ валюты' })
   @IsString()
@@ -29,13 +29,12 @@ export class CreateWithdrawInputDTO implements CreateWithdrawInputDomainInterfac
   @IsString()
   method_id!: string;
 
-  @Field(() => String, { description: 'Дополнительная информация', nullable: true })
+  @Field(() => String, { description: 'Хеш платежа для связи с withdraw' })
   @IsString()
-  @IsOptional()
-  memo?: string;
+  payment_hash!: string;
 
-  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Подписанное заявление на возврат средств' })
+  @Field(() => ReturnByMoneySignedDocumentInputDTO, { description: 'Подписанное заявление на возврат средств' })
   @ValidateNested()
-  @Type(() => SignedDigitalDocumentInputDTO)
-  statement!: SignedDigitalDocumentInputDTO;
+  @Type(() => ReturnByMoneySignedDocumentInputDTO)
+  statement!: ReturnByMoneySignedDocumentInputDTO;
 }

@@ -1,128 +1,139 @@
 <template lang="pug">
 div
-  q-carousel(
-    v-model="slideIndex"
-    animated
-    infinite
-    :arrows="menuWorkspaces.length > 1"
-    swipeable
-    control-type="flat"
-    control-color="grey"
-    height="100px"
-    class="workspace-menu"
+  q-carousel.workspace-menu(
+    v-model='slideIndex',
+    animated,
+    infinite,
+    :arrows='menuWorkspaces.length > 1',
+    swipeable,
+    control-type='flat',
+    control-color='grey',
+    height='100px'
   )
-    q-carousel-slide(
-      v-for="(item, index) in menuWorkspaces"
-      :name="index"
-      :key="item.workspaceName"
-      class="flex flex-center"
+    q-carousel-slide.flex.flex-center(
+      v-for='(item, index) in menuWorkspaces',
+      :name='index',
+      :key='item.workspaceName'
     )
-      q-btn(
-        stack
-        flat
-        v-ripple
-        class="cursor-pointer btn-menu"
-        @click="handleClick(item, index)"
-        align="center"
-      ).full-width
-        q-icon(:name="item.icon").btn-icon.q-pt-sm
+      q-btn.cursor-pointer.btn-menu.full-width(
+        stack,
+        flat,
+        v-ripple,
+        @click='handleClick(item, index)',
+        align='center'
+      )
+        q-icon.btn-icon.q-pt-sm(:name='item.icon')
         span.btn-font {{ item.title }}
 
-  q-dialog(v-model="showDialog")
-    q-card(style="min-width: 300px; max-width: 90vw")
+  q-dialog(v-model='showDialog')
+    q-card(style='min-width: 300px; max-width: 90vw')
       q-bar.bg-primary.text-white
         span Выберите рабочий стол
         q-space
-        q-btn(flat dense icon="close" v-close-popup)
+        q-btn(flat, dense, icon='close', v-close-popup)
           q-tooltip Закрыть
 
-      div.row
+      .row
         div(
-          v-for="(item, index) in menuWorkspaces"
-          :key="item.workspaceName"
-          :class="{ 'col-6': !(index === menuWorkspaces.length - 1 && menuWorkspaces.length % 2 !== 0), 'col-12': index === menuWorkspaces.length - 1 && menuWorkspaces.length % 2 !== 0 }"
+          v-for='(item, index) in menuWorkspaces',
+          :key='item.workspaceName',
+          :class='{ "col-6": !(index === menuWorkspaces.length - 1 && menuWorkspaces.length % 2 !== 0), "col-12": index === menuWorkspaces.length - 1 && menuWorkspaces.length % 2 !== 0 }'
         )
-          q-btn(
-            stack
-            flat
-            class="full-width q-pa-sm btn-menu"
-            :class="headerClass(item)"
-            @click="selectFromDialog(index)"
+          q-btn.full-width.q-pa-sm.btn-menu(
+            stack,
+            flat,
+            :class='headerClass(item)',
+            @click='selectFromDialog(index)'
           )
-            q-icon(:name="item.icon").btn-icon
-            div.btn-font.text-center {{ item.title }}
+            q-icon.btn-icon(:name='item.icon')
+            .btn-font.text-center {{ item.title }}
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCurrentUserStore } from 'src/entities/User'
-import { useDesktopStore } from 'src/entities/Desktop/model'
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { useCurrentUser } from 'src/entities/Session';
+import { useDesktopStore } from 'src/entities/Desktop/model';
 
-const router = useRouter()
-const user = useCurrentUserStore()
-const desktop = useDesktopStore()
+const router = useRouter();
+const user = useCurrentUser();
+const desktop = useDesktopStore();
 
-const slideIndex = ref(0)
-const showDialog = ref(false)
+const slideIndex = ref(0);
+const showDialog = ref(false);
 
 // workspaceMenus – список рабочих столов из store
-const workspaceMenus = computed(() => desktop.workspaceMenus)
+const workspaceMenus = computed(() => desktop.workspaceMenus);
 
 // Фильтрация по ролям (если требуется)
 const menuWorkspaces = computed(() => {
-  const userRole = user.userAccount?.role || 'user'
-  return workspaceMenus.value.filter(item =>
-    item.meta.roles?.includes(userRole) || !item.meta.roles || item.meta.roles.length === 0
-  )
-})
+  const userRole = user.isChairman
+    ? 'chairman'
+    : user.isMember
+      ? 'member'
+      : 'user';
+  return workspaceMenus.value.filter(
+    (item) =>
+      item.meta.roles?.includes(userRole) ||
+      item.meta.roles === undefined ||
+      item.meta.roles.length === 0,
+  );
+});
 
 const headerClass = (item: any) => {
-  return desktop?.activeWorkspaceName === item.workspaceName ? 'text-white bg-teal' : ''
-}
+  return desktop?.activeWorkspaceName === item.workspaceName
+    ? 'text-white bg-teal'
+    : '';
+};
 
 const handleClick = (item: any, index: number) => {
   if (slideIndex.value === index) {
-    showDialog.value = true
+    showDialog.value = true;
   } else {
-    slideIndex.value = index
+    slideIndex.value = index;
     // Обновляем активный рабочий стол
-    desktop.selectWorkspace(item.workspaceName)
-    // Переходим на маршрут по умолчанию для выбранного рабочего стола
-    desktop.goToDefaultPage(router)
+    desktop.selectWorkspace(item.workspaceName);
+    // Добавляем небольшую задержку перед переходом для визуального эффекта
+    setTimeout(() => {
+      desktop.goToDefaultPage(router);
+    }, 100);
   }
-}
+};
 
 const selectFromDialog = (index: number) => {
-  showDialog.value = false
-  slideIndex.value = index
-  const item = menuWorkspaces.value[index]
-  desktop.selectWorkspace(item.workspaceName)
-  // Переходим на маршрут по умолчанию для выбранного рабочего стола
-  desktop.goToDefaultPage(router)
-}
+  showDialog.value = false;
+  slideIndex.value = index;
+  const item = menuWorkspaces.value[index];
+  desktop.selectWorkspace(item.workspaceName);
+  // Добавляем небольшую задержку перед переходом для визуального эффекта
+  setTimeout(() => {
+    desktop.goToDefaultPage(router);
+  }, 100);
+};
 
 onMounted(() => {
   // Находим индекс активного рабочего стола
-  const activeWorkspaceName = desktop.activeWorkspaceName
+  const activeWorkspaceName = desktop.activeWorkspaceName;
   if (activeWorkspaceName) {
     const activeIndex = menuWorkspaces.value.findIndex(
-      item => item.workspaceName === activeWorkspaceName
-    )
+      (item) => item.workspaceName === activeWorkspaceName,
+    );
     if (activeIndex !== -1) {
-      slideIndex.value = activeIndex
+      slideIndex.value = activeIndex;
     }
   }
-})
+});
 
 // При изменении slideIndex обновляем активный рабочий стол
 watch(slideIndex, (newIndex) => {
-  const item = menuWorkspaces.value[newIndex]
-  if (item) {
-    desktop.selectWorkspace(item.workspaceName)
-    desktop.goToDefaultPage(router)
+  const item = menuWorkspaces.value[newIndex];
+  if (item && desktop.activeWorkspaceName !== item.workspaceName) {
+    desktop.selectWorkspace(item.workspaceName);
+    setTimeout(() => {
+      desktop.goToDefaultPage(router);
+    }, 100);
   }
-})
+});
 </script>
 
 <style lang="scss">

@@ -1,129 +1,101 @@
 <template lang="pug">
-div(flat)
-  div.text-center.text-h6.q-mb-md РЕЗУЛЬТАТЫ
+.page-main-card.q-pa-lg
+  .text-center.text-h6.q-mb-md РЕЗУЛЬТАТЫ
 
-  div.row.justify-center
-    // Отображаем документ собрания, если он есть
+  .row.justify-center.q-mb-md(v-if='!!meet?.processed?.decisionAggregate')
     ExpandableDocument(
-      v-if="!!meet?.processed?.decisionAggregate"
-      :documentAggregate="meet.processed.decisionAggregate"
-      title="Протокол решения общего собрания пайщиков"
+      :documentAggregate='meet.processed.decisionAggregate',
+      title='Протокол решения общего собрания пайщиков'
     )
-    div.col-12.col-md-12(v-for="(item, index) in meetAgendaItems" :key="index")
-      q-card(flat bordered).q-mb-md
-        q-card-section
-          div.row
-            div.col-12.col-md-auto.flex.justify-center.q-pa-md
-              AgendaNumberAvatar(:number="item.number")
-            div.col-12.col-md
 
-              div.row.justify-between.items-center
-                div.text-h6 {{ item.title }}
-                q-badge(
-                  :color="getResultBadgeColor(item)"
-                  :label="getResultText(item)"
-                  :icon="getResultIcon(item)"
-                  floating
-                  class="text-weight-bold"
-                )
+  .info-item.q-mb-md(v-for='(item, index) in meetAgendaItems', :key='index')
+    .row.items-start
+      .col-auto.q-mr-md
+        AgendaNumberAvatar(:number='item.number')
+      .col
+        .row.justify-between.items-center
+          .text-h6.q-mb-sm {{ item.title }}
+          q-badge.text-weight-bold(
+            :color='getResultBadgeColor(item)',
+            :label='getResultText(item)',
+            :icon='getResultIcon(item)'
+          )
 
-              q-separator.q-my-sm
-              div.text-body1(v-html="parseLinks(item.context)")
-              q-separator.q-my-sm
+        q-separator.q-my-md
+        .text-body1(v-html='parseLinks(item.context)')
 
-              //- div.text-subtitle1.text-weight-bold Решение
-              //- div.text-body2 {{ item.decision }}
-              //- q-separator.q-my-sm
-
-              div.row.q-col-gutter-sm.q-mt-sm
-                // Новый push-дизайн карточек голосования
-                div.col-12.col-md-4
-                  q-card(flat bordered :class="'q-pa-md q-mb-sm shadow-2 flex flex-center ' + getCardClass('for')")
-                    q-card-section(class="text-center")
-                      q-icon(name="thumb_up" :color="getCardSemanticColor('for')" size="32px")
-                      div(:class="'text-weight-bold q-mt-sm text-' + getCardSemanticColor('for')") ЗА
-                      div(:class="'text-h5 q-mt-xs text-' + getCardSemanticColor('for')") {{ item.votes_for }}
-                div.col-12.col-md-4
-                  q-card(flat bordered :class="'q-pa-md q-mb-sm shadow-2 flex flex-center ' + getCardClass('against')")
-                    q-card-section(class="text-center")
-                      q-icon(name="thumb_down" :color="getCardSemanticColor('against')" size="32px")
-                      div(:class="'text-weight-bold q-mt-sm text-' + getCardSemanticColor('against')") ПРОТИВ
-                      div(:class="'text-h5 q-mt-xs text-' + getCardSemanticColor('against')") {{ item.votes_against }}
-
-
-                div.col-12.col-md-4
-                  q-card(flat bordered :class="'q-pa-md q-mb-sm shadow-2 flex flex-center ' + getCardClass('abstained')")
-                    q-card-section(class="text-center")
-                      q-icon(name="pan_tool" :color="getCardSemanticColor('abstained')" size="32px")
-                      div(:class="'text-weight-bold q-mt-sm text-' + getCardSemanticColor('abstained')") ВОЗДЕРЖАЛИСЬ
-                      div(:class="'text-h5 q-mt-xs text-' + getCardSemanticColor('abstained')") {{ item.votes_abstained }}
+        .row.q-col-gutter-sm.q-mt-md
+          .col-12.col-md-4
+            .balance-card.balance-card-positive
+              .balance-label ЗА
+              .balance-value {{ item.votes_for }}
+          .col-12.col-md-4
+            .balance-card.balance-card-negative
+              .balance-label ПРОТИВ
+              .balance-value {{ item.votes_against }}
+          .col-12.col-md-4
+            .balance-card
+              .balance-label ВОЗДЕРЖАЛИСЬ
+              .balance-value {{ item.votes_abstained }}
 </template>
 
 <script setup lang="ts">
-import type { IMeet } from 'src/entities/Meet'
-import { computed } from 'vue'
-import { ExpandableDocument } from 'src/shared/ui'
-import { AgendaNumberAvatar } from 'src/shared/ui/AgendaNumberAvatar'
-import { useQuasar } from 'quasar'
-import { parseLinks } from 'src/shared/lib/utils'
-
-const $q = useQuasar()
-const isDark = computed(() => $q.dark.isActive)
+import type { IMeet } from 'src/entities/Meet';
+import { computed } from 'vue';
+import { ExpandableDocument } from 'src/shared/ui';
+import { AgendaNumberAvatar } from 'src/shared/ui/AgendaNumberAvatar';
+import { parseLinks } from 'src/shared/lib/utils';
 
 const props = defineProps<{
-  meet: IMeet
-}>()
+  meet: IMeet;
+}>();
 
 const meetAgendaItems = computed(() => {
-  if (!props.meet || !props.meet.processed?.results) return []
-  return props.meet.processed.results || []
-})
+  if (!props.meet || !props.meet.processed?.results) return [];
+  return props.meet.processed.results || [];
+});
 
-// Классы для карточек голосования с учётом темы
-const getCardClass = (type: 'for' | 'against' | 'abstained') => {
-  if (type === 'for') return isDark.value ? 'bg-green-10 card-border-light' : 'bg-green-1'
-  if (type === 'against') return isDark.value ? 'bg-red-10 card-border-light' : 'bg-red-1'
-  if (type === 'abstained') return isDark.value ? 'bg-grey-9 card-border-light' : 'bg-grey-2'
-  return ''
-}
-
-// Цвет иконки и текста для карточки с учетом темы
-const getCardSemanticColor = (type: 'for' | 'against' | 'abstained') => {
-  if (isDark.value) {
-    // В темной теме используем светлые цвета для контраста
-    if (type === 'for') return 'green-3'
-    if (type === 'against') return 'red-3'
-    if (type === 'abstained') return 'grey-4'
-  } else {
-    // В светлой теме используем стандартные цвета
-    if (type === 'for') return 'positive'
-    if (type === 'against') return 'negative'
-    if (type === 'abstained') return 'grey'
-  }
-  return ''
-}
-
-// Получение текста результата
 const getResultText = (question: any) => {
-  if (question.accepted === undefined) return 'Нет данных'
-  return question.accepted ? 'ПРИНЯТО' : 'ОТКЛОНЕНО'
-}
+  if (question.accepted === undefined) return 'Нет данных';
+  return question.accepted ? 'Принято' : 'Отклонено';
+};
 
-// Добавляю функции для иконки и цвета результата
 const getResultIcon = (question: any) => {
-  if (question.accepted === undefined) return 'help_outline'
-  return question.accepted ? 'check_circle' : 'cancel'
-}
+  if (question.accepted === undefined) return 'help_outline';
+  return question.accepted ? 'check_circle' : 'cancel';
+};
 
 const getResultBadgeColor = (question: any) => {
-  if (question.accepted === undefined) return 'grey-5'
-  return question.accepted ? 'positive' : 'negative'
-}
+  if (question.accepted === undefined) return 'grey-5';
+  return question.accepted ? 'positive' : 'negative';
+};
 </script>
 
-<style scoped>
-/* Светлая рамка для карточек в тёмном режиме */
-.card-border-light {
-  border: 1.5px solid #fff2;
+<style lang="scss" scoped>
+@import 'src/shared/ui/CardStyles/index.scss';
+
+.info-item {
+  @extend .info-item; // из CardStyles
+}
+
+.balance-card {
+  @extend .balance-card;
+  text-align: center;
+
+  &.balance-card-positive {
+    background: rgba(76, 175, 80, 0.08);
+    border-left: 4px solid #4caf50;
+    .q-dark & {
+      background: rgba(76, 175, 80, 0.15);
+    }
+  }
+
+  &.balance-card-negative {
+    background: rgba(244, 67, 54, 0.08);
+    border-left: 4px solid #f44336;
+    .q-dark & {
+      background: rgba(244, 67, 54, 0.15);
+    }
+  }
 }
 </style>

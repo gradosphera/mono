@@ -1,4 +1,6 @@
-<template lang="pug">div</template>
+<template lang="pug">
+div
+</template>
 <!-- NotificationCenter.vue
 <template lang="pug">
 div#notification-inbox.notification-container
@@ -8,17 +10,17 @@ div#notification-inbox.notification-container
 import { computed, onMounted, watch } from 'vue'
 import { NovuUI } from '@novu/js/ui'
 import { dark } from '@novu/js/themes'
-import { useCurrentUserStore } from 'src/entities/User'
+import { useCurrentUser } from 'src/entities/Session'
 import { useQuasar } from 'quasar'
 import { env } from 'src/shared/config'
-const currentUser = useCurrentUserStore()
+const currentUser = useCurrentUser()
 
 const $q = useQuasar()
 const isDark = computed(() => $q.dark.isActive)
 let novu: any = null
 
 function mountNovu() {
-  const subscriberId = currentUser.userAccount?.username || '68481006a874d6592b28c530'
+  const subscriberId = currentUser.username || '68481006a874d6592b28c530'
   const el = document.getElementById('notification-inbox')
 
   if (el) el.innerHTML = ''

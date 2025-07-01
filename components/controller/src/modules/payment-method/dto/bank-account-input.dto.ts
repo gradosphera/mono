@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import type { BankAccountDomainInterface } from '../../../domain/common/interfaces/bank-account-domain.interface';
 import { BankAccountDetailsInputDTO } from './bank-account-details-input.dto';
-import { IsJSON, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 @InputType('BankAccountInput')
 export class BankAccountInputDTO implements BankAccountDomainInterface {
@@ -12,6 +12,7 @@ export class BankAccountInputDTO implements BankAccountDomainInterface {
 
   @Field(() => String, { nullable: true, description: 'Номер карты' })
   @IsString()
+  @IsOptional()
   card_number?: string;
 
   @Field(() => String, { description: 'Название банка' })
@@ -26,6 +27,6 @@ export class BankAccountInputDTO implements BankAccountDomainInterface {
 
   @Field(() => BankAccountDetailsInputDTO, { description: 'Детали счета' })
   @IsNotEmpty({ message: 'Детали счёта обязательны' })
-  @IsJSON()
+  @ValidateNested()
   details!: BankAccountDetailsInputDTO;
 }

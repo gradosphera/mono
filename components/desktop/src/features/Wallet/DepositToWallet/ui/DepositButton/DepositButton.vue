@@ -17,7 +17,6 @@ q-btn(@click='showDialog = true', color='primary')
           placeholder='Введите сумму',
           type='number',
           :min='0',
-          :step='1000',
           :rules='[(val) => val > 0 || "Сумма взноса должна быть положительной"]'
         )
           template(#append)

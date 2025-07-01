@@ -1,11 +1,11 @@
-import { markRaw } from 'vue'
-import { ListOfAgendaQuestions } from 'src/pages/Cooperative/ListOfAgenda'
-import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants'
-import { ListOfDocumentsPage } from 'src/pages/Cooperative/ListOfDocuments'
-import { PaymentsPage } from 'src/pages/Cooperative/Payments'
-import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets'
-import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails'
-import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace'
+import { markRaw } from 'vue';
+import { ListOfAgendaQuestions } from 'src/pages/Cooperative/ListOfAgenda';
+import { ListOfParticipantsPage } from 'src/pages/Cooperative/ListOfParticipants';
+import { ListOfDocumentsPage } from 'src/pages/Cooperative/ListOfDocuments';
+import { PaymentsPage } from 'src/pages/Cooperative/Payments';
+import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets';
+import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails';
+import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
 export default async function (): Promise<IWorkspaceConfig> {
   return {
@@ -27,7 +27,7 @@ export default async function (): Promise<IWorkspaceConfig> {
             name: 'agenda',
             component: markRaw(ListOfAgendaQuestions),
             meta: {
-              title: 'Повестка',
+              title: 'Повестка совета',
               icon: 'fa-solid fa-check-to-slot',
               roles: ['chairman', 'member'],
             },
@@ -37,7 +37,7 @@ export default async function (): Promise<IWorkspaceConfig> {
             name: 'participants',
             component: markRaw(ListOfParticipantsPage),
             meta: {
-              title: 'Пайщики',
+              title: 'Реестр пайщиков',
               icon: 'fa-solid fa-users',
               roles: ['chairman', 'member'],
             },
@@ -47,7 +47,7 @@ export default async function (): Promise<IWorkspaceConfig> {
             name: 'documents',
             component: markRaw(ListOfDocumentsPage),
             meta: {
-              title: 'Документы',
+              title: 'Реестр документов',
               icon: 'fa-solid fa-file-invoice',
               roles: ['chairman', 'member'],
             },
@@ -57,7 +57,7 @@ export default async function (): Promise<IWorkspaceConfig> {
             name: 'payments',
             component: markRaw(PaymentsPage),
             meta: {
-              title: 'Платежи',
+              title: 'Реестр платежей',
               icon: 'fa-solid fa-file-invoice',
               roles: ['chairman', 'member'],
             },
@@ -67,7 +67,7 @@ export default async function (): Promise<IWorkspaceConfig> {
             name: 'meets',
             component: markRaw(ListOfMeetsPage),
             meta: {
-              title: 'Собрания',
+              title: 'Реестр собраний',
               icon: 'fa-solid fa-users-between-lines',
               roles: ['chairman', 'member'],
             },
@@ -79,8 +79,8 @@ export default async function (): Promise<IWorkspaceConfig> {
               },
             ],
           },
-        ]
-      }
-    ]
-  }
+        ],
+      },
+    ],
+  };
 }

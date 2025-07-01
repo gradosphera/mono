@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
+import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
 import type { GatewayPaymentDTO } from '../dto/gateway-payment.dto';
 import type { PaginationInputDTO, PaginationResult } from '~/modules/common/dto/pagination.dto';
 import type { SetPaymentStatusInputDTO } from '../dto/set-payment-status-input.dto';
@@ -7,7 +8,10 @@ import type { PaymentFiltersDomainInterface } from '~/domain/gateway/interfaces/
 
 @Injectable()
 export class GatewayService {
-  constructor(private readonly gatewayInteractor: GatewayInteractor) {}
+  constructor(
+    private readonly gatewayInteractor: GatewayInteractor,
+    private readonly userCertificateInteractor: UserCertificateInteractor
+  ) {}
 
   /**
    * Получить платежи с фильтрацией (универсальный метод)
@@ -19,8 +23,16 @@ export class GatewayService {
     // Приводим внешние фильтры к внутренним (без secret)
     const result = await this.gatewayInteractor.getPayments(filters, options);
 
+    // Обогащаем каждый элемент сертификатом пользователя
+    const enrichedItems = await Promise.all(
+      result.items.map(async (item) => {
+        const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(item.username);
+        return item.toDTO(usernameCertificate);
+      })
+    );
+
     return {
-      items: result.items.map((item) => item.toDTO()),
+      items: enrichedItems,
       totalCount: result.totalCount,
       totalPages: result.totalPages,
       currentPage: result.currentPage,
@@ -32,6 +44,7 @@ export class GatewayService {
    */
   async setPaymentStatus(data: SetPaymentStatusInputDTO): Promise<GatewayPaymentDTO> {
     const result = await this.gatewayInteractor.setPaymentStatus(data);
-    return result.toDTO();
+    const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(result.username);
+    return result.toDTO(usernameCertificate);
   }
 }

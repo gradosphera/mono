@@ -1,5 +1,22 @@
+#define COMPLETEWTHD_SIGNATURE name coopname, checksum256 withdraw_hash
+#define DECLINEWTHD_SIGNATURE name coopname, checksum256 withdraw_hash, std::string reason
+
+using completewthd_interface = void(COMPLETEWTHD_SIGNATURE);
+using declinewthd_interface = void(DECLINEWTHD_SIGNATURE);
+
 namespace Wallet {
   
+  static const std::set<eosio::name> wallet_callback_actions = {
+      "authwthd"_n,    // авторизация возврата паевого взноса
+      "declinewthd"_n, // отклонение возврата паевого взноса
+      "completewthd"_n, // завершение возврата паевого взноса
+  };
+
+  inline eosio::name get_valid_wallet_action(const eosio::name& action) {
+    eosio::check(wallet_callback_actions.contains(action), "Недопустимое имя действия wallet");
+    return action;
+  }
+
   inline void validate_asset(const eosio::asset& amount) {
     check(amount.symbol == _root_govern_symbol, "Invalid token symbol");
     check(amount.is_valid(), "Invalid asset");

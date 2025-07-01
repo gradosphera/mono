@@ -3,17 +3,13 @@ import type { ICommonUser, ICooperativeData, IVars } from '../../model'
 
 export const registry_id = 900
 
-// Интерфейс запроса без чувствительных данных
-export interface IMoneyReturnRequest {
-  method_id: string // ID платежного метода
-  amount: string
-  currency: string
-}
-
 // Модель действия для генерации
 export interface Action extends IGenerate {
   registry_id: number
-  request: IMoneyReturnRequest
+  method_id: string // ID платежного метода
+  quantity: string
+  currency: string
+  payment_hash: string // Хеш платежа для связи с withdraw
 }
 
 export type Meta = IMetaDocument & Action
@@ -24,16 +20,15 @@ export interface Model {
   coop: ICooperativeData
   vars: IVars
   user: ICommonUser
-  request: {
-    payment_details: string // Детали платежа из хранилища
-    amount: string
-    currency: string
-  }
+  payment_details: string // Детали платежа из хранилища
+  quantity: string
+  currency: string
+  payment_hash: string // Хеш платежа для связи с withdraw
 }
 
 export const title = 'Заявление на возврат паевого взноса денежными средствами'
 export const description = 'Форма заявления на возврат паевого взноса денежными средствами'
-export const context = `<div class="digital-document"><div style="text-align: right; margin:"><p style="margin: 0px !important">{% trans 'v_soviet' %} {{ vars.full_abbr_genitive}} "{{vars.name}}"</p><p style="margin: 0px !important">{% trans 'from_participant' %}</p><p style="margin: 0px !important">{{ user.full_name_or_short_name}}</p></div><div style="text-align: center; padding-top: 20px; padding-bottom: 20px;"><h1 class="header">{% trans 'statement' %}</h1></div><p style="padding-bottom: 20px;">{% trans 'money_return_request', coop.short_name %}</p><table style="margin-bottom: 20px;"><tbody><tr><th>{% trans 'asset_form' %}</th><td>{% trans 'money_assets' %}</td></tr><tr><th>{% trans 'name_requisites' %}</th><td>{% trans 'return_part_contribution' %}</td></tr><tr><th>№</th><td>1</td></tr><tr><th>{% trans 'payment_details_field' %}</th><td style="white-space: pre-line;">{{ request.payment_details }}</td></tr><tr><th>{% trans 'article' %}</th><td>na</td></tr><tr><th>{% trans 'unit_measurement' %}</th><td>{{ request.currency }}</td></tr><tr><th>{% trans 'quantity' %}</th><td>{{ request.amount }}</td></tr><tr><th>{% trans 'unit_cost' %}</th><td>na</td></tr><tr><th>{% trans 'total_cost' %}</th><td>{{ request.amount }} {{ request.currency }}</td></tr></tbody></table><p style="padding-top: 20px;">{% trans 'signature' %}</p><p>{{ user.full_name_or_short_name }}</p><p>{{ meta.created_at }}</p><style>.digital-document {padding: 20px;white-space: pre-wrap;};table {width: 100%;border-collapse: collapse;}th, td {border: 1px solid #ccc;padding: 8px;text-align: left;word-wrap: break-word; overflow-wrap: break-word; }th {background-color: #f4f4f4;width: 30%;}</style>`
+export const context = `<div class="digital-document"><div style="text-align: right; margin:"><p style="margin: 0px !important">{% trans 'v_soviet' %} {{ vars.full_abbr_genitive}} "{{vars.name}}"</p><p style="margin: 0px !important">{% trans 'from_participant' %}</p><p style="margin: 0px !important">{{ user.full_name_or_short_name}}</p></div><div style="text-align: center; padding-top: 20px; padding-bottom: 20px;"><h1 class="header">{% trans 'statement' %}</h1></div><p style="padding-bottom: 20px;">{% trans 'money_return_request', coop.short_name %}</p><table style="margin-bottom: 20px;"><tbody><tr><th>{% trans 'asset_form' %}</th><td>{% trans 'money_assets' %}</td></tr><tr><th>{% trans 'name_requisites' %}</th><td>{% trans 'return_part_contribution' %}</td></tr><tr><th>№</th><td>1</td></tr><tr><th>{% trans 'payment_details_field' %}</th><td style="white-space: pre-line;">{{ payment_details }}</td></tr><tr><th>{% trans 'article' %}</th><td>na</td></tr><tr><th>{% trans 'unit_measurement' %}</th><td>{{ currency }}</td></tr><tr><th>{% trans 'quantity' %}</th><td>{{ quantity }}</td></tr><tr><th>{% trans 'unit_cost' %}</th><td>na</td></tr><tr><th>{% trans 'total_cost' %}</th><td>{{ quantity }} {{ currency }}</td></tr></tbody></table><p style="padding-top: 20px;">{% trans 'signature' %}</p><p>{{ user.full_name_or_short_name }}</p><p>{{ meta.created_at }}</p><style>.digital-document {padding: 20px;white-space: pre-wrap;};table {width: 100%;border-collapse: collapse;}th, td {border: 1px solid #ccc;padding: 8px;text-align: left;word-wrap: break-word; overflow-wrap: break-word; }th {background-color: #f4f4f4;width: 30%;}</style>`
 
 export const translations = {
   ru: {
@@ -69,9 +64,8 @@ export const exampleData = {
   meta: {
     created_at: '18.03.2025',
   },
-  request: {
-    amount: '50 000',
-    currency: 'Руб.',
-    payment_details: '№ счета получателя: 40817 810 6 3826 1231150\nБанк получателя: ПАО «Сбербанк»\nКорр. счет банка: 30101 810 4 0000 0000225\nБИК 44525225\nПолучатель: Иванов Иван Иванович',
-  },
+  quantity: '50 000',
+  currency: 'Руб.',
+  payment_hash: 'abc123def456789',
+  payment_details: '№ счета получателя: 40817 810 6 3826 1231150\nБанк получателя: ПАО «Сбербанк»\nКорр. счет банка: 30101 810 4 0000 0000225\nБИК 44525225\nПолучатель: Иванов Иван Иванович',
 }

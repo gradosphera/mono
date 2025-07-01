@@ -53,7 +53,7 @@ export class Factory extends DocFactory<ReturnByMoneyDecision.Action> {
       coop,
       decision,
       user: super.getCommonUser(user),
-      amount: data.amount,
+      quantity: data.quantity,
       currency: data.currency,
     }
 

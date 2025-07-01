@@ -47,7 +47,7 @@ q-header.header(bordered, :class='headerClass')
 import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
-import { useCurrentUserStore } from 'src/entities/User';
+import { useCurrentUser } from 'src/entities/Session';
 import { useSessionStore } from 'src/entities/Session';
 import config from 'src/app/config';
 import { useWindowSize } from 'src/shared/hooks';
@@ -77,13 +77,19 @@ const isDark = computed(() => $q.dark.isActive);
 const headerClass = computed(() =>
   isDark.value ? 'text-white bg-dark' : 'text-black bg-light',
 );
-const currentUser = useCurrentUserStore();
-const loggedIn = computed(
-  () => currentUser.isRegistrationComplete && session.isAuth,
-);
+const currentUser = useCurrentUser();
+const loggedIn = computed(() => {
+  console.log(
+    'on loggedIn',
+    currentUser.isRegistrationComplete.value,
+    session.isAuth,
+    currentUser,
+  );
+  return currentUser.isRegistrationComplete.value && session.isAuth;
+});
 
-const isChairman = computed(() => currentUser.userAccount?.role === 'chairman');
-const isMember = computed(() => currentUser.userAccount?.role === 'member');
+const isChairman = computed(() => currentUser.isChairman);
+const isMember = computed(() => currentUser.isMember);
 
 const showRegisterButton = computed(() => {
   if (!loggedIn.value) {

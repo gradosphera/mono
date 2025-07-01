@@ -1647,17 +1647,17 @@ input CreateWithdrawInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
-  """Дополнительная информация"""
-  memo: String
-
   """ID метода платежа"""
   method_id: String!
 
+  """Хеш платежа для связи с withdraw"""
+  payment_hash: String!
+
   """Количество средств"""
-  quantity: String!
+  quantity: Float!
 
   """Подписанное заявление на возврат средств"""
-  statement: SignedDigitalDocumentInput!
+  statement: ReturnByMoneySignedDocumentInput!
 
   """Символ валюты"""
   symbol: String!
@@ -2182,6 +2182,9 @@ type GatewayPayment {
 
   """Имя пользователя"""
   username: String!
+
+  """Сертификат пользователя, создавшего платеж"""
+  username_certificate: UserCertificateUnion
 }
 
 input GenerateDocumentInput {
@@ -3850,17 +3853,6 @@ input RepresentedByInput {
   position: String!
 }
 
-input RequestInput {
-  """Сумма к возврату"""
-  amount: String!
-
-  """Валюта"""
-  currency: String!
-
-  """ID платежного метода"""
-  method_id: String!
-}
-
 input ResetKeyInput {
   """Публичный ключ для замены"""
   public_key: String!
@@ -4164,9 +4156,6 @@ input ReturnByAssetStatementSignedMetaDocumentInput {
 }
 
 input ReturnByMoneyDecisionGenerateDocumentInput {
-  """Сумма к возврату"""
-  amount: String!
-
   """Номер блока, на котором был создан документ"""
   block_num: Int
 
@@ -4194,6 +4183,9 @@ input ReturnByMoneyDecisionGenerateDocumentInput {
   """Хэш платежа"""
   payment_hash: String!
 
+  """Количество средств к возврату"""
+  quantity: String!
+
   """Часовой пояс, в котором был создан документ"""
   timezone: String
 
@@ -4217,6 +4209,9 @@ input ReturnByMoneyGenerateDocumentInput {
   """Дата и время создания документа"""
   created_at: String
 
+  """Валюта"""
+  currency: String!
+
   """Имя генератора, использованного для создания документа"""
   generator: String
 
@@ -4226,8 +4221,14 @@ input ReturnByMoneyGenerateDocumentInput {
   """Ссылки, связанные с документом"""
   links: [String!]
 
-  """Данные запроса на возврат денежных средств"""
-  request: RequestInput!
+  """ID платежного метода"""
+  method_id: String!
+
+  """Хеш платежа для связи с withdraw"""
+  payment_hash: String!
+
+  """Количество средств к возврату"""
+  quantity: String!
 
   """Часовой пояс, в котором был создан документ"""
   timezone: String
@@ -4240,6 +4241,75 @@ input ReturnByMoneyGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
+}
+
+input ReturnByMoneySignedDocumentInput {
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
+  hash: String!
+
+  """
+  Метаинформация для документа заявления на возврат паевого взноса денежными средствами
+  """
+  meta: ReturnByMoneySignedMetaDocumentInput!
+
+  """Хэш мета-данных"""
+  meta_hash: String!
+
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
+}
+
+input ReturnByMoneySignedMetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Валюта"""
+  currency: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID платежного метода"""
+  method_id: String!
+
+  """Хеш платежа для связи с withdraw"""
+  payment_hash: String!
+
+  """Количество средств к возврату"""
+  quantity: String!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
 }
 
 type SbpAccount {

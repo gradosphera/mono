@@ -1,48 +1,117 @@
 <template lang="pug">
-div.q-pa-xs.col-xs-12.col-sm-12.col-md-12.q-mt-md
-  q-card(bordered flat)
-    q-card-section.q-py-xs
-      div.text-subtitle2 {{ document.statement?.documentAggregate?.rawDocument?.full_title || '' }}
-      div.text-caption ID: {{ getDocumentHash(document).substring(0, 10) || '' }}
+.document-card__container
+  q-card.document-card(flat)
+    q-card-section
+      .document-header
+        .document-icon
+          q-icon(name='fa-solid fa-file-invoice', size='20px', color='primary')
+        .document-title
+          .title {{ document.statement?.documentAggregate?.rawDocument?.full_title || 'Документ без заголовка' }}
+          .subtitle ID: {{ getDocumentHash(document).substring(0, 10) || 'N/A' }}
+
+    q-separator(v-if='expanded')
+
+    q-slide-transition
+      div(v-show='expanded')
+        q-card-section
+          ComplexDocument(:documents='document')
 
     q-separator
 
-    q-card-actions(align="right")
-      q-btn(size="sm" flat icon="expand_more" @click="$emit('toggle-expand')")
-        | {{ expanded ? 'Скрыть' : 'Подробнее' }}
-
-    q-slide-transition
-      div(v-show="expanded")
-        q-separator
-        q-card-section
-          ComplexDocument(:documents="document")
+    q-card-actions.card-actions(align='right')
+      q-btn(
+        flat,
+        size='sm',
+        color='primary',
+        :icon='expanded ? "expand_less" : "expand_more"',
+        @click='$emit("toggle-expand")',
+        :label='expanded ? "Скрыть" : "Подробнее"'
+      )
 </template>
 
 <script setup lang="ts">
-import { ComplexDocument } from 'src/shared/ui/ComplexDocument'
-import type { IDocumentPackageAggregate } from 'src/entities/Document/model'
+import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
+import type { IDocumentPackageAggregate } from 'src/entities/Document/model';
+import 'src/shared/ui/CardStyles/index.scss';
 
-withDefaults(defineProps<{
-  document: IDocumentPackageAggregate
-  expanded?: boolean
-}>(), {
-  expanded: false
-})
+withDefaults(
+  defineProps<{
+    document: IDocumentPackageAggregate;
+    expanded?: boolean;
+  }>(),
+  {
+    expanded: false,
+  },
+);
 
 defineEmits<{
-  (e: 'toggle-expand'): void
-}>()
+  (e: 'toggle-expand'): void;
+}>();
 
 // Получение хеша документа из агрегата
 function getDocumentHash(doc: IDocumentPackageAggregate) {
   if (doc.statement?.documentAggregate?.rawDocument?.hash) {
-    return doc.statement.documentAggregate.rawDocument.hash
+    return doc.statement.documentAggregate.rawDocument.hash;
   }
 
   if (doc.decision?.documentAggregate?.rawDocument?.hash) {
-    return doc.decision.documentAggregate.rawDocument.hash
+    return doc.decision.documentAggregate.rawDocument.hash;
   }
 
-  return 'нет хеша'
+  return 'нет хеша';
 }
 </script>
+
+<style lang="scss" scoped>
+.document-card__container {
+  padding: 8px;
+  width: 100%;
+}
+
+.document-card {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .q-dark & {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.document-header {
+  display: flex;
+  align-items: center;
+
+  .document-icon {
+    margin-right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .document-title {
+    .title {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--q-gray);
+      margin-top: 4px;
+    }
+  }
+}
+
+.card-actions {
+  padding: 8px 16px;
+}
+</style>

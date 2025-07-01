@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import type { SetPaymentStatusInputDomainInterface } from '../interfaces/set-payment-status-domain-input.interface';
 import type { InternalPaymentFiltersDomainInterface } from '../interfaces/payment-filters-domain.interface';
 import type {
@@ -13,6 +13,7 @@ import { PaymentDirectionEnum, PaymentTypeEnum } from '../enums/payment-type.enu
 import type { PaymentDomainInterface } from '../interfaces/payment-domain.interface';
 import type { CreateInitialPaymentInputDomainInterface } from '../interfaces/create-initial-payment-input-domain.interface';
 import type { CreateDepositPaymentInputDomainInterface } from '../interfaces/create-deposit-payment-input-domain.interface';
+import type { CreateWithdrawPaymentInputDomainInterface } from '../interfaces/create-withdraw-payment-input-domain.interface';
 import config from '~/config/config';
 import { AccountDomainInteractor } from '~/domain/account/interactors/account.interactor';
 import type { CompleteIncomeDomainInterface } from '../interfaces/complete-income-domain.interface';
@@ -24,6 +25,8 @@ import { SystemDomainInteractor } from '~/domain/system/interactors/system.inter
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 import { AccountType } from '~/modules/account/enum/account-type.enum';
 import Settings from '~/models/settings.model';
+import { PaymentMethodRepository, PAYMENT_METHOD_REPOSITORY } from '~/domain/common/repositories/payment-method.repository';
+import type { PaymentDetailsDomainInterface } from '../interfaces/payment-domain.interface';
 
 /**
  * Интерактор домена gateway для управления платежами (просмотр, изменение статуса и создание)
@@ -47,7 +50,9 @@ export class GatewayInteractor {
     private readonly providerInteractor: ProviderInteractor,
     private readonly systemDomainInteractor: SystemDomainInteractor,
     @Inject(ACCOUNT_DOMAIN_SERVICE)
-    private readonly accountDomainService: AccountDomainService
+    private readonly accountDomainService: AccountDomainService,
+    @Inject(PAYMENT_METHOD_REPOSITORY)
+    private readonly paymentMethodRepository: PaymentMethodRepository
   ) {}
 
   /**
@@ -197,6 +202,7 @@ export class GatewayInteractor {
 
       this.logger.log(`Завершен исходящий платеж: ${payment.hash} для пользователя ${payment.username}`);
     } catch (e: any) {
+      console.error(e);
       if (payment.id) {
         await this.paymentRepository.update(payment.id, {
           status: PaymentStatusEnum.FAILED,
@@ -410,6 +416,89 @@ export class GatewayInteractor {
       });
       throw error;
     }
+  }
+
+  /**
+   * Создать исходящий платеж (withdraw)
+   */
+  async createWithdraw(data: CreateWithdrawPaymentInputDomainInterface): Promise<PaymentDomainEntity> {
+    // Обновляем истекшие платежи перед созданием нового
+    await this.paymentRepository.expireOutdatedPayments();
+
+    // Валидируем символ перед созданием платежа
+    QuantityUtils.validateSymbol(data.symbol);
+
+    // Проверяем, нет ли уже платежа с таким же хешем - это ошибка
+    const existingPayment = await this.paymentRepository.findByHash(data.payment_hash);
+
+    if (existingPayment) {
+      throw new Error(`Платеж с хешем ${data.payment_hash} уже существует. Возможно, заявка была создана ранее.`);
+    }
+
+    // Получаем настройки для определения провайдера
+    const settings = await Settings.getSettings();
+    const provider = settings.provider.name;
+
+    const now = new Date();
+    const expiredAt = this.createPaymentExpirationDate();
+
+    // Получаем данные платежного метода из generator repository
+    let paymentDetails: PaymentDetailsDomainInterface;
+    try {
+      const paymentMethod = await this.paymentMethodRepository.get({
+        username: data.username,
+        method_id: data.method_id,
+      });
+
+      // Формируем payment_details на основе данных платежного метода
+      paymentDetails = {
+        data: paymentMethod.data,
+        // Для исходящих платежей комиссия обычно не применяется
+        amount_plus_fee: data.quantity.toString(),
+        amount_without_fee: data.quantity.toString(),
+        fee_amount: '0',
+        fee_percent: 0,
+        fact_fee_percent: 0,
+        tolerance_percent: 0,
+      };
+    } catch (error: any) {
+      throw new BadRequestException(
+        `Платежный метод ${data.method_id} для пользователя ${data.username} не найден. Невозможно создать исходящий платеж.`
+      );
+    }
+
+    const paymentData: PaymentDomainInterface = {
+      id: '', // будет установлен в репозитории
+      coopname: data.coopname,
+      username: data.username,
+      quantity: data.quantity,
+      symbol: data.symbol,
+      type: PaymentTypeEnum.WITHDRAWAL,
+      direction: PaymentDirectionEnum.OUTGOING,
+      provider: provider,
+      status: PaymentStatusEnum.PENDING,
+      memo: `Возврат паевого взноса №${data.payment_hash.slice(0, 8)}`,
+      secret: generateUniqueHash(),
+      payment_method_id: data.method_id,
+      payment_details: paymentDetails,
+      expired_at: expiredAt,
+      created_at: now,
+      updated_at: now,
+      hash: data.payment_hash, // Используем переданный payment_hash
+    };
+
+    // Создаем платеж в базе данных
+    const createdPayment = await this.paymentRepository.create(paymentData);
+
+    if (!createdPayment.id) {
+      throw new Error('Не удалось создать платеж - отсутствует ID');
+    }
+
+    this.logger.log(
+      `Создан исходящий платеж ${data.payment_hash} для пользователя ${data.username} на сумму ${data.quantity} ${data.symbol} с платежным методом ${data.method_id}`
+    );
+
+    return new PaymentDomainEntity(createdPayment);
   }
 
   /**

@@ -11,42 +11,38 @@ type ExcludeCommonProps<T> = Omit<T, 'coopname' | 'username' | 'registry_id'>;
 // интерфейс параметров для генерации
 type action = Cooperative.Registry.ReturnByMoney.Action;
 
-@InputType('RequestInput')
-class RequestInputDTO implements Cooperative.Registry.ReturnByMoney.IMoneyReturnRequest {
+@InputType(`BaseReturnByMoneyMetaDocumentInput`)
+class BaseReturnByMoneyMetaDocumentInputDTO implements ExcludeCommonProps<action> {
   @Field({ description: 'ID платежного метода' })
   @IsString()
   method_id!: string;
 
-  @Field({ description: 'Сумма к возврату' })
+  @Field({ description: 'Количество средств к возврату' })
   @IsString()
-  amount!: string;
+  quantity!: string;
 
   @Field({ description: 'Валюта' })
   @IsString()
   currency!: string;
-}
 
-@InputType(`BaseReturnByMoneyMetaDocumentInput`)
-class BaseReturnByMoneyMetaDocumentInputDTO implements ExcludeCommonProps<action> {
-  @Field(() => RequestInputDTO, { description: 'Данные запроса на возврат денежных средств' })
-  request!: RequestInputDTO;
+  @Field({ description: 'Хеш платежа для связи с withdraw' })
+  @IsString()
+  payment_hash!: string;
 }
 
 @InputType(`ReturnByMoneyGenerateDocumentInput`)
-export class ReturnByMoneyGenerateDocumentInputDTO
-  extends IntersectionType(
-    BaseReturnByMoneyMetaDocumentInputDTO,
-    OmitType(GenerateMetaDocumentInputDTO, ['registry_id'] as const)
-  )
-  implements action
-{
+export class ReturnByMoneyGenerateDocumentInputDTO extends IntersectionType(
+  BaseReturnByMoneyMetaDocumentInputDTO,
+  OmitType(GenerateMetaDocumentInputDTO, ['registry_id'] as const)
+) {
   registry_id!: number;
 }
 
 @InputType(`ReturnByMoneySignedMetaDocumentInput`)
-export class ReturnByMoneySignedMetaDocumentInputDTO
-  extends IntersectionType(BaseReturnByMoneyMetaDocumentInputDTO, MetaDocumentInputDTO)
-  implements action {}
+export class ReturnByMoneySignedMetaDocumentInputDTO extends IntersectionType(
+  BaseReturnByMoneyMetaDocumentInputDTO,
+  MetaDocumentInputDTO
+) {}
 
 @InputType(`ReturnByMoneySignedDocumentInput`)
 export class ReturnByMoneySignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {

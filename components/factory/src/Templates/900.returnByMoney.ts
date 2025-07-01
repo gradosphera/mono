@@ -13,18 +13,6 @@ export type Action = Cooperative.Registry.ReturnByMoney.Action
 // Модель данных
 export type Model = Cooperative.Registry.ReturnByMoney.Model
 
-// Локальная схема для платежного запроса с новой структурой (соответствует Model['request'])
-const PaymentRequestSchema: JSONSchemaType<Model['request']> = {
-  type: 'object',
-  properties: {
-    payment_details: { type: 'string' },
-    amount: { type: 'string' },
-    currency: { type: 'string' },
-  },
-  required: ['payment_details', 'amount', 'currency'],
-  additionalProperties: false,
-}
-
 // Схема для сверки
 export const Schema: JSONSchemaType<Model> = {
   type: 'object',
@@ -33,9 +21,12 @@ export const Schema: JSONSchemaType<Model> = {
     coop: CooperativeSchema,
     vars: VarsSchema,
     user: CommonUserSchema,
-    request: PaymentRequestSchema,
+    payment_details: { type: 'string' },
+    quantity: { type: 'string' },
+    currency: { type: 'string' },
+    payment_hash: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'user', 'request'],
+  required: ['meta', 'coop', 'vars', 'user', 'payment_details', 'quantity', 'currency', 'payment_hash'],
   additionalProperties: false,
 }
 

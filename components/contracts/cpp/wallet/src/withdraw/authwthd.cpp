@@ -14,16 +14,16 @@ void wallet::authwthd(eosio::name coopname, checksum256 withdraw_hash) {
   });
   
   // создаём объект исходящего платежа в gateway с коллбэком после обработки
-  action(permission_level{ _wallet, "active"_n}, _gateway, "createoutpay"_n,
-    std::make_tuple(
-      coopname, 
-      withdraw -> username, 
-      withdraw_hash, 
-      withdraw -> quantity, 
-      _wallet, 
-      "completewthd"_n, 
-      "declinewthd"_n
-    )
-  ).send();  
-  
+  Action::send<createoutpay_interface>(
+    _gateway,
+    "createoutpay"_n,
+    _wallet,
+    coopname, 
+    withdraw -> username, 
+    withdraw_hash, 
+    withdraw -> quantity, 
+    _wallet, 
+    Wallet::get_valid_wallet_action("completewthd"_n), 
+    Wallet::get_valid_wallet_action("declinewthd"_n)
+  );
 }

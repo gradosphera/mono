@@ -19,9 +19,9 @@ class BaseReturnByMoneyDecisionMetaDocumentInputDTO implements ExcludeCommonProp
   @IsString()
   payment_hash!: string;
 
-  @Field({ description: 'Сумма к возврату' })
+  @Field({ description: 'Количество средств к возврату' })
   @IsString()
-  amount!: string;
+  quantity!: string;
 
   @Field({ description: 'Валюта' })
   @IsString()
@@ -29,20 +29,18 @@ class BaseReturnByMoneyDecisionMetaDocumentInputDTO implements ExcludeCommonProp
 }
 
 @InputType('ReturnByMoneyDecisionGenerateDocumentInput')
-export class ReturnByMoneyDecisionGenerateDocumentInputDTO
-  extends IntersectionType(
-    BaseReturnByMoneyDecisionMetaDocumentInputDTO,
-    OmitType(GenerateMetaDocumentInputDTO, ['registry_id'] as const)
-  )
-  implements action
-{
+export class ReturnByMoneyDecisionGenerateDocumentInputDTO extends IntersectionType(
+  BaseReturnByMoneyDecisionMetaDocumentInputDTO,
+  OmitType(GenerateMetaDocumentInputDTO, ['registry_id'] as const)
+) {
   registry_id!: number;
 }
 
 @InputType('ReturnByMoneyDecisionSignedMetaDocumentInput')
-export class ReturnByMoneyDecisionSignedMetaDocumentInputDTO
-  extends IntersectionType(BaseReturnByMoneyDecisionMetaDocumentInputDTO, MetaDocumentInputDTO)
-  implements action {}
+export class ReturnByMoneyDecisionSignedMetaDocumentInputDTO extends IntersectionType(
+  BaseReturnByMoneyDecisionMetaDocumentInputDTO,
+  MetaDocumentInputDTO
+) {}
 
 @InputType('ReturnByMoneyDecisionSignedDocumentInput')
 export class ReturnByMoneyDecisionSignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {

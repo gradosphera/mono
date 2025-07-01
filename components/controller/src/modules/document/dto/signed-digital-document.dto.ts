@@ -100,6 +100,7 @@ export class SignedDigitalDocumentDTO implements ExtendedSignedDocumentDomainInt
         username: cert.username,
         first_name: cert.first_name,
         last_name: cert.last_name,
+        middle_name: cert.middle_name,
         inn: cert.inn,
       });
     } else if ('first_name' in cert && 'last_name' in cert) {
@@ -109,6 +110,7 @@ export class SignedDigitalDocumentDTO implements ExtendedSignedDocumentDomainInt
         username: cert.username,
         first_name: cert.first_name,
         last_name: cert.last_name,
+        middle_name: cert.middle_name,
       });
     }
 

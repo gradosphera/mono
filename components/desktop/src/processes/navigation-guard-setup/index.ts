@@ -1,13 +1,13 @@
 import { Router } from 'vue-router';
 import { useSessionStore } from 'src/entities/Session';
-import { useCurrentUserStore } from 'src/entities/User';
+import { useCurrentUser } from 'src/entities/Session';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { LocalStorage } from 'quasar';
 
-function hasAccess(to, userAccount) {
+function hasAccess(to, userRole) {
   if (!to.meta?.roles || to.meta?.roles.length === 0) return true;
-  return userAccount && to.meta?.roles.includes(userAccount.role);
+  return userRole && to.meta?.roles.includes(userRole);
 }
 
 // Функция для получения URL для редиректа
@@ -21,11 +21,23 @@ function getRedirectUrl(router: Router, to: any): string {
 export function setupNavigationGuard(router: Router) {
   const desktops = useDesktopStore();
   const session = useSessionStore();
-  const currentUser = useCurrentUserStore();
+  const currentUser = useCurrentUser();
   const { info } = useSystemStore();
 
   router.beforeEach(async (to, from, next) => {
     await desktops.healthCheck();
+
+    // Определяем роль пользователя при каждом запросе
+    let userRole: string | null = null;
+    if (session.isAuth) {
+      if (currentUser.isChairman) {
+        userRole = 'chairman';
+      } else if (currentUser.isMember) {
+        userRole = 'member';
+      } else {
+        userRole = 'user'; // Авторизованный пользователь без специальной роли
+      }
+    }
 
     // если требуется установка
     if (desktops.health?.status === 'install' && to.name !== 'install') {
@@ -36,7 +48,7 @@ export function setupNavigationGuard(router: Router) {
     // редирект с index
     if (to.name === 'index') {
       // Убеждаемся, что правильный рабочий стол выбран
-      if (session.isAuth && currentUser.isRegistrationComplete) {
+      if (session.isAuth && currentUser.isRegistrationComplete.value) {
         // Если рабочий стол не выбран - выбираем по правам пользователя
         if (!desktops.activeWorkspaceName) {
           desktops.selectDefaultWorkspace();
@@ -69,7 +81,7 @@ export function setupNavigationGuard(router: Router) {
     }
 
     // проверка по ролям
-    if (hasAccess(to, currentUser.userAccount)) {
+    if (hasAccess(to, userRole)) {
       next();
     } else {
       next({ name: 'permissionDenied' });

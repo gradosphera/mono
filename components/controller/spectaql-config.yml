@@ -2,7 +2,7 @@ spectaql:
   targetDir: ./docs
 introspection:
   # schemaFile: ./schema.gql
-  url: 'http://localhost:2998/v1/graphql'
+  url: 'https://testnet.coopenomics.world/api/v1/graphql'
 
 info:
   title: 'API-Документация'

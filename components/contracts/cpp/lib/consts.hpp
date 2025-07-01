@@ -119,15 +119,6 @@ static const std::set<eosio::name> soviet_actions = {
     "createwthd"_n, //создать заявление на возврат паевого взноса
 };
 
-static const std::set<eosio::name> gateway_income_actions = {
-    "deposit"_n, //паевой взнос по ЦПП Кошелёк
-};
-
-static const std::set<eosio::name> gateway_outcome_actions = {
-    "withdraw"_n, //возврат паевого взноса по ЦПП Кошелёк
-};
-
-
 //program_ids
 static constexpr uint64_t _wallet_program_id = 1;
 static constexpr uint64_t _sosedi_program_id = 2;

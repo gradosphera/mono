@@ -3,11 +3,11 @@ import { Cooperative } from 'cooptypes';
 import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import { WalletBlockchainPort, WALLET_BLOCKCHAIN_PORT } from '../ports/wallet-blockchain.port';
-import { generateUniqueHash } from '~/utils/generate-hash.util';
 import type { CreateWithdrawInputDomainInterface } from '../interfaces/create-withdraw-input-domain.interface';
 import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
 import type { CreateDepositPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-deposit-payment-input-domain.interface';
 import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
+import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
 
 /**
  * Интерактор домена wallet для управления паевыми взносами, их возвратами, и генерацией документов
@@ -56,14 +56,27 @@ export class WalletDomainInteractor {
 
   /**
    * Создание заявки на вывод средств (createWithdraw)
-   * Данный метод создает withdraw в blockchain и автоматически создается outcome в gateway
+   * Данный метод создает платеж в gateway и withdraw в blockchain
    */
   async createWithdraw(data: CreateWithdrawInputDomainInterface): Promise<{ withdraw_hash: string }> {
-    const withdraw_hash = generateUniqueHash();
+    // Используем payment_hash из параметров вместо генерации нового
+    const withdraw_hash = data.payment_hash;
+
+    let createdPayment: PaymentDomainEntity | null = null;
 
     try {
-      //TODO: создать исходящий платеж в gateway
-      // Создаем withdraw в wallet контракте
+      // 1. Создаем исходящий платеж в gateway для отслеживания
+      createdPayment = await this.gatewayInteractor.createWithdraw({
+        coopname: data.coopname,
+        username: data.username,
+        quantity: data.quantity,
+        symbol: data.symbol,
+        method_id: data.method_id,
+        statement: data.statement,
+        payment_hash: data.payment_hash,
+      });
+
+      // 2. Создаем withdraw в wallet контракте
       // wallet контракт автоматически создаст outcome в gateway контракте
       await this.walletBlockchainPort.createWithdraw({
         coopname: data.coopname,
@@ -78,6 +91,22 @@ export class WalletDomainInteractor {
       return { withdraw_hash };
     } catch (error: any) {
       this.logger.error(`Ошибка при создании withdraw: ${error.message}`, error);
+
+      // Если платеж был создан, но произошла ошибка при создании withdraw в блокчейне
+      if (createdPayment?.id) {
+        try {
+          // Обновляем статус платежа на FAILED с сообщением об ошибке
+          await this.gatewayInteractor.setPaymentStatus({
+            id: createdPayment.id,
+            status: PaymentStatusEnum.FAILED,
+          });
+
+          this.logger.log(`Платеж ${createdPayment.id} помечен как FAILED из-за ошибки создания withdraw`);
+        } catch (updateError: any) {
+          this.logger.error(`Ошибка при обновлении статуса платежа: ${updateError.message}`, updateError);
+        }
+      }
+
       throw error;
     }
   }

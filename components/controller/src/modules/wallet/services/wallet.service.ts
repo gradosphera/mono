@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { WalletDomainInteractor } from '~/domain/wallet/interactors/wallet.interactor';
+import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/modules/document/dto/generated-document.dto';
 import { ReturnByMoneyGenerateDocumentInputDTO } from '~/modules/document/documents-dto/return-by-money-statement.dto';
@@ -15,14 +16,18 @@ import type { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
  */
 @Injectable()
 export class WalletService {
-  constructor(private readonly walletDomainInteractor: WalletDomainInteractor) {}
+  constructor(
+    private readonly walletDomainInteractor: WalletDomainInteractor,
+    private readonly userCertificateInteractor: UserCertificateInteractor
+  ) {}
 
   /**
    * Создать депозитный платеж
    */
   public async createDepositPayment(data: CreateDepositPaymentInputDTO): Promise<GatewayPaymentDTO> {
     const result = await this.walletDomainInteractor.createDepositPayment(data);
-    return result.toDTO();
+    const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(result.username);
+    return result.toDTO(usernameCertificate);
   }
 
   /**
