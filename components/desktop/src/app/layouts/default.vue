@@ -16,9 +16,7 @@ q-layout(view='lHh LpR fff')
 
   q-page-container
     q-page
-      .absolute-full.flex.flex-center.bg-white.z-top(
-        v-if='desktop.isWorkspaceChanging'
-      )
+      .absolute-full.flex.flex-center.z-top(v-if='desktop.isWorkspaceChanging')
         Loader
 
       router-view(v-else)

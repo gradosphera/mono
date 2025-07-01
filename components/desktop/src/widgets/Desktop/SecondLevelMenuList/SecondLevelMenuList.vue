@@ -1,23 +1,24 @@
 <template lang="pug">
 div
-  q-list.second-menu(v-if='filteredRoutes')
-    q-item(
-      v-for='route in filteredRoutes',
-      :key='route.name',
-      clickable,
-      v-ripple,
-      :active='isActive(route)',
-      active-class='bg-gradient-dark text-white',
-      @click='navigate(route)'
-    )
-      q-item-section
-        q-item-label.no-select
-          span {{ route.meta.title }}
-      //- q-icon(
-      //-   v-if="route.meta.roles && !route.meta.roles.includes('user') && route.meta.roles.length > 0"
-      //-   name="fa-solid fa-lock-open"
-      //-   :color="context.userRole === 'member' ? 'orange' : 'teal'"
-      //- )
+  transition(
+    mode='out-in',
+    enter-active-class='menu-enter-active',
+    leave-active-class='menu-leave-active'
+  )
+    q-list.second-menu(v-if='filteredRoutes.length > 0', :key='menuKey')
+      q-item.menu-item(
+        v-for='(route, index) in filteredRoutes',
+        :key='route.name',
+        clickable,
+        v-ripple,
+        :active='isActive(route)',
+        active-class='bg-gradient-dark text-white',
+        @click='navigate(route)',
+        :style='{ "animation-delay": `${index * 60}ms` }'
+      )
+        q-item-section
+          q-item-label.no-select
+            span {{ route.meta.title }}
 </template>
 
 <script lang="ts" setup>
@@ -95,10 +96,59 @@ const navigate = (routeToNavigate: IRoute) => {
     params: { coopname: info.coopname },
   });
 };
+
+// Ключ для принудительного перерендера при смене маршрутов
+const menuKey = computed(() => {
+  return filteredRoutes.value.map((route) => route.name).join('-');
+});
 </script>
 
 <style>
 .second-menu .q-item-label {
   font-size: 12px !important;
+}
+
+/* Анимации для входа и выхода всего меню */
+.menu-enter-active {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.menu-leave-active {
+  transition: all 0.15s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
+.menu-enter-active .menu-item {
+  animation: slideInDown 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.menu-leave-active .menu-item {
+  animation: slideOutUp 0.2s cubic-bezier(0.55, 0.06, 0.68, 0.19) both;
+}
+
+/* Анимации для отдельных элементов */
+@keyframes slideInDown {
+  0% {
+    transform: translateY(-30px) scale(0.95);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(5px) scale(1.02);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutUp {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-25px) scale(0.9);
+    opacity: 0;
+  }
 }
 </style>
