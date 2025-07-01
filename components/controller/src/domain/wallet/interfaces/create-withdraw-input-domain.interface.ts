@@ -6,9 +6,9 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 export interface CreateWithdrawInputDomainInterface {
   coopname: string;
   username: string;
-  quantity: string;
+  quantity: number;
   symbol: string;
   method_id: string;
-  memo?: string;
   statement: ISignedDocumentDomainInterface;
+  payment_hash: string; // Хеш платежа, генерируется на фронтенде
 }

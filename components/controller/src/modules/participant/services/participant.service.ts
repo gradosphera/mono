@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GenerateDocumentOptionsInputDTO } from '~/modules/document/dto/generate-document-options-input.dto';
 import { ParticipantDomainInteractor } from '~/domain/participant/interactors/participant-domain.interactor';
+import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
 import type { ParticipantApplicationGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-document.dto';
 import type { ParticipantApplicationDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-decision-document.dto';
 import type { AddParticipantInputDTO } from '../dto/add-participant-input.dto';
@@ -14,7 +15,10 @@ import type { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
 
 @Injectable()
 export class ParticipantService {
-  constructor(private readonly participantDomainInteractor: ParticipantDomainInteractor) {}
+  constructor(
+    private readonly participantDomainInteractor: ParticipantDomainInteractor,
+    private readonly userCertificateInteractor: UserCertificateInteractor
+  ) {}
 
   public async generateParticipantApplication(
     data: ParticipantApplicationGenerateDocumentInputDTO,
@@ -51,6 +55,7 @@ export class ParticipantService {
    */
   public async createInitialPayment(data: CreateInitialPaymentInputDTO): Promise<GatewayPaymentDTO> {
     const result = await this.participantDomainInteractor.createInitialPayment(data);
-    return result.toDTO();
+    const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(result.username);
+    return result.toDTO(usernameCertificate);
   }
 }

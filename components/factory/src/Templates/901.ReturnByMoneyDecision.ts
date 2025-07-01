@@ -43,11 +43,11 @@ export const Schema: JSONSchemaType<Model> = {
       additionalProperties: true,
     },
     user: CommonUserSchema,
-    amount: { type: 'string' },
+    quantity: { type: 'string' },
     currency: { type: 'string' },
     vars: VarsSchema,
   },
-  required: ['meta', 'coop', 'decision', 'user', 'amount', 'currency', 'vars'],
+  required: ['meta', 'coop', 'decision', 'user', 'quantity', 'currency', 'vars'],
   additionalProperties: false,
 }
 

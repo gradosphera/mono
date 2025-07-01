@@ -2080,14 +2080,14 @@ export type ValueTypes = {
 	["CreateWithdrawInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Дополнительная информация */
-	memo?: string | undefined | null | Variable<any, string>,
 	/** ID метода платежа */
 	method_id: string | Variable<any, string>,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string | Variable<any, string>,
 	/** Количество средств */
-	quantity: string | Variable<any, string>,
+	quantity: number | Variable<any, string>,
 	/** Подписанное заявление на возврат средств */
-	statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	statement: ValueTypes["ReturnByMoneySignedDocumentInput"] | Variable<any, string>,
 	/** Символ валюты */
 	symbol: string | Variable<any, string>,
 	/** Имя пользователя */
@@ -2445,6 +2445,8 @@ export type ValueTypes = {
 	updated_at?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
+	/** Сертификат пользователя, создавшего платеж */
+	username_certificate?:ValueTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
 	["GenerateDocumentInput"]: {
@@ -3500,14 +3502,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	middle_name: string | Variable<any, string>,
 	position: string | Variable<any, string>
 };
-	["RequestInput"]: {
-	/** Сумма к возврату */
-	amount: string | Variable<any, string>,
-	/** Валюта */
-	currency: string | Variable<any, string>,
-	/** ID платежного метода */
-	method_id: string | Variable<any, string>
-};
 	["ResetKeyInput"]: {
 	/** Публичный ключ для замены */
 	public_key: string | Variable<any, string>,
@@ -3720,8 +3714,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	version: string | Variable<any, string>
 };
 	["ReturnByMoneyDecisionGenerateDocumentInput"]: {
-	/** Сумма к возврату */
-	amount: string | Variable<any, string>,
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
 	/** Название кооператива, связанное с документом */
@@ -3740,6 +3732,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	links?: Array<string> | undefined | null | Variable<any, string>,
 	/** Хэш платежа */
 	payment_hash: string | Variable<any, string>,
+	/** Количество средств к возврату */
+	quantity: string | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null | Variable<any, string>,
 	/** Название документа */
@@ -3756,14 +3750,20 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	coopname: string | Variable<any, string>,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null | Variable<any, string>,
+	/** Валюта */
+	currency: string | Variable<any, string>,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null | Variable<any, string>,
 	/** Язык документа */
 	lang?: string | undefined | null | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Данные запроса на возврат денежных средств */
-	request: ValueTypes["RequestInput"] | Variable<any, string>,
+	/** ID платежного метода */
+	method_id: string | Variable<any, string>,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string | Variable<any, string>,
+	/** Количество средств к возврату */
+	quantity: string | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null | Variable<any, string>,
 	/** Название документа */
@@ -3772,6 +3772,52 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	username: string | Variable<any, string>,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null | Variable<any, string>
+};
+	["ReturnByMoneySignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для документа заявления на возврат паевого взноса денежными средствами */
+	meta: ValueTypes["ReturnByMoneySignedMetaDocumentInput"] | Variable<any, string>,
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
+};
+	["ReturnByMoneySignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Валюта */
+	currency: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID платежного метода */
+	method_id: string | Variable<any, string>,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string | Variable<any, string>,
+	/** Количество средств к возврату */
+	quantity: string | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
 };
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
@@ -5435,14 +5481,14 @@ export type ResolverInputTypes = {
 	["CreateWithdrawInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Дополнительная информация */
-	memo?: string | undefined | null,
 	/** ID метода платежа */
 	method_id: string,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string,
 	/** Количество средств */
-	quantity: string,
+	quantity: number,
 	/** Подписанное заявление на возврат средств */
-	statement: ResolverInputTypes["SignedDigitalDocumentInput"],
+	statement: ResolverInputTypes["ReturnByMoneySignedDocumentInput"],
 	/** Символ валюты */
 	symbol: string,
 	/** Имя пользователя */
@@ -5800,6 +5846,8 @@ export type ResolverInputTypes = {
 	updated_at?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
+	/** Сертификат пользователя, создавшего платеж */
+	username_certificate?:ResolverInputTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
 	["GenerateDocumentInput"]: {
@@ -6857,14 +6905,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	middle_name: string,
 	position: string
 };
-	["RequestInput"]: {
-	/** Сумма к возврату */
-	amount: string,
-	/** Валюта */
-	currency: string,
-	/** ID платежного метода */
-	method_id: string
-};
 	["ResetKeyInput"]: {
 	/** Публичный ключ для замены */
 	public_key: string,
@@ -7077,8 +7117,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	version: string
 };
 	["ReturnByMoneyDecisionGenerateDocumentInput"]: {
-	/** Сумма к возврату */
-	amount: string,
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Название кооператива, связанное с документом */
@@ -7097,6 +7135,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	links?: Array<string> | undefined | null,
 	/** Хэш платежа */
 	payment_hash: string,
+	/** Количество средств к возврату */
+	quantity: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -7113,14 +7153,20 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null,
+	/** Валюта */
+	currency: string,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
-	/** Данные запроса на возврат денежных средств */
-	request: ResolverInputTypes["RequestInput"],
+	/** ID платежного метода */
+	method_id: string,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string,
+	/** Количество средств к возврату */
+	quantity: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -7129,6 +7175,52 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
+};
+	["ReturnByMoneySignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация для документа заявления на возврат паевого взноса денежными средствами */
+	meta: ResolverInputTypes["ReturnByMoneySignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ReturnByMoneySignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Валюта */
+	currency: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID платежного метода */
+	method_id: string,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string,
+	/** Количество средств к возврату */
+	quantity: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
@@ -8774,14 +8866,14 @@ export type ModelTypes = {
 	["CreateWithdrawInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Дополнительная информация */
-	memo?: string | undefined | null,
 	/** ID метода платежа */
 	method_id: string,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string,
 	/** Количество средств */
-	quantity: string,
+	quantity: number,
 	/** Подписанное заявление на возврат средств */
-	statement: ModelTypes["SignedDigitalDocumentInput"],
+	statement: ModelTypes["ReturnByMoneySignedDocumentInput"],
 	/** Символ валюты */
 	symbol: string,
 	/** Имя пользователя */
@@ -9124,7 +9216,9 @@ export type ModelTypes = {
 	/** Дата обновления */
 	updated_at?: ModelTypes["DateTime"] | undefined | null,
 	/** Имя пользователя */
-	username: string
+	username: string,
+	/** Сертификат пользователя, создавшего платеж */
+	username_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null
 };
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -10220,14 +10314,6 @@ export type ModelTypes = {
 	middle_name: string,
 	position: string
 };
-	["RequestInput"]: {
-	/** Сумма к возврату */
-	amount: string,
-	/** Валюта */
-	currency: string,
-	/** ID платежного метода */
-	method_id: string
-};
 	["ResetKeyInput"]: {
 	/** Публичный ключ для замены */
 	public_key: string,
@@ -10438,8 +10524,6 @@ export type ModelTypes = {
 	version: string
 };
 	["ReturnByMoneyDecisionGenerateDocumentInput"]: {
-	/** Сумма к возврату */
-	amount: string,
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Название кооператива, связанное с документом */
@@ -10458,6 +10542,8 @@ export type ModelTypes = {
 	links?: Array<string> | undefined | null,
 	/** Хэш платежа */
 	payment_hash: string,
+	/** Количество средств к возврату */
+	quantity: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -10474,14 +10560,20 @@ export type ModelTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null,
+	/** Валюта */
+	currency: string,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
-	/** Данные запроса на возврат денежных средств */
-	request: ModelTypes["RequestInput"],
+	/** ID платежного метода */
+	method_id: string,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string,
+	/** Количество средств к возврату */
+	quantity: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -10490,6 +10582,52 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
+};
+	["ReturnByMoneySignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация для документа заявления на возврат паевого взноса денежными средствами */
+	meta: ModelTypes["ReturnByMoneySignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ReturnByMoneySignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Валюта */
+	currency: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID платежного метода */
+	method_id: string,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string,
+	/** Количество средств к возврату */
+	quantity: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["SbpAccount"]: {
 		/** Мобильный телефон получателя */
@@ -12141,14 +12279,14 @@ export type GraphQLTypes = {
 	["CreateWithdrawInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Дополнительная информация */
-	memo?: string | undefined | null,
 	/** ID метода платежа */
 	method_id: string,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string,
 	/** Количество средств */
-	quantity: string,
+	quantity: number,
 	/** Подписанное заявление на возврат средств */
-	statement: GraphQLTypes["SignedDigitalDocumentInput"],
+	statement: GraphQLTypes["ReturnByMoneySignedDocumentInput"],
 	/** Символ валюты */
 	symbol: string,
 	/** Имя пользователя */
@@ -12506,7 +12644,9 @@ export type GraphQLTypes = {
 	/** Дата обновления */
 	updated_at?: GraphQLTypes["DateTime"] | undefined | null,
 	/** Имя пользователя */
-	username: string
+	username: string,
+	/** Сертификат пользователя, создавшего платеж */
+	username_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null
 };
 	["GenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -13648,14 +13788,6 @@ export type GraphQLTypes = {
 	middle_name: string,
 	position: string
 };
-	["RequestInput"]: {
-		/** Сумма к возврату */
-	amount: string,
-	/** Валюта */
-	currency: string,
-	/** ID платежного метода */
-	method_id: string
-};
 	["ResetKeyInput"]: {
 		/** Публичный ключ для замены */
 	public_key: string,
@@ -13868,9 +14000,7 @@ export type GraphQLTypes = {
 	version: string
 };
 	["ReturnByMoneyDecisionGenerateDocumentInput"]: {
-		/** Сумма к возврату */
-	amount: string,
-	/** Номер блока, на котором был создан документ */
+		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
@@ -13888,6 +14018,8 @@ export type GraphQLTypes = {
 	links?: Array<string> | undefined | null,
 	/** Хэш платежа */
 	payment_hash: string,
+	/** Количество средств к возврату */
+	quantity: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -13904,14 +14036,20 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null,
+	/** Валюта */
+	currency: string,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
-	/** Данные запроса на возврат денежных средств */
-	request: GraphQLTypes["RequestInput"],
+	/** ID платежного метода */
+	method_id: string,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string,
+	/** Количество средств к возврату */
+	quantity: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -13920,6 +14058,52 @@ export type GraphQLTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
+};
+	["ReturnByMoneySignedDocumentInput"]: {
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация для документа заявления на возврат паевого взноса денежными средствами */
+	meta: GraphQLTypes["ReturnByMoneySignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ReturnByMoneySignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Валюта */
+	currency: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID платежного метода */
+	method_id: string,
+	/** Хеш платежа для связи с withdraw */
+	payment_hash: string,
+	/** Количество средств к возврату */
+	quantity: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["SbpAccount"]: {
 	__typename: "SbpAccount",
@@ -14602,7 +14786,6 @@ type ZEUS_VARIABLES = {
 	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];
 	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
 	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
-	["RequestInput"]: ValueTypes["RequestInput"];
 	["ResetKeyInput"]: ValueTypes["ResetKeyInput"];
 	["RestartAnnualGeneralMeetInput"]: ValueTypes["RestartAnnualGeneralMeetInput"];
 	["ReturnByAssetActGenerateDocumentInput"]: ValueTypes["ReturnByAssetActGenerateDocumentInput"];
@@ -14614,6 +14797,8 @@ type ZEUS_VARIABLES = {
 	["ReturnByAssetStatementSignedMetaDocumentInput"]: ValueTypes["ReturnByAssetStatementSignedMetaDocumentInput"];
 	["ReturnByMoneyDecisionGenerateDocumentInput"]: ValueTypes["ReturnByMoneyDecisionGenerateDocumentInput"];
 	["ReturnByMoneyGenerateDocumentInput"]: ValueTypes["ReturnByMoneyGenerateDocumentInput"];
+	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
+	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
 	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
 	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];
 	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];

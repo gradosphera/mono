@@ -38,11 +38,10 @@ describe('тестируем цифровой кошелёк', () => {
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
-      request: {
-        method_id: 'test-method-123', // Используем ID платежного метода
-        amount: '50 000',
-        currency: 'RUB',
-      },
+      method_id: 'test-method-123', // ID платежного метода
+      quantity: '50 000',
+      currency: 'RUB',
+      payment_hash: 'test-payment-hash-123', // Хеш платежа для связи с withdraw
     })
   })
 
@@ -54,7 +53,7 @@ describe('тестируем цифровой кошелёк', () => {
       lang: 'ru',
       decision_id: 9001,
       payment_hash: 'abc123def456hash789',
-      amount: '50000',
+      quantity: '50000',
       currency: 'руб.',
     })
   })

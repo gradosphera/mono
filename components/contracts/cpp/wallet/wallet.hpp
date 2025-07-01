@@ -25,8 +25,8 @@ public:
  
     //возврат паевого взноса
     [[eosio::action]] void createwthd(eosio::name coopname, eosio::name username, checksum256 withdraw_hash, eosio::asset quantity, document2 statement);
-    [[eosio::action]] void completewthd(eosio::name coopname, checksum256 withdraw_hash, std::string memo);
-    [[eosio::action]] void declinewthd(eosio::name coopname, checksum256 withdraw_hash, std::string reason);
+    [[eosio::action]] void completewthd(COMPLETEWTHD_SIGNATURE);
+    [[eosio::action]] void declinewthd(DECLINEWTHD_SIGNATURE);
     [[eosio::action]] void authwthd(eosio::name coopname, checksum256 withdraw_hash);
     [[eosio::action]] void approvewthd(eosio::name coopname, checksum256 withdraw_hash, document2 approved_statement);
     

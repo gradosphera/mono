@@ -9,7 +9,7 @@ import { useGlobalStore } from 'src/shared/store';
 import { useSystemStore } from 'src/entities/System/model';
 
 import type { IInitialPaymentOrder } from 'src/shared/lib/types/payments';
-import { useCurrentUserStore } from 'src/entities/User';
+import { useCurrentUser } from 'src/entities/Session';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import {
   IEntrepreneurData,
@@ -22,6 +22,8 @@ import { client } from 'src/shared/api/client';
 import { Mutations, Zeus } from '@coopenomics/sdk';
 import { DigitalDocument } from 'src/shared/lib/document';
 import { IDocument } from 'src/shared/lib/types/document';
+import { useAccountStore } from 'src/entities/Account/model';
+
 export interface ICreateUser {
   email: string;
   entrepreneur_data?: IEntrepreneurData;
@@ -213,7 +215,7 @@ export function useCreateUser() {
     } else if (synthData.type === Zeus.AccountType.entrepreneur) {
       synthData.entrepreneur_data = userData.entrepreneur_data;
     }
-    console.log('synthData: ', synthData);
+
     const data: IRegisterAccount = {
       ...synthData,
       email,
@@ -231,8 +233,15 @@ export function useCreateUser() {
 
     await sessionStore.init();
 
-    const currentUser = useCurrentUserStore();
-    await currentUser.loadProfile(account.username, info.coopname);
+    const currentUser = useCurrentUser();
+    const accountStore = useAccountStore();
+    // После создания пользователя обновляем данные в сессии
+    const updatedAccount = await accountStore.getAccount(account.username);
+    if (updatedAccount) {
+      console.log('updatedAccount: ', updatedAccount);
+
+      currentUser.setCurrentUserAccount(updatedAccount);
+    }
   }
 
   function emailIsValid(email: string): boolean {

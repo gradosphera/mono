@@ -1,13 +1,14 @@
 <script setup lang="ts">
-const emit = defineEmits(['cancel'])
+const emit = defineEmits(['cancel']);
 interface IFormProps {
-  handlerSubmit: (e?: Event) => Promise<void>
-  isSubmitting?: boolean
-  showSubmit?: boolean
-  showCancel?: boolean
-  buttonSubmitTxt?: string
-  buttonCancelTxt?: string
-  disabled?: boolean
+  handlerSubmit: (e?: Event) => Promise<void>;
+  isSubmitting?: boolean;
+  showSubmit?: boolean;
+  showCancel?: boolean;
+  buttonSubmitTxt?: string;
+  buttonCancelTxt?: string;
+  disabled?: boolean;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 withDefaults(defineProps<IFormProps>(), {
@@ -17,19 +18,26 @@ withDefaults(defineProps<IFormProps>(), {
   buttonSubmitTxt: 'Продолжить',
   buttonCancelTxt: 'Отменить',
   disabled: false,
-})
+  size: 'md',
+});
 
 const cancel = (): void => {
-  emit('cancel')
-}
+  emit('cancel');
+};
 </script>
 
 <template lang="pug">
-q-form(@submit.prevent="handlerSubmit")
+q-form(@submit.prevent='handlerSubmit')
   template(#default)
     slot
-    div.flex
-      q-btn(v-if="showCancel" flat @click="cancel" size="sm") {{ buttonCancelTxt }}
-      q-btn(v-if="showSubmit" size="sm" type="submit" :loading="isSubmitting" color="primary" :disabled="disabled") {{ buttonSubmitTxt }}
-
+    .flex
+      q-btn(v-if='showCancel', flat, @click='cancel', :size='size') {{ buttonCancelTxt }}
+      q-btn(
+        v-if='showSubmit',
+        :size='size',
+        type='submit',
+        :loading='isSubmitting',
+        color='primary',
+        :disabled='disabled'
+      ) {{ buttonSubmitTxt }}
 </template>

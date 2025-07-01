@@ -1,19 +1,18 @@
-<template lang='pug'>
-div.bg-none.full-width.text-center.q-pt-lg.q-pb-lg
-  q-spinner(size='50px', color='grey' style="margin: auto;").bg-none
-  p(style='font-size:12px').full-width.text-center.text-grey {{ text }}
+<template lang="pug">
+.bg-none.full-width.text-center.q-pt-lg.q-pb-lg
+  q-spinner.bg-none(size='50px', color='grey', style='margin: auto')
+  p.full-width.text-center.text-grey(style='font-size: 12px') {{ text }}
 </template>
 
-<script setup lang='ts'>
+<script setup lang="ts">
 import { computed } from 'vue';
 
 const props = defineProps({
   text: {
     type: String,
     required: false,
-    default: ''
-  }
+    default: '',
+  },
 });
-const text = computed(() => props.text)
-
+const text = computed(() => props.text);
 </script>

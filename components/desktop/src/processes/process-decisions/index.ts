@@ -2,6 +2,7 @@ import { Cooperative, SovietContract } from 'cooptypes';
 import { useGenerateFreeDecision } from 'src/features/FreeDecision/GenerateDecision';
 import { useGenerateParticipantApplicationDecision } from 'src/features/Decision/ParticipantApplication';
 import { useGenerateSovietDecisionOnAnnualMeet } from 'src/features/Meet/GenerateSovietDecision/model';
+import { useGenerateReturnByMoneyDecision } from 'src/features/Wallet/GenerateReturnByMoneyDecision';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
@@ -112,16 +113,15 @@ export function useDecisionProcessor() {
     const decision_id = Number(row.table.id);
     const username = row.table.username;
     const type = row.table.type;
+    console.log('type: ', type, Cooperative.Document.decisionsRegistry);
     const registry_id = Cooperative.Document.decisionsRegistry[type];
 
     // Генерация документа в зависимости от типа решения
     let document;
 
     if (registry_id === Cooperative.Registry.FreeDecision.registry_id) {
-      const unparsedDocumentMeta =
-        row.table.statement.meta == '' ? '{}' : row.table.statement.meta;
       const parsedDocumentMeta = JSON.parse(
-        unparsedDocumentMeta,
+        row.table.statement.meta,
       ) as Cooperative.Registry.FreeDecision.Action;
       const project_id = parsedDocumentMeta.project_id;
 
@@ -147,10 +147,8 @@ export function useDecisionProcessor() {
     ) {
       const { generateSovietDecisionOnAnnualMeet } =
         useGenerateSovietDecisionOnAnnualMeet();
-      const unparsedDocumentMeta =
-        row.table.statement.meta == '' ? '{}' : row.table.statement.meta;
       const parsedDocumentMeta = JSON.parse(
-        unparsedDocumentMeta,
+        row.table.statement.meta,
       ) as Cooperative.Registry.AnnualGeneralMeetingAgenda.Action;
       const is_repeated = parsedDocumentMeta.is_repeated || false;
 
@@ -160,12 +158,23 @@ export function useDecisionProcessor() {
         meet_hash: row.table.hash as string,
         is_repeated,
       });
-    } else if (registry_id === Cooperative.Registry.ReturnByMoney.registry_id) {
-      // const { generateReturnByMoneyDecision } = useGenerateReturnByMoneyDecision()
-      // document = await generateReturnByMoneyDecision({
-      //   username: username,
-      //   decision_id: decision_id
-      // })
+    } else if (
+      registry_id === Cooperative.Registry.ReturnByMoneyDecision.registry_id
+    ) {
+      const { generateReturnByMoneyDecision } =
+        useGenerateReturnByMoneyDecision();
+
+      const parsedDocumentMeta = JSON.parse(
+        row.table.statement.meta,
+      ) as Cooperative.Registry.ReturnByMoney.Action;
+      console.log('row.table.statement.meta', parsedDocumentMeta.payment_hash);
+      document = await generateReturnByMoneyDecision({
+        username: username,
+        decision_id: decision_id,
+        payment_hash: parsedDocumentMeta.payment_hash,
+        quantity: parsedDocumentMeta.quantity,
+        currency: parsedDocumentMeta.currency,
+      });
     } else {
       console.log('Неизвестный тип решения', registry_id);
       throw new Error('Неизвестный тип решения');

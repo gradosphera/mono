@@ -37,8 +37,8 @@ void wallet::createwthd(eosio::name coopname, eosio::name username, checksum256 
     get_valid_soviet_action("createwthd"_n),
     withdraw_hash,
     _wallet, // callback_contract (текущий контракт)
-    "approvewthd"_n, // callback_action_approve
-    "declinewthd"_n, // callback_action_decline
+    Wallet::get_valid_wallet_action("authwthd"_n), // callback_action_approve
+    Wallet::get_valid_wallet_action("declinewthd"_n), // callback_action_decline
     statement,
     std::string("")
   );

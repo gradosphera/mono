@@ -3,6 +3,16 @@
 using createoutpay_interface = void(CREATEOUTPAY_SIGNATURE);
 
 namespace Gateway {
+  
+  static const std::set<eosio::name> gateway_income_actions = {
+      "deposit"_n, //паевой взнос по ЦПП Кошелёк
+  };
+
+  static const std::set<eosio::name> gateway_outcome_actions = {
+      "withdraw"_n, //возврат паевого взноса по ЦПП Кошелёк
+  };
+
+
   inline eosio::name get_valid_income_action(const eosio::name& action) {
     eosio::check(gateway_income_actions.contains(action), "Недопустимое имя действия");
     return action;

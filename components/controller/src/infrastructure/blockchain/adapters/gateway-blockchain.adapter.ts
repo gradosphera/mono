@@ -35,7 +35,7 @@ export class GatewayBlockchainAdapter implements GatewayBlockchainPort {
       coopname: data.coopname,
       outcome_hash: data.outcome_hash,
     };
-
+    console.log('blockchainData', blockchainData);
     const result = (await this.blockchainService.transact({
       account: GatewayContract.contractName.production,
       name: GatewayContract.Actions.CompleteOutcome.actionName,

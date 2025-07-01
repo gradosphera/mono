@@ -1,8 +1,9 @@
 import {
-  AnnualGeneralMeetingDecision,
+  // AnnualGeneralMeetingDecision,
   AnnualGeneralMeetingSovietDecision, // 300
   DecisionOfParticipantApplication, // 501
-  FreeDecision, // 600
+  FreeDecision,
+  ReturnByMoneyDecision, // 901
   // InvestByMoneyStatement, // 1005
   // InvestByResultAct, // 1002
   // // InvestByResultDecision, // ???
@@ -21,7 +22,8 @@ export const decisionsRegistry: Record<string, number> = {
   freedecision: FreeDecision.registry_id,
 
   creategm: AnnualGeneralMeetingSovietDecision.registry_id, // предложение повестки планового общего собрания
-  completegm: AnnualGeneralMeetingDecision.registry_id, // решение общего собрания пайщиков
+  // completegm: AnnualGeneralMeetingDecision.registry_id, // решение общего собрания пайщиков
+  createwthd: ReturnByMoneyDecision.registry_id, // заявление на возврат паевого взноса
   // capitalinvst: InvestByResultDecision.registry_id, // заявление на инвестиции по договору УХД
   // createresult: InvestByResultAct.registry_id, // клайм прироста капитализации из задания
   // createdebt: InvestByMoneyStatement.registry_id, // взять ссуду под залог будущего задания

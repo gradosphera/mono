@@ -1,113 +1,183 @@
 <template lang="pug">
-div.q-pa-md
-  q-card(flat class="card-container q-pa-md")
-    div.row.items-center
-      div.col-12
-        div.text-h4.q-mb-sm Способы получения платежей
-        p.q-mb-md Указанные реквизиты используются при платежах от кооператива в пользу пайщика
+.q-pa-md
+  q-card.card-container.q-pa-lg(flat)
+    // Заголовок секции
+    .section-header.large
+      .section-icon
+        q-icon(name='payment', size='24px', color='primary')
+      .section-title Способы получения платежей
 
-    div.row.q-mb-md
-      div.col-12
-        AddPaymentMethodButton(:username="username").full-width.card-action-btn
+    // Описание
+    .q-mb-lg
+      p.text-body2 Указанные реквизиты используются при платежах от кооператива в пользу пайщика
 
-    div.row
-      div.col-12
-        div(v-if="wallet.methods && wallet.methods.length > 0")
-          div.info-card.hover(
-            v-for="(method, index) in wallet.methods"
-            :key="method.method_id"
-            class="q-mb-md"
+    // Кнопка добавления
+    .q-mb-lg
+      AddPaymentMethodButton.full-width.card-action-btn(:username='username')
+
+    // Список способов оплаты
+    .profile-section
+      .info-content(v-if='wallet.methods && wallet.methods.length > 0')
+        .info-group
+          .info-item(
+            v-for='(method, index) in wallet.methods',
+            :key='method.method_id'
           )
-            div.row.items-start
-              div.col-auto.q-mr-sm
-                q-badge(color="primary" outline) {{ index + 1 }}
-              div.col
-                div.card-title {{ method.method_type === 'sbp' ? 'Система Быстрых Платежей' : 'Банковский перевод' }}
+            .method-header
+              .method-badge
+                q-badge(color='primary', outline) {{ index + 1 }}
+              .method-title
+                .info-label Способ платежа
+                .info-value {{ method.method_type === 'sbp' ? 'Система Быстрых Платежей' : 'Банковский перевод' }}
 
-                div.q-mb-md(v-if="method.method_type === 'sbp' && isSBPData(method.data)")
-                  div.q-my-sm
-                    span.card-label Телефон:
-                    span.card-value {{ method.data.phone }}
+            // СБП данные
+            .method-details(
+              v-if='method.method_type === "sbp" && isSBPData(method.data)'
+            )
+              .info-label Телефон
+              .info-value {{ method.data.phone }}
 
-                div.q-mb-md(v-if="method.method_type === 'bank_transfer' && isBankTransferData(method.data)")
-                  div.row.q-col-gutter-md
-                    div.col-12.col-md-4
-                      div.q-my-sm
-                        div.card-label Валюта
-                        div.card-value {{ method.data.currency }}
+            // Банковский перевод данные
+            .method-details(
+              v-if='method.method_type === "bank_transfer" && isBankTransferData(method.data)'
+            )
+              .row.q-col-gutter-md.q-mb-md
+                .col-12.col-md-4
+                  .info-label Валюта
+                  .info-value {{ method.data.currency }}
+                .col-12.col-md-4
+                  .info-label Банк
+                  .info-value {{ method.data.bank_name }}
+                .col-12.col-md-4
+                  .info-label Номер счёта
+                  .info-value {{ method.data.account_number }}
 
-                    div.col-12.col-md-4
-                      div.q-my-sm
-                        div.card-label Банк
-                        div.card-value {{ method.data.bank_name }}
+              .row.q-col-gutter-md
+                .col-12.col-md-4
+                  .info-label Корр. счёт
+                  .info-value {{ method.data.details.corr }}
+                .col-12.col-md-4
+                  .info-label БИК
+                  .info-value {{ method.data.details.bik }}
+                .col-12.col-md-4
+                  .info-label КПП
+                  .info-value {{ method.data.details.kpp }}
 
-                    div.col-12.col-md-4
-                      div.q-my-sm
-                        div.card-label Счет
-                        div.card-value {{ method.data.account_number }}
+            // Действия
+            .method-actions
+              DeletePaymentButton.card-action-btn(
+                :username='username',
+                :method_id='method.method_id',
+                size='sm',
+                flat,
+                color='negative'
+              )
 
-                  div.row.q-col-gutter-md
-                    div.col-12.col-md-4
-                      div.q-my-sm
-                        div.card-label Корр. счет
-                        div.card-value {{ method.data.details.corr }}
-
-                    div.col-12.col-md-4
-                      div.q-my-sm
-                        div.card-label БИК
-                        div.card-value {{ method.data.details.bik }}
-
-                    div.col-12.col-md-4
-                      div.q-my-sm
-                        div.card-label КПП
-                        div.card-value {{ method.data.details.kpp }}
-
-                div.row.justify-end
-                  DeletePaymentButton(
-                    :size="'sm'"
-                    :username="username"
-                    :method_id="method.method_id"
-                    flat
-                    class="card-action-btn"
-                  )
-
-        div.q-pa-md.text-center(v-else)
-          p.text-grey У вас еще не добавлены способы получения платежей
+      // Пустое состояние
+      .empty-state(v-else)
+        .empty-icon
+          q-icon(name='payment', size='48px', color='grey-5')
+        .empty-text Способы получения платежей не добавлены
+        .empty-subtitle Добавьте банковскую карту или реквизиты для получения платежей от кооператива
 </template>
-
 
 <script lang="ts" setup>
 import { useWalletStore } from 'src/entities/Wallet';
 import { useSystemStore } from 'src/entities/System/model';
-const { info } = useSystemStore()
-
 import { computed } from 'vue';
 import { AddPaymentMethodButton } from 'src/features/PaymentMethod/AddPaymentMethod';
-import type { IBankTransferData, ISBPData } from 'src/features/PaymentMethod/AddPaymentMethod/model';
+import type {
+  IBankTransferData,
+  ISBPData,
+} from 'src/features/PaymentMethod/AddPaymentMethod/model';
 import { DeletePaymentButton } from 'src/features/PaymentMethod/DeletePaymentMethod/ui';
+import 'src/shared/ui/CardStyles/index.scss';
 
 const props = defineProps({
   username: {
     type: String,
     required: true,
   },
-})
+});
 
-const wallet = useWalletStore()
+const { info } = useSystemStore();
+const wallet = useWalletStore();
 
-const username = computed(() => props.username)
+const username = computed(() => props.username);
 
-wallet.loadUserWallet({ coopname: info.coopname, username: username.value })
+wallet.loadUserWallet({ coopname: info.coopname, username: username.value });
 
 function isSBPData(data: ISBPData | IBankTransferData): data is ISBPData {
   return (data as ISBPData).phone !== undefined;
 }
 
-function isBankTransferData(data: ISBPData | IBankTransferData): data is IBankTransferData {
+function isBankTransferData(
+  data: ISBPData | IBankTransferData,
+): data is IBankTransferData {
   return (data as IBankTransferData).account_number !== undefined;
 }
 </script>
 
 <style lang="scss" scoped>
-// Можно добавить дополнительные стили, если потребуется
+// Дополнительные стили для способов оплаты
+.method-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 12px;
+
+  .method-badge {
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .method-title {
+    flex: 1;
+  }
+}
+
+.method-details {
+  margin-bottom: 16px;
+
+  .info-label {
+    font-size: 12px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+
+    .q-dark & {
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  .info-value {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    word-break: break-word;
+  }
+}
+
+.method-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+// Адаптивность
+@media (max-width: 768px) {
+  .method-header {
+    flex-direction: column;
+    gap: 8px;
+
+    .method-badge {
+      align-self: flex-start;
+    }
+  }
+
+  .method-details .row {
+    flex-direction: column;
+  }
+}
 </style>

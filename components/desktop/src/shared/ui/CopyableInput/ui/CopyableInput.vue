@@ -1,62 +1,63 @@
 <template lang="pug">
 q-input(
-  :label="label"
-  :model-value="modelValue"
-  :readonly="readonly"
-  :standout="standout"
-  :dense="dense"
-  :class="inputClass"
+  :label='label',
+  :model-value='modelValue',
+  :readonly='readonly',
+  :standout='standout',
+  :dense='dense',
+  :class='inputClass'
 )
   template(v-slot:append)
     q-btn(
-      flat
-      round
-      dense
-      icon="fa fa-copy"
-      @click="copyToClipboard"
+      size='md',
+      flat,
+      round,
+      dense,
+      icon='fa fa-copy',
+      @click='copyToClipboard'
     )
       q-tooltip Копировать
 </template>
 
 <script lang="ts" setup>
-import { copyToClipboard as copy } from 'quasar'
-import { FailAlert, SuccessAlert } from 'src/shared/api'
+import { copyToClipboard as copy } from 'quasar';
+import { FailAlert, SuccessAlert } from 'src/shared/api';
 
 const props = defineProps({
   modelValue: {
     type: [String, Number],
-    required: true
+    required: true,
   },
   label: {
     type: String,
-    default: ''
+    default: '',
   },
   readonly: {
     type: Boolean,
-    default: true
+    default: true,
   },
   standout: {
     type: [Boolean, String],
-    default: false
+    default: false,
   },
   dense: {
     type: Boolean,
-    default: false
+    default: false,
   },
   inputClass: {
     type: String,
-    default: ''
-  }
-})
+    default: '',
+  },
+});
 
 const copyToClipboard = () => {
   copy(String(props.modelValue))
     .then(() => {
-      SuccessAlert('Скопировано в буфер обмена')
+      SuccessAlert('Скопировано в буфер обмена');
     })
     .catch((e) => {
-      console.error(e)
-      FailAlert('Не удалось скопировать')
-    })
-}
+      console.error(e);
+      FailAlert('Не удалось скопировать');
+    });
+};
 </script>

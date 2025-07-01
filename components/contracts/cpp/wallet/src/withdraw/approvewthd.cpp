@@ -25,6 +25,6 @@ void wallet::approvewthd(eosio::name coopname, checksum256 withdraw_hash, docume
       withdraw -> statement, 
       std::string("")
     )
-  ).send();  
+  ).send();
   
 }

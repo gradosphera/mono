@@ -1,69 +1,96 @@
 <template lang="pug">
-q-card(:flat="isMobile" style="word-break: break-all !important; white-space: normal !important;").dynamic-padding
-
-  div(v-if="loading").full-width.text-center
-    div(style="margin:auto;").flex.q-pa-sm.full-width.text-center
+q-card.dynamic-padding(
+  :flat='isMobile',
+  style='word-break: break-all !important; white-space: normal !important'
+)
+  .full-width.text-center(v-if='loading')
+    .flex.q-pa-sm.full-width.text-center(style='margin: auto')
       q-spinner
-      span.q-ml-sm.text-grey подговка {{doc?.meta?.title}}
-  div(v-if="!loading")
-    div(v-html="safeHtml").description.q-pa-xs
-    div.row.q-mt-lg.q-pa-sm.justify-center
-
-      q-card(style="word-break: break-all !important; text-wrap: pretty;" flat).col-md-8.col-xs-12.q-pa-sm.verify-card
-        div.q-mr-lg.q-mt-md
-          q-badge(:color="documentAggregate?.document?.doc_hash == regeneratedHash ? 'teal' : 'red'").text-center.q-pa-xs
-            q-icon(:name="documentAggregate?.document?.doc_hash == regeneratedHash ? 'check_circle' : 'cancel'" ).q-mr-sm
+      span.q-ml-sm.text-grey подговка {{ doc?.meta?.title }}
+  div(v-if='!loading')
+    ShadowHtml(:html='safeHtml', :styles='shadowStyles')
+    .row.q-mt-lg.q-pa-sm.justify-center
+      q-card.col-md-8.col-xs-12.q-pa-sm.verify-card(
+        style='word-break: break-all !important; text-wrap: pretty',
+        flat
+      )
+        .q-mr-lg.q-mt-md
+          q-badge.text-center.q-pa-xs(
+            :color='documentAggregate?.document?.doc_hash == regeneratedHash ? "teal" : "red"'
+          )
+            q-icon.q-mr-sm(
+              :name='documentAggregate?.document?.doc_hash == regeneratedHash ? "check_circle" : "cancel"'
+            )
             span контрольная сумма
           p.q-mr-lg.q-ml-lg.text-grey {{ documentAggregate?.document?.doc_hash }}
 
         // Показываем все подписи (если это агрегат документа)
-        template(v-if="documentAggregate?.document?.signatures && documentAggregate.document.signatures.length > 0")
-          div.q-mr-lg.q-mt-md
-
-            q-badge(:color="hasInvalidSignature ? 'red' : 'teal'").text-center.q-pa-xs
-              q-icon(:name="hasInvalidSignature ? 'cancel' : 'verified'").q-mr-sm
+        template(
+          v-if='documentAggregate?.document?.signatures && documentAggregate.document.signatures.length > 0'
+        )
+          .q-mr-lg.q-mt-md
+            q-badge.text-center.q-pa-xs(
+              :color='hasInvalidSignature ? "red" : "teal"'
+            )
+              q-icon.q-mr-sm(
+                :name='hasInvalidSignature ? "cancel" : "verified"'
+              )
               span Подписи ({{ documentAggregate.document.signatures.length }})
 
           // Список всех подписей
-          q-list(bordered separator dense)
+          q-list(bordered, separator, dense)
             q-expansion-item(
-              v-for="(signature, index) in documentAggregate.document.signatures"
-              :key="index"
-              :label="`Подпись ${index + 1}: ${getSignerName(signature.signer_certificate)}`"
-              header-class="signature-header"
+              v-for='(signature, index) in documentAggregate.document.signatures',
+              :key='index',
+              :label='`Подпись ${index + 1}: ${getSignerName(signature.signer_certificate)}`',
+              header-class='signature-header',
               dense
             )
               q-card(flat)
                 q-card-section
-                  div.q-mb-sm
-                    q-badge(:color="signature.is_valid ? 'teal' : 'red'").text-center.q-pa-xs
+                  .q-mb-sm
+                    q-badge.text-center.q-pa-xs(
+                      :color='signature.is_valid ? "teal" : "red"'
+                    )
                       span Подписант
                     p.q-mt-sm.q-ml-lg {{ getSignerName(signature.signer_certificate) }}
 
-                  div(v-if="signature.public_key").q-mb-sm
-                    q-badge(:color="signature.is_valid ? 'teal' : 'red'").text-center.q-pa-xs
+                  .q-mb-sm(v-if='signature.public_key')
+                    q-badge.text-center.q-pa-xs(
+                      :color='signature.is_valid ? "teal" : "red"'
+                    )
                       span Публичный ключ
                     p.q-mt-sm.q-ml-lg {{ signature.public_key }}
 
-                  div(v-if="signature.signature").q-mb-sm
-                    q-badge(:color="signature.is_valid ? 'teal' : 'red'").text-center.q-pa-xs
+                  .q-mb-sm(v-if='signature.signature')
+                    q-badge.text-center.q-pa-xs(
+                      :color='signature.is_valid ? "teal" : "red"'
+                    )
                       span Цифровая подпись
                     p.q-mt-sm.q-ml-lg {{ signature.signature }}
 
-                  div.q-mt-md
-                    q-badge(:color="signature.is_valid ? 'teal' : 'red'").text-center.q-pa-xs
-                      q-icon(:name="signature.is_valid ? 'check_circle' : 'cancel'").q-mr-sm
+                  .q-mt-md
+                    q-badge.text-center.q-pa-xs(
+                      :color='signature.is_valid ? "teal" : "red"'
+                    )
+                      q-icon.q-mr-sm(
+                        :name='signature.is_valid ? "check_circle" : "cancel"'
+                      )
                       span Статус подписи: {{ signature.is_valid ? 'Верифицирована' : 'Не верифицирована' }}
 
-        div.text-center.q-gutter-sm.q-mt-md
-          q-btn(size="sm" color="primary" icon="download" @click="download") скачать
+        .text-center.q-gutter-sm.q-mt-md
+          q-btn(size='sm', color='primary', icon='download', @click='download') скачать
           //- q-btn(size="sm" color="primary" icon="download" @click="download2") скачать2
-          q-btn(size="sm" color="primary" icon="fa-solid fa-check-double" @click="regenerate" :loading="onRegenerate") сверить
-
-
+          q-btn(
+            size='sm',
+            color='primary',
+            icon='fa-solid fa-check-double',
+            @click='regenerate',
+            :loading='onRegenerate'
+          ) сверить
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue';
 import { useGlobalStore } from 'src/shared/store';
 import DOMPurify from 'dompurify';
 import { DigitalDocument } from 'src/shared/lib/document';
@@ -71,49 +98,141 @@ import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useWindowSize } from 'src/shared/hooks';
 import type { IDocumentAggregate } from 'src/entities/Document/model';
 import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
+import { ShadowHtml } from '../ShadowHtml';
 
 const props = defineProps({
   documentAggregate: {
     type: Object as () => IDocumentAggregate,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
-const doc = computed(() => props.documentAggregate.rawDocument)
+const doc = computed(() => props.documentAggregate.rawDocument);
 
-const loading = ref(false)
-const { isMobile } = useWindowSize()
-const regeneratedHash = ref()
-const onRegenerate = ref(false)
-const regenerated = ref()
+const loading = ref(false);
+const { isMobile } = useWindowSize();
+const regeneratedHash = ref();
+const onRegenerate = ref(false);
+const regenerated = ref();
 
-const regenerate = async() => {
+const regenerate = async () => {
   try {
-    onRegenerate.value = true
+    onRegenerate.value = true;
 
-    regenerated.value = await new DigitalDocument().generate({...doc.value?.meta}, {skip_save: true})
+    regenerated.value = await new DigitalDocument().generate(
+      { ...doc.value?.meta },
+      { skip_save: true },
+    );
 
     if (regenerated.value.hash == regeneratedHash.value)
-      SuccessAlert('Сверка прошла успешно: аналогичный документ восстановлен из исходных данных')
+      SuccessAlert(
+        'Сверка прошла успешно: аналогичный документ восстановлен из исходных данных',
+      );
     else
-      FailAlert('Сверка прошла безуспешно: аналогичный документ невозможно получить из исходных данных')
+      FailAlert(
+        'Сверка прошла безуспешно: аналогичный документ невозможно получить из исходных данных',
+      );
 
-    onRegenerate.value = false
-  } catch(e){
-    onRegenerate.value = false
+    onRegenerate.value = false;
+  } catch (e) {
+    onRegenerate.value = false;
   }
-}
+};
 
 // Функция для декодирования и очистки HTML
 function sanitizeHtml(html: string) {
   return DOMPurify.sanitize(html, {
     ADD_TAGS: ['style'],
-    ADD_ATTR: ['class', 'id']
+    ADD_ATTR: ['class', 'id'],
   });
 }
 
 const safeHtml = computed(() => sanitizeHtml(doc.value?.html ?? ''));
 
+// Стили для Shadow DOM
+const shadowStyles = computed(
+  () =>
+    `
+  /* Универсальные стили для всех таблиц */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    word-break: break-word;
+    table-layout: auto;
+  }
+
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-all !important;
+    white-space: normal !important;
+  }
+
+  th {
+    background-color: #f4f4f4;
+    width: 30% !important;
+    max-width: 30% !important;
+    word-break: break-word !important;
+  }
+
+  tr {
+    word-break: break-word;
+  }
+
+  /* Стили для description класса */
+  td {
+    word-break: break-all !important;
+    word-wrap: break-word !important;
+    white-space: normal !important;
+  }
+
+  .digital-document .header {
+    text-align: center;
+  }
+
+  .digital-document {
+    word-break: break-word !important;
+    white-space: pre-wrap;
+  }
+
+   p {
+    margin: 0 !important;
+    font-size: 14px;
+    white-space: pre-wrap;
+  }
+
+   table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+   th,
+   td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+   th {
+    background-color: #f4f4f4;
+    width: 30% !important;
+    max-width: 30% !important;
+    word-break: break-word !important;
+  }
+
+  /* Quasar таблицы */
+  .q-table--no-wrap th,
+  .q-table--no-wrap td {
+    white-space: break-spaces !important;
+    word-break: break-word !important;
+  }
+`,
+);
 
 const hashBuffer = async () => {
   try {
@@ -127,18 +246,20 @@ const hashBuffer = async () => {
     }
 
     // Вычисление хэша из декодированных бинарных данных
-    regeneratedHash.value = (await useGlobalStore().hashMessage(data)).toUpperCase();
+    regeneratedHash.value = (
+      await useGlobalStore().hashMessage(data)
+    ).toUpperCase();
     console.log('Хэш успешно вычислен:', regeneratedHash.value);
   } catch (error) {
     console.error('Ошибка при вычислении хэша:', error);
   }
-}
+};
 
 // Получение ФИО/названия подписанта по сертификату
 const getSignerName = (signer_certificate: any) => {
   if (!signer_certificate) return 'Неизвестный подписант';
   return getNameFromCertificate(signer_certificate) || 'Неизвестный подписант';
-}
+};
 
 // Верификация всех подписей из агрегата
 const verifySignatures = () => {
@@ -160,19 +281,21 @@ const verifySignatures = () => {
   //     }
   //   })
   // }
-}
+};
 
 onMounted(() => {
-  hashBuffer()
-  verifySignatures()
-})
+  hashBuffer();
+  verifySignatures();
+});
 
 async function download() {
   try {
     // PDF теперь в формате base64, можно использовать data URL
     const link = document.createElement('a');
     link.href = `data:application/pdf;base64,${doc.value?.binary}`;
-    link.download = doc.value?.full_title ? doc.value?.full_title : `${doc.value?.meta?.title} - ${doc.value?.meta?.username} - ${doc.value?.meta?.created_at}.pdf`;
+    link.download = doc.value?.full_title
+      ? doc.value?.full_title
+      : `${doc.value?.meta?.title} - ${doc.value?.meta?.username} - ${doc.value?.meta?.created_at}.pdf`;
 
     document.body.appendChild(link);
     link.click();
@@ -183,44 +306,13 @@ async function download() {
 }
 
 // Вычисляем, есть ли хотя бы одна невалидная подпись
-const hasInvalidSignature = computed(() => props.documentAggregate?.document?.signatures?.some(signature => !signature.is_valid))
-
+const hasInvalidSignature = computed(() =>
+  props.documentAggregate?.document?.signatures?.some(
+    (signature) => !signature.is_valid,
+  ),
+);
 </script>
 <style>
-
-.description td {
-  word-break: break-all !important;
-  word-wrap: break-word !important;
-  white-space: normal !important;
-}
-
-.digital-document .header {
-  text-align: center;
-  word-break: break-word !important;
-}
-
-.description {
-  font-size: 14px;
-  white-space: pre-wrap;
-}
-
-.description p {
-  margin: 0 !important;
-}
-
-.verify-card {
-  font-size: 10px !important;
-}
-
-.signature-header {
-  font-size: 12px;
-}
-
-.signature-text {
-  font-size: 10px;
-  word-break: break-all;
-}
-
 @media (min-width: 700px) {
   .dynamic-padding {
     padding: 50px !important;
@@ -230,31 +322,5 @@ const hasInvalidSignature = computed(() => props.documentAggregate?.document?.si
   .dynamic-padding {
     padding: 10px !important;
   }
-}
-/*
-/* Стили для таблиц внутри документа */
-.description table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.description th,
-.description td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: left;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.description th {
-  background-color: #f4f4f4;
-  width: 30% !important;
-  max-width: 30% !important;
-  word-break: break-word !important;
-}
-.q-table--no-wrap th, .q-table--no-wrap td {
-  white-space: break-spaces !important;
-  word-break: break-word !important;
 }
 </style>

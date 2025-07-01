@@ -14,6 +14,12 @@ void gateway::createoutpay(eosio::name coopname, eosio::name username, checksum2
   eosio::check(confirm_callback != ""_n, "Действие для коллбэка-успеха должено быть установлено");
   eosio::check(decline_callback != ""_n, "Действие для коллбэка-отлонения должно быть установлено");
   
+  // Валидируем callback действия если они от wallet контракта
+  if (callback_contract == _wallet) {
+    Wallet::get_valid_wallet_action(confirm_callback);
+    Wallet::get_valid_wallet_action(decline_callback);
+  }
+  
   auto outcome = Gateway::get_outcome(coopname, outcome_hash);
   
   eosio::check(!outcome.has_value(), "Объект возврата уже существует с указанным хэшем");

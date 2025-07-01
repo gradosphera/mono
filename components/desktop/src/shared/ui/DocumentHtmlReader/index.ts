@@ -1,1 +1,1 @@
-export {default as DocumentHtmlReader} from './DocumentHtmlReader.vue'
+export { default as DocumentHtmlReader } from './DocumentHtmlReader.vue';

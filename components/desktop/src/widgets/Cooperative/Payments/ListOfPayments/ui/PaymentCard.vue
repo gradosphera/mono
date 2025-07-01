@@ -1,73 +1,155 @@
 <template lang="pug">
-div.q-pa-xs.col-xs-12.col-sm-12.col-md-12.q-mt-md
-  q-card(bordered flat)
-    q-card-section.q-py-xs
-      div.text-subtitle2 № {{ payment.id }}
-      div.text-caption Сумма: {{ payment.amount }}
+.payment-card__container
+  q-card.payment-card(flat)
+    q-card-section.payment-card__header-section
+      .payment-header
+        .payment-icon
+          q-icon(
+            :name='getDirectionIcon(payment.direction)',
+            size='24px',
+            :color='getDirectionColor(payment.direction)'
+          )
+        .payment-title
+          .title {{ payment.type_label }}
+          .subtitle {{ getShortNameFromCertificate(payment.username_certificate) || payment.username }}
+      .payment-amount
+        .amount {{ payment.quantity }} {{ payment.symbol }}
+        .status
+          q-badge(:color='getStatusColor(payment.status)') {{ payment.status_label }}
+
+    q-slide-transition
+      div(v-show='expanded')
+        q-separator
+        q-card-section
+          PaymentDetails(:payment='payment')
 
     q-separator
 
-    q-card-section.q-py-xs
-      div.row.items-center
-        div.col-6 Тип платежа:
-        div.col-6.text-right
-          q-badge(v-if="payment.details.data.includes('registration')") регистрационный
-          q-badge(v-else) паевой
-
-      div.row.items-center.q-mt-sm
-        div.col-6 От кого:
-        div.col-6.text-right {{ payment.username }}
-
-      div.row.items-center.q-mt-sm
-        div.col-6 Статус:
-        div.col-6.text-right
-          q-badge(v-if="payment.status ==='COMPLETED'" color="teal") обработан
-          q-badge(v-if="payment.status ==='PENDING'" color="orange") ожидание оплаты
-          q-badge(v-if="payment.status ==='FAILED'" color="red") ошибка
-          q-badge(v-if="payment.status ==='PAID'" color="orange") оплачен
-          q-badge(v-if="payment.status ==='REFUNDED'" color="grey") отменён
-          q-badge(v-if="payment.status ==='EXPIRED'" color="grey") истёк
-
-    q-card-actions(align="right")
-      q-btn(
-        v-if="payment.message"
-        size="sm"
+    q-card-actions.card-actions(align='right')
+      q-btn-dropdown(
+        v-if='!hideActions && payment.can_change_status',
+        size='sm',
+        label='Действия',
+        color='primary',
         flat
-        icon="expand_more"
-        @click="$emit('toggle-expand')"
       )
-        | {{ expanded ? 'Скрыть' : 'Подробнее' }}
-
-      q-btn-dropdown(v-if="!hideActions" size="sm" label="действия" color="primary")
         q-list(dense)
-          SetOrderPaidStatusButton(:id="payment.id" @close="$emit('close-dropdown')")
-          SetOrderRefundedStatusButton(:id="payment.id" @close="$emit('close-dropdown')")
-
-    q-slide-transition
-      div(v-show="expanded && payment.message")
-        q-separator
-        q-card-section
-          p Причина ошибки: {{payment.message}}
+          SetOrderPaidStatusButton(
+            v-if='payment.id && [Zeus.PaymentStatus.PENDING, Zeus.PaymentStatus.FAILED].includes(payment.status)',
+            :id='payment.id',
+            @close='$emit("close-dropdown")'
+          )
+          SetOrderRefundedStatusButton(
+            v-if='payment.id && [Zeus.PaymentStatus.PAID, Zeus.PaymentStatus.COMPLETED].includes(payment.status)',
+            :id='payment.id',
+            @close='$emit("close-dropdown")'
+          )
+      q-btn(
+        flat,
+        size='sm',
+        :icon='expanded ? "expand_less" : "expand_more"',
+        @click='$emit("toggle-expand")',
+        :label='expanded ? "Скрыть" : "Подробнее"',
+        color='primary'
+      )
 </template>
 
 <script setup lang="ts">
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
 import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
+import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
+import 'src/shared/ui/CardStyles/index.scss';
+import { PaymentDetails } from 'src/shared/ui';
+import type { IPayment } from 'src/entities/Payment';
+import { Zeus } from '@coopenomics/sdk';
 
-defineProps({
-  payment: {
-    type: Object,
-    required: true
-  },
-  expanded: {
-    type: Boolean,
-    default: false
-  },
-  hideActions: {
-    type: Boolean,
-    default: false
+defineProps<{
+  payment: IPayment;
+  expanded?: boolean;
+  hideActions?: boolean;
+}>();
+
+defineEmits(['toggle-expand', 'close-dropdown']);
+
+const getDirectionIcon = (direction?: string | null) => {
+  return direction === Zeus.PaymentDirection.INCOMING
+    ? 'fa-solid fa-arrow-down'
+    : 'fa-solid fa-arrow-up';
+};
+
+const getDirectionColor = (direction?: string | null) => {
+  return direction === Zeus.PaymentDirection.INCOMING ? 'positive' : 'negative';
+};
+
+const statusColors: Record<string, string> = {
+  [Zeus.PaymentStatus.COMPLETED]: 'teal',
+  [Zeus.PaymentStatus.PENDING]: 'orange',
+  [Zeus.PaymentStatus.FAILED]: 'red',
+  [Zeus.PaymentStatus.PAID]: 'blue',
+  [Zeus.PaymentStatus.REFUNDED]: 'grey',
+  [Zeus.PaymentStatus.EXPIRED]: 'grey',
+};
+
+const getStatusColor = (status?: string | null) => {
+  if (!status) {
+    return 'grey';
   }
-})
-
-defineEmits(['toggle-expand', 'close-dropdown'])
+  return statusColors[status] || 'grey';
+};
 </script>
+
+<style lang="scss" scoped>
+.payment-card__container {
+  padding: 8px;
+  width: 100%;
+}
+
+.payment-card {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease-in-out;
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+}
+
+.payment-card__header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.payment-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.payment-title .title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.payment-title .subtitle {
+  font-size: 12px;
+  color: #757575;
+}
+
+.payment-amount {
+  text-align: right;
+}
+
+.payment-amount .amount {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.payment-amount .status {
+  margin-top: 4px;
+}
+
+.card-actions {
+  padding: 4px 8px;
+}
+</style>

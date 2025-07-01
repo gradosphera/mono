@@ -161,7 +161,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	CreateWithdrawInput:{
-		statement:"SignedDigitalDocumentInput"
+		statement:"ReturnByMoneySignedDocumentInput"
 	},
 	DateTime: `scalar.DateTime` as const,
 	DeclineRequestInput:{
@@ -609,9 +609,6 @@ export const AllTypesProps: Record<string,any> = {
 	RepresentedByInput:{
 
 	},
-	RequestInput:{
-
-	},
 	ResetKeyInput:{
 
 	},
@@ -647,7 +644,14 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	ReturnByMoneyGenerateDocumentInput:{
-		request:"RequestInput"
+
+	},
+	ReturnByMoneySignedDocumentInput:{
+		meta:"ReturnByMoneySignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ReturnByMoneySignedMetaDocumentInput:{
+
 	},
 	SearchPrivateAccountsInput:{
 
@@ -1103,7 +1107,8 @@ export const ReturnTypes: Record<string,any> = {
 		type:"PaymentType",
 		type_label:"String",
 		updated_at:"DateTime",
-		username:"String"
+		username:"String",
+		username_certificate:"UserCertificateUnion"
 	},
 	GeneratedDocument:{
 		binary:"String",

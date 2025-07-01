@@ -146,7 +146,6 @@ export class MeetDomainInteractor {
 
         // Получаем данные processed из репозитория
         const processedMeetEntity = await this.meetProcessedRepository.findByHash(processingData.hash);
-
         // Создаем агрегат с данными из репозитория и блокчейна
         return new MeetAggregate(preMeet, processingData, processedMeetEntity);
       })

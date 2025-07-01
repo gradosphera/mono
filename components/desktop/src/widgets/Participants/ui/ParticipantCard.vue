@@ -1,97 +1,145 @@
 <template lang="pug">
-div.q-pa-xs.col-xs-12.col-sm-6.col-md-4.col-lg-3.q-mt-md
-  q-card.full-height
-    q-card-section
-      div.text-h6 {{ getName(participant) }}
-      q-separator.q-my-md
-      div
-        div.q-mb-md
-          div.text-caption Аккаунт:
-          div.text-subtitle1.q-mb-xs {{ participant.username }}
-        div.q-mb-md
-          div.text-caption Дата вступления:
-          div.text-subtitle1.q-mb-xs {{ formatDate(String(participant.participant_account?.created_at || '')) == '' ? 'отсутствует' : formatDate(String(participant.participant_account?.created_at || '')) }}
-        div
-          div.text-caption Активен:
-          q-checkbox(
-            :model-value="participant.participant_account?.status === 'accepted'"
-            disable
-            color="primary"
-            size="sm"
-          )
-    q-card-actions(align="right")
-      q-btn(
-        color="primary"
-        :icon="isExpanded ? 'remove' : 'add'"
-        label="Подробнее"
-        @click="toggleExpand"
-      )
+.participant-card__container
+  q-card.participant-card(flat)
+    q-card-section.participant-card__header-section
+      .participant-header
+        .participant-icon
+          q-icon(name='fa-solid fa-user', size='24px', color='primary')
+        .participant-title
+          .title {{ getName(participant) }}
+          .subtitle {{ participant.username }}
+          .email {{ participant.provider_account?.email || 'Email не указан' }}
+      .participant-status
+        .joined-date {{ formatDate(String(participant.participant_account?.created_at || '')) }}
+        .status
+          q-badge(
+            :color='participant.participant_account?.status === "accepted" ? "positive" : "grey"'
+          ) {{ participant.participant_account?.status === 'accepted' ? 'Активен' : 'Неактивен' }}
+
     q-slide-transition
-      div.q-pa-md(v-if="isExpanded")
+      div(v-show='expanded')
         q-separator
-        ParticipantDetails(
-          :participant="participant"
-          :tab-name="currentTab"
-          @update="onUpdate"
-        )
+        q-card-section
+          ParticipantDetails(
+            :participant='participant',
+            :tab-name='currentTab',
+            @update='onUpdate'
+          )
+
+    q-separator
+
+    q-card-actions.card-actions(align='right')
+      q-btn(
+        flat,
+        size='sm',
+        :icon='expanded ? "expand_less" : "expand_more"',
+        @click='$emit("toggle-expand")',
+        :label='expanded ? "Скрыть" : "Подробнее"',
+        color='primary'
+      )
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import moment from 'moment-with-locales-es6'
-import ParticipantDetails from './ParticipantDetails.vue'
+import { ref } from 'vue';
+import moment from 'moment-with-locales-es6';
+import ParticipantDetails from './ParticipantDetails.vue';
+import 'src/shared/ui/CardStyles/index.scss';
+import { getName } from 'src/shared/lib/utils';
 import {
-  AccountTypes,
   type IAccount,
   type IIndividualData,
   type IOrganizationData,
-  type IEntrepreneurData
-} from 'src/entities/Account/types'
+  type IEntrepreneurData,
+} from 'src/entities/Account/types';
 
-// Props
 const props = defineProps<{
-  participant: IAccount
-  expanded: Map<string, boolean>
-}>()
+  participant: IAccount;
+  expanded?: boolean;
+}>();
 
-// Emits
 const emit = defineEmits<{
-  (e: 'toggle-expand', id: string): void
-  (e: 'update', account: IAccount, newData: IIndividualData | IOrganizationData | IEntrepreneurData): void
-}>()
+  'toggle-expand': [];
+  update: [
+    participant: IAccount,
+    newData: IIndividualData | IOrganizationData | IEntrepreneurData,
+  ];
+}>();
 
 // Локальное состояние
-const currentTab = ref('info')
+const currentTab = ref('info');
 
-// Computed
-const isExpanded = computed(() => props.expanded.get(props.participant.username))
+// Форматирование даты
+const formatDate = (date?: string) => {
+  if (!date) return 'Дата не указана';
+  const formatted = moment(date).format('DD.MM.YY');
+  return formatted === 'Invalid date' ? 'Дата не указана' : formatted;
+};
 
-// Функция для получения имени участника
-const getName = (account: IAccount) => {
-  const d = account.private_account
-  if (!d) return ''
-  switch (d.type) {
-    case AccountTypes.individual:
-      return `${d.individual_data?.last_name} ${d.individual_data?.first_name} ${d.individual_data?.middle_name}`
-    case AccountTypes.entrepreneur:
-      return `ИП ${d.entrepreneur_data?.last_name} ${d.entrepreneur_data?.first_name} ${d.entrepreneur_data?.middle_name}`
-    case AccountTypes.organization:
-      return d.organization_data?.short_name
-    default:
-      return ''
+const onUpdate = (
+  newData: IIndividualData | IOrganizationData | IEntrepreneurData,
+) => {
+  emit('update', props.participant, newData);
+};
+</script>
+
+<style lang="scss" scoped>
+.participant-card__container {
+  padding: 8px;
+  width: 100%;
+}
+
+.participant-card {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease-in-out;
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
   }
 }
 
-// Форматирование даты
-const formatDate = (date?: string) =>
-  date ? moment(date).format('DD.MM.YY HH:mm:ss') : ''
-
-// События
-const toggleExpand = () => {
-  emit('toggle-expand', props.participant.username)
+.participant-card__header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-const onUpdate = (newData: IIndividualData | IOrganizationData | IEntrepreneurData) => {
-  emit('update', props.participant, newData)
+.participant-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
-</script>
+
+.participant-title .title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.participant-title .subtitle {
+  font-size: 12px;
+  color: #757575;
+}
+
+.participant-title .email {
+  font-size: 12px;
+  color: #757575;
+}
+
+.participant-status {
+  text-align: right;
+}
+
+.participant-status .joined-date {
+  font-size: 12px;
+  color: #757575;
+  margin-bottom: 4px;
+}
+
+.participant-status .status {
+  margin-top: 4px;
+}
+
+.card-actions {
+  padding: 4px 8px;
+}
+</style>
