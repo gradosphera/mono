@@ -12,13 +12,18 @@ export function useInitWalletProcess() {
   const account = useAccountStore();
   const desktops = useDesktopStore();
 
-  const run = async () => {
+  const run = async (forceReload = false) => {
     await session.init();
 
     if (!session.isAuth) return;
 
     // Запоминаем, была ли уже загрузка завершена
     const wasLoadComplete = session.loadComplete;
+
+    // При принудительной перезагрузке временно сбрасываем loadComplete
+    if (forceReload) {
+      session.loadComplete = false;
+    }
 
     try {
       const userAccount = await account.getAccount(session.username);
@@ -47,8 +52,10 @@ export function useInitWalletProcess() {
       }
     }
 
-    // фоновая проверка каждые 10 сек
-    setTimeout(run, 10_000);
+    // фоновая проверка каждые 10 сек (только если это не принудительная перезагрузка)
+    if (!forceReload) {
+      setTimeout(run, 10_000);
+    }
   };
 
   return { run };

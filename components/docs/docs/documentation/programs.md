@@ -4,43 +4,11 @@
 
 Кооператив может создавать целевые программы по шаблонам и использовать их в [Расширениях](/documentation/extensions) при использовании [Витрин](/documentation/extensions). При подключении какой-либо [Витрины](/documentation/extensions) потребуется указать параметры целевой потребительской программы, по которой она будет функционировать. 
 
-При создании целевой потребительской программы в кооперативе используется идентификатор шаблона стандартизированной целевой потребительской программы, описания программы для отображения на ветринах, а также, информация о способе расчёта членских взносов при участии в ней. 
+При создании целевой потребительской программы в кооперативе используется идентификатор шаблона стандартизированной целевой потребительской программы, описания программы для отображения на ветринах, а также, информация о способе расчёта членских взносов при участии в ней.
 
+## Управление программами
 
-## Получить программы
-{{ get_sdk_doc("Queries", "Programs", "GetPrograms") }} | {{ get_graphql_doc("Query.getPrograms") }}
+Создание и управление целевыми потребительскими программами осуществляется напрямую через смарт-контракты блокчейна, а не через GraphQL API. Программы создаются при инициализации кооператива и могут быть изменены только через блокчейн-транзакции с соответствующими правами доступа.
 
-{{ get_typedoc_input("Queries.Programs.GetPrograms") }}
-
-Результат:
-
-{{ get_typedoc_definition("Queries.Programs.GetPrograms", "IOutput") }}
-
-## Создать программу
-{{ get_sdk_doc("Mutations", "Programs", "CreateProgram") }} | {{ get_graphql_doc("Mutation.createProgram") }}
-
-{{ get_typedoc_input("Mutations.Programs.CreateProgram") }}
-
-Результат:
-
-{{ get_typedoc_definition("Mutations.Programs.CreateProgram", "IOutput") }}
-
-
-## Обновить программу
-{{ get_sdk_doc("Mutations", "Programs", "UpdateProgram") }} | {{ get_graphql_doc("Mutation.updateProgram") }}
-
-{{ get_typedoc_input("Mutations.Programs.UpdateProgram") }}
-
-Результат:
-
-{{ get_typedoc_definition("Mutations.Programs.UpdateProgram", "IOutput") }}
-
-## Остановить программу
-{{ get_sdk_doc("Mutations", "Programs", "StopProgram") }} | {{ get_graphql_doc("Mutation.stopProgram") }}
-
-{{ get_typedoc_input("Mutations.Programs.StopProgram") }}
-
-Результат:
-
-{{ get_typedoc_definition("Mutations.Programs.StopProgram", "IOutput") }}
+Текущие активные программы можно просматривать через интерфейс расширений, где они используются для настройки витрин и утилит кооператива.
 

@@ -134,6 +134,7 @@ nav:
     - Архитектура: documentation/architecture.md
     - Язык API: documentation/graphql.md
     - Обзор SDK: documentation/sdk.md
+    - Классы SDK: documentation/classes.md
     - Установка: documentation/install.md
     - Первый старт: documentation/init.md
     - Аккаунты: documentation/accounts.md
@@ -144,11 +145,13 @@ nav:
     - Платежи и взносы: documentation/payments.md
     - Методы платежа: documentation/payment-methods.md
     - Решения: documentation/decisions.md
+    - Общие собрания: documentation/meetings.md
     - Целевые программы: documentation/programs.md
     - Документы: documentation/documents.md
     - Кооперативные участки: documentation/branches.md
     - Фонды: documentation/funds.md
     - Расширения: documentation/extensions.md
+    - Рабочий стол: documentation/desktop.md
     - Системная информация: documentation/system.md
     
     # - 🔗 SDK Docs: /sdk

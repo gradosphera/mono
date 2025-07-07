@@ -1,9 +1,34 @@
 import os
 import json
+import atexit
 
 def define_env(env):
     """Инициализация макросов для MkDocs"""
     print("✅ Macros загружен!")  # Проверка загрузки
+
+    # --- СИСТЕМА СБОРА ОШИБОК ---
+    macro_errors = []  # Массив для сбора ошибок
+    
+    def add_error(error_msg):
+        """Добавляет ошибку в массив для вывода в конце"""
+        macro_errors.append(error_msg)
+    
+    def print_collected_errors():
+        """Выводит все собранные ошибки одним блоком"""
+        if macro_errors:
+            print("\n" + "="*60)
+            print("🚨 ОБНАРУЖЕНЫ ОШИБКИ В МАКРОСАХ ДОКУМЕНТАЦИИ:")
+            print("="*60)
+            for i, error in enumerate(macro_errors, 1):
+                print(f"{i:2d}. {error}")
+            print("="*60)
+            print(f"Всего ошибок: {len(macro_errors)}")
+            print("="*60 + "\n")
+        else:
+            print("✅ Ошибок в макросах документации не обнаружено!")
+    
+    # Регистрируем функцию для вызова в конце процесса
+    atexit.register(print_collected_errors)
 
     # --- SDK LINKS ---
     sdk_docs_path = "docs/sdk"  # Фиксированный путь к SDK в MkDocs
@@ -37,7 +62,7 @@ def define_env(env):
         with open(typedoc_path, "r", encoding="utf-8") as f:
             typedoc_data = json.load(f)
     else:
-        print(f"⚠️ TypeDoc JSON ({typedoc_path}) не найден, макросы работать не будут.")
+        add_error(f"TypeDoc JSON ({typedoc_path}) не найден, макросы работать не будут.")
 
     # ----------------------------------------------------------------
     # Вспомогательные функции
@@ -50,11 +75,13 @@ def define_env(env):
         if full_name in sdk_doc_links:
             return f"{SDK_LINK_PREFIX}[{full_name}]({sdk_doc_links[full_name]})"
 
+        add_error(f"SDK метод '{full_name}' не найден")
         return f"⚠️ {SDK_LINK_PREFIX}{full_name} не найден"
 
     def get_graphql_doc(reference: str):
         """Генерирует ссылку на GraphQL Query, Mutation или Definition"""
         if not reference:
+            add_error("Некорректный GraphQL идентификатор")
             return "⚠️ Некорректный GraphQL идентификатор"
 
         # Преобразуем reference из "Query.getAccount" → "query-getAccount"
@@ -72,6 +99,7 @@ def define_env(env):
     def get_graphql_definition(definition_name: str):
         """Генерирует ссылку на GraphQL-определение"""
         if not definition_name:
+            add_error("Некорректное имя определения")
             return "⚠️ Некорректное имя определения"
 
         link = f"{graphql_web_path}#definition-{definition_name}"
@@ -80,6 +108,7 @@ def define_env(env):
     def get_class_doc(*args):
         """Генерирует ссылку на класс или метод внутри класса в TypeDoc JSON"""
         if len(args) < 1:
+            add_error("Некорректный формат для get_class_doc, используйте `Namespace.ClassName`")
             return "⚠️ Некорректный формат, используйте `Namespace.ClassName`"
 
         class_name = ".".join(args[:-1]) if len(args) > 1 else args[0]
@@ -123,13 +152,14 @@ def define_env(env):
         """Извлекает описание (summary/@example) переменной/метода из TypeDoc JSON"""
         parts = namespace_variable.split(".")
         if len(parts) < 2:
+            add_error(f"Некорректный формат для get_typedoc_desc: '{namespace_variable}', используйте `Namespace.Variable`")
             return f"⚠️ Некорректный формат, используйте `Namespace.Variable`"
 
         namespace_path, variable_name = parts[:-1], parts[-1]
 
         variable = find_variable(namespace_path, variable_name, typedoc_data)
         if not variable:
-            print(f"❌ Не найден объект для {namespace_variable}")
+            add_error(f"Не найден объект для {namespace_variable}")
             return f"⚠️ Описание для `{namespace_variable}` не найдено"
 
         # Обрабатываем summary
@@ -155,12 +185,14 @@ def define_env(env):
         """Извлекает значение (const/var) из TypeDoc JSON"""
         parts = namespace_variable.split(".")
         if len(parts) < 2:
+            add_error(f"Некорректный формат для get_typedoc_value: '{namespace_variable}', используйте `Namespace.Variable`")
             return f"⚠️ Некорректный формат, используйте `Namespace.Variable`"
 
         namespace_path, variable_name = parts[:-1], parts[-1]
         variable = find_variable(namespace_path, variable_name, typedoc_data)
 
         if not variable:
+            add_error(f"Значение для `{namespace_variable}` не найдено")
             return f"⚠️ Значение для `{namespace_variable}` не найдено"
 
         # Если это константа (kind = 32 и isConst = true)
@@ -174,6 +206,7 @@ def define_env(env):
         if "defaultValue" in variable:
             return variable["defaultValue"]
 
+        add_error(f"Значение для `{namespace_variable}` не найдено")
         return f"⚠️ Значение для `{namespace_variable}` не найдено"
 
     # ----------------------------------------------------------------
@@ -351,20 +384,24 @@ def define_env(env):
 
         parts = namespace_variable.split(".")
         if len(parts) < 2:
+            add_error(f"Некорректный формат для get_typedoc_input: '{namespace_variable}', используйте `Namespace.Method`")
             return f"⚠️ Некорректный формат, используйте `Namespace.Method`"
 
         root_namespace, *namespace_path, variable_name = parts
         if root_namespace not in {"Mutations", "Queries"}:
+            add_error(f"Некорректный корневой namespace `{root_namespace}` для '{namespace_variable}'")
             return f"⚠️ Некорректный корневой namespace `{root_namespace}`"
 
         debug_print(f"[DEBUG] Ищем variable: {namespace_variable}")
         variable = find_variable([root_namespace] + namespace_path, variable_name, typedoc_data)
         if not variable:
+            add_error(f"`{namespace_variable}` не найден в TypeDoc")
             return f"⚠️ `{namespace_variable}` не найден"
 
         # Ищем нужный интерфейс внутри variable
         interface_obj = find_interface(variable, interface_name, debug_print)
         if not interface_obj:
+            add_error(f"`{interface_name}` для `{namespace_variable}` не найден")
             return f"⚠️ `{interface_name}` для `{namespace_variable}` не найден"
 
         debug_print(f"[DEBUG] Начинаем разбирать {interface_name}, id={interface_obj.get('id')}")
@@ -428,12 +465,14 @@ def define_env(env):
             debug_print(f"[DEBUG] (Definition) Ищем variable: {namespace_variable_or_interface_name}")
             variable = find_variable([root_namespace] + namespace_path, variable_name, typedoc_data)
             if not variable:
+                add_error(f"`{namespace_variable_or_interface_name}` не найден в TypeDoc")
                 return f"⚠️ `{namespace_variable_or_interface_name}` не найден"
 
             # Ищем нужный интерфейс внутри variable
             debug_print(f"[DEBUG] Ищем {interface_name} внутри {variable.get('name')}")
             interface_obj = find_interface(variable, interface_name, debug_print)
             if not interface_obj:
+                add_error(f"`{interface_name}` для `{namespace_variable_or_interface_name}` не найден")
                 return f"⚠️ `{interface_name}` для `{namespace_variable_or_interface_name}` не найден"
 
             debug_print(f"[DEBUG] Начинаем разбирать {interface_name}, id={interface_obj.get('id')}")
@@ -514,6 +553,7 @@ def define_env(env):
         found_nodes = _find_all_by_name_deep(interface_name, typedoc_data, [])
 
         if not found_nodes:
+            add_error(f"Интерфейс `{interface_name}` не найден в typedoc_data")
             return f"⚠️ Интерфейс `{interface_name}` не найден в typedoc_data"
 
         # Печатаем все пути и id

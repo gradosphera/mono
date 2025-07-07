@@ -55,8 +55,9 @@ const context = computed(() => {
     user.privateAccount.value?.type === Zeus.AccountType.organization &&
     user.privateAccount.value?.organization_data &&
     'type' in user.privateAccount.value.organization_data &&
-    user.privateAccount.value.organization_data.type ===
+    user.privateAccount.value.organization_data.type.toUpperCase() ===
       Zeus.OrganizationType.COOP;
+
   // Роль берем из computed свойств session
   const userRole = user.isChairman
     ? 'chairman'

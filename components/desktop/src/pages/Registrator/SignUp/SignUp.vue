@@ -92,11 +92,36 @@ onBeforeUnmount(() => {
 
 watch(
   () => session.currentUserAccount?.participant_account,
-  (newValue) => {
+  async (newValue) => {
     if (newValue) {
       clearUserData();
-      desktops.selectDefaultWorkspace();
-      desktops.goToDefaultPage(router);
+
+      // Включаем лоадер для плавного перехода
+      desktops.setWorkspaceChanging(true);
+
+      try {
+        // Принудительно перезагружаем данные пользователя для получения обновленной роли
+        const { run } = useInitWalletProcess();
+        await run(true); // forceReload = true
+
+        // Дожидаемся завершения загрузки данных
+        let attempts = 0;
+        const maxAttempts = 50; // 5 секунд максимум
+
+        while (!session.loadComplete && attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          attempts++;
+        }
+
+        // Теперь выбираем рабочий стол с обновленными данными о роли
+        desktops.selectDefaultWorkspace();
+        desktops.goToDefaultPage(router);
+      } catch (e) {
+        console.error('Ошибка при обновлении данных пользователя:', e);
+        // В случае ошибки все равно пытаемся перейти
+        desktops.selectDefaultWorkspace();
+        desktops.goToDefaultPage(router);
+      }
     }
   },
   { deep: true },
@@ -124,10 +149,34 @@ const registeredAndloggedIn = computed(() => {
 
 watch(
   () => registeredAndloggedIn,
-  (newValue) => {
+  async (newValue) => {
     if (newValue.value === true) {
-      desktops.selectDefaultWorkspace();
-      desktops.goToDefaultPage(router);
+      // Включаем лоадер для плавного перехода
+      desktops.setWorkspaceChanging(true);
+
+      try {
+        // Принудительно перезагружаем данные пользователя для получения обновленной роли
+        const { run } = useInitWalletProcess();
+        await run(true); // forceReload = true
+
+        // Дожидаемся завершения загрузки данных
+        let attempts = 0;
+        const maxAttempts = 50; // 5 секунд максимум
+
+        while (!session.loadComplete && attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          attempts++;
+        }
+
+        // Теперь выбираем рабочий стол с обновленными данными о роли
+        desktops.selectDefaultWorkspace();
+        desktops.goToDefaultPage(router);
+      } catch (e) {
+        console.error('Ошибка при обновлении данных пользователя:', e);
+        // В случае ошибки все равно пытаемся перейти
+        desktops.selectDefaultWorkspace();
+        desktops.goToDefaultPage(router);
+      }
     }
   },
 );

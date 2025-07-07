@@ -76,22 +76,22 @@ sequenceDiagram
 #### Соглашение о ЦПП "Цифровой Кошелёк"
 {{ get_sdk_doc("Mutations", "Agreements", "GenerateWalletAgreement") }} | {{ get_graphql_doc("Mutation.generateWalletAgreement") }}
 
-{{ get_typedoc_input("Mutations.Participants.GenerateParticipantApplication") }}
+{{ get_typedoc_input("Mutations.Agreements.GenerateWalletAgreement") }}
 
 #### Соглашение о простой электронной подписи
 {{ get_sdk_doc("Mutations", "Agreements", "GenerateSignatureAgreement") }} | {{ get_graphql_doc("Mutation.generateSignatureAgreement") }}
 
-{{ get_typedoc_input("Mutations.Participants.GenerateParticipantApplication") }}
+{{ get_typedoc_input("Mutations.Agreements.GenerateSignatureAgreement") }}
 
 #### Пользовательское соглашение
 {{ get_sdk_doc("Mutations", "Agreements", "GenerateUserAgreement") }} | {{ get_graphql_doc("Mutation.generateUserAgreement") }}
 
-{{ get_typedoc_input("Mutations.Participants.GenerateParticipantApplication") }}
+{{ get_typedoc_input("Mutations.Agreements.GenerateUserAgreement") }}
 
 #### Согласие с политикой конфиденциальности
 {{ get_sdk_doc("Mutations", "Agreements", "GeneratePrivacyAgreement") }} | {{ get_graphql_doc("Mutation.generatePrivacyAgreement") }}
 
-{{ get_typedoc_input("Mutations.Participants.GenerateParticipantApplication") }}
+{{ get_typedoc_input("Mutations.Agreements.GeneratePrivacyAgreement") }}
 
 В результате предгенерации будет получены объекты с документами, которые могут быть продемонстрированы пользователю перед запросом его собственноручной подписи. Кроме того, предгенерация необходима, чтобы криптографически связать заявление на вступление с соглашениями на этапе основной генерации после получения собственноручной подписи. 
 
@@ -130,12 +130,12 @@ signatureCanvas.destroy()
 В результате, у вас будет строковое представление изображения собственноручной подписи пользователя, которое теперь необходимо использовать на основной генерации заявления на вступление в кооператив. 
 
 ### 5. Генерация заявления
-{{ get_sdk_doc("Mutations", "Participants", "GenerateApplication") }} | {{ get_graphql_doc("Mutation.generateApplication") }}
+{{ get_sdk_doc("Mutations", "Participants", "GenerateParticipantApplication") }} | {{ get_graphql_doc("Mutation.generateParticipantApplication") }}
 
 Основная генерация заявления производится аналогично [предгенерации](/documentation/participants/pregeneration-applicaion), однако, в `signature` необходимо передать полученную ранее собственноручную подпись, а в массиве `links` указать хэши всех ранее сгенерированных соглашений. 
 
 ```typescript
-const variables: Mutations.Participants.GenerateApplication.IInput = {
+const variables: Mutations.Participants.GenerateParticipantApplication.IInput = {
     data: {
       singature: <полученная ранее строка с изображением подписи в png/base64>,
       links: [participantApplication.hash, signatureAgreement.hash, userAgreement.hash, privacyAgreement.hash]
@@ -143,8 +143,8 @@ const variables: Mutations.Participants.GenerateApplication.IInput = {
       coopname: <имя аккаунта кооператива>
   }
 
-const { [Mutations.Participants.GenerateApplication.name]: participantApplication2 } = await client.Mutation(
-  Mutations.Participants.GenerateApplication.mutation,
+const { [Mutations.Participants.GenerateParticipantApplication.name]: participantApplication2 } = await client.Mutation(
+  Mutations.Participants.GenerateParticipantApplication.mutation,
   {
     variables,
   }
@@ -191,11 +191,11 @@ const signedParticipantApplication = client.Document.sign(participantApplication
 
 ### 7. Оплата взносов
 
-{{ get_sdk_doc("Mutations", "Payments", "CreateInitialPayment") }} | {{ get_graphql_doc("Mutation.createInitialPayment") }}
+{{ get_sdk_doc("Mutations", "Participants", "CreateInitialPayment") }} | {{ get_graphql_doc("Mutation.createInitialPayment") }}
 
 Перед тем, как принятые документы будут отправлены в повестку совета на голосование, новому пайщику необходимо оплатить вступительный и минимальный паевый взносы (одним платежом). 
 
-{{ get_typedoc_input("Mutations.Payments.CreateInitialPayment") }}
+{{ get_typedoc_input("Mutations.Participants.CreateInitialPayment") }}
 
 Результат:
 
