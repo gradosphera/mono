@@ -43,10 +43,10 @@
 
 ## Отправить соглашение
 
-{{ get_sdk_doc("Mutations", "Agreements", "SendAgreement") }} | {{ get_graphql_doc("Mutation.sendAgreement") }}
+{{ get_sdk_doc("Mutations", "Agreements", "GenerateUserAgreement") }} | {{ get_graphql_doc("Mutation.generateUserAgreement") }}
 
-{{ get_typedoc_desc("Mutations.Agreements.SendAgreement") }}
+{{ get_typedoc_desc("Mutations.Agreements.GenerateUserAgreement") }}
 
-{{ get_typedoc_input("Mutations.Agreements.SendAgreement") }}
+{{ get_typedoc_input("Mutations.Agreements.GenerateUserAgreement") }}
 
 
