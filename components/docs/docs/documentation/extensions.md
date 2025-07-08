@@ -1,8 +1,8 @@
-# Расширения
+# Приложения
 
-Расширения (экстеншены) позволяют кооперативам подключать дополнительные функции и витрины для расширения возможностей платформы MONO.
+Приложения позволяют кооперативам подключать дополнительные функции и витрины для расширения возможностей платформы MONO.
 
-## Получить список расширений
+## Получить список приложений
 {{ get_sdk_doc("Queries", "Extensions", "GetExtensions") }} | {{ get_graphql_doc("Query.getExtensions") }}
 
 {{ get_typedoc_input("Queries.Extensions.GetExtensions") }}
@@ -11,7 +11,7 @@
 
 {{ get_typedoc_definition("Queries.Extensions.GetExtensions", "IOutput") }}
 
-## Установить расширение
+## Установить приложение
 {{ get_sdk_doc("Mutations", "Extensions", "InstallExtension") }} | {{ get_graphql_doc("Mutation.installExtension") }}
 
 {{ get_typedoc_input("Mutations.Extensions.InstallExtension") }}
@@ -20,7 +20,7 @@
 
 {{ get_typedoc_definition("Mutations.Extensions.InstallExtension", "IOutput") }}
 
-## Обновить расширение
+## Обновить приложение
 {{ get_sdk_doc("Mutations", "Extensions", "UpdateExtension") }} | {{ get_graphql_doc("Mutation.updateExtension") }}
 
 {{ get_typedoc_input("Mutations.Extensions.UpdateExtension") }}
@@ -29,7 +29,7 @@
 
 {{ get_typedoc_definition("Mutations.Extensions.UpdateExtension", "IOutput") }}
 
-## Удалить расширение
+## Удалить приложение
 {{ get_sdk_doc("Mutations", "Extensions", "UninstallExtension") }} | {{ get_graphql_doc("Mutation.uninstallExtension") }}
 
 {{ get_typedoc_input("Mutations.Extensions.UninstallExtension") }}
@@ -39,6 +39,6 @@
 {{ get_typedoc_definition("Mutations.Extensions.UninstallExtension", "IOutput") }}
 
 
-## Опубликовать расширение
+## Опубликовать приложение
 
-Функционал добавления внешних расширений временно не доступен.
+Функционал добавления внешних приложений временно не доступен.

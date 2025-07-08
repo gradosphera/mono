@@ -84,75 +84,137 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 nav:  
-  - Введение: index.md
+  - Главная: index.md
   - Руководителям: 
-    - Настройки Кооператива:
-      - Настройка Совета: manual/settings/soviet.md
-      # - Настройка Администраторов: manual/admins/add.md
-        # - Добавить администратора: manual/admins/add.md
-        # - Удалить администратора: manual/admins/remove.md
-        # - Установить права: manual/admins/rights.md
+    - О системе:
+      - Что такое MONO: manual/about-mono/what-is-mono.md
+      - Рабочие столы: manual/about-mono/workspaces.md
+      - Подключение к платформе: manual/about-mono/platform-connection.md
+      - Установка и запуск: manual/about-mono/installation.md
+      - Посмотреть демо: manual/about-mono/demo.md
+      - Стоимость использования: manual/about-mono/pricing.md
       
-      # - Настройка Уполномоченных: manual/settings/branches.md
-      # - Настройка Кооперативных Участков: manual/settings/branches.md
-      # - Настройка Фондов: manual/settings/funds.md
-      # - Настройка Меню: manual/settings/menu.md
-      # - Настройка Внешнего Вида: manual/settings/theme.md
-      # - Настройка Реквизитов: manual/settings/soviet.md
-      # - Настройка Контактов: manual/settings/contacts.md
+    - Стол председателя:
+      - Магазин приложений:
+        - Архитектура приложений: manual/workspace-management/chairman/extensions/architecture.md
+        - Витрина приложений: manual/workspace-management/chairman/extensions/showcase.md
+        - Установка и конфигурация: manual/workspace-management/chairman/extensions/extension-configuration.md
       
-    - Собрания Совета:
-      - Объявить собрание: manual/soviet/meet.md
-      - Повестка собрания: manual/soviet/agenda.md
-      - Голосование по повестке: manual/soviet/voting.md
-      - Утверждение протокола: manual/soviet/approve.md
-      - Исполнение решений: manual/soviet/exec.md
-      
-    # - Фонды Кооператива: 
-    #   - Просмотреть участки: manual/decisions/exec.md
+    #   - Настройки кооператива:
+    #     - Управление настройками: manual/cooperative-management/cooperative-settings/settings-management.md
+    #     - Настройка совета: manual/settings/soviet.md
+    #     - Кооперативные участки: manual/workspace-management/chairman/settings/branches.md
+    #     - Фонды накопления: manual/workspace-management/chairman/settings/accumulation-funds.md
+    #     - Фонды списания: manual/workspace-management/chairman/settings/expense-funds.md
+    #     - Паевые взносы: manual/workspace-management/chairman/settings/initial-contributions.md
+    #     - Контакты кооператива: manual/workspace-management/chairman/settings/contacts.md
+    #     - Настройка уведомлений: manual/cooperative-management/cooperative-settings/notification-setup.md
     
-    # - Общие Собрания:
-    #   - Инициировать общее собрание: manual/decision/exec.md
+    # - Стол совета:
+    #   - Повестка совета:
+    #     - Объявление собрания: manual/document-workflow-and-decisions/board-meetings/meeting-announcement.md
+    #     - Повестка собрания: manual/document-workflow-and-decisions/board-meetings/meeting-agenda.md
+    #     - Голосование по повестке: manual/soviet/voting.md
+    #     - Утверждение протокола: manual/soviet/approve.md
+    #     - Исполнение решений: manual/soviet/exec.md
       
-    - Реестр документов:
-      - Цифровой документ: manual/documents/structure.md
-      - Папки документов: manual/documents/folders.md
-      - Реестр документов: manual/documents/look.md
-      # - Проверить документ: manual/documents/check.md
-            
-    - Реестр пайщиков: 
-      - Папка пайщика: manual/participants/folders.md
-      - Просмотреть реестр пайщиков: 'manual/participants/search.md'
+    #   - Реестр пайщиков:
+    #     - Управление пайщиками: manual/cooperative-management/participants-management/participants-registry.md
+    #     - Папки пайщиков: manual/participants/folders.md
+    #     - Обработка заявлений: manual/cooperative-management/participants-management/process-applications.md
+      
+    #   - Реестр документов:
+    #     - Структура документов: manual/documents/structure.md
+    #     - Папки документов: manual/documents/folders.md
+    #     - Работа с документами: manual/documents/look.md
+      
+    #   - Реестр платежей:
+    #     - Обработка платежей: manual/financial-management/payments-and-contributions/payment-processing.md
+    #     - Контроль взносов: manual/workspace-management/soviet/payments/payment-control.md
+      
+    #   - Реестр собраний:
+    #     - Организация собраний: manual/workspace-management/soviet/meetings/organization.md
+    #     - Протоколы собраний: manual/workspace-management/soviet/meetings/protocols.md
     
-  - Пайщикам: 
-    - Вступить в кооператив: 'participants/registration.md' 
-    - Восстановление ключа: 'participants/restore.md' 
+    # - Стол бухгалтера (планируется):
+      # - Учёт операций: manual/workspace-management/accountant/operations/accounting.md
+      # - Отчётность: manual/workspace-management/accountant/reports/financial-reports.md
+      # - Налоговые документы: manual/workspace-management/accountant/tax/tax-documents.md
+    
+  # - Пайщикам: 
+    # - Начало работы:
+      # - Регистрация: participants/getting-started/joining/registration.md
+    #   - Первые шаги: participants/getting-started/joining/first-steps.md
+    #   - Интерфейс кабинета: participants/getting-started/work-basics/interface.md
+    #   - Навигация по системе: participants/getting-started/work-basics/navigation.md
+    
+    # - Кошелёк:
+    #   - Пополнение кошелька: participants/financial-operations/wallet-and-payments/wallet-deposit.md
+    #   - Просмотр баланса: participants/financial-operations/wallet-and-payments/view-balance.md
+    #   - Паевые взносы: participants/financial-operations/wallet-and-payments/share-contributions.md
+    #   - Возврат средств: participants/financial-operations/wallet-and-payments/refund.md
+    
+    # - Профиль и настройки:
+    #   - Настройка профиля: participants/getting-started/work-basics/profile-setup.md
+    #   - Безопасность: participants/getting-started/work-basics/security.md
+    #   - Уведомления: participants/getting-started/work-basics/notifications.md
+    
+    # - Документы:
+    #   - Мои документы: participants/documents-and-applications/document-work/my-documents.md
+    #   - Подписание документов: participants/documents-and-applications/document-work/document-signing.md
+    #   - Статусы заявлений: participants/documents-and-applications/document-work/application-statuses.md
+    #   - Архив документов: participants/documents-and-applications/document-work/document-archive.md
+    
+    # - Платежи:
+    #   - История платежей: participants/getting-started/work-basics/payments-history.md
+    #   - Детализация операций: participants/getting-started/work-basics/transaction-details.md
+    
+    # - Собрания:
+    #   - Участие в собраниях: participants/getting-started/work-basics/meeting-participation.md
+    #   - Голосование: participants/getting-started/work-basics/voting.md
+    
+    # - Контакты: participants/getting-started/work-basics/contacts.md
   
   - Разработчикам: 
-    - Разработчикам: documentation/index.md
-    - Как это работает: documentation/howitworks.md
-    - Архитектура: documentation/architecture.md
-    - Язык API: documentation/graphql.md
-    - Обзор SDK: documentation/sdk.md
-    - Классы SDK: documentation/classes.md
-    - Установка: documentation/install.md
-    - Первый старт: documentation/init.md
-    - Аккаунты: documentation/accounts.md
-    - Аудентификация: documentation/auth.md
-    - Пайщики: documentation/participants.md
-    - Соглашения: documentation/agreements.md
-    - Кошелёк: documentation/wallet.md
-    - Платежи и взносы: documentation/payments.md
-    - Методы платежа: documentation/payment-methods.md
-    - Решения: documentation/decisions.md
-    - Общие собрания: documentation/meetings.md
-    - Целевые программы: documentation/programs.md
-    - Документы: documentation/documents.md
-    - Кооперативные участки: documentation/branches.md
-    - Фонды: documentation/funds.md
-    - Расширения: documentation/extensions.md
-    - Рабочий стол: documentation/desktop.md
-    - Системная информация: documentation/system.md
+    - Основы платформы:
+      - Введение: documentation/index.md
+      - Как это работает: documentation/howitworks.md
+      - Архитектура: documentation/architecture.md
+      - Установка: documentation/install.md
+      - Первый старт: documentation/init.md
+    
+    - API и интеграции:
+      - Язык GraphQL API: documentation/graphql.md
+      - Обзор SDK: documentation/sdk.md
+      - Классы SDK: documentation/classes.md
+      - Аутентификация: documentation/auth.md
+    
+    - Основные сущности:
+      - Пользователи и аккаунты:
+        - Аккаунты: documentation/accounts.md
+        - Пайщики: documentation/participants.md
+        - Соглашения: documentation/agreements.md
+      
+      - Финансы и платежи:
+        - Кошелёк: documentation/wallet.md
+        - Платежи и взносы: documentation/payments.md
+        - Методы платежа: documentation/payment-methods.md
+    
+    - Управление и документооборот:
+      - Решения и собрания:
+        - Решения: documentation/decisions.md
+        - Общие собрания: documentation/meetings.md
+        - Документы: documentation/documents.md
+      
+      - Структура кооператива:
+        - Кооперативные участки: documentation/branches.md
+        - Фонды: documentation/funds.md
+        - Целевые программы: documentation/programs.md
+    
+    - Расширение функциональности:
+      - Приложения: documentation/extensions.md
+      - Рабочий стол: documentation/desktop.md
+      - Системная информация: documentation/system.md
     
     # - 🔗 SDK Docs: /sdk
     # - 🔗 GraphQL-API Docs: /graphql

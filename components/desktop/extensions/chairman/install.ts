@@ -8,6 +8,7 @@ import { MemberBranchList } from 'src/pages/Cooperative/MemberBranchList';
 import { ChangeRegisterPaymentsPage } from 'src/pages/Cooperative/ChangeRegisterPayments';
 import { ChangeCooperativeContacts } from 'src/pages/Cooperative/ChangeContacts';
 import { MembersPage } from 'src/pages/Cooperative/MembersPage';
+
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 

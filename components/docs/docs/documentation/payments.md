@@ -76,50 +76,50 @@ __Опциональный провайдер__: `yookassa` - оплата че�
 
 <a id="get-payment-providers"></a>
 ## Список активных провайдеров
-{{ get_sdk_doc("Queries", "Payments", "GetPaymentProviders") }} | {{ get_graphql_doc("Query.getPaymentProviders") }}
+{{ get_sdk_doc("Queries", "PaymentMethods", "GetPaymentProviders") }} | {{ get_graphql_doc("Query.getPaymentProviders") }}
 
 Запрос по извлечению списка провайдеров возвращает идентификаторы провайдеров и схемы их данных.
 
 ## Вступительный и минимальный паевой взносы
-{{ get_sdk_doc("Mutations", "Payments", "CreateInitialPayment") }} | {{ get_graphql_doc("Mutation.createInitialPayment") }}
+{{ get_sdk_doc("Mutations", "Gateway", "CreateInitialPayment") }} | {{ get_graphql_doc("Mutation.createInitialPayment") }}
 
 В процессе [регистрации пайщика](/documentation/participants) необходимо совершить вступительный и минимальный паевый взносы, выполнив регистрационный платеж. Для создания регистрационного платежа необходимо вызвать мутацию CreateInitialPayment. 
 
-{{ get_typedoc_desc("Mutations.Payments.CreateInitialPayment") }}
+{{ get_typedoc_desc("Mutations.Gateway.CreateInitialPayment") }}
 
-{{ get_typedoc_input("Mutations.Payments.CreateInitialPayment") }}
+{{ get_typedoc_input("Mutations.Gateway.CreateInitialPayment") }}
 
 
 ## Паевый взнос
-{{ get_sdk_doc("Mutations", "Payments", "CreateDepositPayment") }} | {{ get_graphql_doc("Mutation.createDepositPayment") }}
+{{ get_sdk_doc("Mutations", "Gateway", "CreateDepositPayment") }} | {{ get_graphql_doc("Mutation.createDepositPayment") }}
 
-{{ get_typedoc_desc("Mutations.Payments.CreateDepositPayment") }}
+{{ get_typedoc_desc("Mutations.Gateway.CreateDepositPayment") }}
 
-{{ get_typedoc_input("Mutations.Payments.CreateDepositPayment") }}
+{{ get_typedoc_input("Mutations.Gateway.CreateDepositPayment") }}
 
 
 ## Список платежей
-{{ get_sdk_doc("Queries", "Payments", "GetPayments") }} | {{ get_graphql_doc("Query.getPayments") }}
+{{ get_sdk_doc("Queries", "Gateway", "GetPayments") }} | {{ get_graphql_doc("Query.getPayments") }}
 
-{{ get_typedoc_desc("Queries.Payments.GetPayments") }}
+{{ get_typedoc_desc("Queries.Gateway.GetPayments") }}
 
-{{ get_typedoc_input("Queries.Payments.GetPayments") }}
+{{ get_typedoc_input("Queries.Gateway.GetPayments") }}
 
 
 ## Платеж возврата
-{{ get_sdk_doc("Mutations", "Payments", "CreateWithdraw") }} | {{ get_graphql_doc("Mutation.createWithdraw") }}
+{{ get_sdk_doc("Mutations", "Wallet", "CreateWithdraw") }} | {{ get_graphql_doc("Mutation.createWithdraw") }}
 
-{{ get_typedoc_desc("Mutations.Payments.CreateWithdraw") }}
+{{ get_typedoc_desc("Mutations.Wallet.CreateWithdraw") }}
 
-{{ get_typedoc_input("Mutations.Payments.CreateWithdraw") }}
+{{ get_typedoc_input("Mutations.Wallet.CreateWithdraw") }}
 
 
 
 ## Управление платежами
-{{ get_sdk_doc("Mutations", "Payments", "SetPaymentStatus") }} | {{ get_graphql_doc("Mutation.setPaymentStatus") }}
+{{ get_sdk_doc("Mutations", "Gateway", "SetPaymentStatus") }} | {{ get_graphql_doc("Mutation.setPaymentStatus") }}
 
-{{ get_typedoc_desc("Mutations.Payments.SetPaymentStatus") }}
+{{ get_typedoc_desc("Mutations.Gateway.SetPaymentStatus") }}
 
-{{ get_typedoc_input("Mutations.Payments.SetPaymentStatus") }}
+{{ get_typedoc_input("Mutations.Gateway.SetPaymentStatus") }}
 
 
