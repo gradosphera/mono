@@ -37,7 +37,7 @@ export const sendEmail = async (to, subject, text) => {
 export const sendResetKeyEmail = async (to, token) => {
   const subject = 'Восстановление доступа';
 
-  const resetPasswordUrl = `${config.base_url}/#/${config.coopname}/auth/reset-key?token=${token}`;
+  const resetPasswordUrl = `${config.base_url}/${config.coopname}/auth/reset-key?token=${token}`;
   const text = `Мы получили запрос на перевыпуск приватного ключа,
 Для перевыпуска нажмите на ссылку: ${resetPasswordUrl}. Время действия ссылки - 10 минут.
 
@@ -55,7 +55,7 @@ export const sendResetKeyEmail = async (to, token) => {
 export const sendInviteEmail = async (to, token) => {
   const subject = 'Приглашение в Цифровой Кооператив';
 
-  const inviteUrl = `${config.base_url}/#/${config.coopname}/auth/reset-key?token=${token}`;
+  const inviteUrl = `${config.base_url}/${config.coopname}/auth/reset-key?token=${token}`;
   const text = `Вам отправлено приглашение на подключение к Цифровому Кооперативу в качестве действующего пайщика.
 Для того, чтобы воспользоваться приглашением и получить ключ доступа, пожалуйста, нажмите на ссылку: ${inviteUrl}
 
