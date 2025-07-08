@@ -46,8 +46,8 @@ export class SystemDomainService {
       full_name: cooperative?.full_name,
       full_address: cooperative?.full_address,
       details: cooperative?.details,
-      phone: meta.phone,
-      email: meta.email,
+      phone: meta.phone || cooperative?.phone,
+      email: meta.email || cooperative?.email,
       // description: cooperative?.description,
       chairman: {
         first_name: cooperative?.chairman.first_name,
