@@ -19,6 +19,7 @@ import { DesktopModule } from './desktop/desktop.module';
 import { MeetModule } from './meet/meet.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { WalletModule } from './wallet/wallet.module';
+import { WebPushSubscriptionModule } from './web-push-subscription/web-push-subscription.module';
 @Module({
   imports: [
     AccountModule,
@@ -40,6 +41,7 @@ import { WalletModule } from './wallet/wallet.module';
     MeetModule,
     GatewayModule,
     WalletModule,
+    WebPushSubscriptionModule,
   ],
   exports: [
     AccountModule,
@@ -61,6 +63,7 @@ import { WalletModule } from './wallet/wallet.module';
     MeetModule,
     GatewayModule,
     WalletModule,
+    WebPushSubscriptionModule,
   ],
 })
 export class ApplicationModule {}

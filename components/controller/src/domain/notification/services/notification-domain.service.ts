@@ -1,12 +1,20 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { NOTIFICATION_PORT, NotificationPort, NotificationSubscriberData } from '../interfaces/notification.port';
+import { WebPushSubscriptionDomainInteractor } from '../interactors/web-push-subscription-domain.interactor';
 import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
+import type {
+  CreateSubscriptionInputDomainInterface,
+  NotificationPayloadDomainInterface,
+} from '../interfaces/web-push-subscription-domain.interface';
 
 @Injectable()
 export class NotificationDomainService {
   private readonly logger = new Logger(NotificationDomainService.name);
 
-  constructor(@Inject(NOTIFICATION_PORT) private readonly notificationPort: NotificationPort) {}
+  constructor(
+    @Inject(NOTIFICATION_PORT) private readonly notificationPort: NotificationPort,
+    private readonly webPushSubscriptionDomainInteractor: WebPushSubscriptionDomainInteractor
+  ) {}
 
   /**
    * Создает подписчика уведомлений из данных аккаунта
@@ -33,6 +41,86 @@ export class NotificationDomainService {
       this.logger.log(`Подписчик ${account.username} успешно создан/обновлен`);
     } catch (error: any) {
       this.logger.error(`Ошибка создания подписчика ${account.username}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Создать веб-пуш подписку для пользователя
+   * @param data Данные для создания подписки
+   */
+  async createWebPushSubscription(data: CreateSubscriptionInputDomainInterface): Promise<void> {
+    this.logger.log(`Создание веб-пуш подписки для пользователя ${data.userId}`);
+
+    try {
+      await this.webPushSubscriptionDomainInteractor.createOrUpdateSubscription(data);
+      this.logger.log(`Веб-пуш подписка создана для пользователя ${data.userId}`);
+    } catch (error: any) {
+      this.logger.error(`Ошибка создания веб-пуш подписки для ${data.userId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Отправить push уведомление пользователю
+   * @param userId ID пользователя
+   * @param payload Данные уведомления
+   */
+  async sendPushNotificationToUser(userId: string, payload: NotificationPayloadDomainInterface): Promise<void> {
+    this.logger.log(`Отправка push уведомления пользователю ${userId}: ${payload.title}`);
+
+    try {
+      await this.webPushSubscriptionDomainInteractor.sendNotificationToUser(userId, payload);
+      this.logger.log(`Push уведомление отправлено пользователю ${userId}`);
+    } catch (error: any) {
+      this.logger.error(`Ошибка отправки push уведомления пользователю ${userId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Отправить push уведомление всем пользователям
+   * @param payload Данные уведомления
+   */
+  async sendPushNotificationToAll(payload: NotificationPayloadDomainInterface): Promise<void> {
+    this.logger.log(`Отправка push уведомления всем пользователям: ${payload.title}`);
+
+    try {
+      await this.webPushSubscriptionDomainInteractor.sendNotificationToAll(payload);
+      this.logger.log(`Push уведомление отправлено всем пользователям`);
+    } catch (error: any) {
+      this.logger.error(`Ошибка отправки push уведомления всем пользователям: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Получить статистику веб-пуш подписок
+   */
+  async getWebPushSubscriptionStats() {
+    this.logger.debug('Получение статистики веб-пуш подписок');
+
+    try {
+      return await this.webPushSubscriptionDomainInteractor.getSubscriptionStats();
+    } catch (error: any) {
+      this.logger.error(`Ошибка получения статистики подписок: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Очистить неактивные веб-пуш подписки
+   * @param olderThanDays Количество дней
+   */
+  async cleanupInactiveWebPushSubscriptions(olderThanDays = 30): Promise<number> {
+    this.logger.log(`Очистка неактивных веб-пуш подписок старше ${olderThanDays} дней`);
+
+    try {
+      const deletedCount = await this.webPushSubscriptionDomainInteractor.cleanupInactiveSubscriptions(olderThanDays);
+      this.logger.log(`Очищено ${deletedCount} неактивных веб-пуш подписок`);
+      return deletedCount;
+    } catch (error: any) {
+      this.logger.error(`Ошибка очистки неактивных подписок: ${error.message}`, error.stack);
       throw error;
     }
   }
