@@ -160,10 +160,16 @@ export const AllTypesProps: Record<string,any> = {
 	CreateProjectFreeDecisionInput:{
 
 	},
+	CreateSubscriptionInput:{
+		subscription:"WebPushSubscriptionDataInput"
+	},
 	CreateWithdrawInput:{
 		statement:"ReturnByMoneySignedDocumentInput"
 	},
 	DateTime: `scalar.DateTime` as const,
+	DeactivateSubscriptionInput:{
+
+	},
 	DeclineRequestInput:{
 
 	},
@@ -225,6 +231,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	GetPaymentMethodsInput:{
+
+	},
+	GetUserSubscriptionsInput:{
 
 	},
 	Init:{
@@ -294,8 +303,14 @@ export const AllTypesProps: Record<string,any> = {
 		createProjectOfFreeDecision:{
 			data:"CreateProjectFreeDecisionInput"
 		},
+		createWebPushSubscription:{
+			data:"CreateSubscriptionInput"
+		},
 		createWithdraw:{
 			input:"CreateWithdrawInput"
+		},
+		deactivateWebPushSubscriptionById:{
+			data:"DeactivateSubscriptionInput"
 		},
 		declineRequest:{
 			data:"DeclineRequestInput"
@@ -583,6 +598,9 @@ export const AllTypesProps: Record<string,any> = {
 			data:"PaymentFiltersInput",
 			options:"PaginationInput"
 		},
+		getUserWebPushSubscriptions:{
+			data:"GetUserSubscriptionsInput"
+		},
 		searchPrivateAccounts:{
 			data:"SearchPrivateAccountsInput"
 		}
@@ -745,6 +763,12 @@ export const AllTypesProps: Record<string,any> = {
 	VoteOnAnnualGeneralMeetInput:{
 		ballot:"AnnualGeneralMeetingVotingBallotSignedDocumentInput",
 		votes:"VoteItemInput"
+	},
+	WebPushSubscriptionDataInput:{
+		keys:"WebPushSubscriptionKeysInput"
+	},
+	WebPushSubscriptionKeysInput:{
+
 	}
 }
 
@@ -971,6 +995,11 @@ export const ReturnTypes: Record<string,any> = {
 		type:"String",
 		username:"String",
 		verifications:"Verification"
+	},
+	CreateSubscriptionResponse:{
+		message:"String",
+		subscription:"WebPushSubscriptionDto",
+		success:"Boolean"
 	},
 	CreateWithdrawResponse:{
 		withdraw_hash:"String"
@@ -1252,7 +1281,9 @@ export const ReturnTypes: Record<string,any> = {
 		createInitialPayment:"GatewayPayment",
 		createParentOffer:"Transaction",
 		createProjectOfFreeDecision:"CreatedProjectFreeDecision",
+		createWebPushSubscription:"CreateSubscriptionResponse",
 		createWithdraw:"CreateWithdrawResponse",
+		deactivateWebPushSubscriptionById:"Boolean",
 		declineRequest:"Transaction",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
@@ -1444,6 +1475,8 @@ export const ReturnTypes: Record<string,any> = {
 		getPaymentMethods:"PaymentMethodPaginationResult",
 		getPayments:"PaginatedGatewayPaymentsPaginationResult",
 		getSystemInfo:"SystemInfo",
+		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
+		getWebPushSubscriptionStats:"SubscriptionStatsDto",
 		searchPrivateAccounts:"PrivateAccountSearchResult"
 	},
 	Question:{
@@ -1530,6 +1563,12 @@ export const ReturnTypes: Record<string,any> = {
 		action:"ExtendedBlockchainAction",
 		documentAggregate:"DocumentAggregate"
 	},
+	SubscriptionStatsDto:{
+		active:"Int",
+		inactive:"Int",
+		total:"Int",
+		uniqueUsers:"Int"
+	},
 	SystemInfo:{
 		blockchain_account:"BlockchainAccount",
 		blockchain_info:"BlockchainInfoDTO",
@@ -1604,6 +1643,17 @@ export const ReturnTypes: Record<string,any> = {
 	WaitWeight:{
 		wait_sec:"Int",
 		weight:"Int"
+	},
+	WebPushSubscriptionDto:{
+		authKey:"String",
+		createdAt:"DateTime",
+		endpoint:"String",
+		id:"String",
+		isActive:"Boolean",
+		p256dhKey:"String",
+		updatedAt:"DateTime",
+		userAgent:"String",
+		username:"String"
 	}
 }
 

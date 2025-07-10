@@ -2077,6 +2077,23 @@ export type ValueTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string | Variable<any, string>
 };
+	["CreateSubscriptionInput"]: {
+	/** Данные подписки */
+	subscription: ValueTypes["WebPushSubscriptionDataInput"] | Variable<any, string>,
+	/** User Agent браузера */
+	userAgent?: string | undefined | null | Variable<any, string>,
+	/** Username пользователя */
+	username: string | Variable<any, string>
+};
+	["CreateSubscriptionResponse"]: AliasType<{
+	/** Сообщение о результате операции */
+	message?:boolean | `@${string}`,
+	/** Данные созданной подписки */
+	subscription?:ValueTypes["WebPushSubscriptionDto"],
+	/** Успешно ли создана подписка */
+	success?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CreateWithdrawInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -2109,6 +2126,10 @@ export type ValueTypes = {
 }>;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
+	["DeactivateSubscriptionInput"]: {
+	/** ID подписки для деактивации */
+	subscriptionId: string | Variable<any, string>
+};
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и агрегат документа самого решения. */
 ["DecisionDetailAggregate"]: AliasType<{
 	action?:ValueTypes["ExtendedBlockchainAction"],
@@ -2544,6 +2565,10 @@ export type ValueTypes = {
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null | Variable<any, string>
 };
+	["GetUserSubscriptionsInput"]: {
+	/** Username пользователя */
+	username: string | Variable<any, string>
+};
 	["Individual"]: AliasType<{
 	/** Дата рождения */
 	birthdate?:boolean | `@${string}`,
@@ -2852,7 +2877,9 @@ createDepositPayment?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variab
 createInitialPayment?: [{	data: ValueTypes["CreateInitialPaymentInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
 createParentOffer?: [{	data: ValueTypes["CreateParentOfferInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["CreatedProjectFreeDecision"]],
+createWebPushSubscription?: [{	data: ValueTypes["CreateSubscriptionInput"] | Variable<any, string>},ValueTypes["CreateSubscriptionResponse"]],
 createWithdraw?: [{	input: ValueTypes["CreateWithdrawInput"] | Variable<any, string>},ValueTypes["CreateWithdrawResponse"]],
+deactivateWebPushSubscriptionById?: [{	data: ValueTypes["DeactivateSubscriptionInput"] | Variable<any, string>},boolean | `@${string}`],
 declineRequest?: [{	data: ValueTypes["DeclineRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -3374,6 +3401,9 @@ getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined |
 getPayments?: [{	data?: ValueTypes["PaymentFiltersInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedGatewayPaymentsPaginationResult"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
+getUserWebPushSubscriptions?: [{	data: ValueTypes["GetUserSubscriptionsInput"] | Variable<any, string>},ValueTypes["WebPushSubscriptionDto"]],
+	/** Получить статистику веб-пуш подписок (только для председателя) */
+	getWebPushSubscriptionStats?:ValueTypes["SubscriptionStatsDto"],
 searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Variable<any, string>},ValueTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -4023,6 +4053,17 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	documentAggregate?:ValueTypes["DocumentAggregate"],
 		__typename?: boolean | `@${string}`
 }>;
+	["SubscriptionStatsDto"]: AliasType<{
+	/** Количество активных подписок */
+	active?:boolean | `@${string}`,
+	/** Количество неактивных подписок */
+	inactive?:boolean | `@${string}`,
+	/** Общее количество подписок */
+	total?:boolean | `@${string}`,
+	/** Количество уникальных пользователей */
+	uniqueUsers?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SupplyOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -4324,7 +4365,40 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Вес */
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
-}>
+}>;
+	["WebPushSubscriptionDataInput"]: {
+	/** Endpoint для отправки уведомлений */
+	endpoint: string | Variable<any, string>,
+	/** Ключи для шифрования */
+	keys: ValueTypes["WebPushSubscriptionKeysInput"] | Variable<any, string>
+};
+	["WebPushSubscriptionDto"]: AliasType<{
+	/** Auth ключ для аутентификации */
+	authKey?:boolean | `@${string}`,
+	/** Дата создания подписки */
+	createdAt?:boolean | `@${string}`,
+	/** Endpoint для отправки уведомлений */
+	endpoint?:boolean | `@${string}`,
+	/** Уникальный идентификатор подписки */
+	id?:boolean | `@${string}`,
+	/** Активна ли подписка */
+	isActive?:boolean | `@${string}`,
+	/** P256DH ключ для шифрования */
+	p256dhKey?:boolean | `@${string}`,
+	/** Дата последнего обновления */
+	updatedAt?:boolean | `@${string}`,
+	/** User Agent браузера */
+	userAgent?:boolean | `@${string}`,
+	/** Username пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["WebPushSubscriptionKeysInput"]: {
+	/** Auth ключ для аутентификации */
+	auth: string | Variable<any, string>,
+	/** P256DH ключ для шифрования */
+	p256dh: string | Variable<any, string>
+}
   }
 
 export type ResolverInputTypes = {
@@ -5482,6 +5556,23 @@ export type ResolverInputTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	["CreateSubscriptionInput"]: {
+	/** Данные подписки */
+	subscription: ResolverInputTypes["WebPushSubscriptionDataInput"],
+	/** User Agent браузера */
+	userAgent?: string | undefined | null,
+	/** Username пользователя */
+	username: string
+};
+	["CreateSubscriptionResponse"]: AliasType<{
+	/** Сообщение о результате операции */
+	message?:boolean | `@${string}`,
+	/** Данные созданной подписки */
+	subscription?:ResolverInputTypes["WebPushSubscriptionDto"],
+	/** Успешно ли создана подписка */
+	success?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CreateWithdrawInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -5514,6 +5605,10 @@ export type ResolverInputTypes = {
 }>;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
+	["DeactivateSubscriptionInput"]: {
+	/** ID подписки для деактивации */
+	subscriptionId: string
+};
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и агрегат документа самого решения. */
 ["DecisionDetailAggregate"]: AliasType<{
 	action?:ResolverInputTypes["ExtendedBlockchainAction"],
@@ -5949,6 +6044,10 @@ export type ResolverInputTypes = {
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null
 };
+	["GetUserSubscriptionsInput"]: {
+	/** Username пользователя */
+	username: string
+};
 	["Individual"]: AliasType<{
 	/** Дата рождения */
 	birthdate?:boolean | `@${string}`,
@@ -6257,7 +6356,9 @@ createDepositPayment?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]}
 createInitialPayment?: [{	data: ResolverInputTypes["CreateInitialPaymentInput"]},ResolverInputTypes["GatewayPayment"]],
 createParentOffer?: [{	data: ResolverInputTypes["CreateParentOfferInput"]},ResolverInputTypes["Transaction"]],
 createProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecisionInput"]},ResolverInputTypes["CreatedProjectFreeDecision"]],
+createWebPushSubscription?: [{	data: ResolverInputTypes["CreateSubscriptionInput"]},ResolverInputTypes["CreateSubscriptionResponse"]],
 createWithdraw?: [{	input: ResolverInputTypes["CreateWithdrawInput"]},ResolverInputTypes["CreateWithdrawResponse"]],
+deactivateWebPushSubscriptionById?: [{	data: ResolverInputTypes["DeactivateSubscriptionInput"]},boolean | `@${string}`],
 declineRequest?: [{	data: ResolverInputTypes["DeclineRequestInput"]},ResolverInputTypes["Transaction"]],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
@@ -6781,6 +6882,9 @@ getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | und
 getPayments?: [{	data?: ResolverInputTypes["PaymentFiltersInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedGatewayPaymentsPaginationResult"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
+getUserWebPushSubscriptions?: [{	data: ResolverInputTypes["GetUserSubscriptionsInput"]},ResolverInputTypes["WebPushSubscriptionDto"]],
+	/** Получить статистику веб-пуш подписок (только для председателя) */
+	getWebPushSubscriptionStats?:ResolverInputTypes["SubscriptionStatsDto"],
 searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"]},ResolverInputTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -7430,6 +7534,17 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	documentAggregate?:ResolverInputTypes["DocumentAggregate"],
 		__typename?: boolean | `@${string}`
 }>;
+	["SubscriptionStatsDto"]: AliasType<{
+	/** Количество активных подписок */
+	active?:boolean | `@${string}`,
+	/** Количество неактивных подписок */
+	inactive?:boolean | `@${string}`,
+	/** Общее количество подписок */
+	total?:boolean | `@${string}`,
+	/** Количество уникальных пользователей */
+	uniqueUsers?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SupplyOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -7733,6 +7848,39 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["WebPushSubscriptionDataInput"]: {
+	/** Endpoint для отправки уведомлений */
+	endpoint: string,
+	/** Ключи для шифрования */
+	keys: ResolverInputTypes["WebPushSubscriptionKeysInput"]
+};
+	["WebPushSubscriptionDto"]: AliasType<{
+	/** Auth ключ для аутентификации */
+	authKey?:boolean | `@${string}`,
+	/** Дата создания подписки */
+	createdAt?:boolean | `@${string}`,
+	/** Endpoint для отправки уведомлений */
+	endpoint?:boolean | `@${string}`,
+	/** Уникальный идентификатор подписки */
+	id?:boolean | `@${string}`,
+	/** Активна ли подписка */
+	isActive?:boolean | `@${string}`,
+	/** P256DH ключ для шифрования */
+	p256dhKey?:boolean | `@${string}`,
+	/** Дата последнего обновления */
+	updatedAt?:boolean | `@${string}`,
+	/** User Agent браузера */
+	userAgent?:boolean | `@${string}`,
+	/** Username пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["WebPushSubscriptionKeysInput"]: {
+	/** Auth ключ для аутентификации */
+	auth: string,
+	/** P256DH ключ для шифрования */
+	p256dh: string
+};
 	["schema"]: AliasType<{
 	query?:ResolverInputTypes["Query"],
 	mutation?:ResolverInputTypes["Mutation"],
@@ -8871,6 +9019,22 @@ export type ModelTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	["CreateSubscriptionInput"]: {
+	/** Данные подписки */
+	subscription: ModelTypes["WebPushSubscriptionDataInput"],
+	/** User Agent браузера */
+	userAgent?: string | undefined | null,
+	/** Username пользователя */
+	username: string
+};
+	["CreateSubscriptionResponse"]: {
+		/** Сообщение о результате операции */
+	message: string,
+	/** Данные созданной подписки */
+	subscription: ModelTypes["WebPushSubscriptionDto"],
+	/** Успешно ли создана подписка */
+	success: boolean
+};
 	["CreateWithdrawInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -8901,6 +9065,10 @@ export type ModelTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
+	["DeactivateSubscriptionInput"]: {
+	/** ID подписки для деактивации */
+	subscriptionId: string
+};
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и агрегат документа самого решения. */
 ["DecisionDetailAggregate"]: {
 		action: ModelTypes["ExtendedBlockchainAction"],
@@ -9322,6 +9490,10 @@ export type ModelTypes = {
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null
 };
+	["GetUserSubscriptionsInput"]: {
+	/** Username пользователя */
+	username: string
+};
 	["Individual"]: {
 		/** Дата рождения */
 	birthdate: string,
@@ -9635,8 +9807,12 @@ export type ModelTypes = {
 	createParentOffer: ModelTypes["Transaction"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 	createProjectOfFreeDecision: ModelTypes["CreatedProjectFreeDecision"],
+	/** Создать веб-пуш подписку для пользователя */
+	createWebPushSubscription: ModelTypes["CreateSubscriptionResponse"],
 	/** Создать заявку на вывод средств */
 	createWithdraw: ModelTypes["CreateWithdrawResponse"],
+	/** Деактивировать веб-пуш подписку по ID */
+	deactivateWebPushSubscriptionById: boolean,
 	/** Отклонить заявку */
 	declineRequest: ModelTypes["Transaction"],
 	/** Удалить кооперативный участок */
@@ -10199,6 +10375,10 @@ export type ModelTypes = {
 	getPayments: ModelTypes["PaginatedGatewayPaymentsPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"],
+	/** Получить веб-пуш подписки пользователя */
+	getUserWebPushSubscriptions: Array<ModelTypes["WebPushSubscriptionDto"]>,
+	/** Получить статистику веб-пуш подписок (только для председателя) */
+	getWebPushSubscriptionStats: ModelTypes["SubscriptionStatsDto"],
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<ModelTypes["PrivateAccountSearchResult"]>
 };
@@ -10836,6 +11016,16 @@ export type ModelTypes = {
 		action: ModelTypes["ExtendedBlockchainAction"],
 	documentAggregate: ModelTypes["DocumentAggregate"]
 };
+	["SubscriptionStatsDto"]: {
+		/** Количество активных подписок */
+	active: number,
+	/** Количество неактивных подписок */
+	inactive: number,
+	/** Общее количество подписок */
+	total: number,
+	/** Количество уникальных пользователей */
+	uniqueUsers: number
+};
 	["SupplyOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -11123,6 +11313,38 @@ export type ModelTypes = {
 	wait_sec: number,
 	/** Вес */
 	weight: number
+};
+	["WebPushSubscriptionDataInput"]: {
+	/** Endpoint для отправки уведомлений */
+	endpoint: string,
+	/** Ключи для шифрования */
+	keys: ModelTypes["WebPushSubscriptionKeysInput"]
+};
+	["WebPushSubscriptionDto"]: {
+		/** Auth ключ для аутентификации */
+	authKey: string,
+	/** Дата создания подписки */
+	createdAt: ModelTypes["DateTime"],
+	/** Endpoint для отправки уведомлений */
+	endpoint: string,
+	/** Уникальный идентификатор подписки */
+	id: string,
+	/** Активна ли подписка */
+	isActive: boolean,
+	/** P256DH ключ для шифрования */
+	p256dhKey: string,
+	/** Дата последнего обновления */
+	updatedAt: ModelTypes["DateTime"],
+	/** User Agent браузера */
+	userAgent?: string | undefined | null,
+	/** Username пользователя */
+	username: string
+};
+	["WebPushSubscriptionKeysInput"]: {
+	/** Auth ключ для аутентификации */
+	auth: string,
+	/** P256DH ключ для шифрования */
+	p256dh: string
 };
 	["schema"]: {
 	query?: ModelTypes["Query"] | undefined | null,
@@ -12288,6 +12510,23 @@ export type GraphQLTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	["CreateSubscriptionInput"]: {
+		/** Данные подписки */
+	subscription: GraphQLTypes["WebPushSubscriptionDataInput"],
+	/** User Agent браузера */
+	userAgent?: string | undefined | null,
+	/** Username пользователя */
+	username: string
+};
+	["CreateSubscriptionResponse"]: {
+	__typename: "CreateSubscriptionResponse",
+	/** Сообщение о результате операции */
+	message: string,
+	/** Данные созданной подписки */
+	subscription: GraphQLTypes["WebPushSubscriptionDto"],
+	/** Успешно ли создана подписка */
+	success: boolean
+};
 	["CreateWithdrawInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -12320,6 +12559,10 @@ export type GraphQLTypes = {
 };
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]: "scalar" & { name: "DateTime" };
+	["DeactivateSubscriptionInput"]: {
+		/** ID подписки для деактивации */
+	subscriptionId: string
+};
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и агрегат документа самого решения. */
 ["DecisionDetailAggregate"]: {
 	__typename: "DecisionDetailAggregate",
@@ -12755,6 +12998,10 @@ export type GraphQLTypes = {
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null
 };
+	["GetUserSubscriptionsInput"]: {
+		/** Username пользователя */
+	username: string
+};
 	["Individual"]: {
 	__typename: "Individual",
 	/** Дата рождения */
@@ -13079,8 +13326,12 @@ export type GraphQLTypes = {
 	createParentOffer: GraphQLTypes["Transaction"],
 	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
 	createProjectOfFreeDecision: GraphQLTypes["CreatedProjectFreeDecision"],
+	/** Создать веб-пуш подписку для пользователя */
+	createWebPushSubscription: GraphQLTypes["CreateSubscriptionResponse"],
 	/** Создать заявку на вывод средств */
 	createWithdraw: GraphQLTypes["CreateWithdrawResponse"],
+	/** Деактивировать веб-пуш подписку по ID */
+	deactivateWebPushSubscriptionById: boolean,
 	/** Отклонить заявку */
 	declineRequest: GraphQLTypes["Transaction"],
 	/** Удалить кооперативный участок */
@@ -13672,6 +13923,10 @@ export type GraphQLTypes = {
 	getPayments: GraphQLTypes["PaginatedGatewayPaymentsPaginationResult"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"],
+	/** Получить веб-пуш подписки пользователя */
+	getUserWebPushSubscriptions: Array<GraphQLTypes["WebPushSubscriptionDto"]>,
+	/** Получить статистику веб-пуш подписок (только для председателя) */
+	getWebPushSubscriptionStats: GraphQLTypes["SubscriptionStatsDto"],
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<GraphQLTypes["PrivateAccountSearchResult"]>
 };
@@ -14321,6 +14576,17 @@ export type GraphQLTypes = {
 	action: GraphQLTypes["ExtendedBlockchainAction"],
 	documentAggregate: GraphQLTypes["DocumentAggregate"]
 };
+	["SubscriptionStatsDto"]: {
+	__typename: "SubscriptionStatsDto",
+	/** Количество активных подписок */
+	active: number,
+	/** Количество неактивных подписок */
+	inactive: number,
+	/** Общее количество подписок */
+	total: number,
+	/** Количество уникальных пользователей */
+	uniqueUsers: number
+};
 	["SupplyOnRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -14623,6 +14889,39 @@ export type GraphQLTypes = {
 	wait_sec: number,
 	/** Вес */
 	weight: number
+};
+	["WebPushSubscriptionDataInput"]: {
+		/** Endpoint для отправки уведомлений */
+	endpoint: string,
+	/** Ключи для шифрования */
+	keys: GraphQLTypes["WebPushSubscriptionKeysInput"]
+};
+	["WebPushSubscriptionDto"]: {
+	__typename: "WebPushSubscriptionDto",
+	/** Auth ключ для аутентификации */
+	authKey: string,
+	/** Дата создания подписки */
+	createdAt: GraphQLTypes["DateTime"],
+	/** Endpoint для отправки уведомлений */
+	endpoint: string,
+	/** Уникальный идентификатор подписки */
+	id: string,
+	/** Активна ли подписка */
+	isActive: boolean,
+	/** P256DH ключ для шифрования */
+	p256dhKey: string,
+	/** Дата последнего обновления */
+	updatedAt: GraphQLTypes["DateTime"],
+	/** User Agent браузера */
+	userAgent?: string | undefined | null,
+	/** Username пользователя */
+	username: string
+};
+	["WebPushSubscriptionKeysInput"]: {
+		/** Auth ключ для аутентификации */
+	auth: string,
+	/** P256DH ключ для шифрования */
+	p256dh: string
 }
     }
 /** Тип аккаунта пользователя в системе */
@@ -14747,8 +15046,10 @@ type ZEUS_VARIABLES = {
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateParentOfferInput"]: ValueTypes["CreateParentOfferInput"];
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
+	["CreateSubscriptionInput"]: ValueTypes["CreateSubscriptionInput"];
 	["CreateWithdrawInput"]: ValueTypes["CreateWithdrawInput"];
 	["DateTime"]: ValueTypes["DateTime"];
+	["DeactivateSubscriptionInput"]: ValueTypes["DeactivateSubscriptionInput"];
 	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
@@ -14770,6 +15071,7 @@ type ZEUS_VARIABLES = {
 	["GetMeetInput"]: ValueTypes["GetMeetInput"];
 	["GetMeetsInput"]: ValueTypes["GetMeetsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
+	["GetUserSubscriptionsInput"]: ValueTypes["GetUserSubscriptionsInput"];
 	["Init"]: ValueTypes["Init"];
 	["Install"]: ValueTypes["Install"];
 	["JSON"]: ValueTypes["JSON"];
@@ -14843,4 +15145,6 @@ type ZEUS_VARIABLES = {
 	["VarsInput"]: ValueTypes["VarsInput"];
 	["VoteItemInput"]: ValueTypes["VoteItemInput"];
 	["VoteOnAnnualGeneralMeetInput"]: ValueTypes["VoteOnAnnualGeneralMeetInput"];
+	["WebPushSubscriptionDataInput"]: ValueTypes["WebPushSubscriptionDataInput"];
+	["WebPushSubscriptionKeysInput"]: ValueTypes["WebPushSubscriptionKeysInput"];
 }

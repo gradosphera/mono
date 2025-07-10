@@ -1,8 +1,6 @@
-import type {
-  WebPushSubscriptionDomainInterface,
-  CreateWebPushSubscriptionDomainInterface,
-  SubscriptionStatsDomainInterface,
-} from './web-push-subscription-domain.interface';
+import type { WebPushSubscriptionDomainInterface } from './web-push-subscription-domain.interface';
+import type { CreateWebPushSubscriptionDomainInterface } from './create-web-push-subscription-domain.interface';
+import type { SubscriptionStatsDomainInterface } from './subscription-stats-domain.interface';
 
 /**
  * Порт для работы с веб-пуш подписками
@@ -25,10 +23,10 @@ export interface WebPushSubscriptionPort {
 
   /**
    * Получить все активные подписки пользователя
-   * @param userId ID пользователя
+   * @param username Username пользователя
    * @returns Promise<WebPushSubscriptionDomainInterface[]>
    */
-  getUserSubscriptions(userId: string): Promise<WebPushSubscriptionDomainInterface[]>;
+  getUserSubscriptions(username: string): Promise<WebPushSubscriptionDomainInterface[]>;
 
   /**
    * Получить все активные подписки

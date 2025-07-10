@@ -6,7 +6,7 @@ import type { WebPushSubscriptionDomainInterface } from '../interfaces/web-push-
  */
 export class WebPushSubscriptionDomainEntity implements WebPushSubscriptionDomainInterface {
   public readonly id: string;
-  public readonly userId: string;
+  public readonly username: string;
   public readonly endpoint: string;
   public readonly p256dhKey: string;
   public readonly authKey: string;
@@ -17,7 +17,7 @@ export class WebPushSubscriptionDomainEntity implements WebPushSubscriptionDomai
 
   constructor(data: WebPushSubscriptionDomainInterface) {
     this.id = data.id;
-    this.userId = data.userId;
+    this.username = data.username;
     this.endpoint = data.endpoint;
     this.p256dhKey = data.p256dhKey;
     this.authKey = data.authKey;
@@ -51,11 +51,11 @@ export class WebPushSubscriptionDomainEntity implements WebPushSubscriptionDomai
 
   /**
    * Проверяет, принадлежит ли подписка указанному пользователю
-   * @param userId ID пользователя
+   * @param username Username пользователя
    * @returns true, если подписка принадлежит пользователю
    */
-  belongsToUser(userId: string): boolean {
-    return this.userId === userId;
+  belongsToUser(username: string): boolean {
+    return this.username === username;
   }
 
   /**

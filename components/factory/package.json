@@ -2,7 +2,6 @@
   "name": "@coopenomics/factory",
   "type": "module",
   "version": "2025.7.6-1",
-  "packageManager": "pnpm@9.0.6",
   "description": "",
   "author": "Alex Ant <chairman.voskhod@gmail.com>",
   "license": "MIT",
@@ -81,16 +80,6 @@
     "unbuild": "^2.0.0",
     "vite": "^5.2.11",
     "vitest": "^1.6.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@babel/traverse@<7.23.2": ">=7.23.2",
-      "node-fetch@<2.6.7": ">=2.6.7",
-      "nth-check@<2.0.1": ">=2.0.1",
-      "semver@<5.7.2": ">=5.7.2",
-      "tar@<6.2.1": ">=6.2.1",
-      "vite@>=5.1.0 <=5.1.6": ">=5.1.7"
-    }
   },
   "gitHead": "b05c17bee481d90c4cd82aa2a34ac428f8263a5f"
 }

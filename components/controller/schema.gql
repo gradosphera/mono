@@ -1643,6 +1643,28 @@ input CreateProjectFreeDecisionInput {
   question: String!
 }
 
+input CreateSubscriptionInput {
+  """Данные подписки"""
+  subscription: WebPushSubscriptionDataInput!
+
+  """User Agent браузера"""
+  userAgent: String
+
+  """Username пользователя"""
+  username: String!
+}
+
+type CreateSubscriptionResponse {
+  """Сообщение о результате операции"""
+  message: String!
+
+  """Данные созданной подписки"""
+  subscription: WebPushSubscriptionDto!
+
+  """Успешно ли создана подписка"""
+  success: Boolean!
+}
+
 input CreateWithdrawInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -1686,6 +1708,11 @@ type CreatedProjectFreeDecision {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input DeactivateSubscriptionInput {
+  """ID подписки для деактивации"""
+  subscriptionId: String!
+}
 
 """
 Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и агрегат документа самого решения.
@@ -2316,6 +2343,11 @@ input GetPaymentMethodsInput {
   username: String
 }
 
+input GetUserSubscriptionsInput {
+  """Username пользователя"""
+  username: String!
+}
+
 type Individual {
   """Дата рождения"""
   birthdate: String!
@@ -2790,8 +2822,14 @@ type Mutation {
   """
   createProjectOfFreeDecision(data: CreateProjectFreeDecisionInput!): CreatedProjectFreeDecision!
 
+  """Создать веб-пуш подписку для пользователя"""
+  createWebPushSubscription(data: CreateSubscriptionInput!): CreateSubscriptionResponse!
+
   """Создать заявку на вывод средств"""
   createWithdraw(input: CreateWithdrawInput!): CreateWithdrawResponse!
+
+  """Деактивировать веб-пуш подписку по ID"""
+  deactivateWebPushSubscriptionById(data: DeactivateSubscriptionInput!): Boolean!
 
   """Отклонить заявку"""
   declineRequest(data: DeclineRequestInput!): Transaction!
@@ -3662,6 +3700,12 @@ type Query {
 
   """Получить сводную публичную информацию о системе"""
   getSystemInfo: SystemInfo!
+
+  """Получить веб-пуш подписки пользователя"""
+  getUserWebPushSubscriptions(data: GetUserSubscriptionsInput!): [WebPushSubscriptionDto!]!
+
+  """Получить статистику веб-пуш подписок (только для председателя)"""
+  getWebPushSubscriptionStats: SubscriptionStatsDto!
 
   """
   Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.
@@ -4588,6 +4632,20 @@ type StatementDetailAggregate {
   documentAggregate: DocumentAggregate!
 }
 
+type SubscriptionStatsDto {
+  """Количество активных подписок"""
+  active: Int!
+
+  """Количество неактивных подписок"""
+  inactive: Int!
+
+  """Общее количество подписок"""
+  total: Int!
+
+  """Количество уникальных пользователей"""
+  uniqueUsers: Int!
+}
+
 input SupplyOnRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -5001,4 +5059,49 @@ type WaitWeight {
 
   """Вес"""
   weight: Int!
+}
+
+input WebPushSubscriptionDataInput {
+  """Endpoint для отправки уведомлений"""
+  endpoint: String!
+
+  """Ключи для шифрования"""
+  keys: WebPushSubscriptionKeysInput!
+}
+
+type WebPushSubscriptionDto {
+  """Auth ключ для аутентификации"""
+  authKey: String!
+
+  """Дата создания подписки"""
+  createdAt: DateTime!
+
+  """Endpoint для отправки уведомлений"""
+  endpoint: String!
+
+  """Уникальный идентификатор подписки"""
+  id: String!
+
+  """Активна ли подписка"""
+  isActive: Boolean!
+
+  """P256DH ключ для шифрования"""
+  p256dhKey: String!
+
+  """Дата последнего обновления"""
+  updatedAt: DateTime!
+
+  """User Agent браузера"""
+  userAgent: String
+
+  """Username пользователя"""
+  username: String!
+}
+
+input WebPushSubscriptionKeysInput {
+  """Auth ключ для аутентификации"""
+  auth: String!
+
+  """P256DH ключ для шифрования"""
+  p256dh: String!
 }

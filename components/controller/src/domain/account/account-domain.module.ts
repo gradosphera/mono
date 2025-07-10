@@ -4,10 +4,11 @@ import { Global, Module } from '@nestjs/common';
 import { AccountDomainInteractor } from './interactors/account.interactor';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from './services/account-domain.service';
 import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
+import { NotificationDomainModule } from '~/domain/notification/notification-domain.module';
 
 @Global()
 @Module({
-  imports: [InfrastructureModule],
+  imports: [InfrastructureModule, NotificationDomainModule],
   providers: [
     AccountDomainInteractor,
     AccountDomainService,

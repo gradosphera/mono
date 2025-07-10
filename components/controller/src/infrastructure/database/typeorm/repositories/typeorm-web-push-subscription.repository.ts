@@ -3,12 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WebPushSubscriptionEntity } from '../entities/web-push-subscription.entity';
 import { WebPushSubscriptionPort } from '~/domain/notification/interfaces/web-push-subscription.port';
-import { WebPushSubscriptionDomainEntity } from '~/domain/notification/entities/web-push-subscription-domain.entity';
-import type {
-  WebPushSubscriptionDomainInterface,
-  CreateWebPushSubscriptionDomainInterface,
-  SubscriptionStatsDomainInterface,
-} from '~/domain/notification/interfaces/web-push-subscription-domain.interface';
+import type { WebPushSubscriptionDomainInterface } from '~/domain/notification/interfaces/web-push-subscription-domain.interface';
+import type { CreateWebPushSubscriptionDomainInterface } from '~/domain/notification/interfaces/create-web-push-subscription-domain.interface';
+import type { SubscriptionStatsDomainInterface } from '~/domain/notification/interfaces/subscription-stats-domain.interface';
 
 @Injectable()
 export class TypeOrmWebPushSubscriptionRepository implements WebPushSubscriptionPort {
@@ -22,7 +19,7 @@ export class TypeOrmWebPushSubscriptionRepository implements WebPushSubscription
    */
   async saveSubscription(data: CreateWebPushSubscriptionDomainInterface): Promise<WebPushSubscriptionDomainInterface> {
     const entity = this.ormRepo.create({
-      userId: data.userId,
+      username: data.username,
       endpoint: data.endpoint,
       p256dhKey: data.p256dhKey,
       authKey: data.authKey,
@@ -45,9 +42,9 @@ export class TypeOrmWebPushSubscriptionRepository implements WebPushSubscription
   /**
    * Получить все активные подписки пользователя
    */
-  async getUserSubscriptions(userId: string): Promise<WebPushSubscriptionDomainInterface[]> {
+  async getUserSubscriptions(username: string): Promise<WebPushSubscriptionDomainInterface[]> {
     const entities = await this.ormRepo.find({
-      where: { userId, isActive: true },
+      where: { username, isActive: true },
     });
     return entities.map((entity) => entity.toDomainEntity());
   }
@@ -107,7 +104,7 @@ export class TypeOrmWebPushSubscriptionRepository implements WebPushSubscription
 
     const uniqueUsersResult = await this.ormRepo
       .createQueryBuilder('subscription')
-      .select('COUNT(DISTINCT subscription.userId)', 'count')
+      .select('COUNT(DISTINCT subscription.username)', 'count')
       .where('subscription.isActive = :isActive', { isActive: true })
       .getRawOne();
 
@@ -133,7 +130,7 @@ export class TypeOrmWebPushSubscriptionRepository implements WebPushSubscription
     }
 
     // Обновляем только переданные поля
-    if (data.userId !== undefined) existingEntity.userId = data.userId;
+    if (data.username !== undefined) existingEntity.username = data.username;
     if (data.p256dhKey !== undefined) existingEntity.p256dhKey = data.p256dhKey;
     if (data.authKey !== undefined) existingEntity.authKey = data.authKey;
     if (data.userAgent !== undefined) existingEntity.userAgent = data.userAgent;

@@ -1,8 +1,10 @@
 <template lang="pug">
-div.breable-text(v-if='isLoaded')
+.breable-text(v-if='isLoaded')
   router-view
+
   RequireAgreements
   SelectBranchOverlay
+  NotificationPermissionDialog
 </template>
 
 <script setup lang="ts">
@@ -10,9 +12,12 @@ import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { Cookies, LocalStorage } from 'quasar';
 import { FailAlert } from 'src/shared/api/alerts';
-import { handleException } from 'src/shared/api';
 import { RequireAgreements } from 'src/widgets/RequireAgreements';
 import { SelectBranchOverlay } from 'src/features/Branch/SelectBranch';
+import {
+  NotificationPermissionDialog,
+  useNotificationPermissionDialog,
+} from 'src/features/NotificationPermissionDialog';
 import { useSystemStore } from 'src/entities/System/model';
 import { useDesktopHealthWatcherProcess } from 'src/processes/watch-desktop-health';
 import 'src/shared/ui/CardStyles/index.scss';
@@ -24,7 +29,10 @@ const isLoaded = ref(false);
 // запускаем процесс мониторинга "технического обслуживания"
 useDesktopHealthWatcherProcess();
 
-onMounted(() => {
+// Диалог разрешения уведомлений
+const { showDialog } = useNotificationPermissionDialog();
+
+onMounted(async () => {
   try {
     removeLoader();
     isLoaded.value = true;
@@ -33,9 +41,14 @@ onMounted(() => {
     if (ref) {
       LocalStorage.setItem(`${info.coopname}:referer`, ref);
     }
+
+    // Показываем диалог разрешения уведомлений после загрузки
+    setTimeout(() => {
+      showDialog();
+    }, 1000);
   } catch (e) {
     console.error(e);
-    handleException(e);
+    FailAlert(e);
     isLoaded.value = true;
     removeLoader();
   }

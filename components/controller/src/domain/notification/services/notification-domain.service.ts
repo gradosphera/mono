@@ -2,10 +2,9 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { NOTIFICATION_PORT, NotificationPort, NotificationSubscriberData } from '../interfaces/notification.port';
 import { WebPushSubscriptionDomainInteractor } from '../interactors/web-push-subscription-domain.interactor';
 import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
-import type {
-  CreateSubscriptionInputDomainInterface,
-  NotificationPayloadDomainInterface,
-} from '../interfaces/web-push-subscription-domain.interface';
+import type { CreateSubscriptionInputDomainInterface } from '../interfaces/create-subscription-input-domain.interface';
+import type { NotificationPayloadDomainInterface } from '../interfaces/notification-payload-domain.interface';
+import type { WorkflowActorDomainInterface } from '../interfaces/workflow-trigger-domain.interface';
 
 @Injectable()
 export class NotificationDomainService {
@@ -36,13 +35,8 @@ export class NotificationDomainService {
 
     this.logger.log(`Создание подписчика уведомлений для ${account.username}`);
 
-    try {
-      await this.notificationPort.upsertSubscriber(subscriber);
-      this.logger.log(`Подписчик ${account.username} успешно создан/обновлен`);
-    } catch (error: any) {
-      this.logger.error(`Ошибка создания подписчика ${account.username}: ${error.message}`, error.stack);
-      throw error;
-    }
+    await this.notificationPort.upsertSubscriber(subscriber);
+    this.logger.log(`Подписчик ${account.username} успешно создан/обновлен`);
   }
 
   /**
@@ -50,48 +44,76 @@ export class NotificationDomainService {
    * @param data Данные для создания подписки
    */
   async createWebPushSubscription(data: CreateSubscriptionInputDomainInterface): Promise<void> {
-    this.logger.log(`Создание веб-пуш подписки для пользователя ${data.userId}`);
+    this.logger.log(`Создание веб-пуш подписки для пользователя ${data.username}`);
 
-    try {
-      await this.webPushSubscriptionDomainInteractor.createOrUpdateSubscription(data);
-      this.logger.log(`Веб-пуш подписка создана для пользователя ${data.userId}`);
-    } catch (error: any) {
-      this.logger.error(`Ошибка создания веб-пуш подписки для ${data.userId}: ${error.message}`, error.stack);
-      throw error;
-    }
+    await this.webPushSubscriptionDomainInteractor.createOrUpdateSubscription(data);
+    this.logger.log(`Веб-пуш подписка создана для пользователя ${data.username}`);
   }
 
   /**
-   * Отправить push уведомление пользователю
-   * @param userId ID пользователя
+   * Отправить push уведомление пользователю через NOVU workflow
+   * @param username Username пользователя
+   * @param workflowName Имя воркфлоу
    * @param payload Данные уведомления
+   * @param actor Данные отправителя (опционально)
    */
-  async sendPushNotificationToUser(userId: string, payload: NotificationPayloadDomainInterface): Promise<void> {
-    this.logger.log(`Отправка push уведомления пользователю ${userId}: ${payload.title}`);
+  async sendPushNotificationToUser(
+    username: string,
+    workflowName: string,
+    payload: NotificationPayloadDomainInterface,
+    actor?: WorkflowActorDomainInterface
+  ): Promise<void> {
+    this.logger.log(`Отправка push уведомления пользователю ${username}: ${payload.title}`);
 
-    try {
-      await this.webPushSubscriptionDomainInteractor.sendNotificationToUser(userId, payload);
-      this.logger.log(`Push уведомление отправлено пользователю ${userId}`);
-    } catch (error: any) {
-      this.logger.error(`Ошибка отправки push уведомления пользователю ${userId}: ${error.message}`, error.stack);
-      throw error;
-    }
+    await this.webPushSubscriptionDomainInteractor.sendNotificationToUser(username, workflowName, payload, actor);
+    this.logger.log(`Push уведомление отправлено пользователю ${username}`);
   }
 
   /**
-   * Отправить push уведомление всем пользователям
+   * Отправить push уведомление нескольким пользователям через NOVU workflow
+   * @param usernames Массив username пользователей
+   * @param workflowName Имя воркфлоу
    * @param payload Данные уведомления
+   * @param actor Данные отправителя (опционально)
    */
-  async sendPushNotificationToAll(payload: NotificationPayloadDomainInterface): Promise<void> {
+  async sendPushNotificationToUsers(
+    usernames: string[],
+    workflowName: string,
+    payload: NotificationPayloadDomainInterface,
+    actor?: WorkflowActorDomainInterface
+  ): Promise<void> {
+    this.logger.log(`Отправка push уведомления пользователям (${usernames.length}): ${payload.title}`);
+
+    await this.webPushSubscriptionDomainInteractor.sendNotificationToUsers(usernames, workflowName, payload, actor);
+    this.logger.log(`Push уведомление отправлено пользователям (${usernames.length})`);
+  }
+
+  /**
+   * Отправить push уведомление всем пользователям через NOVU workflow
+   * @param workflowName Имя воркфлоу
+   * @param payload Данные уведомления
+   * @param actor Данные отправителя (опционально)
+   */
+  async sendPushNotificationToAll(
+    workflowName: string,
+    payload: NotificationPayloadDomainInterface,
+    actor?: WorkflowActorDomainInterface
+  ): Promise<void> {
     this.logger.log(`Отправка push уведомления всем пользователям: ${payload.title}`);
 
-    try {
-      await this.webPushSubscriptionDomainInteractor.sendNotificationToAll(payload);
-      this.logger.log(`Push уведомление отправлено всем пользователям`);
-    } catch (error: any) {
-      this.logger.error(`Ошибка отправки push уведомления всем пользователям: ${error.message}`, error.stack);
-      throw error;
-    }
+    await this.webPushSubscriptionDomainInteractor.sendNotificationToAll(workflowName, payload, actor);
+    this.logger.log(`Push уведомление отправлено всем пользователям`);
+  }
+
+  /**
+   * Синхронизировать device tokens пользователя с веб-пуш подписками
+   * @param username Username пользователя
+   */
+  async syncUserDeviceTokens(username: string): Promise<void> {
+    this.logger.log(`Синхронизация device tokens для пользователя ${username}`);
+
+    await this.webPushSubscriptionDomainInteractor.syncUserDeviceTokens(username);
+    this.logger.log(`Device tokens синхронизированы для пользователя ${username}`);
   }
 
   /**
@@ -100,12 +122,7 @@ export class NotificationDomainService {
   async getWebPushSubscriptionStats() {
     this.logger.debug('Получение статистики веб-пуш подписок');
 
-    try {
-      return await this.webPushSubscriptionDomainInteractor.getSubscriptionStats();
-    } catch (error: any) {
-      this.logger.error(`Ошибка получения статистики подписок: ${error.message}`, error.stack);
-      throw error;
-    }
+    return await this.webPushSubscriptionDomainInteractor.getSubscriptionStats();
   }
 
   /**
@@ -115,14 +132,9 @@ export class NotificationDomainService {
   async cleanupInactiveWebPushSubscriptions(olderThanDays = 30): Promise<number> {
     this.logger.log(`Очистка неактивных веб-пуш подписок старше ${olderThanDays} дней`);
 
-    try {
-      const deletedCount = await this.webPushSubscriptionDomainInteractor.cleanupInactiveSubscriptions(olderThanDays);
-      this.logger.log(`Очищено ${deletedCount} неактивных веб-пуш подписок`);
-      return deletedCount;
-    } catch (error: any) {
-      this.logger.error(`Ошибка очистки неактивных подписок: ${error.message}`, error.stack);
-      throw error;
-    }
+    const deletedCount = await this.webPushSubscriptionDomainInteractor.cleanupInactiveSubscriptions(olderThanDays);
+    this.logger.log(`Очищено ${deletedCount} неактивных веб-пуш подписок`);
+    return deletedCount;
   }
 
   /**

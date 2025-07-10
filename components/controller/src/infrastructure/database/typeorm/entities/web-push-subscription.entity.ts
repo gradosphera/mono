@@ -3,14 +3,14 @@ import { WebPushSubscriptionDomainEntity } from '~/domain/notification/entities/
 import type { WebPushSubscriptionDomainInterface } from '~/domain/notification/interfaces/web-push-subscription-domain.interface';
 
 @Entity('web_push_subscriptions')
-@Index(['userId'], { unique: false })
+@Index(['username'], { unique: false })
 @Index(['endpoint'], { unique: true })
 export class WebPushSubscriptionEntity implements WebPushSubscriptionDomainInterface {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column('varchar', { length: 255 })
-  userId!: string;
+  username!: string;
 
   @Column('text')
   endpoint!: string;
@@ -21,7 +21,7 @@ export class WebPushSubscriptionEntity implements WebPushSubscriptionDomainInter
   @Column('varchar', { length: 255 })
   authKey!: string;
 
-  @Column('varchar', { length: 100, nullable: true })
+  @Column('text', { nullable: true })
   userAgent?: string;
 
   @Column('boolean', { default: true })
@@ -36,7 +36,7 @@ export class WebPushSubscriptionEntity implements WebPushSubscriptionDomainInter
   constructor(data?: WebPushSubscriptionDomainEntity) {
     if (data) {
       this.id = data.id;
-      this.userId = data.userId;
+      this.username = data.username;
       this.endpoint = data.endpoint;
       this.p256dhKey = data.p256dhKey;
       this.authKey = data.authKey;

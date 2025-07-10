@@ -3,7 +3,7 @@
  */
 export interface WebPushSubscriptionDomainInterface {
   id: string;
-  userId: string;
+  username: string;
   endpoint: string;
   p256dhKey: string;
   authKey: string;

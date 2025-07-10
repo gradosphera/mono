@@ -1,11 +1,10 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { WebPushSubscriptionDomainEntity } from '../entities/web-push-subscription-domain.entity';
 import { WebPushSubscriptionPort, WEB_PUSH_SUBSCRIPTION_PORT } from '../interfaces/web-push-subscription.port';
-import type {
-  CreateSubscriptionInputDomainInterface,
-  SubscriptionStatsDomainInterface,
-  NotificationPayloadDomainInterface,
-} from '../interfaces/web-push-subscription-domain.interface';
+import type { CreateSubscriptionInputDomainInterface } from '../interfaces/create-subscription-input-domain.interface';
+import type { SubscriptionStatsDomainInterface } from '../interfaces/subscription-stats-domain.interface';
+import type { NotificationPayloadDomainInterface } from '../interfaces/notification-payload-domain.interface';
+import type { WorkflowActorDomainInterface } from '../interfaces/workflow-trigger-domain.interface';
 
 /**
  * Доменный интерактор для управления веб-пуш подписками
@@ -26,7 +25,7 @@ export class WebPushSubscriptionDomainInteractor {
    * @returns Promise<WebPushSubscriptionDomainEntity>
    */
   async createOrUpdateSubscription(data: CreateSubscriptionInputDomainInterface): Promise<WebPushSubscriptionDomainEntity> {
-    this.logger.log(`Создание/обновление подписки для пользователя ${data.userId}`);
+    this.logger.log(`Создание/обновление подписки для пользователя ${data.username}`);
 
     // Валидация входных данных
     this.validateSubscriptionData(data);
@@ -37,7 +36,7 @@ export class WebPushSubscriptionDomainInteractor {
     if (existingSubscription) {
       // Обновляем существующую подписку
       const updatedSubscription = await this.webPushSubscriptionPort.updateSubscription(data.subscription.endpoint, {
-        userId: data.userId,
+        username: data.username,
         p256dhKey: data.subscription.keys.p256dh,
         authKey: data.subscription.keys.auth,
         userAgent: data.userAgent,
@@ -49,7 +48,7 @@ export class WebPushSubscriptionDomainInteractor {
 
     // Создаем новую подписку
     const newSubscription = await this.webPushSubscriptionPort.saveSubscription({
-      userId: data.userId,
+      username: data.username,
       endpoint: data.subscription.endpoint,
       p256dhKey: data.subscription.keys.p256dh,
       authKey: data.subscription.keys.auth,
@@ -62,13 +61,13 @@ export class WebPushSubscriptionDomainInteractor {
 
   /**
    * Получить все активные подписки пользователя
-   * @param userId ID пользователя
+   * @param username Username пользователя
    * @returns Promise<WebPushSubscriptionDomainEntity[]>
    */
-  async getUserSubscriptions(userId: string): Promise<WebPushSubscriptionDomainEntity[]> {
-    this.logger.debug(`Получение подписок для пользователя ${userId}`);
+  async getUserSubscriptions(username: string): Promise<WebPushSubscriptionDomainEntity[]> {
+    this.logger.debug(`Получение подписок для пользователя ${username}`);
 
-    const subscriptions = await this.webPushSubscriptionPort.getUserSubscriptions(userId);
+    const subscriptions = await this.webPushSubscriptionPort.getUserSubscriptions(username);
     return subscriptions.map((subscription) => new WebPushSubscriptionDomainEntity(subscription));
   }
 
@@ -110,7 +109,7 @@ export class WebPushSubscriptionDomainInteractor {
    * @param olderThanDays Количество дней
    * @returns Promise<number> Количество удаленных подписок
    */
-  async cleanupInactiveSubscriptions(olderThanDays: number = 30): Promise<number> {
+  async cleanupInactiveSubscriptions(olderThanDays = 30): Promise<number> {
     this.logger.log(`Очистка неактивных подписок старше ${olderThanDays} дней`);
 
     const deletedCount = await this.webPushSubscriptionPort.cleanupInactiveSubscriptions(olderThanDays);
@@ -130,50 +129,125 @@ export class WebPushSubscriptionDomainInteractor {
   }
 
   /**
-   * Отправить уведомление пользователю
-   * Примечание: Пока не реализована отправка, только заглушка для интерфейса
-   * @param userId ID пользователя
+   * Отправить уведомление пользователю через NOVU workflow
+   * Доменная логика проверяет наличие активных подписок
+   * @param username Username пользователя
+   * @param workflowName Имя воркфлоу
    * @param payload Данные уведомления
+   * @param actor Данные отправителя (опционально)
    * @returns Promise<void>
    */
-  async sendNotificationToUser(userId: string, payload: NotificationPayloadDomainInterface): Promise<void> {
-    this.logger.log(`Отправка уведомления пользователю ${userId}: ${payload.title}`);
+  async sendNotificationToUser(
+    username: string,
+    workflowName: string,
+    payload: NotificationPayloadDomainInterface,
+    actor?: WorkflowActorDomainInterface
+  ): Promise<void> {
+    this.logger.log(`Подготовка отправки уведомления пользователю ${username}: ${payload.title}`);
 
-    // TODO: Реализовать отправку уведомлений через интеграцию с NOVU
-    // Пока просто логируем, что уведомление должно быть отправлено
-
-    const subscriptions = await this.getUserSubscriptions(userId);
+    // Проверяем наличие активных подписок
+    const subscriptions = await this.getUserSubscriptions(username);
 
     if (subscriptions.length === 0) {
-      this.logger.warn(`Нет активных подписок для пользователя ${userId}`);
-      return;
+      this.logger.warn(`Нет активных подписок для пользователя ${username}`);
+      throw new Error(`User ${username} has no active push subscriptions`);
     }
 
-    this.logger.log(`Найдено ${subscriptions.length} активных подписок для пользователя ${userId}`);
-    // Здесь будет интеграция с NOVU для отправки уведомлений
+    this.logger.log(`Найдено ${subscriptions.length} активных подписок для пользователя ${username}`);
+    this.logger.log(`Готов к отправке уведомления пользователю ${username} через воркфлоу ${workflowName}`);
+
+    // Доменная логика завершена, фактическая отправка происходит в сервисе приложения
   }
 
   /**
-   * Отправить уведомление всем пользователям
-   * Примечание: Пока не реализована отправка, только заглушка для интерфейса
+   * Отправить уведомление нескольким пользователям через NOVU workflow
+   * Доменная логика проверяет наличие активных подписок для каждого пользователя
+   * @param usernames Массив username пользователей
+   * @param workflowName Имя воркфлоу
    * @param payload Данные уведомления
-   * @returns Promise<void>
+   * @param actor Данные отправителя (опционально)
+   * @returns Promise<string[]> Список пользователей с активными подписками
    */
-  async sendNotificationToAll(payload: NotificationPayloadDomainInterface): Promise<void> {
-    this.logger.log(`Отправка уведомления всем пользователям: ${payload.title}`);
+  async sendNotificationToUsers(
+    usernames: string[],
+    workflowName: string,
+    payload: NotificationPayloadDomainInterface,
+    actor?: WorkflowActorDomainInterface
+  ): Promise<string[]> {
+    this.logger.log(`Подготовка отправки уведомления пользователям (${usernames.length}): ${payload.title}`);
 
-    // TODO: Реализовать отправку уведомлений через интеграцию с NOVU
-    // Пока просто логируем, что уведомление должно быть отправлено
+    // Проверяем наличие активных подписок для каждого пользователя
+    const usersWithSubscriptions: string[] = [];
+
+    for (const username of usernames) {
+      const subscriptions = await this.getUserSubscriptions(username);
+      if (subscriptions.length > 0) {
+        usersWithSubscriptions.push(username);
+      }
+    }
+
+    if (usersWithSubscriptions.length === 0) {
+      this.logger.warn(`Нет пользователей с активными подписками из ${usernames.length} пользователей`);
+      throw new Error(`No users with active push subscriptions found`);
+    }
+
+    this.logger.log(`Найдено ${usersWithSubscriptions.length} пользователей с активными подписками из ${usernames.length}`);
+    this.logger.log(
+      `Готов к отправке уведомления пользователям (${usersWithSubscriptions.length}) через воркфлоу ${workflowName}`
+    );
+
+    return usersWithSubscriptions;
+  }
+
+  /**
+   * Отправить уведомление всем пользователям через NOVU workflow
+   * Доменная логика проверяет наличие активных подписок
+   * @param workflowName Имя воркфлоу
+   * @param payload Данные уведомления
+   * @param actor Данные отправителя (опционально)
+   * @returns Promise<number> Количество активных подписок
+   */
+  async sendNotificationToAll(
+    workflowName: string,
+    payload: NotificationPayloadDomainInterface,
+    actor?: WorkflowActorDomainInterface
+  ): Promise<number> {
+    this.logger.log(`Подготовка отправки уведомления всем пользователям: ${payload.title}`);
 
     const subscriptions = await this.getAllActiveSubscriptions();
 
     if (subscriptions.length === 0) {
       this.logger.warn('Нет активных подписок');
-      return;
+      throw new Error('No active push subscriptions found');
     }
 
     this.logger.log(`Найдено ${subscriptions.length} активных подписок для отправки`);
-    // Здесь будет интеграция с NOVU для отправки уведомлений
+    this.logger.log(`Готов к отправке уведомления всем пользователям через воркфлоу ${workflowName}`);
+
+    return subscriptions.length;
+  }
+
+  /**
+   * Синхронизировать device tokens пользователя с веб-пуш подписками
+   * Доменная логика проверяет активные подписки
+   * @param username Username пользователя
+   * @returns Promise<number> Количество активных подписок пользователя
+   */
+  async syncUserDeviceTokens(username: string): Promise<number> {
+    this.logger.log(`Проверка подписок для синхронизации device tokens: ${username}`);
+
+    // Получаем активные подписки пользователя
+    const subscriptions = await this.getUserSubscriptions(username);
+
+    if (subscriptions.length === 0) {
+      this.logger.warn(`Нет активных подписок для пользователя ${username}`);
+      return 0;
+    }
+
+    this.logger.log(`Найдено ${subscriptions.length} активных подписок для пользователя ${username}`);
+    this.logger.log(`Готов к синхронизации device tokens для пользователя ${username}`);
+
+    return subscriptions.length;
   }
 
   /**
@@ -181,8 +255,8 @@ export class WebPushSubscriptionDomainInteractor {
    * @param data Данные подписки
    */
   private validateSubscriptionData(data: CreateSubscriptionInputDomainInterface): void {
-    if (!data.userId || typeof data.userId !== 'string') {
-      throw new Error('userId обязателен и должен быть строкой');
+    if (!data.username || typeof data.username !== 'string') {
+      throw new Error('username обязателен и должен быть строкой');
     }
 
     if (!data.subscription || typeof data.subscription !== 'object') {

@@ -49,6 +49,7 @@ import { useRegistratorStore } from 'src/entities/Registrator';
 import { useLogoutUser } from 'src/features/User/Logout';
 import { useSessionStore } from 'src/entities/Session';
 import { useAgreementStore } from 'src/entities/Agreement';
+import { useNotificationPermissionDialog } from 'src/features/NotificationPermissionDialog';
 
 import { useRouter } from 'vue-router';
 import { useInitWalletProcess } from 'src/processes/init-wallet';
@@ -62,6 +63,9 @@ const { state, clearUserData, steps } = useRegistratorStore();
 const store = state;
 const agreementer = useAgreementStore();
 const desktops = useDesktopStore();
+
+// Диалог разрешения уведомлений
+const { showDialog } = useNotificationPermissionDialog();
 
 onMounted(() => {
   agreementer.loadCooperativeAgreements(info.coopname);
@@ -116,11 +120,21 @@ watch(
         // Теперь выбираем рабочий стол с обновленными данными о роли
         desktops.selectDefaultWorkspace();
         desktops.goToDefaultPage(router);
+
+        // Показываем диалог разрешения уведомлений после успешной регистрации
+        setTimeout(() => {
+          showDialog();
+        }, 1000);
       } catch (e) {
         console.error('Ошибка при обновлении данных пользователя:', e);
         // В случае ошибки все равно пытаемся перейти
         desktops.selectDefaultWorkspace();
         desktops.goToDefaultPage(router);
+
+        // Показываем диалог разрешения уведомлений даже при ошибке
+        setTimeout(() => {
+          showDialog();
+        }, 1000);
       }
     }
   },
@@ -171,11 +185,21 @@ watch(
         // Теперь выбираем рабочий стол с обновленными данными о роли
         desktops.selectDefaultWorkspace();
         desktops.goToDefaultPage(router);
+
+        // Показываем диалог разрешения уведомлений после успешной регистрации
+        setTimeout(() => {
+          showDialog();
+        }, 1000);
       } catch (e) {
         console.error('Ошибка при обновлении данных пользователя:', e);
         // В случае ошибки все равно пытаемся перейти
         desktops.selectDefaultWorkspace();
         desktops.goToDefaultPage(router);
+
+        // Показываем диалог разрешения уведомлений даже при ошибке
+        setTimeout(() => {
+          showDialog();
+        }, 1000);
       }
     }
   },
