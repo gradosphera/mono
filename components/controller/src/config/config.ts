@@ -74,6 +74,12 @@ const envVarsSchema = z.object({
   NOVU_BACKEND_URL: z.string().min(1, { message: 'Не должно быть пустым' }).default('https://novu.coopenomics.world/api'),
   NOVU_SOCKET_URL: z.string().min(1, { message: 'Не должно быть пустым' }).default('https://novu.coopenomics.world/ws'),
   NOVU_API_KEY: z.string().min(1, { message: 'Не должно быть пустым' }),
+  NOVU_WEBHOOK_SECRET: z.string().min(1, { message: 'Не должно быть пустым' }).default('default-webhook-secret'),
+
+  // Параметры VAPID для web push
+  VAPID_PUBLIC_KEY: z.string().min(1, { message: 'VAPID_PUBLIC_KEY не должен быть пустым' }),
+  VAPID_PRIVATE_KEY: z.string().min(1, { message: 'VAPID_PRIVATE_KEY не должен быть пустым' }),
+  VAPID_SUBJECT: z.string().default('mailto:admin@coopenomics.world'),
 
   // Параметры блокчейна
   ROOT_SYMBOL: z.string().default('AXON'),
@@ -164,5 +170,11 @@ export default {
     backend_url: envVars.data.NOVU_BACKEND_URL,
     socket_url: envVars.data.NOVU_SOCKET_URL,
     api_key: envVars.data.NOVU_API_KEY,
+    webhook_secret: envVars.data.NOVU_WEBHOOK_SECRET,
+  },
+  vapid: {
+    public_key: envVars.data.VAPID_PUBLIC_KEY,
+    private_key: envVars.data.VAPID_PRIVATE_KEY,
+    subject: envVars.data.VAPID_SUBJECT,
   },
 };

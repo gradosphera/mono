@@ -20,5 +20,6 @@ declare namespace NodeJS {
     NOVU_APP_ID: string;
     NOVU_BACKEND_URL: string;
     NOVU_SOCKET_URL: string;
+    VAPID_PUBLIC_KEY: string;
   }
 }

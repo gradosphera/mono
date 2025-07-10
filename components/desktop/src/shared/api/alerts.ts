@@ -5,7 +5,7 @@ export function SuccessAlert(message: string): void {
   Notify.create({
     message,
     color: 'primary',
-    position: 'center',
+    position: 'top-right',
     actions: [
       {
         icon: 'close',

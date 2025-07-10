@@ -3,17 +3,57 @@
   "editor.guides.bracketPairs": true,
   "editor.tabCompletion": "onlySnippets",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  // "editor.formatOnSave": true,
-  // "editor.codeActionsOnSave": {
-  //   "source.addMissingImports.ts": "explicit",
-  //   "source.fixAll.ts": "explicit",
-  //   "source.fixAll.eslint": "explicit"
-  // },
   "eslint.run": "onType",
   "eslint.validate": ["javascript", "typescript", "vue"],
   "i18n-ally.localesPaths": ["src/i18n"],
   "typescript.format.enable": true,
   "typescript.format.indentSwitchCase": false,
   "typescript.validate.enable": true,
-  "notebook.defaultFormatter": "Vue.volar"
+  "notebook.defaultFormatter": "Vue.volar",
+  
+  // Оптимизация для монорепозитория
+  "typescript.preferences.useAliasesForRenames": false,
+  "typescript.preferences.include": false,
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "typescript.suggest.autoImports": true,
+  "typescript.suggest.paths": true,
+  "typescript.updateImportsOnFileMove.enabled": "prompt",
+  "typescript.workspaceSymbols.scope": "currentProject",
+  
+  // Настройки для снижения нагрузки
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/.cache/**": true,
+    "**/.quasar/**": true,
+    "**/*.tsbuildinfo": true
+  },
+  
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.cache": true,
+    "**/.quasar": true,
+    "**/*.tsbuildinfo": true
+  },
+  
+  "files.exclude": {
+    "**/.cache": true,
+    "**/*.tsbuildinfo": true,
+    "**/node_modules/.cache": true
+  },
+  
+  // TypeScript server настройки
+  "typescript.tsserver.maxTsServerMemory": 8192,
+  "typescript.tsserver.watchOptions": {
+    "excludeFiles": [
+      "**/node_modules/**/*",
+      "**/dist/**/*",
+      "**/.cache/**/*"
+    ]
+  }
 }

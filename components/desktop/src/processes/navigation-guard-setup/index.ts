@@ -46,6 +46,7 @@ export function setupNavigationGuard(router: Router) {
       }
 
       if (attempts >= maxAttempts) {
+        session.loadComplete = true;
         console.warn('User data loading timeout');
       }
     }

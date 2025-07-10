@@ -12,7 +12,7 @@ export const welcomeWorkflow: WorkflowDefinition<WelcomeWorkflowPayload> = Workf
   .addSteps([
     createEmailStep(
       'welcome-email',
-      'Добро пожаловать, {{payload.userName}}!',
+      'Добро пожаловать, {{payload.userName}}',
       'Здравствуй, {{payload.userName}}! Ваш email: {{payload.userEmail}}. {{payload.age}}Ваш возраст: {{payload.age}} лет.{{payload.age}}'
     ),
     createInAppStep(
