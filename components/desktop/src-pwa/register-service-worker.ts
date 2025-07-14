@@ -29,6 +29,9 @@ if (!shouldRegisterSW) {
   console.log('Регистрируем Service Worker (Production или PWA в Development)');
   console.log('Файл Service Worker:', process.env.SERVICE_WORKER_FILE);
 
+  // Переменная для отслеживания обновлений
+  let refreshing = false;
+
   // Регистрируем Service Worker
   register(process.env.SERVICE_WORKER_FILE, {
     // The registrationOptions object will be passed as the second argument
@@ -43,6 +46,11 @@ if (!shouldRegisterSW) {
 
     registered(registration) {
       console.log('Service Worker зарегистрирован:', registration);
+
+      // Проверяем обновления каждые 30 секунд
+      setInterval(() => {
+        registration.update();
+      }, 30000);
     },
 
     cached(registration) {
@@ -51,25 +59,103 @@ if (!shouldRegisterSW) {
 
     updatefound(registration) {
       console.log('Найдено обновление Service Worker:', registration);
+
+      // Показываем уведомление пользователю о доступном обновлении
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Обновление доступно', {
+          body: 'Новая версия приложения готова к установке',
+          icon: '/icons/icon-192x192.png',
+        });
+      }
     },
 
     updated(registration) {
       console.log(
-        'Новый контент доступен, автоматически перезагружаем:',
+        'Новый контент доступен, требуется перезагрузка:',
         registration,
       );
-      // Принудительная перезагрузка без подтверждения
-      window.location.reload();
+
+      // Вместо принудительной перезагрузки, обрабатываем обновление мягче
+      if (!refreshing) {
+        refreshing = true;
+
+        // Ждём активации нового Service Worker
+        if (registration.waiting) {
+          // Сообщаем новому SW что он может активироваться
+          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+
+        // Слушаем событие активации нового SW
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshing) {
+            refreshing = false;
+            console.log(
+              'Новый Service Worker активирован, перезагружаем страницу',
+            );
+
+            // Мягкая перезагрузка с небольшой задержкой
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+        });
+      }
     },
 
     offline() {
       console.log(
         'Нет подключения к интернету. Приложение работает в офлайн режиме.',
       );
+
+      // Показываем уведомление об офлайн режиме
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Офлайн режим', {
+          body: 'Приложение работает в автономном режиме',
+          icon: '/icons/icon-192x192.png',
+        });
+      }
     },
 
     error(err) {
       console.error('Ошибка регистрации Service Worker:', err);
+
+      // Если Service Worker не может быть зарегистрирован, продолжаем работу без него
+      console.log('Приложение будет работать без Service Worker');
     },
   });
+
+  // Обработка сообщений от Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      console.log('Сообщение от Service Worker:', event.data);
+
+      if (event.data && event.data.type === 'OFFLINE_STATUS') {
+        console.log('Статус офлайн:', event.data.offline);
+      }
+    });
+  }
 }
+
+// Функция для проверки сетевого соединения
+function checkNetworkStatus() {
+  if ('navigator' in window && 'onLine' in navigator) {
+    console.log('Статус сети:', navigator.onLine ? 'онлайн' : 'офлайн');
+
+    // Отправляем статус в Service Worker
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'NETWORK_STATUS',
+        online: navigator.onLine,
+      });
+    }
+  }
+}
+
+// Слушаем изменения сетевого статуса
+if ('addEventListener' in window) {
+  window.addEventListener('online', checkNetworkStatus);
+  window.addEventListener('offline', checkNetworkStatus);
+}
+
+// Проверяем статус сети при загрузке
+checkNetworkStatus();

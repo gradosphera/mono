@@ -194,3 +194,15 @@ export const findUserBySubscriberId = async (subscriber_id: string): Promise<IUs
   const user = await User.findOne({ subscriber_id });
   return user;
 };
+
+/**
+ * Find users without subscriber_id for notification sync
+ * @returns {Promise<IUser[]>}
+ */
+export const findUsersWithoutSubscriberId = async (): Promise<IUser[]> => {
+  const users = await User.find({
+    $or: [{ subscriber_id: { $exists: false } }, { subscriber_id: null }, { subscriber_id: '' }],
+  }).limit(100); // Ограничиваем для безопасности
+
+  return users;
+};

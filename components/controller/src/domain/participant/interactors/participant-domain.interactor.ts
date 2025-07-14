@@ -19,6 +19,10 @@ import { Classes } from '@coopenomics/sdk';
 import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
 import type { CreateInitialPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-initial-payment-input-domain.interface';
 import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
+import {
+  NOTIFICATION_DOMAIN_SERVICE,
+  NotificationDomainService,
+} from '~/domain/notification/services/notification-domain.service';
 
 @Injectable()
 export class ParticipantDomainInteractor {
@@ -28,7 +32,8 @@ export class ParticipantDomainInteractor {
     private readonly documentDomainService: DocumentDomainService,
     private readonly accountDomainService: AccountDomainService,
     @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository,
-    private readonly gatewayInteractor: GatewayInteractor
+    private readonly gatewayInteractor: GatewayInteractor,
+    @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService
   ) {}
 
   async generateParticipantApplication(
@@ -152,6 +157,13 @@ export class ParticipantDomainInteractor {
     };
 
     await this.accountDomainService.addProviderAccount(newAccount);
+
+    // Настраиваем подписчика NOVU для участника
+    try {
+      await this.accountDomainService.setupNotificationSubscriber(data.username, 'участника');
+    } catch (error: any) {
+      this.logger.error(`Ошибка настройки подписчика NOVU для участника ${data.username}: ${error.message}`, error.stack);
+    }
 
     await this.accountDomainService.addParticipantAccount({
       referer: data.referer ? data.referer : '',

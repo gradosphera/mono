@@ -3,6 +3,10 @@ import config from '~/config/config';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import { Inject, Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { tokenService, userService } from '~/services';
+import {
+  NOTIFICATION_DOMAIN_SERVICE,
+  NotificationDomainService,
+} from '~/domain/notification/services/notification-domain.service';
 import type { MonoAccountDomainInterface } from '../interfaces/mono-account-domain.interface';
 import type { GetAccountsInputDomainInterface } from '../interfaces/get-accounts-input.interface';
 import type {
@@ -43,7 +47,8 @@ export class AccountDomainInteractor {
     @Inject(SEARCH_PRIVATE_ACCOUNTS_REPOSITORY)
     private readonly searchPrivateAccountsRepository: SearchPrivateAccountsRepository,
     @Inject(ACCOUNT_BLOCKCHAIN_PORT) private readonly accountBlockchainPort: AccountBlockchainPort,
-    @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository
+    @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository,
+    @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService
   ) {}
 
   private readonly logger = new Logger(AccountDomainInteractor.name);
@@ -68,10 +73,16 @@ export class AccountDomainInteractor {
       throw new Error('Не получены входные данные для обновления');
     }
 
-    // Синхронизируем обновленные данные с системой уведомлений
-    await this.accountDomainService.syncAccountWithNotifications(user.username);
+    // Обновляем подписчика NOVU с новыми данными
+    try {
+      const account = await this.getAccount(user.username);
+      await this.notificationDomainService.createSubscriberFromAccount(account);
+      this.logger.log(`Подписчик NOVU обновлен для ${data.username}`);
+    } catch (error: any) {
+      this.logger.error(`Ошибка обновления подписчика NOVU для ${data.username}: ${error.message}`, error.stack);
+    }
 
-    // Получаем финальный аккаунт после синхронизации
+    // Получаем финальный аккаунт
     const account = await this.getAccount(user.username);
 
     this.logger.log(`Успешно обновлен аккаунт ${data.username}`);
@@ -104,6 +115,13 @@ export class AccountDomainInteractor {
     //TODO refactor after migrate from mongo
     const user = await userService.createUser({ ...data, role: 'user' });
     const tokens = await tokenService.generateAuthTokens(user);
+
+    // Настраиваем подписчика NOVU
+    try {
+      await this.accountDomainService.setupNotificationSubscriber(user.username, 'регистрации');
+    } catch (error: any) {
+      this.logger.error(`Ошибка настройки подписчика NOVU при регистрации ${data.username}: ${error.message}`, error.stack);
+    }
 
     // Создаем нового кандидата в репозитории
     const now = new Date();

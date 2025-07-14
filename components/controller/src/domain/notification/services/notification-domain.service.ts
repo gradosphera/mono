@@ -27,16 +27,40 @@ export class NotificationDomainService {
 
     const subscriber = this.buildSubscriberData(account);
 
-    // Если нет email или имени, пропускаем
-    if (!subscriber.email || (!subscriber.firstName && !subscriber.data?.org_name)) {
-      this.logger.warn(`Недостаточно данных для создания подписчика ${account.username}`);
+    // Проверяем минимальные требования для создания подписчика
+    if (!subscriber.email) {
+      this.logger.warn(`Нет email для создания подписчика ${account.username}`);
       return;
+    }
+
+    // Если нет имени и названия организации, все равно создаем подписчика
+    if (!subscriber.firstName && !subscriber.data?.org_name) {
+      this.logger.warn(`Создаем подписчика ${account.username} с минимальными данными (только email)`);
     }
 
     this.logger.log(`Создание подписчика уведомлений для ${account.username}`);
 
-    await this.notificationPort.upsertSubscriber(subscriber);
-    this.logger.log(`Подписчик ${account.username} успешно создан/обновлен`);
+    await this.notificationPort.createSubscriber(subscriber);
+    this.logger.log(`Подписчик ${account.username} успешно создан`);
+  }
+
+  /**
+   * Обновить подписчика уведомлений из аккаунта
+   * @param account Данные аккаунта
+   */
+  async updateSubscriberFromAccount(account: AccountDomainEntity): Promise<void> {
+    const subscriber = this.buildSubscriberData(account);
+
+    // Проверяем минимальные требования для обновления подписчика
+    if (!subscriber.email) {
+      this.logger.warn(`Нет email для обновления подписчика ${account.username}`);
+      return;
+    }
+
+    this.logger.log(`Обновление подписчика уведомлений для ${account.username}`);
+
+    await this.notificationPort.updateSubscriber(subscriber);
+    this.logger.log(`Подписчик ${account.username} успешно обновлен`);
   }
 
   /**

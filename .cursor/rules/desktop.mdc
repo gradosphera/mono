@@ -1,9 +1,6 @@
 ---
-description: 
-globs: 
 alwaysApply: true
 ---
-
 # DESKTOP
 
 - Пишем код фронтенда в архитектуре Feature Sliced Design (FSD). 

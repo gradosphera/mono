@@ -79,6 +79,8 @@ const userSchema = new Schema<IUser, IUserModel>(
     subscriber_id: {
       type: String,
       default: '',
+      unique: true,
+      sparse: true, // Позволяет множественные пустые значения, но уникальные непустые
     },
     subscriber_hash: {
       type: String,

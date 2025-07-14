@@ -1,55 +1,52 @@
 import { Injectable, Logger } from '@nestjs/common';
-import axios, { AxiosResponse } from 'axios';
+import { Novu } from '@novu/api';
 import config from '~/config/config';
 import { NotificationPort, NotificationSubscriberData } from '~/domain/notification/interfaces/notification.port';
 
 @Injectable()
 export class NovuAdapter implements NotificationPort {
   private readonly logger = new Logger(NovuAdapter.name);
-  private readonly novuBaseUrl: string;
-  private readonly apiKey: string;
+  private readonly novu: Novu;
 
   constructor() {
-    this.apiKey = config.novu.api_key;
+    // Инициализируем Novu SDK
+    this.novu = new Novu({
+      secretKey: config.novu.api_key,
+      serverURL: config.novu.backend_url,
+    });
 
-    // Настраиваем базовый URL для NOVU API
-    let baseUrl = config.novu.backend_url;
-    if (!baseUrl.endsWith('/v1/subscribers')) {
-      baseUrl = baseUrl.replace(/\/+$/, '') + '/v1/subscribers';
-    }
-    this.novuBaseUrl = baseUrl;
-    console.log('apiKey', this.apiKey, this.novuBaseUrl);
-    this.logger.log(`NOVU адаптер инициализирован. URL: ${this.novuBaseUrl}`);
+    this.logger.log(`NOVU адаптер инициализирован с @novu/api`);
   }
 
   /**
-   * Создает или обновляет подписчика в NOVU
+   * Создает подписчика в NOVU
    * @param subscriber Данные подписчика
    */
-  async upsertSubscriber(subscriber: NotificationSubscriberData): Promise<void> {
-    this.logger.log(`Upsert подписчика: ${subscriber.subscriberId}`);
+  async createSubscriber(subscriber: NotificationSubscriberData): Promise<void> {
+    this.logger.log(`Создание подписчика: ${subscriber.subscriberId}`);
 
     try {
-      // Сначала пытаемся обновить существующего подписчика
-      await this.updateSubscriber(subscriber);
+      await this.novu.subscribers.create(subscriber);
+      this.logger.log(`Подписчик создан: ${subscriber.subscriberId}`);
+    } catch (error: any) {
+      this.logger.error(`Ошибка создания подписчика ${subscriber.subscriberId}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Обновляет подписчика в NOVU
+   * @param subscriber Данные подписчика
+   */
+  async updateSubscriber(subscriber: NotificationSubscriberData): Promise<void> {
+    this.logger.log(`Обновление подписчика: ${subscriber.subscriberId}`);
+
+    try {
+      await this.novu.subscribers.patch(subscriber, subscriber.subscriberId);
       this.logger.log(`Подписчик обновлен: ${subscriber.subscriberId}`);
     } catch (error: any) {
-      // Если подписчик не найден - создаем нового
-      if (this.isNotFoundError(error)) {
-        try {
-          await this.createSubscriber(subscriber);
-          this.logger.log(`Подписчик создан: ${subscriber.subscriberId}`);
-        } catch (createError: any) {
-          this.logger.error(
-            `Ошибка создания подписчика ${subscriber.subscriberId}: ${createError.message}`,
-            createError.stack
-          );
-          throw createError;
-        }
-      } else {
-        this.logger.error(`Ошибка обновления подписчика ${subscriber.subscriberId}: ${error.message}`, error.stack);
-        throw error;
-      }
+      this.logger.error(`Ошибка обновления подписчика ${subscriber.subscriberId}: ${error.message}`, error.stack);
+      throw error;
     }
   }
 
@@ -59,13 +56,30 @@ export class NovuAdapter implements NotificationPort {
    */
   async getSubscriber(subscriberId: string): Promise<NotificationSubscriberData | null> {
     try {
-      const response: AxiosResponse = await axios.get(`${this.novuBaseUrl}/${subscriberId}`, {
-        headers: this.getHeaders(),
-      });
+      const response = await this.novu.subscribers.retrieve(subscriberId);
+      const subscriber = response.result;
 
-      return response.data;
+      if (!subscriber) {
+        return null;
+      }
+
+      // Преобразуем SubscriberResponseDto в NotificationSubscriberData
+      const result: NotificationSubscriberData = {
+        subscriberId: subscriber.subscriberId,
+        email: subscriber.email || '', // Преобразуем null/undefined в пустую строку
+        firstName: subscriber.firstName || undefined,
+        lastName: subscriber.lastName || undefined,
+        locale: subscriber.locale || undefined,
+        phone: subscriber.phone || undefined,
+        timezone: subscriber.timezone || undefined,
+        data: subscriber.data || undefined,
+      };
+
+      return result;
     } catch (error: any) {
-      if (this.isNotFoundError(error)) {
+      // Если подписчик не найден - возвращаем null
+      const status = error?.response?.status || error?.status;
+      if (status === 404 || status === 400) {
         return null;
       }
 
@@ -80,57 +94,15 @@ export class NovuAdapter implements NotificationPort {
    */
   async deleteSubscriber(subscriberId: string): Promise<void> {
     try {
-      await axios.delete(`${this.novuBaseUrl}/${subscriberId}`, {
-        headers: this.getHeaders(),
-      });
-
+      await this.novu.subscribers.delete(subscriberId);
       this.logger.log(`Подписчик удален: ${subscriberId}`);
     } catch (error: any) {
-      if (!this.isNotFoundError(error)) {
+      // Игнорируем ошибки "не найдено" при удалении
+      const status = error?.response?.status || error?.status;
+      if (status !== 404 && status !== 400) {
         this.logger.error(`Ошибка удаления подписчика ${subscriberId}: ${error.message}`, error.stack);
         throw error;
       }
     }
-  }
-
-  /**
-   * Обновляет существующего подписчика
-   * @param subscriber Данные подписчика
-   */
-  private async updateSubscriber(subscriber: NotificationSubscriberData): Promise<void> {
-    await axios.put(`${this.novuBaseUrl}/${subscriber.subscriberId}`, subscriber, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  /**
-   * Создает нового подписчика
-   * @param subscriber Данные подписчика
-   */
-  private async createSubscriber(subscriber: NotificationSubscriberData): Promise<void> {
-    await axios.post(this.novuBaseUrl, subscriber, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  /**
-   * Возвращает заголовки для запросов к NOVU API
-   */
-  private getHeaders(): Record<string, string> {
-    return {
-      Authorization: `ApiKey ${this.apiKey}`,
-      'Content-Type': 'application/json',
-    };
-  }
-
-  /**
-   * Проверяет, является ли ошибка "не найдено"
-   * @param error Ошибка axios
-   */
-  private isNotFoundError(error: any): boolean {
-    const status = error?.response?.status;
-    const message = error?.response?.data?.message || '';
-
-    return (status === 400 || status === 404) && typeof message === 'string' && message.toLowerCase().includes('not found');
   }
 }

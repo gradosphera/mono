@@ -1,11 +1,17 @@
-import { sendPOST } from 'src/shared/api';
+import { client } from 'src/shared/api/client';
+import { Mutations } from '@coopenomics/sdk';
 
-import type { IAddUser } from '@coopenomics/controller';
+async function addParticipant(
+  data: Mutations.Participants.AddParticipant.IInput['data'],
+): Promise<Mutations.Participants.AddParticipant.IOutput['addParticipant']> {
+  const { [Mutations.Participants.AddParticipant.name]: result } =
+    await client.Mutation(Mutations.Participants.AddParticipant.mutation, {
+      variables: { data },
+    });
 
-async function addUser(data: IAddUser): Promise<void> {
-  await sendPOST('/v1/users/add', data);
+  return result;
 }
 
 export const api = {
-  addUser,
+  addParticipant,
 };
