@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/desktop",
-  "version": "2025.7.8",
+  "version": "2025.7.15",
   "description": "A Desktop Project",
   "productName": "Desktop App",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
@@ -25,8 +25,8 @@
   },
   "dependencies": {
     "@coopenomics/controller": "workspace:*",
-    "@coopenomics/sdk": "workspace:*",
     "@coopenomics/notifications": "workspace:*",
+    "@coopenomics/sdk": "workspace:*",
     "@dicebear/collection": "^9.0.1",
     "@dicebear/core": "^9.0.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
