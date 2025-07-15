@@ -97,3 +97,19 @@ jobs:
               -H 'Content-Type: application/json' \
               -d '${{ env.DOCKER_TAG }}'
           fi
+
+      # Уведомление в Telegram об успехе
+      - name: Telegram notify success
+        if: ${{ success() }}
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="✅ [GITHUB MONO] Успешная сборка контейнеров: $GITHUB_REPOSITORY ($GITHUB_REF) [${{ env.DOCKER_TAG }}]"
+
+      # Уведомление в Telegram об ошибке
+      - name: Telegram notify failure
+        if: ${{ failure() }}
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="❌ [GITHUB MONO] Ошибка при сборке контейнеров: $GITHUB_REPOSITORY ($GITHUB_REF) [${{ env.DOCKER_TAG }}]"
