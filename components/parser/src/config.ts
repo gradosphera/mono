@@ -44,7 +44,7 @@ export const subsribedTables: IDeltaConfig[] = [
 ]
 
 export const subsribedActions: IActionConfig[] = [
-  // { code: 'eosio.token', action: 'transfer', notify: true },
+  { code: 'eosio.token', action: 'transfer', notify: true },
   { code: 'registrator', action: 'confirmreg', notify: true },
 
   { code: 'soviet', action: 'votefor' },

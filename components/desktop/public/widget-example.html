@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MonoCoop Widget Example</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+
+      .widget-container {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        margin: 20px 0;
+        min-height: 400px;
+        background: white;
+        position: relative;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .control-group label {
+        font-weight: 500;
+        color: #555;
+      }
+
+      button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      button:hover {
+        background: #0056b3;
+      }
+
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      input,
+      select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .log {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 10px;
+        margin: 20px 0;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .log-entry {
+        margin: 2px 0;
+        padding: 2px 4px;
+        border-radius: 2px;
+      }
+
+      .log-entry.info {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+
+      .log-entry.success {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .log-entry.error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
+      .log-entry.warning {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .status.ready {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .status.loading {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>MonoCoop Widget Example</h1>
+
+      <div class="controls">
+        <div class="control-group">
+          <label for="baseUrl">Base URL:</label>
+          <input
+            type="text"
+            id="baseUrl"
+            value="http://localhost:3005"
+            placeholder="http://localhost:3005"
+          />
+        </div>
+
+        <div class="control-group">
+          <label for="page">Page:</label>
+          <select id="page">
+            <option value="">Default</option>
+            <option value="/signup">Sign Up</option>
+            <option value="/signin">Sign In</option>
+            <option value="/home">Home</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="theme">Theme:</label>
+          <select id="theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="width">Width:</label>
+          <input type="text" id="width" value="100%" placeholder="100%" />
+        </div>
+
+        <div class="control-group">
+          <label for="height">Height:</label>
+          <input type="text" id="height" value="500px" placeholder="500px" />
+        </div>
+      </div>
+
+      <div class="controls">
+        <button onclick="createWidget()">Create Widget</button>
+        <button onclick="destroyWidget()" disabled id="destroyBtn">
+          Destroy Widget
+        </button>
+        <button onclick="sendData()" disabled id="sendDataBtn">
+          Send Data
+        </button>
+        <button onclick="getData()" disabled id="getDataBtn">Get Data</button>
+        <button onclick="navigate()" disabled id="navigateBtn">Navigate</button>
+        <button onclick="clearLog()">Clear Log</button>
+      </div>
+
+      <div>
+        Status: <span id="status" class="status loading">Not Created</span>
+      </div>
+
+      <div id="widgetContainer" class="widget-container">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+          "
+        >
+          Widget will appear here
+        </div>
+      </div>
+
+      <div class="log" id="log"></div>
+    </div>
+
+    <!-- Подключаем SDK -->
+    <script src="monocoop-widget-sdk.js"></script>
+
+    <script>
+      let widget = null;
+      let widgetReady = false;
+
+      // Элементы UI
+      const statusEl = document.getElementById('status');
+      const logEl = document.getElementById('log');
+      const destroyBtn = document.getElementById('destroyBtn');
+      const sendDataBtn = document.getElementById('sendDataBtn');
+      const getDataBtn = document.getElementById('getDataBtn');
+      const navigateBtn = document.getElementById('navigateBtn');
+
+      // Функции логирования
+      function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${type}`;
+        entry.textContent = `[${timestamp}] ${message}`;
+        logEl.appendChild(entry);
+        logEl.scrollTop = logEl.scrollHeight;
+        console.log(`[Widget Example] ${message}`);
+      }
+
+      function clearLog() {
+        logEl.innerHTML = '';
+      }
+
+      function updateStatus(status, className) {
+        statusEl.textContent = status;
+        statusEl.className = `status ${className}`;
+      }
+
+      function updateButtons(ready) {
+        destroyBtn.disabled = !widget;
+        sendDataBtn.disabled = !ready;
+        getDataBtn.disabled = !ready;
+        navigateBtn.disabled = !ready;
+      }
+
+      // Создание виджета
+      function createWidget() {
+        if (widget) {
+          log('Widget already exists, destroying first', 'warning');
+          destroyWidget();
+        }
+
+        const baseUrl = document.getElementById('baseUrl').value;
+        const page = document.getElementById('page').value;
+        const theme = document.getElementById('theme').value;
+        const width = document.getElementById('width').value;
+        const height = document.getElementById('height').value;
+
+        if (!baseUrl) {
+          log('Base URL is required', 'error');
+          return;
+        }
+
+        log('Creating widget...');
+        updateStatus('Creating...', 'loading');
+
+        try {
+          widget = MonoCoopWidget.create({
+            baseUrl: baseUrl,
+            container: document.getElementById('widgetContainer'),
+            page: page || undefined,
+            theme: theme,
+            width: width,
+            height: height,
+            hideHeader: true,
+            hideFooter: true,
+            autoResize: true,
+            loadingText: 'Загрузка виджета...',
+            errorText: 'Ошибка загрузки виджета',
+            timeout: 15000,
+            allowedOrigins: ['*'], // В production нужно указать конкретные домены
+
+            // Начальные данные
+            initialData: {
+              source: 'widget-example',
+              timestamp: Date.now(),
+              userAgent: navigator.userAgent,
+            },
+          });
+
+          // Подписываемся на события
+          widget
+            .on('ready', (data) => {
+              widgetReady = true;
+              updateStatus('Ready', 'ready');
+              updateButtons(true);
+              log('Widget is ready!', 'success');
+              log(`Ready data: ${JSON.stringify(data)}`, 'info');
+            })
+            .on('dataChange', (data) => {
+              log(`Data changed: ${JSON.stringify(data)}`, 'info');
+            })
+            .on('error', (error) => {
+              log(`Error: ${error.message || error}`, 'error');
+              updateStatus('Error', 'error');
+              updateButtons(false);
+            })
+            .on('navigate', (data) => {
+              log(`Navigation: ${JSON.stringify(data)}`, 'info');
+            })
+            .on('resize', (dimensions) => {
+              log(`Resize: ${dimensions.width}x${dimensions.height}`, 'info');
+            });
+
+          // Монтируем виджет
+          widget.mount();
+
+          log('Widget created and mounted', 'success');
+          updateButtons(false);
+        } catch (error) {
+          log(`Failed to create widget: ${error.message}`, 'error');
+          updateStatus('Error', 'error');
+          updateButtons(false);
+        }
+      }
+
+      // Уничтожение виджета
+      function destroyWidget() {
+        if (!widget) return;
+
+        log('Destroying widget...');
+        widget.destroy();
+        widget = null;
+        widgetReady = false;
+
+        updateStatus('Destroyed', 'loading');
+        updateButtons(false);
+
+        // Очищаем контейнер
+        const container = document.getElementById('widgetContainer');
+        container.innerHTML =
+          '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">Widget will appear here</div>';
+
+        log('Widget destroyed', 'success');
+      }
+
+      // Отправка данных
+      function sendData() {
+        if (!widget || !widgetReady) return;
+
+        const data = {
+          message: 'Hello from parent!',
+          timestamp: Date.now(),
+          randomValue: Math.random(),
+          userInput: prompt('Enter some data to send:') || 'No input',
+        };
+
+        log(`Sending data: ${JSON.stringify(data)}`);
+        widget.setData(data);
+      }
+
+      // Получение данных
+      async function getData() {
+        if (!widget || !widgetReady) return;
+
+        log('Requesting data from widget...');
+
+        try {
+          const data = await widget.getData();
+          log(`Received data: ${JSON.stringify(data)}`, 'success');
+        } catch (error) {
+          log(`Failed to get data: ${error.message}`, 'error');
+        }
+      }
+
+      // Навигация
+      function navigate() {
+        if (!widget || !widgetReady) return;
+
+        const path = prompt('Enter path to navigate to:');
+        if (path) {
+          log(`Navigating to: ${path}`);
+          widget.navigateTo(path);
+        }
+      }
+
+      // Обработка ошибок
+      window.addEventListener('error', (event) => {
+        log(`Global error: ${event.error.message}`, 'error');
+      });
+
+      // Инициализация
+      log('Widget example loaded', 'success');
+      log(`SDK Version: ${MonoCoopWidget.version}`, 'info');
+
+      // Автоматическое создание виджета для демонстрации
+      setTimeout(() => {
+        createWidget();
+      }, 1000);
+    </script>
+  </body>
+</html>

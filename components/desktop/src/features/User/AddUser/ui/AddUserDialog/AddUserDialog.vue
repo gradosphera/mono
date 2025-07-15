@@ -89,7 +89,7 @@ import { useAddUser } from '../../model';
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { useCreateUser } from 'src/features/User/CreateUser';
+
 import { useSystemStore } from 'src/entities/System/model';
 import { notEmpty } from 'src/shared/lib/utils';
 import { validateDateWithinRange } from 'src/shared/lib/utils/dates/validateDateWithinRange';
@@ -161,8 +161,7 @@ watch(minimum, (newValue) => {
   else addUserState.minimum = Number(newValue);
 });
 
-const { addUser } = useAddUser();
-const api = useCreateUser();
+const { addUser, emailIsValid } = useAddUser();
 const coop = useCooperativeStore();
 
 onMounted(async () => {
@@ -227,7 +226,7 @@ const refresh = (what: string) => {
   updateLocalVars();
 };
 
-const isValidEmail = computed(() => api.emailIsValid(state.email));
+const isValidEmail = computed(() => emailIsValid(state.email));
 const isEmailExist = ref(false);
 
 const validateEmail = () => {

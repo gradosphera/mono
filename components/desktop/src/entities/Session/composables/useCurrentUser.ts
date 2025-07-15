@@ -30,6 +30,7 @@ export function useCurrentUser() {
     isRegistrationComplete: computed(() => session.isRegistrationComplete),
     isChairman: session.isChairman,
     isMember: session.isMember,
+    isAuth: session.isAuth,
 
     // Методы
     setCurrentUserAccount: session.setCurrentUserAccount,

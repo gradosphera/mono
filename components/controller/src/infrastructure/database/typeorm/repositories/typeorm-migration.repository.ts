@@ -31,4 +31,8 @@ export class TypeOrmMigrationRepository implements IMigrationRepository {
   async getMigrationByVersion(version: string): Promise<MigrationEntity | null> {
     return this.migrationRepository.findOne({ where: { version } });
   }
+
+  async updateMigrationLogs(version: string, logs: string): Promise<void> {
+    await this.migrationRepository.update({ version }, { logs });
+  }
 }

@@ -66,6 +66,7 @@ export interface WorkflowDefinition<T extends BaseWorkflowPayload = BaseWorkflow
   steps: WorkflowStep[];
   preferences: PreferencesConfig;
   origin?: NovuOrigin; // Делаем optional
+  tags?: string[]; // Теги для группировки воркфлоу
   // Типизированная схема для валидации payload
   payloadZodSchema: z.ZodSchema<T>;
 }
@@ -79,6 +80,7 @@ export interface NovuWorkflowData {
   steps: WorkflowStep[];
   preferences: PreferencesConfig;
   origin?: NovuOrigin; // Optional - только для обновлений
+  tags?: string[]; // Теги для группировки воркфлоу
 }
 
 // Интерфейс для триггера воркфлоу

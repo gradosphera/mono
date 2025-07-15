@@ -27,6 +27,7 @@ export function createEnvObject(): EnvVars {
     NOVU_APP_ID: process.env.NOVU_APP_ID as string,
     NOVU_BACKEND_URL: process.env.NOVU_BACKEND_URL as string,
     NOVU_SOCKET_URL: process.env.NOVU_SOCKET_URL as string,
+    VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY as string,
   };
 
   console.log('DEBUG: createEnvObject result:', envObj);
