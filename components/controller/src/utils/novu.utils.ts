@@ -44,7 +44,7 @@ export function generateSubscriberIdSync(coopname: string): string {
  */
 export function generateSubscriberHash(subscriberId: string): string {
   // Используем server_secret как ключ для HMAC
-  const hmac = createHmac('sha256', config.server_secret);
+  const hmac = createHmac('sha256', config.novu.api_key);
   hmac.update(subscriberId);
   return hmac.digest('hex');
 }

@@ -27,17 +27,17 @@ export class NotificationSenderService {
   ) {}
 
   /**
-   * Отправить уведомление пользователю
+   * Отправить уведомление пользователю с типизированным payload
    * @param username Username получателя
    * @param workflowName Имя воркфлоу
-   * @param payload Данные уведомления
+   * @param payload Данные уведомления (типизированные для конкретного воркфлоу)
    * @param actor Данные отправителя (опционально)
    * @returns Promise<WorkflowTriggerResultDomainInterface>
    */
-  async sendNotificationToUser(
+  async sendNotificationToUser<T extends Record<string, any>>(
     username: string,
     workflowName: string,
-    payload: NotificationPayloadDomainInterface,
+    payload: T,
     actor?: WorkflowActorDomainInterface
   ): Promise<WorkflowTriggerResultDomainInterface> {
     this.logger.log(`Отправка уведомления пользователю: ${username}, воркфлоу: ${workflowName}`);
@@ -48,9 +48,6 @@ export class NotificationSenderService {
     if (!account.provider_account?.subscriber_id) {
       throw new Error(`Не найден subscriber_id для пользователя ${username}`);
     }
-
-    // Синхронизируем device tokens перед отправкой
-    await this.deviceTokenService.syncDeviceTokensWithSubscriptions(username);
 
     // Создаем данные получателя с правильным subscriber_id
     const recipient: WorkflowRecipientDomainInterface = {
@@ -65,21 +62,7 @@ export class NotificationSenderService {
     const triggerData: WorkflowTriggerDomainInterface = {
       name: workflowName,
       to: recipient,
-      payload: {
-        title: payload.title,
-        body: payload.body,
-        icon: payload.icon,
-        badge: payload.badge,
-        image: payload.image,
-        url: payload.url,
-        tag: payload.tag,
-        requireInteraction: payload.requireInteraction,
-        silent: payload.silent,
-        actions: payload.actions,
-        data: payload.data,
-        vibrate: payload.vibrate,
-        timestamp: payload.timestamp,
-      },
+      payload: payload, // Передаем payload напрямую без преобразования
       actor,
     };
 
@@ -109,9 +92,6 @@ export class NotificationSenderService {
     actor?: WorkflowActorDomainInterface
   ): Promise<WorkflowTriggerResultDomainInterface[]> {
     this.logger.log(`Отправка уведомления пользователям: ${usernames.length}, воркфлоу: ${workflowName}`);
-
-    // Синхронизируем device tokens для всех пользователей
-    await Promise.all(usernames.map((username) => this.deviceTokenService.syncDeviceTokensWithSubscriptions(username)));
 
     // Получаем аккаунты пользователей для получения правильных subscriber_id
     const recipients: WorkflowRecipientDomainInterface[] = [];

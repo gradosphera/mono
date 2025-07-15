@@ -1,8 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { 
-  WorkflowDefinition, 
-  NovuWorkflowData,
-  allWorkflows 
+  Types,
+  Workflows 
 } from '../index';
 
 export interface NovuSyncConfig {
@@ -51,7 +50,7 @@ export class NovuSyncService {
   /**
    * Создать новый воркфлоу
    */
-  async createWorkflow(data: NovuWorkflowData): Promise<any> {
+  async createWorkflow(data: Types.NovuWorkflowData): Promise<any> {
     try {
       // Для создания НЕ передаем origin (как в testFramework2.ts)
       const createData = { ...data };
@@ -68,12 +67,12 @@ export class NovuSyncService {
   /**
    * Обновить существующий воркфлоу
    */
-  async updateWorkflow(workflowId: string, data: NovuWorkflowData): Promise<any> {
+  async updateWorkflow(workflowId: string, data: Types.NovuWorkflowData): Promise<any> {
     try {
       // Для обновления ВСЕГДА передаем origin: "external" (как в testFramework2.ts)
-      const updateData = { ...data, origin: 'external' as const };
-      
+      const updateData = { ...data, origin: 'novu-cloud' as const };
       const response = await this.client.put(`/v2/workflows/${workflowId}`, updateData);
+      // console.log('response', response.data);
       return response.data;
     } catch (error: any) {
       console.error(`Ошибка обновления воркфлоу ${workflowId}:`, error.response?.data || error.message);
@@ -84,18 +83,19 @@ export class NovuSyncService {
   /**
    * Создать или обновить воркфлоу (upsert)
    */
-  async upsertWorkflow(workflow: WorkflowDefinition): Promise<any> {
+  async upsertWorkflow(workflow: Types.WorkflowDefinition): Promise<any> {
     try {
       console.log(`Проверяем воркфлоу: ${workflow.workflowId}`);
       
       const existingWorkflow = await this.getWorkflow(workflow.workflowId);
-      const novuData: NovuWorkflowData = {
+      const novuData: Types.NovuWorkflowData = {
         name: workflow.name,
         workflowId: workflow.workflowId,
         description: workflow.description,
         payloadSchema: workflow.payloadSchema,
         steps: workflow.steps,
         preferences: workflow.preferences,
+        tags: workflow.tags,
       };
 
       if (existingWorkflow) {
@@ -115,12 +115,12 @@ export class NovuSyncService {
    * Создать или обновить все воркфлоу
    */
   async upsertAllWorkflows(): Promise<void> {
-    console.log(`Начинаем upsert ${allWorkflows.length} воркфлоу...`);
+    console.log(`Начинаем upsert ${Workflows.allWorkflows.length} воркфлоу...`);
     
     const errors: string[] = [];
     let successCount = 0;
     
-    for (const workflow of allWorkflows) {
+    for (const workflow of Workflows.allWorkflows) {
       try {
         await this.upsertWorkflow(workflow);
         console.log(`✓ Воркфлоу ${workflow.workflowId} успешно обработан`);
@@ -142,7 +142,7 @@ export class NovuSyncService {
         console.log(`${index + 1}. ${error}`);
       });
       
-      throw new Error(`Синхронизация завершилась с ошибками: ${errors.length} из ${allWorkflows.length} воркфлоу`);
+      throw new Error(`Синхронизация завершилась с ошибками: ${errors.length} из ${Workflows.allWorkflows.length} воркфлоу`);
     }
     
     console.log('✅ Все воркфлоу синхронизированы успешно');

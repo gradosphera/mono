@@ -10,6 +10,7 @@
     "@coopenomics/factory": "workspace:*",
     "@coopenomics/parser": "workspace:*",
     "@coopenomics/sdk": "workspace:*",
+    "@coopenomics/notifications": "workspace:*",
     "commitgpt": "^2.0.0",
     "coop-notificator": "workspace:*",
     "cooptypes": "workspace:*",

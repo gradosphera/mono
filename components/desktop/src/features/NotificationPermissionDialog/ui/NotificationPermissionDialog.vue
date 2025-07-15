@@ -8,41 +8,39 @@ q-dialog(
   transition-hide='fade'
 )
   q-card.notification-permission-dialog
-    q-card-section.text-center.q-pa-xl
-      .dialog-icon.q-mb-lg
-        q-icon(name='notifications', size='4rem', color='primary')
+    q-card-section.text-center.dialog-content
+      .dialog-icon.q-mb-md
+        q-icon(name='notifications', size='3rem', color='primary')
 
-      .dialog-title.text-h4.q-mb-md
+      .dialog-title.text-h5.q-mb-md
         | Разрешить уведомления?
 
-      .dialog-description.text-body1.q-mb-xl
+      .dialog-description.text-body2.q-mb-lg
         p Мы хотели бы присылать вам важные уведомления о событиях в кооперативе:
-        ul.q-pl-md
+        ul.q-pl-md.q-mt-sm
           li Статус ваших заявок и документов
           li Важные объявления
           li Уведомления о собраниях
           li И прочее...
 
-        p.q-mt-md
+        p.q-mt-md.disclaimer
           | Вы сможете настроить типы уведомлений или отключить их в любое время.
 
-    q-card-actions.q-pa-xl.justify-center
+    q-card-actions.justify-center.dialog-actions-container
       .dialog-actions
-        q-btn.q-mr-md(
+        q-btn.deny-btn(
           @click='handleDeny',
           flat,
           color='grey-7',
-          size='lg',
           :disable='isProcessing'
         ) Не сейчас
 
-        q-btn(
+        q-btn.allow-btn(
           @click='handleAllow',
           color='primary',
-          size='lg',
           :loading='isProcessing',
           :disable='isProcessing'
-        ) Разрешить уведомления
+        ) Разрешить
 </template>
 
 <script setup lang="ts">
@@ -54,67 +52,181 @@ const { isDialogVisible, isProcessing, handleAllow, handleDeny } =
 
 <style lang="scss" scoped>
 .notification-permission-dialog {
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+
+  .dialog-content {
+    padding: 32px 24px 24px 24px;
+  }
 
   .dialog-icon {
     .q-icon {
       background: rgba(var(--q-primary-rgb), 0.1);
       border-radius: 50%;
-      padding: 20px;
+      padding: 16px;
     }
   }
 
   .dialog-title {
     font-weight: 600;
     color: var(--q-dark);
+    line-height: 1.3;
   }
 
   .dialog-description {
     color: var(--q-dark);
-    line-height: 1.6;
-    max-width: 500px;
+    line-height: 1.5;
+    max-width: 400px;
     margin: 0 auto;
 
     ul {
       text-align: left;
+      margin: 0;
 
       li {
-        margin-bottom: 8px;
+        margin-bottom: 4px;
+        font-size: 14px;
       }
     }
+
+    .disclaimer {
+      font-size: 13px;
+      color: var(--q-grey-8);
+      opacity: 0.8;
+    }
+  }
+
+  .dialog-actions-container {
+    padding: 16px 24px 24px 24px;
   }
 
   .dialog-actions {
     display: flex;
-    gap: 16px;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
 
-    .q-btn {
-      min-width: 160px;
+    .deny-btn {
+      flex: 1;
+      min-height: 44px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .allow-btn {
+      flex: 1.5;
+      min-height: 44px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+}
+
+// Для планшетов и небольших экранов
+@media (max-width: 768px) {
+  .notification-permission-dialog {
+    max-width: 90vw;
+    margin: 16px;
+
+    .dialog-content {
+      padding: 24px 20px 20px 20px;
+    }
+
+    .dialog-icon .q-icon {
+      padding: 14px;
+    }
+
+    .dialog-title {
+      font-size: 1.25rem;
+    }
+
+    .dialog-description {
+      font-size: 14px;
+
+      ul li {
+        font-size: 13px;
+      }
+
+      .disclaimer {
+        font-size: 12px;
+      }
+    }
+
+    .dialog-actions-container {
+      padding: 12px 20px 20px 20px;
     }
   }
 }
 
 // Для мобильных устройств
-@media (max-width: 600px) {
+@media (max-width: 480px) {
   .notification-permission-dialog {
-    margin: 20px;
+    max-width: 95vw;
+    margin: 12px;
 
-    .q-card-section {
-      padding: 24px !important;
+    .dialog-content {
+      padding: 20px 16px 16px 16px;
     }
 
-    .q-card-actions {
-      padding: 24px !important;
+    .dialog-icon .q-icon {
+      font-size: 2.5rem;
+      padding: 12px;
+    }
+
+    .dialog-title {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+    }
+
+    .dialog-description {
+      font-size: 13px;
+      margin-bottom: 16px;
+
+      ul {
+        margin-top: 8px;
+
+        li {
+          font-size: 12px;
+          margin-bottom: 3px;
+        }
+      }
+
+      .disclaimer {
+        font-size: 11px;
+        margin-top: 12px;
+      }
+    }
+
+    .dialog-actions-container {
+      padding: 8px 16px 16px 16px;
     }
 
     .dialog-actions {
-      flex-direction: column;
+      gap: 8px;
 
-      .q-btn {
+      .deny-btn,
+      .allow-btn {
+        min-height: 42px;
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+// Для очень маленьких экранов
+@media (max-width: 360px) {
+  .notification-permission-dialog {
+    .dialog-actions {
+      flex-direction: column;
+      gap: 8px;
+
+      .deny-btn,
+      .allow-btn {
+        flex: none;
         width: 100%;
+        min-height: 44px;
       }
     }
   }

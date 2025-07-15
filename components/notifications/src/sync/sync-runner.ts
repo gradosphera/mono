@@ -2,9 +2,10 @@
 
 import { NovuSyncService } from './novu-sync.service';
 import { existsSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { watch } from 'chokidar';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ async function main() {
     }
     
     // Отслеживаем изменения в файлах воркфлоу и типов
+    const __dirname = dirname(fileURLToPath(import.meta.url));
     const workflowsPath = join(__dirname, '../workflows');
     const typesPath = join(__dirname, '../types');
     
@@ -141,7 +143,8 @@ async function main() {
   }
 }
 
-if (require.main === module) {
+// Проверяем, запущен ли файл как основной модуль
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
     console.error('❌ Критическая ошибка:', error);
     process.exit(1);

@@ -26,6 +26,7 @@
   "dependencies": {
     "@coopenomics/controller": "workspace:*",
     "@coopenomics/sdk": "workspace:*",
+    "@coopenomics/notifications": "workspace:*",
     "@dicebear/collection": "^9.0.1",
     "@dicebear/core": "^9.0.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",

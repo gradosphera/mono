@@ -6,6 +6,11 @@ import config from '../config/config';
 import { MeetDomainInteractor } from '~/domain/meet/interactors/meet.interactor';
 import type { MeetDecisionDomainInterface } from '~/domain/meet/interfaces/meet-decision-domain.interface';
 import { DomainToBlockchainUtils } from '~/infrastructure/blockchain/utils/domain-to-blockchain.utils';
+import { NotificationSenderService } from '~/modules/notification/services/notification-sender.service';
+import { Workflows } from '@coopenomics/notifications';
+import User from '~/models/user.model';
+import type { TokenContract } from 'cooptypes';
+import { nestApp } from '~/index';
 
 let clientSocket: Socket | undefined;
 let meetInteractor: MeetDomainInteractor;
@@ -83,5 +88,81 @@ async function processEvent(event: IAction) {
         logger.error(`Error processing meet decision: ${error.message}`, { source: 'processEvent', error });
       }
     }
+  }
+
+  if (event.name === 'transfer' && event.receiver === 'eosio.token') {
+    console.log('transfer', event);
+
+    // Отправляем уведомление о входящем переводе
+    try {
+      await sendIncomingTransferNotification(event);
+    } catch (error: any) {
+      logger.error(`Ошибка отправки уведомления о входящем переводе: ${error.message}`, { source: 'processEvent', error });
+    }
+  }
+}
+
+/**
+ * Отправляет уведомление о входящем переводе
+ * @param event Событие transfer из блокчейна
+ */
+async function sendIncomingTransferNotification(event: IAction): Promise<void> {
+  // Получаем NotificationSenderService из NestJS приложения
+  let notificationSender: NotificationSenderService;
+  try {
+    notificationSender = nestApp.get(NotificationSenderService);
+  } catch (error: any) {
+    logger.warn('Не удалось получить NotificationSenderService, пропускаем уведомление о переводе', {
+      error: error.message,
+    });
+    return;
+  }
+
+  // Извлекаем данные перевода из события
+  const transferData = event.data as TokenContract.Actions.Transfer.ITransfer;
+
+  if (!transferData.to || !transferData.quantity) {
+    logger.warn('Неполные данные в событии transfer, пропускаем уведомление', { transferData });
+    return;
+  }
+
+  const recipientUsername = transferData.to;
+  const transferAmount = transferData.quantity;
+
+  logger.info(`Обработка уведомления о переводе для пользователя: ${recipientUsername}, сумма: ${transferAmount}`);
+
+  try {
+    // Ищем пользователя по username
+    const user = await User.findOne({ username: recipientUsername });
+
+    if (!user) {
+      logger.info(`Пользователь ${recipientUsername} не найден в базе данных, пропускаем уведомление`);
+      return;
+    }
+
+    // Если у пользователя нет subscriber_id, пропускаем уведомление
+    if (!user.subscriber_id) {
+      logger.info(`У пользователя ${recipientUsername} нет subscriber_id, пропускаем уведомление`);
+      return;
+    }
+
+    // Подготавливаем payload для уведомления согласно схеме из @coopenomics/notifications
+    const notificationPayload: Workflows.NewTransfer.IPayload = {
+      quantity: transferAmount,
+    };
+
+    // Отправляем уведомление используя воркфлоу из пакета @coopenomics/notifications
+    await notificationSender.sendNotificationToUser(
+      recipientUsername,
+      Workflows.NewTransfer.workflow.workflowId, // 'vkhodyaschiy-perevod'
+      notificationPayload
+    );
+
+    logger.info(`Уведомление о входящем переводе отправлено пользователю: ${recipientUsername}`);
+  } catch (error: any) {
+    logger.error(`Ошибка при отправке уведомления о переводе пользователю ${recipientUsername}: ${error.message}`, {
+      error,
+    });
+    // Не перебрасываем ошибку, чтобы не прерывать обработку других событий
   }
 }
