@@ -76,7 +76,14 @@ jobs:
           echo "CMD [\"pnpm\", \"-F\", \"coop-notificator\", \"run\", \"start\"]" >> Dockerfile.notificator
           docker build -t dicoop/notificator:${{ env.DOCKER_TAG }} -f Dockerfile.notificator .
           docker push dicoop/notificator:${{ env.DOCKER_TAG }}
-            
+      
+      - name: Build notifications image
+        run: |
+          echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.notifications
+          echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/notifications\", \"run\", \"sync\"]" >> Dockerfile.notifications
+          docker build -t dicoop/notifications:${{ env.DOCKER_TAG }} -f Dockerfile.notifications .
+          docker push dicoop/notifications:${{ env.DOCKER_TAG }}
+                 
       # Отправка хука для деплоя
       - name: Trigger deployment webhook
         if: ${{ success() }}
