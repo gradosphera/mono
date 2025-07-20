@@ -93,6 +93,19 @@ public:
     [[eosio::action]]
     void approvecnvrt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 convert_hash, document2 approved_statement);
     
+    // Конвертация согласно этапу 4 ТЗ БЛАГОРОСТ v0.1
+    [[eosio::action]]
+    void convtowallet(eosio::name coopname, eosio::name application, eosio::name username, checksum256 result_hash, asset amount, document2 convert_statement);
+    
+    [[eosio::action]]
+    void convtoblagst(eosio::name coopname, eosio::name application, eosio::name username, checksum256 result_hash, asset amount, document2 convert_statement);
+    
+    [[eosio::action]]
+    void approvecnvtw(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 convert_hash, document2 approved_statement);
+    
+    [[eosio::action]]
+    void approvecnvtb(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 convert_hash, document2 approved_statement);
+    
     [[eosio::action]]
     void createcnvrt(
       eosio::name coopname,
@@ -108,6 +121,24 @@ public:
 
     [[eosio::action]]
     void addauthor(name coopname, name application, checksum256 project_hash, name author, uint64_t shares);
+    
+    // Координаторы согласно ТЗ БЛАГОРОСТ v0.1 (автоматическая регистрация по referer)
+    [[eosio::action]]
+    void paycoordntr(name coopname, name application, checksum256 project_hash, name coordinator, asset amount);
+    
+    // Получение накопленных средств координатором при сдаче результата (согласно ТЗ БЛАГОРОСТ v0.1)
+    [[eosio::action]]
+    void claimcoordntr(name coopname, name application, checksum256 project_hash, checksum256 result_hash, name coordinator, document2 presentation);
+    
+    // Мастера согласно ТЗ БЛАГОРОСТ v0.1
+    [[eosio::action]]
+    void addmaster(name coopname, name application, checksum256 project_hash, checksum256 assignment_hash, name master, name role);
+    
+    [[eosio::action]]
+    void setplannig(name coopname, name application, checksum256 assignment_hash, uint64_t plan_time, asset plan_expense, asset norma_hour_cost);
+    
+    [[eosio::action]]
+    void setprojevl(name coopname, name application, checksum256 project_hash, uint64_t total_plan_time, asset total_plan_expense, asset norma_hour_cost);
     
     // Коммиты
     [[eosio::action]]
@@ -194,12 +225,24 @@ public:
     [[eosio::action]] void fundprog(eosio::name coopname, asset amount, std::string memo);
     [[eosio::action]] void refreshprog(name coopname, name application, name username);
     
+    // Голосование по методу Водянова
+    [[eosio::action]]
+    void startvodyanov(name coopname, name application, checksum256 result_hash);
+    
+    [[eosio::action]]
+    void submitvote(name coopname, name application, name voter, checksum256 result_hash, std::vector<std::pair<name, asset>> votes);
+    
+    [[eosio::action]]
+    void finalvodyanov(name coopname, name application, checksum256 result_hash);
+    
 private:
     
   static constexpr symbol TOKEN_SYMBOL = _root_govern_symbol; ///< Символ используемого токена.
   static constexpr symbol ACCUMULATION_SYMBOL = _root_symbol; ///< Символ токена для учёта распределения.
   
   static constexpr int64_t MAX_AUTHORS = 12;
+  static constexpr double COORDINATOR_PERCENT = 0.04; ///< Процент координатора согласно ТЗ БЛАГОРОСТ v0.1 (4%)
+  static constexpr int64_t MAX_COORDINATOR_ACCUMULATION = 10000000; ///< Максимальная сумма накоплений координатора за инвестора (100,000 RUB в минимальных единицах)
   
   static constexpr name _intellectual = "intellectual"_n; ///< Символьное обозначение интеллектуального взноса
   static constexpr name _property = "property"_n; ///< Символьное обозначение имущественного взноса
@@ -220,6 +263,7 @@ private:
   global_state get_global_state(name coopname);
       
   static bonus_result calculcate_capital_amounts(const eosio::asset& spended);
+  static eosio::asset calculate_capitalists_bonus_with_debts(eosio::asset generated, eosio::asset sum_debt_amount);
   
   std::optional<author> get_author(eosio::name coopname, eosio::name username, const checksum256 &project_hash);
   std::optional<creator> get_creator(eosio::name coopname, eosio::name username, const checksum256 &assignment_hash);
@@ -259,6 +303,26 @@ private:
   
   std::optional<capital_tables::capitalist> get_capitalist(eosio::name coopname, eosio::name username);
   
+  // Функции для работы с координаторами согласно ТЗ БЛАГОРОСТ v0.1
+  std::optional<coordinator> get_coordinator(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
+  coordinator get_coordinator_or_fail(eosio::name coopname, const checksum256 &project_hash, eosio::name username, const char* msg);
+  eosio::asset calculate_coordinator_base(eosio::asset creator_base, eosio::asset author_base);
+  
+  // Функции для отслеживания выплат координаторам (с лимитом накоплений)
+  bool has_coordinator_received_payout(eosio::name coopname, eosio::name coordinator_username, eosio::name investor_username);
+  eosio::asset get_coordinator_accumulated_amount(eosio::name coopname, eosio::name coordinator_username, eosio::name investor_username);
+  void record_coordinator_payout(eosio::name coopname, eosio::name coordinator_username, eosio::name investor_username, checksum256 result_hash, eosio::asset total_accumulated, eosio::asset amount_claimed);
+  
+  // Функции для работы с мастерами согласно ТЗ БЛАГОРОСТ v0.1
+  std::optional<master> get_assignment_master(eosio::name coopname, const checksum256 &assignment_hash);
+  std::optional<master> get_project_master(eosio::name coopname, const checksum256 &project_hash);
+  master get_assignment_master_or_fail(eosio::name coopname, const checksum256 &assignment_hash, const char* msg);
+    
+  // Функции для расчёта долей в ОАП согласно ТЗ БЛАГОРОСТ v0.1
+  double calculate_creator_share(eosio::asset creator_base, eosio::asset creator_bonus, eosio::asset total_project_cost);
+  double calculate_author_share(eosio::asset author_base, eosio::asset author_bonus, eosio::asset total_project_cost);
+  double calculate_contributor_share(eosio::asset contributor_amount, eosio::asset contributors_amounts);
+  
   int64_t get_capital_program_share_balance(eosio::name coopname);
   
   uint64_t count_authors_by_project(eosio::name coopname, const checksum256 &project_hash);
@@ -269,5 +333,13 @@ private:
   std::optional<creauthor> get_creauthor(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username);
   result get_result_by_assignment_and_username_or_fail(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username, const char* msg);
   assignment get_assignment_or_fail(eosio::name coopname, const checksum256 &assignment_hash, const char* msg);
+  
+  // Функции для работы с голосованием по методу Водянова
+  std::optional<capital_tables::vodyanov_distribution> get_vodyanov_distribution(eosio::name coopname, const checksum256 &result_hash);
+  capital_tables::vodyanov_distribution get_vodyanov_distribution_or_fail(eosio::name coopname, const checksum256 &result_hash, const char* msg);
+  std::vector<eosio::name> get_assignment_participants(eosio::name coopname, const checksum256 &assignment_hash);
+  eosio::asset calculate_vodyanov_amounts(eosio::asset authors_bonus, eosio::asset creators_bonus);
+  bool has_user_voted(eosio::name coopname, uint64_t distribution_id, eosio::name voter);
+  void calculate_vodyanov_results(eosio::name coopname, uint64_t distribution_id);
   
 };

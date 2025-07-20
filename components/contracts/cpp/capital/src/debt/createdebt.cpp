@@ -16,6 +16,43 @@ void capital::createdebt(name coopname, name username, checksum256 assignment_ha
   auto exist_contributor = get_active_contributor_or_fail(coopname, assignment -> project_hash, username);
   eosio::check(exist_contributor.has_value(), "Договор УХД с пайщиком не найден");
   
+  // Проверяем ограничения выдачи ссуд согласно ТЗ БЛАГОРОСТ v0.1
+  eosio::check(assignment -> allocated.amount > 0, "Нет аллоцированных средств для выдачи ссуд");
+  
+  // Рассчитываем доступные суммы ссуд согласно формулам ТЗ
+  eosio::asset allocated_loans = assignment -> allocated; // 100% * invest_amount
+  
+  // creator_available_debt_amount = creator_base_fact / invest_plan * allocated_loans
+  eosio::asset creator_available_debt_amount = eosio::asset(0, amount.symbol);
+  if (assignment -> invest_plan.amount > 0) {
+      double creator_ratio = static_cast<double>(assignment -> creator_base_plan.amount) / static_cast<double>(assignment -> invest_plan.amount);
+      creator_available_debt_amount = eosio::asset(
+          int64_t(static_cast<double>(allocated_loans.amount) * creator_ratio), 
+          amount.symbol
+      );
+  }
+  
+  // author_available_debt_amount = author_base / invest_plan * allocated_loans  
+  eosio::asset author_available_debt_amount = eosio::asset(0, amount.symbol);
+  if (assignment -> invest_plan.amount > 0) {
+      double author_ratio = static_cast<double>(assignment -> author_base_plan.amount) / static_cast<double>(assignment -> invest_plan.amount);
+      author_available_debt_amount = eosio::asset(
+          int64_t(static_cast<double>(allocated_loans.amount) * author_ratio), 
+          amount.symbol
+      );
+  }
+  
+  // max_debt_amount = creator_available_debt_amount + author_available_debt_amount
+  eosio::asset max_debt_amount = eosio::asset(
+      creator_available_debt_amount.amount + author_available_debt_amount.amount,
+      amount.symbol
+  );
+  
+  // Проверяем общий лимит ссуд для задания
+  eosio::asset total_debts_issued = assignment -> creators_base; // Общая сумма уже выданных ссуд
+  eosio::check(total_debts_issued + amount <= max_debt_amount, 
+              "Превышен лимит доступных ссуд для задания");
+  
   contributor_index contributors(_capital, coopname.value);
   auto contributor = contributors.find(exist_contributor -> id);
   

@@ -13,6 +13,7 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   eosio::check(contributed_hours > 0, "Только положительная сумма часов");
   
   // считаем сумму фактических затрат создателя на основе ставки в час и потраченного времени
+  // Используем персональную ставку пайщика
   eosio::asset spended = contributor -> rate_per_hour * contributed_hours;
   
   // Вычисляем премии на основе суммы фактических затрат
@@ -21,10 +22,8 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   commit_index commits(_capital, coopname.value);
   auto commit_id = get_global_id_in_scope(_capital, coopname, "commits"_n);
   
-  //TODO: надо смотреть надо ли здесь добавлять creator_base и author_base
   commits.emplace(coopname, [&](auto &a) {
     a.id = commit_id;
-    a.status = "created"_n;
     a.coopname = coopname;
     a.application = application;
     a.username = username;
@@ -34,12 +33,13 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
     a.contributed_hours = contributed_hours;
     a.rate_per_hour = contributor -> rate_per_hour;
     a.spended = spended;
+    a.status = "created"_n;
+    a.created_at = current_time_point();
     a.generated = amounts.generated;
     a.creators_bonus = amounts.creators_bonus;
     a.authors_bonus = amounts.authors_bonus;
     a.capitalists_bonus = amounts.capitalists_bonus;
     a.total = amounts.total;
-    a.created_at = current_time_point();
   });
   
   auto empty_doc = document2{};

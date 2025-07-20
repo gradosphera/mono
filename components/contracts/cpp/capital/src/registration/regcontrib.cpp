@@ -13,7 +13,6 @@ void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::n
   eosio::check(project.has_value(), "Проект с указанным хэшем не найден");
 
   contributor_index contributors(_capital, coopname.value);
-  auto contributor = contributors.find(exist -> id);
    
   contributors.emplace(coopname, [&](auto &c) {
     c.id = get_global_id_in_scope(_capital, coopname, "contributors"_n);
