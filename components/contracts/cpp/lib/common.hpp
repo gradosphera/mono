@@ -1,9 +1,17 @@
+#include <eosio/eosio.hpp>
+#include <eosio/asset.hpp>
+#include <eosio/symbol.hpp>
+#include <eosio/system.hpp>
+#include <eosio/crypto.hpp>
+#include <eosio/transaction.hpp>
+#include <eosio/permission.hpp>
+
 #include "consts.hpp"
 #include "registry.hpp"
 #include "utils.hpp"
 #include "drafts.hpp"
+#include "shared_document.hpp"
 #include "accounts.hpp"
-#include "changes.hpp"
 #include "coops.hpp"
 #include "counts.hpp"
 #include "permissions.hpp"
@@ -17,10 +25,13 @@
 #include "shared_actions.hpp"
 #include "shared_soviet.hpp"
 #include "shared_wallet.hpp"
+#include "shared_fund.hpp"
 #include "shared_gateway.hpp"
+#include "shared_ledger.hpp"
 #include "shared_approver.hpp"
 #include "shared_registrator.hpp"
 #include "shared_loan.hpp"
 #include "shared_branch.hpp"
+#include "shared_marketplace.hpp"
 #include "approves.hpp"
 #include "debts.hpp"

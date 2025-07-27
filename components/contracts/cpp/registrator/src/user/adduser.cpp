@@ -15,7 +15,7 @@
  *    - устанавливаем дату вступления
  *    - фиксируем принятый взнос в реестре взносов
  *      4. fund::addcirculate (добавляем минимальный взнос)
- *      5. fund::spreadamount? (опционально распределяем вступительный взнос по фондам)
+ *      5. fund::addinitial (добавляем вступительный взнос в кошелек кооператива)
  *    )
  *  )
  * )
@@ -78,20 +78,10 @@
     });
     
   
-  action(
-    permission_level{ _registrator, "active"_n},
-    _fund,
-    "addcirculate"_n,
-    std::make_tuple(coopname, minimum)
-  ).send();
+  Ledger::add(_registrator, coopname, Ledger::accounts::SHARE_FUND, minimum, "Паевой взнос при регистрации пайщика");
   
   if (spread_initial) {
-    action(
-      permission_level{ _registrator, "active"_n},
-      _fund,
-      "addinitial"_n,
-      std::make_tuple(coopname, initial)
-    ).send();
+    Ledger::add(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, initial, "Вступительный взнос при регистрации пайщика");
   }
   
   eosio::name braname = ""_n;

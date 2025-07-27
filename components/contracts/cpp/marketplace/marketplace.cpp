@@ -1,38 +1,37 @@
 #include "marketplace.hpp"
 #include <eosio/transaction.hpp>
-#include "src/accept.cpp"
-#include "src/addunits.cpp"
-#include "src/authorize.cpp"
-#include "src/cancel.cpp"
-#include "src/change.cpp"
-#include "src/complete.cpp"
-#include "src/decline.cpp"
-#include "src/delivered.cpp"
-#include "src/dispute.cpp"
-#include "src/moderate.cpp"
-#include "src/offer.cpp"
-#include "src/order.cpp"
-#include "src/prohibit.cpp"
-#include "src/publish.cpp"
-#include "src/recieve.cpp"
-#include "src/recievecnfrm.cpp"
-#include "src/supply.cpp"
-#include "src/supplycnfrm.cpp"
-#include "src/unpublish.cpp"
-#include "src/update.cpp"
 
-/**
- * @brief Пустой метод регистрации нового идентификатора
- * @ingroup public_actions
- * Этот метод используется для возврата информации из контракта.
- * @param id идентификатор
- * @param type тип идентификатора
- */
-[[eosio::action]] void marketplace::newid(uint64_t id, eosio::name type) {
-  require_auth(_marketplace);
-};
+// Процесс поставки по заявкам orderoffer
+#include "src/deliver_on_offer/orderoffer.cpp"
+#include "src/deliver_on_offer/accept.cpp"
+#include "src/deliver_on_offer/authcontrib.cpp"
+#include "src/deliver_on_offer/authreturn.cpp"
+#include "src/deliver_on_offer/declineacc.cpp"
+#include "src/deliver_on_offer/supply.cpp"
+#include "src/deliver_on_offer/supplcnf.cpp"
+
+#include "src/deliver_on_offer/delivered.cpp"
+#include "src/deliver_on_offer/receive.cpp"
+#include "src/deliver_on_offer/receivecnf.cpp"
+#include "src/deliver_on_offer/complete.cpp"
+#include "src/deliver_on_offer/decline.cpp"
+#include "src/deliver_on_offer/cancel.cpp"
+
+// Новая система перевозок
+#include "src/shipment/createship.cpp"
+#include "src/shipment/signbydriver.cpp"
+#include "src/shipment/arrived.cpp"
+#include "src/shipment/receiveshipm.cpp"
+#include "src/shipment/retransport.cpp"
+
+// Диспуты
+#include "src/dispute_on_offer/dispute.cpp"
+#include "src/dispute_on_offer/wauthorize.cpp"
+#include "src/dispute_on_offer/wreturn.cpp"
+#include "src/dispute_on_offer/woffer.cpp"
+#include "src/dispute_on_offer/waccept.cpp"
 
 
 [[eosio::action]] void marketplace::migrate(){
-  require_auth(_marketplace);
+  // require_auth(_marketplace);
 }
