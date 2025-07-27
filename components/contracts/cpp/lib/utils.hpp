@@ -58,3 +58,43 @@ uint64_t generate() {
 
     return seed;
 }
+
+std::string checksum256_to_hex(const eosio::checksum256& hash) {
+    auto hash_bytes = hash.extract_as_byte_array();
+    std::string hash_hex;
+    for (const auto& byte : hash_bytes) {
+        char hex_char[3];
+        sprintf(hex_char, "%02x", byte);
+        hash_hex += hex_char;
+    }
+    return hash_hex;
+}
+
+uint64_t extract_registry_id_from_meta(const std::string& meta_json) {
+    // Ищем "registry_id": и извлекаем число после двоеточия
+    std::string search_key = "\"registry_id\":";
+    size_t pos = meta_json.find(search_key);
+    
+    eosio::check(pos != std::string::npos, "registry_id not found in meta");
+    
+    // Перемещаемся после двоеточия
+    pos += search_key.length();
+    
+    // Ищем первую цифру
+    while (pos < meta_json.length() && (meta_json[pos] < '0' || meta_json[pos] > '9')) {
+        pos++;
+    }
+    
+    eosio::check(pos < meta_json.length(), "registry_id value not found");
+    
+    // Собираем цифры
+    uint64_t result = 0;
+    while (pos < meta_json.length() && meta_json[pos] >= '0' && meta_json[pos] <= '9') {
+        result = result * 10 + (meta_json[pos] - '0');
+        pos++;
+    }
+    
+    eosio::check(result > 0, "invalid registry_id value");
+    
+    return result;
+}

@@ -4,7 +4,14 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   auto assignment = get_assignment(coopname, assignment_hash);
   eosio::check(assignment.has_value(), "Задание не найдено");
   
-  auto contributor = get_active_contributor_or_fail(coopname, assignment -> project_hash, username);
+  // Проверяем основной договор УХД
+  auto contributor = get_contributor(coopname, assignment -> project_hash, username);
+  eosio::check(contributor.has_value(), "Пайщик не подписывал основной договор УХД");
+  eosio::check(contributor -> status == "authorized"_n, "Основной договор УХД не активен");
+  
+  // Проверяем приложение к проекту
+  eosio::check(is_contributor_has_appendix_in_project(coopname, assignment -> project_hash, username), 
+               "Пайщик не подписывал приложение к договору УХД для данного проекта");
   
   auto exist_commit = get_commit(coopname, commit_hash);
   
@@ -13,7 +20,6 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   eosio::check(contributed_hours > 0, "Только положительная сумма часов");
   
   // считаем сумму фактических затрат создателя на основе ставки в час и потраченного времени
-  // Используем персональную ставку пайщика
   eosio::asset spended = contributor -> rate_per_hour * contributed_hours;
   
   // Вычисляем премии на основе суммы фактических затрат
@@ -22,8 +28,10 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   commit_index commits(_capital, coopname.value);
   auto commit_id = get_global_id_in_scope(_capital, coopname, "commits"_n);
   
+  //TODO: надо смотреть надо ли здесь добавлять creator_base и author_base
   commits.emplace(coopname, [&](auto &a) {
     a.id = commit_id;
+    a.status = "created"_n;
     a.coopname = coopname;
     a.application = application;
     a.username = username;
@@ -33,13 +41,12 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
     a.contributed_hours = contributed_hours;
     a.rate_per_hour = contributor -> rate_per_hour;
     a.spended = spended;
-    a.status = "created"_n;
-    a.created_at = current_time_point();
     a.generated = amounts.generated;
     a.creators_bonus = amounts.creators_bonus;
     a.authors_bonus = amounts.authors_bonus;
     a.capitalists_bonus = amounts.capitalists_bonus;
     a.total = amounts.total;
+    a.created_at = current_time_point();
   });
   
   auto empty_doc = document2{};

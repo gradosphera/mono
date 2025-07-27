@@ -14,4 +14,6 @@ void capital::authrslt(eosio::name coopname, checksum256 result_hash, document2 
     r.status = "authorized"_n;
     r.authorization = decision;
   });
+  
+   
 };

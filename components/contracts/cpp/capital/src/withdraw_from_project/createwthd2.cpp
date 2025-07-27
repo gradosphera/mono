@@ -6,7 +6,14 @@ void capital::createwthd2(name coopname, name application, name username, checks
   auto exist_project = get_project(coopname, project_hash);
   eosio::check(exist_project.has_value(), "Проект с указанным хэшем не найден");
 
-  auto exist_contributor = capital::get_active_contributor_or_fail(coopname, project_hash, username);
+  // Проверяем основной договор УХД
+  auto exist_contributor = get_contributor(coopname, project_hash, username);
+  eosio::check(exist_contributor.has_value(), "Пайщик не подписывал основной договор УХД");
+  eosio::check(exist_contributor -> status == "authorized"_n, "Основной договор УХД не активен");
+  
+  // Проверяем приложение к проекту
+  eosio::check(is_contributor_has_appendix_in_project(coopname, project_hash, username), 
+               "Пайщик не подписывал приложение к договору УХД для данного проекта");
   eosio::check(exist_contributor -> pending_rewards >= amount, "Недостаточно накопленных средств для создания запроса на возврат");
 
   contributor_index contributors(_capital, coopname.value);

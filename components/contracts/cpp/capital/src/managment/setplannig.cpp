@@ -56,4 +56,15 @@ void capital::setplannig(name coopname, name application, checksum256 assignment
         a.coordinator_base_plan = coordinator_base_plan;
         a.invest_plan = invest_plan;
     });
+    
+    // Обновляем проект с общей оценкой
+    // project_index projects(_capital, coopname.value);
+    // auto project = get_project(coopname, project_hash);
+    // eosio::check(project.has_value(), "Проект не найден");
+    // auto project_itr = projects.find(project->id);
+    
+    // projects.modify(project_itr, project_master->username, [&](auto &p) {
+    //     // Обновляем целевые показатели проекта
+    //     p.target = invest_plan;
+    // });
 } 
