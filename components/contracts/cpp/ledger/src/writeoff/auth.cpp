@@ -7,7 +7,7 @@
 void ledger::auth(eosio::name coopname, checksum256 writeoff_hash) {
   require_auth(_soviet);
 
-  auto writeoff_opt = get_writeoff_by_hash(writeoff_hash);
+  auto writeoff_opt = Ledger::get_writeoff_by_hash(writeoff_hash);
   eosio::check(writeoff_opt.has_value(), "Операция не найдена");
   
   auto writeoff = writeoff_opt.value();

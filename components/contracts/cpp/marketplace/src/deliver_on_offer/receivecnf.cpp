@@ -44,7 +44,7 @@
   std::string memo = "Подтверждение получения для заказа №" + std::to_string(change.id);
   
   // Паевой фонд - уменьшаем циркуляцию
-  Fund::sub_circulating_funds(_marketplace, coopname, change.base_cost);
+  Ledger::sub(_marketplace, coopname, Ledger::accounts::SHARE_FUND, change.base_cost, memo);
   
   // Заказчик - списываем заблокированный баланс
   Wallet::sub_blocked_funds(_marketplace, coopname, change.money_contributor, change.total_cost, _marketplace_program, memo);

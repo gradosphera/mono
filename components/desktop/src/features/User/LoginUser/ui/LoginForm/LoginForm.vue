@@ -37,6 +37,7 @@ form.full-width(@submit.prevent='submit')
 import { useCurrentUser } from 'src/entities/Session';
 import { useSessionStore } from 'src/entities/Session';
 import { useLoginUser } from 'src/features/User/LoginUser';
+import { useNotificationPermissionDialog } from 'src/features/NotificationPermissionDialog';
 import { FailAlert } from 'src/shared/api';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -49,6 +50,9 @@ const email = ref('');
 const privateKey = ref('');
 const loading = ref(false);
 const currentUser = useCurrentUser();
+
+// Диалог разрешения уведомлений
+const { showDialog } = useNotificationPermissionDialog();
 
 /**
  * Функция для перехода по сохраненному URL после успешного входа
@@ -112,6 +116,11 @@ const submit = async () => {
     }
 
     loading.value = false;
+
+    // Показываем диалог разрешения уведомлений после успешного входа
+    setTimeout(() => {
+      showDialog();
+    }, 1000);
   } catch (e: any) {
     console.error(e);
     loading.value = false;

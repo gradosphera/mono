@@ -4,6 +4,7 @@
     "baseUrl": ".",
     "skipLibCheck": true,
     "noImplicitAny": false,
+    "lib": ["ES2020", "DOM", "WebWorker"]
     // "declaration": true,                // Включаем генерацию деклараций типов
     // "declarationDir": "./dist/types",   // Папка, куда будут сохранены сгенерированные типы
     // "emitDeclarationOnly": true,        // Генерировать только типы, без JS-кода

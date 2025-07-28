@@ -1,14 +1,21 @@
 import { WorkflowDefinition } from '../types';
+// Импорты воркфлоу для регистрации
+import { workflow as welcomeWorkflow } from './welcome';
+import { workflow as newAgendaItemWorkflow } from './new-agenda-item';
+import { workflow as incomingTransferWorkflow } from './incoming-transfer';
+
 
 // Импортируем все воркфлоу
-export * from './welcome';
+export * as Welcome from './welcome';
+export * as NewAgenda from './new-agenda-item';
+export * as NewTransfer from './incoming-transfer';
 
-// Импорты воркфлоу для регистрации
-import { welcomeWorkflow } from './welcome';
 
 // Массив всех воркфлоу для автоматической регистрации
 export const allWorkflows: WorkflowDefinition[] = [
   welcomeWorkflow,
+  newAgendaItemWorkflow,
+  incomingTransferWorkflow,
   // Здесь будут добавляться новые воркфлоу
 ];
 

@@ -2,10 +2,14 @@
 #include <ctime>
 #include <eosio/transaction.hpp>
 
-#include "src/initialize/init.cpp"
 #include "src/common/add.cpp"
 #include "src/common/sub.cpp"
 #include "src/common/transfer.cpp"
+#include "src/common/block.cpp"
+#include "src/common/unblock.cpp"
+#include "src/common/writeoff.cpp"
+#include "src/common/writeoffcnsl.cpp"
+
 #include "src/writeoff/create.cpp"
 #include "src/writeoff/auth.cpp"
 #include "src/writeoff/complete.cpp"

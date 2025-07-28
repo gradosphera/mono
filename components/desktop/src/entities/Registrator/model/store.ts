@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, reactive } from 'vue';
 import { IGeneratedAccount } from 'src/shared/lib/types/user';
-import { type IRegisterAccount } from 'src/shared/lib/types/user/IUserData';
+import { type IUserData } from 'src/shared/lib/types/user/IUserData';
 import type { Cooperative } from 'cooptypes';
 import { useSystemStore } from 'src/entities/System/model';
 import type { IDocument, ISignatureInfo } from 'src/shared/lib/types/document';
@@ -19,10 +19,7 @@ const initialAccountState: IGeneratedAccount = {
 };
 
 // Начальное состояние для userData
-const initialUserDataState: IRegisterAccount = {
-  email: '',
-  username: '',
-  public_key: '',
+const initialUserDataState: IUserData = {
   type: AccountTypes.individual,
   individual_data: {
     first_name: '',

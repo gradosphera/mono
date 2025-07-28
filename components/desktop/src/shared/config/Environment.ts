@@ -18,7 +18,7 @@ export interface EnvVars {
   NOVU_APP_ID: string;
   NOVU_BACKEND_URL: string;
   NOVU_SOCKET_URL: string;
-  [key: string]: string | boolean | undefined;
+  VAPID_PUBLIC_KEY: string;
 }
 
 // Расширяем глобальный Window чтобы TypeScript понимал window.__APP_CONFIG__
@@ -148,6 +148,7 @@ function getEnv(): EnvVars {
     NOVU_APP_ID: process.env.NOVU_APP_ID as string,
     NOVU_BACKEND_URL: process.env.NOVU_BACKEND_URL as string,
     NOVU_SOCKET_URL: process.env.NOVU_SOCKET_URL as string,
+    VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY as string,
   };
 
   isLoading = false;

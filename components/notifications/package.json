@@ -1,26 +1,50 @@
 {
   "name": "@coopenomics/notifications",
-  "version": "2025.7.6-1",
+  "version": "2025.7.23-1",
   "description": "Typesafe notification workflows library for Novu",
-  "main": "dist/index.js",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./dist/index.d.ts"
+      ]
+    }
+  },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "clean": "rm -rf dist"
+    "build": "unbuild",
+    "dev": "unbuild --watch",
+    "clean": "rm -rf dist",
+    "sync": "tsx src/sync/sync-runner.ts",
+    "sync:dev": "tsx src/sync/sync-runner.ts --dev",
+    "sync:watch": "tsx src/sync/sync-runner.ts --dev"
   },
   "dependencies": {
+    "axios": "^1.7.7",
+    "dotenv": "^17.1.0",
+    "transliteration": "^2.3.5",
     "zod": "^3.22.4",
     "zod-to-json-schema": "^3.22.5"
   },
   "devDependencies": {
+    "@types/chokidar": "^2.1.3",
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
+    "chokidar": "^3.6.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "unbuild": "^2.0.0"
+  },
+  "bin": {
+    "novu-sync": "./dist/sync/sync-runner.js"
   },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     }
   }
 }

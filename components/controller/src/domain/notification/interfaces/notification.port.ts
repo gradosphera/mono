@@ -11,10 +11,16 @@ export interface NotificationSubscriberData {
 
 export interface NotificationPort {
   /**
-   * Создает или обновляет подписчика в системе уведомлений
+   * Создает подписчика в системе уведомлений
    * @param subscriber Данные подписчика
    */
-  upsertSubscriber(subscriber: NotificationSubscriberData): Promise<void>;
+  createSubscriber(subscriber: NotificationSubscriberData): Promise<void>;
+
+  /**
+   * Обновляет подписчика в системе уведомлений
+   * @param subscriber Данные подписчика
+   */
+  updateSubscriber(subscriber: NotificationSubscriberData): Promise<void>;
 
   /**
    * Получает подписчика по ID

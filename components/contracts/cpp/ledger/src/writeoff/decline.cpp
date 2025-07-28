@@ -9,7 +9,7 @@ void ledger::decline(eosio::name coopname, checksum256 writeoff_hash, std::strin
   // Может быть вызван от _soviet (отклонение решения) или _gateway (отклонение платежа)
   eosio::check(has_auth(_soviet) || has_auth(_gateway), "Недостаточно прав для отклонения операции");
 
-  auto writeoff_opt = get_writeoff_by_hash(writeoff_hash);
+  auto writeoff_opt = Ledger::get_writeoff_by_hash(writeoff_hash);
   eosio::check(writeoff_opt.has_value(), "Операция не найдена");
   
   auto writeoff = writeoff_opt.value();

@@ -13,6 +13,44 @@ const currentUser = useCurrentUser();
 const $q = useQuasar();
 const isDark = computed(() => $q.dark.isActive);
 
+// Определяем роль пользователя
+const userRole = computed((): string => {
+  if (currentUser.isChairman) {
+    return 'chairman';
+  }
+  if (currentUser.isMember) {
+    return 'member';
+  }
+  return 'user';
+});
+
+// Создаем статические табы с правильными фильтрами
+function createNotificationTabs() {
+  return [
+    {
+      label: 'Пайщик',
+      filter: {
+        // Вкладка "Пользователь" показывает все уведомления
+        tags: ['user', 'member', 'chairman'],
+      },
+    },
+    {
+      label: 'Член совета',
+      filter: {
+        // Вкладка "Член совета" показывает только member воркфлоу
+        tags: ['member'],
+      },
+    },
+    {
+      label: 'Председатель',
+      filter: {
+        // Вкладка "Председатель" показывает только chairman воркфлоу
+        tags: ['chairman'],
+      },
+    },
+  ];
+}
+
 let novuUI: any = null;
 let novu: any = null;
 const unsubscribeFunctions = ref<Array<() => void>>([]);
@@ -48,6 +86,16 @@ async function mountNovu() {
       socketUrl: env.NOVU_SOCKET_URL,
     });
 
+    // Создаем статические табы с правильными фильтрами
+    const tabs = createNotificationTabs();
+
+    console.log(
+      'Текущая роль пользователя:',
+      userRole.value,
+      'Созданные табы:',
+      tabs.map((tab) => tab.label),
+    );
+
     const el = document.getElementById('notification-inbox');
     if (el) el.innerHTML = '';
 
@@ -61,6 +109,7 @@ async function mountNovu() {
         apiUrl: env.NOVU_BACKEND_URL,
         socketUrl: env.NOVU_SOCKET_URL,
       },
+      tabs: tabs, // Добавляем tabs для фильтрации по ролям
       appearance: {
         baseTheme: isDark.value ? dark : undefined,
       },
@@ -75,8 +124,11 @@ async function mountNovu() {
         'notifications.actions.readAll': 'Прочитать все',
         'notifications.actions.archiveAll': 'Архивировать все',
         'notifications.actions.archiveRead': 'Архивировать прочитанные',
-        'notifications.newNotifications':
-          '{{notificationCount}} новое уведомление(ий)',
+        'notifications.newNotifications': ({
+          notificationCount,
+        }: {
+          notificationCount: number;
+        }) => `Новых уведомлений: ${notificationCount}`,
         'notification.actions.read.tooltip': 'Отметить как прочитанное',
         'notification.actions.unread.tooltip': 'Отметить как непрочитанное',
         'notification.actions.archive.tooltip': 'В архив',
@@ -91,6 +143,7 @@ async function mountNovu() {
         locale: 'ru-RU',
         dynamic: {
           'comment-on-post': 'Комментарии к записи',
+          'new-agenda-item': 'Новый вопрос на повестке',
         },
       },
     });

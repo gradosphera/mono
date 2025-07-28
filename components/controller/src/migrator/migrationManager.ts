@@ -6,11 +6,12 @@ import config from '../config/config';
 import logger from '../config/logger';
 import { BlockchainService } from '../infrastructure/blockchain/blockchain.service';
 import { WinstonLoggerService } from '../modules/logger/logger-app.service';
+import { MigrationLogger } from './migration-logger';
 
 export interface Migration {
   name: string;
   validUntil?: Date; // Дата в UTC, до которой миграция должна применяться. Если не указана или null, миграция применяется всегда
-  up: (services: { blockchain: BlockchainService }) => Promise<boolean>;
+  up: (services: { blockchain: BlockchainService; logger: MigrationLogger }) => Promise<boolean>;
 }
 
 export class MigrationManager {
@@ -146,37 +147,57 @@ export class MigrationManager {
   }
 
   async runMigration(migration: Migration, version: string, description: string, isTest: boolean): Promise<boolean> {
+    // Создаем запись в базе данных для сохранения логов
+    if (!isTest) {
+      await this.migrationRepository.save({
+        version,
+        name: migration.name,
+        executedAt: new Date(),
+        success: false, // Изначально помечаем как неуспешную
+        logs: '', // Пустые логи изначально
+      });
+    }
+
+    // Создаем логгер для миграции
+    const migrationLogger = new MigrationLogger(version, this.migrationRepository);
+
     try {
       if (isTest) {
-        logger.info(`[ТЕСТОВАЯ МИГРАЦИЯ] Запуск миграции ${version} (${description}): ${migration.name}`);
+        migrationLogger.info(`[ТЕСТОВАЯ МИГРАЦИЯ] Запуск миграции ${version} (${description}): ${migration.name}`);
       } else {
-        logger.info(`Запуск миграции ${version} (${description}): ${migration.name}`);
+        migrationLogger.info(`Запуск миграции ${version} (${description}): ${migration.name}`);
       }
 
-      // Предоставляем блокчейн-сервис в миграцию
-      const result = await migration.up({ blockchain: this.blockchainService });
+      // Предоставляем блокчейн-сервис и логгер в миграцию
+      const result = await migration.up({ blockchain: this.blockchainService, logger: migrationLogger });
 
-      // Отмечаем как примененную только если миграция успешна И не является тестовой
-      if (result && !isTest) {
-        await this.markMigrationAsApplied(version, migration.name, true, false);
+      // Обновляем статус миграции в базе данных
+      if (!isTest) {
+        await this.migrationRepository.update({ version }, { success: result });
       }
 
       if (isTest) {
-        logger.info(
+        migrationLogger.info(
           `[ТЕСТОВАЯ МИГРАЦИЯ] Миграция ${version} (${description}) выполнена ${result ? 'успешно' : 'с ошибками'}`
         );
       } else {
-        logger.info(`Миграция ${version} (${description}) выполнена ${result ? 'успешно' : 'с ошибками'}`);
+        migrationLogger.info(`Миграция ${version} (${description}) выполнена ${result ? 'успешно' : 'с ошибками'}`);
       }
+
+      // Сохраняем логи в базе данных
+      await migrationLogger.saveLogs();
 
       return result;
     } catch (error) {
-      logger.error(`Ошибка при выполнении миграции ${version} (${description}):`, error);
+      migrationLogger.error(`Ошибка при выполнении миграции ${version} (${description}): ${error}`);
 
-      // Отмечаем как неуспешную только если это НЕ тестовая миграция
+      // Обновляем статус миграции в базе данных
       if (!isTest) {
-        await this.markMigrationAsApplied(version, migration.name, false, false);
+        await this.migrationRepository.update({ version }, { success: false });
       }
+
+      // Сохраняем логи даже в случае ошибки
+      await migrationLogger.saveLogs();
 
       return false;
     }

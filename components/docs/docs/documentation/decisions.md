@@ -104,19 +104,37 @@ __IV. Все принятые решения фиксируются в реес�
 Выполнение запроса доступно только для членов совета. Подробнее о содержании пакета документов смотри раздел [Документы](/documentation/documents).
 
 ## Проголосовать за решение
-{{ get_sdk_doc("Mutations", "Decisions", "VoteFor") }} | {{ get_graphql_doc("Mutation.voteFor") }}
+{{ get_class_doc("Vote") }}
 
-{{ get_typedoc_desc("Mutations.Decisions.VoteFor") }}
+Для голосования "ЗА" используется метод `voteFor()` класса `Classes.Vote`. Данный метод создает цифровую подпись голоса члена совета.
 
-{{ get_typedoc_input("Mutations.Decisions.VoteFor") }}
+```ts
+import { Classes } from '@coopenomics/sdk'
+
+const wifKey = "your-wif-private-key"
+const voteSigner = new Classes.Vote(wifKey)
+
+// Голосование за решение
+const voteForResult = await voteSigner.voteFor("coopname", "username", 123)
+console.log(voteForResult)
+```
 
 
 ## Проголосовать против решения
-{{ get_sdk_doc("Mutations", "Decisions", "VoteAgainst") }} | {{ get_graphql_doc("Mutation.voteAgainst") }}
+{{ get_class_doc("Vote") }}
 
-{{ get_typedoc_desc("Mutations.Decisions.VoteAgainst") }}
+Для голосования "ПРОТИВ" используется метод `voteAgainst()` класса `Classes.Vote`. Данный метод создает цифровую подпись голоса члена совета.
 
-{{ get_typedoc_input("Mutations.Decisions.VoteAgainst") }}
+```ts
+import { Classes } from '@coopenomics/sdk'
+
+const wifKey = "your-wif-private-key"
+const voteSigner = new Classes.Vote(wifKey)
+
+// Голосование против решения
+const voteAgainstResult = await voteSigner.voteAgainst("coopname", "username", 123)
+console.log(voteAgainstResult)
+```
 
 
 ## Воздержаться от голосования
@@ -124,19 +142,19 @@ __IV. Все принятые решения фиксируются в реес�
 
 <a id="authorize-decision"></a>
 ## Утвердить решение
-{{ get_sdk_doc("Mutations", "Decisions", "Authorize") }} | {{ get_graphql_doc("Mutation.authorize") }}
+{{ get_graphql_doc("Mutation.authorize") }}
 
-{{ get_typedoc_desc("Mutations.Decisions.Authorize") }}
+Утверждение решения производится председателем совета путем отправки транзакции `authorize` напрямую в блокчейн с подписанным протоколом решения.
 
-{{ get_typedoc_input("Mutations.Decisions.Authorize") }}
+**Примечание:** В настоящее время в SDK нет готовой мутации для утверждения решений. Операция выполняется через прямое взаимодействие с блокчейном при помощи класса `Classes.Blockchain`.
 
 
 ## Исполнить решение
-{{ get_sdk_doc("Mutations", "Decisions", "Exec") }} | {{ get_graphql_doc("Mutation.exec") }}
+{{ get_graphql_doc("Mutation.exec") }}
 
-{{ get_typedoc_desc("Mutations.Decisions.Exec") }}
+Исполнение решения производится путем отправки транзакции `exec` напрямую в блокчейн для фиксации принятого решения в реестре.
 
-{{ get_typedoc_input("Mutations.Decisions.Exec") }}
+**Примечание:** В настоящее время в SDK нет готовой мутации для исполнения решений. Операция выполняется через прямое взаимодействие с блокчейном при помощи класса `Classes.Blockchain`.
 
 
 

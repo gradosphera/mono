@@ -10,7 +10,7 @@
  */
 [[eosio::action]]
 void ledger::create(eosio::name coopname, eosio::name username, uint64_t account_id, eosio::asset quantity, std::string reason, document2 document, checksum256 writeoff_hash) {
-  require_auth(username);
+  require_auth(coopname);
 
   eosio::check(quantity.is_valid(), "Некорректная сумма");
   eosio::check(quantity.amount > 0, "Сумма должна быть положительной");
@@ -28,10 +28,10 @@ void ledger::create(eosio::name coopname, eosio::name username, uint64_t account
   eosio::check(account_iter != accounts.end(), "Счет не найден");
 
   // Проверяем достаточность средств
-  eosio::check(account_iter -> allocation >= quantity, "Недостаточно средств на счету");
+  eosio::check(account_iter -> available >= quantity, "Недостаточно средств на счету");
 
   // Проверяем уникальность writeoff_hash
-  auto existing_writeoff = get_writeoff_by_hash(writeoff_hash);
+  auto existing_writeoff = Ledger::get_writeoff_by_hash(writeoff_hash);
   eosio::check(!existing_writeoff.has_value(), "Операция с таким хэшем уже существует");
 
   // Создаем операцию ожидающую решения совета
@@ -65,4 +65,9 @@ void ledger::create(eosio::name coopname, eosio::name username, uint64_t account
     document,
     reason
   );
+  
+  // Блокируем средства на счету
+  std::string comment = "Служебная записка отправлена в совет для списания средств со счета " + account_iter->name + " на сумму " + quantity.to_string();
+  Ledger::block(coopname, coopname, account_id, quantity, comment);  
+  
 } 

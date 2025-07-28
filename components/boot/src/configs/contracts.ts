@@ -66,6 +66,11 @@ export default [
     target: 'fund',
   },
   {
+    name: 'ledger',
+    path: path.resolve(process.cwd(), '../contracts/build/contracts/ledger'),
+    target: 'ledger',
+  },
+  {
     name: 'contributor',
     path: path.resolve(process.cwd(), '../contracts/build/contracts/contributor'),
     target: 'contributor',

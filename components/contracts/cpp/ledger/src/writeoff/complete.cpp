@@ -7,7 +7,7 @@
 void ledger::complete(eosio::name coopname, checksum256 writeoff_hash) {
   require_auth(_gateway);
 
-  auto writeoff_opt = get_writeoff_by_hash(writeoff_hash);
+  auto writeoff_opt = Ledger::get_writeoff_by_hash(writeoff_hash);
   eosio::check(writeoff_opt.has_value(), "Операция не найдена");
   
   auto writeoff = writeoff_opt.value();
@@ -27,7 +27,7 @@ void ledger::complete(eosio::name coopname, checksum256 writeoff_hash) {
   eosio::check(account_iter != accounts.end(), "Счет не найден");
 
   accounts.modify(account_iter, _gateway, [&](auto& acc) {
-    acc.allocation -= writeoff.quantity;
+    acc.blocked -= writeoff.quantity;
     acc.writeoff += writeoff.quantity;
   });
 } 

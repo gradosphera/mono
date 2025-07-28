@@ -24,6 +24,9 @@ import { TypeOrmMeetProcessedRepository } from './repositories/typeorm-meet-proc
 import { PaymentEntity } from './entities/payment.entity';
 import { PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
 import { TypeOrmPaymentRepository } from './repositories/typeorm-payment.repository';
+import { WebPushSubscriptionEntity } from './entities/web-push-subscription.entity';
+import { WEB_PUSH_SUBSCRIPTION_PORT } from '~/domain/notification/interfaces/web-push-subscription.port';
+import { TypeOrmWebPushSubscriptionRepository } from './repositories/typeorm-web-push-subscription.repository';
 
 @Global()
 @Module({
@@ -47,6 +50,7 @@ import { TypeOrmPaymentRepository } from './repositories/typeorm-payment.reposit
       MigrationEntity,
       CandidateEntity,
       PaymentEntity,
+      WebPushSubscriptionEntity,
     ]),
   ],
   providers: [
@@ -78,6 +82,10 @@ import { TypeOrmPaymentRepository } from './repositories/typeorm-payment.reposit
       provide: PAYMENT_REPOSITORY,
       useClass: TypeOrmPaymentRepository,
     },
+    {
+      provide: WEB_PUSH_SUBSCRIPTION_PORT,
+      useClass: TypeOrmWebPushSubscriptionRepository,
+    },
   ],
   exports: [
     NestTypeOrmModule,
@@ -88,6 +96,7 @@ import { TypeOrmPaymentRepository } from './repositories/typeorm-payment.reposit
     MIGRATION_REPOSITORY,
     CANDIDATE_REPOSITORY,
     PAYMENT_REPOSITORY,
+    WEB_PUSH_SUBSCRIPTION_PORT,
   ],
 })
 export class TypeOrmModule {}

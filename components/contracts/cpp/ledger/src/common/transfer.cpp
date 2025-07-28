@@ -8,9 +8,12 @@
  */
 [[eosio::action]]
 void ledger::transfer(eosio::name coopname, uint64_t from_account_id, uint64_t to_account_id, eosio::asset quantity, std::string comment) {
+  eosio::name payer = coopname;
+  
   if (!has_auth(coopname)) {
-    check_auth_and_get_payer_or_fail(contracts_whitelist);
+    payer = check_auth_and_get_payer_or_fail(contracts_whitelist);
   } 
+
 
   eosio::check(quantity.is_valid(), "Некорректная сумма");
   eosio::check(quantity.amount > 0, "Сумма должна быть положительной");
@@ -19,22 +22,40 @@ void ledger::transfer(eosio::name coopname, uint64_t from_account_id, uint64_t t
 
   laccounts_index accounts(_ledger, coopname.value);
   
+  // Проверяем счет списания
   auto from_account_iter = accounts.find(from_account_id);
   eosio::check(from_account_iter != accounts.end(), "Счет списания не найден");
-  
+  eosio::check(from_account_iter->available >= quantity, "Недостаточно доступных средств для перевода");
+
+  // Проверяем счет зачисления или создаем его
   auto to_account_iter = accounts.find(to_account_id);
-  eosio::check(to_account_iter != accounts.end(), "Счет зачисления не найден");
-
-  // Проверяем достаточность средств
-  eosio::check(from_account_iter->allocation >= quantity, "Недостаточно средств для перевода");
-
+  
   // Списываем с источника
-  accounts.modify(from_account_iter, coopname, [&](auto& acc) {
-    acc.allocation -= quantity;
+  accounts.modify(from_account_iter, payer, [&](auto& acc) {
+    acc.available -= quantity;
   });
 
-  // Зачисляем на получателя
-  accounts.modify(to_account_iter, coopname, [&](auto& acc) {
-    acc.allocation += quantity;
-  });
+  if (to_account_iter == accounts.end()) {
+    // Счет получателя не существует - создаем автоматически
+    std::string account_name = Ledger::get_account_name_by_id(to_account_id);
+    eosio::check(account_name != "Неизвестный счет", "Счет получателя с таким ID не предусмотрен в плане счетов");
+    
+    accounts.emplace(payer, [&](auto& acc) {
+      acc.id = to_account_id;
+      acc.name = account_name;
+      acc.available = quantity;
+      acc.blocked = eosio::asset(0, _root_govern_symbol);
+      acc.writeoff = eosio::asset(0, _root_govern_symbol);
+    });
+  } else {
+    // Зачисляем на получателя
+    accounts.modify(to_account_iter, payer, [&](auto& acc) {
+      acc.available += quantity;
+    });
+  }
+  
+  // Проверяем и удаляем счет источника если он полностью пуст
+  if (from_account_iter->is_empty()) {
+    accounts.erase(from_account_iter);
+  }
 } 

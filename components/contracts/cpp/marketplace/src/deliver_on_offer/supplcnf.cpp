@@ -42,7 +42,7 @@
   std::string memo = "Подтверждение поставки для заказа №" + std::to_string(change.id);
   
   // Паевой фонд - увеличиваем циркуляцию
-  Fund::add_circulating_funds(_marketplace, coopname, change.total_cost);
+  Ledger::add(_marketplace, coopname, Ledger::accounts::SHARE_FUND, change.total_cost, memo);
   
   // Поставщик - начисляем и блокируем средства
   Wallet::add_available_funds(_marketplace, coopname, change.product_contributor, change.base_cost, _marketplace_program, memo);

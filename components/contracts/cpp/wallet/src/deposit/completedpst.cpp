@@ -11,10 +11,11 @@ void wallet::completedpst(eosio::name coopname, checksum256 deposit_hash) {
   auto deposit = deposits.find(exist_deposit -> id);
   
   auto participant = get_participant_or_fail(coopname, deposit -> username);
-    
-  Wallet::add_available_funds(_wallet, coopname, deposit -> username, deposit ->quantity, _wallet_program, std::string("Паевой взнос в ЦПП 'Цифровой Кошелёк'"));
 
-  Fund::add_circulating_funds(_wallet, coopname, deposit -> quantity);
+  std::string memo = "Паевой взнос по целевой потребительской программе 'Цифровой Кошелёк'";
+  Wallet::add_available_funds(_wallet, coopname, deposit -> username, deposit ->quantity, _wallet_program, memo);
+
+  Ledger::add(_wallet, coopname, Ledger::accounts::SHARE_FUND, deposit -> quantity, memo);
   
   //оповещаем пользователя
   require_recipient(deposit -> username);  

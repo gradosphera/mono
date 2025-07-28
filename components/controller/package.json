@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/controller",
-  "version": "2025.7.6-1",
+  "version": "2025.7.23-1",
   "description": "",
   "private": false,
   "bin": "bin/createNodejsApp.js",
@@ -64,6 +64,7 @@
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
     "@coopenomics/factory": "workspace:*",
+    "@coopenomics/notifications": "workspace:*",
     "@coopenomics/sdk": "workspace:*",
     "@graphql-codegen/typescript-graphql-request": "^6.2.0",
     "@graphql-codegen/typescript-resolvers": "^4.4.0",
@@ -81,6 +82,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/throttler": "^6.3.0",
     "@nestjs/typeorm": "^10.0.2",
+    "@novu/api": "^1.4.0",
     "@types/jest": "^29.5.12",
     "@types/supertest": "^6.0.2",
     "@wharfkit/antelope": "^1.0.7",
@@ -153,6 +155,7 @@
     "typeorm": "0.3.20",
     "uuid": "^11.0.0",
     "validator": "^13.0.0",
+    "web-push": "^3.6.7",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.18.0",

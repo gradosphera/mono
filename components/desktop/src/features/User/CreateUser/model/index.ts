@@ -218,8 +218,8 @@ export function useCreateUser() {
 
     const data: IRegisterAccount = {
       ...synthData,
-      email,
-      username: generatedAccount.username,
+      email: userData.email || email,
+      username: userData.username || generatedAccount.username,
       public_key: generatedAccount.public_key,
     };
     console.log('data: ', data);

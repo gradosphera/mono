@@ -23,6 +23,7 @@ window.__APP_CONFIG__ = {
   NOVU_APP_ID: '',
   NOVU_BACKEND_URL: 'https://novu.coopenomics.world/api',
   NOVU_SOCKET_URL: 'https://novu.coopenomics.world/ws',
+  VAPID_PUBLIC_KEY: '',
 };
 
 console.log('Резервная конфигурация загружена');

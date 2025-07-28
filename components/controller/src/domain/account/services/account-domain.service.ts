@@ -8,12 +8,9 @@ import { AccountDomainEntity } from '../entities/account-domain.entity';
 import type { MonoAccountDomainInterface } from '../interfaces/mono-account-domain.interface';
 import { userService } from '~/services';
 import type { RegisterAccountDomainInterface } from '../interfaces/register-account-input.interface';
-import { userStatus } from '~/types';
 import { ENTREPRENEUR_REPOSITORY, EntrepreneurRepository } from '~/domain/common/repositories/entrepreneur.repository';
 import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { INDIVIDUAL_REPOSITORY, IndividualRepository } from '~/domain/common/repositories/individual.repository';
-import type { PrivateAccountDomainInterface } from '../interfaces/private-account-domain.interface';
-import { AccountType } from '~/modules/account/enum/account-type.enum';
 import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
 import type { EntrepreneurDomainInterface } from '~/domain/common/interfaces/entrepreneur-domain.interface';
@@ -22,6 +19,9 @@ import {
   NOTIFICATION_DOMAIN_SERVICE,
   NotificationDomainService,
 } from '~/domain/notification/services/notification-domain.service';
+import { userStatus } from '~/types';
+import type { PrivateAccountDomainInterface } from '../interfaces/private-account-domain.interface';
+import { AccountType } from '~/modules/account/enum/account-type.enum';
 
 @Injectable()
 export class AccountDomainService {
@@ -34,6 +34,37 @@ export class AccountDomainService {
     @Inject(ENTREPRENEUR_REPOSITORY) private readonly entrepreneurRepository: EntrepreneurRepository,
     @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService
   ) {}
+
+  /**
+   * Настраивает подписчика уведомлений для пользователя
+   * Генерирует subscriber_id и subscriber_hash, обновляет пользователя и создает подписчика NOVU
+   * @param username Имя пользователя
+   * @param context Контекст для логирования (например, "регистрации", "обновления")
+   */
+  async setupNotificationSubscriber(username: string, context = 'пользователя'): Promise<void> {
+    this.logger.log(`Настройка подписчика уведомлений для ${context} ${username}`);
+
+    try {
+      // Генерируем subscriber_id и subscriber_hash для NOVU
+      const subscriberId = await generateSubscriberId(config.coopname);
+      const subscriberHash = generateSubscriberHash(subscriberId);
+
+      // Обновляем пользователя с subscriber данными
+      await userService.updateUserByUsername(username, {
+        subscriber_id: subscriberId,
+        subscriber_hash: subscriberHash,
+      });
+
+      // Создаем подписчика NOVU
+      const account = await this.getAccount(username);
+      await this.notificationDomainService.createSubscriberFromAccount(account);
+
+      this.logger.log(`Подписчик NOVU успешно создан для ${context} ${username}`);
+    } catch (error: any) {
+      this.logger.error(`Ошибка настройки подписчика NOVU для ${context} ${username}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
 
   async addProviderAccount(data: RegisterAccountDomainInterface): Promise<MonoAccountDomainInterface> {
     //TODO refactor it after migrate from mongo
@@ -86,41 +117,6 @@ export class AccountDomainService {
 
     const provider_account = (await userService.findUser(username)) as unknown as MonoAccountDomainInterface;
 
-    // Генерируем subscriber_id и subscriber_hash если их нет
-    if (provider_account && (!provider_account.subscriber_id || !provider_account.subscriber_hash)) {
-      const subscriberId = generateSubscriberId(config.coopname);
-      const subscriberHash = generateSubscriberHash(subscriberId);
-
-      // Обновляем пользователя в базе данных
-      await userService.updateUserByUsername(username, {
-        subscriber_id: subscriberId,
-        subscriber_hash: subscriberHash,
-      });
-
-      // Безопасно обновляем поля объекта
-      Object.assign(provider_account, {
-        subscriber_id: subscriberId,
-        subscriber_hash: subscriberHash,
-      });
-
-      // Создаем подписчика в NOVU после успешного обновления данных
-      try {
-        const account = new AccountDomainEntity({
-          username,
-          user_account: null,
-          blockchain_account: null,
-          provider_account,
-          participant_account: null,
-          private_account: null,
-        });
-
-        await this.notificationDomainService.createSubscriberFromAccount(account);
-      } catch (error: any) {
-        // Логируем ошибку, но не прерываем выполнение основной логики
-        this.logger.error(`Ошибка создания подписчика NOVU для ${username}: ${error.message}`, error.stack);
-      }
-    }
-
     let individual_data, organization_data, entrepreneur_data;
     if (provider_account && provider_account.type == 'individual') {
       individual_data = await this.individualRepository.findByUsername(username);
@@ -150,17 +146,6 @@ export class AccountDomainService {
       private_account,
     });
 
-    // Асинхронно обновляем подписчика в фоне
-    // if (provider_account?.subscriber_id) {
-    //   setImmediate(async () => {
-    //     try {
-    //       await this.notificationDomainService.createSubscriberFromAccount(finalAccount);
-    //     } catch (error: any) {
-    //       this.logger.error(`Ошибка обновления подписчика NOVU для ${username}: ${error.message}`, error.stack);
-    //     }
-    //   });
-    // }
-
     return finalAccount;
   }
 
@@ -181,30 +166,6 @@ export class AccountDomainService {
 
   async getUserAccount(username: string): Promise<RegistratorContract.Tables.Accounts.IAccount | null> {
     return await this.accountBlockchainPort.getUserAccount(username);
-  }
-
-  /**
-   * Синхронизирует аккаунт с системой уведомлений после обновления данных
-   * @param username Имя пользователя
-   */
-  async syncAccountWithNotifications(username: string): Promise<void> {
-    this.logger.log(`Начало синхронизации аккаунта ${username} с системой уведомлений`);
-
-    try {
-      const account = await this.getAccount(username);
-
-      // Синхронизируем подписчика с обновленными данными
-      if (account.provider_account?.subscriber_id) {
-        await this.notificationDomainService.createSubscriberFromAccount(account);
-        this.logger.log(`Успешно синхронизирован аккаунт ${username} с системой уведомлений`);
-      } else {
-        this.logger.warn(`Нет subscriber_id для аккаунта ${username}, пропускаем синхронизацию`);
-      }
-    } catch (error: any) {
-      // Логируем ошибку, но не прерываем выполнение основной логики
-      this.logger.error(`Ошибка синхронизации аккаунта ${username} с системой уведомлений: ${error.message}`, error.stack);
-      // Не пробрасываем ошибку, чтобы не нарушить основной процесс обновления
-    }
   }
 
   /**

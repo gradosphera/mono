@@ -14,6 +14,9 @@ export class MigrationEntity {
   @Column('boolean', { default: true })
   success!: boolean;
 
+  @Column('text', { nullable: true })
+  logs?: string;
+
   @CreateDateColumn()
   createdAt!: Date;
 

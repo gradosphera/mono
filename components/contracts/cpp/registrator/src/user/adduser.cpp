@@ -78,10 +78,10 @@
     });
     
   
-  Fund::add_circulating_funds(_registrator, coopname, minimum);
+  Ledger::add(_registrator, coopname, Ledger::accounts::SHARE_FUND, minimum, "Паевой взнос при регистрации пайщика");
   
   if (spread_initial) {
-    Fund::add_initial_funds(_registrator, coopname, initial);
+    Ledger::add(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, initial, "Вступительный взнос при регистрации пайщика");
   }
   
   eosio::name braname = ""_n;

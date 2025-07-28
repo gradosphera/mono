@@ -17,6 +17,7 @@ export class WorkflowBuilder<T extends BaseWorkflowPayload> {
   private _steps: WorkflowStep[] = [];
   private _payloadZodSchema?: z.ZodSchema<T>;
   private _origin?: NovuOrigin;
+  private _tags?: string[];
 
   static create<T extends BaseWorkflowPayload>(): WorkflowBuilder<T> {
     return new WorkflowBuilder<T>();
@@ -39,6 +40,11 @@ export class WorkflowBuilder<T extends BaseWorkflowPayload> {
 
   origin(origin: NovuOrigin): this {
     this._origin = origin;
+    return this;
+  }
+
+  tags(tags: string[]): this {
+    this._tags = tags;
     return this;
   }
 
@@ -87,6 +93,11 @@ export class WorkflowBuilder<T extends BaseWorkflowPayload> {
       workflow.origin = this._origin;
     }
 
+    // Добавляем tags только если они указаны
+    if (this._tags) {
+      workflow.tags = this._tags;
+    }
+
     return workflow;
   }
 
@@ -105,6 +116,11 @@ export class WorkflowBuilder<T extends BaseWorkflowPayload> {
     // Добавляем origin только если он указан
     if (workflow.origin) {
       novuData.origin = workflow.origin;
+    }
+
+    // Добавляем tags только если они указаны
+    if (workflow.tags) {
+      novuData.tags = workflow.tags;
     }
 
     return novuData;

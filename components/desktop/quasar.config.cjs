@@ -11,8 +11,10 @@
 const { configure } = require('quasar/wrappers');
 const path = require('path');
 
+require('dotenv').config();
 module.exports = configure(function (ctx) {
   const isDev = ctx.dev;
+  const isPWAEnabled = !isDev || process.env.ENABLE_PWA_DEV === 'true';
 
   const isSPA = ctx.mode.spa;
   // Загружаем переменные окружения всегда в режиме разработки
@@ -40,7 +42,7 @@ module.exports = configure(function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['init', 'i18n', 'axios', 'sentry'],
+    boot: ['widget', 'init', 'i18n', 'axios', 'sentry', 'network'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: [
@@ -137,6 +139,13 @@ module.exports = configure(function (ctx) {
         // clientPort: 3005,
         //   overlay: false
       },
+
+      // https: {
+      //   key: fs.readFileSync('./ssl/mono.local-key.pem'),
+      //   cert: fs.readFileSync('./ssl/mono.local.pem'),
+      // },
+      // host: 'dev.coopenomics.world',
+      // allowedHosts: ['all'],
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
@@ -173,11 +182,11 @@ module.exports = configure(function (ctx) {
       rootComponent: 'src/app/App.vue',
       router: 'src/app/providers/router',
       //   store: 'src/store/index',
-      registerServiceWorker: isDev
-        ? undefined
-        : 'src-pwa/register-service-worker',
-      serviceWorker: isDev ? undefined : 'src-pwa/custom-service-worker',
-      pwaManifestFile: isDev ? undefined : 'src-pwa/manifest.json',
+      registerServiceWorker: isPWAEnabled
+        ? 'src-pwa/register-service-worker'
+        : undefined,
+      serviceWorker: isPWAEnabled ? 'src-pwa/custom-service-worker' : undefined,
+      pwaManifestFile: isPWAEnabled ? 'src-pwa/manifest.json' : undefined,
       //   electronMain: 'src-electron/electron-main',
       //   electronPreload: 'src-electron/electron-preload'
     },
@@ -190,7 +199,7 @@ module.exports = configure(function (ctx) {
       // extendSSRWebserverConf (esbuildConf) {},
       // extendPackageJson (json) {},
 
-      pwa: !isDev, // Отключаем PWA в dev режиме
+      pwa: isPWAEnabled, // Включаем PWA в prod или при наличии флага ENABLE_PWA_DEV
 
       // manualStoreHydration: true,
       // manualPostHydrationTrigger: true,
@@ -208,7 +217,7 @@ module.exports = configure(function (ctx) {
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa
-    pwa: isDev
+    pwa: !isPWAEnabled
       ? {}
       : {
           workboxMode: 'injectManifest', // or 'generateSW'
@@ -216,9 +225,13 @@ module.exports = configure(function (ctx) {
           swFilename: 'sw.js',
           manifestFilename: 'manifest.json',
           useCredentialsForManifestTag: false,
-          // useFilenameHashes: true,
-          // extendGenerateSWOptions (cfg) {}
-          // extendInjectManifestOptions (cfg) {},
+          useFilenameHashes: true, // Включаем хеширование файлов
+          extendInjectManifestOptions(cfg) {
+            // Увеличиваем максимальный размер файла для кэширования
+            cfg.maximumFileSizeToCacheInBytes = 5 * 1024 * 1024; // 5MB
+            // Не включаем ревизию для определенных файлов
+            cfg.dontCacheBustURLsMatching = /\.\w{8}\./;
+          },
           extendManifestJson(json) {
             json.name = process.env.COOP_SHORT_NAME || 'Цифровой Кооператив';
             json.short_name = process.env.COOP_SHORT_NAME || 'Кооператив';

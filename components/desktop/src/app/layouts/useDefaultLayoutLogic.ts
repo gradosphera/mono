@@ -44,11 +44,8 @@ export function useDefaultLayoutLogic() {
   );
 
   const footerText = computed(() => {
-    const c = cooperativeStore.contacts;
-    const d = c?.details;
-    return d
-      ? `${c.full_name}, ИНН: ${d.inn}, ОГРН: ${d.ogrn}, телефон: ${c.phone}, почта: ${c.email}`
-      : '';
+    const info = system.info;
+    return `${info.contacts?.full_name}, ИНН: ${info.contacts?.details.inn}, ОГРН: ${info.contacts?.details.ogrn}, телефон: ${info.contacts?.phone}, почта: ${info.contacts?.email}`;
   });
 
   onMounted(() => {
