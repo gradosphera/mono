@@ -8,6 +8,8 @@
  */
 [[eosio::action]]
 void ledger::sub(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+  require_recipient(coopname);
+  
   eosio::name payer = coopname;
   
   if (!has_auth(coopname)) {

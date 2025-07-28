@@ -7,6 +7,8 @@
  */
 [[eosio::action]]
 void ledger::block(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+  require_recipient(coopname);
+  
   eosio::name payer = coopname;
   if (!has_auth(coopname)) {
     payer = check_auth_and_get_payer_or_fail(contracts_whitelist);

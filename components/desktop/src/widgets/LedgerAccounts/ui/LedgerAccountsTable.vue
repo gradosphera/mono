@@ -20,6 +20,15 @@ q-table.full-height(
 
   template(#body='props')
     q-tr(:key='`account_${props.row.id}`', :props='props')
+      q-td(auto-width)
+        q-btn(
+          size='sm',
+          color='primary',
+          round,
+          dense,
+          :icon='expanded.get(props.row.id) ? "expand_more" : "chevron_right"',
+          @click='toggleExpand(props.row.id)'
+        )
       q-td {{ props.row.displayId }}
       q-td(
         style='max-width: 300px; word-wrap: break-word; white-space: normal'
@@ -28,13 +37,38 @@ q-table.full-height(
       q-td.text-right {{ formatAsset2Digits(props.row.blocked) }}
       q-td.text-right {{ formatAsset2Digits(props.row.writeoff) }}
 
+    //- Развернутая строка с историей операций для конкретного счета
+    q-tr.q-virtual-scroll--with-prev(
+      no-hover,
+      v-if='expanded.get(props.row.id)',
+      :key='`e_${props.row.id}`',
+      :props='props'
+    )
+      q-td(colspan='100%')
+        .q-pa-md
+          .text-h6.q-mb-md История операций счёта {{ props.row.displayId }}. {{ props.row.name }}
+          LedgerHistoryTable(
+            :filter='getAccountHistoryFilter(props.row.id)',
+            :hide-account-column='true',
+            @error='handleHistoryError'
+          )
+
   template(#item='props')
     .col-12
       q-card.q-pa-md.q-mb-sm
         .row.q-gutter-y-md
           .col-12
             .row.items-center.q-gutter-x-md
-              .col-12
+              .col-auto
+                q-btn(
+                  size='sm',
+                  color='primary',
+                  round,
+                  dense,
+                  :icon='expanded.get(props.row.id) ? "expand_more" : "chevron_right"',
+                  @click='toggleExpand(props.row.id)'
+                )
+              .col
                 .text-body1 {{ props.row.displayId }}. {{ props.row.name }}
           .col-12
             .row
@@ -53,13 +87,28 @@ q-table.full-height(
                 .text-body1.text-weight-medium.q-pa-sm.rounded-borders(
                   style='background: rgba(244, 67, 54, 0.1); color: #c62828'
                 ) {{ formatAsset2Digits(props.row.writeoff) }}
+
+          //- Развернутая история для мобильной версии
+          .col-12(v-if='expanded.get(props.row.id)')
+            q-separator.q-my-md
+            .text-h6.q-mb-md История операций счёта {{ props.row.displayId }}. {{ props.row.name }}
+            LedgerHistoryTable(
+              :filter='getAccountHistoryFilter(props.row.id)',
+              :hide-account-column='true',
+              @error='handleHistoryError'
+            )
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useWindowSize } from 'src/shared/hooks';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
-import type { ILedgerAccount } from 'src/entities/LedgerAccount';
+import { useSystemStore } from 'src/entities/System/model';
+import { LedgerHistoryTable } from '.';
+import type {
+  ILedgerAccount,
+  ILedgerHistoryFilter,
+} from 'src/entities/LedgerAccount';
 
 // Props
 defineProps<{
@@ -67,12 +116,45 @@ defineProps<{
   loading: boolean;
 }>();
 
+// Emits
+const emit = defineEmits<{
+  historyError: [error: any];
+}>();
+
 // Локальное состояние
 const pagination = ref({ rowsPerPage: 0 });
 const { isMobile } = useWindowSize();
+const { info } = useSystemStore();
 
-// Колонки таблицы
+// Состояние развернутых строк
+const expanded = ref(new Map<number, boolean>());
+
+// Функция переключения разворота
+const toggleExpand = (accountId: number) => {
+  const isExpanded = expanded.value.get(accountId);
+  expanded.value.set(accountId, !isExpanded);
+};
+
+// Создание фильтра для истории конкретного счета
+const getAccountHistoryFilter = (accountId: number): ILedgerHistoryFilter => ({
+  coopname: info.coopname,
+  account_id: accountId,
+});
+
+// Обработчик ошибок истории
+const handleHistoryError = (error: any) => {
+  emit('historyError', error);
+};
+
+// Колонки таблицы (добавлена колонка для кнопки разворота)
 const columns: any[] = [
+  {
+    name: 'expand',
+    align: 'left',
+    label: '',
+    field: 'expand',
+    sortable: false,
+  },
   {
     name: 'id',
     align: 'left',

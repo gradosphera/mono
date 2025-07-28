@@ -2335,6 +2335,28 @@ input GetExtensionsInput {
   name: String
 }
 
+input GetLedgerHistoryInput {
+  """
+  ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам
+  """
+  account_id: Int
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Количество записей на странице (по умолчанию 10, максимум 100)"""
+  limit: Int = 10
+
+  """Номер страницы (по умолчанию 1)"""
+  page: Int = 1
+
+  """Поле для сортировки (created_at, global_sequence)"""
+  sortBy: String
+
+  """Направление сортировки (ASC или DESC)"""
+  sortOrder: String = "DESC"
+}
+
 input GetLedgerInput {
   """Имя кооператива для получения состояния ledger"""
   coopname: String!
@@ -2456,12 +2478,146 @@ type KeyWeight {
   weight: Int!
 }
 
+type LedgerAddOperation {
+  """ID счета"""
+  account_id: Int!
+
+  """Тип операции"""
+  action: String!
+
+  """Комментарий к операции"""
+  comment: String!
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Дата и время создания операции"""
+  created_at: DateTime!
+
+  """Номер глобальной последовательности блокчейна"""
+  global_sequence: Int!
+
+  """Сумма операции"""
+  quantity: String!
+}
+
+type LedgerBlockOperation {
+  """ID счета"""
+  account_id: Int!
+
+  """Тип операции"""
+  action: String!
+
+  """Комментарий к операции"""
+  comment: String!
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Дата и время создания операции"""
+  created_at: DateTime!
+
+  """Номер глобальной последовательности блокчейна"""
+  global_sequence: Int!
+
+  """Сумма операции"""
+  quantity: String!
+}
+
+type LedgerHistoryResponse {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Список операций"""
+  items: [LedgerOperation!]!
+
+  """Общее количество операций"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+union LedgerOperation = LedgerAddOperation | LedgerBlockOperation | LedgerSubOperation | LedgerTransferOperation | LedgerUnblockOperation
+
 type LedgerState {
   """План счетов с актуальными данными"""
   chartOfAccounts: [ChartOfAccountsItem!]!
 
   """Имя кооператива"""
   coopname: String!
+}
+
+type LedgerSubOperation {
+  """ID счета"""
+  account_id: Int!
+
+  """Тип операции"""
+  action: String!
+
+  """Комментарий к операции"""
+  comment: String!
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Дата и время создания операции"""
+  created_at: DateTime!
+
+  """Номер глобальной последовательности блокчейна"""
+  global_sequence: Int!
+
+  """Сумма операции"""
+  quantity: String!
+}
+
+type LedgerTransferOperation {
+  """Тип операции"""
+  action: String!
+
+  """Комментарий к операции"""
+  comment: String!
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Дата и время создания операции"""
+  created_at: DateTime!
+
+  """ID счета отправителя"""
+  from_account_id: Int!
+
+  """Номер глобальной последовательности блокчейна"""
+  global_sequence: Int!
+
+  """Сумма операции"""
+  quantity: String!
+
+  """ID счета получателя"""
+  to_account_id: Int!
+}
+
+type LedgerUnblockOperation {
+  """ID счета"""
+  account_id: Int!
+
+  """Тип операции"""
+  action: String!
+
+  """Комментарий к операции"""
+  comment: String!
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Дата и время создания операции"""
+  created_at: DateTime!
+
+  """Номер глобальной последовательности блокчейна"""
+  global_sequence: Int!
+
+  """Сумма операции"""
+  quantity: String!
 }
 
 input LoginInput {
@@ -3723,6 +3879,11 @@ type Query {
   Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения.
   """
   getLedger(data: GetLedgerInput!): LedgerState!
+
+  """
+  Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми).
+  """
+  getLedgerHistory(data: GetLedgerHistoryInput!): LedgerHistoryResponse!
 
   """Получить данные собрания по хешу"""
   getMeet(data: GetMeetInput!): MeetAggregate!

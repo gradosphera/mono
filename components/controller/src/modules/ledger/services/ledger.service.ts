@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { LedgerDomainInteractor } from '~/domain/ledger/interactors/ledger.interactor';
-import type { GetLedgerInputDTO } from '../dto/get-ledger-input.dto';
-import type { LedgerStateDTO } from '../dto/ledger-state.dto';
+import { GetLedgerInputDTO } from '../dto/get-ledger-input.dto';
+import { GetLedgerHistoryInputDTO } from '../dto/get-ledger-history-input.dto';
+import { LedgerStateDTO } from '../dto/ledger-state.dto';
+import { LedgerHistoryResponseDTO } from '../dto/ledger-operation.dto';
 
 /**
- * Сервис приложения для работы с ledger
- * Координирует взаимодействие между GraphQL слоем и доменом
+ * Сервис для работы с ledger
+ * Связывает GraphQL резолверы с доменными интеракторами
  */
 @Injectable()
 export class LedgerService {
@@ -15,10 +17,54 @@ export class LedgerService {
    * Получить состояние ledger кооператива
    */
   async getLedger(data: GetLedgerInputDTO): Promise<LedgerStateDTO> {
-    // Передаем данные в доменный интерактор
-    const ledgerState = await this.ledgerDomainInteractor.getLedger(data);
+    const result = await this.ledgerDomainInteractor.getLedger(data);
 
-    // Возвращаем результат (DTO уже имплементирует доменный интерфейс)
-    return ledgerState;
+    return {
+      coopname: result.coopname,
+      chartOfAccounts: result.chartOfAccounts,
+    };
+  }
+
+  /**
+   * Получить историю операций ledger
+   */
+  async getLedgerHistory(data: GetLedgerHistoryInputDTO): Promise<LedgerHistoryResponseDTO> {
+    const result = await this.ledgerDomainInteractor.getLedgerHistory(data);
+
+    // Преобразуем доменные операции в DTO
+    const items = result.items.map((operation) => {
+      // operation уже является интерфейсом, не entity
+      // Создаем DTO в зависимости от типа операции
+      const baseDto = {
+        global_sequence: operation.global_sequence,
+        coopname: operation.coopname,
+        action: operation.action,
+        created_at: operation.created_at,
+      };
+
+      if (operation.action === 'transfer') {
+        return {
+          ...baseDto,
+          from_account_id: (operation as any).from_account_id,
+          to_account_id: (operation as any).to_account_id,
+          quantity: (operation as any).quantity,
+          comment: (operation as any).comment,
+        };
+      } else {
+        return {
+          ...baseDto,
+          account_id: (operation as any).account_id,
+          quantity: (operation as any).quantity,
+          comment: (operation as any).comment,
+        };
+      }
+    });
+
+    return {
+      items: items as any,
+      totalCount: result.totalCount,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+    };
   }
 }

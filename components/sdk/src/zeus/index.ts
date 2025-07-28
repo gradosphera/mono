@@ -920,7 +920,7 @@ export type ScalarCoders = {
 	JSON?: ScalarResolver;
 	JSONObject?: ScalarResolver;
 }
-type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"] | GraphQLTypes["PrivateAccountSearchData"] | GraphQLTypes["UserCertificateUnion"]
+type ZEUS_UNIONS = GraphQLTypes["LedgerOperation"] | GraphQLTypes["PaymentMethodData"] | GraphQLTypes["PrivateAccountSearchData"] | GraphQLTypes["UserCertificateUnion"]
 
 export type ValueTypes = {
     ["AcceptChildOrderInput"]: {
@@ -2558,6 +2558,20 @@ export type ValueTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null | Variable<any, string>
 };
+	["GetLedgerHistoryInput"]: {
+	/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
+	account_id?: number | undefined | null | Variable<any, string>,
+	/** Имя кооператива */
+	coopname: string | Variable<any, string>,
+	/** Количество записей на странице (по умолчанию 10, максимум 100) */
+	limit?: number | undefined | null | Variable<any, string>,
+	/** Номер страницы (по умолчанию 1) */
+	page?: number | undefined | null | Variable<any, string>,
+	/** Поле для сортировки (created_at, global_sequence) */
+	sortBy?: string | undefined | null | Variable<any, string>,
+	/** Направление сортировки (ASC или DESC) */
+	sortOrder?: string | undefined | null | Variable<any, string>
+};
 	["GetLedgerInput"]: {
 	/** Имя кооператива для получения состояния ledger */
 	coopname: string | Variable<any, string>
@@ -2643,11 +2657,116 @@ export type ValueTypes = {
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["LedgerAddOperation"]: AliasType<{
+	/** ID счета */
+	account_id?:boolean | `@${string}`,
+	/** Тип операции */
+	action?:boolean | `@${string}`,
+	/** Комментарий к операции */
+	comment?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания операции */
+	created_at?:boolean | `@${string}`,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence?:boolean | `@${string}`,
+	/** Сумма операции */
+	quantity?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerBlockOperation"]: AliasType<{
+	/** ID счета */
+	account_id?:boolean | `@${string}`,
+	/** Тип операции */
+	action?:boolean | `@${string}`,
+	/** Комментарий к операции */
+	comment?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания операции */
+	created_at?:boolean | `@${string}`,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence?:boolean | `@${string}`,
+	/** Сумма операции */
+	quantity?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerHistoryResponse"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Список операций */
+	items?:ValueTypes["LedgerOperation"],
+	/** Общее количество операций */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerOperation"]: AliasType<{		["...on LedgerAddOperation"]?: ValueTypes["LedgerAddOperation"],
+		["...on LedgerBlockOperation"]?: ValueTypes["LedgerBlockOperation"],
+		["...on LedgerSubOperation"]?: ValueTypes["LedgerSubOperation"],
+		["...on LedgerTransferOperation"]?: ValueTypes["LedgerTransferOperation"],
+		["...on LedgerUnblockOperation"]?: ValueTypes["LedgerUnblockOperation"]
+		__typename?: boolean | `@${string}`
+}>;
 	["LedgerState"]: AliasType<{
 	/** План счетов с актуальными данными */
 	chartOfAccounts?:ValueTypes["ChartOfAccountsItem"],
 	/** Имя кооператива */
 	coopname?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerSubOperation"]: AliasType<{
+	/** ID счета */
+	account_id?:boolean | `@${string}`,
+	/** Тип операции */
+	action?:boolean | `@${string}`,
+	/** Комментарий к операции */
+	comment?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания операции */
+	created_at?:boolean | `@${string}`,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence?:boolean | `@${string}`,
+	/** Сумма операции */
+	quantity?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerTransferOperation"]: AliasType<{
+	/** Тип операции */
+	action?:boolean | `@${string}`,
+	/** Комментарий к операции */
+	comment?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания операции */
+	created_at?:boolean | `@${string}`,
+	/** ID счета отправителя */
+	from_account_id?:boolean | `@${string}`,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence?:boolean | `@${string}`,
+	/** Сумма операции */
+	quantity?:boolean | `@${string}`,
+	/** ID счета получателя */
+	to_account_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerUnblockOperation"]: AliasType<{
+	/** ID счета */
+	account_id?:boolean | `@${string}`,
+	/** Тип операции */
+	action?:boolean | `@${string}`,
+	/** Комментарий к операции */
+	comment?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания операции */
+	created_at?:boolean | `@${string}`,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence?:boolean | `@${string}`,
+	/** Сумма операции */
+	quantity?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["LoginInput"]: {
@@ -3422,6 +3541,7 @@ getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},V
 getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>},ValueTypes["DocumentsAggregatePaginationResult"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
 getLedger?: [{	data: ValueTypes["GetLedgerInput"] | Variable<any, string>},ValueTypes["LedgerState"]],
+getLedgerHistory?: [{	data: ValueTypes["GetLedgerHistoryInput"] | Variable<any, string>},ValueTypes["LedgerHistoryResponse"]],
 getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getMeets?: [{	data: ValueTypes["GetMeetsInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentMethodPaginationResult"]],
@@ -6064,6 +6184,20 @@ export type ResolverInputTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetLedgerHistoryInput"]: {
+	/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
+	account_id?: number | undefined | null,
+	/** Имя кооператива */
+	coopname: string,
+	/** Количество записей на странице (по умолчанию 10, максимум 100) */
+	limit?: number | undefined | null,
+	/** Номер страницы (по умолчанию 1) */
+	page?: number | undefined | null,
+	/** Поле для сортировки (created_at, global_sequence) */
+	sortBy?: string | undefined | null,
+	/** Направление сортировки (ASC или DESC) */
+	sortOrder?: string | undefined | null
+};
 	["GetLedgerInput"]: {
 	/** Имя кооператива для получения состояния ledger */
 	coopname: string
@@ -6149,11 +6283,117 @@ export type ResolverInputTypes = {
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["LedgerAddOperation"]: AliasType<{
+	/** ID счета */
+	account_id?:boolean | `@${string}`,
+	/** Тип операции */
+	action?:boolean | `@${string}`,
+	/** Комментарий к операции */
+	comment?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания операции */
+	created_at?:boolean | `@${string}`,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence?:boolean | `@${string}`,
+	/** Сумма операции */
+	quantity?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerBlockOperation"]: AliasType<{
+	/** ID счета */
+	account_id?:boolean | `@${string}`,
+	/** Тип операции */
+	action?:boolean | `@${string}`,
+	/** Комментарий к операции */
+	comment?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания операции */
+	created_at?:boolean | `@${string}`,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence?:boolean | `@${string}`,
+	/** Сумма операции */
+	quantity?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerHistoryResponse"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Список операций */
+	items?:ResolverInputTypes["LedgerOperation"],
+	/** Общее количество операций */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerOperation"]: AliasType<{
+	LedgerAddOperation?:ResolverInputTypes["LedgerAddOperation"],
+	LedgerBlockOperation?:ResolverInputTypes["LedgerBlockOperation"],
+	LedgerSubOperation?:ResolverInputTypes["LedgerSubOperation"],
+	LedgerTransferOperation?:ResolverInputTypes["LedgerTransferOperation"],
+	LedgerUnblockOperation?:ResolverInputTypes["LedgerUnblockOperation"],
+		__typename?: boolean | `@${string}`
+}>;
 	["LedgerState"]: AliasType<{
 	/** План счетов с актуальными данными */
 	chartOfAccounts?:ResolverInputTypes["ChartOfAccountsItem"],
 	/** Имя кооператива */
 	coopname?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerSubOperation"]: AliasType<{
+	/** ID счета */
+	account_id?:boolean | `@${string}`,
+	/** Тип операции */
+	action?:boolean | `@${string}`,
+	/** Комментарий к операции */
+	comment?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания операции */
+	created_at?:boolean | `@${string}`,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence?:boolean | `@${string}`,
+	/** Сумма операции */
+	quantity?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerTransferOperation"]: AliasType<{
+	/** Тип операции */
+	action?:boolean | `@${string}`,
+	/** Комментарий к операции */
+	comment?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания операции */
+	created_at?:boolean | `@${string}`,
+	/** ID счета отправителя */
+	from_account_id?:boolean | `@${string}`,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence?:boolean | `@${string}`,
+	/** Сумма операции */
+	quantity?:boolean | `@${string}`,
+	/** ID счета получателя */
+	to_account_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerUnblockOperation"]: AliasType<{
+	/** ID счета */
+	account_id?:boolean | `@${string}`,
+	/** Тип операции */
+	action?:boolean | `@${string}`,
+	/** Комментарий к операции */
+	comment?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата и время создания операции */
+	created_at?:boolean | `@${string}`,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence?:boolean | `@${string}`,
+	/** Сумма операции */
+	quantity?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["LoginInput"]: {
@@ -6930,6 +7170,7 @@ getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputType
 getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTypes["DocumentsAggregatePaginationResult"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
 getLedger?: [{	data: ResolverInputTypes["GetLedgerInput"]},ResolverInputTypes["LedgerState"]],
+getLedgerHistory?: [{	data: ResolverInputTypes["GetLedgerHistoryInput"]},ResolverInputTypes["LedgerHistoryResponse"]],
 getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 getMeets?: [{	data: ResolverInputTypes["GetMeetsInput"]},ResolverInputTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaymentMethodPaginationResult"]],
@@ -9536,6 +9777,20 @@ export type ModelTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetLedgerHistoryInput"]: {
+	/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
+	account_id?: number | undefined | null,
+	/** Имя кооператива */
+	coopname: string,
+	/** Количество записей на странице (по умолчанию 10, максимум 100) */
+	limit?: number | undefined | null,
+	/** Номер страницы (по умолчанию 1) */
+	page?: number | undefined | null,
+	/** Поле для сортировки (created_at, global_sequence) */
+	sortBy?: string | undefined | null,
+	/** Направление сортировки (ASC или DESC) */
+	sortOrder?: string | undefined | null
+};
 	["GetLedgerInput"]: {
 	/** Имя кооператива для получения состояния ledger */
 	coopname: string
@@ -9618,11 +9873,104 @@ export type ModelTypes = {
 	/** Вес */
 	weight: number
 };
+	["LedgerAddOperation"]: {
+		/** ID счета */
+	account_id: number,
+	/** Тип операции */
+	action: string,
+	/** Комментарий к операции */
+	comment: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания операции */
+	created_at: ModelTypes["DateTime"],
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence: number,
+	/** Сумма операции */
+	quantity: string
+};
+	["LedgerBlockOperation"]: {
+		/** ID счета */
+	account_id: number,
+	/** Тип операции */
+	action: string,
+	/** Комментарий к операции */
+	comment: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания операции */
+	created_at: ModelTypes["DateTime"],
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence: number,
+	/** Сумма операции */
+	quantity: string
+};
+	["LedgerHistoryResponse"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Список операций */
+	items: Array<ModelTypes["LedgerOperation"]>,
+	/** Общее количество операций */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["LedgerOperation"]:ModelTypes["LedgerAddOperation"] | ModelTypes["LedgerBlockOperation"] | ModelTypes["LedgerSubOperation"] | ModelTypes["LedgerTransferOperation"] | ModelTypes["LedgerUnblockOperation"];
 	["LedgerState"]: {
 		/** План счетов с актуальными данными */
 	chartOfAccounts: Array<ModelTypes["ChartOfAccountsItem"]>,
 	/** Имя кооператива */
 	coopname: string
+};
+	["LedgerSubOperation"]: {
+		/** ID счета */
+	account_id: number,
+	/** Тип операции */
+	action: string,
+	/** Комментарий к операции */
+	comment: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания операции */
+	created_at: ModelTypes["DateTime"],
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence: number,
+	/** Сумма операции */
+	quantity: string
+};
+	["LedgerTransferOperation"]: {
+		/** Тип операции */
+	action: string,
+	/** Комментарий к операции */
+	comment: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания операции */
+	created_at: ModelTypes["DateTime"],
+	/** ID счета отправителя */
+	from_account_id: number,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence: number,
+	/** Сумма операции */
+	quantity: string,
+	/** ID счета получателя */
+	to_account_id: number
+};
+	["LedgerUnblockOperation"]: {
+		/** ID счета */
+	account_id: number,
+	/** Тип операции */
+	action: string,
+	/** Комментарий к операции */
+	comment: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания операции */
+	created_at: ModelTypes["DateTime"],
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence: number,
+	/** Сумма операции */
+	quantity: string
 };
 	["LoginInput"]: {
 	/** Электронная почта */
@@ -10445,6 +10793,8 @@ export type ModelTypes = {
 	getExtensions: Array<ModelTypes["Extension"]>,
 	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения. */
 	getLedger: ModelTypes["LedgerState"],
+	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
+	getLedgerHistory: ModelTypes["LedgerHistoryResponse"],
 	/** Получить данные собрания по хешу */
 	getMeet: ModelTypes["MeetAggregate"],
 	/** Получить список всех собраний кооператива */
@@ -13071,6 +13421,20 @@ export type GraphQLTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetLedgerHistoryInput"]: {
+		/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
+	account_id?: number | undefined | null,
+	/** Имя кооператива */
+	coopname: string,
+	/** Количество записей на странице (по умолчанию 10, максимум 100) */
+	limit?: number | undefined | null,
+	/** Номер страницы (по умолчанию 1) */
+	page?: number | undefined | null,
+	/** Поле для сортировки (created_at, global_sequence) */
+	sortBy?: string | undefined | null,
+	/** Направление сортировки (ASC или DESC) */
+	sortOrder?: string | undefined | null
+};
 	["GetLedgerInput"]: {
 		/** Имя кооператива для получения состояния ledger */
 	coopname: string
@@ -13156,12 +13520,118 @@ export type GraphQLTypes = {
 	/** Вес */
 	weight: number
 };
+	["LedgerAddOperation"]: {
+	__typename: "LedgerAddOperation",
+	/** ID счета */
+	account_id: number,
+	/** Тип операции */
+	action: string,
+	/** Комментарий к операции */
+	comment: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания операции */
+	created_at: GraphQLTypes["DateTime"],
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence: number,
+	/** Сумма операции */
+	quantity: string
+};
+	["LedgerBlockOperation"]: {
+	__typename: "LedgerBlockOperation",
+	/** ID счета */
+	account_id: number,
+	/** Тип операции */
+	action: string,
+	/** Комментарий к операции */
+	comment: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания операции */
+	created_at: GraphQLTypes["DateTime"],
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence: number,
+	/** Сумма операции */
+	quantity: string
+};
+	["LedgerHistoryResponse"]: {
+	__typename: "LedgerHistoryResponse",
+	/** Текущая страница */
+	currentPage: number,
+	/** Список операций */
+	items: Array<GraphQLTypes["LedgerOperation"]>,
+	/** Общее количество операций */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["LedgerOperation"]:{
+        	__typename:"LedgerAddOperation" | "LedgerBlockOperation" | "LedgerSubOperation" | "LedgerTransferOperation" | "LedgerUnblockOperation"
+        	['...on LedgerAddOperation']: '__union' & GraphQLTypes["LedgerAddOperation"];
+	['...on LedgerBlockOperation']: '__union' & GraphQLTypes["LedgerBlockOperation"];
+	['...on LedgerSubOperation']: '__union' & GraphQLTypes["LedgerSubOperation"];
+	['...on LedgerTransferOperation']: '__union' & GraphQLTypes["LedgerTransferOperation"];
+	['...on LedgerUnblockOperation']: '__union' & GraphQLTypes["LedgerUnblockOperation"];
+};
 	["LedgerState"]: {
 	__typename: "LedgerState",
 	/** План счетов с актуальными данными */
 	chartOfAccounts: Array<GraphQLTypes["ChartOfAccountsItem"]>,
 	/** Имя кооператива */
 	coopname: string
+};
+	["LedgerSubOperation"]: {
+	__typename: "LedgerSubOperation",
+	/** ID счета */
+	account_id: number,
+	/** Тип операции */
+	action: string,
+	/** Комментарий к операции */
+	comment: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания операции */
+	created_at: GraphQLTypes["DateTime"],
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence: number,
+	/** Сумма операции */
+	quantity: string
+};
+	["LedgerTransferOperation"]: {
+	__typename: "LedgerTransferOperation",
+	/** Тип операции */
+	action: string,
+	/** Комментарий к операции */
+	comment: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания операции */
+	created_at: GraphQLTypes["DateTime"],
+	/** ID счета отправителя */
+	from_account_id: number,
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence: number,
+	/** Сумма операции */
+	quantity: string,
+	/** ID счета получателя */
+	to_account_id: number
+};
+	["LedgerUnblockOperation"]: {
+	__typename: "LedgerUnblockOperation",
+	/** ID счета */
+	account_id: number,
+	/** Тип операции */
+	action: string,
+	/** Комментарий к операции */
+	comment: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания операции */
+	created_at: GraphQLTypes["DateTime"],
+	/** Номер глобальной последовательности блокчейна */
+	global_sequence: number,
+	/** Сумма операции */
+	quantity: string
 };
 	["LoginInput"]: {
 		/** Электронная почта */
@@ -14021,6 +14491,8 @@ export type GraphQLTypes = {
 	getExtensions: Array<GraphQLTypes["Extension"]>,
 	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения. */
 	getLedger: GraphQLTypes["LedgerState"],
+	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
+	getLedgerHistory: GraphQLTypes["LedgerHistoryResponse"],
 	/** Получить данные собрания по хешу */
 	getMeet: GraphQLTypes["MeetAggregate"],
 	/** Получить список всех собраний кооператива */
@@ -15176,6 +15648,7 @@ type ZEUS_VARIABLES = {
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
 	["GetDocumentsInput"]: ValueTypes["GetDocumentsInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
+	["GetLedgerHistoryInput"]: ValueTypes["GetLedgerHistoryInput"];
 	["GetLedgerInput"]: ValueTypes["GetLedgerInput"];
 	["GetMeetInput"]: ValueTypes["GetMeetInput"];
 	["GetMeetsInput"]: ValueTypes["GetMeetsInput"];
