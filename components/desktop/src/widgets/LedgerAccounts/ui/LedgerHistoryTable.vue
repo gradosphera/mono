@@ -107,28 +107,28 @@ const columns = computed(() => {
   const baseColumns = [
     {
       name: 'created_at',
-      align: 'left',
+      align: 'left' as const,
       label: 'Дата',
       field: 'created_at',
       sortable: false,
     },
     {
       name: 'action',
-      align: 'left',
+      align: 'left' as const,
       label: 'Операция',
       field: 'action',
       sortable: false,
     },
     {
       name: 'quantity',
-      align: 'left',
+      align: 'left' as const,
       label: 'Сумма',
       field: 'quantity',
       sortable: false,
     },
     {
       name: 'comment',
-      align: 'left',
+      align: 'left' as const,
       label: 'Комментарий',
       field: 'comment',
       sortable: false,
@@ -139,7 +139,7 @@ const columns = computed(() => {
   if (!props.hideAccountColumn) {
     baseColumns.splice(3, 0, {
       name: 'accounts',
-      align: 'left',
+      align: 'left' as const,
       label: 'Счет',
       field: 'accounts',
       sortable: false,
