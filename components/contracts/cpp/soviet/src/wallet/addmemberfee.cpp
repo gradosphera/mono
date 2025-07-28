@@ -1,6 +1,7 @@
 
 void soviet::addmemberfee(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo){
-  eosio::check(has_auth(_marketplace) || has_auth(_soviet), "Недостаточно прав доступа");
+  name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);
+  
   auto cooperative = get_cooperative_or_fail(coopname);  
   
   programs_index programs(_soviet, coopname.value);
@@ -13,12 +14,12 @@ void soviet::addmemberfee(eosio::name coopname, eosio::name username, uint64_t p
   progwallets_index progwallets(_soviet, coopname.value);
   auto wallet = progwallets.find(exist_wallet.id);
   
-  progwallets.modify(wallet, _soviet, [&](auto &p) { 
+  progwallets.modify(wallet, payer, [&](auto &p) { 
     p.membership_contribution = p.membership_contribution.value_or(asset(0, quantity.symbol)) + quantity;
   });
   
   // Обновляем агрегированный баланс в самой программе (program_id)
-  programs.modify(prg, _soviet, [&](auto &p){
+  programs.modify(prg, payer, [&](auto &p){
     p.membership_contributions = p.membership_contributions.value_or(asset(0, quantity.symbol)) + quantity;
   });
 }

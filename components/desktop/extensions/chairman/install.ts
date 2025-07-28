@@ -3,7 +3,6 @@ import { ExtensionsShowcase } from 'src/pages/ExtensionStore/ExtensionsShowcase'
 import { InstalledExtensions } from 'src/pages/ExtensionStore/InstalledExtensions';
 import { ExtensionPage } from 'src/pages/ExtensionStore/ExtensionPage';
 import { ExtensionsManagement } from 'src/pages/ExtensionStore/ExtensionsManagement';
-import { AccumulationFunds, ExpenseFunds } from 'src/widgets/Cooperative/Funds';
 import { MemberBranchList } from 'src/pages/Cooperative/MemberBranchList';
 import { ChangeRegisterPaymentsPage } from 'src/pages/Cooperative/ChangeRegisterPayments';
 import { ChangeCooperativeContacts } from 'src/pages/Cooperative/ChangeContacts';
@@ -119,33 +118,6 @@ export default async function (): Promise<IWorkspaceConfig> {
             meta: {
               title: 'Кооперативные Участки',
               icon: 'fa-solid fa-sitemap',
-              roles: ['chairman'],
-              agreements: agreementsBase,
-              requiresAuth: true,
-            },
-            children: [],
-          },
-          {
-            path: 'settings/accumulation-funds',
-            name: 'accumulation-funds',
-            component: markRaw(AccumulationFunds),
-            meta: {
-              title: 'Фонды накопления',
-              icon: 'fa-solid fa-piggy-bank',
-              roles: ['chairman'],
-              agreements: agreementsBase,
-              requiresAuth: true,
-            },
-            children: [],
-          },
-
-          {
-            path: 'settings/expense-funds',
-            name: 'expense-funds',
-            component: markRaw(ExpenseFunds),
-            meta: {
-              title: 'Фонды списания',
-              icon: 'fa-solid fa-money-bill-wave',
               roles: ['chairman'],
               agreements: agreementsBase,
               requiresAuth: true,

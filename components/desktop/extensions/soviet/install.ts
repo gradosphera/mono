@@ -5,6 +5,7 @@ import { ListOfDocumentsPage } from 'src/pages/Cooperative/ListOfDocuments';
 import { PaymentsPage } from 'src/pages/Cooperative/Payments';
 import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets';
 import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails';
+import { ListOfLedgerAccountsPage } from 'src/pages/Cooperative/ListOfLedgerAccounts';
 import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
@@ -79,6 +80,16 @@ export default async function (): Promise<IWorkspaceConfig> {
                 component: markRaw(MeetDetailsPage),
               },
             ],
+          },
+          {
+            path: 'ledger',
+            name: 'ledger',
+            component: markRaw(ListOfLedgerAccountsPage),
+            meta: {
+              title: 'Реестр счетов',
+              icon: 'fa-solid fa-chart-line',
+              roles: ['chairman', 'member'],
+            },
           },
           {
             path: 'union/cooperatives',

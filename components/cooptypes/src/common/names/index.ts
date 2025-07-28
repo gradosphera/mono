@@ -67,3 +67,8 @@ export const _wallet = {
   production: 'wallet',
   testnet: 'wallet',
 } as const
+
+export const _ledger = {
+  production: 'ledger',
+  testnet: 'ledger',
+} as const

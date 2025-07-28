@@ -452,7 +452,14 @@ export interface INewact {
   coopname: IName
   username: IName
   action: IName
-  hash: IChecksum256
+  package: IChecksum256
+  document: IDocument2
+}
+
+export interface INewagreement {
+  coopname: IName
+  username: IName
+  type: IName
   document: IDocument2
 }
 
@@ -460,22 +467,37 @@ export interface INewdecision {
   coopname: IName
   username: IName
   action: IName
-  hash: IChecksum256
+  package: IChecksum256
   document: IDocument2
 }
 
 export interface INewdeclined {
   coopname: IName
   username: IName
-  hash: IChecksum256
+  package: IChecksum256
   document: IDocument2
+}
+
+export interface INewlink {
+  coopname: IName
+  username: IName
+  action: IName
+  package: IChecksum256
+  document: IDocument2
+}
+
+export interface INewpackage {
+  coopname: IName
+  username: IName
+  action: IName
+  package: IChecksum256
 }
 
 export interface INewresolved {
   coopname: IName
   username: IName
   action: IName
-  hash: IChecksum256
+  package: IChecksum256
   document: IDocument2
 }
 
@@ -483,7 +505,7 @@ export interface INewsubmitted {
   coopname: IName
   username: IName
   action: IName
-  hash: IChecksum256
+  package: IChecksum256
   document: IDocument2
 }
 
@@ -643,15 +665,25 @@ export interface IValidate {
 }
 
 export interface IVoteagainst {
+  version: string
   coopname: IName
-  member: IName
+  username: IName
   decision_id: IUint64
+  signed_at: ITimePointSec
+  signed_hash: IChecksum256
+  signature: ISignature
+  public_key: IPublicKey
 }
 
 export interface IVotefor {
+  version: string
   coopname: IName
-  member: IName
+  username: IName
   decision_id: IUint64
+  signed_at: ITimePointSec
+  signed_hash: IChecksum256
+  signature: ISignature
+  public_key: IPublicKey
 }
 
 export interface IWithdraw {
