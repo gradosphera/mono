@@ -4,7 +4,7 @@ import type * as Ledger from '../../../interfaces/ledger'
 /**
  * Имя таблицы
  */
-export const tableName = 'laccounts'
+export const tableName = 'accounts'
 
 /**
  * Таблица хранится в {@link Actors._coopname | области памяти кооператива}.

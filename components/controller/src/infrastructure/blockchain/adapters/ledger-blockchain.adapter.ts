@@ -16,21 +16,15 @@ export class LedgerBlockchainAdapter implements LedgerPort {
    * Получить активные счета кооператива из блокчейна
    */
   async getActiveLedgerAccounts(coopname: string): Promise<LedgerAccountDomainInterface[]> {
-    try {
-      // Получаем данные счетов из таблицы laccounts контракта ledger
-      const ledgerAccountsFromBlockchain = await this.blockchainService.getAllRows<LedgerContract.Tables.Laccount.ILaccount>(
-        LedgerContract.contractName.production, // Имя контракта ledger
-        coopname, // Scope - имя кооператива
-        LedgerContract.Tables.Laccount.tableName // Имя таблицы
-      );
+    // Получаем данные счетов из таблицы laccounts контракта ledger
+    const ledgerAccountsFromBlockchain = await this.blockchainService.getAllRows<LedgerContract.Tables.Laccount.ILaccount>(
+      LedgerContract.contractName.production, // Имя контракта ledger
+      coopname, // Scope - имя кооператива
+      LedgerContract.Tables.Laccount.tableName // Имя таблицы
+    );
 
-      // Преобразуем данные блокчейна в доменные объекты
-      return ledgerAccountsFromBlockchain.map(this.convertBlockchainLedgerAccountToDomain);
-    } catch (error) {
-      // Если произошла ошибка (например, нет активных счетов), возвращаем пустой массив
-      console.warn(`Failed to fetch ledger accounts for cooperative ${coopname}:`, error);
-      return [];
-    }
+    // Преобразуем данные блокчейна в доменные объекты
+    return ledgerAccountsFromBlockchain.map(this.convertBlockchainLedgerAccountToDomain);
   }
 
   /**

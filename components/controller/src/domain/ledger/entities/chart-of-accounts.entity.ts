@@ -209,7 +209,6 @@ export class ChartOfAccountsEntity {
     // Обновляем план счетов данными из блокчейна
     return chartOfAccounts.map((accountItem) => {
       const ledgerAccount = ledgerAccountsMap.get(accountItem.id);
-
       if (ledgerAccount) {
         return {
           ...accountItem,

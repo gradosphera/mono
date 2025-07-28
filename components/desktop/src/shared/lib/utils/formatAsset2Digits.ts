@@ -20,7 +20,7 @@ export const formatAsset2Digits = (value: string): string => {
   const formattedNumber = new Intl.NumberFormat('ru-RU', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(numValue / 10000); // Деление на 10000 для EOS формата
+  }).format(numValue);
 
   return currencySymbol
     ? `${formattedNumber} ${currencySymbol}`
