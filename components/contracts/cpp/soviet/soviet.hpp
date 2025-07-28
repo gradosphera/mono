@@ -143,7 +143,7 @@ public:
   [[eosio::action]] void blockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo);
   [[eosio::action]] void unblockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo);
   [[eosio::action]] void addmemberfee(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo);
-  
+  [[eosio::action]] void submemberfee(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo);
 
   //addresses.cpp
   [[eosio::action]] void creaddress(eosio::name coopname, eosio::name chairman, eosio::name braname, address_data data);

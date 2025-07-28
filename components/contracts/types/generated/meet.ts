@@ -7,6 +7,7 @@ export type ISignature = string
 export type ITimePointSec = string
 export type IUint32 = number
 export type IUint64 = number | string
+export type IFloat64 = number
 
 export interface IAuthmeet {
   coopname: IName
@@ -32,6 +33,11 @@ export interface IDeclmeet {
   reason: string
 }
 
+export interface IDelmeet {
+  coopname: IName
+  meet_id: IUint64
+}
+
 export interface IDocument2 {
   version: string
   hash: IChecksum256
@@ -41,11 +47,19 @@ export interface IDocument2 {
   signatures: ISignatureInfo[]
 }
 
+export interface IGmnotify {
+  coopname: IName
+  hash: IChecksum256
+  username: IName
+  notification: IDocument2
+}
+
 export interface IMeet {
   id: IUint64
   hash: IChecksum256
   coopname: IName
   type: IName
+  level: IName
   initiator: IName
   presider: IName
   secretary: IName
@@ -53,9 +67,10 @@ export interface IMeet {
   created_at: ITimePointSec
   open_at: ITimePointSec
   close_at: ITimePointSec
-  quorum_percent: IUint64
+  notified_users: IName[]
+  quorum_percent: IFloat64
   signed_ballots: IUint64
-  current_quorum_percent: IUint64
+  current_quorum_percent: IFloat64
   cycle: IUint64
   quorum_passed: boolean
   proposal: IDocument2
@@ -70,13 +85,19 @@ export interface IMeetPoint {
   decision: string
 }
 
+export interface IMigrate {
+}
+
 export interface INewgdecision {
   coopname: IName
+  presider: IName
+  secretary: IName
   hash: IChecksum256
   results: IQuestionResult[]
   signed_ballots: IUint64
-  quorum_percent: IUint64
+  quorum_percent: IFloat64
   quorum_passed: boolean
+  decision: IDocument2
 }
 
 export interface IQuestion {
@@ -110,6 +131,7 @@ export interface IQuestionResult {
 export interface IRestartmeet {
   coopname: IName
   hash: IChecksum256
+  new_hash: IChecksum256
   newproposal: IDocument2
   new_open_at: ITimePointSec
   new_close_at: ITimePointSec

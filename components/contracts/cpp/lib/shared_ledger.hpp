@@ -147,8 +147,12 @@ public:
     static constexpr uint64_t LOAN_INTEREST = 911;          // Внесение процентов за пользование займами
     
     // Финансовые вложения из средств ПО
+    static constexpr uint64_t FINANCIAL_INVESTMENTS = 58;   // Финансовые вложения из средств ПО
     static constexpr uint64_t SHARES_AND_STAKES = 581;      // Доли, паи и акции в организациях, где участвует ПО
     static constexpr uint64_t SECURITIES = 582;             // Облигации (государственные ценные бумаги)
+    
+    // Расчеты с дебиторами и кредиторами
+    static constexpr uint64_t DEBTORS_CREDITORS = 76;       // Расчеты с дебиторами и кредиторами
     
     // Запасы, затраты, расчеты, собственные средства
     static constexpr uint64_t FIXED_ASSETS = 1;             // Основные средства
@@ -168,6 +172,7 @@ public:
     static constexpr uint64_t CURRENT_YEAR_PROFIT = 841;    // Нераспределенная прибыль (убыток) отчетного года
     static constexpr uint64_t PREVIOUS_YEARS_PROFIT = 842;  // Нераспределенная прибыль (непокрытый убыток) прошлых лет
     static constexpr uint64_t FUNDS_PO_2 = 843;            // Фонды ПО (вариант пополнения фондов ПО)
+    static constexpr uint64_t UNDISTRIBUTED_PROFIT = 84;    // Нераспределенная прибыль (непокрытый убыток)
     static constexpr uint64_t TARGET_RECEIPTS = 86;         // Целевые поступления
     static constexpr uint64_t ENTRANCE_FEES = 861;          // Вступительные взносы
     static constexpr uint64_t RESERVE_FUND = 862;           // Резервный фонд
@@ -177,6 +182,7 @@ public:
     static constexpr uint64_t DEVELOPMENT_FUND = 866;       // Фонд развития потребительской кооперации
     static constexpr uint64_t OTHER_INCOME_EXPENSES = 91;   // Прочие доходы и расходы
     static constexpr uint64_t FUTURE_EXPENSES_RESERVE = 96; // Резерв предстоящих расходов
+    static constexpr uint64_t FUTURE_INCOME = 98;           // Доходы будущих периодов
     static constexpr uint64_t FREE_RECEIPT = 981;           // Безвозмездное получение имущества
   };
 };
@@ -206,6 +212,7 @@ static const std::vector<std::tuple<uint64_t, std::string>> ACCOUNT_MAP = {
   {Ledger::accounts::TARGET_RECEIPTS, "Целевые поступления"},
   {Ledger::accounts::OTHER_INCOME_EXPENSES, "Прочие доходы и расходы"},
   {Ledger::accounts::FUTURE_EXPENSES_RESERVE, "Резерв предстоящих расходов"},
+  {Ledger::accounts::FUTURE_INCOME, "Доходы будущих периодов"},
   {Ledger::accounts::SHARES_AND_STAKES, "Доли, паи и акции в организациях"},
   {Ledger::accounts::SECURITIES, "Облигации (государственные ценные бумаги)"},
   {Ledger::accounts::LOANS_ISSUED, "Расчеты по выданным займам"},
@@ -214,17 +221,20 @@ static const std::vector<std::tuple<uint64_t, std::string>> ACCOUNT_MAP = {
   {Ledger::accounts::MEMBER_FEES, "По членским взносам"},
   {Ledger::accounts::PROPERTY_TRANSFER, "По передаче имущества для некоммерческой деятельности"},
   {Ledger::accounts::OTHER_SETTLEMENTS, "Другие расчеты"},
+  {Ledger::accounts::DEBTORS_CREDITORS, "Расчеты с дебиторами и кредиторами"},
   {Ledger::accounts::ENTRANCE_FEES, "Вступительные взносы"},
   {Ledger::accounts::FUNDS_PO_1, "Фонды ПО (вариант пополнения фондов ПО)"},
   {Ledger::accounts::CURRENT_YEAR_PROFIT, "Нераспределенная прибыль (убыток) отчетного года"},
   {Ledger::accounts::PREVIOUS_YEARS_PROFIT, "Нераспределенная прибыль (непокрытый убыток) прошлых лет"},
   {Ledger::accounts::FUNDS_PO_2, "Фонды ПО (вариант пополнения фондов ПО)"},
+  {Ledger::accounts::UNDISTRIBUTED_PROFIT, "Нераспределенная прибыль (непокрытый убыток)"},
   {Ledger::accounts::RESERVE_FUND, "Резервный фонд"},
   {Ledger::accounts::INDIVISIBLE_FUND, "Неделимый фонд"},
   {Ledger::accounts::ECONOMIC_ACTIVITY_FUND, "Фонд обеспечения хозяйственной деятельности"},
   {Ledger::accounts::MUTUAL_SECURITY_FUND, "Фонд взаимного обеспечения"},
   {Ledger::accounts::DEVELOPMENT_FUND, "Фонд развития потребительской кооперации"},
   {Ledger::accounts::LOAN_INTEREST, "Внесение процентов за пользование займами"},
+  {Ledger::accounts::FINANCIAL_INVESTMENTS, "Финансовые вложения из средств ПО"},
   {Ledger::accounts::FREE_RECEIPT, "Безвозмездное получение имущества"}
 }; 
 

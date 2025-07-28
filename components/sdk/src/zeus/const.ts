@@ -224,6 +224,9 @@ export const AllTypesProps: Record<string,any> = {
 	GetExtensionsInput:{
 
 	},
+	GetLedgerInput:{
+
+	},
 	GetMeetInput:{
 
 	},
@@ -584,6 +587,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		getExtensions:{
 			data:"GetExtensionsInput"
+		},
+		getLedger:{
+			data:"GetLedgerInput"
 		},
 		getMeet:{
 			data:"GetMeetInput"
@@ -961,6 +967,14 @@ export const ReturnTypes: Record<string,any> = {
 		trustee:"Individual",
 		type:"String"
 	},
+	ChartOfAccountsItem:{
+		available:"String",
+		blocked:"String",
+		displayId:"String",
+		id:"Int",
+		name:"String",
+		writeoff:"String"
+	},
 	ContactsDTO:{
 		chairman:"PublicChairman",
 		details:"OrganizationDetails",
@@ -1169,6 +1183,10 @@ export const ReturnTypes: Record<string,any> = {
 	KeyWeight:{
 		key:"String",
 		weight:"Int"
+	},
+	LedgerState:{
+		chartOfAccounts:"ChartOfAccountsItem",
+		coopname:"String"
 	},
 	Meet:{
 		authorization:"DocumentAggregate",
@@ -1470,6 +1488,7 @@ export const ReturnTypes: Record<string,any> = {
 		getDesktop:"Desktop",
 		getDocuments:"DocumentsAggregatePaginationResult",
 		getExtensions:"Extension",
+		getLedger:"LedgerState",
 		getMeet:"MeetAggregate",
 		getMeets:"MeetAggregate",
 		getPaymentMethods:"PaymentMethodPaginationResult",

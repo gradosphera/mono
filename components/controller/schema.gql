@@ -1244,6 +1244,28 @@ input CancelRequestInput {
   username: String!
 }
 
+type ChartOfAccountsItem {
+  """Доступные средства"""
+  available: String!
+
+  """Заблокированные средства"""
+  blocked: String!
+
+  """
+  Идентификатор счета для отображения (может быть дробным, например "86.6")
+  """
+  displayId: String!
+
+  """Идентификатор счета"""
+  id: Int!
+
+  """Название счета"""
+  name: String!
+
+  """Списанные средства"""
+  writeoff: String!
+}
+
 input CommonRequestInput {
   currency: String!
   hash: String!
@@ -2313,6 +2335,11 @@ input GetExtensionsInput {
   name: String
 }
 
+input GetLedgerInput {
+  """Имя кооператива для получения состояния ledger"""
+  coopname: String!
+}
+
 input GetMeetInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -2427,6 +2454,14 @@ type KeyWeight {
 
   """Вес"""
   weight: Int!
+}
+
+type LedgerState {
+  """План счетов с актуальными данными"""
+  chartOfAccounts: [ChartOfAccountsItem!]!
+
+  """Имя кооператива"""
+  coopname: String!
 }
 
 input LoginInput {
@@ -3683,6 +3718,11 @@ type Query {
 
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!
+
+  """
+  Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения.
+  """
+  getLedger(data: GetLedgerInput!): LedgerState!
 
   """Получить данные собрания по хешу"""
   getMeet(data: GetMeetInput!): MeetAggregate!

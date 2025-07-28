@@ -1804,6 +1804,21 @@ export type ValueTypes = {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["ChartOfAccountsItem"]: AliasType<{
+	/** Доступные средства */
+	available?:boolean | `@${string}`,
+	/** Заблокированные средства */
+	blocked?:boolean | `@${string}`,
+	/** Идентификатор счета для отображения (может быть дробным, например "86.6") */
+	displayId?:boolean | `@${string}`,
+	/** Идентификатор счета */
+	id?:boolean | `@${string}`,
+	/** Название счета */
+	name?:boolean | `@${string}`,
+	/** Списанные средства */
+	writeoff?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CommonRequestInput"]: {
 	currency: string | Variable<any, string>,
 	hash: string | Variable<any, string>,
@@ -2543,6 +2558,10 @@ export type ValueTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null | Variable<any, string>
 };
+	["GetLedgerInput"]: {
+	/** Имя кооператива для получения состояния ledger */
+	coopname: string | Variable<any, string>
+};
 	["GetMeetInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -2622,6 +2641,13 @@ export type ValueTypes = {
 	key?:boolean | `@${string}`,
 	/** Вес */
 	weight?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerState"]: AliasType<{
+	/** План счетов с актуальными данными */
+	chartOfAccounts?:ValueTypes["ChartOfAccountsItem"],
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["LoginInput"]: {
@@ -3395,6 +3421,7 @@ getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},V
 	getDesktop?:ValueTypes["Desktop"],
 getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>},ValueTypes["DocumentsAggregatePaginationResult"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
+getLedger?: [{	data: ValueTypes["GetLedgerInput"] | Variable<any, string>},ValueTypes["LedgerState"]],
 getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getMeets?: [{	data: ValueTypes["GetMeetsInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentMethodPaginationResult"]],
@@ -5283,6 +5310,21 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["ChartOfAccountsItem"]: AliasType<{
+	/** Доступные средства */
+	available?:boolean | `@${string}`,
+	/** Заблокированные средства */
+	blocked?:boolean | `@${string}`,
+	/** Идентификатор счета для отображения (может быть дробным, например "86.6") */
+	displayId?:boolean | `@${string}`,
+	/** Идентификатор счета */
+	id?:boolean | `@${string}`,
+	/** Название счета */
+	name?:boolean | `@${string}`,
+	/** Списанные средства */
+	writeoff?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CommonRequestInput"]: {
 	currency: string,
 	hash: string,
@@ -6022,6 +6064,10 @@ export type ResolverInputTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetLedgerInput"]: {
+	/** Имя кооператива для получения состояния ledger */
+	coopname: string
+};
 	["GetMeetInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -6101,6 +6147,13 @@ export type ResolverInputTypes = {
 	key?:boolean | `@${string}`,
 	/** Вес */
 	weight?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["LedgerState"]: AliasType<{
+	/** План счетов с актуальными данными */
+	chartOfAccounts?:ResolverInputTypes["ChartOfAccountsItem"],
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["LoginInput"]: {
@@ -6876,6 +6929,7 @@ getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputType
 	getDesktop?:ResolverInputTypes["Desktop"],
 getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTypes["DocumentsAggregatePaginationResult"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
+getLedger?: [{	data: ResolverInputTypes["GetLedgerInput"]},ResolverInputTypes["LedgerState"]],
 getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 getMeets?: [{	data: ResolverInputTypes["GetMeetsInput"]},ResolverInputTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaymentMethodPaginationResult"]],
@@ -8749,6 +8803,20 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["ChartOfAccountsItem"]: {
+		/** Доступные средства */
+	available: string,
+	/** Заблокированные средства */
+	blocked: string,
+	/** Идентификатор счета для отображения (может быть дробным, например "86.6") */
+	displayId: string,
+	/** Идентификатор счета */
+	id: number,
+	/** Название счета */
+	name: string,
+	/** Списанные средства */
+	writeoff: string
+};
 	["CommonRequestInput"]: {
 	currency: string,
 	hash: string,
@@ -9468,6 +9536,10 @@ export type ModelTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetLedgerInput"]: {
+	/** Имя кооператива для получения состояния ledger */
+	coopname: string
+};
 	["GetMeetInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -9545,6 +9617,12 @@ export type ModelTypes = {
 	key: string,
 	/** Вес */
 	weight: number
+};
+	["LedgerState"]: {
+		/** План счетов с актуальными данными */
+	chartOfAccounts: Array<ModelTypes["ChartOfAccountsItem"]>,
+	/** Имя кооператива */
+	coopname: string
 };
 	["LoginInput"]: {
 	/** Электронная почта */
@@ -10365,6 +10443,8 @@ export type ModelTypes = {
 	getDocuments: ModelTypes["DocumentsAggregatePaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<ModelTypes["Extension"]>,
+	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения. */
+	getLedger: ModelTypes["LedgerState"],
 	/** Получить данные собрания по хешу */
 	getMeet: ModelTypes["MeetAggregate"],
 	/** Получить список всех собраний кооператива */
@@ -12237,6 +12317,21 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["ChartOfAccountsItem"]: {
+	__typename: "ChartOfAccountsItem",
+	/** Доступные средства */
+	available: string,
+	/** Заблокированные средства */
+	blocked: string,
+	/** Идентификатор счета для отображения (может быть дробным, например "86.6") */
+	displayId: string,
+	/** Идентификатор счета */
+	id: number,
+	/** Название счета */
+	name: string,
+	/** Списанные средства */
+	writeoff: string
+};
 	["CommonRequestInput"]: {
 		currency: string,
 	hash: string,
@@ -12976,6 +13071,10 @@ export type GraphQLTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetLedgerInput"]: {
+		/** Имя кооператива для получения состояния ledger */
+	coopname: string
+};
 	["GetMeetInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -13056,6 +13155,13 @@ export type GraphQLTypes = {
 	key: string,
 	/** Вес */
 	weight: number
+};
+	["LedgerState"]: {
+	__typename: "LedgerState",
+	/** План счетов с актуальными данными */
+	chartOfAccounts: Array<GraphQLTypes["ChartOfAccountsItem"]>,
+	/** Имя кооператива */
+	coopname: string
 };
 	["LoginInput"]: {
 		/** Электронная почта */
@@ -13913,6 +14019,8 @@ export type GraphQLTypes = {
 	getDocuments: GraphQLTypes["DocumentsAggregatePaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<GraphQLTypes["Extension"]>,
+	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения. */
+	getLedger: GraphQLTypes["LedgerState"],
 	/** Получить данные собрания по хешу */
 	getMeet: GraphQLTypes["MeetAggregate"],
 	/** Получить список всех собраний кооператива */
@@ -15068,6 +15176,7 @@ type ZEUS_VARIABLES = {
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
 	["GetDocumentsInput"]: ValueTypes["GetDocumentsInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
+	["GetLedgerInput"]: ValueTypes["GetLedgerInput"];
 	["GetMeetInput"]: ValueTypes["GetMeetInput"];
 	["GetMeetsInput"]: ValueTypes["GetMeetsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];

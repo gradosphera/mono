@@ -8,13 +8,12 @@ import {
   ILoadCooperativeAddresses,
   IAdministratorData,
 } from './types';
-import { Cooperative, FundContract, RegistratorContract } from 'cooptypes';
+import { Cooperative, RegistratorContract } from 'cooptypes';
 
 const namespace = 'cooperative';
 
 interface ICooperativeStore {
   // методы
-  loadFunds: (coopname: string) => Promise<void>;
   loadAddresses: (params: ILoadCooperativeAddresses) => Promise<void>;
   loadPrograms: (params: ILoadCoopPrograms) => Promise<void>;
   loadPrivateCooperativeData: () => Promise<void>;
@@ -26,15 +25,13 @@ interface ICooperativeStore {
   admins: Ref<IAdministratorData[]>;
   programs: Ref<ICoopProgramData[]>;
   addresses: Ref<IAddressesData[]>;
-  contacts: Ref<Cooperative.Model.IContacts | undefined>
-  publicCooperativeData: Ref<RegistratorContract.Tables.Cooperatives.ICooperative | undefined>;
+  contacts: Ref<Cooperative.Model.IContacts | undefined>;
+  publicCooperativeData: Ref<
+    RegistratorContract.Tables.Cooperatives.ICooperative | undefined
+  >;
   privateCooperativeData: Ref<Cooperative.Model.ICooperativeData | undefined>;
 
-  coopWallet: Ref<FundContract.Tables.CoopWallet.ICoopWallet | undefined>
-  accumulationFunds: Ref<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>
-  expenseFunds: Ref<FundContract.Tables.ExpensedFunds.IExpensedFund[]>
-
-  governSymbol: ComputedRef<string>
+  governSymbol: ComputedRef<string>;
 }
 
 export const useCooperativeStore = defineStore(
@@ -43,55 +40,40 @@ export const useCooperativeStore = defineStore(
     const programs = ref([] as ICoopProgramData[]);
     const addresses = ref([] as IAddressesData[]);
     const admins = ref([] as IAdministratorData[]);
-    const publicCooperativeData = ref<RegistratorContract.Tables.Cooperatives.ICooperative>();
-    const privateCooperativeData = ref<Cooperative.Model.ICooperativeData>()
-    const coopWallet = ref<FundContract.Tables.CoopWallet.ICoopWallet>()
-    const accumulationFunds = ref<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>([])
-    const expenseFunds = ref<FundContract.Tables.ExpensedFunds.IExpensedFund[]>([])
+    const publicCooperativeData =
+      ref<RegistratorContract.Tables.Cooperatives.ICooperative>();
+    const privateCooperativeData = ref<Cooperative.Model.ICooperativeData>();
 
     const governSymbol = computed(() => {
       if (publicCooperativeData.value) {
-        const [, symbol] = publicCooperativeData.value.initial.split(' ')
-        return symbol
-      } else return ''
-    })
+        const [, symbol] = publicCooperativeData.value.initial.split(' ');
+        return symbol;
+      } else return '';
+    });
 
-    const contacts = ref<Cooperative.Model.IContacts>()
+    const contacts = ref<Cooperative.Model.IContacts>();
 
-    const loadFunds = async(coopname: string) : Promise<void> => {
-      coopWallet.value = await api.loadCoopWallet(coopname)
-      accumulationFunds.value = (await api.loadAccumulationFunds(coopname)).map(el => ({
-        ...el,
-        percent: Number(el.percent) / 10000
-      }));
-
-      expenseFunds.value = await api.loadExpenseFunds(coopname)
-    }
-
-    const loadContacts = async(): Promise<void> => {
-      contacts.value = await api.loadContacts()
-    }
-
-    const loadPrivateCooperativeData = async(): Promise<void> => {
-      privateCooperativeData.value = await api.loadPrivateCooperativeData()
-    }
-
-    const loadPublicCooperativeData = async (
-      coopname: string
-    ): Promise<void> => {
-      publicCooperativeData.value = await api.loadPublicCooperativeData(
-        coopname
-      );
+    const loadContacts = async (): Promise<void> => {
+      contacts.value = await api.loadContacts();
     };
 
-    const loadPrograms = async (
-      params: ILoadCoopPrograms
+    const loadPrivateCooperativeData = async (): Promise<void> => {
+      privateCooperativeData.value = await api.loadPrivateCooperativeData();
+    };
+
+    const loadPublicCooperativeData = async (
+      coopname: string,
     ): Promise<void> => {
+      publicCooperativeData.value =
+        await api.loadPublicCooperativeData(coopname);
+    };
+
+    const loadPrograms = async (params: ILoadCoopPrograms): Promise<void> => {
       programs.value = await api.loadPrograms(params);
     };
 
     const loadAddresses = async (
-      params: ILoadCooperativeAddresses
+      params: ILoadCooperativeAddresses,
     ): Promise<void> => {
       addresses.value = await api.loadCooperativeAddresses(params);
     };
@@ -101,7 +83,6 @@ export const useCooperativeStore = defineStore(
     };
 
     return {
-      loadFunds,
       loadPrograms,
       loadAddresses,
       loadContacts,
@@ -115,9 +96,6 @@ export const useCooperativeStore = defineStore(
       loadAdmins,
       admins,
       governSymbol,
-      coopWallet,
-      accumulationFunds,
-      expenseFunds
     };
-  }
+  },
 );

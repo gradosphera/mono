@@ -28,7 +28,6 @@ export interface ICompletedpst {
 export interface ICompletewthd {
   coopname: IName
   withdraw_hash: IChecksum256
-  memo: string
 }
 
 export interface ICreatedpst {
