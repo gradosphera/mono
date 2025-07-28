@@ -29,21 +29,21 @@ void ledger::migrate(){
       if (wallet_iter->circulating_account.available.amount > 0) {
         Ledger::add(_ledger, coopname, Ledger::accounts::SHARE_FUND, 
                    wallet_iter->circulating_account.available, 
-                   "Миграция: перенос паевого фонда из fund контракта");
+                   "Миграция: перенос паевого фонда");
       }
 
       // Вступительные взносы (initial_account) -> счет 861 (ENTRANCE_FEES)
       if (wallet_iter->initial_account.available.amount > 0) {
         Ledger::add(_ledger, coopname, Ledger::accounts::ENTRANCE_FEES, 
                    wallet_iter->initial_account.available, 
-                   "Миграция: перенос вступительных взносов из fund контракта");
+                   "Миграция: перенос вступительных взносов");
       }
 
       // Накопительный счет членских взносов (accumulative_expense_account) -> счет 86 (TARGET_RECEIPTS)
       if (wallet_iter->accumulative_expense_account.available.amount > 0) {
         Ledger::add(_ledger, coopname, Ledger::accounts::TARGET_RECEIPTS, 
                    wallet_iter->accumulative_expense_account.available, 
-                   "Миграция: перенос накопительного счета членских взносов из fund контракта");
+                   "Миграция: перенос накопительного счета членских взносов");
       }
     }
   }
