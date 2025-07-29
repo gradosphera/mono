@@ -1,0 +1,58 @@
+#pragma once
+
+using namespace eosio;
+using std::string;
+
+namespace Capital {
+
+/**
+  * @brief Структура запроса на возврат из проекта.
+  */
+struct [[eosio::table, eosio::contract(CAPITAL)]] project_withdraw {
+  uint64_t id;                                ///< Уникальный ID запроса на возврат.
+  name coopname;                              ///< Имя аккаунта кооператива
+  checksum256 project_hash;                    ///< Хэш проекта
+  checksum256 withdraw_hash;                  ///< Уникальный внешний ключ
+  name username;                              ///< Имя аккаунта участника, запрашивающего возврат.
+  name status = "created"_n;                  ///< Статус взноса-возврата (created | approved | )
+  asset amount = asset(0, _root_govern_symbol);      ///< Запрошенная сумма для возврата.
+  document2 return_statement;                  ///< Заявление на возврат паевого взноса деньгами
+  
+  document2 approved_return_statement;         ///< Принятое председателем заявление на возврат взноса деньгами
+  
+  time_point_sec created_at = current_time_point();                   ///< Дата и время создания действия.                       ///< Время создания запроса.
+  
+  uint64_t primary_key() const { return id; }             ///< Основной ключ.
+  uint64_t by_account() const { return username.value; }   ///< Вторичный индекс по аккаунту.
+  uint64_t by_created() const { return created_at.sec_since_epoch(); }
+  checksum256 by_hash() const { return withdraw_hash; } ///< Индекс по хэшу
+  checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта
+};
+
+typedef eosio::multi_index<"prjwithdraws"_n, project_withdraw,
+  indexed_by<"byhash"_n, const_mem_fun<project_withdraw, checksum256, &project_withdraw::by_hash>>,
+  indexed_by<"byprojhash"_n, const_mem_fun<project_withdraw, checksum256, &project_withdraw::by_project_hash>>,
+  indexed_by<"byusername"_n, const_mem_fun<project_withdraw, uint64_t, &project_withdraw::by_account>>,
+  indexed_by<"bycreated"_n, const_mem_fun<project_withdraw, uint64_t, &project_withdraw::by_created>>
+> project_withdraws_index; ///< Таблица для хранения запросов на возврат из проекта.
+
+/**
+ * @brief Получает запрос на возврат из проекта по хэшу.
+ * @param coopname Имя кооператива (scope таблицы).
+ * @param hash Хэш запроса на возврат.
+ * @return Найденный запрос на возврат или nullopt, если запрос не найден.
+ */
+inline std::optional<project_withdraw> get_project_withdraw(eosio::name coopname, const checksum256 &hash) {
+  Capital::project_withdraws_index project_withdraws(_capital, coopname.value);
+  auto index = project_withdraws.get_index<"byhash"_n>();
+
+  auto itr = index.find(hash);
+  
+  if (itr == index.end()) {
+      return std::nullopt;
+  }
+
+  return *itr;
+}
+
+}// namespace Capital

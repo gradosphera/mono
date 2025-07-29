@@ -5,8 +5,8 @@
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include "../lib/common.hpp"
-#include "include/tables.hpp"
-#include "include/appendix.hpp"
+#include "domain/index.hpp"
+
 
 using namespace eosio;
 using std::string;
@@ -203,86 +203,4 @@ public:
     [[eosio::action]] void fundprog(eosio::name coopname, asset amount, std::string memo);
     [[eosio::action]] void refreshprog(name coopname, name application, name username);
     
-private:
-    
-  static constexpr symbol TOKEN_SYMBOL = _root_govern_symbol; ///< Символ используемого токена.
-  static constexpr symbol ACCUMULATION_SYMBOL = _root_symbol; ///< Символ токена для учёта распределения.
-  
-  static constexpr int64_t MAX_AUTHORS = 12;
-  
-  static constexpr name _intellectual = "intellectual"_n; ///< Символьное обозначение интеллектуального взноса
-  static constexpr name _property = "property"_n; ///< Символьное обозначение имущественного взноса
-  
-
-  /**
-    * @brief Обновляет глобальное состояние новыми значениями.
-    *
-    * @param gs Новое глобальное состояние.
-    */
-  void update_global_state(const global_state& gs);
-      
-  /**
-    * @brief Получает текущее глобальное состояние.
-    *
-    * @return Текущее глобальное состояние.
-    */
-  global_state get_global_state(name coopname);
-      
-  static bonus_result calculcate_capital_amounts(const eosio::asset& spended);
-  
-  std::optional<author> get_author(eosio::name coopname, eosio::name username, const checksum256 &project_hash);
-  std::optional<creator> get_creator(eosio::name coopname, eosio::name username, const checksum256 &assignment_hash);
-  std::optional<assignment> get_assignment(eosio::name coopname, const checksum256 &assignment_hash);
-  std::optional<debt> get_debt(eosio::name coopname, const checksum256 &debt_hash);
-  
-  
-  std::optional<project> get_project(eosio::name coopname, const checksum256 &project_hash);
-  std::optional<project> get_master_project(eosio::name coopname);
-  void validate_project_hierarchy_depth(eosio::name coopname, checksum256 project_hash);
-  
-  void distribute_project_membership_funds(eosio::name coopname, uint64_t project_id, asset amount, uint8_t level);
-  
-  int64_t get_capital_user_share_balance(eosio::name coopname, eosio::name username);
-  
-  std::optional<result> get_result_by_assignment_and_username(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username);
-  std::optional<result> get_result(eosio::name coopname, const checksum256 &result_hash);
-  
-  std::optional<convert> get_convert(eosio::name coopname, const checksum256 &hash);
-  
-  std::optional<commit> get_commit(eosio::name coopname, const checksum256 &hash);
-  std::optional<invest> get_invest(eosio::name coopname, const checksum256 &invest_hash);
-  std::optional<capital_tables::result_withdraw> get_result_withdraw(eosio::name coopname, const checksum256 &hash);
-  std::optional<capital_tables::project_withdraw> get_project_withdraw(eosio::name coopname, const checksum256 &hash);
-  std::optional<capital_tables::program_withdraw> get_program_withdraw(eosio::name coopname, const checksum256 &hash);
-  
-
-  std::optional<expense> get_expense(eosio::name coopname, const checksum256 &hash);
-  
-  program get_capital_program_or_fail(eosio::name coopname);
-  program get_source_program_or_fail(eosio::name coopname);
-  std::optional<progwallet> get_capital_wallet(eosio::name coopname, eosio::name username);
-  
-  
-  std::optional<contributor> get_contributor(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
-  std::optional<contributor> get_active_contributor_or_fail(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
-  
-  std::optional<appendix> get_appendix(eosio::name coopname, const checksum256 &appendix_hash) {
-    return AppendixHelper::get_appendix(coopname, appendix_hash, _capital);
-  }
-  
-  bool is_contributor_has_appendix_in_project(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
-  
-  std::optional<capital_tables::capitalist> get_capitalist(eosio::name coopname, eosio::name username);
-  
-  int64_t get_capital_program_share_balance(eosio::name coopname);
-  
-  uint64_t count_authors_by_project(eosio::name coopname, const checksum256 &project_hash);
-  
-  eosio::asset get_amount_for_withdraw_from_commit(eosio::name coopname, eosio::name username, const checksum256 &hash);
-  
-  creauthor get_creauthor_or_fail(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username, const char* msg);
-  std::optional<creauthor> get_creauthor(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username);
-  result get_result_by_assignment_and_username_or_fail(eosio::name coopname, const checksum256 &assignment_hash, eosio::name username, const char* msg);
-  assignment get_assignment_or_fail(eosio::name coopname, const checksum256 &assignment_hash, const char* msg);
-  
 };

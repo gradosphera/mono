@@ -52,8 +52,8 @@
 
 ## Изменения в существующих функциях
 
-### calculcate_capital_amounts
-Добавлены новые поля в структуру `bonus_result`:
+### calculcate_generation_amounts
+Добавлены новые поля в структуру `generation_result`:
 - `authors_direct_bonus` - 68.2% от авторских премий
 - `authors_vodyanov_bonus` - 31.8% от авторских премий  
 - `creators_direct_bonus` - 68.2% от создательских премий

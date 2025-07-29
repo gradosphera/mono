@@ -129,7 +129,8 @@ static const std::set<eosio::name> soviet_actions = {
 //program_ids
 static constexpr uint64_t _wallet_program_id = 1;
 static constexpr uint64_t _marketplace_program_id = 2;
-static constexpr uint64_t _capital_program_id = 3;
+static constexpr uint64_t _source_program_id = 3;
+static constexpr uint64_t _capital_program_id = 4;
 
 static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный коэффициент для вознаграждений (1e8).
 
