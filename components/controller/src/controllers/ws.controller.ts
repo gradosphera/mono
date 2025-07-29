@@ -96,7 +96,7 @@ async function processEvent(event: IAction) {
     }
 
     // Обработка событий операций ledger
-    const ledgerActions = ['add', 'sub', 'transfer', 'block', 'unblock'];
+    const ledgerActions = ['add', 'sub', 'transfer', 'block', 'unblock', 'writeoff', 'writeoffcnsl'];
     if (ledgerActions.includes(event.name)) {
       try {
         if (ledgerInteractor) {

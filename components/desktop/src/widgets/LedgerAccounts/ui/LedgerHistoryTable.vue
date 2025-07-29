@@ -191,6 +191,8 @@ const getActionColor = (action: string): string => {
     transfer: 'blue',
     block: 'orange',
     unblock: 'teal',
+    writeoff: 'deep-orange',
+    writeoffcnsl: 'purple',
   };
   return colors[action] || 'grey';
 };
@@ -202,6 +204,8 @@ const getActionLabel = (action: string): string => {
     transfer: 'Перевод',
     block: 'Блокировка',
     unblock: 'Разблокировка',
+    writeoff: 'Списание',
+    writeoffcnsl: 'Отмена списания',
   };
   return labels[action] || action;
 };

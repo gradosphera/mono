@@ -333,25 +333,8 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
 });
 
 // Обработка активации Service Worker
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', () => {
   console.log('Service Worker активирован');
-
-  // Очищаем старые кэши
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          // Удаляем кэши которые не относятся к текущей версии
-          if (
-            cacheName.startsWith('workbox-') ||
-            cacheName.startsWith('config-cache')
-          ) {
-            return caches.delete(cacheName);
-          }
-        }),
-      );
-    }),
-  );
 });
 
 // Обработка ошибок Service Worker

@@ -72,6 +72,7 @@ export const subsribedActions: IActionConfig[] = [
   { code: 'ledger', action: 'block', notify: true },
   { code: 'ledger', action: 'unblock', notify: true },
   { code: 'ledger', action: 'writeoff', notify: true },
+  { code: 'ledger', action: 'writeoffcnsl', notify: true },
 ]
 
 // --------------------------
