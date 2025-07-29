@@ -27,6 +27,9 @@ import { TypeOrmPaymentRepository } from './repositories/typeorm-payment.reposit
 import { WebPushSubscriptionEntity } from './entities/web-push-subscription.entity';
 import { WEB_PUSH_SUBSCRIPTION_PORT } from '~/domain/notification/interfaces/web-push-subscription.port';
 import { TypeOrmWebPushSubscriptionRepository } from './repositories/typeorm-web-push-subscription.repository';
+import { LEDGER_OPERATION_REPOSITORY } from '~/domain/ledger/repositories/ledger-operation.repository';
+import { TypeOrmLedgerOperationRepository } from './repositories/typeorm-ledger-operation.repository';
+import { LedgerOperationEntity } from './entities/ledger-operation.entity';
 
 @Global()
 @Module({
@@ -51,6 +54,7 @@ import { TypeOrmWebPushSubscriptionRepository } from './repositories/typeorm-web
       CandidateEntity,
       PaymentEntity,
       WebPushSubscriptionEntity,
+      LedgerOperationEntity,
     ]),
   ],
   providers: [
@@ -86,6 +90,10 @@ import { TypeOrmWebPushSubscriptionRepository } from './repositories/typeorm-web
       provide: WEB_PUSH_SUBSCRIPTION_PORT,
       useClass: TypeOrmWebPushSubscriptionRepository,
     },
+    {
+      provide: LEDGER_OPERATION_REPOSITORY,
+      useClass: TypeOrmLedgerOperationRepository,
+    },
   ],
   exports: [
     NestTypeOrmModule,
@@ -97,6 +105,7 @@ import { TypeOrmWebPushSubscriptionRepository } from './repositories/typeorm-web
     CANDIDATE_REPOSITORY,
     PAYMENT_REPOSITORY,
     WEB_PUSH_SUBSCRIPTION_PORT,
+    LEDGER_OPERATION_REPOSITORY,
   ],
 })
 export class TypeOrmModule {}

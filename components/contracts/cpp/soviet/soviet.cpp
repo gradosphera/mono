@@ -69,6 +69,8 @@
 
 #include "src/wallet/addbal.cpp"
 #include "src/wallet/addmemberfee.cpp"
+#include "src/wallet/submemberfee.cpp"
+
 #include "src/wallet/blockbal.cpp"
 #include "src/wallet/openprogwall.cpp"
 #include "src/wallet/subbal.cpp"

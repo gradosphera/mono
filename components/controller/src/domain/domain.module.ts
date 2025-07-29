@@ -20,6 +20,7 @@ import { UserCertificateDomainModule } from './user-certificate/user-certificate
 import { GatewayDomainModule } from './gateway/gateway-domain.module';
 import { WalletDomainModule } from './wallet/wallet-domain.module';
 import { NotificationDomainModule } from './notification/notification-domain.module';
+import { LedgerDomainModule } from './ledger/ledger-domain.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { NotificationDomainModule } from './notification/notification-domain.mod
     GatewayDomainModule,
     WalletDomainModule,
     NotificationDomainModule,
+    LedgerDomainModule,
   ],
   exports: [
     AuthDomainModule,
@@ -64,6 +66,7 @@ import { NotificationDomainModule } from './notification/notification-domain.mod
     GatewayDomainModule,
     WalletDomainModule,
     NotificationDomainModule,
+    LedgerDomainModule,
   ],
 })
 export class DomainModule {}

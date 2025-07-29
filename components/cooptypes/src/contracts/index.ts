@@ -70,6 +70,11 @@ export * as CapitalContract from './capital'
 export * as WalletContract from './wallet'
 
 /**
+ * Смарт-контракт для управления бухгалтерской книгой кооператива
+ */
+export * as LedgerContract from './ledger'
+
+/**
  * Смарт-контракт управления общими собраниями пайщиков
  */
 export * as MeetContract from './meet'

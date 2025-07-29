@@ -19,6 +19,8 @@ import { GatewayBlockchainAdapter } from './adapters/gateway-blockchain.adapter'
 import { WALLET_BLOCKCHAIN_PORT } from '~/domain/wallet/ports/wallet-blockchain.port';
 import { GATEWAY_BLOCKCHAIN_PORT } from '~/domain/gateway/ports/gateway-blockchain.port';
 import { WalletBlockchainAdapter } from './adapters/wallet-blockchain.adapter';
+import { LedgerBlockchainAdapter } from './adapters/ledger-blockchain.adapter';
+import { LEDGER_BLOCKCHAIN_PORT } from '~/domain/ledger/ports/ledger.port';
 
 @Global()
 @Module({
@@ -63,6 +65,11 @@ import { WalletBlockchainAdapter } from './adapters/wallet-blockchain.adapter';
       provide: WALLET_BLOCKCHAIN_PORT,
       useClass: WalletBlockchainAdapter,
     },
+    // Провайдеры для ledger
+    {
+      provide: LEDGER_BLOCKCHAIN_PORT,
+      useClass: LedgerBlockchainAdapter,
+    },
     DomainToBlockchainUtils,
   ],
   exports: [
@@ -76,6 +83,7 @@ import { WalletBlockchainAdapter } from './adapters/wallet-blockchain.adapter';
     MEET_BLOCKCHAIN_PORT,
     GATEWAY_BLOCKCHAIN_PORT,
     WALLET_BLOCKCHAIN_PORT,
+    LEDGER_BLOCKCHAIN_PORT,
     DomainToBlockchainUtils,
   ],
 })

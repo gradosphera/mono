@@ -47,7 +47,7 @@
     
     // Направляем комиссию в фонд членских взносов
     if (change.cancellation_fee_amount.amount > 0) {
-      Wallet::add_member_fee(_marketplace, coopname, change.username, _marketplace_program_id, change.cancellation_fee_amount, memo);
+      // Wallet::add_member_fee(_marketplace, coopname, change.username, _marketplace_program_id, change.cancellation_fee_amount, memo);
     }
   }
 

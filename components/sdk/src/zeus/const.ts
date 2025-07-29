@@ -224,6 +224,12 @@ export const AllTypesProps: Record<string,any> = {
 	GetExtensionsInput:{
 
 	},
+	GetLedgerHistoryInput:{
+
+	},
+	GetLedgerInput:{
+
+	},
 	GetMeetInput:{
 
 	},
@@ -584,6 +590,12 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		getExtensions:{
 			data:"GetExtensionsInput"
+		},
+		getLedger:{
+			data:"GetLedgerInput"
+		},
+		getLedgerHistory:{
+			data:"GetLedgerHistoryInput"
 		},
 		getMeet:{
 			data:"GetMeetInput"
@@ -961,6 +973,14 @@ export const ReturnTypes: Record<string,any> = {
 		trustee:"Individual",
 		type:"String"
 	},
+	ChartOfAccountsItem:{
+		available:"String",
+		blocked:"String",
+		displayId:"String",
+		id:"Int",
+		name:"String",
+		writeoff:"String"
+	},
 	ContactsDTO:{
 		chairman:"PublicChairman",
 		details:"OrganizationDetails",
@@ -1169,6 +1189,69 @@ export const ReturnTypes: Record<string,any> = {
 	KeyWeight:{
 		key:"String",
 		weight:"Int"
+	},
+	LedgerAddOperation:{
+		account_id:"Int",
+		action:"String",
+		comment:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		global_sequence:"Int",
+		quantity:"String"
+	},
+	LedgerBlockOperation:{
+		account_id:"Int",
+		action:"String",
+		comment:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		global_sequence:"Int",
+		quantity:"String"
+	},
+	LedgerHistoryResponse:{
+		currentPage:"Int",
+		items:"LedgerOperation",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	LedgerOperation:{
+		"...on LedgerAddOperation":"LedgerAddOperation",
+		"...on LedgerBlockOperation":"LedgerBlockOperation",
+		"...on LedgerSubOperation":"LedgerSubOperation",
+		"...on LedgerTransferOperation":"LedgerTransferOperation",
+		"...on LedgerUnblockOperation":"LedgerUnblockOperation"
+	},
+	LedgerState:{
+		chartOfAccounts:"ChartOfAccountsItem",
+		coopname:"String"
+	},
+	LedgerSubOperation:{
+		account_id:"Int",
+		action:"String",
+		comment:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		global_sequence:"Int",
+		quantity:"String"
+	},
+	LedgerTransferOperation:{
+		action:"String",
+		comment:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		from_account_id:"Int",
+		global_sequence:"Int",
+		quantity:"String",
+		to_account_id:"Int"
+	},
+	LedgerUnblockOperation:{
+		account_id:"Int",
+		action:"String",
+		comment:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		global_sequence:"Int",
+		quantity:"String"
 	},
 	Meet:{
 		authorization:"DocumentAggregate",
@@ -1470,6 +1553,8 @@ export const ReturnTypes: Record<string,any> = {
 		getDesktop:"Desktop",
 		getDocuments:"DocumentsAggregatePaginationResult",
 		getExtensions:"Extension",
+		getLedger:"LedgerState",
+		getLedgerHistory:"LedgerHistoryResponse",
 		getMeet:"MeetAggregate",
 		getMeets:"MeetAggregate",
 		getPaymentMethods:"PaymentMethodPaginationResult",

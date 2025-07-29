@@ -30,7 +30,7 @@
   
   // Членские взносы (если больше нуля)
   if (change.membership_fee_amount.amount > 0) {
-    Wallet::add_member_fee(_marketplace, coopname, change.username, _marketplace_program_id, change.membership_fee_amount, memo);
+    // Wallet::add_member_fee(_marketplace, coopname, change.username, _marketplace_program_id, change.membership_fee_amount, memo);
   }
 
   // Удаляем заявку из системы

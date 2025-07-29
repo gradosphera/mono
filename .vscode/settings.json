@@ -18,7 +18,7 @@
   "typescript.preferences.includePackageJsonAutoImports": "off",
   "typescript.suggest.autoImports": true,
   "typescript.suggest.paths": true,
-  "typescript.updateImportsOnFileMove.enabled": "prompt",
+  "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.workspaceSymbols.scope": "currentProject",
   
   // Настройки для снижения нагрузки

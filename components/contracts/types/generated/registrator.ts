@@ -44,6 +44,18 @@ export interface ICandidate {
   minimum: IAsset
 }
 
+export interface ICandidateLegacy {
+  username: IName
+  coopname: IName
+  braname: IName
+  status: IName
+  created_at: ITimePointSec
+  statement: IDocument
+  registration_hash: IChecksum256
+  initial: IAsset
+  minimum: IAsset
+}
+
 export interface IChangekey {
   coopname: IName
   changer: IName
@@ -100,6 +112,7 @@ export interface ICooperative2 {
   status: IName$
   created_at: ITimePointSec$
   document: IDocument2$
+  active_participants_count: IUint64$
 }
 
 export interface ICreatebranch {
@@ -117,6 +130,11 @@ export interface IDeclinereg {
   coopname: IName
   registration_hash: IChecksum256
   reason: string
+}
+
+export interface IDecparticpnt {
+  coopname: IName
+  username: IName
 }
 
 export interface IDelcoop {

@@ -4,6 +4,7 @@ import { wsService } from '../services';
 import logger from '../config/logger';
 import config from '../config/config';
 import { MeetDomainInteractor } from '~/domain/meet/interactors/meet.interactor';
+import { LedgerDomainInteractor } from '~/domain/ledger/interactors/ledger.interactor';
 import type { MeetDecisionDomainInterface } from '~/domain/meet/interfaces/meet-decision-domain.interface';
 import { DomainToBlockchainUtils } from '~/infrastructure/blockchain/utils/domain-to-blockchain.utils';
 import { NotificationSenderService } from '~/modules/notification/services/notification-sender.service';
@@ -14,9 +15,14 @@ import { nestApp } from '~/index';
 
 let clientSocket: Socket | undefined;
 let meetInteractor: MeetDomainInteractor;
+let ledgerInteractor: LedgerDomainInteractor;
 
 export const setMeetInteractor = (interactor: MeetDomainInteractor): void => {
   meetInteractor = interactor;
+};
+
+export const setLedgerInteractor = (interactor: LedgerDomainInteractor): void => {
+  ledgerInteractor = interactor;
 };
 
 // Инициация подключения
@@ -86,6 +92,34 @@ async function processEvent(event: IAction) {
         logger.info(`Processed meet decision for ${event.data.hash}`, { source: 'processEvent' });
       } catch (error: any) {
         logger.error(`Error processing meet decision: ${error.message}`, { source: 'processEvent', error });
+      }
+    }
+
+    // Обработка событий операций ledger
+    const ledgerActions = ['add', 'sub', 'transfer', 'block', 'unblock', 'writeoff', 'writeoffcnsl'];
+    if (ledgerActions.includes(event.name)) {
+      try {
+        if (ledgerInteractor) {
+          await ledgerInteractor.processLedgerEvent(event);
+          logger.info('Ledger operation processed successfully', {
+            source: 'processEvent',
+            action: event.name,
+            coopname: event.data.coopname,
+            global_sequence: event.global_sequence,
+          });
+        } else {
+          logger.warn('LedgerInteractor not available for ledger event processing', {
+            source: 'processEvent',
+            action: event.name,
+          });
+        }
+      } catch (error: any) {
+        logger.error('Failed to process ledger operation event', {
+          source: 'processEvent',
+          error: error.message,
+          stack: error.stack,
+          event,
+        });
       }
     }
   }

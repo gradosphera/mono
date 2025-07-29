@@ -7,15 +7,15 @@ import {
   ILoadCoopPrograms,
   ILoadCooperativeAddresses,
 } from '../model';
-import {Cooperative, FundContract, RegistratorContract, SovietContract } from 'cooptypes';
+import { Cooperative, RegistratorContract, SovietContract } from 'cooptypes';
 
 async function loadPrograms(
-  params: ILoadCoopPrograms
+  params: ILoadCoopPrograms,
 ): Promise<ICoopProgramData[]> {
   return (await fetchTable(
     SovietContract.contractName.production,
     params.coopname,
-    SovietContract.Tables.Programs.tableName
+    SovietContract.Tables.Programs.tableName,
   )) as ICoopProgramData[];
 }
 
@@ -26,50 +26,23 @@ async function loadAdmins(coopname: string): Promise<IAdministratorData[]> {
 }
 
 async function loadPrivateCooperativeData(): Promise<Cooperative.Model.ICooperativeData> {
-  return (await sendGET('/v1/coop/info', {}, false)) as Cooperative.Model.ICooperativeData;
+  return (await sendGET(
+    '/v1/coop/info',
+    {},
+    false,
+  )) as Cooperative.Model.ICooperativeData;
 }
 
 async function loadContacts(): Promise<Cooperative.Model.IContacts> {
-  return (await sendGET('/v1/coop/contacts', {}, true)) as Cooperative.Model.IContacts;
+  return (await sendGET(
+    '/v1/coop/contacts',
+    {},
+    true,
+  )) as Cooperative.Model.IContacts;
 }
-
-async function loadCoopWallet(coopname: string): Promise<FundContract.Tables.CoopWallet.ICoopWallet>{
-  return (
-    await fetchTable(
-      FundContract.contractName.production,
-      coopname,
-      FundContract.Tables.CoopWallet.tableName,
-      0,
-      0,
-      1
-    )
-  )[0] as FundContract.Tables.CoopWallet.ICoopWallet;
-}
-
-async function loadAccumulationFunds(coopname: string): Promise<FundContract.Tables.AccumulatedFunds.IAccumulatedFund[]>{
-  return (
-    await fetchTable(
-      FundContract.contractName.production,
-      coopname,
-      FundContract.Tables.AccumulatedFunds.tableName,
-    )
-  )as FundContract.Tables.AccumulatedFunds.IAccumulatedFund[];
-}
-
-
-async function loadExpenseFunds(coopname: string): Promise<FundContract.Tables.ExpensedFunds.IExpensedFund[]>{
-  return (
-    await fetchTable(
-      FundContract.contractName.production,
-      coopname,
-      FundContract.Tables.ExpensedFunds.tableName,
-    )
-  )as FundContract.Tables.ExpensedFunds.IExpensedFund[];
-}
-
 
 async function loadPublicCooperativeData(
-  coopname: string
+  coopname: string,
 ): Promise<RegistratorContract.Tables.Cooperatives.ICooperative> {
   return (
     await fetchTable(
@@ -78,18 +51,18 @@ async function loadPublicCooperativeData(
       RegistratorContract.Tables.Cooperatives.tableName,
       coopname,
       coopname,
-      1
+      1,
     )
   )[0] as RegistratorContract.Tables.Cooperatives.ICooperative;
 }
 
 async function loadCooperativeAddresses(
-  params: ILoadCooperativeAddresses
+  params: ILoadCooperativeAddresses,
 ): Promise<IAddressesData[]> {
   return (await fetchTable(
     ContractsList.Soviet,
     params.coopname,
-    TablesList.CooperativeAddresses
+    TablesList.CooperativeAddresses,
   )) as IAddressesData[];
 }
 
@@ -100,7 +73,4 @@ export const api = {
   loadAdmins,
   loadPrivateCooperativeData,
   loadContacts,
-  loadCoopWallet,
-  loadAccumulationFunds,
-  loadExpenseFunds
 };

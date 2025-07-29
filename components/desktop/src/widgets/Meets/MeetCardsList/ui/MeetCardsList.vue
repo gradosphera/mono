@@ -1,17 +1,10 @@
 <template lang="pug">
 div
-  // Заголовок с текстом в зависимости от наличия собраний
-  .q-pa-md.q-pb-xs(v-if='!loading && meets.length === 0')
-    .empty-state
-      .empty-icon
-        q-icon(name='event_busy', size='64px', color='grey-5')
-      .empty-text У кооператива нет предстоящих общих собраний
-
   .q-pa-md(v-if='loading')
     .q-mb-lg(v-for='i in 3', :key='i')
       q-skeleton.rounded(type='rect', height='160px')
 
-  .empty-state.q-pa-xl(v-else-if='!meets.length')
+  .empty-state.q-pa-xl(v-else-if='!loading && !meets.length')
     .empty-icon
       q-icon(name='event_busy', size='64px', color='grey-5')
     .empty-text У кооператива нет предстоящих общих собраний

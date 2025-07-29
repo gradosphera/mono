@@ -8,6 +8,8 @@
  */
 [[eosio::action]]
 void ledger::transfer(eosio::name coopname, uint64_t from_account_id, uint64_t to_account_id, eosio::asset quantity, std::string comment) {
+  require_recipient(coopname);
+  
   eosio::name payer = coopname;
   
   if (!has_auth(coopname)) {
