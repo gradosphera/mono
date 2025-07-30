@@ -7,7 +7,7 @@
  * @param comment - комментарий к операции
  */
 [[eosio::action]]
-void ledger::add(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+void ledger::debet(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   require_recipient(coopname);
   
   eosio::name payer = coopname;

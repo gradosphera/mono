@@ -79,7 +79,7 @@ export class LedgerDomainInteractor {
    */
   async processLedgerEvent(eventData: any): Promise<void> {
     // Проверяем, что событие относится к операциям ledger
-    const allowedActions = ['add', 'sub', 'transfer', 'block', 'unblock'];
+    const allowedActions = ['debet', 'credit', 'block', 'unblock'];
     if (!allowedActions.includes(eventData.name)) {
       return;
     }
@@ -90,18 +90,9 @@ export class LedgerDomainInteractor {
       coopname: eventData.data.coopname,
       action: eventData.name,
       created_at: new Date(eventData.block_time || new Date()),
-      ...(eventData.name === 'transfer'
-        ? {
-            from_account_id: eventData.data.from_account_id,
-            to_account_id: eventData.data.to_account_id,
-            quantity: eventData.data.quantity,
-            comment: eventData.data.comment,
-          }
-        : {
-            account_id: eventData.data.account_id,
-            quantity: eventData.data.quantity,
-            comment: eventData.data.comment,
-          }),
+      account_id: eventData.data.account_id,
+      quantity: eventData.data.quantity,
+      comment: eventData.data.comment,
     } as LedgerOperationDomainInterface;
 
     await this.saveLedgerOperation(operationData);

@@ -9,7 +9,7 @@ export type ITimePointSec = string
 export type IUint32 = number
 export type IUint64 = number | string
 
-export interface IAdd {
+export interface IDebet {
   coopname: IName
   account_id: IUint64
   quantity: IAsset
@@ -79,17 +79,9 @@ export interface ISignatureInfo {
   meta: string
 }
 
-export interface ISub {
+export interface ICredit {
   coopname: IName
   account_id: IUint64
-  quantity: IAsset
-  comment: string
-}
-
-export interface ITransfer {
-  coopname: IName
-  from_account_id: IUint64
-  to_account_id: IUint64
   quantity: IAsset
   comment: string
 }

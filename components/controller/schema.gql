@@ -2478,52 +2478,6 @@ type KeyWeight {
   weight: Int!
 }
 
-type LedgerAddOperation {
-  """ID счета"""
-  account_id: Int!
-
-  """Тип операции"""
-  action: String!
-
-  """Комментарий к операции"""
-  comment: String!
-
-  """Имя кооператива"""
-  coopname: String!
-
-  """Дата и время создания операции"""
-  created_at: DateTime!
-
-  """Номер глобальной последовательности блокчейна"""
-  global_sequence: Int!
-
-  """Сумма операции"""
-  quantity: String!
-}
-
-type LedgerBlockOperation {
-  """ID счета"""
-  account_id: Int!
-
-  """Тип операции"""
-  action: String!
-
-  """Комментарий к операции"""
-  comment: String!
-
-  """Имя кооператива"""
-  coopname: String!
-
-  """Дата и время создания операции"""
-  created_at: DateTime!
-
-  """Номер глобальной последовательности блокчейна"""
-  global_sequence: Int!
-
-  """Сумма операции"""
-  quantity: String!
-}
-
 type LedgerHistoryResponse {
   """Текущая страница"""
   currentPage: Int!
@@ -2538,7 +2492,28 @@ type LedgerHistoryResponse {
   totalPages: Int!
 }
 
-union LedgerOperation = LedgerAddOperation | LedgerBlockOperation | LedgerSubOperation | LedgerTransferOperation | LedgerUnblockOperation
+type LedgerOperation {
+  """ID счета"""
+  account_id: Int!
+
+  """Тип операции"""
+  action: String!
+
+  """Комментарий к операции"""
+  comment: String
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Дата и время создания операции"""
+  created_at: DateTime!
+
+  """Номер глобальной последовательности блокчейна"""
+  global_sequence: Int!
+
+  """Сумма операции"""
+  quantity: String!
+}
 
 type LedgerState {
   """План счетов с актуальными данными"""
@@ -2546,78 +2521,6 @@ type LedgerState {
 
   """Имя кооператива"""
   coopname: String!
-}
-
-type LedgerSubOperation {
-  """ID счета"""
-  account_id: Int!
-
-  """Тип операции"""
-  action: String!
-
-  """Комментарий к операции"""
-  comment: String!
-
-  """Имя кооператива"""
-  coopname: String!
-
-  """Дата и время создания операции"""
-  created_at: DateTime!
-
-  """Номер глобальной последовательности блокчейна"""
-  global_sequence: Int!
-
-  """Сумма операции"""
-  quantity: String!
-}
-
-type LedgerTransferOperation {
-  """Тип операции"""
-  action: String!
-
-  """Комментарий к операции"""
-  comment: String!
-
-  """Имя кооператива"""
-  coopname: String!
-
-  """Дата и время создания операции"""
-  created_at: DateTime!
-
-  """ID счета отправителя"""
-  from_account_id: Int!
-
-  """Номер глобальной последовательности блокчейна"""
-  global_sequence: Int!
-
-  """Сумма операции"""
-  quantity: String!
-
-  """ID счета получателя"""
-  to_account_id: Int!
-}
-
-type LedgerUnblockOperation {
-  """ID счета"""
-  account_id: Int!
-
-  """Тип операции"""
-  action: String!
-
-  """Комментарий к операции"""
-  comment: String!
-
-  """Имя кооператива"""
-  coopname: String!
-
-  """Дата и время создания операции"""
-  created_at: DateTime!
-
-  """Номер глобальной последовательности блокчейна"""
-  global_sequence: Int!
-
-  """Сумма операции"""
-  quantity: String!
 }
 
 input LoginInput {

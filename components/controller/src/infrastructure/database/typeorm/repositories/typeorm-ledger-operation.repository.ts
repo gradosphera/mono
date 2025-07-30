@@ -26,8 +26,6 @@ export class TypeOrmLedgerOperationRepository implements LedgerOperationReposito
       account_id: operation.account_id,
       quantity: operation.quantity,
       comment: operation.comment,
-      from_account_id: operation.from_account_id,
-      to_account_id: operation.to_account_id,
     });
 
     // Используем upsert (ON CONFLICT DO UPDATE) по global_sequence
@@ -41,10 +39,7 @@ export class TypeOrmLedgerOperationRepository implements LedgerOperationReposito
 
     // Фильтр по account_id если указан
     if (params.account_id !== undefined) {
-      queryBuilder.andWhere(
-        '(op.account_id = :account_id OR op.from_account_id = :account_id OR op.to_account_id = :account_id)',
-        { account_id: params.account_id }
-      );
+      queryBuilder.andWhere('op.account_id = :account_id', { account_id: params.account_id });
     }
 
     // Сортировка
@@ -68,25 +63,15 @@ export class TypeOrmLedgerOperationRepository implements LedgerOperationReposito
 
     // Преобразование в доменные интерфейсы
     const operations = entities.map((entity) => {
-      const operationData: any = {
+      return {
         global_sequence: entity.global_sequence,
         coopname: entity.coopname,
         action: entity.action,
         created_at: entity.created_at,
+        account_id: entity.account_id,
+        quantity: entity.quantity,
+        comment: entity.comment,
       };
-
-      if (entity.action === 'transfer') {
-        operationData.from_account_id = entity.from_account_id;
-        operationData.to_account_id = entity.to_account_id;
-        operationData.quantity = entity.quantity;
-        operationData.comment = entity.comment;
-      } else {
-        operationData.account_id = entity.account_id;
-        operationData.quantity = entity.quantity;
-        operationData.comment = entity.comment;
-      }
-
-      return operationData;
     });
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -108,23 +93,15 @@ export class TypeOrmLedgerOperationRepository implements LedgerOperationReposito
       return null;
     }
 
-    const operationData: any = {
+    const operationData = {
       global_sequence: entity.global_sequence,
       coopname: entity.coopname,
       action: entity.action,
       created_at: entity.created_at,
+      account_id: entity.account_id,
+      quantity: entity.quantity,
+      comment: entity.comment,
     };
-
-    if (entity.action === 'transfer') {
-      operationData.from_account_id = entity.from_account_id;
-      operationData.to_account_id = entity.to_account_id;
-      operationData.quantity = entity.quantity;
-      operationData.comment = entity.comment;
-    } else {
-      operationData.account_id = entity.account_id;
-      operationData.quantity = entity.quantity;
-      operationData.comment = entity.comment;
-    }
 
     return new LedgerOperationDomainEntity(operationData);
   }

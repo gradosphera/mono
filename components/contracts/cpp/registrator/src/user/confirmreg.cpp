@@ -35,9 +35,9 @@ void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash
   ).send();
 
   //добавляем   
-  Ledger::add(_registrator, coopname, Ledger::accounts::SHARE_FUND, candidate -> minimum, "Паевой взнос при подтверждении регистрации");
+  Ledger::debet(_registrator, coopname, Ledger::accounts::SHARE_FUND, candidate -> minimum, "Паевой взнос при подтверждении регистрации");
   
-  Ledger::add(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, candidate -> initial, "Вступительный взнос при подтверждении регистрации");
+  Ledger::debet(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, candidate -> initial, "Вступительный взнос при подтверждении регистрации");
   
   // Увеличиваем счетчик активных пайщиков
   cooperatives2_index cooperatives(_registrator, _registrator.value);

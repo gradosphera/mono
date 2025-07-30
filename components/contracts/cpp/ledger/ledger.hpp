@@ -27,9 +27,8 @@ public:
   [[eosio::action]] void migrate();
 
   // Операции со счетами (common процесс)
-  [[eosio::action]] void add(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
-  [[eosio::action]] void sub(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
-  [[eosio::action]] void transfer(eosio::name coopname, uint64_t from_account_id, uint64_t to_account_id, eosio::asset quantity, std::string comment);
+  [[eosio::action]] void debet(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
+  [[eosio::action]] void credit(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
   
   // Операции блокировки/разблокировки средств
   [[eosio::action]] void block(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);

@@ -1190,24 +1190,6 @@ export const ReturnTypes: Record<string,any> = {
 		key:"String",
 		weight:"Int"
 	},
-	LedgerAddOperation:{
-		account_id:"Int",
-		action:"String",
-		comment:"String",
-		coopname:"String",
-		created_at:"DateTime",
-		global_sequence:"Int",
-		quantity:"String"
-	},
-	LedgerBlockOperation:{
-		account_id:"Int",
-		action:"String",
-		comment:"String",
-		coopname:"String",
-		created_at:"DateTime",
-		global_sequence:"Int",
-		quantity:"String"
-	},
 	LedgerHistoryResponse:{
 		currentPage:"Int",
 		items:"LedgerOperation",
@@ -1215,43 +1197,17 @@ export const ReturnTypes: Record<string,any> = {
 		totalPages:"Int"
 	},
 	LedgerOperation:{
-		"...on LedgerAddOperation":"LedgerAddOperation",
-		"...on LedgerBlockOperation":"LedgerBlockOperation",
-		"...on LedgerSubOperation":"LedgerSubOperation",
-		"...on LedgerTransferOperation":"LedgerTransferOperation",
-		"...on LedgerUnblockOperation":"LedgerUnblockOperation"
+		account_id:"Int",
+		action:"String",
+		comment:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		global_sequence:"Int",
+		quantity:"String"
 	},
 	LedgerState:{
 		chartOfAccounts:"ChartOfAccountsItem",
 		coopname:"String"
-	},
-	LedgerSubOperation:{
-		account_id:"Int",
-		action:"String",
-		comment:"String",
-		coopname:"String",
-		created_at:"DateTime",
-		global_sequence:"Int",
-		quantity:"String"
-	},
-	LedgerTransferOperation:{
-		action:"String",
-		comment:"String",
-		coopname:"String",
-		created_at:"DateTime",
-		from_account_id:"Int",
-		global_sequence:"Int",
-		quantity:"String",
-		to_account_id:"Int"
-	},
-	LedgerUnblockOperation:{
-		account_id:"Int",
-		action:"String",
-		comment:"String",
-		coopname:"String",
-		created_at:"DateTime",
-		global_sequence:"Int",
-		quantity:"String"
 	},
 	Meet:{
 		authorization:"DocumentAggregate",
