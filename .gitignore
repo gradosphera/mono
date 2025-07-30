@@ -8,3 +8,4 @@ scripts/release-info.md
 components/docs/docs/sdk
 dist/
 .env
+.DS_Store
