@@ -12,14 +12,6 @@ export type IGetLedgerHistoryInput =
   Queries.Ledger.GetLedgerHistory.IInput['data'];
 export type ILedgerOperation = Zeus.ModelTypes['LedgerOperation'];
 
-// Типы для конкретных операций
-export type ILedgerAddOperation = Zeus.ModelTypes['LedgerAddOperation'];
-export type ILedgerSubOperation = Zeus.ModelTypes['LedgerSubOperation'];
-export type ILedgerTransferOperation =
-  Zeus.ModelTypes['LedgerTransferOperation'];
-export type ILedgerBlockOperation = Zeus.ModelTypes['LedgerBlockOperation'];
-export type ILedgerUnblockOperation = Zeus.ModelTypes['LedgerUnblockOperation'];
-
 // Интерфейс для пагинации истории операций
 export interface ILedgerHistoryPagination {
   currentPage: number;

@@ -66,9 +66,8 @@ export const subsribedActions: IActionConfig[] = [
   { code: 'meet', action: 'newgdecision', notify: true },
   { code: 'wallet', action: 'createwthd', notify: true },
 
-  { code: 'ledger', action: 'add', notify: true },
-  { code: 'ledger', action: 'sub', notify: true },
-  { code: 'ledger', action: 'transfer', notify: true },
+  { code: 'ledger', action: 'debet', notify: true },
+  { code: 'ledger', action: 'credit', notify: true },
   { code: 'ledger', action: 'block', notify: true },
   { code: 'ledger', action: 'unblock', notify: true },
   { code: 'ledger', action: 'writeoff', notify: true },

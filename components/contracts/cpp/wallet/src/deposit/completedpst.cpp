@@ -3,7 +3,6 @@ void wallet::completedpst(eosio::name coopname, checksum256 deposit_hash) {
   
   auto cooperative = get_cooperative_or_fail(coopname);
   
-  
   auto exist_deposit = Wallet::get_deposit(coopname, deposit_hash);
   eosio::check(exist_deposit.has_value(), "Объект паевого взноса не найден");
   
@@ -15,7 +14,7 @@ void wallet::completedpst(eosio::name coopname, checksum256 deposit_hash) {
   std::string memo = "Паевой взнос по целевой потребительской программе 'Цифровой Кошелёк'";
   Wallet::add_available_funds(_wallet, coopname, deposit -> username, deposit ->quantity, _wallet_program, memo);
 
-  Ledger::add(_wallet, coopname, Ledger::accounts::SHARE_FUND, deposit -> quantity, memo);
+  Ledger::debet(_wallet, coopname, Ledger::accounts::SHARE_FUND, deposit -> quantity, memo);
   
   //оповещаем пользователя
   require_recipient(deposit -> username);  

@@ -1,6 +1,5 @@
-export * as Add from './add'
-export * as Sub from './sub'
-export * as Transfer from './transfer'
+export * as Add from './debet'
+export * as Sub from './credit'
 export * as Block from './block'
 export * as Unblock from './unblock'
 export * as Writeoff from './writeoff'

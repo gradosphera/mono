@@ -70,7 +70,6 @@ import {
 import type {
   ILedgerOperation,
   ILedgerHistoryFilter,
-  ILedgerTransferOperation,
 } from 'src/entities/LedgerAccount/types';
 
 // Props
@@ -186,9 +185,8 @@ const formatDate = (dateString: string): string => {
 
 const getActionColor = (action: string): string => {
   const colors: Record<string, string> = {
-    add: 'green',
-    sub: 'red',
-    transfer: 'blue',
+    debet: 'green',
+    credit: 'red',
     block: 'orange',
     unblock: 'teal',
     writeoff: 'deep-orange',
@@ -199,9 +197,8 @@ const getActionColor = (action: string): string => {
 
 const getActionLabel = (action: string): string => {
   const labels: Record<string, string> = {
-    add: 'Дебет',
-    sub: 'Кредит',
-    transfer: 'Перевод',
+    debet: 'Дебет',
+    credit: 'Кредит',
     block: 'Блокировка',
     unblock: 'Разблокировка',
     writeoff: 'Списание',
@@ -220,16 +217,8 @@ const getAccountsInfo = (operation: ILedgerOperation): string => {
       : `Счет ${accountId}`;
   };
 
-  // Для переводов показываем источник и назначение
-  if (operation.action === 'transfer') {
-    const transferOp = operation as ILedgerTransferOperation;
-    const fromAccountName = getAccountDisplayName(transferOp.from_account_id);
-    const toAccountName = getAccountDisplayName(transferOp.to_account_id);
-    return `${fromAccountName} → ${toAccountName}`;
-  }
-
-  // Для остальных операций показываем один счет
-  const accountId = (operation as any).account_id;
+  // Для всех операций показываем один счет
+  const accountId = operation.account_id;
   return accountId ? getAccountDisplayName(accountId) : '-';
 };
 

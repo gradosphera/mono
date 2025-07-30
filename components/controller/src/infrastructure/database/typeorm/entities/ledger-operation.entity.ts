@@ -7,8 +7,6 @@ import { Entity, PrimaryColumn, Column, CreateDateColumn, Index } from 'typeorm'
 @Entity('ledger_operations')
 @Index(['coopname', 'created_at'])
 @Index(['coopname', 'account_id', 'created_at'])
-@Index(['coopname', 'from_account_id', 'created_at'])
-@Index(['coopname', 'to_account_id', 'created_at'])
 export class LedgerOperationEntity {
   @PrimaryColumn({ type: 'bigint' })
   global_sequence!: number;
@@ -23,7 +21,7 @@ export class LedgerOperationEntity {
   @CreateDateColumn()
   created_at!: Date;
 
-  // Поля для операций add, sub, block, unblock
+  // Поля для операций debet, credit, block, unblock
   @Column({ type: 'bigint', nullable: true })
   account_id?: number;
 
@@ -32,11 +30,4 @@ export class LedgerOperationEntity {
 
   @Column({ type: 'text', nullable: true })
   comment?: string;
-
-  // Поля для операции transfer
-  @Column({ type: 'bigint', nullable: true })
-  from_account_id?: number;
-
-  @Column({ type: 'bigint', nullable: true })
-  to_account_id?: number;
 }

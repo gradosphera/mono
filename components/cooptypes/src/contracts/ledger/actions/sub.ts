@@ -7,9 +7,9 @@ export const authorizations = [{ permissions: [Permissions.active], actor: Actor
 /**
  * Имя действия
  */
-export const actionName = 'sub'
+export const actionName = 'credit'
 
 /**
  * @interface
  */
-export type ISub = Ledger.ISub
+export type ICredit = Ledger.ICredit
