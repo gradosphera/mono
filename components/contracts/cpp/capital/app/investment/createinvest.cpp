@@ -8,7 +8,7 @@ void capital::createinvest(name coopname, name application, name username, check
   check(amount.amount > 0, "Сумма должна быть положительной");
   
   // Проверяем основной договор УХД
-  auto contributor = Capital::get_contributor(coopname, project_hash, username);
+  auto contributor = Capital::get_contributor(coopname, username);
   eosio::check(contributor.has_value(), "Пайщик не подписывал основной договор УХД");
   eosio::check(contributor -> status == "authorized"_n, "Основной договор УХД не активен");
   

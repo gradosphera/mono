@@ -1,0 +1,56 @@
+/**
+ * @brief Регистрация пайщика в контракте и получение договора УХД от него.
+ */
+void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::name username, checksum256 contributor_hash, uint64_t convert_percent, eosio::asset rate_per_hour, bool is_external_contract, document2 contract) {
+  check_auth_or_fail(_capital, coopname, application, "regcontrib"_n);
+  
+  // если договор не внешний, то проверяем его на корректность
+  if (!is_external_contract) {
+    // проверяем, что договор подписан пайщиком
+    verify_document_or_fail(contract, {username});
+  }
+  
+  auto exist_by_username = Capital::get_contributor(coopname, username);
+  eosio::check(!exist_by_username.has_value(), "Пайщик уже обладает подписанным договором УХД");
+  
+  auto exist_by_hash = Capital::get_contributor_by_hash(coopname, contributor_hash);
+  eosio::check(!exist_by_hash.has_value(), "Контрибьютор с данным хэшем уже зарегистрирован");
+
+  Capital::contributor_index contributors(_capital, coopname.value);
+   
+  contributors.emplace(coopname, [&](auto &c) {
+    c.id = get_global_id_in_scope(_capital, coopname, "contributors"_n);
+    c.coopname = coopname;
+    c.username = username;
+    c.contributor_hash = contributor_hash;
+    c.status = "pending"_n;
+    c.is_external_contract = is_external_contract;
+    c.contract = contract;
+    c.created_at = eosio::current_time_point();
+    c.convert_percent = convert_percent;
+    c.rate_per_hour = rate_per_hour;
+  });
+  
+  std::string memo = "";
+  
+  if (is_external_contract) {
+    memo += "Договор УХД подписан за пределами цифровой платформы";
+  }
+  
+  //отправить на approve председателю
+  Action::send<createapprv_interface>(
+    _soviet,
+    "createapprv"_n,
+    _capital,
+    coopname,
+    username,
+    contract,
+    ApprovesNames::Capital::REGISTER_CONTRIBUTOR,
+    contributor_hash,
+    _capital,
+    "approvereg"_n,
+    "declinereg"_n,
+    memo
+  );
+
+};

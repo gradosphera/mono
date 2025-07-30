@@ -8,9 +8,14 @@ void capital::addmaster(name coopname, name application, checksum256 project_has
     // Проверяем роль
     eosio::check(role == "project"_n || role == "assignment"_n, "Неверная роль мастера");
     
+    // Проверяем что пользователь подписал основной договор УХД
+    auto contributor = Capital::get_contributor(coopname, master);
+    eosio::check(contributor.has_value(), "Мастер должен подписать основной договор УХД");
+    eosio::check(contributor -> status == "authorized"_n, "Основной договор УХД не активен");
+    
     // Проверяем что пользователь является участником проекта
-    auto contributor = Capital::get_contributor(coopname, project_hash, master);
-    eosio::check(contributor.has_value(), "Мастер должен быть участником проекта");
+    eosio::check(Capital::is_contributor_has_appendix_in_project(coopname, project_hash, master), 
+                 "Мастер должен быть участником проекта");
     
     // Если роль assignment, проверяем что задание существует
     if (role == "assignment"_n) {

@@ -25,10 +25,6 @@ void soviet::exec(eosio::name executer, eosio::name coopname, uint64_t decision_
     soviet::subaccum_effect(executer, coopname, decision->id, decision->batch_id);
   } else if (decision -> type == _free_decision_action) {//операция свободного решения
     soviet::freedecision_effect(executer, coopname, decision->id);
-  } else if (decision -> type == _capital_contributor_authorize_action) {//операция регистрации контрибьютора (заключение договора УХД)
-    soviet::capital_register_contributor_authorize_action_effect(executer, coopname, decision -> id); 
-  } else if (decision -> type == _capital_invest_authorize_action) {//операция приёма паевого взноса с кошелька на проект
-    soviet::capital_invest_authorize_action_effect(executer, coopname, decision -> id);
   } else {
     soviet::authorize_action_effect(executer, coopname, decision -> id);
   };

@@ -13,7 +13,7 @@ void capital::approvecnvrt(eosio::name coopname, eosio::name application, eosio:
   eosio::check(assignment.has_value(), "Задание не найдено");
   
   // добавляем доли актору и отмечаем статистику сконвертированных сумм
-  auto contributor = Capital::get_active_contributor_or_fail(coopname, convert -> project_hash, convert -> username);
+  auto contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, assignment -> project_hash, convert -> username);
   
   Capital::contributor_index contributors(_capital, coopname.value);
   auto contributor_for_modify = contributors.find(contributor -> id);

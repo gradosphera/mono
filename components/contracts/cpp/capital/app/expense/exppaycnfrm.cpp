@@ -4,7 +4,9 @@ void capital::exppaycnfrm(eosio::name coopname, checksum256 expense_hash) {
   auto expense = Capital::get_expense(coopname, expense_hash);
   eosio::check(expense.has_value(), "Объект расходов не найден");
   
-  auto contributor = Capital::get_active_contributor_or_fail(coopname, expense -> project_hash, expense -> username);
+  auto contributor = Capital::get_contributor(coopname, expense -> username);
+  eosio::check(contributor.has_value(), "Договор УХД с пайщиком по проекту не найден");
+  
   Capital::contributor_index contributors(_capital, coopname.value);
   auto contributor_for_modify = contributors.find(contributor -> id);
   

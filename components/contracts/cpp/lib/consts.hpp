@@ -77,14 +77,6 @@ static constexpr eosio::name _product_contribution_action = "productcntr"_n;
 static constexpr eosio::name _product_return_action = "productrtrn"_n;
 
 // capitalization linked actions
-static constexpr eosio::name _capital_contributor_authorize_action = "capregcontr"_n;
-static constexpr eosio::name _capital_invest_authorize_action = "capauthinvst"_n;
-static constexpr eosio::name _capital_withdraw_from_result_authorize_action = "capauthwthd1"_n;
-static constexpr eosio::name _capital_expense_authorize_action = "capauthexpns"_n;
-
-static constexpr eosio::name _capital_withdraw_from_project_authorize_action = "capauthwthd2"_n;
-
-static constexpr eosio::name _capital_withdraw_from_program_authorize_action = "capauthwthd3"_n;
 
 
 //capital::debts

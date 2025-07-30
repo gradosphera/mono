@@ -1,16 +1,14 @@
 void capital::createproj (
+  eosio::name coopname, 
   checksum256 project_hash,
   checksum256 parent_project_hash,
   double parent_distribution_ratio,
-  eosio::name coopname, 
-  eosio::name application,
   std::string title, 
   std::string description,
-  std::string terms,
-  std::string subject
+  std::string meta
 ) {
   
-    check_auth_or_fail(_capital, coopname, application, "createproj"_n);
+    require_auth(coopname);
     
     auto exist = Capital::get_project(_capital, project_hash);
     eosio::check(!exist.has_value(), "Проект с указанным хэшем уже существует");
@@ -32,11 +30,9 @@ void capital::createproj (
       row.project_hash = project_hash;
       row.parent_distribution_ratio = parent_distribution_ratio;
       row.coopname = coopname;
-      row.application = application;
       row.title = title;
       row.description = description;
-      row.terms = terms;
-      row.subject = subject;
+      row.meta = meta;
     });
     
 }

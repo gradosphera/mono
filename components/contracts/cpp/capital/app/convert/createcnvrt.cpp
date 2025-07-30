@@ -26,7 +26,7 @@ void capital::createcnvrt(
     auto assignment = assignments.find(exist_assignment.id);
     
     // Получаем контрибьютора
-    auto exist_contributor = Capital::get_active_contributor_or_fail(coopname, exist_assignment.project_hash, username);
+    auto exist_contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, exist_assignment.project_hash, username);
     Capital::contributor_index contributors(_capital, coopname.value);
     auto contributor = contributors.find(exist_contributor->id);
 

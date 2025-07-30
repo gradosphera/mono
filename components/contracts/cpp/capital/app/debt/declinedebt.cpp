@@ -8,7 +8,7 @@ void capital::declinedebt(name coopname, checksum256 debt_hash, std::string reas
   Capital::debts_index debts(_capital, coopname.value);
   auto debt = debts.find(exist_debt -> id);
 
-  auto exist_contributor = Capital::get_active_contributor_or_fail(coopname, debt -> project_hash, debt -> username);
+  auto exist_contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, debt -> project_hash, debt -> username);
   eosio::check(exist_contributor.has_value(), "Договор УХД с пайщиком не найден");
   
   Capital::contributor_index contributors(_capital, coopname.value);

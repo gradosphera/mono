@@ -11,16 +11,15 @@ namespace Capital {
 */
 struct [[eosio::table, eosio::contract(CAPITAL)]] project {
   uint64_t id;
+  
+  name coopname;
   checksum256 project_hash;
   checksum256 parent_project_hash;
-  name coopname;
-  name application;
   eosio::name status = "created"_n; ///< created
   
   std::string title;
   std::string description;
-  std::string terms;
-  std::string subject;
+  std::string meta;
   
   uint64_t authors_count;
   uint64_t authors_shares;

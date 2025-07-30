@@ -7,7 +7,7 @@ void capital::capauthexpns(eosio::name coopname, checksum256 expense_hash, docum
   Capital::expense_index expenses(_capital, coopname.value);
   auto expense = expenses.find(exist_expense -> id);
   
-  auto contributor = Capital::get_active_contributor_or_fail(coopname, expense -> project_hash, expense -> username);
+  auto contributor = Capital::get_contributor(coopname, expense -> username);
   eosio::check(contributor.has_value(), "Договор УХД с пайщиком по проекту не найден");
   
   //TODO: заменить плательщика на coopname

@@ -13,7 +13,7 @@ void capital::createdebt(name coopname, name username, checksum256 assignment_ha
   
   eosio::check(assignment -> status == "opened"_n, "Только результаты в статусе opened могут быть основанием для выдачи ссуды");
   
-  auto exist_contributor = Capital::get_active_contributor_or_fail(coopname, assignment -> project_hash, username);
+  auto exist_contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, assignment -> project_hash, username);
   eosio::check(exist_contributor.has_value(), "Договор УХД с пайщиком не найден");
   
   Capital::contributor_index contributors(_capital, coopname.value);
@@ -54,22 +54,20 @@ void capital::createdebt(name coopname, name username, checksum256 assignment_ha
     d.repaid_at = repaid_at;
   });
   
-  
-  // Отправляем в совет approve-запрос
-  action(
-    permission_level{_capital, "active"_n}, // кто вызывает
+  Action::send<createapprv_interface>(
     _soviet,
     "createapprv"_n,
-    std::make_tuple(
-      coopname,
-      username,
-      statement,
-      debt_hash, // внешний ID
-      _capital, // callback_contract (текущий контракт)
-      "approvedebt"_n, // callback_action_approve
-      "declinedebt"_n, // callback_action_decline
-      std::string("") 
-    )
-  ).send();
+    _capital,
+    coopname,
+    username,
+    statement,
+    ApprovesNames::Capital::CREATE_DEBT,
+    debt_hash,
+    _capital,
+    "approvedebt"_n,
+    "declinedebt"_n,
+    std::string("")
+  );
+  
   
 }

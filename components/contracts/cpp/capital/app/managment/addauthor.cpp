@@ -6,7 +6,7 @@ void capital::addauthor(name coopname, name application, checksum256 project_has
     
     eosio::check(project.has_value(), "Проект с указанным хэшем не найден");
     
-    auto contributor = Capital::get_active_contributor_or_fail(coopname, project_hash, author);
+    auto contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, project_hash, author);
     
     Capital::authors_index authors(_capital, coopname.value);
     auto project_author_index = authors.get_index<"byprojauthor"_n>();

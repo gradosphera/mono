@@ -60,15 +60,13 @@ public:
 
     [[eosio::action]]
     void createproj (
+      eosio::name coopname, 
       checksum256 project_hash,
       checksum256 parent_project_hash,
       double parent_distribution_ratio,
-      eosio::name coopname, 
-      eosio::name application,
       std::string title, 
       std::string description,
-      std::string terms,
-      std::string subject
+      std::string meta
     );
     
     // results
@@ -150,15 +148,15 @@ public:
         
     // Регистрация
     [[eosio::action]]
-    void regcontrib(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, uint64_t convert_percent, eosio::asset rate_per_hour, time_point_sec created_at, document2 agreement);
+    void regcontrib(eosio::name coopname, eosio::name application, eosio::name username, checksum256 contributor_hash, uint64_t convert_percent, eosio::asset rate_per_hour, bool is_external_contract, document2 contract);
     [[eosio::action]]
-    void capregcontr(eosio::name coopname, uint64_t contributor_id, document2 authorization);    
+    void approvereg(eosio::name coopname, checksum256 contributor_hash, document2 contract);
     [[eosio::action]]
-    void approvereg(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 project_hash, eosio::name username, document2 approved_agreement);
+    void declinereg(eosio::name coopname, checksum256 contributor_hash, std::string reason);
     
     // Приложения к договору УХД
     [[eosio::action]]
-    void createappndx(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document);
+    void signappndx(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document);
     [[eosio::action]]
     void apprvappndx(eosio::name coopname, checksum256 appendix_hash, document2 approved_document);
     [[eosio::action]]

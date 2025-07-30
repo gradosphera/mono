@@ -1,10 +1,10 @@
-void capital::createappndx(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document) {
+void capital::signappndx(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document) {
   require_auth(application);
   
   // Проверяем что пользователь подписал общий договор УХД
-  auto contributor = Capital::get_contributor(coopname, project_hash, username);
+  auto contributor = Capital::get_contributor(coopname, username);
   eosio::check(contributor.has_value(), "Пайщик не подписывал основной договор УХД");
-  eosio::check(contributor -> status == "authorized"_n, "Основной договор УХД не активен");
+  eosio::check(contributor -> status == "pending"_n, "Основной договор УХД не активен");
   
   // Проверяем что приложение с таким хэшем не существует
   auto exist_appendix = Capital::get_appendix(coopname, appendix_hash);
@@ -36,6 +36,7 @@ void capital::createappndx(eosio::name coopname, eosio::name application, eosio:
     coopname,
     username,
     document,
+    ApprovesNames::Capital::CREATE_APPENDIX,
     appendix_hash,
     _capital,
     "apprvappndx"_n,

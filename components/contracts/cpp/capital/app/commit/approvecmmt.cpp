@@ -47,7 +47,7 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
   });
     
   // Обновляем актора и проект
-  auto exist_contributor = Capital::get_active_contributor_or_fail(coopname, commit -> project_hash, commit -> username);
+  auto exist_contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, exist_assignment->project_hash, commit -> username);
   Capital::contributor_index contributors(_capital, coopname.value);
   auto contributor = contributors.find(exist_contributor -> id);
   contributors.modify(contributor, coopname, [&](auto &c){

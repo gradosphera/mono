@@ -7,7 +7,7 @@ void capital::createwthd2(name coopname, name application, name username, checks
   eosio::check(exist_project.has_value(), "Проект с указанным хэшем не найден");
 
   // Проверяем основной договор УХД
-  auto exist_contributor = Capital::get_contributor(coopname, project_hash, username);
+  auto exist_contributor = Capital::get_contributor(coopname, username);
   eosio::check(exist_contributor.has_value(), "Пайщик не подписывал основной договор УХД");
   eosio::check(exist_contributor -> status == "authorized"_n, "Основной договор УХД не активен");
   

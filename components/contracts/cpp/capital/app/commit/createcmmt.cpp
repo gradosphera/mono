@@ -5,7 +5,7 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   eosio::check(assignment.has_value(), "Задание не найдено");
   
   // Проверяем основной договор УХД
-  auto contributor = Capital::get_contributor(coopname, assignment -> project_hash, username);
+  auto contributor = Capital::get_contributor(coopname, username);
   eosio::check(contributor.has_value(), "Пайщик не подписывал основной договор УХД");
   eosio::check(contributor -> status == "authorized"_n, "Основной договор УХД не активен");
   
@@ -59,6 +59,7 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
     coopname,
     username,
     empty_doc,
+    ApprovesNames::Capital::CREATE_COMMIT,
     commit_hash,
     _capital,
     "approvecmmt"_n,

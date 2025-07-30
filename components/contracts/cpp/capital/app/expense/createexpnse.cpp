@@ -11,7 +11,7 @@ void capital::createexpnse(eosio::name coopname, eosio::name application, checks
   auto assignment = Capital::get_assignment(coopname, assignment_hash);
   eosio::check(assignment.has_value(), "Объект задананиеа не существует");
   
-  auto contributor = Capital::get_active_contributor_or_fail(coopname, assignment -> project_hash, creator);  
+  auto contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, assignment -> project_hash, creator);  
 
   auto exist_expense = Capital::get_expense(coopname, expense_hash);
   eosio::check(!exist_expense.has_value(), "Расход с указанным хэшем уже существует");

@@ -30,9 +30,6 @@
 
 #include "src/branch/deletebranch.cpp"
 
-#include "src/capital/capauthinvst.cpp"
-#include "src/capital/capregcontr.cpp"
-
 #include "src/decision/authorize.cpp"
 #include "src/decision/freedecision.cpp"
 #include "src/decision/exec.cpp"

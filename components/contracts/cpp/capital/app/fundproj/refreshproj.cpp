@@ -9,7 +9,7 @@
     auto project = projects.find(exist_project->id);
 
     // 2. Находим пайщика в проекте
-    auto exist = Capital::get_active_contributor_or_fail(coopname, project_hash, username);
+    auto exist = Capital::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
     
     Capital::contributor_index contributors(_capital, coopname.value);
     auto contributor = contributors.find(exist->id);

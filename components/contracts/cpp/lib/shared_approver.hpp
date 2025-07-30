@@ -3,6 +3,7 @@ namespace Approver {
     uint64_t         id;
     eosio::name      coopname;
     eosio::name      username;
+    eosio::name      type;
     document2         document;
     checksum256      approval_hash;
     eosio::name      callback_contract; 
@@ -13,13 +14,15 @@ namespace Approver {
 
     uint64_t primary_key() const { return id; }
     checksum256 by_hash() const { return approval_hash; } /*!< Индекс по хэшу платежа */
-    uint64_t by_username() const { return username.value; }      
+    uint64_t by_username() const { return username.value; }
+    uint64_t by_type() const { return type.value; }
   };
 
   typedef eosio::multi_index<
       "approvals"_n, approval,
       eosio::indexed_by<"byhash"_n, eosio::const_mem_fun<approval, checksum256, &approval::by_hash>>,
-      eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<approval, uint64_t, &approval::by_username>>
+      eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<approval, uint64_t, &approval::by_username>>,
+      eosio::indexed_by<"bytype"_n, eosio::const_mem_fun<approval, uint64_t, &approval::by_type>>
   > approvals_index; /*!< Мультииндекс для доступа и манипуляции данными таблицы `approvals` */
 
 

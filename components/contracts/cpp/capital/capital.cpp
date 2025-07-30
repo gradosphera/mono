@@ -1,19 +1,22 @@
 // capital.cpp
 #include "capital.hpp"
 
-// Управление
+// Регистрация вкладчика (приём договора УХД)
+#include "app/register_contributor/approvereg.cpp"
+#include "app/register_contributor/declinereg.cpp"
+#include "app/register_contributor/regcontrib.cpp"
+
+// Создание проекта (шаблона приложения к договору УХД)
+#include "app/create_project/createproj.cpp"
+
+// Управление кооперативом на контракте
 #include "app/managment/init.cpp"
-#include "app/managment/createproj.cpp"
 #include "app/managment/addauthor.cpp"
 // #include "app/managment/addmaster.cpp"
 
-// Регистрация
-#include "app/registration/capregcontr.cpp"
-#include "app/registration/approvereg.cpp"
-#include "app/registration/regcontrib.cpp"
 
 // Приложения
-#include "app/appendix/createappndx.cpp"
+#include "app/appendix/signappndx.cpp"
 #include "app/appendix/apprvappndx.cpp"
 #include "app/appendix/dclineappndx.cpp"
 

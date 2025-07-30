@@ -11,7 +11,7 @@ void capital::capauthinvst(eosio::name coopname, checksum256 invest_hash, docume
   Capital::invest_index invests(_capital, coopname.value);
   auto invest = invests.find(exist_invest -> id);
     
-  auto contributor = Capital::get_active_contributor_or_fail(coopname, invest -> project_hash, invest -> username);
+  auto contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, invest -> project_hash, invest -> username);
   eosio::check(contributor.has_value(), "Договор УХД с пайщиком по проекту не найден");
   
   Capital::contributor_index contributors(_capital, coopname.value);

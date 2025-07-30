@@ -131,11 +131,6 @@ public:
   [[eosio::action]] void withdraw(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document2 statement);
   [[eosio::action]] void cancelexprd(eosio::name coopname, uint64_t decision_id);
 
-  //contributions.cpp
-  // [[eosio::action]] void addbalance(eosio::name coopname, eosio::name username, eosio::asset quantity);
-  // [[eosio::action]] void subbalance(eosio::name coopname, eosio::name username, eosio::asset quantity, bool skip_available_check = false);
-  // [[eosio::action]] void addprogbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity);
-  // [[eosio::action]] void subprogbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity);
   void withdraw_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id, uint64_t batch_id);
   
   [[eosio::action]] void addbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo);
@@ -168,14 +163,6 @@ public:
 
   //branch.cpp
   [[eosio::action]] void deletebranch(eosio::name coopname, eosio::name braname);
-  
-  //capital.cpp
-  void capital_return_on_withdraw_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
-  
-  [[eosio::action]] void capregcontr(eosio::name coopname, eosio::name username, uint64_t contributor_id, document2 statement, std::string meta);
-  void capital_register_contributor_authorize_action_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
-  void capital_invest_authorize_action_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
-  [[eosio::action]] void capauthinvst(eosio::name coopname, eosio::name username, uint64_t invest_id, document2 statement, std::string meta);
   
 };
   

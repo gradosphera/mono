@@ -30,7 +30,7 @@ void capital::setact2(
     Capital::project_index projects(_capital, coopname.value);
     auto project = projects.find(exist -> id);
     
-    auto contributor = Capital::get_active_contributor_or_fail(coopname, result -> project_hash, result -> username);
+    auto contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, result -> project_hash, result -> username);
     
     Capital::contributor_index contributors(_capital, coopname.value);
     auto contributor_for_modify = contributors.find(contributor -> id);

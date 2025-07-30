@@ -1,6 +1,7 @@
 void soviet::createapprv(eosio::name coopname,
                          eosio::name username,
                          document2 document,
+                         name type,
                          checksum256 approval_hash,
                          eosio::name callback_contract,
                          eosio::name callback_action_approve,
@@ -28,6 +29,7 @@ void soviet::createapprv(eosio::name coopname,
       a.id                      = apprv_id;
       a.coopname                = coopname;
       a.username                = username;
+      a.type                    = type;
       a.document                = document;
       a.approval_hash           = approval_hash;
       a.callback_contract       = callback_contract;
