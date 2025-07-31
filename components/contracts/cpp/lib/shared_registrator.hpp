@@ -1,3 +1,18 @@
+namespace Core::Registrator {
+    /**
+     * @brief Получает аккаунт по имени пользователя
+     * @param username Имя пользователя
+     * @return account Найденный аккаунт
+     * @throws check если аккаунт не найден
+     */
+    inline account get_account_or_fail(eosio::name username) {
+      accounts_index accounts(_registrator, _registrator.value);
+      auto account_itr = accounts.find(username.value);
+      eosio::check(account_itr != accounts.end(), "Аккаунт не найден");
+      return *account_itr;
+    }
+} // namespace Core::Registrator
+
 namespace Registrator {
   
   struct [[eosio::table, eosio::contract(REGISTRATOR)]] candidate_legacy {

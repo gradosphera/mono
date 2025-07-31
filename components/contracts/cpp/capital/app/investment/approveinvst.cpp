@@ -1,32 +1,35 @@
-void capital::approveinvst(name coopname, name application, name approver, checksum256 invest_hash, document2 approved_statement) {
-  check_auth_or_fail(_capital, coopname, application, "approveinvst"_n);
+void capital::approveinvst(eosio::name coopname, checksum256 invest_hash, document2 approved_statement) {
+  require_auth(_soviet);
+
+  // Получаем инвестицию
+  auto invest = Capital::Invests::get_invest_or_fail(coopname, invest_hash);
   
-  verify_document_or_fail(approved_statement);
+  // Получаем активного пайщика с приложением к проекту
+  auto contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, invest.project_hash, invest.username);
+
+  // Добавляем инвестора как генератора с investor_base
+  Capital::Circle::upsert_investor_segment(coopname, invest.project_hash, invest.username, invest.amount);
+    
+  // Обновляем проект - добавляем инвестиции
+  Capital::Projects::add_investments(coopname, invest.project_hash, invest.amount);
   
-  auto exist_invest = Capital::get_invest(coopname, invest_hash);
-  eosio::check(exist_invest.has_value(), "Объект инвестиции не найден");
+  // Обрабатываем координаторские взносы, если есть координатор и сумма
+  if (invest.coordinator != eosio::name{} && invest.coordinator_amount.amount > 0) {
+    // Создаём сегмент координатора
+    Capital::Circle::upsert_coordinator_segment(coopname, invest.project_hash, invest.coordinator, invest.coordinator_amount);
+    
+    // Добавляем координаторский взнос в проект
+    Capital::Projects::add_coordinator_funds(coopname, invest.project_hash, invest.coordinator_amount);
+  }
   
-  Capital::invest_index invests(_capital, coopname.value);
-  auto invest = invests.find(exist_invest -> id);
-  
-  invests.modify(invest, coopname, [&](auto &i) {
-    i.status = "approved"_n;
-    i.approved_statement = approved_statement;
-  });
-  
-  //отправляем в совет
-  action(permission_level{ _capital, "active"_n}, _soviet, "createagenda"_n,
-    std::make_tuple(
-      coopname, 
-      invest -> username, 
-      get_valid_soviet_action("capitalinvst"_n), 
-      invest -> invest_hash,
-      _capital, 
-      "capauthinvst"_n, 
-      "capdeclinvst"_n, 
-      invest -> invest_statement, 
-      std::string("")
-    )
-  ).send();  
-  
-};
+  std::string memo = Capital::Memo::get_approve_invest_memo(contributor -> id);
+
+  // Списываем заблокированные средства с кошелька
+  Wallet::sub_blocked_funds(_capital, coopname, contributor -> username, invest.amount, _wallet_program, memo);
+
+  // Пополняем кошелек договора УХД и блокируем средства
+  Wallet::add_blocked_funds(_capital, coopname, contributor -> username, invest.amount, _source_program, memo);
+
+  // Удаляем инвестицию после обработки
+  Capital::Invests::delete_invest(coopname, invest_hash);
+}

@@ -12,7 +12,7 @@
     int64_t last_crps    = capitalist == capitalists.end() ? 0 : capitalist -> reward_per_share_last;
     int64_t delta        = current_crps - last_crps;
 
-    int64_t share_balance = Capital::get_capital_user_share_balance(coopname, username);
+    int64_t share_balance = Capital::Core::get_capital_user_share_balance(coopname, username);
     
     if (delta > 0 && share_balance > 0) {
       // Начисляем вознаграждение

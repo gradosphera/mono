@@ -8,7 +8,7 @@ void capital::declinedebt(name coopname, checksum256 debt_hash, std::string reas
   Capital::debts_index debts(_capital, coopname.value);
   auto debt = debts.find(exist_debt -> id);
 
-  auto exist_contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, debt -> project_hash, debt -> username);
+  auto exist_contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, debt -> project_hash, debt -> username);
   eosio::check(exist_contributor.has_value(), "Договор УХД с пайщиком не найден");
   
   Capital::contributor_index contributors(_capital, coopname.value);
@@ -20,16 +20,16 @@ void capital::declinedebt(name coopname, checksum256 debt_hash, std::string reas
     c.debt_amount -= debt -> amount;
   });
   
-  auto exist_creauthor = Capital::get_creauthor(coopname, debt -> assignment_hash, debt -> username);
-  eosio::check(exist_creauthor.has_value(), "Резактор не найден");
+  auto exist_segment = Capital::Circle::get_segment(coopname, debt -> project_hash, debt -> username);
+  eosio::check(exist_segment.has_value(), "Резактор не найден");
   
-  Capital::creauthor_index creauthors(_capital, coopname.value);
-  auto creauthor = creauthors.find(exist_creauthor->id);
+  Capital::Circle::segments_index segments(_capital, coopname.value);
+  auto segment = segments.find(exist_segment->id);
   
-  eosio::check(creauthor -> provisional_amount >= debt -> amount, "Недостаточно доступных средств для получения ссуды");
-  eosio::check(creauthor -> debt_amount >= debt -> amount, "Возникла какая-то чудовищная ошибка: у пайщика недостаточно средств в долговом кошельке для того, чтобы принять возврат долга. Такого вообще не должно было быть, но если произошло, пожалуйста, срочно обратитесь в поддержку.");
+  eosio::check(segment -> provisional_amount >= debt -> amount, "Недостаточно доступных средств для получения ссуды");
+  eosio::check(segment -> debt_amount >= debt -> amount, "Возникла какая-то чудовищная ошибка: у пайщика недостаточно средств в долговом кошельке для того, чтобы принять возврат долга. Такого вообще не должно было быть, но если произошло, пожалуйста, срочно обратитесь в поддержку.");
   
-  creauthors.modify(creauthor, coopname, [&](auto &ra) {
+  segments.modify(segment, coopname, [&](auto &ra) {
     ra.debt_amount -= debt -> amount;
     ra.provisional_amount += debt -> amount;
   });

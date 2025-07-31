@@ -11,7 +11,6 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
   
   name status = "created"_n;                   ///< Статус расхода (created | approved | authorized)
   checksum256 project_hash;                    ///< Хэш проекта, связанного с расходом.
-  checksum256 assignment_hash;                     ///< Хэш задания, связанного с расходом.
   checksum256 expense_hash;                    ///< Хэш расхода.
   uint64_t fund_id;                            ///< Идентификатор фонда списания (expfunds в контакте fund)
   eosio::asset amount;                         ///< Сумма расхода.
@@ -26,7 +25,6 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
   uint64_t primary_key() const { return id; } ///< Основной ключ.
   uint64_t by_username() const { return username.value; } ///< По имени пользователя.
   checksum256 by_expense_hash() const { return expense_hash; } ///< Индекс по хэшу задачи.
-  checksum256 by_assignment_hash() const { return assignment_hash; } ///< Индекс по хэшу задания.
   checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта.
 
 };
@@ -35,7 +33,6 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
     "expenses"_n, expense,
     indexed_by<"byusername"_n, const_mem_fun<expense, uint64_t, &expense::by_username>>,
     indexed_by<"byhash"_n, const_mem_fun<expense, checksum256, &expense::by_expense_hash>>,
-    indexed_by<"byassignment"_n, const_mem_fun<expense, checksum256, &expense::by_assignment_hash>>,
     indexed_by<"byprojhash"_n, const_mem_fun<expense, checksum256, &expense::by_project_hash>>
   > expense_index;
 

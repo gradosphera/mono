@@ -4,10 +4,7 @@ void capital::approverslt(eosio::name coopname, eosio::name application, eosio::
   verify_document_or_fail(approved_statement);
   
   auto exist_result = Capital::get_result(coopname, result_hash);
-  eosio::check(exist_result.has_value(), "Клайм пользователя для задания не существует");
-  
-  auto assignment = Capital::get_assignment(coopname, exist_result -> assignment_hash);
-  eosio::check(assignment.has_value(), "Задание не найдено");
+  eosio::check(exist_result.has_value(), "Результат пользователя не существует");
   
   Capital::result_index results(_capital, coopname.value);
   auto result = results.find(exist_result -> id);

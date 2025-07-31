@@ -10,10 +10,10 @@ void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::n
     verify_document_or_fail(contract, {username});
   }
   
-  auto exist_by_username = Capital::get_contributor(coopname, username);
+  auto exist_by_username = Capital::Contributors::get_contributor(coopname, username);
   eosio::check(!exist_by_username.has_value(), "Пайщик уже обладает подписанным договором УХД");
   
-  auto exist_by_hash = Capital::get_contributor_by_hash(coopname, contributor_hash);
+  auto exist_by_hash = Capital::Contributors::get_contributor_by_hash(coopname, contributor_hash);
   eosio::check(!exist_by_hash.has_value(), "Контрибьютор с данным хэшем уже зарегистрирован");
 
   Capital::contributor_index contributors(_capital, coopname.value);
@@ -23,7 +23,7 @@ void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::n
     c.coopname = coopname;
     c.username = username;
     c.contributor_hash = contributor_hash;
-    c.status = "pending"_n;
+    c.status = Capital::Contributors::Status::PENDING;
     c.is_external_contract = is_external_contract;
     c.contract = contract;
     c.created_at = eosio::current_time_point();
@@ -34,7 +34,7 @@ void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::n
   std::string memo = "";
   
   if (is_external_contract) {
-    memo += "Договор УХД подписан за пределами цифровой платформы";
+    memo += Capital::Memo::get_external_contract_memo();
   }
   
   //отправить на approve председателю

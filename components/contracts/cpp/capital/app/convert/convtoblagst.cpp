@@ -40,7 +40,7 @@ void capital::convtoblagst(eosio::name coopname, eosio::name application, eosio:
     
     // Конвертируем средства из программы УХД в ЦПП "Благорост"
     // С этого момента пайщик начинает получать капитализацию от последующих взносов
-    std::string memo = "Конвертация паевого взноса по программе УХД в ЦПП 'Благорост'";
+    std::string memo = Capital::Memo::get_convert_to_blagorost_memo();
     Wallet::convert_between_programs(_capital, coopname, username, total_converted, _capital_program, _capital_program, memo);
     
     // Обновляем баланс пайщика в программе капитализации

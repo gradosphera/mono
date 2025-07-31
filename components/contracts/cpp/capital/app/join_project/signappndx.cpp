@@ -2,16 +2,16 @@ void capital::signappndx(eosio::name coopname, eosio::name application, eosio::n
   require_auth(application);
   
   // Проверяем что пользователь подписал общий договор УХД
-  auto contributor = Capital::get_contributor(coopname, username);
+  auto contributor = Capital::Contributors::get_contributor(coopname, username);
   eosio::check(contributor.has_value(), "Пайщик не подписывал основной договор УХД");
-  eosio::check(contributor -> status == "pending"_n, "Основной договор УХД не активен");
+  eosio::check(contributor -> status == Capital::Contributors::Status::PENDING, "Основной договор УХД не активен");
   
   // Проверяем что приложение с таким хэшем не существует
   auto exist_appendix = Capital::get_appendix(coopname, appendix_hash);
   eosio::check(!exist_appendix.has_value(), "Приложение с указанным хэшем уже существует");
   
   // Проверяем что у пользователя нет уже приложения для этого проекта
-  eosio::check(!Capital::is_contributor_has_appendix_in_project(coopname, project_hash, username), 
+  eosio::check(!Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, username), 
                "У пайщика уже есть приложение для данного проекта");
   
   Capital::appendix_index appendixes(_capital, coopname.value);

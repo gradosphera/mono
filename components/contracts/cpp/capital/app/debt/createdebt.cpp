@@ -1,19 +1,11 @@
-void capital::createdebt(name coopname, name username, checksum256 assignment_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document2 statement) {
+void capital::createdebt(name coopname, name username, checksum256 project_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document2 statement) {
   require_auth(coopname);
   
   verify_document_or_fail(statement);
   
   Wallet::validate_asset(amount);
   
-  auto exist_assignment = Capital::get_assignment(coopname, assignment_hash);  
-  eosio::check(exist_assignment.has_value(), "Задание не найдено");
-  
-  Capital::assignment_index assignments(_capital, coopname.value);
-  auto assignment = assignments.find(exist_assignment -> id);
-  
-  eosio::check(assignment -> status == "opened"_n, "Только результаты в статусе opened могут быть основанием для выдачи ссуды");
-  
-  auto exist_contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, assignment -> project_hash, username);
+  auto exist_contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
   eosio::check(exist_contributor.has_value(), "Договор УХД с пайщиком не найден");
   
   Capital::contributor_index contributors(_capital, coopname.value);
@@ -23,15 +15,15 @@ void capital::createdebt(name coopname, name username, checksum256 assignment_ha
     c.debt_amount += amount;
   });
   
-  auto exist_creauthor = Capital::get_creauthor(coopname, assignment_hash, username);
-  eosio::check(exist_creauthor.has_value(), "Резактор не найден");
+  auto exist_segment = Capital::Circle::get_segment(coopname, project_hash, username);
+  eosio::check(exist_segment.has_value(), "Резактор не найден");
   
-  Capital::creauthor_index creauthors(_capital, coopname.value);
+  Capital::Circle::segments_index segments(_capital, coopname.value);
   
-  auto creauthor = creauthors.find(exist_creauthor->id);
-  eosio::check(creauthor -> provisional_amount >= amount, "Недостаточно доступных средств для получения ссуды");
+  auto segment = segments.find(exist_segment->id);
+  eosio::check(segment -> provisional_amount >= amount, "Недостаточно доступных средств для получения ссуды");
   
-  creauthors.modify(creauthor, coopname, [&](auto &ra) {
+  segments.modify(segment, coopname, [&](auto &ra) {
       ra.debt_amount += amount;
       ra.provisional_amount -= amount;
   });
@@ -47,8 +39,7 @@ void capital::createdebt(name coopname, name username, checksum256 assignment_ha
     d.coopname = coopname;
     d.username = username;
     d.debt_hash = debt_hash;
-    d.assignment_hash = assignment_hash;
-    d.project_hash = assignment -> project_hash;
+    d.project_hash = project_hash;
     d.amount = amount;
     d.statement = statement;
     d.repaid_at = repaid_at;

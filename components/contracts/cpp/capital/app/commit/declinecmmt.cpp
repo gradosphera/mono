@@ -7,8 +7,5 @@ void capital::declinecmmt(eosio::name coopname, checksum256 commit_hash, std::st
   Capital::commit_index commits(_capital, coopname.value);
   auto commit = commits.find(exist_commit -> id);
   
-  commits.modify(commit, coopname, [&](auto &c) {
-      c.status = "declined"_n;
-      c.decline_comment = reason;
-  });
+  commits.erase(commit);
 }

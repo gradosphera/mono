@@ -1,6 +1,9 @@
 // capital.cpp
 #include "capital.hpp"
 
+// Подключение реализации core функций
+#include "domain/core/core.cpp"
+
 // Регистрация вкладчика (приём договора УХД)
 #include "app/register_contributor/approvereg.cpp"
 #include "app/register_contributor/declinereg.cpp"
@@ -11,39 +14,36 @@
 
 // Управление кооперативом на контракте
 #include "app/managment/init.cpp"
-#include "app/managment/addauthor.cpp"
-// #include "app/managment/addmaster.cpp"
 
+// Планирование
+#include "app/plan_project/setmaster.cpp"
+#include "app/plan_project/addauthor.cpp"
+#include "app/plan_project/setplan.cpp"
+#include "app/plan_project/openproject.cpp"
 
-// Приложения
-#include "app/appendix/signappndx.cpp"
-#include "app/appendix/apprvappndx.cpp"
-#include "app/appendix/dclineappndx.cpp"
+// Присоединиться к проекту
+#include "app/join_project/signappndx.cpp"
+#include "app/join_project/apprvappndx.cpp"
+#include "app/join_project/dclineappndx.cpp"
 
 
 // Аллокация средств
-#include "app/allocation/allocate.cpp"
-#include "app/allocation/diallocate.cpp"
-
-// Задания
-#include "app/assignment/createassign.cpp"
-#include "app/assignment/startdistrbn.cpp"
+// #include "app/allocation/allocate.cpp"
+// #include "app/allocation/diallocate.cpp"
 
 // Инвестиции
 #include "app/investment/createinvest.cpp"
 #include "app/investment/approveinvst.cpp"
-#include "app/investment/capauthinvst.cpp"
+#include "app/investment/declineinvst.cpp"
 
 // Коммиты
 #include "app/commit/createcmmt.cpp"
 #include "app/commit/approvecmmt.cpp"
 #include "app/commit/declinecmmt.cpp"
-#include "app/commit/delcmmt.cpp"
 
 // Долги
 #include "app/debt/createdebt.cpp"
 #include "app/debt/approvedebt.cpp"
-
 #include "app/debt/debtauthcnfr.cpp"
 #include "app/debt/debtpaycnfrm.cpp"
 #include "app/debt/debtpaydcln.cpp"
@@ -58,18 +58,17 @@
 #include "app/result/setact1.cpp"
 #include "app/result/setact2.cpp"
 
-
-// Вывод средств из результатов
+// Возврат из результатов
 #include "app/withdraw_from_result/createwthd1.cpp"
 #include "app/withdraw_from_result/capauthwthd1.cpp"
 #include "app/withdraw_from_result/approvewthd1.cpp"
 
-// Вывод средств из проекта
+// Возврат из проекта
 #include "app/withdraw_from_project/createwthd2.cpp"
 #include "app/withdraw_from_project/capauthwthd2.cpp"
 #include "app/withdraw_from_project/approvewthd2.cpp"
 
-// Вывод средств из программы
+// Возврат из программы
 #include "app/withdraw_from_program/createwthd3.cpp"
 #include "app/withdraw_from_program/capauthwthd3.cpp"
 #include "app/withdraw_from_program/approvewthd3.cpp"

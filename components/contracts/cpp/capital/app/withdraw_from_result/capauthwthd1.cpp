@@ -8,11 +8,10 @@ void capital::capauthwthd1(eosio::name coopname, checksum256 withdraw_hash, docu
   Capital::result_withdraws_index result_withdraws(_capital, coopname.value);
   auto withdraw = result_withdraws.find(exist_withdraw -> id);
   
-  auto exist_assignment = Capital::get_assignment_or_fail(coopname, withdraw -> assignment_hash, "Задание не найдено");
-  auto exist_contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, exist_assignment.project_hash, withdraw -> username);
+  auto exist_contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, withdraw->project_hash, withdraw -> username);
   
   // списание с УХД
-  std::string memo_out = "Зачёт части целевого паевого взноса по договору УХД с ID: " + std::to_string(exist_contributor -> id) + " в качестве паевого взноса по программе 'Цифровой Кошелёк'";
+  std::string memo_out = Capital::Memo::get_result_withdraw_memo(exist_contributor -> id);
 
   // списываем с кошелька программы генерации при договоре УХД
   Wallet::sub_blocked_funds(_capital, coopname, withdraw -> username, withdraw -> amount, _source_program, memo_out);

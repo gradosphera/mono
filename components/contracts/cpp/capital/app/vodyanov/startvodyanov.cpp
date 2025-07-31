@@ -14,8 +14,8 @@ void capital::startvodyanov(name coopname, name application, checksum256 result_
     auto existing_distribution = get_vodyanov_distribution(coopname, result_hash);
     eosio::check(!existing_distribution.has_value(), "Голосование для данного результата уже создано");
     
-    // Получаем участников (авторы + создатели) для данного задания
-    auto participants = Capital::get_assignment_participants(coopname, result->assignment_hash);
+    // Получаем участников (авторы + создатели) для данного проекта
+    auto participants = Capital::Projects::get_project_participants(coopname, result->project_hash);
     eosio::check(participants.size() >= 2, "Для голосования по методу Водянова необходимо минимум 2 участника");
     
     // Рассчитываем суммы для голосования (31.8% от всех премий авторов и создателей)
@@ -39,7 +39,7 @@ void capital::startvodyanov(name coopname, name application, checksum256 result_
     distributions.emplace(application, [&](auto &d) {
         d.id = distribution_id;
         d.result_hash = result_hash;
-        d.assignment_hash = result->assignment_hash;
+        d.project_hash = result->project_hash;
         d.coopname = coopname;
         d.status = "voting"_n;
         d.participants = participants;

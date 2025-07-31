@@ -1,6 +1,6 @@
 {
   "name": "reference-contracts",
-  "generators": [
+  "segments": [
     {
       "name": "collate_markdown",
       "options": {
@@ -26,14 +26,18 @@
     {
       "name": "sanitize",
       "options": {
-        "exclude": ["action-reference"]
+        "exclude": [
+          "action-reference"
+        ]
       }
     },
     {
       "name": "capitalize",
       "options": {
         "mode": "all",
-        "exclude": ["action-reference"]
+        "exclude": [
+          "action-reference"
+        ]
       }
     }
   ]

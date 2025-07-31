@@ -3,16 +3,16 @@ void capital::createwthd2(name coopname, name application, name username, checks
 
   verify_document_or_fail(return_statement);
 
-  auto exist_project = Capital::get_project(coopname, project_hash);
+  auto exist_project = Capital::Projects::get_project(coopname, project_hash);
   eosio::check(exist_project.has_value(), "Проект с указанным хэшем не найден");
 
   // Проверяем основной договор УХД
-  auto exist_contributor = Capital::get_contributor(coopname, username);
+  auto exist_contributor = Capital::Contributors::get_contributor(coopname, username);
   eosio::check(exist_contributor.has_value(), "Пайщик не подписывал основной договор УХД");
-  eosio::check(exist_contributor -> status == "authorized"_n, "Основной договор УХД не активен");
+  eosio::check(exist_contributor -> status == Capital::Contributors::Status::ACTIVE, "Основной договор УХД не активен");
   
   // Проверяем приложение к проекту
-  eosio::check(Capital::is_contributor_has_appendix_in_project(coopname, project_hash, username), 
+  eosio::check(Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, username), 
                "Пайщик не подписывал приложение к договору УХД для данного проекта");
   eosio::check(exist_contributor -> pending_rewards >= amount, "Недостаточно накопленных средств для создания запроса на возврат");
 

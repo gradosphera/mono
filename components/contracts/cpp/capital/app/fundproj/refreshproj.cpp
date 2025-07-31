@@ -2,14 +2,14 @@
     check_auth_or_fail(_capital, coopname, application, "contribute"_n);
 
     // 1. Получаем проект
-    auto exist_project = Capital::get_project(coopname, project_hash);
+    auto exist_project = Capital::Projects::get_project(coopname, project_hash);
     eosio::check(exist_project.has_value(), "Проект не найден");
 
     Capital::project_index projects(_capital, coopname.value);
     auto project = projects.find(exist_project->id);
 
     // 2. Находим пайщика в проекте
-    auto exist = Capital::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
+    auto exist = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
     
     Capital::contributor_index contributors(_capital, coopname.value);
     auto contributor = contributors.find(exist->id);

@@ -3,7 +3,7 @@ void capital::approvewthd3(name coopname, name application, name approver, check
   
   verify_document_or_fail(approved_return_statement);
   
-  auto exist_withdraw = Capital::get_project_withdraw(coopname, withdraw_hash);
+  auto exist_withdraw = Capital::get_program_withdraw(coopname, withdraw_hash);
   eosio::check(exist_withdraw.has_value(), "Объект возврата не найден");
   
   Capital::program_withdraws_index program_withdraws(_capital, coopname.value);

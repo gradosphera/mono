@@ -8,7 +8,6 @@ namespace Capital {
 struct [[eosio::table, eosio::contract(CAPITAL)]] convert {
   uint64_t id;
   checksum256 project_hash;
-  checksum256 assignment_hash;
   checksum256 convert_hash;
   
   eosio::name coopname;
@@ -25,19 +24,18 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] convert {
   uint64_t primary_key() const { return id; }     ///< Основной ключ.
   uint64_t by_username() const { return username.value; } ///< Индекс по владельцу
   checksum256 by_convert_hash() const { return convert_hash; } ///< Индекс по хэшу
-  checksum256 by_assignment_hash() const { return assignment_hash; } ///< Индекс по хэшу
   checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта
   
-  uint128_t by_assignment_user() const {
-      return combine_checksum_ids(assignment_hash, username);
+  uint128_t by_project_user() const {
+      return combine_checksum_ids(project_hash, username);
   }
 };
 
 typedef eosio::multi_index<"converts"_n, convert,
   indexed_by<"byusername"_n, const_mem_fun<convert, uint64_t, &convert::by_username>>,
   indexed_by<"byhash"_n, const_mem_fun<convert, checksum256, &convert::by_convert_hash>>,
-  indexed_by<"byassignment"_n, const_mem_fun<convert, checksum256, &convert::by_assignment_hash>>,
-  indexed_by<"byprojecthash"_n, const_mem_fun<convert, checksum256, &convert::by_project_hash>>
+  indexed_by<"byprojecthash"_n, const_mem_fun<convert, checksum256, &convert::by_project_hash>>,
+  indexed_by<"byprojuser"_n, const_mem_fun<convert, uint128_t, &convert::by_project_user>>
 > convert_index;
 
 

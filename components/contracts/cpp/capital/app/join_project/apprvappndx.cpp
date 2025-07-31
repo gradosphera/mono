@@ -10,7 +10,7 @@ void capital::apprvappndx(eosio::name coopname, checksum256 appendix_hash, docum
   auto itr = appendixes.find(appendix -> id);
   
   // Находим контрибьютора с основным договором УХД
-  auto contributor = Capital::get_contributor(coopname, appendix -> username);
+  auto contributor = Capital::Contributors::get_contributor(coopname, appendix -> username);
   eosio::check(contributor.has_value(), "Контрибьютор с основным договором УХД не найден");
   
   // Добавляем project_hash в вектор appendixes у контрибьютора

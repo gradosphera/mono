@@ -10,9 +10,9 @@ void capital::approvereg(eosio::name coopname, checksum256 contributor_hash, doc
 
   verify_document_or_fail(contract);
   
-  auto exist = Capital::get_contributor_by_hash(coopname, contributor_hash);
+  auto exist = Capital::Contributors::get_contributor_by_hash(coopname, contributor_hash);
   eosio::check(exist.has_value(), "Пайщик не обладает подписанным договором УХД");
-  eosio::check(exist -> status == "pending"_n, "Договор УХД должен находиться в статусе pending для приёма.");
+  eosio::check(exist -> status == Capital::Contributors::Status::PENDING, "Договор УХД должен находиться в статусе pending для приёма.");
   
   Capital::contributor_index contributors(_capital, coopname.value);
   auto contributor = contributors.find(exist -> id);
@@ -21,7 +21,7 @@ void capital::approvereg(eosio::name coopname, checksum256 contributor_hash, doc
 
   // Обновляем пайщика и устанавливаем принятый договор УХД
   contributors.modify(contributor, coopname, [&](auto &c){
-    c.status = "active"_n;
+    c.status = Capital::Contributors::Status::ACTIVE;
     c.contract = contract;
   });
   

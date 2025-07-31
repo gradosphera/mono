@@ -10,7 +10,7 @@ void capital::createproj (
   
     require_auth(coopname);
     
-    auto exist = Capital::get_project(_capital, project_hash);
+    auto exist = Capital::Projects::get_project(_capital, project_hash);
     eosio::check(!exist.has_value(), "Проект с указанным хэшем уже существует");
     
     Capital::project_index projects(_capital, coopname.value);    
@@ -19,7 +19,7 @@ void capital::createproj (
     
     if (parent_project_hash != checksum256()) {
       // проверяем глубину количества родительский связей проекта
-      Capital::validate_project_hierarchy_depth(coopname, parent_project_hash);
+      Capital::Projects::validate_hierarchy_depth(coopname, parent_project_hash);
     };
     
     if (parent_distribution_ratio > 0)
@@ -28,6 +28,7 @@ void capital::createproj (
     projects.emplace(coopname, [&](auto& row) {
       row.id = get_global_id_in_scope(_capital, coopname, "projects"_n); 
       row.project_hash = project_hash;
+      row.parent_project_hash = parent_project_hash;
       row.parent_distribution_ratio = parent_distribution_ratio;
       row.coopname = coopname;
       row.title = title;

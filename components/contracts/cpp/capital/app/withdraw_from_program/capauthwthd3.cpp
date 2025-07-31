@@ -9,7 +9,7 @@ void capital::capauthwthd3(name coopname, checksum256 withdraw_hash, document2 a
   
   eosio::check(withdraw != program_withdraws.end(), "Объект возврата не найден");
 
-  std::string memo = "Зачёт части целевого паевого взноса по программе 'Капитализация' в качестве паевого взноса по программе 'Цифровой Кошелёк' с ID: " + std::to_string(withdraw -> id);
+  std::string memo = Capital::Memo::get_program_withdraw_memo(withdraw -> id);
 
   Wallet::sub_blocked_funds(_capital, coopname, withdraw->username, withdraw->amount, _capital_program, memo);
   Wallet::add_available_funds(_capital, coopname, withdraw->username, withdraw->amount, _wallet_program, memo);

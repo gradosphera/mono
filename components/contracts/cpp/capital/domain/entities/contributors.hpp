@@ -17,16 +17,12 @@ namespace Capital {
     time_point_sec created_at;
     bool is_external_contract = false;
     document2 contract;
-    // document2 authorization;
-    
-    eosio::asset invested = asset(0, _root_govern_symbol);
     
     uint64_t convert_percent;
-    uint64_t contributed_hours;
+    uint64_t creator_hours;
     
     eosio::asset rate_per_hour = asset(0, _root_govern_symbol);
     
-    eosio::asset spended = asset(0, _root_govern_symbol);
     eosio::asset debt_amount = asset(0, _root_govern_symbol);
     
     eosio::asset withdrawed = asset(0, _root_govern_symbol);
@@ -43,6 +39,14 @@ namespace Capital {
     uint64_t primary_key() const { return id; }
     uint64_t by_username() const { return username.value; }
     checksum256 by_hash() const { return contributor_hash; }
+    
+    /**
+     * @brief Добавляет часы создателя к участнику.
+     * @param hours Количество часов для добавления.
+     */
+    void add_creator_hours(uint64_t hours) {
+        creator_hours += hours;
+    }
 };
 
 typedef eosio::multi_index<
@@ -50,22 +54,34 @@ typedef eosio::multi_index<
     indexed_by<"byusername"_n, const_mem_fun<contributor, uint64_t, &contributor::by_username>>,
     indexed_by<"byhash"_n, const_mem_fun<contributor, checksum256, &contributor::by_hash>>
 > contributor_index;
+}// namespace Capital
 
+namespace Capital::Contributors {
 
-/**
- * @brief Получает участника по имени аккаунта.
- */
- inline std::optional<contributor> get_contributor(eosio::name coopname, eosio::name username) {
-  contributor_index contributors(_capital, coopname.value);
-  auto username_index = contributors.get_index<"byusername"_n>();
-
-  auto itr = username_index.find(username.value);
-  if (itr == username_index.end()) {
-      return std::nullopt;
+  /**
+   * @brief Константы статусов контрибьюторов
+   */
+  namespace Status {
+    const eosio::name PENDING = "pending"_n;       ///< Ожидает подтверждения
+    const eosio::name ACTIVE = "active"_n; ///< Авторизован/активен
   }
 
-  return *itr;
-}
+  /**
+  * @brief Получает участника по имени аккаунта.
+  */
+  inline std::optional<contributor> get_contributor(eosio::name coopname, eosio::name username) {
+    contributor_index contributors(_capital, coopname.value);
+    auto username_index = contributors.get_index<"byusername"_n>();
+
+    auto itr = username_index.find(username.value);
+    if (itr == username_index.end()) {
+        return std::nullopt;
+    }
+
+    return *itr;
+  }
+
+
 
 
 /**
@@ -110,7 +126,7 @@ inline bool is_contributor_has_appendix_in_project(eosio::name coopname, const c
 inline std::optional<contributor> get_active_contributor_or_fail(eosio::name coopname, eosio::name username) {
   auto contributor = get_contributor(coopname, username);
   eosio::check(contributor.has_value(), "Создатель не подписывал договор УХД");
-  eosio::check(contributor -> status == "authorized"_n, "Договор УХД с пайщиком не активен");
+  eosio::check(contributor -> status == Status::ACTIVE, "Договор УХД с пайщиком не активен");
   return contributor;
 }
 
@@ -125,4 +141,20 @@ inline std::optional<contributor> get_active_contributor_with_appendix_or_fail(e
   return contributor;
 }
 
-}// namespace Capital
+/**
+ * @brief Добавляет часы создателя к участнику.
+ * @param coopname Имя кооператива (scope таблицы).
+ * @param project_hash Хэш проекта.
+ * @param username Имя пользователя участника.
+ * @param creator_hours Количество часов для добавления.
+ */
+inline void add_creator_hours_to_contributor(eosio::name coopname, const checksum256 &project_hash, eosio::name username, uint64_t creator_hours) {
+    auto exist_contributor = get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
+    contributor_index contributors(_capital, coopname.value);
+    auto contributor = contributors.find(exist_contributor->id);
+    contributors.modify(contributor, coopname, [&](auto &c){
+        c.add_creator_hours(creator_hours);
+    });
+}
+
+}// namespace Capital::Contributors

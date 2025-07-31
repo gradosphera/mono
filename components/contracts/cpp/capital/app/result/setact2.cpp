@@ -25,12 +25,12 @@ void capital::setact2(
       r.act1 = act;
     });
 
-    auto exist = Capital::get_project(coopname, result -> project_hash);
+    auto exist = Capital::Projects::get_project(coopname, result -> project_hash);
     eosio::check(exist.has_value(),"Проект не найден");
     Capital::project_index projects(_capital, coopname.value);
     auto project = projects.find(exist -> id);
     
-    auto contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, result -> project_hash, result -> username);
+    auto contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, result -> project_hash, result -> username);
     
     Capital::contributor_index contributors(_capital, coopname.value);
     auto contributor_for_modify = contributors.find(contributor -> id);
@@ -43,7 +43,7 @@ void capital::setact2(
       p.total_share_balance += result -> creator_base_amount;
     });
     
-    std::string memo = "Зачёт части целевого паевого взноса по договору УХД с ID: " + std::to_string(contributor -> id) + " в качестве паевого взноса по программе 'Цифровой Кошелёк' с ID: " + std::to_string(result -> id);
+    std::string memo = Capital::Memo::get_result_memo(contributor -> id, result -> id);
     
     //Увеличиваем баланс средств в капитализации
     //TODO: 

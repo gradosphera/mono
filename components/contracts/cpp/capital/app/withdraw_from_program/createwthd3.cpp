@@ -3,7 +3,7 @@ void capital::createwthd3(name coopname, name application, name username, checks
 
   verify_document_or_fail(return_statement);
 
-  auto exist_project = Capital::get_project(coopname, project_hash);
+  auto exist_project = Capital::Projects::get_project(coopname, project_hash);
   eosio::check(exist_project.has_value(), "Проект с указанным хэшем не найден");
 
   Capital::capitalist_index capitalists(_capital, coopname.value);
@@ -12,7 +12,7 @@ void capital::createwthd3(name coopname, name application, name username, checks
 
   eosio::check(capitalist -> pending_rewards >= amount, "Недостаточно накопленных средств для создания запроса на возврат");
 
-  int64_t share_balance = Capital::get_capital_user_share_balance(coopname, username);
+  int64_t share_balance = Capital::Core::get_capital_user_share_balance(coopname, username);
   eosio::check(share_balance >= amount.amount, "Недостаточно долей для уменьшения");
 
   // Обновление данных капиталиста
@@ -23,14 +23,13 @@ void capital::createwthd3(name coopname, name application, name username, checks
 
   // Обновление глобального состояния
   auto state = Capital::get_global_state(coopname);
-  auto program_share_balance = Capital::get_capital_program_share_balance(coopname);
+  auto program_share_balance = Capital::Core::get_capital_program_share_balance(coopname);
 
   int64_t prev_total_shares = program_share_balance;
   int64_t new_total_shares = prev_total_shares - amount.amount;
 
   eosio::check(new_total_shares >= 0, "Нельзя уменьшить total_shares ниже 0");
-
-  const int64_t PRECISION = 100000000; // 1e8 — масштаб фиксированной дроби
+  const uint64_t PRECISION = 100000000; // 1e8 — масштаб фиксированной дроби
 
   if (new_total_shares > 0) {
     eosio::check(state.program_membership_cumulative_reward_per_share >= 0, "Некорректное значение reward_per_share");

@@ -34,7 +34,7 @@ void capital::finalvodyanov(name coopname, name application, checksum256 result_
          ++itr) {
         
         // Получаем результат для данного участника
-        auto result_entry = Capital::get_result_by_assignment_and_username(coopname, distribution.assignment_hash, itr->participant);
+        auto result_entry = Capital::get_result_by_project_and_username(coopname, distribution.project_hash, itr->participant);
         if (!result_entry.has_value()) continue;
         
         // Обновляем баланс участника (добавляем сумму от голосования Водянова)

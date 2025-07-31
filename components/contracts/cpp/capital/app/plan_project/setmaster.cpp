@@ -1,0 +1,24 @@
+void capital::setmaster(name coopname, checksum256 project_hash, name master) {
+    require_auth(coopname);
+    
+    // Проверяем что проект существует
+    auto project = Capital::Projects::get_project(coopname, project_hash);
+    eosio::check(project.has_value(), "Проект не найден");
+    
+    // Проверяем что пользователь подписал основной договор УХД
+    auto contributor = Capital::Contributors::get_contributor(coopname, master);
+    eosio::check(contributor.has_value(), "Мастер должен подписать основной договор УХД");
+    eosio::check(contributor -> status == Capital::Contributors::Status::ACTIVE, "Основной договор УХД не активен");
+    
+    // Проверяем что пользователь является участником проекта
+    eosio::check(Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, master), 
+                 "Мастер должен быть участником проекта");
+    
+    // Назначаем мастера проекта
+    Capital::project_index projects(_capital, coopname.value);
+    auto project_itr = projects.find(project->id);
+    
+    projects.modify(project_itr, coopname, [&](auto &p) {
+        p.master = master;
+    });
+} 

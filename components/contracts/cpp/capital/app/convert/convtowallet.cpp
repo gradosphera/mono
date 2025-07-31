@@ -22,6 +22,6 @@ void capital::convtowallet(eosio::name coopname, eosio::name application, eosio:
     });
     
     // Конвертируем средства из программы УХД в ЦПП "Цифровой Кошелёк"
-    std::string memo = "Конвертация паевого взноса по программе УХД в ЦПП 'Цифровой Кошелёк'";
+    std::string memo = Capital::Memo::get_convert_to_wallet_memo();
     Wallet::convert_between_programs(_capital, coopname, username, amount, _capital_program, _wallet_program, memo);
 } 

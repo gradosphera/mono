@@ -14,19 +14,7 @@ void capital::approveexpns(name coopname, name application, name approver, check
     i.approved_statement = approved_statement;
   });
   
-  auto exist_assignment = Capital::get_assignment(coopname, expense -> assignment_hash);
-  eosio::check(exist_assignment.has_value(),"Задание не найдено");
-  
-  auto contributor = Capital::get_active_contributor_with_appendix_or_fail(coopname, exist_assignment->project_hash, expense -> username);
-  
-  eosio::check(exist_assignment -> available >= expense -> amount, "Недостаточно средств в результате для списания расходов");
-
-  Capital::assignment_index assignments(_capital, coopname.value);
-  auto assignment = assignments.find(exist_assignment -> id);
-  
-  assignments.modify(assignment, coopname, [&](auto &r){
-    r.available -= expense -> amount;
-  });  
+  auto contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, expense->project_hash, expense -> username);
   
   //отправляем в совет
   action(permission_level{ _capital, "active"_n}, _soviet, "createagenda"_n,

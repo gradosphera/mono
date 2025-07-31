@@ -19,7 +19,7 @@ void capital::paycoordntr(name coopname, name application, checksum256 project_h
     });
     
     // Конвертируем средства из ЦПП "Благорост" в ЦПП "Цифровой Кошелёк"
-    std::string memo = "Выплата координатору проекта";
+    std::string memo = Capital::Memo::get_coordinator_payment_memo();
     //TODO: тут напрямую вроде так нельзя - надо проверить (только через заявление?)
     Wallet::convert_between_programs(_capital, coopname, coordinator, amount, _capital_program, _wallet_program, memo);
 } 

@@ -7,7 +7,7 @@ void capital::capauthwthd2(name coopname, checksum256 withdraw_hash, document2 a
   Capital::project_withdraws_index project_withdraws(_capital, coopname.value);
   auto withdraw = project_withdraws.find(exist_withdraw -> id);
   
-  std::string memo = "Зачёт части целевого паевого взноса по программе 'Капитализация' в качестве паевого взноса по участию в 'Цифровой Кошелёк'";
+  std::string memo = Capital::Memo::get_project_withdraw_memo();
 
   Wallet::sub_blocked_funds(_capital, coopname, withdraw->username, withdraw->amount, _capital_program, memo);
   Wallet::add_available_funds(_capital, coopname, withdraw->username, withdraw->amount, _wallet_program, memo);

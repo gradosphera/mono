@@ -3,7 +3,7 @@ void capital::fundprog(eosio::name coopname, asset amount, std::string memo) {
 
     Wallet::validate_asset(amount);
 
-    int64_t total_share_balance = Capital::get_capital_program_share_balance(coopname);
+    int64_t total_share_balance = Capital::Core::get_capital_program_share_balance(coopname);
         
     auto state = Capital::get_global_state(coopname);
     

@@ -12,7 +12,6 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] result_withdraw {
   uint64_t id;                                ///< Уникальный ID запроса на возврат.
   name coopname;                              ///< Имя аккаунта кооператива
   checksum256 project_hash;                    ///< Хэш проекта
-  checksum256 assignment_hash;                    ///< Хэш задания
   checksum256 withdraw_hash;                  ///< Уникальный внешний ключ
   name username;                              ///< Имя аккаунта участника, запрашивающего возврат.
   name status = "created"_n;                  ///< Статус взноса-возврата (created | approved | )

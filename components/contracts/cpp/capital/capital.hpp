@@ -2,6 +2,12 @@
 
 #pragma once
 
+#include <cstdint>
+
+// Константы
+const double COORDINATOR_PERCENT = 0.04; ///< Процент координатора (4%)
+const uint32_t THIRTY_DAYS_IN_SECONDS = 2592000;
+    
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include "../lib/common.hpp"
@@ -28,12 +34,9 @@ public:
     [[eosio::action]]
     void init(name coopname, name initiator);
 
+    //Возврат из результата  
     [[eosio::action]]
-    void createassign(name coopname, name application, checksum256 project_hash, checksum256 assignment_hash, eosio::name assignee, std::string description);
-
-    //Возврат из задания  
-    [[eosio::action]]
-    void createwthd1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 assignment_hash, checksum256 withdraw_hash, asset amount, document2 return_statement);
+    void createwthd1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document2 return_statement);
 
     [[eosio::action]]
     void capauthwthd1(eosio::name coopname, checksum256 withdraw_hash, document2 authorization);
@@ -75,7 +78,7 @@ public:
       eosio::name coopname,
       eosio::name application,
       eosio::name username,
-      checksum256 assignment_hash,
+      checksum256 project_hash,
       checksum256 result_hash
     );
     
@@ -97,30 +100,25 @@ public:
       eosio::name coopname,
       eosio::name application,
       eosio::name username,
-      checksum256 assignment_hash,
+      checksum256 project_hash,
       checksum256 convert_hash,
       document2 convert_statement
     );
     
     [[eosio::action]]
-    void startdistrbn(name coopname, name application, checksum256 assignment_hash);
-
-    [[eosio::action]]
     void addauthor(name coopname, name application, checksum256 project_hash, name author, uint64_t shares);
     
     // Коммиты
     [[eosio::action]]
-    void createcmmt(eosio::name coopname, eosio::name application, eosio::name username, checksum256 assignment_hash, checksum256 commit_hash, uint64_t contributed_hours);
+    void createcmmt(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours);
     [[eosio::action]]
     void approvecmmt(eosio::name coopname, checksum256 commit_hash, document2 empty_document);
     [[eosio::action]]
     void declinecmmt(eosio::name coopname, checksum256 commit_hash, std::string reason);
-    [[eosio::action]]
-    void delcmmt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 commit_hash);
     
     // Долги
     [[eosio::action]]
-    void createdebt(name coopname, name username, checksum256 assignment_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document2 statement);
+    void createdebt(name coopname, name username, checksum256 project_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document2 statement);
     
     [[eosio::action]]
     void approvedebt(eosio::name coopname, checksum256 debt_hash, document2 approved_statement);
@@ -167,23 +165,23 @@ public:
     void createinvest(name coopname, name application, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document2 statement);    
     
     [[eosio::action]]
-    void capauthinvst(eosio::name coopname, checksum256 invest_hash, document2 authorization);    
+    void approveinvst(eosio::name coopname, checksum256 invest_hash, document2 approved_statement);
     
     [[eosio::action]]
-    void approveinvst(name coopname, name application, name approver, checksum256 invest_hash, document2 approved_statement);
+    void declineinvst(eosio::name coopname, checksum256 invest_hash, document2 decline_statement);
     
-    [[eosio::action]]
-    void allocate(eosio::name coopname, eosio::name application, checksum256 project_hash, checksum256 assignment_hash, eosio::asset amount);
+    // [[eosio::action]]
+    // void allocate(eosio::name coopname, eosio::name application, checksum256 project_hash, eosio::asset amount);
     
-    [[eosio::action]]
-    void diallocate(eosio::name coopname, eosio::name application, checksum256 project_hash, checksum256 assignment_hash, eosio::asset amount);
+    // [[eosio::action]]
+    // void diallocate(eosio::name coopname, eosio::name application, checksum256 project_hash, eosio::asset amount);
     
     [[eosio::action]]
     void approvewthd1(name coopname, name application, name approver, checksum256 withdraw_hash, document2 approved_return_statement);
         
     // Расходы
     [[eosio::action]]
-    void createexpnse(eosio::name coopname, eosio::name application, checksum256 expense_hash, checksum256 assignment_hash, name creator, uint64_t fund_id, asset amount, std::string description, document2 statement);
+    void createexpnse(eosio::name coopname, eosio::name application, checksum256 expense_hash, checksum256 project_hash, name creator, uint64_t fund_id, asset amount, std::string description, document2 statement);
     
     [[eosio::action]]
     void approveexpns(name coopname, name application, name approver, checksum256 expense_hash, document2 approved_statement);
@@ -194,11 +192,14 @@ public:
     [[eosio::action]]
     void exppaycnfrm(eosio::name coopname, checksum256 expense_hash);
     
-
     // Членские взносы
     [[eosio::action]] void fundproj(eosio::name coopname, checksum256 project_hash, asset amount, std::string memo);
     [[eosio::action]] void refreshproj(name coopname, name application, checksum256 project_hash, name username);
     [[eosio::action]] void fundprog(eosio::name coopname, asset amount, std::string memo);
     [[eosio::action]] void refreshprog(name coopname, name application, name username);
     
+    // Планирование
+    [[eosio::action]] void setmaster(name coopname, checksum256 project_hash, name master);
+    [[eosio::action]] void openproject(name coopname, checksum256 project_hash);
+    [[eosio::action]] void setplan(name coopname, checksum256 project_hash, uint64_t plan_creators_time, asset plan_expenses, asset plan_hour_cost);
 };
