@@ -9,11 +9,16 @@ using namespace eosio;
 namespace Capital::Core {
 
   /**
+   * @brief Распределяет авторские средства между всеми авторами проекта пропорционально их долям.
+   */
+  void distribute_author_rewards(eosio::name coopname, const checksum256 &project_hash, const pools &delta_pools);
+
+  /**
    * @brief Функция расчета плановых показателей проекта
    */
   pools calculate_plan_generation_amounts(
     const eosio::asset& plan_hour_cost,
-    const uint64_t& plan_creators_time,
+    const uint64_t& plan_creators_hours,
     const eosio::asset& plan_expenses
   );
   

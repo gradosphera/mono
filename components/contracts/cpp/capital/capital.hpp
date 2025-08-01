@@ -7,7 +7,8 @@
 // Константы
 const double COORDINATOR_PERCENT = 0.04; ///< Процент координатора (4%)
 const uint32_t THIRTY_DAYS_IN_SECONDS = 2592000;
-    
+const uint32_t MAX_PROJECT_AUTHORS = 12;
+        
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include "../lib/common.hpp"
@@ -201,5 +202,6 @@ public:
     // Планирование
     [[eosio::action]] void setmaster(name coopname, checksum256 project_hash, name master);
     [[eosio::action]] void openproject(name coopname, checksum256 project_hash);
-    [[eosio::action]] void setplan(name coopname, checksum256 project_hash, uint64_t plan_creators_time, asset plan_expenses, asset plan_hour_cost);
+    [[eosio::action]] void startproject(name coopname, checksum256 project_hash);
+    [[eosio::action]] void setplan(name coopname, checksum256 project_hash, uint64_t plan_creators_hours, asset plan_expenses, asset plan_hour_cost);
 };

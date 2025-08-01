@@ -137,7 +137,7 @@ inline void validate_hierarchy_depth(eosio::name coopname, checksum256 project_h
           p.commits_count++;
           
           // Обновляем время создателей
-          p.fact.creators_time += calculated_fact.creators_time;
+          p.fact.creators_hours += calculated_fact.creators_hours;
           
           // Инкрементальное вычисление среднего для стоимости часа
           if (calculated_fact.hour_cost.amount > 0) {

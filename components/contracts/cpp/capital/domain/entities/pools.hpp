@@ -16,7 +16,7 @@ struct pools {
   eosio::asset hour_cost = asset(0, _root_govern_symbol);                 ///< Фактическая стоимость часа
 
   // Время создателей
-  uint64_t creators_time = 0;                                         ///< Время в часах (только для плана)
+  uint64_t creators_hours = 0;                                         ///< Время в часах (только для плана)
   
   // Коэффициент возврата себестоимости
   double return_cost_coefficient = 0.0;

@@ -5,7 +5,14 @@
 using namespace eosio;
 using std::string;
 
-namespace Capital {
+namespace Capital::Commits {
+
+/**
+ * @brief Статусы коммитов
+ */
+ namespace Status {
+  constexpr name CREATED = "created"_n;
+}
 
 /**
   * @brief Структура коммитов, хранящая данные о выполненных операциях в проекте.
@@ -19,16 +26,7 @@ namespace Capital {
     name status;                                 ///< Статус коммита (created | approved | authorized | act1 | act2 )
     checksum256 project_hash;                    ///< Хэш проекта, связанного с действием.
     checksum256 commit_hash;                     ///< Хэш действия.
-    
-    // Информация о времени и ставке
-    uint64_t creator_hours;                  ///< Количество часов, затраченных на коммит
-    eosio::asset rate_per_hour = asset(0, _root_govern_symbol); ///< Стоимость часа создателя
-    
-    // Структурированные суммы коммита
-    eosio::asset creator_base;                   ///< Себестоимость создателя (основа)
     pools amounts;                               ///< Рассчитанные показатели генерации
-    
-    std::string decline_comment;
     time_point_sec created_at;                   ///< Дата и время создания действия.
 
     uint64_t primary_key() const { return id; } ///< Основной ключ.
@@ -65,6 +63,20 @@ typedef eosio::multi_index<
 
 }
 
+
+/**
+ * @brief Получает действие по хэшу действия.
+ * @param coopname Имя кооператива (scope таблицы).
+ * @param hash Хэш действия.
+ * @return `commit` - найденное действие.
+ */
+ inline commit get_commit_or_fail(eosio::name coopname, const checksum256 &hash) {
+  auto commit = get_commit(coopname, hash);
+  eosio::check(commit.has_value(), "Коммит не найден");
+
+  return commit.value();
+}
+
 /**
  * @brief Удаляет коммит по хэшу действия.
  * @param coopname Имя кооператива (scope таблицы).
@@ -78,6 +90,60 @@ inline void delete_commit(eosio::name coopname, const checksum256 &hash) {
   eosio::check(itr != commit_index.end(), "Коммит не найден");
 
   commits.erase(*itr);
+}
+
+/**
+ * @brief Создает коммит и отправляет его на утверждение.
+ * @param coopname Имя кооператива.
+ * @param application Приложение, инициировавшее действие.
+ * @param username Имя пользователя.
+ * @param project_hash Хэш проекта.
+ * @param commit_hash Хэш коммита.
+ * @param calculated_fact Рассчитанные показатели генерации.
+ */
+inline void create_commit_with_approve(
+  eosio::name coopname,
+  eosio::name application,
+  eosio::name username,
+  checksum256 project_hash,
+  checksum256 commit_hash,
+  const pools &calculated_fact
+) {
+  // Создаем коммит
+  commit_index commits(_capital, coopname.value);
+  auto commit_id = get_global_id_in_scope(_capital, coopname, "commits"_n);
+  
+  // Создаем коммит в таблице commits
+  commits.emplace(coopname, [&](auto &c) {
+    c.id = commit_id;
+    c.status = Capital::Commits::Status::CREATED;
+    c.coopname = coopname;
+    c.application = application;
+    c.username = username;
+    c.project_hash = project_hash;
+    c.commit_hash = commit_hash;
+    c.amounts = calculated_fact;
+    c.created_at = current_time_point();
+  });
+
+  // Создаем пустой документ
+  auto empty_doc = document2{};
+  
+  // Отправляем на approve председателю
+  Action::send<createapprv_interface>(
+    _soviet,
+    "createapprv"_n,
+    _capital,
+    coopname,
+    username,
+    empty_doc,
+    ApprovesNames::Capital::CREATE_COMMIT,
+    commit_hash,
+    _capital,
+    "approvecmmt"_n,
+    "declinecmmt"_n,
+    std::string("")
+  );
 }
 
 } // namespace Capital

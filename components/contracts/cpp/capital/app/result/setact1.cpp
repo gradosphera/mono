@@ -4,11 +4,11 @@ void capital::setact1(eosio::name coopname, eosio::name application, eosio::name
   verify_document_or_fail(act);
 
   // commits
-  auto commit = Capital::get_commit(coopname, commit_hash);
+  auto commit = Capital::Commits::get_commit(coopname, commit_hash);
   eosio::check(commit.has_value(), "Объект коммита не найден");
   eosio::check(commit -> username == username, "Неверно указано имя пользователя владельца коммита");
 
-  Capital::commit_index commits(_capital, coopname.value);
+  Capital::Commits::commit_index commits(_capital, coopname.value);
   auto commit_for_modify = commits.find(commit -> id);
   
   // Проверяем статус. 

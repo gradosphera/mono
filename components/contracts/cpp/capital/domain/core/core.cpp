@@ -4,6 +4,53 @@ using namespace eosio;
 using std::string;
 
 namespace Capital::Core {
+  
+  /**
+  * @brief Распределяет авторские средства между всеми авторами проекта пропорционально их долям.
+  * @param coopname Имя кооператива (scope таблицы).
+  * @param project_hash Хэш проекта.
+  * @param delta_pools Объект с изменениями пулов.
+  */
+  void distribute_author_rewards(eosio::name coopname, const checksum256 &project_hash, const pools &delta_pools) {
+    // Получаем всех авторов проекта
+    auto authors = Circle::get_project_authors(coopname, project_hash);
+    
+    // Сначала подсчитываем общее количество авторских долей в проекте
+    uint64_t total_author_shares = 0;
+    for (const auto& author : authors) {
+        total_author_shares += author.author_shares;
+    }
+    
+    // Если нет авторов, то нечего распределять
+    if (total_author_shares == 0 || authors.empty()) {
+        return;
+    }
+    
+    // Распределяем средства пропорционально долям
+    Circle::segments_index segments(_capital, coopname.value);
+    for (const auto& author_segment : authors) {
+        auto segment_it = segments.find(author_segment.id);
+        
+        // Вычисляем долю автора
+        double author_ratio = static_cast<double>(author_segment.author_shares) / static_cast<double>(total_author_shares);
+        
+        // Вычисляем суммы для данного автора
+        eosio::asset author_base_share = eosio::asset(
+            static_cast<int64_t>(delta_pools.authors_base_pool.amount * author_ratio), 
+            delta_pools.authors_base_pool.symbol
+        );
+        eosio::asset author_bonus_share = eosio::asset(
+            static_cast<int64_t>(delta_pools.authors_bonus_pool.amount * author_ratio), 
+            delta_pools.authors_bonus_pool.symbol
+        );
+        
+        // Обновляем сегмент автора
+        segments.modify(segment_it, _capital, [&](auto &g) {
+            g.author_base += author_base_share;
+            g.author_bonus += author_bonus_share;
+        });
+    }
+  }
   /**
   * @brief Функция расчета премий вкладчиков
   */
@@ -42,18 +89,18 @@ namespace Capital::Core {
   */
   pools calculate_plan_generation_amounts(
     const eosio::asset& plan_hour_cost,
-    const uint64_t& plan_creators_time,
+    const uint64_t& plan_creators_hours,
     const eosio::asset& plan_expenses
   ) {
     pools plan;
     
     // устанавливаем стоимость часа и время
     plan.hour_cost = plan_hour_cost;
-    plan.creators_time = plan_creators_time;
+    plan.creators_hours = plan_creators_hours;
     plan.expenses_pool = plan_expenses;
     
     // расчет плановой себестоимости создателя (double)
-    double creator_double_amount = static_cast<double>(plan_creators_time) * static_cast<double>(plan_hour_cost.amount);
+    double creator_double_amount = static_cast<double>(plan_creators_hours) * static_cast<double>(plan_hour_cost.amount);
     
     // расчет плановой себестоимости создателя
     plan.creators_base_pool = asset(int64_t(creator_double_amount), _root_govern_symbol);
@@ -65,7 +112,7 @@ namespace Capital::Core {
     plan.authors_base_pool = eosio::asset(int64_t(author_double_amount), _root_govern_symbol);
     
     // расчет планируемых премий координаторов
-    plan.coordinators_base_pool = plan.creators_base_pool + plan.authors_base_pool + plan.expenses_pool * COORDINATOR_PERCENT;
+    plan.coordinators_base_pool = (plan.creators_base_pool + plan.authors_base_pool + plan.expenses_pool) * COORDINATOR_PERCENT;
 
     // расчет планируемой суммы инвестиций
     plan.invest_pool = plan.creators_base_pool + plan.authors_base_pool + plan.coordinators_base_pool + plan.expenses_pool;
@@ -90,7 +137,7 @@ namespace Capital::Core {
     pools fact;
     
     // расчет фактических показателей генерации
-    fact.creators_time = creator_hours;
+    fact.creators_hours = creator_hours;
     fact.hour_cost = rate_per_hour;
     
     // расчет себестоимости создателя
@@ -135,7 +182,7 @@ namespace Capital::Core {
     eosio::symbol sym = investment_amount.symbol;
     
     // Рассчитываем премию координатора от инвестиций
-    return eosio::asset(int64_t(amount * COORDINATOR_PERCENT), sym);
+    return eosio::asset(int64_t(amount * COORDINATOR_PERCENT / (1 + COORDINATOR_PERCENT)), sym);
   }
 
   /**

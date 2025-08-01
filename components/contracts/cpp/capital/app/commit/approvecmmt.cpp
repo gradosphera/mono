@@ -2,21 +2,20 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
   require_auth(_soviet);
 
   // Получаем коммит
-  auto commit = Capital::get_commit(coopname, commit_hash);
-  eosio::check(commit.has_value(), "Коммит не найден");
-  
-  // Используем уже рассчитанные при создании коммита фактические показатели
-  auto calculated_fact = commit -> amounts;
+  auto commit = Capital::Commits::get_commit_or_fail(coopname, commit_hash);
   
   // Добавляем коммит к проекту
-  Capital::Projects::add_commit(coopname, commit -> project_hash, calculated_fact);
+  Capital::Projects::add_commit(coopname, commit.project_hash, commit.amounts);
 
   // Добавляем вкладчику накопительные часы создателя
-  Capital::Contributors::add_creator_hours_to_contributor(coopname, commit -> project_hash, commit -> username, commit -> creator_hours);
+  Capital::Contributors::add_creator_hours_to_contributor(coopname, commit.project_hash, commit.username, commit.amounts.creators_hours);
 
   // Обновляем или создаем сегмент создателя
-  Capital::Circle::upsert_creator_segment(coopname, commit -> project_hash, commit -> username, commit -> creator_base);
+  Capital::Circle::upsert_creator_segment(coopname, commit.project_hash, commit.username, commit.amounts);
+
+  // Распределяем авторские средства между всеми авторами проекта
+  Capital::Core::distribute_author_rewards(coopname, commit.project_hash, commit.amounts);
 
   // Удаляем коммит после обработки
-  Capital::delete_commit(coopname, commit_hash);  
+  Capital::Commits::delete_commit(coopname, commit_hash);  
 };

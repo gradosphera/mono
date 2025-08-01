@@ -20,6 +20,7 @@
 #include "app/plan_project/addauthor.cpp"
 #include "app/plan_project/setplan.cpp"
 #include "app/plan_project/openproject.cpp"
+#include "app/plan_project/startproject.cpp"
 
 // Присоединиться к проекту
 #include "app/join_project/signappndx.cpp"
