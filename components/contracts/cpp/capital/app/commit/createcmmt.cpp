@@ -26,7 +26,7 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   eosio::asset creator_base = contributor -> rate_per_hour * creator_hours;
   
   // Вычисляем фактическое изменение пулов
-  auto delta_pools = Capital::Core::calculate_fact_generation_amounts(contributor -> rate_per_hour, creator_hours);
+  auto delta_pools = Capital::Core::Generation::calculate_fact_generation_amounts(contributor -> rate_per_hour, creator_hours);
   
   // Создаем коммит и отправляем на approve
   Capital::Commits::create_commit_with_approve(

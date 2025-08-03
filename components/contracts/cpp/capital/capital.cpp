@@ -2,31 +2,48 @@
 #include "capital.hpp"
 
 // Подключение реализации core функций
-#include "domain/core/core.cpp"
+#include "domain/core/generation/generation.cpp"
+#include "domain/core/crps/crps.cpp"
+#include "domain/core/balances/balances.cpp"
+#include "domain/core/voting/voting.cpp"
 
 // Регистрация вкладчика (приём договора УХД)
 #include "app/register_contributor/approvereg.cpp"
 #include "app/register_contributor/declinereg.cpp"
 #include "app/register_contributor/regcontrib.cpp"
 
-// Создание проекта (шаблона приложения к договору УХД)
-#include "app/create_project/createproj.cpp"
-
-// Управление кооперативом на контракте
+// Инициализация
 #include "app/managment/init.cpp"
+
+// Создать проект
+#include "app/managment/createproj.cpp"
+// Открыть проект на приём инвестиций
+#include "app/managment/openproject.cpp"
+// Запустить проект на приём коммитов
+#include "app/managment/startproject.cpp"
+// Завершение проекта и начало голосования
+#include "app/managment/cmpltproject.cpp"
+// Завершение голосования
+#include "app/managment/cmpltvoting.cpp"
+// Закрытие проекта
+#include "app/managment/closeproject.cpp"
+// Удаление проекта
+#include "app/managment/delproject.cpp"
+
 
 // Планирование
 #include "app/plan_project/setmaster.cpp"
 #include "app/plan_project/addauthor.cpp"
 #include "app/plan_project/setplan.cpp"
-#include "app/plan_project/openproject.cpp"
-#include "app/plan_project/startproject.cpp"
 
 // Присоединиться к проекту
 #include "app/join_project/signappndx.cpp"
 #include "app/join_project/apprvappndx.cpp"
 #include "app/join_project/dclineappndx.cpp"
 
+// CRPS
+#include "app/crps/rfrshsegment.cpp"
+#include "app/crps/addcontrib.cpp"
 
 // Аллокация средств
 // #include "app/allocation/allocate.cpp"

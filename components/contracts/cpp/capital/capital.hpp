@@ -8,7 +8,10 @@
 const double COORDINATOR_PERCENT = 0.04; ///< Процент координатора (4%)
 const uint32_t THIRTY_DAYS_IN_SECONDS = 2592000;
 const uint32_t MAX_PROJECT_AUTHORS = 12;
-        
+const uint32_t VOTING_PERIOD_IN_DAYS = 7; ///< Период голосования (7 дней)
+const double AUTHORS_VOTING_PERCENT = 38.2; ///< Процент премий авторов для голосования
+const double CREATORS_VOTING_PERCENT = 38.2; ///< Процент премий создателей для голосования
+
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include "../lib/common.hpp"
@@ -35,6 +38,42 @@ public:
     [[eosio::action]]
     void init(name coopname, name initiator);
 
+    // Создать проект
+    [[eosio::action]]
+    void createproj (
+      eosio::name coopname, 
+      checksum256 project_hash,
+      checksum256 parent_project_hash,
+      double parent_distribution_ratio,
+      std::string title, 
+      std::string description,
+      std::string meta
+    );
+    
+    // Открыть проект на приём инвестиций
+    [[eosio::action]]
+    void openproject(name coopname, checksum256 project_hash);
+    
+    // Запустить проект на приём коммитов
+    [[eosio::action]]
+    void startproject(name coopname, checksum256 project_hash);
+    
+    // Завершить проект и начать голосование
+    [[eosio::action]]
+    void cmpltproject(name coopname, checksum256 project_hash);
+    
+    // Завершить голосование
+    [[eosio::action]]
+    void cmpltvoting(name coopname, checksum256 project_hash);
+    
+    // Закрыть проект
+    [[eosio::action]]
+    void closeproject(name coopname, checksum256 project_hash);
+    
+    // Удалить проект
+    [[eosio::action]]
+    void delproject(name coopname, checksum256 project_hash);
+    
     //Возврат из результата  
     [[eosio::action]]
     void createwthd1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document2 return_statement);
@@ -62,16 +101,6 @@ public:
     [[eosio::action]]
     void approvewthd3(name coopname, name application, name approver, checksum256 withdraw_hash, document2 approved_return_statement);
 
-    [[eosio::action]]
-    void createproj (
-      eosio::name coopname, 
-      checksum256 project_hash,
-      checksum256 parent_project_hash,
-      double parent_distribution_ratio,
-      std::string title, 
-      std::string description,
-      std::string meta
-    );
     
     // results
     [[eosio::action]]
@@ -201,7 +230,11 @@ public:
     
     // Планирование
     [[eosio::action]] void setmaster(name coopname, checksum256 project_hash, name master);
-    [[eosio::action]] void openproject(name coopname, checksum256 project_hash);
-    [[eosio::action]] void startproject(name coopname, checksum256 project_hash);
     [[eosio::action]] void setplan(name coopname, checksum256 project_hash, uint64_t plan_creators_hours, asset plan_expenses, asset plan_hour_cost);
-};
+    
+    // CRPS
+    [[eosio::action]] void rfrshsegment(name coopname, checksum256 project_hash, name username);
+
+    [[eosio::action]] void addcontrib(name coopname, checksum256 project_hash, name username);
+    
+  };

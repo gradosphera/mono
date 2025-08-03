@@ -8,7 +8,7 @@ void capital::approveinvst(eosio::name coopname, checksum256 invest_hash, docume
   auto contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, invest.project_hash, invest.username);
 
   // Добавляем инвестора как генератора с investor_base
-  Capital::Circle::upsert_investor_segment(coopname, invest.project_hash, invest.username, invest.amount);
+  Capital::Core::upsert_investor_segment(coopname, invest.project_hash, invest.username, invest.amount);
     
   // Обновляем проект - добавляем инвестиции
   Capital::Projects::add_investments(coopname, invest.project_hash, invest.amount);
@@ -16,10 +16,11 @@ void capital::approveinvst(eosio::name coopname, checksum256 invest_hash, docume
   // Обрабатываем координаторские взносы, если есть координатор и сумма
   if (invest.coordinator != eosio::name{} && invest.coordinator_amount.amount > 0) {
     // Создаём сегмент координатора
-    Capital::Circle::upsert_coordinator_segment(coopname, invest.project_hash, invest.coordinator, invest.coordinator_amount);
+    Capital::Core::upsert_coordinator_segment(coopname, invest.project_hash, invest.coordinator, invest.coordinator_amount);
     
     // Добавляем координаторский взнос в проект
     Capital::Projects::add_coordinator_funds(coopname, invest.project_hash, invest.coordinator_amount);
+    
   }
   
   std::string memo = Capital::Memo::get_approve_invest_memo(contributor -> id);

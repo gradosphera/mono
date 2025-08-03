@@ -10,7 +10,7 @@ void capital::addauthor(name coopname, name application, checksum256 project_has
     
     // Проверяем, что пользователь еще не является автором
     auto existing_segment = Capital::Circle::get_segment(coopname, project_hash, author);
-    if (existing_segment.has_value() && existing_segment->is_author) {
+    if (existing_segment.has_value() && existing_segment->author_shares > 0) {
         eosio::check(false, "Пользователь уже является автором проекта");
     }
     
@@ -19,7 +19,7 @@ void capital::addauthor(name coopname, name application, checksum256 project_has
     eosio::check(current_authors_count < MAX_PROJECT_AUTHORS, "Превышено максимальное количество авторов в проекте");
     
     // Добавляем автора как генератора с авторскими долями
-    Capital::Circle::upsert_author_segment(coopname, project_hash, author, shares);
+    Capital::Core::upsert_author_segment(coopname, project_hash, author, shares);
 
     // Обновляем проект
     Capital::Projects::add_author(coopname, project_hash, shares);

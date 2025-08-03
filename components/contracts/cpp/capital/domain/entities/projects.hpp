@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pools.hpp"
+#include "votes.hpp"
 
 using namespace eosio;
 using std::string;
@@ -39,6 +40,9 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
   
   pools plan;                                                   ///< Плановые показатели
   pools fact;                                                   ///< Фактические показатели
+  
+  // Голосование по методу Водянова
+  voting_data voting;
   
   eosio::asset total = asset(0, _root_govern_symbol); // стоимость проекта с учетом генерации и капитализации
   
@@ -80,6 +84,7 @@ namespace Capital::Projects {
     const eosio::name CREATED = "created"_n;     ///< Проект создан
     const eosio::name OPENED = "opened"_n;       ///< Проект открыт для инвестиций
     const eosio::name ACTIVE = "active"_n;       ///< Проект активен для коммитов
+    const eosio::name VOTING = "voting"_n;       ///< Проект на голосовании
     const eosio::name COMPLETED = "completed"_n; ///< Проект завершен
     const eosio::name CLOSED = "closed"_n;       ///< Проект закрыт
   }
@@ -222,7 +227,7 @@ inline void validate_hierarchy_depth(eosio::name coopname, checksum256 project_h
           p.fact.invest_pool += amount;
           
           // Пересчитываем коэффициент возврата себестоимости
-          p.fact.return_cost_coefficient = Capital::Core::calculate_return_cost_coefficient(p.fact);
+          p.fact.return_cost_coefficient = Capital::Core::Generation::calculate_return_cost_coefficient(p.fact);
       });
   }
 
@@ -238,20 +243,135 @@ inline void validate_hierarchy_depth(eosio::name coopname, checksum256 project_h
       project_index projects(_capital, coopname.value);
       auto project = projects.find(exist_project.id);
       
+      // Рассчитываем награду координаторов от инвестиций
+      eosio::asset coordinator_base = Capital::Core::Generation::calculate_coordinator_bonus_from_investment(amount);
+      
       projects.modify(project, coopname, [&](auto &p) {
           // Накапливаем инвестиции, привлеченные координаторами  
           p.fact.coordinators_investment_pool += amount;
           
-          // Пересчитываем пул премий координаторов
-          p.fact.coordinators_base_pool = Capital::Core::calculate_coordinator_bonus_from_investment(p.fact.coordinators_investment_pool);
+          // Накапливаем общий пул премий координаторов
+          p.fact.coordinators_base_pool += coordinator_base;
           
           // Пересчитываем коэффициент возврата себестоимости
-          p.fact.return_cost_coefficient = Capital::Core::calculate_return_cost_coefficient(p.fact);
+          p.fact.return_cost_coefficient = Capital::Core::Generation::calculate_return_cost_coefficient(p.fact);
           
           // Пересчитываем премии вкладчиков, т.к. премии координаторов влияют на премии вкладчиков
-          p.fact.contributors_bonus_pool = Capital::Core::calculate_contributors_bonus_pool(p.fact);
-
+          p.fact.contributors_bonus_pool = Capital::Core::Generation::calculate_contributors_bonus_pool(p.fact);
       });
+
+      // Распределяем награды координаторов через CRPS систему
+      Capital::Core::update_coordinator_crps(coopname, project_hash, coordinator_base);
+  }
+  
+  
+  /**
+   * @brief Увеличивает количество инвесторских долей в проекте на 1
+   */
+   inline void increment_total_investor_shares(eosio::name coopname, const checksum256 &project_hash) {
+    Capital::project_index projects(_capital, coopname.value);
+    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+    
+    projects.modify(project, _capital, [&](auto &p) {
+      p.fact.total_investor_shares += 1;
+    });
   }
 
-  }// namespace Project
+  /**
+   * @brief Увеличивает количество вкладчических долей в проекте на указанное количество
+   */
+  inline void increment_total_contributor_shares(eosio::name coopname, const checksum256 &project_hash, uint64_t shares_amount) {
+    Capital::project_index projects(_capital, coopname.value);
+    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+    
+    projects.modify(project, _capital, [&](auto &p) {
+      p.fact.total_contributor_shares += shares_amount;
+    });
+  }
+  
+  /**
+   * @brief Увеличивает количество авторских долей в проекте на 1
+   */
+  inline void increment_total_author_shares(eosio::name coopname, const checksum256 &project_hash) {
+    Capital::project_index projects(_capital, coopname.value);
+    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+    
+    projects.modify(project, _capital, [&](auto &p) {
+      p.fact.total_author_shares += 1;
+    });
+  }
+  
+    /**
+   * @brief Увеличивает количество координаторских долей в проекте на 1
+   */
+  inline void increment_total_coordinator_shares(eosio::name coopname, const checksum256 &project_hash) {
+    Capital::project_index projects(_capital, coopname.value);
+    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+    
+    projects.modify(project, _capital, [&](auto &p) {
+      p.fact.total_coordinator_shares += 1;
+    });
+  }
+  
+  /**
+   * @brief Увеличивает количество создательских долей в проекте на 1
+   */
+  inline void increment_total_creator_shares(eosio::name coopname, const checksum256 &project_hash) {
+    Capital::project_index projects(_capital, coopname.value);
+    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+    
+    projects.modify(project, _capital, [&](auto &p) {
+      p.fact.total_creator_shares += 1;
+    });
+  }
+
+  /**
+   * @brief Увеличивает счетчик полученных голосов в проекте
+   */
+  inline void increment_votes_received(eosio::name coopname, const checksum256 &project_hash) {
+    auto exist_project = get_project_or_fail(coopname, project_hash);
+    
+    project_index projects(_capital, coopname.value);
+    auto project = projects.find(exist_project.id);
+    
+    projects.modify(project, _capital, [&](auto &p) {
+      p.voting.votes_received++;
+    });
+  }
+
+  /**
+   * @brief Увеличивает счетчик общего количества участников голосования в проекте
+   */
+  inline void increment_total_voters(eosio::name coopname, const checksum256 &project_hash) {
+    auto exist_project = get_project_or_fail(coopname, project_hash);
+    
+    project_index projects(_capital, coopname.value);
+    auto project = projects.find(exist_project.id);
+    
+    projects.modify(project, _capital, [&](auto &p) {
+      p.voting.total_voters++;
+    });
+  }
+
+
+
+  /**
+   * @brief Инициализирует данные голосования в проекте
+   * @param coopname Имя кооператива
+   * @param project_hash Хэш проекта
+   * @param amounts Рассчитанные суммы для голосования
+   */
+  inline void initialize_voting_amounts(eosio::name coopname, const checksum256 &project_hash, 
+                                   const voting_amounts &amounts) {
+    auto exist_project = get_project_or_fail(coopname, project_hash);
+    
+    project_index projects(_capital, coopname.value);
+    auto project_itr = projects.find(exist_project.id);
+    
+    projects.modify(project_itr, _capital, [&](auto &p) {
+      p.voting.amounts = amounts;
+    });
+  }
+
+
+}// namespace Project

@@ -2,16 +2,11 @@
 
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
-#include "../entities/pools.hpp"
+#include "../../entities/pools.hpp"
 
 using namespace eosio;
 
-namespace Capital::Core {
-
-  /**
-   * @brief Распределяет авторские средства между всеми авторами проекта пропорционально их долям.
-   */
-  void distribute_author_rewards(eosio::name coopname, const checksum256 &project_hash, const pools &delta_pools);
+namespace Capital::Core::Generation {
 
   /**
    * @brief Функция расчета плановых показателей проекта
@@ -41,16 +36,6 @@ namespace Capital::Core {
    * @brief Функция расчета коэффициента возврата себестоимости
    */
   double calculate_return_cost_coefficient(const pools& current_pools);
-
-  /**
-   * @brief Получение баланса паевых взносов по программе капитализации
-   */
-  int64_t get_capital_program_share_balance(eosio::name coopname);
-
-  /**
-   * @brief Получение баланса паевых взносов пользователя в программе капитализации
-   */
-  int64_t get_capital_user_share_balance(eosio::name coopname, eosio::name username);
 
   /**
    * @brief Распределение паевых средств проекта

@@ -48,6 +48,17 @@ struct pools {
   // Пул входящих инвестиций
   eosio::asset invest_pool = asset(0, _root_govern_symbol);            
   
+  // CRPS поля для масштабируемого распределения
+  uint64_t total_author_shares = 0;                         ///< Общее количество авторских долей в проекте
+  uint64_t total_coordinator_shares = 0;                    ///< Общее количество координаторских долей в проекте
+  uint64_t total_creator_shares = 0;                        ///< Общее количество создательских долей в проекте
+  uint64_t total_investor_shares = 0;                       ///< Общее количество инвестрских долей в проекте
+  uint64_t total_contributor_shares = 0;                    ///< Общее количество вкладчических долей в проекте
+  int64_t author_base_cumulative_reward_per_share = 0;     ///< Накопительная базовая награда на авторскую долю  
+  int64_t author_bonus_cumulative_reward_per_share = 0;    ///< Накопительная бонусная награда на авторскую долю
+  int64_t coordinator_cumulative_reward_per_share = 0;     ///< Накопительная награда на координаторскую долю
+  int64_t contributor_cumulative_reward_per_share = 0;     ///< Накопительная награда на вкладчическую долю
+  
 };
 
 } // namespace Capital 

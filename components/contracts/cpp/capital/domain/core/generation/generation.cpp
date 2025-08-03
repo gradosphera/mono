@@ -1,56 +1,11 @@
-#include "core.hpp"
+#include "generation.hpp"
 
 using namespace eosio;
 using std::string;
 
-namespace Capital::Core {
+namespace Capital::Core::Generation {
   
-  /**
-  * @brief Распределяет авторские средства между всеми авторами проекта пропорционально их долям.
-  * @param coopname Имя кооператива (scope таблицы).
-  * @param project_hash Хэш проекта.
-  * @param delta_pools Объект с изменениями пулов.
-  */
-  void distribute_author_rewards(eosio::name coopname, const checksum256 &project_hash, const pools &delta_pools) {
-    // Получаем всех авторов проекта
-    auto authors = Circle::get_project_authors(coopname, project_hash);
-    
-    // Сначала подсчитываем общее количество авторских долей в проекте
-    uint64_t total_author_shares = 0;
-    for (const auto& author : authors) {
-        total_author_shares += author.author_shares;
-    }
-    
-    // Если нет авторов, то нечего распределять
-    if (total_author_shares == 0 || authors.empty()) {
-        return;
-    }
-    
-    // Распределяем средства пропорционально долям
-    Circle::segments_index segments(_capital, coopname.value);
-    for (const auto& author_segment : authors) {
-        auto segment_it = segments.find(author_segment.id);
-        
-        // Вычисляем долю автора
-        double author_ratio = static_cast<double>(author_segment.author_shares) / static_cast<double>(total_author_shares);
-        
-        // Вычисляем суммы для данного автора
-        eosio::asset author_base_share = eosio::asset(
-            static_cast<int64_t>(delta_pools.authors_base_pool.amount * author_ratio), 
-            delta_pools.authors_base_pool.symbol
-        );
-        eosio::asset author_bonus_share = eosio::asset(
-            static_cast<int64_t>(delta_pools.authors_bonus_pool.amount * author_ratio), 
-            delta_pools.authors_bonus_pool.symbol
-        );
-        
-        // Обновляем сегмент автора
-        segments.modify(segment_it, _capital, [&](auto &g) {
-            g.author_base += author_base_share;
-            g.author_bonus += author_bonus_share;
-        });
-    }
-  }
+  
   /**
   * @brief Функция расчета премий вкладчиков
   */
@@ -222,24 +177,6 @@ namespace Capital::Core {
     };
   };
 
-  /**
-   * @brief Функция получения баланса паевых взносов по программе капитализации
-   */
-  int64_t get_capital_program_share_balance(eosio::name coopname) {
-    auto capital_program = get_capital_program_or_fail(coopname);
-    
-    return capital_program.available -> amount + capital_program.blocked -> amount;
-  }
-
-  /**
-   * @brief Функция получения баланса паевых взносов пользователя в программе капитализации
-   */
-  int64_t get_capital_user_share_balance(eosio::name coopname, eosio::name username) {
-    auto wallet = Capital::get_capital_wallet(coopname, username);
-    eosio::check(wallet.has_value(), "Кошелёк пайщика в программе не найден");
-
-    return wallet -> available.amount + wallet -> blocked -> amount;
-  }
 
 
 } // namespace Capital::Core
