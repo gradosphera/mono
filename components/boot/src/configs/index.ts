@@ -92,6 +92,14 @@ export default {
       code_permissions_to: ['loan'],
     },
     {
+      name: 'ledger',
+      code_permissions_to: ['ledger'],
+    },
+    {
+      name: 'test',
+      code_permissions_to: ['test'],
+    },
+    {
       name: 'meet',
       code_permissions_to: ['meet'],
     },

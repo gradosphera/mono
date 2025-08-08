@@ -41,7 +41,7 @@ export class CooperativeClass {
     await this.blockchain.createProgram({
       coopname,
       username: coopname,
-      type: 'cooplace',
+      type: 'marketplace',
       title: 'КООПЛЕЙС',
       announce: '',
       description: '',
