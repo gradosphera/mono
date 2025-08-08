@@ -14,52 +14,39 @@ void capital::createwthd2(name coopname, name application, name username, checks
   // Проверяем приложение к проекту
   eosio::check(Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, username), 
                "Пайщик не подписывал приложение к договору УХД для данного проекта");
-  eosio::check(exist_contributor -> pending_rewards >= amount, "Недостаточно накопленных средств для создания запроса на возврат");
 
-  Capital::contributor_index contributors(_capital, coopname.value);
-  auto contributor = contributors.find(exist_contributor -> id);
+  // Проверяем что кошелек проекта существует и обновлен
+  auto project_wallet = Capital::get_project_wallet_or_fail(coopname, project_hash, username, 
+                                                           "Кошелек проекта не найден. Необходимо сначала сконвертировать сегмент в кошелек проекта");
 
-  eosio::check(contributor->share_balance >= amount, "Недостаточно долей для уменьшения");
+  // Обновляем кошелек проекта перед проверкой
+  Capital::Core::refresh_project_wallet_membership_rewards(coopname, project_hash, username);
+  
+  // Получаем обновленный кошелек проекта
+  auto updated_wallet = Capital::get_project_wallet_or_fail(coopname, project_hash, username, 
+                                                          "Кошелек проекта не найден");
 
-  // Обновление долей
-  contributors.modify(contributor, coopname, [&](auto &c) {
-    c.pending_rewards -= amount;
-    c.returned += amount;
-    c.share_balance -= amount;
-  });
+  // Проверяем достаточность накопленных средств от членских взносов
+  eosio::check(updated_wallet.membership_available >= amount, 
+               "Недостаточно накопленных средств от членских взносов для создания запроса на возврат");
 
-  // Обновление проекта
-  Capital::project_index projects(_capital, coopname.value);
-  auto project = projects.find(exist_project->id);
+  // Проверяем достаточность available средств в проекте
+  Capital::Projects::subtract_membership_available(coopname, project_hash, amount);
 
-  int64_t prev_total_shares = project->total_share_balance.amount;
-  int64_t new_total_shares = prev_total_shares - amount.amount;
-  eosio::check(new_total_shares >= 0, "Нельзя уменьшить total_shares ниже 0");
-
-  if (new_total_shares > 0) {
-    projects.modify(project, coopname, [&](auto &p) {
-      p.membership_cumulative_reward_per_share = (p.membership_cumulative_reward_per_share * prev_total_shares) / new_total_shares;
-      p.total_share_balance -= amount;
-    });
-  } else {
-    projects.modify(project, coopname, [&](auto &p) {
-      p.membership_cumulative_reward_per_share = 0;
-      p.total_share_balance = asset(0, _root_govern_symbol);
-    });
-  }
-
-  // Запись возврата
+  // Запись возврата без изменения долей участника
   auto exist_withdraw = Capital::get_project_withdraw(coopname, withdraw_hash);
   eosio::check(!exist_withdraw.has_value(), "Заявка на взнос-возврат с таким хэшем уже существует");
 
   Capital::project_withdraws_index project_withdraws(_capital, coopname.value);
+  
   project_withdraws.emplace(coopname, [&](auto &w) {
     w.id = get_global_id_in_scope(_capital, coopname, "withdraws2"_n);
+    w.status = Capital::ProjectWithdraw::Status::CREATED;
     w.coopname = coopname;
     w.withdraw_hash = withdraw_hash;
     w.project_hash = project_hash;
     w.username = username;
     w.amount = amount;
-    w.return_statement = return_statement;
+    w.statement = return_statement;
   });
 }

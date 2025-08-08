@@ -4,13 +4,12 @@
 
 #include <cstdint>
 
-// Константы
-const double COORDINATOR_PERCENT = 0.04; ///< Процент координатора (4%)
-const uint32_t THIRTY_DAYS_IN_SECONDS = 2592000;
-const uint32_t MAX_PROJECT_AUTHORS = 12;
-const uint32_t VOTING_PERIOD_IN_DAYS = 7; ///< Период голосования (7 дней)
-const double AUTHORS_VOTING_PERCENT = 38.2; ///< Процент премий авторов для голосования
-const double CREATORS_VOTING_PERCENT = 38.2; ///< Процент премий создателей для голосования
+// Коэффициенты (константы бизнес-логики; не управляются конфигом)
+const double CREATORS_BONUS_COEFFICIENT = 1; ///< Коэффициент премий создателей от своей себестоимости (100%)
+const double AUTHOR_BASE_COEFFICIENT = 0.618; ///< Коэффициент авторской себестоимости от себестоимости создателя (61.8%)
+const double AUTHOR_BONUS_COEFFICIENT = 1;    ///< Коэффициент премий авторов от своей себестоимости (100%)
+const double CONTRIBUTORS_BONUS_COEFFICIENT = 1.618; ///< Коэффициент премий вкладчиков от себестоимостей создателей, авторов и координаторов (161.8%)
+const uint32_t MAX_PROJECT_AUTHORS = 12; ///< Максимальное количество авторов в проекте
 
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
@@ -31,20 +30,18 @@ public:
     using contract::contract;
     
     /**
-     * @brief Инициализирует контракт, устанавливая глобальное состояние.
+     * @brief Устанавливает или обновляет конфигурацию контракта для кооператива.
      * \ingroup public_actions
-     * Это действие должно быть вызвано один раз после развертывания контракта.
      */
     [[eosio::action]]
-    void init(name coopname, name initiator);
+    void setconfig(name coopname, name initiator, Capital::config cfg);
 
     // Создать проект
     [[eosio::action]]
     void createproj (
       eosio::name coopname, 
       checksum256 project_hash,
-      checksum256 parent_project_hash,
-      double parent_distribution_ratio,
+      checksum256 parent_hash,
       std::string title, 
       std::string description,
       std::string meta
@@ -65,6 +62,14 @@ public:
     // Завершить голосование
     [[eosio::action]]
     void cmpltvoting(name coopname, checksum256 project_hash);
+
+    // Подсчитать результаты голосования для участника
+    [[eosio::action]]
+    void finalvoting(name coopname, name application, name username, checksum256 project_hash);
+    
+    // Проголосовать по методу Водянова
+    [[eosio::action]]
+    void submitvote(name coopname, name application, name voter, checksum256 project_hash, std::vector<std::pair<name, asset>> votes);
     
     // Закрыть проект
     [[eosio::action]]
@@ -74,13 +79,10 @@ public:
     [[eosio::action]]
     void delproject(name coopname, checksum256 project_hash);
     
-    //Возврат из результата  
+    // Конвертация сегмента
     [[eosio::action]]
-    void createwthd1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document2 return_statement);
+    void convertsegm(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 convert_hash, asset wallet_amount, asset capital_amount, asset project_amount, document2 convert_statement);
 
-    [[eosio::action]]
-    void capauthwthd1(eosio::name coopname, checksum256 withdraw_hash, document2 authorization);
-    
     // Возврат из проекта    
     [[eosio::action]]
     void createwthd2(name coopname, name application, name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document2 return_statement);
@@ -89,11 +91,14 @@ public:
     void capauthwthd2(eosio::name coopname, checksum256 withdraw_hash, document2 authorization);
     
     [[eosio::action]]
+    void capdeclwthd2(name coopname, checksum256 withdraw_hash, std::string reason);
+    
+    [[eosio::action]]
     void approvewthd2(name coopname, name application, name approver, checksum256 withdraw_hash, document2 approved_return_statement);
 
     // Возврат из программы
     [[eosio::action]]
-    void createwthd3(name coopname, name application, name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document2 return_statement);
+    void createwthd3(name coopname, name application, name username, checksum256 withdraw_hash, asset amount, document2 return_statement);
     
     [[eosio::action]]
     void capauthwthd3(eosio::name coopname, checksum256 withdraw_hash, document2 authorization);
@@ -101,19 +106,13 @@ public:
     [[eosio::action]]
     void approvewthd3(name coopname, name application, name approver, checksum256 withdraw_hash, document2 approved_return_statement);
 
+    [[eosio::action]]
+    void capdeclwthd3(name coopname, checksum256 withdraw_hash, std::string reason);
     
     // results
     [[eosio::action]]
-    void updaterslt(
-      eosio::name coopname,
-      eosio::name application,
-      eosio::name username,
-      checksum256 project_hash,
-      checksum256 result_hash
-    );
-    
-    [[eosio::action]]
-    void pushrslt(name coopname, name application, checksum256 result_hash, document2 statement);
+    void pushrslt(name coopname, name application, checksum256 project_hash, checksum256 result_hash, 
+                  eosio::asset contribution_amount, eosio::asset debt_amount, document2 statement);
     
     [[eosio::action]]
     void authrslt(eosio::name coopname, checksum256 result_hash, document2 decision);
@@ -121,22 +120,22 @@ public:
     [[eosio::action]]
     void approverslt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 result_hash, document2 approved_statement);
     
+    [[eosio::action]]
+    void declineapprv(eosio::name coopname, checksum256 result_hash, document2 decline_reason);
+    
+    [[eosio::action]]
+    void declrslt(eosio::name coopname, checksum256 result_hash, document2 decision);
+    
+    [[eosio::action]]
+    void signact1(eosio::name coopname, eosio::name application, checksum256 result_hash, document2 act);
+    
+    [[eosio::action]]
+    void signact2(eosio::name coopname, eosio::name application, checksum256 result_hash, document2 act);
+    
     // конвертация
-    [[eosio::action]]
-    void approvecnvrt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 convert_hash, document2 approved_statement);
     
     [[eosio::action]]
-    void createcnvrt(
-      eosio::name coopname,
-      eosio::name application,
-      eosio::name username,
-      checksum256 project_hash,
-      checksum256 convert_hash,
-      document2 convert_statement
-    );
-    
-    [[eosio::action]]
-    void addauthor(name coopname, name application, checksum256 project_hash, name author, uint64_t shares);
+    void addauthor(name coopname, name application, checksum256 project_hash, name author);
     
     // Коммиты
     [[eosio::action]]
@@ -168,15 +167,12 @@ public:
     [[eosio::action]]
     void settledebt(name coopname);
 
-    
-    [[eosio::action]]
-    void setact1(eosio::name coopname, eosio::name application, eosio::name username, checksum256 commit_hash, document2 act);    
-    [[eosio::action]]
-    void setact2(eosio::name coopname, eosio::name application, eosio::name username, checksum256 commit_hash, document2 act);
+        
+        
         
     // Регистрация
     [[eosio::action]]
-    void regcontrib(eosio::name coopname, eosio::name application, eosio::name username, checksum256 contributor_hash, uint64_t convert_percent, eosio::asset rate_per_hour, bool is_external_contract, document2 contract);
+    void regcontrib(eosio::name coopname, eosio::name application, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, bool is_external_contract, document2 contract);
     [[eosio::action]]
     void approvereg(eosio::name coopname, checksum256 contributor_hash, document2 contract);
     [[eosio::action]]
@@ -200,24 +196,39 @@ public:
     [[eosio::action]]
     void declineinvst(eosio::name coopname, checksum256 invest_hash, document2 decline_statement);
     
-    // [[eosio::action]]
-    // void allocate(eosio::name coopname, eosio::name application, checksum256 project_hash, eosio::asset amount);
+    [[eosio::action]]
+    void returnunused(name coopname, name application, checksum256 project_hash, name username);
     
-    // [[eosio::action]]
-    // void diallocate(eosio::name coopname, eosio::name application, checksum256 project_hash, eosio::asset amount);
+    // Программные инвестиции
+    [[eosio::action]]
+    void createpinv(name coopname, name application, name username, checksum256 invest_hash, asset amount, document2 statement);
     
     [[eosio::action]]
-    void approvewthd1(name coopname, name application, name approver, checksum256 withdraw_hash, document2 approved_return_statement);
-        
+    void apprvpinv(eosio::name coopname, checksum256 invest_hash, document2 approved_statement);
+    
+    [[eosio::action]]
+    void declpinv(eosio::name coopname, checksum256 invest_hash, document2 declined_statement);
+    
+    // Аллокация программных инвестиций
+    [[eosio::action]]
+    void allocate(eosio::name coopname, eosio::name application, checksum256 project_hash, eosio::asset amount);
+    
+    [[eosio::action]]
+    void diallocate(eosio::name coopname, eosio::name application, checksum256 project_hash);
+    
+    
     // Расходы
     [[eosio::action]]
-    void createexpnse(eosio::name coopname, eosio::name application, checksum256 expense_hash, checksum256 project_hash, name creator, uint64_t fund_id, asset amount, std::string description, document2 statement);
+    void createexpnse(eosio::name coopname, eosio::name application, checksum256 expense_hash, checksum256 project_hash, name creator, asset amount, std::string description, document2 statement);
     
     [[eosio::action]]
     void approveexpns(name coopname, name application, name approver, checksum256 expense_hash, document2 approved_statement);
     
     [[eosio::action]]
     void capauthexpns(eosio::name coopname, checksum256 expense_hash, document2 authorization);
+    
+    [[eosio::action]]
+    void capdeclexpns(eosio::name coopname, checksum256 expense_hash);
     
     [[eosio::action]]
     void exppaycnfrm(eosio::name coopname, checksum256 expense_hash);
@@ -231,10 +242,13 @@ public:
     // Планирование
     [[eosio::action]] void setmaster(name coopname, checksum256 project_hash, name master);
     [[eosio::action]] void setplan(name coopname, checksum256 project_hash, uint64_t plan_creators_hours, asset plan_expenses, asset plan_hour_cost);
+    [[eosio::action]] void expandexpnss(name coopname, checksum256 project_hash, asset additional_expenses);
     
     // CRPS
     [[eosio::action]] void rfrshsegment(name coopname, checksum256 project_hash, name username);
 
+    // Кошельки проектов
+    
     [[eosio::action]] void addcontrib(name coopname, checksum256 project_hash, name username);
     
-  };
+};

@@ -6,4 +6,5 @@ void capital::cmpltvoting(name coopname, checksum256 project_hash) {
   
   // Обновляем статус проекта на "completed"
   Capital::Projects::update_status(coopname, project_hash, Capital::Projects::Status::COMPLETED);
+  
 }

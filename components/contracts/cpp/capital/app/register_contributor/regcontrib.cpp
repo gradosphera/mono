@@ -1,7 +1,7 @@
 /**
  * @brief Регистрация пайщика в контракте и получение договора УХД от него.
  */
-void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::name username, checksum256 contributor_hash, uint64_t convert_percent, eosio::asset rate_per_hour, bool is_external_contract, document2 contract) {
+void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, bool is_external_contract, document2 contract) {
   check_auth_or_fail(_capital, coopname, application, "regcontrib"_n);
   
   // если договор не внешний, то проверяем его на корректность
@@ -27,7 +27,6 @@ void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::n
     c.is_external_contract = is_external_contract;
     c.contract = contract;
     c.created_at = eosio::current_time_point();
-    c.convert_percent = convert_percent;
     c.rate_per_hour = rate_per_hour;
   });
   
@@ -38,18 +37,16 @@ void capital::regcontrib(eosio::name coopname, eosio::name application, eosio::n
   }
   
   //отправить на approve председателю
-  Action::send<createapprv_interface>(
-    _soviet,
-    "createapprv"_n,
+  ::Soviet::create_approval(
     _capital,
     coopname,
     username,
     contract,
-    ApprovesNames::Capital::REGISTER_CONTRIBUTOR,
+    Names::Capital::REGISTER_CONTRIBUTOR,
     contributor_hash,
     _capital,
-    "approvereg"_n,
-    "declinereg"_n,
+    Names::Capital::APPROVE_CONTRIBUTOR,
+    Names::Capital::DECLINE_CONTRIBUTOR,
     memo
   );
 

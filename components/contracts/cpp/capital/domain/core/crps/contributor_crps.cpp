@@ -11,10 +11,10 @@ namespace Capital::Core {
     auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
     
     projects.modify(project, _capital, [&](auto &p) {
-      if (p.fact.total_contributor_shares > 0) {
-        // Рассчитываем дельту reward per share
-        int64_t delta = (reward_amount.amount * REWARD_SCALE) / p.fact.total_contributor_shares;
-        p.fact.contributor_cumulative_reward_per_share += delta;
+      if (p.crps.total_capital_contributors_shares.amount > 0) {
+        // Рассчитываем дельту reward per share (награда на долю в базовых единицах)
+        int64_t delta = reward_amount.amount / p.crps.total_capital_contributors_shares.amount;
+        p.crps.contributor_cumulative_reward_per_share += delta;
       }
     });
   }
@@ -32,13 +32,10 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
     auto contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
     
     // Проверяем положительный баланс в программе капитализации
-    int64_t user_balance = Capital::Core::get_capital_user_share_balance(coopname, username);
-    eosio::check(user_balance > 0, "У пайщика отсутствует баланс в программе капитализации");
+    eosio::asset user_shares = Capital::Core::get_capital_user_share_balance(coopname, username);
     
-    uint64_t user_shares = static_cast<uint64_t>(user_balance);
-    
-    Circle::segments_index segments(_capital, coopname.value);
-    auto exist_segment = Circle::get_segment(coopname, project_hash, username);
+    Segments::segments_index segments(_capital, coopname.value);
+    auto exist_segment = Segments::get_segment(coopname, project_hash, username);
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
         
     if (!exist_segment.has_value()) {
@@ -46,39 +43,47 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
             g.id            = segments.available_primary_key();
             g.project_hash  = project_hash;
             g.username      = username;
-            g.contributor_shares = user_shares; // Доли равны балансу в программе капитализации
+            g.is_contributor = true; // Устанавливаем флаг вкладчика
+            g.capital_contributor_shares = user_shares; // Доли равны балансу в программе капитализации
             // Инициализируем CRPS поля для вкладчика текущими значениями
-            g.last_contributor_reward_per_share = project.fact.contributor_cumulative_reward_per_share;
+            g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
         });
         
-        // Увеличиваем счетчик вкладчических долей в проекте
+        // Увеличиваем счетчики вкладчиков
+        Capital::Projects::increment_total_contributors(coopname, project_hash);
         Capital::Projects::increment_total_contributor_shares(coopname, project_hash, user_shares);
     } else {
         auto segment = segments.find(exist_segment->id);
+        bool became_contributor = (!exist_segment->is_contributor);
+        
         segments.modify(segment, _capital, [&](auto &g) {
-            if (g.contributor_shares == 0) {
-                // Это новый вкладчик
-                g.contributor_shares = user_shares;
-                g.last_contributor_reward_per_share = project.fact.contributor_cumulative_reward_per_share;
-                // Увеличиваем счетчик
-                Capital::Projects::increment_total_contributor_shares(coopname, project_hash, user_shares);
+            if (!g.is_contributor) {
+                // Становится новым вкладчиком
+                g.is_contributor = true;
+                g.capital_contributor_shares = user_shares;
+                g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
             } else {
                 // Обновляем количество долей если баланс изменился
-                if (user_shares != g.contributor_shares) {
-                    int64_t shares_delta = static_cast<int64_t>(user_shares) - static_cast<int64_t>(g.contributor_shares);
-                    g.contributor_shares = user_shares;
+                if (user_shares != g.capital_contributor_shares) {
+                    eosio::asset shares_delta = user_shares - g.capital_contributor_shares;
+                    g.capital_contributor_shares = user_shares;
                     
                     // Обновляем общее количество долей в проекте
                     Capital::project_index projects(_capital, coopname.value);
                     auto project_it = projects.find(project.id);
                     projects.modify(project_it, _capital, [&](auto &p) {
-                        p.fact.total_contributor_shares = static_cast<uint64_t>(
-                            static_cast<int64_t>(p.fact.total_contributor_shares) + shares_delta
-                        );
+                        p.crps.total_capital_contributors_shares += shares_delta;
                     });
                 }
             }
         });
+        
+        if (became_contributor) {
+            // Увеличиваем счетчик зарегистрированных вкладчиков
+            Capital::Projects::increment_total_contributors(coopname, project_hash);
+            // Увеличиваем счетчик долей для нового вкладчика
+            Capital::Projects::increment_total_contributor_shares(coopname, project_hash, user_shares);
+        }
     }
 }
 
@@ -86,8 +91,8 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
    * @brief Обновляет награды вкладчика в сегменте
    */
   void refresh_contributor_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
-    Circle::segments_index segments(_capital, coopname.value);
-    auto segment_opt = Circle::get_segment(coopname, project_hash, username);
+    Segments::segments_index segments(_capital, coopname.value);
+    auto segment_opt = Segments::get_segment(coopname, project_hash, username);
     
     if (!segment_opt.has_value()) {
       return; // Сегмент не найден
@@ -98,33 +103,36 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
     
     segments.modify(segment_it, _capital, [&](auto &s) {
       // Обновляем награды вкладчика
-      if (s.contributor_shares > 0) {
-        int64_t pending_contributor_reward = s.contributor_shares * 
-          (project.fact.contributor_cumulative_reward_per_share - s.last_contributor_reward_per_share) / REWARD_SCALE;
+      if (s.capital_contributor_shares.amount > 0) {
+        int64_t pending_contributor_reward = s.capital_contributor_shares.amount * 
+          (project.crps.contributor_cumulative_reward_per_share - s.last_contributor_reward_per_share);
         
         if (pending_contributor_reward > 0) {
           s.contributor_bonus += eosio::asset(pending_contributor_reward, _root_govern_symbol);
-          s.last_contributor_reward_per_share = project.fact.contributor_cumulative_reward_per_share;
+          s.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
         }
       }
       
-      // Обновление contributor_shares на основе текущего баланса
-      int64_t capital_balance = Capital::Core::get_capital_user_share_balance(coopname, username);
+      // Обновление capital_contributor_shares на основе текущего баланса
+      eosio::asset capital_balance = Capital::Core::get_capital_user_share_balance(coopname, username);
       
-      if (s.contributor_shares != capital_balance) {
+      if (s.capital_contributor_shares != capital_balance) {
         // Корректируем общие доли в проекте
         Capital::project_index projects(_capital, coopname.value);
         auto project_it = projects.find(project.id);
         projects.modify(project_it, _capital, [&](auto &p) {
-          p.fact.total_contributor_shares = p.fact.total_contributor_shares - s.contributor_shares + capital_balance;
+          p.crps.total_capital_contributors_shares = p.crps.total_capital_contributors_shares - s.capital_contributor_shares + capital_balance;
         });
         
-        // Если становится новым вкладчиком, инициализируем CRPS
-        if (s.contributor_shares == 0 && capital_balance > 0) {
-          s.last_contributor_reward_per_share = project.fact.contributor_cumulative_reward_per_share;
+        // Если становится новым вкладчиком, инициализируем CRPS и устанавливаем флаг
+        if (!s.is_contributor && capital_balance.amount > 0) {
+          s.is_contributor = true;
+          s.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
+          // Увеличиваем счетчик зарегистрированных вкладчиков
+          Capital::Projects::increment_total_contributors(coopname, project_hash);
         }
         
-        s.contributor_shares = capital_balance;
+        s.capital_contributor_shares = capital_balance;
       }
     });
   }

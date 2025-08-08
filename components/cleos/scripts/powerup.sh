@@ -1,0 +1,1 @@
+./cleos.sh push action eosio powerup '[eosio, test, 1, "150.0000 AXON", true]' -p eosio

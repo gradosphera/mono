@@ -1,32 +1,19 @@
 void capital::exppaycnfrm(eosio::name coopname, checksum256 expense_hash) {
   auto payer = check_auth_and_get_payer_or_fail({ _gateway });
   
-  auto expense = Capital::get_expense(coopname, expense_hash);
-  eosio::check(expense.has_value(), "Объект расходов не найден");
+  // Получаем расход и проверяем его статус
+  auto expense = Capital::Expenses::get_expense_or_fail(coopname, expense_hash);
+  eosio::check(expense.status == Capital::Expenses::Status::AUTHORIZED, "Расход должен быть в статусе 'authorized'");
   
-  auto contributor = Capital::Contributors::get_contributor(coopname, expense -> username);
+  // Проверяем что пользователь зарегистрирован
+  auto contributor = Capital::Contributors::get_contributor(coopname, expense.username);
   eosio::check(contributor.has_value(), "Договор УХД с пайщиком по проекту не найден");
   
-  Capital::contributor_index contributors(_capital, coopname.value);
-  auto contributor_for_modify = contributors.find(contributor -> id);
+  // Обновляем used_expense_pool в проекте
+  Capital::Projects::complete_expense(coopname, expense.project_hash, expense.amount);
   
-  contributors.modify(contributor_for_modify, payer, [&](auto &c){
-    c.expensed += expense -> amount;
-  });
-  
-  //обновить сумму расходов по проекту
-  auto exist_project = Capital::Projects::get_project(coopname, expense -> project_hash);
-  Capital::project_index projects(_capital, coopname.value);
-  auto project = projects.find(exist_project->id);
-  
-  projects.modify(project, _capital, [&](auto &p){
-    p.expensed += expense -> amount;
-  });
-  
-  Capital::expense_index expenses(_capital, coopname.value);
-  auto expense_for_delete = expenses.find(expense -> id);
-  
-  expenses.erase(expense_for_delete);  
+  // Удаляем запись расхода
+  Capital::Expenses::delete_expense(coopname, expense_hash);
   
   //TODO: здесь должна быть проводка по фонду
 }

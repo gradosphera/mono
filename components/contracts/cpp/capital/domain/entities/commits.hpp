@@ -1,18 +1,15 @@
 #pragma once
 
-#include "pools.hpp"
+#include "generation_amounts.hpp"
 
 using namespace eosio;
 using std::string;
 
-namespace Capital::Commits {
-
-/**
- * @brief Статусы коммитов
- */
- namespace Status {
-  constexpr name CREATED = "created"_n;
+namespace Capital::Commits::Status {
+  constexpr eosio::name CREATED = "created"_n;
 }
+
+namespace Capital::Commits {
 
 /**
   * @brief Структура коммитов, хранящая данные о выполненных операциях в проекте.
@@ -26,7 +23,7 @@ namespace Capital::Commits {
     name status;                                 ///< Статус коммита (created | approved | authorized | act1 | act2 )
     checksum256 project_hash;                    ///< Хэш проекта, связанного с действием.
     checksum256 commit_hash;                     ///< Хэш действия.
-    pools amounts;                               ///< Рассчитанные показатели генерации
+    generation_amounts amounts;                  ///< Рассчитанные показатели генерации
     time_point_sec created_at;                   ///< Дата и время создания действия.
 
     uint64_t primary_key() const { return id; } ///< Основной ключ.
@@ -107,7 +104,7 @@ inline void create_commit_with_approve(
   eosio::name username,
   checksum256 project_hash,
   checksum256 commit_hash,
-  const pools &calculated_fact
+  const generation_amounts &calculated_fact
 ) {
   // Создаем коммит
   commit_index commits(_capital, coopname.value);
@@ -130,20 +127,18 @@ inline void create_commit_with_approve(
   auto empty_doc = document2{};
   
   // Отправляем на approve председателю
-  Action::send<createapprv_interface>(
-    _soviet,
-    "createapprv"_n,
+  ::Soviet::create_approval(
     _capital,
     coopname,
     username,
     empty_doc,
-    ApprovesNames::Capital::CREATE_COMMIT,
+    Names::Capital::CREATE_COMMIT,
     commit_hash,
     _capital,
-    "approvecmmt"_n,
-    "declinecmmt"_n,
+    Names::Capital::APPROVE_COMMIT,
+    Names::Capital::DECLINE_COMMIT,
     std::string("")
   );
 }
 
-} // namespace Capital
+} // namespace Capital::Commits

@@ -124,7 +124,7 @@ static constexpr uint64_t _marketplace_program_id = 2;
 static constexpr uint64_t _source_program_id = 3;
 static constexpr uint64_t _capital_program_id = 4;
 
-static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный коэффициент для вознаграждений (1e8).
+
 
 #define HUNDR_PERCENTS 1000000
 #define ONE_PERCENT 10000
@@ -187,6 +187,7 @@ static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный к�
         "wallet"_n,
         "meet"_n,
         "loan"_n,
+        "test"_n,
         "contributor"_n,
         "eosio.token"_n,
         "eosio.msig"_n,

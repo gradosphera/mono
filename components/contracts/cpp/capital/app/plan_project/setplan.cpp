@@ -14,7 +14,7 @@ void capital::setplan(name coopname, checksum256 project_hash, uint64_t plan_cre
   eosio::check(plan_hour_cost.amount > 0, "Стоимость нормо-часа должна быть положительной");
   
   // Вычисляем плановые показатели через ядро
-  auto calculated_plan = Capital::Core::Generation::calculate_plan_generation_amounts(plan_hour_cost, plan_creators_hours, plan_expenses);
+  auto calculated_plan = Capital::Core::Generation::calculate_plan_generation_amounts(coopname, plan_hour_cost, plan_creators_hours, plan_expenses);
 
   // Устанавливаем плановые показатели проекта
   Capital::Projects::set_plan(coopname, project_hash, calculated_plan);

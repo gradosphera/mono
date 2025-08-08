@@ -25,8 +25,8 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   // считаем сумму фактических затрат создателя на основе ставки в час и потраченного времени
   eosio::asset creator_base = contributor -> rate_per_hour * creator_hours;
   
-  // Вычисляем фактическое изменение пулов
-  auto delta_pools = Capital::Core::Generation::calculate_fact_generation_amounts(contributor -> rate_per_hour, creator_hours);
+  // Вычисляем фактическое изменение сумм генерации
+  auto delta_amounts = Capital::Core::Generation::calculate_fact_generation_amounts(contributor -> rate_per_hour, creator_hours);
   
   // Создаем коммит и отправляем на approve
   Capital::Commits::create_commit_with_approve(
@@ -35,7 +35,7 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
     username,
     project_hash,
     commit_hash,
-    delta_pools
+    delta_amounts
   );
 
 }

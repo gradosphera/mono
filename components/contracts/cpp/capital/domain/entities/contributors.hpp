@@ -9,44 +9,28 @@ namespace Capital {
   * @brief Структура участника, хранящая данные индивидуального участника.
   */
   struct [[eosio::table, eosio::contract(CAPITAL)]] contributor {
-    uint64_t id;
-    name coopname;
-    name username;
+    uint64_t id; ///< Идентификатор контрибьютора
+    name coopname; ///< Имя кооператива
+    name username; ///< Имя пользователя
     checksum256 contributor_hash; ///< Внешний идентификатор контрибьютора
-    name status;
-    time_point_sec created_at;
-    bool is_external_contract = false;
-    document2 contract;
+    time_point_sec created_at; ///< Время создания контрибьютора
+    name status; ///< Статус контрибьютора
     
-    uint64_t convert_percent;
-    uint64_t creator_hours;
-    
-    eosio::asset rate_per_hour = asset(0, _root_govern_symbol);
-    
-    eosio::asset debt_amount = asset(0, _root_govern_symbol);
-    
-    eosio::asset withdrawed = asset(0, _root_govern_symbol);
-    eosio::asset converted = asset(0, _root_govern_symbol);
-    eosio::asset expensed = asset(0, _root_govern_symbol);
-    eosio::asset returned = asset(0, _root_govern_symbol);
-    
-    eosio::asset share_balance = asset(0, _root_govern_symbol); ///< Баланс долей пайщика
-    eosio::asset pending_rewards = asset(0, _root_govern_symbol); ///< Накопленные награды
-    int64_t reward_per_share_last = 0; ///< Последний зафиксированный cumulative_reward_per_share по проекту
-    
+    bool is_external_contract = false; ///< Флаг, указывающий на внешний контракт
+    document2 contract; ///< Договор УХД
     std::vector<checksum256> appendixes; ///< Вектор хэшей проектов, для которых подписаны приложения
+    
+    eosio::asset rate_per_hour = asset(0, _root_govern_symbol); ///< Ставка за час
+    
+    eosio::asset debt_amount = asset(0, _root_govern_symbol);///< Сумма долга
+    
+    eosio::asset capital_available = asset(0, _root_govern_symbol); ///< Накопленные членские взносы по программе капитализации
+    int64_t reward_per_share_last = 0; ///< Последний зафиксированный cumulative_reward_per_share по программе капитализации
 
     uint64_t primary_key() const { return id; }
     uint64_t by_username() const { return username.value; }
     checksum256 by_hash() const { return contributor_hash; }
     
-    /**
-     * @brief Добавляет часы создателя к участнику.
-     * @param hours Количество часов для добавления.
-     */
-    void add_creator_hours(uint64_t hours) {
-        creator_hours += hours;
-    }
 };
 
 typedef eosio::multi_index<
@@ -139,22 +123,6 @@ inline std::optional<contributor> get_active_contributor_with_appendix_or_fail(e
   eosio::check(is_contributor_has_appendix_in_project(coopname, project_hash, username), 
                "Пайщик не подписывал приложение к договору УХД для данного проекта");
   return contributor;
-}
-
-/**
- * @brief Добавляет часы создателя к участнику.
- * @param coopname Имя кооператива (scope таблицы).
- * @param project_hash Хэш проекта.
- * @param username Имя пользователя участника.
- * @param creator_hours Количество часов для добавления.
- */
-inline void add_creator_hours_to_contributor(eosio::name coopname, const checksum256 &project_hash, eosio::name username, uint64_t creator_hours) {
-    auto exist_contributor = get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
-    contributor_index contributors(_capital, coopname.value);
-    auto contributor = contributors.find(exist_contributor->id);
-    contributors.modify(contributor, coopname, [&](auto &c){
-        c.add_creator_hours(creator_hours);
-    });
 }
 
 }// namespace Capital::Contributors

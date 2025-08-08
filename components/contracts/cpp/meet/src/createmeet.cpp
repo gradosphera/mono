@@ -61,9 +61,7 @@ void meet::createmeet(name coopname, checksum256 hash, eosio::name initiator, na
     });
   }
   
-  Action::send<createagenda_interface>(
-    _soviet,
-    "createagenda"_n,
+  ::Soviet::create_agenda(
     _meet,
     coopname, 
     initiator, 

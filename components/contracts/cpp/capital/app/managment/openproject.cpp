@@ -7,6 +7,6 @@ void capital::openproject(name coopname, checksum256 project_hash) {
     // Проверяем, что проект в статусе "created"
     eosio::check(project.status == Capital::Projects::Status::CREATED, "Проект должен быть в статусе 'created'");
     
-    // Обновляем статус проекта на "opened"
-    Capital::Projects::update_status(coopname, project_hash, Capital::Projects::Status::OPENED);
+    // Открываем проект через доменную логику
+    Capital::Projects::open_project(coopname, project_hash);
 } 

@@ -51,17 +51,15 @@ void ledger::create(eosio::name coopname, eosio::name username, uint64_t account
   });
 
   // Создаем агенду в совете через Action::send
-  Action::send<createagenda_interface>(
-    _soviet,
-    "createagenda"_n,
-    username,
+  ::Soviet::create_agenda(
+    _ledger,
     coopname,
     username,
     get_valid_soviet_action("ledgerwthd"_n), // тип решения
     writeoff_hash,
     _ledger, // callback_contract
-    "auth"_n, // confirm_callback
-    "decline"_n, // decline_callback
+    Names::Ledger::AUTHORIZE_WRITEOFF, // confirm_callback
+    Names::Ledger::DECLINE_WRITEOFF, // decline_callback
     document,
     reason
   );

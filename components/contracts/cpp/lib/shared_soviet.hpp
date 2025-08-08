@@ -1,5 +1,9 @@
 #pragma once
 
+#include <eosio/eosio.hpp>
+
+using namespace eosio;
+
 #define CREATEAGENDA_SIGNATURE name coopname, name username, name type, checksum256 hash, name callback_contract, name confirm_callback, name decline_callback, document2 statement, std::string meta
 using createagenda_interface = void(CREATEAGENDA_SIGNATURE);
 
@@ -35,19 +39,55 @@ using newagreement_interface = void(NEWAGREEMENT_SIGNATURE);
 #define NEWPACKAGE_SIGNATURE name coopname, name username, name action, checksum256 package
 using newpackage_interface = void(NEWPACKAGE_SIGNATURE);
 
-/*!
- *  \brief Константы для типов аппрувалов (максимум 12 символов)
+#define OPENPROGWALL_SIGNATURE name coopname, name username, name program_type, uint64_t agreement_id  
+using openprogwall_interface = void(OPENPROGWALL_SIGNATURE);
+
+namespace Soviet {
+
+/**
+ * @brief Создаёт агенду в совете
  */
-namespace ApprovesNames {
-  namespace Capital {
-    static constexpr const name REGISTER_CONTRIBUTOR = "regcontrib"_n; // акцепт договора УХД
-    static constexpr const name CREATE_DEBT = "createdebt"_n; // акцепт ссуды
-    static constexpr const name CREATE_COMMIT = "createcmmt"_n; // акцепт коммита
-    static constexpr const name CREATE_APPENDIX = "createappndx"_n; // акцепт приложения
-    static constexpr const name CREATE_INVESTMENT = "createinvest"_n; // акцепт инвестиции
-    static constexpr const name CREATE_EXPENSE = "createexpnse"_n; // акцепт расхода
-    static constexpr const name CREATE_WITHDRAW_1 = "createwthd1"_n; // акцепт возврата из задания
-    static constexpr const name CREATE_WITHDRAW_2 = "createwthd2"_n; // акцепт возврата из проекта
-    static constexpr const name CREATE_WITHDRAW_3 = "createwthd3"_n; // акцепт возврата из программы
-  }
+inline void create_agenda(
+  name calling_contract,
+  CREATEAGENDA_SIGNATURE
+) {
+  Action::send<createagenda_interface>(
+    _soviet,
+    Names::External::CREATE_AGENDA,
+    calling_contract,
+    coopname,
+    username,
+    type,
+    hash,
+    callback_contract,
+    confirm_callback,
+    decline_callback,
+    statement,
+    meta
+  );
 }
+
+/**
+ * @brief Создаёт аппрув в совете
+ */
+inline void create_approval(
+  name calling_contract,
+  CREATEAPPRV_SIGNATURE
+) {
+  Action::send<createapprv_interface>(
+    _soviet,
+    Names::External::CREATE_APPROVAL,
+    calling_contract,
+    coopname,
+    username,
+    document,
+    type,
+    approval_hash,
+    callback_contract,
+    callback_action_approve,
+    callback_action_decline,
+    meta
+  );
+}
+
+} // namespace Soviet

@@ -1,5 +1,22 @@
+#pragma once
+
+#include <eosio/eosio.hpp>
+#include <eosio/asset.hpp>
+
 using namespace eosio;
 using std::string;
+
+
+namespace Capital::Expenses::Status {
+  /**
+   * @brief Константы статусов расходов
+   */
+    const eosio::name CREATED = "created"_n;        ///< Расход создан
+    const eosio::name APPROVED = "approved"_n;      ///< Расход одобрен председателем
+    const eosio::name AUTHORIZED = "authorized"_n;  ///< Расход авторизован советом
+    const eosio::name PAID = "paid"_n;             ///< Расход оплачен
+    const eosio::name DECLINED = "declined"_n;      ///< Расход отклонен
+}
 
 namespace Capital {
 
@@ -9,14 +26,14 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
   name application;                            ///< Приложение, инициировавшее расход.
   name username;                               ///< Имя пользователя, создавшего расход.
   
-  name status = "created"_n;                   ///< Статус расхода (created | approved | authorized)
+  name status = Expenses::Status::CREATED;                   ///< Статус расхода (created | approved | authorized)
   checksum256 project_hash;                    ///< Хэш проекта, связанного с расходом.
   checksum256 expense_hash;                    ///< Хэш расхода.
   uint64_t fund_id;                            ///< Идентификатор фонда списания (expfunds в контакте fund)
   eosio::asset amount;                         ///< Сумма расхода.
   std::string description;                     ///< Публичное описание расхода. 
 
-  document2 expense_statement;                          ///< Служебная записка
+  document2 expense_statement;                  ///< Служебная записка
   document2 approved_statement;                 ///< принятая записка председателем или доверенным
   document2 authorization;                      ///< утвержденная записка советом
                                   
@@ -56,3 +73,123 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
 }
 
 } // namespace Capital
+
+namespace Capital::Expenses {
+
+
+  /**
+   * @brief Получает расход по хэшу или вызывает ошибку.
+   * @param coopname Имя кооператива.
+   * @param expense_hash Хэш расхода.
+   * @return expense - найденный расход.
+   */
+  inline expense get_expense_or_fail(eosio::name coopname, const checksum256 &expense_hash) {
+    auto expense = Capital::get_expense(coopname, expense_hash);
+    eosio::check(expense.has_value(), "Расход с указанным хэшем не найден");
+    return *expense;
+  }
+
+  /**
+   * @brief Создает запись расхода в таблице.
+   * @param coopname Имя кооператива.
+   * @param project_hash Хэш проекта.
+   * @param expense_hash Хэш расхода.
+   * @param username Создатель расхода.
+   * @param application Приложение.
+   * @param amount Сумма расхода.
+   * @param description Описание.
+   * @param statement Служебная записка.
+   */
+  inline void create_expense(eosio::name coopname, const checksum256 &project_hash, 
+                            const checksum256 &expense_hash, eosio::name username, 
+                            eosio::name application, const eosio::asset &amount,
+                            const std::string &description, const document2 &statement) {
+    
+    Capital::expense_index expenses(_capital, coopname.value);
+    uint64_t expense_id = get_global_id_in_scope(_capital, coopname, "expenses"_n);
+    
+    expenses.emplace(coopname, [&](auto &e) {
+      e.id = expense_id;
+      e.coopname = coopname;
+      e.application = application;
+      e.username = username;
+      e.project_hash = project_hash;
+      e.expense_hash = expense_hash;
+      e.fund_id = Ledger::accounts::ECONOMIC_ACTIVITY_FUND;
+      e.status = Expenses::Status::CREATED;
+      e.spended_at = current_time_point();
+      e.expense_statement = statement;
+      e.amount = amount;
+      e.description = description;
+    });
+  }
+
+  /**
+   * @brief Обновляет статус расхода.
+   * @param coopname Имя кооператива.
+   * @param expense_hash Хэш расхода.
+   * @param new_status Новый статус.
+   */
+  inline void update_status(eosio::name coopname, const checksum256 &expense_hash, eosio::name new_status) {
+    auto exist_expense = get_expense_or_fail(coopname, expense_hash);
+    
+    Capital::expense_index expenses(_capital, coopname.value);
+    auto expense = expenses.find(exist_expense.id);
+    
+    expenses.modify(expense, coopname, [&](auto &e) {
+      e.status = new_status;
+    });
+  }
+
+  /**
+   * @brief Обновляет статус и одобренную записку расхода.
+   * @param coopname Имя кооператива.
+   * @param expense_hash Хэш расхода.
+   * @param approved_statement Одобренная записка.
+   */
+  inline void set_approved(eosio::name coopname, const checksum256 &expense_hash, 
+                          const document2 &approved_statement) {
+    auto exist_expense = get_expense_or_fail(coopname, expense_hash);
+    
+    Capital::expense_index expenses(_capital, coopname.value);
+    auto expense = expenses.find(exist_expense.id);
+    
+    expenses.modify(expense, coopname, [&](auto &e) {
+      e.status = Expenses::Status::APPROVED;
+      e.approved_statement = approved_statement;
+    });
+  }
+
+  /**
+   * @brief Обновляет статус и авторизацию расхода.
+   * @param coopname Имя кооператива.
+   * @param expense_hash Хэш расхода.
+   * @param authorization Документ авторизации.
+   */
+  inline void set_authorized(eosio::name coopname, const checksum256 &expense_hash, 
+                            const document2 &authorization) {
+    auto exist_expense = get_expense_or_fail(coopname, expense_hash);
+    
+    Capital::expense_index expenses(_capital, coopname.value);
+    auto expense = expenses.find(exist_expense.id);
+    
+    expenses.modify(expense, coopname, [&](auto &e) {
+      e.status = Expenses::Status::AUTHORIZED;
+      e.authorization = authorization;
+    });
+  }
+
+  /**
+   * @brief Удаляет запись расхода из таблицы.
+   * @param coopname Имя кооператива.
+   * @param expense_hash Хэш расхода.
+   */
+  inline void delete_expense(eosio::name coopname, const checksum256 &expense_hash) {
+    auto exist_expense = get_expense_or_fail(coopname, expense_hash);
+    
+    Capital::expense_index expenses(_capital, coopname.value);
+    auto expense = expenses.find(exist_expense.id);
+    expenses.erase(expense);
+  }
+
+} // namespace Capital::Expenses

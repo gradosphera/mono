@@ -3,6 +3,9 @@
 using namespace eosio;
 using std::string;
 
+namespace Capital::Invests::Status {
+  const eosio::name CREATED = "created"_n;
+}
 
 namespace Capital {
 /**
@@ -15,8 +18,8 @@ namespace Capital {
     name username;                              ///< Имя аккаунта инвестора.
     checksum256 invest_hash;                           ///< Хэш идентификатор объекта инвестиции.
     checksum256 project_hash;                   ///< Хэш идентификатора проекта.    
+    name status;                                ///< created
     eosio::asset amount = asset(0, _root_govern_symbol); ///< Сумма инвестиции.
-    name status;                                ///< created | signed | authorized | blocked
     time_point_sec invested_at;                 ///< Дата приёма инвестиции.
     document2 statement;                         ///< Заявление на зачёт из кошелька.
     
@@ -74,7 +77,8 @@ inline invest get_invest_or_fail(eosio::name coopname, const checksum256 &invest
  * @param investment_amount Сумма инвестиции.
  * @return Пара: имя координатора и сумма координаторского взноса (или nullopt если условия не выполнены).
  */
- inline std::optional<std::pair<eosio::name, eosio::asset>> get_coordinator_amount(
+inline std::optional<std::pair<eosio::name, eosio::asset>> get_coordinator_amount(
+  eosio::name coopname,
   eosio::name investor_username, 
   const eosio::asset &investment_amount
 ) {
@@ -91,11 +95,12 @@ inline invest get_invest_or_fail(eosio::name coopname, const checksum256 &invest
   
   auto time_since_registration = current_time.sec_since_epoch() - registration_time.sec_since_epoch();
   
-  if (time_since_registration >= THIRTY_DAYS_IN_SECONDS) {
+  auto coop_config_seconds = Capital::get_global_state(coopname).config.coordinator_invite_validity_days * 24 * 60 * 60;
+  if (time_since_registration >= coop_config_seconds) {
       return std::nullopt;
   }
   
-  // Возвращаем координатора и сумму координаторского взноса (равную сумме инвестиции)
+  // Возвращаем координатора и сумму взноса с координатором (равную сумме инвестиции)
   return std::make_pair(investor_account.referer, investment_amount);
 }
 
@@ -126,25 +131,23 @@ inline void create_invest_with_approve(
     i.username = username;
     i.project_hash = project_hash;
     i.invest_hash = invest_hash;
-    i.status = "created"_n;
+    i.status = Capital::Invests::Status::CREATED;
     i.invested_at = current_time_point();
     i.statement = statement;
     i.amount = amount;
   });
   
   // Отправляем на approve председателю
-  Action::send<createapprv_interface>(
-    _soviet,
-    "createapprv"_n,
+  ::Soviet::create_approval(
     _capital,
     coopname,
     username,
     statement,
-    ApprovesNames::Capital::CREATE_INVESTMENT,
+    Names::Capital::CREATE_INVESTMENT,
     invest_hash,
     _capital,
-    "approveinvst"_n,
-    "declineinvst"_n,
+    Names::Capital::APPROVE_INVESTMENT,
+    Names::Capital::DECLINE_INVESTMENT,
     std::string("")
   );
 }

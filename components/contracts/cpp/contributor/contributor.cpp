@@ -224,7 +224,7 @@ void contributor::refresh(name coopname, name username) {
         return;
     }
 
-    int64_t reward_amount_int = (participant.share_balance.amount * participant_delta) / REWARD_SCALE;
+    int64_t reward_amount_int = participant.share_balance.amount * participant_delta;
     asset reward_amount = asset(reward_amount_int, TOKEN_SYMBOL);
 
     // Update participant data
@@ -248,10 +248,9 @@ void contributor::process_intellectual(const name & coopname, const name& userna
     asset distribution_amount = asset(distribution_amount_int, TOKEN_SYMBOL);
 
     int64_t cumulative_reward_per_share = gs.cumulative_reward_per_share;
-    int64_t total_shares_int = gs.total_shares.amount;
-
-    if (total_shares_int > 0) {
-        int64_t delta = (distribution_amount_int * REWARD_SCALE) / total_shares_int;
+    
+    if (gs.total_shares.amount > 0) {
+        int64_t delta = distribution_amount_int / gs.total_shares.amount;
         cumulative_reward_per_share += delta;
 
         // Update global state

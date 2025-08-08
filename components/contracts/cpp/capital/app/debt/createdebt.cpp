@@ -2,63 +2,45 @@ void capital::createdebt(name coopname, name username, checksum256 project_hash,
   require_auth(coopname);
   
   verify_document_or_fail(statement);
-  
   Wallet::validate_asset(amount);
   
+  // Проверяем что участник существует в проекте
   auto exist_contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
   eosio::check(exist_contributor.has_value(), "Договор УХД с пайщиком не найден");
   
+  // Проверяем что сегмент существует и обновлен
+  auto exist_segment = Capital::Segments::get_segment(coopname, project_hash, username);
+  eosio::check(exist_segment.has_value(), "Сегмент не найден");
+  
+  // Проверяем что сегмент обновлен (CRPS актуален)
+  Capital::Segments::check_segment_is_updated(coopname, project_hash, username, 
+    "Сегмент не обновлен. Выполните rfrshsegment перед получением ссуды");
+  
+  // Проверяем доступность средств для ссуды
+  eosio::check(exist_segment -> provisional_amount >= amount, "Недостаточно доступных средств для получения ссуды");
+  eosio::check((exist_segment -> debt_amount + amount) <= exist_segment->provisional_amount, 
+    "Сумма долга не может превышать доступную сумму залога");
+  
+  // Обновляем debt_amount у участника в программе капитализации
   Capital::contributor_index contributors(_capital, coopname.value);
-  auto contributor = contributors.find(exist_contributor -> id);
+  auto contributor = contributors.find(exist_contributor->id);
   
   contributors.modify(contributor, coopname, [&](auto &c){
     c.debt_amount += amount;
   });
   
-  auto exist_segment = Capital::Circle::get_segment(coopname, project_hash, username);
-  eosio::check(exist_segment.has_value(), "Резактор не найден");
-  
-  Capital::Circle::segments_index segments(_capital, coopname.value);
-  
+  // Обновляем debt_amount в сегменте (НЕ уменьшаем provisional_amount)
+  Capital::Segments::segments_index segments(_capital, coopname.value);
   auto segment = segments.find(exist_segment->id);
-  eosio::check(segment -> provisional_amount >= amount, "Недостаточно доступных средств для получения ссуды");
   
-  segments.modify(segment, coopname, [&](auto &ra) {
-      ra.debt_amount += amount;
-      ra.provisional_amount -= amount;
+  segments.modify(segment, coopname, [&](auto &s) {
+      s.debt_amount += amount;
   });
   
-  auto exist_debt = Capital::get_debt(coopname, debt_hash);
-  eosio::check(!exist_debt.has_value(), "Ссуда с указанным hash уже существует");
+  // Создаем долг в таблице
+  Capital::Debts::create_debt(coopname, username, project_hash, debt_hash, amount, repaid_at, statement);
   
-  Capital::debts_index debts(_capital, coopname.value);
-  auto debt_id = get_global_id_in_scope(_capital, coopname, "debts"_n);
-  
-  debts.emplace(coopname, [&](auto &d){
-    d.id = debt_id;
-    d.coopname = coopname;
-    d.username = username;
-    d.debt_hash = debt_hash;
-    d.project_hash = project_hash;
-    d.amount = amount;
-    d.statement = statement;
-    d.repaid_at = repaid_at;
-  });
-  
-  Action::send<createapprv_interface>(
-    _soviet,
-    "createapprv"_n,
-    _capital,
-    coopname,
-    username,
-    statement,
-    ApprovesNames::Capital::CREATE_DEBT,
-    debt_hash,
-    _capital,
-    "approvedebt"_n,
-    "declinedebt"_n,
-    std::string("")
-  );
-  
+  // Создаем аппрув для долга
+  Capital::Debts::create_debt_approval(coopname, username, debt_hash, statement);
   
 }

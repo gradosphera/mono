@@ -30,8 +30,14 @@ void capital::approvereg(eosio::name coopname, checksum256 contributor_hash, doc
   
   if (!program_wallet.has_value()) {
     // Открываем кошелек для пайщика для договора УХД
-    action(permission_level{ _capital, "active"_n}, _soviet, "openprogwall"_n,
-      std::make_tuple(coopname, contributor -> username, _source_program, uint64_t(0)))
-    .send();
+    Action::send<openprogwall_interface>(
+      _soviet,
+      Names::External::OPEN_PROGRAM_WALLET,
+      _capital,
+      coopname, 
+      contributor -> username, 
+      _source_program, 
+      uint64_t(0)
+    );
   };
 };

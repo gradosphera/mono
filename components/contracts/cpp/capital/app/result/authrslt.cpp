@@ -1,19 +1,17 @@
 void capital::authrslt(eosio::name coopname, checksum256 result_hash, document2 decision) {
   require_auth(_soviet);
   
-  auto exist_result = Capital::get_result(coopname, result_hash);
-  eosio::check(exist_result.has_value(), "Объект результата не найден");
-
-  Capital::result_index results(_capital, coopname.value);
-  auto result = results.find(exist_result -> id);
-
-  // Проверяем статус
-  eosio::check(result -> status == "statement"_n, "Неверный статус");
-
-  results.modify(result, _capital, [&](auto &r){
-    r.status = "authorized"_n;
-    r.authorization = decision;
-  });
+  // Проверяем заявление
+  verify_document_or_fail(decision);
   
-   
+  // Проверяем статус результата
+  auto exist_result = Capital::Results::get_result(coopname, result_hash);
+  eosio::check(exist_result.has_value(), "Объект результата не найден");
+  eosio::check(exist_result->status == Capital::Results::Status::APPROVED, "Неверный статус. Результат должен быть одобрен председателем");
+  
+  // Устанавливаем документ авторизации
+  Capital::Results::set_result_authorization(coopname, result_hash, decision);
+  
+  // Обновляем статус
+  Capital::Results::update_result_status(coopname, result_hash, Capital::Results::Status::AUTHORIZED);
 };

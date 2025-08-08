@@ -1,5 +1,5 @@
 void capital::signappndx(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document) {
-  require_auth(application);
+  require_auth(coopname);
   
   // Проверяем что пользователь подписал общий договор УХД
   auto contributor = Capital::Contributors::get_contributor(coopname, username);
@@ -17,30 +17,28 @@ void capital::signappndx(eosio::name coopname, eosio::name application, eosio::n
   Capital::appendix_index appendixes(_capital, coopname.value);
   auto appendix_id = get_global_id_in_scope(_capital, coopname, "appendixes"_n);
   
-  appendixes.emplace(application, [&](auto &a) {
+  appendixes.emplace(coopname, [&](auto &a) {
     a.id = appendix_id;
     a.coopname = coopname;
     a.username = username;
     a.project_hash = project_hash;
     a.appendix_hash = appendix_hash;
-    a.status = "created"_n;
+    a.status = Capital::Appendix::Status::CREATED;
     a.created_at = current_time_point();
-    a.document = document;
+    a.appendix = document;
   });
   
   // Отправляем на аппрув председателю
-  Action::send<createapprv_interface>(
-    _soviet,
-    "createapprv"_n,
+  ::Soviet::create_approval(
     _capital,
     coopname,
     username,
     document,
-    ApprovesNames::Capital::CREATE_APPENDIX,
+    Names::Capital::CREATE_APPENDIX,
     appendix_hash,
     _capital,
-    "apprvappndx"_n,
-    "dclineappndx"_n,
+    Names::Capital::APPROVE_APPENDIX,
+    Names::Capital::DECLINE_APPENDIX,
     std::string("")
   );
 } 

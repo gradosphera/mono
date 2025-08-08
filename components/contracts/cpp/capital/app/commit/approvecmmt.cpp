@@ -7,9 +7,6 @@ void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, documen
   // Добавляем коммит к проекту
   Capital::Projects::add_commit(coopname, commit.project_hash, commit.amounts);
 
-  // Добавляем вкладчику накопительные часы создателя
-  Capital::Contributors::add_creator_hours_to_contributor(coopname, commit.project_hash, commit.username, commit.amounts.creators_hours);
-
   // Обновляем или создаем сегмент создателя
   Capital::Core::upsert_creator_segment(coopname, commit.project_hash, commit.username, commit.amounts);
 

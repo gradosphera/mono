@@ -8,10 +8,10 @@ void capital::submitvote(name coopname, name application, name voter, checksum25
     // Получаем проект и проверяем состояние голосования
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
     eosio::check(project.status == Capital::Projects::Status::VOTING, "Проект не в статусе голосования");
-    eosio::check(current_time_point() <= project.voting.voting_deadline, "Срок голосования истек");
+    eosio::check(current_time_point().sec_since_epoch() <= project.voting.voting_deadline.sec_since_epoch(), "Срок голосования истек");
     
     // Проверяем участника голосования
-    eosio::check(Capital::Circle::is_voting_participant(coopname, project_hash, voter), "Пользователь не является участником голосования");
+    eosio::check(Capital::Segments::is_voting_participant(coopname, project_hash, voter), "Пользователь не является участником голосования");
     eosio::check(!Capital::Votes::has_user_voted(coopname, project_hash, voter), "Пользователь уже проголосовал");
     
     // Получаем общую сумму на распределение по Водянову
@@ -31,7 +31,7 @@ void capital::submitvote(name coopname, name application, name voter, checksum25
     
     for (const auto& vote : votes) {
         eosio::check(vote.first != voter, "Нельзя голосовать за себя");
-        eosio::check(Capital::Circle::is_voting_participant(coopname, project_hash, vote.first), "Получатель голоса не является участником голосования");
+        eosio::check(Capital::Segments::is_voting_participant(coopname, project_hash, vote.first), "Получатель голоса не является участником голосования");
         eosio::check(voted_for.insert(vote.first).second, "Нельзя голосовать за одного участника дважды");
         eosio::check(vote.second.amount > 0, "Сумма голоса должна быть положительной");
         

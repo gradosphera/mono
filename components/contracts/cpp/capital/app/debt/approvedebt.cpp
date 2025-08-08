@@ -2,31 +2,13 @@ void capital::approvedebt(eosio::name coopname, checksum256 debt_hash, document2
 {
     require_auth(_soviet);
 
-    Capital::debts_index debts(_capital, coopname.value);
-    auto exist_debt = Capital::get_debt(coopname, debt_hash);
-    eosio::check(exist_debt.has_value(), "Долг не найден");
+    // Получаем долг
+    auto exist_debt = Capital::Debts::get_debt_or_fail(coopname, debt_hash);
+    
+    // Обновляем статус долга
+    Capital::Debts::update_debt_status(coopname, debt_hash, Capital::Debts::Status::APPROVED, 
+                                       _soviet, approved_statement);
 
-    auto debt = debts.find(exist_debt -> id);
-
-    debts.modify(debt, coopname, [&](auto& d) {
-      d.status = "approved"_n;
-      d.approved_statement = approved_statement;
-    });
-
-    //отправляем в совет
-    Action::send<createagenda_interface>(
-      _soviet,
-      "createagenda"_n,
-      _capital,
-      coopname,
-      debt -> username, 
-      get_valid_soviet_action("createdebt"_n),
-      debt_hash, 
-      _capital, 
-      "debtauthcnfr"_n, 
-      "declinedebt"_n, 
-      debt -> statement, 
-      std::string("")
-    );
-
+    // Создаем агенду в совете
+    Capital::Debts::create_debt_agenda(coopname, exist_debt.username, debt_hash, exist_debt.statement);
 }

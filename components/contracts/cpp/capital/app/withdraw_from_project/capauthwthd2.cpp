@@ -12,5 +12,7 @@ void capital::capauthwthd2(name coopname, checksum256 withdraw_hash, document2 a
   Wallet::sub_blocked_funds(_capital, coopname, withdraw->username, withdraw->amount, _capital_program, memo);
   Wallet::add_available_funds(_capital, coopname, withdraw->username, withdraw->amount, _wallet_program, memo);
 
+  Capital::Projects::distribute_membership_funds(coopname, withdraw->project_hash, withdraw->amount);
+  
   project_withdraws.erase(withdraw);
 }

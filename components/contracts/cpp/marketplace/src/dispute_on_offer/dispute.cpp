@@ -44,9 +44,7 @@
   checksum256 agenda_hash = change.hash;
 
   // Отправляем заявление на гарантийный возврат в совет
-  Action::send<createagenda_interface>(
-    _soviet,
-    "createagenda"_n,
+  ::Soviet::create_agenda(
     _marketplace,
     coopname,
     username,

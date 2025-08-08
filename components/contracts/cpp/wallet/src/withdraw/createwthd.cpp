@@ -28,9 +28,7 @@ void wallet::createwthd(eosio::name coopname, eosio::name username, checksum256 
     d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
   });
 
-  Action::send<createagenda_interface>(
-    _soviet,
-    "createagenda"_n,
+  ::Soviet::create_agenda(
     _wallet,
     coopname,
     username,

@@ -1,34 +1,20 @@
 void capital::approverslt(eosio::name coopname, eosio::name application, eosio::name approver, checksum256 result_hash, document2 approved_statement){
   require_auth(coopname);
   
+  // Проверяем заявление
   verify_document_or_fail(approved_statement);
   
-  auto exist_result = Capital::get_result(coopname, result_hash);
+  // Проверяем статус результата
+  auto exist_result = Capital::Results::get_result(coopname, result_hash);
   eosio::check(exist_result.has_value(), "Результат пользователя не существует");
+  eosio::check(exist_result->status == Capital::Results::Status::CREATED, "Неверный статус результата");
   
-  Capital::result_index results(_capital, coopname.value);
-  auto result = results.find(exist_result -> id);
+  // Устанавливаем одобренное заявление
+  Capital::Results::set_result_approved_statement(coopname, result_hash, approved_statement, coopname);
   
-  results.modify(result, coopname, [&](auto &a) {
-    a.status = "approved"_n;
-    a.approved_statement = approved_statement;
-  });
+  // Обновляем статус
+  Capital::Results::update_result_status(coopname, result_hash, Capital::Results::Status::APPROVED);
   
-  //отправляем в совет
-  Action::send<createagenda_interface>(
-    _soviet,
-    "createagenda"_n,
-    _capital,
-    coopname, 
-    result -> username, 
-    get_valid_soviet_action("createresult"_n), 
-    result -> result_hash,
-    _capital, 
-    "authrslt"_n, 
-    "declrslt"_n, 
-    result -> result_statement, 
-    std::string("")
-  );
-
-  
+  // Отправляем в совет
+  Capital::Results::send_result_to_soviet(coopname, exist_result->username, result_hash, approved_statement);
 };

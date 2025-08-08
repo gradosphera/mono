@@ -1,34 +1,28 @@
-void capital::createexpnse(eosio::name coopname, eosio::name application, checksum256 expense_hash, checksum256 project_hash, name creator, uint64_t fund_id, asset amount, std::string description, document2 statement){
+void capital::createexpnse(eosio::name coopname, eosio::name application, checksum256 expense_hash, checksum256 project_hash, name creator, asset amount, std::string description, document2 statement){
   check_auth_or_fail(_capital, coopname, application, "createexpns"_n);
   
   verify_document_or_fail(statement);
   
-  check(amount.symbol == _root_govern_symbol, "Invalid token symbol");
-  check(amount.is_valid(), "Invalid asset");
-  check(amount.amount > 0, "Amount must be positive");
+  Wallet::validate_asset(amount);
   
+  eosio::check(amount.amount > 0, "Сумма должна быть положительной");
+  
+  // Проверяем что создатель является участником проекта
   auto contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, creator);  
 
+  // Проверяем что расхода с таким хэшем нет
   auto exist_expense = Capital::get_expense(coopname, expense_hash);
   eosio::check(!exist_expense.has_value(), "Расход с указанным хэшем уже существует");
-    
-  // добавляем запись в таблицу расходов
-  Capital::expense_index expenses(_capital, coopname.value);
-  uint64_t expense_id = get_global_id_in_scope(_capital, coopname, "expenses"_n);
   
-  expenses.emplace(coopname, [&](auto &i) {
-    i.id = expense_id;
-    i.coopname = coopname;
-    i.application = application;
-    i.username = creator;
-    i.project_hash = project_hash;
-    i.expense_hash = expense_hash;
-    i.fund_id = fund_id;
-    i.status = "created"_n;
-    i.spended_at = current_time_point();
-    i.expense_statement = statement;
-    i.amount = amount;
-    i.description = description;
-  });
+  // Получаем проект и проверяем доступность средств
+  auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+  eosio::check(project.fact.accumulated_expense_pool >= amount, 
+               "Недостаточно средств в пуле расходов проекта");
   
+  // Резервируем средства (уменьшаем accumulated_expense_pool)
+  Capital::Projects::reserve_expense_funds(coopname, project_hash, amount);
+  
+  // Создаем запись расхода
+  Capital::Expenses::create_expense(coopname, project_hash, expense_hash, creator, 
+                                   application, amount, description, statement);
 }

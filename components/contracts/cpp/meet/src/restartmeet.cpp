@@ -84,9 +84,7 @@ void meet::restartmeet(name coopname, checksum256 hash, checksum256 new_hash, do
     }
 
     // Отправляем документ решения в совет
-    Action::send<createagenda_interface>(
-        _soviet,
-        "createagenda"_n,
+    ::Soviet::create_agenda(
         _meet,
         coopname,
         meet_record.initiator,

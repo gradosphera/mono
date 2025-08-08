@@ -5,7 +5,11 @@ void capital::fundproj(eosio::name coopname, checksum256 project_hash, asset amo
     auto exist_project = Capital::Projects::get_project(coopname, project_hash);
     eosio::check(exist_project.has_value(), "Проект не найден");
 
-    Capital::Core::Generation::distribute_project_membership_funds(coopname, exist_project->id, amount, 0);
+    // Проверяем, что в проекте есть доли для распределения
+    eosio::check(exist_project->membership.total_shares.amount > 0, 
+                 "В проекте нет долей для распределения членских взносов");
+
+    Capital::Core::Generation::distribute_project_membership_funds(coopname, exist_project->id, amount);
 };
 
 

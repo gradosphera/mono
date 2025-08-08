@@ -1,17 +1,29 @@
 #include "voting.hpp"
 #include "../../entities/votes.hpp"
-#include "../../entities/circle.hpp"
+#include "../../entities/segments.hpp"
 #include "../../entities/projects.hpp"
 
 namespace Capital::Core::Voting {
 
     void initialize_project_voting(name coopname, checksum256 project_hash) {
         auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+        auto st = Capital::get_global_state(coopname);
+        
+        // Устанавливаем параметры голосования из конфигурации
+        Capital::project_index projects(_capital, coopname.value);
+        auto proj = projects.find(project.id);
+        projects.modify(proj, coopname, [&](auto &p) {
+            p.voting.authors_voting_percent = st.config.authors_voting_percent;
+            p.voting.creators_voting_percent = st.config.creators_voting_percent;
+            p.voting.voting_deadline = time_point_sec(current_time_point().sec_since_epoch() + st.config.voting_period_in_days * 86400);
+        });
+        
+        project = Capital::Projects::get_project_or_fail(coopname, project_hash);
         
         auto amounts = calculate_voting_amounts(
             project.fact.authors_bonus_pool,
             project.fact.creators_bonus_pool,
-            project.fact.total_author_shares,
+            project.counts.total_authors,
             project.voting.total_voters,
             project.voting.authors_voting_percent,
             project.voting.creators_voting_percent
@@ -23,7 +35,7 @@ namespace Capital::Core::Voting {
 
     voting_amounts calculate_voting_amounts(const eosio::asset& authors_bonus_pool, 
                                            const eosio::asset& creators_bonus_pool,
-                                           uint64_t total_author_shares,
+                                           uint64_t total_authors,
                                            uint32_t total_voters,
                                            double authors_voting_percent,
                                            double creators_voting_percent) {
@@ -46,9 +58,9 @@ namespace Capital::Core::Voting {
         );
         
         // Рассчитываем равную сумму на каждого автора (61.8% авторских премий / количество авторов)
-        if (total_author_shares > 0) {
+        if (total_authors > 0) {
           result.authors_equal_per_author = eosio::asset(
-              result.authors_equal_spread.amount / total_author_shares,
+              result.authors_equal_spread.amount / total_authors,
               result.authors_equal_spread.symbol
           );
         } else {
@@ -83,7 +95,7 @@ namespace Capital::Core::Voting {
         auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
         
         // Получаем сегмент участника для определения его ролей
-        auto segment = Capital::Circle::get_segment_or_fail(coopname, project_hash, participant, "Сегмент участника не найден");
+        auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, participant, "Сегмент участника не найден");
         
         // Получаем все голоса за данного участника от других участников
         auto votes = Capital::Votes::get_votes_for_recipient(coopname, project_hash, participant);
@@ -107,17 +119,17 @@ namespace Capital::Core::Voting {
         return total_vodyanov_amount;
     }
 
-    eosio::asset calculate_equal_author_bonus(const Capital::project& project, const Capital::Circle::segment& segment) {
+    eosio::asset calculate_equal_author_bonus(const Capital::project& project, const Capital::Segments::segment& segment) {
         // Если участник является автором, возвращаем равную премию
-        if (segment.author_shares > 0) {
+        if (segment.is_author) {
             return project.voting.amounts.authors_equal_per_author;
         }
         return asset(0, project.voting.amounts.authors_equal_per_author.symbol);
     }
 
-    eosio::asset calculate_direct_creator_bonus(const Capital::project& project, const Capital::Circle::segment& segment) {
+    eosio::asset calculate_direct_creator_bonus(const Capital::project& project, const Capital::Segments::segment& segment) {
         // Если участник является создателем, рассчитываем прямую премию
-        if (segment.creator_shares > 0) {
+        if (segment.is_creator) {
             double direct_percent = (100.0 - project.voting.creators_voting_percent) / 100.0;
             return eosio::asset(
                 int64_t(static_cast<double>(segment.creator_bonus.amount) * direct_percent),

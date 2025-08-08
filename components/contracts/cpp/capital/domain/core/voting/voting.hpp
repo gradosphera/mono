@@ -3,7 +3,7 @@
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include "../../entities/projects.hpp"
-#include "../../entities/circle.hpp"
+#include "../../entities/segments.hpp"
 
 using namespace eosio;
 
@@ -42,7 +42,7 @@ namespace Capital::Core::Voting {
      * @param segment Сегмент участника
      * @return Сумма равной премии автора
      */
-    eosio::asset calculate_equal_author_bonus(const Capital::project& project, const Capital::Circle::segment& segment);
+    eosio::asset calculate_equal_author_bonus(const Capital::project& project, const Capital::Segments::segment& segment);
 
     /**
      * @brief Рассчитывает прямую премию создателя
@@ -50,7 +50,7 @@ namespace Capital::Core::Voting {
      * @param segment Сегмент участника
      * @return Сумма прямой премии создателя
      */
-    eosio::asset calculate_direct_creator_bonus(const Capital::project& project, const Capital::Circle::segment& segment);
+    eosio::asset calculate_direct_creator_bonus(const Capital::project& project, const Capital::Segments::segment& segment);
 
     /**
      * @brief Проверяет, завершено ли голосование (кто-то проголосовал или истек срок)

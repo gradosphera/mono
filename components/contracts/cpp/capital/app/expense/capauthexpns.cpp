@@ -1,32 +1,28 @@
 void capital::capauthexpns(eosio::name coopname, checksum256 expense_hash, document2 authorization) {
   require_auth(_soviet);
   
-  auto exist_expense = Capital::get_expense(coopname, expense_hash);
-  eosio::check(exist_expense.has_value(), "Расход не найден");
+  // Получаем расход и проверяем его статус
+  auto expense = Capital::Expenses::get_expense_or_fail(coopname, expense_hash);
+  eosio::check(expense.status == Capital::Expenses::Status::APPROVED, "Расход должен быть в статусе 'approved'");
   
-  Capital::expense_index expenses(_capital, coopname.value);
-  auto expense = expenses.find(exist_expense -> id);
-  
-  auto contributor = Capital::Contributors::get_contributor(coopname, expense -> username);
+  // Проверяем что пользователь зарегистрирован
+  auto contributor = Capital::Contributors::get_contributor(coopname, expense.username);
   eosio::check(contributor.has_value(), "Договор УХД с пайщиком по проекту не найден");
   
-  //TODO: заменить плательщика на coopname
-  expenses.modify(expense, _soviet, [&](auto &i) {
-    i.status = "authorized"_n;
-    i.authorization = authorization;
-  });
+  // Авторизуем расход (простое обновление статуса)
+  Capital::Expenses::set_authorized(coopname, expense_hash, authorization);
   
-  // создаём объект исходящего платежа в gateway с коллбэком после обработки
-  action(permission_level{ _capital, "active"_n}, _gateway, "createoutpay"_n,
-    std::make_tuple(
-      coopname, 
-      expense -> username, 
-      expense -> expense_hash, 
-      expense -> amount, 
-      _capital, 
-      "exppaycnfrm"_n, 
-      "capdeclexpns"_n
-    )
-  ).send();  
-
+  // Создаём объект исходящего платежа в gateway с коллбэком после обработки
+  Action::send<createoutpay_interface>(
+    _gateway,
+    Names::External::CREATE_OUTPAY,
+    _capital,
+    coopname, 
+    expense.username, 
+    expense.expense_hash, 
+    expense.amount, 
+    _capital, 
+    Names::Capital::CONFIRM_EXPENSE_PAYMENT, 
+    Names::Capital::DECLINE_EXPENSE
+  );  
 }

@@ -3,6 +3,10 @@
 using namespace eosio;
 using std::string;
 
+namespace Capital::Appendix::Status {
+  constexpr eosio::name CREATED = "created"_n;
+}
+
 namespace Capital {
 /**
   * @brief Структура приложения к договору УХД для конкретного проекта
@@ -13,11 +17,10 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] appendix {
     name username;
     checksum256 project_hash;
     checksum256 appendix_hash;
-    name status; ///< "created", "approved", "declined"
+    name status;
     time_point_sec created_at;
-    document2 document;
-    document2 approved_document;
-
+    document2 appendix;
+    
     uint64_t primary_key() const { return id; }
     
     uint64_t by_username() const { return username.value; }

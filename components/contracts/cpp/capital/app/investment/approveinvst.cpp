@@ -19,7 +19,7 @@ void capital::approveinvst(eosio::name coopname, checksum256 invest_hash, docume
     Capital::Core::upsert_coordinator_segment(coopname, invest.project_hash, invest.coordinator, invest.coordinator_amount);
     
     // Добавляем координаторский взнос в проект
-    Capital::Projects::add_coordinator_funds(coopname, invest.project_hash, invest.coordinator_amount);
+    Capital::Core::Generation::add_coordinator_funds(coopname, invest.project_hash, invest.coordinator_amount);
     
   }
   

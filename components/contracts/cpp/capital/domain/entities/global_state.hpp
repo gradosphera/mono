@@ -5,29 +5,32 @@ using std::string;
 
 namespace Capital {
 
+  /**
+   * @brief Конфигурация контракта, управляемая пользователем.
+   */
+  struct config {
+    double coordinator_bonus_percent = 0.04;   ///< Процент премий координатора от инвестиций (по умолчанию 4%)
+    double expense_pool_percent = 1.0;         ///< Процент инвестиций в пул расходов (по умолчанию 1.0)
+    uint32_t coordinator_invite_validity_days = 30; ///< Срок действия приглашения координатора (по умолчанию 30 дней)
+    uint32_t voting_period_in_days = 7;        ///< Период голосования в днях (по умолчанию 7)
+    double authors_voting_percent = 38.2;      ///< Процент премий авторов для голосования (по умолчанию)
+    double creators_voting_percent = 38.2;     ///< Процент премий создателей для голосования (по умолчанию)
+  };
+
 /**
   * @brief Структура глобального состояния, хранящая общие данные контракта.
   * \ingroup public_tables
   */
   struct [[eosio::table, eosio::contract(CAPITAL)]] global_state {
     eosio::name coopname;                                ///< Имя кооператива глобального состояния.
-    uint64_t program_id;                                  ///<  Идентификатор целевой программы.
-    
+    asset global_available_invest_pool = asset(0, _root_govern_symbol); ///< Глобальный пул доступных для аллокации инвестиций в программу.
     asset program_membership_funded = asset(0, _root_govern_symbol); ///< Общая сумма членских взносов по программе
     asset program_membership_available = asset(0, _root_govern_symbol); ///< Доступная сумма членских взносов по программе
     asset program_membership_distributed = asset(0, _root_govern_symbol); ///< Распределенная сумма членских взносов по программе
     int64_t program_membership_cumulative_reward_per_share;               ///< Накопительное вознаграждение на долю в членских взносах
-    
-        
-    asset total_shares = asset(0, _root_govern_symbol);    ///< Общая сумма долей всех участников.
-    asset total_contributions = asset(0, _root_govern_symbol); ///< Общая сумма всех вкладов.
-    asset total_rewards_distributed = asset(0, _root_symbol); ///< Общая сумма распределенных вознаграждений.
-    asset total_withdrawed = asset(0, _root_symbol); ///< Общая сумма, выведенная через withdraw1.
-    asset total_intellectual_contributions = asset(0, _root_govern_symbol); ///< Общая сумма интеллектуальных вкладов.
-    asset total_property_contributions = asset(0, _root_govern_symbol); ///< Общая сумма имущественных вкладов.
-    asset accumulated_amount = asset(0, _root_symbol); ///< Накопленные членские взносы.
-    int64_t cumulative_reward_per_share = 0;        ///< Накопленное вознаграждение на долю (масштабировано).
 
+    config config;                                           ///< Управляемая конфигурация контракта
+    
     uint64_t primary_key() const { return coopname.value; }     ///< Основной ключ.
 };
 

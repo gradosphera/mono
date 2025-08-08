@@ -78,7 +78,7 @@ public:
 
 private:
     static constexpr symbol TOKEN_SYMBOL = _root_govern_symbol; ///< Символ используемого токена.
-    static constexpr int64_t REWARD_SCALE = 100000000; ///< Масштабный коэффициент для вознаграждений (1e8).
+    
 
     /**
      * @brief Структура участника, хранящая данные индивидуального участника.

@@ -57,9 +57,7 @@
   checksum256 agenda_hash = change.hash;
 
   // Отправляем ПЕРВЫЙ вопрос в совет - по заявлению на имущественный паевой взнос
-  Action::send<createagenda_interface>(
-    _soviet,
-    "createagenda"_n,
+  ::Soviet::create_agenda(
     _marketplace,
     coopname,
     username,
@@ -73,9 +71,7 @@
   );
 
   // Отправляем ВТОРОЙ вопрос в совет - по заявлению на возврат имущества  
-  Action::send<createagenda_interface>(
-    _soviet,
-    "createagenda"_n,
+  ::Soviet::create_agenda(
     _marketplace,
     coopname,
     username,

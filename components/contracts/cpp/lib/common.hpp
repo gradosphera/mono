@@ -7,6 +7,7 @@
 #include <eosio/permission.hpp>
 
 #include "consts.hpp"
+#include "shared_names.hpp"
 #include "registry.hpp"
 #include "utils.hpp"
 #include "drafts.hpp"

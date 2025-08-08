@@ -8,6 +8,7 @@ using std::string;
 #include "contributor_crps.cpp"
 #include "coordinator_crps.cpp"
 #include "creator_crps.cpp"
+#include "program_crps.cpp"
 
 namespace Capital::Core {
 
@@ -15,9 +16,12 @@ namespace Capital::Core {
    * @brief Обновляет сегмент участника - диспетчер для обновления всех ролей
    */
   void refresh_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
-    auto segment_opt = Circle::get_segment(coopname, project_hash, username);
-    if (!segment_opt.has_value()) {
-      return; // Сегмент не найден
+    auto segment_opt = Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент пайщика не найден");
+    
+    bool is_segment_updated = Capital::Segments::is_segment_updated(coopname, project_hash, username);
+    
+    if (is_segment_updated) {
+      return; // Сегмент обновлен
     }
     
     // Обновляем награды для каждой роли отдельно
@@ -27,50 +31,78 @@ namespace Capital::Core {
     
     // Пересчитываем доступную сумму к компенсации
     refresh_provisional_amount(coopname, project_hash, username);
+    
+    // Обновляем фактически используемую сумму инвестора если он является инвестором
+    update_investor_used_amount(coopname, project_hash, username);
+    
+    // Обновляем общую стоимость сегмента в конце
+    Capital::Segments::update_segment_total_cost(coopname, project_hash, username, _capital);
   }
 
   /**
-   * @brief Пересчитывает доступную сумму к компенсации на основе инвестиций
+   * @brief Пересчитывает доступную сумму к компенсации на основе инвестиций с учетом return_cost_coefficient
    */
   void refresh_provisional_amount(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
-    auto segment_opt = Circle::get_segment(coopname, project_hash, username);
+    auto segment_opt = Segments::get_segment(coopname, project_hash, username);
     if (!segment_opt.has_value()) {
       return; // Сегмент не найден
     }
     
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
     
-    // Если нет инвестиций, provisional_amount = 0
-    if (project.fact.invest_pool.amount == 0) {
-      Circle::segments_index segments(_capital, coopname.value);
-      auto segment_it = segments.find(segment_opt->id);
-      segments.modify(segment_it, _capital, [&](auto &s) {
-        s.provisional_amount = eosio::asset(0, _root_govern_symbol);
-      });
-      return;
-    }
-    
-    // Общая сумма базовых полей всех ролей = сумма пулов проекта
-    int64_t total_base_amount = project.fact.creators_base_pool.amount + 
-                               project.fact.authors_base_pool.amount + 
-                               project.fact.coordinators_base_pool.amount;
-    
-    // Базовые поля текущего пользователя
+    // Базовые поля текущего пользователя (себестоимость труда)
     int64_t user_base_amount = segment_opt->creator_base.amount + 
                               segment_opt->author_base.amount + 
                               segment_opt->coordinator_base.amount;
     
-    // Рассчитываем пропорциональную долю от инвестиций
-    int64_t provisional_amount = 0;
-    if (total_base_amount > 0 && user_base_amount > 0) {
-      provisional_amount = static_cast<int64_t>((static_cast<double>(user_base_amount) * static_cast<double>(project.fact.invest_pool.amount)) / static_cast<double>(total_base_amount));
+    // Если нет себестоимости труда у пользователя, provisional_amount = 0
+    if (user_base_amount == 0) {
+      Segments::segments_index segments(_capital, coopname.value);
+      auto segment_it = segments.find(segment_opt->id);
+      segments.modify(segment_it, _capital, [&](auto &s) {
+        s.provisional_amount = eosio::asset(0, _root_govern_symbol);
+        s.last_known_invest_pool = project.fact.invest_pool; // Все равно синхронизируем инвестиции
+      });
+      return;
     }
     
-    // Обновляем provisional_amount в сегменте
-    Circle::segments_index segments(_capital, coopname.value);
+    // Рассчитываем provisional_amount с учетом return_cost_coefficient
+    double return_coefficient = project.fact.return_cost_coefficient;
+    
+    // Ограничиваем коэффициент максимум 1.0 (100% компенсации)
+    if (return_coefficient > 1.0) {
+      return_coefficient = 1.0;
+    }
+    
+    // provisional_amount = себестоимость_труда * return_cost_coefficient
+    int64_t provisional_amount = static_cast<int64_t>(
+      static_cast<double>(user_base_amount) * return_coefficient
+    );
+    
+    // Общая сумма базовых полей всех ролей в проекте
+    int64_t total_base_amount = project.fact.creators_base_pool.amount + 
+                               project.fact.authors_base_pool.amount + 
+                               project.fact.coordinators_base_pool.amount;
+    
+    // Если есть инвестиции, проверяем что provisional_amount не превышает долю в инвестициях
+    if (project.fact.invest_pool.amount > 0 && total_base_amount > 0) {
+      int64_t user_investment_share = static_cast<int64_t>(
+        (static_cast<double>(user_base_amount) * static_cast<double>(project.fact.invest_pool.amount)) / 
+        static_cast<double>(total_base_amount)
+      );
+      
+      // provisional_amount не может превышать долю в инвестициях
+      if (provisional_amount > user_investment_share) {
+        provisional_amount = user_investment_share;
+      }
+    }
+    
+    // Обновляем provisional_amount и last_known_invest_pool в сегменте
+    Segments::segments_index segments(_capital, coopname.value);
     auto segment_it = segments.find(segment_opt->id);
     segments.modify(segment_it, _capital, [&](auto &s) {
       s.provisional_amount = eosio::asset(provisional_amount, _root_govern_symbol);
+      s.last_known_invest_pool = project.fact.invest_pool; // Синхронизируем с актуальной суммой инвестиций
     });
   }
 
@@ -81,30 +113,95 @@ namespace Capital::Core {
    */
   void upsert_investor_segment(eosio::name coopname, const checksum256 &project_hash, 
                                         eosio::name username, const eosio::asset &investor_amount) {
-    Circle::segments_index segments(_capital, coopname.value);
-    auto exist_segment = Circle::get_segment(coopname, project_hash, username);
+    Segments::segments_index segments(_capital, coopname.value);
+    auto exist_segment = Segments::get_segment(coopname, project_hash, username);
         
     if (!exist_segment.has_value()) {
         segments.emplace(_capital, [&](auto &g){
             g.id            = segments.available_primary_key();
             g.project_hash  = project_hash;
             g.username      = username;
-            g.investor_base = investor_amount;
-            g.investor_shares = 1;
+            g.investor_amount = investor_amount;
+            g.is_investor = true;
         });
         
-        Capital::Projects::increment_total_investor_shares(coopname, project_hash);
+        Capital::Projects::increment_total_investors(coopname, project_hash);
         
     } else {
         auto segment = segments.find(exist_segment->id);
         segments.modify(segment, _capital, [&](auto &g) {
-            if (g.investor_shares == 0) {
-                g.investor_shares = 1;
-                Capital::Projects::increment_total_investor_shares(coopname, project_hash);
+            if (!g.is_investor) {
+                g.is_investor = true;
+                Capital::Projects::increment_total_investors(coopname, project_hash);
             }
-            g.investor_base += investor_amount;
+            g.investor_amount += investor_amount;
         });
     }
+    
+    // Обновляем общую стоимость сегмента
+    Capital::Segments::update_segment_total_cost(coopname, project_hash, username, _capital);
+  }
+
+  /**
+   * @brief Обновляет доли участника в кошельке проекта для получения членских взносов
+   */
+  void refresh_project_wallet_membership_rewards(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
+    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+    auto wallet_opt = Capital::get_project_wallet(coopname, project_hash, username);
+    
+    if (!wallet_opt.has_value()) {
+      return; // Кошелек проекта не найден
+    }
+    
+    Capital::project_wallets_index project_wallets(_capital, coopname.value);
+    auto wallet_it = project_wallets.find(wallet_opt->id);
+    
+    // Если у участника нет долей в кошельке проекта, то нет и права на членские взносы
+    if (wallet_opt->shares.amount == 0 || project.membership.total_shares.amount == 0) {
+      project_wallets.modify(wallet_it, _capital, [&](auto &w) {
+        w.last_membership_reward_per_share = project.membership.cumulative_reward_per_share;
+      });
+      return;
+    }
+    
+    project_wallets.modify(wallet_it, _capital, [&](auto &w) {
+      // Рассчитываем накопленные награды от членских взносов на основе долей в кошельке проекта
+      int64_t pending_membership_reward = w.shares.amount * 
+        (project.membership.cumulative_reward_per_share - w.last_membership_reward_per_share);
+      
+      if (pending_membership_reward > 0) {
+        w.membership_available += eosio::asset(pending_membership_reward, _root_govern_symbol);
+      }
+      
+      w.last_membership_reward_per_share = project.membership.cumulative_reward_per_share;
+    });
+  }
+
+  /**
+   * @brief Обновляет фактически используемую сумму инвестора в сегменте с учетом коэффициента возврата
+   * @param coopname Имя кооператива
+   * @param project_hash Хэш проекта
+   * @param username Имя инвестора
+   */
+  void update_investor_used_amount(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
+    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+    
+    Segments::segments_index segments(_capital, coopname.value);
+    auto segment_opt = Segments::get_segment(coopname, project_hash, username);
+    
+    if (!segment_opt.has_value() || !segment_opt->is_investor) {
+      return; // Не инвестор
+    }
+    
+    auto segment = segments.find(segment_opt->id);
+    
+    segments.modify(segment, _capital, [&](auto &s) {
+      // Рассчитываем фактически используемую сумму инвестора
+      s.investor_base = Capital::Core::Generation::calculate_investor_used_amount(
+        s.investor_amount, 
+        project.fact.return_cost_coefficient
+      );
+    });
   }
 
 }

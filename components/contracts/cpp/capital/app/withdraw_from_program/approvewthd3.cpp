@@ -10,23 +10,22 @@ void capital::approvewthd3(name coopname, name application, name approver, check
   auto withdraw = program_withdraws.find(exist_withdraw -> id);
 
   program_withdraws.modify(withdraw, coopname, [&](auto &i) {
-    i.status = "approved"_n;
-    i.approved_return_statement = approved_return_statement;
+    i.status = Capital::ProgramWithdraw::Status::APPROVED;
+    i.statement = approved_return_statement;
   });
   
   //отправляем в совет
-  action(permission_level{ _capital, "active"_n}, _soviet, "createagenda"_n,
-    std::make_tuple(
-      coopname, 
-      exist_withdraw -> username, 
-      get_valid_soviet_action("capwthdrprog"_n),
-      withdraw_hash, 
-      _capital, 
-      "capauthwthd3"_n,
-      "capdeclwthd3"_n,
-      exist_withdraw -> return_statement, 
-      std::string("")
-    )
-  ).send(); 
+  ::Soviet::create_agenda(
+    _capital,
+    coopname, 
+    exist_withdraw -> username, 
+    Names::SovietActions::CAPITAL_WITHDRAW_FROM_PROGRAM,
+    withdraw_hash, 
+    _capital, 
+    Names::Capital::AUTHORIZE_PROGRAM_WITHDRAW,
+    Names::Capital::DECLINE_PROGRAM_WITHDRAW,
+    exist_withdraw -> statement, 
+    std::string("")
+  ); 
 
 };

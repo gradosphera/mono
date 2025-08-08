@@ -20,7 +20,7 @@ void capital::createinvest(name coopname, name application, name username, check
   Capital::Invests::create_invest_with_approve(coopname, username, project_hash, invest_hash, amount, statement);
 
   // Получаем информацию о координаторе и его сумме для взноса
-  auto coordinator_info = Capital::Invests::get_coordinator_amount(username, amount);
+  auto coordinator_info = Capital::Invests::get_coordinator_amount(coopname, username, amount);
   
   // Обновляем информацию о координаторе в инвестиции, если она есть
   if (coordinator_info.has_value()) {
