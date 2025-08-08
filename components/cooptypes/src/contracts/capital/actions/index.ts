@@ -1,37 +1,73 @@
-export * as AddAuthor from './addAuthor'
-export * as Allocate from './allocate'
-export * as ApproveCommit from './approveCommit'
-export * as ApproveInvest from './approveInvest'
-export * as ApproveRegister from './approveRegister'
-export * as ApproveExpense from './approveExpense'
-export * as ApproveWithdrawResult from './approveWithdrawResult'
-export * as ApproveWithdrawProgram from './approveWithdrawProgram'
-export * as ApproveWithdrawProject from './approveWithdrawProject'
+// Актуальные действия контракта Capital из capital.hpp
 
-export * as CreateCommit from './createCommit'
+// Управление конфигурацией
+export * as SetConfig from './setConfig'
+
+// Управление проектами
 export * as CreateProject from './createProject'
-export * as CreateExpense from './createExpense'
-export * as CreateInvest from './createInvest'
+export * as OpenProject from './openProject'
+export * as StartProject from './startProject'
+export * as CompleteProject from './completeProject'
+export * as CompleteVoting from './completeVoting'
+export * as FinalVoting from './finalVoting'
+export * as SubmitVote from './submitVote'
+export * as CloseProject from './closeProject'
+export * as DeleteProject from './deleteProject'
+export * as SetMaster from './setMaster'
+export * as SetPlan from './setPlan'
+export * as ExpandExpenses from './expandExpenses'
 
-export * as Diallocate from './diallocate'
+// Конвертация сегментов
+export * as ConvertSegment from './convertSegment'
 
-export * as FundProgram from './fundProgram'
-export * as FundProject from './fundProject'
+// Возврат из проекта (createwthd2, capauthwthd2, capdeclwthd2, approvewthd2)
+export * as CreateWithdrawProject from './createWithdrawProject'
 
-export * as Init from './init'
-export * as RefreshProject from './refreshProject'
-export * as RefreshProgram from './refreshProgram'
+// Возврат из программы (createwthd3, capauthwthd3, approvewthd3, capdeclwthd3)
+export * as CreateWithdrawProgram from './createWithdrawProgram'
 
+// Результаты
+export * as PushResult from './pushResult'
+export * as SignAct1 from './signAct1'
+export * as SignAct2 from './signAct2'
+
+// Авторы
+export * as AddAuthor from './addAuthor'
+
+// Коммиты
+export * as CreateCommit from './createCommit'
+
+// Долги
+export * as CreateDebt from './createDebt'
+
+// Регистрация участников
 export * as RegisterContributor from './registerContributor'
 
-export * as SetAct1 from './setAct1'
-export * as SetAct2 from './setAct2'
+// Приложения к договору УХД
+export * as SignAppendix from './signAppendix'
 
-export * as StartDistribution from './startDistribution'
+// Инвестиции в проекты
+export * as CreateInvest from './createInvest'
+export * as ReturnUnused from './returnUnused'
 
-export * as WithdrawResult from './withdrawResult'
-export * as WithdrawProject from './withdrawProject'
-export * as WithdrawProgram from './withdrawProgram'
+// Программные инвестиции
+export * as CreateProgramInvest from './createProgramInvest'
 
-export * as CreateConvert from './createConvert'
-export * as ApproveConvert from './approveConvert'
+// Аллокация программных инвестиций
+export * as Allocate from './allocate'
+export * as Deallocate from './deallocate'
+
+// Расходы
+export * as CreateExpense from './createExpense'
+
+// Членские взносы
+export * as FundProject from './fundProject'
+export * as RefreshProject from './refreshProject'
+export * as FundProgram from './fundProgram'
+export * as RefreshProgram from './refreshProgram'
+
+// CRPS
+export * as RefreshSegment from './refreshSegment'
+
+// Участники проектов
+export * as AddContributor from './addContributor'

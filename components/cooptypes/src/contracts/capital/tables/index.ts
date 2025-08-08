@@ -1,13 +1,20 @@
-export * as Authors from './authors'
-export * as Contributors from './contributors'
-export * as Creators from './creators'
-export * as Projects from './projects'
-export * as Results from './results'
-export * as State from './state'
-export * as ProjectWithdraws from './projectWithdraws'
-export * as ProgramWithdraws from './programWithdraws'
-export * as ResultWithdraws from './resultWithdraws'
-export * as Invests from './invests'
-export * as Expenses from './expenses'
+// Актуальные таблицы контракта Capital из интерфейсов capital.ts
+
+// Основные сущности
+export * as Appendixes from './appendixes'
 export * as Commits from './commits'
-export * as Converts from './converts'
+export * as Contributors from './contributors'
+export * as Debts from './debts'
+export * as Expenses from './expenses'
+export * as Invests from './invests'
+export * as ProgramInvests from './programInvests'
+export * as ProgramWithdraws from './programWithdraws'
+export * as Projects from './projects'
+export * as ProjectWallets from './projectWallets'
+export * as ProjectWithdraws from './projectWithdraws'
+export * as Results from './results'
+export * as Segments from './segments'
+export * as Votes from './votes'
+
+// Глобальное состояние
+export * as State from './state'

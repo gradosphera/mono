@@ -4,7 +4,7 @@ import { Actors } from '../../../common'
 /**
  * Имя таблицы
  */
-export const tableName = 'authors'
+export const tableName = 'appendixes'
 
 /**
  * Таблица хранится в {@link Actors._coopname | области памяти кооператива}.
@@ -13,6 +13,6 @@ export const scope = Actors._coopname
 
 /**
  * @interface
- * Таблица содержит информацию об авторах.
+ * Таблица содержит информацию о приложениях к договору УХД.
  */
-export type IAuthor = Capital.IAuthor
+export type IAppendix = Capital.IAppendix

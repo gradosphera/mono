@@ -9,13 +9,6 @@ export type ITimePointSec = string
 export type IUint32 = number
 export type IUint64 = number | string
 
-export interface IAdd {
-  coopname: IName
-  account_id: IUint64
-  quantity: IAsset
-  comment: string
-}
-
 export interface IAuth {
   coopname: IName
   writeoff_hash: IChecksum256
@@ -41,6 +34,20 @@ export interface ICreate {
   reason: string
   document: IDocument2
   writeoff_hash: IChecksum256
+}
+
+export interface ICredit {
+  coopname: IName
+  account_id: IUint64
+  quantity: IAsset
+  comment: string
+}
+
+export interface IDebet {
+  coopname: IName
+  account_id: IUint64
+  quantity: IAsset
+  comment: string
 }
 
 export interface IDecline {
@@ -77,21 +84,6 @@ export interface ISignatureInfo {
   signature: ISignature
   signed_at: ITimePointSec
   meta: string
-}
-
-export interface ISub {
-  coopname: IName
-  account_id: IUint64
-  quantity: IAsset
-  comment: string
-}
-
-export interface ITransfer {
-  coopname: IName
-  from_account_id: IUint64
-  to_account_id: IUint64
-  quantity: IAsset
-  comment: string
 }
 
 export interface IUnblock {

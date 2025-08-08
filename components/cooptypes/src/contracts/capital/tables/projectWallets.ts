@@ -4,7 +4,7 @@ import { Actors } from '../../../common'
 /**
  * Имя таблицы
  */
-export const tableName = 'reswithdraws'
+export const tableName = 'projwallets'
 
 /**
  * Таблица хранится в {@link Actors._coopname | области памяти кооператива}.
@@ -13,6 +13,6 @@ export const scope = Actors._coopname
 
 /**
  * @interface
- * Таблица содержит информацию о заявках на вывод средств.
+ * Таблица содержит информацию о кошельках проектов.
  */
-export type IResultWithdraw = Capital.IResultWithdraw
+export type IProjectWallet = Capital.IProjectWallet
