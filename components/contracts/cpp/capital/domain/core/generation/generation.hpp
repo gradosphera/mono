@@ -43,12 +43,17 @@ namespace Capital::Core::Generation {
   /**
    * @brief Функция расчета коэффициента возврата себестоимости (для фактических показателей)
    */
-  double calculate_return_cost_coefficient(const fact_pool& current_pools);
+  double calculate_return_base_percent(eosio::asset creators_base_pool, eosio::asset authors_base_pool, eosio::asset coordinators_base_pool, eosio::asset invest_pool);
 
   /**
-   * @brief Функция расчета коэффициента возврата себестоимости (для плановых показателей)
+   * @brief Функция расчета коэффициента используемых инвестиций для плановых показателей
    */
-  double calculate_return_cost_coefficient(const plan_pool& current_pools);
+  double calculate_use_invest_percent_planned(eosio::asset creators_base_pool, eosio::asset authors_base_pool, eosio::asset coordinators_base_pool, eosio::asset target_expense_pool, eosio::asset total_received_investments);
+  
+  /**
+   * @brief Функция расчета коэффициента используемых инвестиций для фактических показателей
+   */
+  double calculate_use_invest_percent(eosio::asset creators_base_pool, eosio::asset authors_base_pool, eosio::asset coordinators_base_pool, eosio::asset accumulated_expense_pool, eosio::asset used_expense_pool, eosio::asset total_received_investments);
 
   /**
    * @brief Распределение паевых средств проекта
@@ -56,9 +61,9 @@ namespace Capital::Core::Generation {
   void distribute_project_membership_funds(eosio::name coopname, uint64_t project_id, asset amount, uint8_t level);
 
   /**
-   * @brief Рассчитывает фактически используемую сумму инвестора с учетом коэффициента возврата
+   * @brief Рассчитывает фактически используемую сумму инвестора с учетом коэффициента использования
    */
-  eosio::asset calculate_investor_used_amount(const eosio::asset& investor_base, double return_cost_coefficient);
+  eosio::asset calculate_investor_used_amount(const eosio::asset& investor_amount, double use_invest_percent);
 
   /**
    * @brief Добавляет координаторские средства к проекту

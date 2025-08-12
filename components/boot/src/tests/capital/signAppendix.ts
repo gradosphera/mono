@@ -4,22 +4,20 @@ import { fakeDocument } from '../shared/fakeDocument'
 import { getTotalRamUsage } from '../../utils/getTotalRamUsage'
 import { processApprove } from './processApprove'
 
-export async function registerContributor(
+export async function signAppendix(
   blockchain: any,
   coopname: string,
   username: string,
-  contributorHash: string,
-  ratePerHour: string,
+  projectHash: string,
+  appendixHash: string,
 ) {
-  const contract = fakeDocument
-  contract.signatures[0].signer = username
-  const data: CapitalContract.Actions.RegisterContributor.IRegisterContributor = {
+  // Подписание приложения пайщиком (через кооператив, как и в контракте)
+  const data: CapitalContract.Actions.SignAppendix.ISignAppendix = {
     coopname,
     username,
-    contributor_hash: contributorHash,
-    rate_per_hour: ratePerHour,
-    is_external_contract: false,
-    contract,
+    project_hash: projectHash,
+    appendix_hash: appendixHash,
+    document: fakeDocument,
   }
 
   const result = await blockchain.api.transact(
@@ -27,7 +25,7 @@ export async function registerContributor(
       actions: [
         {
           account: CapitalContract.contractName.production,
-          name: CapitalContract.Actions.RegisterContributor.actionName,
+          name: CapitalContract.Actions.SignAppendix.actionName,
           authorization: [{ actor: coopname, permission: 'active' }],
           data,
         },
@@ -38,13 +36,14 @@ export async function registerContributor(
       expireSeconds: 30,
     },
   )
+
   getTotalRamUsage(result)
   expect(result.transaction_id).toBeDefined()
 
-  // Аппрув председателя (через совет) по хэшу договора УХД
-  await processApprove(blockchain, coopname, contributorHash)
+  // Аппрув председателя (через совет) по хэшу приложения
+  await processApprove(blockchain, coopname, appendixHash)
 
-  // Проверяем, что контрибьютор активирован и договор сохранён
+  // Проверяем, что приложение применилось к контрибьютору, а запись удалена
   const contributor = (
     await blockchain.getTableRows(
       CapitalContract.contractName.production,
@@ -59,6 +58,5 @@ export async function registerContributor(
   )[0]
 
   expect(contributor).toBeDefined()
-  expect(contributor.status).toBe('active')
-  expect(contributor.contract).toBeDefined()
+  expect(contributor.appendixes).toContain(projectHash)
 }

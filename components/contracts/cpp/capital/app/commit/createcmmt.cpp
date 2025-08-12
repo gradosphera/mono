@@ -17,7 +17,8 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
                "Пайщик не подписывал приложение к договору УХД для данного проекта");
   
   // Проверяем, что действие с указанным хэшем не существует
-  Capital::Commits::get_commit_or_fail(coopname, commit_hash);
+  auto commit = Capital::Commits::get_commit(coopname, commit_hash);
+  eosio::check(!commit.has_value(), "Коммит с указанным хэшем уже существует");
   
   // Проверяем, что сумма часов создателя больше 0
   eosio::check(creator_hours > 0, "Только положительная сумма часов создателя");

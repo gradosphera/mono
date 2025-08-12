@@ -11,6 +11,8 @@ void capital::createinvest(name coopname, name application, name username, check
   
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
   
+  eosio::check(project.is_opened == true, "Проект закрыт для инвестиций");
+  
   std::string memo = Capital::Memo::get_invest_memo(contributor -> id);
   
   // блокируем средства в программе кошелька

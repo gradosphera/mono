@@ -15,8 +15,9 @@ struct fact_pool {
   eosio::asset hour_cost = asset(0, _root_govern_symbol);                 ///< Фактическая стоимость часа
   uint64_t creators_hours = 0;                                           ///< Фактическое время в часах
 
-  // Коэффициент возврата себестоимости
-  double return_cost_coefficient = 0.0;
+  // Коэффициенты возврата (в процентах)
+  double return_base_percent = 0.0;                                  ///< Коэффициент возврата себестоимости для создателей/авторов/координаторов (0-100%)
+  double use_invest_percent = 0.0;                                ///< Коэффициент используемых инвестиций для инвесторов (0-100%)
   
   // Пулы себестоимостей
   eosio::asset creators_base_pool = asset(0, _root_govern_symbol);        ///< Фактическая себестоимость создателей
@@ -34,9 +35,11 @@ struct fact_pool {
   eosio::asset used_expense_pool = asset(0, _root_govern_symbol);         ///< Фактически израсходованные средства
   
   // Пулы инвестиций
-  eosio::asset invest_pool = asset(0, _root_govern_symbol);               ///< Фактические инвестиции от инвесторов
+  eosio::asset invest_pool = asset(0, _root_govern_symbol);               ///< Фактические инвестиции от инвесторов (после вычета расходов)
   eosio::asset coordinators_investment_pool = asset(0, _root_govern_symbol); ///< Фактические инвестиции, привлеченные координаторами
   eosio::asset program_invest_pool = asset(0, _root_govern_symbol);       ///< Фактические программные инвестиции, аллоцированные в проект
+  eosio::asset total_received_investments = asset(0, _root_govern_symbol); ///< Общая сумма всех полученных инвестиций (до распределения)
+  eosio::asset total_returned_investments = asset(0, _root_govern_symbol); ///< Общая сумма возвращенных неиспользованных инвестиций
   
   // Общая сумма генерации (без вкладчиков)
   eosio::asset total_generation_pool = asset(0, _root_govern_symbol);     ///< Общая фактическая сумма генерации

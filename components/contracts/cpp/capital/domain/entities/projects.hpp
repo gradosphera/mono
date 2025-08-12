@@ -17,8 +17,7 @@ namespace Capital::Projects::Status {
   /**
   * @brief Константы статусов проекта
   */
-  const eosio::name CREATED = "created"_n;     ///< Проект создан
-  const eosio::name OPENED = "opened"_n;       ///< Проект открыт для инвестиций
+  const eosio::name PENDING = "pending"_n;     ///< Проект создан
   const eosio::name ACTIVE = "active"_n;       ///< Проект активен для коммитов
   const eosio::name VOTING = "voting"_n;       ///< Проект на голосовании
   const eosio::name COMPLETED = "completed"_n; ///< Проект завершен
@@ -38,7 +37,9 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
   checksum256 parent_hash; // Хэш родительского проекта (если есть)
   
   eosio::name status; // Статус проекта
-
+  
+  bool is_opened; // Открыт ли проект для инвестиций
+  
   // Мастер проекта
   name master; // Мастер проекта
   
@@ -140,7 +141,7 @@ namespace Capital::Projects {
     
     projects.emplace(coopname, [&](auto& row) {
       row.id = get_global_id_in_scope(_capital, coopname, "projects"_n); 
-      row.status = Capital::Projects::Status::CREATED;
+      row.status = Capital::Projects::Status::PENDING;
       row.project_hash = project_hash;
       row.parent_hash = parent_hash;
       row.coopname = coopname;
@@ -184,8 +185,29 @@ namespace Capital::Projects {
           p.fact.total_generation_pool += delta.total_generation_pool;
           p.fact.contributors_bonus_pool += delta.contributors_bonus_pool;
           p.fact.total_contribution += delta.total_contribution;
-          p.fact.total += p.fact.total_contribution + p.fact.used_expense_pool;
+          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
+          
+          // Пересчитываем коэффициенты
+          p.fact.return_base_percent = Capital::Core::Generation::calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
+          p.fact.use_invest_percent = Capital::Core::Generation::calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
       });
+  }
+  
+  /**
+   * @brief Назначает мастера проекта
+   * 
+   * @param coopname Имя кооператива
+   * @param project_id ID проекта
+   * @param master Имя мастера
+   */
+  inline void set_master(eosio::name coopname, uint64_t project_id, eosio::name master) {
+    Capital::project_index projects(_capital, coopname.value);
+    auto project_itr = projects.find(project_id);
+    
+    projects.modify(project_itr, coopname, [&](auto &p) {
+        p.master = master;
+    });
+    
   }
 
   /**
@@ -244,7 +266,7 @@ namespace Capital::Projects {
           if (expense_gap.amount > 0) {
               // Рассчитываем процент от инвестиций для пула расходов
               auto st = Capital::get_global_state(coopname);
-              eosio::asset potential_to_expense = amount * st.config.expense_pool_percent;
+              eosio::asset potential_to_expense = amount * st.config.expense_pool_percent / 100;
               
               // Но не больше, чем нужно для достижения цели
               to_expense_pool = (potential_to_expense.amount <= expense_gap.amount) ? potential_to_expense : expense_gap;
@@ -256,9 +278,11 @@ namespace Capital::Projects {
           // Обновляем пулы
           p.fact.invest_pool += to_invest_pool;
           p.fact.accumulated_expense_pool += to_expense_pool;
+          p.fact.total_received_investments += amount;  // Увеличиваем общую сумму полученных инвестиций
           
-          // Пересчитываем коэффициент возврата себестоимости
-          p.fact.return_cost_coefficient = Capital::Core::Generation::calculate_return_cost_coefficient(p.fact);
+          // Пересчитываем коэффициенты возврата
+          p.fact.return_base_percent = Capital::Core::Generation::calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
+          p.fact.use_invest_percent = Capital::Core::Generation::calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
       });
   }
 
@@ -300,7 +324,7 @@ namespace Capital::Projects {
           // так как фактических поступлений и трат еще не было
           
           // Меняем статус на "opened"
-          p.status = Capital::Projects::Status::OPENED;
+          p.is_opened = true;
       });
   }
 

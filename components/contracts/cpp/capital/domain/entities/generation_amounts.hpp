@@ -35,9 +35,6 @@ struct generation_amounts {
   // Общая сумма вкладов всех пайщиков
   eosio::asset total_contribution = asset(0, _root_govern_symbol); ///< Общая сумма вкладов всех пайщиков
   
-  // Общая сумма вкладов с расходами
-  eosio::asset total = asset(0, _root_govern_symbol); ///< Общая сумма вкладов с расходами
-  
 };
 
 } // namespace Capital 

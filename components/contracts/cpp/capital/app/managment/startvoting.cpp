@@ -1,4 +1,4 @@
-void capital::cmpltproject(name coopname, checksum256 project_hash) {
+void capital::startvoting(name coopname, checksum256 project_hash) {
   require_auth(coopname);
   
   // Проверяем существование проекта и получаем его

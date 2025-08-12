@@ -158,7 +158,7 @@ export interface ICloseproject {
   project_hash: IChecksum256
 }
 
-export interface ICmpltproject {
+export interface IStartvoting {
   coopname: IName
   project_hash: IChecksum256
 }
@@ -642,7 +642,6 @@ export interface IRefreshproj {
 
 export interface IRegcontrib {
   coopname: IName
-  application: IName
   username: IName
   contributor_hash: IChecksum256
   rate_per_hour: IAsset
@@ -729,8 +728,7 @@ export interface ISegment {
 
 export interface ISetconfig {
   coopname: IName
-  initiator: IName
-  cfg: IConfig
+  config: IConfig
 }
 
 export interface ISetmaster {
@@ -741,6 +739,7 @@ export interface ISetmaster {
 
 export interface ISetplan {
   coopname: IName
+  master: IName
   project_hash: IChecksum256
   plan_creators_hours: IUint64
   plan_expenses: IAsset
@@ -767,7 +766,6 @@ export interface ISignact2 {
 
 export interface ISignappndx {
   coopname: IName
-  application: IName
   username: IName
   project_hash: IChecksum256
   appendix_hash: IChecksum256

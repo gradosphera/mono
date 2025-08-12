@@ -37,20 +37,49 @@ typedef eosio::multi_index<
     indexed_by<"byprojuser"_n, const_mem_fun<appendix, uint128_t, &appendix::by_project_user>>
 > appendix_index;
 
-
-/**
-  * @brief Получает приложение по хэшу
-  */
-  inline  std::optional<appendix> get_appendix(eosio::name coopname, const checksum256 &appendix_hash) {
-    appendix_index appendixes(_capital, coopname.value);
-    auto by_hash = appendixes.get_index<"byhash"_n>();
-    auto itr = by_hash.find(appendix_hash);
-    
-    if (itr == by_hash.end()) {
-        return std::nullopt;
-    }
-    
-    return *itr;
-  }
-  
 }// namespace Capital
+
+
+namespace Capital::Appendix {
+  inline void create_appendix(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document){
+    Capital::appendix_index appendixes(_capital, coopname.value);
+    auto appendix_id = get_global_id_in_scope(_capital, coopname, "appendixes"_n);
+    
+    appendixes.emplace(coopname, [&](auto &a) {
+      a.id = appendix_id;
+      a.coopname = coopname;
+      a.username = username;
+      a.project_hash = project_hash;
+      a.appendix_hash = appendix_hash;
+      a.status = Capital::Appendix::Status::CREATED;
+      a.created_at = current_time_point();
+      a.appendix = document;
+    }); 
+  }
+
+  /**
+    * @brief Получает приложение по хэшу
+    */
+    inline  std::optional<appendix> get_appendix(eosio::name coopname, const checksum256 &appendix_hash) {
+      appendix_index appendixes(_capital, coopname.value);
+      auto by_hash = appendixes.get_index<"byhash"_n>();
+      auto itr = by_hash.find(appendix_hash);
+      
+      if (itr == by_hash.end()) {
+          return std::nullopt;
+      }
+      
+      return *itr;
+    }
+  
+    /**
+     * @brief Удаляет приложение из таблицы appendixes
+     */
+    inline void delete_appendix(eosio::name coopname, uint64_t appendix_id){
+      // Удаляем запись из таблицы appendixes
+      Capital::appendix_index appendixes(_capital, coopname.value);
+      auto itr = appendixes.find(appendix_id);
+      appendixes.erase(itr);
+    }
+  
+}// namespace Capital::Appendix

@@ -25,16 +25,15 @@ namespace Capital {
    * 
    */
   struct voting_data {
-    uint32_t total_voters = 0;                          ///< Общее количество участников
-    uint32_t votes_received = 0;                              ///< Количество полученных голосов
+    uint32_t total_voters;                          ///< Общее количество участников
+    uint32_t votes_received;                              ///< Количество полученных голосов
     
-    double authors_voting_percent = 38.2;                     ///< Процент премий авторов для голосования (по умолчанию; уточняется из config при инициализации голосования)
-    double creators_voting_percent = 38.2;                    ///< Процент премий создателей для голосования (по умолчанию; уточняется из config при инициализации голосования)
+    double authors_voting_percent;                     ///< Процент премий авторов для голосования (по умолчанию; уточняется из config при инициализации голосования)
+    double creators_voting_percent;                    ///< Процент премий создателей для голосования (по умолчанию; уточняется из config при инициализации голосования)
     
-    voting_amounts amounts;
+    voting_amounts amounts; ///< Суммы на голосовании
     
-    time_point_sec created_at = current_time_point();
-    time_point_sec voting_deadline = time_point_sec(current_time_point().sec_since_epoch() + 7 * 86400);      ///< Дедлайн голосования (по умолчанию 7 дней; уточняется из config при старте голосования)
+    time_point_sec voting_deadline; ///< Дедлайн голосования
   };
 
   

@@ -3,7 +3,7 @@ import { GatewayContract, WalletContract } from 'cooptypes'
 import { expect } from 'vitest'
 import { getTotalRamUsage } from '../../utils/getTotalRamUsage'
 import { generateRandomSHA256 } from '../../utils/randomHash'
-import { compareTokenAmounts, getCoopProgramWallet, getCoopWallet, getDeposit, getUserProgramWallet } from './walletUtils'
+import { compareTokenAmounts, getCirculationAccount, getCoopProgramWallet, getDeposit, getUserProgramWallet } from './walletUtils'
 
 export async function depositToWallet(blockchain: any, coopname: string, username: string, amount: number) {
   const depositId = randomInt(100000)
@@ -48,8 +48,7 @@ export async function depositToWallet(blockchain: any, coopname: string, usernam
   const prevUserWallet = await getUserProgramWallet(blockchain, coopname, username, 1)
   const prevUserWalletAvailable = prevUserWallet?.available || '0.0000 RUB'
 
-  const prevCoopWallet = await getCoopWallet(blockchain, coopname)
-  const prevCoopWalletAvailable = prevCoopWallet?.circulating_account?.available || '0.0000 RUB'
+  const prevCoopWalletAvailable = (await getCirculationAccount(blockchain, coopname)).available
 
   const data2: GatewayContract.Actions.CompleteIncome.ICompleteIncome = {
     coopname,
@@ -85,7 +84,7 @@ export async function depositToWallet(blockchain: any, coopname: string, usernam
 
   // Проверяем изменение балансов
   compareTokenAmounts(prevUserWalletAvailable, userWallet.available, amount)
-  compareTokenAmounts(prevCoopWalletAvailable, (await getCoopWallet(blockchain, coopname)).circulating_account.available, amount)
+  compareTokenAmounts(prevCoopWalletAvailable, (await getCirculationAccount(blockchain, coopname)).available, amount)
 
   return { depositId, program, userWallet }
 }

@@ -15,10 +15,5 @@ void capital::setmaster(name coopname, checksum256 project_hash, name master) {
                  "Мастер должен быть участником проекта");
     
     // Назначаем мастера проекта
-    Capital::project_index projects(_capital, coopname.value);
-    auto project_itr = projects.find(project->id);
-    
-    projects.modify(project_itr, coopname, [&](auto &p) {
-        p.master = master;
-    });
+    Capital::Projects::set_master(coopname, project -> id, master);
 } 

@@ -15,8 +15,9 @@ struct plan_pool {
   eosio::asset hour_cost = asset(0, _root_govern_symbol);                 ///< Планируемая стоимость часа
   uint64_t creators_hours = 0;                                           ///< Планируемое время в часах
 
-  // Коэффициент возврата себестоимости
-  double return_cost_coefficient = 0.0;
+  // Коэффициенты возврата (в процентах)
+  double return_base_percent = 0.0;                                  ///< Коэффициент возврата себестоимости для создателей/авторов/координаторов (0-100%)
+  double use_invest_percent = 0.0;                                ///< Коэффициент используемых инвестиций для инвесторов (0-100%)
   
   // Пулы себестоимостей
   eosio::asset creators_base_pool = asset(0, _root_govern_symbol);        ///< Планируемая себестоимость создателей
@@ -32,9 +33,10 @@ struct plan_pool {
   eosio::asset target_expense_pool = asset(0, _root_govern_symbol);       ///< Планируемый размер расходов
   
   // Пулы инвестиций
-  eosio::asset invest_pool = asset(0, _root_govern_symbol);               ///< Планируемые инвестиции
+  eosio::asset invest_pool = asset(0, _root_govern_symbol);               ///< Планируемые инвестиции (после вычета расходов)
   eosio::asset coordinators_investment_pool = asset(0, _root_govern_symbol); ///< Планируемые инвестиции от координаторов
   eosio::asset program_invest_pool = asset(0, _root_govern_symbol);       ///< Планируемые программные инвестиции
+  eosio::asset total_received_investments = asset(0, _root_govern_symbol); ///< Планируемая общая сумма инвестиций (до распределения)
   
   // Общая сумма генерации (без вкладчиков)
   eosio::asset total_generation_pool = asset(0, _root_govern_symbol);     ///< Общая планируемая сумма генерации

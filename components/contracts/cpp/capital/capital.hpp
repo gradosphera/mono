@@ -34,7 +34,7 @@ public:
      * \ingroup public_actions
      */
     [[eosio::action]]
-    void setconfig(name coopname, name initiator, Capital::config cfg);
+    void setconfig(name coopname, Capital::config config);
 
     // Создать проект
     [[eosio::action]]
@@ -57,7 +57,7 @@ public:
     
     // Завершить проект и начать голосование
     [[eosio::action]]
-    void cmpltproject(name coopname, checksum256 project_hash);
+    void startvoting(name coopname, checksum256 project_hash);
     
     // Завершить голосование
     [[eosio::action]]
@@ -172,7 +172,7 @@ public:
         
     // Регистрация
     [[eosio::action]]
-    void regcontrib(eosio::name coopname, eosio::name application, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, bool is_external_contract, document2 contract);
+    void regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, bool is_external_contract, document2 contract);
     [[eosio::action]]
     void approvereg(eosio::name coopname, checksum256 contributor_hash, document2 contract);
     [[eosio::action]]
@@ -180,7 +180,7 @@ public:
     
     // Приложения к договору УХД
     [[eosio::action]]
-    void signappndx(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document);
+    void signappndx(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document);
     [[eosio::action]]
     void apprvappndx(eosio::name coopname, checksum256 appendix_hash, document2 approved_document);
     [[eosio::action]]
@@ -241,7 +241,7 @@ public:
     
     // Планирование
     [[eosio::action]] void setmaster(name coopname, checksum256 project_hash, name master);
-    [[eosio::action]] void setplan(name coopname, checksum256 project_hash, uint64_t plan_creators_hours, asset plan_expenses, asset plan_hour_cost);
+    [[eosio::action]] void setplan(name coopname, name master, checksum256 project_hash, uint64_t plan_creators_hours, asset plan_expenses, asset plan_hour_cost);
     [[eosio::action]] void expandexpnss(name coopname, checksum256 project_hash, asset additional_expenses);
     
     // CRPS

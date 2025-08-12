@@ -9,8 +9,8 @@ namespace Capital {
    * @brief Конфигурация контракта, управляемая пользователем.
    */
   struct config {
-    double coordinator_bonus_percent = 0.04;   ///< Процент премий координатора от инвестиций (по умолчанию 4%)
-    double expense_pool_percent = 1.0;         ///< Процент инвестиций в пул расходов (по умолчанию 1.0)
+    double coordinator_bonus_percent = 4;   ///< Процент премий координатора от инвестиций (по умолчанию 4%)
+    double expense_pool_percent = 100;         ///< Процент инвестиций в пул расходов (по умолчанию 1.0)
     uint32_t coordinator_invite_validity_days = 30; ///< Срок действия приглашения координатора (по умолчанию 30 дней)
     uint32_t voting_period_in_days = 7;        ///< Период голосования в днях (по умолчанию 7)
     double authors_voting_percent = 38.2;      ///< Процент премий авторов для голосования (по умолчанию)

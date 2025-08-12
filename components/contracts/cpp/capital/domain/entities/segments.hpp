@@ -23,6 +23,7 @@ namespace Capital::Segments {
   struct [[eosio::table, eosio::contract(CAPITAL)]] segment {
     uint64_t    id;                   // Идентификатор сегмента
     checksum256 project_hash;         // С каким проектом связан сегмент
+    eosio::name coopname;             // Имя кооператива
     eosio::name username;             // Имя участника
     
     // Статус результата сегмента
@@ -68,6 +69,9 @@ namespace Capital::Segments {
 
     // Последняя известная сумма инвестиций в проекте для расчета provisional_amount
     eosio::asset last_known_invest_pool = asset(0, _root_govern_symbol);
+    
+    // Последняя известная сумма базового пула создателей для расчета использования инвестиций
+    eosio::asset last_known_creators_base_pool = asset(0, _root_govern_symbol);
     
     // Финансовые данные для ссуд
     eosio::asset provisional_amount = asset(0, _root_govern_symbol); //доступная сумма для залога при получении ссуды
@@ -299,16 +303,22 @@ inline bool is_segment_updated(eosio::name coopname, const checksum256 &project_
                          (segment_opt->last_author_base_reward_per_share == project.crps.author_base_cumulative_reward_per_share &&
                           segment_opt->last_author_bonus_reward_per_share == project.crps.author_bonus_cumulative_reward_per_share);
     
+    // Координаторы используют пропорциональное распределение, проверяем что есть изменения в пулах
     bool coordinator_updated = (!segment_opt->is_coordinator) || 
-                              (segment_opt->last_coordinator_reward_per_share == project.crps.coordinator_cumulative_reward_per_share);
+                              (project.fact.coordinators_base_pool.amount == 0 || 
+                               project.fact.coordinators_investment_pool.amount == 0);
     
     bool contributor_updated = (!segment_opt->is_contributor) || 
                               (segment_opt->last_contributor_reward_per_share == project.crps.contributor_cumulative_reward_per_share);
     
-    // Проверяем актуальность инвестиционного пула для расчета provisional_amount
+    // Проверяем актуальность инвестиционного пула для расчета provisional_amount (нужно всем ролям)
     bool invest_pool_updated = (segment_opt->last_known_invest_pool == project.fact.invest_pool);
     
-    return author_updated && coordinator_updated && contributor_updated && invest_pool_updated;
+    // Проверяем актуальность базового пула создателей для корректного расчета использования инвестиций (нужно только инвесторам)
+    bool creators_base_pool_updated = (!segment_opt->is_investor) || 
+                                     (segment_opt->last_known_creators_base_pool == project.fact.creators_base_pool);
+    
+    return author_updated && coordinator_updated && contributor_updated && invest_pool_updated && creators_base_pool_updated;
 }
 
 /**

@@ -41,6 +41,7 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
     if (!exist_segment.has_value()) {
         segments.emplace(_capital, [&](auto &g){
             g.id            = segments.available_primary_key();
+            g.coopname      = coopname;
             g.project_hash  = project_hash;
             g.username      = username;
             g.is_contributor = true; // Устанавливаем флаг вкладчика

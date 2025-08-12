@@ -23,7 +23,7 @@
 // Запустить проект на приём коммитов
 #include "app/managment/startproject.cpp"
 // Завершение проекта и начало голосования
-#include "app/managment/cmpltproject.cpp"
+#include "app/managment/startvoting.cpp"
 // Завершение голосования
 #include "app/managment/cmpltvoting.cpp"
 // Закрытие проекта

@@ -9,14 +9,14 @@ void capital::diallocate(eosio::name coopname, eosio::name application, checksum
   eosio::check(project.fact.program_invest_pool.amount > 0, "Нет программных средств для возврата");
 
   // Неиспользованная сумма программных средств
-  // При коэффициенте > 1 часть программных средств не используется
+  // При коэффициенте > 100% часть программных средств не используется
   eosio::asset unused_program_amount = asset(0, _root_govern_symbol);
   
-  if (project.fact.return_cost_coefficient > 1.0) {
+  if (project.fact.use_invest_percent > 100.0) {
     // Рассчитываем фактически использованную сумму программных средств
     eosio::asset used_program_amount = Capital::Core::Generation::calculate_investor_used_amount(
       project.fact.program_invest_pool, 
-      project.fact.return_cost_coefficient
+      project.fact.use_invest_percent
     );
     
     unused_program_amount = project.fact.program_invest_pool - used_program_amount;

@@ -330,7 +330,7 @@ export async function startInfra() {
   await blockchain.transfer({
     from: 'eosio',
     to: config.provider,
-    quantity: `100.0000 ${config.token.symbol}`,
+    quantity: `1000.0000 ${config.token.symbol}`,
     memo: '',
   })
 

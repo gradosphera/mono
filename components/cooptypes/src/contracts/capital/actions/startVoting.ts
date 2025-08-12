@@ -7,9 +7,9 @@ export const authorizations = [{ permissions: [Permissions.active], actor: Actor
 /**
  * Имя действия
  */
-export const actionName = 'cmpltproject'
+export const actionName = 'startvoting'
 
 /**
  * @interface
  */
-export type ICompleteProject = Capital.ICmpltproject
+export type IStartVoting = Capital.IStartvoting

@@ -20,48 +20,81 @@ namespace Capital::Core::Generation {
   /**
   * @brief Функция расчета коэффициента возврата себестоимости (для фактических показателей)
   */
-  double calculate_return_cost_coefficient(const fact_pool& current_pools) {
-    // invest_pool теперь содержит все инвестиции (включая программные)
-    if (current_pools.invest_pool.amount == 0) {
+  double calculate_return_base_percent(eosio::asset creators_base_pool, eosio::asset authors_base_pool, eosio::asset coordinators_base_pool, eosio::asset invest_pool) {
+    // Только трудозатраты (без расходов)
+    double work_costs = static_cast<double>(
+      creators_base_pool.amount +
+      authors_base_pool.amount +
+      coordinators_base_pool.amount
+    );
+    
+    // Если нет трудозатрат, коэффициент = 0%
+    if (work_costs == 0.0) {
       return 0.0;
     }
     
-    double total_costs = static_cast<double>(
-      current_pools.creators_base_pool.amount +
-      current_pools.authors_base_pool.amount +
-      current_pools.coordinators_base_pool.amount +
-      current_pools.target_expense_pool.amount
-    );
+    double available_investments = static_cast<double>(invest_pool.amount);
     
-    double total_investments = static_cast<double>(current_pools.invest_pool.amount);
-    
-    return total_costs / total_investments;
+    // Коэффициент в процентах показывает какую долю себестоимости можно компенсировать
+    // Не может быть больше 100.0% компенсации
+    double coefficient_percent = (available_investments / work_costs) * 100.0;
+    return coefficient_percent > 100.0 ? 100.0 : coefficient_percent;
   }
 
   /**
-  * @brief Функция расчета коэффициента возврата себестоимости (для плановых показателей)
-  */
-  double calculate_return_cost_coefficient(const plan_pool& current_pools) {
-    // invest_pool теперь содержит все инвестиции (включая программные)
-    if (current_pools.invest_pool.amount == 0) {
+   * @brief Функция расчета коэффициента возврата инвестиций для плановых показателей
+   */
+  double calculate_use_invest_percent_planned(eosio::asset creators_base_pool, eosio::asset authors_base_pool, eosio::asset coordinators_base_pool, eosio::asset target_expense_pool, eosio::asset total_received_investments) {
+    // Используем общую сумму инвестиций
+    if (total_received_investments.amount == 0) {
       return 0.0;
     }
     
+    // Все затраты проекта (трудозатраты + расходы)
     double total_costs = static_cast<double>(
-      current_pools.creators_base_pool.amount +
-      current_pools.authors_base_pool.amount +
-      current_pools.coordinators_base_pool.amount +
-      current_pools.target_expense_pool.amount
+      creators_base_pool.amount +
+      authors_base_pool.amount +
+      coordinators_base_pool.amount +
+      target_expense_pool.amount
     );
     
-    double total_investments = static_cast<double>(current_pools.invest_pool.amount);
+    double total_investments = static_cast<double>(total_received_investments.amount);
     
-    return total_costs / total_investments;
+    // Коэффициент в процентах показывает долю инвестиций, которая используется
+    // Физически не может быть больше 100.0% использования
+    double coefficient_percent = (total_costs / total_investments) * 100.0;
+    return coefficient_percent > 100.0 ? 100.0 : coefficient_percent;
+  }
+  
+  /**
+   * @brief Функция расчета коэффициента возврата инвестиций для фактических показателей
+   */
+  double calculate_use_invest_percent(eosio::asset creators_base_pool, eosio::asset authors_base_pool, eosio::asset coordinators_base_pool, eosio::asset accumulated_expense_pool, eosio::asset used_expense_pool, eosio::asset total_received_investments) {
+    // Используем общую сумму инвестиций
+    if (total_received_investments.amount == 0) {
+      return 0.0;
+    }
+    
+    // Все затраты проекта (трудозатраты + фактические расходы)
+    double total_costs = static_cast<double>(
+      creators_base_pool.amount +
+      authors_base_pool.amount +
+      coordinators_base_pool.amount +
+      accumulated_expense_pool.amount +
+      used_expense_pool.amount
+    );
+    
+    double total_investments = static_cast<double>(total_received_investments.amount);
+    
+    // Коэффициент в процентах показывает долю инвестиций, которая используется
+    // Физически не может быть больше 100.0% использования
+    double coefficient_percent = (total_costs / total_investments) * 100.0;
+    return coefficient_percent > 100.0 ? 100.0 : coefficient_percent;
   }
 
   /**
-  * @brief Функция расчета плановых показателей проекта
-  */
+   * @brief Функция расчета плановых показателей проекта
+   */
   plan_pool calculate_plan_generation_amounts(
     eosio::name coopname,
     const eosio::asset& plan_hour_cost,
@@ -94,7 +127,7 @@ namespace Capital::Core::Generation {
     
     // расчет планируемых премий координаторов
     
-    plan.coordinators_base_pool = (plan.creators_base_pool + plan.authors_base_pool + plan.target_expense_pool) * st.config.coordinator_bonus_percent;
+    plan.coordinators_base_pool = (plan.creators_base_pool + plan.authors_base_pool + plan.target_expense_pool) * st.config.coordinator_bonus_percent / 100;
 
     // расчет премий создателя
     double creators_bonus_double = static_cast<double>(plan.creators_base_pool.amount * CREATORS_BONUS_COEFFICIENT);
@@ -104,15 +137,19 @@ namespace Capital::Core::Generation {
     double authors_bonus_double = static_cast<double>(plan.authors_base_pool.amount * AUTHOR_BONUS_COEFFICIENT);
     plan.authors_bonus_pool = eosio::asset(int64_t(authors_bonus_double), _root_govern_symbol);
     
-    // расчет планируемой суммы инвестиций
-    plan.invest_pool = plan.creators_base_pool + plan.authors_base_pool + plan.coordinators_base_pool + plan.target_expense_pool;
+    // расчет общей планируемой суммы инвестиций (все затраты)
+    plan.total_received_investments = plan.creators_base_pool + plan.authors_base_pool + plan.coordinators_base_pool + plan.target_expense_pool;
+    
+    // расчет планируемой суммы инвестиций (только для трудозатрат, после вычета расходов)
+    plan.invest_pool = plan.creators_base_pool + plan.authors_base_pool + plan.coordinators_base_pool;
 
     // расчет суммы, которую координаторы привлекут в проект
-    // считаем, что координаторы будут привлекать всю сумму инвестиций
-    plan.coordinators_investment_pool = plan.invest_pool;    
+    // считаем, что координаторы будут привлекать всю общую сумму инвестиций
+    plan.coordinators_investment_pool = plan.total_received_investments;    
     
-    // коэффициент возврата себестоимости для плана будет равен 1, т.к. мы планируем привлечение инвестиций в полном размере себестоимости
-    plan.return_cost_coefficient = calculate_return_cost_coefficient(plan);
+    // коэффициенты возврата
+    plan.return_base_percent = calculate_return_base_percent(plan.creators_base_pool, plan.authors_base_pool, plan.coordinators_base_pool, plan.invest_pool);
+    plan.use_invest_percent = calculate_use_invest_percent_planned(plan.creators_base_pool, plan.authors_base_pool, plan.coordinators_base_pool, plan.target_expense_pool, plan.total_received_investments);
     
     plan.total_generation_pool = plan.creators_base_pool + plan.authors_base_pool + plan.coordinators_base_pool + plan.creators_bonus_pool + plan.authors_bonus_pool;
     
@@ -173,7 +210,7 @@ namespace Capital::Core::Generation {
     eosio::symbol sym = investment_amount.symbol;
     
     // Рассчитываем премию координатора от инвестиций
-    double k = st.config.coordinator_bonus_percent;
+    double k = st.config.coordinator_bonus_percent / 100;
     return eosio::asset(int64_t(amount * k / (1 + k)), sym);
   }
 
@@ -204,22 +241,16 @@ namespace Capital::Core::Generation {
   };
 
   /**
-   * @brief Рассчитывает фактически используемую сумму инвестора с учетом коэффициента возврата
-   * @param investor_base Базовая сумма инвестора
-   * @param return_cost_coefficient Коэффициент возврата себестоимости проекта
+   * @brief Рассчитывает фактически используемую сумму инвестора с учетом коэффициента использования
+   * @param investor_amount Общая сумма инвестора
+   * @param use_invest_percent_percent Коэффициент используемых инвестиций в процентах (от 0.0 до 100.0)
    * @return Фактически используемая сумма инвестора
    */
-  eosio::asset calculate_investor_used_amount(const eosio::asset& investor_base, double return_cost_coefficient) {
-    if (return_cost_coefficient <= 1.0) {
-      // Если коэффициент <= 1, то все средства инвестора используются
-      return investor_base;
-    }
+  eosio::asset calculate_investor_used_amount(const eosio::asset& investor_amount, double use_invest_percent_percent) {
+    // Используемая сумма = общая_сумма * (коэффициент_процентов / 100)
+    double used_amount = static_cast<double>(investor_amount.amount) * (use_invest_percent_percent / 100.0);
     
-    // Если коэффициент > 1, то используется только часть средств инвестора
-    // Используемая сумма = базовая_сумма / коэффициент
-    double used_amount = static_cast<double>(investor_base.amount) / return_cost_coefficient;
-    
-    return eosio::asset(static_cast<int64_t>(used_amount), investor_base.symbol);
+    return eosio::asset(static_cast<int64_t>(used_amount), investor_amount.symbol);
   }
 
   /**
@@ -245,7 +276,8 @@ namespace Capital::Core::Generation {
           p.fact.coordinators_base_pool += coordinator_base;
           
           // Пересчитываем коэффициент возврата себестоимости
-          p.fact.return_cost_coefficient = calculate_return_cost_coefficient(p.fact);
+          p.fact.return_base_percent = calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
+          p.fact.use_invest_percent = calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
           
           // Пересчитываем премии вкладчиков, т.к. премии координаторов влияют на премии вкладчиков
           p.fact.contributors_bonus_pool = calculate_contributors_bonus_pool(p.fact.total_generation_pool);
@@ -257,8 +289,8 @@ namespace Capital::Core::Generation {
           p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
       });
 
-      // Распределяем награды координаторов через CRPS систему
-      Capital::Core::update_coordinator_crps(coopname, project_hash, coordinator_base);
+      // Примечание: Координаторские награды будут распределены пропорционально при обновлении сегментов
+      // через refresh_coordinator_segment на основе привлеченных каждым координатором средств
   }
 
 } // namespace Capital::Core

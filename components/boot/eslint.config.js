@@ -9,7 +9,7 @@ export default antfu(
   },
   {
     rules: {
-      'no-unused-vars': 'warn',
+      'no-unused-vars': 'off',
       'unused-imports/no-unused-vars': 'off',
       'no-console': 'off',
       'unicorn/prefer-number-properties': 'off',

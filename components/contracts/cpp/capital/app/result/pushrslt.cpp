@@ -56,4 +56,7 @@ void capital::pushrslt(name coopname, name application, checksum256 project_hash
   // для избежания двойного обновления одной записи
   Capital::Segments::update_segment_after_result_contribution_with_shares(coopname, project_hash, application, application, 
                                                                        available_base_after_pay_debt, debt_amount);
+
+  // Обновляем накопительные показатели контрибьютора на основе его ролей в сегменте
+  Capital::Contributors::update_contributor_ratings_from_segment(coopname, segment);
 }

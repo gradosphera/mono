@@ -10,6 +10,7 @@ void capital::returnunused(name coopname, name application, checksum256 project_
   eosio::check(segment.is_investor, "Пользователь не является инвестором проекта");
 
   // Рассчитываем неиспользованную сумму
+  eosio::check(segment.investor_base <= segment.investor_amount, "Ошибка: использованная сумма больше инвестированной");
   eosio::asset unused_amount = segment.investor_amount - segment.investor_base;
   eosio::check(unused_amount.amount > 0, "Нет неиспользованных средств для возврата");
 
@@ -22,6 +23,14 @@ void capital::returnunused(name coopname, name application, checksum256 project_
   Wallet::sub_blocked_funds(_capital, coopname, username, unused_amount, _source_program, memo);
   Wallet::add_available_funds(_capital, coopname, username, unused_amount, _wallet_program, memo);
   
+  // Обновляем проект - увеличиваем сумму возвращенных инвестиций
+  Capital::project_index projects(_capital, coopname.value);
+  auto project_itr = projects.find(project.id);
+  
+  projects.modify(project_itr, application, [&](auto &p) {
+    p.fact.total_returned_investments += unused_amount;
+  });
+
   // Обновляем сегмент - отмечаем что неиспользованные средства возвращены
   Capital::Segments::segments_index segments(_capital, coopname.value);
   auto segment_itr = segments.find(segment.id);

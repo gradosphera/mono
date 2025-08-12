@@ -43,7 +43,7 @@ namespace Capital::Core {
       if (expense_gap.amount > 0) {
         // Рассчитываем процент от инвестиций для пула расходов
         auto st = Capital::get_global_state(coopname);
-        eosio::asset potential_to_expense = amount * st.config.expense_pool_percent;
+        eosio::asset potential_to_expense = amount * st.config.expense_pool_percent / 100;
         
         // Но не больше, чем нужно для достижения цели
         to_expense_pool = (potential_to_expense.amount <= expense_gap.amount) ? potential_to_expense : expense_gap;
@@ -58,9 +58,11 @@ namespace Capital::Core {
       // Также фиксируем в program_invest_pool для отслеживания программных средств
       p.fact.program_invest_pool += to_invest_pool;
       p.fact.accumulated_expense_pool += to_expense_pool;
+      p.fact.total_received_investments += amount;  // Увеличиваем общую сумму полученных инвестиций
       
-      // Пересчитываем коэффициент возврата себестоимости
-      p.fact.return_cost_coefficient = Capital::Core::Generation::calculate_return_cost_coefficient(p.fact);
+      // Пересчитываем коэффициенты возврата
+      p.fact.return_base_percent = Capital::Core::Generation::calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
+      p.fact.use_invest_percent = Capital::Core::Generation::calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
     });
     
     // Списываем средства из глобального пула

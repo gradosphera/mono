@@ -6,20 +6,8 @@ import type { Account, Contract, Keys } from '../types'
 import config, { GOVERN_SYMBOL, SYMBOL } from '../configs'
 import Blockchain from '../blockchain'
 import { sendPostToCoopbackWithSecret, sleep } from '../utils'
+import { fakeDocument } from '../tests/shared/fakeDocument'
 
-// const test_hash
-//   = '157192b276da23cc84ab078fc8755c051c5f0430bf4802e55718221e6b76c777'
-// const test_sign
-//   = 'SIG_K1_KmKWPBC8dZGGDGhbKEoZEzPr3h5crRrR2uLdGRF5DJbeibY1MY1bZ9sPwHsgmPfiGFv9psfoCVsXFh9TekcLuvaeuxRKA8'
-// const test_pkey = 'EOS5JhMfxbsNebajHcTEK8yC9uNN9Dit9hEmzE8ri8yMhhzxrLg3J'
-// const test_meta = JSON.stringify({})
-
-// const document = {
-//   hash: test_hash,
-//   signature: test_sign,
-//   public_key: test_pkey,
-//   meta: test_meta,
-// }
 
 export class CooperativeClass {
   public blockchain: Blockchain
@@ -28,7 +16,7 @@ export class CooperativeClass {
     this.blockchain = blockchain
   }
 
-  async addUser(username: string, keys?: Keys) {
+  async addUser(username: string, keys?: Keys, referer?: string) {
     const account = await this.blockchain.generateKeypair(
       username,
       keys,
@@ -38,7 +26,7 @@ export class CooperativeClass {
 
     const data: RegistratorContract.Actions.AddUser.IAddUser = {
       coopname: config.provider,
-      referer: '',
+      referer: referer || '',
       username: account.username,
       type: 'individual',
       created_at: '2025-02-05T09:34:27',
@@ -92,12 +80,7 @@ export class CooperativeClass {
       administrator: config.provider,
       username: username!,
       agreement_type: 'wallet',
-      document: { // отправляем произвольный документ с валидной подписью
-        hash: '157192B276DA23CC84AB078FC8755C051C5F0430BF4802E55718221E6B76C777',
-        public_key: 'PUB_K1_5JhMfxbsNebajHcTEK8yC9uNN9Dit9hEmzE8ri8yMhhzzEtUA4',
-        signature: 'SIG_K1_KmKWPBC8dZGGDGhbKEoZEzPr3h5crRrR2uLdGRF5DJbeibY1MY1bZ9sPwHsgmPfiGFv9psfoCVsXFh9TekcLuvaeuxRKA8',
-        meta: '{}',
-      },
+      document: fakeDocument,
     })
 
     console.log('создаём кошелёк')
@@ -114,7 +97,7 @@ export class CooperativeClass {
   }
 }
 
-export async function addUser(username: string) {
+export async function addUser(username: string, referer?: string) {
   // инициализируем инстанс с ключами
   const blockchain = new Blockchain(config.network, config.private_keys)
   const cooperative = new CooperativeClass(blockchain)
@@ -124,5 +107,5 @@ export async function addUser(username: string) {
     privateKey: process.env.EOSIO_PRV_KEY!,
     // eslint-disable-next-line node/prefer-global/process
     publicKey: process.env.EOSIO_PUB_KEY!,
-  })
+  }, referer)
 }
