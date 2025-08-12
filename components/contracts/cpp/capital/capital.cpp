@@ -52,7 +52,9 @@
 #include "app/investment/createinvest.cpp"
 #include "app/investment/approveinvst.cpp"
 #include "app/investment/declineinvst.cpp"
-#include "app/investment/returnunused.cpp"
+
+// Возврат неиспользованных инвестиций
+#include "app/return_unused/returnunused.cpp"
 
 // Программные инвестиции
 #include "app/program_investment/createpinv.cpp"

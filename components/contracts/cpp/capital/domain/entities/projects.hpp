@@ -628,4 +628,17 @@ namespace Capital::Projects {
     });
   }
 
+  
+  inline void increase_total_returned_investments(eosio::name coopname, const uint64_t &project_id, const eosio::asset &amount) {
+    // Обновляем проект - увеличиваем сумму возвращенных инвестиций
+    Capital::project_index projects(_capital, coopname.value);
+    auto project_itr = projects.find(project_id);
+    
+    projects.modify(project_itr, coopname, [&](auto &p) {
+      p.fact.total_returned_investments += amount;
+    });
+
+    
+  }
+  
 }// namespace Project

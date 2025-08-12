@@ -1,5 +1,5 @@
 void capital::returnunused(name coopname, name application, checksum256 project_hash, name username) {
-  check_auth_or_fail(_capital, coopname, application, "returnunused"_n);
+  require_auth(coopname);
 
   // Проверяем, что проект закрыт
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
@@ -22,21 +22,10 @@ void capital::returnunused(name coopname, name application, checksum256 project_
   // Разблокируем неиспользованные средства и возвращаем в кошелек программы
   Wallet::sub_blocked_funds(_capital, coopname, username, unused_amount, _source_program, memo);
   Wallet::add_available_funds(_capital, coopname, username, unused_amount, _wallet_program, memo);
-  
-  // Обновляем проект - увеличиваем сумму возвращенных инвестиций
-  Capital::project_index projects(_capital, coopname.value);
-  auto project_itr = projects.find(project.id);
-  
-  projects.modify(project_itr, application, [&](auto &p) {
-    p.fact.total_returned_investments += unused_amount;
-  });
 
-  // Обновляем сегмент - отмечаем что неиспользованные средства возвращены
-  Capital::Segments::segments_index segments(_capital, coopname.value);
-  auto segment_itr = segments.find(segment.id);
+  // Обновляем проект - увеличиваем сумму возвращенных инвестиций
+  Capital::Projects::increase_total_returned_investments(coopname, project.id, unused_amount);
   
-  segments.modify(segment_itr, application, [&](auto &s) {
-    // Обновляем общую сумму инвестора до фактически использованной
-    s.investor_amount = s.investor_base;
-  });
+  // Обновляем сегмент - устанавливаем фактически используемую сумму инвестиций
+  Capital::Segments::set_investor_base_amount_on_return_unused(coopname, segment.id, segment.investor_base);
 }

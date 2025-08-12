@@ -73,6 +73,9 @@ namespace Capital::Segments {
     // Последняя известная сумма базового пула создателей для расчета использования инвестиций
     eosio::asset last_known_creators_base_pool = asset(0, _root_govern_symbol);
     
+    // Последняя известная сумма инвестиций координаторов для отслеживания изменений
+    eosio::asset last_known_coordinators_investment_pool = asset(0, _root_govern_symbol);
+    
     // Финансовые данные для ссуд
     eosio::asset provisional_amount = asset(0, _root_govern_symbol); //доступная сумма для залога при получении ссуды
     eosio::asset debt_amount = asset(0, _root_govern_symbol); //сумма, которая уже выдана в ссуду
@@ -303,10 +306,9 @@ inline bool is_segment_updated(eosio::name coopname, const checksum256 &project_
                          (segment_opt->last_author_base_reward_per_share == project.crps.author_base_cumulative_reward_per_share &&
                           segment_opt->last_author_bonus_reward_per_share == project.crps.author_bonus_cumulative_reward_per_share);
     
-    // Координаторы используют пропорциональное распределение, проверяем что есть изменения в пулах
+    // Координаторы используют пропорциональное распределение на основе coordinators_investment_pool
     bool coordinator_updated = (!segment_opt->is_coordinator) || 
-                              (project.fact.coordinators_base_pool.amount == 0 || 
-                               project.fact.coordinators_investment_pool.amount == 0);
+                              (segment_opt->last_known_coordinators_investment_pool == project.fact.coordinators_investment_pool);
     
     bool contributor_updated = (!segment_opt->is_contributor) || 
                               (segment_opt->last_contributor_reward_per_share == project.crps.contributor_cumulative_reward_per_share);
@@ -504,6 +506,17 @@ inline void update_segment_voting_results(eosio::name coopname, const checksum25
     
     // Обновляем общую стоимость сегмента после изменения премий
     update_segment_total_cost(coopname, project_hash, username, application);
+}
+
+inline void set_investor_base_amount_on_return_unused(eosio::name coopname, uint64_t segment_id, eosio::asset used_amount) {
+  Capital::Segments::segments_index segments(_capital, coopname.value);
+  auto segment_itr = segments.find(segment_id);
+  
+  segments.modify(segment_itr, coopname, [&](auto &s) {
+    // Обновляем общую сумму инвестора до фактически использованной
+    s.investor_amount = used_amount;
+  });
+  
 }
 
 

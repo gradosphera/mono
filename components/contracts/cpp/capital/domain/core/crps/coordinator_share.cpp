@@ -3,58 +3,25 @@
 namespace Capital::Core {
 
   /**
-   * @brief Рассчитывает пропорциональную долю координатора в общем пуле премий
+   * @brief Рассчитывает координаторскую премию как процент от привлеченных им средств
    * @param coordinator_investments Сумма инвестиций, привлеченная координатором
-   * @param total_coordinator_investments Общая сумма инвестиций, привлеченная всеми координаторами
-   * @param plan_total_investments Плановая общая сумма инвестиций проекта
-   * @param coordinator_base_pool Общий пул премий координаторов
-   * @param all_coordinators_scores Сумма всех промежуточных баллов R всех координаторов
-   * @return Доля координатора в пуле премий
+   * @param referal_percent Процент вознаграждения координатора (например, 0.04 для 4%)
+   * @return Премия координатора
    */
-  inline eosio::asset calculate_coordinator_proportional_share(
+  inline eosio::asset calculate_coordinator_direct_reward(
     const eosio::asset &coordinator_investments,
-    const eosio::asset &total_coordinator_investments, 
-    const eosio::asset &plan_total_investments,
-    const eosio::asset &coordinator_base_pool,
-    double all_coordinators_scores
+    double referal_percent
   ) {
-    if (coordinator_investments.amount == 0 || 
-        total_coordinator_investments.amount == 0 || 
-        plan_total_investments.amount == 0 || 
-        all_coordinators_scores <= 0.0) {
+    if (coordinator_investments.amount == 0) {
       return eosio::asset(0, _root_govern_symbol);
     }
 
-    // Rn = (Yn / invest_plan) * (Yn / YN_fact_invest)
-    double coordinator_score = 
-      (static_cast<double>(coordinator_investments.amount) / static_cast<double>(plan_total_investments.amount)) *
-      (static_cast<double>(coordinator_investments.amount) / static_cast<double>(total_coordinator_investments.amount));
-
-    // Zn = Rn / RN * coordinator_base_fact
-    double share_ratio = coordinator_score / all_coordinators_scores;
-    int64_t coordinator_share = static_cast<int64_t>(
-      static_cast<double>(coordinator_base_pool.amount) * share_ratio
+    // Прямой расчет: coordinator_base = Yn * referal_percent / (1 + referal_percent)
+    int64_t coordinator_reward = static_cast<int64_t>(
+      static_cast<double>(coordinator_investments.amount) * referal_percent / (1.0 + referal_percent)
     );
 
-    return eosio::asset(coordinator_share, _root_govern_symbol);
-  }
-
-  /**
-   * @brief Рассчитывает промежуточный балл R для координатора
-   */
-  inline double calculate_coordinator_score(
-    const eosio::asset &coordinator_investments,
-    const eosio::asset &total_coordinator_investments,
-    const eosio::asset &plan_total_investments
-  ) {
-    if (coordinator_investments.amount == 0 || 
-        total_coordinator_investments.amount == 0 || 
-        plan_total_investments.amount == 0) {
-      return 0.0;
-    }
-
-    return (static_cast<double>(coordinator_investments.amount) / static_cast<double>(plan_total_investments.amount)) *
-           (static_cast<double>(coordinator_investments.amount) / static_cast<double>(total_coordinator_investments.amount));
+    return eosio::asset(coordinator_reward, _root_govern_symbol);
   }
 
   
@@ -69,6 +36,7 @@ void upsert_coordinator_segment(eosio::name coopname, const checksum256 &project
                                        eosio::name coordinator_username, const eosio::asset &rised_amount) {
     Segments::segments_index segments(_capital, coopname.value);
     auto exist_segment = Segments::get_segment(coopname, project_hash, coordinator_username);
+    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
         
     if (!exist_segment.has_value()) {
         segments.emplace(_capital, [&](auto &g){
@@ -78,7 +46,8 @@ void upsert_coordinator_segment(eosio::name coopname, const checksum256 &project
             g.username      = coordinator_username;
             g.coordinator_investments   = rised_amount;
             g.is_coordinator = true;
-            // Не устанавливаем CRPS поля, т.к. используем пропорциональное распределение
+            // Инициализируем отслеживаемые поля для корректной работы пропорционального распределения
+            g.last_known_coordinators_investment_pool = project.fact.coordinators_investment_pool;
         });
         
         Capital::Projects::increment_total_coordinators(coopname, project_hash);
@@ -90,61 +59,51 @@ void upsert_coordinator_segment(eosio::name coopname, const checksum256 &project
                 Capital::Projects::increment_total_coordinators(coopname, project_hash);
             }
             g.coordinator_investments += rised_amount;
+            // Обновляем отслеживаемые поля при изменении coordinator_investments
+            g.last_known_coordinators_investment_pool = project.fact.coordinators_investment_pool;
         });
     }
     
 }
 
   /**
-   * @brief Обновляет награды координатора в сегменте на основе пропорционального распределения
+   * @brief Обновляет награды координатора в сегменте на основе прямого расчета (O(1) операция)
    */
   void refresh_coordinator_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+    auto segment_opt = Segments::get_segment(coopname, project_hash, username);
     
-    // Если нет координаторов или премий к распределению, ничего не делаем
-    if (project.counts.total_coordinators == 0 || project.fact.coordinators_base_pool.amount == 0) {
-      return;
+    if (!segment_opt.has_value() || !segment_opt->is_coordinator) {
+      return; // Сегмент не найден или пользователь не координатор
     }
     
-    // Получаем всех координаторов проекта
-    auto coordinators = Capital::Segments::get_project_coordinators(coopname, project_hash);
-    
-    if (coordinators.empty()) {
-      return;
-    }
-    
-    // Рассчитываем общую сумму промежуточных баллов R всех координаторов
-    double total_coordinators_score = 0.0;
-    for (const auto& coord : coordinators) {
-      total_coordinators_score += calculate_coordinator_score(
-        coord.coordinator_investments,
-        project.fact.coordinators_investment_pool,
-        project.plan.total_received_investments
-      );
-    }
-    
-    if (total_coordinators_score <= 0.0) {
-      return; // Нет баллов для распределения
-    }
-    
-    // Обновляем координаторские доли для всех координаторов проекта
     Segments::segments_index segments(_capital, coopname.value);
+    auto segment_it = segments.find(segment_opt->id);
     
-    for (const auto& coord : coordinators) {
-      auto segment_it = segments.find(coord.id);
-      
-      eosio::asset new_coordinator_base = calculate_coordinator_proportional_share(
-        coord.coordinator_investments,
-        project.fact.coordinators_investment_pool,
-        project.plan.total_received_investments,
-        project.fact.coordinators_base_pool,
-        total_coordinators_score
-      );
-      
+    // Если координатор ничего не привлек, обнуляем его базу
+    if (segment_opt->coordinator_investments.amount == 0) {
       segments.modify(segment_it, _capital, [&](auto &s) {
-        s.coordinator_base = new_coordinator_base;
+        s.coordinator_base = asset(0, _root_govern_symbol);
+        s.last_known_coordinators_investment_pool = project.fact.coordinators_investment_pool;
       });
+      return;
     }
+    
+    // Получаем конфигурацию кооператива для процента координатора
+    auto global_state = Capital::get_global_state(coopname);
+    double referal_percent = global_state.config.coordinator_bonus_percent / 100.0; // Конвертируем из процентов в доли
+    
+    // Прямой расчет: coordinator_base = Yn * referal_percent / (1 + referal_percent)
+    eosio::asset new_coordinator_base = calculate_coordinator_direct_reward(
+      segment_opt->coordinator_investments,
+      referal_percent
+    );
+    
+    // Обновляем сегмент координатора
+    segments.modify(segment_it, _capital, [&](auto &s) {
+      s.coordinator_base = new_coordinator_base;
+      s.last_known_coordinators_investment_pool = project.fact.coordinators_investment_pool;
+    });
   }
 
 }// namespace Capital::Core

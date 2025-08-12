@@ -818,7 +818,7 @@ describe('тест контракта CAPITAL', () => {
     const { project, prevProject, transactionId } = await investInProject(blockchain, 'voskhod', investor3, project1.project_hash, `${investAmount3}.0000 RUB`, fakeDocument)
     expect(project).toBeDefined()
     expect(transactionId).toBeDefined()
-    console.log('prevProject: ', prevProject)
+    // console.log('prevProject: ', prevProject)
     console.log('project: ', project)
     expect(project.counts.total_coordinators).toBe(2)
     expect(project.fact.coordinators_investment_pool).toBe('50000.0000 RUB')
@@ -828,10 +828,11 @@ describe('тест контракта CAPITAL', () => {
     expect(parseFloat(project.fact.use_invest_percent)).toBeCloseTo(100, 1)
 
     const { prevSegment: prevTester5, updatedSegment: updatedTester5 } = await refreshSegment(blockchain, 'voskhod', project1.project_hash, tester5)
-    console.log('updatedTester5: ', updatedTester5)
-    // expect(updatedTester5.provisional_amount).toBe('0.0000 RUB')
-    // expect(updatedTester5.investor_base).toBe('25000.0000 RUB')
-    // expect(updatedTester5.investor_amount).toBe('25000.0000 RUB')
+    // console.log('updatedTester5: ', updatedTester5)
+    expect(updatedTester5.provisional_amount).toBe('634.1912 RUB')
+    expect(updatedTester5.coordinator_base).toBe('961.5384 RUB')
+    expect(updatedTester5.is_coordinator).toBe(1)
+    expect(updatedTester5.coordinator_investments).toBe('25000.0000 RUB')
   })
 
   // it('финансировать результат проекта на 10000 RUB', async () => {
