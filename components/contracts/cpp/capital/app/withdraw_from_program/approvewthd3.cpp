@@ -1,5 +1,5 @@
-void capital::approvewthd3(name coopname, name application, name approver, checksum256 withdraw_hash, document2 approved_return_statement) {
-  check_auth_or_fail(_capital, coopname, application, "approvewthd3"_n);
+void capital::approvewthd3(name coopname, name approver, checksum256 withdraw_hash, document2 approved_return_statement) {
+  require_auth(coopname);
   
   verify_document_or_fail(approved_return_statement);
   

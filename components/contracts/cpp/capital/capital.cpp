@@ -49,9 +49,9 @@
 
 
 // Инвестиции
-#include "app/investment/createinvest.cpp"
-#include "app/investment/approveinvst.cpp"
-#include "app/investment/declineinvst.cpp"
+#include "app/project_investment/createinvest.cpp"
+#include "app/project_investment/approveinvst.cpp"
+#include "app/project_investment/declineinvst.cpp"
 
 // Возврат неиспользованных инвестиций
 #include "app/return_unused/returnunused.cpp"
@@ -68,14 +68,27 @@
 #include "app/commit/approvecmmt.cpp"
 #include "app/commit/declinecmmt.cpp"
 
+// Проектные имущественные взносы
+#include "app/project_property/createpjprp.cpp"
+#include "app/project_property/approvepjprp.cpp"
+#include "app/project_property/declinepjprp.cpp"
+
+// Программные имущественные взносы
+#include "app/program_property/createpgprp.cpp"
+#include "app/program_property/approvepgprp.cpp"
+#include "app/program_property/declinepgprp.cpp"
+#include "app/program_property/authpgprp.cpp"
+#include "app/program_property/act1pgprp.cpp"
+#include "app/program_property/act2pgprp.cpp"
+
 // Долги
-#include "app/debt/createdebt.cpp"
-#include "app/debt/approvedebt.cpp"
-#include "app/debt/debtauthcnfr.cpp"
-#include "app/debt/debtpaycnfrm.cpp"
-#include "app/debt/debtpaydcln.cpp"
-#include "app/debt/declinedebt.cpp"
-#include "app/debt/settledebt.cpp"
+#include "app/create_debt/createdebt.cpp"
+#include "app/create_debt/approvedebt.cpp"
+#include "app/create_debt/debtauthcnfr.cpp"
+#include "app/create_debt/debtpaycnfrm.cpp"
+#include "app/create_debt/debtpaydcln.cpp"
+#include "app/create_debt/declinedebt.cpp"
+#include "app/settle_debt/settledebt.cpp"
 
 // Голосование  
 #include "app/voting/finalvoting.cpp"

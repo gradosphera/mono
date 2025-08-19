@@ -1,7 +1,7 @@
 void capital::createdebt(name coopname, name username, checksum256 project_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document2 statement) {
   require_auth(coopname);
   
-  verify_document_or_fail(statement);
+  verify_document_or_fail(statement, {username});
   Wallet::validate_asset(amount);
   
   // Проверяем что участник существует в проекте
@@ -18,26 +18,13 @@ void capital::createdebt(name coopname, name username, checksum256 project_hash,
   
   // Проверяем доступность средств для ссуды
   eosio::check(exist_segment -> provisional_amount >= amount, "Недостаточно доступных средств для получения ссуды");
-  eosio::check((exist_segment -> debt_amount + amount) <= exist_segment->provisional_amount, 
-    "Сумма долга не может превышать доступную сумму залога");
+  eosio::check(exist_segment -> debt_amount + amount <= exist_segment->provisional_amount, 
+    "Сумма долга не может превышать доступную сумму залога в provisional_amount");
   
-  // Обновляем debt_amount у участника в программе капитализации
-  Capital::contributor_index contributors(_capital, coopname.value);
-  auto contributor = contributors.find(exist_contributor->id);
+  // Обновляем debt_amount в сегменте
+  Capital::Segments::increase_debt_amount(coopname, exist_segment->id, amount);
   
-  contributors.modify(contributor, coopname, [&](auto &c){
-    c.debt_amount += amount;
-  });
-  
-  // Обновляем debt_amount в сегменте (НЕ уменьшаем provisional_amount)
-  Capital::Segments::segments_index segments(_capital, coopname.value);
-  auto segment = segments.find(exist_segment->id);
-  
-  segments.modify(segment, coopname, [&](auto &s) {
-      s.debt_amount += amount;
-  });
-  
-  // Создаем долг в таблице
+  // Создаем долг во внутренней таблице
   Capital::Debts::create_debt(coopname, username, project_hash, debt_hash, amount, repaid_at, statement);
   
   // Создаем аппрув для долга

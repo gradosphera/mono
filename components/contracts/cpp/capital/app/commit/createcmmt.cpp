@@ -1,4 +1,4 @@
-void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours){
+void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours){
   require_auth(coopname);
   
   // Проверяем существование проекта и получаем его
@@ -32,7 +32,6 @@ void capital::createcmmt(eosio::name coopname, eosio::name application, eosio::n
   // Создаем коммит и отправляем на approve
   Capital::Commits::create_commit_with_approve(
     coopname,
-    application,
     username,
     project_hash,
     commit_hash,

@@ -18,7 +18,6 @@ namespace Capital::Commits {
   struct [[eosio::table, eosio::contract(CAPITAL)]] commit {
     uint64_t id;                                 ///< Уникальный идентификатор действия.
     name coopname;                               ///< Имя кооператива.
-    name application;                            ///< Приложение, инициировавшее действие.
     name username;                               ///< Имя пользователя, совершившего действие.
     name status;                                 ///< Статус коммита (created | approved | authorized | act1 | act2 )
     checksum256 project_hash;                    ///< Хэш проекта, связанного с действием.
@@ -92,7 +91,6 @@ inline void delete_commit(eosio::name coopname, const checksum256 &hash) {
 /**
  * @brief Создает коммит и отправляет его на утверждение.
  * @param coopname Имя кооператива.
- * @param application Приложение, инициировавшее действие.
  * @param username Имя пользователя.
  * @param project_hash Хэш проекта.
  * @param commit_hash Хэш коммита.
@@ -100,7 +98,6 @@ inline void delete_commit(eosio::name coopname, const checksum256 &hash) {
  */
 inline void create_commit_with_approve(
   eosio::name coopname,
-  eosio::name application,
   eosio::name username,
   checksum256 project_hash,
   checksum256 commit_hash,
@@ -115,7 +112,6 @@ inline void create_commit_with_approve(
     c.id = commit_id;
     c.status = Capital::Commits::Status::CREATED;
     c.coopname = coopname;
-    c.application = application;
     c.username = username;
     c.project_hash = project_hash;
     c.commit_hash = commit_hash;

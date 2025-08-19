@@ -1,14 +1,13 @@
 import { SovietContract } from 'cooptypes'
 import { expect } from 'vitest'
 import { getTotalRamUsage } from '../../utils/getTotalRamUsage'
-import { fakeDocument } from './fakeDocument'
+import { fakeDocument } from '../shared/fakeDocument'
+import type Blockchain from '../../blockchain'
+import { fakeVote } from '../shared/fakeVote'
 
-export async function processDecision(blockchain: any, decisionId: number) {
-  const voteData: SovietContract.Actions.Decisions.VoteFor.IVoteForDecision = {
-    coopname: 'voskhod',
-    member: 'ant',
-    decision_id: decisionId,
-  }
+export async function processDecision(blockchain: Blockchain, decisionId: number) {
+  const voteData: SovietContract.Actions.Decisions.VoteFor.IVoteForDecision = fakeVote
+  voteData.decision_id = decisionId
 
   const authData: SovietContract.Actions.Decisions.Authorize.IAuthorize = {
     coopname: 'voskhod',

@@ -9,21 +9,28 @@ export type ITimePointSec = string
 export type IUint32 = number
 export type IUint64 = number | string
 
-export interface IAcceptoff {
+export interface IAccept {
   coopname: IName
+  supplier_braname: IName
   username: IName
   request_hash: IChecksum256
   convert_out: IDocument2
   return_document: IDocument2
 }
 
-export interface IAuthoffc2r {
+export interface IArrived {
+  coopname: IName
+  hash: IChecksum256
+  transport_act_delivery: IDocument2
+}
+
+export interface IAuthcontrib {
   coopname: IName
   request_hash: IChecksum256
   authorization: IDocument2
 }
 
-export interface IAuthoffs2c {
+export interface IAuthreturn {
   coopname: IName
   request_hash: IChecksum256
   authorization: IDocument2
@@ -44,20 +51,7 @@ export interface ICancel {
   request_hash: IChecksum256
 }
 
-export interface IChildorder {
-  coopname: IName
-  braname: IName
-  username: IName
-  hash: IChecksum256
-  parent_hash: IChecksum256
-  units: IUint64
-  unit_cost: IAsset
-  statement: IDocument2
-  convert_in: IDocument2
-  meta: string
-}
-
-export interface ICompleteoff {
+export interface IComplete {
   coopname: IName
   username: IName
   request_hash: IChecksum256
@@ -72,45 +66,33 @@ export interface ICountsBase {
   value: IUint64
 }
 
-export interface IDeclineacc {
+export interface ICreateship {
   coopname: IName
   hash: IChecksum256
-  reason: string
+  driver_username: IName
+  source_braname: IName
+  destination_braname: IName
+  request_hashes: IChecksum256[]
+  transport_act_sender: IDocument2
 }
 
-export interface IDeclineoff {
+export interface IDecline {
   coopname: IName
   username: IName
   request_hash: IChecksum256
   meta: string
 }
 
-export interface IDeliveroff1 {
+export interface IDeclineacc {
   coopname: IName
-  username: IName
-  request_hash: IChecksum256
-  transport_act_1: IDocument2
+  hash: IChecksum256
+  reason: string
 }
 
-export interface IDeliveroff2 {
+export interface IDelivered {
   coopname: IName
   username: IName
   request_hash: IChecksum256
-  transport_act_2: IDocument2
-}
-
-export interface IDeliveroff3 {
-  coopname: IName
-  username: IName
-  request_hash: IChecksum256
-  transport_act_3: IDocument2
-}
-
-export interface IDeliveroff4 {
-  coopname: IName
-  username: IName
-  request_hash: IChecksum256
-  transport_act_4: IDocument2
 }
 
 export interface IDispute {
@@ -132,9 +114,14 @@ export interface IDocument2 {
 export interface IMigrate {
 }
 
-export interface IParentoffer {
+export interface INamedDocument {
+  name: IName
+  document: IDocument2
+}
+
+export interface IOrderoffer {
   coopname: IName
-  braname: IName
+  receiver_braname: IName
   username: IName
   hash: IChecksum256
   units: IUint64
@@ -143,45 +130,52 @@ export interface IParentoffer {
   warranty_period_secs: IUint32
   membership_fee_amount: IAsset
   cancellation_fee_amount: IAsset
+  product_return_statement: IDocument2
+  convert_in: IDocument2
   meta: string
 }
 
-export interface IRecvcnfoff {
+export interface IReceive {
   coopname: IName
   username: IName
   request_hash: IChecksum256
   document: IDocument2
 }
 
-export interface IRecvoff {
+export interface IReceivecnf {
   coopname: IName
   username: IName
   request_hash: IChecksum256
   document: IDocument2
+}
+
+export interface IReceiveshipm {
+  coopname: IName
+  hash: IChecksum256
+  warehouse_receipt_act: IDocument2
 }
 
 export interface IRequest {
   id: IUint64
   hash: IChecksum256
-  parent_id: IUint64
-  parent_hash: IChecksum256
   coopname: IName
   type: IName
   status: IName
   username: IName
-  parent_username: IName
   braname: IName
+  warehouse: IName
   token_contract: IName
+  receiver_braname: IName
+  supplier_braname: IName
   unit_cost: IAsset
   base_cost: IAsset
   membership_fee_amount: IAsset
   total_cost: IAsset
-  remaining_units: IUint64
-  blocked_units: IUint64
-  supplied_units: IUint64
+  units: IUint64
   meta: string
   money_contributor: IName
   product_contributor: IName
+  documents: INamedDocument[]
   product_lifecycle_secs: IUint64
   warranty_period_secs: IUint64
   cancellation_fee_amount: IAsset
@@ -198,6 +192,16 @@ export interface IRequest {
   declined_at: ITimePointSec
   disputed_at: ITimePointSec
   canceled_at: ITimePointSec
+}
+
+export interface IRetransport {
+  coopname: IName
+  completed_hash: IChecksum256
+  new_driver_username: IName
+  source_braname: IName
+  new_destination_braname: IName
+  request_hashes: IChecksum256[]
+  transport_act_sender: IDocument2
 }
 
 export interface ISegment {
@@ -224,6 +228,22 @@ export interface ISegment {
   updated_at: ITimePointSec
 }
 
+export interface IShipment {
+  id: IUint64
+  hash: IChecksum256
+  coopname: IName
+  driver_username: IName
+  source_braname: IName
+  destination_braname: IName
+  status: IName
+  request_hashes: IChecksum256[]
+  documents: INamedDocument[]
+  created_at: ITimePointSec
+  loaded_at: ITimePointSec
+  delivered_at: ITimePointSec
+  completed_at: ITimePointSec
+}
+
 export interface ISignatureInfo {
   id: IUint32
   signed_hash: IChecksum256
@@ -234,21 +254,24 @@ export interface ISignatureInfo {
   meta: string
 }
 
-export interface ISupplcnfoff {
+export interface ISignbydriver {
+  coopname: IName
+  hash: IChecksum256
+  transport_act_driver: IDocument2
+}
+
+export interface ISupplcnf {
   coopname: IName
   username: IName
   request_hash: IChecksum256
-  act2: IDocument2
+  act: IDocument2
 }
 
-export interface ISupplyoff {
+export interface ISupply {
   coopname: IName
   username: IName
   request_hash: IChecksum256
-  act1: IDocument2
-}
-
-export interface ITest {
+  act: IDocument2
 }
 
 export interface IWaccept {

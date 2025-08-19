@@ -119,4 +119,23 @@ namespace Gateway {
 
       return *itr;
   }
+  
+  inline void create_outcome(
+    name calling_contract,
+    CREATEOUTPAY_SIGNATURE
+  ) {
+    Action::send<createoutpay_interface>(
+      _gateway,
+      Names::External::CREATE_OUTPAY,
+      calling_contract,
+      coopname,
+      username,
+      outcome_hash,
+      quantity,
+      callback_contract,
+      confirm_callback,
+      decline_callback
+    );
+  }
+  
 }

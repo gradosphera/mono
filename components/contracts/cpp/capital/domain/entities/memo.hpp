@@ -80,4 +80,8 @@ namespace Capital::Memo {
     return "Создание заявки на возврат из программы";
   }
 
+  inline std::string get_program_property_memo(checksum256 property_hash) {
+    return "Внесение имущества в программу капитализации: " + checksum256_to_hex(property_hash);
+  }
+
 } // namespace Capital::Memo

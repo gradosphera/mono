@@ -1,4 +1,4 @@
-void capital::createpinv(name coopname, name application, name username, checksum256 invest_hash, asset amount, document2 statement) {
+void capital::createpinv(name coopname, name username, checksum256 invest_hash, asset amount, document2 statement) {
   require_auth(coopname);
   
   verify_document_or_fail(statement, {username});

@@ -59,4 +59,12 @@ namespace Capital::Core::Voting {
      */
     bool is_voting_completed(const Capital::project& project);
 
+    /**
+     * @brief Обновляет статус голосования участника в зависимости от его ролей
+     * @param coopname Имя кооператива
+     * @param project_hash Хэш проекта
+     * @param username Имя пользователя
+     */
+    void update_voting_status(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
+
 } // namespace Capital::Core

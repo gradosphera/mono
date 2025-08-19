@@ -1,4 +1,4 @@
-[[eosio::action]] void capital::refreshproj(name coopname, name application, checksum256 project_hash, name username) {
+[[eosio::action]] void capital::refreshproj(name coopname, checksum256 project_hash, name username) {
     require_auth(username);
   
     // Проверяем существование проекта

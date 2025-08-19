@@ -16,7 +16,6 @@ namespace Status {
   constexpr name APPROVED = "approved"_n;    ///< Долг одобрен
   constexpr name AUTHORIZED = "authorized"_n; ///< Долг авторизован советом
   constexpr name PAID = "paid"_n;            ///< Долг выплачен
-  constexpr name DECLINED = "declined"_n;    ///< Долг отклонен
 }
 
 /**
@@ -200,5 +199,6 @@ inline void create_debt_agenda(
     std::string("")
   );
 }
+
 
 } // namespace Capital::Debts

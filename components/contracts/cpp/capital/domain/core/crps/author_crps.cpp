@@ -29,8 +29,8 @@ namespace Capital::Core {
         });
         
         Capital::Projects::increment_total_authors(coopname, project_hash);
-        // Увеличиваем счетчик участников голосования, т.к. новый автор имеет право голоса
-        Capital::Projects::increment_total_voters(coopname, project_hash);
+        // Обновляем статус голосования участника
+        Capital::Core::Voting::update_voting_status(coopname, project_hash, username);
     } else {
         auto segment = segments.find(exist_segment->id);
         bool became_author = (!exist_segment->is_author);
@@ -46,9 +46,10 @@ namespace Capital::Core {
         
         if (became_author) {
             Capital::Projects::increment_total_authors(coopname, project_hash);
-            // Увеличиваем счетчик участников голосования, т.к. участник стал автором
-            Capital::Projects::increment_total_voters(coopname, project_hash);
         }
+        
+        // Всегда обновляем статус голосования после изменения ролей
+        Capital::Core::Voting::update_voting_status(coopname, project_hash, username);
     }
     
   }

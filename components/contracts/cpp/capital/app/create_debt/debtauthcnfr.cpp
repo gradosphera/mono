@@ -9,23 +9,9 @@ void capital::debtauthcnfr(eosio::name coopname, checksum256 debt_hash, document
     // Обновляем статус долга
     Capital::Debts::update_debt_status(coopname, debt_hash, Capital::Debts::Status::AUTHORIZED, 
                                        _capital, decision);
-    
-    //Создаём объект долга в контракте loan
-    Action::send<createdebt_interface>(
-      _loan,
-      Names::External::CREATE_DEBT,
-      _capital,
-      coopname, 
-      exist_debt.username, 
-      exist_debt.debt_hash, 
-      exist_debt.repaid_at,
-      exist_debt.amount
-    );
-    
+      
     // создаём объект исходящего платежа в gateway с коллбэком после обработки
-    Action::send<createoutpay_interface>(
-      _gateway,
-      Names::External::CREATE_OUTPAY,
+    ::Gateway::create_outcome(
       _capital,
       coopname, 
       exist_debt.username, 

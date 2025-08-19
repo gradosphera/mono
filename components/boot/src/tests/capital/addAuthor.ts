@@ -7,7 +7,6 @@ import { makeCombinedChecksum256NameIndexKey } from '../shared/combinedKeys'
 export async function addAuthor(blockchain: Blockchain, coopname: string, project_hash: string, author: string) {
   const data: CapitalContract.Actions.AddAuthor.IAddAuthor = {
     coopname,
-    application: coopname,
     project_hash,
     author,
   }

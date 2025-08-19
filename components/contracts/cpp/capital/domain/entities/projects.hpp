@@ -152,6 +152,29 @@ namespace Capital::Projects {
   }
 
     /**
+   * @brief Добавляет имущественный взнос к проекту.
+   * @param coopname Имя кооператива (scope таблицы).
+   * @param project_hash Хэш проекта.
+   * @param property_amount Стоимость имущественного взноса.
+   */
+  inline void add_property_base(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &property_amount) {
+      auto exist_project = get_project(coopname, project_hash);
+      eosio::check(exist_project.has_value(), "Проект не найден");
+      
+      project_index projects(_capital, coopname.value);
+      auto project = projects.find(exist_project->id);
+      
+      projects.modify(project, _capital, [&](auto &p) {
+          // Добавляем стоимость имущества в пул себестоимостей
+          p.fact.property_base_pool += property_amount;
+          
+          // Обновляем общую сумму вкладов
+          p.fact.total_contribution += property_amount;
+          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
+      });
+  }
+
+  /**
    * @brief Добавляет коммит к проекту, обновляя фактические показатели и счетчик коммитов.
    * @param coopname Имя кооператива (scope таблицы).
    * @param project_hash Хэш проекта.
@@ -381,6 +404,17 @@ namespace Capital::Projects {
       });
   }
   
+  /**
+   * @brief Увеличивает количество проперторов в проекте на 1
+   */
+  inline void increment_total_propertors(eosio::name coopname, const checksum256 &project_hash) {
+    project_index projects(_capital, coopname.value);
+    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+    
+    projects.modify(project, _capital, [&](auto &p) {
+      p.counts.total_propertors += 1;
+    });
+  }
   
   /**
    * @brief Увеличивает количество инвесторов в проекте на 1
@@ -479,26 +513,6 @@ namespace Capital::Projects {
     
     projects.modify(project, _capital, [&](auto &p) {
       p.voting.total_voters++;
-    });
-  }
-
-
-
-  /**
-   * @brief Инициализирует данные голосования в проекте
-   * @param coopname Имя кооператива
-   * @param project_hash Хэш проекта
-   * @param amounts Рассчитанные суммы для голосования
-   */
-  inline void initialize_voting_amounts(eosio::name coopname, const checksum256 &project_hash, 
-                                   const voting_amounts &amounts) {
-    auto exist_project = get_project_or_fail(coopname, project_hash);
-    
-    project_index projects(_capital, coopname.value);
-    auto project_itr = projects.find(exist_project.id);
-    
-    projects.modify(project_itr, _capital, [&](auto &p) {
-      p.voting.amounts = amounts;
     });
   }
 

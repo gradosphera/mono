@@ -79,6 +79,12 @@ namespace Capital::Core {
                                          eosio::name coordinator_username, const eosio::asset &rised_amount);
 
   /**
+   * @brief Создает или обновляет запись пропертора с имущественным взносом в таблице segments.
+   */
+  void upsert_propertor_segment(eosio::name coopname, const checksum256 &project_hash, 
+                                     eosio::name username, const eosio::asset &property_amount);
+
+  /**
    * @brief Создает или обновляет запись вкладчика в таблице segments.
    */
   void upsert_contributor_segment(eosio::name coopname, const checksum256 &project_hash, 

@@ -5,8 +5,8 @@
  * - Фиксированные распределения: 61.8% авторских премий равно между авторами, 61.8% создательских премий прямо создателям
  * Обновляет сегмент участника с итоговыми суммами раздельно по пулам
  */
-void capital::finalvoting(name coopname, name application, name username, checksum256 project_hash) {
-    require_auth(application);
+void capital::finalvoting(name coopname, name username, checksum256 project_hash) {
+    require_auth(coopname);
     
     // Получаем проект и проверяем состояние
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
@@ -23,6 +23,6 @@ void capital::finalvoting(name coopname, name application, name username, checks
     auto direct_creator_amount = Capital::Core::Voting::calculate_direct_creator_bonus(project, segment);
     
     // Обновляем сегмент участника
-    Capital::Segments::update_segment_voting_results(coopname, project_hash, username, application,
+    Capital::Segments::update_segment_voting_results(coopname, project_hash, username,
                                                    voting_amount, equal_author_amount, direct_creator_amount);
 } 

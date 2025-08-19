@@ -100,6 +100,7 @@ export interface IApproval {
   id: IUint64
   coopname: IName
   username: IName
+  type: IName
   document: IDocument2
   approval_hash: IChecksum256
   callback_contract: IName
@@ -188,31 +189,6 @@ export interface ICancelvote {
   decision_id: IUint64
 }
 
-export interface ICapauthinvst {
-  coopname: IName
-  username: IName
-  invest_id: IUint64
-  statement: IDocument2
-  meta: string
-}
-
-export interface ICapregcontr {
-  coopname: IName
-  username: IName
-  contributor_id: IUint64
-  statement: IDocument2
-  meta: string
-}
-
-export interface IChange {
-  coopname: IName
-  parent_username: IName
-  username: IName
-  exchange_id: IUint64
-  money_contributor: IName
-  product_contributor: IName
-}
-
 export interface IChanges {
   id: IUint64
   exchange_id: IUint64
@@ -272,6 +248,7 @@ export interface ICreateapprv {
   coopname: IName
   username: IName
   document: IDocument2
+  type: IName
   approval_hash: IChecksum256
   callback_contract: IName
   callback_action_approve: IName
@@ -567,11 +544,6 @@ export interface IProgwallet {
   membership_contribution: IAsset$
 }
 
-export interface IRecieved {
-  coopname: IName
-  exchange_id: IUint64
-}
-
 export interface IRight {
   contract: IName
   action_name: IName
@@ -630,6 +602,14 @@ export interface ISubbal {
   program_id: IUint64
   quantity: IAsset
   skip_available_check: boolean
+  memo: string
+}
+
+export interface ISubmemberfee {
+  coopname: IName
+  username: IName
+  program_id: IUint64
+  quantity: IAsset
   memo: string
 }
 

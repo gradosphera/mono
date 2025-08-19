@@ -1,4 +1,4 @@
-void capital::createinvest(name coopname, name application, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document2 statement) {
+void capital::createinvest(name coopname, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document2 statement) {
   require_auth(coopname);
   
   verify_document_or_fail(statement, {username});
@@ -12,6 +12,8 @@ void capital::createinvest(name coopname, name application, name username, check
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
   
   eosio::check(project.is_opened == true, "Проект закрыт для инвестиций");
+  
+  eosio::check(project.status == Capital::Projects::Status::ACTIVE || project.status == Capital::Projects::Status::VOTING, "Проект должен быть в статусе 'active' или 'voting'");
   
   std::string memo = Capital::Memo::get_invest_memo(contributor -> id);
   

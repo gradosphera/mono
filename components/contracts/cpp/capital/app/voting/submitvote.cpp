@@ -2,8 +2,8 @@
  * @brief Подача голоса по методу Водянова
  * Участник распределяет общую голосующую сумму между остальными участниками
  */
-void capital::submitvote(name coopname, name application, name voter, checksum256 project_hash, std::vector<std::pair<name, asset>> votes) {
-    require_auth(application);
+void capital::submitvote(name coopname, name voter, checksum256 project_hash, std::vector<Capital::vote_input> votes) {
+    require_auth(coopname);
     
     // Получаем проект и проверяем состояние голосования
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
@@ -17,8 +17,11 @@ void capital::submitvote(name coopname, name application, name voter, checksum25
     // Получаем общую сумму на распределение по Водянову
     eosio::asset total_voting_pool = project.voting.amounts.total_voting_pool;
     
-    // Получаем голосующую сумму
-    eosio::asset voting_amount = project.voting.amounts.voting_amount;
+    // Получаем активную голосующую сумму
+    eosio::asset active_voting_amount = project.voting.amounts.active_voting_amount;
+    
+    // Получаем среднюю не голосующую сумму для каждого участника
+    eosio::asset equal_voting_amount = project.voting.amounts.equal_voting_amount;
     
     // Проверяем корректность голосов
     eosio::asset total_vote_amount = asset(0, _root_govern_symbol);
@@ -30,21 +33,22 @@ void capital::submitvote(name coopname, name application, name voter, checksum25
     uint32_t total_voters = 0;
     
     for (const auto& vote : votes) {
-        eosio::check(vote.first != voter, "Нельзя голосовать за себя");
-        eosio::check(Capital::Segments::is_voting_participant(coopname, project_hash, vote.first), "Получатель голоса не является участником голосования");
-        eosio::check(voted_for.insert(vote.first).second, "Нельзя голосовать за одного участника дважды");
-        eosio::check(vote.second.amount > 0, "Сумма голоса должна быть положительной");
+        eosio::check(vote.recipient != voter, "Нельзя голосовать за себя");
+        eosio::check(Capital::Segments::is_voting_participant(coopname, project_hash, vote.recipient), "Получатель голоса не является участником голосования");
+        eosio::check(voted_for.insert(vote.recipient).second, "Нельзя голосовать за одного участника дважды");
+        eosio::check(vote.amount.amount > 0, "Сумма голоса должна быть положительной");
         
-        total_vote_amount += vote.second;
+        total_vote_amount += vote.amount;
         total_voters++;
     }
     
     eosio::check(total_voters == total_voters_except_one, "Количество участников за кого отдается голос должно равняться общему количеству участников без одного");
-    eosio::check(total_vote_amount + voting_amount == total_voting_pool, "(Общая сумма голосов + Голосующая сумма) должны равняться сумме на распределении `total_voting_pool`");
+    eosio::check(total_vote_amount == active_voting_amount, "Общая сумма голосов должна быть равна активной голосующей сумме");
+    eosio::check(total_vote_amount + equal_voting_amount == total_voting_pool, "(Общая сумма голосов + Равная не голосующая сумма) должны равняться сумме на распределении `total_voting_pool`");
     
     // Сохраняем голоса
     for (const auto& vote : votes) {
-        Capital::Votes::add_vote(coopname, application, project_hash, voter, vote.first, vote.second);
+        Capital::Votes::add_vote(coopname, project_hash, voter, vote.recipient, vote.amount);
     }
     
     // Обновляем счетчик полученных голосов

@@ -7,10 +7,10 @@ import { addUser } from '../init/participant'
 import { generateRandomUsername } from '../utils/randomUsername'
 import { generateRandomSHA256 } from '../utils/randomHash'
 import { sleep } from '../utils'
-import { getCoopProgramWallet } from './wallet/walletUtils'
+import { getCoopProgramWallet, getLedgerAccountById } from './wallet/walletUtils'
 import { registerContributor } from './capital/registerContributor'
 import { signAppendix } from './capital/signAppendix'
-import { capitalProgramId, sourceProgramId } from './capital/consts'
+import { capitalProgramId, circulationAccountId, sourceProgramId } from './capital/consts'
 import { makeCombinedChecksum256NameIndexKey } from './shared/combinedKeys'
 import { commitToResult } from './capital/commitToResult'
 import { processApprove } from './capital/processApprove'
@@ -22,6 +22,12 @@ import { signCapitalAgreement } from './capital/signCapitalAgreement'
 import { addAuthor } from './capital/addAuthor'
 import { getSegment } from './capital/getSegment'
 import { investInProject } from './capital/investInProject'
+import { processLastDecision } from './soviet/processLastDecision'
+import { processDebt } from './capital/processDebt'
+import { processCreateProjectProperty } from './capital/processCreateProjectProperty'
+import { processCreateProgramProperty } from './capital/processCreateProgramProperty'
+import { processStartVoting } from './capital/processStartVoting'
+import { createVoteDistribution, submitVote } from './capital/submitVote'
 
 // const CLI_PATH = 'src/index.ts'
 
@@ -344,7 +350,7 @@ describe('тест контракта CAPITAL', () => {
       expect(contributor.appendixes).toContain(project1.project_hash)
       expect(contributor.status).toBe('active')
     }
-  })
+  }, 1000_000)
 
   it(`подписываем соглашения о ЦПП "Цифровой Кошелек" и "Капитализация"`, async () => {
     const testerNames = [tester1, tester2, tester3, tester4, tester5, investor1, investor2, investor3] // Можно передавать любое количество пользователей
@@ -353,7 +359,7 @@ describe('тест контракта CAPITAL', () => {
       await signWalletAgreement(blockchain, 'voskhod', tester, fakeDocument)
       await signCapitalAgreement(blockchain, 'voskhod', tester, fakeDocument)
     }
-  })
+  }, 1000_000)
 
   it(`пополняем баланс кошелька investor1`, async () => {
     const { depositId, program, userWallet } = await depositToWallet(blockchain, 'voskhod', investor1, investAmount1)
@@ -835,9 +841,315 @@ describe('тест контракта CAPITAL', () => {
     expect(updatedTester5.coordinator_investments).toBe('25000.0000 RUB')
   })
 
-  // it('финансировать результат проекта на 10000 RUB', async () => {
-  //   await allocateFundsToResult(blockchain, 'voskhod', project1.project_hash, result1.result_hash, '10000.0000 RUB')
-  // })
+  it(`берем ссуду на 10000 RUB от tester1`, async () => {
+    // Обновляем сегмент перед получением ссуды
+    await sleep(1000)
+    await refreshSegment(blockchain, 'voskhod', project1.project_hash, tester1)
+    const repaidAtDate = new Date()
+    repaidAtDate.setDate(repaidAtDate.getDate() + 30)
+
+    // Процессим полный цикл получения долга
+    const debtResult = await processDebt(
+      blockchain,
+      'voskhod',
+      tester1,
+      project1.project_hash,
+      '10000.0000 RUB',
+      fakeDocument,
+      repaidAtDate,
+    )
+
+    // Проверяем что debt_amount увеличился на 10000.0000 RUB в сегменте
+    expect(debtResult.segmentAfter.debt_amount).toBe('10000.0000 RUB')
+
+    // Проверяем что debt_amount увеличился у контрибьютора
+    expect(debtResult.contributorAfter.debt_amount).toBe('10000.0000 RUB')
+
+    console.log(`✅ Долг на 10000.0000 RUB успешно получен пользователем ${tester1}`)
+  })
+
+  it('внести имущество на 10000 RUB в проект от tester4', async () => {
+    const data: CapitalContract.Actions.CreateProjectProperty.ICreateProjectProperty = {
+      coopname: 'voskhod',
+      username: tester4,
+      project_hash: project1.project_hash,
+      property_hash: generateRandomSHA256(),
+      property_amount: '10000.0000 RUB',
+      property_description: 'Тестовое имущество',
+    }
+
+    const res = await processCreateProjectProperty(blockchain, data)
+    const prevTotalCost = parseFloat(res.segmentBefore.total_segment_cost)
+
+    expect(res.segmentAfter.total_segment_cost).not.toBe(res.segmentBefore.total_segment_cost)
+    expect(parseFloat(res.segmentAfter.total_segment_cost)).toBeGreaterThan(prevTotalCost)
+
+    // Проверяем точное приращение
+    const prevContributedAsPropertor = parseFloat(res.segmentBefore.property_base.split(' ')[0])
+    const afterContributedAsPropertor = parseFloat(res.segmentAfter.property_base.split(' ')[0])
+    expect(afterContributedAsPropertor).toBe(prevContributedAsPropertor + 10000)
+
+    const programWalletBefore = await getCoopProgramWallet(blockchain, 'voskhod', capitalProgramId)
+  })
+
+  it('внести программный имущественный взнос на 10000 RUB от tester5 и проверить точное приращение блокированных средств и паевого фонда', async () => {
+    const programWalletBefore = await getCoopProgramWallet(blockchain, 'voskhod', capitalProgramId)
+    const ledgerShareBefore = await getLedgerAccountById(blockchain, 'voskhod', circulationAccountId)
+
+    const data: CapitalContract.Actions.CreateProgramProperty.ICreateProgramProperty = {
+      coopname: 'voskhod',
+      username: tester5,
+      property_hash: generateRandomSHA256(),
+      property_amount: '10000.0000 RUB',
+      property_description: 'Программный имущественный взнос',
+      statement: fakeDocument,
+    }
+
+    const res = await processCreateProgramProperty(blockchain, data, fakeDocument)
+    expect(res.txCreateId).toBeDefined()
+    expect(res.txAct1Id).toBeDefined()
+    expect(res.txAct2Id).toBeDefined()
+
+    // Логирование состояний до/после
+    // console.log('Program wallet before:', res.programWalletBefore)
+    // console.log('Program wallet after:', res.programWalletAfter)
+    // console.log('Ledger share before:', res.ledgerShareBefore)
+    // console.log('Ledger share after:', res.ledgerShareAfter)
+
+    // Проверяем точное приращение: блокированные средства программы +10000.0000 RUB
+    const prevBlocked = parseFloat(res.programWalletBefore.blocked.split(' ')[0])
+    const afterBlocked = parseFloat(res.programWalletAfter.blocked.split(' ')[0])
+    expect(afterBlocked).toBe(prevBlocked + 10000)
+
+    // Проверяем точное приращение: паевой фонд в бухгалтерии +10000.0000 RUB
+    const prevAvailable = parseFloat(res.ledgerShareBefore.available.split(' ')[0])
+    const afterAvailable = parseFloat(res.ledgerShareAfter.available.split(' ')[0])
+    expect(afterAvailable).toBe(prevAvailable + 10000)
+  })
+
+  it('внести проектный имущественный взнос на 10000 RUB от tester5 и проверить точное приращение в сегменте проекта', async () => {
+    const data: CapitalContract.Actions.CreateProjectProperty.ICreateProjectProperty = {
+      coopname: 'voskhod',
+      username: tester5,
+      property_hash: generateRandomSHA256(),
+      property_amount: '10000.0000 RUB',
+      property_description: 'Проектный имущественный взнос',
+      project_hash: project1.project_hash,
+    }
+
+    const res = await processCreateProjectProperty(blockchain, data)
+    expect(res.txCreateId).toBeDefined()
+
+    // Логирование состояний до/после
+    // console.log('Segment before:', res.segmentBefore)
+    // console.log('Segment after:', res.segmentAfter)
+    // console.log('Project before:', res.projectBefore)
+    // console.log('Project after:', res.projectAfter)
+
+    // Проверяем точное приращение: имущественный взнос в сегменте +10000.0000 RUB
+    const prevProperty = parseFloat(res.segmentBefore.property_base.split(' ')[0])
+    const afterProperty = parseFloat(res.segmentAfter.property_base.split(' ')[0])
+    expect(afterProperty).toBe(prevProperty + 10000)
+
+    // Проверяем точное приращение: общая стоимость сегмента +10000.0000 RUB
+    const prevTotal = parseFloat(res.segmentBefore.total_segment_cost.split(' ')[0])
+    const afterTotal = parseFloat(res.segmentAfter.total_segment_cost.split(' ')[0])
+    expect(afterTotal).toBe(prevTotal + 10000)
+
+    // Проверяем точное приращение: имущественная база проекта +10000.0000 RUB
+    const prevPropertyBase = parseFloat(res.projectBefore.fact.property_base_pool.split(' ')[0])
+    const afterPropertyBase = parseFloat(res.projectAfter.fact.property_base_pool.split(' ')[0])
+    expect(afterPropertyBase).toBe(prevPropertyBase + 10000)
+    expect(afterPropertyBase).toBe(20000)
+  })
+
+  it(`берем ссуду координатору 100 RUB от tester4`, async () => {
+    // Обновляем сегмент перед получением ссуды
+    await sleep(1000)
+    await refreshSegment(blockchain, 'voskhod', project1.project_hash, tester4)
+    const repaidAtDate = new Date()
+    repaidAtDate.setDate(repaidAtDate.getDate() + 30)
+
+    // Процессим полный цикл получения долга
+    const debtResult = await processDebt(
+      blockchain,
+      'voskhod',
+      tester4,
+      project1.project_hash,
+      '100.0000 RUB',
+      fakeDocument,
+      repaidAtDate,
+    )
+
+    // Проверяем что debt_amount увеличился на 10000.0000 RUB в сегменте
+    expect(debtResult.segmentAfter.debt_amount).toBe('100.0000 RUB')
+
+    // Проверяем что debt_amount увеличился у контрибьютора
+    expect(debtResult.contributorAfter.debt_amount).toBe('100.0000 RUB')
+
+    console.log('debtResult tester4: ', debtResult)
+
+    console.log(`✅ Долг на 100 RUB успешно получен пользователем ${tester4}`)
+  })
+
+  it('начать голосование по проекту и проверить изменение статуса с active на voting', async () => {
+    const data: CapitalContract.Actions.StartVoting.IStartVoting = {
+      coopname: 'voskhod',
+      project_hash: project1.project_hash,
+    }
+
+    const res = await processStartVoting(blockchain, data)
+    expect(res.txStartId).toBeDefined()
+
+    // Логирование состояний до/после
+    console.log('Project before:', res.projectBefore)
+    console.log('Project after:', res.projectAfter)
+
+    // Проверяем изменение статуса проекта с 'active' на 'voting'
+    expect(res.projectBefore.status).toBe('active')
+    expect(res.projectAfter.status).toBe('voting')
+
+    // Проверяем что данные голосования инициализированы
+    expect(res.projectAfter.voting.authors_voting_percent).toBeCloseTo(38.2, 10)
+    expect(res.projectAfter.voting.creators_voting_percent).toBeCloseTo(38.2, 10)
+    expect(res.projectAfter.voting.amounts.authors_equal_spread).toBe('49650.1200 RUB')
+    expect(res.projectAfter.voting.amounts.creators_direct_spread).toBe('80340.0000 RUB')
+    expect(res.projectAfter.voting.total_voters).toBe(3)
+    expect(res.projectAfter.voting.votes_received).toBe(0)
+
+    expect(parseFloat(res.projectAfter.fact.creators_bonus_pool)).toBeCloseTo(parseFloat(res.projectAfter.voting.amounts.creators_direct_spread) + parseFloat(res.projectAfter.voting.amounts.creators_bonuses_on_voting), 10)
+
+    expect(parseFloat(res.projectAfter.fact.authors_bonus_pool)).toBeCloseTo(parseFloat(res.projectAfter.voting.amounts.authors_equal_spread) + parseFloat(res.projectAfter.voting.amounts.authors_bonuses_on_voting), 10)
+
+    expect(res.projectAfter.voting.amounts.authors_equal_per_author).toBe('24825.0600 RUB')
+
+    expect(parseFloat(res.projectAfter.voting.amounts.total_voting_pool)).toBeCloseTo(parseFloat(res.projectAfter.voting.amounts.creators_bonuses_on_voting) + parseFloat(res.projectAfter.voting.amounts.authors_bonuses_on_voting), 10)
+
+    expect(res.projectAfter.voting.amounts.total_voting_pool).toBe('80349.8800 RUB')
+    expect(res.projectAfter.voting.amounts.active_voting_amount).toBe('53566.5866 RUB')
+  })
+
+  it('голосовать аккаунтом tester1', async () => {
+    const voters = [tester1, tester2, tester3]
+
+    // Получаем текущий проект для получения active_voting_amount
+    const currentProject = (await blockchain.getTableRows(
+      CapitalContract.contractName.production,
+      'voskhod',
+      'projects',
+      1,
+      project1.project_hash,
+      project1.project_hash,
+      3,
+      'sha256',
+    ))[0]
+
+    const votingAmount = currentProject.voting.amounts.active_voting_amount
+    console.log('Голосующая сумма для распределения:', votingAmount)
+
+    // Создаем равномерное распределение голосующей суммы между другими участниками
+    const voteDistribution = createVoteDistribution(voters, tester1, votingAmount)
+
+    const result = await submitVote(
+      blockchain,
+      'voskhod',
+      tester1,
+      project1.project_hash,
+      voteDistribution,
+    )
+
+    // Проверяем что транзакция прошла успешно
+    expect(result.txId).toBeDefined()
+
+    // Проверяем увеличение количества голосов в проекте
+    expect(result.projectAfter.voting.votes_received).toBe(result.projectBefore.voting.votes_received + 1)
+
+    // Проверяем что новые голоса появились в таблице
+    expect(result.votesAfter.length).toBe(result.votesBefore.length + 2)
+
+    // Проверяем что у участника раньше не было голосов, а теперь есть
+    expect(result.voterVotesBefore.length).toBe(0)
+    expect(result.voterVotesAfter.length).toBe(2)
+
+    console.log('VOTING RESULT tester1: ', result)
+
+    // Проверяем что голоса соответствуют ожидаемому распределению
+    result.voterVotesAfter.forEach((vote: any) => {
+      expect(vote.voter).toBe(tester1)
+      expect(vote.project_hash).toBe(project1.project_hash)
+      const expectedVote = result.voteInput.find(v => v.recipient === vote.recipient)
+      expect(expectedVote).toBeDefined()
+      expect(vote.amount).toBe(expectedVote!.amount)
+    })
+  })
+
+  it('голосовать аккаунтом tester2', async () => {
+    const voters = [tester1, tester2, tester3]
+
+    // Получаем текущий проект для получения active_voting_amount
+    const currentProject = (await blockchain.getTableRows(
+      CapitalContract.contractName.production,
+      'voskhod',
+      'projects',
+      1,
+      project1.project_hash,
+      project1.project_hash,
+      3,
+      'sha256',
+    ))[0]
+
+    const votingAmount = currentProject.voting.amounts.active_voting_amount
+
+    const voteDistribution = createVoteDistribution(voters, tester2, votingAmount)
+
+    const result = await submitVote(
+      blockchain,
+      'voskhod',
+      tester2,
+      project1.project_hash,
+      voteDistribution,
+    )
+
+    expect(result.txId).toBeDefined()
+    expect(result.projectAfter.voting.votes_received).toBe(result.projectBefore.voting.votes_received + 1)
+    expect(result.votesAfter.length).toBe(result.votesBefore.length + 2)
+    expect(result.voterVotesBefore.length).toBe(0)
+    expect(result.voterVotesAfter.length).toBe(2)
+  })
+
+  it('голосовать аккаунтом tester3', async () => {
+    const voters = [tester1, tester2, tester3]
+
+    // Получаем текущий проект для получения active_voting_amount
+    const currentProject = (await blockchain.getTableRows(
+      CapitalContract.contractName.production,
+      'voskhod',
+      'projects',
+      1,
+      project1.project_hash,
+      project1.project_hash,
+      3,
+      'sha256',
+    ))[0]
+
+    const votingAmount = currentProject.voting.amounts.active_voting_amount
+
+    const voteDistribution = createVoteDistribution(voters, tester3, votingAmount)
+
+    const result = await submitVote(
+      blockchain,
+      'voskhod',
+      tester3,
+      project1.project_hash,
+      voteDistribution,
+    )
+
+    expect(result.txId).toBeDefined()
+    expect(result.projectAfter.voting.votes_received).toBe(result.projectBefore.voting.votes_received + 1)
+    expect(result.votesAfter.length).toBe(result.votesBefore.length + 2)
+    expect(result.voterVotesBefore.length).toBe(0)
+    expect(result.voterVotesAfter.length).toBe(2)
+  })
 
   // it('финансировать результат проекта на 20000 RUB', async () => {
   //   await allocateFundsToResult(blockchain, 'voskhod', project1.project_hash, result1.result_hash, '20000.0000 RUB')

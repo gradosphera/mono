@@ -80,5 +80,38 @@ namespace Loan {
       }
     }
   }
-
+  
+  //Создаём объект долга в контракте loan
+  inline void create_debt(
+    name calling_contract,
+    CREATEDEBT_SIGNATURE
+  ) {
+    //Создаём объект долга в контракте loan
+    Action::send<createdebt_interface>(
+      _loan,
+      Names::Loan::CREATE_DEBT,
+      calling_contract,
+      coopname, 
+      username, 
+      debt_hash, 
+      repaid_at,
+      quantity
+    );
+  }
+  
+  inline void settle_debt(
+    name calling_contract,
+    SETTLEDEBT_SIGNATURE
+  ) {
+    Action::send<settledebt_interface>(
+      _loan,
+      Names::Loan::SETTLE_DEBT,
+      calling_contract,
+      coopname,
+      username,
+      debt_hash,
+      quantity
+    );
+  }
+  
 }

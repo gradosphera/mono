@@ -1,5 +1,5 @@
-void capital::allocate(eosio::name coopname, eosio::name application, checksum256 project_hash, eosio::asset amount) {
-  check_auth_or_fail(_capital, coopname, application, "allocateprog"_n);
+void capital::allocate(eosio::name coopname, checksum256 project_hash, eosio::asset amount) {
+  require_auth(coopname);
 
   Wallet::validate_asset(amount);
   

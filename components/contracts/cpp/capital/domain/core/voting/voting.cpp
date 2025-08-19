@@ -8,7 +8,16 @@ namespace Capital::Core::Voting {
     void initialize_project_voting(name coopname, checksum256 project_hash) {
         auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
         auto st = Capital::get_global_state(coopname);
-        
+
+        auto amounts = calculate_voting_amounts(
+          project.fact.authors_bonus_pool,
+          project.fact.creators_bonus_pool,
+          project.counts.total_authors,
+          project.voting.total_voters,
+          st.config.authors_voting_percent,
+          st.config.creators_voting_percent
+      );
+      
         // Устанавливаем параметры голосования из конфигурации
         Capital::project_index projects(_capital, coopname.value);
         auto proj = projects.find(project.id);
@@ -16,80 +25,79 @@ namespace Capital::Core::Voting {
             p.voting.authors_voting_percent = st.config.authors_voting_percent;
             p.voting.creators_voting_percent = st.config.creators_voting_percent;
             p.voting.voting_deadline = time_point_sec(current_time_point().sec_since_epoch() + st.config.voting_period_in_days * 86400);
+            p.voting.amounts = amounts;
         });
         
-        project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-        
-        auto amounts = calculate_voting_amounts(
-            project.fact.authors_bonus_pool,
-            project.fact.creators_bonus_pool,
-            project.counts.total_authors,
-            project.voting.total_voters,
-            project.voting.authors_voting_percent,
-            project.voting.creators_voting_percent
-        );
-        
-        // Инициализируем данные голосования в проекте
-        Capital::Projects::initialize_voting_amounts(coopname, project_hash, amounts);
     }
 
     voting_amounts calculate_voting_amounts(const eosio::asset& authors_bonus_pool, 
-                                           const eosio::asset& creators_bonus_pool,
-                                           uint64_t total_authors,
-                                           uint32_t total_voters,
-                                           double authors_voting_percent,
-                                           double creators_voting_percent) {
-        voting_amounts result;
-        
-        // Рассчитываем процентные доли
-        double authors_equal_percent = (100.0 - authors_voting_percent) / 100.0;  // 61.8%
-        double creators_direct_percent = (100.0 - creators_voting_percent) / 100.0; // 61.8%
-        double authors_voting_coeff = authors_voting_percent / 100.0;  // 38.2%
-        double creators_voting_coeff = creators_voting_percent / 100.0; // 38.2%
-        
-        // Распределение авторских премий
-        result.authors_equal_spread = eosio::asset(
-            int64_t(static_cast<double>(authors_bonus_pool.amount) * authors_equal_percent),
-            authors_bonus_pool.symbol
+                                       const eosio::asset& creators_bonus_pool,
+                                       uint64_t total_authors,
+                                       uint32_t total_voters,
+                                       double authors_voting_percent,
+                                       double creators_voting_percent) {
+    voting_amounts result;
+    
+    // Коэффициенты
+    double authors_equal_percent = (100.0 - authors_voting_percent) / 100.0;
+    double creators_direct_percent = (100.0 - creators_voting_percent) / 100.0;
+    double authors_voting_coeff = authors_voting_percent / 100.0;
+    double creators_voting_coeff = creators_voting_percent / 100.0;
+    
+    // Авторские премии
+    result.authors_equal_spread = eosio::asset(
+        int64_t(static_cast<double>(authors_bonus_pool.amount) * authors_equal_percent),
+        authors_bonus_pool.symbol
+    );
+    result.authors_bonuses_on_voting = eosio::asset(
+        int64_t(static_cast<double>(authors_bonus_pool.amount) * authors_voting_coeff),
+        authors_bonus_pool.symbol
+    );
+    
+    if (total_authors > 0) {
+        result.authors_equal_per_author = eosio::asset(
+            result.authors_equal_spread.amount / total_authors,
+            result.authors_equal_spread.symbol
         );
-        result.authors_bonuses_on_voting = eosio::asset(
-            int64_t(static_cast<double>(authors_bonus_pool.amount) * authors_voting_coeff),
-            authors_bonus_pool.symbol
-        );
-        
-        // Рассчитываем равную сумму на каждого автора (61.8% авторских премий / количество авторов)
-        if (total_authors > 0) {
-          result.authors_equal_per_author = eosio::asset(
-              result.authors_equal_spread.amount / total_authors,
-              result.authors_equal_spread.symbol
-          );
-        } else {
-            result.authors_equal_per_author = asset(0, authors_bonus_pool.symbol);
-        }
-        
-        
-        // Распределение создательских премий
-        result.creators_direct_spread = eosio::asset(
-            int64_t(static_cast<double>(creators_bonus_pool.amount) * creators_direct_percent),
-            creators_bonus_pool.symbol
-        );
-        
-        result.creators_bonuses_on_voting = eosio::asset(
-            int64_t(static_cast<double>(creators_bonus_pool.amount) * creators_voting_coeff),
-            creators_bonus_pool.symbol
-        );
-        
-        // Рассчитываем общую сумму для распределения по Водянову
-        result.total_voting_pool = result.authors_bonuses_on_voting + result.creators_bonuses_on_voting;
-        
-        // Рассчитываем общую голосующую сумму по формуле: total_voting_pool * (voters-1)/voters
-        result.voting_amount = eosio::asset(
-            int64_t(static_cast<double>(result.total_voting_pool.amount) * (total_voters - 1) / total_voters),
-            result.total_voting_pool.symbol
-        );
-        
-        return result;
+    } else {
+        result.authors_equal_per_author = eosio::asset(0, authors_bonus_pool.symbol);
     }
+    
+    // Создательские премии
+    result.creators_direct_spread = eosio::asset(
+        int64_t(static_cast<double>(creators_bonus_pool.amount) * creators_direct_percent),
+        creators_bonus_pool.symbol
+    );
+    result.creators_bonuses_on_voting = eosio::asset(
+        int64_t(static_cast<double>(creators_bonus_pool.amount) * creators_voting_coeff),
+        creators_bonus_pool.symbol
+    );
+    
+    // Общий пул для голосования
+    result.total_voting_pool = result.authors_bonuses_on_voting + result.creators_bonuses_on_voting;
+    
+    // Активная голосующая сумма
+    result.active_voting_amount = eosio::asset(
+        int64_t(static_cast<double>(result.total_voting_pool.amount) * (total_voters - 1) / total_voters),
+        result.total_voting_pool.symbol
+    );
+    
+    // Равная сумма на каждого
+    result.equal_voting_amount = eosio::asset(
+        int64_t(static_cast<double>(result.total_voting_pool.amount) / total_voters),
+        result.total_voting_pool.symbol
+    );
+    
+    // ---- Корректировка хвостика ----
+    int64_t distributed = result.equal_voting_amount.amount * total_voters;
+    int64_t diff = result.total_voting_pool.amount - distributed;
+    if (diff != 0) {
+        result.equal_voting_amount.amount += diff;  
+    }
+    
+    return result;
+  }
+
 
     eosio::asset calculate_voting_final_amount(name coopname, checksum256 project_hash, name participant) {
         auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
@@ -144,6 +152,37 @@ namespace Capital::Core::Voting {
         bool someone_voted = project.voting.votes_received > 0;
         
         return deadline_passed || someone_voted;
+    }
+
+    /**
+     * @brief Обновляет статус сегмента участника, предоставляя ему право голоса, если это необходимо
+     * @param coopname Имя кооператива
+     * @param project_hash Хэш проекта
+     * @param username Имя пользователя
+     */
+    void update_voting_status(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
+        Capital::Segments::segments_index segments(_capital, coopname.value);
+        auto idx = segments.get_index<"byprojuser"_n>();
+        auto key = combine_checksum_ids(project_hash, username);
+        auto segment_itr = idx.find(key);
+        
+        if (segment_itr == idx.end()) {
+            return; // Сегмент не найден
+        }
+        
+        bool had_vote_before = segment_itr->has_vote;
+        bool should_have_vote = segment_itr->is_author || segment_itr->is_creator; 
+        
+        // Обновляем статус голосования только если участник получил право голоса
+        if (!had_vote_before && should_have_vote) {
+            idx.modify(segment_itr, _capital, [&](auto &s) {
+                s.has_vote = true;
+            });
+            
+            // Участник получил право голоса - увеличиваем счетчик
+            Capital::Projects::increment_total_voters(coopname, project_hash);
+        }
+        // Участник не может потерять право голоса - убираем эту логику
     }
 
 } // namespace Capital::Core

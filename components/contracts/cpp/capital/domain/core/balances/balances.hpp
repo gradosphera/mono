@@ -16,4 +16,5 @@ namespace Capital::Core {
     * @brief Получение баланса паевых взносов пользователя в программе капитализации
     */
    eosio::asset get_capital_user_share_balance(eosio::name coopname, eosio::name username);
+
 }

@@ -1,5 +1,5 @@
-void capital::createwthd2(name coopname, name application, name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document2 return_statement) {
-  check_auth_or_fail(_capital, coopname, application, "createwthd2"_n);
+void capital::createwthd2(name coopname, name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document2 return_statement) {
+  require_auth(coopname);
 
   verify_document_or_fail(return_statement);
 

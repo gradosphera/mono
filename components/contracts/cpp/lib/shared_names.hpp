@@ -16,6 +16,17 @@ namespace Names {
     constexpr eosio::name APPROVE_COMMIT = "approvecmmt"_n;
     constexpr eosio::name DECLINE_COMMIT = "declinecmmt"_n;
     
+    // Коллбэки для проектных имущественных взносов
+    constexpr eosio::name APPROVE_PROPERTY = "approvepjprp"_n;
+    constexpr eosio::name DECLINE_PROPERTY = "declinepjprp"_n;
+    
+    // Коллбэки для программных имущественных взносов
+    constexpr eosio::name APPROVE_PROGRAM_PROPERTY = "approvepgprp"_n;
+    constexpr eosio::name DECLINE_PROGRAM_PROPERTY = "declinepgprp"_n;
+    constexpr eosio::name AUTHORIZE_PROGRAM_PROPERTY = "authpgprp"_n;
+    constexpr eosio::name SIGN_ACT1_PROGRAM_PROPERTY = "act1pgprp"_n;
+    constexpr eosio::name SIGN_ACT2_PROGRAM_PROPERTY = "act2pgprp"_n;
+    
     // Коллбэки для регистрации вкладчиков
     constexpr eosio::name APPROVE_CONTRIBUTOR = "approvereg"_n;
     constexpr eosio::name DECLINE_CONTRIBUTOR = "declinereg"_n;
@@ -57,11 +68,14 @@ namespace Names {
     constexpr eosio::name CONFIRM_EXPENSE_PAYMENT = "exppaycnfrm"_n;
   }
   
+  namespace Loan {
+    constexpr eosio::name CREATE_DEBT = "createdebt"_n;
+    constexpr eosio::name SETTLE_DEBT = "settledebt"_n;
+  }
+  
   namespace External {
     // Внешние действия в других контрактах
-    constexpr eosio::name CREATE_DEBT = "createdebt"_n;
     constexpr eosio::name CREATE_OUTPAY = "createoutpay"_n;
-    constexpr eosio::name SETTLE_DEBT = "settledebt"_n;
     constexpr eosio::name OPEN_PROGRAM_WALLET = "openprogwall"_n;
     
     // Действия для отправки в soviet
@@ -87,6 +101,8 @@ namespace Names {
     constexpr eosio::name REGISTER_CONTRIBUTOR = "regcontrib"_n; // акцепт договора УХД
     constexpr eosio::name CREATE_DEBT = "createdebt"_n; // акцепт ссуды
     constexpr eosio::name CREATE_COMMIT = "createcmmt"_n; // акцепт коммита
+    constexpr eosio::name CREATE_PROPERTY = "createpjprp"_n; // акцепт проектного имущественного взноса
+    constexpr eosio::name CREATE_PROGRAM_PROPERTY = "createpgprp"_n; // акцепт программного имущественного взноса
     constexpr eosio::name CREATE_APPENDIX = "createappndx"_n; // акцепт приложения
     constexpr eosio::name CREATE_INVESTMENT = "createinvest"_n; // акцепт инвестиции
     constexpr eosio::name CREATE_PROGRAM_INVESTMENT = "createprinv"_n; // акцепт программной инвестиции

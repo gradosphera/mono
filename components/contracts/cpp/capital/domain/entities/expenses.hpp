@@ -23,7 +23,6 @@ namespace Capital {
 struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
   uint64_t id;                                 ///< Уникальный идентификатор действия.
   name coopname;                               ///< Имя кооператива.
-  name application;                            ///< Приложение, инициировавшее расход.
   name username;                               ///< Имя пользователя, создавшего расход.
   
   name status = Expenses::Status::CREATED;                   ///< Статус расхода (created | approved | authorized)
@@ -95,14 +94,13 @@ namespace Capital::Expenses {
    * @param project_hash Хэш проекта.
    * @param expense_hash Хэш расхода.
    * @param username Создатель расхода.
-   * @param application Приложение.
    * @param amount Сумма расхода.
    * @param description Описание.
    * @param statement Служебная записка.
    */
   inline void create_expense(eosio::name coopname, const checksum256 &project_hash, 
                             const checksum256 &expense_hash, eosio::name username, 
-                            eosio::name application, const eosio::asset &amount,
+                            const eosio::asset &amount,
                             const std::string &description, const document2 &statement) {
     
     Capital::expense_index expenses(_capital, coopname.value);
@@ -111,7 +109,6 @@ namespace Capital::Expenses {
     expenses.emplace(coopname, [&](auto &e) {
       e.id = expense_id;
       e.coopname = coopname;
-      e.application = application;
       e.username = username;
       e.project_hash = project_hash;
       e.expense_hash = expense_hash;

@@ -32,6 +32,7 @@ namespace Capital {
     eosio::asset contributed_as_author = asset(0, _root_govern_symbol); ///< Сумма, вложенная в проект как автор
     eosio::asset contributed_as_coordinator = asset(0, _root_govern_symbol); ///< Сумма, вложенная в проект как координатор
     eosio::asset contributed_as_contributor = asset(0, _root_govern_symbol); ///< Сумма, вложенная в проект как контрибьютор
+    eosio::asset contributed_as_propertor = asset(0, _root_govern_symbol); ///< Сумма, вложенная в проект как пропертор
     
     uint64_t primary_key() const { return id; }
     uint64_t by_username() const { return username.value; }
@@ -41,7 +42,8 @@ namespace Capital {
     uint64_t by_author_rating() const { return contributed_as_author.amount; }
     uint64_t by_coordinator_rating() const { return contributed_as_coordinator.amount; }
     uint64_t by_contributor_rating() const { return contributed_as_contributor.amount; }
-    uint64_t by_rating() const { return contributed_as_investor.amount + contributed_as_creator.amount + contributed_as_author.amount + contributed_as_coordinator.amount + contributed_as_contributor.amount; }
+    uint64_t by_propertor_rating() const { return contributed_as_propertor.amount; }
+    uint64_t by_rating() const { return contributed_as_investor.amount + contributed_as_creator.amount + contributed_as_author.amount + contributed_as_coordinator.amount + contributed_as_contributor.amount + contributed_as_propertor.amount; }
 };
 
 typedef eosio::multi_index<
@@ -53,6 +55,7 @@ typedef eosio::multi_index<
     indexed_by<"byauthorate"_n, const_mem_fun<contributor, uint64_t, &contributor::by_author_rating>>,
     indexed_by<"bycoordrate"_n, const_mem_fun<contributor, uint64_t, &contributor::by_coordinator_rating>>,
     indexed_by<"bycontrate"_n, const_mem_fun<contributor, uint64_t, &contributor::by_contributor_rating>>,
+    indexed_by<"byprprate"_n, const_mem_fun<contributor, uint64_t, &contributor::by_propertor_rating>>,
     indexed_by<"byrating"_n, const_mem_fun<contributor, uint64_t, &contributor::by_rating>>
 > contributor_index;
 }// namespace Capital
@@ -201,6 +204,24 @@ inline void update_contributor_ratings_from_segment(eosio::name coopname, const 
     if (segment.is_contributor) {
       c.contributed_as_contributor += segment.contributor_bonus;
     }
+    
+    if (segment.is_propertor) {
+      c.contributed_as_propertor += segment.property_base;
+    }
+  });
+}
+
+/**
+ * @brief Увеличивает долг контрибьютора
+ */
+inline void increase_debt_amount(eosio::name coopname, eosio::name username, eosio::asset amount) {
+  contributor_index contributors(_capital, coopname.value);
+  auto username_index = contributors.get_index<"byusername"_n>();
+  auto contributor_itr = username_index.find(username.value);
+  
+  //TODO: make coopname payer
+  username_index.modify(contributor_itr, _capital, [&](auto &c) {
+    c.debt_amount += amount;
   });
 }
 

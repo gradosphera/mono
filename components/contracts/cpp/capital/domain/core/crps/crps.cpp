@@ -9,6 +9,7 @@ using std::string;
 #include "coordinator_share.cpp"  // Пропорциональное распределение для координаторов
 #include "creator_crps.cpp"
 #include "program_crps.cpp"
+#include "propertor_segment.cpp"  // Обработка имущественных взносов
 
 namespace Capital::Core {
 
@@ -36,7 +37,7 @@ namespace Capital::Core {
     update_investor_used_amount(coopname, project_hash, username);
     
     // Обновляем общую стоимость сегмента в конце
-    Capital::Segments::update_segment_total_cost(coopname, project_hash, username, _capital);
+    Capital::Segments::update_segment_total_cost(coopname, project_hash, username);
   }
 
   /**
@@ -53,7 +54,7 @@ namespace Capital::Core {
     // Базовые поля текущего пользователя (себестоимость труда)
     int64_t user_base_amount = segment_opt->creator_base.amount + 
                               segment_opt->author_base.amount + 
-                              segment_opt->coordinator_base.amount;
+                              segment_opt->coordinator_base.amount; //имущественный взнос здесь НЕ учитывается
     
     // Если нет себестоимости труда у пользователя, provisional_amount = 0
     if (user_base_amount == 0) {
@@ -121,7 +122,7 @@ namespace Capital::Core {
     }
     
     // Обновляем общую стоимость сегмента
-    Capital::Segments::update_segment_total_cost(coopname, project_hash, username, _capital);
+    Capital::Segments::update_segment_total_cost(coopname, project_hash, username);
   }
 
   /**

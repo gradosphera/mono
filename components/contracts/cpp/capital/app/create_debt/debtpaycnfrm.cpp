@@ -7,6 +7,19 @@ void capital::debtpaycnfrm(name coopname, checksum256 debt_hash) {
   // Обновляем статус долга
   Capital::Debts::update_debt_status(coopname, debt_hash, Capital::Debts::Status::PAID, _gateway);
   
+  //Создаём объект долга в контракте loan
+  ::Loan::create_debt(
+    _capital,
+    coopname, 
+    exist_debt.username, 
+    exist_debt.debt_hash, 
+    exist_debt.repaid_at,
+    exist_debt.amount
+  );
+  
+  // Увеличиваем долг contributor
+  Capital::Contributors::increase_debt_amount(coopname, exist_debt.username, exist_debt.amount);
+  
   // Удаляем долг после подтверждения оплаты
   Capital::Debts::delete_debt(coopname, debt_hash);
 };

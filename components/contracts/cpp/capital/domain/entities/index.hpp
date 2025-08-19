@@ -10,6 +10,8 @@
 #include "segments.hpp"
 #include "expenses.hpp"
 #include "commits.hpp"
+#include "project_properties.hpp"
+#include "program_properties.hpp"
 #include "invests.hpp"
 #include "program_invests.hpp"
 #include "contributors.hpp"

@@ -1,4 +1,4 @@
-void capital::addauthor(name coopname, name application, checksum256 project_hash, name author) {
+void capital::addauthor(name coopname, checksum256 project_hash, name author) {
     require_auth(coopname);
     
     // Проверяем существование проекта

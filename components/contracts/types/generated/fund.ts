@@ -20,6 +20,11 @@ export interface IAccfund {
   withdrawed: IAsset
 }
 
+export interface IAccumfee {
+  coopname: IName
+  quantity: IAsset
+}
+
 export interface IAddaccum {
   coopname: IName
   fund_id: IUint64

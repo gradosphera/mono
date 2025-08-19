@@ -30,6 +30,10 @@ export * as CreateWithdrawProgram from './createWithdrawProgram'
 export * as PushResult from './pushResult'
 export * as SignAct1 from './signAct1'
 export * as SignAct2 from './signAct2'
+// Программные имущественные взносы (новые действия)
+export * as CreateProgramProperty from './createProgramProperty'
+export * as Act1ProgramProperty from './act1ProgramProperty'
+export * as Act2ProgramProperty from './act2ProgramProperty'
 
 // Авторы
 export * as AddAuthor from './addAuthor'
@@ -47,11 +51,13 @@ export * as RegisterContributor from './registerContributor'
 export * as SignAppendix from './signAppendix'
 
 // Инвестиции в проекты
-export * as CreateInvest from './createInvest'
+export * as CreateProjectInvest from './createInvest'
 export * as ReturnUnused from './returnUnused'
 
 // Программные инвестиции
 export * as CreateProgramInvest from './createProgramInvest'
+// Проектные имущественные взносы (новые действия)
+export * as CreateProjectProperty from './createProjectProperty'
 
 // Аллокация программных инвестиций
 export * as Allocate from './allocate'

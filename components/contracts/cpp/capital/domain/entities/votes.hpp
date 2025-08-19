@@ -8,6 +8,14 @@ using namespace eosio;
 namespace Capital {
 
   /**
+   * @brief Структура для передачи одного голоса в submitvote
+   */
+  struct vote_input {
+      name recipient;    ///< За кого голосует
+      asset amount;      ///< Сумма голоса
+  };
+
+  /**
     * @brief Рассчитывает суммы для распределения по пулам
   */
   struct voting_amounts {
@@ -16,7 +24,8 @@ namespace Capital {
       eosio::asset authors_bonuses_on_voting = asset(0, _root_govern_symbol);         // 38.2% авторских премий на голосование
       eosio::asset creators_bonuses_on_voting = asset(0, _root_govern_symbol);        // 38.2% создательских премий на голосование
       eosio::asset total_voting_pool = asset(0, _root_govern_symbol);         // Общая сумма для распределения по Водянову (авторы + создатели)
-      eosio::asset voting_amount = asset(0, _root_govern_symbol);             // Общая голосующая сумма = total_voting_pool * (voters-1)/voters
+      eosio::asset active_voting_amount = asset(0, _root_govern_symbol);             // Общая голосующая сумма = total_voting_pool * (voters-1)/voters
+      eosio::asset equal_voting_amount = asset(0, _root_govern_symbol);             // Средняя сумма на каждого участника (total_voting_pool / voters)
       eosio::asset authors_equal_per_author = asset(0, _root_govern_symbol);  // Равная сумма на каждого автора (62.8% / количество авторов)
   };
   
@@ -102,12 +111,12 @@ namespace Votes {
     /**
      * @brief Добавляет голос в проект
      */
-    inline void add_vote(name coopname, name application, checksum256 project_hash, 
+    inline void add_vote(name coopname, checksum256 project_hash, 
                         name voter, name recipient, asset amount) {
         votes_index votes(_capital, coopname.value);
         auto vote_id = get_global_id_in_scope(_capital, coopname, "vote"_n);
         
-        votes.emplace(application, [&](auto &v) {
+        votes.emplace(coopname, [&](auto &v) {
             v.id = vote_id;
             v.project_hash = project_hash;
             v.voter = voter;

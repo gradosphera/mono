@@ -39,9 +39,8 @@ export async function investInProject(
   console.log('▶ Кошелек программы:', prevProgramWallet)
 
   // Создание инвестиции
-  const createInvestData: CapitalContract.Actions.CreateInvest.ICreateInvest = {
+  const createInvestData: CapitalContract.Actions.CreateProjectInvest.ICreateInvest = {
     coopname,
-    application: coopname,
     project_hash: projectHash,
     username: investor,
     invest_hash: investHash,
@@ -55,7 +54,7 @@ export async function investInProject(
       actions: [
         {
           account: CapitalContract.contractName.production,
-          name: CapitalContract.Actions.CreateInvest.actionName,
+          name: CapitalContract.Actions.CreateProjectInvest.actionName,
           authorization: [{ actor: coopname, permission: 'active' }],
           data: createInvestData,
         },

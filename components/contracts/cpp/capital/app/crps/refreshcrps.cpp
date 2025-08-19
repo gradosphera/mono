@@ -1,5 +1,5 @@
-[[eosio::action]] void capital::refreshpcrps(name coopname, name application, name username) {
-    check_auth_or_fail(_capital, coopname, application, "refreshpcrps"_n);
+[[eosio::action]] void capital::refreshpcrps(name coopname, name username) {
+    require_auth(coopname);
 
     // Проверяем основной договор УХД
     auto exist_contributor = Capital::Contributors::get_contributor(coopname, username);

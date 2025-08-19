@@ -34,8 +34,9 @@ namespace Capital::Segments {
     bool is_creator = false;         // Является ли участник создателем  
     bool is_coordinator = false;     // Является ли участник координатором
     bool is_investor = false;        // Является ли участник инвестором
+    bool is_propertor = false;       // Является ли участник пропертором
     bool is_contributor = false;     // Является ли участник вкладчиком
-    
+    bool has_vote = false;           // Имеет ли участник право голоса
     
     /// Вклады
     // Основная информация о вкладе инвестора
@@ -56,6 +57,9 @@ namespace Capital::Segments {
     
     // Основная информация о вкладе вкладчика
     eosio::asset contributor_bonus = asset(0, _root_govern_symbol); //сумма бонусов, которую вкладчик получил от проекта
+    
+    // Имущественные взносы
+    eosio::asset property_base = asset(0, _root_govern_symbol); //стоимость внесенного имущества участника
       
     // CRPS поля для масштабируемого распределения наград
     int64_t last_author_base_reward_per_share = 0;         // Последняя зафиксированная базовая награда на долю для авторов  
@@ -108,46 +112,12 @@ namespace Capital::Segments {
         return combine_checksum_ids(project_hash, username);
     }
     
-    // Индекс для поиска авторов в проекте
-    uint128_t by_project_author() const {
-        if (!is_author) return 0;
-        return combine_checksum_ids(project_hash, eosio::name{"isauthor"});
-    }
-    
-    // Индекс для поиска создателей в проекте
-    uint128_t by_project_creator() const {
-        if (!is_creator) return 0;
-        return combine_checksum_ids(project_hash, eosio::name{"iscreator"});
-    }
-    
-    // Индекс для поиска координаторов в проекте
-    uint128_t by_project_coordinator() const {
-        if (!is_coordinator) return 0;
-        return combine_checksum_ids(project_hash, eosio::name{"iscoord"});
-    }
-    
-    // Индекс для поиска инвесторов в проекте  
-    uint128_t by_project_investor() const {
-        if (!is_investor) return 0;
-        return combine_checksum_ids(project_hash, eosio::name{"isinvestor"});
-    }
-    
-    // Индекс для поиска вкладчиков в проекте  
-    uint128_t by_project_contributor() const {
-        if (!is_contributor) return 0;
-        return combine_checksum_ids(project_hash, eosio::name{"iscontrib"});
-    }
   };
   
   typedef eosio::multi_index<
     "segments"_n, segment,
     indexed_by<"byproject"_n, const_mem_fun<segment, checksum256, &segment::by_project_hash>>,
-    indexed_by<"byprojuser"_n, const_mem_fun<segment, uint128_t, &segment::by_project_user>>,
-    indexed_by<"byprojauth"_n, const_mem_fun<segment, uint128_t, &segment::by_project_author>>,
-    indexed_by<"byprojcr"_n, const_mem_fun<segment, uint128_t, &segment::by_project_creator>>,
-    indexed_by<"byprojcoord"_n, const_mem_fun<segment, uint128_t, &segment::by_project_coordinator>>,
-    indexed_by<"byprojinv"_n, const_mem_fun<segment, uint128_t, &segment::by_project_investor>>,
-    indexed_by<"byprojcontr"_n, const_mem_fun<segment, uint128_t, &segment::by_project_contributor>>
+    indexed_by<"byprojuser"_n, const_mem_fun<segment, uint128_t, &segment::by_project_user>>
   > segments_index;
 
   
@@ -274,6 +244,8 @@ inline uint64_t count_project_authors(eosio::name coopname, const checksum256 &p
     return count;
 }
 
+
+
 /**
  * @brief Проверяет является ли пользователь участником голосования
  * @param coopname Имя кооператива
@@ -283,7 +255,7 @@ inline uint64_t count_project_authors(eosio::name coopname, const checksum256 &p
  */
 inline bool is_voting_participant(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
     auto segment = get_segment(coopname, project_hash, username);
-    return segment.has_value() && segment->is_author && segment->is_creator;
+    return segment.has_value() && segment->has_vote;
 }
 
 /**
@@ -344,6 +316,7 @@ inline eosio::asset calculate_segment_base_cost(const segment& seg) {
     total += seg.creator_base;
     total += seg.author_base;
     total += seg.coordinator_base;
+    total += seg.property_base; // стоимость внесенного имущества
     
     return total;
 }
@@ -388,7 +361,7 @@ inline eosio::asset calculate_total_segment_cost(const segment& seg, const Capit
 /**
  * @brief Обновляет все стоимости сегмента (базовые, бонусные и общую)
  */
-inline void update_segment_total_cost(eosio::name coopname, const checksum256 &project_hash, eosio::name username, eosio::name application) {
+inline void update_segment_total_cost(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
     segments_index segments(_capital, coopname.value);
     auto idx = segments.get_index<"byprojuser"_n>();
     auto key = combine_checksum_ids(project_hash, username);
@@ -398,7 +371,7 @@ inline void update_segment_total_cost(eosio::name coopname, const checksum256 &p
     
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
     
-    idx.modify(segment_itr, application, [&](auto &s) {
+    idx.modify(segment_itr, _capital, [&](auto &s) {
         s.total_segment_base_cost = calculate_segment_base_cost(s);
         s.total_segment_bonus_cost = calculate_segment_bonus_cost(s, project);
         s.total_segment_cost = s.total_segment_base_cost + s.total_segment_bonus_cost;
@@ -409,7 +382,7 @@ inline void update_segment_total_cost(eosio::name coopname, const checksum256 &p
  * @brief Обновляет сегмент после конвертации
  */
 inline void update_segment_conversion(eosio::name coopname, const checksum256 &project_hash,
-                                     eosio::name username, eosio::name application,
+                                     eosio::name username,
                                      const eosio::asset &wallet_amount, const eosio::asset &capital_amount,
                                      const eosio::asset &project_amount) {
     segments_index segments(_capital, coopname.value);
@@ -419,7 +392,7 @@ inline void update_segment_conversion(eosio::name coopname, const checksum256 &p
     
     eosio::check(segment_itr != idx.end(), "Сегмент участника не найден");
     
-    idx.modify(segment_itr, application, [&](auto &s) {
+    idx.modify(segment_itr, coopname, [&](auto &s) {
         s.converted_to_wallet = wallet_amount;
         s.converted_to_capital = capital_amount;
         s.converted_to_project = project_amount;
@@ -450,7 +423,7 @@ inline void update_segment_conversion(eosio::name coopname, const checksum256 &p
  * Оптимизированная версия для избежания двойного обновления одной записи
  */
 inline void update_segment_after_result_contribution_with_shares(eosio::name coopname, const checksum256 &project_hash, 
-                                                               eosio::name username, eosio::name application,
+                                                               eosio::name username,
                                                                eosio::asset available_base_after_pay_debt,
                                                                eosio::asset debt_settled_amount = asset(0, _root_govern_symbol)) {
     segments_index segments(_capital, coopname.value);
@@ -460,7 +433,7 @@ inline void update_segment_after_result_contribution_with_shares(eosio::name coo
     
     eosio::check(segment_itr != idx.end(), "Сегмент участника не найден");
     
-    idx.modify(segment_itr, application, [&](auto &s) {
+    idx.modify(segment_itr, coopname, [&](auto &s) {
         // Обновляем после принятия результата
         s.available_base_after_pay_debt = available_base_after_pay_debt;
         s.status = Capital::Segments::Status::CONTRIBUTED;
@@ -471,7 +444,8 @@ inline void update_segment_after_result_contribution_with_shares(eosio::name coo
         }
         
         // Пересчитываем доли участника: базовые_вклады - конвертации - ссуды
-        eosio::asset base_contributions = s.creator_base + s.author_base + s.coordinator_base;
+        eosio::asset base_contributions = s.creator_base + s.author_base + s.coordinator_base + s.property_base;
+        //TODO: тут кажется это не нужно т.к. суммы равны нулю - проверить
         eosio::asset conversions = s.converted_to_wallet + s.converted_to_capital;
         
         s.project_contributor_shares = base_contributions - conversions - s.debt_amount;
@@ -487,7 +461,7 @@ inline void update_segment_after_result_contribution_with_shares(eosio::name coo
  * @brief Обновляет сегмент участника результатами голосования и премиями
  */
 inline void update_segment_voting_results(eosio::name coopname, const checksum256 &project_hash, 
-                                         eosio::name username, eosio::name application,
+                                         eosio::name username,
                                          eosio::asset voting_amount,
                                          eosio::asset equal_author_amount,
                                          eosio::asset direct_creator_amount) {
@@ -498,14 +472,14 @@ inline void update_segment_voting_results(eosio::name coopname, const checksum25
     
     eosio::check(segment_itr != idx.end(), "Сегмент участника не найден");
     
-    idx.modify(segment_itr, application, [&](auto &s) {
+    idx.modify(segment_itr, coopname, [&](auto &s) {
         s.voting_bonus = voting_amount;
         s.equal_author_bonus = equal_author_amount;
         s.direct_creator_bonus = direct_creator_amount;
     });
     
     // Обновляем общую стоимость сегмента после изменения премий
-    update_segment_total_cost(coopname, project_hash, username, application);
+    update_segment_total_cost(coopname, project_hash, username);
 }
 
 inline void set_investor_base_amount_on_return_unused(eosio::name coopname, uint64_t segment_id, eosio::asset used_amount) {
@@ -519,6 +493,26 @@ inline void set_investor_base_amount_on_return_unused(eosio::name coopname, uint
   
 }
 
+inline void increase_debt_amount(eosio::name coopname, uint64_t segment_id, eosio::asset amount) {
+  Capital::Segments::segments_index segments(_capital, coopname.value);
+  auto segment = segments.find(segment_id);
+  
+  segments.modify(segment, coopname, [&](auto &s) {
+      s.debt_amount += amount;
+  });
+}
+  
+inline void decrease_debt_amount(eosio::name coopname, uint64_t segment_id, eosio::asset amount) {
+  Capital::Segments::segments_index segments(_capital, coopname.value);
+  auto segment = segments.find(segment_id);
+  
+  eosio::check(segment->debt_amount >= amount, "Пайщик не может погасить долг больше, чем должен");
+  
+  segments.modify(segment, coopname, [&](auto &s) {
+    s.debt_amount -= amount;
+  });
+}
+  
 
 } // namespace Capital::Segments
 

@@ -23,6 +23,7 @@ struct fact_pool {
   eosio::asset creators_base_pool = asset(0, _root_govern_symbol);        ///< Фактическая себестоимость создателей
   eosio::asset authors_base_pool = asset(0, _root_govern_symbol);         ///< Фактическая авторская себестоимость
   eosio::asset coordinators_base_pool = asset(0, _root_govern_symbol);    ///< Фактические премии координаторов
+  eosio::asset property_base_pool = asset(0, _root_govern_symbol);        ///< Фактическая стоимость внесенного имущества
   
   // Пулы премий
   eosio::asset creators_bonus_pool = asset(0, _root_govern_symbol);       ///< Фактические премии создателей

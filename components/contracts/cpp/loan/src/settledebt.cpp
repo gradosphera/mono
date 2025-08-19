@@ -1,5 +1,6 @@
 void loan::settledebt(name coopname, name username, checksum256 debt_hash, asset quantity) {
-  require_auth(_loan);
+  name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);
+  
   check(quantity.amount > 0, "Сумма должна быть положительной");
 
   auto debt_opt = get_debt(coopname, debt_hash);

@@ -1,4 +1,4 @@
-void capital::returnunused(name coopname, name application, checksum256 project_hash, name username) {
+void capital::returnunused(name coopname, checksum256 project_hash, name username) {
   require_auth(coopname);
 
   // Проверяем, что проект закрыт

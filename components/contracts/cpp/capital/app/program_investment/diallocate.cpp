@@ -1,4 +1,4 @@
-void capital::diallocate(eosio::name coopname, eosio::name application, checksum256 project_hash) {
+void capital::diallocate(eosio::name coopname, checksum256 project_hash) {
   require_auth(coopname);
 
   // Проверяем, что проект закрыт

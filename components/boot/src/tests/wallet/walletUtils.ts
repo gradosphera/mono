@@ -39,6 +39,11 @@ export async function getLedgerAccounts(blockchain: Blockchain, coopname: string
   ))
 }
 
+export async function getLedgerAccountById(blockchain: Blockchain, coopname: string, accountId: number) {
+  const accounts = await getLedgerAccounts(blockchain, coopname)
+  return accounts.find((account: any) => account.id === accountId)
+}
+
 export async function getCirculationAccount(blockchain: Blockchain, coopname: string) {
   const accounts = await getLedgerAccounts(blockchain, coopname)
   return accounts.find((account: any) => account.id === circulationAccountId) || { available: '0.0000 RUB' }

@@ -1,8 +1,8 @@
-void capital::convertsegm(eosio::name coopname, eosio::name application, eosio::name username,
+void capital::convertsegm(eosio::name coopname, eosio::name username,
                           checksum256 project_hash, checksum256 convert_hash, 
                           eosio::asset wallet_amount, eosio::asset capital_amount, eosio::asset project_amount,
                           document2 convert_statement) {
-  require_auth(application);
+  require_auth(coopname);
   
   // Получаем сегмент пайщика
   auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, 
@@ -25,14 +25,19 @@ void capital::convertsegm(eosio::name coopname, eosio::name application, eosio::
   eosio::check(total_available.amount > 0, 
                "У участника нет средств для конвертации (базовая сумма после долга и бонусы равны нулю)");
   
+  // Рассчитываем базовую сумму без имущественных взносов (они не могут конвертироваться в кошелек)
+  eosio::asset base_without_property = segment.creator_base + segment.author_base + 
+                                      segment.coordinator_base + segment.investor_base;
+  eosio::asset available_for_wallet_project = base_without_property - segment.debt_amount;
+  
   // Проверяем, что общая сумма конвертации в кошелек и проект не превышает доступную сумму из инвестиций
   eosio::asset total_wallet_project = wallet_amount + project_amount;
   eosio::check(total_wallet_project <= segment.provisional_amount,
                "Общая сумма конвертации в кошелек и проект превышает доступную сумму из инвестиционных средств проекта");
   
-  // 1. Общая сумма конвертации в кошелек и проект не должна превышать доступную базовую сумму после погашения долга
-  eosio::check(total_wallet_project <= segment.available_base_after_pay_debt, 
-               "Общая сумма конвертации в кошелек и проект превышает доступную базовую стоимость после погашения долга");
+  // 1. Общая сумма конвертации в кошелек и проект не должна превышать базовую сумму БЕЗ имущественных взносов
+  eosio::check(total_wallet_project <= available_for_wallet_project, 
+               "Общая сумма конвертации в кошелек и проект превышает доступную базовую стоимость (имущественные взносы не могут идти в кошелек)");
   
   // 2. Проверяем что capital_amount рассчитан правильно
   // В капитализацию: ВСЕ бонусы + остаток базовой стоимости (не сконвертированный в кошелек и проект)
@@ -81,7 +86,7 @@ void capital::convertsegm(eosio::name coopname, eosio::name application, eosio::
                              Capital::Memo::get_convert_segment_to_project_wallet_memo(convert_hash));
     
     // Создаем или обновляем кошелек целевого проекта с долями участника
-    Capital::upsert_project_wallet(coopname, target_project_hash, username, project_amount, application);
+    Capital::upsert_project_wallet(coopname, target_project_hash, username, project_amount);
     
     // Добавляем сконвертированные средства в глобальный пул программных инвестиций
     Capital::Core::add_program_investment_funds(coopname, project_amount);
@@ -91,7 +96,7 @@ void capital::convertsegm(eosio::name coopname, eosio::name application, eosio::
   }
   
   // Обновляем сегмент (включая конвертированные суммы)
-  Capital::Segments::update_segment_conversion(coopname, project_hash, username, application, 
+  Capital::Segments::update_segment_conversion(coopname, project_hash, username, 
                                             wallet_amount, capital_amount, project_amount);
   
   

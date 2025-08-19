@@ -1,5 +1,5 @@
-void capital::createexpnse(eosio::name coopname, eosio::name application, checksum256 expense_hash, checksum256 project_hash, name creator, asset amount, std::string description, document2 statement){
-  check_auth_or_fail(_capital, coopname, application, "createexpns"_n);
+void capital::createexpnse(eosio::name coopname, checksum256 expense_hash, checksum256 project_hash, name creator, asset amount, std::string description, document2 statement){
+  require_auth(coopname);
   
   verify_document_or_fail(statement);
   
@@ -24,5 +24,5 @@ void capital::createexpnse(eosio::name coopname, eosio::name application, checks
   
   // Создаем запись расхода
   Capital::Expenses::create_expense(coopname, project_hash, expense_hash, creator, 
-                                   application, amount, description, statement);
+                                   amount, description, statement);
 }
