@@ -1,8 +1,19 @@
+/**
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица типовых соглашений кооператива
+*
+* Таблица содержит типовые соглашения кооператива, которые должны подписывать участники.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): coagreements
+* @anchor soviet_coagreement
+*/
 struct [[eosio::table, eosio::contract(SOVIET)]] coagreement {
-  eosio::name type;  ///< wallet | user | signature | privary | ...
-  eosio::name coopname;  
-  uint64_t program_id;
-  uint64_t draft_id;
+  eosio::name type; ///< Тип соглашения (wallet | user | signature | privacy | ...)
+  eosio::name coopname; ///< Имя кооператива
+  uint64_t program_id; ///< Идентификатор программы
+  uint64_t draft_id; ///< Идентификатор шаблона документа
   
   uint64_t primary_key() const { return type.value;};
     
@@ -20,15 +31,26 @@ coagreement get_coagreement_or_fail(eosio::name coopname, eosio::name type) {
 };
 
 
+/**
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица соглашений (устаревшая версия)
+*
+* Таблица содержит соглашения, которые подписали участники кооператива.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): agreements
+* @anchor soviet_agreement
+*/
 struct [[eosio::table, eosio::contract(SOVIET)]] agreement {
-  uint64_t id;
-  eosio::name coopname;
-  eosio::name username;
+  uint64_t id; ///< Уникальный идентификатор соглашения
+  eosio::name coopname; ///< Имя кооператива
+  eosio::name username; ///< Имя пользователя
   eosio::name type; ///< Тип принимаемого документа (соответствует действию в контракте)
   uint64_t program_id; ///< Вторичный индекс используется для связи с типовой таблицей
   uint64_t draft_id; ///< Шаблон документа по регистру
   uint64_t version; ///< Версия шаблона (draft), связанного с типовым документом
-  document document;
+  document document; ///< Документ соглашения
   eosio::name status; ///< Статус приёма документа 
   eosio::time_point_sec updated_at; ///< Дата-время последнего обновления
   uint64_t primary_key() const { return id; };
@@ -54,15 +76,26 @@ typedef eosio::multi_index<"agreements"_n, agreement,
 > agreements_index;
 
 
+/**
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица соглашений (новая версия)
+*
+* Таблица содержит соглашения, которые подписали участники кооператива.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): agreements3
+* @anchor soviet_agreement2
+*/
 struct [[eosio::table, eosio::contract(SOVIET)]] agreement2 {
-  uint64_t id;
-  eosio::name coopname;
-  eosio::name username;
+  uint64_t id; ///< Уникальный идентификатор соглашения
+  eosio::name coopname; ///< Имя кооператива
+  eosio::name username; ///< Имя пользователя
   eosio::name type; ///< Тип принимаемого документа (соответствует действию в контракте)
   uint64_t program_id; ///< Вторичный индекс используется для связи с типовой таблицей
   uint64_t draft_id; ///< Шаблон документа по регистру
   uint64_t version; ///< Версия шаблона (draft), связанного с типовым документом
-  document2 document;
+  document2 document; ///< Документ соглашения
   eosio::name status; ///< Статус приёма документа 
   eosio::time_point_sec updated_at; ///< Дата-время последнего обновления
   uint64_t primary_key() const { return id; };

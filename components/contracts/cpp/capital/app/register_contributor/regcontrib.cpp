@@ -1,5 +1,20 @@
 /**
- * @brief Регистрация пайщика в контракте и получение договора УХД от него.
+ * @brief Регистрация пайщика в контракте и получение договора УХД от него
+ * Создает нового пайщика в системе кооператива с указанными параметрами:
+ * - Проверяет уникальность пайщика по имени и хешу
+ * - Валидирует договор УХД (если не внешний)
+ * - Создает запись пайщика с указанной почасовой ставкой
+ * - Отправляет договор на одобрение председателю
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-пайщика
+ * @param contributor_hash Хеш пайщика для идентификации
+ * @param rate_per_hour Почасовая ставка пайщика
+ * @param is_external_contract Флаг внешнего договора
+ * @param contract Договор УХД пайщика
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_regcontrib
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, bool is_external_contract, document2 contract) {
   require_auth(coopname);

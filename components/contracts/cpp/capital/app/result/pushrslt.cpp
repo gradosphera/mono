@@ -1,3 +1,26 @@
+/**
+ * @brief Вносит результат участника в проект
+ * Вносит результат участника в завершенный проект с обработкой долгов и обновлением долей:
+ * - Проверяет подлинность заявления о результате
+ * - Валидирует входные параметры (суммы взноса и долга)
+ * - Проверяет завершенность проекта и актуальность сегмента
+ * - Валидирует сегмент участника и его статус
+ * - Проверяет соответствие сумм взноса и долга
+ * - Создает объект результата
+ * - Обновляет сегмент после принятия результата и пересчитывает доли
+ * - Обновляет накопительные показатели контрибьютора
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-участника
+ * @param project_hash Хеш проекта
+ * @param result_hash Хеш результата
+ * @param contribution_amount Сумма взноса в результат
+ * @param debt_amount Сумма долга для погашения
+ * @param statement Заявление о результате
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_pushrslt
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::pushrslt(name coopname, name username, checksum256 project_hash, checksum256 result_hash, 
                         eosio::asset contribution_amount, eosio::asset debt_amount, document2 statement) {
   require_auth(coopname);

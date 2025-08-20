@@ -17,13 +17,17 @@ namespace Capital {
     double creators_voting_percent = 38.2;     ///< Процент премий создателей для голосования (по умолчанию)
   };
 
-/**
-  * @brief Структура глобального состояния, хранящая общие данные контракта.
-  * \ingroup public_tables
-  */
+  /**
+   * @brief Таблица глобального состояния хранит общие данные контракта капитализации.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_global_state
+   * @par Область памяти (scope): _capital
+   * @par Имя таблицы (table): state 
+   */
   struct [[eosio::table, eosio::contract(CAPITAL)]] global_state {
-    eosio::name coopname;                                ///< Имя кооператива глобального состояния.
-    asset global_available_invest_pool = asset(0, _root_govern_symbol); ///< Глобальный пул доступных для аллокации инвестиций в программу.
+    eosio::name coopname;                                ///< Имя кооператива
+    asset global_available_invest_pool = asset(0, _root_govern_symbol); ///< Глобальный пул доступных для аллокации инвестиций в программу
     asset program_membership_funded = asset(0, _root_govern_symbol); ///< Общая сумма членских взносов по программе
     asset program_membership_available = asset(0, _root_govern_symbol); ///< Доступная сумма членских взносов по программе
     asset program_membership_distributed = asset(0, _root_govern_symbol); ///< Распределенная сумма членских взносов по программе
@@ -31,8 +35,8 @@ namespace Capital {
 
     config config;                                           ///< Управляемая конфигурация контракта
     
-    uint64_t primary_key() const { return coopname.value; }     ///< Основной ключ.
-};
+    uint64_t primary_key() const { return coopname.value; }     ///< Первичный ключ (1)
+  };
 
   typedef eosio::multi_index<"state"_n, global_state> global_state_table; ///< Таблица для хранения глобального состояния.
 

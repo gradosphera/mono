@@ -511,7 +511,7 @@ export interface IFactPool {
   total: IAsset
 }
 
-export interface IFinalvoting {
+export interface ICalcvotes {
   coopname: IName
   username: IName
   project_hash: IChecksum256

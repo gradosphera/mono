@@ -1,3 +1,21 @@
+/**
+ * @brief Подписывает приложение к договору УХД для участия в проекте
+ * Создает приложение к договору УХД для участия пайщика в проекте:
+ * - Проверяет что пользователь подписал основной договор УХД
+ * - Валидирует уникальность приложения по хешу
+ * - Проверяет отсутствие существующего приложения для проекта
+ * - Создает приложение к договору УХД
+ * - Отправляет на одобрение председателю
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-пайщика
+ * @param project_hash Хеш проекта для участия
+ * @param appendix_hash Хеш приложения к договору
+ * @param document Документ приложения к договору
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_signappndx
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::signappndx(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document) {
   require_auth(coopname);
   

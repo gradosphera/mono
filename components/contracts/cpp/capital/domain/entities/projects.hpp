@@ -12,60 +12,68 @@
 using namespace eosio;
 using std::string;
 
-
-namespace Capital::Projects::Status {
+namespace Capital::Projects {
   /**
   * @brief Константы статусов проекта
+  * @ingroup public_consts
+  * @ingroup public_capital_consts
+  * @anchor capital_project_status
   */
-  const eosio::name PENDING = "pending"_n;     ///< Проект создан
-  const eosio::name ACTIVE = "active"_n;       ///< Проект активен для коммитов
-  const eosio::name VOTING = "voting"_n;       ///< Проект на голосовании
-  const eosio::name COMPLETED = "completed"_n; ///< Проект завершен
-  const eosio::name CLOSED = "closed"_n;       ///< Проект закрыт
-}// namespace Capital::Projects::Status
-
+  namespace Status {
+    const eosio::name PENDING = "pending"_n;     ///< Проект создан
+    const eosio::name ACTIVE = "active"_n;       ///< Проект активен для коммитов
+    const eosio::name VOTING = "voting"_n;       ///< Проект на голосовании
+    const eosio::name COMPLETED = "completed"_n; ///< Проект завершен
+    const eosio::name CLOSED = "closed"_n;       ///< Проект закрыт
+  }// namespace Capital::Projects::Status
+}// namespace Capital::Projects
 
 namespace Capital {
 /**
-* @brief Таблица проектов
+* @brief Таблица проектов хранит информацию о проектах кооператива, которые станут результатами.
+* @ingroup public_tables
+* @ingroup public_capital_tables
+* @anchor capital_project
+* @par Область памяти (scope): coopname
+* @par Имя таблицы (table): projects 
 */
 struct [[eosio::table, eosio::contract(CAPITAL)]] project {
-  uint64_t id;
+  uint64_t id; ///< ID проекта (внутренний ключ)
   
-  name coopname; // Имя кооператива
-  checksum256 project_hash; // Хэш проекта
-  checksum256 parent_hash; // Хэш родительского проекта (если есть)
+  name coopname; ///< Имя кооператива
+  checksum256 project_hash; ///< Хэш проекта (внешний ключ)
+  checksum256 parent_hash; ///< Хэш родительского проекта (если есть)
   
-  eosio::name status; // Статус проекта
+  eosio::name status; ///< Статус проекта
   
-  bool is_opened; // Открыт ли проект для инвестиций
+  bool is_opened; ///< Открыт ли проект для инвестиций
   
   // Мастер проекта
-  name master; // Мастер проекта
+  name master; ///< Мастер проекта
   
-  std::string title; // Название проекта
-  std::string description; // Описание проекта
-  std::string meta; // Метаданные проекта
+  std::string title; ///< Название проекта
+  std::string description; ///< Описание проекта
+  std::string meta; ///< Метаданные проекта
 
-  counts_data counts; // Счетчики участников проекта
+  counts_data counts; ///< Счетчики участников проекта
   
-  plan_pool plan; // Плановые показатели
-  fact_pool fact; // Фактические показатели
-  crps_data crps; // Данные CRPS для распределения наград
+  plan_pool plan; ///< Плановые показатели
+  fact_pool fact; ///< Фактические показатели
+  crps_data crps; ///< Данные CRPS для распределения наград
   
   // Голосование по методу Водянова
-  voting_data voting; // Данные голосования по методу Водянова
+  voting_data voting; ///< Данные голосования по методу Водянова
   
   // Членские взносы
-  membership_crps membership; // Данные CRPS для распределения членских взносов
+  membership_crps membership; ///< Данные CRPS для распределения членских взносов
 
   // Время создания проекта
-  time_point_sec created_at = current_time_point();
+  time_point_sec created_at = current_time_point(); ///< Время создания проекта
   
-  uint64_t primary_key() const { return id; }
-  uint64_t by_created_at() const { return created_at.sec_since_epoch(); }
-  checksum256 by_hash() const { return project_hash; }
-  checksum256 by_parent_hash() const { return parent_hash; }
+  uint64_t primary_key() const { return id; } ///< Первичный ключ (1)
+  uint64_t by_created_at() const { return created_at.sec_since_epoch(); } ///< Индекс по времени создания (2)
+  checksum256 by_hash() const { return project_hash; } ///< Индекс по хэшу проекта (3)
+  checksum256 by_parent_hash() const { return parent_hash; } ///< Индекс по хэшу родительского проекта (4)
 };
 
 typedef eosio::multi_index<"projects"_n, project,

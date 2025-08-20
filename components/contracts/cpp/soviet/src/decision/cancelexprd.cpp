@@ -1,3 +1,14 @@
+/**
+ * @brief Отмена истекшего решения
+ * Отменяет решение совета по истечении срока его действия.
+ * Отправляет обратный вызов об отклонении и удаляет решение из системы.
+ * @param coopname Наименование кооператива
+ * @param decision_id Идентификатор решения для отмены
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_cancelexprd
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void soviet::cancelexprd(eosio::name coopname, uint64_t decision_id) { 
   require_auth(coopname);
 

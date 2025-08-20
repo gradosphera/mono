@@ -1,23 +1,19 @@
 
 /**
-\ingroup public_actions
-\brief Создание нового совета кооператива
-*
-* Этот метод позволяет председателю кооператива создать новый совет с указанными членами и параметрами. Если совет создается как совет кооператива, председатель должен быть указан в списке членов совета.
-*
-* @param coopname Имя кооператива
-* @param username Имя председателя кооператива
-* @param type Тип совета. Доступные типы:
-*   - **soviet** - Совет кооператива (Board of Members)
-*   - **executive** - Правление (Executive Board)
-*   - **audit** - Ревизионный комитет (Audit and Revision Board)
-*   - **other** - Другая комиссия (Other committee)
-* @param members Список членов совета
-* @param name Название совета
-* @param description Описание совета
-* 
-* @note Авторизация требуется от аккаунта: @p username
-*/
+ * @brief Создание нового совета кооператива
+ * Создает новый совет с указанными членами и параметрами.
+ * При создании совета кооператива автоматически создаются базовые соглашения и адрес.
+ * @param coopname Наименование кооператива
+ * @param username Наименование председателя кооператива
+ * @param type Тип совета (soviet, executive, audit, other)
+ * @param members Список членов совета
+ * @param name Название совета
+ * @param description Описание совета
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_createboard
+ * @note Авторизация требуется от аккаунта: @p username
+ */
 void soviet::createboard(eosio::name coopname, eosio::name username, eosio::name type, std::vector<board_member> members, std::string name, std::string description){
   require_recipient(coopname);
   

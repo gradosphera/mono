@@ -1,3 +1,17 @@
+/**
+ * @brief Отклоняет возврат из проекта советом
+ * Отклоняет возврат из проекта советом и возвращает средства в проект:
+ * - Получает объект возврата
+ * - Возвращает available средства в проект
+ * - Удаляет объект возврата
+ * @param coopname Наименование кооператива
+ * @param withdraw_hash Хеш заявки на возврат для отклонения
+ * @param reason Причина отклонения возврата
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_capdeclwthd2
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void capital::capdeclwthd2(name coopname, checksum256 withdraw_hash, std::string reason) {
   require_auth(_soviet);
   

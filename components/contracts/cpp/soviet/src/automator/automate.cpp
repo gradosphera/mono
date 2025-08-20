@@ -4,21 +4,20 @@ inline void is_valid_action_for_automation(eosio::name action_type) {
 }
 
 /**
-\ingroup public_actions
-\brief Автоматизация подписи на решениях
-*
-* Этот метод позволяет члену совета автоматизировать подпись на решениях по определенным типам вопросов. 
-* Член совета может настроить автоматическую подпись для указанных типов действий.
-*
-* @param coopname Имя кооператива
-* @param board_id ID совета кооператива
-* @param member Имя члена совета, который настраивает автоматизацию
-* @param action_type Тип действия для автоматизации
-* @param permission_name Имя разрешения для использования в автоматизированном действии
-* @param encrypted_private_key Зашифрованный приватный ключ для автоматизации на аккаунт oracul по алгоритму Д-Х
-* 
-* @note Авторизация требуется от аккаунта: @p member
-*/
+ * @brief Настройка автоматизации подписи на решениях
+ * Позволяет члену совета настроить автоматическую подпись на решениях по определенным типам вопросов.
+ * Создает запись об автоматизации с зашифрованным приватным ключом.
+ * @param coopname Наименование кооператива
+ * @param board_id Идентификатор совета кооператива
+ * @param member Наименование члена совета, который настраивает автоматизацию
+ * @param action_type Тип действия для автоматизации
+ * @param permission_name Наименование разрешения для использования в автоматизированном действии
+ * @param encrypted_private_key Зашифрованный приватный ключ для автоматизации
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_automate
+ * @note Авторизация требуется от аккаунта: @p member
+ */
 void soviet::automate(eosio::name coopname, uint64_t board_id, eosio::name member, eosio::name action_type, eosio::name permission_name, std::string encrypted_private_key) {
 
   require_auth(member);

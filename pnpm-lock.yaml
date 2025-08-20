@@ -153,7 +153,15 @@ importers:
 
   components/cleos: {}
 
-  components/contracts: {}
+  components/contracts:
+    dependencies:
+      xml2js:
+        specifier: ^0.6.2
+        version: 0.6.2
+    devDependencies:
+      hdoc:
+        specifier: ^0.2.3
+        version: 0.2.3
 
   components/controller:
     dependencies:
@@ -1485,6 +1493,7 @@ packages:
 
   '@apollo/server-gateway-interface@1.1.1':
     resolution: {integrity: sha512-pGwCl/po6+rxRmDMFgozKQo2pbsSwE91TpsDBAOgf74CRDPXHHtM88wbwjab0wMMZh95QfR45GGyDIdhY24bkQ==}
+    deprecated: '@apollo/server-gateway-interface v1 is part of Apollo Server v4, which is deprecated and will transition to end-of-life on January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v2 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.'
     peerDependencies:
       graphql: 14.x || 15.x || 16.x
 
@@ -9590,6 +9599,10 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
+  hdoc@0.2.3:
+    resolution: {integrity: sha512-UNtyN4d3dHA04g+UlyqgYJDpfbueIT9ufkTtGO2p847qmV9Gr6jChWf19PnJjRLHawCSyyFgW9+ar5SFFKq6vA==}
+    engines: {node: '>= 0.6.0'}
+
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
@@ -15654,6 +15667,14 @@ packages:
 
   xml-utils@1.10.1:
     resolution: {integrity: sha512-Dn6vJ1Z9v1tepSjvnCpwk5QqwIPcEFKdgnjqfYOABv1ngSofuAhtlugcUC3ehS1OHdgDWSG6C5mvj+Qm15udTQ==}
+
+  xml2js@0.6.2:
+    resolution: {integrity: sha512-T4rieHaC1EXcES0Kxxj4JWgaUQHDk+qwHcYOCFHfiwKz7tOVPLq7Hjq9dM1WCMhylqMEfP7hMcOIChvotiZegA==}
+    engines: {node: '>=4.0.0'}
+
+  xmlbuilder@11.0.1:
+    resolution: {integrity: sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==}
+    engines: {node: '>=4.0'}
 
   xmlcreate@2.0.4:
     resolution: {integrity: sha512-nquOebG4sngPmGPICTS5EnxqhKbCmz5Ox5hsszI2T6U5qdrJizBc+0ilYSEjTSzU0yZcmvppztXe/5Al5fUwdg==}
@@ -26713,6 +26734,8 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
+  hdoc@0.2.3: {}
+
   he@1.2.0: {}
 
   header-case@2.0.4:
@@ -34184,6 +34207,13 @@ snapshots:
   xml-name-validator@4.0.0: {}
 
   xml-utils@1.10.1: {}
+
+  xml2js@0.6.2:
+    dependencies:
+      sax: 1.4.1
+      xmlbuilder: 11.0.1
+
+  xmlbuilder@11.0.1: {}
 
   xmlcreate@2.0.4: {}
 

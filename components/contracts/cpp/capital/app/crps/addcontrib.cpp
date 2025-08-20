@@ -1,3 +1,17 @@
+/**
+ * @brief Добавляет вкладчика в проект через CRPS систему
+ * Добавляет вкладчика в проект через систему CRPS с автоматическими проверками:
+ * - Проверяет существование проекта
+ * - Выполняет проверки через CRPS систему (активный договор УХД, приложение к проекту, положительный баланс)
+ * - Добавляет вкладчика через CRPS систему
+ * @param coopname Наименование кооператива
+ * @param project_hash Хеш проекта
+ * @param username Наименование пользователя-вкладчика
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_addcontrib
+ * @note Авторизация требуется от аккаунта: @p username
+ */
 void capital::addcontrib(eosio::name coopname, checksum256 project_hash, eosio::name username) {
   require_auth(username);
   

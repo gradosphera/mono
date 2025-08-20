@@ -1,3 +1,24 @@
+/**
+ * @brief Создает инвестицию в проект
+ * Создает инвестицию в проект с блокировкой средств и отправкой на одобрение:
+ * - Проверяет подлинность заявления об инвестиции
+ * - Валидирует сумму инвестиции
+ * - Проверяет активность договора УХД и приложения к проекту
+ * - Валидирует статус проекта (открыт для инвестиций)
+ * - Блокирует средства в программе кошелька
+ * - Создает инвестицию и отправляет на одобрение
+ * - Обновляет информацию о координаторе если необходимо
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-инвестора
+ * @param project_hash Хеш проекта для инвестиции
+ * @param invest_hash Хеш инвестиции
+ * @param amount Сумма инвестиции
+ * @param statement Заявление об инвестиции
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_createinvest
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::createinvest(name coopname, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document2 statement) {
   require_auth(coopname);
   

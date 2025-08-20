@@ -1,3 +1,17 @@
+/**
+ * @brief Отправка соглашения участнику
+ * Отправляет соглашение участнику кооператива для подписания.
+ * Создает новое соглашение или обновляет существующее, привязывая его к целевой программе.
+ * @param coopname Наименование кооператива
+ * @param administrator Наименование администратора
+ * @param username Наименование пользователя, которому отправляется соглашение
+ * @param agreement_type Тип соглашения
+ * @param document Документ соглашения для подписания
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_sndagreement
+ * @note Авторизация требуется от аккаунта: @p username или @p administrator
+ */
 [[eosio::action]] void soviet::sndagreement(eosio::name coopname, eosio::name administrator, eosio::name username, eosio::name agreement_type, document2 document) {
   
   eosio::check(has_auth(username) || has_auth(administrator), "Недостаточно прав доступа");

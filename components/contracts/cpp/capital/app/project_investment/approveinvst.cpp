@@ -1,3 +1,21 @@
+/**
+ * @brief Одобряет инвестицию в проект
+ * Одобряет инвестицию в проект и обрабатывает все связанные операции:
+ * - Получает инвестицию и активного пайщика
+ * - Добавляет инвестора как генератора с investor_base
+ * - Обновляет проект - добавляет инвестиции
+ * - Обрабатывает координаторские взносы если есть координатор
+ * - Списывает заблокированные средства с кошелька
+ * - Пополняет кошелек договора УХД и блокирует средства
+ * - Удаляет инвестицию после обработки
+ * @param coopname Наименование кооператива
+ * @param invest_hash Хеш инвестиции для одобрения
+ * @param approved_statement Одобренное заявление об инвестиции
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_approveinvst
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void capital::approveinvst(eosio::name coopname, checksum256 invest_hash, document2 approved_statement) {
   require_auth(_soviet);
 

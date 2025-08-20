@@ -1,25 +1,22 @@
 /**
-\ingroup public_actions
-\brief Метод редактирования целевой программы
-*
-* Этот метод позволяет модифицировать существующую программу.
-*
-* @param coopname Имя кооператива
-* @param id Идентификатор программы
-* @param name Имя программы
-* @param announce Объявление о программе
-* @param description Описание программы
-* @param preview Предварительный просмотр
-* @param images Изображения для программы
-* @param website Веб-сайт программы
-* @param initial Вступительный взнос
-* @param minimum Минимальный взнос
-* @param membership Членский взнос
-* @param period Периодичность
-* @param category Категория
-*
-* @note Авторизация требуется от аккаунта: @p coopname
-*/
+ * @brief Редактирование целевой программы
+ * Модифицирует существующую целевую программу в кооперативе.
+ * Позволяет изменить основные параметры программы.
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, редактирующего программу
+ * @param program_id Идентификатор программы для редактирования
+ * @param draft_id Идентификатор шаблона
+ * @param title Название программы
+ * @param announce Объявление о программе
+ * @param description Описание программы
+ * @param preview Предварительный просмотр
+ * @param images Изображения для программы
+ * @param meta Дополнительные метаданные
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_editprog
+ * @note Авторизация требуется от аккаунта: @p username
+ */
 void soviet::editprog(eosio::name coopname, eosio::name username, uint64_t program_id, uint64_t draft_id, std::string title, std::string announce, std::string description, std::string preview, std::string images, std::string meta) {
   check_auth_or_fail(_soviet, coopname, username, "editprog"_n);
   

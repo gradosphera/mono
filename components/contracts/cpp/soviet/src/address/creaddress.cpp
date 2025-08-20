@@ -1,3 +1,16 @@
+/**
+ * @brief Создание нового адреса кооператива
+ * Создает новый адрес в системе кооператива с указанными данными.
+ * Адрес может быть привязан к конкретному филиалу или быть общим для кооператива.
+ * @param coopname Наименование кооператива
+ * @param chairman Наименование председателя совета
+ * @param braname Наименование филиала (может быть пустым для общего адреса)
+ * @param data Данные адреса (структура address_data)
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_creaddress
+ * @note Авторизация требуется от аккаунта: @p chairman
+ */
 void soviet::creaddress(eosio::name coopname, eosio::name chairman, eosio::name braname, address_data data) {
 
   require_auth(chairman);

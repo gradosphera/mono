@@ -1,6 +1,16 @@
 /**
- * @brief Авторизация предложения по программному имущественному взносу советом
- * \ingroup public_actions
+ * @brief Авторизует предложение по программному имущественному взносу советом
+ * Авторизует предложение по программному имущественному взносу советом:
+ * - Проверяет подлинность документа решения совета
+ * - Получает предложение и валидирует его статус (должен быть approved)
+ * - Сохраняет решение совета
+ * - Обновляет статус на authorized
+ * @param coopname Наименование кооператива
+ * @param property_hash Хеш программного имущественного взноса для авторизации
+ * @param decision Документ решения совета
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_authpgprp
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::authpgprp(eosio::name coopname, checksum256 property_hash, document2 decision) {

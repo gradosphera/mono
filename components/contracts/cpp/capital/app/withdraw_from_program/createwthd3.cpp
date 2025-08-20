@@ -1,3 +1,22 @@
+/**
+ * @brief Создает заявку на возврат из программы капитализации
+ * Создает заявку на возврат средств из программы капитализации:
+ * - Проверяет подлинность заявления о возврате
+ * - Валидирует активность основного договора УХД
+ * - Обновляет CRPS contributor
+ * - Проверяет уникальность заявки по хешу
+ * - Обрабатывает вывод средств через core функцию
+ * - Создает заявку на возврат
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-участника
+ * @param withdraw_hash Хеш заявки на возврат
+ * @param amount Сумма возврата
+ * @param return_statement Заявление о возврате
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_createwthd3
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::createwthd3(name coopname, name username, checksum256 withdraw_hash, asset amount, document2 return_statement) {
   require_auth(coopname);
 

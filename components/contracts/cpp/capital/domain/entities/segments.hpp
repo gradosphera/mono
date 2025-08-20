@@ -8,107 +8,115 @@ using namespace eosio;
 namespace Capital::Segments {
   /**
    * @brief Константы статусов сегмента
+   * @ingroup public_consts
+   * @ingroup public_capital_consts
+   * @anchor capital_segment_status
    */
    namespace Status {
     const eosio::name GENERATION = "generation"_n;         ///< На генерации результата
-    const eosio::name READY = "ready"_n;         ///< Готов к конвертации
-    const eosio::name CONTRIBUTED = "contributed"_n;   ///< Результат внесён, долг погашен, готов к конвертации
-    const eosio::name ACCEPTED = "accepted"_n;   ///< Результат принят советом
-    const eosio::name COMPLETED = "completed"_n;   ///< Сконвертирован
+    const eosio::name READY = "ready"_n;                   ///< Готов к конвертации
+    const eosio::name CONTRIBUTED = "contributed"_n;       ///< Результат внесён, долг погашен, готов к конвертации
+    const eosio::name ACCEPTED = "accepted"_n;             ///< Результат принят советом
+    const eosio::name COMPLETED = "completed"_n;           ///< Сконвертирован
   }
   
-/**
-  * @brief Структура сегмента, хранящая данные о вкладах участника в проект.  
-  */
+  /**
+   * @brief Таблица сегментов хранит данные о вкладах участника в проект.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_segment
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): segments 
+   */
   struct [[eosio::table, eosio::contract(CAPITAL)]] segment {
-    uint64_t    id;                   // Идентификатор сегмента
-    checksum256 project_hash;         // С каким проектом связан сегмент
-    eosio::name coopname;             // Имя кооператива
-    eosio::name username;             // Имя участника
+    uint64_t id;                                          ///< ID сегмента (внутренний ключ)
+    checksum256 project_hash;                             ///< Хэш проекта
+    eosio::name coopname;                                 ///< Имя кооператива
+    eosio::name username;                                 ///< Имя участника
     
     // Статус результата сегмента
-    eosio::name status = Status::GENERATION; ///< generation | ready | contributed | accepted | completed
+    eosio::name status = Status::GENERATION;              ///< Статус сегмента: generation | ready | contributed | accepted | completed
 
     // Роли участника в проекте
-    bool is_author = false;          // Является ли участник автором
-    bool is_creator = false;         // Является ли участник создателем  
-    bool is_coordinator = false;     // Является ли участник координатором
-    bool is_investor = false;        // Является ли участник инвестором
-    bool is_propertor = false;       // Является ли участник пропертором
-    bool is_contributor = false;     // Является ли участник вкладчиком
-    bool has_vote = false;           // Имеет ли участник право голоса
+    bool is_author = false;                               ///< Является ли участник автором
+    bool is_creator = false;                              ///< Является ли участник создателем  
+    bool is_coordinator = false;                          ///< Является ли участник координатором
+    bool is_investor = false;                             ///< Является ли участник инвестором
+    bool is_propertor = false;                            ///< Является ли участник пропертором
+    bool is_contributor = false;                          ///< Является ли участник вкладчиком
+    bool has_vote = false;                                ///< Имеет ли участник право голоса
     
     /// Вклады
     // Основная информация о вкладе инвестора
-    eosio::asset investor_amount = asset(0, _root_govern_symbol); //полная сумма инвестиций, которую инвестор внес в проект
-    eosio::asset investor_base = asset(0, _root_govern_symbol); //фактически используемая сумма инвестора при коэффициенте возврата > 1
+    eosio::asset investor_amount = asset(0, _root_govern_symbol); ///< Полная сумма инвестиций, которую инвестор внес в проект
+    eosio::asset investor_base = asset(0, _root_govern_symbol);   ///< Фактически используемая сумма инвестора при коэффициенте возврата > 1
     
     // Основная информация о вкладе создателя
-    eosio::asset creator_base = asset(0, _root_govern_symbol); //сумма себестоимости, которую создатель фактически потратил на выполнение проекта
-    eosio::asset creator_bonus = asset(0, _root_govern_symbol); //сумма бонусов, которую создатель получил за выполнение проекта
+    eosio::asset creator_base = asset(0, _root_govern_symbol);    ///< Сумма себестоимости, которую создатель фактически потратил на выполнение проекта
+    eosio::asset creator_bonus = asset(0, _root_govern_symbol);   ///< Сумма бонусов, которую создатель получил за выполнение проекта
     
     // Основная информация о вкладе автора
-    eosio::asset author_base = asset(0, _root_govern_symbol); //сумма себестоимости, которую автор фактически потратил на выполнение проекта
-    eosio::asset author_bonus = asset(0, _root_govern_symbol); //сумма бонусов, которую автор получил за выполнение проекта
+    eosio::asset author_base = asset(0, _root_govern_symbol);     ///< Сумма себестоимости, которую автор фактически потратил на выполнение проекта
+    eosio::asset author_bonus = asset(0, _root_govern_symbol);    ///< Сумма бонусов, которую автор получил за выполнение проекта
     
     // Основная информация о вкладе координатора
-    eosio::asset coordinator_investments = asset(0, _root_govern_symbol); //сумма инвестиций, которую координатор привлек в проект
-    eosio::asset coordinator_base = asset(0, _root_govern_symbol); //сумма себестоимости, которую координатор фактически потратил на выполнение проекта
+    eosio::asset coordinator_investments = asset(0, _root_govern_symbol); ///< Сумма инвестиций, которую координатор привлек в проект
+    eosio::asset coordinator_base = asset(0, _root_govern_symbol);        ///< Сумма себестоимости, которую координатор фактически потратил на выполнение проекта
     
     // Основная информация о вкладе вкладчика
-    eosio::asset contributor_bonus = asset(0, _root_govern_symbol); //сумма бонусов, которую вкладчик получил от проекта
+    eosio::asset contributor_bonus = asset(0, _root_govern_symbol);       ///< Сумма бонусов, которую вкладчик получил от проекта
     
     // Имущественные взносы
-    eosio::asset property_base = asset(0, _root_govern_symbol); //стоимость внесенного имущества участника
+    eosio::asset property_base = asset(0, _root_govern_symbol);           ///< Стоимость внесенного имущества участника
       
     // CRPS поля для масштабируемого распределения наград
-    int64_t last_author_base_reward_per_share = 0;         // Последняя зафиксированная базовая награда на долю для авторов  
-    int64_t last_author_bonus_reward_per_share = 0;        // Последняя зафиксированная бонусная награда на долю для авторов
-    int64_t last_coordinator_reward_per_share = 0;         // Последняя зафиксированная награда на долю для координаторов
-    int64_t last_contributor_reward_per_share = 0;         // Последняя зафиксированная награда на долю для вкладчиков
+    int64_t last_author_base_reward_per_share = 0;                       ///< Последняя зафиксированная базовая награда на долю для авторов  
+    int64_t last_author_bonus_reward_per_share = 0;                      ///< Последняя зафиксированная бонусная награда на долю для авторов
+    int64_t last_coordinator_reward_per_share = 0;                       ///< Последняя зафиксированная награда на долю для координаторов
+    int64_t last_contributor_reward_per_share = 0;                       ///< Последняя зафиксированная награда на долю для вкладчиков
 
     // Доли в программе и проекте
-    eosio::asset capital_contributor_shares = asset(0, _root_govern_symbol); // Количество долей вкладчика в программе капитализации
-    eosio::asset project_contributor_shares = asset(0, _root_govern_symbol); // Текущая доля участника в проекте (базовые_вклады - конвертации - ссуды)
+    eosio::asset capital_contributor_shares = asset(0, _root_govern_symbol); ///< Количество долей вкладчика в программе капитализации
+    eosio::asset project_contributor_shares = asset(0, _root_govern_symbol); ///< Текущая доля участника в проекте (базовые_вклады - конвертации - ссуды)
 
     // Последняя известная сумма инвестиций в проекте для расчета provisional_amount
-    eosio::asset last_known_invest_pool = asset(0, _root_govern_symbol);
+    eosio::asset last_known_invest_pool = asset(0, _root_govern_symbol);     ///< Последняя известная сумма инвестиций в проекте
     
     // Последняя известная сумма базового пула создателей для расчета использования инвестиций
-    eosio::asset last_known_creators_base_pool = asset(0, _root_govern_symbol);
+    eosio::asset last_known_creators_base_pool = asset(0, _root_govern_symbol); ///< Последняя известная сумма базового пула создателей
     
     // Последняя известная сумма инвестиций координаторов для отслеживания изменений
-    eosio::asset last_known_coordinators_investment_pool = asset(0, _root_govern_symbol);
+    eosio::asset last_known_coordinators_investment_pool = asset(0, _root_govern_symbol); ///< Последняя известная сумма инвестиций координаторов
     
     // Финансовые данные для ссуд
-    eosio::asset provisional_amount = asset(0, _root_govern_symbol); //доступная сумма для залога при получении ссуды
-    eosio::asset debt_amount = asset(0, _root_govern_symbol); //сумма, которая уже выдана в ссуду
-    eosio::asset debt_settled = asset(0, _root_govern_symbol); //сумма погашенных ссуд
+    eosio::asset provisional_amount = asset(0, _root_govern_symbol);       ///< Доступная сумма для залога при получении ссуды
+    eosio::asset debt_amount = asset(0, _root_govern_symbol);              ///< Сумма, которая уже выдана в ссуду
+    eosio::asset debt_settled = asset(0, _root_govern_symbol);             ///< Сумма погашенных ссуд
     
     // Пулы равных премий авторов и прямых премий создателей
-    eosio::asset equal_author_bonus = asset(0, _root_govern_symbol); //сумма равных премий авторам
-    eosio::asset direct_creator_bonus = asset(0, _root_govern_symbol); //сумма прямых премий создателю
+    eosio::asset equal_author_bonus = asset(0, _root_govern_symbol);       ///< Сумма равных премий авторам
+    eosio::asset direct_creator_bonus = asset(0, _root_govern_symbol);     ///< Сумма прямых премий создателю
     
     // Результаты голосования по методу Водянова
-    eosio::asset voting_bonus = asset(0, _root_govern_symbol);  //сумма от голосования авторского пула
+    eosio::asset voting_bonus = asset(0, _root_govern_symbol);             ///< Сумма от голосования авторского пула
     
     // Общая стоимость сегмента (рассчитывается автоматически)
-    eosio::asset total_segment_base_cost = asset(0, _root_govern_symbol); //общая стоимость базовых вкладов сегмента
-    eosio::asset total_segment_bonus_cost = asset(0, _root_govern_symbol); //общая стоимость бонусных вкладов сегмента
-    eosio::asset total_segment_cost = asset(0, _root_govern_symbol); //общая стоимость всех вкладов сегмента
+    eosio::asset total_segment_base_cost = asset(0, _root_govern_symbol);  ///< Общая стоимость базовых вкладов сегмента
+    eosio::asset total_segment_bonus_cost = asset(0, _root_govern_symbol); ///< Общая стоимость бонусных вкладов сегмента
+    eosio::asset total_segment_cost = asset(0, _root_govern_symbol);       ///< Общая стоимость всех вкладов сегмента
     
-    eosio::asset available_base_after_pay_debt = asset(0, _root_govern_symbol); //базовая сумма доступная для конвертации после погашения долга
+    eosio::asset available_base_after_pay_debt = asset(0, _root_govern_symbol); ///< Базовая сумма доступная для конвертации после погашения долга
     
-    eosio::asset converted_to_wallet = asset(0, _root_govern_symbol); //сумма, сконвертированная в кошелек
-    eosio::asset converted_to_capital = asset(0, _root_govern_symbol); //сумма, сконвертированная в программу капитализации
-    eosio::asset converted_to_project = asset(0, _root_govern_symbol); //сумма, сконвертированная в проект
+    eosio::asset converted_to_wallet = asset(0, _root_govern_symbol);      ///< Сумма, сконвертированная в кошелек
+    eosio::asset converted_to_capital = asset(0, _root_govern_symbol);     ///< Сумма, сконвертированная в программу капитализации
+    eosio::asset converted_to_project = asset(0, _root_govern_symbol);     ///< Сумма, сконвертированная в проект
         
-    uint64_t primary_key() const { return id; }
+    uint64_t primary_key() const { return id; }                           ///< Первичный ключ (1)
     
-    checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта
+    checksum256 by_project_hash() const { return project_hash; }          ///< Индекс по хэшу проекта (2)
   
     // Индекс по (project_hash + username) - уникальный для каждого участника проекта
-    uint128_t by_project_user() const {
+    uint128_t by_project_user() const {                                   ///< Индекс по проекту и пользователю (3)
         return combine_checksum_ids(project_hash, username);
     }
     

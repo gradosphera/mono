@@ -1,3 +1,17 @@
+/**
+ * @brief Завершает проект и начинает голосование
+ * Переводит проект в статус голосования и инициализирует процесс:
+ * - Проверяет существование проекта
+ * - Валидирует что проект в статусе active
+ * - Обновляет статус проекта на voting
+ * - Инициализирует голосование по методу Водянова
+ * @param coopname Наименование кооператива
+ * @param project_hash Хеш проекта для начала голосования
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_startvoting
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::startvoting(name coopname, checksum256 project_hash) {
   require_auth(coopname);
   

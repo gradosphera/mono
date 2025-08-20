@@ -1,3 +1,15 @@
+/**
+ * @brief Отклонение одобрения документа
+ * Отклоняет одобрение документа с указанием причины и выполняет соответствующий обратный вызов.
+ * Удаляет запись об одобрении после отклонения.
+ * @param coopname Наименование кооператива
+ * @param approval_hash Хеш одобрения для отклонения
+ * @param reason Причина отклонения одобрения
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_declineapprv
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void soviet::declineapprv(eosio::name coopname, checksum256 approval_hash, std::string reason)
 {
     require_auth(coopname);

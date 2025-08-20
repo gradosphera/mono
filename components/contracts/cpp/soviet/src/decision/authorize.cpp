@@ -1,15 +1,16 @@
 /**
-\ingroup public_actions
-\brief Авторизация принятого решения советом
-*
-* Этот метод позволяет председателю совета утвердить принятое решение совета. 
-*
-* @param coopname Имя кооператива
-* @param chairman Имя председателя совета кооператива
-* @param decision_id Идентификатор решения для авторизации
-* 
-* @note Авторизация требуется от аккаунта: @p chairman
-*/
+ * @brief Авторизация принятого решения советом
+ * Позволяет председателю совета утвердить принятое решение совета.
+ * Изменяет статус решения на авторизованное и добавляет документ авторизации.
+ * @param coopname Наименование кооператива
+ * @param chairman Наименование председателя совета кооператива
+ * @param decision_id Идентификатор решения для авторизации
+ * @param document Документ авторизации решения
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_authorize
+ * @note Авторизация требуется от аккаунта: @p chairman
+ */
 void soviet::authorize(eosio::name coopname, eosio::name chairman, uint64_t decision_id, document2 document) { 
   require_auth(chairman);
 

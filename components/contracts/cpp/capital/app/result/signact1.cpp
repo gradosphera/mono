@@ -1,3 +1,20 @@
+/**
+ * @brief Подписывает акт 1 по результату участника
+ * Подписывает первый акт по результату участника:
+ * - Проверяет подлинность документа акта от участника
+ * - Валидирует статус результата (должен быть authorized)
+ * - Проверяет права участника на подписание акта
+ * - Устанавливает первый акт
+ * - Обновляет статус на act1
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-участника
+ * @param result_hash Хеш результата
+ * @param act Документ акта 1
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_signact1
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::signact1(eosio::name coopname, eosio::name username, checksum256 result_hash, document2 act) {
   require_auth(coopname);
   

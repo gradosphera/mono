@@ -1,3 +1,14 @@
+/**
+ * @brief Обновляет CRPS пайщика в программе капитализации
+ * Обновляет CRPS (систему вознаграждений программы) пайщика:
+ * - Обновляет CRPS contributor через core функцию
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-пайщика
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_refreshprog
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 [[eosio::action]] void capital::refreshprog(name coopname, name username) {
     require_auth(coopname);
 

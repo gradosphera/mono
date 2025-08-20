@@ -1,5 +1,20 @@
 /**
- * @brief Принимаем запрос на повстку дня для голосования совета о приёме инвестиций по УХД
+ * @brief Создание повестки дня для голосования совета
+ * Создает новую повестку дня для голосования совета по различным вопросам кооператива.
+ * Инициирует процесс принятия решения с указанными параметрами и обратными вызовами.
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, создающего повестку
+ * @param type Тип повестки/решения
+ * @param hash Хеш документа или объекта для решения
+ * @param callback_contract Контракт для обратного вызова
+ * @param confirm_callback Действие подтверждения
+ * @param decline_callback Действие отклонения
+ * @param statement Документ с описанием повестки
+ * @param meta Дополнительные метаданные
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_createagenda
+ * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 [[eosio::action]] void soviet::createagenda(eosio::name coopname, eosio::name username, eosio::name type, checksum256 hash, name callback_contract, name confirm_callback, name decline_callback, document2 statement, std::string meta){
   auto payer = check_auth_and_get_payer_or_fail(contracts_whitelist);

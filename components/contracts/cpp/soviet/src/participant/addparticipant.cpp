@@ -1,20 +1,19 @@
 /**
+ * @brief Добавление пайщика в кооператив
+ * Добавляет действующего пайщика в систему, пропуская этап подписания заявления на вступление.
+ * Позволяет установить дату регистрации и распределить взносы по фондам.
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя
+ * @param braname Наименование филиала
+ * @param type Тип участника
+ * @param created_at Дата создания
+ * @param initial Сумма вступительного взноса
+ * @param minimum Сумма минимального взноса
+ * @param spread_initial Флаг распределения вступительного взноса
  * @ingroup public_actions
- * @brief  Добавление пайщика по API без процедуры подписания заявления на вступление.
- * Действие добавляет действующего пайщика в систему, пропуская этап подписи заявления на вступление и оплату вступительного и минимального паевого взносов.
- * Система позволяет установить дату регистрации участника, которая будет соответствовать дате уплаты им минимального и вступительного взносов.
- * Если spread_initial установлен в false, то сумма вступительного взноса не распределяется среди фондов. Тогда система считает, что учет распределения вступительного взноса произошел за её пределами. 
- * Если spread_initial установлен в true, то сумма вступительного взноса распределяется по фондам согласно правилам распределения кооператива в контракте fund.
- * Минимальный паевой взнос всегда добавляется в кошелёк пайщика и отмечается в статистике оборотного фонда кооператива.
- *
- * @param[in]  coopname        The coopname
- * @param[in]  username        The username
- * @param[in]  type            The type
- * @param[in]  created_at      The created at
- * @param[in]  initial         The initial
- * @param[in]  minimum         The minimum
- * @param[in]  spread_initial  The spread initial
- *
+ * @ingroup public_soviet_actions
+ * @anchor soviet_addpartcpnt
+ * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 void soviet::addpartcpnt(eosio::name coopname, eosio::name username, eosio::name braname, eosio::name type, eosio::time_point_sec created_at, eosio::asset initial, eosio::asset minimum, bool spread_initial) {
   check_auth_and_get_payer_or_fail(contracts_whitelist);

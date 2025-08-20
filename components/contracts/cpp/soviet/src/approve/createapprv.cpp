@@ -1,3 +1,21 @@
+/**
+ * @brief Создание одобрения документа
+ * Создает новое одобрение документа с указанными параметрами и обратными вызовами.
+ * Используется для инициации процесса одобрения документов в системе.
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, создающего одобрение
+ * @param document Документ для одобрения
+ * @param type Тип одобрения
+ * @param approval_hash Хеш одобрения
+ * @param callback_contract Контракт для обратного вызова
+ * @param callback_action_approve Действие подтверждения
+ * @param callback_action_decline Действие отклонения
+ * @param meta Дополнительные метаданные
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_createapprv
+ * @note Авторизация требуется от аккаунта в белом списке контрактов
+ */
 void soviet::createapprv(eosio::name coopname,
                          eosio::name username,
                          document2 document,

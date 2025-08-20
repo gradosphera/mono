@@ -1,5 +1,17 @@
 
 
+/**
+ * @brief Отмена регистрации участника
+ * Отменяет регистрацию участника в кооперативе, обнуляя его взносы и блокируя аккаунт.
+ * Используется при отмене регистрации до принятия решения советом.
+ * @param coopname Наименование кооператива
+ * @param username Наименование участника для отмены регистрации
+ * @param message Сообщение о причине отмены регистрации
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_cancelreg
+ * @note Авторизация требуется от аккаунта: @p _gateway
+ */
 void soviet::cancelreg(eosio::name coopname, eosio::name username, std::string message){
   require_auth(_gateway);
 

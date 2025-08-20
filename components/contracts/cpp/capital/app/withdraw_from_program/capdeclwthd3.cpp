@@ -1,3 +1,18 @@
+/**
+ * @brief Отклоняет возврат из программы капитализации советом
+ * Отклоняет возврат из программы капитализации советом и возвращает средства:
+ * - Получает объект возврата
+ * - Возвращает средства обратно в capital_available contributor
+ * - Обновляет глобальное состояние (возвращает средства в доступные)
+ * - Удаляет заявку
+ * @param coopname Наименование кооператива
+ * @param withdraw_hash Хеш заявки на возврат для отклонения
+ * @param reason Причина отклонения возврата
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_capdeclwthd3
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void capital::capdeclwthd3(name coopname, checksum256 withdraw_hash, std::string reason) {
   require_auth(_soviet);
 

@@ -6,32 +6,44 @@
 using namespace eosio;
 using std::string;
 
-namespace Capital::ProjectProperties::Status {
-  constexpr eosio::name CREATED = "created"_n;
+namespace Capital::ProjectProperties {
+  /**
+   * @brief Константы статусов имущественных взносов
+   * @ingroup public_consts
+   * @ingroup public_capital_consts
+   * @anchor capital_property_status
+   */
+   namespace Status {
+    constexpr eosio::name CREATED = "created"_n;     ///< Имущественный взнос создан
+  }
 }
 
 namespace Capital::ProjectProperties {
 
-/**
-  * @brief Структура предложений по имущественным взносам
-  * \ingroup public_tables
-  */
+  /**
+   * @brief Таблица имущественных взносов хранит данные о предложениях по имущественным взносам в проекты.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_property
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): pjproperties 
+   */
   struct [[eosio::table, eosio::contract(CAPITAL)]] property {
-    uint64_t id;                                 ///< Уникальный идентификатор предложения.
-    name coopname;                               ///< Имя кооператива.
-    name username;                               ///< Имя пользователя, подающего предложение.
+    uint64_t id;                                 ///< ID имущественного взноса (внутренний ключ)
+    name coopname;                               ///< Имя кооператива
+    name username;                               ///< Имя пользователя, подающего предложение
     name status;                                 ///< Статус предложения (created)
-    checksum256 project_hash;                    ///< Хэш проекта, связанного с предложением.
-    checksum256 property_hash;                   ///< Хэш предложения.
+    checksum256 project_hash;                    ///< Хэш проекта, связанного с предложением
+    checksum256 property_hash;                   ///< Хэш предложения
     eosio::asset property_amount;                ///< Оценочная стоимость имущества
     std::string property_description;            ///< Описание имущества
-    time_point_sec created_at;                   ///< Дата и время создания предложения.
+    time_point_sec created_at;                   ///< Время создания предложения
 
-    uint64_t primary_key() const { return id; } ///< Основной ключ.
-    uint64_t by_username() const { return username.value; } ///< По имени пользователя.
-    checksum256 by_property_hash() const { return property_hash; } ///< Индекс по хэшу предложения.
-    checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта.
-};
+    uint64_t primary_key() const { return id; } ///< Первичный ключ (1)
+    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+    checksum256 by_property_hash() const { return property_hash; } ///< Индекс по хэшу предложения (3)
+    checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта (4)
+  };
 
 typedef eosio::multi_index<
     "pjproperties"_n, property,

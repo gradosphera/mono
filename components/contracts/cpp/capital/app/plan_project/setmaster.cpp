@@ -1,3 +1,18 @@
+/**
+ * @brief Устанавливает мастера проекта
+ * Назначает мастера для управления проектом:
+ * - Проверяет существование проекта
+ * - Валидирует что пользователь подписал договор УХД
+ * - Проверяет что пользователь является участником проекта
+ * - Назначает мастера проекта
+ * @param coopname Наименование кооператива
+ * @param project_hash Хеш проекта
+ * @param master Наименование пользователя-мастера
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_setmaster
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::setmaster(name coopname, checksum256 project_hash, name master) {
     require_auth(coopname);
     

@@ -1,9 +1,16 @@
 /**
  * @brief Отклоняет председателем договор УХД и удаляет вкладчика из базы
- * 
+ * Отклоняет регистрацию вкладчика и удаляет его из системы кооператива:
+ * - Проверяет существование вкладчика по хешу
+ * - Валидирует статус вкладчика (должен быть PENDING)
+ * - Удаляет вкладчика из базы данных с указанием причины
  * @param coopname Имя кооператива
  * @param contributor_hash Хэш контрибьютора
  * @param reason Причина отклонения
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_declinereg
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
  void capital::declinereg(eosio::name coopname, checksum256 contributor_hash, std::string reason) {
   name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);

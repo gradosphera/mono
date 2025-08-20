@@ -1,3 +1,17 @@
+/**
+ * @brief Разблокировка участника кооператива
+ * Разблокирует участника кооператива, восстанавливая его права и статус.
+ * Устанавливает участника как активного с правом голоса и взносами.
+ * @param coopname Наименование кооператива
+ * @param admin Наименование администратора
+ * @param username Наименование разблокируемого участника
+ * @param is_registration Флаг регистрации (не используется)
+ * @param message Сообщение о причине разблокировки
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_unblock
+ * @note Авторизация требуется от аккаунта: @p _soviet или @p admin
+ */
 void soviet::unblock(eosio::name coopname, eosio::name admin, eosio::name username, bool is_registration, std::string message) {
   //разблокировку может выписать контракт или администратор
   auto payer = check_auth_and_get_payer_or_fail({_soviet, admin});

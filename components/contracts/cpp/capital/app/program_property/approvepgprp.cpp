@@ -1,6 +1,17 @@
 /**
- * @brief Принятие предложения по программному имущественному взносу председателем
- * \ingroup public_actions
+ * @brief Принимает предложение по программному имущественному взносу председателем
+ * Принимает предложение по программному имущественному взносу и отправляет на рассмотрение совета:
+ * - Проверяет подлинность документа председателя
+ * - Получает предложение и валидирует его статус
+ * - Сохраняет одобренное заявление
+ * - Обновляет статус на approved
+ * - Отправляет на рассмотрение совета
+ * @param coopname Наименование кооператива
+ * @param property_hash Хеш программного имущественного взноса для принятия
+ * @param approved_statement Одобренное заявление председателя
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_approvepgprp
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::approvepgprp(eosio::name coopname, checksum256 property_hash, document2 approved_statement) {

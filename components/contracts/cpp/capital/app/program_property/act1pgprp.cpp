@@ -1,6 +1,18 @@
 /**
- * @brief Подписание акта 1 по программному имущественному взносу
- * \ingroup public_actions
+ * @brief Подписывает акт 1 по программному имущественному взносу
+ * Подписывает первый акт по программному имущественному взносу участником:
+ * - Проверяет подлинность документа акта от участника
+ * - Получает предложение и валидирует его статус (должен быть authorized)
+ * - Проверяет права участника на подписание акта
+ * - Сохраняет первый акт
+ * - Обновляет статус на act1
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-участника
+ * @param property_hash Хеш программного имущественного взноса
+ * @param act Документ акта 1
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_act1pgprp
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::act1pgprp(eosio::name coopname, eosio::name username, checksum256 property_hash, document2 act) {

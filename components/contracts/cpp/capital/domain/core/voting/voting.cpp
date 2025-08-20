@@ -113,18 +113,12 @@ namespace Capital::Core::Voting {
         for (const auto& vote : votes) {
             total_votes_received += vote.amount;
         }
-          
+
+        // Формула: (сумма всех полученных голосов + средняя сумма на каждого) / общее количество голосующих
+        eosio::asset total_sum = (total_votes_received + project.voting.amounts.equal_voting_amount) / project.voting.total_voters;
+        
         // Итоговая сумма от голосования по Водянову
-        // Формула: (сумма всех полученных голосов + голосующая сумма) / общее количество голосующих
-        eosio::asset total_sum = total_votes_received + project.voting.amounts.total_voting_pool;
-        eosio::asset total_vodyanov_amount = asset(
-            total_sum.amount / project.voting.total_voters, 
-            total_sum.symbol
-        );
-        
-        // Прямые начисления будут выплачиваться отдельно, здесь только голосование
-        
-        return total_vodyanov_amount;
+        return total_sum;
     }
 
     eosio::asset calculate_equal_author_bonus(const Capital::project& project, const Capital::Segments::segment& segment) {

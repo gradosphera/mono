@@ -1,3 +1,24 @@
+/**
+ * @brief Создает коммит в проект
+ * Создает коммит с затраченным временем создателя и отправляет на одобрение:
+ * - Проверяет существование проекта и его активный статус
+ * - Валидирует активность основного договора УХД
+ * - Проверяет наличие приложения к проекту
+ * - Валидирует уникальность коммита по хешу
+ * - Проверяет положительность часов создателя
+ * - Рассчитывает сумму фактических затрат создателя
+ * - Вычисляет фактическое изменение сумм генерации
+ * - Создает коммит и отправляет на одобрение
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-создателя
+ * @param project_hash Хеш проекта
+ * @param commit_hash Хеш коммита
+ * @param creator_hours Количество часов создателя
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_createcmmt
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours){
   require_auth(coopname);
   

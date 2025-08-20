@@ -1,3 +1,19 @@
+/**
+ * @brief Добавляет автора проекта
+ * Добавляет нового автора к проекту с авторскими долями:
+ * - Проверяет существование проекта
+ * - Валидирует что пользователь является участником проекта
+ * - Проверяет что пользователь еще не является автором
+ * - Проверяет лимит количества авторов
+ * - Добавляет автора как генератора с авторскими долями
+ * @param coopname Наименование кооператива
+ * @param project_hash Хеш проекта
+ * @param author Наименование пользователя-автора
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_addauthor
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::addauthor(name coopname, checksum256 project_hash, name author) {
     require_auth(coopname);
     

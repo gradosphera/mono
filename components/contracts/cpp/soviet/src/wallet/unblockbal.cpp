@@ -1,3 +1,17 @@
+/**
+ * @brief Разблокировка баланса в кошельке программы
+ * Разблокирует средства в кошельке участника по конкретной программе.
+ * Переводит средства из заблокированных в доступные.
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя
+ * @param program_id Идентификатор программы
+ * @param quantity Количество средств для разблокировки
+ * @param memo Примечание к операции
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_unblockbal
+ * @note Авторизация требуется от аккаунта в белом списке контрактов
+ */
 void soviet::unblockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo) {
   name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);
   

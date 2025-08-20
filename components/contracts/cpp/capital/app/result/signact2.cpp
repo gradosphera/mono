@@ -1,3 +1,21 @@
+/**
+ * @brief Подписывает акт 2 по результату участника
+ * Подписывает второй акт председателем и завершает процесс принятия результата:
+ * - Проверяет что подписывает председатель
+ * - Валидирует статус результата (должен быть act1)
+ * - Проверяет подлинность документа акта от председателя и участника
+ * - Устанавливает второй акт
+ * - Обновляет статус сегмента на accepted
+ * - Удаляет объект результата после успешного принятия
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-председателя
+ * @param result_hash Хеш результата
+ * @param act Документ акта 2
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_signact2
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::signact2(eosio::name coopname, eosio::name username, checksum256 result_hash, document2 act) {
   require_auth(coopname);
 

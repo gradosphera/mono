@@ -1,3 +1,19 @@
+/**
+ * @brief Финансирует проект из внешних источников
+ * Финансирует проект из внешних источников и распределяет членские взносы:
+ * - Валидирует сумму финансирования
+ * - Проверяет существование проекта
+ * - Проверяет наличие долей для распределения членских взносов
+ * - Распределяет членские взносы в проекте
+ * @param coopname Наименование кооператива
+ * @param project_hash Хеш проекта для финансирования
+ * @param amount Сумма финансирования
+ * @param memo Мемо для транзакции
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_fundproj
+ * @note Авторизация требуется от аккаунта: @p _soviet или @p _gateway
+ */
 void capital::fundproj(eosio::name coopname, checksum256 project_hash, asset amount, std::string memo) {
     auto payer = check_auth_and_get_payer_or_fail({ _soviet, _gateway });
     Wallet::validate_asset(amount);

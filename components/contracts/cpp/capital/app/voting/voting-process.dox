@@ -1,0 +1,12 @@
+/**
+ * @page voting_overview Обзор процессов голосования
+ * @ingroup public_capital_processes
+ * 
+ * Эта страница описывает все процессы доступные в системе голосования.
+ * 
+ * ## Основные процессы
+ * - @ref capital::calcvotes - Рассчитывает голоса для участника
+ * 
+ * 
+ * @see public_capital_actions
+ */

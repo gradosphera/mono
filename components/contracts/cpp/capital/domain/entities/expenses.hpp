@@ -6,44 +6,55 @@
 using namespace eosio;
 using std::string;
 
-
-namespace Capital::Expenses::Status {
+namespace Capital::Expenses {
   /**
    * @brief Константы статусов расходов
+   * @ingroup public_consts
+   * @ingroup public_capital_consts
+   * @anchor capital_expense_status
    */
+   namespace Status {
     const eosio::name CREATED = "created"_n;        ///< Расход создан
     const eosio::name APPROVED = "approved"_n;      ///< Расход одобрен председателем
     const eosio::name AUTHORIZED = "authorized"_n;  ///< Расход авторизован советом
     const eosio::name PAID = "paid"_n;             ///< Расход оплачен
     const eosio::name DECLINED = "declined"_n;      ///< Расход отклонен
+  }
 }
 
 namespace Capital {
 
-struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
-  uint64_t id;                                 ///< Уникальный идентификатор действия.
-  name coopname;                               ///< Имя кооператива.
-  name username;                               ///< Имя пользователя, создавшего расход.
-  
-  name status = Expenses::Status::CREATED;                   ///< Статус расхода (created | approved | authorized)
-  checksum256 project_hash;                    ///< Хэш проекта, связанного с расходом.
-  checksum256 expense_hash;                    ///< Хэш расхода.
-  uint64_t fund_id;                            ///< Идентификатор фонда списания (expfunds в контакте fund)
-  eosio::asset amount;                         ///< Сумма расхода.
-  std::string description;                     ///< Публичное описание расхода. 
+  /**
+   * @brief Таблица расходов хранит информацию о расходах проектов кооператива.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_expense
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): expenses 
+   */
+  struct [[eosio::table, eosio::contract(CAPITAL)]] expense {
+    uint64_t id;                                    ///< ID расхода (внутренний ключ)
+    name coopname;                                  ///< Имя кооператива
+    name username;                                  ///< Имя пользователя, создавшего расход
+    
+    name status = Expenses::Status::CREATED;        ///< Статус расхода (created | approved | authorized | paid | declined)
+    checksum256 project_hash;                       ///< Хэш проекта, связанного с расходом
+    checksum256 expense_hash;                       ///< Хэш расхода
+    uint64_t fund_id;                               ///< Идентификатор фонда списания (expfunds в контакте fund)
+    eosio::asset amount;                            ///< Сумма расхода
+    std::string description;                        ///< Публичное описание расхода
 
-  document2 expense_statement;                  ///< Служебная записка
-  document2 approved_statement;                 ///< принятая записка председателем или доверенным
-  document2 authorization;                      ///< утвержденная записка советом
+    document2 expense_statement;                    ///< Служебная записка
+    document2 approved_statement;                   ///< Принятая записка председателем или доверенным
+    document2 authorization;                        ///< Утвержденная записка советом
                                   
-  time_point_sec spended_at = current_time_point();  ///< Дата и время создания расхода.
+    time_point_sec spended_at = current_time_point(); ///< Дата и время создания расхода
 
-  uint64_t primary_key() const { return id; } ///< Основной ключ.
-  uint64_t by_username() const { return username.value; } ///< По имени пользователя.
-  checksum256 by_expense_hash() const { return expense_hash; } ///< Индекс по хэшу задачи.
-  checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта.
-
-};
+    uint64_t primary_key() const { return id; }     ///< Первичный ключ (1)
+    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+    checksum256 by_expense_hash() const { return expense_hash; } ///< Индекс по хэшу расхода (3)
+    checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта (4)
+  };
 
   typedef eosio::multi_index<
     "expenses"_n, expense,

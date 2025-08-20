@@ -6,37 +6,49 @@
 using namespace eosio;
 using std::string;
 
-namespace Capital::ProgramProperties::Status {
-  constexpr eosio::name CREATED = "created"_n;
-  constexpr eosio::name APPROVED = "approved"_n;
-  constexpr eosio::name AUTHORIZED = "authorized"_n;
-  constexpr eosio::name ACT1 = "act1"_n;
-  constexpr eosio::name ACT2 = "act2"_n;
+namespace Capital::ProgramProperties {
+  /**
+   * @brief Константы статусов программных имущественных взносов
+   * @ingroup public_consts
+   * @ingroup public_capital_consts
+   * @anchor capital_program_property_status
+   */
+   namespace Status {
+    constexpr eosio::name CREATED = "created"_n;     ///< Программный имущественный взнос создан
+    constexpr eosio::name APPROVED = "approved"_n;   ///< Программный имущественный взнос одобрен
+    constexpr eosio::name AUTHORIZED = "authorized"_n; ///< Программный имущественный взнос авторизован
+    constexpr eosio::name ACT1 = "act1"_n;          ///< Первый акт подписан
+    constexpr eosio::name ACT2 = "act2"_n;          ///< Второй акт подписан
+  }
 }
 
 namespace Capital::ProgramProperties {
 
-/**
-  * @brief Структура предложений по программным имущественным взносам
-  * \ingroup public_tables
-  */
+  /**
+   * @brief Таблица программных имущественных взносов хранит данные о предложениях по имущественным взносам в программу капитализации.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_program_property
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): pgproperties 
+   */
   struct [[eosio::table, eosio::contract(CAPITAL)]] program_property {
-    uint64_t id;                                 ///< Уникальный идентификатор предложения.
-    name coopname;                               ///< Имя кооператива.
-    name username;                               ///< Имя пользователя, подающего предложение.
+    uint64_t id;                                 ///< ID программного имущественного взноса (внутренний ключ)
+    name coopname;                               ///< Имя кооператива
+    name username;                               ///< Имя пользователя, подающего предложение
     name status;                                 ///< Статус предложения (created | approved | authorized | act1 | act2)
-    checksum256 property_hash;                   ///< Хэш предложения.
+    checksum256 property_hash;                   ///< Хэш предложения
     eosio::asset property_amount;                ///< Оценочная стоимость имущества
     std::string property_description;            ///< Описание имущества
     document2 statement;                         ///< Заявление о внесении имущества
     document2 authorization;                     ///< Решение совета
     document2 act;                              ///< Акт
-    time_point_sec created_at;                   ///< Дата и время создания предложения.
+    time_point_sec created_at;                   ///< Время создания предложения
 
-    uint64_t primary_key() const { return id; } ///< Основной ключ.
-    uint64_t by_username() const { return username.value; } ///< По имени пользователя.
-    checksum256 by_property_hash() const { return property_hash; } ///< Индекс по хэшу предложения.
-};
+    uint64_t primary_key() const { return id; } ///< Первичный ключ (1)
+    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+    checksum256 by_property_hash() const { return property_hash; } ///< Индекс по хэшу предложения (3)
+  };
 
 typedef eosio::multi_index<
     "pgproperties"_n, program_property,

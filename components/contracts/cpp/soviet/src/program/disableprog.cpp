@@ -1,14 +1,14 @@
 /**
-\ingroup public_actions
-\brief Метод отключения целевой программы
-*
-* Этот метод позволяет отключить существующую программу, устанавливая поле `is_active` в `false`.
-*
-* @param coopname Имя кооператива
-* @param id Идентификатор программы
-*
-* @note Авторизация требуется от аккаунта: @p coopname
-*/
+ * @brief Отключение целевой программы
+ * Отключает существующую целевую программу, устанавливая поле is_active в false.
+ * Программа остается в системе, но становится неактивной.
+ * @param coopname Наименование кооператива
+ * @param program_id Идентификатор программы для отключения
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_disableprog
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void soviet::disableprog(eosio::name coopname, uint64_t program_id) {
   require_auth(coopname);
 

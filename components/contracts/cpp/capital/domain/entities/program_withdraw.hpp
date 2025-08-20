@@ -3,31 +3,44 @@
 using namespace eosio;
 using std::string;
 
-namespace Capital::ProgramWithdraw::Status {
-  const eosio::name CREATED = "created"_n;
-  const eosio::name APPROVED = "approved"_n;
+namespace Capital::ProgramWithdraw {
+  /**
+   * @brief Константы статусов возвратов из программы
+   * @ingroup public_consts
+   * @ingroup public_capital_consts
+   * @anchor capital_program_withdraw_status
+   */
+   namespace Status {
+    const eosio::name CREATED = "created"_n;     ///< Запрос на возврат создан
+    const eosio::name APPROVED = "approved"_n;   ///< Запрос на возврат одобрен
+  }
 }
 
 namespace Capital {
 
-/**
-  * @brief Структура запроса на возврат из программы.
-  */
-struct [[eosio::table, eosio::contract(CAPITAL)]] program_withdraw {
-  uint64_t id;                                ///< Уникальный ID запроса на возврат.
-  name coopname;                              ///< Имя аккаунта кооператива
-  checksum256 withdraw_hash;                  ///< Уникальный внешний ключ
-  name username;                              ///< Имя аккаунта участника, запрашивающего возврат.
-  name status;                                ///< Статус взноса-возврата (created | approved | )
-  asset amount = asset(0, _root_govern_symbol);      ///< Запрошенная сумма для возврата.
-  document2 statement;                  ///< Заявление на возврат паевого взноса деньгами
+  /**
+   * @brief Таблица возвратов из программы хранит данные о запросах на возврат средств из программы капитализации.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_program_withdraw
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): prgwithdraws 
+   */
+  struct [[eosio::table, eosio::contract(CAPITAL)]] program_withdraw {
+    uint64_t id;                                ///< ID запроса на возврат (внутренний ключ)
+    name coopname;                              ///< Имя кооператива
+    checksum256 withdraw_hash;                  ///< Хэш запроса на возврат
+    name username;                              ///< Имя участника, запрашивающего возврат
+    name status;                                ///< Статус запроса (created | approved)
+    asset amount = asset(0, _root_govern_symbol); ///< Запрошенная сумма для возврата
+    document2 statement;                        ///< Заявление на возврат паевого взноса деньгами
   
-  time_point_sec created_at = current_time_point();                   ///< Дата и время создания действия.                       ///< Время создания запроса.
+    time_point_sec created_at = current_time_point(); ///< Время создания запроса
   
-  uint64_t primary_key() const { return id; }             ///< Основной ключ.
-  uint64_t by_username() const { return username.value; }   ///< Вторичный индекс по аккаунту.
-  checksum256 by_hash() const { return withdraw_hash; } ///< Индекс по хэшу
-};
+    uint64_t primary_key() const { return id; } ///< Первичный ключ (1)
+    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+    checksum256 by_hash() const { return withdraw_hash; } ///< Индекс по хэшу запроса (3)
+  };
 
 typedef eosio::multi_index<"prgwithdraws"_n, program_withdraw,
   indexed_by<"byhash"_n, const_mem_fun<program_withdraw, checksum256, &program_withdraw::by_hash>>,

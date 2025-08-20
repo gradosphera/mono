@@ -3,36 +3,48 @@
 using namespace eosio;
 using std::string;
 
-namespace Capital::Invests::Status {
-  const eosio::name CREATED = "created"_n;
+namespace Capital::Invests {
+  /**
+   * @brief Константы статусов инвестиций
+   * @ingroup public_consts
+   * @ingroup public_capital_consts
+   * @anchor capital_invest_status
+   */
+   namespace Status {
+    const eosio::name CREATED = "created"_n;     ///< Инвестиция создана
+  }
 }
 
 namespace Capital {
-/**
-  * @brief Структура инвестиций, хранящая данные о вложениях в проекты.
-  * \ingroup public_tables
-  */
+  /**
+   * @brief Таблица инвестиций хранит данные о вложениях в проекты.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_invest
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): invests 
+   */
   struct [[eosio::table, eosio::contract(CAPITAL)]] invest {
-    uint64_t id;                                ///< Уникальный идентификатор инвестиции.
-    name coopname;                              ///< Имя аккаунта кооператива.
-    name username;                              ///< Имя аккаунта инвестора.
-    checksum256 invest_hash;                           ///< Хэш идентификатор объекта инвестиции.
-    checksum256 project_hash;                   ///< Хэш идентификатора проекта.    
-    name status;                                ///< created
-    eosio::asset amount = asset(0, _root_govern_symbol); ///< Сумма инвестиции.
-    time_point_sec invested_at;                 ///< Дата приёма инвестиции.
-    document2 statement;                         ///< Заявление на зачёт из кошелька.
+    uint64_t id;                                ///< ID инвестиции (внутренний ключ)
+    name coopname;                              ///< Имя кооператива
+    name username;                              ///< Имя инвестора
+    checksum256 invest_hash;                    ///< Хэш инвестиции
+    checksum256 project_hash;                   ///< Хэш проекта    
+    name status;                                ///< Статус инвестиции (created)
+    eosio::asset amount = asset(0, _root_govern_symbol); ///< Сумма инвестиции
+    time_point_sec invested_at;                 ///< Дата приёма инвестиции
+    document2 statement;                         ///< Заявление на зачёт из кошелька
     
     // Координаторская информация
-    eosio::name coordinator;                    ///< Имя координатора (реферера), если есть.
-    eosio::asset coordinator_amount = asset(0, _root_govern_symbol); ///< Сумма координаторского взноса.
+    eosio::name coordinator;                    ///< Имя координатора (реферера), если есть
+    eosio::asset coordinator_amount = asset(0, _root_govern_symbol); ///< Сумма координаторского взноса
     
-    uint64_t primary_key() const { return id; } ///< Основной ключ.
-    uint64_t by_username() const { return username.value; } ///< Индекс по имени аккаунта.
-    checksum256 by_project() const { return project_hash; } ///< Индекс по проекту.
-    checksum256 by_hash() const { return invest_hash; } ///< Индекс по хэшу.
-    uint128_t by_project_user() const { return combine_checksum_ids(project_hash, username); } ///< Комбинированный индекс.
-};
+    uint64_t primary_key() const { return id; } ///< Первичный ключ (1)
+    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+    checksum256 by_project() const { return project_hash; } ///< Индекс по проекту (3)
+    checksum256 by_hash() const { return invest_hash; } ///< Индекс по хэшу инвестиции (4)
+    uint128_t by_project_user() const { return combine_checksum_ids(project_hash, username); } ///< Индекс по проекту и пользователю (5)
+  };
 
 typedef eosio::multi_index<
     "invests"_n, invest,

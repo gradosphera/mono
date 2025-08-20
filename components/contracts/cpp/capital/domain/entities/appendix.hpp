@@ -3,31 +3,44 @@
 using namespace eosio;
 using std::string;
 
-namespace Capital::Appendix::Status {
-  constexpr eosio::name CREATED = "created"_n;
+namespace Capital::Appendix {
+  /**
+   * @brief Константы статусов приложений
+   * @ingroup public_consts
+   * @ingroup public_capital_consts
+   * @anchor capital_appendix_status
+   */
+   namespace Status {
+    constexpr eosio::name CREATED = "created"_n;     ///< Приложение создано
+  }
 }
 
 namespace Capital {
-/**
-  * @brief Структура приложения к договору УХД для конкретного проекта
-  */
-struct [[eosio::table, eosio::contract(CAPITAL)]] appendix {
-    uint64_t id;
-    name coopname;
-    name username;
-    checksum256 project_hash;
-    checksum256 appendix_hash;
-    name status;
-    time_point_sec created_at;
-    document2 appendix;
+  /**
+   * @brief Таблица приложений хранит данные о приложениях к договору УХД для конкретных проектов.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_appendix
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): appendixes 
+   */
+  struct [[eosio::table, eosio::contract(CAPITAL)]] appendix {
+    uint64_t id;                                    ///< ID приложения (внутренний ключ)
+    name coopname;                                  ///< Имя кооператива
+    name username;                                  ///< Имя пользователя
+    checksum256 project_hash;                       ///< Хэш проекта
+    checksum256 appendix_hash;                      ///< Хэш приложения
+    name status;                                    ///< Статус приложения
+    time_point_sec created_at;                      ///< Время создания приложения
+    document2 appendix;                             ///< Документ приложения
     
-    uint64_t primary_key() const { return id; }
+    uint64_t primary_key() const { return id; }     ///< Первичный ключ (1)
     
-    uint64_t by_username() const { return username.value; }
-    checksum256 by_project() const { return project_hash; }
-    checksum256 by_hash() const { return appendix_hash; }
-    uint128_t by_project_user() const { return combine_checksum_ids(project_hash, username); }
-};
+    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+    checksum256 by_project() const { return project_hash; } ///< Индекс по проекту (3)
+    checksum256 by_hash() const { return appendix_hash; } ///< Индекс по хэшу приложения (4)
+    uint128_t by_project_user() const { return combine_checksum_ids(project_hash, username); } ///< Индекс по проекту и пользователю (5)
+  };
 
 typedef eosio::multi_index<
     "appendixes"_n, appendix,

@@ -1,17 +1,14 @@
 /**
-\ingroup public_actions
-\brief Удаление персонала из кооператива
-*
-* Данный метод позволяет удалить члена персонала из кооператива. 
-* Авторизация для выполнения этого метода требуется только от председателя совета кооператива.
-*
-* @param coopname Имя кооператива
-* @param board_id ID совета кооператива
-* @param chairman Имя председателя совета
-* @param username Имя удаляемого члена персонала
-* 
-* @note Авторизация требуется от аккаунта: @p chairman
-*/
+ * @brief Удаление персонала из кооператива
+ * Удаляет члена персонала из кооператива, лишая его всех прав и доступа к системе.
+ * @param coopname Наименование кооператива
+ * @param chairman Наименование председателя совета
+ * @param username Наименование удаляемого члена персонала
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_rmstaff
+ * @note Авторизация требуется от аккаунта: @p chairman
+ */
 void soviet::rmstaff(eosio::name coopname, eosio::name chairman, eosio::name username) {
   require_auth(chairman);
 

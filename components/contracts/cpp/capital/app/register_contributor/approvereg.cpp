@@ -1,9 +1,17 @@
 /**
  * @brief Принимает принятый председателем договор УХД и активирует вкладчика по нему
- * 
+ * Активирует пайщика в системе кооператива после одобрения договора УХД:
+ * - Проверяет подлинность договора УХД
+ * - Валидирует статус пайщика (должен быть PENDING)
+ * - Активирует пайщика и устанавливает принятый договор
+ * - Создает программный кошелек для пайщика если необходимо
  * @param coopname Имя кооператива
  * @param contributor_hash Хэш контрибьютора
  * @param contract Договор УХД
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_approvereg
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::approvereg(eosio::name coopname, checksum256 contributor_hash, document2 contract) {
   name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);

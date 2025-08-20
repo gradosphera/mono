@@ -1,3 +1,25 @@
+/**
+ * @brief Создает расход в проекте
+ * Создает расход в проекте с резервированием средств:
+ * - Проверяет подлинность заявления о расходе
+ * - Валидирует сумму расхода (положительная)
+ * - Проверяет что создатель является участником проекта
+ * - Валидирует уникальность расхода по хешу
+ * - Проверяет доступность средств в пуле расходов проекта
+ * - Резервирует средства в проекте
+ * - Создает запись расхода
+ * @param coopname Наименование кооператива
+ * @param expense_hash Хеш расхода
+ * @param project_hash Хеш проекта
+ * @param creator Наименование пользователя-создателя расхода
+ * @param amount Сумма расхода
+ * @param description Описание расхода
+ * @param statement Заявление о расходе
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_createexpnse
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::createexpnse(eosio::name coopname, checksum256 expense_hash, checksum256 project_hash, name creator, asset amount, std::string description, document2 statement){
   require_auth(coopname);
   

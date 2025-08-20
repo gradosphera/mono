@@ -14,21 +14,22 @@ void add_vote_for(eosio::name coopname, eosio::name username, uint64_t decision_
 }
 
 /**
-\ingroup public_actions
-\brief Голосование за решение совета
-*
-* Этот метод позволяет члену совета голосовать за конкретное решение. Если у члена совета нет права голоса или голосование уже было произведено ранее, процедура завершится ошибкой. После голосования рассчитывается, превысило ли количество голосов "за" заданный процент консенсуса от общего количества членов.
-*
-* @param coopname Имя кооператива
-* @param username Имя члена совета, голосующего за решение
-* @param decision_hash Хэш решения, за которое происходит голосование
-* @param signed_at Время подписи
-* @param signed_hash Подписанный хэш
-* @param signature Подпись
-* @param public_key Публичный ключ
-* 
-* @note Авторизация требуется от аккаунта: @p username или @p permission_level{username, "oracle"_n}
-*/
+ * @brief Голосование за решение совета
+ * Позволяет члену совета голосовать за конкретное решение.
+ * После голосования рассчитывается, превысило ли количество голосов "за" заданный процент консенсуса.
+ * @param version Версия протокола
+ * @param coopname Наименование кооператива
+ * @param username Наименование члена совета, голосующего за решение
+ * @param decision_id Идентификатор решения для голосования
+ * @param signed_at Время подписи
+ * @param signed_hash Подписанный хеш
+ * @param signature Подпись
+ * @param public_key Публичный ключ
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_votefor
+ * @note Авторизация требуется от аккаунта: @p username или @p coopname
+ */
 void soviet::votefor(
   std::string version,
   eosio::name coopname, 

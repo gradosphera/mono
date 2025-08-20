@@ -1,3 +1,18 @@
+/**
+ * @brief Авторизует возврат из программы капитализации советом
+ * Авторизует возврат из программы капитализации советом и выполняет операции с балансами:
+ * - Получает объект возврата
+ * - Списывает заблокированные средства из программы капитализации
+ * - Добавляет доступные средства в кошелек программы
+ * - Удаляет объект возврата
+ * @param coopname Наименование кооператива
+ * @param withdraw_hash Хеш заявки на возврат для авторизации
+ * @param authorization Документ авторизации совета
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_capauthwthd3
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void capital::capauthwthd3(name coopname, checksum256 withdraw_hash, document2 authorization) {
   require_auth(_soviet);
   

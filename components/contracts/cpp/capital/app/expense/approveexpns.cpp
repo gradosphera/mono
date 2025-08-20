@@ -1,3 +1,20 @@
+/**
+ * @brief Одобряет расход в проекте
+ * Одобряет расход в проекте и отправляет в совет:
+ * - Проверяет подлинность одобренного заявления
+ * - Валидирует статус расхода (должен быть created)
+ * - Проверяет что создатель является участником проекта
+ * - Одобряет расход (обновляет статус)
+ * - Отправляет в совет для рассмотрения
+ * @param coopname Наименование кооператива
+ * @param approver Наименование пользователя-одобряющего
+ * @param expense_hash Хеш расхода для одобрения
+ * @param approved_statement Одобренное заявление о расходе
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_approveexpns
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::approveexpns(name coopname, name approver, checksum256 expense_hash, document2 approved_statement) {
   require_auth(coopname);
 

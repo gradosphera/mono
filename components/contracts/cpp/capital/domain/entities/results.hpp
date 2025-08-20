@@ -3,60 +3,70 @@
 using namespace eosio;
 using std::string;
 
-namespace Capital::Results::Status {
-
+namespace Capital::Results {
   /**
    * @brief Константы статусов результата
+   * @ingroup public_consts
+   * @ingroup public_capital_consts
+   * @anchor capital_result_status
    */
+   namespace Status {
     const eosio::name CREATED = "created"_n;     ///< Заявление подано
     const eosio::name APPROVED = "approved"_n;       ///< Одобрено председателем
     const eosio::name AUTHORIZED = "authorized"_n;   ///< Авторизовано советом
     const eosio::name DECLINED = "declined"_n;       ///< Отклонено советом
     const eosio::name ACT1 = "act1"_n;              ///< Первый акт подписан
     const eosio::name ACT2 = "act2"_n;              ///< Второй акт подписан
-  
-} // namespace Capital::Results::Status
-
+  }
+}
 
 namespace Capital {
 
-struct [[eosio::table, eosio::contract(CAPITAL)]] result {
-  uint64_t id;
-  checksum256 project_hash;
-  checksum256 result_hash;
-  
-  eosio::name coopname;
-  eosio::name username;
+  /**
+   * @brief Таблица результатов хранит данные о результатах участников проектов.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_result
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): results 
+   */
+  struct [[eosio::table, eosio::contract(CAPITAL)]] result {
+    uint64_t id;                                    ///< ID результата (внутренний ключ)
+    checksum256 project_hash;                       ///< Хэш проекта
+    checksum256 result_hash;                        ///< Хэш результата
+    
+    eosio::name coopname;                           ///< Имя кооператива
+    eosio::name username;                           ///< Имя пользователя
 
-  eosio::name status = Capital::Results::Status::CREATED; ///< created | approved | authorized | declined | act1 | act2
-  time_point_sec created_at = current_time_point();
+    eosio::name status = Capital::Results::Status::CREATED; ///< Статус результата: created | approved | authorized | declined | act1 | act2
+    time_point_sec created_at = current_time_point(); ///< Время создания результата
 
-  eosio::asset creator_base_amount = asset(0, _root_govern_symbol);
-  eosio::asset author_base_amount = asset(0, _root_govern_symbol);
-  eosio::asset debt_amount = asset(0, _root_govern_symbol);
-  
-  eosio::asset creator_bonus_amount = asset(0, _root_govern_symbol);
-  eosio::asset author_bonus_amount = asset(0, _root_govern_symbol);
-  eosio::asset generation_amount = asset(0, _root_govern_symbol);
-  eosio::asset capitalist_bonus_amount = asset(0, _root_govern_symbol);
-  
-  eosio::asset total_amount = asset(0, _root_govern_symbol);
-  eosio::asset available_for_return = asset(0, _root_govern_symbol);
-  eosio::asset available_for_convert = asset(0, _root_govern_symbol);
+    eosio::asset creator_base_amount = asset(0, _root_govern_symbol); ///< Базовая сумма создателя
+    eosio::asset author_base_amount = asset(0, _root_govern_symbol);   ///< Базовая сумма автора
+    eosio::asset debt_amount = asset(0, _root_govern_symbol);          ///< Сумма долга
+    
+    eosio::asset creator_bonus_amount = asset(0, _root_govern_symbol); ///< Бонусная сумма создателя
+    eosio::asset author_bonus_amount = asset(0, _root_govern_symbol);  ///< Бонусная сумма автора
+    eosio::asset generation_amount = asset(0, _root_govern_symbol);    ///< Сумма генерации
+    eosio::asset capitalist_bonus_amount = asset(0, _root_govern_symbol); ///< Бонусная сумма капиталиста
+    
+    eosio::asset total_amount = asset(0, _root_govern_symbol);         ///< Общая сумма
+    eosio::asset available_for_return = asset(0, _root_govern_symbol); ///< Доступно для возврата
+    eosio::asset available_for_convert = asset(0, _root_govern_symbol); ///< Доступно для конвертации
       
-  document2 statement; ///< Заявление
-  document2 authorization; ///< Решение совета
-  document2 act; ///< Акт
+    document2 statement;                            ///< Заявление
+    document2 authorization;                        ///< Решение совета
+    document2 act;                                  ///< Акт
   
-  uint64_t primary_key() const { return id; }     ///< Основной ключ.
-  uint64_t by_username() const { return username.value; } ///< Индекс по владельцу
-  checksum256 by_hash() const { return result_hash; } ///< Индекс по хэшу результата
-  checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта
+    uint64_t primary_key() const { return id; }     ///< Первичный ключ (1)
+    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+    checksum256 by_hash() const { return result_hash; } ///< Индекс по хэшу результата (3)
+    checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта (4)
   
-  uint128_t by_project_user() const {
-      return combine_checksum_ids(project_hash, username);
-  }
-};
+    uint128_t by_project_user() const {             ///< Индекс по проекту и пользователю (5)
+        return combine_checksum_ids(project_hash, username);
+    }
+  };
 
 typedef eosio::multi_index<"results"_n, result,
   indexed_by<"byusername"_n, const_mem_fun<result, uint64_t, &result::by_username>>,

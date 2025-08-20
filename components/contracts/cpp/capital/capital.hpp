@@ -4,12 +4,48 @@
 
 #include <cstdint>
 
-// Коэффициенты (константы бизнес-логики; не управляются конфигом)
+
+
+/**
+\defgroup public_capital Контракт CAPITAL
+* @anchor public_capital
+* Смарт-контракт капитализации результатов интеллектуальной деятельности предназначен для управления учётом и распределением вознаграждений за результаты интеллектуальной деятельности.
+*/
+
+/**
+\defgroup public_capital_processes Процессы
+\ingroup public_capital
+*/
+
+/**
+\defgroup public_capital_actions Действия
+\ingroup public_capital
+*/
+
+/**
+\defgroup public_capital_tables Таблицы
+\ingroup public_capital
+*/
+
+/**
+\defgroup public_capital_consts Константы
+\ingroup public_capital
+*/
+
+
+/**
+ * Коэффициенты бизнес-логики (не управляются конфигом)
+ * @ingroup public_consts
+ * @ingroup public_capital_consts
+ * @anchor capital_business_constants
+ * @{
+ */
 const double CREATORS_BONUS_COEFFICIENT = 1; ///< Коэффициент премий создателей от своей себестоимости (100%)
 const double AUTHOR_BASE_COEFFICIENT = 0.618; ///< Коэффициент авторской себестоимости от себестоимости создателя (61.8%)
 const double AUTHOR_BONUS_COEFFICIENT = 1;    ///< Коэффициент премий авторов от своей себестоимости (100%)
 const double CONTRIBUTORS_BONUS_COEFFICIENT = 1.618; ///< Коэффициент премий вкладчиков от себестоимостей создателей, авторов и координаторов (161.8%)
 const uint32_t MAX_PROJECT_AUTHORS = 12; ///< Максимальное количество авторов в проекте
+/** @} */
 
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
@@ -65,7 +101,7 @@ public:
 
     // Подсчитать результаты голосования для участника
     [[eosio::action]]
-    void finalvoting(name coopname, name username, checksum256 project_hash);
+    void calcvotes(name coopname, name username, checksum256 project_hash);
     
     // Проголосовать по методу Водянова
     [[eosio::action]]

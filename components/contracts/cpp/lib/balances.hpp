@@ -25,25 +25,36 @@ typedef eosio::multi_index<"balances"_n, balances_base, eosio::indexed_by<"bycon
 // -----------------------------------------------------------------
 // Таблица кошельков конкретных программ
 // -----------------------------------------------------------------
+/**
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица кошельков программ кооператива
+*
+* Таблица содержит информацию о кошельках участников кооперативных программ.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): progwallets
+* @anchor soviet_progwallet
+*/
 struct [[eosio::table, eosio::contract(SOVIET)]] progwallet {
-  uint64_t id;
-  eosio::name coopname;
-  uint64_t program_id;
-  uint64_t agreement_id;
-  eosio::name username;
-  eosio::asset available; ///< доступные средства паевого взноса
-  eosio::binary_extension<eosio::asset> blocked; ///< недоступные средства паевого взноса
-  eosio::binary_extension<eosio::asset> membership_contribution; ///< внесенный членский взнос
+  uint64_t id; ///< Уникальный идентификатор кошелька
+  eosio::name coopname; ///< Имя кооператива
+  uint64_t program_id; ///< Идентификатор программы
+  uint64_t agreement_id; ///< Идентификатор соглашения
+  eosio::name username; ///< Имя пользователя
+  eosio::asset available; ///< Доступные средства паевого взноса
+  eosio::binary_extension<eosio::asset> blocked; ///< Недоступные средства паевого взноса
+  eosio::binary_extension<eosio::asset> membership_contribution; ///< Внесенный членский взнос
   
 
-  uint64_t primary_key() const { return id; } /*!< return id - primary_key */
-  uint64_t by_username() const { return username.value; } /*!< username - secondary_key */
-  uint64_t by_program() const { return program_id; } /*!< program_id - secondary_key */
-  uint64_t by_agreement() const { return agreement_id; } /*!< agreement_id - secondary_key */
+  uint64_t primary_key() const { return id; }
+  uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя
+  uint64_t by_program() const { return program_id; } ///< Индекс по идентификатору программы
+  uint64_t by_agreement() const { return agreement_id; } ///< Индекс по идентификатору соглашения
 
   uint128_t by_username_and_program() const {
     return combine_ids(username.value, program_id);
-  } /*!< возвращает уникальный индекс, сформированный из username и program_id */
+  } ///< Комбинированный индекс по имени пользователя и идентификатору программы
 };
 
 typedef eosio::multi_index<

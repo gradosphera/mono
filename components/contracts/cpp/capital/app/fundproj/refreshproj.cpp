@@ -1,3 +1,16 @@
+/**
+ * @brief Обновляет кошелек проекта участника
+ * Обновляет кошелек проекта участника через CRPS систему:
+ * - Проверяет существование проекта
+ * - Обновляет кошелек проекта участника через CRPS систему
+ * @param coopname Наименование кооператива
+ * @param project_hash Хеш проекта
+ * @param username Наименование пользователя-участника
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_refreshproj
+ * @note Авторизация требуется от аккаунта: @p username
+ */
 [[eosio::action]] void capital::refreshproj(name coopname, checksum256 project_hash, name username) {
     require_auth(username);
   

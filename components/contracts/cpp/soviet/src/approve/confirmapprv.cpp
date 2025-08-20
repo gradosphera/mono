@@ -1,3 +1,15 @@
+/**
+ * @brief Подтверждение одобрения документа
+ * Подтверждает одобрение документа и выполняет соответствующий обратный вызов.
+ * Удаляет запись об одобрении после успешного выполнения.
+ * @param coopname Наименование кооператива
+ * @param approval_hash Хеш одобрения для подтверждения
+ * @param approved_document Подтвержденный документ
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_confirmapprv
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void soviet::confirmapprv(eosio::name coopname, checksum256 approval_hash, document2 approved_document)
 {
    require_auth(coopname);

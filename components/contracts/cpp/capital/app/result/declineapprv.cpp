@@ -1,3 +1,17 @@
+/**
+ * @brief Отклоняет одобрение результата участника
+ * Отклоняет одобрение результата участника и возвращает статус сегмента:
+ * - Проверяет подлинность документа причины отклонения
+ * - Валидирует статус результата (должен быть created)
+ * - Удаляет объект результата и возвращает статус сегмента в ready
+ * @param coopname Наименование кооператива
+ * @param result_hash Хеш результата для отклонения одобрения
+ * @param decline_reason Документ причины отклонения
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_declineapprv
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::declineapprv(eosio::name coopname, checksum256 result_hash, document2 decline_reason) {
   require_auth(coopname);
   

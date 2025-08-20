@@ -9,21 +9,34 @@
 
 #include "../lib/common.hpp"
 
+
 /**
- *  \ingroup public_contracts
- *
- *  @brief  Класс `soviet` предоставляет средства для управления и работы кооперативов в рамках блокчейн-системы. 
- *  Он служит связующим звеном между различными контрактами и действиями, предоставляя интерфейс для создания, 
- *  автоматизации, управления и голосования по различным решениям, связанным с деятельностью кооператива.
- *  
- *  Основные функции класса:
- *  - Получение и обработка действий от других контрактов.
- *  - Формирование шаблонов решений для голосования членами совета.
- *  - Выполнение действий на основе принятых решений.
- *  - Управление участниками, их правами и автоматическими действиями в рамках кооператива.
- *  
- *  \note Этот класс является основой для реализации логики кооперативов и их взаимодействия внутри блокчейн-среды.
- */
+\defgroup public_soviet Контракт SOVIET
+* @anchor public_soviet
+* Смарт-контракт совета кооператива предназначен для управления процессами принятия решений и подписания документов.
+*/
+
+/**
+\defgroup public_soviet_processes Процессы
+\ingroup public_soviet
+*/
+
+/**
+\defgroup public_soviet_actions Действия
+\ingroup public_soviet
+*/
+
+/**
+\defgroup public_soviet_tables Таблицы
+\ingroup public_soviet
+*/
+
+/**
+\defgroup public_soviet_consts Константы
+\ingroup public_soviet
+*/
+
+
 class [[eosio::contract(SOVIET)]] soviet : public eosio::contract {
 public:
   using contract::contract;
@@ -167,15 +180,28 @@ public:
 };
   
 
+/**
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица счетчиков
+*
+* Таблица содержит различные счетчики для генерации уникальных идентификаторов.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @anchor soviet_counts
+*/
   struct [[eosio::table, eosio::contract(SOVIET)]] counts : counts_base {};
  
 /**
 \ingroup public_tables
+\ingroup public_soviet_tables
 \brief Таблица автоматизированных действий
 *
 * Таблица содержит набор действий, которые член совета автоматизировал.
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): automator
+* @anchor soviet_automator
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] automator {
     uint64_t id; ///< Уникальный идентификатор автоматизированного действия
@@ -199,27 +225,49 @@ struct [[eosio::table, eosio::contract(SOVIET)]] automator {
   > automator_index;
 
 
+/**
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица автоподписанта
+*
+* Таблица содержит идентификаторы решений для автоматического подписания.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): autosigner
+* @anchor soviet_autosigner
+*/
   struct [[eosio::table, eosio::contract(SOVIET)]] autosigner {
-    uint64_t decision_id;
+    uint64_t decision_id; ///< Идентификатор решения для автоподписания
     uint64_t primary_key() const { return decision_id; }    
   };
 
   typedef eosio::multi_index< "autosigner"_n, autosigner> autosigner_index;
 
 
+/**
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица заявок на вступление в кооператив
+*
+* Таблица содержит заявки пользователей на вступление в кооператив.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): joincoops
+* @anchor soviet_joincoops
+*/
   struct [[eosio::table, eosio::contract(SOVIET)]] joincoops {
-    uint64_t id;
-    eosio::name username;
-    bool is_paid = false; 
-    std::string notice;
+    uint64_t id; ///< Уникальный идентификатор заявки
+    eosio::name username; ///< Имя пользователя, подавшего заявку
+    bool is_paid = false; ///< Флаг оплаты вступительного взноса
+    std::string notice; ///< Примечание к заявке
     
-    eosio::binary_extension<eosio::name> braname;
+    eosio::binary_extension<eosio::name> braname; ///< Имя кооперативного участка
     
     uint64_t primary_key() const {
       return id;
     };
 
-    uint64_t byusername() const {return username.value;}
+    uint64_t byusername() const {return username.value;} ///< Индекс по имени пользователя
 
   };
 
@@ -227,11 +275,22 @@ struct [[eosio::table, eosio::contract(SOVIET)]] automator {
     eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<joincoops, uint64_t, &joincoops::byusername>>
   > joincoops_index; 
 
+/**
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица изменений обменов
+*
+* Таблица содержит информацию об изменениях в обменах маркетплейса.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): changes
+* @anchor soviet_changes
+*/
   struct [[eosio::table, eosio::contract(SOVIET)]] changes {
-    uint64_t id;
-    uint64_t exchange_id; // идентификатор обмена в контракте marketplace
-    uint64_t contribution_product_decision_id;
-    uint64_t return_product_decision_id;
+    uint64_t id; ///< Уникальный идентификатор изменения
+    uint64_t exchange_id; ///< Идентификатор обмена в контракте marketplace
+    uint64_t contribution_product_decision_id; ///< Идентификатор решения о внесении продукта
+    uint64_t return_product_decision_id; ///< Идентификатор решения о возврате продукта
 
 
     uint64_t primary_key() const {
@@ -239,7 +298,7 @@ struct [[eosio::table, eosio::contract(SOVIET)]] automator {
     };
 
     uint64_t byexchange() const {
-      return exchange_id;
+      return exchange_id; ///< Индекс по идентификатору обмена
     };
   };
 

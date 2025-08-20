@@ -1,22 +1,18 @@
 /**
-\ingroup public_actions
-\brief Обновление совета или комиссии
-*
-* Этот метод позволяет председателю кооператива обновить совет с указанными членами. 
-*
-* @param coopname Имя кооператива
-* @param chairman Имя председателя кооператива
-* @param type Тип совета. Доступные типы:
-*   - **soviet** - Совет кооператива (Board of Members)
-*   - **executive** - Правление (Executive Board)
-*   - **audit** - Ревизионный комитет (Audit and Revision Board)
-*   - **other** - Другая комиссия (Other committee)
-* @param members Список членов совета
-* @param name Название совета
-* @param description Описание совета
-* 
-* @note Авторизация требуется от аккаунта: @p username
-*/
+ * @brief Обновление совета или комиссии
+ * Обновляет состав и параметры существующего совета кооператива.
+ * Позволяет изменить список членов, название и описание совета.
+ * @param coopname Наименование кооператива
+ * @param username Наименование председателя кооператива
+ * @param board_id Идентификатор совета для обновления
+ * @param members Список членов совета
+ * @param name Название совета
+ * @param description Описание совета
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_updateboard
+ * @note Авторизация требуется от аккаунта: @p username
+ */
 void soviet::updateboard(eosio::name coopname, eosio::name username, uint64_t board_id, std::vector<board_member> members, std::string name, std::string description){
   require_recipient(coopname);
   

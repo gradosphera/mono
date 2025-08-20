@@ -1,3 +1,18 @@
+/**
+ * @brief Авторизует расход в проекте советом
+ * Авторизует расход в проекте советом и создает исходящий платеж:
+ * - Получает расход и валидирует его статус (должен быть approved)
+ * - Проверяет регистрацию пользователя
+ * - Авторизует расход (обновляет статус)
+ * - Создает объект исходящего платежа в gateway с коллбэком
+ * @param coopname Наименование кооператива
+ * @param expense_hash Хеш расхода для авторизации
+ * @param authorization Документ авторизации совета
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_capauthexpns
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void capital::capauthexpns(eosio::name coopname, checksum256 expense_hash, document2 authorization) {
   require_auth(_soviet);
   

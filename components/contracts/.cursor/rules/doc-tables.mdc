@@ -1,0 +1,65 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+
+Мне нужно, чтобы ты прошелся по всем таблицам контракта которые используются в нем. Они могут находиться также где-то в @lib/. Мне нужно, чтобы ты добавил все найденные таблицы в указанную по аналогии с тем как тебе предоставлено в примере. 
+
+А именно: 
+- все описания полей должны быть сделаны через ///<
+- У таблицы должно быть описание
+- У таблицы должна быть общая группа всех таблиц и частная группа конкретного контракта
+- У таблицы должен быть якорь
+- У таблицы должна быть область памяти в которой хранятся данные
+- У таблицы должно быть указано имя. 
+
+Пример: 
+
+namespace Capital {
+/**
+* @brief Таблица проектов хранит информацию о проектах кооператива, которые станут результатами.
+* @ingroup public_tables
+* @ingroup public_capital_tables
+* @anchor capital_project
+* @par Область памяти (scope): coopname
+* @par Имя таблицы (table): projects 
+*/
+struct [[eosio::table, eosio::contract(CAPITAL)]] project {
+  uint64_t id; ///< ID проекта (внутренний ключ)
+  
+  name coopname; ///< Имя кооператива
+  checksum256 project_hash; ///< Хэш проекта (внешний ключ)
+  checksum256 parent_hash; ///< Хэш родительского проекта (если есть)
+  
+  eosio::name status; ///< Статус проекта
+  
+  bool is_opened; ///< Открыт ли проект для инвестиций
+  
+  // Мастер проекта
+  name master; ///< Мастер проекта
+  
+  std::string title; ///< Название проекта
+  std::string description; ///< Описание проекта
+  std::string meta; ///< Метаданные проекта
+
+  counts_data counts; ///< Счетчики участников проекта
+  
+  plan_pool plan; ///< Плановые показатели
+  fact_pool fact; ///< Фактические показатели
+  crps_data crps; ///< Данные CRPS для распределения наград
+  
+  // Голосование по методу Водянова
+  voting_data voting; ///< Данные голосования по методу Водянова
+  
+  // Членские взносы
+  membership_crps membership; ///< Данные CRPS для распределения членских взносов
+
+  // Время создания проекта
+  time_point_sec created_at = current_time_point(); ///< Время создания проекта
+  
+  uint64_t primary_key() const { return id; } ///< Первичный ключ (1)
+  uint64_t by_created_at() const { return created_at.sec_since_epoch(); } ///< Индекс по времени создания (2)
+  checksum256 by_hash() const { return project_hash; } ///< Индекс по хэшу проекта (3)
+  checksum256 by_parent_hash() const { return parent_hash; } ///< Индекс по хэшу родительского проекта (4)
+};

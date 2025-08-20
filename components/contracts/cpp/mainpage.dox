@@ -1,0 +1,15 @@
+/**
+@mainpage Обзор
+
+@ref public_capital "Контракт CAPITAL" - смарт-контракт капитализации результатов интеллектуальной деятельности.
+
+\htmlonly
+<div class="mermaid">
+  graph TD
+    A[Создан] --> B[Активен]
+    B --> C[Голосование]
+    C --> D[Завершён]
+    B --> E[Закрыт]
+</div>
+\endhtmlonly
+*/

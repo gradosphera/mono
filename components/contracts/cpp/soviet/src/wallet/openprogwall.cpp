@@ -1,3 +1,16 @@
+/**
+ * @brief Открытие кошелька программы для участника
+ * Создает кошелек программы для участника, если он еще не существует.
+ * Инициализирует кошелек с нулевыми балансами.
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя
+ * @param program_type Тип программы
+ * @param agreement_id Идентификатор соглашения (может быть 0)
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_openprogwall
+ * @note Авторизация требуется от аккаунта в белом списке контрактов
+ */
 void soviet::openprogwall(name coopname, name username, name program_type, uint64_t agreement_id) {
   name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);
   

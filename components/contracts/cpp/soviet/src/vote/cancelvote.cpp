@@ -1,15 +1,15 @@
 /**
-\ingroup public_actions
-\brief Отмена голосования членом совета
-*
-* Этот метод позволяет члену совета отменить свой голос, поданный ранее, по конкретному решению. Если голосование не было произведено или решение не найдено, процедура завершится ошибкой.
-*
-* @param coopname Имя кооператива
-* @param member Имя члена совета, отменяющего свое голосование
-* @param decision_id Идентификатор решения, по которому голосование было проведено
-* 
-* @note Авторизация требуется от аккаунта: @p member или @p permission_level{member, "provide"_n}
-*/
+ * @brief Отмена голосования членом совета
+ * Позволяет члену совета отменить свой голос, поданный ранее, по конкретному решению.
+ * В настоящее время отмена голоса запрещена (функция возвращает ошибку).
+ * @param coopname Наименование кооператива
+ * @param member Наименование члена совета, отменяющего свое голосование
+ * @param decision_id Идентификатор решения, по которому голосование было проведено
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_cancelvote
+ * @note Авторизация требуется от аккаунта: @p member или @p permission_level{member, "provide"_n}
+ */
 void soviet::cancelvote(eosio::name coopname, eosio::name member, uint64_t decision_id) {
   
   if (!has_auth(member)) {

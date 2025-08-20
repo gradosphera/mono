@@ -19,10 +19,16 @@ struct board_member {
 };
 
 /**
- * @ingroup public_tables
- * @brief Структура советов кооперативов
- * @details Эта структура содержит информацию о досках кооператива, их типе, названии, описании и членах.
- */
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица советов кооператива
+*
+* Таблица содержит информацию о советах кооператива, их типе, названии, описании и членах.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): boards
+* @anchor soviet_boards
+*/
 struct [[eosio::table, eosio::contract(SOVIET)]] boards {
   uint64_t id; ///< Уникальный идентификатор доски.
   eosio::name type; ///< Тип доски:
@@ -127,13 +133,24 @@ struct right {
  * @brief Структура, представляющая администраторов кооператива.
  * @details Эта структура содержит информацию об администраторах, их уникальных именах, должностях и правах.
  */
+/**
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица администраторов кооператива
+*
+* Таблица содержит информацию об администраторах кооператива, их правах и ролях.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): staff
+* @anchor soviet_staff
+*/
 struct [[eosio::table, eosio::contract(SOVIET)]] staff {
-  eosio::name username; ///< Уникальное имя администратора.
-  std::string position_title; ///< Название должности администратора.
-  std::vector<eosio::name> roles; ///< Список ролей.
-  std::vector<right> rights; ///< Список прав администратора.
-  eosio::time_point_sec created_at; ///< Время создания записи об администраторе.
-  eosio::time_point_sec updated_at; ///< Время последнего обновления информации об администраторе.
+  eosio::name username; ///< Уникальное имя администратора
+  std::string position_title; ///< Название должности администратора
+  std::vector<eosio::name> roles; ///< Список ролей
+  std::vector<right> rights; ///< Список прав администратора
+  eosio::time_point_sec created_at; ///< Время создания записи об администраторе
+  eosio::time_point_sec updated_at; ///< Время последнего обновления информации об администраторе
 
   uint64_t primary_key() const { return username.value; } ///< Первичный ключ для индексации по имени администратора
 
@@ -151,11 +168,16 @@ typedef eosio::multi_index<"staff"_n, staff> staff_index; ///< Тип мульт
 
 
 /**
- * @ingroup public_tables
- * @brief Структура, представляющая членов кооператива.
- * @details Эта структура содержит информацию о членах кооператива, включая их уникальные имена, дату создания, дату последнего обновления,
- * дату последнего минимального платежа, должность, позицию, флаги их статуса и участия.
- */
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица участников кооператива
+*
+* Таблица содержит информацию о членах кооператива, включая их статус, взносы и права.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): participants
+* @anchor soviet_participant
+*/
 struct [[eosio::table, eosio::contract(SOVIET)]] participant {
   eosio::name username; ///< Уникальное имя члена кооператива.
   eosio::time_point_sec created_at; ///< Время создания записи о члене.
@@ -216,11 +238,16 @@ typedef eosio::multi_index< "participants"_n, participant,
 
 
 /**
- * @ingroup public_tables
- * @brief Структура, представляющая решения кооператива.
- * @details Эта структура содержит информацию о решениях, включая уникальный идентификатор, имя кооператива, тип решения,
- * идентификатор карточки, списки голосов "за" и "против", а также различные флаги состояния решения.
- */
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица решений кооператива
+*
+* Таблица содержит информацию о решениях, принимаемых советом кооператива, включая голосование и авторизацию.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): decisions
+* @anchor soviet_decision
+*/
 struct [[eosio::table, eosio::contract(SOVIET)]] decision {
   uint64_t id; ///< Уникальный идентификатор решения.
   eosio::name coopname; ///< Имя кооператива, связанного с решением.
@@ -369,10 +396,16 @@ struct address_data {
 
 
 /**
- * @ingroup public_tables
- * @brief Структура, представляющая адреса кооператива.
- * @details Эта структура содержит информацию о адресах кооператива, которые используются как точки приёма-выдачи товаров на кооплейсе.
- */
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица адресов кооператива
+*
+* Таблица содержит информацию о адресах кооператива, которые используются как точки приёма-выдачи товаров.
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): addresses
+* @anchor soviet_address
+*/
 struct [[eosio::table, eosio::contract(SOVIET)]] address {
   uint64_t id;
   eosio::name coopname;

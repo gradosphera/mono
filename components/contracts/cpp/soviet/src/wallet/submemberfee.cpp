@@ -1,3 +1,17 @@
+/**
+ * @brief Списание членского взноса из кошелька программы
+ * Списывает членский взнос из кошелька участника по конкретной программе.
+ * Обновляет членские взносы участника и агрегированные показатели программы.
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя
+ * @param program_id Идентификатор программы
+ * @param quantity Количество средств для списания
+ * @param memo Примечание к операции
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_submemberfee
+ * @note Авторизация требуется от аккаунта в белом списке контрактов
+ */
 void soviet::submemberfee(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo){
   name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);
   

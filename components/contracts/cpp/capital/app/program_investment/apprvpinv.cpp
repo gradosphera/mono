@@ -1,3 +1,19 @@
+/**
+ * @brief Одобряет программную инвестицию
+ * Одобряет программную инвестицию и обрабатывает все связанные операции:
+ * - Получает программную инвестицию и активного пайщика
+ * - Списывает заблокированные средства с кошелька
+ * - Пополняет кошелек программы капитализации и блокирует средства
+ * - Добавляет средства в глобальный пул доступных инвестиций
+ * - Удаляет инвестицию после обработки
+ * @param coopname Наименование кооператива
+ * @param invest_hash Хеш программной инвестиции для одобрения
+ * @param approved_statement Одобренное заявление об инвестиции
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_apprvpinv
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void capital::apprvpinv(eosio::name coopname, checksum256 invest_hash, document2 approved_statement) {
   require_auth(_soviet);
 

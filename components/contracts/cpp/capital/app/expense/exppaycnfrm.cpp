@@ -1,3 +1,17 @@
+/**
+ * @brief Подтверждает оплату расхода
+ * Подтверждает оплату расхода и завершает процесс:
+ * - Получает расход и валидирует его статус (должен быть authorized)
+ * - Проверяет регистрацию пользователя
+ * - Обновляет used_expense_pool в проекте
+ * - Удаляет запись расхода
+ * @param coopname Наименование кооператива
+ * @param expense_hash Хеш расхода для подтверждения оплаты
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_exppaycnfrm
+ * @note Авторизация требуется от аккаунта: @p _gateway
+ */
 void capital::exppaycnfrm(eosio::name coopname, checksum256 expense_hash) {
   auto payer = check_auth_and_get_payer_or_fail({ _gateway });
   

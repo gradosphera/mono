@@ -1,26 +1,26 @@
 
 /**
-\ingroup public_actions
-\brief Метод создания целевой программы
-*
-* Этот метод позволяет председателю совета создать новую программу.
-*
-* @param coopname Имя кооператива
-* @param chairman Имя председателя совета
-* @param name Имя программы
-* @param announce Объявление о программе
-* @param description Описание программы
-* @param preview Предварительный просмотр
-* @param images Изображения для программы
-* @param website Веб-сайт программы
-* @param initial Вступительный взнос
-* @param minimum Минимальный взнос
-* @param membership Членский взнос
-* @param period Периодичность
-* @param category Категория
-*
-* @note Авторизация требуется от аккаунта: @p chairman
-*/
+ * @brief Создание целевой программы
+ * Создает новую целевую программу в кооперативе с указанными параметрами.
+ * Автоматически создает соответствующее соглашение для программы.
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, создающего программу
+ * @param type Тип программы
+ * @param title Название программы
+ * @param announce Объявление о программе
+ * @param description Описание программы
+ * @param preview Предварительный просмотр
+ * @param images Изображения для программы
+ * @param calculation_type Тип расчета взносов (free, absolute, relative)
+ * @param fixed_membership_contribution Фиксированный членский взнос
+ * @param membership_percent_fee Процент членского взноса
+ * @param is_can_coop_spend_share_contributions Флаг возможности трат кооперативом
+ * @param meta Дополнительные метаданные
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_createprog
+ * @note Авторизация требуется от аккаунта: @p username
+ */
 void soviet::createprog(eosio::name coopname, eosio::name username, eosio::name type, std::string title, std::string announce, std::string description, std::string preview, std::string images, eosio::name calculation_type, eosio::asset fixed_membership_contribution, uint64_t membership_percent_fee, bool is_can_coop_spend_share_contributions, std::string meta) { 
   
   check_auth_or_fail(_soviet, coopname, username, "createprog"_n);

@@ -1,3 +1,16 @@
+/**
+ * @brief Закрывает проект
+ * Закрывает завершенный проект:
+ * - Проверяет существование проекта
+ * - Валидирует что проект в статусе completed
+ * - Обновляет статус проекта на closed
+ * @param coopname Наименование кооператива
+ * @param project_hash Хеш проекта для закрытия
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_closeproject
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::closeproject(name coopname, checksum256 project_hash) {
   require_auth(coopname);
   

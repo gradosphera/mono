@@ -1,3 +1,18 @@
+/**
+ * @brief Подтверждает оплату долга
+ * Подтверждает оплату долга и создает объект долга в контракте loan:
+ * - Получает долг
+ * - Обновляет статус долга на paid
+ * - Создает объект долга в контракте loan
+ * - Увеличивает долг contributor
+ * - Удаляет долг после подтверждения оплаты
+ * @param coopname Наименование кооператива
+ * @param debt_hash Хеш долга для подтверждения оплаты
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_debtpaycnfrm
+ * @note Авторизация требуется от аккаунта: @p _gateway
+ */
 void capital::debtpaycnfrm(name coopname, checksum256 debt_hash) {
   require_auth(_gateway);
   

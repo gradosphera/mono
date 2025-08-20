@@ -13,21 +13,22 @@ void add_vote_against(eosio::name coopname, eosio::name username, uint64_t decis
 }
 
 /**
-\ingroup public_actions
-\brief Голосование против решения совета
-*
-* Этот метод позволяет члену совета голосовать против конкретного решения. Если у члена совета нет права голоса или голосование уже было произведено ранее, процедура завершится ошибкой.
-*
-* @param coopname Имя кооператива
-* @param username Имя члена совета, голосующего против решения
-* @param decision_id ID решения, против которого происходит голосование
-* @param signed_at Время подписи
-* @param signed_hash Подписанный хэш
-* @param signature Подпись
-* @param public_key Публичный ключ
-* 
-* @note Авторизация требуется от аккаунта: @p username или @p permission_level{username, "provide"_n}
-*/
+ * @brief Голосование против решения совета
+ * Позволяет члену совета голосовать против конкретного решения.
+ * Проверяет права голоса и предотвращает повторное голосование.
+ * @param version Версия протокола
+ * @param coopname Наименование кооператива
+ * @param username Наименование члена совета, голосующего против решения
+ * @param decision_id Идентификатор решения для голосования
+ * @param signed_at Время подписи
+ * @param signed_hash Подписанный хеш
+ * @param signature Подпись
+ * @param public_key Публичный ключ
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_voteagainst
+ * @note Авторизация требуется от аккаунта: @p username или @p coopname
+ */
 void soviet::voteagainst(
   std::string version,
   eosio::name coopname, 

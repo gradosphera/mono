@@ -1,3 +1,19 @@
+/**
+ * @brief Одобряет приложение к договору УХД
+ * Одобряет приложение к договору УХД и добавляет проект к пайщику:
+ * - Проверяет существование приложения
+ * - Валидирует статус приложения (должен быть CREATED)
+ * - Проверяет существование пайщика с основным договором УХД
+ * - Добавляет проект в вектор приложений пайщика
+ * - Удаляет приложение из базы
+ * @param coopname Наименование кооператива
+ * @param appendix_hash Хеш приложения к договору
+ * @param approved_document Одобренный документ приложения
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_apprvappndx
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void capital::apprvappndx(eosio::name coopname, checksum256 appendix_hash, document2 approved_document) {
   require_auth(_soviet);
   

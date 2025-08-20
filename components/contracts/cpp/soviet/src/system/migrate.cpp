@@ -1,4 +1,12 @@
-// вызывается автоматически в CI/CD при каждом деплое
+/**
+ * @brief Миграция данных системы
+ * Выполняет миграцию данных системы при обновлении контракта.
+ * Вызывается автоматически в CI/CD при каждом деплое.
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_migrate
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void soviet::migrate() {
     require_auth(_soviet); // Проверяем авторизацию
 

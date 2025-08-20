@@ -1,3 +1,18 @@
+/**
+ * @brief Одобряет заявку на возврат из проекта
+ * Одобряет заявку на возврат из проекта и отправляет в совет:
+ * - Проверяет подлинность одобренного заявления о возврате
+ * - Получает объект возврата и обновляет его статус на approved
+ * - Отправляет заявку в совет для рассмотрения
+ * @param coopname Наименование кооператива
+ * @param approver Наименование пользователя-одобряющего
+ * @param withdraw_hash Хеш заявки на возврат для одобрения
+ * @param approved_return_statement Одобренное заявление о возврате
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_approvewthd2
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::approvewthd2(name coopname, name approver, checksum256 withdraw_hash, document2 approved_return_statement) {
   require_auth(coopname);
   

@@ -1,3 +1,16 @@
+/**
+ * @brief Блокировка участника кооператива
+ * Блокирует участника кооператива, лишая его права голоса и активного статуса.
+ * Уменьшает счетчик активных пайщиков при блокировке активного участника.
+ * @param coopname Наименование кооператива
+ * @param admin Наименование администратора
+ * @param username Наименование блокируемого участника
+ * @param message Сообщение о причине блокировки
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_block
+ * @note Авторизация требуется от аккаунта: @p _soviet или @p admin
+ */
 void soviet::block(eosio::name coopname, eosio::name admin, eosio::name username, std::string message) {
   
   //блокировку может выписать контракт или администратор

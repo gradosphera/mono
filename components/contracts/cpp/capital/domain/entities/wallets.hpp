@@ -1,22 +1,27 @@
 namespace Capital {
 
   /**
-   * @brief Структура кошелька проекта
+   * @brief Таблица кошельков проектов хранит данные о долях участников в проектах для получения членских взносов.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_project_wallet
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): projwallets 
    */
   struct [[eosio::table, eosio::contract(CAPITAL)]] project_wallet {
-    uint64_t id;
-    eosio::name coopname;
-    checksum256 project_hash;
-    eosio::name username;
-    eosio::asset shares = asset(0, _root_govern_symbol); ///< доли участника в проекте для получения членских взносов
-    int64_t last_membership_reward_per_share = 0; ///< последнее значение CRPS для членских взносов
-    eosio::asset membership_available = asset(0, _root_govern_symbol); ///< доступные средства от членских взносов для вывода
+    uint64_t id;                                    ///< ID кошелька проекта (внутренний ключ)
+    eosio::name coopname;                           ///< Имя кооператива
+    checksum256 project_hash;                       ///< Хэш проекта
+    eosio::name username;                           ///< Имя пользователя
+    eosio::asset shares = asset(0, _root_govern_symbol); ///< Доли участника в проекте для получения членских взносов
+    int64_t last_membership_reward_per_share = 0;   ///< Последнее значение CRPS для членских взносов
+    eosio::asset membership_available = asset(0, _root_govern_symbol); ///< Доступные средства от членских взносов для вывода
     
-    uint64_t primary_key() const { return id; }
-    checksum256 by_project_hash() const { return project_hash; }
-    uint64_t by_username() const { return username.value; }
+    uint64_t primary_key() const { return id; }     ///< Первичный ключ (1)
+    checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта (2)
+    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (3)
     
-    uint128_t by_project_user() const {
+    uint128_t by_project_user() const {             ///< Индекс по проекту и пользователю (4)
       return combine_checksum_ids(project_hash, username);
     }
   };

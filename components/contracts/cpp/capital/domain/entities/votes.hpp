@@ -19,58 +19,61 @@ namespace Capital {
     * @brief Рассчитывает суммы для распределения по пулам
   */
   struct voting_amounts {
-      eosio::asset authors_equal_spread = asset(0, _root_govern_symbol);      // 62.8% авторских премий поровну
-      eosio::asset creators_direct_spread = asset(0, _root_govern_symbol);    // 62.8% создательских премий каждому
-      eosio::asset authors_bonuses_on_voting = asset(0, _root_govern_symbol);         // 38.2% авторских премий на голосование
-      eosio::asset creators_bonuses_on_voting = asset(0, _root_govern_symbol);        // 38.2% создательских премий на голосование
-      eosio::asset total_voting_pool = asset(0, _root_govern_symbol);         // Общая сумма для распределения по Водянову (авторы + создатели)
-      eosio::asset active_voting_amount = asset(0, _root_govern_symbol);             // Общая голосующая сумма = total_voting_pool * (voters-1)/voters
-      eosio::asset equal_voting_amount = asset(0, _root_govern_symbol);             // Средняя сумма на каждого участника (total_voting_pool / voters)
-      eosio::asset authors_equal_per_author = asset(0, _root_govern_symbol);  // Равная сумма на каждого автора (62.8% / количество авторов)
+      eosio::asset authors_equal_spread = asset(0, _root_govern_symbol);      ///< 62.8% авторских премий поровну
+      eosio::asset creators_direct_spread = asset(0, _root_govern_symbol);    ///< 62.8% создательских премий каждому
+      eosio::asset authors_bonuses_on_voting = asset(0, _root_govern_symbol); ///< 38.2% авторских премий на голосование
+      eosio::asset creators_bonuses_on_voting = asset(0, _root_govern_symbol); ///< 38.2% создательских премий на голосование
+      eosio::asset total_voting_pool = asset(0, _root_govern_symbol);         ///< Общая сумма для распределения по Водянову (авторы + создатели)
+      eosio::asset active_voting_amount = asset(0, _root_govern_symbol);      ///< Общая голосующая сумма = total_voting_pool * (voters-1)/voters
+      eosio::asset equal_voting_amount = asset(0, _root_govern_symbol);       ///< Средняя сумма на каждого участника (total_voting_pool / voters)
+      eosio::asset authors_equal_per_author = asset(0, _root_govern_symbol);  ///< Равная сумма на каждого автора (62.8% / количество авторов)
   };
   
   /**
    * @brief Структура данных для голосования по методу Водянова
-   * 
    */
   struct voting_data {
     uint32_t total_voters;                          ///< Общее количество участников
-    uint32_t votes_received;                              ///< Количество полученных голосов
+    uint32_t votes_received;                        ///< Количество полученных голосов
     
-    double authors_voting_percent;                     ///< Процент премий авторов для голосования (по умолчанию; уточняется из config при инициализации голосования)
-    double creators_voting_percent;                    ///< Процент премий создателей для голосования (по умолчанию; уточняется из config при инициализации голосования)
+    double authors_voting_percent;                  ///< Процент премий авторов для голосования (по умолчанию; уточняется из config при инициализации голосования)
+    double creators_voting_percent;                 ///< Процент премий создателей для голосования (по умолчанию; уточняется из config при инициализации голосования)
     
-    voting_amounts amounts; ///< Суммы на голосовании
+    voting_amounts amounts;                         ///< Суммы на голосовании
     
-    time_point_sec voting_deadline; ///< Дедлайн голосования
+    time_point_sec voting_deadline;                 ///< Дедлайн голосования
   };
 
-  
-/**
- * @brief Структура голоса по методу Водянова
- */
-struct [[eosio::table, eosio::contract(CAPITAL)]] vote {
-    uint64_t id;
-    checksum256 project_hash;          ///< Хэш проекта
-    name voter;                        ///< Кто голосует  
-    name recipient;                    ///< За кого голосует
-    asset amount;                      ///< Сумма голоса
-    time_point_sec voted_at;           ///< Время голосования
+  /**
+   * @brief Таблица голосов хранит информацию о голосах участников по методу Водянова.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_vote
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): votes 
+   */
+  struct [[eosio::table, eosio::contract(CAPITAL)]] vote {
+    uint64_t id;                                    ///< ID голоса (внутренний ключ)
+    checksum256 project_hash;                       ///< Хэш проекта
+    name voter;                                     ///< Кто голосует  
+    name recipient;                                 ///< За кого голосует
+    asset amount;                                   ///< Сумма голоса
+    time_point_sec voted_at;                        ///< Время голосования
     
-    uint64_t primary_key() const { return id; }
+    uint64_t primary_key() const { return id; }     ///< Первичный ключ (1)
     
-    checksum256 by_project() const { return project_hash; }
+    checksum256 by_project() const { return project_hash; } ///< Индекс по хэшу проекта (2)
     
     // Индекс по проекту и голосующему - для проверки что пользователь не голосовал дважды
-    uint128_t by_project_voter() const {
+    uint128_t by_project_voter() const {            ///< Индекс по проекту и голосующему (3)
         return combine_checksum_ids(project_hash, voter);
     }
     
     // Индекс по проекту и получателю - для подсчета сумм полученных голосов
-    uint128_t by_project_recipient() const {
+    uint128_t by_project_recipient() const {        ///< Индекс по проекту и получателю (4)
         return combine_checksum_ids(project_hash, recipient);
     }
-};
+  };
 
 typedef eosio::multi_index<"votes"_n, vote,
     indexed_by<"byproject"_n, const_mem_fun<vote, checksum256, &vote::by_project>>,

@@ -1,3 +1,16 @@
+/**
+ * @brief Запускает проект на приём коммитов
+ * Переводит проект в активный статус для приема коммитов:
+ * - Проверяет существование проекта
+ * - Валидирует что проект в статусе pending
+ * - Обновляет статус проекта на active
+ * @param coopname Наименование кооператива
+ * @param project_hash Хеш проекта для запуска
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_startproject
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::startproject(name coopname, checksum256 project_hash) {
     require_auth(coopname);
     

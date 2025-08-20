@@ -1,3 +1,19 @@
+/**
+ * @brief Одобряет коммит в проект
+ * Одобряет коммит и обрабатывает все связанные операции:
+ * - Получает коммит
+ * - Добавляет коммит к проекту
+ * - Обновляет или создает сегмент создателя
+ * - Распределяет авторские средства между всеми авторами проекта
+ * - Удаляет коммит после обработки
+ * @param coopname Наименование кооператива
+ * @param commit_hash Хеш коммита для одобрения
+ * @param empty_document Пустой документ (не используется)
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_approvecmmt
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, document2 empty_document) {
   require_auth(_soviet);
 

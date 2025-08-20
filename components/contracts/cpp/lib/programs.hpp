@@ -1,36 +1,44 @@
 #pragma once
 
-// -----------------------------------------------------------------
-// Таблица программ
-// -----------------------------------------------------------------
+/**
+\ingroup public_tables
+\ingroup public_soviet_tables
+\brief Таблица программ кооператива
+*
+* Таблица содержит информацию о кооперативных программах (кошелёк, маркетплейс, капитал).
+*
+* @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
+* @par Имя таблицы (table): programs
+* @anchor soviet_program
+*/
 struct [[eosio::table, eosio::contract(SOVIET)]] program {
-  uint64_t id;                             /*!< идентификатор обмена */
-  uint64_t draft_id;                       ///< Ссылка на шаблон условий
-  eosio::name program_type;                /*!< тип кооперативной программы (wallet | market | capital) */
+  uint64_t id; ///< Уникальный идентификатор программы
+  uint64_t draft_id; ///< Ссылка на шаблон условий
+  eosio::name program_type; ///< Тип кооперативной программы (wallet | market | capital)
   
-  eosio::name coopname;                    /*!< имя аккаунта кооператива */
-  bool is_active;
-  std::string title;
-  std::string announce;
-  std::string description;
-  std::string preview;
-  std::string images;
-  std::string meta;
+  eosio::name coopname; ///< Имя аккаунта кооператива
+  bool is_active; ///< Флаг активности программы
+  std::string title; ///< Название программы
+  std::string announce; ///< Анонс программы
+  std::string description; ///< Описание программы
+  std::string preview; ///< Предварительный просмотр
+  std::string images; ///< Изображения программы
+  std::string meta; ///< Метаданные программы
 
-  eosio::name calculation_type;            /*!< LEGACY тип настройки платежей по программе ( absolute | relative | free ) */
-  uint64_t membership_percent_fee;         /*!< LEGACY процент комиссии со взноса */
-  eosio::asset fixed_membership_contribution;  /*!< LEGACY Членский взнос */
+  eosio::name calculation_type; ///< LEGACY тип настройки платежей по программе ( absolute | relative | free )
+  uint64_t membership_percent_fee; ///< LEGACY процент комиссии со взноса
+  eosio::asset fixed_membership_contribution; ///< LEGACY Членский взнос
   
-  eosio::time_point_sec start_at;          /*!< Время открытия */
-  eosio::time_point_sec expired_at;        /*!< Временное ограничение */
+  eosio::time_point_sec start_at; ///< Время открытия программы
+  eosio::time_point_sec expired_at; ///< Время истечения программы
   
-  eosio::binary_extension<eosio::asset> available; ///< доступные паевые взносы для расходов по ЦПП
-  eosio::binary_extension<eosio::asset> spendeded; ///< расходы из числа паевых взносов ЦПП
-  eosio::binary_extension<eosio::asset> blocked; ///< недоступные средства из числа паевых взносов для расходов по ЦПП
+  eosio::binary_extension<eosio::asset> available; ///< Доступные паевые взносы для расходов по ЦПП
+  eosio::binary_extension<eosio::asset> spendeded; ///< Расходы из числа паевых взносов ЦПП
+  eosio::binary_extension<eosio::asset> blocked; ///< Недоступные средства из числа паевых взносов для расходов по ЦПП
   
-  eosio::binary_extension<bool> is_can_coop_spend_share_contributions; ///< может ли кооператив использовать паевые взносы программы на расходы
+  eosio::binary_extension<bool> is_can_coop_spend_share_contributions; ///< Может ли кооператив использовать паевые взносы программы на расходы
 
-  eosio::binary_extension<eosio::asset> share_contributions; ///< собранные паевые взносы 
+  eosio::binary_extension<eosio::asset> share_contributions; ///< Паевые взносы ///< собранные паевые взносы 
   eosio::binary_extension<eosio::asset> membership_contributions; ///< собранные членские взносы
   
   uint64_t primary_key() const { return id; } /*!< return id - primary_key */

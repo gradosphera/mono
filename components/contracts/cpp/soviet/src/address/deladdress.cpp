@@ -1,3 +1,14 @@
+/**
+ * @brief Удаление адреса кооператива
+ * Удаляет существующий адрес из системы кооператива по его идентификатору.
+ * @param coopname Наименование кооператива
+ * @param chairman Наименование председателя совета
+ * @param address_id Идентификатор адреса для удаления
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_deladdress
+ * @note Авторизация требуется от аккаунта: @p chairman
+ */
 void soviet::deladdress(eosio::name coopname, eosio::name chairman, uint64_t address_id) {
 
   require_auth(chairman);

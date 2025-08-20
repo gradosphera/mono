@@ -1,3 +1,16 @@
+/**
+ * @brief Выбор филиала участником
+ * Позволяет участнику выбрать филиал кооператива для привязки.
+ * Отправляет уведомления о выборе филиала в систему документооборота.
+ * @param coopname Наименование кооператива
+ * @param username Наименование участника
+ * @param braname Наименование выбранного филиала
+ * @param document Документ с подтверждением выбора филиала
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_selectbranch
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 [[eosio::action]] void soviet::selectbranch(eosio::name coopname, eosio::name username, eosio::name braname, document2 document){
   require_auth(coopname);
   

@@ -1,3 +1,16 @@
+/**
+ * @brief Создание свободного решения совета
+ * Создает свободное решение совета без привязки к конкретному типу действия.
+ * Позволяет инициировать голосование по произвольному вопросу.
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, создающего решение
+ * @param document Документ с описанием решения
+ * @param meta Дополнительные метаданные
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_freedecision
+ * @note Авторизация требуется от аккаунта: @p username
+ */
 [[eosio::action]] void soviet::freedecision(eosio::name coopname, eosio::name username, document2 document, std::string meta) {
   
   check_auth_or_fail(_soviet, coopname, username, "freedecision"_n);

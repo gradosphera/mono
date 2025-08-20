@@ -28,6 +28,8 @@ import { processCreateProjectProperty } from './capital/processCreateProjectProp
 import { processCreateProgramProperty } from './capital/processCreateProgramProperty'
 import { processStartVoting } from './capital/processStartVoting'
 import { createVoteDistribution, submitVote } from './capital/submitVote'
+import { processCompleteVoting } from './capital/processCompleteVoting'
+import { processCalculateVotes } from './capital/processCalculateVotes'
 
 // const CLI_PATH = 'src/index.ts'
 
@@ -1149,6 +1151,61 @@ describe('тест контракта CAPITAL', () => {
     expect(result.votesAfter.length).toBe(result.votesBefore.length + 2)
     expect(result.voterVotesBefore.length).toBe(0)
     expect(result.voterVotesAfter.length).toBe(2)
+  })
+
+  it('завершаем голосование и проверяем изменение статуса проекта с voting на completed', async () => {
+    const data: CapitalContract.Actions.CompleteVoting.ICompleteVoting = {
+      coopname: 'voskhod',
+      project_hash: project1.project_hash,
+    }
+
+    const result = await processCompleteVoting(blockchain, data)
+
+    expect(result.txId).toBeDefined()
+    expect(result.projectBefore.status).toBe('voting')
+    expect(result.projectAfter.status).toBe('completed')
+  })
+
+  it('рассчитываем голоса для участника tester1', async () => {
+    const data: CapitalContract.Actions.CalculateVotes.IFinalVoting = {
+      coopname: 'voskhod',
+      username: tester1,
+      project_hash: project1.project_hash,
+    }
+
+    const result = await processCalculateVotes(blockchain, data)
+    expect(parseFloat(result.segmentAfter.voting_bonus)).toBeCloseTo(parseFloat(result.projectAfter.voting.amounts.equal_voting_amount), 2)
+    expect(parseFloat(result.segmentAfter.voting_bonus)).toBeCloseTo(parseFloat(result.projectAfter.voting.amounts.total_voting_pool) / 3, 2)
+
+    expect(result.txId).toBeDefined()
+  })
+
+  it('рассчитываем голоса для участника tester2', async () => {
+    const data: CapitalContract.Actions.CalculateVotes.IFinalVoting = {
+      coopname: 'voskhod',
+      username: tester2,
+      project_hash: project1.project_hash,
+    }
+
+    const result = await processCalculateVotes(blockchain, data)
+    expect(parseFloat(result.segmentAfter.voting_bonus)).toBeCloseTo(parseFloat(result.projectAfter.voting.amounts.equal_voting_amount), 2)
+    expect(parseFloat(result.segmentAfter.voting_bonus)).toBeCloseTo(parseFloat(result.projectAfter.voting.amounts.total_voting_pool) / 3, 2)
+
+    expect(result.txId).toBeDefined()
+  })
+
+  it('рассчитываем голоса для участника tester3', async () => {
+    const data: CapitalContract.Actions.CalculateVotes.IFinalVoting = {
+      coopname: 'voskhod',
+      username: tester3,
+      project_hash: project1.project_hash,
+    }
+
+    const result = await processCalculateVotes(blockchain, data)
+    expect(parseFloat(result.segmentAfter.voting_bonus)).toBeCloseTo(parseFloat(result.projectAfter.voting.amounts.equal_voting_amount), 2)
+    expect(parseFloat(result.segmentAfter.voting_bonus)).toBeCloseTo(parseFloat(result.projectAfter.voting.amounts.total_voting_pool) / 3, 2)
+
+    expect(result.txId).toBeDefined()
   })
 
   // it('финансировать результат проекта на 20000 RUB', async () => {

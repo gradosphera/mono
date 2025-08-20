@@ -1,6 +1,14 @@
 /**
- * @brief Отклонение предложения по программному имущественному взносу
- * \ingroup public_actions
+ * @brief Отклоняет предложение по программному имущественному взносу
+ * Отклоняет предложение по программному имущественному взносу и удаляет его из базы:
+ * - Получает предложение по программному имущественному взносу
+ * - Удаляет предложение из базы данных с указанием причины
+ * @param coopname Наименование кооператива
+ * @param property_hash Хеш программного имущественного взноса для отклонения
+ * @param reason Причина отклонения предложения
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_declinepgprp
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::declinepgprp(eosio::name coopname, checksum256 property_hash, std::string reason) {

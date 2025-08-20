@@ -1,20 +1,17 @@
 
 /**
-\ingroup public_actions
-\brief Добавление персонала кооператива
-*
-* Данный метод позволяет добавить в кооператив нового члена персонала с указанием определенных прав на выполнение методов действий вместо совета.
-* Авторизация для выполнения этого метода требуется только от председателя совета кооператива.
-*
-* @param coopname Имя кооператива
-* @param board_id ID совета кооператива
-* @param chairman Имя председателя совета
-* @param username Имя нового члена персонала
-* @param rights Список прав, разрешенных для выполнения указанным членом персонала
-* @param position_title Название должности нового члена персонала
-* 
-* @note Авторизация требуется от аккаунта: @p chairman
-*/
+ * @brief Добавление персонала кооператива
+ * Добавляет нового члена персонала в кооператив с указанием определенных прав на выполнение методов действий вместо совета.
+ * @param coopname Наименование кооператива
+ * @param chairman Наименование председателя совета
+ * @param username Наименование нового члена персонала
+ * @param rights Список прав, разрешенных для выполнения указанным членом персонала
+ * @param position_title Название должности нового члена персонала
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+ * @anchor soviet_addstaff
+ * @note Авторизация требуется от аккаунта: @p chairman
+ */
 void soviet::addstaff(eosio::name coopname, eosio::name chairman, eosio::name username, std::vector<right> rights, std::string position_title) {
   require_auth(chairman);
 

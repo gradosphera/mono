@@ -3,29 +3,42 @@
 using namespace eosio;
 using std::string;
 
-namespace Capital::ProgramInvests::Status {
-  const eosio::name CREATED = "created"_n;
+namespace Capital::ProgramInvests {
+  /**
+   * @brief Константы статусов программных инвестиций
+   * @ingroup public_consts
+   * @ingroup public_capital_consts
+   * @anchor capital_program_invest_status
+   */
+   namespace Status {
+    const eosio::name CREATED = "created"_n;     ///< Программная инвестиция создана
+  }
 }
 
 namespace Capital {
 
-/**
- * @brief Структура программной инвестиции, хранящая данные инвестиции в программу.
- */
-struct [[eosio::table, eosio::contract(CAPITAL)]] program_invest {
-    uint64_t id;                                ///< Уникальный идентификатор инвестиции.
-    eosio::name coopname;                       ///< Имя кооператива.
-    eosio::name username;                       ///< Имя пользователя инвестора.
-    checksum256 invest_hash;                    ///< Хэш инвестиции.
-    eosio::name status;                         ///< Статус инвестиции.
-    time_point_sec invested_at;                 ///< Время создания инвестиции.
-    document2 statement;                        ///< Заявление на инвестицию.
-    eosio::asset amount;                        ///< Сумма инвестиции.
+  /**
+   * @brief Таблица программных инвестиций хранит данные об инвестициях в программу капитализации.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_program_invest
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): progrinvests 
+   */
+  struct [[eosio::table, eosio::contract(CAPITAL)]] program_invest {
+    uint64_t id;                                ///< ID программной инвестиции (внутренний ключ)
+    eosio::name coopname;                       ///< Имя кооператива
+    eosio::name username;                       ///< Имя инвестора
+    checksum256 invest_hash;                    ///< Хэш инвестиции
+    eosio::name status;                         ///< Статус инвестиции
+    time_point_sec invested_at;                 ///< Время создания инвестиции
+    document2 statement;                        ///< Заявление на инвестицию
+    eosio::asset amount;                        ///< Сумма инвестиции
     
-    uint64_t primary_key() const { return id; }
-    uint64_t by_username() const { return username.value; }
-    checksum256 by_hash() const { return invest_hash; }
-};
+    uint64_t primary_key() const { return id; } ///< Первичный ключ (1)
+    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+    checksum256 by_hash() const { return invest_hash; } ///< Индекс по хэшу инвестиции (3)
+  };
 
 typedef eosio::multi_index<
     "progrinvests"_n, program_invest,

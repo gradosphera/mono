@@ -91,7 +91,7 @@
 #include "app/settle_debt/settledebt.cpp"
 
 // Голосование  
-#include "app/voting/finalvoting.cpp"
+#include "app/voting/calcvotes.cpp"
 #include "app/voting/submitvote.cpp"
 
 // Результаты

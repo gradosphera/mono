@@ -1,3 +1,18 @@
+/**
+ * @brief Авторизует результат участника советом
+ * Авторизует результат участника советом:
+ * - Проверяет подлинность документа решения совета
+ * - Валидирует статус результата (должен быть approved)
+ * - Устанавливает документ авторизации
+ * - Обновляет статус на authorized
+ * @param coopname Наименование кооператива
+ * @param result_hash Хеш результата для авторизации
+ * @param decision Документ решения совета
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_authrslt
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void capital::authrslt(eosio::name coopname, checksum256 result_hash, document2 decision) {
   require_auth(_soviet);
   

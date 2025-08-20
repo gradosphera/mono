@@ -1,3 +1,22 @@
+/**
+ * @brief Создает программную инвестицию
+ * Создает программную инвестицию с блокировкой средств и отправкой на одобрение:
+ * - Проверяет подлинность заявления об инвестиции
+ * - Валидирует сумму инвестиции
+ * - Проверяет активность основного договора УХД
+ * - Проверяет наличие кошелька в программе капитализации
+ * - Блокирует средства в кошельке пайщика
+ * - Создает программную инвестицию и отправляет на одобрение
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-инвестора
+ * @param invest_hash Хеш программной инвестиции
+ * @param amount Сумма инвестиции
+ * @param statement Заявление об инвестиции
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_createpinv
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::createpinv(name coopname, name username, checksum256 invest_hash, asset amount, document2 statement) {
   require_auth(coopname);
   

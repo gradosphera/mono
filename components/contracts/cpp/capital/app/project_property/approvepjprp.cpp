@@ -1,6 +1,16 @@
 /**
- * @brief Принятие предложения по имущественному взносу
- * \ingroup public_actions
+ * @brief Принимает предложение по имущественному взносу в проект
+ * Принимает предложение по имущественному взносу и обрабатывает связанные операции:
+ * - Получает предложение по имущественному взносу
+ * - Добавляет имущественный взнос к проекту
+ * - Обновляет или создает сегмент пропертора с имущественным взносом
+ * - Удаляет предложение после обработки
+ * @param coopname Наименование кооператива
+ * @param property_hash Хеш имущественного взноса для принятия
+ * @param empty_document Пустой документ (не используется)
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_approvepjprp
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::approvepjprp(eosio::name coopname, checksum256 property_hash, document2 empty_document) {

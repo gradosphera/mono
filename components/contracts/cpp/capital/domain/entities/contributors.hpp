@@ -5,46 +5,51 @@ using std::string;
 
 namespace Capital {
 
-/**
-  * @brief Структура участника, хранящая данные индивидуального участника.
-  */
+  /**
+   * @brief Таблица участников хранит данные индивидуального участника кооператива.
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * @anchor capital_contributor
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): contributors 
+   */
   struct [[eosio::table, eosio::contract(CAPITAL)]] contributor {
-    uint64_t id; ///< Идентификатор контрибьютора
-    name coopname; ///< Имя кооператива
-    name username; ///< Имя пользователя
-    checksum256 contributor_hash; ///< Внешний идентификатор контрибьютора
-    time_point_sec created_at; ///< Время создания контрибьютора
-    name status; ///< Статус контрибьютора
+    uint64_t id;                                    ///< ID контрибьютора (внутренний ключ)
+    name coopname;                                  ///< Имя кооператива
+    name username;                                  ///< Имя пользователя
+    checksum256 contributor_hash;                   ///< Внешний идентификатор контрибьютора
+    time_point_sec created_at;                      ///< Время создания контрибьютора
+    name status;                                    ///< Статус контрибьютора
     
-    bool is_external_contract = false; ///< Флаг, указывающий на внешний контракт
-    document2 contract; ///< Договор УХД
-    std::vector<checksum256> appendixes; ///< Вектор хэшей проектов, для которых подписаны приложения
+    bool is_external_contract = false;              ///< Флаг, указывающий на внешний контракт
+    document2 contract;                             ///< Договор УХД
+    std::vector<checksum256> appendixes;            ///< Вектор хэшей проектов, для которых подписаны приложения
     
     eosio::asset rate_per_hour = asset(0, _root_govern_symbol); ///< Ставка за час
     
-    eosio::asset debt_amount = asset(0, _root_govern_symbol);///< Сумма долга
+    eosio::asset debt_amount = asset(0, _root_govern_symbol);   ///< Сумма долга
     
     eosio::asset capital_available = asset(0, _root_govern_symbol); ///< Накопленные членские взносы по программе капитализации
-    int64_t reward_per_share_last = 0; ///< Последний зафиксированный cumulative_reward_per_share по программе капитализации
+    int64_t reward_per_share_last = 0;                           ///< Последний зафиксированный cumulative_reward_per_share по программе капитализации
     
-    eosio::asset contributed_as_investor = asset(0, _root_govern_symbol); ///< Сумма, вложенная в проект как инвестор
-    eosio::asset contributed_as_creator = asset(0, _root_govern_symbol); ///< Сумма, вложенная в проект как создатель
-    eosio::asset contributed_as_author = asset(0, _root_govern_symbol); ///< Сумма, вложенная в проект как автор
-    eosio::asset contributed_as_coordinator = asset(0, _root_govern_symbol); ///< Сумма, вложенная в проект как координатор
-    eosio::asset contributed_as_contributor = asset(0, _root_govern_symbol); ///< Сумма, вложенная в проект как контрибьютор
-    eosio::asset contributed_as_propertor = asset(0, _root_govern_symbol); ///< Сумма, вложенная в проект как пропертор
+    eosio::asset contributed_as_investor = asset(0, _root_govern_symbol);     ///< Сумма, вложенная в проект как инвестор
+    eosio::asset contributed_as_creator = asset(0, _root_govern_symbol);      ///< Сумма, вложенная в проект как создатель
+    eosio::asset contributed_as_author = asset(0, _root_govern_symbol);       ///< Сумма, вложенная в проект как автор
+    eosio::asset contributed_as_coordinator = asset(0, _root_govern_symbol);  ///< Сумма, вложенная в проект как координатор
+    eosio::asset contributed_as_contributor = asset(0, _root_govern_symbol);  ///< Сумма, вложенная в проект как контрибьютор
+    eosio::asset contributed_as_propertor = asset(0, _root_govern_symbol);    ///< Сумма, вложенная в проект как пропертор
     
-    uint64_t primary_key() const { return id; }
-    uint64_t by_username() const { return username.value; }
-    checksum256 by_hash() const { return contributor_hash; }
-    uint64_t by_investor_rating() const { return contributed_as_investor.amount; }
-    uint64_t by_creator_rating() const { return contributed_as_creator.amount; }
-    uint64_t by_author_rating() const { return contributed_as_author.amount; }
-    uint64_t by_coordinator_rating() const { return contributed_as_coordinator.amount; }
-    uint64_t by_contributor_rating() const { return contributed_as_contributor.amount; }
-    uint64_t by_propertor_rating() const { return contributed_as_propertor.amount; }
-    uint64_t by_rating() const { return contributed_as_investor.amount + contributed_as_creator.amount + contributed_as_author.amount + contributed_as_coordinator.amount + contributed_as_contributor.amount + contributed_as_propertor.amount; }
-};
+    uint64_t primary_key() const { return id; }                  ///< Первичный ключ (1)
+    uint64_t by_username() const { return username.value; }      ///< Индекс по имени пользователя (2)
+    checksum256 by_hash() const { return contributor_hash; }     ///< Индекс по хэшу контрибьютора (3)
+    uint64_t by_investor_rating() const { return contributed_as_investor.amount; }     ///< Индекс по рейтингу инвестора (4)
+    uint64_t by_creator_rating() const { return contributed_as_creator.amount; }       ///< Индекс по рейтингу создателя (5)
+    uint64_t by_author_rating() const { return contributed_as_author.amount; }         ///< Индекс по рейтингу автора (6)
+    uint64_t by_coordinator_rating() const { return contributed_as_coordinator.amount; } ///< Индекс по рейтингу координатора (7)
+    uint64_t by_contributor_rating() const { return contributed_as_contributor.amount; } ///< Индекс по рейтингу контрибьютора (8)
+    uint64_t by_propertor_rating() const { return contributed_as_propertor.amount; }     ///< Индекс по рейтингу пропертора (9)
+    uint64_t by_rating() const { return contributed_as_investor.amount + contributed_as_creator.amount + contributed_as_author.amount + contributed_as_coordinator.amount + contributed_as_contributor.amount + contributed_as_propertor.amount; } ///< Индекс по общему рейтингу (10)
+  };
 
 typedef eosio::multi_index<
     "contributors"_n, contributor,
@@ -64,6 +69,9 @@ namespace Capital::Contributors {
 
   /**
    * @brief Константы статусов контрибьюторов
+   * @ingroup public_consts
+   * @ingroup public_capital_consts
+   * @anchor capital_contributor_status
    */
   namespace Status {
     const eosio::name PENDING = "pending"_n;       ///< Ожидает подтверждения

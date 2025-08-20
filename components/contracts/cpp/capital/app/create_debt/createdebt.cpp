@@ -1,3 +1,26 @@
+/**
+ * @brief Создает долг в проекте
+ * Создает долг в проекте с проверкой доступности средств и отправляет на одобрение:
+ * - Проверяет подлинность заявления о долге
+ * - Валидирует сумму долга
+ * - Проверяет существование участника в проекте
+ * - Валидирует актуальность сегмента (CRPS обновлен)
+ * - Проверяет доступность средств для ссуды
+ * - Обновляет debt_amount в сегменте
+ * - Создает долг во внутренней таблице
+ * - Создает аппрув для долга
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-заемщика
+ * @param project_hash Хеш проекта
+ * @param debt_hash Хеш долга
+ * @param amount Сумма долга
+ * @param repaid_at Дата погашения долга
+ * @param statement Заявление о долге
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_createdebt
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::createdebt(name coopname, name username, checksum256 project_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document2 statement) {
   require_auth(coopname);
   

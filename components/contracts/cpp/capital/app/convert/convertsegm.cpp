@@ -1,3 +1,25 @@
+/**
+ * @brief Конвертирует сегмент участника в различные типы кошельков
+ * Конвертирует сегмент участника в кошелек, капитал и кошелек проекта:
+ * - Проверяет статус сегмента (должен быть contributed)
+ * - Валидирует актуальность сегмента
+ * - Проверяет наличие средств для конвертации
+ * - Валидирует корректность сумм конвертации
+ * - Выполняет операции с балансами (кошелек, капитал, проект)
+ * - Обновляет сегмент и доли проекта
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-участника
+ * @param project_hash Хеш проекта
+ * @param convert_hash Хеш конвертации
+ * @param wallet_amount Сумма для конвертации в кошелек
+ * @param capital_amount Сумма для конвертации в капитал
+ * @param project_amount Сумма для конвертации в кошелек проекта
+ * @param convert_statement Заявление о конвертации
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_convertsegm
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void capital::convertsegm(eosio::name coopname, eosio::name username,
                           checksum256 project_hash, checksum256 convert_hash, 
                           eosio::asset wallet_amount, eosio::asset capital_amount, eosio::asset project_amount,

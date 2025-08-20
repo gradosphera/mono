@@ -10,6 +10,9 @@ namespace Capital::Debts {
 
 /**
  * @brief Статусы долгов
+ * @ingroup public_consts
+ * @ingroup public_capital_consts
+ * @anchor capital_debt_status
  */
 namespace Status {
   constexpr name CREATED = "created"_n;      ///< Долг создан
@@ -19,27 +22,32 @@ namespace Status {
 }
 
 /**
- * @brief Структура долга
+ * @brief Таблица долгов хранит данные о ссудах участников проектов.
+ * @ingroup public_tables
+ * @ingroup public_capital_tables
+ * @anchor capital_debt
+ * @par Область памяти (scope): coopname
+ * @par Имя таблицы (table): debts 
  */
 struct [[eosio::table, eosio::contract(CAPITAL)]] debt {
-  uint64_t         id;
-  eosio::name      coopname;
-  eosio::name      username;
-  eosio::name      status = Status::CREATED;
-  checksum256      debt_hash;
-  checksum256      project_hash;
-  time_point_sec   repaid_at;
-  asset            amount;
-  document2        statement;
-  document2        approved_statement;
-  document2        authorization;
-  std::string      memo;
+  uint64_t         id;                        ///< ID долга (внутренний ключ)
+  eosio::name      coopname;                  ///< Имя кооператива
+  eosio::name      username;                  ///< Имя пользователя
+  eosio::name      status = Status::CREATED;  ///< Статус долга (created | approved | authorized | paid)
+  checksum256      debt_hash;                 ///< Хэш долга
+  checksum256      project_hash;              ///< Хэш проекта
+  time_point_sec   repaid_at;                 ///< Дата погашения долга
+  asset            amount;                    ///< Сумма долга
+  document2        statement;                 ///< Заявление на ссуду
+  document2        approved_statement;        ///< Одобренное заявление
+  document2        authorization;             ///< Авторизация совета
+  std::string      memo;                      ///< Примечание
   
-  uint64_t primary_key() const { return id; }
+  uint64_t primary_key() const { return id; } ///< Первичный ключ (1)
 
-  uint64_t by_username() const { return username.value; }
-  checksum256 by_debt_hash() const { return debt_hash; }
-  checksum256 by_project_hash() const { return project_hash; }
+  uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+  checksum256 by_debt_hash() const { return debt_hash; } ///< Индекс по хэшу долга (3)
+  checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта (4)
 };
 
 typedef eosio::multi_index<

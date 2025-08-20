@@ -1,3 +1,17 @@
+/**
+ * @brief Отклоняет инвестицию в проект
+ * Отклоняет инвестицию в проект и разблокирует средства:
+ * - Получает инвестицию
+ * - Разблокирует средства в программе кошелька
+ * - Удаляет инвестицию из базы данных
+ * @param coopname Наименование кооператива
+ * @param invest_hash Хеш инвестиции для отклонения
+ * @param decline_statement Отклоненное заявление об инвестиции
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @anchor capital_declineinvst
+ * @note Авторизация требуется от аккаунта: @p _soviet
+ */
 void capital::declineinvst(eosio::name coopname, checksum256 invest_hash, document2 decline_statement) {
   require_auth(_soviet);
 
