@@ -13,5 +13,9 @@ node_modules
 build/*
 blockchain-data/*
 wallet-data/*
-docs/*
 blocks/*
+docs/html
+docs/html2
+docs/json
+docs/node_nodules
+docs/xml
