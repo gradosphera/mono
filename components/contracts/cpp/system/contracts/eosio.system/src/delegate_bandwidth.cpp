@@ -20,7 +20,15 @@ namespace eosiosystem {
    using eosio::token;
 
    /**
-    *  This action will buy an exact amount of ram and bill the payer the current market price.
+    * @brief Покупает точное количество RAM в байтах.
+    * Покупает точное количество байт RAM и выставляет счет плательщику по текущей рыночной цене.
+    * @param payer Аккаунт, который платит за RAM
+    * @param receiver Аккаунт, который получает RAM
+    * @param bytes Точное количество байт RAM для покупки
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_buyrambytes
+    * @note Авторизация требуется от аккаунта: @p payer
     */
    void system_contract::buyrambytes( const name& payer, const name& receiver, uint32_t bytes ) {
       auto itr = _rammarket.find(ramcore_symbol.raw());
@@ -32,12 +40,20 @@ namespace eosiosystem {
 
 
    /**
-    *  When buying ram the payer irreversibly transfers quant to system contract and only
-    *  the receiver may reresult the tokens via the sellram action. The receiver pays for the
-    *  storage of all database records associated with this action.
-    *
-    *  RAM is a scarce resource whose supply is defined by global properties max_ram_size. RAM is
-    *  priced using the bancor algorithm such that price-per-byte with a constant reserve ratio of 100:1.
+    * @brief Покупает RAM для указанного аккаунта.
+    * При покупке RAM плательщик безвозвратно передает токены системному контракту, и только
+    * получатель может вернуть токены через действие sellram. Получатель оплачивает хранение
+    * всех записей базы данных, связанных с этим действием.
+    * RAM - это ограниченный ресурс, предложение которого определяется глобальным свойством max_ram_size.
+    * RAM оценивается с использованием алгоритма Bancor с постоянным резервным соотношением 100:1.
+    * @param payer Аккаунт, который платит за RAM
+    * @param receiver Аккаунт, который получает RAM
+    * @param quant Количество токенов для покупки RAM
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_buyram
+    * @note Авторизация требуется от аккаунта: @p payer
+    * @deprecated Используется аренда RAM с помощью метода powerup (@ref system_powerup)
     */
    void system_contract::buyram( const name& payer, const name& receiver, const asset& quant )
     {
@@ -98,6 +114,16 @@ namespace eosiosystem {
     }
 
 
+  /**
+   * @brief Продает RAM обратно в систему.
+   * Позволяет аккаунту продать свои байты RAM обратно в систему и получить токены.
+   * @param account Аккаунт, который продает RAM
+   * @param bytes Количество байт RAM для продажи
+   * @ingroup public_actions
+   * @ingroup public_system_actions
+   * @anchor system_sellram
+   * @note Авторизация требуется от аккаунта: @p eosio.system
+   */
   void system_contract::sellram( const name& account, int64_t bytes ) {
       require_auth(get_self());
       update_ram_supply();
@@ -345,6 +371,19 @@ namespace eosiosystem {
       }
    }
 
+   /**
+    * @brief Делегирует пропускную способность сети и CPU другому аккаунту.
+    * Позволяет аккаунту застейкать токены для предоставления ресурсов сети и CPU другому аккаунту.
+    * @param from Аккаунт, который делегирует ресурсы
+    * @param receiver Аккаунт, который получает делегированные ресурсы
+    * @param stake_net_quantity Количество токенов для стейкинга сети
+    * @param stake_cpu_quantity Количество токенов для стейкинга CPU
+    * @param transfer Флаг передачи владения токенами
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_delegatebw
+    * @note Авторизация требуется от аккаунта: @p from
+    */
    void system_contract::delegatebw( const name& from, const name& receiver,
                                      const asset& stake_net_quantity,
                                      const asset& stake_cpu_quantity, bool transfer )
@@ -364,6 +403,18 @@ namespace eosiosystem {
       
    } // delegatebw
 
+   /**
+    * @brief Отменяет делегирование пропускной способности сети и CPU.
+    * Позволяет аккаунту отменить стейкинг токенов для ресурсов сети и CPU.
+    * @param from Аккаунт, который отменяет делегирование
+    * @param receiver Аккаунт, у которого отменяется делегирование
+    * @param unstake_net_quantity Количество токенов для отмены стейкинга сети
+    * @param unstake_cpu_quantity Количество токенов для отмены стейкинга CPU
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_undelegatebw
+    * @note Авторизация требуется от аккаунта: @p from
+    */
    void system_contract::undelegatebw( const name& from, const name& receiver,
                                        const asset& unstake_net_quantity, const asset& unstake_cpu_quantity )
    {
@@ -384,6 +435,15 @@ namespace eosiosystem {
    } // undelegatebw
 
 
+   /**
+    * @brief Возвращает застейканные токены после истечения периода задержки.
+    * Позволяет аккаунту получить обратно свои токены после отмены делегирования.
+    * @param owner Аккаунт, который запрашивает возврат токенов
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_refund
+    * @note Авторизация требуется от аккаунта: @p owner
+    */
    void system_contract::refund( const name& owner ) {
       require_auth( owner );
 

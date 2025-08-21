@@ -1,3 +1,14 @@
+/**
+ * @brief Отклонение платежа регистрации.
+ * Отклоняет оплату регистрационного взноса от gateway
+ * @param coopname Наименование кооператива
+ * @param registration_hash Хэш регистрации
+ * @param reason Причина отклонения платежа
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_declinepay
+ * @note Авторизация требуется от аккаунта: @p gateway
+ */
 void registrator::declinepay(name coopname, checksum256 registration_hash, std::string reason){
   require_auth(_gateway);
   

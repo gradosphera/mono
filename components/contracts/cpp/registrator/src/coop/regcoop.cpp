@@ -1,11 +1,15 @@
 /**
-\ingroup public_actions
-\brief Регистрация кооператива-члена цифровой системы
-*
-* Этот метод позволяет 
-*
-* @note Авторизация требуется от одного из аккаунтов: @p coopname || username
-*/
+ * @brief Регистрация кооператива-члена цифровой системы.
+ * Регистрирует новый кооператив в системе
+ * @param coopname Наименование кооператива
+ * @param username Имя пользователя-регистратора
+ * @param params Параметры кооператива
+ * @param document Документ регистрации
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_regcoop
+ * @note Авторизация требуется от аккаунта: @p coopname или @p username
+ */
 [[eosio::action]] void registrator::regcoop(eosio::name coopname, eosio::name username, org_data params, document2 document)
 {
   check_auth_or_fail(_registrator, coopname, username, "regcoop"_n);

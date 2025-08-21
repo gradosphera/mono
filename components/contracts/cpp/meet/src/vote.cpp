@@ -12,6 +12,19 @@ uint64_t get_total_participants(eosio::name coopname) {
     return Registrator::get_active_participants_count(coopname);
 }
 
+/**
+ * @brief Голосование на собрании.
+ * Регистрирует голос участника по вопросам повестки дня собрания
+ * @param coopname Наименование кооператива
+ * @param hash Хэш собрания
+ * @param username Имя пользователя, голосующего на собрании
+ * @param ballot Документ бюллетеня
+ * @param votes Массив голосов по вопросам повестки
+ * @ingroup public_actions
+ * @ingroup public_meet_actions
+ * @anchor meet_vote
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void meet::vote(name coopname, checksum256 hash, name username, document2 ballot, std::vector<vote_point> votes) {
     require_auth(coopname);
     

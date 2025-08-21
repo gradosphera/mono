@@ -1,9 +1,14 @@
 /**
- * @brief Атомарная операция списания - перевод заблокированных средств в списанные
- * @param coopname - имя кооператива
- * @param account_id - идентификатор счета
- * @param quantity - сумма списания
- * @param comment - комментарий к операции
+ * @brief Атомарное списание средств со счета.
+ * Списывает средства в категорию списанных без возможности возврата
+ * @param coopname Наименование кооператива
+ * @param account_id ID счета для списания
+ * @param quantity Сумма для списания
+ * @param comment Комментарий к операции
+ * @ingroup public_actions
+ * @ingroup public_ledger_actions
+ * @anchor ledger_writeoff
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]]
 void ledger::writeoff(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {

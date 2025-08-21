@@ -1,9 +1,12 @@
 #pragma once
 
-
-
 /**
  * @brief Структура бухгалтерского счета
+ * @ingroup public_tables
+ * @ingroup public_ledger_tables
+ * @anchor ledger_laccount
+ * @par Область памяти (scope): coopname
+ * @par Имя таблицы (table): accounts
  */
  struct [[eosio::table, eosio::contract(LEDGER)]] laccount {
   uint64_t id;                    ///< Идентификатор счета
@@ -43,6 +46,11 @@ typedef eosio::multi_index<"accounts"_n, laccount> laccounts_index;
 
 /**
  * @brief Структура для операций ожидающих решения совета
+ * @ingroup public_tables
+ * @ingroup public_ledger_tables
+ * @anchor ledger_writeoff_op
+ * @par Область памяти (scope): _self
+ * @par Имя таблицы (table): writeoffs
  */
 struct [[eosio::table, eosio::contract(LEDGER)]] writeoff_op {
   uint64_t id;                    ///< Идентификатор операции
@@ -93,8 +101,8 @@ public:
   static void check_positive_amount(const eosio::asset& amount);
 
   // Основные операции
-  static void debet(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
-  static void credit(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
+  static void add(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
+  static void sub(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
   static void transfer(eosio::name actor, eosio::name coopname, uint64_t from_account_id, uint64_t to_account_id, eosio::asset quantity, std::string comment);
   
   // Операции блокировки/разблокировки
@@ -106,8 +114,8 @@ public:
   static void writeoffcnsl(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
   
   // Специализированные методы для членских взносов
-  static void debet_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment);
-  static void credit_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment);
+  static void add_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment);
+  static void sub_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment);
   static void block_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment);
   static void unblock_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment);
 
@@ -123,73 +131,79 @@ public:
 
   /**
    * @brief Константы счетов
+   * @ingroup public_consts
+   * @ingroup public_ledger_consts
+   * @anchor ledger_accounts_consts
    */
   struct accounts {
     // Денежные средства
-    static constexpr uint64_t CASH = 50;                    // Касса
-    static constexpr uint64_t BANK_ACCOUNT = 51;            // Расчетный счет
+    static constexpr uint64_t CASH = 50;                    ///< Касса
+    static constexpr uint64_t BANK_ACCOUNT = 51;            ///< Расчетный счет
     
     // Расчеты с пайщиками
-    static constexpr uint64_t MEMBER_SETTLEMENTS = 75;       // Расчеты с пайщиками по внесению/возврату паевых взносов
-    static constexpr uint64_t MEMBER_DEBT = 751;            // Задолженность пайщиков по внесению взносов в паевой фонд
-    static constexpr uint64_t INCOME_ACCRUALS = 752;        // Начисление доходов участникам от предпринимательской деятельности ПО (кооперативные выплаты)
+    static constexpr uint64_t MEMBER_SETTLEMENTS = 75;       ///< Расчеты с пайщиками по внесению/возврату паевых взносов
+    static constexpr uint64_t MEMBER_DEBT = 751;            ///< Задолженность пайщиков по внесению взносов в паевой фонд
+    static constexpr uint64_t INCOME_ACCRUALS = 752;        ///< Начисление доходов участникам от предпринимательской деятельности ПО (кооперативные выплаты)
     
     // Паевой фонд
-    static constexpr uint64_t SHARE_FUND = 80;              // Паевой фонд (складочный капитал)
+    static constexpr uint64_t SHARE_FUND = 80;              ///< Паевой фонд (складочный капитал)
     
     // Расчеты с пайщиками (дебиторами и кредиторами)
-    static constexpr uint64_t MEMBER_FEES = 761;            // По членским взносам
-    static constexpr uint64_t PROPERTY_TRANSFER = 762;       // По передаче имущества для некоммерческой деятельности
-    static constexpr uint64_t OTHER_SETTLEMENTS = 763;       // Другие расчеты
+    static constexpr uint64_t MEMBER_FEES = 761;            ///< По членским взносам
+    static constexpr uint64_t PROPERTY_TRANSFER = 762;       ///< По передаче имущества для некоммерческой деятельности
+    static constexpr uint64_t OTHER_SETTLEMENTS = 763;       ///< Другие расчеты
     
     // Расчеты по займам
-    static constexpr uint64_t LOANS_ISSUED = 583;           // Расчеты по выданным займам
-    static constexpr uint64_t LOAN_INTEREST = 911;          // Внесение процентов за пользование займами
+    static constexpr uint64_t LOANS_ISSUED = 583;           ///< Расчеты по выданным займам
+    static constexpr uint64_t LOAN_INTEREST = 911;          ///< Внесение процентов за пользование займами
     
     // Финансовые вложения из средств ПО
-    static constexpr uint64_t FINANCIAL_INVESTMENTS = 58;   // Финансовые вложения из средств ПО
-    static constexpr uint64_t SHARES_AND_STAKES = 581;      // Доли, паи и акции в организациях, где участвует ПО
-    static constexpr uint64_t SECURITIES = 582;             // Облигации (государственные ценные бумаги)
+    static constexpr uint64_t FINANCIAL_INVESTMENTS = 58;   ///< Финансовые вложения из средств ПО
+    static constexpr uint64_t SHARES_AND_STAKES = 581;      ///< Доли, паи и акции в организациях, где участвует ПО
+    static constexpr uint64_t SECURITIES = 582;             ///< Облигации (государственные ценные бумаги)
     
     // Расчеты с дебиторами и кредиторами
-    static constexpr uint64_t DEBTORS_CREDITORS = 76;       // Расчеты с дебиторами и кредиторами
+    static constexpr uint64_t DEBTORS_CREDITORS = 76;       ///< Расчеты с дебиторами и кредиторами
     
     // Запасы, затраты, расчеты, собственные средства
-    static constexpr uint64_t FIXED_ASSETS = 1;             // Основные средства
-    static constexpr uint64_t INTANGIBLE_ASSETS = 4;        // Нематериальные активы
-    static constexpr uint64_t MATERIALS_GOODS = 10;         // Материалы, товары
-    static constexpr uint64_t MAIN_PRODUCTION = 20;         // Основное производство
-    static constexpr uint64_t NON_PROFIT_ACTIVITY = 201;    // Некоммерческая деятельность
-    static constexpr uint64_t GENERAL_EXPENSES = 26;        // Общехозяйственные расходы (содержание ПО)
-    static constexpr uint64_t RESERVES = 63;                // Резервы по сомнительным долгам
-    static constexpr uint64_t LONG_TERM_LOANS = 67;         // Расчеты по долгосрочным кредитам и займам
-    static constexpr uint64_t TAXES_FEES = 68;              // Расчеты с бюджетом по налогам и сборам
-    static constexpr uint64_t SOCIAL_INSURANCE = 69;        // Расчеты по социальному страхованию и обеспечению
-    static constexpr uint64_t SALARY = 70;                  // Заработная плата
-    static constexpr uint64_t ACCOUNTABLE_PERSONS = 71;     // Расчеты с подотчетными лицами
-    static constexpr uint64_t ADDITIONAL_CAPITAL = 83;      // Добавочный капитал
-    static constexpr uint64_t FUNDS_PO_1 = 831;            // Фонды ПО (вариант пополнения фондов ПО)
-    static constexpr uint64_t CURRENT_YEAR_PROFIT = 841;    // Нераспределенная прибыль (убыток) отчетного года
-    static constexpr uint64_t PREVIOUS_YEARS_PROFIT = 842;  // Нераспределенная прибыль (непокрытый убыток) прошлых лет
-    static constexpr uint64_t FUNDS_PO_2 = 843;            // Фонды ПО (вариант пополнения фондов ПО)
-    static constexpr uint64_t UNDISTRIBUTED_PROFIT = 84;    // Нераспределенная прибыль (непокрытый убыток)
-    static constexpr uint64_t TARGET_RECEIPTS = 86;         // Целевые поступления
-    static constexpr uint64_t ENTRANCE_FEES = 861;          // Вступительные взносы
-    static constexpr uint64_t RESERVE_FUND = 862;           // Резервный фонд
-    static constexpr uint64_t INDIVISIBLE_FUND = 863;       // Неделимый фонд
-    static constexpr uint64_t ECONOMIC_ACTIVITY_FUND = 864; // Фонд обеспечения хозяйственной деятельности
-    static constexpr uint64_t MUTUAL_SECURITY_FUND = 865;   // Фонд взаимного обеспечения
-    static constexpr uint64_t DEVELOPMENT_FUND = 866;       // Фонд развития потребительской кооперации
-    static constexpr uint64_t OTHER_INCOME_EXPENSES = 91;   // Прочие доходы и расходы
-    static constexpr uint64_t FUTURE_EXPENSES_RESERVE = 96; // Резерв предстоящих расходов
-    static constexpr uint64_t FUTURE_INCOME = 98;           // Доходы будущих периодов
-    static constexpr uint64_t FREE_RECEIPT = 981;           // Безвозмездное получение имущества
+    static constexpr uint64_t FIXED_ASSETS = 1;             ///< Основные средства
+    static constexpr uint64_t INTANGIBLE_ASSETS = 4;        ///< Нематериальные активы
+    static constexpr uint64_t MATERIALS_GOODS = 10;         ///< Материалы, товары
+    static constexpr uint64_t MAIN_PRODUCTION = 20;         ///< Основное производство
+    static constexpr uint64_t NON_PROFIT_ACTIVITY = 201;    ///< Некоммерческая деятельность
+    static constexpr uint64_t GENERAL_EXPENSES = 26;        ///< Общехозяйственные расходы (содержание ПО)
+    static constexpr uint64_t RESERVES = 63;                ///< Резервы по сомнительным долгам
+    static constexpr uint64_t LONG_TERM_LOANS = 67;         ///< Расчеты по долгосрочным кредитам и займам
+    static constexpr uint64_t TAXES_FEES = 68;              ///< Расчеты с бюджетом по налогам и сборам
+    static constexpr uint64_t SOCIAL_INSURANCE = 69;        ///< Расчеты по социальному страхованию и обеспечению
+    static constexpr uint64_t SALARY = 70;                  ///< Заработная плата
+    static constexpr uint64_t ACCOUNTABLE_PERSONS = 71;     ///< Расчеты с подотчетными лицами
+    static constexpr uint64_t ADDITIONAL_CAPITAL = 83;      ///< Добавочный капитал
+    static constexpr uint64_t FUNDS_PO_1 = 831;            ///< Фонды ПО (вариант пополнения фондов ПО)
+    static constexpr uint64_t CURRENT_YEAR_PROFIT = 841;    ///< Нераспределенная прибыль (убыток) отчетного года
+    static constexpr uint64_t PREVIOUS_YEARS_PROFIT = 842;  ///< Нераспределенная прибыль (непокрытый убыток) прошлых лет
+    static constexpr uint64_t FUNDS_PO_2 = 843;            ///< Фонды ПО (вариант пополнения фондов ПО)
+    static constexpr uint64_t UNDISTRIBUTED_PROFIT = 84;    ///< Нераспределенная прибыль (непокрытый убыток)
+    static constexpr uint64_t TARGET_RECEIPTS = 86;         ///< Целевые поступления
+    static constexpr uint64_t ENTRANCE_FEES = 861;          ///< Вступительные взносы
+    static constexpr uint64_t RESERVE_FUND = 862;           ///< Резервный фонд
+    static constexpr uint64_t INDIVISIBLE_FUND = 863;       ///< Неделимый фонд
+    static constexpr uint64_t ECONOMIC_ACTIVITY_FUND = 864; ///< Фонд обеспечения хозяйственной деятельности
+    static constexpr uint64_t MUTUAL_SECURITY_FUND = 865;   ///< Фонд взаимного обеспечения
+    static constexpr uint64_t DEVELOPMENT_FUND = 866;       ///< Фонд развития потребительской кооперации
+    static constexpr uint64_t OTHER_INCOME_EXPENSES = 91;   ///< Прочие доходы и расходы
+    static constexpr uint64_t FUTURE_EXPENSES_RESERVE = 96; ///< Резерв предстоящих расходов
+    static constexpr uint64_t FUTURE_INCOME = 98;           ///< Доходы будущих периодов
+    static constexpr uint64_t FREE_RECEIPT = 981;           ///< Безвозмездное получение имущества
   };
 };
 
 /**
  * @brief Карта счетов для инициализации бухгалтерской книги
  * СОХРАНЯЕМ - используется для получения названий при автосоздании счетов
+ * @ingroup public_consts
+ * @ingroup public_ledger_consts
+ * @anchor ledger_account_map
  */
 static const std::vector<std::tuple<uint64_t, std::string>> ACCOUNT_MAP = {
   {Ledger::accounts::FIXED_ASSETS, "Основные средства"},
@@ -240,17 +254,23 @@ static const std::vector<std::tuple<uint64_t, std::string>> ACCOUNT_MAP = {
 
 // Реализация статических методов класса Ledger
 
+/**
+ * @brief Валидные действия ledger для интеграции с другими контрактами
+ * @ingroup public_consts
+ * @ingroup public_ledger_consts
+ * @anchor ledger_actions_consts
+ */
 const std::set<eosio::name> Ledger::ledger_actions = {
-    "debet"_n,      // пополнение счета
-    "credit"_n,      // списание со счета
-    "block"_n,    // блокировка средств
-    "unblock"_n,  // разблокировка средств
-    "writeoff"_n, // атомарное списание средств
-    "writeoffcnsl"_n,  // атомарная отмена списания
-    "create"_n,   // создание заявления на списание
-    "auth"_n,     // авторизация списания
-    "complete"_n, // завершение операции
-    "decline"_n   // отклонение операции
+    "add"_n,      ///< пополнение счета
+    "sub"_n,      ///< списание со счета
+    "block"_n,    ///< блокировка средств
+    "unblock"_n,  ///< разблокировка средств
+    "writeoff"_n, ///< атомарное списание средств
+    "writeoffcnsl"_n,  ///< атомарная отмена списания
+    "create"_n,   ///< создание заявления на списание
+    "auth"_n,     ///< авторизация списания
+    "complete"_n, ///< завершение операции
+    "decline"_n   ///< отклонение операции
 };
 
 inline eosio::name Ledger::get_valid_ledger_action(const eosio::name& action) {
@@ -276,27 +296,27 @@ inline std::string Ledger::get_account_name_by_id(uint64_t account_id) {
   return "Неизвестный счет";
 }
 
-inline void Ledger::debet(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+inline void Ledger::add(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
     _ledger,
-    get_valid_ledger_action("debet"_n),
+    get_valid_ledger_action("add"_n),
     std::make_tuple(coopname, account_id, quantity, comment)
   ).send();
 }
 
-inline void Ledger::credit(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+inline void Ledger::sub(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
     _ledger,
-    get_valid_ledger_action("credit"_n),
+    get_valid_ledger_action("sub"_n),
     std::make_tuple(coopname, account_id, quantity, comment)
   ).send();
 }
 
 inline void Ledger::transfer(eosio::name actor, eosio::name coopname, uint64_t from_account_id, uint64_t to_account_id, eosio::asset quantity, std::string comment) {
-  debet(actor, coopname, from_account_id, quantity, comment);
-  credit(actor, coopname, to_account_id, quantity, comment);
+  add(actor, coopname, from_account_id, quantity, comment);
+  sub(actor, coopname, to_account_id, quantity, comment);
 }
 
 inline void Ledger::block(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
@@ -335,12 +355,12 @@ inline void Ledger::writeoffcnsl(eosio::name actor, eosio::name coopname, uint64
   ).send();
 }
 
-inline void Ledger::debet_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
-  debet(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
+inline void Ledger::add_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
+  add(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
 }
 
-inline void Ledger::credit_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
-  credit(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
+inline void Ledger::sub_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
+  sub(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
 }
 
 inline void Ledger::block_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {

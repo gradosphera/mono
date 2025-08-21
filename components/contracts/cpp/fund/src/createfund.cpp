@@ -1,3 +1,19 @@
+/**
+ * @brief Создание нового фонда кооператива.
+ * Создает новый фонд накопления или списания в кооперативе.
+ * Только председатель совета может создавать фонды.
+ * @param coopname Наименование кооператива
+ * @param username Имя пользователя, создающего фонд
+ * @param type Тип фонда (accumulation - накопления, expend - списания)
+ * @param contract Внешний контракт, управляющий фондом
+ * @param name Название фонда
+ * @param description Описание фонда
+ * @param percent Процент отчислений (только для фондов накопления, 0 для списания)
+ * @ingroup public_actions
+ * @ingroup public_fund_actions
+ * @anchor fund_createfund
+ * @note Авторизация требуется от аккаунта: @p username (председатель совета)
+ */
 // type: accumulation, expend
 [[eosio::action]] void fund::createfund(eosio::name coopname,
                                         eosio::name username, eosio::name type,

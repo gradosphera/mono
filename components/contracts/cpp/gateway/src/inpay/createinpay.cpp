@@ -1,6 +1,17 @@
 /**
-\ingroup public_actions
- * @brief Создает новую запись входящего платежа в контракте `gateway`.
+ * @brief Создание входящего платежа.
+ * Создает новую запись входящего платежа в системе процессинга.
+ * @param coopname Наименование кооператива
+ * @param username Имя пользователя, совершившего платеж
+ * @param income_hash Хэш входящего платежа
+ * @param quantity Количество средств
+ * @param callback_contract Контракт для вызова коллбэков
+ * @param confirm_callback Действие успеха
+ * @param decline_callback Действие отклонения
+ * @ingroup public_actions
+ * @ingroup public_gateway_actions
+ * @anchor gateway_createinpay
+ * @note Авторизация требуется от аккаунта из белого списка контрактов
  */
 [[eosio::action]] void gateway::createinpay(eosio::name coopname, eosio::name username, checksum256 income_hash, eosio::asset quantity, eosio::name callback_contract, eosio::name confirm_callback, eosio::name decline_callback) {
   name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);

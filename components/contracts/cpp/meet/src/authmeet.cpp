@@ -1,3 +1,14 @@
+/**
+ * @brief Авторизация собрания советом.
+ * Подтверждает проведение собрания после одобрения советом
+ * @param coopname Наименование кооператива
+ * @param hash Хэш собрания
+ * @param authorization Документ авторизации от совета
+ * @ingroup public_actions
+ * @ingroup public_meet_actions
+ * @anchor meet_authmeet
+ * @note Авторизация требуется от аккаунта: @p soviet
+ */
 void meet::authmeet(eosio::name coopname, checksum256 hash, document2 authorization) {
   require_auth(_soviet);
   

@@ -1,5 +1,31 @@
 #pragma once
 
+/**
+\defgroup public_msig Контракт MSIG
+* @anchor public_msig
+* Системный контракт для создания предложений транзакций, требующих авторизации от списка аккаунтов.
+*/
+
+/**
+\defgroup public_msig_processes Процессы
+\ingroup public_msig
+*/
+
+/**
+\defgroup public_msig_actions Действия
+\ingroup public_msig
+*/
+
+/**
+\defgroup public_msig_tables Таблицы
+\ingroup public_msig
+*/
+
+/**
+\defgroup public_msig_consts Константы
+\ingroup public_msig
+*/
+
 #include <eosio/binary_extension.hpp>
 #include <eosio/eosio.hpp>
 #include <eosio/ignore.hpp>
@@ -112,20 +138,36 @@ namespace eosio {
          using exec_action = eosio::action_wrapper<"exec"_n, &multisig::exec>;
          using invalidate_action = eosio::action_wrapper<"invalidate"_n, &multisig::invalidate>;
 
+   /**
+   * @brief Таблица предложений хранит информацию о предложенных транзакциях.
+   * @ingroup public_tables
+   * @ingroup public_msig_tables
+   * @anchor msig_proposal
+   * @par Область памяти (scope): proposer
+   * @par Имя таблицы (table): proposal
+   */
    struct [[eosio::table, eosio::contract("eosio.msig")]] proposal {
-      name                                                            proposal_name;
-      std::vector<char>                                               packed_transaction;
-      eosio::binary_extension< std::optional<time_point> >            earliest_exec_time;
+      name                                                            proposal_name; ///< Имя предложения
+      std::vector<char>                                               packed_transaction; ///< Упакованная транзакция
+      eosio::binary_extension< std::optional<time_point> >            earliest_exec_time; ///< Самое раннее время выполнения
 
-      uint64_t primary_key()const { return proposal_name.value; }
+      uint64_t primary_key()const { return proposal_name.value; } ///< Первичный ключ (1)
    };
    typedef eosio::multi_index< "proposal"_n, proposal > proposals;
 
+   /**
+   * @brief Таблица старых одобрений хранит информацию об одобрениях предложений (устаревшая версия).
+   * @ingroup public_tables
+   * @ingroup public_msig_tables
+   * @anchor msig_old_approvals_info
+   * @par Область памяти (scope): proposer
+   * @par Имя таблицы (table): approvals
+   */
    struct [[eosio::table, eosio::contract("eosio.msig")]] old_approvals_info {
-      name                            proposal_name;
-      std::vector<permission_level>   requested_approvals;
-      std::vector<permission_level>   provided_approvals;
-      uint64_t primary_key()const { return proposal_name.value; }
+      name                            proposal_name; ///< Имя предложения
+      std::vector<permission_level>   requested_approvals; ///< Запрошенные одобрения
+      std::vector<permission_level>   provided_approvals; ///< Предоставленные одобрения
+      uint64_t primary_key()const { return proposal_name.value; } ///< Первичный ключ (1)
    };
    typedef eosio::multi_index< "approvals"_n, old_approvals_info > old_approvals;
    struct approval {
@@ -133,23 +175,39 @@ namespace eosio {
       time_point       time;
    };
 
+   /**
+   * @brief Таблица информации об одобрениях хранит информацию об одобрениях предложений.
+   * @ingroup public_tables
+   * @ingroup public_msig_tables
+   * @anchor msig_approvals_info
+   * @par Область памяти (scope): proposer
+   * @par Имя таблицы (table): approvals2
+   */
    struct [[eosio::table, eosio::contract("eosio.msig")]] approvals_info {
-      uint8_t                 version = 1;
-      name                    proposal_name;
+      uint8_t                 version = 1; ///< Версия структуры
+      name                    proposal_name; ///< Имя предложения
       //requested approval doesn't need to contain time, but we want requested approval
       //to be of exactly the same size as provided approval, in this case approve/unapprove
       //doesn't change serialized data size. So, we use the same type.
-      std::vector<approval>   requested_approvals;
-      std::vector<approval>   provided_approvals;
-      uint64_t primary_key()const { return proposal_name.value; }
+      std::vector<approval>   requested_approvals; ///< Запрошенные одобрения
+      std::vector<approval>   provided_approvals; ///< Предоставленные одобрения
+      uint64_t primary_key()const { return proposal_name.value; } ///< Первичный ключ (1)
    };
    typedef eosio::multi_index< "approvals2"_n, approvals_info > approvals;
 
+   /**
+   * @brief Таблица инвалидаций хранит информацию об инвалидированных аккаунтах.
+   * @ingroup public_tables
+   * @ingroup public_msig_tables
+   * @anchor msig_invalidation
+   * @par Область памяти (scope): eosio.msig
+   * @par Имя таблицы (table): invals
+   */
    struct [[eosio::table, eosio::contract("eosio.msig")]] invalidation {
-         name         account;
-         time_point   last_invalidation_time;
+         name         account; ///< Аккаунт
+         time_point   last_invalidation_time; ///< Время последней инвалидации
 
-         uint64_t primary_key() const { return account.value; }
+         uint64_t primary_key() const { return account.value; } ///< Первичный ключ (1)
       };
 
       typedef eosio::multi_index< "invals"_n, invalidation > invalidations;

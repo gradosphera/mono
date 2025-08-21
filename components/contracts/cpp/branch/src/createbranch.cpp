@@ -1,3 +1,15 @@
+/**
+ * @brief Создание нового кооперативного участка.
+ * Создает новый кооперативный участок с указанным председателем.
+ * При создании третьего участка автоматически активирует систему кооперативных участков.
+ * @param coopname Наименование кооператива
+ * @param braname Наименование кооперативного участка
+ * @param trustee Председатель кооперативного участка (должен быть физическим лицом)
+ * @ingroup public_actions
+ * @ingroup public_branch_actions
+ * @anchor branch_createbranch
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 [[eosio::action]] void branch::createbranch(eosio::name coopname, eosio::name braname, eosio::name trustee) {
     check_auth_or_fail(_branch, coopname, coopname, "createbranch"_n);
 

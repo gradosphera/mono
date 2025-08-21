@@ -12,6 +12,14 @@
 
 using namespace eosio;
 
+/**
+ * @brief Миграция контракта процессинга платежей.
+ * Выполняет миграцию контракта на новую версию.
+ * @ingroup public_actions
+ * @ingroup public_gateway_actions
+ * @anchor gateway_migrate
+ * @note Авторизация требуется от аккаунта: @p _gateway
+ */
 [[eosio::action]]
 void gateway::migrate(){
   require_auth(_gateway);

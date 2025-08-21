@@ -1,7 +1,12 @@
 /**
- * @brief Уменьшает счетчик активных пайщиков кооператива
+ * @brief Уменьшение счетчика активных пайщиков.
+ * Уменьшает счетчик активных пайщиков кооператива при блокировке участника
  * @param coopname Имя кооператива
  * @param username Имя пайщика
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_decparticpnt
+ * @note Авторизация требуется от аккаунта: @p soviet
  */
 void registrator::decparticpnt(eosio::name coopname, eosio::name username)
 {

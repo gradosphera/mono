@@ -1,3 +1,12 @@
+/**
+ * @brief Отключение режима филиалов.
+ * Отключает режим кооперативных участков для кооператива
+ * @param coopname Наименование кооператива
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_disbranches
+ * @note Авторизация требуется от аккаунта: @p branch
+ */
 [[eosio::action]] void registrator::disbranches(eosio::name coopname) {
   require_auth(_branch);
   auto cooperative = get_cooperative_or_fail(coopname);

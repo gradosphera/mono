@@ -1223,7 +1223,7 @@ HTML_EXTRA_STYLESHEET  = docs/css/doxygen-awesome.css docs/css/docs/doxygen-cust
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = docs/css/doxygen-awesome-darkmode-toggle.js docs/css/mermaid.min.js
+HTML_EXTRA_FILES       = docs/css/doxygen-awesome-darkmode-toggle.js docs/css/mermaid.min.js docs/css/docs/doxygen-custom/custom.js
 
 # HTML_COLORSTYLE        = LIGHT # required with Doxygen >= 1.9.5
 
@@ -1554,7 +1554,7 @@ ENUM_VALUES_PER_LINE   = 4
 # Minimum value: 0, maximum value: 1500, default value: 250.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-TREEVIEW_WIDTH         = 250
+TREEVIEW_WIDTH         = 200
 
 # If the EXT_LINKS_IN_WINDOW option is set to YES, doxygen will open links to
 # external symbols imported via tag files in a separate window.

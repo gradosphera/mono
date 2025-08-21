@@ -1,3 +1,11 @@
+/**
+ * @brief Инициализация контракта регистратора.
+ * Создает начальные аккаунты и кооператив-провайдер системы
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_init
+ * @note Авторизация требуется от аккаунта: @p system
+ */
 [[eosio::action]] void registrator::init()
 {
   require_auth(_system);

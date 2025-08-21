@@ -1,3 +1,16 @@
+/**
+ * @brief Создание нового перевода шаблона документа.
+ * Создает новый перевод существующего шаблона документа на указанный язык.
+ * @param scope Область видимости (кооператив или _draft)
+ * @param username Имя пользователя, создающего перевод
+ * @param registry_id Реестровый идентификатор шаблона
+ * @param lang Язык перевода
+ * @param data Данные перевода
+ * @ingroup public_actions
+ * @ingroup public_draft_actions
+ * @anchor draft_createtrans
+ * @note Авторизация требуется от аккаунта: @p scope или @p _system
+ */
 void draft::createtrans(eosio::name scope, eosio::name username, uint64_t registry_id, eosio::name lang, std::string data) {
   eosio::name payer = draft::get_payer_and_check_auth_in_scope(scope, username, "createtrans"_n);
   

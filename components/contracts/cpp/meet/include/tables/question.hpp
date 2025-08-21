@@ -1,13 +1,17 @@
 namespace Meet {
 /**
-  * @brief Структура действий, хранящая данные о выполненных операциях.
-  * \ingroup public_tables
+  * @brief Структура вопросов повестки дня собрания.
+  * @ingroup public_tables
+  * @ingroup public_meet_tables
+  * @anchor meet_question
+  * @par Область памяти (scope): coopname
+  * @par Имя таблицы (table): questions
   */
 struct [[eosio::table, eosio::contract(MEET)]] question {
-    uint64_t id;
-    uint64_t number;
-    name coopname;                               ///< Имя кооператива.
-    uint64_t meet_id;                            ///< Идентификатор общего собрания.
+    uint64_t id;                                 ///< Идентификатор вопроса
+    uint64_t number;                             ///< Номер вопроса в повестке
+    name coopname;                               ///< Имя кооператива
+    uint64_t meet_id;                            ///< Идентификатор общего собрания
     
     std::string title;                           ///< Текст вопроса
     std::string context;                         ///< Контекст вопроса
@@ -21,8 +25,8 @@ struct [[eosio::table, eosio::contract(MEET)]] question {
     std::vector<name> voters_against;            ///< Проголосовавшие против
     std::vector<name> voters_abstained;          ///< Воздержавшиеся
 
-    uint64_t primary_key() const { return id; } ///< Основной ключ.
-    uint64_t by_meet_key() const { return meet_id; } ///< Ключ по идентификатору собрания.
+    uint64_t primary_key() const { return id; } ///< Основной ключ
+    uint64_t by_meet_key() const { return meet_id; } ///< Ключ по идентификатору собрания
 };
 
 typedef eosio::multi_index<

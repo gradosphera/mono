@@ -1,3 +1,13 @@
+/**
+ * @brief Завершение обработки исходящего платежа.
+ * Завершает обработку исходящего платежа и вызывает коллбэк успеха.
+ * @param coopname Наименование кооператива
+ * @param outcome_hash Хэш исходящего платежа
+ * @ingroup public_actions
+ * @ingroup public_gateway_actions
+ * @anchor gateway_outcomplete
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void gateway::outcomplete(eosio::name coopname, checksum256 outcome_hash){
   require_auth(coopname);
   auto exist_outcome = Gateway::get_outcome(coopname, outcome_hash);

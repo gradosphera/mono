@@ -37,6 +37,15 @@ namespace eosiosystem {
       _global.set( _gstate, get_self() );
    }
      
+   /**
+    * @brief Устанавливает максимальный размер RAM в системе.
+    * Увеличивает количество RAM доступного для продажи на основе изменения максимального размера RAM.
+    * @param max_ram_size Новый максимальный размер RAM в байтах
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_setram
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::setram( uint64_t max_ram_size ) {
       require_auth( get_self() );
 
@@ -57,6 +66,13 @@ namespace eosiosystem {
       _gstate.max_ram_size = max_ram_size;
    }
 
+   /**
+    * @brief Обновляет предложение RAM на основе времени с последнего увеличения.
+    * Увеличивает количество RAM доступного для продажи на основе времени блоков.
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_update_ram_supply
+    */
    void system_contract::update_ram_supply() {
       auto cbt = eosio::current_block_time();
 
@@ -75,6 +91,14 @@ namespace eosiosystem {
       _gstate.last_ram_increase = cbt;
    }
 
+   /**
+    * @brief Устанавливает скорость увеличения RAM в байтах за блок.
+    * @param bytes_per_block Количество байт RAM, добавляемых за блок
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_setramrate
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::setramrate( uint16_t bytes_per_block ) {
       require_auth( get_self() );
 
@@ -86,6 +110,15 @@ namespace eosiosystem {
    extern "C" [[eosio::wasm_import]] void set_parameters_packed(const void*, size_t);
 #endif
 
+   /**
+    * @brief Устанавливает параметры блокчейна.
+    * Обновляет глобальные параметры блокчейна, включая лимиты блоков, транзакций и авторизаций.
+    * @param params Новые параметры блокчейна
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_setparams
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::setparams( const blockchain_parameters_t& params ) {
       require_auth( get_self() );
       (eosio::blockchain_parameters&)(_gstate) = params;
@@ -183,6 +216,16 @@ namespace eosiosystem {
       set_wasm_parameters_packed( buf, sizeof(buf) );
    }
 
+   /**
+    * @brief Устанавливает лимиты WebAssembly.
+    * Допустимые параметры: "low", "default" (эквивалентно low) и "high".
+    * Значение "high" позволяет развертывать более крупные контракты.
+    * @param settings Настройки лимитов WebAssembly
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_wasmcfg
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::wasmcfg( const name& settings )
    {
       require_auth( get_self() );
@@ -202,11 +245,34 @@ namespace eosiosystem {
 
 #endif
 
+   /**
+    * @brief Устанавливает привилегированный статус для аккаунта.
+    * Позволяет включить или выключить привилегированный статус для аккаунта.
+    * @param account Аккаунт для установки привилегированного статуса
+    * @param ispriv 0 для false, > 0 для true
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_setpriv
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::setpriv( const name& account, uint8_t ispriv ) {
       require_auth( get_self() );
       set_privileged( account, ispriv );
    }
 
+   /**
+    * @brief Устанавливает лимиты ресурсов для аккаунта.
+    * Устанавливает абсолютные лимиты RAM, NET и CPU для указанного аккаунта.
+    * Поддерживает только аккаунты с неограниченными ресурсами.
+    * @param account Имя аккаунта, для которого устанавливаются лимиты ресурсов
+    * @param ram Лимит RAM в абсолютных байтах
+    * @param net Пропорциональный лимит NET на основе (вес / общий_вес_всех_аккаунтов)
+    * @param cpu Пропорциональный лимит CPU на основе (вес / общий_вес_всех_аккаунтов)
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_setalimits
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::setalimits( const name& account, int64_t ram, int64_t net, int64_t cpu ) {
       require_auth( get_self() );
 
@@ -225,6 +291,16 @@ namespace eosiosystem {
       set_resource_limits( account, ram, net, cpu );
    }
 
+   /**
+    * @brief Устанавливает лимиты RAM для аккаунта.
+    * Устанавливает лимит RAM в абсолютных байтах для указанного аккаунта.
+    * @param account Имя аккаунта, для которого устанавливается лимит ресурсов
+    * @param ram_bytes Лимит RAM в абсолютных байтах
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_setacctram
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::setacctram( const name& account, const std::optional<int64_t>& ram_bytes ) {
       require_auth( get_self() );
 
@@ -270,6 +346,16 @@ namespace eosiosystem {
       set_resource_limits( account, ram, current_net, current_cpu );
    }
 
+   /**
+    * @brief Устанавливает лимиты NET для аккаунта.
+    * Устанавливает пропорциональный лимит NET для указанного аккаунта.
+    * @param account Имя аккаунта, для которого устанавливается лимит ресурсов
+    * @param net_weight Пропорциональный лимит NET на основе (вес / общий_вес_всех_аккаунтов)
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_setacctnet
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::setacctnet( const name& account, const std::optional<int64_t>& net_weight ) {
       require_auth( get_self() );
 
@@ -314,6 +400,16 @@ namespace eosiosystem {
       set_resource_limits( account, current_ram, net, current_cpu );
    }
 
+   /**
+    * @brief Устанавливает лимиты CPU для аккаунта.
+    * Устанавливает пропорциональный лимит CPU для указанного аккаунта.
+    * @param account Имя аккаунта, для которого устанавливается лимит ресурсов
+    * @param cpu_weight Пропорциональный лимит CPU на основе (вес / общий_вес_всех_аккаунтов)
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_setacctcpu
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::setacctcpu( const name& account, const std::optional<int64_t>& cpu_weight ) {
       require_auth( get_self() );
 
@@ -358,11 +454,29 @@ namespace eosiosystem {
       set_resource_limits( account, current_ram, current_net, cpu );
    }
 
+   /**
+    * @brief Активирует протокольную функцию.
+    * Активирует протокольную функцию по хешу перед деплоем системного контракта с большим количеством функций.
+    * @param feature_digest Хеш протокольной функции для активации
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_activate
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::activate( const eosio::checksum256& feature_digest ) {
       require_auth( get_self() );
       preactivate_feature( feature_digest );
    }
 
+   /**
+    * @brief Удаляет продюсера по имени.
+    * Деактивирует продюсера по имени, если не найден - вызывает ошибку.
+    * @param producer Аккаунт продюсера для деактивации
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_rmvproducer
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::rmvproducer( const name& producer ) {
       require_auth( get_self() );
       auto prod = _producers.find( producer.value );
@@ -372,6 +486,16 @@ namespace eosiosystem {
          });
    }
 
+   /**
+    * @brief Обновляет текущую ревизию.
+    * Обновляет текущую ревизию. Ревизия должна быть увеличена на 1 по сравнению с текущей.
+    * Текущая ревизия не может быть выше 254 и должна быть меньше или равна 1.
+    * @param revision Ревизия, которая должна быть увеличена на 1 по сравнению с текущей ревизией
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_updtrevision
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::updtrevision( uint8_t revision ) {
       require_auth( get_self() );
       check( _gstate.revision < 255, "can not increment revision" ); // prevent wrap around
@@ -384,7 +508,19 @@ namespace eosiosystem {
 
 
 
-void system_contract::createaccnt(const name coopname, const name new_account_name, authority owner, authority active) {
+   /**
+    * @brief Создает новый аккаунт через кооператив.
+    * Позволяет кооперативу создать новый аккаунт с указанными владельцем и активными разрешениями.
+    * @param coopname Имя кооператива
+    * @param new_account_name Имя нового аккаунта
+    * @param owner Авторизация владельца
+    * @param active Активная авторизация
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_createaccnt
+    * @note Авторизация требуется от аккаунта: @p registrator
+    */
+   void system_contract::createaccnt(const name coopname, const name new_account_name, authority owner, authority active) {
   require_auth(_registrator);
   
   auto core_symbol = system_contract::get_core_symbol();
@@ -532,6 +668,20 @@ void native::setabi( const name& acnt, const std::vector<char>& abi,
     // state_sing.set(state, get_self());
   };
 
+   /**
+    * @brief Инициализирует системный контракт для версии и символа.
+    * Действие выполняется успешно только когда:
+    * - версия равна 0
+    * - символ найден
+    * - предложение системных токенов больше 0
+    * - системный контракт еще не был инициализирован
+    * @param version Версия, должна быть равна 0
+    * @param core Системный символ токена
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_init
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::init( uint64_t version, const symbol& core ) {
       require_auth( get_self() );
       check( version == 0, "unsupported version for init action" );

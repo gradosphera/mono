@@ -1,26 +1,19 @@
 /**
- * @brief Добавляем пайщика.
- *
- * Действие позволяет создать новый аккаунт. Новый аккаунт может быть создан только верифицированной организацией.
- * @note Авторизация требуется от аккаунта: @p registrator
- *
- * 
- * Диаграмма процесса и inline транзакций: 
- * 1. registrator::adduser (
- *  - добавляем аккаунт
- *  2. soviet::adduser(
- *    - добавляем пайщика
- *    - добавляем кошелёк с минимальным взносом
- *    3. gateway::adduser(
- *    - устанавливаем дату вступления
- *    - фиксируем принятый взнос в реестре взносов
- *      4. fund::addcirculate (добавляем минимальный взнос)
- *      5. fund::addinitial (добавляем вступительный взнос в кошелек кооператива)
- *    )
- *  )
- * )
- * 
+ * @brief Добавление пайщика.
+ * Создает новый аккаунт и добавляет пайщика в кооператив
+ * @param coopname Наименование кооператива
+ * @param referer Имя реферера
+ * @param username Имя пользователя для создания
+ * @param type Тип пользователя (individual, entrepreneur, organization)
+ * @param created_at Дата создания аккаунта
+ * @param initial Вступительный взнос
+ * @param minimum Минимальный взнос
+ * @param spread_initial Флаг распределения вступительного взноса
+ * @param meta Метаданные пользователя
  * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_adduser
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]] void registrator::adduser(
     eosio::name coopname, eosio::name referer, 
@@ -78,10 +71,10 @@
     });
     
   
-  Ledger::debet(_registrator, coopname, Ledger::accounts::SHARE_FUND, minimum, "Паевой взнос при регистрации пайщика");
+  Ledger::add(_registrator, coopname, Ledger::accounts::SHARE_FUND, minimum, "Паевой взнос при регистрации пайщика");
   
   if (spread_initial) {
-    Ledger::debet(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, initial, "Вступительный взнос при регистрации пайщика");
+    Ledger::add(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, initial, "Вступительный взнос при регистрации пайщика");
   }
   
   eosio::name braname = ""_n;

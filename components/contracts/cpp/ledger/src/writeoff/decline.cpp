@@ -1,8 +1,13 @@
 /**
- * @brief Коллбэк при отклонении платежа или решения совета
- * @param coopname - имя кооператива
- * @param writeoff_hash - хэш операции списания
- * @param reason - причина отклонения
+ * @brief Отклонение операции списания от gateway
+ * Коллбэк от gateway при отклонении операции
+ * @param coopname Наименование кооператива
+ * @param writeoff_hash Хэш операции списания для отклонения
+ * @param reason Причина отклонения операции
+ * @ingroup public_actions
+ * @ingroup public_ledger_actions
+ * @anchor ledger_decline
+ * @note Авторизация требуется от аккаунта: @p gateway или @p soviet
  */
 [[eosio::action]]
 void ledger::decline(eosio::name coopname, checksum256 writeoff_hash, std::string reason) {

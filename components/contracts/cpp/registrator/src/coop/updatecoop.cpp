@@ -1,16 +1,20 @@
 
 /**
-\ingroup public_actions
-\brief Обновление метаданных аккаунта
-*
-* Этот метод позволяет обновить метаданные указанного аккаунта.
-* Только владелец аккаунта имеет право обновлять его метаданные.
-*
-* @param username Имя аккаунта, который требуется обновить
-* @param meta Новые метаданные для аккаунта
-*
-* @note Авторизация требуется от аккаунта: @p username
-*/
+ * @brief Обновление параметров кооператива.
+ * Обновляет параметры кооператива (взносы, описание)
+ * @param coopname Наименование кооператива
+ * @param username Имя пользователя-обновителя
+ * @param initial Вступительный взнос для физических лиц
+ * @param minimum Минимальный взнос для физических лиц
+ * @param org_initial Вступительный взнос для организаций
+ * @param org_minimum Минимальный взнос для организаций
+ * @param announce Анонс кооператива
+ * @param description Описание кооператива
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_updatecoop
+ * @note Авторизация требуется от аккаунта: @p provider, @p coopname или @p username
+ */
 [[eosio::action]] void registrator::updatecoop(eosio::name coopname, eosio::name username, eosio::asset initial, eosio::asset minimum, eosio::asset org_initial, eosio::asset org_minimum, std::string announce, std::string description)
 {
   

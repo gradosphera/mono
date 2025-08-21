@@ -9,6 +9,32 @@
 #include "../lib/common.hpp"
 
 /**
+\defgroup public_registrator Контракт REGISTRATOR
+* @anchor public_registrator
+* Смарт-контракт регистрации участников кооператива предназначен для регистрации аккаунтов, карточек физических и юридических лиц, а также управления участниками кооперативов.
+*/
+
+/**
+\defgroup public_registrator_processes Процессы
+\ingroup public_registrator
+*/
+
+/**
+\defgroup public_registrator_actions Действия
+\ingroup public_registrator
+*/
+
+/**
+\defgroup public_registrator_tables Таблицы
+\ingroup public_registrator
+*/
+
+/**
+\defgroup public_registrator_consts Константы
+\ingroup public_registrator
+*/
+
+/**
  *  \ingroup public_contracts
  *
  *  @brief  Класс `registrator` служит воротами в блокчейн-систему для новых участников, позволяя регистрировать аккаунты,

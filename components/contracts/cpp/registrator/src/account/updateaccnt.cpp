@@ -1,17 +1,16 @@
 
 
 /**
-\ingroup public_actions
-\brief Обновление метаданных аккаунта
-*
-* Этот метод позволяет обновить метаданные указанного аккаунта.
-* Только владелец аккаунта имеет право обновлять его метаданные.
-*
-* @param username Имя аккаунта, который требуется обновить
-* @param meta Новые метаданные для аккаунта
-*
-* @note Авторизация требуется от аккаунта: @p username
-*/
+ * @brief Обновление метаданных аккаунта.
+ * Обновляет метаданные указанного аккаунта
+ * @param username Имя аккаунта, который обновляет метаданные
+ * @param account_to_change Имя аккаунта, который требуется обновить
+ * @param meta Новые метаданные для аккаунта
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_updateaccnt
+ * @note Авторизация требуется от аккаунта: @p username
+ */
 void registrator::updateaccnt(eosio::name username, eosio::name account_to_change, std::string meta)
 {
   require_auth(username);

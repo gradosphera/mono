@@ -1,3 +1,8 @@
+.anchor {
+  position: relative; 
+  top: -200px;
+}
+
 .github-corner svg {
     fill: var(--primary-light-color);
     color: var(--page-background-color);
@@ -13,4 +18,18 @@
     #projectnumber {
         margin-right: 22px;
     }
+}
+
+/* Делаем весь пункт меню кликабельным */
+#nav-tree .item {
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+
+/* Выделение активного пункта */
+#nav-tree .item.selected {
+  background-color: #d8e8f8;
+  font-weight: bold;
 }

@@ -73,17 +73,25 @@ bool is_empty_document(const document2 &doc)
     return doc.hash == EMPTY_HASH;
 }
 
+/**
+* @brief Таблица шаблонов документов хранит информацию о шаблонах документов и их версиях.
+* @ingroup public_tables
+* @ingroup public_draft_tables
+* @anchor draft_onedraft
+* @par Область памяти (scope): scope (кооператив или _draft)
+* @par Имя таблицы (table): drafts
+*/
 struct [[eosio::table, eosio::contract(DRAFT)]] onedraft
 {
-  uint64_t registry_id;
-  uint64_t version;
-  uint64_t default_translation_id;
-  std::string title;
-  std::string description;
-  std::string context;
-  std::string model;
+  uint64_t registry_id; ///< Реестровый идентификатор шаблона
+  uint64_t version; ///< Версия шаблона
+  uint64_t default_translation_id; ///< Идентификатор перевода по умолчанию
+  std::string title; ///< Заголовок шаблона
+  std::string description; ///< Описание шаблона
+  std::string context; ///< Контекст шаблона
+  std::string model; ///< Модель шаблона
 
-  uint64_t primary_key() const { return registry_id; };
+  uint64_t primary_key() const { return registry_id; }; ///< Первичный ключ (1)
 
 };
 
@@ -99,17 +107,25 @@ onedraft get_scoped_draft_by_registry_or_fail(eosio::name scope, uint64_t draft_
   return *draft;
 }
 
+/**
+* @brief Таблица переводов шаблонов документов хранит переводы шаблонов на различные языки.
+* @ingroup public_tables
+* @ingroup public_draft_tables
+* @anchor draft_translation
+* @par Область памяти (scope): scope (кооператив или _draft)
+* @par Имя таблицы (table): translations
+*/
 struct [[eosio::table, eosio::contract(DRAFT)]] translation
 {
-  uint64_t id;
-  uint64_t draft_id;
-  eosio::name lang;
-  std::string data;
+  uint64_t id; ///< Идентификатор перевода
+  uint64_t draft_id; ///< Идентификатор шаблона документа
+  eosio::name lang; ///< Язык перевода
+  std::string data; ///< Данные перевода
 
-  uint64_t primary_key() const { return id; };
-  uint64_t by_draft() const { return draft_id; };
+  uint64_t primary_key() const { return id; }; ///< Первичный ключ (1)
+  uint64_t by_draft() const { return draft_id; }; ///< Индекс по шаблону (2)
 
-  uint128_t by_draft_lang() const { return combine_ids(draft_id, lang.value); };
+  uint128_t by_draft_lang() const { return combine_ids(draft_id, lang.value); }; ///< Индекс по шаблону и языку (3)
 };
 
 typedef eosio::multi_index<

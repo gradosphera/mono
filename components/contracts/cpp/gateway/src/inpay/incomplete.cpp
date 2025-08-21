@@ -1,5 +1,12 @@
 /**
- * @brief Завершает обработку входящего платежа в контракте `gateway`.
+ * @brief Завершение обработки входящего платежа.
+ * Завершает обработку входящего платежа и вызывает коллбэк успеха.
+ * @param coopname Наименование кооператива
+ * @param income_hash Хэш входящего платежа
+ * @ingroup public_actions
+ * @ingroup public_gateway_actions
+ * @anchor gateway_incomplete
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 void gateway::incomplete(eosio::name coopname, checksum256 income_hash) {
   require_auth(coopname);

@@ -1,3 +1,15 @@
+/**
+ * @brief Подпись протокола секретарем.
+ * Подписывает протокол собрания секретарем после успешного завершения
+ * @param coopname Наименование кооператива
+ * @param username Имя секретаря собрания
+ * @param hash Хэш собрания
+ * @param secretary_decision Документ решения секретаря
+ * @ingroup public_actions
+ * @ingroup public_meet_actions
+ * @anchor meet_signbysecr
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void meet::signbysecr(name coopname, name username, checksum256 hash, document2 secretary_decision) {
     require_auth(coopname);
 

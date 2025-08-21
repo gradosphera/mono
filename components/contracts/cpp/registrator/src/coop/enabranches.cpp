@@ -1,3 +1,12 @@
+/**
+ * @brief Включение режима филиалов.
+ * Включает режим кооперативных участков для кооператива
+ * @param coopname Наименование кооператива
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_enabranches
+ * @note Авторизация требуется от аккаунта: @p branch
+ */
 [[eosio::action]] void registrator::enabranches(eosio::name coopname) {
   require_auth(_branch);
 

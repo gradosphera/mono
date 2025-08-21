@@ -9,6 +9,42 @@
 #include "../lib/common.hpp"
 
 /**
+\defgroup public_gateway Контракт GATEWAY
+* @anchor public_gateway
+* Смарт-контракт процессинга банковских и криптовалютных платежей предназначен для обработки входящих и исходящих платежей в кооперативах.
+*/
+
+/**
+\defgroup public_gateway_processes Процессы
+\ingroup public_gateway
+*/
+
+/**
+\defgroup public_gateway_actions Действия
+\ingroup public_gateway
+*/
+
+/**
+\defgroup public_gateway_tables Таблицы
+\ingroup public_gateway
+*/
+
+/**
+\defgroup public_gateway_consts Константы
+\ingroup public_gateway
+*/
+
+/**
+ * @ingroup public_consts
+ * @ingroup public_gateway_consts
+ * @anchor gateway_constants
+ * @brief Константы контракта процессинга платежей
+ */
+// Константы определены в shared_gateway.hpp:
+// gateway_income_actions = {"deposit"_n}
+// gateway_outcome_actions = {"withdraw"_n}
+
+/**
  *  \ingroup public_contracts
  *
  *  @brief Класс `gateway` обеспечивает процессинг банковских и криптовалютных платежей в кооперативах.

@@ -1,9 +1,14 @@
 /**
- * @brief Блокировка средств на счете (перенос из available в blocked)
- * @param coopname - имя кооператива
- * @param account_id - идентификатор счета
- * @param quantity - сумма блокировки
- * @param comment - комментарий к операции
+ * @brief Блокировка средств на счете. 
+ * Переводит средства из доступных в заблокированные
+ * @param coopname Наименование кооператива
+ * @param account_id ID счета для блокировки средств
+ * @param quantity Сумма для блокировки
+ * @param comment Комментарий к операции
+ * @ingroup public_actions
+ * @ingroup public_ledger_actions
+ * @anchor ledger_block
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]]
 void ledger::block(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {

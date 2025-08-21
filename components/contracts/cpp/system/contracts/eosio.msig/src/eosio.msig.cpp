@@ -39,6 +39,18 @@ std::vector<permission_level> get_approvals_and_adjust_table(name self, name pro
    return approvals_vector;
 }
 
+/**
+ * @brief Создает предложение транзакции.
+ * Позволяет аккаунту proposer создать предложение proposal_name с требуемыми уровнями разрешений.
+ * @param proposer Аккаунт, предлагающий транзакцию
+ * @param proposal_name Имя предложения (должно быть уникальным для proposer)
+ * @param requested Уровни разрешений, ожидаемые для одобрения предложения
+ * @param trx Предлагаемая транзакция
+ * @ingroup public_actions
+ * @ingroup public_msig_actions
+ * @anchor msig_propose
+ * @note Авторизация требуется от аккаунта: @p proposer
+ */
 void multisig::propose( name proposer,
                         name proposal_name,
                         std::vector<permission_level> requested,
@@ -89,6 +101,18 @@ void multisig::propose( name proposer,
       });
 }
 
+/**
+ * @brief Одобряет существующее предложение.
+ * Позволяет аккаунту, владельцу level разрешения, одобрить предложение proposal_name.
+ * @param proposer Аккаунт, предлагающий транзакцию
+ * @param proposal_name Имя предложения (должно быть уникальным для proposer)
+ * @param level Уровень разрешения, одобряющий транзакцию
+ * @param proposal_hash Контрольная сумма транзакции
+ * @ingroup public_actions
+ * @ingroup public_msig_actions
+ * @anchor msig_approve
+ * @note Авторизация требуется от аккаунта: @p level
+ */
 void multisig::approve( name proposer, name proposal_name, permission_level level,
                         const eosio::binary_extension<eosio::checksum256>& proposal_hash )
 {
@@ -140,6 +164,17 @@ void multisig::approve( name proposer, name proposal_name, permission_level leve
    }
 }
 
+/**
+ * @brief Отзывает одобрение существующего предложения.
+ * Позволяет аккаунту отозвать свое одобрение предложения, перемещая разрешение из provided_approvals обратно в requested_approvals.
+ * @param proposer Аккаунт, предлагающий транзакцию
+ * @param proposal_name Имя предложения (должно быть существующим предложением)
+ * @param level Уровень разрешения, отзывающий одобрение предложения
+ * @ingroup public_actions
+ * @ingroup public_msig_actions
+ * @anchor msig_unapprove
+ * @note Авторизация требуется от аккаунта: @p level
+ */
 void multisig::unapprove( name proposer, name proposal_name, permission_level level ) {
    require_auth( level );
 
@@ -181,6 +216,17 @@ void multisig::unapprove( name proposer, name proposal_name, permission_level le
    }
 }
 
+/**
+ * @brief Отменяет существующее предложение.
+ * Позволяет аккаунту canceler отменить предложение proposal_name, созданное proposer.
+ * @param proposer Аккаунт, предлагающий транзакцию
+ * @param proposal_name Имя предложения (должно быть существующим предложением)
+ * @param canceler Аккаунт, отменяющий предложение
+ * @ingroup public_actions
+ * @ingroup public_msig_actions
+ * @anchor msig_cancel
+ * @note Авторизация требуется от аккаунта: @p canceler
+ */
 void multisig::cancel( name proposer, name proposal_name, name canceler ) {
    require_auth( canceler );
 
@@ -205,6 +251,17 @@ void multisig::cancel( name proposer, name proposal_name, name canceler ) {
    }
 }
 
+/**
+ * @brief Выполняет предложение.
+ * Позволяет аккаунту executer выполнить предложение, если все условия выполнены.
+ * @param proposer Аккаунт, предлагающий транзакцию
+ * @param proposal_name Имя предложения (должно быть существующим предложением)
+ * @param executer Аккаунт, выполняющий транзакцию
+ * @ingroup public_actions
+ * @ingroup public_msig_actions
+ * @anchor msig_exec
+ * @note Авторизация требуется от аккаунта: @p executer
+ */
 void multisig::exec( name proposer, name proposal_name, name executer ) {
    require_auth( executer );
 
@@ -237,6 +294,15 @@ void multisig::exec( name proposer, name proposal_name, name executer ) {
    proptable.erase(prop);
 }
 
+/**
+ * @brief Инвалидирует аккаунт.
+ * Позволяет аккаунту инвалидировать себя, добавляя свое имя в таблицу инвалидаций.
+ * @param account Аккаунт, инвалидирующий транзакцию
+ * @ingroup public_actions
+ * @ingroup public_msig_actions
+ * @anchor msig_invalidate
+ * @note Авторизация требуется от аккаунта: @p account
+ */
 void multisig::invalidate( name account ) {
    require_auth( account );
    invalidations inv_table( get_self(), get_self().value );

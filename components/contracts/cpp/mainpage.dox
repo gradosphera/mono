@@ -2,12 +2,14 @@
 @mainpage Обзор
 
 @ref public_capital "Контракт CAPITAL" - смарт-контракт капитализации результатов интеллектуальной деятельности.
+@post test test @ref ledger_create "добавление средств"
+
 
 \htmlonly
 <div class="mermaid">
   graph TD
     A[Создан] --> B[Активен]
-    B --> C[Голосование]
+    B --> C["Голосование активно"]
     C --> D[Завершён]
     B --> E[Закрыт]
 </div>

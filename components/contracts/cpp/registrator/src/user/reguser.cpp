@@ -1,14 +1,17 @@
 /**
-\ingroup public_actions
-\brief Регистрация пользователя
-*
-* Этот метод предназначен для регистрации аккаунта в качестве физического лица.
-* После регистрации пользователь получает статус "user". 
-*
-* @param username Имя пользователя, который регистрируется
-*
-* @note Авторизация требуется от аккаунта: @p registrator
-*/
+ * @brief Регистрация пользователя.
+ * Регистрирует аккаунт в качестве физического лица для вступления в кооператив
+ * @param coopname Наименование кооператива
+ * @param braname Наименование филиала
+ * @param username Имя пользователя, который регистрируется
+ * @param type Тип пользователя (individual, entrepreneur, organization)
+ * @param statement Документ заявления на вступление
+ * @param registration_hash Хэш регистрации
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_reguser
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 [[eosio::action]] void registrator::reguser(eosio::name coopname, eosio::name braname, eosio::name username, eosio::name type, document2 statement, checksum256 registration_hash)
 {
   require_auth(coopname);

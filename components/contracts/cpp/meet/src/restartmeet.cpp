@@ -1,3 +1,17 @@
+/**
+ * @brief Перезапуск собрания.
+ * Перезапускает собрание с новыми параметрами при несостоявшемся кворуме
+ * @param coopname Наименование кооператива
+ * @param hash Хэш текущего собрания
+ * @param new_hash Хэш нового собрания
+ * @param newproposal Новое предложение о проведении собрания
+ * @param new_open_at Новая дата и время открытия собрания
+ * @param new_close_at Новая дата и время закрытия собрания
+ * @ingroup public_actions
+ * @ingroup public_meet_actions
+ * @anchor meet_restartmeet
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void meet::restartmeet(name coopname, checksum256 hash, checksum256 new_hash, document2 newproposal, time_point_sec new_open_at, time_point_sec new_close_at) {
     require_auth(coopname);
 

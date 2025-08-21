@@ -1,3 +1,15 @@
+/**
+ * @brief Завершение запроса на вывод средств из фонда.
+ * Подтверждает фактическое списание средств из фонда после авторизации советом.
+ * Выполняет списание средств из фонда накопления или добавление в фонд списания.
+ * @param coopname Наименование кооператива
+ * @param username Имя пользователя, подтверждающего списание
+ * @param withdraw_id Идентификатор запроса на вывод
+ * @ingroup public_actions
+ * @ingroup public_fund_actions
+ * @anchor fund_complete
+ * @note Авторизация требуется от аккаунта: @p username (сотрудник с правами complete)
+ */
 [[eosio::action]] void fund::complete(eosio::name coopname,
                                       eosio::name username,
                                       uint64_t withdraw_id) {

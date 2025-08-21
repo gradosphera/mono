@@ -1,8 +1,13 @@
 /**
- * @brief Вызывается при запуске кооператива для создания кооперативного кошелька и некоторых фондов
- * 
- * @param coopname 
- * @param initial 
+ * @brief Инициализация фондов кооператива.
+ * Создает кооперативный кошелек и базовые фонды при запуске кооператива.
+ * Создает неделимый, резервный, фонд развития кооперации, хозяйственный и фонд взаимного обеспечения.
+ * @param coopname Наименование кооператива
+ * @param initial Начальная сумма для инициализации фондов
+ * @ingroup public_actions
+ * @ingroup public_fund_actions
+ * @anchor fund_init
+ * @note Авторизация требуется от аккаунта: @p _soviet или @p _registrator
  */
 [[eosio::action]] void fund::init(eosio::name coopname, eosio::asset initial) {
   eosio::name payer = check_auth_and_get_payer_or_fail({_soviet, _registrator});

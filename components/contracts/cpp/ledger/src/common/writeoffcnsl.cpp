@@ -1,9 +1,14 @@
 /**
- * @brief Атомарная операция отмены списания - перевод списанных средств обратно в заблокированные
- * @param coopname - имя кооператива
- * @param account_id - идентификатор счета
- * @param quantity - сумма отмены списания
- * @param comment - комментарий к операции
+ * @brief Атомарная отмена списания средств
+ * Возвращает средства из категории списанных в доступные
+ * @param coopname Наименование кооператива
+ * @param account_id ID счета для отмены списания
+ * @param quantity Сумма для отмены списания
+ * @param comment Комментарий к операции
+ * @ingroup public_actions
+ * @ingroup public_ledger_actions
+ * @anchor ledger_writeoffcnsl
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]]
 void ledger::writeoffcnsl(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {

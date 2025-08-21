@@ -1,7 +1,17 @@
 /**
- * @brief Создаёт запрос на исходящий платеж.
- * 
+ * @brief Создание исходящего платежа.
+ * Создает новый запрос на исходящий платеж в системе процессинга.
+ * @param coopname Наименование кооператива
+ * @param username Имя пользователя, запрашивающего платеж
+ * @param outcome_hash Хэш исходящего платежа
+ * @param quantity Количество средств
+ * @param callback_contract Контракт для вызова коллбэков
+ * @param confirm_callback Действие успеха
+ * @param decline_callback Действие отклонения
  * @ingroup public_actions
+ * @ingroup public_gateway_actions
+ * @anchor gateway_createoutpay
+ * @note Авторизация требуется от аккаунта из белого списка контрактов
  */
 void gateway::createoutpay(eosio::name coopname, eosio::name username, checksum256 outcome_hash, eosio::asset quantity, name callback_contract, name confirm_callback, name decline_callback){
   name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);

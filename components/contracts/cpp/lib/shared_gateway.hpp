@@ -4,10 +4,22 @@ using createoutpay_interface = void(CREATEOUTPAY_SIGNATURE);
 
 namespace Gateway {
   
+  /**
+   * @ingroup public_consts
+   * @ingroup public_gateway_consts
+   * @anchor gateway_income_actions
+   * @brief Допустимые действия для входящих платежей
+   */
   static const std::set<eosio::name> gateway_income_actions = {
       "deposit"_n, //паевой взнос по ЦПП Кошелёк
   };
 
+  /**
+   * @ingroup public_consts
+   * @ingroup public_gateway_consts
+   * @anchor gateway_outcome_actions
+   * @brief Допустимые действия для исходящих платежей
+   */
   static const std::set<eosio::name> gateway_outcome_actions = {
       "withdraw"_n, //возврат паевого взноса по ЦПП Кошелёк
   };
@@ -24,28 +36,32 @@ namespace Gateway {
   }
 
   /**
+  * @brief Таблица входящих платежей хранит информацию о входящих платежах в кооператив.
   * @ingroup public_tables
-  * @brief Таблица `deposits` отслеживает депозиты в контракте GATEWAY.
+  * @ingroup public_gateway_tables
+  * @anchor gateway_income
+  * @par Область памяти (scope): coopname
+  * @par Имя таблицы (table): incomes
   */
   struct [[eosio::table, eosio::contract(GATEWAY)]] income {
-      uint64_t id; /*!< Уникальный идентификатор записи ввода */
-      eosio::name coopname; /*!< Имя аккаунта кооператива, в контексте которого совершается депозит */
-      eosio::name username; /*!< Имя аккаунта пользователя, совершившего ввод */
-      eosio::name type; /*!< Тип взноса */
+      uint64_t id; ///< Уникальный идентификатор записи входящего платежа
+      eosio::name coopname; ///< Имя аккаунта кооператива, в контексте которого совершается платеж
+      eosio::name username; ///< Имя аккаунта пользователя, совершившего платеж
+      eosio::name type; ///< Тип платежа
       checksum256 income_hash; ///< Хэш входящего платежа
-      name callback_contract; ///< контракт для вызова коллбэков
-      name confirm_callback; ///< действие успеха
-      name decline_callback; ///< действие отклонения
+      name callback_contract; ///< Контракт для вызова коллбэков
+      name confirm_callback; ///< Действие успеха
+      name decline_callback; ///< Действие отклонения
       
-      eosio::asset quantity; /*!< Количество средств во внутренней валюте */
-      eosio::name status; /*!< Статус ввода */
+      eosio::asset quantity; ///< Количество средств во внутренней валюте
+      eosio::name status; ///< Статус платежа
 
-      eosio::time_point_sec created_at = current_time_point(); ///< Время истечения срока давности
+      eosio::time_point_sec created_at = current_time_point(); ///< Время создания записи
 
-      uint64_t primary_key() const { return id; } /*!< Возвращает id как первичный ключ */
-      uint64_t by_username() const { return username.value; } /*!< Индекс по имени пользователя */
-      checksum256 by_hash() const { return income_hash; } /*!< Индекс по хэшу платежа */
-      uint64_t by_status() const { return status.value; } /*!< Индекс по статусу вводу */
+      uint64_t primary_key() const { return id; } ///< Первичный ключ (1)
+      uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+      checksum256 by_hash() const { return income_hash; } ///< Индекс по хэшу платежа (3)
+      uint64_t by_status() const { return status.value; } ///< Индекс по статусу платежа (4)
   };
 
   typedef eosio::multi_index<
@@ -76,28 +92,32 @@ namespace Gateway {
   
   
   /**
+  * @brief Таблица исходящих платежей хранит информацию об исходящих платежах из кооператива.
   * @ingroup public_tables
-  * @brief Таблица `deposits` отслеживает депозиты в контракте GATEWAY.
+  * @ingroup public_gateway_tables
+  * @anchor gateway_outcome
+  * @par Область памяти (scope): coopname
+  * @par Имя таблицы (table): outcomes
   */
   struct [[eosio::table, eosio::contract(GATEWAY)]] outcome {
-      uint64_t id; /*!< Уникальный идентификатор записи ввода */
-      eosio::name coopname; /*!< Имя аккаунта кооператива, в контексте которого совершается депозит */
-      eosio::name username; /*!< Имя аккаунта пользователя, совершившего ввод */
-      eosio::name type; /*!< Тип взноса */
-      checksum256 outcome_hash; ///< Хэш входящего платежа
-      name callback_contract; ///< контракт для вызова коллбэков
-      name confirm_callback; ///< действие успеха
-      name decline_callback; ///< действие отклонения
+      uint64_t id; ///< Уникальный идентификатор записи исходящего платежа
+      eosio::name coopname; ///< Имя аккаунта кооператива, в контексте которого совершается платеж
+      eosio::name username; ///< Имя аккаунта пользователя, совершившего платеж
+      eosio::name type; ///< Тип платежа
+      checksum256 outcome_hash; ///< Хэш исходящего платежа
+      name callback_contract; ///< Контракт для вызова коллбэков
+      name confirm_callback; ///< Действие успеха
+      name decline_callback; ///< Действие отклонения
       
-      eosio::asset quantity; /*!< Количество средств во внутренней валюте */
-      eosio::name status; /*!< Статус ввода */
+      eosio::asset quantity; ///< Количество средств во внутренней валюте
+      eosio::name status; ///< Статус платежа
 
-      eosio::time_point_sec created_at = current_time_point(); ///< Время истечения срока давности
+      eosio::time_point_sec created_at = current_time_point(); ///< Время создания записи
 
-      uint64_t primary_key() const { return id; } /*!< Возвращает id как первичный ключ */
-      uint64_t by_username() const { return username.value; } /*!< Индекс по имени пользователя */
-      checksum256 by_hash() const { return outcome_hash; } /*!< Индекс по хэшу платежа */
-      uint64_t by_status() const { return status.value; } /*!< Индекс по статусу вводу */
+      uint64_t primary_key() const { return id; } ///< Первичный ключ (1)
+      uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+      checksum256 by_hash() const { return outcome_hash; } ///< Индекс по хэшу платежа (3)
+      uint64_t by_status() const { return status.value; } ///< Индекс по статусу платежа (4)
   };
 
   typedef eosio::multi_index<

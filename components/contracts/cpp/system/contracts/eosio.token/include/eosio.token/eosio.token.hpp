@@ -1,5 +1,31 @@
 #pragma once
 
+/**
+\defgroup public_token Контракт TOKEN
+* @anchor public_token
+* Смарт-контракт для создания, выпуска и управления токенами в блокчейне EOSIO.
+*/
+
+/**
+\defgroup public_token_processes Процессы
+\ingroup public_token
+*/
+
+/**
+\defgroup public_token_actions Действия
+\ingroup public_token
+*/
+
+/**
+\defgroup public_token_tables Таблицы
+\ingroup public_token
+*/
+
+/**
+\defgroup public_token_consts Константы
+\ingroup public_token
+*/
+
 #include <eosio/asset.hpp>
 #include <eosio/eosio.hpp>
 
@@ -122,18 +148,34 @@ namespace eosio {
          using open_action = eosio::action_wrapper<"open"_n, &token::open>;
          using close_action = eosio::action_wrapper<"close"_n, &token::close>;
       private:
+         /**
+         * @brief Таблица аккаунтов хранит балансы токенов для каждого аккаунта.
+         * @ingroup public_tables
+         * @ingroup public_token_tables
+         * @anchor token_account
+         * @par Область памяти (scope): owner
+         * @par Имя таблицы (table): accounts
+         */
          struct [[eosio::table]] account {
-            asset    balance;
+            asset    balance; ///< Баланс токенов
 
-            uint64_t primary_key()const { return balance.symbol.code().raw(); }
+            uint64_t primary_key()const { return balance.symbol.code().raw(); } ///< Первичный ключ (1)
          };
 
+         /**
+         * @brief Таблица статистики валют хранит информацию о токенах.
+         * @ingroup public_tables
+         * @ingroup public_token_tables
+         * @anchor token_currency_stats
+         * @par Область памяти (scope): symbol_code
+         * @par Имя таблицы (table): stat
+         */
          struct [[eosio::table]] currency_stats {
-            asset    supply;
-            asset    max_supply;
-            name     issuer;
+            asset    supply; ///< Текущее предложение токенов
+            asset    max_supply; ///< Максимальное предложение токенов
+            name     issuer; ///< Аккаунт-эмитент токенов
 
-            uint64_t primary_key()const { return supply.symbol.code().raw(); }
+            uint64_t primary_key()const { return supply.symbol.code().raw(); } ///< Первичный ключ (1)
          };
 
          typedef eosio::multi_index< "accounts"_n, account > accounts;

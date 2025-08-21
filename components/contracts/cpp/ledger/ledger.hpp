@@ -11,6 +11,32 @@
 using namespace eosio;
 
 /**
+\defgroup public_ledger Контракт LEDGER
+* @anchor public_ledger
+* Смарт-контракт бухгалтерской книги кооператива предназначен для управления счетами согласно стандартам кооперативной отчетности.
+*/
+
+/**
+\defgroup public_ledger_processes Процессы
+\ingroup public_ledger
+*/
+
+/**
+\defgroup public_ledger_actions Действия
+\ingroup public_ledger
+*/
+
+/**
+\defgroup public_ledger_tables Таблицы
+\ingroup public_ledger
+*/
+
+/**
+\defgroup public_ledger_consts Константы
+\ingroup public_ledger
+*/
+
+/**
  * @ingroup public_contracts
  * @brief Контракт ledger для управления бухгалтерской книгой кооператива
  * @details Обеспечивает ведение счетов согласно стандартам кооперативной отчетности
@@ -27,8 +53,8 @@ public:
   [[eosio::action]] void migrate();
 
   // Операции со счетами (common процесс)
-  [[eosio::action]] void debet(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
-  [[eosio::action]] void credit(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
+  [[eosio::action]] void add(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
+  [[eosio::action]] void sub(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
   
   // Операции блокировки/разблокировки средств
   [[eosio::action]] void block(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);

@@ -1,14 +1,13 @@
 /**
-\ingroup public_actions
-\brief Верификация аккаунта
-*
-* Этот метод позволяет верифицировать аккаунты как пользователей, так и организаций.
-* На данный момент может быть применен только аккаунтом автономной некоммерческой организации "Кооперативная Экономика".
-*
-* @param username Имя аккаунта, который подлежит верификации
-*
-* @note Авторизация требуется от аккаунта: @p
-*/
+ * @brief Верификация аккаунта.
+ * Верифицирует аккаунты как пользователей, так и организаций
+ * @param username Имя аккаунта, который подлежит верификации
+ * @param procedure Процедура верификации (online)
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_verificate
+ * @note Авторизация требуется от аккаунта: @p provider
+ */
 [[eosio::action]] void registrator::verificate(eosio::name username, eosio::name procedure)
 {
   require_auth(_provider);

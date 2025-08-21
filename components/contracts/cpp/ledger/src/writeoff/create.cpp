@@ -1,12 +1,18 @@
 /**
- * @brief Создание заявления в совет для списания средств
- * @param coopname - имя кооператива
- * @param username - инициатор заявления
- * @param account_id - идентификатор счета для списания
- * @param quantity - сумма списания
- * @param reason - обоснование списания
- * @param document - документ обоснования
- * @param writeoff_hash - внешний хэш операции списания
+ * @anchor ledger_create
+ *
+ * @brief Создание заявления на списание средств через совет. 
+ * Создает операцию списания, требующую одобрения советом
+ * @param coopname Наименование кооператива
+ * @param username Имя пользователя-инициатора списания
+ * @param account_id ID счета для списания
+ * @param quantity Сумма для списания
+ * @param reason Обоснование списания
+ * @param document Документ обоснования
+ * @param writeoff_hash Хэш операции списания
+ * @ingroup public_actions
+ * @ingroup public_ledger_actions
+ * @note Авторизация требуется от аккаунта: @p username
  */
 [[eosio::action]]
 void ledger::create(eosio::name coopname, eosio::name username, uint64_t account_id, eosio::asset quantity, std::string reason, document2 document, checksum256 writeoff_hash) {

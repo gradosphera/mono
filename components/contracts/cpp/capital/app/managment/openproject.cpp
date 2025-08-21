@@ -17,9 +17,9 @@ void capital::openproject(name coopname, checksum256 project_hash) {
     // Проверяем существование проекта и получаем его
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
     
-    // Проверяем, что проект в статусе "created"
+    // Проверяем, что проект еще не открыт
     eosio::check(project.is_opened == false, "Проект уже открыт");
     
-    // Открываем проект через доменную логику
+    // Открываем проект
     Capital::Projects::open_project(coopname, project_hash);
 } 

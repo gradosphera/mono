@@ -3,4 +3,4 @@ description:
 globs:
 alwaysApply: false
 ---
-Тебе необходимо добавить все константы контракта в группу public_contractname_contst. 
+Тебе необходимо добавить все константы контракта в группу public_contractname_contst. Если констант нет - группа должна быть закоментирована. 

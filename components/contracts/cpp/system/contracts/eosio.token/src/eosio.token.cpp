@@ -3,6 +3,16 @@
 
 namespace eosio {
 
+/**
+ * @brief Создает новый токен с указанным максимальным предложением.
+ * Позволяет эмитенту создать токен с заданным символом и максимальным предложением.
+ * @param issuer Аккаунт-эмитент токена
+ * @param maximum_supply Максимальное предложение токенов
+ * @ingroup public_actions
+ * @ingroup public_token_actions
+ * @anchor token_create
+ * @note Авторизация требуется от аккаунта: @p eosio.token
+ */
 void token::create( const name&   issuer,
                     const asset&  maximum_supply )
 {
@@ -39,6 +49,17 @@ void token::is_can_transfer(const name& from, const name& to) {
   }
 }
 
+/**
+ * @brief Выпускает токены указанному аккаунту.
+ * Позволяет эмитенту выпустить определенное количество токенов на аккаунт получателя.
+ * @param to Аккаунт, которому выпускаются токены
+ * @param quantity Количество токенов для выпуска
+ * @param memo Мемо транзакции (максимум 256 байт)
+ * @ingroup public_actions
+ * @ingroup public_token_actions
+ * @anchor token_issue
+ * @note Авторизация требуется от аккаунта: @p issuer
+ */
 void token::issue( const name& to, const asset& quantity, const string& memo )
 {
     auto sym = quantity.symbol;
@@ -67,6 +88,16 @@ void token::issue( const name& to, const asset& quantity, const string& memo )
     add_balance( to, quantity, st.issuer );
 }
 
+/**
+ * @brief Изымает токены из обращения.
+ * Позволяет эмитенту изъять определенное количество токенов из общего предложения.
+ * @param quantity Количество токенов для изъятия
+ * @param memo Мемо транзакции (максимум 256 байт)
+ * @ingroup public_actions
+ * @ingroup public_token_actions
+ * @anchor token_retire
+ * @note Авторизация требуется от аккаунта: @p issuer
+ */
 void token::retire( const asset& quantity, const string& memo )
 {
     auto sym = quantity.symbol;
@@ -91,6 +122,18 @@ void token::retire( const asset& quantity, const string& memo )
     sub_balance( st.issuer, quantity );
 }
 
+/**
+ * @brief Переводит токены между аккаунтами.
+ * Позволяет отправителю перевести определенное количество токенов получателю.
+ * @param from Аккаунт-отправитель
+ * @param to Аккаунт-получатель
+ * @param quantity Количество токенов для перевода
+ * @param memo Мемо транзакции
+ * @ingroup public_actions
+ * @ingroup public_token_actions
+ * @anchor token_transfer
+ * @note Авторизация требуется от аккаунта: @p from
+ */
 void token::transfer( const name&    from,
                       const name&    to,
                       const asset&   quantity,
@@ -145,6 +188,17 @@ void token::add_balance( const name& owner, const asset& value, const name& ram_
    }
 }
 
+/**
+ * @brief Открывает аккаунт для указанного токена.
+ * Позволяет ram_payer создать аккаунт owner с нулевым балансом для указанного токена.
+ * @param owner Аккаунт, который будет создан
+ * @param symbol Символ токена
+ * @param ram_payer Аккаунт, который оплачивает RAM для этого действия
+ * @ingroup public_actions
+ * @ingroup public_token_actions
+ * @anchor token_open
+ * @note Авторизация требуется от аккаунта: @p ram_payer
+ */
 void token::open( const name& owner, const symbol& symbol, const name& ram_payer )
 {
    require_auth( ram_payer );
@@ -165,6 +219,16 @@ void token::open( const name& owner, const symbol& symbol, const name& ram_payer
    }
 }
 
+/**
+ * @brief Закрывает аккаунт для указанного токена.
+ * Позволяет владельцу закрыть аккаунт для указанного токена, если баланс равен нулю.
+ * @param owner Аккаунт-владелец для выполнения действия закрытия
+ * @param symbol Символ токена для выполнения действия закрытия
+ * @ingroup public_actions
+ * @ingroup public_token_actions
+ * @anchor token_close
+ * @note Авторизация требуется от аккаунта: @p owner
+ */
 void token::close( const name& owner, const symbol& symbol )
 {
    require_auth( owner );

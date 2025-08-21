@@ -1,3 +1,14 @@
+/**
+ * @brief Удаление доверенного лица из кооперативного участка.
+ * Удаляет доверенное лицо из существующего кооперативного участка.
+ * @param coopname Наименование кооператива
+ * @param braname Наименование кооперативного участка
+ * @param trusted Доверенное лицо для удаления
+ * @ingroup public_actions
+ * @ingroup public_branch_actions
+ * @anchor branch_deltrusted
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 [[eosio::action]] void branch::deltrusted(eosio::name coopname, eosio::name braname, eosio::name trusted) {
     check_auth_or_fail(_branch, coopname, coopname, "deltrusted"_n);
 

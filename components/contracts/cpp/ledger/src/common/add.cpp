@@ -1,13 +1,17 @@
 /**
- * @brief Пополнение счета с автоматическим созданием если не существует
- * @param actor - кто предоставляет авторизацию
- * @param coopname - имя кооператива
- * @param account_id - идентификатор счета
- * @param quantity - сумма пополнения
- * @param comment - комментарий к операции
+ * @brief Пополнение счета (дебетовая операция). 
+ * Увеличивает доступные средства на указанном счете. Счет создается автоматически при первом пополнении.
+ * @param coopname Наименование кооператива
+ * @param account_id ID счета для пополнения
+ * @param quantity Сумма для пополнения
+ * @param comment Комментарий к операции
+ * @ingroup public_actions
+ * @ingroup public_ledger_actions
+ * @anchor ledger_add
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]]
-void ledger::debet(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+void ledger::add(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   require_recipient(coopname);
   
   eosio::name payer = coopname;

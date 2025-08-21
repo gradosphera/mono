@@ -9,7 +9,19 @@ namespace eosiosystem {
    using eosio::token;
 
 
-void system_contract::bidname(const name& bidder, const name& newname, const asset& bid) {
+   /**
+    * @brief Размещает ставку на премиум имя.
+    * Позволяет аккаунту разместить ставку на премиум имя. Ставки можно размещать только на имена
+    * длиной не более 5 символов без точек. Ставка должна быть больше текущей на 10%.
+    * @param bidder Аккаунт, размещающий ставку
+    * @param newname Имя, на которое делается ставка
+    * @param bid Сумма ставки в системных токенах
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_bidname
+    * @note Авторизация требуется от аккаунта: @p bidder
+    */
+   void system_contract::bidname(const name& bidder, const name& newname, const asset& bid) {
     require_auth(bidder);
     
     check(false, "service is temporary unavailable");
@@ -72,6 +84,16 @@ void system_contract::bidname(const name& bidder, const name& newname, const ass
     }
 }
 
+   /**
+    * @brief Возвращает ставку на имя.
+    * Позволяет аккаунту получить обратно сумму своей ставки на имя, если она была перебита.
+    * @param bidder Аккаунт, который получает возврат
+    * @param newname Имя, на которое была сделана ставка
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_bidrefund
+    * @note Авторизация требуется от аккаунта: @p bidder
+    */
    void system_contract::bidrefund( const name& bidder, const name& newname ) {
       bid_refund_table refunds_table(get_self(), newname.value);
       auto it = refunds_table.find( bidder.value );

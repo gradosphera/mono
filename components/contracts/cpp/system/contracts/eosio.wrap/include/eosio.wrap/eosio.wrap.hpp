@@ -1,5 +1,31 @@
 #pragma once
 
+/**
+\defgroup public_wrap Контракт WRAP
+* @anchor public_wrap
+* Системный контракт, позволяющий блок-продюсерам обходить проверки авторизации или выполнять привилегированные действия.
+*/
+
+/**
+\defgroup public_wrap_processes Процессы
+\ingroup public_wrap
+*/
+
+/**
+\defgroup public_wrap_actions Действия
+\ingroup public_wrap
+*/
+
+/**
+\defgroup public_wrap_tables Таблицы
+\ingroup public_wrap
+*/
+
+/**
+\defgroup public_wrap_consts Константы
+\ingroup public_wrap
+*/
+
 #include <eosio/eosio.hpp>
 #include <eosio/ignore.hpp>
 #include <eosio/transaction.hpp>
@@ -17,18 +43,20 @@ namespace eosio {
          using contract::contract;
 
          /**
-          * Execute action.
-          *
-          * Execute a transaction while bypassing regular authorization checks.
+          * @brief Выполняет транзакцию, обходя обычные проверки авторизации.
           * 
-          * Preconditions:
-          * - Requires authorization of eosio.wrap which needs to be a privileged account.
+          * Предусловия:
+          * - Требует авторизации eosio.wrap, который должен быть привилегированным аккаунтом.
           *
-          * Postconditions:
-          * - Deferred transaction RAM usage is billed to 'executer'          *
+          * Постусловия:
+          * - Использование RAM отложенной транзакции оплачивается 'executer'
           * 
-          * @param executer - account executing the transaction,
-          * @param trx - the transaction to be executed.
+          * @param executer Аккаунт, выполняющий транзакцию
+          * @param trx Транзакция для выполнения
+          * @ingroup public_actions
+          * @ingroup public_wrap_actions
+          * @anchor wrap_exec
+          * @note Авторизация требуется от аккаунта: @p eosio.wrap
           */
          [[eosio::action]]
          void exec( ignore<name> executer, ignore<transaction> trx );

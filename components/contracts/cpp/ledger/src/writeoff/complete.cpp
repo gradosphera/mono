@@ -1,7 +1,12 @@
 /**
- * @brief Коллбэк при успешном завершении платежа
- * @param coopname - имя кооператива
- * @param writeoff_hash - хэш операции списания
+ * @brief Завершение операции списания от gateway
+ * Коллбэк от gateway при успешном завершении операции
+ * @param coopname Наименование кооператива
+ * @param writeoff_hash Хэш операции списания для завершения
+ * @ingroup public_actions
+ * @ingroup public_ledger_actions
+ * @anchor ledger_complete
+ * @note Авторизация требуется от аккаунта: @p gateway
  */
 [[eosio::action]]
 void ledger::complete(eosio::name coopname, checksum256 writeoff_hash) {

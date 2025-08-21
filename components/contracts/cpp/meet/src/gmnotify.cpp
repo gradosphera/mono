@@ -1,3 +1,15 @@
+/**
+ * @brief Уведомление о собрании.
+ * Регистрирует уведомление пользователя о проведении собрания
+ * @param coopname Наименование кооператива
+ * @param hash Хэш собрания
+ * @param username Имя пользователя, уведомляющего о собрании
+ * @param notification Документ уведомления
+ * @ingroup public_actions
+ * @ingroup public_meet_actions
+ * @anchor meet_gmnotify
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void meet::gmnotify(name coopname, checksum256 hash, name username, document2 notification) {
     require_auth(coopname);
 

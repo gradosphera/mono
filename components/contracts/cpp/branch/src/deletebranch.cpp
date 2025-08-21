@@ -1,3 +1,14 @@
+/**
+ * @brief Удаление кооперативного участка.
+ * Удаляет существующий кооперативный участок и отключает его участников.
+ * При удалении участка, когда остается менее 3 участков, автоматически отключает систему кооперативных участков.
+ * @param coopname Наименование кооператива
+ * @param braname Наименование кооперативного участка для удаления
+ * @ingroup public_actions
+ * @ingroup public_branch_actions
+ * @anchor branch_deletebranch
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 [[eosio::action]] void branch::deletebranch(eosio::name coopname, eosio::name braname) {
   check_auth_or_fail(_branch, coopname, coopname, "deletebranch"_n);
 

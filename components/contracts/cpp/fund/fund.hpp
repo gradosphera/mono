@@ -9,6 +9,42 @@
 #include "../lib/common.hpp"
 
 /**
+\defgroup public_fund Контракт FUND
+* @anchor public_fund
+* Смарт-контракт управления фондами кооператива предназначен для создания и управления фондами накопления и списания, а также для управления кооперативным кошельком.
+*/
+
+/**
+\defgroup public_fund_processes Процессы
+\ingroup public_fund
+*/
+
+/**
+\defgroup public_fund_actions Действия
+\ingroup public_fund
+*/
+
+/**
+\defgroup public_fund_tables Таблицы
+\ingroup public_fund
+*/
+
+/**
+\defgroup public_fund_consts Константы
+\ingroup public_fund
+*/
+
+/**
+ * @ingroup public_consts
+ * @ingroup public_fund_consts
+ * @anchor fund_constants
+ * @brief Константы контракта управления фондами
+ */
+// Константы определены в lib/consts.hpp:
+// HUNDR_PERCENTS = 1000000 (100%)
+// ONE_PERCENT = 10000 (1%)
+
+/**
  *  \ingroup public_contracts
  *
  *  @brief Класс `fund`

@@ -1,3 +1,14 @@
+/**
+ * @brief Установка статуса кооператива.
+ * Изменяет статус кооператива (active, blocked, pending)
+ * @param coopname Наименование кооператива
+ * @param administrator Имя администратора
+ * @param status Новый статус кооператива
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_stcoopstatus
+ * @note Авторизация требуется от аккаунта: @p provider или @p administrator
+ */
 [[eosio::action]] void registrator::stcoopstatus(eosio::name coopname, eosio::name administrator, eosio::name status) {
     check_auth_or_fail(_registrator, _provider, administrator, "stcoopstatus"_n); //ожидаем разрешений от оператора
     

@@ -10,6 +10,32 @@ using namespace eosio;
 using std::string;
 
 /**
+\defgroup public_meet Контракт MEET
+* @anchor public_meet
+* Смарт-контракт управления собраниями пайщиков кооператива предназначен для организации и проведения общих собраний участников.
+*/
+
+/**
+\defgroup public_meet_processes Процессы
+\ingroup public_meet
+*/
+
+/**
+\defgroup public_meet_actions Действия
+\ingroup public_meet
+*/
+
+/**
+\defgroup public_meet_tables Таблицы
+\ingroup public_meet
+*/
+
+/**
+\defgroup public_meet_consts Константы
+\ingroup public_meet
+*/
+
+/**
  *  \ingroup public_contracts
  *  @brief  Контракт Meet управляет собраниями пайщиков.
  */
@@ -17,7 +43,20 @@ class [[eosio::contract]] meet : public contract {
 public:
     using contract::contract;
 
+    /**
+     * @brief Минимальная задержка до открытия общего собрания.
+     * @ingroup public_consts
+     * @ingroup public_meet_consts
+     * @anchor meet_min_open_delay
+     */
     static constexpr uint32_t MIN_OPEN_AGM_DELAY_SEC = 60 * 60 * 24 * 15; // 15 дней
+    
+    /**
+     * @brief Флаг тестового режима.
+     * @ingroup public_consts
+     * @ingroup public_meet_consts
+     * @anchor meet_test_mode
+     */
     static constexpr bool TEST_MODE = true; // Флаг тестового режима
 
     [[eosio::action]]

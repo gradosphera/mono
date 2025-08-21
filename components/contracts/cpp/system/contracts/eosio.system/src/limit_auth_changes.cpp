@@ -3,6 +3,20 @@
 
 namespace eosiosystem {
 
+   /**
+    * @brief Ограничивает или отменяет ограничения на изменение авторизации.
+    * Позволяет аккаунту включиться в ограничения или выйти из них для действий updateauth,
+    * deleteauth, linkauth и unlinkauth. Если allow_perms не пуст, то authorized_by должен
+    * быть в векторе. Если disallow_perms не пуст, то authorized_by не должен быть в векторе.
+    * Если оба вектора пусты, то аккаунт выходит из ограничений.
+    * @param account Аккаунт для изменения
+    * @param allow_perms Разрешения, которые могут использовать ограниченные действия
+    * @param disallow_perms Разрешения, которые не могут использовать ограниченные действия
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_limitauthchg
+    * @note Авторизация требуется от аккаунта: @p account
+    */
    void system_contract::limitauthchg(const name& account, const std::vector<name>& allow_perms,
                                       const std::vector<name>& disallow_perms) {
       limit_auth_change_table table(get_self(), get_self().value);

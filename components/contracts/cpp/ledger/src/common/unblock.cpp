@@ -1,9 +1,14 @@
 /**
- * @brief Разблокировка средств на счете (перенос из blocked в available)
- * @param coopname - имя кооператива
- * @param account_id - идентификатор счета
- * @param quantity - сумма разблокировки
- * @param comment - комментарий к операции
+ * @brief Разблокировка средств на счете. 
+ * Переводит средства из заблокированных в доступные
+ * @param coopname Наименование кооператива
+ * @param account_id ID счета для разблокировки средств
+ * @param quantity Сумма для разблокировки
+ * @param comment Комментарий к операции
+ * @ingroup public_actions
+ * @ingroup public_ledger_actions
+ * @anchor ledger_unblock
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]]
 void ledger::unblock(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {

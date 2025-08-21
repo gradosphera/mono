@@ -1,5 +1,31 @@
 #pragma once
 
+// /**
+// \defgroup public_boot Контракт BOOT
+// * @anchor public_boot
+// * Крайне минималистичный системный контракт, поддерживающий только нативные действия и активацию протокольных функций.
+// */
+
+// /**
+// \defgroup public_boot_processes Процессы
+// \ingroup public_boot
+// */
+
+// /**
+// \defgroup public_boot_actions Действия
+// \ingroup public_boot
+// */
+
+// /**
+// \defgroup public_boot_tables Таблицы
+// \ingroup public_boot
+// */
+
+// /**
+// \defgroup public_boot_consts Константы
+// \ingroup public_boot
+// */
+
 #include <eosio/crypto.hpp>
 #include <eosio/eosio.hpp>
 

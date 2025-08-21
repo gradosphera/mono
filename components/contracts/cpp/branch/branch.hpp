@@ -9,6 +9,40 @@
 #include "../lib/common.hpp"
 
 /**
+\defgroup public_branch Контракт BRANCH
+* @anchor public_branch
+* Смарт-контракт управления кооперативными участками предназначен для создания, редактирования и удаления кооперативных участков, а также управления доверенными лицами.
+*/
+
+/**
+\defgroup public_branch_processes Процессы
+\ingroup public_branch
+*/
+
+/**
+\defgroup public_branch_actions Действия
+\ingroup public_branch
+*/
+
+/**
+\defgroup public_branch_tables Таблицы
+\ingroup public_branch
+*/
+
+// /**
+// \defgroup public_branch_consts Константы
+// \ingroup public_branch
+// */
+
+/**
+ * @ingroup public_consts
+ * @ingroup public_branch_consts
+ * @anchor branch_constants
+ * @brief Константы контракта кооперативных участков
+ */
+// Константы будут добавлены по мере необходимости
+
+/**
  *  \ingroup public_contracts
  *
  *  @brief  Класс `branch` управляет кооперативными участками.

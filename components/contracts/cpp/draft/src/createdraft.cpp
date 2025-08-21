@@ -1,3 +1,20 @@
+/**
+ * @brief Создание нового шаблона документа.
+ * Создает новый шаблон документа с указанными параметрами и переводом на указанный язык.
+ * @param scope Область видимости (кооператив или _draft)
+ * @param username Имя пользователя, создающего шаблон
+ * @param registry_id Реестровый идентификатор шаблона
+ * @param lang Язык перевода по умолчанию
+ * @param title Заголовок шаблона
+ * @param description Описание шаблона
+ * @param context Контекст шаблона
+ * @param model Модель шаблона
+ * @param translation_data Данные перевода на указанный язык
+ * @ingroup public_actions
+ * @ingroup public_draft_actions
+ * @anchor draft_createdraft
+ * @note Авторизация требуется от аккаунта: @p scope или @p _system
+ */
 void draft::createdraft(eosio::name scope, eosio::name username, uint64_t registry_id, eosio::name lang, std::string title, 
                     std::string description, std::string context, std::string model, std::string translation_data) {
   

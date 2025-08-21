@@ -1,3 +1,15 @@
+/**
+ * @brief Добавление доверенного лица в кооперативный участок.
+ * Добавляет нового доверенного лица в существующий кооперативный участок.
+ * Максимальное количество доверенных лиц на один участок - 3.
+ * @param coopname Наименование кооператива
+ * @param braname Наименование кооперативного участка
+ * @param trusted Доверенное лицо для добавления (должно быть физическим лицом)
+ * @ingroup public_actions
+ * @ingroup public_branch_actions
+ * @anchor branch_addtrusted
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 [[eosio::action]] void branch::addtrusted(eosio::name coopname, eosio::name braname, eosio::name trusted) {
     check_auth_or_fail(_branch, coopname, coopname, "addtrusted"_n);
 

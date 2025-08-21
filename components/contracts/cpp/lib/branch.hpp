@@ -1,8 +1,16 @@
 #pragma once
 
+/**
+* @brief Таблица статистики кооперативных участков хранит количество участков для каждого кооператива.
+* @ingroup public_tables
+* @ingroup public_branch_tables
+* @anchor branch_branchstat
+* @par Область памяти (scope): _branch
+* @par Имя таблицы (table): branchstat
+*/
 struct [[eosio::table, eosio::contract(BRANCH)]] branchstat {
-  eosio::name coopname;
-  uint64_t count;
+  eosio::name coopname; ///< Имя кооператива
+  uint64_t count; ///< Количество кооперативных участков
   
   uint64_t primary_key() const { return coopname.value; }
 };
@@ -50,18 +58,21 @@ uint64_t sub_branch_count(eosio::name coopname){
 
 
 /**
- * @ingroup public_tables
- * @brief Структура, представляющая кооперативные участка.
- * @details Эта структура содержит информацию о кооперативных участках.
- */
+* @brief Таблица кооперативных участков хранит информацию о кооперативных участках и их доверенных лицах.
+* @ingroup public_tables
+* @ingroup public_branch_tables
+* @anchor branch_coobranch
+* @par Область памяти (scope): coopname
+* @par Имя таблицы (table): branches
+*/
 struct [[eosio::table, eosio::contract(BRANCH)]] coobranch {
-  eosio::name braname;
-  eosio::name trustee;
-  std::vector<eosio::name> trusted;
+  eosio::name braname; ///< Имя кооперативного участка
+  eosio::name trustee; ///< Председатель кооперативного участка
+  std::vector<eosio::name> trusted; ///< Список доверенных лиц кооперативного участка
   
 
-  uint64_t primary_key() const { return braname.value; }
-  uint64_t by_trustee() const { return trustee.value; }
+  uint64_t primary_key() const { return braname.value; } ///< Первичный ключ (1)
+  uint64_t by_trustee() const { return trustee.value; } ///< Индекс по доверенному лицу (2)
   
   void add_account_to_trusted(const eosio::name& account) {
     trusted.push_back(account);

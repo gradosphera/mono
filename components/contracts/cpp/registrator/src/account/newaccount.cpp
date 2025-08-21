@@ -1,16 +1,15 @@
 /**
- * @brief Регистрирует новый аккаунт.
- *
- * Действие позволяет создать новый аккаунт. Новый аккаунт может быть создан только верифицированной организацией.
- * @note Авторизация требуется от аккаунта: @p registrator
- *
- * @param registrator Аккаунт, который оплачивает создание нового аккаунта.
- * @param referer Реферер, который представил нового пользователя.
- * @param username Имя нового аккаунта (от 5 до 12 символов).
- * @param public_key Открытый ключ нового аккаунта.
- * @param meta Дополнительная мета-информация.
- *
+ * @brief Регистрация нового аккаунта.
+ * Создает новый аккаунт в системе блокчейна
+ * @param coopname Наименование кооператива
+ * @param referer Реферер, который представил нового пользователя
+ * @param username Имя нового аккаунта (от 5 до 12 символов)
+ * @param public_key Открытый ключ нового аккаунта
+ * @param meta Дополнительная мета-информация
  * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_newaccount
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 void registrator::newaccount(
     eosio::name coopname, eosio::name referer,

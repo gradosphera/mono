@@ -1,16 +1,16 @@
 
 /**
-\ingroup public_actions
-\brief Изменение ключа активной учетной записи
-*
-* Этот метод позволяет изменить активный ключ указанной учетной записи.
-* Только аккаунт автономной некомерческой организации "Кооперативная Экономика" имеет право изменять ключи учетных записей.
-*
-* @param username Имя аккаунта, ключ которого требуется изменить
-* @param public_key Новый публичный ключ для активной учетной записи
-*
-* @note Авторизация требуется от аккаунта: @p changer
-*/
+ * @brief Изменение ключа активной учетной записи.
+ * Изменяет активный ключ указанной учетной записи
+ * @param coopname Наименование кооператива
+ * @param changer Имя аккаунта, который изменяет ключ
+ * @param username Имя аккаунта, ключ которого требуется изменить
+ * @param public_key Новый публичный ключ для активной учетной записи
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_changekey
+ * @note Авторизация требуется от аккаунта: @p changer
+ */
 void registrator::changekey(eosio::name coopname, eosio::name changer, eosio::name username,
                                               eosio::public_key public_key)
 {

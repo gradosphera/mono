@@ -1,13 +1,17 @@
 /**
- * @brief Списание со счета
- * @param actor - кто предоставляет авторизацию
- * @param coopname - имя кооператива
- * @param account_id - идентификатор счета
- * @param quantity - сумма списания
- * @param comment - комментарий к операции
+ * @brief Списание со счета (кредитовая операция). 
+ * Уменьшает доступные средства на указанном счете. Счет удаляется при обнулении всех балансов.
+ * @param coopname Наименование кооператива
+ * @param account_id ID счета для списания
+ * @param quantity Сумма для списания
+ * @param comment Комментарий к операции
+ * @ingroup public_actions
+ * @ingroup public_ledger_actions
+ * @anchor ledger_sub
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]]
-void ledger::credit(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+void ledger::sub(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   require_recipient(coopname);
   
   eosio::name payer = coopname;

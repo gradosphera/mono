@@ -2,8 +2,8 @@
 #include <ctime>
 #include <eosio/transaction.hpp>
 
-#include "src/common/debet.cpp"
-#include "src/common/credit.cpp"
+#include "src/common/add.cpp"
+#include "src/common/sub.cpp"
 #include "src/common/block.cpp"
 #include "src/common/unblock.cpp" 
 #include "src/common/writeoff.cpp"

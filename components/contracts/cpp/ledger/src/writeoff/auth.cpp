@@ -1,7 +1,12 @@
 /**
- * @brief Авторизация операции после положительного решения совета
- * @param coopname - имя кооператива
- * @param writeoff_hash - хэш операции списания
+ * @brief Авторизация списания средств советом
+ * Подтверждает операцию списания после одобрения советом
+ * @param coopname Наименование кооператива
+ * @param writeoff_hash Хэш операции списания для авторизации
+ * @ingroup public_actions
+ * @ingroup public_ledger_actions
+ * @anchor ledger_auth
+ * @note Авторизация требуется от аккаунта: @p soviet
  */
 [[eosio::action]]
 void ledger::auth(eosio::name coopname, checksum256 writeoff_hash) {

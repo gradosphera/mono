@@ -1,3 +1,14 @@
+/**
+ * @brief Отклонение входящего платежа.
+ * Отклоняет входящий платеж и вызывает коллбэк отклонения с указанной причиной.
+ * @param coopname Наименование кооператива
+ * @param income_hash Хэш входящего платежа
+ * @param reason Причина отклонения платежа
+ * @ingroup public_actions
+ * @ingroup public_gateway_actions
+ * @anchor gateway_indecline
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void gateway::indecline(eosio::name coopname, checksum256 income_hash, std::string reason) {
   require_auth(coopname);
   

@@ -8,6 +8,40 @@
 
 #include "../lib/common.hpp"
 
+/**
+\defgroup public_draft Контракт DRAFT
+* @anchor public_draft
+* Смарт-контракт управления шаблонами документов предназначен для создания, редактирования и управления шаблонами документов и их переводами на различные языки.
+*/
+
+/**
+\defgroup public_draft_processes Процессы
+\ingroup public_draft
+*/
+
+/**
+\defgroup public_draft_actions Действия
+\ingroup public_draft
+*/
+
+/**
+\defgroup public_draft_tables Таблицы
+\ingroup public_draft
+*/
+
+/**
+\defgroup public_draft_consts Константы
+\ingroup public_draft
+*/
+
+/**
+ * @ingroup public_consts
+ * @ingroup public_draft_consts
+ * @anchor draft_constants
+ * @brief Константы контракта шаблонов документов
+ */
+// Константы будут добавлены по мере необходимости
+
 class [[eosio::contract(DRAFT)]] draft : public eosio::contract {
 
 public:

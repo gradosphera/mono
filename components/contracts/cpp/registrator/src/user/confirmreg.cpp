@@ -1,3 +1,14 @@
+/**
+ * @brief Подтверждение регистрации пользователя.
+ * Подтверждает регистрацию кандидата советом и добавляет его в кооператив
+ * @param coopname Наименование кооператива
+ * @param registration_hash Хэш регистрации
+ * @param authorization Документ авторизации от совета
+ * @ingroup public_actions
+ * @ingroup public_registrator_actions
+ * @anchor registrator_confirmreg
+ * @note Авторизация требуется от аккаунта: @p soviet
+ */
 void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash, document2 authorization)
 {
   require_auth(_soviet);
@@ -35,9 +46,9 @@ void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash
   ).send();
 
   //добавляем   
-  Ledger::debet(_registrator, coopname, Ledger::accounts::SHARE_FUND, candidate -> minimum, "Паевой взнос при подтверждении регистрации");
+  Ledger::add(_registrator, coopname, Ledger::accounts::SHARE_FUND, candidate -> minimum, "Паевой взнос при подтверждении регистрации");
   
-  Ledger::debet(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, candidate -> initial, "Вступительный взнос при подтверждении регистрации");
+  Ledger::add(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, candidate -> initial, "Вступительный взнос при подтверждении регистрации");
   
   // Увеличиваем счетчик активных пайщиков
   cooperatives2_index cooperatives(_registrator, _registrator.value);

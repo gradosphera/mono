@@ -95,7 +95,17 @@ void system_contract::process_powerup_queue(time_point_sec now, symbol core_symb
    state.ram.utilization -= ram_delta_available;
 }
 
-void system_contract::cfgpowerup(powerup_config& args) {
+   /**
+    * @brief Конфигурирует систему аренды ресурсов.
+    * Настраивает параметры рынка ресурсов powerup, включая количество дней и минимальную комиссию.
+    * Рынок становится доступным при первом вызове этого действия.
+    * @param args Конфигурация powerup с параметрами дней и минимальной комиссии
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_cfgpowerup
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
+   void system_contract::cfgpowerup(powerup_config& args) {
    require_auth(get_self());
    time_point_sec         now         = eosio::current_time_point();
    auto                   core_symbol = get_core_symbol();
@@ -148,7 +158,18 @@ void system_contract::cfgpowerup(powerup_config& args) {
 }
 
 
-void system_contract::powerupexec(const name& user, uint16_t max) {
+   /**
+    * @brief Обрабатывает очередь powerup и обновляет состояние.
+    * Действие не выполняет ничего связанного с конкретным пользователем, а обрабатывает
+    * очередь заказов powerup и обновляет состояние рынка ресурсов.
+    * @param user Любой аккаунт может выполнить это действие
+    * @param max Количество элементов очереди для обработки
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_powerupexec
+    * @note Авторизация требуется от аккаунта: @p user
+    */
+   void system_contract::powerupexec(const name& user, uint16_t max) {
    require_auth(user);
    powerup_state_singleton state_sing{ get_self(), 0 };
    powerup_order_table     orders{ get_self(), 0 };
@@ -166,7 +187,21 @@ void system_contract::powerupexec(const name& user, uint16_t max) {
    state_sing.set(state, get_self());
 }
 
-void system_contract::powerup(const name& payer, const name& receiver, uint32_t days, const asset& payment, const bool transfer) {
+   /**
+    * @brief Аренда ресурсов NET и CPU через систему powerup.
+    * Позволяет аккаунту арендовать ресурсы сети и CPU на определенное количество дней.
+    * Ресурсы предоставляются получателю, а плательщик оплачивает их стоимость.
+    * @param payer Аккаунт, который платит за ресурсы
+    * @param receiver Аккаунт, который получает ресурсы
+    * @param days Количество дней доступности ресурсов (должно соответствовать конфигурации рынка)
+    * @param payment Максимальная сумма, которую плательщик готов заплатить
+    * @param transfer Флаг передачи ресурсов (требует специальных прав)
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_powerup
+    * @note Авторизация требуется от аккаунта: @p payer
+    */
+   void system_contract::powerup(const name& payer, const name& receiver, uint32_t days, const asset& payment, const bool transfer) {
   require_auth(payer);
 
   eosio::check(payment.amount > 0, "Payment must be positive");

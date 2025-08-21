@@ -1,5 +1,31 @@
 #pragma once
 
+// /**
+// \defgroup public_bios Контракт BIOS
+// * @anchor public_bios
+// * Минималистичный системный контракт, предоставляющий только критические действия для загрузки блокчейна.
+// */
+
+// /**
+// \defgroup public_bios_processes Процессы
+// \ingroup public_bios
+// */
+
+// /**
+// \defgroup public_bios_actions Действия
+// \ingroup public_bios
+// */
+
+// /**
+// \defgroup public_bios_tables Таблицы
+// \ingroup public_bios
+// */
+
+// /**
+// \defgroup public_bios_consts Константы
+// \ingroup public_bios
+// */
+
 #include <eosio/action.hpp>
 #include <eosio/crypto.hpp>
 #include <eosio/eosio.hpp>
@@ -253,10 +279,18 @@ namespace eosiobios {
          [[eosio::action]]
          void reqactivated( const eosio::checksum256& feature_digest );
 
+         /**
+         * @brief Таблица хешей ABI хранит хеши ABI для аккаунтов.
+         * @ingroup public_tables
+         * @ingroup public_bios_tables
+         * @anchor bios_abi_hash
+         * @par Область памяти (scope): eosio.bios
+         * @par Имя таблицы (table): abihash
+         */
          struct [[eosio::table]] abi_hash {
-            name              owner;
-            checksum256       hash;
-            uint64_t primary_key()const { return owner.value; }
+            name              owner; ///< Владелец ABI
+            checksum256       hash; ///< Хеш ABI
+            uint64_t primary_key()const { return owner.value; } ///< Первичный ключ (1)
 
             EOSLIB_SERIALIZE( abi_hash, (owner)(hash) )
          };

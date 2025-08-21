@@ -7,6 +7,18 @@ namespace eosiosystem {
    using eosio::microseconds;
    using eosio::token;
 
+   /**
+    * @brief Действие при блоке. Это специальное действие срабатывает при применении блока данным продюсером
+    * и не может быть сгенерировано из любого другого источника. Используется для оплаты продюсеров и расчета
+    * пропущенных блоков других продюсеров. Оплата продюсера депонируется в баланс ставки продюсера
+    * и может быть выведена со временем. Раз в минуту может обновлять активную конфигурацию продюсера из
+    * голосов продюсеров. Действие также заполняет таблицу blockinfo.
+    * @param header Заголовок произведенного блока
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_onblock
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::onblock( ignore<block_header> ) {
       using namespace eosio;
 
@@ -77,6 +89,15 @@ namespace eosiosystem {
       }
    }
 
+   /**
+    * @brief Выпускает новые токены в фонд.
+    * Выпускает указанное количество новых токенов и передает их в сберегательный фонд.
+    * @param new_emission Количество новых токенов для выпуска
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_emit
+    * @note Авторизация требуется от аккаунта: @p eosio.system
+    */
    void system_contract::emit(eosio::asset new_emission) {
       if (new_emission.amount > 0) {
         token::issue_action issue_act{ token_account, { {get_self(), active_permission} } };
@@ -87,6 +108,16 @@ namespace eosiosystem {
       }
    };
 
+   /**
+    * @brief Получает награды за производство блоков и голосование.
+    * Позволяет продюсеру получить награды за производство блоков и голосование.
+    * Награды можно получать не чаще одного раза в день.
+    * @param owner Аккаунт продюсера для получения наград
+    * @ingroup public_actions
+    * @ingroup public_system_actions
+    * @anchor system_claimrewards
+    * @note Авторизация требуется от аккаунта: @p owner
+    */
    void system_contract::claimrewards( const name& owner ) {
       require_auth( owner );
 

@@ -12,11 +12,28 @@
 
 #include <optional>
 
+/**
+ * @brief Миграция данных контракта.
+ * @ingroup public_actions
+ * @ingroup public_meet_actions
+ * @anchor meet_migrate
+ * @note Авторизация требуется от аккаунта: @p meet
+ */
 [[eosio::action]]
 void meet::migrate(){
   require_auth(_meet);
 };
 
+/**
+ * @brief Удаление собрания.
+ * Удаляет собрание из системы по его ID
+ * @param coopname Наименование кооператива
+ * @param meet_id ID собрания для удаления
+ * @ingroup public_actions
+ * @ingroup public_meet_actions
+ * @anchor meet_delmeet
+ * @note Авторизация требуется от аккаунта: @p meet
+ */
 [[eosio::action]]
 void meet::delmeet(eosio::name coopname, uint64_t meet_id) {
   require_auth(_meet);

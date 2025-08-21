@@ -1,3 +1,20 @@
+/**
+ * @brief Создание общего собрания.
+ * Создает новое общее собрание пайщиков с повесткой дня и участниками
+ * @param coopname Наименование кооператива
+ * @param hash Хэш собрания
+ * @param initiator Инициатор собрания
+ * @param presider Председатель собрания
+ * @param secretary Секретарь собрания
+ * @param agenda Повестка дня собрания
+ * @param proposal Предложение о проведении собрания
+ * @param open_at Дата и время открытия собрания
+ * @param close_at Дата и время закрытия собрания
+ * @ingroup public_actions
+ * @ingroup public_meet_actions
+ * @anchor meet_createmeet
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
 void meet::createmeet(name coopname, checksum256 hash, eosio::name initiator, name presider, name secretary, std::vector<meet_point> agenda, document2 proposal, time_point_sec open_at, time_point_sec close_at) {
   require_auth(coopname);
   
