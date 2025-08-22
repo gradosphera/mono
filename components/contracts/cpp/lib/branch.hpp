@@ -4,7 +4,7 @@
 * @brief Таблица статистики кооперативных участков хранит количество участков для каждого кооператива.
 * @ingroup public_tables
 * @ingroup public_branch_tables
-* @anchor branch_branchstat
+
 * @par Область памяти (scope): _branch
 * @par Имя таблицы (table): branchstat
 */
@@ -61,7 +61,7 @@ uint64_t sub_branch_count(eosio::name coopname){
 * @brief Таблица кооперативных участков хранит информацию о кооперативных участках и их доверенных лицах.
 * @ingroup public_tables
 * @ingroup public_branch_tables
-* @anchor branch_coobranch
+
 * @par Область памяти (scope): coopname
 * @par Имя таблицы (table): branches
 */

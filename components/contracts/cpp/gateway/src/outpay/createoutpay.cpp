@@ -10,7 +10,7 @@
  * @param decline_callback Действие отклонения
  * @ingroup public_actions
  * @ingroup public_gateway_actions
- * @anchor gateway_createoutpay
+
  * @note Авторизация требуется от аккаунта из белого списка контрактов
  */
 void gateway::createoutpay(eosio::name coopname, eosio::name username, checksum256 outcome_hash, eosio::asset quantity, name callback_contract, name confirm_callback, name decline_callback){

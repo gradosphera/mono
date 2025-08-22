@@ -12,7 +12,7 @@
  * @param meta Метаданные пользователя
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_adduser
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]] void registrator::adduser(

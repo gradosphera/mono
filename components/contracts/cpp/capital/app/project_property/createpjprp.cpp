@@ -15,7 +15,7 @@
  * @param property_description Описание имущества
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_createpjprp
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::createpjprp(eosio::name coopname, eosio::name username, 

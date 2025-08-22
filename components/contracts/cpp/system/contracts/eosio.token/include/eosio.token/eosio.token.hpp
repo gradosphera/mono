@@ -2,7 +2,7 @@
 
 /**
 \defgroup public_token Контракт TOKEN
-* @anchor public_token
+
 * Смарт-контракт для создания, выпуска и управления токенами в блокчейне EOSIO.
 */
 
@@ -152,7 +152,7 @@ namespace eosio {
          * @brief Таблица аккаунтов хранит балансы токенов для каждого аккаунта.
          * @ingroup public_tables
          * @ingroup public_token_tables
-         * @anchor token_account
+
          * @par Область памяти (scope): owner
          * @par Имя таблицы (table): accounts
          */
@@ -166,7 +166,7 @@ namespace eosio {
          * @brief Таблица статистики валют хранит информацию о токенах.
          * @ingroup public_tables
          * @ingroup public_token_tables
-         * @anchor token_currency_stats
+
          * @par Область памяти (scope): symbol_code
          * @par Имя таблицы (table): stat
          */

@@ -8,7 +8,7 @@
  * @param meta Дополнительная мета-информация
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_newaccount
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void registrator::newaccount(

@@ -7,7 +7,7 @@
  * @param withdraw_id Идентификатор запроса на вывод
  * @ingroup public_actions
  * @ingroup public_fund_actions
- * @anchor fund_complete
+
  * @note Авторизация требуется от аккаунта: @p username (сотрудник с правами complete)
  */
 [[eosio::action]] void fund::complete(eosio::name coopname,

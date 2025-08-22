@@ -9,7 +9,7 @@
  * @param approved_statement Одобренное заявление о долге
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_approvedebt
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::approvedebt(eosio::name coopname, checksum256 debt_hash, document2 approved_statement)

@@ -13,7 +13,7 @@
  * @param meta Дополнительные метаданные
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_createapprv
+
  * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 void soviet::createapprv(eosio::name coopname,

@@ -9,7 +9,7 @@
  * @param authorization Документ авторизации
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_newdecision
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 [[eosio::action]] void soviet::newdecision(NEWDECISION_SIGNATURE) {

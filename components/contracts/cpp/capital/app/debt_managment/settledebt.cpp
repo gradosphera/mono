@@ -9,7 +9,7 @@
  * @param statement Заявление о погашении долга
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_settledebt
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::settledebt(name coopname, name username, eosio::asset amount, document2 statement){

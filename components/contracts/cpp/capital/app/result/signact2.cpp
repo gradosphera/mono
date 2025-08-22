@@ -13,7 +13,7 @@
  * @param act Документ акта 2
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_signact2
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::signact2(eosio::name coopname, eosio::name username, checksum256 result_hash, document2 act) {

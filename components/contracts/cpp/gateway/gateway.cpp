@@ -17,7 +17,7 @@ using namespace eosio;
  * Выполняет миграцию контракта на новую версию.
  * @ingroup public_actions
  * @ingroup public_gateway_actions
- * @anchor gateway_migrate
+
  * @note Авторизация требуется от аккаунта: @p _gateway
  */
 [[eosio::action]]

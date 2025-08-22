@@ -9,7 +9,7 @@
  * @param document Документ соглашения для подписания
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_sndagreement
+
  * @note Авторизация требуется от аккаунта: @p username или @p administrator
  */
 [[eosio::action]] void soviet::sndagreement(eosio::name coopname, eosio::name administrator, eosio::name username, eosio::name agreement_type, document2 document) {

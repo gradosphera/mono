@@ -8,7 +8,7 @@
  * @param meta Дополнительные метаданные
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_freedecision
+
  * @note Авторизация требуется от аккаунта: @p username
  */
 [[eosio::action]] void soviet::freedecision(eosio::name coopname, eosio::name username, document2 document, std::string meta) {

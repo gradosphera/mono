@@ -17,7 +17,7 @@
  * @param statement Заявление о расходе
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_createexpnse
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::createexpnse(eosio::name coopname, checksum256 expense_hash, checksum256 project_hash, name creator, asset amount, std::string description, document2 statement){

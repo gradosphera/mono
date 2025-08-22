@@ -14,7 +14,7 @@ alwaysApply: false
   - Проводки по кошельку Wallet::add_available_funds, add_available_funds, add_blocked_funds, sub_blocked_funds, block_funds, unblock_funds, pay_membership_fee, unpay_membership_fee
   - Проводки по фондам Ledger::add, sub, transfer, block, unblock, writeoff, writeoffcnsl, add_membership_fee, sub_membership_fee, block_membership_fee, unblock_membership_fee
   - Передаваемые на вход документы
-
+- При необходимости делай ссылки на таблицы и действия через @ref <contract>::<something>
 Пример оформления диаграммы
 \htmlonly
 <div class="mermaid">

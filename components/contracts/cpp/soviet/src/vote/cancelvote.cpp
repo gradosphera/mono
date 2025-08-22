@@ -7,7 +7,7 @@
  * @param decision_id Идентификатор решения, по которому голосование было проведено
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_cancelvote
+
  * @note Авторизация требуется от аккаунта: @p member или @p permission_level{member, "provide"_n}
  */
 void soviet::cancelvote(eosio::name coopname, eosio::name member, uint64_t decision_id) {

@@ -9,7 +9,7 @@
  * @param project_hash Хеш проекта для начала голосования
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_startvoting
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::startvoting(name coopname, checksum256 project_hash) {

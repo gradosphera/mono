@@ -16,7 +16,7 @@
  * @param creator_hours Количество часов создателя
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_createcmmt
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours){

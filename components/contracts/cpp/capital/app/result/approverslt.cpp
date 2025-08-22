@@ -11,7 +11,7 @@
  * @param approved_statement Одобренное заявление о результате
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_approverslt
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::approverslt(eosio::name coopname, checksum256 result_hash, document2 approved_statement){

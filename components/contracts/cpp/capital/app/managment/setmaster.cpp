@@ -10,7 +10,7 @@
  * @param master Наименование пользователя-мастера
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_setmaster
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::setmaster(name coopname, checksum256 project_hash, name master) {

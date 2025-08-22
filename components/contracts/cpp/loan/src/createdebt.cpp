@@ -10,7 +10,7 @@ using namespace Loan;
  * @param quantity Сумма долга
  * @ingroup public_actions
  * @ingroup public_loan_actions
- * @anchor loan_createdebt
+
  * @note Авторизация требуется от аккаунта: @p contracts_whitelist
  */
 void loan::createdebt(name coopname, name username, checksum256 debt_hash, time_point_sec repaid_at, asset quantity) {

@@ -11,7 +11,7 @@
  * @param approved_statement Одобренное заявление председателя
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_approvepgprp
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::approvepgprp(eosio::name coopname, checksum256 property_hash, document2 approved_statement) {

@@ -6,7 +6,7 @@
  * @param withdraw_id Идентификатор запроса на вывод
  * @ingroup public_actions
  * @ingroup public_fund_actions
- * @anchor fund_authorize
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 [[eosio::action]] void fund::authorize(eosio::name coopname, eosio::name type,

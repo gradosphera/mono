@@ -9,7 +9,7 @@
  * @param username Наименование пользователя-вкладчика
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_addcontrib
+
  * @note Авторизация требуется от аккаунта: @p username
  */
 void capital::addcontrib(eosio::name coopname, checksum256 project_hash, eosio::name username) {

@@ -26,7 +26,7 @@ void add_vote_against(eosio::name coopname, eosio::name username, uint64_t decis
  * @param public_key Публичный ключ
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_voteagainst
+
  * @note Авторизация требуется от аккаунта: @p username или @p coopname
  */
 void soviet::voteagainst(

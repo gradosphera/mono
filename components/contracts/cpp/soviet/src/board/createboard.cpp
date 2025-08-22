@@ -11,7 +11,7 @@
  * @param description Описание совета
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_createboard
+
  * @note Авторизация требуется от аккаунта: @p username
  */
 void soviet::createboard(eosio::name coopname, eosio::name username, eosio::name type, std::vector<board_member> members, std::string name, std::string description){

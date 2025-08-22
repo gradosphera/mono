@@ -6,7 +6,7 @@
  * @param authorization Документ авторизации от совета
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_confirmreg
+
  * @note Авторизация требуется от аккаунта: @p soviet
  */
 void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash, document2 authorization)

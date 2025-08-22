@@ -18,7 +18,7 @@
  * @param meta Дополнительные метаданные
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_createprog
+
  * @note Авторизация требуется от аккаунта: @p username
  */
 void soviet::createprog(eosio::name coopname, eosio::name username, eosio::name type, std::string title, std::string announce, std::string description, std::string preview, std::string images, eosio::name calculation_type, eosio::asset fixed_membership_contribution, uint64_t membership_percent_fee, bool is_can_coop_spend_share_contributions, std::string meta) { 

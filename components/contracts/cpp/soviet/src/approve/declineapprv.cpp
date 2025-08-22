@@ -7,7 +7,7 @@
  * @param reason Причина отклонения одобрения
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_declineapprv
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void soviet::declineapprv(eosio::name coopname, checksum256 approval_hash, std::string reason)

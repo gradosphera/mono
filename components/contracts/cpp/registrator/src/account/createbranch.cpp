@@ -5,7 +5,7 @@
  * @param braname Наименование филиала
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_createbranch
+
  * @note Авторизация требуется от аккаунта: @p branch
  */
 void registrator::createbranch(eosio::name coopname, eosio::name braname) {

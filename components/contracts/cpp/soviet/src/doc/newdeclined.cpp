@@ -8,7 +8,7 @@
  * @param document Документ
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_newdeclined
+
  * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 [[eosio::action]] void soviet::newdeclined(NEWDECLINED_SIGNATURE) {

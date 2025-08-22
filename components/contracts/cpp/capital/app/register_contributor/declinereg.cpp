@@ -9,7 +9,7 @@
  * @param reason Причина отклонения
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_declinereg
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
  void capital::declinereg(eosio::name coopname, checksum256 contributor_hash, std::string reason) {

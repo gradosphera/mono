@@ -9,7 +9,7 @@
  * @param decision Документ решения совета
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_debtauthcnfr
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 //действие вызывается советом как коллбэк при положительном решении по вопросу выдачи ссуд

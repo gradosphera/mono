@@ -28,7 +28,7 @@ using namespace eosio;
  * Выполняет миграцию контракта на новую версию.
  * @ingroup public_actions
  * @ingroup public_fund_actions
- * @anchor fund_migrate
+
  * @note Авторизация требуется от аккаунта: @p _fund
  */
 [[eosio::action]] void fund::migrate() {
@@ -43,7 +43,7 @@ using namespace eosio;
  * @param id Идентификатор фонда
  * @ingroup public_actions
  * @ingroup public_fund_actions
- * @anchor fund_newfund
+
  * @note Авторизация требуется от аккаунта: @p _fund
  */
 [[eosio::action]] void fund::newfund(eosio::name coopname, eosio::name type,
@@ -59,7 +59,7 @@ using namespace eosio;
  * @param id Идентификатор запроса
  * @ingroup public_actions
  * @ingroup public_fund_actions
- * @anchor fund_newwithdraw
+
  * @note Авторизация требуется от аккаунта: @p _fund
  */
 [[eosio::action]] void fund::newwithdraw(eosio::name coopname, eosio::name type,

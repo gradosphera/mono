@@ -2,7 +2,7 @@
 
 /**
 \defgroup public_system Контракт SYSTEM
-* @anchor public_system
+
 * Системный смарт-контракт, который определяет структуры и действия, необходимые для основной функциональности блокчейна.
 */
 
@@ -128,7 +128,7 @@ namespace eosiosystem {
    * @brief Таблица ставок на имена хранит информацию о аукционах на премиум имена.
    * @ingroup public_tables
    * @ingroup public_system_tables
-   * @anchor system_name_bid
+
    * @par Область памяти (scope): eosio.system
    * @par Имя таблицы (table): namebids
    */
@@ -146,7 +146,7 @@ namespace eosiosystem {
    * @brief Таблица возвратов ставок хранит информацию о возвратах средств от неудачных ставок на имена.
    * @ingroup public_tables
    * @ingroup public_system_tables
-   * @anchor system_bid_refund
+
    * @par Область памяти (scope): eosio.system
    * @par Имя таблицы (table): bidrefunds
    */
@@ -166,7 +166,7 @@ namespace eosiosystem {
    * @brief Глобальное состояние системы хранит основные параметры блокчейна и статистику.
    * @ingroup public_tables
    * @ingroup public_system_tables
-   * @anchor system_global_state
+
    * @par Область памяти (scope): eosio.system
    * @par Имя таблицы (table): global
    */
@@ -211,7 +211,7 @@ namespace eosiosystem {
    * @brief Таблица информации о продюсерах хранит данные о зарегистрированных блок-продюсерах.
    * @ingroup public_tables
    * @ingroup public_system_tables
-   * @anchor system_producer_info
+
    * @par Область памяти (scope): eosio.system
    * @par Имя таблицы (table): producers
    */
@@ -287,7 +287,7 @@ namespace eosiosystem {
    * @brief Таблица информации о голосующих хранит данные о голосующих и их голосах.
    * @ingroup public_tables
    * @ingroup public_system_tables
-   * @anchor system_voter_info
+
    * @par Область памяти (scope): eosio.system
    * @par Имя таблицы (table): voters
    */
@@ -335,7 +335,7 @@ namespace eosiosystem {
    * @brief Таблица ресурсов пользователя хранит информацию о ресурсах, принадлежащих пользователю.
    * @ingroup public_tables
    * @ingroup public_system_tables
-   * @anchor system_user_resources
+
    * @par Область памяти (scope): eosio.system
    * @par Имя таблицы (table): userres
    */
@@ -357,7 +357,7 @@ namespace eosiosystem {
    * @brief Таблица делегированной пропускной способности хранит информацию о делегированных ресурсах между пользователями.
    * @ingroup public_tables
    * @ingroup public_system_tables
-   * @anchor system_delegated_bandwidth
+
    * @par Область памяти (scope): from
    * @par Имя таблицы (table): delband
    */
@@ -379,7 +379,7 @@ namespace eosiosystem {
    * @brief Таблица запросов на возврат хранит информацию о запросах на возврат делегированных ресурсов.
    * @ingroup public_tables
    * @ingroup public_system_tables
-   * @anchor system_refund_request
+
    * @par Область памяти (scope): eosio.system
    * @par Имя таблицы (table): refunds
    */
@@ -400,7 +400,7 @@ namespace eosiosystem {
     * @brief Таблица записей о долгах по RAM хранит информацию о долгах аккаунтов по RAM.
     * @ingroup public_tables
     * @ingroup public_system_tables
-    * @anchor system_ram_debt_record
+
     * @par Область памяти (scope): eosio.system
     * @par Имя таблицы (table): ramdebts
     */
@@ -439,7 +439,7 @@ namespace eosiosystem {
    * @brief Таблица состояния powerup хранит состояние рынка ресурсов для powerup.
    * @ingroup public_tables
    * @ingroup public_system_tables
-   * @anchor system_powerup_state
+
    * @par Область памяти (scope): eosio.system
    * @par Имя таблицы (table): powerstate
    */
@@ -463,7 +463,7 @@ namespace eosiosystem {
   * @brief Таблица состояния эмиссии хранит информацию о текущем такте эмиссии токенов.
   * @ingroup public_tables
   * @ingroup public_system_tables
-  * @anchor system_emission_state
+
   * @par Область памяти (scope): eosio.system
   * @par Имя таблицы (table): emission
   */
@@ -490,7 +490,7 @@ namespace eosiosystem {
    * @brief Таблица заказов powerup хранит информацию о заказах на покупку ресурсов через powerup.
    * @ingroup public_tables
    * @ingroup public_system_tables
-   * @anchor system_powerup_order
+
    * @par Область памяти (scope): eosio.system
    * @par Имя таблицы (table): powup.order
    */

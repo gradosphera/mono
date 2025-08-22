@@ -7,7 +7,7 @@
  * @param presider_decision Документ решения председателя
  * @ingroup public_actions
  * @ingroup public_meet_actions
- * @anchor meet_signbypresid
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void meet::signbypresid(name coopname, name username, checksum256 hash, document2 presider_decision) {

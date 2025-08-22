@@ -5,7 +5,7 @@
  * @param writeoff_hash Хэш операции списания для завершения
  * @ingroup public_actions
  * @ingroup public_ledger_actions
- * @anchor ledger_complete
+
  * @note Авторизация требуется от аккаунта: @p gateway
  */
 [[eosio::action]]

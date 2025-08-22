@@ -2,7 +2,7 @@
 * @brief Структура простого кошелька содержит информацию о доступных и выведенных средствах.
 * @ingroup public_tables
 * @ingroup public_fund_tables
-* @anchor fund_simple_wallet
+
 */
 struct simple_wallet {
   eosio::asset available; ///< Доступные средства
@@ -13,7 +13,7 @@ struct simple_wallet {
 * @brief Таблица кооперативного кошелька хранит информацию о различных счетах кооператива.
 * @ingroup public_tables
 * @ingroup public_fund_tables
-* @anchor fund_coopwallet
+
 * @par Область памяти (scope): coopname
 * @par Имя таблицы (table): coopwallet
 */
@@ -39,7 +39,7 @@ typedef eosio::multi_index<"coopwallet"_n, coopwallet> coopwallet_index;
 * @brief Таблица фондов накопления хранит информацию о фондах накопления кооператива.
 * @ingroup public_tables
 * @ingroup public_fund_tables
-* @anchor fund_accfund
+
 * @par Область памяти (scope): coopname
 * @par Имя таблицы (table): accfunds
 */
@@ -67,7 +67,7 @@ typedef eosio::multi_index<"accfunds"_n, accfund> accfunds_index;
 * @brief Таблица фондов списания хранит информацию о фондах списания кооператива.
 * @ingroup public_tables
 * @ingroup public_fund_tables
-* @anchor fund_expfund
+
 * @par Область памяти (scope): coopname
 * @par Имя таблицы (table): expfunds
 */
@@ -93,7 +93,7 @@ typedef eosio::multi_index<"expfunds"_n, expfund> expfunds_index;
 * @brief Таблица запросов на вывод средств из фондов накопления хранит информацию о запросах на использование фондов.
 * @ingroup public_tables
 * @ingroup public_fund_tables
-* @anchor fund_fwithdraw
+
 * @par Область памяти (scope): coopname
 * @par Имя таблицы (table): fwithdraws
 */

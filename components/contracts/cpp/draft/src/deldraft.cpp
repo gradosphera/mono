@@ -6,7 +6,7 @@
  * @param registry_id Реестровый идентификатор шаблона для удаления
  * @ingroup public_actions
  * @ingroup public_draft_actions
- * @anchor draft_deldraft
+
  * @note Авторизация требуется от аккаунта: @p scope или @p _system
  */
 void draft::deldraft(eosio::name scope, eosio::name username, uint64_t registry_id) {

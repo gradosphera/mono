@@ -7,7 +7,7 @@ namespace Gateway {
   /**
    * @ingroup public_consts
    * @ingroup public_gateway_consts
-   * @anchor gateway_income_actions
+
    * @brief Допустимые действия для входящих платежей
    */
   static const std::set<eosio::name> gateway_income_actions = {
@@ -17,7 +17,7 @@ namespace Gateway {
   /**
    * @ingroup public_consts
    * @ingroup public_gateway_consts
-   * @anchor gateway_outcome_actions
+
    * @brief Допустимые действия для исходящих платежей
    */
   static const std::set<eosio::name> gateway_outcome_actions = {
@@ -39,7 +39,7 @@ namespace Gateway {
   * @brief Таблица входящих платежей хранит информацию о входящих платежах в кооператив.
   * @ingroup public_tables
   * @ingroup public_gateway_tables
-  * @anchor gateway_income
+
   * @par Область памяти (scope): coopname
   * @par Имя таблицы (table): incomes
   */
@@ -95,7 +95,7 @@ namespace Gateway {
   * @brief Таблица исходящих платежей хранит информацию об исходящих платежах из кооператива.
   * @ingroup public_tables
   * @ingroup public_gateway_tables
-  * @anchor gateway_outcome
+
   * @par Область памяти (scope): coopname
   * @par Имя таблицы (table): outcomes
   */

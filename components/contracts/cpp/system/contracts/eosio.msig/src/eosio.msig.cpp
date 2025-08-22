@@ -48,7 +48,7 @@ std::vector<permission_level> get_approvals_and_adjust_table(name self, name pro
  * @param trx Предлагаемая транзакция
  * @ingroup public_actions
  * @ingroup public_msig_actions
- * @anchor msig_propose
+
  * @note Авторизация требуется от аккаунта: @p proposer
  */
 void multisig::propose( name proposer,
@@ -110,7 +110,7 @@ void multisig::propose( name proposer,
  * @param proposal_hash Контрольная сумма транзакции
  * @ingroup public_actions
  * @ingroup public_msig_actions
- * @anchor msig_approve
+
  * @note Авторизация требуется от аккаунта: @p level
  */
 void multisig::approve( name proposer, name proposal_name, permission_level level,
@@ -172,7 +172,7 @@ void multisig::approve( name proposer, name proposal_name, permission_level leve
  * @param level Уровень разрешения, отзывающий одобрение предложения
  * @ingroup public_actions
  * @ingroup public_msig_actions
- * @anchor msig_unapprove
+
  * @note Авторизация требуется от аккаунта: @p level
  */
 void multisig::unapprove( name proposer, name proposal_name, permission_level level ) {
@@ -224,7 +224,7 @@ void multisig::unapprove( name proposer, name proposal_name, permission_level le
  * @param canceler Аккаунт, отменяющий предложение
  * @ingroup public_actions
  * @ingroup public_msig_actions
- * @anchor msig_cancel
+
  * @note Авторизация требуется от аккаунта: @p canceler
  */
 void multisig::cancel( name proposer, name proposal_name, name canceler ) {
@@ -259,7 +259,7 @@ void multisig::cancel( name proposer, name proposal_name, name canceler ) {
  * @param executer Аккаунт, выполняющий транзакцию
  * @ingroup public_actions
  * @ingroup public_msig_actions
- * @anchor msig_exec
+
  * @note Авторизация требуется от аккаунта: @p executer
  */
 void multisig::exec( name proposer, name proposal_name, name executer ) {
@@ -300,7 +300,7 @@ void multisig::exec( name proposer, name proposal_name, name executer ) {
  * @param account Аккаунт, инвалидирующий транзакцию
  * @ingroup public_actions
  * @ingroup public_msig_actions
- * @anchor msig_invalidate
+
  * @note Авторизация требуется от аккаунта: @p account
  */
 void multisig::invalidate( name account ) {

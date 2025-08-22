@@ -7,7 +7,7 @@
  * @param comment Комментарий к операции
  * @ingroup public_actions
  * @ingroup public_ledger_actions
- * @anchor ledger_sub
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]]

@@ -10,7 +10,7 @@ namespace Capital::Segments {
    * @brief Константы статусов сегмента
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_segment_status
+
    */
    namespace Status {
     const eosio::name GENERATION = "generation"_n;         ///< На генерации результата
@@ -24,7 +24,7 @@ namespace Capital::Segments {
    * @brief Таблица сегментов хранит данные о вкладах участника в проект.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_segment
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): segments 
    */

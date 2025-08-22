@@ -10,7 +10,7 @@
  * @param approved_return_statement Одобренное заявление о возврате
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_approvewthd3
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::approvewthd3(name coopname, name approver, checksum256 withdraw_hash, document2 approved_return_statement) {

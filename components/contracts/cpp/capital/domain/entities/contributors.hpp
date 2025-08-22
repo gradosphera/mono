@@ -9,7 +9,7 @@ namespace Capital {
    * @brief Таблица участников хранит данные индивидуального участника кооператива.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_contributor
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): contributors 
    */
@@ -71,7 +71,7 @@ namespace Capital::Contributors {
    * @brief Константы статусов контрибьюторов
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_contributor_status
+
    */
   namespace Status {
     const eosio::name PENDING = "pending"_n;       ///< Ожидает подтверждения

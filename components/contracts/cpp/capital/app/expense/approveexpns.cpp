@@ -12,7 +12,7 @@
  * @param approved_statement Одобренное заявление о расходе
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_approveexpns
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::approveexpns(name coopname, name approver, checksum256 expense_hash, document2 approved_statement) {

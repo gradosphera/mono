@@ -14,7 +14,7 @@
  * @param return_statement Заявление о возврате
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_createwthd3
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::createwthd3(name coopname, name username, checksum256 withdraw_hash, asset amount, document2 return_statement) {

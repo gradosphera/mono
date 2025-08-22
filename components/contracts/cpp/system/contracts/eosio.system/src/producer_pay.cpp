@@ -16,7 +16,7 @@ namespace eosiosystem {
     * @param header Заголовок произведенного блока
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_onblock
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::onblock( ignore<block_header> ) {
@@ -95,7 +95,7 @@ namespace eosiosystem {
     * @param new_emission Количество новых токенов для выпуска
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_emit
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::emit(eosio::asset new_emission) {
@@ -115,7 +115,7 @@ namespace eosiosystem {
     * @param owner Аккаунт продюсера для получения наград
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_claimrewards
+
     * @note Авторизация требуется от аккаунта: @p owner
     */
    void system_contract::claimrewards( const name& owner ) {

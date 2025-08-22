@@ -5,7 +5,7 @@
  * @param outcome_hash Хэш исходящего платежа
  * @ingroup public_actions
  * @ingroup public_gateway_actions
- * @anchor gateway_outcomplete
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void gateway::outcomplete(eosio::name coopname, checksum256 outcome_hash){

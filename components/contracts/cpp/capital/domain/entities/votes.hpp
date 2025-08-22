@@ -48,7 +48,7 @@ namespace Capital {
    * @brief Таблица голосов хранит информацию о голосах участников по методу Водянова.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_vote
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): votes 
    */

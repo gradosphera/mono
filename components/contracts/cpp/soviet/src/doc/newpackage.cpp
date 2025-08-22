@@ -9,7 +9,7 @@
  * @param document Документ пакета
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_newpackage
+
  * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 [[eosio::action]] void soviet::newpackage(NEWPACKAGE_SIGNATURE) {

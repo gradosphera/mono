@@ -10,7 +10,7 @@
 
 /**
 \defgroup public_gateway Контракт GATEWAY
-* @anchor public_gateway
+
 * Смарт-контракт процессинга банковских и криптовалютных платежей предназначен для обработки входящих и исходящих платежей в кооперативах.
 */
 
@@ -37,7 +37,7 @@
 /**
  * @ingroup public_consts
  * @ingroup public_gateway_consts
- * @anchor gateway_constants
+
  * @brief Константы контракта процессинга платежей
  */
 // Константы определены в shared_gateway.hpp:

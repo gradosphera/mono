@@ -27,7 +27,7 @@ void add_vote_for(eosio::name coopname, eosio::name username, uint64_t decision_
  * @param public_key Публичный ключ
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_votefor
+
  * @note Авторизация требуется от аккаунта: @p username или @p coopname
  */
 void soviet::votefor(

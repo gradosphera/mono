@@ -18,7 +18,7 @@ namespace eosiosystem {
     * @param bid Сумма ставки в системных токенах
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_bidname
+
     * @note Авторизация требуется от аккаунта: @p bidder
     */
    void system_contract::bidname(const name& bidder, const name& newname, const asset& bid) {
@@ -91,7 +91,7 @@ namespace eosiosystem {
     * @param newname Имя, на которое была сделана ставка
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_bidrefund
+
     * @note Авторизация требуется от аккаунта: @p bidder
     */
    void system_contract::bidrefund( const name& bidder, const name& newname ) {

@@ -9,7 +9,7 @@
  * @param project_hash Хеш проекта для завершения голосования
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_cmpltvoting
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::cmpltvoting(name coopname, checksum256 project_hash) {

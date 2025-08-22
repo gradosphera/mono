@@ -9,7 +9,7 @@
  * @param project_hash Хеш проекта для деаллокации
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_diallocate
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::diallocate(eosio::name coopname, checksum256 project_hash) {

@@ -6,7 +6,7 @@
  * @param reason Причина отклонения платежа
  * @ingroup public_actions
  * @ingroup public_gateway_actions
- * @anchor gateway_outdecline
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void gateway::outdecline(eosio::name coopname, checksum256 outcome_hash, std::string reason) {

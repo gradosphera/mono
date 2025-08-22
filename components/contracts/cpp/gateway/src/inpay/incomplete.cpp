@@ -5,7 +5,7 @@
  * @param income_hash Хэш входящего платежа
  * @ingroup public_actions
  * @ingroup public_gateway_actions
- * @anchor gateway_incomplete
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void gateway::incomplete(eosio::name coopname, checksum256 income_hash) {

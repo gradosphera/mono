@@ -7,7 +7,7 @@
  * @param notification Документ уведомления
  * @ingroup public_actions
  * @ingroup public_meet_actions
- * @anchor meet_gmnotify
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void meet::gmnotify(name coopname, checksum256 hash, name username, document2 notification) {

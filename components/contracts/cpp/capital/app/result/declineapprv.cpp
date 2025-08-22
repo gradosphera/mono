@@ -9,7 +9,7 @@
  * @param decline_reason Документ причины отклонения
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_declineapprv
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::declineapprv(eosio::name coopname, checksum256 result_hash, document2 decline_reason) {

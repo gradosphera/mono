@@ -14,7 +14,7 @@
  * @param plan_hour_cost Планируемая стоимость часа создателя (asset)
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_setplan
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::setplan(name coopname, name master, checksum256 project_hash, uint64_t plan_creators_hours, asset plan_expenses, asset plan_hour_cost){

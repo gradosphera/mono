@@ -10,7 +10,7 @@
  * @param rights Вектор прав, которые будут установлены для указанного члена персонала
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_setrights
+
  * @note Авторизация требуется от аккаунта: @p chairman
  */
 void soviet::setrights(eosio::name coopname, eosio::name chairman, eosio::name username, std::vector<right> rights) {

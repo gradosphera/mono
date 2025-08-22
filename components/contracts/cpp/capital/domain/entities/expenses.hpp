@@ -11,7 +11,7 @@ namespace Capital::Expenses {
    * @brief Константы статусов расходов
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_expense_status
+
    */
    namespace Status {
     const eosio::name CREATED = "created"_n;        ///< Расход создан
@@ -28,7 +28,7 @@ namespace Capital {
    * @brief Таблица расходов хранит информацию о расходах проектов кооператива.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_expense
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): expenses 
    */

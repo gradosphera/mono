@@ -12,7 +12,7 @@
  * @param meta Дополнительные метаданные проекта
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_createproj
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::createproj (

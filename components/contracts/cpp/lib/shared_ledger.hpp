@@ -4,7 +4,7 @@
  * @brief Структура бухгалтерского счета
  * @ingroup public_tables
  * @ingroup public_ledger_tables
- * @anchor ledger_laccount
+
  * @par Область памяти (scope): coopname
  * @par Имя таблицы (table): accounts
  */
@@ -48,7 +48,7 @@ typedef eosio::multi_index<"accounts"_n, laccount> laccounts_index;
  * @brief Структура для операций ожидающих решения совета
  * @ingroup public_tables
  * @ingroup public_ledger_tables
- * @anchor ledger_writeoff_op
+
  * @par Область памяти (scope): _self
  * @par Имя таблицы (table): writeoffs
  */
@@ -133,7 +133,7 @@ public:
    * @brief Константы счетов
    * @ingroup public_consts
    * @ingroup public_ledger_consts
-   * @anchor ledger_accounts_consts
+
    */
   struct accounts {
     // Денежные средства
@@ -203,7 +203,7 @@ public:
  * СОХРАНЯЕМ - используется для получения названий при автосоздании счетов
  * @ingroup public_consts
  * @ingroup public_ledger_consts
- * @anchor ledger_account_map
+
  */
 static const std::vector<std::tuple<uint64_t, std::string>> ACCOUNT_MAP = {
   {Ledger::accounts::FIXED_ASSETS, "Основные средства"},
@@ -258,7 +258,7 @@ static const std::vector<std::tuple<uint64_t, std::string>> ACCOUNT_MAP = {
  * @brief Валидные действия ledger для интеграции с другими контрактами
  * @ingroup public_consts
  * @ingroup public_ledger_consts
- * @anchor ledger_actions_consts
+
  */
 const std::set<eosio::name> Ledger::ledger_actions = {
     "add"_n,      ///< пополнение счета

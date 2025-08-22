@@ -5,7 +5,7 @@
  * @param procedure Процедура верификации (online)
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_verificate
+
  * @note Авторизация требуется от аккаунта: @p provider
  */
 [[eosio::action]] void registrator::verificate(eosio::name username, eosio::name procedure)

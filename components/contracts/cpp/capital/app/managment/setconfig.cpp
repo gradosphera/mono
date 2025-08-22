@@ -8,7 +8,7 @@
  * @param config Новая конфигурация кооператива
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_setconfig
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::setconfig(eosio::name coopname, Capital::config config) {

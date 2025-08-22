@@ -6,7 +6,7 @@
  * @param username Наименование пользователя-пайщика
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_refreshprog
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]] void capital::refreshprog(name coopname, name username) {

@@ -2,7 +2,7 @@
 
 /**
 \defgroup public_wrap Контракт WRAP
-* @anchor public_wrap
+
 * Системный контракт, позволяющий блок-продюсерам обходить проверки авторизации или выполнять привилегированные действия.
 */
 
@@ -55,7 +55,7 @@ namespace eosio {
           * @param trx Транзакция для выполнения
           * @ingroup public_actions
           * @ingroup public_wrap_actions
-          * @anchor wrap_exec
+
           * @note Авторизация требуется от аккаунта: @p eosio.wrap
           */
          [[eosio::action]]

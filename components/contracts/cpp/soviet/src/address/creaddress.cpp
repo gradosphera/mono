@@ -8,7 +8,7 @@
  * @param data Данные адреса (структура address_data)
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_creaddress
+
  * @note Авторизация требуется от аккаунта: @p chairman
  */
 void soviet::creaddress(eosio::name coopname, eosio::name chairman, eosio::name braname, address_data data) {

@@ -13,7 +13,7 @@
  * @param contract Договор УХД пайщика
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_regcontrib
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, bool is_external_contract, document2 contract) {

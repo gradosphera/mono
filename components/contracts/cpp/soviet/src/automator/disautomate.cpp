@@ -8,7 +8,7 @@
  * @param automation_id Идентификатор автоматизации для удаления
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_disautomate
+
  * @note Авторизация требуется от аккаунта: @p member
  */
 void soviet::disautomate(eosio::name coopname, uint64_t board_id, eosio::name member, uint64_t automation_id ) {

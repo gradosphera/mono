@@ -8,7 +8,7 @@
  * @param project_hash Хеш проекта для удаления
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_delproject
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::delproject(name coopname, checksum256 project_hash) {

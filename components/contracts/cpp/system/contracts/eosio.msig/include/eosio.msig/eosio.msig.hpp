@@ -2,7 +2,7 @@
 
 /**
 \defgroup public_msig Контракт MSIG
-* @anchor public_msig
+
 * Системный контракт для создания предложений транзакций, требующих авторизации от списка аккаунтов.
 */
 
@@ -142,7 +142,7 @@ namespace eosio {
    * @brief Таблица предложений хранит информацию о предложенных транзакциях.
    * @ingroup public_tables
    * @ingroup public_msig_tables
-   * @anchor msig_proposal
+
    * @par Область памяти (scope): proposer
    * @par Имя таблицы (table): proposal
    */
@@ -159,7 +159,7 @@ namespace eosio {
    * @brief Таблица старых одобрений хранит информацию об одобрениях предложений (устаревшая версия).
    * @ingroup public_tables
    * @ingroup public_msig_tables
-   * @anchor msig_old_approvals_info
+
    * @par Область памяти (scope): proposer
    * @par Имя таблицы (table): approvals
    */
@@ -179,7 +179,7 @@ namespace eosio {
    * @brief Таблица информации об одобрениях хранит информацию об одобрениях предложений.
    * @ingroup public_tables
    * @ingroup public_msig_tables
-   * @anchor msig_approvals_info
+
    * @par Область памяти (scope): proposer
    * @par Имя таблицы (table): approvals2
    */
@@ -199,7 +199,7 @@ namespace eosio {
    * @brief Таблица инвалидаций хранит информацию об инвалидированных аккаунтах.
    * @ingroup public_tables
    * @ingroup public_msig_tables
-   * @anchor msig_invalidation
+
    * @par Область памяти (scope): eosio.msig
    * @par Имя таблицы (table): invals
    */

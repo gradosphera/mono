@@ -8,7 +8,7 @@
  * @param reason Причина отклонения коммита
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_declinecmmt
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::declinecmmt(eosio::name coopname, checksum256 commit_hash, std::string reason) {

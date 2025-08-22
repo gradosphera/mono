@@ -10,7 +10,7 @@ namespace eosio {
  * @param maximum_supply Максимальное предложение токенов
  * @ingroup public_actions
  * @ingroup public_token_actions
- * @anchor token_create
+
  * @note Авторизация требуется от аккаунта: @p eosio.token
  */
 void token::create( const name&   issuer,
@@ -57,7 +57,7 @@ void token::is_can_transfer(const name& from, const name& to) {
  * @param memo Мемо транзакции (максимум 256 байт)
  * @ingroup public_actions
  * @ingroup public_token_actions
- * @anchor token_issue
+
  * @note Авторизация требуется от аккаунта: @p issuer
  */
 void token::issue( const name& to, const asset& quantity, const string& memo )
@@ -95,7 +95,7 @@ void token::issue( const name& to, const asset& quantity, const string& memo )
  * @param memo Мемо транзакции (максимум 256 байт)
  * @ingroup public_actions
  * @ingroup public_token_actions
- * @anchor token_retire
+
  * @note Авторизация требуется от аккаунта: @p issuer
  */
 void token::retire( const asset& quantity, const string& memo )
@@ -131,7 +131,7 @@ void token::retire( const asset& quantity, const string& memo )
  * @param memo Мемо транзакции
  * @ingroup public_actions
  * @ingroup public_token_actions
- * @anchor token_transfer
+
  * @note Авторизация требуется от аккаунта: @p from
  */
 void token::transfer( const name&    from,
@@ -196,7 +196,7 @@ void token::add_balance( const name& owner, const asset& value, const name& ram_
  * @param ram_payer Аккаунт, который оплачивает RAM для этого действия
  * @ingroup public_actions
  * @ingroup public_token_actions
- * @anchor token_open
+
  * @note Авторизация требуется от аккаунта: @p ram_payer
  */
 void token::open( const name& owner, const symbol& symbol, const name& ram_payer )
@@ -226,7 +226,7 @@ void token::open( const name& owner, const symbol& symbol, const name& ram_payer
  * @param symbol Символ токена для выполнения действия закрытия
  * @ingroup public_actions
  * @ingroup public_token_actions
- * @anchor token_close
+
  * @note Авторизация требуется от аккаунта: @p owner
  */
 void token::close( const name& owner, const symbol& symbol )

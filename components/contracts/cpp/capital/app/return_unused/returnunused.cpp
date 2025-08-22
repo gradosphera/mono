@@ -12,7 +12,7 @@
  * @param username Наименование пользователя-инвестора
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_returnunused
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::returnunused(name coopname, checksum256 project_hash, name username) {

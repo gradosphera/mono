@@ -10,7 +10,7 @@
  * @param authorization Документ авторизации совета
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_capauthexpns
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::capauthexpns(eosio::name coopname, checksum256 expense_hash, document2 authorization) {

@@ -6,7 +6,7 @@
  * @param braname Наименование кооперативного участка для удаления
  * @ingroup public_actions
  * @ingroup public_branch_actions
- * @anchor branch_deletebranch
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]] void branch::deletebranch(eosio::name coopname, eosio::name braname) {

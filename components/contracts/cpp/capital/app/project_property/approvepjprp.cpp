@@ -10,7 +10,7 @@
  * @param empty_document Пустой документ (не используется)
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_approvepjprp
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::approvepjprp(eosio::name coopname, checksum256 property_hash, document2 empty_document) {

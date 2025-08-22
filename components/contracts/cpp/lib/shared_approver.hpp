@@ -8,7 +8,7 @@ namespace Approver {
   *
   * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
   * @par Имя таблицы (table): approvals
-  * @anchor soviet_approval
+
   */
   struct [[eosio::table, eosio::contract(SOVIET)]] approval {
     uint64_t         id; ///< Уникальный идентификатор утверждения

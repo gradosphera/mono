@@ -10,7 +10,7 @@
  * @param contract Договор УХД
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_approvereg
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::approvereg(eosio::name coopname, checksum256 contributor_hash, document2 contract) {

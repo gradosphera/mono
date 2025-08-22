@@ -9,7 +9,7 @@
  * @param document Документ
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_newsubmitted
+
  * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 [[eosio::action]] void soviet::newsubmitted(NEWSUBMITTED_SIGNATURE) {

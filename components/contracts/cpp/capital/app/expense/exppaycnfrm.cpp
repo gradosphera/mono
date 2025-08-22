@@ -9,7 +9,7 @@
  * @param expense_hash Хеш расхода для подтверждения оплаты
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_exppaycnfrm
+
  * @note Авторизация требуется от аккаунта: @p _gateway
  */
 void capital::exppaycnfrm(eosio::name coopname, checksum256 expense_hash) {

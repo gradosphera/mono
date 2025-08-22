@@ -6,7 +6,7 @@
  * @param reason Причина отклонения операции
  * @ingroup public_actions
  * @ingroup public_ledger_actions
- * @anchor ledger_decline
+
  * @note Авторизация требуется от аккаунта: @p gateway или @p soviet
  */
 [[eosio::action]]

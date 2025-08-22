@@ -8,7 +8,7 @@
  * @param document Документ соглашения
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_newagreement
+
  * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 [[eosio::action]] void soviet::newagreement(NEWAGREEMENT_SIGNATURE) {

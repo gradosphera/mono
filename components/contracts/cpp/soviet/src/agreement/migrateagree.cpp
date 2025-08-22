@@ -11,7 +11,7 @@
  * @param agreement_id Идентификатор соглашения для миграции
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_migrateagree
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void soviet::migrateagree(eosio::name coopname, uint64_t agreement_id) {

@@ -11,7 +11,7 @@
  * @param approved_document Одобренный документ приложения
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_apprvappndx
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::apprvappndx(eosio::name coopname, checksum256 appendix_hash, document2 approved_document) {

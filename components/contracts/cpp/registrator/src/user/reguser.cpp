@@ -9,7 +9,7 @@
  * @param registration_hash Хэш регистрации
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_reguser
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]] void registrator::reguser(eosio::name coopname, eosio::name braname, eosio::name username, eosio::name type, document2 statement, checksum256 registration_hash)

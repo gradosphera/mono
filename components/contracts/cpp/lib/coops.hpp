@@ -27,7 +27,7 @@ struct board_member {
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): boards
-* @anchor soviet_boards
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] boards {
   uint64_t id; ///< Уникальный идентификатор доски.
@@ -142,7 +142,7 @@ struct right {
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): staff
-* @anchor soviet_staff
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] staff {
   eosio::name username; ///< Уникальное имя администратора
@@ -176,7 +176,7 @@ typedef eosio::multi_index<"staff"_n, staff> staff_index; ///< Тип мульт
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): participants
-* @anchor soviet_participant
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] participant {
   eosio::name username; ///< Уникальное имя члена кооператива.
@@ -246,7 +246,7 @@ typedef eosio::multi_index< "participants"_n, participant,
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): decisions
-* @anchor soviet_decision
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] decision {
   uint64_t id; ///< Уникальный идентификатор решения.
@@ -404,7 +404,7 @@ struct address_data {
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): addresses
-* @anchor soviet_address
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] address {
   uint64_t id;

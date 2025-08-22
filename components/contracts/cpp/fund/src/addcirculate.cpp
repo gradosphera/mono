@@ -5,7 +5,7 @@
  * @param quantity Количество средств для добавления
  * @ingroup public_actions
  * @ingroup public_fund_actions
- * @anchor fund_addcirculate
+
  * @note Авторизация требуется от аккаунта из белого списка контрактов
  */
 // атомарные транзакции фондового кошелька

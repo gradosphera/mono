@@ -18,7 +18,7 @@
  * @param statement Заявление о долге
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_createdebt
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::createdebt(name coopname, name username, checksum256 project_hash, checksum256 debt_hash, asset amount, time_point_sec repaid_at, document2 statement) {

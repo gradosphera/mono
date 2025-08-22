@@ -8,7 +8,7 @@
  * @param reason Причина отклонения предложения
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_declinepjprp
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::declinepjprp(eosio::name coopname, checksum256 property_hash, std::string reason) {

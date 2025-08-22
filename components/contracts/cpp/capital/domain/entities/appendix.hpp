@@ -8,7 +8,7 @@ namespace Capital::Appendix {
    * @brief Константы статусов приложений
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_appendix_status
+
    */
    namespace Status {
     constexpr eosio::name CREATED = "created"_n;     ///< Приложение создано
@@ -20,7 +20,7 @@ namespace Capital {
    * @brief Таблица приложений хранит данные о приложениях к договору УХД для конкретных проектов.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_appendix
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): appendixes 
    */

@@ -9,7 +9,7 @@
  * @param project_hash Хеш проекта для которого завершается голосование
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_calcvotes
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::calcvotes(name coopname, name username, checksum256 project_hash) {

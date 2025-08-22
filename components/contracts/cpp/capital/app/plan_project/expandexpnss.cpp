@@ -10,7 +10,7 @@
  * @param additional_expenses Дополнительные расходы для добавления
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_expandexpnss
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::expandexpnss(name coopname, checksum256 project_hash, asset additional_expenses) {

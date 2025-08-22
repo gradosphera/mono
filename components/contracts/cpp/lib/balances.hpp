@@ -34,7 +34,7 @@ typedef eosio::multi_index<"balances"_n, balances_base, eosio::indexed_by<"bycon
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): progwallets
-* @anchor soviet_progwallet
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] progwallet {
   uint64_t id; ///< Уникальный идентификатор кошелька

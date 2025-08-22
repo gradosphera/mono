@@ -14,7 +14,7 @@ namespace eosiosystem {
     * @param disallow_perms Разрешения, которые не могут использовать ограниченные действия
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_limitauthchg
+
     * @note Авторизация требуется от аккаунта: @p account
     */
    void system_contract::limitauthchg(const name& account, const std::vector<name>& allow_perms,

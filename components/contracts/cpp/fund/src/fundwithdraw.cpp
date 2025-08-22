@@ -11,7 +11,7 @@
  * @param bank_data_id Идентификатор банковских данных
  * @ingroup public_actions
  * @ingroup public_fund_actions
- * @anchor fund_fundwithdraw
+
  * @note Авторизация требуется от аккаунта: @p contract (если фонд управляется внешним контрактом) или @p username (сотрудник с правами complete)
  */
 /* Метод создания вывода средств из фонда накопления или по фонду списания

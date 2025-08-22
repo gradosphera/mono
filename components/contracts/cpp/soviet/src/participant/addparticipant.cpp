@@ -12,7 +12,7 @@
  * @param spread_initial Флаг распределения вступительного взноса
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_addpartcpnt
+
  * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 void soviet::addpartcpnt(eosio::name coopname, eosio::name username, eosio::name braname, eosio::name type, eosio::time_point_sec created_at, eosio::asset initial, eosio::asset minimum, bool spread_initial) {

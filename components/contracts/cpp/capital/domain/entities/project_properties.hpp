@@ -11,7 +11,7 @@ namespace Capital::ProjectProperties {
    * @brief Константы статусов имущественных взносов
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_property_status
+
    */
    namespace Status {
     constexpr eosio::name CREATED = "created"_n;     ///< Имущественный взнос создан
@@ -24,7 +24,7 @@ namespace Capital::ProjectProperties {
    * @brief Таблица имущественных взносов хранит данные о предложениях по имущественным взносам в проекты.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_property
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): pjproperties 
    */

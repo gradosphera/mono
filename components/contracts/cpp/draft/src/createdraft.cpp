@@ -12,7 +12,7 @@
  * @param translation_data Данные перевода на указанный язык
  * @ingroup public_actions
  * @ingroup public_draft_actions
- * @anchor draft_createdraft
+
  * @note Авторизация требуется от аккаунта: @p scope или @p _system
  */
 void draft::createdraft(eosio::name scope, eosio::name username, uint64_t registry_id, eosio::name lang, std::string title, 

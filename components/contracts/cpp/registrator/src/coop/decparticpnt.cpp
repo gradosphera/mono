@@ -5,7 +5,7 @@
  * @param username Имя пайщика
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_decparticpnt
+
  * @note Авторизация требуется от аккаунта: @p soviet
  */
 void registrator::decparticpnt(eosio::name coopname, eosio::name username)

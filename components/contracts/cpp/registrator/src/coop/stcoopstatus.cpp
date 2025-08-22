@@ -6,7 +6,7 @@
  * @param status Новый статус кооператива
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_stcoopstatus
+
  * @note Авторизация требуется от аккаунта: @p provider или @p administrator
  */
 [[eosio::action]] void registrator::stcoopstatus(eosio::name coopname, eosio::name administrator, eosio::name status) {

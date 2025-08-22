@@ -10,7 +10,7 @@
  * @param model Новая модель шаблона
  * @ingroup public_actions
  * @ingroup public_draft_actions
- * @anchor draft_editdraft
+
  * @note Авторизация требуется от аккаунта: @p scope или @p _system
  */
 void draft::editdraft(eosio::name scope, eosio::name username, uint64_t registry_id, std::string title, std::string description, std::string context, std::string model){

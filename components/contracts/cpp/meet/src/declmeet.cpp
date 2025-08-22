@@ -6,7 +6,7 @@
  * @param reason Причина отклонения собрания
  * @ingroup public_actions
  * @ingroup public_meet_actions
- * @anchor meet_declmeet
+
  * @note Авторизация требуется от аккаунта: @p soviet
  */
 void meet::declmeet(name coopname, checksum256 hash, std::string reason) {

@@ -12,7 +12,7 @@
  * @param act Документ акта 1
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_act1pgprp
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::act1pgprp(eosio::name coopname, eosio::name username, checksum256 property_hash, document2 act) {

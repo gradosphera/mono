@@ -8,7 +8,7 @@
  * @param username Наименование пользователя-участника
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_rfrshsegment
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::rfrshsegment(eosio::name coopname, checksum256 project_hash, eosio::name username) {

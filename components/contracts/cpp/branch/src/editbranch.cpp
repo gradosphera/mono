@@ -6,7 +6,7 @@
  * @param trustee Новый председатель кооперативного участка (должен быть физическим лицом)
  * @ingroup public_actions
  * @ingroup public_branch_actions
- * @anchor branch_editbranch
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]] void branch::editbranch(eosio::name coopname, eosio::name braname, eosio::name trustee) {

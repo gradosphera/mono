@@ -7,7 +7,7 @@
  * @param trusted Доверенное лицо для добавления (должно быть физическим лицом)
  * @ingroup public_actions
  * @ingroup public_branch_actions
- * @anchor branch_addtrusted
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]] void branch::addtrusted(eosio::name coopname, eosio::name braname, eosio::name trusted) {

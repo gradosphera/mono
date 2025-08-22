@@ -6,7 +6,7 @@
  * @param braname Наименование кооперативного участка
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_deletebranch
+
  * @note Авторизация требуется от аккаунта: @p _branch
  */
 void soviet::deletebranch(eosio::name coopname, eosio::name braname) {

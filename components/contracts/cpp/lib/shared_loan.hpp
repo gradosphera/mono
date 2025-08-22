@@ -11,7 +11,7 @@ using std::string;
  * @brief Сигнатуры действий контракта loan.
  * @ingroup public_consts
  * @ingroup public_loan_consts
- * @anchor loan_action_signatures
+
  */
 // Сигнатуры как макросы
 #define CREATEDEBT_SIGNATURE name coopname, name username, checksum256 debt_hash, time_point_sec repaid_at, asset quantity
@@ -29,7 +29,7 @@ namespace Loan {
    * @brief Структура долгового обязательства.
    * @ingroup public_tables
    * @ingroup public_loan_tables
-   * @anchor loan_debt
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): debts
    */
@@ -62,7 +62,7 @@ namespace Loan {
    * @brief Структура сводки по долгам пользователя.
    * @ingroup public_tables
    * @ingroup public_loan_tables
-   * @anchor loan_summary
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): summaries
    */

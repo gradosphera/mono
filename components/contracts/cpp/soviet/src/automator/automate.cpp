@@ -15,7 +15,7 @@ inline void is_valid_action_for_automation(eosio::name action_type) {
  * @param encrypted_private_key Зашифрованный приватный ключ для автоматизации
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_automate
+
  * @note Авторизация требуется от аккаунта: @p member
  */
 void soviet::automate(eosio::name coopname, uint64_t board_id, eosio::name member, eosio::name action_type, eosio::name permission_name, std::string encrypted_private_key) {

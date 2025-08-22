@@ -8,7 +8,7 @@
  * @param reason Причина отклонения приложения
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_dclineappndx
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::dclineappndx(eosio::name coopname, checksum256 appendix_hash, std::string reason) {

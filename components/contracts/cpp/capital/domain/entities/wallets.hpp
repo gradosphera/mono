@@ -4,7 +4,7 @@ namespace Capital {
    * @brief Таблица кошельков проектов хранит данные о долях участников в проектах для получения членских взносов.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_project_wallet
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): projwallets 
    */

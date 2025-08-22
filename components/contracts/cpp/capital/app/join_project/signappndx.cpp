@@ -13,7 +13,7 @@
  * @param document Документ приложения к договору
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_signappndx
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::signappndx(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document) {

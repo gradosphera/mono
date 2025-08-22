@@ -6,7 +6,7 @@
  * @param program_id Идентификатор программы для отключения
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_disableprog
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void soviet::disableprog(eosio::name coopname, uint64_t program_id) {

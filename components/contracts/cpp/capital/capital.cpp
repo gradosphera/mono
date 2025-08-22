@@ -16,16 +16,16 @@
 // Конфигурация
 #include "app/managment/setconfig.cpp"
 
+// Установка мастера проекта
+#include "app/managment/setmaster.cpp"
+
 // Создать проект
 #include "app/managment/createproj.cpp"
 // Открыть проект на приём инвестиций
 #include "app/managment/openproject.cpp"
 // Запустить проект на приём коммитов
 #include "app/managment/startproject.cpp"
-// Завершение проекта и начало голосования
-#include "app/managment/startvoting.cpp"
-// Завершение голосования
-#include "app/managment/cmpltvoting.cpp"
+
 // Закрытие проекта
 #include "app/managment/closeproject.cpp"
 // Удаление проекта
@@ -33,7 +33,6 @@
 
 
 // Планирование
-#include "app/plan_project/setmaster.cpp"
 #include "app/plan_project/addauthor.cpp"
 #include "app/plan_project/setplan.cpp"
 #include "app/plan_project/expandexpnss.cpp"
@@ -82,17 +81,19 @@
 #include "app/program_property/act2pgprp.cpp"
 
 // Долги
-#include "app/create_debt/createdebt.cpp"
-#include "app/create_debt/approvedebt.cpp"
-#include "app/create_debt/debtauthcnfr.cpp"
-#include "app/create_debt/debtpaycnfrm.cpp"
-#include "app/create_debt/debtpaydcln.cpp"
-#include "app/create_debt/declinedebt.cpp"
-#include "app/settle_debt/settledebt.cpp"
+#include "app/debt_managment/createdebt.cpp"
+#include "app/debt_management/approvedebt.cpp"
+#include "app/debt_management/debtauthcnfr.cpp"
+#include "app/debt_management/debtpaycnfrm.cpp"
+#include "app/debt_management/debtpaydcln.cpp"
+#include "app/debt_management/declinedebt.cpp"
+#include "app/debt_management/settledebt.cpp"
 
 // Голосование  
 #include "app/voting/calcvotes.cpp"
 #include "app/voting/submitvote.cpp"
+#include "app/voting/cmpltvoting.cpp"
+#include "app/voting/startvoting.cpp"
 
 // Результаты
 #include "app/result/approverslt.cpp"

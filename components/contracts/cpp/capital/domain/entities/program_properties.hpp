@@ -11,7 +11,7 @@ namespace Capital::ProgramProperties {
    * @brief Константы статусов программных имущественных взносов
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_program_property_status
+
    */
    namespace Status {
     constexpr eosio::name CREATED = "created"_n;     ///< Программный имущественный взнос создан
@@ -28,7 +28,7 @@ namespace Capital::ProgramProperties {
    * @brief Таблица программных имущественных взносов хранит данные о предложениях по имущественным взносам в программу капитализации.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_program_property
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): pgproperties 
    */

@@ -4,7 +4,7 @@
  * Вызывается автоматически в CI/CD при каждом деплое.
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_migrate
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void soviet::migrate() {

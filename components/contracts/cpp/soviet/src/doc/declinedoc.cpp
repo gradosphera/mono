@@ -8,7 +8,7 @@
  * @param document Документ для отклонения
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_declinedoc
+
  * @note Авторизация требуется от аккаунта: @p username
  */
 [[eosio::action]] void soviet::declinedoc(eosio::name coopname, eosio::name username, checksum256 hash, document2 document) {

@@ -2,7 +2,7 @@
 
 // /**
 // \defgroup public_bios Контракт BIOS
-// * @anchor public_bios
+
 // * Минималистичный системный контракт, предоставляющий только критические действия для загрузки блокчейна.
 // */
 
@@ -283,7 +283,7 @@ namespace eosiobios {
          * @brief Таблица хешей ABI хранит хеши ABI для аккаунтов.
          * @ingroup public_tables
          * @ingroup public_bios_tables
-         * @anchor bios_abi_hash
+
          * @par Область памяти (scope): eosio.bios
          * @par Имя таблицы (table): abihash
          */

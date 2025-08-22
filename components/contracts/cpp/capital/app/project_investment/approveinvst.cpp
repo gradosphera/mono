@@ -13,7 +13,7 @@
  * @param approved_statement Одобренное заявление об инвестиции
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_approveinvst
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::approveinvst(eosio::name coopname, checksum256 invest_hash, document2 approved_statement) {

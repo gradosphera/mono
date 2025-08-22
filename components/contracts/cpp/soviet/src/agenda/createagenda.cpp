@@ -13,7 +13,7 @@
  * @param meta Дополнительные метаданные
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_createagenda
+
  * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 [[eosio::action]] void soviet::createagenda(eosio::name coopname, eosio::name username, eosio::name type, checksum256 hash, name callback_contract, name confirm_callback, name decline_callback, document2 statement, std::string meta){

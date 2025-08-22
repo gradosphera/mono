@@ -12,7 +12,7 @@
  * @param close_at Дата и время закрытия собрания
  * @ingroup public_actions
  * @ingroup public_meet_actions
- * @anchor meet_createmeet
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void meet::createmeet(name coopname, checksum256 hash, eosio::name initiator, name presider, name secretary, std::vector<meet_point> agenda, document2 proposal, time_point_sec open_at, time_point_sec close_at) {

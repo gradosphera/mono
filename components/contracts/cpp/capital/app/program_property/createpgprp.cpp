@@ -14,7 +14,7 @@
  * @param statement Заявление об имущественном взносе
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_createpgprp
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::createpgprp(eosio::name coopname, eosio::name username, 

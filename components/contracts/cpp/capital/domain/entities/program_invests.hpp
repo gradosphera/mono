@@ -8,7 +8,7 @@ namespace Capital::ProgramInvests {
    * @brief Константы статусов программных инвестиций
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_program_invest_status
+
    */
    namespace Status {
     const eosio::name CREATED = "created"_n;     ///< Программная инвестиция создана
@@ -21,7 +21,7 @@ namespace Capital {
    * @brief Таблица программных инвестиций хранит данные об инвестициях в программу капитализации.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_program_invest
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): progrinvests 
    */

@@ -18,7 +18,7 @@ using namespace eosio;
  * Выполняет миграцию контракта на новую версию.
  * @ingroup public_actions
  * @ingroup public_draft_actions
- * @anchor draft_migrate
+
  * @note Авторизация требуется от аккаунта: @p _draft
  */
 [[eosio::action]]
@@ -33,7 +33,7 @@ void draft::migrate() {
  * @param id Идентификатор для создания
  * @ingroup public_actions
  * @ingroup public_draft_actions
- * @anchor draft_newid
+
  * @note Авторизация требуется от аккаунта: @p _draft
  */
 void draft::newid(eosio::name scope, uint64_t id) { require_auth(_draft); };

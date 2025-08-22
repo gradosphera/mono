@@ -7,7 +7,7 @@
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): coagreements
-* @anchor soviet_coagreement
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] coagreement {
   eosio::name type; ///< Тип соглашения (wallet | user | signature | privacy | ...)
@@ -40,7 +40,7 @@ coagreement get_coagreement_or_fail(eosio::name coopname, eosio::name type) {
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): agreements
-* @anchor soviet_agreement
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] agreement {
   uint64_t id; ///< Уникальный идентификатор соглашения
@@ -85,7 +85,7 @@ typedef eosio::multi_index<"agreements"_n, agreement,
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): agreements3
-* @anchor soviet_agreement2
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] agreement2 {
   uint64_t id; ///< Уникальный идентификатор соглашения

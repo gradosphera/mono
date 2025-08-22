@@ -43,7 +43,7 @@ namespace eosiosystem {
     * @param max_ram_size Новый максимальный размер RAM в байтах
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_setram
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::setram( uint64_t max_ram_size ) {
@@ -71,7 +71,7 @@ namespace eosiosystem {
     * Увеличивает количество RAM доступного для продажи на основе времени блоков.
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_update_ram_supply
+
     */
    void system_contract::update_ram_supply() {
       auto cbt = eosio::current_block_time();
@@ -96,7 +96,7 @@ namespace eosiosystem {
     * @param bytes_per_block Количество байт RAM, добавляемых за блок
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_setramrate
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::setramrate( uint16_t bytes_per_block ) {
@@ -116,7 +116,7 @@ namespace eosiosystem {
     * @param params Новые параметры блокчейна
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_setparams
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::setparams( const blockchain_parameters_t& params ) {
@@ -223,7 +223,7 @@ namespace eosiosystem {
     * @param settings Настройки лимитов WebAssembly
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_wasmcfg
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::wasmcfg( const name& settings )
@@ -252,7 +252,7 @@ namespace eosiosystem {
     * @param ispriv 0 для false, > 0 для true
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_setpriv
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::setpriv( const name& account, uint8_t ispriv ) {
@@ -270,7 +270,7 @@ namespace eosiosystem {
     * @param cpu Пропорциональный лимит CPU на основе (вес / общий_вес_всех_аккаунтов)
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_setalimits
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::setalimits( const name& account, int64_t ram, int64_t net, int64_t cpu ) {
@@ -298,7 +298,7 @@ namespace eosiosystem {
     * @param ram_bytes Лимит RAM в абсолютных байтах
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_setacctram
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::setacctram( const name& account, const std::optional<int64_t>& ram_bytes ) {
@@ -353,7 +353,7 @@ namespace eosiosystem {
     * @param net_weight Пропорциональный лимит NET на основе (вес / общий_вес_всех_аккаунтов)
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_setacctnet
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::setacctnet( const name& account, const std::optional<int64_t>& net_weight ) {
@@ -407,7 +407,7 @@ namespace eosiosystem {
     * @param cpu_weight Пропорциональный лимит CPU на основе (вес / общий_вес_всех_аккаунтов)
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_setacctcpu
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::setacctcpu( const name& account, const std::optional<int64_t>& cpu_weight ) {
@@ -460,7 +460,7 @@ namespace eosiosystem {
     * @param feature_digest Хеш протокольной функции для активации
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_activate
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::activate( const eosio::checksum256& feature_digest ) {
@@ -474,7 +474,7 @@ namespace eosiosystem {
     * @param producer Аккаунт продюсера для деактивации
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_rmvproducer
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::rmvproducer( const name& producer ) {
@@ -493,7 +493,7 @@ namespace eosiosystem {
     * @param revision Ревизия, которая должна быть увеличена на 1 по сравнению с текущей ревизией
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_updtrevision
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::updtrevision( uint8_t revision ) {
@@ -517,7 +517,7 @@ namespace eosiosystem {
     * @param active Активная авторизация
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_createaccnt
+
     * @note Авторизация требуется от аккаунта: @p registrator
     */
    void system_contract::createaccnt(const name coopname, const name new_account_name, authority owner, authority active) {
@@ -679,7 +679,7 @@ void native::setabi( const name& acnt, const std::vector<char>& abi,
     * @param core Системный символ токена
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_init
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::init( uint64_t version, const symbol& core ) {

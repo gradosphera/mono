@@ -12,7 +12,7 @@
  * @param description Описание кооператива
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_updatecoop
+
  * @note Авторизация требуется от аккаунта: @p provider, @p coopname или @p username
  */
 [[eosio::action]] void registrator::updatecoop(eosio::name coopname, eosio::name username, eosio::asset initial, eosio::asset minimum, eosio::asset org_initial, eosio::asset org_minimum, std::string announce, std::string description)

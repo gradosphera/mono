@@ -9,7 +9,7 @@
  * @param data Новые данные адреса (структура address_data)
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_editaddress
+
  * @note Авторизация требуется от аккаунта: @p chairman
  */
 void soviet::editaddress(eosio::name coopname, eosio::name chairman, eosio::name braname, uint64_t address_id, address_data data){

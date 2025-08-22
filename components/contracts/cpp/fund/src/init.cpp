@@ -6,7 +6,7 @@
  * @param initial Начальная сумма для инициализации фондов
  * @ingroup public_actions
  * @ingroup public_fund_actions
- * @anchor fund_init
+
  * @note Авторизация требуется от аккаунта: @p _soviet или @p _registrator
  */
 [[eosio::action]] void fund::init(eosio::name coopname, eosio::asset initial) {

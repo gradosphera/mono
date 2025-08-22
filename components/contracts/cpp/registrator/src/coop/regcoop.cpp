@@ -7,7 +7,7 @@
  * @param document Документ регистрации
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_regcoop
+
  * @note Авторизация требуется от аккаунта: @p coopname или @p username
  */
 [[eosio::action]] void registrator::regcoop(eosio::name coopname, eosio::name username, org_data params, document2 document)

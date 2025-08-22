@@ -16,7 +16,7 @@
  * @brief Миграция данных контракта.
  * @ingroup public_actions
  * @ingroup public_meet_actions
- * @anchor meet_migrate
+
  * @note Авторизация требуется от аккаунта: @p meet
  */
 [[eosio::action]]
@@ -31,7 +31,7 @@ void meet::migrate(){
  * @param meet_id ID собрания для удаления
  * @ingroup public_actions
  * @ingroup public_meet_actions
- * @anchor meet_delmeet
+
  * @note Авторизация требуется от аккаунта: @p meet
  */
 [[eosio::action]]

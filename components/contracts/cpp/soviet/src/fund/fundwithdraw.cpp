@@ -9,7 +9,7 @@
  * @param document Документ с описанием вывода средств
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_fundwithdraw
+
  * @note Авторизация требуется от аккаунта: @p _fund
  */
 void soviet::fundwithdraw(eosio::name coopname, eosio::name username, eosio::name type, uint64_t withdraw_id, document2 document) { 

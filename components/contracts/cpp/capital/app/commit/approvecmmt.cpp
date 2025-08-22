@@ -11,7 +11,7 @@
  * @param empty_document Пустой документ (не используется)
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_approvecmmt
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, document2 empty_document) {

@@ -8,7 +8,7 @@
  * @param document Документ авторизации решения
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_authorize
+
  * @note Авторизация требуется от аккаунта: @p chairman
  */
 void soviet::authorize(eosio::name coopname, eosio::name chairman, uint64_t decision_id, document2 document) { 

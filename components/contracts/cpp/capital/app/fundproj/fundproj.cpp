@@ -11,7 +11,7 @@
  * @param memo Мемо для транзакции
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_fundproj
+
  * @note Авторизация требуется от аккаунта: @p _soviet или @p _gateway
  */
 void capital::fundproj(eosio::name coopname, checksum256 project_hash, asset amount, std::string memo) {

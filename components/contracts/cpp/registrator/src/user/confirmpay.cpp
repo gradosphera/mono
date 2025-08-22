@@ -5,7 +5,7 @@
  * @param registration_hash Хэш регистрации
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_confirmpay
+
  * @note Авторизация требуется от аккаунта: @p gateway
  */
 void registrator::confirmpay(name coopname, checksum256 registration_hash){

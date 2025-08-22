@@ -10,7 +10,7 @@
  * @param reason Причина отклонения возврата
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_capdeclwthd3
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::capdeclwthd3(name coopname, checksum256 withdraw_hash, std::string reason) {

@@ -10,7 +10,7 @@ namespace Capital::Commits {
    * @brief Константы статусов коммитов
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_commit_status
+
    */
    namespace Status {
     constexpr eosio::name CREATED = "created"_n;     ///< Коммит создан
@@ -23,7 +23,7 @@ namespace Capital::Commits {
    * @brief Таблица коммитов хранит данные о выполненных операциях в проекте.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_commit
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): commits 
    */

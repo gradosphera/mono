@@ -12,7 +12,7 @@
 
 /**
 \defgroup public_soviet Контракт SOVIET
-* @anchor public_soviet
+
 * Смарт-контракт совета кооператива предназначен для управления процессами принятия решений и подписания документов.
 */
 
@@ -188,7 +188,7 @@ public:
 * Таблица содержит различные счетчики для генерации уникальных идентификаторов.
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
-* @anchor soviet_counts
+
 */
   struct [[eosio::table, eosio::contract(SOVIET)]] counts : counts_base {};
  
@@ -201,7 +201,7 @@ public:
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): automator
-* @anchor soviet_automator
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] automator {
     uint64_t id; ///< Уникальный идентификатор автоматизированного действия
@@ -234,7 +234,7 @@ struct [[eosio::table, eosio::contract(SOVIET)]] automator {
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): autosigner
-* @anchor soviet_autosigner
+
 */
   struct [[eosio::table, eosio::contract(SOVIET)]] autosigner {
     uint64_t decision_id; ///< Идентификатор решения для автоподписания
@@ -253,7 +253,7 @@ struct [[eosio::table, eosio::contract(SOVIET)]] automator {
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): joincoops
-* @anchor soviet_joincoops
+
 */
   struct [[eosio::table, eosio::contract(SOVIET)]] joincoops {
     uint64_t id; ///< Уникальный идентификатор заявки
@@ -284,7 +284,7 @@ struct [[eosio::table, eosio::contract(SOVIET)]] automator {
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): changes
-* @anchor soviet_changes
+
 */
   struct [[eosio::table, eosio::contract(SOVIET)]] changes {
     uint64_t id; ///< Уникальный идентификатор изменения

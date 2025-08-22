@@ -8,7 +8,7 @@ namespace Capital::ProgramWithdraw {
    * @brief Константы статусов возвратов из программы
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_program_withdraw_status
+
    */
    namespace Status {
     const eosio::name CREATED = "created"_n;     ///< Запрос на возврат создан
@@ -22,7 +22,7 @@ namespace Capital {
    * @brief Таблица возвратов из программы хранит данные о запросах на возврат средств из программы капитализации.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_program_withdraw
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): prgwithdraws 
    */

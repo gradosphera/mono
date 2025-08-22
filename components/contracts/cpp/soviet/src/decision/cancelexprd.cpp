@@ -6,7 +6,7 @@
  * @param decision_id Идентификатор решения для отмены
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_cancelexprd
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void soviet::cancelexprd(eosio::name coopname, uint64_t decision_id) { 

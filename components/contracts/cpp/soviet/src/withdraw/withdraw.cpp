@@ -8,7 +8,7 @@
  * @param statement Документ с описанием вывода средств
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_withdraw
+
  * @note Авторизация требуется от аккаунта: @p _gateway
  */
 void soviet::withdraw(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document2 statement) { 

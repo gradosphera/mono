@@ -9,7 +9,7 @@
  * @param message Сообщение о причине разблокировки
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_unblock
+
  * @note Авторизация требуется от аккаунта: @p _soviet или @p admin
  */
 void soviet::unblock(eosio::name coopname, eosio::name admin, eosio::name username, bool is_registration, std::string message) {

@@ -8,7 +8,7 @@
  * @param document Документ акта
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_newact
+
  * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 [[eosio::action]] void soviet::newact(NEWACT_SIGNATURE) {

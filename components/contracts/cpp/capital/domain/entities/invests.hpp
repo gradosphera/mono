@@ -8,7 +8,7 @@ namespace Capital::Invests {
    * @brief Константы статусов инвестиций
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_invest_status
+
    */
    namespace Status {
     const eosio::name CREATED = "created"_n;     ///< Инвестиция создана
@@ -20,7 +20,7 @@ namespace Capital {
    * @brief Таблица инвестиций хранит данные о вложениях в проекты.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_invest
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): invests 
    */

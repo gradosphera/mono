@@ -10,7 +10,7 @@
  * @param memo Примечание к операции
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_subbal
+
  * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 void soviet::subbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, bool skip_available_check, std::string memo) {

@@ -14,7 +14,7 @@
  * @param meta Дополнительные метаданные
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_editprog
+
  * @note Авторизация требуется от аккаунта: @p username
  */
 void soviet::editprog(eosio::name coopname, eosio::name username, uint64_t program_id, uint64_t draft_id, std::string title, std::string announce, std::string description, std::string preview, std::string images, std::string meta) {

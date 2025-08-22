@@ -102,7 +102,7 @@ void system_contract::process_powerup_queue(time_point_sec now, symbol core_symb
     * @param args Конфигурация powerup с параметрами дней и минимальной комиссии
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_cfgpowerup
+
     * @note Авторизация требуется от аккаунта: @p eosio.system
     */
    void system_contract::cfgpowerup(powerup_config& args) {
@@ -166,7 +166,7 @@ void system_contract::process_powerup_queue(time_point_sec now, symbol core_symb
     * @param max Количество элементов очереди для обработки
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_powerupexec
+
     * @note Авторизация требуется от аккаунта: @p user
     */
    void system_contract::powerupexec(const name& user, uint16_t max) {
@@ -198,7 +198,7 @@ void system_contract::process_powerup_queue(time_point_sec now, symbol core_symb
     * @param transfer Флаг передачи ресурсов (требует специальных прав)
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_powerup
+
     * @note Авторизация требуется от аккаунта: @p payer
     */
    void system_contract::powerup(const name& payer, const name& receiver, uint32_t days, const asset& payment, const bool transfer) {

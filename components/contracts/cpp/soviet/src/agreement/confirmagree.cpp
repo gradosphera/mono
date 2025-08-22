@@ -8,7 +8,7 @@
  * @param agreement_id Идентификатор соглашения для подтверждения
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_confirmagree
+
  * @note Авторизация требуется от аккаунта: @p administrator
  */
 [[eosio::action]] void soviet::confirmagree(eosio::name coopname, eosio::name administrator, eosio::name username, uint64_t agreement_id) {

@@ -9,7 +9,7 @@
  * @param decision Документ решения совета
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_declrslt
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::declrslt(eosio::name coopname, checksum256 result_hash, document2 decision) {

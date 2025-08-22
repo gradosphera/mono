@@ -17,7 +17,7 @@ namespace Capital::Projects {
   * @brief Константы статусов проекта
   * @ingroup public_consts
   * @ingroup public_capital_consts
-  * @anchor capital_project_status
+
   */
   namespace Status {
     const eosio::name PENDING = "pending"_n;     ///< Проект создан
@@ -33,7 +33,7 @@ namespace Capital {
 * @brief Таблица проектов хранит информацию о проектах кооператива, которые станут результатами.
 * @ingroup public_tables
 * @ingroup public_capital_tables
-* @anchor capital_project
+
 * @par Область памяти (scope): coopname
 * @par Имя таблицы (table): projects 
 */

@@ -72,7 +72,7 @@ namespace eosiosystem {
     * @param location Локация продюсера
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_regproducer
+
     * @note Авторизация требуется от аккаунта: @p producer
     */
    void system_contract::regproducer( const name& producer, const eosio::public_key& producer_key, const std::string& url, uint16_t location ) {
@@ -91,7 +91,7 @@ namespace eosiosystem {
     * @param location Локация продюсера
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_regproducer2
+
     * @note Авторизация требуется от аккаунта: @p producer
     */
    void system_contract::regproducer2( const name& producer, const eosio::block_signing_authority& producer_authority, const std::string& url, uint16_t location ) {
@@ -111,7 +111,7 @@ namespace eosiosystem {
     * @param producer Имя аккаунта продюсера для отмены регистрации
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_unregprod
+
     * @note Авторизация требуется от аккаунта: @p producer
     */
    void system_contract::unregprod( const name& producer ) {
@@ -174,7 +174,7 @@ namespace eosiosystem {
     * @param producers Список продюсеров для голосования (максимум 30)
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_voteproducer
+
     * @note Авторизация требуется от аккаунта: @p voter_name
     */
    void system_contract::voteproducer( const name& voter_name, const name& proxy, const std::vector<name>& producers ) {
@@ -190,7 +190,7 @@ namespace eosiosystem {
     * @param voter_name Имя голосующего для обновления
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_voteupdate
+
     * @note Авторизация требуется от аккаунта: @p voter_name
     */
    void system_contract::voteupdate( const name& voter_name ) {

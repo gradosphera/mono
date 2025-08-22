@@ -18,7 +18,7 @@
  * @param statement Заявление о результате
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_pushrslt
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::pushrslt(name coopname, name username, checksum256 project_hash, checksum256 result_hash, 

@@ -9,7 +9,7 @@
  * @param memo Примечание к операции
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_blockbal
+
  * @note Авторизация требуется от аккаунта в белом списке контрактов
  */
 void soviet::blockbal(eosio::name coopname, eosio::name username, uint64_t program_id, eosio::asset quantity, std::string memo) {

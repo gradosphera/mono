@@ -21,7 +21,7 @@ namespace Capital {
    * @brief Таблица глобального состояния хранит общие данные контракта капитализации.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_global_state
+
    * @par Область памяти (scope): _capital
    * @par Имя таблицы (table): state 
    */

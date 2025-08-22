@@ -8,7 +8,7 @@
  * @param username Наименование пользователя-пайщика
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_refreshpcrps
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]] void capital::refreshpcrps(name coopname, name username) {

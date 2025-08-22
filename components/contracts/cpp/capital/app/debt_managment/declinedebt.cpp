@@ -10,7 +10,7 @@
  * @param reason Причина отклонения долга
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_declinedebt
+
  * @note Авторизация требуется от аккаунта: @p _gateway
  */
 void capital::declinedebt(name coopname, checksum256 debt_hash, std::string reason) {

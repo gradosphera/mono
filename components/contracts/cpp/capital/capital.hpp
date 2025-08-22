@@ -8,7 +8,7 @@
 
 /**
 \defgroup public_capital Контракт CAPITAL
-* @anchor public_capital
+
 */
 
 /**
@@ -36,7 +36,7 @@
  * Коэффициенты бизнес-логики (не управляются конфигом)
  * @ingroup public_consts
  * @ingroup public_capital_consts
- * @anchor capital_business_constants
+
  * @{
  */
 const double CREATORS_BONUS_COEFFICIENT = 1; ///< Коэффициент премий создателей от своей себестоимости (100%)

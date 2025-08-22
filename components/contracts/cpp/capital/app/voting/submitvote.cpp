@@ -12,7 +12,7 @@
  * @param votes Вектор голосов для распределения
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_submitvote
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::submitvote(name coopname, name voter, checksum256 project_hash, std::vector<Capital::vote_input> votes) {

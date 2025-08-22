@@ -3,7 +3,7 @@ namespace Meet {
   * @brief Структура вопросов повестки дня собрания.
   * @ingroup public_tables
   * @ingroup public_meet_tables
-  * @anchor meet_question
+
   * @par Область памяти (scope): coopname
   * @par Имя таблицы (table): questions
   */

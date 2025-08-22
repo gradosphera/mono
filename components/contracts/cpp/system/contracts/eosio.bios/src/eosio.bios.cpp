@@ -9,7 +9,7 @@ namespace eosiobios {
  * @param abi ABI в виде вектора символов
  * @ingroup public_actions
  * @ingroup public_bios_actions
- * @anchor bios_setabi
+
  * @note Авторизация требуется от аккаунта: @p eosio.bios
  */
 void bios::setabi( name account, const std::vector<char>& abi ) {
@@ -38,7 +38,7 @@ void bios::onerror( ignore<uint128_t>, ignore<std::vector<char>> ) {
  * @param is_priv 0 для false, > 0 для true
  * @ingroup public_actions
  * @ingroup public_bios_actions
- * @anchor bios_setpriv
+
  * @note Авторизация требуется от аккаунта: @p eosio.bios
  */
 void bios::setpriv( name account, uint8_t is_priv ) {
@@ -55,7 +55,7 @@ void bios::setpriv( name account, uint8_t is_priv ) {
  * @param cpu_weight Дробно пропорциональный лимит CPU доступных ресурсов
  * @ingroup public_actions
  * @ingroup public_bios_actions
- * @anchor bios_setalimits
+
  * @note Авторизация требуется от аккаунта: @p eosio.bios
  */
 void bios::setalimits( name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight ) {
@@ -69,7 +69,7 @@ void bios::setalimits( name account, int64_t ram_bytes, int64_t net_weight, int6
  * @param schedule Новый список активных продюсеров для установки
  * @ingroup public_actions
  * @ingroup public_bios_actions
- * @anchor bios_setprods
+
  * @note Авторизация требуется от аккаунта: @p eosio.bios
  */
 void bios::setprods( const std::vector<eosio::producer_authority>& schedule ) {
@@ -83,7 +83,7 @@ void bios::setprods( const std::vector<eosio::producer_authority>& schedule ) {
  * @param params Новые параметры блокчейна для установки
  * @ingroup public_actions
  * @ingroup public_bios_actions
- * @anchor bios_setparams
+
  * @note Авторизация требуется от аккаунта: @p eosio.bios
  */
 void bios::setparams( const eosio::blockchain_parameters& params ) {
@@ -97,7 +97,7 @@ void bios::setparams( const eosio::blockchain_parameters& params ) {
  * @param from Имя аккаунта для авторизации
  * @ingroup public_actions
  * @ingroup public_bios_actions
- * @anchor bios_reqauth
+
  * @note Авторизация требуется от аккаунта: @p from
  */
 /**
@@ -106,7 +106,7 @@ void bios::setparams( const eosio::blockchain_parameters& params ) {
  * @param from Имя аккаунта для авторизации
  * @ingroup public_actions
  * @ingroup public_bios_actions
- * @anchor bios_reqauth
+
  * @note Авторизация требуется от аккаунта: @p from
  */
 void bios::reqauth( name from ) {
@@ -119,7 +119,7 @@ void bios::reqauth( name from ) {
  * @param feature_digest Хеш протокольной функции для активации
  * @ingroup public_actions
  * @ingroup public_bios_actions
- * @anchor bios_activate
+
  * @note Авторизация требуется от аккаунта: @p eosio.bios
  */
 void bios::activate( const eosio::checksum256& feature_digest ) {
@@ -133,7 +133,7 @@ void bios::activate( const eosio::checksum256& feature_digest ) {
  * @param feature_digest Хеш протокольной функции для проверки активации
  * @ingroup public_actions
  * @ingroup public_bios_actions
- * @anchor bios_reqactivated
+
  */
 void bios::reqactivated( const eosio::checksum256& feature_digest ) {
    check( is_feature_activated( feature_digest ), "protocol feature is not activated" );

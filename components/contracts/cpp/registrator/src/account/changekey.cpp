@@ -8,7 +8,7 @@
  * @param public_key Новый публичный ключ для активной учетной записи
  * @ingroup public_actions
  * @ingroup public_registrator_actions
- * @anchor registrator_changekey
+
  * @note Авторизация требуется от аккаунта: @p changer
  */
 void registrator::changekey(eosio::name coopname, eosio::name changer, eosio::name username,

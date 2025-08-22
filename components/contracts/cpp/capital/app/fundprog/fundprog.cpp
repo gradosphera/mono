@@ -8,7 +8,7 @@
  * @param memo Мемо для транзакции
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_fundprog
+
  * @note Авторизация требуется от аккаунта: @p _soviet или @p _gateway
  */
 void capital::fundprog(eosio::name coopname, asset amount, std::string memo) {

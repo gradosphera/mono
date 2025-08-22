@@ -15,7 +15,7 @@
  * @param return_statement Заявление о возврате
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_createwthd2
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::createwthd2(name coopname, name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document2 return_statement) {

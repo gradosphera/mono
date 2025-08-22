@@ -77,7 +77,7 @@ bool is_empty_document(const document2 &doc)
 * @brief Таблица шаблонов документов хранит информацию о шаблонах документов и их версиях.
 * @ingroup public_tables
 * @ingroup public_draft_tables
-* @anchor draft_onedraft
+
 * @par Область памяти (scope): scope (кооператив или _draft)
 * @par Имя таблицы (table): drafts
 */
@@ -111,7 +111,7 @@ onedraft get_scoped_draft_by_registry_or_fail(eosio::name scope, uint64_t draft_
 * @brief Таблица переводов шаблонов документов хранит переводы шаблонов на различные языки.
 * @ingroup public_tables
 * @ingroup public_draft_tables
-* @anchor draft_translation
+
 * @par Область памяти (scope): scope (кооператив или _draft)
 * @par Имя таблицы (table): translations
 */

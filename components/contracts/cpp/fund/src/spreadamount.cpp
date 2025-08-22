@@ -6,7 +6,7 @@
  * @param quantity Общая сумма членских взносов для распределения
  * @ingroup public_actions
  * @ingroup public_fund_actions
- * @anchor fund_spreadamount
+
  * @note Авторизация требуется от аккаунта из белого списка контрактов
  */
 [[eosio::action]] void fund::spreadamount(eosio::name coopname,

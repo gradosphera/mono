@@ -5,7 +5,7 @@
  * @param writeoff_hash Хэш операции списания для авторизации
  * @ingroup public_actions
  * @ingroup public_ledger_actions
- * @anchor ledger_auth
+
  * @note Авторизация требуется от аккаунта: @p soviet
  */
 [[eosio::action]]

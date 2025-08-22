@@ -12,7 +12,7 @@
  * @param decision Документ решения
  * @ingroup public_actions
  * @ingroup public_meet_actions
- * @anchor meet_newgdecision
+
  * @note Авторизация требуется от аккаунта: @p meet
  */
 void meet::newgdecision(NEWGDECISION_SIGNATURE) {

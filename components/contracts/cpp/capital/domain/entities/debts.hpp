@@ -12,7 +12,7 @@ namespace Capital::Debts {
  * @brief Статусы долгов
  * @ingroup public_consts
  * @ingroup public_capital_consts
- * @anchor capital_debt_status
+
  */
 namespace Status {
   constexpr name CREATED = "created"_n;      ///< Долг создан
@@ -25,7 +25,7 @@ namespace Status {
  * @brief Таблица долгов хранит данные о ссудах участников проектов.
  * @ingroup public_tables
  * @ingroup public_capital_tables
- * @anchor capital_debt
+
  * @par Область памяти (scope): coopname
  * @par Имя таблицы (table): debts 
  */

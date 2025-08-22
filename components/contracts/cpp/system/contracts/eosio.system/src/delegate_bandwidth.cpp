@@ -27,7 +27,7 @@ namespace eosiosystem {
     * @param bytes Точное количество байт RAM для покупки
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_buyrambytes
+
     * @note Авторизация требуется от аккаунта: @p payer
     */
    void system_contract::buyrambytes( const name& payer, const name& receiver, uint32_t bytes ) {
@@ -51,7 +51,7 @@ namespace eosiosystem {
     * @param quant Количество токенов для покупки RAM
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_buyram
+
     * @note Авторизация требуется от аккаунта: @p payer
     * @deprecated Используется аренда RAM с помощью метода powerup (@ref system_powerup)
     */
@@ -121,7 +121,7 @@ namespace eosiosystem {
    * @param bytes Количество байт RAM для продажи
    * @ingroup public_actions
    * @ingroup public_system_actions
-   * @anchor system_sellram
+
    * @note Авторизация требуется от аккаунта: @p eosio.system
    */
   void system_contract::sellram( const name& account, int64_t bytes ) {
@@ -381,7 +381,7 @@ namespace eosiosystem {
     * @param transfer Флаг передачи владения токенами
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_delegatebw
+
     * @note Авторизация требуется от аккаунта: @p from
     */
    void system_contract::delegatebw( const name& from, const name& receiver,
@@ -412,7 +412,7 @@ namespace eosiosystem {
     * @param unstake_cpu_quantity Количество токенов для отмены стейкинга CPU
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_undelegatebw
+
     * @note Авторизация требуется от аккаунта: @p from
     */
    void system_contract::undelegatebw( const name& from, const name& receiver,
@@ -441,7 +441,7 @@ namespace eosiosystem {
     * @param owner Аккаунт, который запрашивает возврат токенов
     * @ingroup public_actions
     * @ingroup public_system_actions
-    * @anchor system_refund
+
     * @note Авторизация требуется от аккаунта: @p owner
     */
    void system_contract::refund( const name& owner ) {

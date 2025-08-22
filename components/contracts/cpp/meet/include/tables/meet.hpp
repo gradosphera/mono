@@ -4,7 +4,7 @@ namespace Meet {
   * @brief Структура действий, хранящая данные о выполненных операциях.
   * @ingroup public_tables
   * @ingroup public_meet_tables
-  * @anchor meet_meet
+
   * @par Область памяти (scope): coopname
   * @par Имя таблицы (table): meets
   */

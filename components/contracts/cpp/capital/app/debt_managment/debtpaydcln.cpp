@@ -8,7 +8,7 @@
  * @param reason Причина отклонения оплаты долга
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_debtpaydcln
+
  * @note Авторизация требуется от аккаунта: @p _gateway
  */
 void capital::debtpaydcln(name coopname, checksum256 debt_hash, std::string reason) {

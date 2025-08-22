@@ -8,7 +8,7 @@
  * @param project_hash Хеш проекта для открытия
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_openproject
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::openproject(name coopname, checksum256 project_hash) {

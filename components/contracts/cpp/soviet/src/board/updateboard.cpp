@@ -10,7 +10,7 @@
  * @param description Описание совета
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_updateboard
+
  * @note Авторизация требуется от аккаунта: @p username
  */
 void soviet::updateboard(eosio::name coopname, eosio::name username, uint64_t board_id, std::vector<board_member> members, std::string name, std::string description){

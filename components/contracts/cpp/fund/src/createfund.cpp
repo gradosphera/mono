@@ -11,7 +11,7 @@
  * @param percent Процент отчислений (только для фондов накопления, 0 для списания)
  * @ingroup public_actions
  * @ingroup public_fund_actions
- * @anchor fund_createfund
+
  * @note Авторизация требуется от аккаунта: @p username (председатель совета)
  */
 // type: accumulation, expend

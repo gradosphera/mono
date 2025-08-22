@@ -9,7 +9,7 @@
 *
 * @note Таблица хранится в области памяти с именем аккаунта: @p _soviet и скоупом: @p coopname
 * @par Имя таблицы (table): programs
-* @anchor soviet_program
+
 */
 struct [[eosio::table, eosio::contract(SOVIET)]] program {
   uint64_t id; ///< Уникальный идентификатор программы

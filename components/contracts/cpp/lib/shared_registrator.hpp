@@ -19,7 +19,7 @@ namespace Registrator {
    * @brief Структура кандидата на вступление (устаревшая версия).
    * @ingroup public_tables
    * @ingroup public_registrator_tables
-   * @anchor registrator_candidate_legacy
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): candidates
    */
@@ -47,7 +47,7 @@ namespace Registrator {
    * @brief Структура кандидата на вступление.
    * @ingroup public_tables
    * @ingroup public_registrator_tables
-   * @anchor registrator_candidate
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): candidates2
    */

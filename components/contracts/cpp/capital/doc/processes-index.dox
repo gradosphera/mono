@@ -1,3 +1,4 @@
+#if 0
 /**
  * @page capital_processes_index Процессы контракта Capital
  * @ingroup public_capital_processes
@@ -153,3 +154,4 @@
  * @see public_capital_actions
  * @see public_capital_tables
  */
+#endif

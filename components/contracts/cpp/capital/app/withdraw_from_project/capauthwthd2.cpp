@@ -11,7 +11,7 @@
  * @param authorization Документ авторизации совета
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_capauthwthd2
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::capauthwthd2(name coopname, checksum256 withdraw_hash, document2 authorization) {

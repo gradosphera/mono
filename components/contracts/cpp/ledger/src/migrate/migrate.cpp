@@ -3,7 +3,7 @@
  * Переносит данные из контракта fund в счета ledger
  * @ingroup public_actions
  * @ingroup public_ledger_actions
- * @anchor ledger_migrate
+
  * @note Авторизация требуется от аккаунта: @p ledger
  */
 void ledger::migrate(){

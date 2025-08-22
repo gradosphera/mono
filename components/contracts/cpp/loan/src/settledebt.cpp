@@ -7,7 +7,7 @@
  * @param quantity Сумма погашения
  * @ingroup public_actions
  * @ingroup public_loan_actions
- * @anchor loan_settledebt
+
  * @note Авторизация требуется от аккаунта: @p contracts_whitelist
  */
 void loan::settledebt(name coopname, name username, checksum256 debt_hash, asset quantity) {

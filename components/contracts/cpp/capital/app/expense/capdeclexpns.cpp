@@ -8,7 +8,7 @@
  * @param expense_hash Хеш расхода для отклонения
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_capdeclexpns
+
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
 void capital::capdeclexpns(eosio::name coopname, checksum256 expense_hash) {

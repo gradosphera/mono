@@ -9,7 +9,7 @@
  * @param position_title Название должности нового члена персонала
  * @ingroup public_actions
  * @ingroup public_soviet_actions
- * @anchor soviet_addstaff
+
  * @note Авторизация требуется от аккаунта: @p chairman
  */
 void soviet::addstaff(eosio::name coopname, eosio::name chairman, eosio::name username, std::vector<right> rights, std::string position_title) {

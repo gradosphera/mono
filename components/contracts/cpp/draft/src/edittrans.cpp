@@ -7,7 +7,7 @@
  * @param data Новые данные перевода
  * @ingroup public_actions
  * @ingroup public_draft_actions
- * @anchor draft_edittrans
+
  * @note Авторизация требуется от аккаунта: @p scope или @p _system
  */
 void draft::edittrans(eosio::name scope, eosio::name username, uint64_t translate_id, std::string data) {

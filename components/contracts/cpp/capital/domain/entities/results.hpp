@@ -8,7 +8,7 @@ namespace Capital::Results {
    * @brief Константы статусов результата
    * @ingroup public_consts
    * @ingroup public_capital_consts
-   * @anchor capital_result_status
+
    */
    namespace Status {
     const eosio::name CREATED = "created"_n;     ///< Заявление подано
@@ -26,7 +26,7 @@ namespace Capital {
    * @brief Таблица результатов хранит данные о результатах участников проектов.
    * @ingroup public_tables
    * @ingroup public_capital_tables
-   * @anchor capital_result
+
    * @par Область памяти (scope): coopname
    * @par Имя таблицы (table): results 
    */

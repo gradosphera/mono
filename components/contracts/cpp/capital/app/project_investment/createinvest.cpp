@@ -16,7 +16,7 @@
  * @param statement Заявление об инвестиции
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_createinvest
+
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::createinvest(name coopname, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document2 statement) {
