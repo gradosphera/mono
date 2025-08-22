@@ -11,7 +11,6 @@
 // Регистрация вкладчика (приём договора УХД)
 #include "app/register_contributor/approvereg.cpp"
 #include "app/register_contributor/declinereg.cpp"
-#include "app/register_contributor/regcontrib.cpp"
 
 // Конфигурация
 #include "app/managment/setconfig.cpp"
@@ -41,6 +40,7 @@
 #include "app/join_project/signappndx.cpp"
 #include "app/join_project/apprvappndx.cpp"
 #include "app/join_project/dclineappndx.cpp"
+#include "app/join_project/regcontrib.cpp"
 
 // CRPS
 #include "app/crps/rfrshsegment.cpp"
