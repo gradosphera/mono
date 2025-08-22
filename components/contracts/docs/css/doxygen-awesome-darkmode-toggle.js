@@ -96,6 +96,13 @@ class DoxygenAwesomeDarkModeToggle extends HTMLElement {
             document.documentElement.classList.remove("dark-mode")
             document.documentElement.classList.add("light-mode")
         }
+        DoxygenAwesomeDarkModeToggle.updateMermaidTheme(enable)
+    }
+
+    static updateMermaidTheme(isDarkMode) {
+        if (window.mermaid) {           
+          window.location.reload();
+        }
     }
 
     static onSystemPreferenceChanged() {

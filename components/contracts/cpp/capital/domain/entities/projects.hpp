@@ -45,8 +45,9 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
   checksum256 parent_hash; ///< Хэш родительского проекта (если есть)
   
   eosio::name status; ///< Статус проекта
-  
+
   bool is_opened; ///< Открыт ли проект для инвестиций
+  bool is_planed; ///< Запланирован ли проект (установлен план)
   
   // Мастер проекта
   name master; ///< Мастер проекта
@@ -148,7 +149,7 @@ namespace Capital::Projects {
     project_index projects(_capital, coopname.value);    
     
     projects.emplace(coopname, [&](auto& row) {
-      row.id = get_global_id_in_scope(_capital, coopname, "projects"_n); 
+      row.id = get_global_id_in_scope(_capital, coopname, "projects"_n);
       row.status = Capital::Projects::Status::PENDING;
       row.project_hash = project_hash;
       row.parent_hash = parent_hash;
@@ -156,6 +157,7 @@ namespace Capital::Projects {
       row.title = title;
       row.description = description;
       row.meta = meta;
+      row.is_planed = false; // Изначально проект не запланирован
     });
   }
 
@@ -272,6 +274,7 @@ namespace Capital::Projects {
       
       projects.modify(project, coopname, [&](auto &p) {
         p.plan = calculated_plan;
+        p.is_planed = true; // Проект теперь запланирован
       });
   }
 

@@ -1,5 +1,7 @@
 /**
- * @brief Конвертирует сегмент участника в различные типы кошельков
+* @anchor capital_convertsegm
+*
+* @brief Конвертирует сегмент участника в различные типы кошельков
  * Конвертирует сегмент участника в кошелек, капитал и кошелек проекта:
  * - Проверяет статус сегмента (должен быть contributed)
  * - Валидирует актуальность сегмента
@@ -17,7 +19,6 @@
  * @param convert_statement Заявление о конвертации
  * @ingroup public_actions
  * @ingroup public_capital_actions
- * @anchor capital_convertsegm
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::convertsegm(eosio::name coopname, eosio::name username,

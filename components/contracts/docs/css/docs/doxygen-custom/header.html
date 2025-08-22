@@ -30,8 +30,21 @@
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     if (window.mermaid) {
-      mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
-      console.log('success mermaid init')
+      try {
+        // Initialize mermaid with auto theme based on current dark mode state
+        const isDarkMode = document.documentElement.classList.contains('dark-mode');
+        const theme = isDarkMode ? 'dark' : 'neutral';
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: theme,
+          securityLevel: 'loose',
+          fontFamily: 'arial',
+          fontSize: 14
+        });
+        console.log('success mermaid init with theme:', theme);
+      } catch (error) {
+        console.warn('Mermaid initialization error:', error);
+      }
     }
   });
 </script>

@@ -19,6 +19,9 @@ void capital::openproject(name coopname, checksum256 project_hash) {
     
     // Проверяем, что проект еще не открыт
     eosio::check(project.is_opened == false, "Проект уже открыт");
+
+    // Проверяем, что проект запланирован
+    eosio::check(project.is_planed == true, "Проект должен быть запланирован перед открытием для инвестиций");
     
     // Открываем проект
     Capital::Projects::open_project(coopname, project_hash);
