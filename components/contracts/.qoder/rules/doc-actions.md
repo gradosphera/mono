@@ -1,0 +1,43 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+Мне нужно, чтобы ты прошелся по контракту и разнес все действия по группам так, как это сделано в примере. Там:
+- указано краткое описание того что происходит и к чему приводит
+- указаны параметры и их описание
+- указана группа public_actions и public_soviet_actions - для контракта совета, но у тебя может быть другой контракт 
+- указан якорь для ссылок внешних в самом верху и с отступом
+- указана требуемая авторизация
+- если у действия есть проводки по кошельков или фондам - отметить их с помощью тега @post:
+  - Проводки по кошельку Wallet::add_available_funds, add_available_funds, add_blocked_funds, sub_blocked_funds, block_funds, unblock_funds, pay_membership_fee, unpay_membership_fee
+  - Проводки по фондам Ledger::add, sub, transfer, block, unblock, writeoff, writeoffcnsl, add_membership_fee, sub_membership_fee, block_membership_fee, unblock_membership_fee
+- если у действия есть входящий документ - отметить его также с помощью тега @post
+
+Пример:
+/**
+
+ *
+ * @brief Завершение голосования для конкретного участника по методу Водянова.
+ * Рассчитывает полные итоговые суммы участника включая:
+ * - Результаты голосования по Водянову: (сумма голосов + общая сумма распределения) / количество голосующих
+ * - Фиксированные распределения: 61.8% авторских премий равно между авторами, 61.8% создательских премий прямо создателям
+ * Обновляет сегмент участника с итоговыми суммами раздельно по пулам
+ * @param coopname Наименование кооператива
+ * @param username Наименование пользователя-участника голосования
+ * @param project_hash Хеш проекта для которого завершается голосование
+ * @ingroup public_actions
+ * @ingroup public_capital_actions
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
+void capital::calcvotes(name coopname, name username, checksum256 project_hash) {
+    require_auth(coopname);
+    
+    // Получаем проект и проверяем состояние
+    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+    eosio::check(project.status == Capital::Projects::Status::COMPLETED, "Проект не в статусе завершенного голосования");
+   ... и т.д. 
+
+
+ВАЖНО: ВСЕ ДЕЙСТВИЯ НЕОБХОДИМО ДОКУМЕНТИРОВАТЬ В *.cpp файлах, не в .hpp!!!
+ВАЖНО2: ПОСЛЕ ПРЕДЛОЖЕНИЯ @BRIEF ДОЛЖНА БЫТЬ ТОЧКА.

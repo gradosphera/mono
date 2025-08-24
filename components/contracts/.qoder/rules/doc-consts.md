@@ -1,0 +1,6 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+Тебе необходимо добавить все константы контракта в группу public_contractname_consts. 

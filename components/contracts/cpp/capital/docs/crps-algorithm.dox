@@ -1,7 +1,7 @@
 /**
  * @page crps_algorithm Алгоритм CRPS (Cumulative Reward Per Share)
  * @defgroup public_capital_crps_algorithm Алгоритм CRPS
- * @ingroup public_capital_processes
+ * @ingroup public_capital
  *
  * Алгоритм обеспечивает справедливое и эффективное распределение различных типов наград между вкладчиками.
  *

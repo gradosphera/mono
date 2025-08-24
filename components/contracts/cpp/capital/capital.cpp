@@ -37,10 +37,10 @@
 #include "app/plan_project/expandexpnss.cpp"
 
 // Присоединиться к проекту
-#include "app/join_project/signappndx.cpp"
-#include "app/join_project/apprvappndx.cpp"
-#include "app/join_project/dclineappndx.cpp"
-#include "app/join_project/regcontrib.cpp"
+#include "app/project_distribution/join_project/signappndx.cpp"
+#include "app/project_distribution/join_project/apprvappndx.cpp"
+#include "app/project_distribution/join_project/dclineappndx.cpp"
+#include "app/project_distribution/join_project/regcontrib.cpp"
 
 // CRPS
 #include "app/crps/rfrshsegment.cpp"

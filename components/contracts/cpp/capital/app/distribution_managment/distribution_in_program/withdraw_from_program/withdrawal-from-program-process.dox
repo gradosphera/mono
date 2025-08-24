@@ -1,0 +1,79 @@
+/**
+ * @page withdraw_from_program_process Возврат паевого взноса из программы
+ * @defgroup public_capital_withdraw_from_program_process Процесс возврата паевого взноса из программы
+ * @ingroup public_capital_processes
+ *
+ * Процесс возврата накопленных средств участникам из программы капитализации.
+ *
+ * ## Диаграмма процесса
+ *
+ * \htmlonly
+ * <div class="mermaid">
+ * sequenceDiagram
+ *     participant P as Участник
+ *     participant C as Capital Contract
+ *     participant S as Soviet Contract
+ *     participant W as Wallet Contract
+ *
+ *     P->>C: 1. createwthd3(заявление на возврат из программы)
+ *     Note over C: Списание из capital_available
+ *     C->>S: 2. soviet::create_approval
+ *
+ *     S->>C: 3. approvewthd3(одобрение)
+ *     C->>S: 4. soviet::create_agenda
+ *
+ *     alt Авторизация
+ *         S->>C: 5. capauthwthd3()
+ *         C->>W: 6. _capital_program → _wallet_program
+ *     else Отклонение
+ *         S->>C: 5. capdeclwthd3()
+ *         Note over C: Возврат суммы в capital_available
+ *     end
+ * </div>
+ * \endhtmlonly
+ *
+ * ## Создание заявления на возврат из программы
+ * @ref capital::createwthd3 "Создание заявления на возврат из программы"
+ *
+ * Участник подаёт заявление на возврат накопленных доходов из программы капитализации:
+ *
+ * **Входящий документ:** Заявление на возврат из программы "Благорост"
+ *
+ * **Предварительные условия:**
+ * - Участник имеет положительный capital_available
+ * - Запрашиваемая сумма ≤ capital_available
+ * - Участник подписал соглашение об условиях ЦПП
+ *
+ * **Механика возврата:**
+ * - Выполняется refresh_contributor_program_rewards
+ * - Проверяется достаточность capital_available
+ * - process_contributor_program_withdrawal уменьшает capital_available
+ * - Увеличивается state.program_membership_distributed
+ *
+ * **Результат:** Заявление создано, средства зарезервированы для возврата
+ *
+ * ## Авторизация возврата из программы
+ * @ref capital::capauthwthd3 "Авторизация возврата из программы"
+ *
+ * После одобрения председателем и авторизации советом выполняется возврат:
+ *
+ * **Проводки по кошелькам:**
+ * @post Wallet::sub_blocked_funds(_capital_program, amount) - списание из программы "Благорост"
+ * @post Wallet::add_available_funds(_wallet_program, amount) - зачисление в Цифровой Кошелёк
+ *
+ * **Результат:** Средства переведены участнику в Цифровой Кошелёк
+ *
+ * ## Отклонение возврата из программы
+ * @ref capital::capdeclwthd3 "Отклонение возврата из программы"
+ *
+ * При отклонении заявления:
+ * - Сумма возвращается в capital_available участника
+ * - Откатываются изменения в state.program_membership_*
+ * - Заявление удаляется из системы
+ *
+ * ## Связанные процессы
+ *
+ * - @ref public_capital_fundprog_process "Регистрация программных взносов" - создаёт основу для возвратов
+ * - @ref public_capital_refresh_program_process "Обновление кошелька программы" - определяет доли для возвратов
+ * - @ref public_capital_conversion_process "Конвертация взносов" - формирует капитал программы
+ */

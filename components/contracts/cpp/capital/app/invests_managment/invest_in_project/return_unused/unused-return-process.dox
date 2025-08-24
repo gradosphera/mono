@@ -1,0 +1,93 @@
+/**
+ * @page unused_return_process Возврат неиспользованных инвестиций
+ * @defgroup public_capital_unused_return_process Процесс возврата неиспользованных инвестиций
+ * @ingroup public_capital_processes
+ * 
+ * Процесс возврата инвесторам неиспользованной части их инвестиций после
+ * завершения проекта. Обеспечивает справедливое распределение средств
+ * на основе фактического использования инвестиций.
+ * 
+ * ## Математические основы расчёта
+ * 
+ * ### Коэффициент использования инвестиций
+ * use_invest_percent = (использованные_средства / полученные_инвестиции) × 100%
+ * 
+ * ### Расчёт возврата для инвестора
+ * - investor_base = investor_amount × (use_invest_percent / 100) - использованная часть
+ * - unused_amount = investor_amount - investor_base - неиспользованная часть
+ * 
+ * ## Диаграмма процесса
+ * 
+ * \htmlonly
+ * <div class="mermaid">
+ * sequenceDiagram
+ *     participant I as Инвестор
+ *     participant C as Capital Contract
+ *     participant W as Wallet Contract
+ *     
+ *     Note over C: Проект завершён и закрыт
+ *     Note over C: use_invest_percent < 100%
+ *     
+ *     I->>C: 1. returnunused(возврат неиспользованных средств)
+ *     
+ *     Note over C: Расчёт неиспользованной части:
+ *     Note over C: investor_base = investor_amount × use_invest_percent
+ *     Note over C: unused_amount = investor_amount - investor_base
+ *     
+ *     C->>W: 2. sub_blocked_funds(_source_program, unused_amount)
+ *     C->>W: 3. add_available_funds(_wallet_program, unused_amount)
+ *     
+ *     Note over C: Обновление статистики проекта:
+ *     Note over C: total_returned_investments += unused_amount
+ *     Note over C: investor_amount = investor_base (в сегменте)
+ * </div>
+ * \endhtmlonly
+ * 
+ * ## Пошаговое описание
+ * 
+ * ### Предварительные условия для возврата
+ * 
+ * **Состояние проекта:**
+ * - Проект в статусе `closed`
+ * - Все работы завершены и результаты сданы
+ * - Рассчитан итоговый use_invest_percent
+ * - use_invest_percent < 100% (есть неиспользованные средства)
+ * 
+ * **Состояние инвестора:**
+ * - Инвестор вложил средства в данный проект
+ * - investor_amount > 0 в сегменте проекта
+ * - Ещё не получал возврат по данному проекту
+ * 
+ * ### Шаг 1: Инициация возврата неиспользованных средств
+ * @ref capital::returnunused "Возврат неиспользованных инвестиций"
+ * 
+ * Инвестор или уполномоченное лицо инициирует возврат неиспользованных средств:
+ * 
+ * **Автоматический расчёт возврата:**
+ * 
+ * @post Расчёт использованной части инвестиции:
+ * investor_base = investor_amount × (use_invest_percent / 100)
+ * 
+ * @post Расчёт неиспользованной части:
+ * unused_amount = investor_amount - investor_base
+ * 
+ * **Проводки по кошелькам:**
+ * @post Wallet::sub_blocked_funds(_source_program, unused_amount) - списание из договора УХД
+ * @post Wallet::add_available_funds(_wallet_program, unused_amount) - возврат в Цифровой Кошелёк
+ * 
+ * **Обновления проекта:**
+ * @post fact.total_returned_investments += unused_amount - учёт возвращённых средств
+ * 
+ * **Обновления сегмента инвестора:**
+ * @post investor_amount = investor_base - фиксация фактически использованной суммы
+ * @post Пересчёт total_segment_base_cost с учётом скорректированной инвестиции
+ * 
+ * **Результат:** Неиспользованные средства возвращены инвестору
+ * 
+ * ## Связанные процессы
+ * 
+ * - @ref public_capital_lifecycle_process "Жизненный цикл проекта" - возврат в закрытых проектах
+ * - @ref public_capital_project_investment_process "Инвестиции в проект" - исходные инвестиции
+ * - @ref public_capital_result_process "Приём результата" - завершение перед возвратом
+ * - @ref public_capital_conversion_process "Конвертация взносов" - использует скорректированные суммы
+ */

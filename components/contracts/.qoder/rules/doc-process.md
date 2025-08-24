@@ -1,0 +1,37 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+На основе предоставленной тебе информации необходимо создать страницы или страницу с описанием процессов контракта, создав новую группу @defgroup public_<contract>_<process>_process добавив их в общую группу @ingroup public_<contract>_proccesses
+
+Каждый процесс должен включать:
+- Человеко-читаемое название по своему бизнес-смыслу
+- Диаграмму последовательности действий mermaid
+- Пошаговое описание происходящего в процессе с обоснованием зачем это нужно
+- Каждый шаг - это одно действие в смарт-контракте, на которое необходимо ссылаться через @ref <наименование якоря> "заголовок ссылки". 
+- На каждом шаге, если таковое есть в самом действии или в вызываемых им функциях, необходимо дополнительно отмечать с помощью тегов @post:
+  - Проводки по кошельку Wallet::add_available_funds, add_available_funds, add_blocked_funds, sub_blocked_funds, block_funds, unblock_funds, pay_membership_fee, unpay_membership_fee
+  - Проводки по фондам Ledger::add, sub, transfer, block, unblock, writeoff, writeoffcnsl, add_membership_fee, sub_membership_fee, block_membership_fee, unblock_membership_fee
+  - Передаваемые на вход документы
+- При необходимости делай ссылки на таблицы и действия через @ref <contract>::<something>
+Пример оформления диаграммы
+\htmlonly
+<div class="mermaid">
+  graph sequence
+    ...
+</div>
+\endhtmlonly
+*/
+
+Пример оформления процесса
+/**
+ * @page registration_process Регистрация вкладчиков и договоров УХД
+ * @defgroup public_capital_registration_process Процесс регистрации вкладчиков
+ * @ingroup public_capital_processes
+ * 
+ * Процесс приёма договора УХД от пайщика, фиксации его статуса как вкладчика 
+ * и обеспечения технической возможности участвовать в проектах и программе капитализации.
+ * 
+ * ## Назначение процесса
+ * 
