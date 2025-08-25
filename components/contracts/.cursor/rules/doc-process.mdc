@@ -26,7 +26,7 @@ alwaysApply: false
 
 Пример оформления процесса
 /**
- * @page registration_process Регистрация вкладчиков и договоров УХД
+
  * @defgroup public_capital_registration_process Процесс регистрации вкладчиков
  * @ingroup public_capital_processes
  * 

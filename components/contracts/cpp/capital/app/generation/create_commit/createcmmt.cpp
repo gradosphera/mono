@@ -50,8 +50,9 @@ void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256
   // Вычисляем фактическое изменение сумм генерации
   auto delta_amounts = Capital::Core::Generation::calculate_fact_generation_amounts(contributor -> rate_per_hour, creator_hours);
   
-  // Создаем коммит и отправляем на approve
-  Capital::Commits::create_commit_with_approve(
+  // Создаем коммит без отправки на аппрув председателю
+  // Одобрение осуществляется мастером проекта через approvecmmt
+  Capital::Commits::create_commit(
     coopname,
     username,
     project_hash,

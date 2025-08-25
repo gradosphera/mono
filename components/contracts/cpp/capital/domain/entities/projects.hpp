@@ -48,6 +48,7 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
 
   bool is_opened; ///< Открыт ли проект для инвестиций
   bool is_planed; ///< Запланирован ли проект (установлен план)
+  bool can_convert_to_project; ///< Разрешена ли конвертация в кошелек данного проекта
   
   // Мастер проекта
   name master; ///< Мастер проекта
@@ -143,8 +144,9 @@ namespace Capital::Projects {
    * @param title Название проекта  
    * @param description Описание проекта
    * @param meta Метаданные проекта
+   * @param can_convert_to_project Разрешена ли конвертация в кошелек проекта
    */
-  inline void create_project(eosio::name coopname, const checksum256 &project_hash, const checksum256 &parent_hash, const std::string &title, const std::string &description, const std::string &meta) {
+  inline void create_project(eosio::name coopname, const checksum256 &project_hash, const checksum256 &parent_hash, const std::string &title, const std::string &description, const std::string &meta, bool can_convert_to_project) {
     
     project_index projects(_capital, coopname.value);    
     
@@ -158,6 +160,7 @@ namespace Capital::Projects {
       row.description = description;
       row.meta = meta;
       row.is_planed = false; // Изначально проект не запланирован
+      row.can_convert_to_project = can_convert_to_project; // Разрешена ли конвертация в кошелек проекта
     });
   }
 

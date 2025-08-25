@@ -1,21 +1,30 @@
 /**
  * @brief Одобряет коммит в проект
- * Одобряет коммит и обрабатывает все связанные операции:
+ * Одобряет коммит от мастера проекта и обрабатывает все связанные операции:
+ * - Проверяет что одобрение идет от мастера проекта
  * - Получает коммит
  * - Добавляет коммит к проекту
  * - Обновляет или создает сегмент создателя
  * - Распределяет авторские средства между всеми авторами проекта
  * - Удаляет коммит после обработки
  * @param coopname Наименование кооператива
+ * @param master Мастер проекта, одобряющий коммит
  * @param commit_hash Хеш коммита для одобрения
  * @param empty_document Пустой документ (не используется)
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p _soviet
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
-void capital::approvecmmt(eosio::name coopname, checksum256 commit_hash, document2 empty_document) {
-  require_auth(_soviet);
+void capital::approvecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash, document2 empty_document) {
+  require_auth(coopname);
+
+  // Получаем коммит
+  auto commit = Capital::Commits::get_commit_or_fail(coopname, commit_hash);
+  
+  // Получаем проект и проверяем что мастер является мастером этого проекта
+  auto project = Capital::Projects::get_project_or_fail(coopname, commit.project_hash);
+  eosio::check(project.master == master, "Только мастер проекта может одобрять коммиты");
 
   // Получаем коммит
   auto commit = Capital::Commits::get_commit_or_fail(coopname, commit_hash);

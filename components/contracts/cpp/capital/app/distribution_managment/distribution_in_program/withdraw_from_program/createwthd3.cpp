@@ -2,8 +2,8 @@
  * @brief Создает заявку на возврат из программы капитализации
  * Создает заявку на возврат средств из программы капитализации:
  * - Проверяет подлинность заявления о возврате
- * - Валидирует активность основного договора УХД
- * - Обновляет CRPS contributor
+ * - Проверяет наличие баланса в программе капитализации
+ * - Обновляет CRPS через capital_wallet
  * - Проверяет уникальность заявки по хешу
  * - Обрабатывает вывод средств через core функцию
  * - Создает заявку на возврат
@@ -22,13 +22,11 @@ void capital::createwthd3(name coopname, name username, checksum256 withdraw_has
 
   verify_document_or_fail(return_statement);
 
-  // Проверяем основной договор УХД
-  auto exist_contributor = Capital::Contributors::get_contributor(coopname, username);
-  eosio::check(exist_contributor.has_value(), "Пайщик не подписывал основной договор УХД");
-  eosio::check(exist_contributor->status == Capital::Contributors::Status::ACTIVE, 
-               "Основной договор УХД не активен");
+  // Проверяем, что у пользователя есть баланс в программе капитализации
+  eosio::asset share_balance = Capital::get_capital_user_share_balance(coopname, username);
+  eosio::check(share_balance.amount > 0, "Пользователь не имеет баланса в программе капитализации");
 
-  // Сначала обновляем CRPS contributor
+  // Сначала обновляем CRPS через capital_wallet
   Capital::Core::refresh_contributor_program_rewards(coopname, username);
 
   // Проверяем что заявка не существует

@@ -1,3 +1,8 @@
+dl.post {
+  margin-left: 25px !important;
+  padding: 10px !important;
+}
+
 .anchor {
   position: relative; 
   top: -200px;

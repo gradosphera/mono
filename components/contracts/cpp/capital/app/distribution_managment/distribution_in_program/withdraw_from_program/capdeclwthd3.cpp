@@ -2,7 +2,7 @@
  * @brief Отклоняет возврат из программы капитализации советом
  * Отклоняет возврат из программы капитализации советом и возвращает средства:
  * - Получает объект возврата
- * - Возвращает средства обратно в capital_available contributor
+ * - Возвращает средства обратно в capital_available через capital_wallet
  * - Обновляет глобальное состояние (возвращает средства в доступные)
  * - Удаляет заявку
  * @param coopname Наименование кооператива
@@ -24,16 +24,16 @@ void capital::capdeclwthd3(name coopname, checksum256 withdraw_hash, std::string
   
   eosio::check(withdraw != program_withdraws.end(), "Объект возврата не найден");
 
-  // Возвращаем средства обратно в capital_available contributor
-  auto contributor_opt = Capital::Contributors::get_contributor(coopname, withdraw->username);
-  if (contributor_opt.has_value()) {
-    Capital::contributor_index contributors(_capital, coopname.value);
-    auto contributor_it = contributors.get_index<"byusername"_n>();
-    auto contributor = contributor_it.find(withdraw->username.value);
+  // Возвращаем средства обратно в capital_available через capital_wallet
+  auto capital_wallet_opt = Capital::get_capital_wallet_by_username(coopname, withdraw->username);
+  if (capital_wallet_opt.has_value()) {
+    Capital::capital_wallets_index capital_wallets(_capital, coopname.value);
+    auto idx = capital_wallets.get_index<"byusername"_n>();
+    auto wallet_itr = idx.find(withdraw->username.value);
     
-    if (contributor != contributor_it.end()) {
-      contributor_it.modify(contributor, _capital, [&](auto &c) {
-        c.capital_available += withdraw->amount;
+    if (wallet_itr != idx.end()) {
+      idx.modify(wallet_itr, _capital, [&](auto &w) {
+        w.capital_available += withdraw->amount;
       });
       
       // Обновляем глобальное состояние - возвращаем средства

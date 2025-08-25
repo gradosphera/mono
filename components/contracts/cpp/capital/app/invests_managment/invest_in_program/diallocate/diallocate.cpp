@@ -15,9 +15,9 @@
 void capital::diallocate(eosio::name coopname, checksum256 project_hash) {
   require_auth(coopname);
 
-  // Проверяем, что проект закрыт
+  // Проверяем, что проект выполнен
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-  eosio::check(project.status == Capital::Projects::Status::CLOSED, "Проект должен быть закрыт");
+  eosio::check(project.status == Capital::Projects::Status::COMPLETED, "Проект должен быть выполнен");
 
   // Проверяем есть ли неиспользованные программные средства
   eosio::check(project.fact.program_invest_pool.amount > 0, "Нет программных средств для возврата");

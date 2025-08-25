@@ -65,9 +65,6 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
                  "Сумма взноса должна быть >= суммы долга");
   }
 
-  // Рассчитываем базовую сумму после погашения долга
-  eosio::asset available_base_after_pay_debt = segment.total_segment_base_cost - segment.debt_amount;
-
   // Создаем объект результата
   Capital::Results::create_result_for_participant(coopname, project_hash, username, result_hash, contribution_amount, debt_amount, statement);
 
@@ -79,7 +76,7 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   // Обновляем сегмент после принятия результата и пересчитываем доли - объединенная операция
   // для избежания двойного обновления одной записи
   Capital::Segments::update_segment_after_result_contribution_with_shares(coopname, project_hash, username,
-                                                                       available_base_after_pay_debt, debt_amount);
+                                                                       debt_amount);
 
   // Обновляем накопительные показатели контрибьютора на основе его ролей в сегменте
   Capital::Contributors::update_contributor_ratings_from_segment(coopname, segment);

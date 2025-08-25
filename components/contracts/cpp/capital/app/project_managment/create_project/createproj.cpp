@@ -10,6 +10,7 @@
  * @param title Название проекта
  * @param description Описание проекта
  * @param meta Дополнительные метаданные проекта
+ * @param can_convert_to_project Разрешена ли конвертация в кошелек данного проекта
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
@@ -21,7 +22,8 @@ void capital::createproj (
   checksum256 parent_hash,
   std::string title, 
   std::string description,
-  std::string meta
+  std::string meta,
+  bool can_convert_to_project
 ) {
     require_auth(coopname);
     // Проверяем что проекта с таким хэшем еще не существует
@@ -31,5 +33,5 @@ void capital::createproj (
     // Валидируем parent_hash согласно правилам проектов
     Capital::Projects::validate_parent_hash(coopname, parent_hash);
         
-    Capital::Projects::create_project(coopname, project_hash, parent_hash, title, description, meta);
+    Capital::Projects::create_project(coopname, project_hash, parent_hash, title, description, meta, can_convert_to_project);
 }

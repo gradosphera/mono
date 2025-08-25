@@ -18,9 +18,9 @@
 void capital::returnunused(name coopname, checksum256 project_hash, name username) {
   require_auth(coopname);
 
-  // Проверяем, что проект закрыт
+  // Проверяем, что проект выполнен
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-  eosio::check(project.status == Capital::Projects::Status::CLOSED, "Проект должен быть закрыт");
+  eosio::check(project.status == Capital::Projects::Status::COMPLETED, "Проект должен быть выполнен");
 
   // Получаем сегмент инвестора
   auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент инвестора не найден");

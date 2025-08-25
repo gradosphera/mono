@@ -800,7 +800,6 @@ export interface ISegment {
   total_segment_base_cost: IAsset
   total_segment_bonus_cost: IAsset
   total_segment_cost: IAsset
-  available_base_after_pay_debt: IAsset
   converted_to_wallet: IAsset
   converted_to_capital: IAsset
   converted_to_project: IAsset

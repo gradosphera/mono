@@ -1,6 +1,30 @@
 namespace Capital {
 
   /**
+   * @brief Кошелек программы капитализации для учёта CRPS и доступных средств от членских взносов
+   * @ingroup public_tables
+   * @ingroup public_capital_tables
+   * 
+   * @par Область памяти (scope): coopname
+   * @par Имя таблицы (table): capwallets
+   */
+  struct [[eosio::table, eosio::contract(CAPITAL)]] capital_wallet {
+    uint64_t id;                                    ///< ID кошелька (внутренний ключ)
+    eosio::name coopname;                           ///< Имя кооператива
+    eosio::name username;                           ///< Имя пользователя
+    int64_t last_program_crps = 0;                  ///< Последнее значение программной CRPS для членских взносов
+    eosio::asset capital_available = asset(0, _root_govern_symbol); ///< Доступные средства от членских взносов для вывода
+    
+    uint64_t primary_key() const { return id; }     ///< Первичный ключ (1)
+    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (2)
+  };
+  
+  typedef eosio::multi_index<
+    "capwallets"_n, capital_wallet,
+    indexed_by<"byusername"_n, const_mem_fun<capital_wallet, uint64_t, &capital_wallet::by_username>>
+  > capital_wallets_index;
+
+  /**
    * @brief Таблица кошельков проектов хранит данные о долях участников в проектах для получения членских взносов.
    * @ingroup public_tables
    * @ingroup public_capital_tables
@@ -33,6 +57,8 @@ namespace Capital {
     indexed_by<"byprojuser"_n, const_mem_fun<project_wallet, uint128_t, &project_wallet::by_project_user>>
   > project_wallets_index;
 
+namespace Wallet {
+  
   inline std::optional<progwallet> get_capital_wallet(eosio::name coopname, eosio::name username) {
     
     auto program_id = get_program_id(_capital_program);
@@ -47,6 +73,59 @@ namespace Capital {
     
     return *capital_wallet;
     
+  }
+
+  /**
+   * @brief Получает кошелек капитализации по имени пользователя
+   */
+  inline std::optional<capital_wallet> get_capital_wallet_by_username(eosio::name coopname, eosio::name username) {
+    capital_wallets_index capital_wallets(_capital, coopname.value);
+    auto idx = capital_wallets.get_index<"byusername"_n>();
+    
+    auto itr = idx.find(username.value);
+    if (itr == idx.end()) {
+      return std::nullopt;
+    }
+    
+    return *itr;
+  }
+
+  /**
+   * @brief Получает кошелек капитализации или падает с ошибкой
+   */
+  inline capital_wallet get_capital_wallet_or_fail(eosio::name coopname, eosio::name username, const char* msg = "Кошелек капитализации не найден") {
+    auto wallet_opt = get_capital_wallet_by_username(coopname, username);
+    eosio::check(wallet_opt.has_value(), msg);
+    return *wallet_opt;
+  }
+  
+  /**
+   * @brief Создает или обновляет кошелек капитализации
+   */
+  inline void upsert_capital_wallet(eosio::name coopname, eosio::name username, 
+                                   int64_t last_program_crps = 0, 
+                                   const eosio::asset &capital_available = asset(0, _root_govern_symbol),
+                                   eosio::name payer = _capital) {
+    capital_wallets_index capital_wallets(_capital, coopname.value);
+    auto idx = capital_wallets.get_index<"byusername"_n>();
+    
+    auto itr = idx.find(username.value);
+    if (itr == idx.end()) {
+      // Создаем новый кошелек
+      capital_wallets.emplace(payer, [&](auto &w) {
+        w.id = get_global_id_in_scope(_capital, coopname, "capwallets"_n);
+        w.coopname = coopname;
+        w.username = username;
+        w.last_program_crps = last_program_crps;
+        w.capital_available = capital_available;
+      });
+    } else {
+      // Обновляем существующий
+      idx.modify(itr, payer, [&](auto &w) {
+        if (last_program_crps != 0) w.last_program_crps = last_program_crps;
+        if (capital_available.amount != 0) w.capital_available += capital_available;
+      });
+    }
   }
 
   /**
@@ -101,6 +180,6 @@ namespace Capital {
     }
   }
   
-
+} //namespace Capital::Wallet
 } // namespace Capital
 

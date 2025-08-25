@@ -101,14 +101,14 @@ inline void delete_commit(eosio::name coopname, const checksum256 &hash) {
 }
 
 /**
- * @brief Создает коммит и отправляет его на утверждение.
+ * @brief Создает коммит без отправки на утверждение.
  * @param coopname Имя кооператива.
  * @param username Имя пользователя.
  * @param project_hash Хэш проекта.
  * @param commit_hash Хэш коммита.
  * @param calculated_fact Рассчитанные показатели генерации.
  */
-inline void create_commit_with_approve(
+inline void create_commit(
   eosio::name coopname,
   eosio::name username,
   checksum256 project_hash,
@@ -130,23 +130,6 @@ inline void create_commit_with_approve(
     c.amounts = calculated_fact;
     c.created_at = current_time_point();
   });
-
-  // Создаем пустой документ
-  auto empty_doc = document2{};
-  
-  // Отправляем на approve председателю
-  ::Soviet::create_approval(
-    _capital,
-    coopname,
-    username,
-    empty_doc,
-    Names::Capital::CREATE_COMMIT,
-    commit_hash,
-    _capital,
-    Names::Capital::APPROVE_COMMIT,
-    Names::Capital::DECLINE_COMMIT,
-    std::string("")
-  );
 }
 
 } // namespace Capital::Commits

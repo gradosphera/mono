@@ -1,11 +1,12 @@
 /**
 
 *
-* @brief Конвертирует сегмент участника в различные типы кошельков
+ * @brief Конвертирует сегмент участника в различные типы кошельков
  * Конвертирует сегмент участника в кошелек, капитал и кошелек проекта:
  * - Проверяет статус сегмента (должен быть contributed)
  * - Валидирует актуальность сегмента
- * - Проверяет наличие средств для конвертации
+ * - Проверяет что долг уже погашен после pushrslt
+ * - Проверяет наличие средств для конвертации (с учетом погашенного долга)
  * - Валидирует корректность сумм конвертации
  * - Выполняет операции с балансами (кошелек, капитал, проект)
  * - Обновляет сегмент и доли проекта
@@ -39,40 +40,60 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   Capital::Segments::check_segment_is_updated(coopname, project_hash, username,
     "Сегмент не обновлен. Выполните rfrshsegment перед конвертацией");
   
+  // === ФАЗА 1: БАЗОВЫЕ ПРОВЕРКИ ===
   Wallet::validate_asset(wallet_amount);
   Wallet::validate_asset(capital_amount);
   Wallet::validate_asset(project_amount);
   
   // Проверяем, что у пользователя есть что конвертировать
-  eosio::asset total_available = segment.available_base_after_pay_debt + segment.total_segment_bonus_cost;
-  eosio::check(total_available.amount > 0, 
-               "У участника нет средств для конвертации (базовая сумма после долга и бонусы равны нулю)");
+  eosio::check(segment.total_segment_cost.amount > 0, 
+               "У участника нет средств для конвертации (общая стоимость сегмента равна нулю)");
   
-  // Рассчитываем базовую сумму без имущественных взносов (они не могут конвертироваться в кошелек)
-  eosio::asset base_without_property = segment.creator_base + segment.author_base + 
-                                      segment.coordinator_base + segment.investor_base;
-  eosio::asset available_for_wallet_project = base_without_property - segment.debt_amount;
+  // === ФАЗА 2: РАСЧЕТ ДОСТУПНЫХ СУММ ===
   
-  // Проверяем, что общая сумма конвертации в кошелек и проект не превышает доступную сумму из инвестиций
-  eosio::asset total_wallet_project = wallet_amount + project_amount;
-  eosio::check(total_wallet_project <= segment.provisional_amount,
-               "Общая сумма конвертации в кошелек и проект превышает доступную сумму из инвестиционных средств проекта");
+  // Проверяем что долг уже был погашен после pushrslt
+  eosio::check(segment.debt_settled >= segment.debt_amount, 
+               "Долг не был погашен. Сначала внесите результат через pushrslt");
   
-  // 1. Общая сумма конвертации в кошелек и проект не должна превышать базовую сумму БЕЗ имущественных взносов
-  eosio::check(total_wallet_project <= available_for_wallet_project, 
-               "Общая сумма конвертации в кошелек и проект превышает доступную базовую стоимость (имущественные взносы не могут идти в кошелек)");
+  // Суммы доступные для конвертации в проект (все базовые суммы всех ролей)
+  eosio::asset available_for_project = segment.creator_base + segment.author_base + 
+                                      segment.coordinator_base + segment.investor_base + segment.property_base;
   
-  // 2. Проверяем что capital_amount рассчитан правильно
-  // В капитализацию: ВСЕ бонусы + остаток базовой стоимости (не сконвертированный в кошелек и проект)
-  eosio::asset remaining_base = segment.available_base_after_pay_debt - total_wallet_project;
-  eosio::asset expected_capital = segment.total_segment_bonus_cost + remaining_base;
-  eosio::check(capital_amount == expected_capital, 
-               "Сумма конвертации в капитал должна равняться: все бонусы + остаток доступной базовой стоимости");
+  // Суммы доступные для конвертации в кошелек (только creator_base + author_base + coordinator_base)
+  // уменьшенные на погашенный долг, но не больше provisional_amount
+  eosio::asset base_for_wallet = segment.creator_base + segment.author_base + segment.coordinator_base;
+  eosio::asset wallet_base_after_debt = base_for_wallet - segment.debt_amount;
   
-  // 3. Проверяем что общая сумма конвертации соответствует доступным средствам
+  // Долг не может превышать базовые суммы создателя/автора/координатора
+  eosio::check(wallet_base_after_debt.amount >= 0, 
+               "Долг превышает базовые суммы создателя/автора/координатора");
+  
+  eosio::asset available_for_wallet = (wallet_base_after_debt < segment.provisional_amount) ? 
+                                     wallet_base_after_debt : segment.provisional_amount;
+  
+  // Все взносы должны конвертироваться в капитализацию, если не идут в проект или кошелек
+  // Вычитаем погашенный долг из общей стоимости сегмента
+  eosio::asset total_segment_available = segment.total_segment_cost - segment.debt_amount;
+  
+  // === ФАЗА 3: ПРОВЕРКИ ОГРАНИЧЕНИЙ ПО НАПРАВЛЕНИЯМ ===
+  
+  // Проверка 3.1: Ограничения конвертации в проект
+  eosio::check(project_amount <= available_for_project, 
+               "Сумма конвертации в проект превышает доступные базовые суммы всех ролей (creator_base + author_base + coordinator_base + investor_base + property_base)");
+  
+  // Проверка 3.2: Ограничения конвертации в кошелек
+  eosio::check(wallet_amount <= available_for_wallet, 
+               "Сумма конвертации в кошелек превышает доступные суммы (только creator_base + author_base + coordinator_base и не больше provisional_amount)");
+  
+  // Проверка 3.3: Ограничения конвертации в капитализацию
   eosio::asset total_convert = wallet_amount + capital_amount + project_amount;
-  eosio::check(total_convert == total_available, 
-               "Общая сумма конвертации должна равняться всем доступным средствам участника");
+  eosio::check(capital_amount == (total_segment_available - wallet_amount - project_amount), 
+               "Сумма конвертации в капитал должна равняться: total_segment_cost - wallet_amount - project_amount");
+  
+  // === ФАЗА 4: ФИНАЛЬНАЯ ПРОВЕРКА ===
+  // Проверяем что общая сумма конвертации соответствует всем взносам сегмента
+  eosio::check(total_convert == total_segment_available, 
+               "Общая сумма конвертации должна равняться общей стоимости сегмента (total_segment_cost)");
   
   
   // Выполняем операции с балансами
@@ -104,6 +125,11 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
       target_project_hash = current_project.parent_hash;
     }
     
+    // Проверяем разрешение конвертации в целевой проект
+    auto target_project = Capital::Projects::get_project_or_fail(coopname, target_project_hash);
+    eosio::check(target_project.can_convert_to_project, 
+                 "Конвертация в кошелек проекта запрещена для данного проекта");
+    
     // Конвертация в кошелек проекта - создаем или обновляем кошелек проекта
     Wallet::sub_blocked_funds(_capital, coopname, username, project_amount, _source_program,
                              Capital::Memo::get_convert_segment_to_project_wallet_memo(convert_hash));
@@ -122,11 +148,11 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   Capital::Segments::update_segment_conversion(coopname, project_hash, username, 
                                             wallet_amount, capital_amount, project_amount);
   
-  
-  // Уменьшаем общие доли проекта на сумму конвертации в кошелек и капитал (но НЕ в кошелек проекта)
-  eosio::asset project_shares_reduction = wallet_amount + capital_amount;
-  Capital::Projects::subtract_project_shares(coopname, project_hash, project_shares_reduction);
-  
 }
 
-// Конвертация в кошелек реализована с учетом ограничений по инвестиционным средствам через provisional_amount
+// Конвертация реализована с учетом погашенного долга:
+// - В проект: только базовые суммы всех ролей (creator_base + author_base + coordinator_base + investor_base + property_base)
+// - В кошелек: (creator_base + author_base + coordinator_base) - debt_amount, не больше provisional_amount
+// - В капитализацию: все взносы минус погашенный долг минус конвертированные в проект и кошелек
+// - total_segment_available = total_segment_cost - debt_amount (долг уже погашен в pushrslt)
+// - Долг погашается только за счет базовых сумм создателя/автора/координатора

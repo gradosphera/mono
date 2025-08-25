@@ -31,4 +31,12 @@ void capital::setmaster(name coopname, checksum256 project_hash, name master) {
     
     // Назначаем мастера проекта
     Capital::Projects::set_master(coopname, project -> id, master);
+    
+    // Проверяем лимит количества авторов
+    uint64_t current_authors_count = Capital::Segments::count_project_authors(coopname, project_hash);
+    eosio::check(current_authors_count < MAX_PROJECT_AUTHORS, "Превышено максимальное количество соавторов в проекте");
+    
+    // Добавляем мастера как соавтора в проект
+    Capital::Core::upsert_author_segment(coopname, project_hash, master);
+
 } 

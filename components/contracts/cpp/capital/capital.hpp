@@ -79,7 +79,8 @@ public:
       checksum256 parent_hash,
       std::string title, 
       std::string description,
-      std::string meta
+      std::string meta,
+      bool can_convert_to_project
     );
     
     // Открыть проект на приём инвестиций
@@ -105,10 +106,6 @@ public:
     // Проголосовать по методу Водянова
     [[eosio::action]]
     void submitvote(name coopname, name voter, checksum256 project_hash, std::vector<Capital::vote_input> votes);
-    
-    // Закрыть проект
-    [[eosio::action]]
-    void closeproject(name coopname, checksum256 project_hash);
     
     // Удалить проект
     [[eosio::action]]
@@ -176,9 +173,9 @@ public:
     [[eosio::action]]
     void createcmmt(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours);
     [[eosio::action]]
-    void approvecmmt(eosio::name coopname, checksum256 commit_hash, document2 empty_document);
+    void approvecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash, document2 empty_document);
     [[eosio::action]]
-    void declinecmmt(eosio::name coopname, checksum256 commit_hash, std::string reason);
+    void declinecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash, std::string reason);
     
     // Проектные имущественные взносы
     [[eosio::action]]

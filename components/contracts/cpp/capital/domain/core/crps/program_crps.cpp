@@ -29,63 +29,59 @@ namespace Capital::Core {
    * @brief Обновляет программную CRPS для contributor
    */
   void refresh_contributor_program_rewards(eosio::name coopname, eosio::name username) {
-    // Проверяем что contributor существует
-    auto contributor_opt = Capital::Contributors::get_contributor(coopname, username);
-    if (!contributor_opt.has_value()) {
-      return; // Contributor не найден
-    }
-
-    Capital::contributor_index contributors(_capital, coopname.value);
-    auto contributor_it = contributors.get_index<"byusername"_n>();
-    auto contributor = contributor_it.find(username.value);
+    // Проверяем, что у пользователя есть баланс в программе капитализации
+    eosio::asset share_balance = get_capital_user_share_balance(coopname, username);
+    
+    eosio::check(share_balance.amount > 0, "Нет баланса в программе")
+    
+    // Получаем или создаём capital_wallet
+    auto capital_wallet_opt = Capital::Wallets::get_capital_wallet_by_username(coopname, username);
     
     auto state = Capital::get_global_state(coopname);
     
     // Считаем дельту CRPS
     int64_t current_crps = state.program_membership_cumulative_reward_per_share;
-    int64_t last_crps = contributor->reward_per_share_last;
+    int64_t last_crps = capital_wallet_opt.has_value() ? capital_wallet_opt->last_program_crps : 0;
     int64_t delta = current_crps - last_crps;
 
-    eosio::asset share_balance = get_capital_user_share_balance(coopname, username);
-    
     if (delta > 0 && share_balance.amount > 0) {
       // Начисляем вознаграждение
       eosio::asset reward_amount = eosio::asset(share_balance.amount * delta, _root_govern_symbol);
       
-      contributor_it.modify(contributor, _capital, [&](auto &c) {
-        c.capital_available += reward_amount;              
-        c.reward_per_share_last = current_crps;
-      });
+      if (capital_wallet_opt.has_value()) {
+        // Обновляем существующий кошелёк через функцию сущности
+        Capital::Wallets::update_capital_wallet(coopname, username, current_crps, reward_amount);
+      } else {
+        // Создаём новый кошелёк
+        Capital::Wallets::upsert_capital_wallet(coopname, username, current_crps, reward_amount);
+      }
     } else if (delta > 0) {
       // Обновляем last_crps даже если нет долей
-      contributor_it.modify(contributor, _capital, [&](auto &c) {
-        c.reward_per_share_last = current_crps;
-      });
+      if (capital_wallet_opt.has_value()) {
+        Capital::Wallets::update_capital_wallet(coopname, username, current_crps);
+      } else {
+        // Создаём новый кошелёк с обновлённым CRPS
+        Capital::Wallets::upsert_capital_wallet(coopname, username, current_crps);
+      }
     }
   }
 
   /**
-   * @brief Обрабатывает вывод средств из программы через contributor
+   * @brief Обрабатывает вывод средств из программы через capital_wallet
    */
   void process_contributor_program_withdrawal(eosio::name coopname, eosio::name username, 
                                              asset amount, const std::string& memo) {
-    // Проверяем что contributor существует
-    auto contributor_opt = Capital::Contributors::get_contributor(coopname, username);
-    eosio::check(contributor_opt.has_value(), "Участник не найден");
+    // Проверяем что capital_wallet существует
+    auto capital_wallet_opt = Capital::Wallets::get_capital_wallet_by_username(coopname, username);
+    eosio::check(capital_wallet_opt.has_value(), "Кошелёк капитализации не найден");
 
     // Проверяем достаточность накопленных средств
-    eosio::check(contributor_opt->capital_available >= amount, 
+    eosio::check(capital_wallet_opt->capital_available >= amount, 
                  "Недостаточно накопленных средств для создания запроса на возврат");
 
-    Capital::contributor_index contributors(_capital, coopname.value);
-    auto contributor_it = contributors.get_index<"byusername"_n>();
-    auto contributor = contributor_it.find(username.value);
-
-    // Обновление данных contributor - ТОЛЬКО уменьшаем capital_available, доли остаются неизменными!
-    contributor_it.modify(contributor, _capital, [&](auto &c) {
-      c.capital_available -= amount;
-      // НЕ трогаем доли пайщика - они остаются неизменными
-    });
+    // Обновление данных capital_wallet через функцию сущности
+    eosio::asset negative_amount = eosio::asset(-amount.amount, amount.symbol);
+    Capital::Wallets::update_capital_wallet(coopname, username, 0, negative_amount);
 
     // Обновляем глобальное состояние - увеличиваем распределенную сумму
     auto state = Capital::get_global_state(coopname);
