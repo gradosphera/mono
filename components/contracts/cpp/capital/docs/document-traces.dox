@@ -29,9 +29,6 @@
 @ref public_capital_conversion_process
 @include{doc} conversion-process-docs.dox
 
-@ref public_capital_project_property_process
-@include{doc} project-property-docs.dox
-
 @ref public_capital_debt_process
 @include{doc} debt-process-docs.dox
 
