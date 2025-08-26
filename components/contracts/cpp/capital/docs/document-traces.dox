@@ -1,0 +1,41 @@
+/**
+ * @defgroup docs_overview Документы по процессам
+ * @ingroup public_capital
+ 
+@ref public_capital_registration_process
+@include{doc} registration-docs.dox
+
+@ref public_capital_project_creation_process
+@include{doc} project-creation-docs.dox
+
+@ref public_capital_joining_process
+@include{doc} joining-process-docs.dox
+
+@ref public_capital_project_investment_process
+@include{doc} project-investment-docs.dox
+
+@ref public_capital_program_investment_process
+@include{doc} program-investment-docs.dox
+
+@ref public_capital_program_property_process
+@include{doc} program-property-docs.dox
+
+@ref public_capital_unused_return_process
+@include{doc} unused-return-docs.dox
+
+@ref public_capital_result_process
+@include{doc} result-submission-docs.dox
+
+@ref public_capital_conversion_process
+@include{doc} conversion-process-docs.dox
+
+@ref public_capital_project_property_process
+@include{doc} project-property-docs.dox
+
+@ref public_capital_debt_process
+@include{doc} debt-process-docs.dox
+
+@ref public_capital_create_expense_process
+@include{doc} create-expense-docs.dox
+
+*/

@@ -33,10 +33,20 @@ void capital::signact2(eosio::name coopname, eosio::name username, checksum256 r
   // Проверяем документ
   verify_document_or_fail(act, { exist_result->username, username });
 
-  
   // Устанавливаем второй акт
   Capital::Results::set_result_act2(coopname, result_hash, act);
 
+  // Начисляем заблокированные средства в кошелек программы генерации
+  Wallet::add_blocked_funds(_capital, coopname, result.username, result.total_amount - result.debt_amount, _source_program, memo);
+  
+  // Увеличиваем паевой фонд за вычетом ссуммы долга
+  Ledger::add(_capital, coopname, Ledger::accounts::SHARE_FUND, result.total_amount - result.debt_amount, memo);
+  
+  // Уменьшаем сумму выданных ссуд кооператива
+  if (result.debt_amount.amount > 0){
+    Ledger::sub(_capital, coopname, Ledger::accounts::LONG_TERM_LOANS, result.debt_amount, memo);
+  }
+  
   //TODO: линковать документ акта
   
   // Обновляем статус сегмента

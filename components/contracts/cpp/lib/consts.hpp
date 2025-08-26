@@ -76,10 +76,11 @@ static constexpr eosio::name _product_return_action = "productrtrn"_n;
 static constexpr eosio::name _result_action = "result"_n;
 
 //program_types
-static constexpr eosio::name _wallet_program = "wallet"_n;
-static constexpr eosio::name _marketplace_program = "marketplace"_n;
-static constexpr eosio::name _source_program = "source"_n;
-static constexpr eosio::name _capital_program = "capital"_n;
+static constexpr eosio::name _wallet_program = "wallet"_n; ///< Главный Кошелёк
+static constexpr eosio::name _marketplace_program = "marketplace"_n; ///< Кошелёк программы "Маркетплейс"
+
+static constexpr eosio::name _source_program = "source"_n; ///< Кошелёк для генерации по договору УХД
+static constexpr eosio::name _capital_program = "capital"_n; ///< Кошелёк программы "Капитализация"
 
 
 static const std::set<eosio::name> soviet_actions = {

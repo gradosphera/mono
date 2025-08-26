@@ -78,8 +78,16 @@
  * @post разблокировка средств инвестора в главном кошельке
  * 
  * <b>Результат:</b> Средства возвращаются инвестору
+
+ ## Эффекты процесса
+ @include{doc} createpinv-effect.dox
+
+ ## Документы процесса
+  @include{doc} program-investment-docs.dox
+ 
  * 
  * ## Связанные процессы
  * 
  * - @ref public_capital_project_investment_process "Инвестиции в проект" - альтернативный способ финансирования
+
  */

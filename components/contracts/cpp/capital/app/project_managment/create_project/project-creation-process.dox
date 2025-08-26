@@ -2,7 +2,6 @@
 
  @defgroup public_capital_project_creation_process Создать проект
  @ingroup public_capital_processes
-
  @pre Идея проекта прошла отбор в банке идей и готова к планированию
  
  Процесс создания нового проекта в системе кооператива для последующей
@@ -42,5 +41,8 @@
  @post создается запись проекта в таблице projects
  @post статус проекта устанавливается в CREATED
  @post проект готов к переходу в фазу планирования
+ 
+ ## Документы процесса
+  @include{doc} project-creation-docs.dox
  
  */

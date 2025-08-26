@@ -116,10 +116,18 @@
  * @post увеличение суммы возвращенных инвестиций проекта
  * @post корректировка фактически использованной суммы инвестиций
  * 
+ ## Эффекты процесса
+ @include{doc} createinvest-effect.dox
+
+ ## Документы процесса
+  @include{doc} project-investment-docs.dox
+ *
+ * 
  * ## Связанные процессы
  * 
  * - @ref public_capital_planning_process "Планирование проекта" - план определяет потребность в инвестициях
  * - @ref public_capital_debt_process "Управление ссудами" - инвестиции обеспечивают ссуды
  * - @ref public_capital_unused_return_process "Возврат неиспользованных средств" - возврат неиспользованной части
  * - @ref public_capital_result_process "Приём результата" - инвестиции участвуют в капитализации
+
  */

@@ -111,6 +111,12 @@ sequenceDiagram
 @post Сумма использованных средств проекта обновлена
 @post Запись расхода удалена из системы
 
+## Эффекты процесса
+@include{doc} exppaycnfrm-effect.dox
+
+## Документы процесса
+ @include{doc} create-expense-docs.dox
+
 ## Связанные процессы
 
 - @ref public_capital_fundproj_process "Регистрация членских взносов в проект"

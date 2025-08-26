@@ -122,10 +122,10 @@ namespace Loan {
   }
   
   /**
-   * @brief Создает долговое обязательство через интерфейс.
+   * @brief Создает долговое обязательство пайщика.
    * @param calling_contract Контракт, вызывающий создание долга
    * @param coopname Имя кооператива
-   * @param username Имя пользователя-должника
+   * @param username Имя пользователя
    * @param debt_hash Хэш долгового обязательства
    * @param repaid_at Срок погашения долга
    * @param quantity Сумма долга
@@ -148,10 +148,10 @@ namespace Loan {
   }
   
   /**
-   * @brief Погашает долговое обязательство через интерфейс.
+   * @brief Погашает долговое обязательство пайщика.
    * @param calling_contract Контракт, вызывающий погашение долга
    * @param coopname Имя кооператива
-   * @param username Имя пользователя-должника
+   * @param username Имя пользователя
    * @param debt_hash Хэш долгового обязательства
    * @param quantity Сумма погашения
    */

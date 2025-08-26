@@ -1,0 +1,84 @@
+/**
+ * @defgroup deltas_overview Эффекты по процессам
+ * @ingroup public_capital
+  
+@ref public_capital_result_process
+
+➕🏛️ Ledger::add на счёт Ledger::accounts::SHARE_FUND на сумму паевого взноса за вычетом ссуды\n
+➕🔒 Wallet::add_blocked_funds на кошельке @ref _source_program на сумму паевого взноса за вычетом ссуды\n
+➖🏛️ Ledger::sub со счёта Ledger::accounts::LONG_TERM_LOANS на сумму погашаемой ссуды\n
+🫳 Loan::settle_debt на сумму погашаемой ссуды
+
+<hr>
+
+@ref public_capital_debt_process
+
+➕🏛️ Ledger::add на счёт Ledger::accounts::LONG_TERM_LOANS на сумму выданной ссуды\n
+🫴 Loan::create_debt на сумму выданной ссуды
+
+<hr>
+
+@ref public_capital_create_expense_process
+
+➕🏛️ Ledger::add на счёт Ledger::accounts::ECONOMIC_ACTIVITY_FUND на сумму расхода\n
+
+<hr>
+
+@ref public_capital_program_property_process
+
+➕🏛️ Ledger::add на счёт Ledger::accounts::SHARE_FUND на сумму паевого взноса\n
+➕🔒 Wallet::add_blocked_funds на кошельке @ref _capital_program на сумму паевого взноса\n
+
+<hr>
+
+@ref public_capital_conversion_process
+
+➖🔒 Wallet::sub_blocked_funds на кошельке @ref _source_program на сумму паевого взноса за вычетом суммы конвертации в кошелёк проекта\n
+➕🔓 Wallet::add_available_funds на кошельке @ref _wallet_program на сумму конвертации в главный кошелёк\n
+➕🔒 Wallet::add_blocked_funds на кошельке @ref _source_program на сумму конвертации в кошелёк программы\n
+
+<hr>
+
+@ref public_capital_project_investment_process
+
+🔒 Wallet::block_funds на кошельке @ref _wallet_program на сумму инвестиций\n
+➖🔒 Wallet::sub_blocked_funds на кошельке @ref _wallet_program на сумму инвестиций\n
+➕🔒 Wallet::add_blocked_funds на кошельке @ref _source_program на сумму инвестиций\n
+
+<hr>
+
+@ref public_capital_program_investment_process
+
+🔒 Wallet::block_funds на кошельке @ref _wallet_program на сумму инвестиций\n
+➖🔒 Wallet::sub_blocked_funds на кошельке @ref _capital_program на сумму инвестиций\n
+➕🔒 Wallet::add_blocked_funds на кошельке @ref _capital_program на сумму инвестиций\n
+
+<hr>
+
+@ref public_capital_fundprog_process
+
+➖🏛️ Ledger::sub со счёта Ledger::accounts::TARGET_RECEIPTS на сумму фондирования
+
+<hr>
+
+@ref public_capital_fundproj_process
+
+➖🏛️ Ledger::sub со счёта Ledger::accounts::TARGET_RECEIPTS на сумму фондирования
+
+<hr>
+
+@ref public_capital_withdraw_from_project_process
+
+➖🔒 Wallet::sub_blocked_funds на кошельке @ref _capital_program на сумму возврата\n
+➕🔓 Wallet::add_available_funds на кошельке @ref _wallet_program на сумму возврата
+
+<hr>
+
+@ref public_capital_withdraw_from_program_process
+
+➖🔒 Wallet::sub_blocked_funds на кошельке @ref _capital_program на сумму возврата\n
+➕🔓 Wallet::add_available_funds на кошельке @ref _wallet_program на сумму возврата
+
+<hr>
+
+*/

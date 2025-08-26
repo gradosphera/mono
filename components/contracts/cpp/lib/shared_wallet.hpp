@@ -91,6 +91,9 @@ public:
     check(amount.amount > 0, "Amount must be positive");
   }
   
+  /**
+   * @brief Добавляет доступные средства на кошелёк пользователя
+   */
   static void add_available_funds(eosio::name contract, eosio::name coopname, eosio::name username, eosio::asset amount, eosio::name program_type, std::string memo) {
       auto program = get_program_or_fail(coopname, get_program_id(program_type));
 
@@ -103,6 +106,9 @@ public:
 
   }
   
+  /**
+   * @brief Уменьшает доступные средства на кошельке пользователя
+   */
   static void sub_available_funds(eosio::name contract, eosio::name coopname, eosio::name username, eosio::asset amount, eosio::name program_type, std::string memo) {
     auto program = get_program_or_fail(coopname, get_program_id(program_type));
 
@@ -114,6 +120,9 @@ public:
     ).send();
   }
 
+  /**
+   * @brief Добавляет заблокированные средства в баланс кошелька пользователя
+   */
   static void add_blocked_funds(eosio::name contract, eosio::name coopname, eosio::name username, eosio::asset amount, eosio::name program_type, std::string memo) {
       auto program = get_program_or_fail(coopname, get_program_id(program_type));
 
@@ -132,6 +141,9 @@ public:
       ).send();
   }
   
+  /**
+   * @brief Уменьшает заблокированные средства кошелька пользователя
+   */
   static void sub_blocked_funds(eosio::name contract, eosio::name coopname, eosio::name username, eosio::asset amount, eosio::name program_type, std::string memo) {
     auto program = get_program_or_fail(coopname, get_program_id(program_type));
 
@@ -149,7 +161,10 @@ public:
         std::make_tuple(coopname, username, program.id, amount, false, memo)
     ).send();
   }
-  
+
+  /**
+   * @brief Блокирует средства на кошельке пользователя
+   */
   static void block_funds(eosio::name contract, eosio::name coopname, eosio::name username, eosio::asset amount, eosio::name program_type, std::string memo){
     auto program = get_program_or_fail(coopname, get_program_id(program_type));
 
@@ -160,7 +175,10 @@ public:
         std::make_tuple(coopname, username, program.id, amount, memo)
     ).send();
   }
-  
+
+  /**
+   * @brief Разблокирует средства на кошельке пользователя
+   */
   static void unblock_funds(eosio::name contract, eosio::name coopname, eosio::name username, eosio::asset amount, eosio::name program_type, std::string memo){
     auto program = get_program_or_fail(coopname, get_program_id(program_type));
 
@@ -172,6 +190,9 @@ public:
     ).send();
   }
 
+  /**
+   * @brief Оплачивает членский взнос с кошелька пользователя
+   */
   static void pay_membership_fee(name contract, name coopname, name username, eosio::asset amount, uint64_t program_id, std::string memo) {
     auto program = get_program_or_fail(coopname, program_id);
 
@@ -184,6 +205,9 @@ public:
     
   }
   
+  /**
+   * @brief Отменяет оплату членского взноса с кошелька пользователя
+   */
   static void unpay_membership_fee(name contract, name coopname, name username, eosio::asset amount, uint64_t program_id, std::string memo) {
     auto program = get_program_or_fail(coopname, program_id);
 

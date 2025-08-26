@@ -1,6 +1,6 @@
 /**
 
- * @defgroup public_capital_fundprog_process Регистрация членских взносов по программе
+ * @defgroup public_capital_fundprog_process Фондирование членских взносов на программу
  * @ingroup public_capital_processes
  *
  * Кооператив может направлять накопленные членские взносы на распределение между всеми вкладчиками программы "Капитализация" в целях обеспечения возвратов их вкладов.
@@ -45,7 +45,10 @@
  *
  * @post Обновление показателя CRPS для программы капитализации
  *
- * ## Связанные процессы
+ * ## Эффекты процесса
+ @include{doc} fundprog-effect.dox
+
+ ## Связанные процессы
  * - @ref public_capital_refresh_program_process "Обновление кошелька программы"
  * - @ref public_capital_withdraw_from_program_process "Возврат паевого взноса из программы"
  */

@@ -296,6 +296,14 @@ inline std::string Ledger::get_account_name_by_id(uint64_t account_id) {
   return "Неизвестный счет";
 }
 
+/**
+ * @brief Добавить средства на счёт кооператива
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param account_id Идентификатор счёта
+ * @param quantity Сумма для добавления
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::add(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
@@ -305,6 +313,14 @@ inline void Ledger::add(eosio::name actor, eosio::name coopname, uint64_t accoun
   ).send();
 }
 
+/**
+ * @brief Уменьшить средства на счёте кооператива
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param account_id Идентификатор счёта
+ * @param quantity Сумма для вычитания
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::sub(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
@@ -314,11 +330,28 @@ inline void Ledger::sub(eosio::name actor, eosio::name coopname, uint64_t accoun
   ).send();
 }
 
+/**
+ * @brief Перевести средства между счетами кооператива
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param from_account_id Идентификатор счёта отправителя
+ * @param to_account_id Идентификатор счёта получателя
+ * @param quantity Сумма перевода
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::transfer(eosio::name actor, eosio::name coopname, uint64_t from_account_id, uint64_t to_account_id, eosio::asset quantity, std::string comment) {
   add(actor, coopname, from_account_id, quantity, comment);
   sub(actor, coopname, to_account_id, quantity, comment);
 }
 
+/**
+ * @brief Заблокировать средства на счёте кооператива
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param account_id Идентификатор счёта
+ * @param quantity Сумма для блокировки
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::block(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
@@ -328,6 +361,14 @@ inline void Ledger::block(eosio::name actor, eosio::name coopname, uint64_t acco
   ).send();
 }
 
+/**
+ * @brief Разблокировать средства на счёте кооператива
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param account_id Идентификатор счёта
+ * @param quantity Сумма для разблокировки
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::unblock(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
@@ -337,6 +378,14 @@ inline void Ledger::unblock(eosio::name actor, eosio::name coopname, uint64_t ac
   ).send();
 }
 
+/**
+ * @brief Списать средства со счёта кооператива
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param account_id Идентификатор счёта
+ * @param quantity Сумма для списания
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::writeoff(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
@@ -346,6 +395,14 @@ inline void Ledger::writeoff(eosio::name actor, eosio::name coopname, uint64_t a
   ).send();
 }
 
+/**
+ * @brief Списать средства со счёта кооператива
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param account_id Идентификатор счёта
+ * @param quantity Сумма для списания
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::writeoffcnsl(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
@@ -355,18 +412,46 @@ inline void Ledger::writeoffcnsl(eosio::name actor, eosio::name coopname, uint64
   ).send();
 }
 
+/**
+ * @brief Добавить членский взнос на счёт поступлений
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param quantity Сумма для добавления
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::add_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
   add(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
 }
 
+/**
+ * @brief Вычесть членский взнос со счёта поступлений
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param quantity Сумма для вычитания
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::sub_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
   sub(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
 }
 
+/**
+ * @brief Заблокировать членский взнос на счёте поступлений
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param quantity Сумма для блокировки
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::block_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
   block(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
 }
 
+/**
+ * @brief Разблокировать членский взнос на счёте поступлений
+ * @param actor Аккаунт, выполняющий действие
+ * @param coopname Название кооператива
+ * @param quantity Сумма для разблокировки
+ * @param comment Комментарий к операции
+ */
 inline void Ledger::unblock_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
   unblock(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
 }

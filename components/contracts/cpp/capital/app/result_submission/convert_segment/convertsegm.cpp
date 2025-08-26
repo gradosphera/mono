@@ -95,21 +95,18 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   eosio::check(total_convert == total_segment_available, 
                "Общая сумма конвертации должна равняться общей стоимости сегмента (total_segment_cost)");
   
-  
+  Wallet::sub_blocked_funds(_capital, coopname, username, total_convert - project_amount, _source_program, 
+                             Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
+    
   // Выполняем операции с балансами
   if (wallet_amount.amount > 0) {
     // Конвертация в кошелек
-
-    Wallet::sub_blocked_funds(_capital, coopname, username, wallet_amount, _source_program, 
-                             Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
     Wallet::add_available_funds(_capital, coopname, username, wallet_amount, _wallet_program,
                                Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
   }
   
   if (capital_amount.amount > 0) {
     // Конвертация в капитал
-    Wallet::sub_blocked_funds(_capital, coopname, username, capital_amount, _source_program,
-                             Capital::Memo::get_convert_segment_to_capital_memo(convert_hash));
     Wallet::add_blocked_funds(_capital, coopname, username, capital_amount, _capital_program,
                              Capital::Memo::get_convert_segment_to_capital_memo(convert_hash));
   }
@@ -129,10 +126,6 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
     auto target_project = Capital::Projects::get_project_or_fail(coopname, target_project_hash);
     eosio::check(target_project.can_convert_to_project, 
                  "Конвертация в кошелек проекта запрещена для данного проекта");
-    
-    // Конвертация в кошелек проекта - создаем или обновляем кошелек проекта
-    Wallet::sub_blocked_funds(_capital, coopname, username, project_amount, _source_program,
-                             Capital::Memo::get_convert_segment_to_project_wallet_memo(convert_hash));
     
     // Создаем или обновляем кошелек целевого проекта с долями участника
     Capital::upsert_project_wallet(coopname, target_project_hash, username, project_amount);

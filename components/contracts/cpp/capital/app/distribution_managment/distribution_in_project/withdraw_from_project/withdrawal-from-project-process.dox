@@ -89,6 +89,9 @@ sequenceDiagram
 - Сумма возвращается в кошелек вкладчика в проекте
 - Заявление удаляется из системы
 
+## Эффекты процесса
+@include{doc} createwthd2-effect.dox
+
 ## Связанные процессы
 
 - @ref public_capital_fundproj_process "Регистрация членских взносов в проект"
