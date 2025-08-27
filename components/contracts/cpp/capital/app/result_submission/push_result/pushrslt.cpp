@@ -100,7 +100,8 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
       // Суммируем общую сумму погашенных долгов
       total_debt_to_settle += debt.amount;
     }
-
+    print("total_debt_to_settle: ", total_debt_to_settle.amount);
+    print("debt_amount: ", debt_amount.amount);
     // Проверяем что общая сумма погашенных долгов соответствует заявленной сумме долга
     eosio::check(total_debt_to_settle == debt_amount,
                  "Общая сумма погашенных долгов не соответствует заявленной сумме долга");

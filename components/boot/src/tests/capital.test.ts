@@ -62,12 +62,7 @@ const investAmount2 = 25000
 const investAmount3 = 25000
 
 // Хранение хэшей долгов для каждого пользователя
-const userDebtHashes: { [username: string]: string[] } = {
-  tester1: [],
-  tester2: [],
-  tester3: [],
-  tester4: [],
-}
+let userDebtHashes: { [username: string]: string[] } = {}
 beforeAll(async () => {
   await blockchain.update_pass_instance()
 
@@ -94,6 +89,18 @@ beforeAll(async () => {
   tester5 = generateRandomUsername()
   console.log('tester5: ', tester5)
   await addUser(tester5)
+
+  // Инициализируем массивы хэшей долгов для каждого пользователя
+  userDebtHashes = {
+    [tester1]: [],
+    [tester2]: [],
+    [tester3]: [],
+    [tester4]: [],
+    [tester5]: [],
+    [investor1]: [],
+    [investor2]: [],
+    [investor3]: [],
+  }
 
   investor2 = generateRandomUsername()
   console.log('investor2: ', investor2)
