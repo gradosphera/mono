@@ -57,9 +57,9 @@ namespace Capital {
     indexed_by<"byprojuser"_n, const_mem_fun<project_wallet, uint128_t, &project_wallet::by_project_user>>
   > project_wallets_index;
 
-namespace Wallet {
+namespace Wallets {
   
-  inline std::optional<progwallet> get_capital_wallet(eosio::name coopname, eosio::name username) {
+  inline std::optional<progwallet> get_program_capital_wallet(eosio::name coopname, eosio::name username) {
     
     auto program_id = get_program_id(_capital_program);
     
@@ -102,17 +102,17 @@ namespace Wallet {
   /**
    * @brief Создает или обновляет кошелек капитализации
    */
-  inline void upsert_capital_wallet(eosio::name coopname, eosio::name username, 
-                                   int64_t last_program_crps = 0, 
-                                   const eosio::asset &capital_available = asset(0, _root_govern_symbol),
-                                   eosio::name payer = _capital) {
+  inline void upsert_capital_wallet(eosio::name coopname, 
+                                   eosio::name username, 
+                                   int64_t last_program_crps, 
+                                   eosio::asset capital_available) {
     capital_wallets_index capital_wallets(_capital, coopname.value);
     auto idx = capital_wallets.get_index<"byusername"_n>();
     
     auto itr = idx.find(username.value);
     if (itr == idx.end()) {
       // Создаем новый кошелек
-      capital_wallets.emplace(payer, [&](auto &w) {
+      capital_wallets.emplace(coopname, [&](auto &w) {
         w.id = get_global_id_in_scope(_capital, coopname, "capwallets"_n);
         w.coopname = coopname;
         w.username = username;
@@ -121,7 +121,7 @@ namespace Wallet {
       });
     } else {
       // Обновляем существующий
-      idx.modify(itr, payer, [&](auto &w) {
+      idx.modify(itr, coopname, [&](auto &w) {
         if (last_program_crps != 0) w.last_program_crps = last_program_crps;
         if (capital_available.amount != 0) w.capital_available += capital_available;
       });

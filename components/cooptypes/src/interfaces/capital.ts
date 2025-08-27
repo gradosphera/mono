@@ -11,8 +11,6 @@ export type IUint32 = number
 export type IUint64 = number | string
 export type IFloat64 = number
 
-export type IBPairNameAssetE = IPairNameAsset
-
 export interface IAct1pgprp {
   coopname: IName
   username: IName
@@ -58,8 +56,8 @@ export interface IAppendix {
 
 export interface IApprovecmmt {
   coopname: IName
+  master: IName
   commit_hash: IChecksum256
-  empty_document: IDocument2
 }
 
 export interface IApprovedebt {
@@ -143,6 +141,12 @@ export interface IAuthrslt {
   decision: IDocument2
 }
 
+export interface ICalcvotes {
+  coopname: IName
+  username: IName
+  project_hash: IChecksum256
+}
+
 export interface ICapauthexpns {
   coopname: IName
   expense_hash: IChecksum256
@@ -178,9 +182,12 @@ export interface ICapdeclwthd3 {
   reason: string
 }
 
-export interface ICloseproject {
+export interface ICapitalWallet {
+  id: IUint64
   coopname: IName
-  project_hash: IChecksum256
+  username: IName
+  last_program_crps: IInt64
+  capital_available: IAsset
 }
 
 export interface ICmpltvoting {
@@ -321,6 +328,7 @@ export interface ICreateproj {
   title: string
   description: string
   meta: string
+  can_convert_to_project: boolean
 }
 
 export interface ICreatewthd2 {
@@ -394,6 +402,7 @@ export interface IDeclineapprv {
 
 export interface IDeclinecmmt {
   coopname: IName
+  master: IName
   commit_hash: IChecksum256
   reason: string
 }
@@ -511,12 +520,6 @@ export interface IFactPool {
   total: IAsset
 }
 
-export interface ICalcvotes {
-  coopname: IName
-  username: IName
-  project_hash: IChecksum256
-}
-
 export interface IFundprog {
   coopname: IName
   amount: IAsset
@@ -578,11 +581,6 @@ export interface IMembershipCrps {
 export interface IOpenproject {
   coopname: IName
   project_hash: IChecksum256
-}
-
-export interface IPairNameAsset {
-  first: IName
-  second: IAsset
 }
 
 export interface IPlanPool {
@@ -648,6 +646,8 @@ export interface IProject {
   parent_hash: IChecksum256
   status: IName
   is_opened: boolean
+  is_planed: boolean
+  can_convert_to_project: boolean
   master: IName
   title: string
   description: string
@@ -801,7 +801,6 @@ export interface ISegment {
   total_segment_base_cost: IAsset
   total_segment_bonus_cost: IAsset
   total_segment_cost: IAsset
-  available_base_after_pay_debt: IAsset
   converted_to_wallet: IAsset
   converted_to_capital: IAsset
   converted_to_project: IAsset
@@ -876,11 +875,6 @@ export interface IStartvoting {
   project_hash: IChecksum256
 }
 
-export interface IVoteInput {
-  recipient: IName
-  amount: IAsset
-}
-
 export interface ISubmitvote {
   coopname: IName
   voter: IName
@@ -897,13 +891,19 @@ export interface IVote {
   voted_at: ITimePointSec
 }
 
+export interface IVoteInput {
+  recipient: IName
+  amount: IAsset
+}
+
 export interface IVotingAmounts {
   authors_equal_spread: IAsset
   creators_direct_spread: IAsset
   authors_bonuses_on_voting: IAsset
   creators_bonuses_on_voting: IAsset
   total_voting_pool: IAsset
-  voting_amount: IAsset
+  active_voting_amount: IAsset
+  equal_voting_amount: IAsset
   authors_equal_per_author: IAsset
 }
 

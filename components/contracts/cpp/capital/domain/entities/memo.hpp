@@ -19,6 +19,10 @@ namespace Capital::Memo {
   inline std::string get_result_withdraw_memo(uint64_t contributor_id) {
     return "Зачёт части целевого паевого взноса по договору УХД с ID: " + std::to_string(contributor_id) + " в качестве паевого взноса по программе 'Цифровой Кошелёк'";
   }
+  
+  inline std::string get_push_result_memo(uint64_t contributor_id) {
+    return "Внесение паевого взноса по договору УХД: " + std::to_string(contributor_id);
+  }
 
   inline std::string get_project_withdraw_memo() {
     return "Зачёт части целевого паевого взноса по программе 'Капитализация' в качестве паевого взноса по участию в 'Цифровой Кошелёк'";

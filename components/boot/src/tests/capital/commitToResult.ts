@@ -3,7 +3,7 @@ import { CapitalContract, SovietContract } from 'cooptypes'
 import { getTotalRamUsage } from '../../utils/getTotalRamUsage'
 import { generateRandomSHA256 } from '../../utils/randomHash'
 import { fakeDocument } from '../shared/fakeDocument'
-import { processApprove } from './processApprove'
+import { processMasterApprove } from './processMasterApprove'
 
 export async function commitToResult(
   blockchain: any,
@@ -59,7 +59,6 @@ export async function commitToResult(
   // Создание коммита
   const commitData: CapitalContract.Actions.CreateCommit.ICommit = {
     coopname,
-    application: coopname,
     username: creator,
     project_hash: projectHash,
     commit_hash: commitHash,
@@ -104,9 +103,24 @@ export async function commitToResult(
   expect(blockchainCommit.project_hash).toBe(projectHash)
   expect(blockchainCommit.status).toBe('created')
 
-  // Утверждение коммита
-  console.log(`\n✅ Подтверждение коммита ${commitHash}`)
-  const approveCommitResult = await processApprove(blockchain, coopname, commitHash)
+  // Получение данных проекта для определения мастера
+  const projectData = (await blockchain.getTableRows(
+    CapitalContract.contractName.production,
+    coopname,
+    'projects',
+    1,
+    projectHash,
+    projectHash,
+    3,
+    'sha256',
+  ))[0]
+
+  expect(projectData).toBeDefined()
+  expect(projectData.master).toBeDefined()
+
+  // Утверждение коммита мастером проекта
+  console.log(`\n✅ Подтверждение коммита ${commitHash} мастером ${projectData.master}`)
+  const approveCommitResult = await processMasterApprove(blockchain, coopname, commitHash, projectData.master)
 
   // Проверка утвержденного коммита
   const blockchainEmptyCommit = (await blockchain.getTableRows(

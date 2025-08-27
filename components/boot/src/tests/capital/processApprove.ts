@@ -5,7 +5,7 @@ import { fakeDocument } from '../shared/fakeDocument'
 
 export async function processApprove(blockchain: any, coopname: string, approvalHash: string) {
   fakeDocument.signatures[0].signer = 'ant'
-  
+
   const data: SovietContract.Actions.Approves.ConfirmApprove.IConfirmApprove = {
     coopname,
     approval_hash: approvalHash,

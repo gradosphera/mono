@@ -128,7 +128,7 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
                  "Конвертация в кошелек проекта запрещена для данного проекта");
     
     // Создаем или обновляем кошелек целевого проекта с долями участника
-    Capital::upsert_project_wallet(coopname, target_project_hash, username, project_amount);
+    Capital::Wallets::upsert_project_wallet(coopname, target_project_hash, username, project_amount);
     
     // Добавляем сконвертированные средства в глобальный пул программных инвестиций
     Capital::Core::add_program_investment_funds(coopname, project_amount);

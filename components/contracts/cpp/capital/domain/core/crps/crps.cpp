@@ -130,7 +130,7 @@ namespace Capital::Core {
    */
   void refresh_project_wallet_membership_rewards(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    auto wallet_opt = Capital::get_project_wallet(coopname, project_hash, username);
+    auto wallet_opt = Capital::Wallets::get_project_wallet(coopname, project_hash, username);
     
     if (!wallet_opt.has_value()) {
       return; // Кошелек проекта не найден

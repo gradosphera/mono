@@ -10,13 +10,11 @@
  * @param coopname Наименование кооператива
  * @param master Мастер проекта, одобряющий коммит
  * @param commit_hash Хеш коммита для одобрения
- * @param empty_document Пустой документ (не используется)
  * @ingroup public_actions
  * @ingroup public_capital_actions
-
  * @note Авторизация требуется от аккаунта: @p coopname
  */
-void capital::approvecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash, document2 empty_document) {
+void capital::approvecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash) {
   require_auth(coopname);
 
   // Получаем коммит
@@ -26,9 +24,6 @@ void capital::approvecmmt(eosio::name coopname, eosio::name master, checksum256 
   auto project = Capital::Projects::get_project_or_fail(coopname, commit.project_hash);
   eosio::check(project.master == master, "Только мастер проекта может одобрять коммиты");
 
-  // Получаем коммит
-  auto commit = Capital::Commits::get_commit_or_fail(coopname, commit_hash);
-  
   // Добавляем коммит к проекту
   Capital::Projects::add_commit(coopname, commit.project_hash, commit.amounts);
 

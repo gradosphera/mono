@@ -13,7 +13,7 @@
     require_auth(coopname);
 
     // Проверяем, что у пользователя есть баланс в программе капитализации
-    eosio::asset share_balance = Capital::get_capital_user_share_balance(coopname, username);
+    eosio::asset share_balance = Capital::Core::get_capital_program_user_share_balance(coopname, username);
     eosio::check(share_balance.amount > 0, "Пользователь не имеет баланса в программе капитализации");
 
     // Используем обновлённую core функцию для обновления CRPS через capital_wallet

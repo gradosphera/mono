@@ -32,7 +32,7 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
     auto contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
     
     // Проверяем положительный баланс в программе капитализации
-    eosio::asset user_shares = Capital::Core::get_capital_user_share_balance(coopname, username);
+    eosio::asset user_shares = Capital::Core::get_capital_program_user_share_balance(coopname, username);
     
     Segments::segments_index segments(_capital, coopname.value);
     auto exist_segment = Segments::get_segment(coopname, project_hash, username);
@@ -115,7 +115,7 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
       }
       
       // Обновление capital_contributor_shares на основе текущего баланса
-      eosio::asset capital_balance = Capital::Core::get_capital_user_share_balance(coopname, username);
+      eosio::asset capital_balance = Capital::Core::get_capital_program_user_share_balance(coopname, username);
       
       if (s.capital_contributor_shares != capital_balance) {
         // Корректируем общие доли в проекте

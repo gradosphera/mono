@@ -23,7 +23,7 @@ void capital::createwthd3(name coopname, name username, checksum256 withdraw_has
   verify_document_or_fail(return_statement);
 
   // Проверяем, что у пользователя есть баланс в программе капитализации
-  eosio::asset share_balance = Capital::get_capital_user_share_balance(coopname, username);
+  eosio::asset share_balance = Capital::Core::get_capital_program_user_share_balance(coopname, username);
   eosio::check(share_balance.amount > 0, "Пользователь не имеет баланса в программе капитализации");
 
   // Сначала обновляем CRPS через capital_wallet

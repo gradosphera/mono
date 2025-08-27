@@ -25,7 +25,7 @@ void capital::capdeclwthd3(name coopname, checksum256 withdraw_hash, std::string
   eosio::check(withdraw != program_withdraws.end(), "Объект возврата не найден");
 
   // Возвращаем средства обратно в capital_available через capital_wallet
-  auto capital_wallet_opt = Capital::get_capital_wallet_by_username(coopname, withdraw->username);
+  auto capital_wallet_opt = Capital::Wallets::get_capital_wallet_by_username(coopname, withdraw->username);
   if (capital_wallet_opt.has_value()) {
     Capital::capital_wallets_index capital_wallets(_capital, coopname.value);
     auto idx = capital_wallets.get_index<"byusername"_n>();

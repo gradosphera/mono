@@ -36,14 +36,14 @@ void capital::createwthd2(name coopname, name username, checksum256 project_hash
                "Пайщик не подписывал приложение к договору УХД для данного проекта");
 
   // Проверяем что кошелек проекта существует и обновлен
-  auto project_wallet = Capital::get_project_wallet_or_fail(coopname, project_hash, username, 
+  auto project_wallet = Capital::Wallets::get_project_wallet_or_fail(coopname, project_hash, username, 
                                                            "Кошелек проекта не найден. Необходимо сначала сконвертировать сегмент в кошелек проекта");
 
   // Обновляем кошелек проекта перед проверкой
   Capital::Core::refresh_project_wallet_membership_rewards(coopname, project_hash, username);
   
   // Получаем обновленный кошелек проекта
-  auto updated_wallet = Capital::get_project_wallet_or_fail(coopname, project_hash, username, 
+  auto updated_wallet = Capital::Wallets::get_project_wallet_or_fail(coopname, project_hash, username, 
                                                           "Кошелек проекта не найден");
 
   // Проверяем достаточность накопленных средств от членских взносов

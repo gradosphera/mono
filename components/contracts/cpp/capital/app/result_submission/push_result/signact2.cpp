@@ -26,32 +26,35 @@ void capital::signact2(eosio::name coopname, eosio::name username, checksum256 r
                "Только председатель может принять имущество");
   
   // Проверяем результат и права
-  auto exist_result = Capital::Results::get_result(coopname, result_hash);
-  eosio::check(exist_result.has_value(), "Объект результата не найден");
-  eosio::check(exist_result->status == Capital::Results::Status::ACT1, "Неверный статус. Первый акт должен быть подписан");
+  auto result = Capital::Results::get_result(coopname, result_hash);
+  eosio::check(result.has_value(), "Объект результата не найден");
+  eosio::check(result->status == Capital::Results::Status::ACT1, "Неверный статус. Первый акт должен быть подписан");
   
   // Проверяем документ
-  verify_document_or_fail(act, { exist_result->username, username });
+  verify_document_or_fail(act, { result->username, username });
 
   // Устанавливаем второй акт
   Capital::Results::set_result_act2(coopname, result_hash, act);
+  
+  auto contributor = Capital::Contributors::get_active_contributor_or_fail(coopname, username);
+  auto memo = Capital::Memo::get_push_result_memo(contributor -> id);
 
   // Начисляем заблокированные средства в кошелек программы генерации
-  Wallet::add_blocked_funds(_capital, coopname, result.username, result.total_amount - result.debt_amount, _source_program, memo);
+  Wallet::add_blocked_funds(_capital, coopname, result -> username, result -> total_amount - result -> debt_amount, _source_program, memo);
   
   // Увеличиваем паевой фонд за вычетом ссуммы долга
-  Ledger::add(_capital, coopname, Ledger::accounts::SHARE_FUND, result.total_amount - result.debt_amount, memo);
+  Ledger::add(_capital, coopname, Ledger::accounts::SHARE_FUND, result -> total_amount - result -> debt_amount, memo);
   
   // Уменьшаем сумму выданных ссуд кооператива
-  if (result.debt_amount.amount > 0){
-    Ledger::sub(_capital, coopname, Ledger::accounts::LONG_TERM_LOANS, result.debt_amount, memo);
+  if (result -> debt_amount.amount > 0){
+    Ledger::sub(_capital, coopname, Ledger::accounts::LONG_TERM_LOANS, result -> debt_amount, memo);
   }
   
   //TODO: линковать документ акта
   
   // Обновляем статус сегмента
-  Capital::Segments::update_segment_status(coopname, exist_result->project_hash, exist_result->username, Capital::Segments::Status::ACCEPTED);
+  Capital::Segments::update_segment_status(coopname, result->project_hash, result->username, Capital::Segments::Status::ACCEPTED);
   
   // Удаляем объект результата после успешного принятия
-  Capital::Results::delete_result(coopname, exist_result->project_hash, exist_result->username);
+  Capital::Results::delete_result(coopname, result->project_hash, result->username);
 };

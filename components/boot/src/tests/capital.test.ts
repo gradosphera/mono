@@ -271,6 +271,7 @@ describe('тест контракта CAPITAL', () => {
       title: `Идея ${hash.slice(0, 10)}`,
       description: `Описание ${hash.slice(0, 10)}`,
       meta: '',
+      can_convert_to_project: true,
     }
 
     project1 = data
@@ -422,24 +423,25 @@ describe('тест контракта CAPITAL', () => {
     expect(project.master).toBe(tester1)
   })
 
-  it('добавляем автора к идее', async () => {
-    const { project, segment } = await addAuthor(blockchain, 'voskhod', project1.project_hash, tester1)
+  // не делаем потому что мастер - это сразу и автор сейчас. 
+  // it('добавляем автора к идее', async () => {
+  //   const { project, segment } = await addAuthor(blockchain, 'voskhod', project1.project_hash, tester2)
 
-    console.log('segment: ', segment)
-    expect(segment).toBeDefined()
-    expect(segment.username).toBe(tester1)
-    expect(segment.project_hash).toBe(project1.project_hash)
-    expect(segment.is_author).toBe(1)
-    expect(segment.is_creator).toBe(0)
-    expect(segment.is_coordinator).toBe(0)
-    expect(segment.is_investor).toBe(0)
-    expect(segment.is_contributor).toBe(0)
-    expect(segment.is_coordinator).toBe(0)
-    expect(segment.is_investor).toBe(0)
-    expect(segment.is_contributor).toBe(0)
-    expect(project).toBeDefined()
-    expect(project.counts.total_authors).toBe(1)
-  })
+  //   console.log('segment: ', segment)
+  //   expect(segment).toBeDefined()
+  //   expect(segment.username).toBe(tester2)
+  //   expect(segment.project_hash).toBe(project1.project_hash)
+  //   expect(segment.is_author).toBe(1)
+  //   expect(segment.is_creator).toBe(0)
+  //   expect(segment.is_coordinator).toBe(0)
+  //   expect(segment.is_investor).toBe(0)
+  //   expect(segment.is_contributor).toBe(0)
+  //   expect(segment.is_coordinator).toBe(0)
+  //   expect(segment.is_investor).toBe(0)
+  //   expect(segment.is_contributor).toBe(0)
+  //   expect(project).toBeDefined()
+  //   expect(project.counts.total_authors).toBe(1)
+  // })
 
   it('устанавливаем план проекта', async () => {
     const data: CapitalContract.Actions.SetPlan.ISetPlan = {
@@ -1207,6 +1209,8 @@ describe('тест контракта CAPITAL', () => {
 
     expect(result.txId).toBeDefined()
   })
+  
+  /////////////////////
 
   // it('финансировать результат проекта на 20000 RUB', async () => {
   //   await allocateFundsToResult(blockchain, 'voskhod', project1.project_hash, result1.result_hash, '20000.0000 RUB')

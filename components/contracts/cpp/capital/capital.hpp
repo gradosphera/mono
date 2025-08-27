@@ -173,7 +173,7 @@ public:
     [[eosio::action]]
     void createcmmt(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours);
     [[eosio::action]]
-    void approvecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash, document2 empty_document);
+    void approvecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash);
     [[eosio::action]]
     void declinecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash, std::string reason);
     

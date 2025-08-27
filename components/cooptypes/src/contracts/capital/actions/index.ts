@@ -11,7 +11,6 @@ export * as StartVoting from './startVoting'
 export * as CompleteVoting from './completeVoting'
 export * as CalculateVotes from './calcVotes'
 export * as SubmitVote from './submitVote'
-export * as CloseProject from './closeProject'
 export * as DeleteProject from './deleteProject'
 export * as SetMaster from './setMaster'
 export * as SetPlan from './setPlan'
@@ -40,6 +39,8 @@ export * as AddAuthor from './addAuthor'
 
 // Коммиты
 export * as CreateCommit from './createCommit'
+export * as CommitApprove from './commitApprove'
+export * as CommitDecline from './commitDecline'
 
 // Долги
 export * as CreateDebt from './createDebt'
