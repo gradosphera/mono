@@ -703,6 +703,7 @@ export interface IPushrslt {
   contribution_amount: IAsset
   debt_amount: IAsset
   statement: IDocument2
+  debt_hashes: IChecksum256[]
 }
 
 export interface IRefreshprog {

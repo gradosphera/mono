@@ -16,13 +16,15 @@
  * @param contribution_amount Сумма взноса в результат
  * @param debt_amount Сумма долга для погашения
  * @param statement Заявление о результате
+ * @param debt_hashes Вектор хэшей долгов для погашения (опционально)
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
  * @note Авторизация требуется от аккаунта: @p coopname
  */
-void capital::pushrslt(name coopname, name username, checksum256 project_hash, checksum256 result_hash, 
-                        eosio::asset contribution_amount, eosio::asset debt_amount, document2 statement) {
+void capital::pushrslt(name coopname, name username, checksum256 project_hash, checksum256 result_hash,
+                        eosio::asset contribution_amount, eosio::asset debt_amount, document2 statement,
+                        std::vector<checksum256> debt_hashes = {}) {
   require_auth(coopname);
 
   // Проверяем заявление
@@ -46,7 +48,7 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
 
   // Проверяем сегмент участника и его статус
   auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент участника не найден");
-  eosio::check(segment.status == Capital::Segments::Status::READY, "Участник уже подавал результат или результат уже принят");
+  eosio::check(segment.status == Capital::Segments::Status::GENERATION, "Участник уже подавал результат или результат уже принят");
   eosio::check(segment.total_segment_cost.amount > 0, "У участника нет вкладов для приема результата");
   eosio::check(segment.username == username, "Неверный участник");
 
@@ -70,7 +72,44 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
 
   // Выполняем операции с балансами если есть долг
   if (debt_amount.amount > 0) {
-    //TODO: погасить долг на контракте loans
+    // Проверяем что переданы хэши долгов если есть сумма долга
+    eosio::check(!debt_hashes.empty(), "Необходимо передать хэши долгов для погашения");
+
+    // Проверяем что количество хэшей долгов не превышает разумный лимит (10)
+    eosio::check(debt_hashes.size() <= 10, "Количество долгов для погашения не должно превышать 10");
+
+    eosio::asset total_debt_to_settle = eosio::asset(0, debt_amount.symbol);
+
+    // Гасим каждый долг из списка
+    for (const auto& debt_hash : debt_hashes) {
+      // Получаем информацию о долге
+      auto debt = Capital::Debts::get_debt_or_fail(coopname, debt_hash);
+
+      // Проверяем что долг принадлежит пользователю
+      eosio::check(debt.username == username, "Долг не принадлежит указанному пользователю");
+
+      // Проверяем что долг связан с этим проектом
+      eosio::check(debt.project_hash == project_hash, "Долг не связан с указанным проектом");
+
+      // Проверяем что долг в статусе 'paid' (выплачен пользователю, готов к погашению)
+      eosio::check(debt.status == Capital::Debts::Status::PAID, "Долг должен быть в статусе 'paid' для погашения через внесение результата");
+
+      // Удаляем долг после погашения
+      Capital::Debts::delete_debt(coopname, debt_hash);
+
+      // Суммируем общую сумму погашенных долгов
+      total_debt_to_settle += debt.amount;
+    }
+
+    // Проверяем что общая сумма погашенных долгов соответствует заявленной сумме долга
+    eosio::check(total_debt_to_settle == debt_amount,
+                 "Общая сумма погашенных долгов не соответствует заявленной сумме долга");
+
+    // Погашаем долг контрибьютора
+    Capital::Contributors::decrease_debt_amount(coopname, username, debt_amount);
+  } else {
+    // Если нет долга, проверяем что вектор debt_hashes пустой
+    eosio::check(debt_hashes.empty(), "Если нет суммы долга, вектор хэшей долгов должен быть пустым");
   }
 
   // Обновляем сегмент после принятия результата и пересчитываем доли - объединенная операция

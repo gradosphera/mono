@@ -144,7 +144,7 @@ public:
     // results
     [[eosio::action]]
     void pushrslt(name coopname, name username, checksum256 project_hash, checksum256 result_hash, 
-                  eosio::asset contribution_amount, eosio::asset debt_amount, document2 statement);
+                  eosio::asset contribution_amount, eosio::asset debt_amount, document2 statement, std::vector<checksum256> debt_hashes);
     
     [[eosio::action]]
     void authrslt(eosio::name coopname, checksum256 result_hash, document2 decision);

@@ -144,8 +144,15 @@ namespace Capital::Core::Voting {
     bool is_voting_completed(const Capital::project& project) {
         bool deadline_passed = current_time_point().sec_since_epoch() > project.voting.voting_deadline.sec_since_epoch();
         bool someone_voted = project.voting.votes_received > 0;
+        bool all_voted = project.voting.total_voters > 0 && project.voting.votes_received >= project.voting.total_voters;
         
-        return deadline_passed || someone_voted;
+        // Досрочное завершение: все проголосовали
+        if (all_voted) {
+            return true;
+        }
+        
+        // Завершение по дедлайну: дедлайн истек И хотя бы кто-то проголосовал
+        return deadline_passed && someone_voted;
     }
 
     /**

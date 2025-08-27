@@ -188,11 +188,13 @@ inline std::optional<contributor> get_active_contributor_with_appendix_or_fail(e
 */
 inline void update_contributor_ratings_from_segment(eosio::name coopname, const Capital::Segments::segment& segment) {
   Capital::contributor_index contributors(_capital, coopname.value);
-  auto contributor_itr = contributors.find(segment.username.value);
+  auto username_index = contributors.get_index<"byusername"_n>();
+
+  auto itr = username_index.find(segment.username.value);
   
-  eosio::check(contributor_itr != contributors.end(), "Контрибьютор не найден");
+  eosio::check(itr != username_index.end(), "Контрибьютор не найден");
   
-  contributors.modify(contributor_itr, _capital, [&](auto &c) {
+  username_index.modify(itr, _capital, [&](auto &c) {
     if (segment.is_investor) {
       c.contributed_as_investor += segment.investor_base;
     }
@@ -230,6 +232,22 @@ inline void increase_debt_amount(eosio::name coopname, eosio::name username, eos
   //TODO: make coopname payer
   username_index.modify(contributor_itr, _capital, [&](auto &c) {
     c.debt_amount += amount;
+  });
+}
+
+/**
+ * @brief Увеличивает долг контрибьютора
+ */
+ inline void decrease_debt_amount(eosio::name coopname, eosio::name username, eosio::asset amount) {
+  contributor_index contributors(_capital, coopname.value);
+  auto username_index = contributors.get_index<"byusername"_n>();
+  auto contributor_itr = username_index.find(username.value);
+  
+  eosio::check(contributor_itr->debt_amount >= amount, "Недостаточно долга для погашения");
+  
+  //TODO: make coopname payer
+  username_index.modify(contributor_itr, _capital, [&](auto &c) {
+    c.debt_amount -= amount;
   });
 }
 

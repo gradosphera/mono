@@ -53,7 +53,8 @@ namespace Capital::Core::Voting {
     eosio::asset calculate_direct_creator_bonus(const Capital::project& project, const Capital::Segments::segment& segment);
 
     /**
-     * @brief Проверяет, завершено ли голосование (кто-то проголосовал или истек срок)
+     * @brief Проверяет, завершено ли голосование
+     * Досрочно: все проголосовали. По дедлайну: срок истек И хотя бы один проголосовал
      * @param project Проект с данными голосования
      * @return true если голосование завершено
      */

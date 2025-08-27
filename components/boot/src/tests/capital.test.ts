@@ -29,6 +29,8 @@ import { processCreateProgramProperty } from './capital/processCreateProgramProp
 import { processStartVoting } from './capital/processStartVoting'
 import { createVoteDistribution, submitVote } from './capital/submitVote'
 import { processCompleteVoting } from './capital/processCompleteVoting'
+import { processPushResult } from './capital/processPushResult'
+import { processConvertSegment } from './capital/processConvertSegment'
 import { processCalculateVotes } from './capital/processCalculateVotes'
 
 // const CLI_PATH = 'src/index.ts'
@@ -58,6 +60,14 @@ const tester3CommitHours = 100
 const investAmount1 = 100000
 const investAmount2 = 25000
 const investAmount3 = 25000
+
+// Хранение хэшей долгов для каждого пользователя
+const userDebtHashes: { [username: string]: string[] } = {
+  tester1: [],
+  tester2: [],
+  tester3: [],
+  tester4: [],
+}
 beforeAll(async () => {
   await blockchain.update_pass_instance()
 
@@ -423,7 +433,7 @@ describe('тест контракта CAPITAL', () => {
     expect(project.master).toBe(tester1)
   })
 
-  // не делаем потому что мастер - это сразу и автор сейчас. 
+  // не делаем потому что мастер - это сразу и автор сейчас.
   // it('добавляем автора к идее', async () => {
   //   const { project, segment } = await addAuthor(blockchain, 'voskhod', project1.project_hash, tester2)
 
@@ -985,15 +995,130 @@ describe('тест контракта CAPITAL', () => {
       repaidAtDate,
     )
 
-    // Проверяем что debt_amount увеличился на 10000.0000 RUB в сегменте
+    // Сохраняем хэш долга для последующего использования
+    userDebtHashes[tester4].push(debtResult.debtHash)
+
+    // Проверяем что debt_amount увеличился на 100 RUB в сегменте
     expect(debtResult.segmentAfter.debt_amount).toBe('100.0000 RUB')
 
     // Проверяем что debt_amount увеличился у контрибьютора
     expect(debtResult.contributorAfter.debt_amount).toBe('100.0000 RUB')
 
+    // Проверяем что долг перешел в статус 'paid' (готов к использованию/погашению)
+    expect(debtResult.debtAfter.status).toBe('paid')
+
     console.log('debtResult tester4: ', debtResult)
+    console.log(`Сохранен debt_hash для ${tester4}:`, debtResult.debtHash)
 
     console.log(`✅ Долг на 100 RUB успешно получен пользователем ${tester4}`)
+  })
+
+  it(`берем ссуду создателю 200 RUB от tester1`, async () => {
+    // Обновляем сегмент перед получением ссуды
+    await sleep(1000)
+    await refreshSegment(blockchain, 'voskhod', project1.project_hash, tester1)
+    const repaidAtDate = new Date()
+    repaidAtDate.setDate(repaidAtDate.getDate() + 30)
+
+    // Процессим полный цикл получения долга
+    const debtResult = await processDebt(
+      blockchain,
+      'voskhod',
+      tester1,
+      project1.project_hash,
+      '200.0000 RUB',
+      fakeDocument,
+      repaidAtDate,
+    )
+
+    // Сохраняем хэш долга для последующего использования
+    userDebtHashes[tester1].push(debtResult.debtHash)
+
+    // Проверяем что debt_amount увеличился на 200 RUB в сегменте (плюс предыдущий долг 10000)
+    expect(debtResult.segmentAfter.debt_amount).toBe('10200.0000 RUB')
+
+    // Проверяем что debt_amount увеличился у контрибьютора
+    expect(debtResult.contributorAfter.debt_amount).toBe('10200.0000 RUB')
+
+    // Проверяем что долг перешел в статус 'paid' (готов к использованию/погашению)
+    expect(debtResult.debtAfter.status).toBe('paid')
+
+    console.log('debtResult tester1: ', debtResult)
+    console.log(`Сохранен debt_hash для ${tester1}:`, debtResult.debtHash)
+
+    console.log(`✅ Долг на 200 RUB успешно получен пользователем ${tester1}`)
+  })
+
+  it(`берем ссуду создателю 150 RUB от tester2`, async () => {
+    // Обновляем сегмент перед получением ссуды
+    await sleep(1000)
+    await refreshSegment(blockchain, 'voskhod', project1.project_hash, tester2)
+    const repaidAtDate = new Date()
+    repaidAtDate.setDate(repaidAtDate.getDate() + 30)
+
+    // Процессим полный цикл получения долга
+    const debtResult = await processDebt(
+      blockchain,
+      'voskhod',
+      tester2,
+      project1.project_hash,
+      '150.0000 RUB',
+      fakeDocument,
+      repaidAtDate,
+    )
+
+    // Сохраняем хэш долга для последующего использования
+    userDebtHashes[tester2].push(debtResult.debtHash)
+
+    // Проверяем что debt_amount увеличился на 150 RUB в сегменте
+    expect(debtResult.segmentAfter.debt_amount).toBe('150.0000 RUB')
+
+    // Проверяем что debt_amount увеличился у контрибьютора
+    expect(debtResult.contributorAfter.debt_amount).toBe('150.0000 RUB')
+
+    // Проверяем что долг перешел в статус 'paid' (готов к использованию/погашению)
+    expect(debtResult.debtAfter.status).toBe('paid')
+
+    console.log('debtResult tester2: ', debtResult)
+    console.log(`Сохранен debt_hash для ${tester2}:`, debtResult.debtHash)
+
+    console.log(`✅ Долг на 150 RUB успешно получен пользователем ${tester2}`)
+  })
+
+  it(`берем ссуду создателю 250 RUB от tester3`, async () => {
+    // Обновляем сегмент перед получением ссуды
+    await sleep(1000)
+    await refreshSegment(blockchain, 'voskhod', project1.project_hash, tester3)
+    const repaidAtDate = new Date()
+    repaidAtDate.setDate(repaidAtDate.getDate() + 30)
+
+    // Процессим полный цикл получения долга
+    const debtResult = await processDebt(
+      blockchain,
+      'voskhod',
+      tester3,
+      project1.project_hash,
+      '250.0000 RUB',
+      fakeDocument,
+      repaidAtDate,
+    )
+
+    // Сохраняем хэш долга для последующего использования
+    userDebtHashes[tester3].push(debtResult.debtHash)
+
+    // Проверяем что debt_amount увеличился на 250 RUB в сегменте
+    expect(debtResult.segmentAfter.debt_amount).toBe('250.0000 RUB')
+
+    // Проверяем что debt_amount увеличился у контрибьютора
+    expect(debtResult.contributorAfter.debt_amount).toBe('250.0000 RUB')
+
+    // Проверяем что долг перешел в статус 'paid' (готов к использованию/погашению)
+    expect(debtResult.debtAfter.status).toBe('paid')
+
+    console.log('debtResult tester3: ', debtResult)
+    console.log(`Сохранен debt_hash для ${tester3}:`, debtResult.debtHash)
+
+    console.log(`✅ Долг на 250 RUB успешно получен пользователем ${tester3}`)
   })
 
   it('начать голосование по проекту и проверить изменение статуса с active на voting', async () => {
@@ -1113,7 +1238,7 @@ describe('тест контракта CAPITAL', () => {
       project1.project_hash,
       voteDistribution,
     )
-
+    console.log('VOTING RESULT tester2: ', result)
     expect(result.txId).toBeDefined()
     expect(result.projectAfter.voting.votes_received).toBe(result.projectBefore.voting.votes_received + 1)
     expect(result.votesAfter.length).toBe(result.votesBefore.length + 2)
@@ -1147,6 +1272,8 @@ describe('тест контракта CAPITAL', () => {
       project1.project_hash,
       voteDistribution,
     )
+
+    console.log('VOTING RESULT tester3: ', result)
 
     expect(result.txId).toBeDefined()
     expect(result.projectAfter.voting.votes_received).toBe(result.projectBefore.voting.votes_received + 1)
@@ -1209,7 +1336,235 @@ describe('тест контракта CAPITAL', () => {
 
     expect(result.txId).toBeDefined()
   })
-  
+
+  it('вносим результат в кооператив для tester1', async () => {
+    // Получаем сегмент tester1 для определения сумм
+    const segment = await getSegment(blockchain, 'voskhod', project1.project_hash, tester1)
+    const contributionAmount = segment.total_segment_cost
+    const debtAmount = segment.debt_amount
+
+    console.log(`Сегмент tester1 до внесения результата:`, segment)
+    console.log(`Сумма взноса: ${contributionAmount}, Сумма долга: ${debtAmount}`)
+    console.log(`Хэши долгов для погашения:`, userDebtHashes[tester1])
+
+    const result = await processPushResult(
+      blockchain,
+      'voskhod',
+      tester1,
+      project1.project_hash,
+      contributionAmount,
+      debtAmount,
+      userDebtHashes[tester1], // Передаем вектор хэшей долгов
+    )
+
+    expect(result.transactionId).toBeDefined()
+    expect(result.segmentBefore.status).toBe('ready')
+    expect(result.segmentAfter.status).toBe('accepted')
+
+    console.log(`✅ Результат внесен в кооператив для ${tester1}`)
+  })
+
+  it('вносим результат в кооператив для tester2', async () => {
+    // Получаем сегмент tester2 для определения сумм
+    const segment = await getSegment(blockchain, 'voskhod', project1.project_hash, tester2)
+    const contributionAmount = segment.total_segment_cost
+    const debtAmount = segment.debt_amount
+
+    console.log(`Сегмент tester2 до внесения результата:`, segment)
+    console.log(`Сумма взноса: ${contributionAmount}, Сумма долга: ${debtAmount}`)
+    console.log(`Хэши долгов для погашения:`, userDebtHashes[tester2])
+
+    const result = await processPushResult(
+      blockchain,
+      'voskhod',
+      tester2,
+      project1.project_hash,
+      contributionAmount,
+      debtAmount,
+      userDebtHashes[tester2], // Передаем вектор хэшей долгов
+    )
+
+    expect(result.transactionId).toBeDefined()
+    expect(result.segmentBefore.status).toBe('ready')
+    expect(result.segmentAfter.status).toBe('accepted')
+
+    console.log(`✅ Результат внесен в кооператив для ${tester2}`)
+  })
+
+  it('вносим результат в кооператив для tester3', async () => {
+    // Получаем сегмент tester3 для определения сумм
+    const segment = await getSegment(blockchain, 'voskhod', project1.project_hash, tester3)
+    const contributionAmount = segment.total_segment_cost
+    const debtAmount = segment.debt_amount
+
+    console.log(`Сегмент tester3 до внесения результата:`, segment)
+    console.log(`Сумма взноса: ${contributionAmount}, Сумма долга: ${debtAmount}`)
+    console.log(`Хэши долгов для погашения:`, userDebtHashes[tester3])
+
+    const result = await processPushResult(
+      blockchain,
+      'voskhod',
+      tester3,
+      project1.project_hash,
+      contributionAmount,
+      debtAmount,
+      userDebtHashes[tester3], // Передаем вектор хэшей долгов
+    )
+
+    expect(result.transactionId).toBeDefined()
+    expect(result.segmentBefore.status).toBe('ready')
+    expect(result.segmentAfter.status).toBe('accepted')
+
+    console.log(`✅ Результат внесен в кооператив для ${tester3}`)
+  })
+
+  it('вносим результат в кооператив для tester4', async () => {
+    // Получаем сегмент tester4 для определения сумм
+    const segment = await getSegment(blockchain, 'voskhod', project1.project_hash, tester4)
+    const contributionAmount = segment.total_segment_cost
+    const debtAmount = segment.debt_amount
+
+    console.log(`Сегмент tester4 до внесения результата:`, segment)
+    console.log(`Сумма взноса: ${contributionAmount}, Сумма долга: ${debtAmount}`)
+    console.log(`Хэши долгов для погашения:`, userDebtHashes[tester4])
+
+    const result = await processPushResult(
+      blockchain,
+      'voskhod',
+      tester4,
+      project1.project_hash,
+      contributionAmount,
+      debtAmount,
+      userDebtHashes[tester4], // Передаем вектор хэшей долгов
+    )
+
+    expect(result.transactionId).toBeDefined()
+    expect(result.segmentBefore.status).toBe('ready')
+    expect(result.segmentAfter.status).toBe('accepted')
+
+    console.log(`✅ Результат внесен в кооператив для ${tester4}`)
+  })
+
+  it('конвертируем сегмент tester1 в главный кошелек', async () => {
+    // Получаем сегмент tester1 для определения доступных сумм
+    const segment = await getSegment(blockchain, 'voskhod', project1.project_hash, tester1)
+    console.log(`Сегмент tester1 перед конвертацией:`, segment)
+
+    // Рассчитываем суммы для конвертации
+    const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
+    const walletAmount = `${(availableAmount * 0.5).toFixed(4)} RUB` // 50% в кошелек
+    const capitalAmount = `${(availableAmount * 0.3).toFixed(4)} RUB` // 30% в капитализацию
+    const projectAmount = `${(availableAmount * 0.2).toFixed(4)} RUB` // 20% в проект
+
+    console.log(`Конвертация tester1: кошелек=${walletAmount}, капитализация=${capitalAmount}, проект=${projectAmount}`)
+
+    const result = await processConvertSegment(
+      blockchain,
+      'voskhod',
+      tester1,
+      project1.project_hash,
+      walletAmount,
+      capitalAmount,
+      projectAmount,
+    )
+
+    expect(result.transactionId).toBeDefined()
+    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentAfter.status).toBe('completed')
+
+    console.log(`✅ Сегмент ${tester1} конвертирован`)
+  })
+
+  it('конвертируем сегмент tester2 полностью в проект', async () => {
+    // Получаем сегмент tester2 для определения доступных сумм
+    const segment = await getSegment(blockchain, 'voskhod', project1.project_hash, tester2)
+    console.log(`Сегмент tester2 перед конвертацией:`, segment)
+
+    // Конвертируем все доступные средства в проект
+    const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
+    const walletAmount = '0.0000 RUB'
+    const capitalAmount = '0.0000 RUB'
+    const projectAmount = `${availableAmount.toFixed(4)} RUB`
+
+    console.log(`Конвертация tester2: только в проект=${projectAmount}`)
+
+    const result = await processConvertSegment(
+      blockchain,
+      'voskhod',
+      tester2,
+      project1.project_hash,
+      walletAmount,
+      capitalAmount,
+      projectAmount,
+    )
+
+    expect(result.transactionId).toBeDefined()
+    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentAfter.status).toBe('completed')
+
+    console.log(`✅ Сегмент ${tester2} конвертирован в проект`)
+  })
+
+  it('конвертируем сегмент tester3 полностью в капитализацию', async () => {
+    // Получаем сегмент tester3 для определения доступных сумм
+    const segment = await getSegment(blockchain, 'voskhod', project1.project_hash, tester3)
+    console.log(`Сегмент tester3 перед конвертацией:`, segment)
+
+    // Конвертируем все доступные средства в капитализацию
+    const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
+    const walletAmount = '0.0000 RUB'
+    const capitalAmount = `${availableAmount.toFixed(4)} RUB`
+    const projectAmount = '0.0000 RUB'
+
+    console.log(`Конвертация tester3: только в капитализацию=${capitalAmount}`)
+
+    const result = await processConvertSegment(
+      blockchain,
+      'voskhod',
+      tester3,
+      project1.project_hash,
+      walletAmount,
+      capitalAmount,
+      projectAmount,
+    )
+
+    expect(result.transactionId).toBeDefined()
+    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentAfter.status).toBe('completed')
+
+    console.log(`✅ Сегмент ${tester3} конвертирован в капитализацию`)
+  })
+
+  it('конвертируем сегмент tester4 частично в разные направления', async () => {
+    // Получаем сегмент tester4 для определения доступных сумм
+    const segment = await getSegment(blockchain, 'voskhod', project1.project_hash, tester4)
+    console.log(`Сегмент tester4 перед конвертацией:`, segment)
+
+    // Конвертируем в разные направления
+    const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
+    const walletAmount = `${(availableAmount * 0.4).toFixed(4)} RUB`// 40% в кошелек
+    const capitalAmount = `${(availableAmount * 0.4).toFixed(4)} RUB`// 40% в капитализацию
+    const projectAmount = `${(availableAmount * 0.2).toFixed(4)} RUB`// 20% в проект
+
+    console.log(`Конвертация tester4: кошелек=${walletAmount}, капитализация=${capitalAmount}, проект=${projectAmount}`)
+
+    const result = await processConvertSegment(
+      blockchain,
+      'voskhod',
+      tester4,
+      project1.project_hash,
+      walletAmount,
+      capitalAmount,
+      projectAmount,
+    )
+
+    expect(result.transactionId).toBeDefined()
+    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentAfter.status).toBe('completed')
+
+    console.log(`✅ Сегмент ${tester4} конвертирован в смешанные направления`)
+  })
+
   /////////////////////
 
   // it('финансировать результат проекта на 20000 RUB', async () => {

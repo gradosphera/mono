@@ -14,7 +14,6 @@ namespace Capital::Segments {
    */
    namespace Status {
     const eosio::name GENERATION = "generation"_n;         ///< На генерации результата
-    const eosio::name READY = "ready"_n;                   ///< Готов к конвертации
     const eosio::name CONTRIBUTED = "contributed"_n;       ///< Результат внесён, долг погашен, готов к конвертации
     const eosio::name ACCEPTED = "accepted"_n;             ///< Результат принят советом
     const eosio::name COMPLETED = "completed"_n;           ///< Сконвертирован

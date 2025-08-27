@@ -144,17 +144,32 @@ export async function processDebt(
   ))
   const contributorAfter = contributorsAfter[0]
 
+  // Получаем долг после подтверждения оплаты
+  const debtsAfter = (await blockchain.getTableRows(
+    CapitalContract.contractName.production,
+    coopname,
+    'debts',
+    1,
+    debtHash,
+    debtHash,
+    3,
+    'sha256',
+  ))
+  const debtAfter = debtsAfter[0]
+
   console.log('\n📊 Результаты после обработки долга:')
   console.log('▶ Сегмент до:', segmentBefore)
   console.log('▶ Сегмент после:', segmentAfter)
   console.log('▶ Контрибьютор до:', contributorBefore)
   console.log('▶ Контрибьютор после:', contributorAfter)
+  console.log('▶ Долг после оплаты:', debtAfter)
 
   console.log(`\n✅ Процесс долга на ${debtAmount} завершен успешно!`)
 
   return {
     debtHash,
     debt: createdDebt,
+    debtAfter,
     segmentBefore,
     segmentAfter,
     contributorBefore,

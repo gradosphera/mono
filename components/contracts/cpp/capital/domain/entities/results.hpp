@@ -147,8 +147,6 @@ inline void delete_result_and_reset_segment(eosio::name coopname, const checksum
         results.erase(result_itr);
     }
     
-    // Возвращаем статус сегмента в ready
-    Capital::Segments::update_segment_status(coopname, project_hash, username, Capital::Segments::Status::READY);
 }
 
 /**

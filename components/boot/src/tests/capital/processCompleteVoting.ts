@@ -32,6 +32,7 @@ export async function processCompleteVoting(
   console.log('▶ Статус проекта:', projectBefore.status)
   console.log('▶ Голосов получено:', projectBefore.voting.votes_received)
   console.log('▶ Всего участников голосования:', projectBefore.voting.total_voters)
+  console.log('▶ Дедлайн голосования:', projectBefore.voting.voting_deadline)
 
   // Отправляем транзакцию завершения голосования
   const txResult = await blockchain.api.transact(
@@ -67,7 +68,13 @@ export async function processCompleteVoting(
   console.log('▶ Голосов получено:', projectAfter.voting.votes_received)
   console.log('▶ Всего участников голосования:', projectAfter.voting.total_voters)
 
+  // Проверяем что статус изменился на completed
+  expect(projectAfter.status).toBe('completed')
+
+  console.log(`\n✅ Голосование для проекта ${project_hash} успешно завершено!`)
+
   return {
+    projectHash: project_hash,
     txId: txResult.transaction_id,
     projectBefore,
     projectAfter,

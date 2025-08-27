@@ -23,6 +23,9 @@ void capital::declrslt(eosio::name coopname, checksum256 result_hash, document2 
   eosio::check(exist_result.has_value(), "Объект результата не найден");
   eosio::check(exist_result->status == Capital::Results::Status::APPROVED, "Неверный статус результата");
 
-  // Удаляем объект результата и возвращаем статус сегмента в ready
+  // Удаляем объект результата и возвращаем статус сегмента в GENERATION
   Capital::Results::delete_result_and_reset_segment(coopname, exist_result->project_hash, exist_result->username);
+  
+  // Возвращаем статус сегмента в GENERATION
+  Capital::Segments::update_segment_status(coopname, exist_result->project_hash, exist_result->username, Capital::Segments::Status::GENERATION);
 };

@@ -18,7 +18,7 @@ namespace Status {
   constexpr name CREATED = "created"_n;      ///< Долг создан
   constexpr name APPROVED = "approved"_n;    ///< Долг одобрен
   constexpr name AUTHORIZED = "authorized"_n; ///< Долг авторизован советом
-  constexpr name PAID = "paid"_n;            ///< Долг выплачен
+  constexpr name PAID = "paid"_n;            ///< Долг выплачен (готов к использованию)
 }
 
 /**
