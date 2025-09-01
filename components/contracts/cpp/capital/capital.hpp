@@ -232,7 +232,7 @@ public:
 
     // Приложения к договору УХД
     [[eosio::action]]
-    void signappndx(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document);
+    void getclearance(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document);
     [[eosio::action]]
     void apprvappndx(eosio::name coopname, checksum256 appendix_hash, document2 approved_document);
     [[eosio::action]]
@@ -300,7 +300,6 @@ public:
     [[eosio::action]] void rfrshsegment(name coopname, checksum256 project_hash, name username);
 
     // Кошельки проектов
-    
-    [[eosio::action]] void addcontrib(name coopname, checksum256 project_hash, name username);
+    [[eosio::action]] void regshare(name coopname, checksum256 project_hash, name username);
     
 };

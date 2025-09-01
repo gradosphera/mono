@@ -12,7 +12,7 @@
 
  * @note Авторизация требуется от аккаунта: @p username
  */
-void capital::addcontrib(eosio::name coopname, checksum256 project_hash, eosio::name username) {
+void capital::regshare(eosio::name coopname, checksum256 project_hash, eosio::name username) {
   require_auth(coopname);
   
   // Проверяем существование проекта

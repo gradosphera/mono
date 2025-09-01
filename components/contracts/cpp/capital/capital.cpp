@@ -18,9 +18,9 @@
 #include "app/participation_management/import_contributor/importcontr.cpp"
 
 // Регистрация приложений к договору
-#include "app/participation_management/register_appendix/apprvappndx.cpp"
-#include "app/participation_management/register_appendix/dclineappndx.cpp"
-#include "app/participation_management/register_appendix/signappndx.cpp"
+#include "app/participation_management/get_clearance/apprvappndx.cpp"
+#include "app/participation_management/get_clearance/dclineappndx.cpp"
+#include "app/participation_management/get_clearance/getclearance.cpp"
 
 // Управление проектами
 #include "app/project_managment/add_author/addauthor.cpp"
@@ -81,7 +81,7 @@
 #include "app/generation/create_commit/createcmmt.cpp"
 #include "app/generation/create_commit/declinecmmt.cpp"
 #include "app/generation/refresh_segment/rfrshsegment.cpp"
-#include "app/generation/share_register/addcontrib.cpp"
+#include "app/generation/register_share/regshare.cpp"
 
 // Голосование
 #include "app/voting/calculcate_votes/calcvotes.cpp"

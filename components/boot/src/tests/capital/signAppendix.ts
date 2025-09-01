@@ -12,7 +12,7 @@ export async function signAppendix(
   appendixHash: string,
 ) {
   // Подписание приложения пайщиком (через кооператив, как и в контракте)
-  const data: CapitalContract.Actions.SignAppendix.ISignAppendix = {
+  const data: CapitalContract.Actions.GetClearance.IGetClearance = {
     coopname,
     username,
     project_hash: projectHash,
@@ -25,7 +25,7 @@ export async function signAppendix(
       actions: [
         {
           account: CapitalContract.contractName.production,
-          name: CapitalContract.Actions.SignAppendix.actionName,
+          name: CapitalContract.Actions.GetClearance.actionName,
           authorization: [{ actor: coopname, permission: 'active' }],
           data,
         },

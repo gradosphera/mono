@@ -52,7 +52,7 @@ export * as CreateDebt from './createDebt'
 export * as RegisterContributor from './registerContributor'
 
 // Приложения к договору УХД
-export * as SignAppendix from './signAppendix'
+export * as GetClearance from './getClearance'
 
 // Инвестиции в проекты
 export * as CreateProjectInvest from './createInvest'
@@ -80,4 +80,4 @@ export * as RefreshProgram from './refreshProgram'
 export * as RefreshSegment from './refreshSegment'
 
 // Участники проектов
-export * as AddContributor from './addContributor'
+export * as RegisterShare from './registerShare'

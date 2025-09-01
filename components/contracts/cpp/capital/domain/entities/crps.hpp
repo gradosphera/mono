@@ -22,7 +22,6 @@ struct crps_data {
   // Накопительные награды на долю (double для точности)
   double author_base_cumulative_reward_per_share = 0.0;     ///< Накопительная базовая награда на авторскую долю
   double author_bonus_cumulative_reward_per_share = 0.0;    ///< Накопительная бонусная награда на авторскую долю  
-  double coordinator_cumulative_reward_per_share = 0.0;     ///< Накопительная награда на координаторскую долю (НЕ ИСПОЛЬЗУЕТСЯ)
   double contributor_cumulative_reward_per_share = 0.0;     ///< Накопительная награда на вкладчическую долю
 };
 

@@ -16,7 +16,7 @@
 
  * @note Авторизация требуется от аккаунта: @p coopname
  */
-void capital::signappndx(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document) {
+void capital::getclearance(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document) {
   require_auth(coopname);
   
   // Проверяем что пользователь подписал общий договор УХД

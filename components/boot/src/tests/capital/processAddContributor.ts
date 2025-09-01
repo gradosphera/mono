@@ -19,7 +19,7 @@ export async function processAddContributor(
     // Сегмент может не существовать - это нормально
   }
 
-  const data: CapitalContract.Actions.AddContributor.IAddContributor = {
+  const data: CapitalContract.Actions.RegisterShare.IRegisterShare = {
     coopname,
     project_hash,
     username,
@@ -31,7 +31,7 @@ export async function processAddContributor(
       actions: [
         {
           account: CapitalContract.contractName.production,
-          name: CapitalContract.Actions.AddContributor.actionName,
+          name: CapitalContract.Actions.RegisterShare.actionName,
           authorization: [{ actor: coopname, permission: 'active' }],
           data,
         },

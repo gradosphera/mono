@@ -7,9 +7,9 @@ export const authorizations = [{ permissions: [Permissions.active], actor: Actor
 /**
  * Имя действия
  */
-export const actionName = 'signappndx'
+export const actionName = 'regshare'
 
 /**
  * @interface
  */
-export type ISignAppendix = Capital.ISignappndx
+export type IRegisterShare = Capital.IRegshare

@@ -31,12 +31,6 @@ export interface IAddauthor {
   author: IName
 }
 
-export interface IAddcontrib {
-  coopname: IName
-  project_hash: IChecksum256
-  username: IName
-}
-
 export interface IAllocate {
   coopname: IName
   project_hash: IChecksum256
@@ -353,7 +347,6 @@ export interface ICrpsData {
   total_capital_contributors_shares: IAsset
   author_base_cumulative_reward_per_share: IFloat64
   author_bonus_cumulative_reward_per_share: IFloat64
-  coordinator_cumulative_reward_per_share: IFloat64
   contributor_cumulative_reward_per_share: IFloat64
 }
 
@@ -538,6 +531,14 @@ export interface IGenerationAmounts {
   total_generation_pool: IAsset
   contributors_bonus_pool: IAsset
   total_contribution: IAsset
+}
+
+export interface IGetclearance {
+  coopname: IName
+  username: IName
+  project_hash: IChecksum256
+  appendix_hash: IChecksum256
+  document: IDocument2
 }
 
 export interface IGlobalState {
@@ -729,6 +730,12 @@ export interface IRegcontrib {
   contract: IDocument2
 }
 
+export interface IRegshare {
+  coopname: IName
+  project_hash: IChecksum256
+  username: IName
+}
+
 export interface IResult {
   id: IUint64
   project_hash: IChecksum256
@@ -803,9 +810,6 @@ export interface ISegment {
   total_segment_base_cost: IAsset
   total_segment_bonus_cost: IAsset
   total_segment_cost: IAsset
-  converted_to_wallet: IAsset
-  converted_to_capital: IAsset
-  converted_to_project: IAsset
 }
 
 export interface ISetconfig {
@@ -847,14 +851,6 @@ export interface ISignact2 {
   chairman: IName
   result_hash: IChecksum256
   act: IDocument2
-}
-
-export interface ISignappndx {
-  coopname: IName
-  username: IName
-  project_hash: IChecksum256
-  appendix_hash: IChecksum256
-  document: IDocument2
 }
 
 export interface ISignatureInfo {

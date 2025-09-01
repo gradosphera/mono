@@ -102,10 +102,6 @@ namespace Capital::Segments {
     eosio::asset total_segment_bonus_cost = asset(0, _root_govern_symbol); ///< Общая стоимость бонусных вкладов сегмента
     eosio::asset total_segment_cost = asset(0, _root_govern_symbol);       ///< Общая стоимость всех вкладов сегмента
     
-    eosio::asset converted_to_wallet = asset(0, _root_govern_symbol);      ///< Сумма, сконвертированная в кошелек
-    eosio::asset converted_to_capital = asset(0, _root_govern_symbol);     ///< Сумма, сконвертированная в программу капитализации
-    eosio::asset converted_to_project = asset(0, _root_govern_symbol);     ///< Сумма, сконвертированная в проект
-        
     uint64_t primary_key() const { return id; }                           ///< Первичный ключ (1)
     
     checksum256 by_project_hash() const { return project_hash; }          ///< Индекс по хэшу проекта (2)
@@ -375,29 +371,6 @@ inline void update_segment_total_cost(eosio::name coopname, const checksum256 &p
         s.total_segment_base_cost = calculate_segment_base_cost(s);
         s.total_segment_bonus_cost = calculate_segment_bonus_cost(s, project);
         s.total_segment_cost = s.total_segment_base_cost + s.total_segment_bonus_cost;
-    });
-}
-
-/**
- * @brief Обновляет сегмент после конвертации
- */
-inline void update_segment_conversion(eosio::name coopname, const checksum256 &project_hash,
-                                     eosio::name username,
-                                     const eosio::asset &wallet_amount, const eosio::asset &capital_amount,
-                                     const eosio::asset &project_amount) {
-    segments_index segments(_capital, coopname.value);
-    auto idx = segments.get_index<"byprojuser"_n>();
-    auto key = combine_checksum_ids(project_hash, username);
-    auto segment_itr = idx.find(key);
-    
-    eosio::check(segment_itr != idx.end(), "Сегмент участника не найден");
-    
-    idx.modify(segment_itr, coopname, [&](auto &s) {
-        s.converted_to_wallet = wallet_amount;
-        s.converted_to_capital = capital_amount;
-        s.converted_to_project = project_amount;
-        
-        s.status = Capital::Segments::Status::COMPLETED; // Смешанная конвертация
     });
 }
 
