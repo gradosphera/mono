@@ -187,7 +187,8 @@ static constexpr uint64_t _capital_program_id = 4;
         "eosio.wrap"_n,
         "eosio.power"_n,
         "eosio.saving"_n,
-        "ledger"_n
+        "ledger"_n,
+        "capital"_n
         // Добавьте остальные стандартные или пользовательские контракты по необходимости
       };
 
