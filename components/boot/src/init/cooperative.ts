@@ -3,6 +3,7 @@ import type { Keys } from '../types'
 import config, { GOVERN_SYMBOL, SYMBOL } from '../configs'
 import Blockchain from '../blockchain'
 import { generateRandomSHA256 } from '../utils/randomHash'
+import { processLastDecision } from '../tests/soviet/processLastDecision'
 
 const test_hash
   = '157192b276da23cc84ab078fc8755c051c5f0430bf4802e55718221e6b76c777'
@@ -90,35 +91,36 @@ export class CooperativeClass {
       income_hash: registration_hash,
     })
 
-    console.log('Голосуем по решению в провайдере')
+    await processLastDecision(this.blockchain, config.provider)
+    // console.log('Голосуем по решению в провайдере')
 
-    await this.blockchain.votefor({
-      version: '1.0.0',
-      signed_at: '2025-05-14T12:22:26',
-      signed_hash: test_hash,
-      signature: test_sign,
-      public_key: test_pkey,
-      coopname: config.provider,
-      username: config.provider_chairman,
-      decision_id: 1,
-    })
+    // await this.blockchain.votefor({
+    //   version: '1.0.0',
+    //   signed_at: '2025-05-14T12:22:26',
+    //   signed_hash: test_hash,
+    //   signature: test_sign,
+    //   public_key: test_pkey,
+    //   coopname: config.provider,
+    //   username: config.provider_chairman,
+    //   decision_id: 1,
+    // })
 
-    console.log('Утверждаем решение в провайдере')
+    // console.log('Утверждаем решение в провайдере')
 
-    await this.blockchain.authorize({
-      coopname: config.provider,
-      chairman: config.provider_chairman,
-      decision_id: 1,
-      document,
-    })
+    // await this.blockchain.authorize({
+    //   coopname: config.provider,
+    //   chairman: config.provider_chairman,
+    //   decision_id: 1,
+    //   document,
+    // })
 
-    console.log('Исполняем решение в провайдере')
+    // console.log('Исполняем решение в провайдере')
 
-    await this.blockchain.exec({
-      executer: config.provider_chairman,
-      coopname: config.provider,
-      decision_id: 1,
-    })
+    // await this.blockchain.exec({
+    //   executer: config.provider_chairman,
+    //   coopname: config.provider,
+    //   decision_id: 1,
+    // })
 
     console.log('Отправляем подписанное положение о ЦПП Кошелька оператору')
 

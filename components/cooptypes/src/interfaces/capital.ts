@@ -186,7 +186,7 @@ export interface ICapitalWallet {
   id: IUint64
   coopname: IName
   username: IName
-  last_program_crps: IInt64
+  last_program_crps: IFloat64
   capital_available: IAsset
 }
 
@@ -222,6 +222,7 @@ export interface IContributor {
   contributor_hash: IChecksum256
   created_at: ITimePointSec
   status: IName
+  memo: string
   is_external_contract: boolean
   contract: IDocument2
   appendixes: IChecksum256[]
@@ -350,10 +351,10 @@ export interface ICreatewthd3 {
 
 export interface ICrpsData {
   total_capital_contributors_shares: IAsset
-  author_base_cumulative_reward_per_share: IInt64
-  author_bonus_cumulative_reward_per_share: IInt64
-  coordinator_cumulative_reward_per_share: IInt64
-  contributor_cumulative_reward_per_share: IInt64
+  author_base_cumulative_reward_per_share: IFloat64
+  author_bonus_cumulative_reward_per_share: IFloat64
+  coordinator_cumulative_reward_per_share: IFloat64
+  contributor_cumulative_reward_per_share: IFloat64
 }
 
 export interface IDclineappndx {
@@ -545,8 +546,16 @@ export interface IGlobalState {
   program_membership_funded: IAsset
   program_membership_available: IAsset
   program_membership_distributed: IAsset
-  program_membership_cumulative_reward_per_share: IInt64
+  program_membership_cumulative_reward_per_share: IFloat64
   config: IConfig
+}
+
+export interface IImportcontrib {
+  coopname: IName
+  username: IName
+  contributor_hash: IChecksum256
+  contribution_amount: IAsset
+  memo: string
 }
 
 export interface IInvest {
@@ -564,7 +573,7 @@ export interface IInvest {
 }
 
 export interface IMembershipCrps {
-  cumulative_reward_per_share: IInt64
+  cumulative_reward_per_share: IFloat64
   total_shares: IAsset
   funded: IAsset
   available: IAsset
@@ -661,7 +670,7 @@ export interface IProjectWallet {
   project_hash: IChecksum256
   username: IName
   shares: IAsset
-  last_membership_reward_per_share: IInt64
+  last_membership_reward_per_share: IFloat64
   membership_available: IAsset
 }
 
@@ -778,12 +787,10 @@ export interface ISegment {
   coordinator_base: IAsset
   contributor_bonus: IAsset
   property_base: IAsset
-  last_author_base_reward_per_share: IInt64
-  last_author_bonus_reward_per_share: IInt64
-  last_coordinator_reward_per_share: IInt64
-  last_contributor_reward_per_share: IInt64
+  last_author_base_reward_per_share: IFloat64
+  last_author_bonus_reward_per_share: IFloat64
+  last_contributor_reward_per_share: IFloat64
   capital_contributor_shares: IAsset
-  project_contributor_shares: IAsset
   last_known_invest_pool: IAsset
   last_known_creators_base_pool: IAsset
   last_known_coordinators_investment_pool: IAsset
@@ -910,3 +917,4 @@ export interface IVotingData {
   amounts: IVotingAmounts
   voting_deadline: ITimePointSec
 }
+

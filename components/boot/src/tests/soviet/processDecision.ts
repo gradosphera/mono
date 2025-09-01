@@ -1,5 +1,4 @@
 import { SovietContract } from 'cooptypes'
-import { expect } from 'vitest'
 import { getTotalRamUsage } from '../../utils/getTotalRamUsage'
 import { fakeDocument } from '../shared/fakeDocument'
 import type Blockchain from '../../blockchain'
@@ -52,5 +51,4 @@ export async function processDecision(blockchain: Blockchain, decisionId: number
   )
 
   getTotalRamUsage(result)
-  expect(result.transaction_id).toBeDefined()
 }

@@ -20,7 +20,7 @@ namespace Capital {
     checksum256 contributor_hash;                   ///< Внешний идентификатор контрибьютора
     time_point_sec created_at;                      ///< Время создания контрибьютора
     name status;                                    ///< Статус контрибьютора
-    
+    std::string memo;                                ///< Мемо для импортированных контрибьюторов
     bool is_external_contract = false;              ///< Флаг, указывающий на внешний контракт
     document2 contract;                             ///< Договор УХД
     std::vector<checksum256> appendixes;            ///< Вектор хэшей проектов, для которых подписаны приложения
@@ -93,6 +93,24 @@ namespace Capital::Contributors {
       c.rate_per_hour = rate_per_hour;
     });
   }
+  
+  
+  inline void import_contributor(eosio::name coopname, eosio::name username, checksum256 contributor_hash, std::string memo, eosio::asset rate_per_hour){
+    Capital::contributor_index contributors(_capital, coopname.value);
+   
+    contributors.emplace(coopname, [&](auto &c) {
+      c.id = get_global_id_in_scope(_capital, coopname, "contributors"_n);
+      c.coopname = coopname;
+      c.username = username;
+      c.contributor_hash = contributor_hash;
+      c.status = Capital::Contributors::Status::ACTIVE;
+      c.is_external_contract = true;
+      c.created_at = eosio::current_time_point();
+      c.memo = memo;
+      c.rate_per_hour = rate_per_hour;
+    });
+  }
+  
   
   /**
    * @brief Добавляет project_hash в вектор appendixes у контрибьютора

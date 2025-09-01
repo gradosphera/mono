@@ -876,7 +876,7 @@ export default class Blockchain {
             name: SovietContract.Actions.Boards.CreateBoard.actionName,
             authorization: [
               {
-                actor: params.username,
+                actor: params.coopname,
                 permission: 'active',
               },
             ],

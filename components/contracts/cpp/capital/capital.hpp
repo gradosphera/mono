@@ -218,9 +218,6 @@ public:
     [[eosio::action]]
     void settledebt(name coopname, name username, eosio::asset amount, document2 statement);
 
-        
-        
-        
     // Регистрация
     [[eosio::action]]
     void regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, bool is_external_contract, document2 contract);
@@ -229,6 +226,10 @@ public:
     [[eosio::action]]
     void declinereg(eosio::name coopname, checksum256 contributor_hash, std::string reason);
     
+    // Импорт вкладчиков
+    [[eosio::action]]
+    void importcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset contribution_amount, std::string memo);
+
     // Приложения к договору УХД
     [[eosio::action]]
     void signappndx(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 appendix_hash, document2 document);
