@@ -234,7 +234,8 @@ namespace Capital::Core::Generation {
 
         // Используем total_shares для расчета распределения на основе долей
         if (project -> membership.total_shares.amount > 0) {
-            int64_t delta = membership_current_fund.amount / project->membership.total_shares.amount;
+            double delta = static_cast<double>(membership_current_fund.amount) / 
+                          static_cast<double>(project->membership.total_shares.amount);
             p.membership.cumulative_reward_per_share += delta;
         };
     });

@@ -28,21 +28,15 @@ export async function refreshSegment(
     username,
   }
 
-  const refreshResult = await blockchain.api.transact(
-    {
-      actions: [
-        {
-          account: CapitalContract.contractName.production,
-          name: CapitalContract.Actions.RefreshSegment.actionName,
-          authorization: [{ actor: coopname, permission: 'active' }],
-          data: refreshSegmentData,
-        },
-      ],
-    },
-    {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    },
+  const refreshResult = await blockchain.transactWithLogs(
+    [
+      {
+        account: CapitalContract.contractName.production,
+        name: CapitalContract.Actions.RefreshSegment.actionName,
+        authorization: [{ actor: coopname, permission: 'active' }],
+        data: refreshSegmentData,
+      },
+    ],
   )
 
   getTotalRamUsage(refreshResult)

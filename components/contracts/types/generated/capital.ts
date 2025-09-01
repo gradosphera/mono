@@ -58,7 +58,6 @@ export interface IApprovecmmt {
   coopname: IName
   master: IName
   commit_hash: IChecksum256
-  empty_document: IDocument2
 }
 
 export interface IApprovedebt {
@@ -395,12 +394,6 @@ export interface IDebtpaydcln {
   reason: string
 }
 
-export interface IDeclineapprv {
-  coopname: IName
-  result_hash: IChecksum256
-  decline_reason: IDocument2
-}
-
 export interface IDeclinecmmt {
   coopname: IName
   master: IName
@@ -447,7 +440,7 @@ export interface IDeclpinv {
 export interface IDeclrslt {
   coopname: IName
   result_hash: IChecksum256
-  decision: IDocument2
+  reason: string
 }
 
 export interface IDelproject {
@@ -704,6 +697,7 @@ export interface IPushrslt {
   contribution_amount: IAsset
   debt_amount: IAsset
   statement: IDocument2
+  debt_hashes: IChecksum256[]
 }
 
 export interface IRefreshprog {
@@ -843,7 +837,7 @@ export interface ISignact1 {
 
 export interface ISignact2 {
   coopname: IName
-  username: IName
+  chairman: IName
   result_hash: IChecksum256
   act: IDocument2
 }

@@ -63,6 +63,7 @@ namespace Names {
     // Коллбэки для результатов
     constexpr eosio::name AUTHORIZE_RESULT = "authrslt"_n;
     constexpr eosio::name DECLINE_RESULT = "declrslt"_n;
+    constexpr eosio::name APPROVE_RESULT = "approverslt"_n;
     
     // Коллбэки для платежей
     constexpr eosio::name CONFIRM_EXPENSE_PAYMENT = "exppaycnfrm"_n;
@@ -110,5 +111,6 @@ namespace Names {
     constexpr eosio::name CREATE_WITHDRAW_1 = "createwthd1"_n; // акцепт возврата из задания
     constexpr eosio::name CREATE_WITHDRAW_2 = "createwthd2"_n; // акцепт возврата из проекта
     constexpr eosio::name CREATE_WITHDRAW_3 = "createwthd3"_n; // акцепт возврата из программы
+    constexpr eosio::name CREATE_RESULT = "createresult"_n; // акцепт результата
   }
 }

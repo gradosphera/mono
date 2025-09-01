@@ -13,15 +13,21 @@
  * @note Авторизация требуется от аккаунта: @p username
  */
 void capital::addcontrib(eosio::name coopname, checksum256 project_hash, eosio::name username) {
-  require_auth(username);
+  require_auth(coopname);
   
   // Проверяем существование проекта
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+
+  auto check_appendix = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
+
+  // Проверяем наличие сегмента
+  auto exist_segment = Capital::Segments::get_segment(coopname, project_hash, username);
   
-  // Добавляем вкладчика через CRPS систему
-  // Функция сама выполнит все необходимые проверки:
-  // - наличие активного договора УХД
-  // - наличие подписанного приложения к проекту
-  // - положительный баланс в программе капитализации
+  if (exist_segment.has_value()) {
+    // Проверяем что пользователь не зарегистрирован в проекте как вкладчик
+    eosio::check(!exist_segment -> is_contributor, "Вкладчик уже зарегистрирован в проекте");
+  }
+
+  // Добавляем вкладчика
   Capital::Core::upsert_contributor_segment(coopname, project_hash, username);
 } 

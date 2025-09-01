@@ -71,23 +71,23 @@ namespace Capital::Core {
     segments.modify(segment_it, _capital, [&](auto &s) {
       if (s.is_author) {
         // Обновляем базовые авторские награды
-        int64_t pending_base_reward = 1 * 
-          (project.crps.author_base_cumulative_reward_per_share - s.last_author_base_reward_per_share);
-        
-        if (pending_base_reward > 0) {
-          eosio::asset base_reward_asset = eosio::asset(pending_base_reward, _root_govern_symbol);
-          s.author_base += base_reward_asset;
-          s.last_author_base_reward_per_share = project.crps.author_base_cumulative_reward_per_share;
-          
+        double base_delta = project.crps.author_base_cumulative_reward_per_share - s.last_author_base_reward_per_share;
+        if (base_delta > 0.0) {
+          int64_t pending_base_reward = static_cast<int64_t>(base_delta);
+          if (pending_base_reward > 0) {
+            s.author_base += eosio::asset(pending_base_reward, _root_govern_symbol);
+            s.last_author_base_reward_per_share = project.crps.author_base_cumulative_reward_per_share;
+          }
         }
         
         // Обновляем бонусные авторские награды
-        int64_t pending_bonus_reward = 1 * 
-          (project.crps.author_bonus_cumulative_reward_per_share - s.last_author_bonus_reward_per_share);
-        
-        if (pending_bonus_reward > 0) {
-          s.author_bonus += eosio::asset(pending_bonus_reward, _root_govern_symbol);
-          s.last_author_bonus_reward_per_share = project.crps.author_bonus_cumulative_reward_per_share;
+        double bonus_delta = project.crps.author_bonus_cumulative_reward_per_share - s.last_author_bonus_reward_per_share;
+        if (bonus_delta > 0.0) {
+          int64_t pending_bonus_reward = static_cast<int64_t>(bonus_delta);
+          if (pending_bonus_reward > 0) {
+            s.author_bonus += eosio::asset(pending_bonus_reward, _root_govern_symbol);
+            s.last_author_bonus_reward_per_share = project.crps.author_bonus_cumulative_reward_per_share;
+          }
         }        
       }
     });
@@ -106,13 +106,13 @@ namespace Capital::Core {
       if (p.counts.total_authors > 0) {
         // Обновляем базовые авторские награды
         if (base_reward.amount > 0) {
-          int64_t base_delta = base_reward.amount / p.counts.total_authors;
+          double base_delta = static_cast<double>(base_reward.amount) / static_cast<double>(p.counts.total_authors);
           p.crps.author_base_cumulative_reward_per_share += base_delta;
         }
         
         // Обновляем бонусные авторские награды
         if (bonus_reward.amount > 0) {
-          int64_t bonus_delta = bonus_reward.amount / p.counts.total_authors;
+          double bonus_delta = static_cast<double>(bonus_reward.amount) / static_cast<double>(p.counts.total_authors);
           p.crps.author_bonus_cumulative_reward_per_share += bonus_delta;
         }
       }

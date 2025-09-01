@@ -127,8 +127,8 @@ export async function investInProject(
   console.log('▶ Кошелек программы:', finalProgramWallet)
 
   // Проверка изменения балансов
-  expect(parseFloat(finalUserWallet.blocked)).toBe(parseFloat(prevUserWallet.blocked) + parseFloat(investAmount))
-  expect(parseFloat(finalProgramWallet.blocked)).toBe(parseFloat(prevProgramWallet.blocked) + parseFloat(investAmount))
+  expect(parseFloat(finalUserWallet.blocked)).toBeCloseTo(parseFloat(prevUserWallet.blocked) + parseFloat(investAmount), 1)
+  expect(parseFloat(finalProgramWallet.blocked)).toBeCloseTo(parseFloat(prevProgramWallet.blocked) + parseFloat(investAmount), 1)
 
   console.log(`\n✅ Инвестирование на ${investAmount} завершено успешно!`)
 

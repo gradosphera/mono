@@ -34,7 +34,10 @@ void capital::approvecmmt(eosio::name coopname, eosio::name master, checksum256 
   Capital::Core::increment_authors_crps_in_project(coopname, commit.project_hash, 
                                    commit.amounts.authors_base_pool, 
                                    commit.amounts.authors_bonus_pool);
-
+  
+  // Распределяем премии вкладчиков между всеми вкладчиками проекта через CRPS  
+  Capital::Core::increment_contributors_crps_in_project(coopname, commit.project_hash, commit.amounts.contributors_bonus_pool);
+                                   
   // Удаляем коммит после обработки
   Capital::Commits::delete_commit(coopname, commit_hash);  
 };

@@ -31,7 +31,7 @@ namespace Capital {
     asset program_membership_funded = asset(0, _root_govern_symbol); ///< Общая сумма членских взносов по программе
     asset program_membership_available = asset(0, _root_govern_symbol); ///< Доступная сумма членских взносов по программе
     asset program_membership_distributed = asset(0, _root_govern_symbol); ///< Распределенная сумма членских взносов по программе
-    int64_t program_membership_cumulative_reward_per_share;               ///< Накопительное вознаграждение на долю в членских взносах
+    double program_membership_cumulative_reward_per_share;               ///< Накопительное вознаграждение на долю в членских взносах
 
     config config;                                           ///< Управляемая конфигурация контракта
     

@@ -69,15 +69,13 @@ namespace Capital::Segments {
     eosio::asset property_base = asset(0, _root_govern_symbol);           ///< Стоимость внесенного имущества участника
       
     // CRPS поля для масштабируемого распределения наград
-    int64_t last_author_base_reward_per_share = 0;                       ///< Последняя зафиксированная базовая награда на долю для авторов  
-    int64_t last_author_bonus_reward_per_share = 0;                      ///< Последняя зафиксированная бонусная награда на долю для авторов
-    int64_t last_coordinator_reward_per_share = 0;                       ///< Последняя зафиксированная награда на долю для координаторов
-    int64_t last_contributor_reward_per_share = 0;                       ///< Последняя зафиксированная награда на долю для вкладчиков
+    double last_author_base_reward_per_share = 0.0;                       ///< Последняя зафиксированная базовая награда на долю для авторов  
+    double last_author_bonus_reward_per_share = 0.0;                      ///< Последняя зафиксированная бонусная награда на долю для авторов
+    double last_contributor_reward_per_share = 0.0;                       ///< Последняя зафиксированная награда на долю для вкладчиков
 
     // Доли в программе и проекте
     eosio::asset capital_contributor_shares = asset(0, _root_govern_symbol); ///< Количество долей вкладчика в программе капитализации
-    eosio::asset project_contributor_shares = asset(0, _root_govern_symbol); ///< Текущая доля участника в проекте (базовые_вклады - конвертации - ссуды)
-
+    
     // Последняя известная сумма инвестиций в проекте для расчета provisional_amount
     eosio::asset last_known_invest_pool = asset(0, _root_govern_symbol);     ///< Последняя известная сумма инвестиций в проекте
     
@@ -271,31 +269,28 @@ inline bool is_voting_participant(eosio::name coopname, const checksum256 &proje
  * @return true если сегмент обновлен
  */
 inline bool is_segment_updated(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
-    auto segment_opt = get_segment(coopname, project_hash, username);
-    if (!segment_opt.has_value()) {
-        return false; // Сегмент не найден
-    }
+    auto segment = get_segment_or_fail(coopname, project_hash, username, "Сегмент пайщика не найден");
     
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
     
     // Проверяем актуальность CRPS для каждой роли
-    bool author_updated = (!segment_opt->is_author) || 
-                         (segment_opt->last_author_base_reward_per_share == project.crps.author_base_cumulative_reward_per_share &&
-                          segment_opt->last_author_bonus_reward_per_share == project.crps.author_bonus_cumulative_reward_per_share);
+    bool author_updated = (!segment.is_author) || 
+                         (segment.last_author_base_reward_per_share == project.crps.author_base_cumulative_reward_per_share &&
+                          segment.last_author_bonus_reward_per_share == project.crps.author_bonus_cumulative_reward_per_share);
     
     // Координаторы используют пропорциональное распределение на основе coordinators_investment_pool
-    bool coordinator_updated = (!segment_opt->is_coordinator) || 
-                              (segment_opt->last_known_coordinators_investment_pool == project.fact.coordinators_investment_pool);
+    bool coordinator_updated = (!segment.is_coordinator) || 
+                              (segment.last_known_coordinators_investment_pool == project.fact.coordinators_investment_pool);
     
-    bool contributor_updated = (!segment_opt->is_contributor) || 
-                              (segment_opt->last_contributor_reward_per_share == project.crps.contributor_cumulative_reward_per_share);
+    bool contributor_updated = (!segment.is_contributor) || 
+                              (segment.last_contributor_reward_per_share == project.crps.contributor_cumulative_reward_per_share);
     
     // Проверяем актуальность инвестиционного пула для расчета provisional_amount (нужно всем ролям)
-    bool invest_pool_updated = (segment_opt->last_known_invest_pool == project.fact.invest_pool);
+    bool invest_pool_updated = (segment.last_known_invest_pool == project.fact.invest_pool);
     
     // Проверяем актуальность базового пула создателей для корректного расчета использования инвестиций (нужно только инвесторам)
-    bool creators_base_pool_updated = (!segment_opt->is_investor) || 
-                                     (segment_opt->last_known_creators_base_pool == project.fact.creators_base_pool);
+    bool creators_base_pool_updated = (!segment.is_investor) || 
+                                     (segment.last_known_creators_base_pool == project.fact.creators_base_pool);
     
     return author_updated && coordinator_updated && contributor_updated && invest_pool_updated && creators_base_pool_updated;
 }
@@ -427,7 +422,7 @@ inline void update_segment_conversion(eosio::name coopname, const checksum256 &p
  * @brief Объединенная функция: обновляет сегмент после принятия результата и пересчитывает доли участника
  * Оптимизированная версия для избежания двойного обновления одной записи
  */
-inline void update_segment_after_result_contribution_with_shares(eosio::name coopname, const checksum256 &project_hash, 
+inline void update_segment_after_result_contribution(eosio::name coopname, const checksum256 &project_hash, 
                                                                eosio::name username,
                                                                eosio::asset debt_settled_amount = asset(0, _root_govern_symbol)) {
     segments_index segments(_capital, coopname.value);
@@ -444,18 +439,6 @@ inline void update_segment_after_result_contribution_with_shares(eosio::name coo
         // Если есть погашение долга, отмечаем его
         if (debt_settled_amount.amount > 0) {
             s.debt_settled += debt_settled_amount;
-        }
-        
-        // Пересчитываем доли участника: базовые_вклады - конвертации - ссуды
-        eosio::asset base_contributions = s.creator_base + s.author_base + s.coordinator_base + s.property_base;
-        //TODO: тут кажется это не нужно т.к. суммы равны нулю - проверить
-        eosio::asset conversions = s.converted_to_wallet + s.converted_to_capital;
-        
-        s.project_contributor_shares = base_contributions - conversions - s.debt_amount;
-        
-        // Доли не могут быть отрицательными
-        if (s.project_contributor_shares.amount < 0) {
-            s.project_contributor_shares = asset(0, _root_govern_symbol);
         }
     });
 }
@@ -515,7 +498,38 @@ inline void decrease_debt_amount(eosio::name coopname, uint64_t segment_id, eosi
     s.debt_amount -= amount;
   });
 }
+
+/**
+ * @brief Удаляет сегмент участника
+ * @param coopname Имя кооператива
+ * @param project_hash Хэш проекта
+ * @param username Имя пользователя
+ */
+inline void remove_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
+  segments_index segments(_capital, coopname.value);
+  auto idx = segments.get_index<"byprojuser"_n>();
+  auto key = combine_checksum_ids(project_hash, username);
+  auto segment_itr = idx.find(key);
   
+  eosio::check(segment_itr != idx.end(), "Сегмент участника не найден");
+  
+  idx.erase(segment_itr);
+
+}
+
+/**
+ * @brief Проверяет наличие сегментов в проекте
+ * @param coopname Имя кооператива
+ * @param project_hash Хэш проекта
+ * @return true если есть сегменты, false если нет
+ */
+inline bool has_project_segments(eosio::name coopname, const checksum256 &project_hash) {
+  segments_index segments(_capital, coopname.value);
+  auto idx = segments.get_index<"byproject"_n>();
+  auto it = idx.lower_bound(project_hash);
+  
+  return it != idx.end() && it->project_hash == project_hash;
+}
 
 } // namespace Capital::Segments
 

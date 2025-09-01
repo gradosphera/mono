@@ -17,8 +17,8 @@ namespace Capital::Core {
     state.program_membership_available += amount;
     
     if (total_shares.amount > 0) {
-          // Рассчитываем награду на долю в базовых единицах
-    int64_t delta = amount.amount / total_shares.amount;
+          // Рассчитываем награду на долю
+      double delta = static_cast<double>(amount.amount) / static_cast<double>(total_shares.amount);
       state.program_membership_cumulative_reward_per_share += delta;
     }
 
@@ -40,14 +40,19 @@ namespace Capital::Core {
     auto state = Capital::get_global_state(coopname);
     
     // Считаем дельту CRPS
-    int64_t current_crps = state.program_membership_cumulative_reward_per_share;
-    int64_t last_crps = capital_wallet_opt.has_value() ? capital_wallet_opt->last_program_crps : 0;
-    int64_t delta = current_crps - last_crps;
+    double current_crps = state.program_membership_cumulative_reward_per_share;
+    double last_crps = capital_wallet_opt.has_value() ? capital_wallet_opt->last_program_crps : 0.0;
+    double delta = current_crps - last_crps;
 
-    if (delta > 0) {
-      // Начисляем вознаграждение
-      eosio::asset reward_amount = eosio::asset(share_balance.amount * delta, _root_govern_symbol);
-      Capital::Wallets::upsert_capital_wallet(coopname, username, current_crps, reward_amount);
+    if (delta > 0.0) {
+      // Рассчитываем вознаграждение
+      double pending_reward_double = static_cast<double>(share_balance.amount) * delta;
+      int64_t pending_reward = static_cast<int64_t>(pending_reward_double);
+      
+      if (pending_reward > 0) {
+        eosio::asset reward_amount = eosio::asset(pending_reward, _root_govern_symbol);
+        Capital::Wallets::upsert_capital_wallet(coopname, username, current_crps, reward_amount);
+      }
     } 
   }
 

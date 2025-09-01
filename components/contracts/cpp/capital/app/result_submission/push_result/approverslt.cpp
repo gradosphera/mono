@@ -15,7 +15,7 @@
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 void capital::approverslt(eosio::name coopname, checksum256 result_hash, document2 approved_statement){
-  require_auth(coopname);
+  require_auth(_soviet);
   
   // Проверяем заявление
   verify_document_or_fail(approved_statement);
@@ -26,7 +26,7 @@ void capital::approverslt(eosio::name coopname, checksum256 result_hash, documen
   eosio::check(exist_result->status == Capital::Results::Status::CREATED, "Неверный статус результата");
   
   // Устанавливаем одобренное заявление
-  Capital::Results::set_result_approved_statement(coopname, result_hash, approved_statement, coopname);
+  Capital::Results::set_result_approved_statement(coopname, result_hash, approved_statement);
   
   // Обновляем статус
   Capital::Results::update_result_status(coopname, result_hash, Capital::Results::Status::APPROVED);

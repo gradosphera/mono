@@ -7,7 +7,7 @@ using namespace eosio;
 
 struct membership_crps {
 
-  int64_t cumulative_reward_per_share = 0; ///< Сумма накопленных членских взносов на одну долю вкладчика проекта
+  double cumulative_reward_per_share = 0.0; ///< Сумма накопленных членских взносов на одну долю
   eosio::asset total_shares = asset(0, _root_govern_symbol);    ///< Общая сумма долей всех участников в проекте (только сконвертированные в кошельки проекта)
 
   eosio::asset funded = asset(0, _root_govern_symbol);       ///< Общее количество поступивших членских взносов 

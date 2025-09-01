@@ -24,7 +24,7 @@ namespace Capital::Core {
     if (is_segment_updated) {
       return; // Сегмент обновлен
     }
-    
+    print("before refresh_segment");
     // Обновляем награды для каждой роли отдельно
     refresh_author_segment(coopname, project_hash, username);
     refresh_coordinator_segment(coopname, project_hash, username);
@@ -148,12 +148,16 @@ namespace Capital::Core {
     }
     
     project_wallets.modify(wallet_it, _capital, [&](auto &w) {
-      // Рассчитываем накопленные награды от членских взносов на основе долей в кошельке проекта
-      int64_t pending_membership_reward = w.shares.amount * 
-        (project.membership.cumulative_reward_per_share - w.last_membership_reward_per_share);
+      // Рассчитываем накопленные награды от членских взносов
+      double membership_delta = project.membership.cumulative_reward_per_share - w.last_membership_reward_per_share;
       
-      if (pending_membership_reward > 0) {
-        w.membership_available += eosio::asset(pending_membership_reward, _root_govern_symbol);
+      if (membership_delta > 0.0) {
+        double pending_reward_double = static_cast<double>(w.shares.amount) * membership_delta;
+        int64_t pending_membership_reward = static_cast<int64_t>(pending_reward_double);
+        
+        if (pending_membership_reward > 0) {
+          w.membership_available += eosio::asset(pending_membership_reward, _root_govern_symbol);
+        }
       }
       
       w.last_membership_reward_per_share = project.membership.cumulative_reward_per_share;

@@ -15,6 +15,7 @@ import EosApi from 'eosjs-api'
 // @ts-expect-error заменить на antelope
 import ecc from 'eosjs-ecc'
 import config from '../configs'
+import { consoleIt } from '../tests/shared/consoleIt'
 
 import type { Contract, Feature, Keys, Network } from '../types'
 
@@ -986,5 +987,36 @@ export default class Blockchain {
     )
 
     console.log('Программа установлена: ', params)
+  }
+
+  /**
+   * Выполняет транзакцию и автоматически выводит консоль логи через consoleIt
+   * @param actions - массив действий для транзакции
+   * @param options - опции транзакции (по умолчанию стандартные)
+   * @param options.blocksBehind - количество блоков позади для подтверждения
+   * @param options.expireSeconds - время жизни транзакции в секундах
+   * @returns результат транзакции
+   */
+  async transactWithLogs(
+    actions: any[],
+    options: { blocksBehind?: number, expireSeconds?: number } = {},
+  ): Promise<any> {
+    await this.update_pass_instance()
+
+    const defaultOptions = {
+      blocksBehind: 3,
+      expireSeconds: 30,
+      ...options,
+    }
+
+    const result = await this.api.transact(
+      { actions },
+      defaultOptions,
+    )
+
+    // Автоматически выводим консоль логи
+    consoleIt(result)
+
+    return result
   }
 }

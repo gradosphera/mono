@@ -29,7 +29,6 @@ void capital::createdebt(name coopname, name username, checksum256 project_hash,
   
   // Проверяем что участник существует в проекте
   auto exist_contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
-  eosio::check(exist_contributor.has_value(), "Договор УХД с пайщиком не найден");
   
   // Проверяем что сегмент существует и обновлен
   auto exist_segment = Capital::Segments::get_segment(coopname, project_hash, username);

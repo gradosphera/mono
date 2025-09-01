@@ -14,22 +14,14 @@ export async function processMasterApprove(
     commit_hash: commitHash,
   }
 
-  const result = await blockchain.api.transact(
+  const result = await blockchain.transactWithLogs([
     {
-      actions: [
-        {
-          account: CapitalContract.contractName.production,
-          name: CapitalContract.Actions.CommitApprove.actionName,
-          authorization: [{ actor: coopname, permission: 'active' }],
-          data,
-        },
-      ],
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CommitApprove.actionName,
+      authorization: [{ actor: coopname, permission: 'active' }],
+      data,
     },
-    {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    },
-  )
+  ])
 
   getTotalRamUsage(result)
   expect(result.transaction_id).toBeDefined()

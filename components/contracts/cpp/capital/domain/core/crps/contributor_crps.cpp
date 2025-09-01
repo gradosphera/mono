@@ -6,15 +6,24 @@ namespace Capital::Core {
   /**
    * @brief Обновляет CRPS поля в проекте для вкладчиков при добавлении наград
    */
-   void update_contributor_crps(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &reward_amount) {
+   void increment_contributors_crps_in_project(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &reward_amount) {
     Capital::project_index projects(_capital, coopname.value);
     auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
     
+    print("DEBUG increment_contributors_crps: reward_amount=", reward_amount);
+    print(" total_shares=", project->crps.total_capital_contributors_shares);
+    print(" old_crps=", project->crps.contributor_cumulative_reward_per_share);
+    
     projects.modify(project, _capital, [&](auto &p) {
+      // Проверяем что есть зарегистрированные доли для распределения
       if (p.crps.total_capital_contributors_shares.amount > 0) {
-        // Рассчитываем дельту reward per share (награда на долю в базовых единицах)
-        int64_t delta = reward_amount.amount / p.crps.total_capital_contributors_shares.amount;
-        p.crps.contributor_cumulative_reward_per_share += delta;
+        // Простой расчет награды на долю
+        double reward_per_share = static_cast<double>(reward_amount.amount) / static_cast<double>(p.crps.total_capital_contributors_shares.amount);
+        p.crps.contributor_cumulative_reward_per_share += reward_per_share;
+        print(" reward_per_share=", reward_per_share);
+        print(" new_crps=", p.crps.contributor_cumulative_reward_per_share);
+      } else {
+        print(" NO SHARES REGISTERED!");
       }
     });
   }
@@ -51,6 +60,7 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
         });
         
         // Увеличиваем счетчики вкладчиков
+        print("DEBUG upsert_contributor: new contributor ", username, " shares=", user_shares);
         Capital::Projects::increment_total_contributors(coopname, project_hash);
         Capital::Projects::increment_total_contributor_shares(coopname, project_hash, user_shares);
     } else {
@@ -81,6 +91,7 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
         
         if (became_contributor) {
             // Увеличиваем счетчик зарегистрированных вкладчиков
+            print("DEBUG upsert_contributor: existing user ", username, " became contributor, shares=", user_shares);
             Capital::Projects::increment_total_contributors(coopname, project_hash);
             // Увеличиваем счетчик долей для нового вкладчика
             Capital::Projects::increment_total_contributor_shares(coopname, project_hash, user_shares);
@@ -96,44 +107,39 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
     auto segment_opt = Segments::get_segment(coopname, project_hash, username);
     
     if (!segment_opt.has_value()) {
+      print("DEBUG: segment not found for ", username);
       return; // Сегмент не найден
     }
     
     auto segment_it = segments.find(segment_opt->id);
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
     
+    print("DEBUG refresh_contributor_segment: user=", username);
+    print(" shares=", segment_opt->capital_contributor_shares);
+    print(" project_crps=", project.crps.contributor_cumulative_reward_per_share);
+    print(" last_crps=", segment_opt->last_contributor_reward_per_share);
+    
     segments.modify(segment_it, _capital, [&](auto &s) {
-      // Обновляем награды вкладчика
+      // Обновляем награды вкладчика через CRPS алгоритм
       if (s.capital_contributor_shares.amount > 0) {
-        int64_t pending_contributor_reward = s.capital_contributor_shares.amount * 
-          (project.crps.contributor_cumulative_reward_per_share - s.last_contributor_reward_per_share);
+        // Разность наград на долю
+        double reward_per_share_delta = project.crps.contributor_cumulative_reward_per_share - s.last_contributor_reward_per_share;
+        print(" delta=", reward_per_share_delta);
         
-        if (pending_contributor_reward > 0) {
-          s.contributor_bonus += eosio::asset(pending_contributor_reward, _root_govern_symbol);
-          s.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
+        if (reward_per_share_delta > 0.0) {
+          // Простой расчет награды участника
+          double pending_reward_double = static_cast<double>(s.capital_contributor_shares.amount) * reward_per_share_delta;
+          int64_t pending_contributor_reward = static_cast<int64_t>(pending_reward_double);
+          print(" pending_reward=", pending_contributor_reward);
+          
+          if (pending_contributor_reward > 0) {
+            s.contributor_bonus += eosio::asset(pending_contributor_reward, _root_govern_symbol);
+            s.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
+            print(" new_bonus=", s.contributor_bonus);
+          }
         }
-      }
-      
-      // Обновление capital_contributor_shares на основе текущего баланса
-      eosio::asset capital_balance = Capital::Core::get_capital_program_user_share_balance(coopname, username);
-      
-      if (s.capital_contributor_shares != capital_balance) {
-        // Корректируем общие доли в проекте
-        Capital::project_index projects(_capital, coopname.value);
-        auto project_it = projects.find(project.id);
-        projects.modify(project_it, _capital, [&](auto &p) {
-          p.crps.total_capital_contributors_shares = p.crps.total_capital_contributors_shares - s.capital_contributor_shares + capital_balance;
-        });
-        
-        // Если становится новым вкладчиком, инициализируем CRPS и устанавливаем флаг
-        if (!s.is_contributor && capital_balance.amount > 0) {
-          s.is_contributor = true;
-          s.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
-          // Увеличиваем счетчик зарегистрированных вкладчиков
-          Capital::Projects::increment_total_contributors(coopname, project_hash);
-        }
-        
-        s.capital_contributor_shares = capital_balance;
+      } else {
+        print(" no shares!");
       }
     });
   }

@@ -86,9 +86,9 @@ public:
   }
 
   static void validate_asset(const eosio::asset& amount) {
-    check(amount.symbol == _root_govern_symbol, "Invalid token symbol");
-    check(amount.is_valid(), "Invalid asset");
-    check(amount.amount > 0, "Amount must be positive");
+    check(amount.symbol == _root_govern_symbol, "Неверный символ токена");
+    check(amount.is_valid(), "Неверный актив");
+    check(amount.amount >= 0, "Сумма должна быть неотрицательной");
   }
   
   /**

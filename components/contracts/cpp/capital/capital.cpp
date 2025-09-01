@@ -90,7 +90,6 @@
 #include "app/result_submission/convert_segment/convertsegm.cpp"
 #include "app/result_submission/push_result/approverslt.cpp"
 #include "app/result_submission/push_result/authrslt.cpp"
-#include "app/result_submission/push_result/declineapprv.cpp"
 #include "app/result_submission/push_result/declrslt.cpp"
 #include "app/result_submission/push_result/pushrslt.cpp"
 #include "app/result_submission/push_result/signact1.cpp"

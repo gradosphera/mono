@@ -173,6 +173,7 @@ export async function commitToResult(
     commitHash,
     commit: blockchainCommit,
     transactionId: approveCommitResult.transaction_id,
+    transaction: approveCommitResult,
     finalProject,
     finalContributor,
   }

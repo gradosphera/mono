@@ -2,6 +2,7 @@ import { expect } from 'vitest'
 import { CapitalContract, SovietContract } from 'cooptypes'
 import { getTotalRamUsage } from '../../utils/getTotalRamUsage'
 import { generateRandomSHA256 } from '../../utils/randomHash'
+import { setDocumentSignatures } from '../../utils/setDocumentSignatures'
 import { processLastDecision } from '../soviet/processLastDecision'
 import { fakeDocument } from '../shared/fakeDocument'
 import type Blockchain from '../../blockchain'
@@ -34,7 +35,8 @@ export async function processPushResult(
   const segmentBefore = await getSegment(blockchain, coopname, projectHash, username)
   console.log('📊 Сегмент до внесения результата:', segmentBefore)
 
-  fakeDocument.signatures[0].signer = username
+  // Устанавливаем подписи документа
+  const documentWithSignatures = setDocumentSignatures([username])
 
   // 1. Вносим результат
   const pushResultData: CapitalContract.Actions.PushResult.IPushResult = {
@@ -44,7 +46,7 @@ export async function processPushResult(
     result_hash: resultHash,
     contribution_amount: contributionAmount,
     debt_amount: debtAmount,
-    statement: fakeDocument,
+    statement: documentWithSignatures,
     debt_hashes: debtHashes,
   }
 
@@ -95,12 +97,13 @@ export async function processPushResult(
   await processLastDecision(blockchain, coopname)
   console.log('✅ Решение совета принято')
 
+  console.log('🔍 Подписываем акт №1 вкладчиком', documentWithSignatures)
   // 4. Подписываем акт №1 вкладчиком
   const signAct1Data: CapitalContract.Actions.SignAct1.ISignAct1 = {
     coopname,
     username,
     result_hash: resultHash,
-    act: fakeDocument,
+    act: documentWithSignatures,
   }
 
   console.log(`\n✅ Подписание акта №1 вкладчиком ${username}`)
@@ -125,18 +128,18 @@ export async function processPushResult(
   expect(signAct1Result.transaction_id).toBeDefined()
   console.log('✅ Акт №1 подписан вкладчиком')
 
-  fakeDocument.signatures[1] = fakeDocument.signatures[0]
-  fakeDocument.signatures[1].signer = 'ant'
+  // Создаем документ с подписями вкладчика и председателя
+  const documentWithChairmanSignature = setDocumentSignatures([username, 'ant'])
 
   // 5. Подписываем акт №2 председателем
   const signAct2Data: CapitalContract.Actions.SignAct2.ISignAct2 = {
     coopname,
     result_hash: resultHash,
-    act: fakeDocument,
-    username: 'ant',
+    act: documentWithChairmanSignature,
+    chairman: 'ant',
   }
 
-  console.log(`\n✅ Подписание акта №2 председателем`)
+  console.log(`\n✅ Подписание акта №2 председателем`, documentWithChairmanSignature)
   const signAct2Result = await blockchain.api.transact(
     {
       actions: [

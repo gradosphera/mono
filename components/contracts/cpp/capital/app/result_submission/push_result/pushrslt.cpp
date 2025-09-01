@@ -113,11 +113,13 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
     eosio::check(debt_hashes.empty(), "Если нет суммы долга, вектор хэшей долгов должен быть пустым");
   }
 
-  // Обновляем сегмент после принятия результата и пересчитываем доли - объединенная операция
-  // для избежания двойного обновления одной записи
-  Capital::Segments::update_segment_after_result_contribution_with_shares(coopname, project_hash, username,
+  // Обновляем сегмент
+  Capital::Segments::update_segment_after_result_contribution(coopname, project_hash, username,
                                                                        debt_amount);
 
   // Обновляем накопительные показатели контрибьютора на основе его ролей в сегменте
   Capital::Contributors::update_contributor_ratings_from_segment(coopname, segment);
+  
+  // Отправляем результат на одобрение председателем
+  Capital::Results::send_result_for_approval(coopname, username, result_hash, statement);
 }

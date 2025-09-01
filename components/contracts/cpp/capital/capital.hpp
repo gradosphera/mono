@@ -153,16 +153,13 @@ public:
     void approverslt(eosio::name coopname, checksum256 result_hash, document2 approved_statement);
     
     [[eosio::action]]
-    void declineapprv(eosio::name coopname, checksum256 result_hash, document2 decline_reason);
-    
-    [[eosio::action]]
-    void declrslt(eosio::name coopname, checksum256 result_hash, document2 decision);
+    void declrslt(eosio::name coopname, checksum256 result_hash, std::string reason);
     
     [[eosio::action]]
     void signact1(eosio::name coopname, eosio::name username, checksum256 result_hash, document2 act);
     
     [[eosio::action]]
-    void signact2(eosio::name coopname, eosio::name username, checksum256 result_hash, document2 act);
+    void signact2(eosio::name coopname, eosio::name chairman, checksum256 result_hash, document2 act);
     
     // конвертация
     

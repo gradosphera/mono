@@ -394,12 +394,6 @@ export interface IDebtpaydcln {
   reason: string
 }
 
-export interface IDeclineapprv {
-  coopname: IName
-  result_hash: IChecksum256
-  decline_reason: IDocument2
-}
-
 export interface IDeclinecmmt {
   coopname: IName
   master: IName
@@ -446,7 +440,7 @@ export interface IDeclpinv {
 export interface IDeclrslt {
   coopname: IName
   result_hash: IChecksum256
-  decision: IDocument2
+  reason: string
 }
 
 export interface IDelproject {
@@ -843,7 +837,7 @@ export interface ISignact1 {
 
 export interface ISignact2 {
   coopname: IName
-  username: IName
+  chairman: IName
   result_hash: IChecksum256
   act: IDocument2
 }

@@ -135,9 +135,9 @@ inline void create_result_for_participant(eosio::name coopname, const checksum25
 
 
 /**
- * @brief Удаляет объект результата и возвращает статус сегмента в ready
+ * @brief Удаляет объект результата
  */
-inline void delete_result_and_reset_segment(eosio::name coopname, const checksum256 &project_hash, 
+inline void delete_result(eosio::name coopname, const checksum256 &project_hash, 
                                            eosio::name username) {
     // Удаляем объект результата
     auto result_opt = get_result_by_project_and_username(coopname, project_hash, username);
@@ -147,19 +147,6 @@ inline void delete_result_and_reset_segment(eosio::name coopname, const checksum
         results.erase(result_itr);
     }
     
-}
-
-/**
- * @brief Удаляет объект результата после успешного принятия
- */
-inline void delete_result(eosio::name coopname, const checksum256 &project_hash, 
-                                          eosio::name username) {
-    auto result_opt = get_result_by_project_and_username(coopname, project_hash, username);
-    if (result_opt.has_value()) {
-        result_index results(_capital, coopname.value);
-        auto result_itr = results.find(result_opt->id);
-        results.erase(result_itr);
-    }
 }
 
 /**
@@ -195,14 +182,14 @@ inline void set_result_authorization(eosio::name coopname, const checksum256 &re
 /**
  * @brief Устанавливает одобренное заявление результата
  */
-inline void set_result_approved_statement(eosio::name coopname, const checksum256 &result_hash, const document2 &approved_statement, eosio::name payer) {
+inline void set_result_approved_statement(eosio::name coopname, const checksum256 &result_hash, const document2 &approved_statement) {
     auto exist_result = get_result(coopname, result_hash);
     eosio::check(exist_result.has_value(), "Объект результата не найден");
 
     result_index results(_capital, coopname.value);
     auto result = results.find(exist_result->id);
-
-    results.modify(result, payer, [&](auto &r){
+  
+    results.modify(result, _capital, [&](auto &r){
         r.statement = approved_statement;
     });
 }
@@ -217,7 +204,7 @@ inline void set_result_act1(eosio::name coopname, const checksum256 &result_hash
     result_index results(_capital, coopname.value);
     auto result = results.find(exist_result->id);
 
-    results.modify(result, _capital, [&](auto &r){
+    results.modify(result, coopname, [&](auto &r){
         r.act = act;
     });
 }
@@ -232,7 +219,7 @@ inline void set_result_act2(eosio::name coopname, const checksum256 &result_hash
     result_index results(_capital, coopname.value);
     auto result = results.find(exist_result->id);
 
-    results.modify(result, _capital, [&](auto &r){
+    results.modify(result, coopname, [&](auto &r){
         r.act = act;
     });
 }
@@ -241,18 +228,36 @@ inline void set_result_act2(eosio::name coopname, const checksum256 &result_hash
  * @brief Отправляет результат на рассмотрение в совет
  */
 inline void send_result_to_soviet(eosio::name coopname, eosio::name username, const checksum256 &result_hash, const document2 &approved_statement) {
-    ::Soviet::create_agenda(
-        _capital,
-        coopname, 
-        username, 
-        Names::SovietActions::CREATE_RESULT, 
-        result_hash,
-        _capital, 
-        Names::Capital::AUTHORIZE_RESULT, 
-        Names::Capital::DECLINE_RESULT, 
-        approved_statement, 
-        std::string("")
-    );
+  ::Soviet::create_agenda(
+    _capital,
+    coopname, 
+    username, 
+    Names::SovietActions::CREATE_RESULT, 
+    result_hash,
+    _capital, 
+    Names::Capital::AUTHORIZE_RESULT, 
+    Names::Capital::DECLINE_RESULT, 
+    approved_statement, 
+    std::string("")
+  );
+}
+
+/**
+ * @brief Отправляет результат на одобрение председателем
+ */
+inline void send_result_for_approval(eosio::name coopname, eosio::name username, const checksum256 &result_hash, const document2 &statement) {
+  ::Soviet::create_approval(
+    _capital,
+    coopname,
+    username,
+    statement,
+    Names::Capital::CREATE_RESULT,
+    result_hash,
+    _capital,
+    Names::Capital::APPROVE_RESULT,
+    Names::Capital::DECLINE_RESULT,
+    std::string("")
+  );
 }
 
 } // namespace Results

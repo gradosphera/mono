@@ -1,4 +1,7 @@
 namespace Capital::Memo {
+  inline std::string get_debt_memo(eosio::name username) {
+    return "Выдача ссуды для  " + username.to_string();
+  }
 
   inline std::string get_invest_memo(uint64_t contributor_id) {
     return "Зачёт части целевого паевого взноса по программе 'Цифровой Кошелёк' в качестве паевого взноса по договору УХД с ID: " + std::to_string(contributor_id);

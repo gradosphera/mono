@@ -12,7 +12,7 @@ namespace Capital {
     uint64_t id;                                    ///< ID кошелька (внутренний ключ)
     eosio::name coopname;                           ///< Имя кооператива
     eosio::name username;                           ///< Имя пользователя
-    int64_t last_program_crps = 0;                  ///< Последнее значение программной CRPS для членских взносов
+    double last_program_crps = 0.0;                  ///< Последнее значение программной CRPS для членских взносов
     eosio::asset capital_available = asset(0, _root_govern_symbol); ///< Доступные средства от членских взносов для вывода
     
     uint64_t primary_key() const { return id; }     ///< Первичный ключ (1)
@@ -38,7 +38,7 @@ namespace Capital {
     checksum256 project_hash;                       ///< Хэш проекта
     eosio::name username;                           ///< Имя пользователя
     eosio::asset shares = asset(0, _root_govern_symbol); ///< Доли участника в проекте для получения членских взносов
-    int64_t last_membership_reward_per_share = 0;   ///< Последнее значение CRPS для членских взносов
+    double last_membership_reward_per_share = 0.0;   ///< Последнее значение CRPS для членских взносов
     eosio::asset membership_available = asset(0, _root_govern_symbol); ///< Доступные средства от членских взносов для вывода
     
     uint64_t primary_key() const { return id; }     ///< Первичный ключ (1)

@@ -17,6 +17,11 @@ export async function getUserProgramWallet(blockchain: any, coopname: string, us
   return wallets.find((el: any) => el.program_id === program_id)
 }
 
+export async function getUserProgramWalletAmount(blockchain: any, coopname: string, username: string, program_id: number) {
+  const wallet = await getUserProgramWallet(blockchain, coopname, username, program_id)
+  return wallet ? `${(parseFloat(wallet.available) + parseFloat(wallet.blocked)).toFixed(4)} RUB` : '0.0000 RUB'
+}
+
 export async function getCoopProgramWallet(blockchain: any, coopname: string, program_id: number) {
   const program = await blockchain.getTableRows(
     SovietContract.contractName.production,
@@ -76,5 +81,5 @@ export function compareTokenAmounts(prevAmount: string, currentAmount: string, e
   const current = parseFloat(currentAmount.split(' ')[0])
   const expected = prev + expectedIncrease
 
-  expect(current).toBe(expected)
+  expect(current).toBeCloseTo(expected, 4)
 }

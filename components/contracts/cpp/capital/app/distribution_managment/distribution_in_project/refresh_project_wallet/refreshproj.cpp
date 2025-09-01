@@ -9,10 +9,10 @@
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p username
+ * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]] void capital::refreshproj(name coopname, checksum256 project_hash, name username) {
-    require_auth(username);
+    require_auth(coopname);
   
     // Проверяем существование проекта
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);

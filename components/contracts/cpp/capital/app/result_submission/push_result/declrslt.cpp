@@ -6,25 +6,22 @@
  * - Удаляет объект результата и возвращает статус сегмента в ready
  * @param coopname Наименование кооператива
  * @param result_hash Хеш результата для отклонения
- * @param decision Документ решения совета
+ * @param reason Причина отклонения
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
  * @note Авторизация требуется от аккаунта: @p _soviet
  */
-void capital::declrslt(eosio::name coopname, checksum256 result_hash, document2 decision) {
+void capital::declrslt(eosio::name coopname, checksum256 result_hash, std::string reason) {
   require_auth(_soviet);
-  
-  // Проверяем документ решения
-  verify_document_or_fail(decision);
   
   // Получаем результат и проверяем статус
   auto exist_result = Capital::Results::get_result(coopname, result_hash);
   eosio::check(exist_result.has_value(), "Объект результата не найден");
-  eosio::check(exist_result->status == Capital::Results::Status::APPROVED, "Неверный статус результата");
+  eosio::check(exist_result->status == Capital::Results::Status::APPROVED || exist_result -> status == Capital::Results::Status::CREATED, "Неверный статус результата");
 
-  // Удаляем объект результата и возвращаем статус сегмента в GENERATION
-  Capital::Results::delete_result_and_reset_segment(coopname, exist_result->project_hash, exist_result->username);
+  // Удаляем объект результата
+  Capital::Results::delete_result(coopname, exist_result->project_hash, exist_result->username);
   
   // Возвращаем статус сегмента в GENERATION
   Capital::Segments::update_segment_status(coopname, exist_result->project_hash, exist_result->username, Capital::Segments::Status::GENERATION);

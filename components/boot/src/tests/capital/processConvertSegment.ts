@@ -4,7 +4,11 @@ import { getTotalRamUsage } from '../../utils/getTotalRamUsage'
 import { generateRandomSHA256 } from '../../utils/randomHash'
 import { fakeDocument } from '../shared/fakeDocument'
 import type Blockchain from '../../blockchain'
+import { getCoopProgramWallet, getUserProgramWallet } from '../wallet/walletUtils'
 import { getSegment } from './getSegment'
+import { getProjectWallet } from './getProjectWallet'
+import { capitalProgramId, walletProgramId } from './consts'
+import { getProject } from './getProject'
 
 /**
  * Функция для конвертации сегмента участника
@@ -31,6 +35,20 @@ export async function processConvertSegment(
   // Получаем сегмент до конвертации
   const segmentBefore = await getSegment(blockchain, coopname, projectHash, username)
   console.log('📊 Сегмент до конвертации:', segmentBefore)
+
+  // Получаем кошельки до конвертации
+  const mainWalletBefore = await getCoopProgramWallet(blockchain, coopname, walletProgramId)
+  const capitalWalletBefore = await getCoopProgramWallet(blockchain, coopname, capitalProgramId)
+  const userCapitalWalletBefore = await getUserProgramWallet(blockchain, coopname, username, capitalProgramId)
+  const projectWalletBefore = await getProjectWallet(blockchain, coopname, projectHash, username)
+  const projectBefore = await getProject(blockchain, coopname, projectHash)
+
+  console.log('💰 Кошельки до конвертации:')
+  console.log('  ▶ Главный кошелек программы:', mainWalletBefore)
+  console.log('  ▶ Глобальный кошелек программы капитализации:', capitalWalletBefore)
+  console.log('  ▶ Кошелек пользователя в программе капитализации:', userCapitalWalletBefore)
+  console.log('  ▶ Кошелек проекта:', projectWalletBefore)
+  console.log('  ▶ Проект до конвертации: ', projectBefore)
 
   // 1. Конвертируем сегмент
   const convertSegmentData: CapitalContract.Actions.ConvertSegment.IConvertSegment = {
@@ -70,16 +88,71 @@ export async function processConvertSegment(
   expect(convertResult.transaction_id).toBeDefined()
   console.log('✅ Сегмент конвертирован:', convertHash)
 
-  // Получаем сегмент после конвертации
+  // Получаем сегмент после конвертации (должен быть удален)
   const segmentAfter = await getSegment(blockchain, coopname, projectHash, username)
 
-  // Проверяем изменение статуса сегмента на COMPLETED
-  expect(segmentAfter.status).toBe('completed')
-  console.log('🔍 Статус сегмента после конвертации:', segmentAfter.status)
+  // Получаем кошельки после конвертации
+  const mainWalletAfter = await getCoopProgramWallet(blockchain, coopname, walletProgramId)
+  const capitalWalletAfter = await getCoopProgramWallet(blockchain, coopname, capitalProgramId)
+  const userCapitalWalletAfter = await getUserProgramWallet(blockchain, coopname, username, capitalProgramId)
+  const projectWalletAfter = await getProjectWallet(blockchain, coopname, projectHash, username)
+
+  console.log('💰 Кошельки после конвертации:')
+  console.log('  ▶ Главный кошелек программы:', mainWalletAfter)
+  console.log('  ▶ Глобальный кошелек программы капитализации:', capitalWalletAfter)
+  console.log('  ▶ Кошелек пользователя в программе капитализации:', userCapitalWalletAfter)
+  console.log('  ▶ Кошелек проекта:', projectWalletAfter)
+
+  // Проверяем что сегмент удален после конвертации
+  expect(segmentAfter).toBeUndefined()
+  console.log('🔍 Сегмент после конвертации: ', segmentAfter)
+
+  // Проверяем изменения в кошельках
+  console.log('\n🔍 Проверка изменений в кошельках:')
+
+  // Проверяем главный кошелек программы (wallet_amount)
+  if (walletAmount !== '0.0000 RUB') {
+    const walletAmountValue = parseFloat(walletAmount.split(' ')[0])
+    const beforeAvailable = mainWalletBefore ? parseFloat(mainWalletBefore.available.split(' ')[0]) : 0
+    const afterAvailable = mainWalletAfter ? parseFloat(mainWalletAfter.available.split(' ')[0]) : 0
+    const expectedIncrease = beforeAvailable + walletAmountValue
+    console.log(`✅ Главный кошелек программы: ${beforeAvailable} → ${afterAvailable} (+${walletAmountValue})`)
+    expect(afterAvailable).toBeCloseTo(expectedIncrease, 1)
+  }
+
+  // Проверяем глобальный кошелек программы капитализации (capital_amount)
+  if (capitalAmount !== '0.0000 RUB') {
+    const capitalAmountValue = parseFloat(capitalAmount.split(' ')[0])
+    const beforeBlocked = capitalWalletBefore ? parseFloat(capitalWalletBefore.blocked.split(' ')[0]) : 0
+    const afterBlocked = capitalWalletAfter ? parseFloat(capitalWalletAfter.blocked.split(' ')[0]) : 0
+    const expectedIncrease = beforeBlocked + capitalAmountValue
+    console.log(`✅ Глобальный кошелек программы капитализации: ${beforeBlocked} → ${afterBlocked} (+${capitalAmountValue})`)
+    expect(afterBlocked).toBeCloseTo(expectedIncrease, 1)
+  }
+
+  // Проверяем кошелек пользователя в программе капитализации (capital_amount)
+  if (capitalAmount !== '0.0000 RUB') {
+    const capitalAmountValue = parseFloat(capitalAmount.split(' ')[0])
+    const beforeBlocked = userCapitalWalletBefore ? parseFloat(userCapitalWalletBefore.blocked.split(' ')[0]) : 0
+    const afterBlocked = userCapitalWalletAfter ? parseFloat(userCapitalWalletAfter.blocked.split(' ')[0]) : 0
+    const expectedIncrease = beforeBlocked + capitalAmountValue
+    console.log(`✅ Кошелек пользователя в программе капитализации: ${beforeBlocked} → ${afterBlocked} (+${capitalAmountValue})`)
+    expect(afterBlocked).toBeCloseTo(expectedIncrease, 1)
+  }
+
+  // Проверяем кошелек проекта (project_amount)
+  if (projectAmount !== '0.0000 RUB' && projectBefore.parent_hash.includes('0000000000')) {
+    const projectAmountValue = parseFloat(projectAmount.split(' ')[0])
+    const beforeShares = projectWalletBefore ? parseFloat(projectWalletBefore.shares.split(' ')[0]) : 0
+    const afterShares = projectWalletAfter ? parseFloat(projectWalletAfter.shares.split(' ')[0]) : 0
+    const expectedIncrease = beforeShares + projectAmountValue
+    console.log(`✅ Кошелек проекта: ${beforeShares} → ${afterShares} (+${projectAmountValue})`)
+    expect(afterShares).toBeCloseTo(expectedIncrease, 1)
+  }
 
   console.log('\n📊 Результаты после конвертации сегмента:')
   console.log('▶ Сегмент до:', segmentBefore)
-  console.log('▶ Сегмент после:', segmentAfter)
+  console.log('▶ Сегмент после удалён: ', segmentAfter)
 
   console.log(`\n✅ Процесс конвертации сегмента завершен успешно!`)
 
@@ -87,6 +160,14 @@ export async function processConvertSegment(
     convertHash,
     segmentBefore,
     segmentAfter,
+    mainWalletBefore,
+    mainWalletAfter,
+    capitalWalletBefore,
+    capitalWalletAfter,
+    userCapitalWalletBefore,
+    userCapitalWalletAfter,
+    projectWalletBefore,
+    projectWalletAfter,
     transactionId: convertResult.transaction_id,
   }
 }

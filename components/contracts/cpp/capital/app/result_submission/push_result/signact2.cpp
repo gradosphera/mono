@@ -16,13 +16,13 @@
 
  * @note Авторизация требуется от аккаунта: @p coopname
  */
-void capital::signact2(eosio::name coopname, eosio::name username, checksum256 result_hash, document2 act) {
+void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 result_hash, document2 act) {
   require_auth(coopname);
 
   auto soviet = get_board_by_type_or_fail(coopname, "soviet"_n);
-  auto chairman = soviet.get_chairman();
+  auto real_chairman = soviet.get_chairman();
 
-  eosio::check(username == chairman,
+  eosio::check(real_chairman == chairman,
                "Только председатель может принять имущество");
   
   // Проверяем результат и права
@@ -31,12 +31,12 @@ void capital::signact2(eosio::name coopname, eosio::name username, checksum256 r
   eosio::check(result->status == Capital::Results::Status::ACT1, "Неверный статус. Первый акт должен быть подписан");
   
   // Проверяем документ
-  verify_document_or_fail(act, { result->username, username });
+  verify_document_or_fail(act, { result->username, real_chairman });
 
   // Устанавливаем второй акт
   Capital::Results::set_result_act2(coopname, result_hash, act);
   
-  auto contributor = Capital::Contributors::get_active_contributor_or_fail(coopname, username);
+  auto contributor = Capital::Contributors::get_active_contributor_or_fail(coopname, result -> username);
   auto memo = Capital::Memo::get_push_result_memo(contributor -> id);
 
   // Начисляем заблокированные средства в кошелек программы генерации

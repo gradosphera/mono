@@ -15,7 +15,8 @@
  * @note Авторизация требуется от аккаунта: @p _soviet или @p _gateway
  */
 void capital::fundproj(eosio::name coopname, checksum256 project_hash, asset amount, std::string memo) {
-    auto payer = check_auth_and_get_payer_or_fail({ _soviet, _gateway });
+    require_auth(coopname);
+    // auto payer = check_auth_and_get_payer_or_fail({ _soviet, _gateway });
     Wallet::validate_asset(amount);
 
     auto exist_project = Capital::Projects::get_project(coopname, project_hash);

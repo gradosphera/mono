@@ -668,5 +668,19 @@ namespace Capital::Projects {
 
     
   }
+
+  /**
+   * @brief Удаляет проект
+   * @param coopname Имя кооператива
+   * @param project_hash Хэш проекта
+   */
+  inline void delete_project(eosio::name coopname, const checksum256 &project_hash) {
+    auto exist_project = get_project_or_fail(coopname, project_hash);
+    
+    project_index projects(_capital, coopname.value);
+    auto project_itr = projects.find(exist_project.id);
+    
+    projects.erase(project_itr);
+  }
   
 }// namespace Project
