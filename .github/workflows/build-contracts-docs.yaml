@@ -3,7 +3,7 @@ name: Trigger Contracts Docs Deploy
 
 on:
   push:
-    branches: [main, capital] # или когда нужно триггерить
+    branches: [dev, testnet, main, capital] # или когда нужно триггерить
 
 jobs:
   trigger-coopenomics:
