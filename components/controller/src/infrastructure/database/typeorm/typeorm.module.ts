@@ -30,6 +30,17 @@ import { TypeOrmWebPushSubscriptionRepository } from './repositories/typeorm-web
 import { LEDGER_OPERATION_REPOSITORY } from '~/domain/ledger/repositories/ledger-operation.repository';
 import { TypeOrmLedgerOperationRepository } from './repositories/typeorm-ledger-operation.repository';
 import { LedgerOperationEntity } from './entities/ledger-operation.entity';
+import { ActionEntity } from './entities/action.entity';
+import { DeltaEntity } from './entities/delta.entity';
+import { SyncStateEntity } from './entities/sync-state.entity';
+import {
+  ACTION_REPOSITORY_PORT,
+  DELTA_REPOSITORY_PORT,
+  SYNC_STATE_REPOSITORY_PORT,
+} from '~/domain/parser/ports/parser.port';
+import { TypeOrmActionRepository } from './repositories/typeorm-action.repository';
+import { TypeOrmDeltaRepository } from './repositories/typeorm-delta.repository';
+import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.repository';
 
 @Global()
 @Module({
@@ -55,6 +66,9 @@ import { LedgerOperationEntity } from './entities/ledger-operation.entity';
       PaymentEntity,
       WebPushSubscriptionEntity,
       LedgerOperationEntity,
+      ActionEntity,
+      DeltaEntity,
+      SyncStateEntity,
     ]),
   ],
   providers: [
@@ -94,6 +108,18 @@ import { LedgerOperationEntity } from './entities/ledger-operation.entity';
       provide: LEDGER_OPERATION_REPOSITORY,
       useClass: TypeOrmLedgerOperationRepository,
     },
+    {
+      provide: ACTION_REPOSITORY_PORT,
+      useClass: TypeOrmActionRepository,
+    },
+    {
+      provide: DELTA_REPOSITORY_PORT,
+      useClass: TypeOrmDeltaRepository,
+    },
+    {
+      provide: SYNC_STATE_REPOSITORY_PORT,
+      useClass: TypeOrmSyncStateRepository,
+    },
   ],
   exports: [
     NestTypeOrmModule,
@@ -106,6 +132,9 @@ import { LedgerOperationEntity } from './entities/ledger-operation.entity';
     PAYMENT_REPOSITORY,
     WEB_PUSH_SUBSCRIPTION_PORT,
     LEDGER_OPERATION_REPOSITORY,
+    ACTION_REPOSITORY_PORT,
+    DELTA_REPOSITORY_PORT,
+    SYNC_STATE_REPOSITORY_PORT,
   ],
 })
 export class TypeOrmModule {}

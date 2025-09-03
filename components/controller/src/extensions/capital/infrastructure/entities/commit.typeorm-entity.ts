@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { CommitStatus } from '../../domain/entities/commit.entity';
+import { CommitStatus } from '../../domain/interfaces/commit.entity';
 import { AssignmentTypeormEntity } from './assignment.typeorm-entity';
 import { ContributorTypeormEntity } from './contributor.typeorm-entity';
 

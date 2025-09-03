@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CycleRepository } from '../../domain/repositories/cycle.repository';
-import { CycleDomainEntity } from '../../domain/entities/cycle.entity';
+import { CycleDomainEntity } from '../../domain/interfaces/cycle.entity';
 import { CycleTypeormEntity } from '../entities/cycle.typeorm-entity';
 
 @Injectable()

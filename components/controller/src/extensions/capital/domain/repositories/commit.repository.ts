@@ -1,4 +1,4 @@
-import { CommitDomainEntity } from '../entities/commit.entity';
+import { CommitDomainEntity } from '../interfaces/commit.entity';
 
 export interface CommitRepository {
   create(commit: Omit<CommitDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<CommitDomainEntity>;

@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { LedgerDomainInteractor } from './interactors/ledger.interactor';
+import { LedgerEventService } from './services/ledger-event.service';
 import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
-import { ControllersWsLedgerModule } from './controllers-ws-ledger.module';
 
 /**
  * Доменный модуль для ledger
@@ -9,8 +9,8 @@ import { ControllersWsLedgerModule } from './controllers-ws-ledger.module';
  */
 @Global()
 @Module({
-  imports: [InfrastructureModule, ControllersWsLedgerModule],
-  providers: [LedgerDomainInteractor],
+  imports: [InfrastructureModule],
+  providers: [LedgerDomainInteractor, LedgerEventService],
   exports: [LedgerDomainInteractor],
 })
 export class LedgerDomainModule {}

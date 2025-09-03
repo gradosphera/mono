@@ -9,7 +9,7 @@ import { ProjectResolver } from './application/resolvers/project.resolver';
 import { AssignmentResolver } from './application/resolvers/assignment.resolver';
 import { CommitResolver } from './application/resolvers/commit.resolver';
 import { Injectable } from '@nestjs/common';
-import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 // Репозитории
 import { CycleTypeormRepository } from './infrastructure/repositories/cycle.typeorm-repository';

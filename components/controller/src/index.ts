@@ -5,10 +5,9 @@ import { AppModule } from './app.module';
 import config from './config/config';
 import logger from './config/logger';
 import { connectGenerator, diconnectGenerator } from './services/document.service';
-import { initSocketConnection } from './controllers/ws.controller';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import expressApp from './app';
-import { WinstonLoggerService } from './modules/logger/logger-app.service';
+import { WinstonLoggerService } from './application/logger/logger-app.service';
 import { GraphQLExceptionFilter } from './filters/graphql-exceptions.filter';
 import { migrateData } from './migrator/migrate';
 import { ValidationPipe } from '@nestjs/common';
@@ -34,8 +33,6 @@ async function bootstrap() {
 
   // Запуск дополнительных сервисов
   await connectGenerator();
-  await initSocketConnection(SERVER_URL);
-  // await paymentService.init();
 
   // Добавьте миддлвар для отключения CSP в локальной разработке
   expressApp.use((req, res, next) => {

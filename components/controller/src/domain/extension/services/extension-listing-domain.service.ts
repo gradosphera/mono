@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ExtensionDomainService } from './extension-domain.service';
 import { ExtensionDomainEntity } from '../entities/extension-domain.entity';
-import { ExtensionDTO } from '~/modules/appstore/dto/extension-graphql.dto';
+import { ExtensionDTO } from '~/application/appstore/dto/extension-graphql.dto';
 import { AppRegistry, IRegistryExtension } from '~/extensions/extensions.registry';
 import zodToJsonSchema from 'zod-to-json-schema';
-import type { GetExtensionsGraphQLInput } from '~/modules/appstore/dto/get-extensions-input.dto';
+import type { GetExtensionsGraphQLInput } from '~/application/appstore/dto/get-extensions-input.dto';
 
 /**
  * Новый доменный сервис, занимающийся сборкой информации о расширениях:

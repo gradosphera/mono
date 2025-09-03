@@ -1,4 +1,4 @@
-import { ProjectDomainEntity } from '../../domain/entities/project.entity';
+import { ProjectDomainEntity } from '../../domain/interfaces/project.entity';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
 
 export class ProjectMapper {

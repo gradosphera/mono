@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 import config from '~/config/config';
-import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { Provider } from '@nestjs/common';
 
 export const REDIS_PROVIDER = 'REDIS_CLIENT';
@@ -15,6 +15,20 @@ export const RedisProvider: Provider = {
     });
 
     const redisPublisher = new Redis({
+      port: config.redis.port,
+      host: config.redis.host,
+      password: config.redis.password,
+    });
+
+    // Создаем отдельный клиент для команд управления стримами
+    const redisStreamManager = new Redis({
+      port: config.redis.port,
+      host: config.redis.host,
+      password: config.redis.password,
+    });
+
+    // Создаем отдельный клиент для чтения стримов (xreadgroup)
+    const redisStreamReader = new Redis({
       port: config.redis.port,
       host: config.redis.host,
       password: config.redis.password,
@@ -40,10 +54,14 @@ export const RedisProvider: Provider = {
 
     logConnectionStatus(redisSubscriber, 'Subscriber');
     logConnectionStatus(redisPublisher, 'Publisher');
+    logConnectionStatus(redisStreamManager, 'StreamManager');
+    logConnectionStatus(redisStreamReader, 'StreamReader');
 
     return {
       subscriber: redisSubscriber,
       publisher: redisPublisher,
+      streamManager: redisStreamManager,
+      streamReader: redisStreamReader,
     };
   },
   inject: [WinstonLoggerService], // Инжектируем логгер

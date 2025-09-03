@@ -7,6 +7,7 @@ import { BlockchainModule } from './blockchain/blockchain.module';
 import { GeneratorInfrastructureModule } from './generator/generator.module';
 import { RedisModule } from './redis/redis.module';
 import { NovuModule } from './novu/novu.module';
+import { EventsInfrastructureModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { NovuModule } from './novu/novu.module';
     GeneratorInfrastructureModule,
     RedisModule,
     NovuModule,
+    EventsInfrastructureModule,
   ],
   exports: [
     MongooseModule.forRoot(config.mongoose.url),
@@ -26,6 +28,7 @@ import { NovuModule } from './novu/novu.module';
     GeneratorInfrastructureModule,
     RedisModule,
     NovuModule,
+    EventsInfrastructureModule,
   ],
 })
 export class InfrastructureModule {}

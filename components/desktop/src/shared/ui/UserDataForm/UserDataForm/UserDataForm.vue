@@ -2,27 +2,43 @@
 div
   q-form(ref='localUserDataForm')
     slot(name='top')
-
-    .full-width.text-center
-      q-btn-group(flat)
-        q-btn(
+    p.full-width.text-center.text-bold(v-if='showTypeButtons') Кто Вы?
+    .row(v-if='showTypeButtons')
+      .col-xs-12.col-sm-12.col-md-4.q-pa-sm
+        q-btn.full-width(
           glossy,
           label='Физлицо',
-          :color='userData.type === "individual" ? "primary" : undefined',
-          @click='userData.type = "individual"'
+          color='primary',
+          @click='selectType("individual")',
+          style='height: 75px'
         )
-        q-btn(
+      .col-xs-12.col-sm-12.col-md-4.q-pa-sm
+        q-btn.full-width(
           glossy,
-          label='Предприниматель',
-          :color='userData.type === "entrepreneur" ? "primary" : undefined',
-          @click='userData.type = "entrepreneur"'
+          label='ИП',
+          color='primary',
+          @click='selectType("entrepreneur")',
+          style='height: 75px'
         )
-        q-btn(
+      .col-xs-12.col-sm-12.col-md-4.q-pa-sm
+        q-btn.full-width(
           glossy,
           label='Организация',
-          :color='userData.type === "organization" ? "primary" : undefined',
-          @click='userData.type = "organization"'
+          color='primary',
+          @click='selectType("organization")',
+          style='height: 75px'
         )
+
+    .full-width.text-center(v-else)
+      q-btn(
+        flat,
+        color='grey-7',
+        full-width,
+        :label='getSelectedTypeLabel()',
+        @click='changeAccountType',
+        size='sm',
+        icon='arrow_back'
+      )
 
     div(v-if='userData.type === "individual"')
       IndividualDataForm(v-model:userData='userData')
@@ -44,10 +60,40 @@ import { OrganizationDataForm } from '../OrganizationDataForm';
 import { EntrepreneurDataForm } from '../EntrepreneurDataForm';
 
 const props = defineProps<{ userData: IUserData }>();
+const emit = defineEmits<{
+  typeSelected: [type: 'individual' | 'entrepreneur' | 'organization'];
+  typeCleared: [];
+}>();
 
 const userData = ref<IUserData>(props.userData);
+const showTypeButtons = ref<boolean>(
+  !userData.value.type || userData.value.type === null,
+); // Показывать кнопки если тип не выбран
 
-if (!userData.value.type) userData.value.type = 'individual';
+const selectType = (type: 'individual' | 'entrepreneur' | 'organization') => {
+  userData.value.type = type;
+  showTypeButtons.value = false; // Скрыть кнопки после выбора
+  emit('typeSelected', type); // Сообщить родителю о выборе типа
+};
+
+const changeAccountType = () => {
+  (userData.value.type as any) = undefined; // Скрыть формы путем удаления типа
+  showTypeButtons.value = true; // Показать кнопки выбора типа
+  emit('typeCleared'); // Сообщить родителю о сбросе типа
+};
+
+const getSelectedTypeLabel = () => {
+  switch (userData.value.type) {
+    case 'individual':
+      return 'Физлицо';
+    case 'entrepreneur':
+      return 'Предприниматель';
+    case 'organization':
+      return 'Организация';
+    default:
+      return 'Выбрать тип';
+  }
+};
 
 const localUserDataForm = ref(null);
 </script>

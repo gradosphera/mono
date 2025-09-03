@@ -1,4 +1,4 @@
-import type { AccountType } from '~/modules/account/enum/account-type.enum';
+import type { AccountType } from '~/application/account/enum/account-type.enum';
 
 /**
  * Интерфейс сертификата физического лица

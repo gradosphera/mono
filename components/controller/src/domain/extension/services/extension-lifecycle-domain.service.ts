@@ -3,7 +3,7 @@
 import { Injectable, type INestApplication } from '@nestjs/common';
 import { ExtensionDomainService } from '~/domain/extension/services/extension-domain.service';
 import { AppRegistry } from '~/extensions/extensions.registry';
-import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 @Injectable()
 export class ExtensionLifecycleDomainService<TConfig = any> {

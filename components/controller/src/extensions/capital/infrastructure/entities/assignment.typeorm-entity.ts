@@ -8,7 +8,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { AssignmentStatus } from '../../domain/entities/assignment.entity';
+import { AssignmentStatus } from '../../domain/interfaces/assignment.entity';
 import { ProjectTypeormEntity } from './project.typeorm-entity';
 import { CommitTypeormEntity } from './commit.typeorm-entity';
 

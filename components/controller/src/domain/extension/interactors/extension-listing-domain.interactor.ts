@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ExtensionDomainListingService } from '../services/extension-listing-domain.service';
-import { ExtensionDTO } from '~/modules/appstore/dto/extension-graphql.dto';
-import { GetExtensionsGraphQLInput } from '~/modules/appstore/dto/get-extensions-input.dto';
+import { ExtensionDTO } from '~/application/appstore/dto/extension-graphql.dto';
+import { GetExtensionsGraphQLInput } from '~/application/appstore/dto/get-extensions-input.dto';
 
 @Injectable()
 export class ExtensionDomainListingInteractor<TConfig = any> {

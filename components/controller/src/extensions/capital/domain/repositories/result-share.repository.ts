@@ -1,4 +1,4 @@
-import { ResultShareDomainEntity } from '../entities/result-share.entity';
+import { ResultShareDomainEntity } from '../interfaces/result-share.entity';
 
 export interface ResultShareRepository {
   create(share: Omit<ResultShareDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ResultShareDomainEntity>;

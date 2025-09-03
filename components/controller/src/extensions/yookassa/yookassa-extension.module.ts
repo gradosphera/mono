@@ -7,7 +7,7 @@ import config from '~/config/config';
 import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { ProviderInteractor } from '~/domain/provider/provider.interactor';
 import { IPNProvider } from '~/services/payment/ipn/ipnProvider';
-import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { TypeOrmPaymentRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-payment.repository';
 import { PaymentEntity } from '~/infrastructure/database/typeorm/entities/payment.entity';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';

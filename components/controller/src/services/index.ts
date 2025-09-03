@@ -5,7 +5,6 @@ export * as userService from './user.service';
 export * as blockchainService from './blockchain.service';
 export * as documentService from './document.service';
 export * as coopService from './coop.service';
-export * as wsService from './ws.service';
 export * as systemService from './system.service';
 export * as participantService from './participant.service';
 export * as redisService from './redis.service';

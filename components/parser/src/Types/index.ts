@@ -29,6 +29,10 @@ export interface IParserAction {
   process: (db: Database, action: IAction) => Promise<void>
 }
 
+export interface IParserFork {
+  process: (db: Database, block_num: number) => Promise<void>
+}
+
 export interface ITableResult {
   results: IDelta[]
   page: number

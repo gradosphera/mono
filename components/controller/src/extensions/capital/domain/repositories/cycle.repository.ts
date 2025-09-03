@@ -1,4 +1,4 @@
-import { CycleDomainEntity } from '../entities/cycle.entity';
+import { CycleDomainEntity } from '../interfaces/cycle.entity';
 
 export interface CycleRepository {
   create(cycle: Omit<CycleDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<CycleDomainEntity>;

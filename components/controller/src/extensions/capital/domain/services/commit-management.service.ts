@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CommitDomainEntity, CommitStatus } from '../entities/commit.entity';
-import { AssignmentDomainEntity, AssignmentStatus } from '../entities/assignment.entity';
+import { CommitDomainEntity, CommitStatus } from '../interfaces/commit.entity';
+import { AssignmentDomainEntity, AssignmentStatus } from '../interfaces/assignment.entity';
 import { COMMIT_REPOSITORY, CommitRepository } from '../repositories/commit.repository';
 import { ASSIGNMENT_REPOSITORY, AssignmentRepository } from '../repositories/assignment.repository';
 import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../repositories/contributor.repository';

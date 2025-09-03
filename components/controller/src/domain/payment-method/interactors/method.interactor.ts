@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PAYMENT_METHOD_REPOSITORY, PaymentMethodRepository } from '../../common/repositories/payment-method.repository';
 import { PaymentMethodDomainEntity } from '../entities/method-domain.entity';
 import { randomUUID } from 'crypto';
-import { UpdateBankAccountInputDTO } from '~/modules/payment-method/dto/update-bank-account-input.dto';
+import { UpdateBankAccountInputDTO } from '~/application/payment-method/dto/update-bank-account-input.dto';
 import type { ListPaymentMethodsDomainInterface } from '../interfaces/list-payment-methods-input.interface';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { CreateBankAccountDomainInterface } from '../interfaces/create-bank-account-domain.interface';

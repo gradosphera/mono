@@ -1,6 +1,6 @@
 import type { Cooperative } from 'cooptypes';
-import type { RegisterRole } from '~/modules/account/enum/account-role-on-register.enum';
-import type { AccountType } from '~/modules/account/enum/account-type.enum';
+import type { RegisterRole } from '~/application/account/enum/account-role-on-register.enum';
+import type { AccountType } from '~/application/account/enum/account-type.enum';
 
 export interface AddParticipantDomainInterface {
   email: string;

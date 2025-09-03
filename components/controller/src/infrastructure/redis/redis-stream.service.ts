@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 import { REDIS_PROVIDER } from './redis.provider';
-import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 export interface StreamMessage {
   messageId: string;
@@ -25,7 +25,8 @@ export class RedisStreamService implements OnModuleDestroy {
   private consumers: Map<string, boolean> = new Map();
 
   constructor(
-    @Inject(REDIS_PROVIDER) private readonly redisClient: { subscriber: Redis; publisher: Redis },
+    @Inject(REDIS_PROVIDER)
+    private readonly redisClient: { subscriber: Redis; publisher: Redis; streamManager: Redis; streamReader: Redis },
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(RedisStreamService.name);
@@ -36,6 +37,9 @@ export class RedisStreamService implements OnModuleDestroy {
     this.consumers.forEach((_, key) => {
       this.consumers.set(key, false);
     });
+    // Закрываем дополнительные соединения
+    this.redisClient.streamManager.quit();
+    this.redisClient.streamReader.quit();
   }
 
   /**
@@ -43,7 +47,7 @@ export class RedisStreamService implements OnModuleDestroy {
    */
   async createConsumerGroup(stream: string, group: string, startId = '0'): Promise<void> {
     try {
-      await this.redisClient.subscriber.xgroup('CREATE', stream, group, startId, 'MKSTREAM');
+      await this.redisClient.streamManager.xgroup('CREATE', stream, group, startId, 'MKSTREAM');
       this.logger.log(`Consumer group created: ${group} for stream: ${stream}`);
     } catch (error: any) {
       if (error.message.includes('BUSYGROUP')) {
@@ -72,7 +76,7 @@ export class RedisStreamService implements OnModuleDestroy {
 
     while (this.consumers.get(consumerKey)) {
       try {
-        const result: any = await this.redisClient.subscriber.xreadgroup(
+        const result: any = await this.redisClient.streamReader.xreadgroup(
           'GROUP',
           group,
           consumer,
@@ -124,7 +128,7 @@ export class RedisStreamService implements OnModuleDestroy {
    */
   async acknowledgeMessage(stream: string, group: string, messageId: string): Promise<void> {
     try {
-      await this.redisClient.subscriber.xack(stream, group, messageId);
+      await this.redisClient.streamManager.xack(stream, group, messageId);
       this.logger.debug(`Message acknowledged: ${messageId} in stream ${stream}`);
     } catch (error: any) {
       this.logger.error(`Error acknowledging message ${messageId} in stream ${stream}, group ${group}: ${error.message}`);
@@ -146,7 +150,7 @@ export class RedisStreamService implements OnModuleDestroy {
    */
   async getPendingMessages(stream: string, group: string): Promise<any> {
     try {
-      return await this.redisClient.subscriber.xpending(stream, group);
+      return await this.redisClient.streamManager.xpending(stream, group);
     } catch (error: any) {
       this.logger.error(`Error getting pending messages: ${error.message}`);
       throw error;
@@ -158,7 +162,7 @@ export class RedisStreamService implements OnModuleDestroy {
    */
   async getConsumerGroups(stream: string): Promise<any> {
     try {
-      return await this.redisClient.subscriber.xinfo('GROUPS', stream);
+      return await this.redisClient.streamManager.xinfo('GROUPS', stream);
     } catch (error: any) {
       this.logger.error(`Error getting consumer groups: ${error.message}`);
       throw error;

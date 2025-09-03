@@ -2,10 +2,10 @@ import type { PaymentDomainInterface, PaymentDetailsDomainInterface } from '../i
 import { PaymentStatusEnum } from '../enums/payment-status.enum';
 import { PaymentTypeEnum, PaymentDirectionEnum } from '../enums/payment-type.enum';
 import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
-import { IndividualCertificateDTO } from '~/modules/common/dto/individual-certificate.dto';
-import { EntrepreneurCertificateDTO } from '~/modules/common/dto/entrepreneur-certificate.dto';
-import { OrganizationCertificateDTO } from '~/modules/common/dto/organization-certificate.dto';
-import { AccountType } from '~/modules/account/enum/account-type.enum';
+import { IndividualCertificateDTO } from '~/application/common/dto/individual-certificate.dto';
+import { EntrepreneurCertificateDTO } from '~/application/common/dto/entrepreneur-certificate.dto';
+import { OrganizationCertificateDTO } from '~/application/common/dto/organization-certificate.dto';
+import { AccountType } from '~/application/account/enum/account-type.enum';
 
 /**
  * Универсальная доменная сущность платежа

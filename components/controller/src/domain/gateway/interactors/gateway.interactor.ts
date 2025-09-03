@@ -23,7 +23,7 @@ import { ProviderInteractor } from '~/domain/provider/provider.interactor';
 import { QuantityUtils } from '~/shared/utils/quantity.utils';
 import { SystemDomainInteractor } from '~/domain/system/interactors/system.interactor';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
-import { AccountType } from '~/modules/account/enum/account-type.enum';
+import { AccountType } from '~/application/account/enum/account-type.enum';
 import Settings from '~/models/settings.model';
 import { PaymentMethodRepository, PAYMENT_METHOD_REPOSITORY } from '~/domain/common/repositories/payment-method.repository';
 import type { PaymentDetailsDomainInterface } from '../interfaces/payment-domain.interface';

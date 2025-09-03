@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { ShareType } from '../../domain/entities/result-share.entity';
+import { ShareType } from '../../domain/interfaces/result-share.entity';
 import { ProjectTypeormEntity } from './project.typeorm-entity';
 import { ContributorTypeormEntity } from './contributor.typeorm-entity';
 

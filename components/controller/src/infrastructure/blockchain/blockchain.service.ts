@@ -6,7 +6,7 @@ import { Session, TransactResult } from '@wharfkit/session';
 import { WalletPluginPrivateKey } from '@wharfkit/wallet-plugin-privatekey';
 import config from '~/config/config';
 import { BlockchainPort } from '~/domain/common/ports/blockchain.port';
-import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
 import type { BlockchainAccountInterface } from '~/types/shared';
 

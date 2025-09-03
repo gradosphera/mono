@@ -15,12 +15,12 @@ import { AgendaDomainModule } from './agenda/agenda-domain.module';
 import { CooplaceDomainModule } from './cooplace/cooplace.module';
 import { DesktopDomainModule } from './desktop/desktop-domain.module';
 import { MeetDomainModule } from './meet/meet-domain.module';
-import { ControllerWsMeetModule } from './meet/controllers-ws-meet.module';
 import { UserCertificateDomainModule } from './user-certificate/user-certificate.module';
 import { GatewayDomainModule } from './gateway/gateway-domain.module';
 import { WalletDomainModule } from './wallet/wallet-domain.module';
 import { NotificationDomainModule } from './notification/notification-domain.module';
 import { LedgerDomainModule } from './ledger/ledger-domain.module';
+import { ParserDomainModule } from './parser/parser-domain.module';
 
 @Module({
   imports: [
@@ -39,12 +39,12 @@ import { LedgerDomainModule } from './ledger/ledger-domain.module';
     ParticipantDomainModule,
     CooplaceDomainModule,
     MeetDomainModule,
-    ControllerWsMeetModule,
     UserCertificateDomainModule,
     GatewayDomainModule,
     WalletDomainModule,
     NotificationDomainModule,
     LedgerDomainModule,
+    ParserDomainModule,
   ],
   exports: [
     AuthDomainModule,
@@ -67,6 +67,7 @@ import { LedgerDomainModule } from './ledger/ledger-domain.module';
     WalletDomainModule,
     NotificationDomainModule,
     LedgerDomainModule,
+    ParserDomainModule,
   ],
 })
 export class DomainModule {}

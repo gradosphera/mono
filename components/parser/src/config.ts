@@ -41,6 +41,8 @@ export const subsribedTables: IDeltaConfig[] = [
   // регистратор
   { code: 'registrator', table: 'accounts' },
   { code: 'registrator', table: 'coops' },
+
+  { code: 'eosio.token', table: 'accounts', notify: true },
 ]
 
 export const subsribedActions: IActionConfig[] = [

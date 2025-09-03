@@ -1,5 +1,8 @@
 import { Module, Global, forwardRef } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
+import { BlockchainConsumerService } from './blockchain-consumer.service';
+import { RedisModule } from '../redis/redis.module';
+import { EventsInfrastructureModule } from '../events/events.module';
 import { BRANCH_BLOCKCHAIN_PORT } from '~/domain/branch/interfaces/branch-blockchain.port';
 import { BLOCKCHAIN_PORT } from '~/domain/common/ports/blockchain.port';
 import { BranchBlockchainAdapter } from './adapters/branch.adapter';
@@ -24,9 +27,10 @@ import { LEDGER_BLOCKCHAIN_PORT } from '~/domain/ledger/ports/ledger.port';
 
 @Global()
 @Module({
-  imports: [forwardRef(() => DomainModule)],
+  imports: [forwardRef(() => DomainModule), RedisModule, EventsInfrastructureModule],
   providers: [
     BlockchainService,
+    BlockchainConsumerService,
     {
       provide: BLOCKCHAIN_PORT,
       useClass: BlockchainService,
@@ -74,6 +78,7 @@ import { LEDGER_BLOCKCHAIN_PORT } from '~/domain/ledger/ports/ledger.port';
   ],
   exports: [
     BlockchainService,
+    BlockchainConsumerService,
     BLOCKCHAIN_PORT,
     BRANCH_BLOCKCHAIN_PORT,
     SYSTEM_BLOCKCHAIN_PORT,

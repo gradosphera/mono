@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ContributorRepository } from '../../domain/repositories/contributor.repository';
-import { ContributorDomainEntity } from '../../domain/entities/contributor.entity';
+import { ContributorDomainEntity } from '../../domain/interfaces/contributor.entity';
 import { ContributorTypeormEntity } from '../entities/contributor.typeorm-entity';
 
 @Injectable()

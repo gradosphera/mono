@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { CycleStatus } from '../../domain/entities/cycle.entity';
+import { CycleStatus } from '../../domain/interfaces/cycle.entity';
 import { ProjectTypeormEntity } from './project.typeorm-entity';
 
 @Entity('capital_cycles')

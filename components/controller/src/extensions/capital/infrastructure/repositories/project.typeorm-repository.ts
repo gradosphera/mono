@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProjectRepository } from '../../domain/repositories/project.repository';
-import { ProjectDomainEntity } from '../../domain/entities/project.entity';
+import { ProjectDomainEntity } from '../../domain/interfaces/project.entity';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
 import { ProjectMapper } from '../mappers/project.mapper';
 

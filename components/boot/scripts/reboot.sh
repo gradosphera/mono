@@ -1,0 +1,1 @@
+cd ../ && docker stop node && docker rm node && docker compose stop cooparser && sudo rm -rf blockchain-data/ && pnpm run boot && docker compose start cooparser

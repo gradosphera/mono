@@ -41,9 +41,6 @@ importers:
       commitgpt:
         specifier: ^2.0.0
         version: 2.0.0
-      coop-notificator:
-        specifier: workspace:*
-        version: link:components/notificator
       cooptypes:
         specifier: workspace:*
         version: link:components/cooptypes
@@ -196,6 +193,9 @@ importers:
       '@nestjs/core':
         specifier: ^10.0.0
         version: 10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.2)
+      '@nestjs/event-emitter':
+        specifier: ^3.0.1
+        version: 3.0.1(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.2))
       '@nestjs/graphql':
         specifier: ^12.2.1
         version: 12.2.1(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.2))(class-transformer@0.5.1)(class-validator@0.14.1)(graphql@16.9.0)(reflect-metadata@0.1.14)
@@ -1036,73 +1036,6 @@ importers:
       unbuild:
         specifier: ^2.0.0
         version: 2.0.0(sass@1.80.5)(typescript@5.6.3)(vue-tsc@1.8.27(typescript@5.6.3))
-
-  components/notificator:
-    dependencies:
-      axios:
-        specifier: ^1.7.2
-        version: 1.7.7
-      cooptypes:
-        specifier: workspace:*
-        version: link:../cooptypes
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
-      handlebars:
-        specifier: ^4.7.8
-        version: 4.7.8
-      import-sync:
-        specifier: ^2.2.2
-        version: 2.2.2
-      ioredis:
-        specifier: ^5.4.1
-        version: 5.4.1
-      socket.io:
-        specifier: ^4.7.5
-        version: 4.8.1
-    devDependencies:
-      '@antfu/eslint-config':
-        specifier: ^2.18.1
-        version: 2.27.3(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@2.3.3))(typescript@5.6.3))(@vue/compiler-sfc@3.5.12)(eslint@9.13.0(jiti@2.3.3))(typescript@5.6.3)(vitest@1.6.0(@types/node@20.17.3)(jsdom@11.12.0)(sass@1.80.5)(terser@5.36.0))
-      '@antfu/ni':
-        specifier: ^0.21.12
-        version: 0.21.12
-      '@antfu/utils':
-        specifier: ^0.7.8
-        version: 0.7.10
-      '@types/node':
-        specifier: ^20.12.12
-        version: 20.17.3
-      bumpp:
-        specifier: ^9.4.1
-        version: 9.8.0
-      concurrently:
-        specifier: ^8.2.2
-        version: 8.2.2
-      eslint:
-        specifier: ^9.3.0
-        version: 9.13.0(jiti@2.3.3)
-      esno:
-        specifier: ^4.7.0
-        version: 4.8.0
-      pnpm:
-        specifier: ^9.1.1
-        version: 9.12.3
-      rimraf:
-        specifier: ^5.0.7
-        version: 5.0.10
-      typescript:
-        specifier: ^5.4.5
-        version: 5.6.3
-      unbuild:
-        specifier: ^2.0.0
-        version: 2.0.0(sass@1.80.5)(typescript@5.6.3)(vue-tsc@1.8.27(typescript@5.6.3))
-      vite:
-        specifier: ^5.2.11
-        version: 5.4.10(@types/node@20.17.3)(sass@1.80.5)(terser@5.36.0)
-      vitest:
-        specifier: ^1.6.0
-        version: 1.6.0(@types/node@20.17.3)(jsdom@11.12.0)(sass@1.80.5)(terser@5.36.0)
 
   components/parser:
     dependencies:
@@ -3786,10 +3719,6 @@ packages:
     peerDependencies:
       vue: ^3.2.0
 
-  '@httptoolkit/esm@3.3.0':
-    resolution: {integrity: sha512-gS+TH14750cveYP5p2q/oLyjVV5+qRFZMOpsPzK1KrgacqKc6RLDmt3ioGaMjsn1aianQbROkl4QXDJmO5swPA==}
-    engines: {node: '>=6'}
-
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -4264,6 +4193,12 @@ packages:
         optional: true
       '@nestjs/websockets':
         optional: true
+
+  '@nestjs/event-emitter@3.0.1':
+    resolution: {integrity: sha512-0Ln/x+7xkU6AJFOcQI9tIhUMXVF7D5itiaQGOyJbXtlAfAIt8gzDdJm+Im7cFzKoWkiW5nCXCPh6GSvdQd/3Dw==}
+    peerDependencies:
+      '@nestjs/common': ^10.0.0 || ^11.0.0
+      '@nestjs/core': ^10.0.0 || ^11.0.0
 
   '@nestjs/graphql@12.2.1':
     resolution: {integrity: sha512-eXbme7RcecXaz6pZOc3uR9gR7AEAS20BTkzToWab4ExdDJRLhd7ua4C/uNEPUK+82HbNfd3h3z4Mes29N2R+/w==}
@@ -5489,9 +5424,6 @@ packages:
 
   '@types/multer@1.4.12':
     resolution: {integrity: sha512-pQ2hoqvXiJt2FP9WQVLPRO+AmiIm/ZYkavPlIQnx282u4ZrVdztx0pkh3jjpQt0Kz+YI0YhSG264y08UJKoUQg==}
-
-  '@types/node-fetch@2.6.11':
-    resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
 
   '@types/node-fetch@2.6.12':
     resolution: {integrity: sha512-8nneRWKCg3rMtF69nLQJnOYUcbafYeFSjqkw3jCRLsqkWFlHaoQrr5mXmofFGOx3DKn7UfmBMyov8ySvLRVldA==}
@@ -9811,9 +9743,6 @@ packages:
     resolution: {integrity: sha512-2SPlun1JUPWoM6t3F0dw0FkCF/jWY8kttcY4f599GLTSjh2OCuuhdTkJQsEcZzBqbXZGKMK2OqW1oZsjtf/gQA==}
     engines: {node: '>=8'}
     hasBin: true
-
-  import-sync@2.2.2:
-    resolution: {integrity: sha512-MQ+8aB1LZu0dHqTmpkOJ5DLCqQNVNqbMrH/S9nvHChUSMsAlX6R3ydQhX3R5/YfCU6+qU3cbASiX59hJisMKgg==}
 
   imurmurhash@0.1.4:
     resolution: {integrity: sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA==}
@@ -17346,7 +17275,7 @@ snapshots:
   '@blockmatic/eosio-ship-reader@1.2.0(encoding@0.1.13)(typescript@5.6.3)':
     dependencies:
       '@eosrio/node-abieos': 2.2.0
-      '@types/node-fetch': 2.6.11
+      '@types/node-fetch': 2.6.12
       eosjs: 22.1.0
       lodash.omit: 4.5.0
       node-fetch: 2.7.0(encoding@0.1.13)
@@ -18782,8 +18711,6 @@ snapshots:
       '@tanstack/vue-virtual': 3.10.8(vue@3.5.12(typescript@4.9.5))
       vue: 3.5.12(typescript@4.9.5)
 
-  '@httptoolkit/esm@3.3.0': {}
-
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.6':
@@ -19428,6 +19355,12 @@ snapshots:
       '@nestjs/platform-express': 10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@10.4.6)
     transitivePeerDependencies:
       - encoding
+
+  '@nestjs/event-emitter@3.0.1(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.2))':
+    dependencies:
+      '@nestjs/common': 10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2)
+      '@nestjs/core': 10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.2)
+      eventemitter2: 6.4.9
 
   '@nestjs/graphql@12.2.1(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@10.4.6(@nestjs/common@10.4.6(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/platform-express@10.4.6)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.2))(class-transformer@0.5.1)(class-validator@0.14.1)(graphql@16.9.0)(reflect-metadata@0.1.14)':
     dependencies:
@@ -20942,11 +20875,6 @@ snapshots:
   '@types/multer@1.4.12':
     dependencies:
       '@types/express': 4.17.21
-
-  '@types/node-fetch@2.6.11':
-    dependencies:
-      '@types/node': 20.17.16
-      form-data: 4.0.1
 
   '@types/node-fetch@2.6.12':
     dependencies:
@@ -26975,10 +26903,6 @@ snapshots:
     dependencies:
       pkg-dir: 4.2.0
       resolve-cwd: 3.0.0
-
-  import-sync@2.2.2:
-    dependencies:
-      '@httptoolkit/esm': 3.3.0
 
   imurmurhash@0.1.4: {}
 

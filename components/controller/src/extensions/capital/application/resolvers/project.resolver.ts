@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { CapitalApplicationService } from '../services/capital-application.service';
 import { CreateProjectRequestInputDTO, ProjectResponseDTO } from '../dto/create-project.dto';
-import { ProjectStatus } from '../../domain/entities/project.entity';
+import { ProjectStatus } from '../../domain/interfaces/project.entity';
 
 @Resolver(() => ProjectResponseDTO)
 export class ProjectResolver {

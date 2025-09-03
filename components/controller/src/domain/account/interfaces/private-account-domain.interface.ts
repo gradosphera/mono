@@ -1,5 +1,5 @@
 import type { Cooperative } from 'cooptypes';
-import type { AccountType } from '~/modules/account/enum/account-type.enum';
+import type { AccountType } from '~/application/account/enum/account-type.enum';
 
 export interface PrivateAccountDomainInterface {
   type: AccountType;

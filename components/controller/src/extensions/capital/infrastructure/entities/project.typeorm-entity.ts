@@ -8,7 +8,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { ProjectStatus } from '../../domain/entities/project.entity';
+import { ProjectStatus } from '../../domain/interfaces/project.entity';
 import { CycleTypeormEntity } from './cycle.typeorm-entity';
 import { AssignmentTypeormEntity } from './assignment.typeorm-entity';
 import { ResultShareTypeormEntity } from './result-share.typeorm-entity';

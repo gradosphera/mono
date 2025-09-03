@@ -17,7 +17,7 @@ import type { QueryResultLegacy } from '~/domain/common/interfaces/query-result-
 import type { RegisterAccountDomainInterface } from '../interfaces/register-account-input.interface';
 import type { RegisteredAccountDomainInterface } from '../interfaces/registeted-account.interface';
 import type { UpdateAccountDomainInterface } from '../interfaces/update-account-input.interface';
-import { AccountType } from '~/modules/account/enum/account-type.enum';
+import { AccountType } from '~/application/account/enum/account-type.enum';
 import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { INDIVIDUAL_REPOSITORY, IndividualRepository } from '~/domain/common/repositories/individual.repository';
 import { ENTREPRENEUR_REPOSITORY, EntrepreneurRepository } from '~/domain/common/repositories/entrepreneur.repository';

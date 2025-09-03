@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { sendEmail } from '~/services/email.service';
-import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DateUtils } from '~/shared/utils/date-utils';
 import { default as config } from '~/config/config';
 import { TrackedMeet, NotificationTypes, ILog } from './types';

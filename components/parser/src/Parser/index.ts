@@ -2,6 +2,7 @@ import { ActionsParser } from '../ActionParser'
 import { BlockParser } from '../BlockParser/Parser/BlockParser'
 import { db } from '../Database'
 import { DeltasParser } from '../DeltaParser'
+import { ForksParser } from '../ForkParser'
 import { loadReader } from '../Reader'
 
 export class Parser {
@@ -11,6 +12,7 @@ export class Parser {
       BlockParser(db, reader)
       ActionsParser(db, reader)
       DeltasParser(db, reader)
+      ForksParser(db, reader)
     }
     catch (e) {
       console.error('Ошибка: ', e)

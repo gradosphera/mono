@@ -21,7 +21,7 @@ import {
 } from '~/domain/notification/services/notification-domain.service';
 import { userStatus } from '~/types';
 import type { PrivateAccountDomainInterface } from '../interfaces/private-account-domain.interface';
-import { AccountType } from '~/modules/account/enum/account-type.enum';
+import { AccountType } from '~/application/account/enum/account-type.enum';
 
 @Injectable()
 export class AccountDomainService {

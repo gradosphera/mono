@@ -7,6 +7,7 @@ import {
   NotificationSubscriberSyncService,
   NOTIFICATION_SUBSCRIBER_SYNC_SERVICE,
 } from './services/notification-subscriber-sync.service';
+import { AccountRoleEventService } from './services/account-role-event.service';
 import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
 import { NotificationDomainModule } from '~/domain/notification/notification-domain.module';
 
@@ -17,6 +18,7 @@ import { NotificationDomainModule } from '~/domain/notification/notification-dom
     AccountDomainInteractor,
     AccountDomainService,
     NotificationSubscriberSyncService,
+    AccountRoleEventService,
     {
       provide: ACCOUNT_DOMAIN_SERVICE,
       useExisting: AccountDomainService,
@@ -30,6 +32,7 @@ import { NotificationDomainModule } from '~/domain/notification/notification-dom
     AccountDomainInteractor,
     AccountDomainService,
     NotificationSubscriberSyncService,
+    AccountRoleEventService,
     ACCOUNT_DOMAIN_SERVICE,
     NOTIFICATION_SUBSCRIBER_SYNC_SERVICE,
   ],

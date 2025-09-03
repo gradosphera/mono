@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ResultShareDomainEntity, ShareType } from '../entities/result-share.entity';
+import { ResultShareDomainEntity, ShareType } from '../interfaces/result-share.entity';
 import { RESULT_SHARE_REPOSITORY, ResultShareRepository } from '../repositories/result-share.repository';
 import { PROJECT_REPOSITORY, ProjectRepository } from '../repositories/project.repository';
 import { COMMIT_REPOSITORY, CommitRepository } from '../repositories/commit.repository';
 import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../repositories/contributor.repository';
-import { CommitStatus } from '../entities/commit.entity';
+import { CommitStatus } from '../interfaces/commit.entity';
 
 @Injectable()
 export class ResultCalculationService {

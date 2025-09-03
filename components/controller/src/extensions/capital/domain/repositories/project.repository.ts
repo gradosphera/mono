@@ -1,4 +1,4 @@
-import { ProjectDomainEntity } from '../entities/project.entity';
+import { ProjectDomainEntity } from '../interfaces/project.entity';
 
 export interface ProjectRepository {
   create(project: Omit<ProjectDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ProjectDomainEntity>;

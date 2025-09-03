@@ -8,7 +8,7 @@ import type {
   OrganizationCertificateDomainInterface,
 } from '../interfaces/user-certificate-domain.interface';
 import { UserCertificateServiceInterface } from '../interfaces/user-certificate-service.interface';
-import { AccountType } from '~/modules/account/enum/account-type.enum';
+import { AccountType } from '~/application/account/enum/account-type.enum';
 
 @Injectable()
 export class UserCertificateDomainService implements UserCertificateServiceInterface {

@@ -5,10 +5,10 @@ import { ResultCalculationService } from '../../domain/services/result-calculati
 import { CreateProjectRequestInputDTO, ProjectResponseDTO } from '../dto/create-project.dto';
 import { CreateAssignmentRequestInputDTO, AssignmentResponseDTO } from '../dto/create-assignment.dto';
 import { CreateCommitRequestInputDTO, CommitResponseDTO, ReviewCommitRequestInputDTO } from '../dto/create-commit.dto';
-import { ProjectDomainEntity } from '../../domain/entities/project.entity';
-import { AssignmentDomainEntity } from '../../domain/entities/assignment.entity';
-import { CommitDomainEntity } from '../../domain/entities/commit.entity';
-import { ResultShareDomainEntity } from '../../domain/entities/result-share.entity';
+import { ProjectDomainEntity } from '../../domain/interfaces/project.entity';
+import { AssignmentDomainEntity } from '../../domain/interfaces/assignment.entity';
+import { CommitDomainEntity } from '../../domain/interfaces/commit.entity';
+import { ResultShareDomainEntity } from '../../domain/interfaces/result-share.entity';
 
 @Injectable()
 export class CapitalApplicationService {

@@ -2,7 +2,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DomainModule } from './domain/domain.module';
-import { ApplicationModule } from './modules/application.module';
+import { ApplicationModule } from './application/application.module';
 import { InfrastructureModule } from './infrastructure/infrastructure.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 

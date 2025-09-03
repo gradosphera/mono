@@ -1,5 +1,5 @@
 import { SovietContract, RegistratorContract, DraftContract } from 'cooptypes';
-import { IAction, ITable } from '../../src/types/common';
+import { IAction, IDelta } from '../../src/types/common';
 import mongoose from 'mongoose';
 import { DocumentsRegistry } from '@coopenomics/factory';
 
@@ -13,7 +13,7 @@ export const insertActions = async (actions: IAction[]) => {
   await collection.insertMany(actions);
 };
 
-export const insertDelta = async (delta: ITable) => {
+export const insertDelta = async (delta: IDelta) => {
   const collection = mongoose.connection.db.collection('deltas'); // Замените на имя вашей коллекции
   await collection.insertOne(delta);
 };
@@ -92,7 +92,7 @@ export const fixtureDelta = (
   table: string,
   primary_key: string,
   value: any
-): ITable => {
+): IDelta => {
   return {
     chain_id: '8a34ec7df1b8cd06ff4a8abbaa7cc50300823350cadc59ab296cb00d104d2b8f',
     block_num: block_num,

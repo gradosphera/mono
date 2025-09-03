@@ -1,5 +1,5 @@
 import type { Database } from '../../Database'
-import { publishEvent } from '../../RedisNotifier'
+import { publishDelta } from '../../RedisNotifier'
 import type { EosioShipReaderResolved, IDelta } from '../../Types'
 import { subsribedTables } from '../../config'
 import { DeltaParserFactory } from '../Factory'
@@ -14,9 +14,9 @@ export async function DeltasParser(db: Database, reader: EosioShipReaderResolved
     const parser = DeltaParserFactory.create(delta.code, delta.scope, delta.table)
     if (parser) {
       await parser.process(db, delta)
-
+      console.log('publishDelta', delta)
       if (source?.notify)
-        await publishEvent('delta', delta)
+        await publishDelta('delta', delta)
     }
   })
 

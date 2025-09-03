@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { ContributorRole } from '../../domain/entities/contributor.entity';
+import { ContributorRole } from '../../domain/interfaces/contributor.entity';
 import { CommitTypeormEntity } from './commit.typeorm-entity';
 import { ResultShareTypeormEntity } from './result-share.typeorm-entity';
 

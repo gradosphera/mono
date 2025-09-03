@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { AccountExtensionPort } from '../ports/account-extension-port';
 import { AccountDomainInteractor } from '~/domain/account/interactors/account.interactor';
 import { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
-import { PaginationInputDTO } from '~/modules/common/dto/pagination.dto';
+import { PaginationInputDTO } from '~/application/common/dto/pagination.dto';
 import { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { GetAccountsInputDomainInterface } from '~/domain/account/interfaces/get-accounts-input.interface';
 

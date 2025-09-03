@@ -1,4 +1,4 @@
-import { AssignmentDomainEntity } from '../entities/assignment.entity';
+import { AssignmentDomainEntity } from '../interfaces/assignment.entity';
 
 export interface AssignmentRepository {
   create(assignment: Omit<AssignmentDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<AssignmentDomainEntity>;

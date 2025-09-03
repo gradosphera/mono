@@ -16,7 +16,7 @@ import { OrganizationDomainEntity } from '../entities/organization-domain.entity
 import { PAYMENT_METHOD_REPOSITORY, PaymentMethodRepository } from '~/domain/common/repositories/payment-method.repository';
 import { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
 import { randomUUID } from 'crypto';
-import { BankPaymentMethodDTO } from '~/modules/payment-method/dto/bank-payment-method.dto';
+import { BankPaymentMethodDTO } from '~/application/payment-method/dto/bank-payment-method.dto';
 import type { SelectBranchInputDomainInterface } from '../interfaces/select-branch-domain-input.interface';
 import config from '~/config/config';
 import { Cooperative } from 'cooptypes';

@@ -1,4 +1,4 @@
-import { ContributorDomainEntity } from '../entities/contributor.entity';
+import { ContributorDomainEntity } from '../interfaces/contributor.entity';
 
 export interface ContributorRepository {
   create(contributor: Omit<ContributorDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContributorDomainEntity>;

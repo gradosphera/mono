@@ -10,12 +10,12 @@ export interface IGetActions<T> {
 }
 
 export interface IGetTables<T> {
-  results: ITable[];
+  results: IDelta[];
   page: number;
   limit: number;
 }
 
-export interface ITable {
+export interface IDelta {
   chain_id: string;
   block_num: number;
   block_id: string;
@@ -64,7 +64,7 @@ export interface IAction {
   elapsed: number;
 }
 
-export type IExtendedTable = ITable;
+export type IExtendedTable = IDelta;
 
 export interface IExtendedAction extends IAction {
   user: IIndividualData | IEntrepreneurData | IOrganizationData | null;

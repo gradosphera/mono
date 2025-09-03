@@ -5,7 +5,7 @@ import { MigrationEntity } from '../infrastructure/database/typeorm/entities/mig
 import config from '../config/config';
 import logger from '../config/logger';
 import { BlockchainService } from '../infrastructure/blockchain/blockchain.service';
-import { WinstonLoggerService } from '../modules/logger/logger-app.service';
+import { WinstonLoggerService } from '../application/logger/logger-app.service';
 import { MigrationLogger } from './migration-logger';
 
 export interface Migration {

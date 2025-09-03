@@ -11,7 +11,7 @@ import {
   type ExtensionDomainRepository,
 } from '~/domain/extension/repositories/extension-domain.repository';
 import { TypeOrmExtensionDomainRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-extension.repository';
-import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { z } from 'zod';
 import config from '~/config/config';

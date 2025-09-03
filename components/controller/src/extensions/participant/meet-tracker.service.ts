@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { WinstonLoggerService } from '~/modules/logger/logger-app.service';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DateUtils } from '~/shared/utils/date-utils';
 import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
 import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';

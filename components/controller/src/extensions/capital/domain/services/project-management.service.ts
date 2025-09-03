@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ProjectDomainEntity, ProjectStatus } from '../entities/project.entity';
+import { ProjectDomainEntity, ProjectStatus } from '../interfaces/project.entity';
 import { PROJECT_REPOSITORY, ProjectRepository } from '../repositories/project.repository';
 import { CYCLE_REPOSITORY, CycleRepository } from '../repositories/cycle.repository';
 import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../repositories/contributor.repository';
