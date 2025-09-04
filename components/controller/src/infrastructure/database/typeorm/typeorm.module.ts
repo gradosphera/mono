@@ -32,14 +32,15 @@ import { TypeOrmLedgerOperationRepository } from './repositories/typeorm-ledger-
 import { LedgerOperationEntity } from './entities/ledger-operation.entity';
 import { ActionEntity } from './entities/action.entity';
 import { DeltaEntity } from './entities/delta.entity';
+import { ForkEntity } from './entities/fork.entity';
 import { SyncStateEntity } from './entities/sync-state.entity';
-import {
-  ACTION_REPOSITORY_PORT,
-  DELTA_REPOSITORY_PORT,
-  SYNC_STATE_REPOSITORY_PORT,
-} from '~/domain/parser/ports/parser.port';
+import { ACTION_REPOSITORY_PORT } from '~/domain/parser/ports/action-repository.port';
+import { DELTA_REPOSITORY_PORT } from '~/domain/parser/ports/delta-repository.port';
+import { FORK_REPOSITORY_PORT } from '~/domain/parser/ports/fork-repository.port';
+import { SYNC_STATE_REPOSITORY_PORT } from '~/domain/parser/ports/sync-state-repository.port';
 import { TypeOrmActionRepository } from './repositories/typeorm-action.repository';
 import { TypeOrmDeltaRepository } from './repositories/typeorm-delta.repository';
+import { TypeOrmForkRepository } from './repositories/typeorm-fork.repository';
 import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.repository';
 
 @Global()
@@ -68,6 +69,7 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       LedgerOperationEntity,
       ActionEntity,
       DeltaEntity,
+      ForkEntity,
       SyncStateEntity,
     ]),
   ],
@@ -117,6 +119,10 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       useClass: TypeOrmDeltaRepository,
     },
     {
+      provide: FORK_REPOSITORY_PORT,
+      useClass: TypeOrmForkRepository,
+    },
+    {
       provide: SYNC_STATE_REPOSITORY_PORT,
       useClass: TypeOrmSyncStateRepository,
     },
@@ -134,6 +140,7 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
     LEDGER_OPERATION_REPOSITORY,
     ACTION_REPOSITORY_PORT,
     DELTA_REPOSITORY_PORT,
+    FORK_REPOSITORY_PORT,
     SYNC_STATE_REPOSITORY_PORT,
   ],
 })

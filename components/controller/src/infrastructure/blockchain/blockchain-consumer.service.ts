@@ -5,6 +5,7 @@ import { IAction, IDelta } from '~/types/common';
 import { RedisStreamService, StreamMessage } from '~/infrastructure/redis/redis-stream.service';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { EventsService } from '~/infrastructure/events/events.service';
+import { config } from '~/config';
 
 export interface BlockchainEventData {
   type: string;
@@ -12,6 +13,13 @@ export interface BlockchainEventData {
   delta?: IDelta;
   block_num?: number;
 }
+
+// Выносим исключения в конфиг или отдельный файл
+const ACTION_EXCEPTIONS = {
+  'eosio.token': ['transfer', 'issue'],
+  'some.other.contract': ['mint', 'burn'],
+  'another.contract': ['*'], // все действия для этого контракта
+};
 
 /**
  * Инфраструктурный сервис потребления событий блокчейна из Redis
@@ -97,11 +105,31 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
   private async processAction(action: IAction): Promise<void> {
     this.logger.debug(`Processing action: ${action.name} from ${action.account}: ${JSON.stringify(action.data)}`);
 
-    // Публикуем событие во внутреннюю шину с типизированным именем
+    // Проверяем, является ли действие исключением
+    const isException = this.isActionException(action.account, action.name);
+
+    // Если не исключение и нет coopname - пропускаем
+    if (!isException && action.data?.coopname !== config.coopname) {
+      this.logger.debug(`Skipping action: ${action.account}::${action.name} - wrong coopname`);
+      return;
+    }
+
+    // Публикуем событие
     const eventName = `action::${action.account}::${action.name}`;
     this.eventsService.emit(eventName, action);
 
     this.logger.debug(`Action published to event bus: ${eventName} with sequence ${action.global_sequence}`);
+  }
+
+  private isActionException(account: string, actionName: string): boolean {
+    const accountExceptions = ACTION_EXCEPTIONS[account];
+    if (!accountExceptions) return false;
+
+    // Если есть звездочка - все действия исключение
+    if (accountExceptions.includes('*')) return true;
+
+    // Проверяем конкретное действие
+    return accountExceptions.includes(actionName);
   }
 
   /**
@@ -110,6 +138,10 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
    */
   private async processDelta(delta: IDelta): Promise<void> {
     this.logger.debug(`Processing delta: ${delta.table} from ${delta.code}`);
+
+    if (delta.value?.coopname != config.coopname) {
+      return;
+    }
 
     // Публикуем событие во внутреннюю шину с типизированным именем
     const eventName = `delta::${delta.code}::${delta.table}`;
@@ -126,7 +158,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
     this.logger.debug(`Processing fork at block: ${block_num}`);
 
     // Публикуем событие во внутреннюю шину с типизированным именем
-    const eventName = `fork`;
+    const eventName = `fork::${block_num}`;
     this.eventsService.emit(eventName, { block_num });
 
     this.logger.debug(`Fork published to event bus: ${eventName}`);

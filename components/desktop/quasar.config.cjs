@@ -131,21 +131,12 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
-      // https: true
+      https: false,
       vueDevtools: false,
-      open: false, // opens browser window automatically
+      open: false,
       port: 3005,
-      hmr: {
-        // clientPort: 3005,
-        //   overlay: false
-      },
-
-      // https: {
-      //   key: fs.readFileSync('./ssl/mono.local-key.pem'),
-      //   cert: fs.readFileSync('./ssl/mono.local.pem'),
-      // },
-      // host: 'dev.coopenomics.world',
-      // allowedHosts: ['all'],
+      strictPort: true,
+      host: '0.0.0.0',
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework

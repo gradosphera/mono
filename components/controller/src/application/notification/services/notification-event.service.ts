@@ -47,6 +47,8 @@ export class NotificationEventService {
       return;
     }
 
+    if (action.receipt.receiver != TokenContract.contractName.production) return;
+
     const recipientUsername = transferData.to;
     const transferAmount = transferData.quantity;
 

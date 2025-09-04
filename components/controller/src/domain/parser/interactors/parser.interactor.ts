@@ -1,13 +1,20 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { ActionDomainInterface } from '../interfaces/action-domain.interface';
 import type { DeltaDomainInterface } from '../interfaces/delta-domain.interface';
+import type { ForkDomainInterface } from '../interfaces/fork-domain.interface';
 import type {
   ActionFilterDomainInterface,
   DeltaFilterDomainInterface,
   PaginatedResultDomainInterface,
 } from '../interfaces/parser-config-domain.interface';
-import type { ActionRepositoryPort, DeltaRepositoryPort, SyncStateRepositoryPort } from '../ports/parser.port';
-import { ACTION_REPOSITORY_PORT, DELTA_REPOSITORY_PORT, SYNC_STATE_REPOSITORY_PORT } from '../ports/parser.port';
+import type { ActionRepositoryPort } from '../ports/action-repository.port';
+import type { DeltaRepositoryPort } from '../ports/delta-repository.port';
+import type { ForkRepositoryPort } from '../ports/fork-repository.port';
+import type { SyncStateRepositoryPort } from '../ports/sync-state-repository.port';
+import { ACTION_REPOSITORY_PORT } from '../ports/action-repository.port';
+import { DELTA_REPOSITORY_PORT } from '../ports/delta-repository.port';
+import { FORK_REPOSITORY_PORT } from '../ports/fork-repository.port';
+import { SYNC_STATE_REPOSITORY_PORT } from '../ports/sync-state-repository.port';
 
 /**
  * Интерактор парсера блокчейна
@@ -20,6 +27,8 @@ export class ParserInteractor {
     private readonly actionRepository: ActionRepositoryPort,
     @Inject(DELTA_REPOSITORY_PORT)
     private readonly deltaRepository: DeltaRepositoryPort,
+    @Inject(FORK_REPOSITORY_PORT)
+    private readonly forkRepository: ForkRepositoryPort,
     @Inject(SYNC_STATE_REPOSITORY_PORT)
     private readonly syncStateRepository: SyncStateRepositoryPort
   ) {}
@@ -36,6 +45,13 @@ export class ParserInteractor {
    */
   async saveDelta(deltaData: Omit<DeltaDomainInterface, 'id' | 'created_at'>): Promise<DeltaDomainInterface> {
     return await this.deltaRepository.save(deltaData);
+  }
+
+  /**
+   * Сохранение форка блокчейна
+   */
+  async saveFork(forkData: Omit<ForkDomainInterface, 'id' | 'created_at'>): Promise<ForkDomainInterface> {
+    return await this.forkRepository.save(forkData);
   }
 
   /**
@@ -78,11 +94,12 @@ export class ParserInteractor {
    * Очистка данных после указанного блока (для репарсинга)
    */
   async purgeAfterBlock(sinceBlock: number): Promise<void> {
-    console.log(`Очищаем действия и дельты после блока: ${sinceBlock}`);
+    console.log(`Очищаем действия, дельты и форки после блока: ${sinceBlock}`);
 
     await Promise.all([
       this.actionRepository.deleteAfterBlock(sinceBlock),
       this.deltaRepository.deleteAfterBlock(sinceBlock),
+      this.forkRepository.deleteAfterBlock(sinceBlock),
     ]);
 
     console.log('Очистка завершена');
@@ -94,23 +111,29 @@ export class ParserInteractor {
   async getStats(): Promise<{
     actionsCount: number;
     deltasCount: number;
+    forksCount: number;
     lastActionBlock: number | null;
     lastDeltaBlock: number | null;
+    lastForkBlock: number | null;
     currentBlock: number;
   }> {
-    const [actionsCount, deltasCount, lastAction, lastDelta, currentBlock] = await Promise.all([
+    const [actionsCount, deltasCount, forksCount, lastAction, lastDelta, lastFork, currentBlock] = await Promise.all([
       this.actionRepository.count(),
       this.deltaRepository.count(),
+      this.forkRepository.count(),
       this.actionRepository.findLastByBlock(),
       this.deltaRepository.findLastByBlock(),
+      this.forkRepository.findLastByBlock(),
       this.syncStateRepository.getCurrentBlock(),
     ]);
 
     return {
       actionsCount,
       deltasCount,
+      forksCount,
       lastActionBlock: lastAction?.block_num || null,
       lastDeltaBlock: lastDelta?.block_num || null,
+      lastForkBlock: lastFork?.block_num || null,
       currentBlock,
     };
   }

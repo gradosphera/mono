@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
-import type { DeltaRepositoryPort } from '~/domain/parser/ports/parser.port';
+import type { DeltaRepositoryPort } from '~/domain/parser/ports/delta-repository.port';
 import type { DeltaDomainInterface } from '~/domain/parser/interfaces/delta-domain.interface';
 import type {
   DeltaFilterDomainInterface,

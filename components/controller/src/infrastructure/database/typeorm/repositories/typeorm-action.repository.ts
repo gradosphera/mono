@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
-import type { ActionRepositoryPort } from '~/domain/parser/ports/parser.port';
+import type { ActionRepositoryPort } from '~/domain/parser/ports/action-repository.port';
 import type { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import type {
   ActionFilterDomainInterface,

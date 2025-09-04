@@ -19,7 +19,7 @@ export interface IDelta {
   chain_id: string;
   block_num: number;
   block_id: string;
-  present: string;
+  present: boolean;
   code: string;
   scope: string;
   table: string;

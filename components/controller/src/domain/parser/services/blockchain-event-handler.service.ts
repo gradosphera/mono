@@ -1,0 +1,120 @@
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
+import type { IAction, IDelta } from '~/types/common';
+import { ParserInteractor } from '../interactors/parser.interactor';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
+import { config } from '~/config';
+
+/**
+ * Доменный сервис для обработки событий блокчейна
+ * Подписывается на события от BlockchainConsumerService и сохраняет данные в базу
+ */
+@Injectable()
+export class BlockchainEventHandlerService implements OnModuleInit {
+  constructor(private readonly parserInteractor: ParserInteractor, private readonly logger: WinstonLoggerService) {
+    this.logger.setContext(BlockchainEventHandlerService.name);
+  }
+
+  async onModuleInit() {
+    this.logger.log('Blockchain event handler service initialized');
+  }
+
+  /**
+   * Обработка события действия блокчейна
+   * Сохраняет действие в базу данных
+   */
+  @OnEvent('action::*')
+  async handleActionEvent(action: IAction): Promise<void> {
+    try {
+      this.logger.debug(`Handling action event: ${action.name} from ${action.account}`);
+
+      // Преобразование данных действия для сохранения
+      const actionData = {
+        transaction_id: action.transaction_id || '',
+        account: action.account,
+        block_num: Number(action.block_num),
+        block_id: action.block_id || '',
+        chain_id: action.chain_id || '',
+        name: action.name,
+        receiver: action.receiver,
+        authorization: action.authorization || [],
+        data: action.data || {},
+        action_ordinal: action.action_ordinal || 0,
+        global_sequence: action.global_sequence || '',
+        account_ram_deltas: action.account_ram_deltas || [],
+        console: action.console,
+        receipt: action.receipt || {
+          receiver: action.receiver,
+          act_digest: '',
+          global_sequence: action.global_sequence || '',
+          recv_sequence: '',
+          auth_sequence: [],
+          code_sequence: 0,
+          abi_sequence: 0,
+        },
+        creator_action_ordinal: action.creator_action_ordinal || 0,
+        context_free: action.context_free || false,
+        elapsed: action.elapsed || 0,
+      };
+
+      await this.parserInteractor.saveAction(actionData);
+      this.logger.debug(`Action saved: ${action.account}::${action.name} with global_sequence ${action.global_sequence}`);
+    } catch (error: any) {
+      this.logger.error(`Error handling action event: ${error.message}`, error.stack);
+      throw error; // Перебрасываем ошибку для корректной обработки
+    }
+  }
+
+  /**
+   * Обработка события дельты блокчейна
+   * Сохраняет дельту в базу данных
+   */
+  @OnEvent('delta::*')
+  async handleDeltaEvent(delta: IDelta): Promise<void> {
+    try {
+      this.logger.debug(`Handling delta event: ${delta.table} from ${delta.code}`);
+
+      // Преобразование данных дельты для сохранения
+      const deltaData = {
+        chain_id: delta.chain_id || '',
+        block_num: Number(delta.block_num),
+        block_id: delta.block_id || '',
+        present: delta.present,
+        code: delta.code,
+        scope: delta.scope,
+        table: delta.table,
+        primary_key: delta.primary_key,
+        value: delta.value,
+      };
+
+      await this.parserInteractor.saveDelta(deltaData);
+      this.logger.debug(`Delta saved: ${delta.code}::${delta.table} with primary_key ${delta.primary_key}`);
+    } catch (error: any) {
+      this.logger.error(`Error handling delta event: ${error.message}`, error.stack);
+      throw error; // Перебрасываем ошибку для корректной обработки
+    }
+  }
+
+  /**
+   * Обработка события форка блокчейна
+   * Сохраняет форк в базу данных
+   */
+  @OnEvent('fork::*')
+  async handleForkEvent(data: { block_num: number }): Promise<void> {
+    try {
+      this.logger.debug(`Handling fork event at block: ${data.block_num}`);
+
+      // Преобразование данных форка для сохранения
+      const forkData = {
+        chain_id: config.blockchain.id, // Используем chain_id из конфигурации
+        block_num: data.block_num,
+      };
+
+      await this.parserInteractor.saveFork(forkData);
+      this.logger.debug(`Fork saved at block: ${data.block_num} for chain: ${config.blockchain.id}`);
+    } catch (error: any) {
+      this.logger.error(`Error handling fork event: ${error.message}`, error.stack);
+      throw error; // Перебрасываем ошибку для корректной обработки
+    }
+  }
+}

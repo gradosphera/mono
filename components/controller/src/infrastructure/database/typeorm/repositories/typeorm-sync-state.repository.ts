@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import type { SyncStateRepositoryPort } from '~/domain/parser/ports/parser.port';
+import type { SyncStateRepositoryPort } from '~/domain/parser/ports/sync-state-repository.port';
 import { SyncStateEntity } from '../entities/sync-state.entity';
 
 /**
