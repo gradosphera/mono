@@ -10,6 +10,8 @@ import { BuiltinPluginModule, Schema as BuiltinSchema } from './builtin/builtin-
 import { ChairmanPluginModule, Schema as ChairmanSchema } from './chairman/chairman-extension.module';
 import { ParticipantPluginModule } from './participant/participant-extension.module';
 import { Schema as ParticipantSchema } from './participant/types';
+import { Schema as CapitalSchema } from './capital/capital-extension.module';
+import { CapitalPluginModule } from './capital/capital-extension.module';
 /**
  * Основной интерфейс для описания расширения в реестре.
  * Обрати внимание: сохраняем его тут, а не в домене, чтобы не тянуть поля readme, instructions и т.д. в домен.
@@ -69,11 +71,11 @@ export const AppRegistry: INamedExtension = {
     title: 'Стол Вкладчика',
     description: 'Расширение для управления интеллектуальными и имущественными вкладами по целевой программе "Благорост".',
     image: 'https://i.ibb.co/HRW1nFY/Chat-GPT-Image-10-2025-20-40-57.png',
-    class: BuiltinPluginModule,
-    schema: BuiltinSchema,
-    tags: ['стол', 'управление', 'благорост'],
-    readme: getReadmeContent('./yookassa'),
-    instructions: getInstructionsContent('./yookassa'),
+    class: CapitalPluginModule,
+    schema: CapitalSchema,
+    tags: ['стол', 'управление'],
+    readme: getReadmeContent('./capital'),
+    instructions: getInstructionsContent('./capital'),
   },
   chairman: {
     is_builtin: true,

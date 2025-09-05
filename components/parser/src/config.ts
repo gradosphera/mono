@@ -43,6 +43,7 @@ export const subsribedTables: IDeltaConfig[] = [
   { code: 'registrator', table: 'coops' },
 
   { code: 'eosio.token', table: 'accounts', notify: true },
+  { code: 'capital', table: 'projects', notify: true },
 ]
 
 export const subsribedActions: IActionConfig[] = [
@@ -74,6 +75,8 @@ export const subsribedActions: IActionConfig[] = [
   { code: 'ledger', action: 'unblock', notify: true },
   { code: 'ledger', action: 'writeoff', notify: true },
   { code: 'ledger', action: 'writeoffcnsl', notify: true },
+
+  { code: 'capital', action: '*', notify: true },
 ]
 
 // --------------------------

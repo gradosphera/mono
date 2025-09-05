@@ -1,17 +1,16 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CycleTypeormEntity } from '../entities/cycle.typeorm-entity';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
 import { ContributorTypeormEntity } from '../entities/contributor.typeorm-entity';
-import { AssignmentTypeormEntity } from '../entities/assignment.typeorm-entity';
-import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
-import { ResultShareTypeormEntity } from '../entities/result-share.typeorm-entity';
 import { config } from '~/config';
+
+// Константа для имени подключения к базе данных capital
+export const CAPITAL_DATABASE_CONNECTION = 'capital';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      name: 'capital', // Отдельное подключение для capital
+      name: CAPITAL_DATABASE_CONNECTION, // Отдельное подключение для capital
       useFactory: () => ({
         type: 'postgres',
         host: config.postgres.host,
@@ -20,29 +19,12 @@ import { config } from '~/config';
         password: config.postgres.password,
         database: config.postgres.database,
 
-        entities: [
-          CycleTypeormEntity,
-          ProjectTypeormEntity,
-          ContributorTypeormEntity,
-          AssignmentTypeormEntity,
-          CommitTypeormEntity,
-          ResultShareTypeormEntity,
-        ],
+        entities: [ProjectTypeormEntity, ContributorTypeormEntity],
         synchronize: true, // В продакшене использовать миграции
         logging: false,
       }),
     }),
-    TypeOrmModule.forFeature(
-      [
-        CycleTypeormEntity,
-        ProjectTypeormEntity,
-        ContributorTypeormEntity,
-        AssignmentTypeormEntity,
-        CommitTypeormEntity,
-        ResultShareTypeormEntity,
-      ],
-      'capital'
-    ), // Указываем connection name
+    TypeOrmModule.forFeature([ProjectTypeormEntity, ContributorTypeormEntity], CAPITAL_DATABASE_CONNECTION), // Указываем connection name
   ],
   exports: [TypeOrmModule],
 })

@@ -17,9 +17,6 @@ export class ForkEntity implements ForkDomainInterface {
   @Column({ type: 'bigint' })
   block_num!: number;
 
-  @Column({ type: 'varchar' })
-  block_id!: string;
-
   @CreateDateColumn()
   created_at!: Date;
 }

@@ -16,7 +16,7 @@ import { COOPLACE_BLOCKCHAIN_PORT } from '~/domain/cooplace/interfaces/cooplace-
 import { CooplaceBlockchainAdapter } from './adapters/cooplace-blockchain.adapter';
 import { MEET_BLOCKCHAIN_PORT } from '~/domain/meet/ports/meet-blockchain.port';
 import { MeetBlockchainAdapter } from './adapters/meet-blockchain.adapter';
-import { DomainToBlockchainUtils } from './utils/domain-to-blockchain.utils';
+import { DomainToBlockchainUtils } from '../../shared/utils/domain-to-blockchain.utils';
 import { DomainModule } from '~/domain/domain.module';
 import { GatewayBlockchainAdapter } from './adapters/gateway-blockchain.adapter';
 import { WALLET_BLOCKCHAIN_PORT } from '~/domain/wallet/ports/wallet-blockchain.port';

@@ -1,13 +1,13 @@
-import { ContributorDomainEntity } from '../interfaces/contributor.entity';
+import { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
+import { ContributorDomainEntity } from '../entities/contributor.entity';
 
-export interface ContributorRepository {
+export interface ContributorRepository extends IBlockchainSyncRepository<ContributorDomainEntity> {
   create(contributor: Omit<ContributorDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContributorDomainEntity>;
   findById(id: string): Promise<ContributorDomainEntity | null>;
-  findByUserId(userId: string): Promise<ContributorDomainEntity | null>;
   findAll(): Promise<ContributorDomainEntity[]>;
-  findByRole(role: string): Promise<ContributorDomainEntity[]>;
-  findActive(): Promise<ContributorDomainEntity[]>;
-  update(id: string, contributor: Partial<ContributorDomainEntity>): Promise<ContributorDomainEntity>;
+  findByUsername(username: string): Promise<ContributorDomainEntity[]>;
+  findByStatus(status: string): Promise<ContributorDomainEntity[]>;
+  update(entity: ContributorDomainEntity): Promise<ContributorDomainEntity>;
   delete(id: string): Promise<void>;
 }
 

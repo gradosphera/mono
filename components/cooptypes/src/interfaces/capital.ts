@@ -222,8 +222,6 @@ export interface IContributor {
   appendixes: IChecksum256[]
   rate_per_hour: IAsset
   debt_amount: IAsset
-  capital_available: IAsset
-  reward_per_share_last: IInt64
   contributed_as_investor: IAsset
   contributed_as_creator: IAsset
   contributed_as_author: IAsset
@@ -913,4 +911,3 @@ export interface IVotingData {
   amounts: IVotingAmounts
   voting_deadline: ITimePointSec
 }
-

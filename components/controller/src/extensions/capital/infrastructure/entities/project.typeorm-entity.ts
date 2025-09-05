@@ -1,80 +1,86 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  OneToMany,
-  JoinColumn,
-} from 'typeorm';
-import { ProjectStatus } from '../../domain/interfaces/project.entity';
-import { CycleTypeormEntity } from './cycle.typeorm-entity';
-import { AssignmentTypeormEntity } from './assignment.typeorm-entity';
-import { ResultShareTypeormEntity } from './result-share.typeorm-entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { ProjectStatus } from '../../domain/enums/project-status.enum';
+import type { IProjectDomainInterface } from '../../domain/interfaces/project.interface';
 
-@Entity('capital_projects')
+const EntityName = 'capital_projects';
+@Entity(EntityName)
+@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+@Index(`idx_${EntityName}_hash`, ['project_hash'])
+@Index(`idx_${EntityName}_coopname`, ['coopname'])
+@Index(`idx_${EntityName}_status`, ['status'])
 export class ProjectTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'uuid' })
-  cycleId!: string;
+  @Column({ type: 'bigint', nullable: true, unique: true })
+  blockchain_id?: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'integer', nullable: true })
+  block_num?: number;
+
+  @Column({ type: 'boolean', default: true })
+  present!: boolean;
+
+  // Поля из блокчейна (projects.hpp)
+  @Column({ type: 'varchar', length: 12 })
+  coopname!: string;
+
+  @Column({ type: 'varchar', length: 64 })
+  project_hash!: string;
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  parent_hash?: string;
+
+  @Column({ type: 'varchar', length: 20 })
+  blockchain_status!: string;
+
+  @Column({ type: 'boolean', default: false })
+  is_opened!: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  is_planed!: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  can_convert_to_project!: boolean;
+
+  @Column({ type: 'varchar', length: 12 })
+  master!: string;
+
+  @Column({ type: 'varchar' })
   title!: string;
 
   @Column({ type: 'text' })
   description!: string;
 
+  @Column({ type: 'text', nullable: true })
+  meta?: string;
+
+  @Column({ type: 'json' })
+  counts!: IProjectDomainInterface['counts'];
+
+  @Column({ type: 'json' })
+  plan!: IProjectDomainInterface['plan'];
+
+  @Column({ type: 'json' })
+  fact!: IProjectDomainInterface['fact'];
+
+  @Column({ type: 'json' })
+  crps!: IProjectDomainInterface['crps'];
+
+  @Column({ type: 'json' })
+  voting!: IProjectDomainInterface['voting'];
+
+  @Column({ type: 'json' })
+  membership!: IProjectDomainInterface['membership'];
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at!: Date;
+
+  // Доменные поля (расширения)
   @Column({
     type: 'enum',
     enum: ProjectStatus,
-    default: ProjectStatus.WAITING,
+    default: ProjectStatus.PENDING,
   })
   status!: ProjectStatus;
-
-  @Column({ type: 'json' })
-  authors: Array<{
-    contributorId: string;
-    sharePercent: number;
-  }> = [];
-
-  @Column({ type: 'uuid', nullable: true })
-  masterId?: string;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  plannedHours!: number;
-
-  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
-  plannedExpenses!: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  actualHours!: number;
-
-  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
-  actualExpenses!: number;
-
-  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
-  totalInvestment!: number;
-
-  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
-  availableInvestment!: number;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt!: Date;
-
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt!: Date;
-
-  // Связи
-  @ManyToOne(() => CycleTypeormEntity, (cycle) => cycle.projects)
-  @JoinColumn({ name: 'cycleId' })
-  cycle: CycleTypeormEntity = new CycleTypeormEntity();
-
-  @OneToMany(() => AssignmentTypeormEntity, (assignment) => assignment.project)
-  assignments: AssignmentTypeormEntity[] = [];
-
-  @OneToMany(() => ResultShareTypeormEntity, (share) => share.project)
-  shares: ResultShareTypeormEntity[] = [];
 }

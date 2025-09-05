@@ -1,6 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { AppRegistry } from './extensions.registry';
 import { ChairmanPluginModule } from './chairman/chairman-extension.module';
+import { CapitalPluginModule } from './capital/capital-extension.module';
 import { PowerupPluginModule } from './powerup/powerup-extension.module';
 import { YookassaPluginModule } from './yookassa/yookassa-extension.module';
 import { SberpollPluginModule } from './sberpoll/sberpoll-extension.module';
@@ -20,6 +21,7 @@ export class ExtensionsModule {
         ExtensionDomainModule,
         BuiltinPluginModule,
         ChairmanPluginModule,
+        CapitalPluginModule,
         PowerupPluginModule,
         YookassaPluginModule,
         SberpollPluginModule,

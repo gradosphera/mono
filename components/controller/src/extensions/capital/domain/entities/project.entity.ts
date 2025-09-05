@@ -1,15 +1,7 @@
-import { CapitalContract } from 'cooptypes';
-import { ProjectStatus } from '../interfaces/project.entity';
-
-// Типы из блокчейн контракта
-type IProject = CapitalContract.Tables.Projects.IProject;
-type BlockchainProjectId = IProject['id'];
-type ProjectCounts = IProject['counts'];
-type ProjectPlan = IProject['plan'];
-type ProjectFact = IProject['fact'];
-type ProjectCrps = IProject['crps'];
-type ProjectVoting = IProject['voting'];
-type ProjectMembership = IProject['membership'];
+import { ProjectStatus } from '../enums/project-status.enum';
+import type { IProjectDomainInterfaceDatabaseData } from '../interfaces/project-database.interface';
+import type { IProjectDomainInterfaceBlockchainData } from '../interfaces/project-blockchain.interface';
+import type { IBlockchainSynchronizable } from '../../../../shared/interfaces/blockchain-sync.interface';
 
 /**
  * Доменная сущность проекта
@@ -18,57 +10,53 @@ type ProjectMembership = IProject['membership'];
  * - База данных: внутренний ID, ссылка на блокчейн
  * - Блокчейн: все данные проекта из таблицы projects
  */
-export class ProjectDomainEntity {
+export class ProjectDomainEntity implements IBlockchainSynchronizable {
   // Поля из базы данных
-  public readonly id: string; // Внутренний ID базы данных
-  public readonly blockchainId: BlockchainProjectId; // ID в блокчейне
+  public id: string; // Внутренний ID базы данных
+  public blockchain_id: number; // ID в блокчейне
+  public block_num: number | null; // Номер блока последнего обновления
+  public present = true; // Существует ли запись в блокчейне
 
   // Доменные поля (расширения)
-  public readonly status: ProjectStatus;
+  public status: ProjectStatus;
 
   // Поля из блокчейна (projects.hpp)
-  public readonly coopname: IProject['coopname'];
-  public readonly project_hash: IProject['project_hash'];
-  public readonly parent_hash: IProject['parent_hash'];
-  public readonly blockchainStatus: IProject['status']; // Статус из блокчейна
-  public readonly is_opened: IProject['is_opened'];
-  public readonly is_planed: IProject['is_planed'];
-  public readonly can_convert_to_project: IProject['can_convert_to_project'];
-  public readonly master: IProject['master'];
-  public readonly title: IProject['title'];
-  public readonly description: IProject['description'];
-  public readonly meta: IProject['meta'];
-  public readonly counts: ProjectCounts;
-  public readonly plan: ProjectPlan;
-  public readonly fact: ProjectFact;
-  public readonly crps: ProjectCrps;
-  public readonly voting: ProjectVoting;
-  public readonly membership: ProjectMembership;
-  public readonly created_at: IProject['created_at'];
+  public coopname: IProjectDomainInterfaceBlockchainData['coopname'];
+  public project_hash: IProjectDomainInterfaceBlockchainData['project_hash'];
+  public parent_hash: IProjectDomainInterfaceBlockchainData['parent_hash'];
+  public blockchain_status: IProjectDomainInterfaceBlockchainData['status']; // Статус из блокчейна
+  public is_opened: IProjectDomainInterfaceBlockchainData['is_opened'];
+  public is_planed: IProjectDomainInterfaceBlockchainData['is_planed'];
+  public can_convert_to_project: IProjectDomainInterfaceBlockchainData['can_convert_to_project'];
+  public master: IProjectDomainInterfaceBlockchainData['master'];
+  public title: IProjectDomainInterfaceBlockchainData['title'];
+  public description: IProjectDomainInterfaceBlockchainData['description'];
+  public meta: IProjectDomainInterfaceBlockchainData['meta'];
+  public counts: IProjectDomainInterfaceBlockchainData['counts'];
+  public plan: IProjectDomainInterfaceBlockchainData['plan'];
+  public fact: IProjectDomainInterfaceBlockchainData['fact'];
+  public crps: IProjectDomainInterfaceBlockchainData['crps'];
+  public voting: IProjectDomainInterfaceBlockchainData['voting'];
+  public membership: IProjectDomainInterfaceBlockchainData['membership'];
+  public created_at: IProjectDomainInterfaceBlockchainData['created_at'];
 
   /**
    * Конструктор для сборки композитной сущности
    *
    * @param databaseData - данные из базы данных
    * @param blockchainData - данные из блокчейна
-   * @param domainData - доменные данные
    */
-  constructor(
-    databaseData: {
-      id: string;
-      blockchainId: BlockchainProjectId;
-    },
-    blockchainData: IProject
-  ) {
+  constructor(databaseData: IProjectDomainInterfaceDatabaseData, blockchainData: IProjectDomainInterfaceBlockchainData) {
     // Данные из базы данных
     this.id = databaseData.id;
-    this.blockchainId = databaseData.blockchainId;
+    this.blockchain_id = Number(blockchainData.id);
+    this.block_num = databaseData.block_num;
 
     // Данные из блокчейна
     this.coopname = blockchainData.coopname;
     this.project_hash = blockchainData.project_hash;
     this.parent_hash = blockchainData.parent_hash;
-    this.blockchainStatus = blockchainData.status;
+    this.blockchain_status = blockchainData.status;
     this.is_opened = blockchainData.is_opened;
     this.is_planed = blockchainData.is_planed;
     this.can_convert_to_project = blockchainData.can_convert_to_project;
@@ -87,72 +75,12 @@ export class ProjectDomainEntity {
     // Синхронизация статуса с блокчейн данными
     this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
   }
-  /**
-   * Возвращает полное представление сущности для сериализации
-   */
-  public toJSON(): {
-    // Данные из базы данных
-    id: string;
-    blockchainId: BlockchainProjectId;
-
-    // Данные из блокчейна
-    coopname: IProject['coopname'];
-    project_hash: IProject['project_hash'];
-    parent_hash: IProject['parent_hash'];
-    blockchainStatus: IProject['status'];
-    is_opened: IProject['is_opened'];
-    is_planed: IProject['is_planed'];
-    can_convert_to_project: IProject['can_convert_to_project'];
-    master: IProject['master'];
-    title: IProject['title'];
-    description: IProject['description'];
-    meta: IProject['meta'];
-    counts: ProjectCounts;
-    plan: ProjectPlan;
-    fact: ProjectFact;
-    crps: ProjectCrps;
-    voting: ProjectVoting;
-    membership: ProjectMembership;
-    created_at: IProject['created_at'];
-
-    // Доменные данные
-    status: ProjectStatus;
-  } {
-    return {
-      // Данные из базы данных
-      id: this.id,
-      blockchainId: this.blockchainId,
-
-      // Данные из блокчейна
-      coopname: this.coopname,
-      project_hash: this.project_hash,
-      parent_hash: this.parent_hash,
-      blockchainStatus: this.blockchainStatus,
-      is_opened: this.is_opened,
-      is_planed: this.is_planed,
-      can_convert_to_project: this.can_convert_to_project,
-      master: this.master,
-      title: this.title,
-      description: this.description,
-      meta: this.meta,
-      counts: this.counts,
-      plan: this.plan,
-      fact: this.fact,
-      crps: this.crps,
-      voting: this.voting,
-      membership: this.membership,
-      created_at: this.created_at,
-
-      // Доменные данные
-      status: this.status,
-    };
-  }
 
   /**
    * Маппинг статуса из блокчейна в доменный статус
    * Синхронизировано с константами из projects.hpp
    */
-  private mapBlockchainStatusToDomain(blockchainStatus: IProject['status']): ProjectStatus {
+  private mapBlockchainStatusToDomain(blockchainStatus: IProjectDomainInterfaceBlockchainData['status']): ProjectStatus {
     const statusValue = blockchainStatus.toString();
 
     switch (statusValue) {
@@ -171,5 +99,48 @@ export class ProjectDomainEntity {
         console.warn(`Неизвестный статус блокчейна: ${statusValue}, устанавливаем CLOSED`);
         return ProjectStatus.CLOSED;
     }
+  }
+
+  /**
+   * Получение ID сущности в блокчейне
+   */
+  getBlockchainId(): string {
+    return this.blockchain_id.toString();
+  }
+
+  /**
+   * Получение номера блока последнего обновления
+   */
+  getBlockNum(): number | null {
+    return this.block_num;
+  }
+
+  /**
+   * Обновление данных из блокчейна
+   * Обновляет текущий экземпляр
+   */
+  updateFromBlockchain(blockchainData: IProjectDomainInterfaceBlockchainData, blockNum: number, present = true): void {
+    // Обновляем все поля из блокчейна
+    this.coopname = blockchainData.coopname;
+    this.project_hash = blockchainData.project_hash;
+    this.parent_hash = blockchainData.parent_hash;
+    this.blockchain_status = blockchainData.status;
+    this.is_opened = blockchainData.is_opened;
+    this.is_planed = blockchainData.is_planed;
+    this.can_convert_to_project = blockchainData.can_convert_to_project;
+    this.master = blockchainData.master;
+    this.title = blockchainData.title;
+    this.description = blockchainData.description;
+    this.meta = blockchainData.meta;
+    this.counts = blockchainData.counts;
+    this.plan = blockchainData.plan;
+    this.fact = blockchainData.fact;
+    this.crps = blockchainData.crps;
+    this.voting = blockchainData.voting;
+    this.membership = blockchainData.membership;
+    this.created_at = blockchainData.created_at;
+    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+    this.block_num = blockNum;
+    this.present = present;
   }
 }

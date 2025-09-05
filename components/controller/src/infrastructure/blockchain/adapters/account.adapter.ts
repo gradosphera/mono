@@ -6,7 +6,7 @@ import type { AccountBlockchainPort } from '~/domain/account/interfaces/account-
 import Vault from '~/models/vault.model';
 import { Name } from '@wharfkit/antelope';
 import config from '~/config/config';
-import { DomainToBlockchainUtils } from '../utils/domain-to-blockchain.utils';
+import { DomainToBlockchainUtils } from '../../../shared/utils/domain-to-blockchain.utils';
 import { CandidateDomainInterface } from '~/domain/account/interfaces/candidate-domain.interface';
 import { Classes } from '@coopenomics/sdk';
 

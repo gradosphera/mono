@@ -1,28 +1,28 @@
 import { Module } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
 import { CapitalDatabaseModule } from './infrastructure/database/capital-database.module';
-import { CapitalApplicationService } from './application/services/capital-application.service';
-import { ProjectManagementService } from './domain/services/project-management.service';
-import { CommitManagementService } from './domain/services/commit-management.service';
-import { ResultCalculationService } from './domain/services/result-calculation.service';
-import { ProjectResolver } from './application/resolvers/project.resolver';
-import { AssignmentResolver } from './application/resolvers/assignment.resolver';
-import { CommitResolver } from './application/resolvers/commit.resolver';
+import { EventsInfrastructureModule } from '~/infrastructure/events/events.module';
 import { Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 // Репозитории
-import { CycleTypeormRepository } from './infrastructure/repositories/cycle.typeorm-repository';
 import { ProjectTypeormRepository } from './infrastructure/repositories/project.typeorm-repository';
 import { ContributorTypeormRepository } from './infrastructure/repositories/contributor.typeorm-repository';
 
+// Blockchain синхронизация
+import { BlockchainDeltaTrackerService } from './infrastructure/blockchain/services/blockchain-delta-tracker.service';
+import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
+import { ProjectSyncService } from './infrastructure/blockchain/services/project-sync.service';
+import { ContributorDeltaMapper } from './infrastructure/blockchain/mappers/contributor-delta.mapper';
+import { ContributorSyncService } from './infrastructure/blockchain/services/contributor-sync.service';
+import { CapitalSyncInteractor } from './domain/interactors/capital-sync.interactor';
+
+// Services
+import { CapitalContractInfoService } from './infrastructure/services/capital-contract-info.service';
+
 // Символы для DI
-import { CYCLE_REPOSITORY } from './domain/repositories/cycle.repository';
 import { PROJECT_REPOSITORY } from './domain/repositories/project.repository';
 import { CONTRIBUTOR_REPOSITORY } from './domain/repositories/contributor.repository';
-import { ASSIGNMENT_REPOSITORY } from './domain/repositories/assignment.repository';
-import { COMMIT_REPOSITORY } from './domain/repositories/commit.repository';
-import { RESULT_SHARE_REPOSITORY } from './domain/repositories/result-share.repository';
 
 import { z } from 'zod';
 
@@ -47,7 +47,7 @@ export const Schema = z.object({
 
 @Injectable()
 export class CapitalPlugin extends BaseExtModule {
-  constructor(private readonly logger: WinstonLoggerService) {
+  constructor(private readonly logger: WinstonLoggerService, private readonly syncInteractor: CapitalSyncInteractor) {
     super();
     this.logger.setContext(CapitalPlugin.name);
   }
@@ -60,28 +60,38 @@ export class CapitalPlugin extends BaseExtModule {
 
   async initialize(): Promise<void> {
     this.logger.log('Capital module initialized');
+
+    // Инициализируем синхронизацию с блокчейном
+    try {
+      await this.syncInteractor.initializeSync();
+      this.logger.log('Capital blockchain sync initialized');
+    } catch (error: any) {
+      this.logger.error(`Failed to initialize Capital blockchain sync: ${error.message}`, error.stack);
+      // Не бросаем ошибку, чтобы не блокировать запуск модуля
+    }
   }
 }
 
 @Module({
-  imports: [CapitalDatabaseModule],
+  imports: [CapitalDatabaseModule, EventsInfrastructureModule],
   providers: [
     // Plugin
     CapitalPlugin,
 
-    // Application Services
-    CapitalApplicationService,
+    // Services
+    CapitalContractInfoService,
 
-    // Domain Services
-    ProjectManagementService,
-    CommitManagementService,
-    ResultCalculationService,
+    // Blockchain Sync Services
+    BlockchainDeltaTrackerService,
+    ProjectDeltaMapper,
+    ProjectSyncService,
+    ContributorDeltaMapper,
+    ContributorSyncService,
+
+    // Domain Interactors
+    CapitalSyncInteractor,
 
     // Repositories
-    {
-      provide: CYCLE_REPOSITORY,
-      useClass: CycleTypeormRepository,
-    },
     {
       provide: PROJECT_REPOSITORY,
       useClass: ProjectTypeormRepository,
@@ -90,25 +100,13 @@ export class CapitalPlugin extends BaseExtModule {
       provide: CONTRIBUTOR_REPOSITORY,
       useClass: ContributorTypeormRepository,
     },
-    // TODO: Добавить остальные репозитории когда будут созданы
-    {
-      provide: ASSIGNMENT_REPOSITORY,
-      useValue: {}, // Заглушка
-    },
-    {
-      provide: COMMIT_REPOSITORY,
-      useValue: {}, // Заглушка
-    },
-    {
-      provide: RESULT_SHARE_REPOSITORY,
-      useValue: {}, // Заглушка
-    },
-
-    // GraphQL Resolvers
-    ProjectResolver,
-    AssignmentResolver,
-    CommitResolver,
   ],
   exports: [CapitalPlugin],
 })
-export class CapitalPluginModule {}
+export class CapitalPluginModule {
+  constructor(private readonly capitalPlugin: CapitalPlugin) {}
+
+  async initialize() {
+    await this.capitalPlugin.initialize();
+  }
+}

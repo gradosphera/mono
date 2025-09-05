@@ -1,14 +1,13 @@
-import { ProjectDomainEntity } from '../interfaces/project.entity';
+import { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
+import { ProjectDomainEntity } from '../entities/project.entity';
 
-export interface ProjectRepository {
+export interface ProjectRepository extends IBlockchainSyncRepository<ProjectDomainEntity> {
   create(project: Omit<ProjectDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ProjectDomainEntity>;
   findById(id: string): Promise<ProjectDomainEntity | null>;
   findAll(): Promise<ProjectDomainEntity[]>;
-  findByCycleId(cycleId: string): Promise<ProjectDomainEntity[]>;
-  findByAuthor(contributorId: string): Promise<ProjectDomainEntity[]>;
-  findByMaster(masterId: string): Promise<ProjectDomainEntity[]>;
+  findByMaster(master: string): Promise<ProjectDomainEntity[]>;
   findByStatus(status: string): Promise<ProjectDomainEntity[]>;
-  update(id: string, project: Partial<ProjectDomainEntity>): Promise<ProjectDomainEntity>;
+  update(entity: ProjectDomainEntity): Promise<ProjectDomainEntity>;
   delete(id: string): Promise<void>;
 }
 

@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MeetDomainInteractor } from '../interactors/meet.interactor';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { DomainToBlockchainUtils } from '~/infrastructure/blockchain/utils/domain-to-blockchain.utils';
+import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import type { MeetDecisionDomainInterface } from '../interfaces/meet-decision-domain.interface';
 import { MeetContract } from 'cooptypes';
 import type { IAction } from '~/types';

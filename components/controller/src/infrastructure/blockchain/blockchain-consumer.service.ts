@@ -5,6 +5,7 @@ import { IAction, IDelta } from '~/types/common';
 import { RedisStreamService, StreamMessage } from '~/infrastructure/redis/redis-stream.service';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { EventsService } from '~/infrastructure/events/events.service';
+import { ParserInteractor } from '~/domain/parser/interactors/parser.interactor';
 import { config } from '~/config';
 
 export interface BlockchainEventData {
@@ -35,7 +36,8 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
   constructor(
     private readonly redisStreamService: RedisStreamService,
     private readonly logger: WinstonLoggerService,
-    private readonly eventsService: EventsService
+    private readonly eventsService: EventsService,
+    private readonly parserInteractor: ParserInteractor
   ) {
     this.logger.setContext(BlockchainConsumerService.name);
     this.consumerName = `consumer-${Math.random().toString(36).substr(2, 9)}`;
@@ -100,7 +102,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
 
   /**
    * Обработка действия (action) из блокчейна
-   * Выполняет минимальную предварительную фильтрацию и публикует событие во внутреннюю шину
+   * Выполняет минимальную предварительную фильтрацию, сохраняет в базу и публикует событие во внутреннюю шину
    */
   private async processAction(action: IAction): Promise<void> {
     this.logger.debug(`Processing action: ${action.name} from ${action.account}: ${JSON.stringify(action.data)}`);
@@ -112,6 +114,17 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
     if (!isException && action.data?.coopname !== config.coopname) {
       this.logger.debug(`Skipping action: ${action.account}::${action.name} - wrong coopname`);
       return;
+    }
+
+    try {
+      // Сохраняем действие в базу данных через интерактор
+      await this.parserInteractor.saveAction(action);
+      this.logger.debug(
+        `Action saved to database: ${action.account}::${action.name} with sequence ${action.global_sequence}`
+      );
+    } catch (error: any) {
+      this.logger.error(`Failed to save action ${action.account}::${action.name}: ${error.message}`, error.stack);
+      throw error; // Перебрасываем ошибку чтобы сообщение не было подтверждено
     }
 
     // Публикуем событие
@@ -134,13 +147,22 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
 
   /**
    * Обработка дельты (delta) из блокчейна
-   * Выполняет минимальную предварительную фильтрацию и публикует событие во внутреннюю шину
+   * Выполняет минимальную предварительную фильтрацию, сохраняет в базу и публикует событие во внутреннюю шину
    */
   private async processDelta(delta: IDelta): Promise<void> {
     this.logger.debug(`Processing delta: ${delta.table} from ${delta.code}`);
 
     if (delta.value?.coopname != config.coopname) {
       return;
+    }
+
+    try {
+      // Сохраняем дельту в базу данных через интерактор
+      await this.parserInteractor.saveDelta(delta);
+      this.logger.debug(`Delta saved to database: ${delta.code}::${delta.table} with primary_key ${delta.primary_key}`);
+    } catch (error: any) {
+      this.logger.error(`Failed to save delta ${delta.code}::${delta.table}: ${error.message}`, error.stack);
+      throw error; // Перебрасываем ошибку чтобы сообщение не было подтверждено
     }
 
     // Публикуем событие во внутреннюю шину с типизированным именем
@@ -152,10 +174,22 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
 
   /**
    * Обработка форка (fork) из блокчейна
-   * Публикует событие форка во внутреннюю шину
+   * Сохраняет форк в базу и публикует событие форка во внутреннюю шину
    */
   private async processFork(block_num: number): Promise<void> {
     this.logger.debug(`Processing fork at block: ${block_num}`);
+
+    try {
+      // Сохраняем форк в базу данных через интерактор
+      await this.parserInteractor.saveFork({
+        chain_id: config.blockchain.id, // Используем chain id из конфига
+        block_num: block_num,
+      });
+      this.logger.debug(`Fork saved to database at block: ${block_num}`);
+    } catch (error: any) {
+      this.logger.error(`Failed to save fork at block ${block_num}: ${error.message}`, error.stack);
+      throw error; // Перебрасываем ошибку чтобы сообщение не было подтверждено
+    }
 
     // Публикуем событие во внутреннюю шину с типизированным именем
     const eventName = `fork::${block_num}`;

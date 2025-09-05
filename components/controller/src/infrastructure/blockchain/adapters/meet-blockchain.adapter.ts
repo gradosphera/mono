@@ -10,7 +10,7 @@ import type { TransactionResult } from '~/domain/blockchain/types/transaction-re
 import { VoteOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/vote-on-annual-general-meet-input.interface';
 import { RestartAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/restart-annual-general-meet-input-domain.interface';
 import { CreateAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/create-annual-meet-input-domain.interface';
-import { DomainToBlockchainUtils } from '../utils/domain-to-blockchain.utils';
+import { DomainToBlockchainUtils } from '../../../shared/utils/domain-to-blockchain.utils';
 import { GetMeetInputDomainInterface } from '~/domain/meet/interfaces/get-meet-input-domain.interface';
 import { GetMeetsInputDomainInterface } from '~/domain/meet/interfaces/get-meets-input-domain.interface';
 import { MeetProcessingDomainEntity } from '~/domain/meet/entities/meet-processing-domain.entity';

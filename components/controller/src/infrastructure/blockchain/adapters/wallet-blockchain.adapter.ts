@@ -12,7 +12,7 @@ import type {
   GenerateReturnStatementDomainInterface,
 } from '~/domain/wallet/ports/wallet-blockchain.port';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
-import { DomainToBlockchainUtils } from '../utils/domain-to-blockchain.utils';
+import { DomainToBlockchainUtils } from '../../../shared/utils/domain-to-blockchain.utils';
 
 /**
  * Блокчейн адаптер для wallet

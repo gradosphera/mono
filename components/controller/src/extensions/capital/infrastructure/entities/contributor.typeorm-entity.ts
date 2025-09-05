@@ -1,50 +1,90 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { ContributorRole } from '../../domain/interfaces/contributor.entity';
-import { CommitTypeormEntity } from './commit.typeorm-entity';
-import { ResultShareTypeormEntity } from './result-share.typeorm-entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { ContributorStatus } from '../../domain/enums/contributor-status.enum';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
-@Entity('capital_contributors')
+const EntityName = 'capital_contributors';
+
+@Entity(EntityName)
+@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+@Index(`idx_${EntityName}_hash`, ['contributor_hash'])
+@Index(`idx_${EntityName}_coopname`, ['coopname'])
+@Index(`idx_${EntityName}_status`, ['status'])
 export class ContributorTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'uuid' })
-  userId!: string;
+  @Column({ type: 'bigint', nullable: true, unique: true })
+  blockchain_id?: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 2000 })
-  personalHourCost!: number;
-
-  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
-  totalInvestedAmount!: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  totalWorkedHours!: number;
-
-  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
-  totalEarnedAmount!: number;
-
-  @Column({
-    type: 'simple-array',
-    transformer: {
-      to: (value: ContributorRole[]) => value,
-      from: (value: string) => (value ? (value.split(',') as ContributorRole[]) : []),
-    },
-  })
-  roles!: ContributorRole[];
+  @Column({ type: 'integer', nullable: true })
+  block_num?: number;
 
   @Column({ type: 'boolean', default: true })
-  isActive!: boolean;
+  present!: boolean;
+
+  // Поля из блокчейна (contributors.hpp)
+  @Column({ type: 'varchar', length: 12 })
+  coopname!: string;
+
+  @Column({ type: 'varchar', length: 12 })
+  username!: string;
+
+  @Column({ type: 'varchar', length: 64 })
+  contributor_hash!: string;
+
+  @Column({ type: 'varchar', length: 20 })
+  blockchain_status!: string;
+
+  @Column({ type: 'text', nullable: true })
+  memo?: string;
+
+  @Column({ type: 'boolean', default: false })
+  is_external_contract!: boolean;
+
+  @Column({ type: 'json', nullable: true })
+  contract!: ISignedDocumentDomainInterface;
+
+  @Column({ type: 'json', nullable: true })
+  appendixes?: string[];
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  rate_per_hour?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  debt_amount?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  capital_available?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  reward_per_share_last?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  contributed_as_investor?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  contributed_as_creator?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  contributed_as_author?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  contributed_as_coordinator?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  contributed_as_contributor?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  contributed_as_propertor?: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt!: Date;
+  created_at!: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt!: Date;
-
-  // Связи
-  @OneToMany(() => CommitTypeormEntity, (commit) => commit.creator)
-  commits!: CommitTypeormEntity[];
-
-  @OneToMany(() => ResultShareTypeormEntity, (share) => share.contributor)
-  shares!: ResultShareTypeormEntity[];
+  // Доменные поля (расширения)
+  @Column({
+    type: 'enum',
+    enum: ContributorStatus,
+    default: ContributorStatus.PENDING,
+  })
+  status!: ContributorStatus;
 }

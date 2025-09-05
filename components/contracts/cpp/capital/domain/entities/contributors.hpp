@@ -29,9 +29,6 @@ namespace Capital {
     
     eosio::asset debt_amount = asset(0, _root_govern_symbol);   ///< Сумма долга
     
-    eosio::asset capital_available = asset(0, _root_govern_symbol); ///< Накопленные членские взносы по программе капитализации
-    int64_t reward_per_share_last = 0;                           ///< Последний зафиксированный cumulative_reward_per_share по программе капитализации
-    
     eosio::asset contributed_as_investor = asset(0, _root_govern_symbol);     ///< Сумма, вложенная в проект как инвестор
     eosio::asset contributed_as_creator = asset(0, _root_govern_symbol);      ///< Сумма, вложенная в проект как создатель
     eosio::asset contributed_as_author = asset(0, _root_govern_symbol);       ///< Сумма, вложенная в проект как автор
