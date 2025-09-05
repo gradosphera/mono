@@ -7,6 +7,7 @@ import { SberpollPluginModule } from './sberpoll/sberpoll-extension.module';
 import { QrPayPluginModule } from './qrpay/qrpay-extension.module';
 import { BuiltinPluginModule } from './builtin/builtin-extension.module';
 import { ParticipantPluginModule } from './participant/participant-extension.module';
+import { CoopgramPluginModule } from './coopgram/coopgram-extension.module';
 import { ExtensionDomainModule } from '~/domain/extension/extension-domain.module';
 
 @Module({})
@@ -25,6 +26,7 @@ export class ExtensionsModule {
         SberpollPluginModule,
         QrPayPluginModule,
         ParticipantPluginModule,
+        CoopgramPluginModule,
       ],
       providers: [],
       exports: [],
