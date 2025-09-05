@@ -20,7 +20,7 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
         database: config.postgres.database,
 
         entities: [ProjectTypeormEntity, ContributorTypeormEntity],
-        synchronize: config.env === 'development', // Используем миграции
+        synchronize: config.env === 'development', // Используем миграции для production
         logging: false,
       }),
     }),
