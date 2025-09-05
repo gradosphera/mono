@@ -2,7 +2,6 @@
 
 export default {
   name: 'Создание таблиц для модуля capital (capital_projects и capital_contributors)',
-  validUntil: new Date('2025-12-31'), // Действует до конца года
 
   async up({ dataSource }: { dataSource: any }): Promise<boolean> {
     console.log('Выполнение миграции: Создание таблиц для модуля capital');
