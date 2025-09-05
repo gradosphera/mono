@@ -1,8 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 
-const __dirname = path.resolve();
-
 // Получаем аргументы командной строки
 const args = process.argv.slice(2);
 if (args.length === 0) {
@@ -62,7 +60,7 @@ export default {
   name: '${migrationName.replace(/_/g, ' ')}',
   validUntil: new Date('2025-12-31'), // Действует до конца года
 
-  async up({ dataSource }: { dataSource: any }): Promise<boolean> {
+  async up({ dataSource, blockchain, logger }: { dataSource: any; blockchain: any; logger: any }): Promise<boolean> {
     console.log('Выполнение миграции: ${migrationName.replace(/_/g, ' ')}');
 
     try {
@@ -78,7 +76,7 @@ export default {
     }
   },
 
-  async down({ dataSource }: { dataSource: any }): Promise<boolean> {
+  async down({ dataSource, blockchain, logger }: { dataSource: any; blockchain: any; logger: any }): Promise<boolean> {
     console.log('Откат миграции: ${migrationName.replace(/_/g, ' ')}');
 
     try {
@@ -102,6 +100,6 @@ fs.writeFileSync(filePath, template);
 console.log(`✅ Миграция создана: ${fileName}`);
 console.log(`📁 Путь: ${filePath}`);
 console.log('\n📝 Не забудьте:');
-console.log('1. Заполнить методы up() и down() SQL командами (используйте dataSource из параметров)');
+console.log('1. Заполнить методы up() и down() командами (dataSource, blockchain, logger доступны)');
 console.log('2. Протестировать миграцию: npm run migration:run');
 console.log('3. Проверить откат: npm run migration:rollback');
