@@ -13,14 +13,14 @@ export class ProjectMapper {
   static toDomain(entity: ProjectTypeormEntity): ProjectDomainEntity {
     const databaseData: IProjectDomainInterfaceDatabaseData = {
       id: entity.id,
-      blockchain_id: entity.blockchain_id || 0,
+      blockchain_id: entity.blockchain_id || '',
       block_num: entity.block_num || null,
       present: entity.present,
     };
 
     // Используем данные из TypeORM сущности
     const blockchainData: IProjectDomainInterfaceBlockchainData = {
-      id: entity.blockchain_id || 0,
+      id: entity.blockchain_id || '',
       coopname: entity.coopname,
       project_hash: entity.project_hash,
       parent_hash: entity.parent_hash || '',
@@ -49,7 +49,7 @@ export class ProjectMapper {
    */
   static toEntity(domain: Partial<ProjectDomainEntity>): Partial<ProjectTypeormEntity> {
     const entity: Partial<ProjectTypeormEntity> = {
-      blockchain_id: domain.blockchain_id ? Number(domain.blockchain_id) : undefined,
+      blockchain_id: domain.blockchain_id ? domain.blockchain_id : '',
       block_num: domain.block_num || undefined,
       present: domain.present,
     };
@@ -88,7 +88,7 @@ export class ProjectMapper {
     const updateData: Partial<ProjectTypeormEntity> = {};
 
     // Поля из базы данных (локальные)
-    if (domain.id !== undefined) updateData.blockchain_id = Number(domain.blockchain_id);
+    if (domain.id !== undefined) updateData.blockchain_id = domain.blockchain_id;
     if (domain.block_num !== undefined) updateData.block_num = domain.block_num || undefined;
     if (domain.present !== undefined) updateData.present = domain.present;
 

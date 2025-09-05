@@ -13,14 +13,14 @@ export class ContributorMapper {
   static toDomain(entity: ContributorTypeormEntity): ContributorDomainEntity {
     const databaseData: IContributorDatabaseData = {
       id: entity.id,
-      blockchain_id: entity.blockchain_id || 0,
+      blockchain_id: entity.blockchain_id || '',
       block_num: entity.block_num || null,
       present: entity.present,
     };
 
     // Используем данные из TypeORM сущности
     const blockchainData: IContributorBlockchainData = {
-      id: entity.blockchain_id || 0,
+      id: entity.blockchain_id || '',
       coopname: entity.coopname,
       username: entity.username,
       contributor_hash: entity.contributor_hash,

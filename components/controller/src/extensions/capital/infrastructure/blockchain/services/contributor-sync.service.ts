@@ -72,7 +72,7 @@ export class ContributorSyncService
       if (result) {
         const action = result.created ? 'created' : result.updated ? 'updated' : 'processed';
         this.logger.log(
-          `Contributor ${result.entityId} ${action} at block ${result.blockNum} from ${delta.code}::${delta.table}`
+          `Contributor ${result.blockchainId} ${action} at block ${result.blockNum} from ${delta.code}::${delta.table}`
         );
       }
     } catch (error: any) {

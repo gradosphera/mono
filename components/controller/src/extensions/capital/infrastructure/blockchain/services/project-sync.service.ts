@@ -72,7 +72,7 @@ export class ProjectSyncService
       if (result) {
         const action = result.created ? 'created' : result.updated ? 'updated' : 'processed';
         this.logger.log(
-          `Project ${result.entityId} ${action} at block ${result.blockNum} from ${delta.code}::${delta.table}`
+          `Project ${result.blockchainId} ${action} at block ${result.blockNum} from ${delta.code}::${delta.table}`
         );
       }
     } catch (error: any) {

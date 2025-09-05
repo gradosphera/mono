@@ -17,7 +17,7 @@ const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 export let nestApp;
 
 async function bootstrap() {
-  // Запускаем миграцию
+  // Всегда запускаем миграции (теперь без синхронизации)
   await migrateData();
 
   // Проверяем, был ли запущен режим только миграций

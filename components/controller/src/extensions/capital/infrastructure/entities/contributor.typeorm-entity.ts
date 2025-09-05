@@ -5,16 +5,16 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 const EntityName = 'capital_contributors';
 
 @Entity(EntityName)
-@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
-@Index(`idx_${EntityName}_hash`, ['contributor_hash'])
-@Index(`idx_${EntityName}_coopname`, ['coopname'])
-@Index(`idx_${EntityName}_status`, ['status'])
+// @Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+// @Index(`idx_${EntityName}_hash`, ['contributor_hash'])
+// @Index(`idx_${EntityName}_coopname`, ['coopname'])
+// @Index(`idx_${EntityName}_status`, ['status'])
 export class ContributorTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'bigint', nullable: true, unique: true })
-  blockchain_id?: number;
+  @Column({ type: 'varchar', nullable: true, unique: true })
+  blockchain_id?: string;
 
   @Column({ type: 'integer', nullable: true })
   block_num?: number;

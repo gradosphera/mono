@@ -74,7 +74,7 @@ export class ProjectTypeormRepository implements ProjectRepository, IBlockchainS
    */
   async findByBlockchainId(blockchainId: string): Promise<ProjectDomainEntity | null> {
     const entity = await this.repository.findOne({
-      where: { blockchain_id: parseInt(blockchainId) },
+      where: { blockchain_id: blockchainId },
     });
     return entity ? ProjectMapper.toDomain(entity) : null;
   }

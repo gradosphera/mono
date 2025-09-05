@@ -1,19 +1,19 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
 import { ProjectStatus } from '../../domain/enums/project-status.enum';
-import type { IProjectDomainInterface } from '../../domain/interfaces/project.interface';
+import { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/project-blockchain.interface';
 
 const EntityName = 'capital_projects';
 @Entity(EntityName)
-@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
-@Index(`idx_${EntityName}_hash`, ['project_hash'])
-@Index(`idx_${EntityName}_coopname`, ['coopname'])
-@Index(`idx_${EntityName}_status`, ['status'])
+// @Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+// @Index(`idx_${EntityName}_hash`, ['project_hash'])
+// @Index(`idx_${EntityName}_coopname`, ['coopname'])
+// @Index(`idx_${EntityName}_status`, ['status'])
 export class ProjectTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'bigint', nullable: true, unique: true })
-  blockchain_id?: number;
+  @Column({ type: 'varchar', nullable: true, unique: true })
+  blockchain_id?: string;
 
   @Column({ type: 'integer', nullable: true })
   block_num?: number;
@@ -56,22 +56,22 @@ export class ProjectTypeormEntity {
   meta?: string;
 
   @Column({ type: 'json' })
-  counts!: IProjectDomainInterface['counts'];
+  counts!: IProjectDomainInterfaceBlockchainData['counts'];
 
   @Column({ type: 'json' })
-  plan!: IProjectDomainInterface['plan'];
+  plan!: IProjectDomainInterfaceBlockchainData['plan'];
 
   @Column({ type: 'json' })
-  fact!: IProjectDomainInterface['fact'];
+  fact!: IProjectDomainInterfaceBlockchainData['fact'];
 
   @Column({ type: 'json' })
-  crps!: IProjectDomainInterface['crps'];
+  crps!: IProjectDomainInterfaceBlockchainData['crps'];
 
   @Column({ type: 'json' })
-  voting!: IProjectDomainInterface['voting'];
+  voting!: IProjectDomainInterfaceBlockchainData['voting'];
 
   @Column({ type: 'json' })
-  membership!: IProjectDomainInterface['membership'];
+  membership!: IProjectDomainInterfaceBlockchainData['membership'];
 
   @CreateDateColumn({ type: 'timestamp' })
   created_at!: Date;

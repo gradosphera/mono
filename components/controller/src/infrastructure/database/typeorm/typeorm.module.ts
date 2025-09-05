@@ -54,7 +54,7 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       password: config.postgres.password,
       database: config.postgres.database,
       entities: [path.join(__dirname, '**/entities/*.entity.{ts,js}')],
-      synchronize: true, // Отключите в продакшене
+      synchronize: false, // Полностью отключаем синхронизацию, используем только миграции
       logging: false,
     }),
     NestTypeOrmModule.forFeature([

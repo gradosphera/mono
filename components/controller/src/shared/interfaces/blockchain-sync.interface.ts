@@ -79,7 +79,7 @@ export interface ISyncResult {
   updated: boolean;
 
   /** Идентификатор сущности */
-  entityId: string;
+  blockchainId: string;
 
   /** Номер блока */
   blockNum: number;

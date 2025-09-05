@@ -65,25 +65,25 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
    * Обработка создания/обновления сущности
    */
   private async handleEntityUpsert(
-    entityId: string,
+    blockchainId: string,
     blockchainData: TBlockchainData,
     blockNum: number,
     present = true
   ): Promise<ISyncResult> {
     // Ищем существующую сущность
-    const existingEntity = await this.repository.findByBlockchainId(entityId);
+    const existingEntity = await this.repository.findByBlockchainId(blockchainId);
 
     if (existingEntity) {
       // Проверяем, не является ли это устаревшим обновлением
       const currentBlockNum = existingEntity.getBlockNum();
       if (currentBlockNum !== null && blockNum <= currentBlockNum) {
         this.logger.debug(
-          `Skipping outdated update for ${this.entityName} ${entityId}: block ${blockNum} <= ${currentBlockNum}`
+          `Skipping outdated update for ${this.entityName} ${blockchainId}: block ${blockNum} <= ${currentBlockNum}`
         );
         return {
           created: false,
           updated: false,
-          entityId,
+          blockchainId,
           blockNum: currentBlockNum,
         };
       }
@@ -92,24 +92,24 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
       existingEntity.updateFromBlockchain(blockchainData, blockNum, present);
       await this.repository.update(existingEntity);
 
-      this.logger.debug(`Updated ${this.entityName} ${entityId} at block ${blockNum}`);
+      this.logger.debug(`Updated ${this.entityName} ${blockchainId} at block ${blockNum}`);
 
       return {
         created: false,
         updated: true,
-        entityId,
+        blockchainId,
         blockNum,
       };
     } else {
       // Создаем новую сущность
       await this.repository.createIfNotExists(blockchainData, blockNum, present);
 
-      this.logger.debug(`Created ${this.entityName} ${entityId} at block ${blockNum}`);
+      this.logger.debug(`Created ${this.entityName} ${blockchainId} at block ${blockNum}`);
 
       return {
         created: true,
         updated: false,
-        entityId,
+        blockchainId,
         blockNum,
       };
     }
@@ -118,16 +118,16 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
   /**
    * Обработка удаления сущности
    */
-  private async handleEntityDeletion(entityId: string, blockNum: number): Promise<ISyncResult | null> {
+  private async handleEntityDeletion(blockchainId: string, blockNum: number): Promise<ISyncResult | null> {
     // Для большинства случаев в EOSIO удаление записи означает
     // что сущность была перемещена в другое состояние
     // Конкретная логика может быть переопределена в наследниках
-    this.logger.debug(`Entity ${this.entityName} ${entityId} was deleted at block ${blockNum}`);
+    this.logger.debug(`Entity ${this.entityName} ${blockchainId} was deleted at block ${blockNum}`);
 
     return {
       created: false,
       updated: false,
-      entityId,
+      blockchainId,
       blockNum,
     };
   }

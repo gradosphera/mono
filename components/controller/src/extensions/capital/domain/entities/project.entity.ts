@@ -13,7 +13,7 @@ import type { IBlockchainSynchronizable } from '../../../../shared/interfaces/bl
 export class ProjectDomainEntity implements IBlockchainSynchronizable {
   // Поля из базы данных
   public id: string; // Внутренний ID базы данных
-  public blockchain_id: number; // ID в блокчейне
+  public blockchain_id: string; // ID в блокчейне
   public block_num: number | null; // Номер блока последнего обновления
   public present = true; // Существует ли запись в блокчейне
 
@@ -49,7 +49,7 @@ export class ProjectDomainEntity implements IBlockchainSynchronizable {
   constructor(databaseData: IProjectDomainInterfaceDatabaseData, blockchainData: IProjectDomainInterfaceBlockchainData) {
     // Данные из базы данных
     this.id = databaseData.id;
-    this.blockchain_id = Number(blockchainData.id);
+    this.blockchain_id = blockchainData.id.toString();
     this.block_num = databaseData.block_num;
 
     // Данные из блокчейна

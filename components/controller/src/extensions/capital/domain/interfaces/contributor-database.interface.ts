@@ -5,7 +5,7 @@ export interface IContributorDatabaseData {
   /** Внутренний ID базы данных */
   id: string;
   /** ID вкладчика в блокчейне */
-  blockchain_id: number;
+  blockchain_id: string;
   /** Номер блока последнего обновления */
   block_num: number | null;
   /** Существует ли запись в блокчейне */

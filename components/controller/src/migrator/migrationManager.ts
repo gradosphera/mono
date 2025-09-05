@@ -11,7 +11,8 @@ import { MigrationLogger } from './migration-logger';
 export interface Migration {
   name: string;
   validUntil?: Date; // Дата в UTC, до которой миграция должна применяться. Если не указана или null, миграция применяется всегда
-  up: (services: { blockchain: BlockchainService; logger: MigrationLogger }) => Promise<boolean>;
+  up: (services: { blockchain: BlockchainService; logger: MigrationLogger; dataSource: DataSource }) => Promise<boolean>;
+  down?: (services: { blockchain: BlockchainService; logger: MigrationLogger; dataSource: DataSource }) => Promise<boolean>;
 }
 
 export class MigrationManager {
@@ -147,15 +148,29 @@ export class MigrationManager {
   }
 
   async runMigration(migration: Migration, version: string, description: string, isTest: boolean): Promise<boolean> {
-    // Создаем запись в базе данных для сохранения логов
+    // Создаем или обновляем запись в базе данных для сохранения логов
     if (!isTest) {
-      await this.migrationRepository.save({
-        version,
-        name: migration.name,
-        executedAt: new Date(),
-        success: false, // Изначально помечаем как неуспешную
-        logs: '', // Пустые логи изначально
-      });
+      const existingMigration = await this.migrationRepository.findOne({ where: { version } });
+      if (!existingMigration) {
+        // Создаем новую запись
+        await this.migrationRepository.save({
+          version,
+          name: migration.name,
+          executedAt: new Date(),
+          success: false, // Изначально помечаем как неуспешную
+          logs: '', // Пустые логи изначально
+        });
+      } else {
+        // Обновляем существующую запись - сбрасываем статус и логи
+        await this.migrationRepository.update(
+          { version },
+          {
+            executedAt: new Date(),
+            success: false,
+            logs: '',
+          }
+        );
+      }
     }
 
     // Создаем логгер для миграции
@@ -168,8 +183,12 @@ export class MigrationManager {
         migrationLogger.info(`Запуск миграции ${version} (${description}): ${migration.name}`);
       }
 
-      // Предоставляем блокчейн-сервис и логгер в миграцию
-      const result = await migration.up({ blockchain: this.blockchainService, logger: migrationLogger });
+      // Предоставляем блокчейн-сервис, логгер и подключение к БД в миграцию
+      const result = await migration.up({
+        blockchain: this.blockchainService,
+        logger: migrationLogger,
+        dataSource: this.dataSource,
+      });
 
       // Обновляем статус миграции в базе данных
       if (!isTest) {
@@ -223,16 +242,28 @@ export class MigrationManager {
       const appliedMigrations = await this.getAppliedMigrations();
       logger.info(`В базе данных найдено ${appliedMigrations.length} примененных миграций`);
 
-      const appliedVersions = new Set(appliedMigrations.map((m) => m.version));
+      // Создаем Map для быстрого поиска миграций по версии с их статусом
+      // Нормализуем версии в базе данных для поиска (убираем V если есть)
+      const appliedMigrationsMap = new Map(
+        appliedMigrations.map((m) => [m.version.startsWith('V') ? m.version.substring(1) : m.version, m])
+      );
       const currentDate = new Date();
 
       for (const { filename, version, description } of migrationFiles) {
         const isTest = filename.includes('__test');
 
-        // Обычные миграции пропускаем, если уже применялись
-        if (!isTest && appliedVersions.has(version)) {
-          logger.info(`Миграция ${version} (${description}) уже применена, пропускаем`);
+        // Проверяем, применялась ли уже миграция
+        const existingMigration = appliedMigrationsMap.get(version);
+
+        // Обычные миграции пропускаем, если уже успешно применялись
+        if (!isTest && existingMigration && existingMigration.success) {
+          logger.info(`Миграция ${version} (${description}) уже успешно применена, пропускаем`);
           continue;
+        }
+
+        // Если миграция применялась но с ошибкой, повторяем её
+        if (!isTest && existingMigration && !existingMigration.success) {
+          logger.info(`Миграция ${version} (${description}) ранее завершилась с ошибкой, повторяем`);
         }
 
         // Грузим файл миграции
@@ -271,6 +302,118 @@ export class MigrationManager {
     } catch (error) {
       logger.error('Ошибка в процессе миграции:', error);
       throw error;
+    }
+  }
+
+  async rollbackMigration(version: string): Promise<boolean> {
+    try {
+      // Нормализуем версию - убираем префикс V если он есть
+      const normalizedVersion = version.startsWith('V') ? version.substring(1) : version;
+      logger.info(`Откат миграции ${version}...`);
+
+      // Проверяем, существует ли миграция
+      const migrationRecord = await this.migrationRepository.findOne({ where: { version: normalizedVersion } });
+      if (!migrationRecord) {
+        logger.warn(`Миграция ${version} не найдена в базе данных`);
+        return false;
+      }
+
+      // Находим файл миграции
+      const migrationFiles = await this.getMigrationFiles();
+      const migrationFile = migrationFiles.find((m) => m.version === normalizedVersion);
+
+      if (!migrationFile) {
+        logger.warn(`Файл миграции ${version} не найден`);
+        return false;
+      }
+
+      // Загружаем миграцию
+      const result = await this.loadMigration(migrationFile.filename);
+      if (!result) {
+        logger.warn(`Не удалось загрузить миграцию из файла ${migrationFile.filename}`);
+        return false;
+      }
+
+      const { migration } = result;
+
+      // Проверяем, есть ли метод down
+      if (!migration.down) {
+        logger.warn(`Миграция ${version} не имеет метода down для отката`);
+        return false;
+      }
+
+      // Создаем логгер для миграции
+      const migrationLogger = new MigrationLogger(version, this.migrationRepository);
+
+      logger.info(`Выполнение отката миграции ${version}: ${migration.name}`);
+
+      // Выполняем откат
+      const rollbackResult = await migration.down({
+        blockchain: this.blockchainService,
+        logger: migrationLogger,
+        dataSource: this.dataSource,
+      });
+
+      if (rollbackResult) {
+        // Удаляем запись о миграции из базы данных
+        await this.migrationRepository.delete({ version: normalizedVersion });
+
+        // Проверяем, что миграция удалена из базы
+        const deletedMigration = await this.migrationRepository.findOne({ where: { version: normalizedVersion } });
+
+        if (!deletedMigration) {
+          logger.info(`✅ Запись о миграции ${version} удалена из базы данных`);
+        }
+
+        logger.info(`Миграция ${normalizedVersion} успешно откачена`);
+        return true;
+      } else {
+        logger.error(`Ошибка при откате миграции ${version}`);
+        return false;
+      }
+    } catch (error) {
+      logger.error(`Ошибка при откате миграции ${version}:`, error);
+      return false;
+    }
+  }
+
+  async runSpecificMigration(version: string): Promise<boolean> {
+    try {
+      // Нормализуем версию - убираем префикс V если он есть
+      const normalizedVersion = version.startsWith('V') ? version.substring(1) : version;
+      logger.info(`Запуск конкретной миграции ${version}...`);
+
+      // Находим файл миграции
+      const migrationFiles = await this.getMigrationFiles();
+      const migrationFile = migrationFiles.find((m) => m.version === normalizedVersion);
+
+      if (!migrationFile) {
+        logger.warn(`Файл миграции ${version} не найден`);
+        return false;
+      }
+
+      // Загружаем миграцию
+      const result = await this.loadMigration(migrationFile.filename);
+      if (!result) {
+        logger.warn(`Не удалось загрузить миграцию из файла ${migrationFile.filename}`);
+        return false;
+      }
+
+      const { migration } = result;
+
+      // Запускаем миграцию
+      const success = await this.runMigration(migration, migrationFile.version, migrationFile.description, false);
+
+      if (success) {
+        logger.info(`Миграция ${version} успешно выполнена`);
+      } else {
+        logger.error(`Ошибка при выполнении миграции ${version}`);
+      }
+
+      return success;
+    } catch (error) {
+      logger.error(`Ошибка при запуске миграции ${version}:`, error);
+      return false;
     }
   }
 }

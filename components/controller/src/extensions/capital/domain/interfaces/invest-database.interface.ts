@@ -5,7 +5,7 @@ export interface IInvestDatabaseData {
   /** Внутренний ID базы данных */
   id: string;
   /** ID инвестиции в блокчейне */
-  blockchain_id: number;
+  blockchain_id: string;
   /** Номер блока последнего обновления */
   block_num: number | null;
   /** Существует ли запись в блокчейне */

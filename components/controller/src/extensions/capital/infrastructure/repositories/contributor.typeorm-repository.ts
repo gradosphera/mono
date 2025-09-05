@@ -78,7 +78,7 @@ export class ContributorTypeormRepository
    */
   async findByBlockchainId(blockchainId: string): Promise<ContributorDomainEntity | null> {
     const entity = await this.repository.findOne({
-      where: { blockchain_id: parseInt(blockchainId) },
+      where: { blockchain_id: blockchainId },
     });
     return entity ? ContributorMapper.toDomain(entity) : null;
   }
@@ -114,7 +114,7 @@ export class ContributorTypeormRepository
     // Остальные данные будут храниться только в доменной сущности
     const minimalDatabaseData = {
       id: '', // Будет сгенерирован базой данных
-      blockchain_id: parseInt(blockchainId),
+      blockchain_id: blockchainId,
       block_num: blockNum,
       present: present,
     };
