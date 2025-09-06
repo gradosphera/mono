@@ -40,9 +40,9 @@ export class ContributorDeltaMapper implements IBlockchainDeltaMapper<IContribut
       }
 
       // Парсим документ
-      value.contract = DomainToBlockchainUtils.convertChainDocumentToSignedDocument2(value.contract);
+      const contract = DomainToBlockchainUtils.convertChainDocumentToDomainFormat(value.contract);
 
-      return value as any as IContributorBlockchainData;
+      return { ...value, contract };
     } catch (error: any) {
       this.logger.error(`Error mapping delta to blockchain data: ${error.message}`, error.stack);
       return null;
@@ -119,14 +119,5 @@ export class ContributorDeltaMapper implements IBlockchainDeltaMapper<IContribut
     }
 
     return patterns;
-  }
-
-  /**
-   * Получение паттерна для подписки на все события вкладчиков
-   * Использует wildcard паттерн для гибкой подписки
-   */
-  getSubscriptionPattern(): string {
-    // Паттерн для подписки на все события, содержащие "contributor" в названии таблицы
-    return 'delta::*::contributor*';
   }
 }

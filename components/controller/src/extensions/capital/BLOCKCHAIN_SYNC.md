@@ -92,6 +92,38 @@ const health = await capitalSyncInteractor.checkSyncHealth();
 
 ## Важные детали
 
+### Документы в блокчейне
+
+В блокчейне Capital контракта некоторые поля содержат подписанные документы. Эти документы должны быть правильно распарсены при получении дельт:
+
+**Поля документов:**
+- `statement` - выписка/заявление (в results, expenses, debts, invests)
+- `approved_statement` - одобренное заявление (в expenses, debts)
+- `authorization` - авторизация (в results, expenses, debts)
+- `act` - акт (в results)
+- `contract` - контракт (в contributors)
+
+**Парсинг документов:**
+```typescript
+// В дельта-маппере для каждой сущности
+if (value.statement) {
+  value.statement = DomainToBlockchainUtils.convertChainDocumentToDomainFormat(value.statement);
+}
+if (value.authorization) {
+  value.authorization = DomainToBlockchainUtils.convertChainDocumentToDomainFormat(value.authorization);
+}
+// ... остальные документы
+```
+
+**Типы в TypeORM сущностях:**
+```typescript
+@Column({ type: 'json' })
+statement!: ISignedDocumentDomainInterface;
+
+@Column({ type: 'json' })
+approved_statement!: ISignedDocumentDomainInterface;
+```
+
 ### Номера блоков
 
 - `block_num = null` - сущность создана до синхронизации с блокчейном

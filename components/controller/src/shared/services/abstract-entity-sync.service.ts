@@ -168,16 +168,9 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
   }
 
   /**
-   * Получение имени события для подписки на дельты
-   */
-  getEventName(): string {
-    return this.mapper.getSubscriptionPattern();
-  }
-
-  /**
    * Получение всех возможных имен событий для подписки
    */
-  getAllEventNames(): string[] {
+  getAllEventPatterns(): string[] {
     return this.mapper.getAllEventPatterns();
   }
 

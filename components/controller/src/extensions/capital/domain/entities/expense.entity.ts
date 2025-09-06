@@ -1,6 +1,8 @@
 import { ExpenseStatus } from '../enums/expense-status.enum';
 import type { IExpenseDatabaseData } from '../interfaces/expense-database.interface';
 import type { IExpenseBlockchainData } from '../interfaces/expense-blockchain.interface';
+import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 /**
  * Доменная сущность расхода
@@ -9,27 +11,29 @@ import type { IExpenseBlockchainData } from '../interfaces/expense-blockchain.in
  * - База данных: внутренний ID, ссылка на блокчейн
  * - Блокчейн: все данные расхода из таблицы expenses
  */
-export class ExpenseDomainEntity {
+export class ExpenseDomainEntity implements IBlockchainSynchronizable {
   // Поля из базы данных
-  public readonly _id: string; // Внутренний ID базы данных
-  public readonly id: number; // ID в блокчейне
+  public id: string; // Внутренний ID базы данных
+  public blockchain_id: string; // ID в блокчейне
+  public block_num: number | null; // Номер блока последнего обновления
+  public present = true; // Существует ли запись в блокчейне
 
   // Доменные поля (расширения)
-  public readonly status: ExpenseStatus;
+  public status: ExpenseStatus;
 
   // Поля из блокчейна (expenses.hpp)
-  public readonly coopname: IExpenseBlockchainData['coopname'];
-  public readonly username: IExpenseBlockchainData['username'];
-  public readonly project_hash: IExpenseBlockchainData['project_hash'];
-  public readonly expense_hash: IExpenseBlockchainData['expense_hash'];
-  public readonly fund_id: IExpenseBlockchainData['fund_id'];
-  public readonly blockchainStatus: IExpenseBlockchainData['status']; // Статус из блокчейна
-  public readonly amount: IExpenseBlockchainData['amount'];
-  public readonly description: IExpenseBlockchainData['description'];
-  public readonly expense_statement: IExpenseBlockchainData['expense_statement'];
-  public readonly approved_statement: IExpenseBlockchainData['approved_statement'];
-  public readonly authorization: IExpenseBlockchainData['authorization'];
-  public readonly spended_at: IExpenseBlockchainData['spended_at'];
+  public coopname: IExpenseBlockchainData['coopname'];
+  public username: IExpenseBlockchainData['username'];
+  public project_hash: IExpenseBlockchainData['project_hash'];
+  public expense_hash: IExpenseBlockchainData['expense_hash'];
+  public fund_id: IExpenseBlockchainData['fund_id'];
+  public blockchainStatus: IExpenseBlockchainData['status']; // Статус из блокчейна
+  public amount: IExpenseBlockchainData['amount'];
+  public description: IExpenseBlockchainData['description'];
+  public expense_statement: ISignedDocumentDomainInterface;
+  public approved_statement: ISignedDocumentDomainInterface;
+  public authorization: ISignedDocumentDomainInterface;
+  public spended_at: IExpenseBlockchainData['spended_at'];
 
   /**
    * Конструктор для сборки композитной сущности
@@ -39,8 +43,9 @@ export class ExpenseDomainEntity {
    */
   constructor(databaseData: IExpenseDatabaseData, blockchainData: IExpenseBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
-    this.id = Number(blockchainData.id);
+    this.id = databaseData.id;
+    this.blockchain_id = blockchainData.id.toString();
+    this.block_num = databaseData.block_num;
 
     // Данные из блокчейна
     this.coopname = blockchainData.coopname;
@@ -58,6 +63,43 @@ export class ExpenseDomainEntity {
 
     // Синхронизация статуса с блокчейн данными
     this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+  }
+
+  /**
+   * Получение ID сущности в блокчейне
+   */
+  getBlockchainId(): string {
+    return this.blockchain_id;
+  }
+
+  /**
+   * Получение номера блока последнего обновления
+   */
+  getBlockNum(): number | null {
+    return this.block_num;
+  }
+
+  /**
+   * Обновление данных из блокчейна
+   * Обновляет текущий экземпляр
+   */
+  updateFromBlockchain(blockchainData: IExpenseBlockchainData, blockNum: number, present = true): void {
+    // Обновляем все поля из блокчейна
+    this.coopname = blockchainData.coopname;
+    this.username = blockchainData.username;
+    this.project_hash = blockchainData.project_hash;
+    this.expense_hash = blockchainData.expense_hash;
+    this.fund_id = blockchainData.fund_id;
+    this.blockchainStatus = blockchainData.status;
+    this.amount = blockchainData.amount;
+    this.description = blockchainData.description;
+    this.expense_statement = blockchainData.expense_statement;
+    this.approved_statement = blockchainData.approved_statement;
+    this.authorization = blockchainData.authorization;
+    this.spended_at = blockchainData.spended_at;
+    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+    this.block_num = blockNum;
+    this.present = present;
   }
 
   /**

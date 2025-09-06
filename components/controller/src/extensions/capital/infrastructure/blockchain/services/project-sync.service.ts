@@ -40,7 +40,7 @@ export class ProjectSyncService
     );
 
     // Программная подписка на все поддерживаемые паттерны событий
-    const allPatterns = this.getAllEventNames();
+    const allPatterns = this.getAllEventPatterns();
     this.logger.log(`Subscribing to ${allPatterns.length} event patterns: ${allPatterns.join(', ')}`);
 
     // Подписываемся на каждый паттерн программно

@@ -117,13 +117,4 @@ export class ProjectDeltaMapper
 
     return patterns;
   }
-
-  /**
-   * Получение паттерна для подписки на все события проектов
-   * Использует wildcard паттерн для гибкой подписки
-   */
-  getSubscriptionPattern(): string {
-    // Паттерн для подписки на все события, содержащие "projects" в названии таблицы
-    return 'delta::*::projects*';
-  }
 }

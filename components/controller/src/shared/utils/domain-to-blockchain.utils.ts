@@ -104,4 +104,20 @@ export class DomainToBlockchainUtils {
       signatures: chainDoc.signatures,
     };
   }
+
+  /**
+   * Преобразует документ из блокчейна в доменный интерфейс (правильная версия)
+   * @param chainDoc Документ из блокчейна
+   * @returns Документ в доменном формате
+   */
+  static convertChainDocumentToDomainFormat(chainDoc: Cooperative.Document.IChainDocument2): ISignedDocumentDomainInterface {
+    return {
+      version: chainDoc.version,
+      hash: chainDoc.hash,
+      doc_hash: chainDoc.doc_hash,
+      meta_hash: chainDoc.meta_hash,
+      meta: typeof chainDoc.meta === 'string' ? (chainDoc.meta === '' ? {} : JSON.parse(chainDoc.meta)) : chainDoc.meta,
+      signatures: chainDoc.signatures,
+    };
+  }
 }

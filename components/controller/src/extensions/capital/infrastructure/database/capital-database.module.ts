@@ -2,6 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
 import { ContributorTypeormEntity } from '../entities/contributor.typeorm-entity';
+import { AppendixTypeormEntity } from '../entities/appendix.typeorm-entity';
+import { ProgramInvestTypeormEntity } from '../entities/program-invest.typeorm-entity';
+import { ProgramPropertyTypeormEntity } from '../entities/program-property.typeorm-entity';
+import { ProgramWithdrawTypeormEntity } from '../entities/program-withdraw.typeorm-entity';
+import { ProjectPropertyTypeormEntity } from '../entities/project-property.typeorm-entity';
+import { ProgramWalletTypeormEntity } from '../entities/program-wallet.typeorm-entity';
+import { ProjectWalletTypeormEntity } from '../entities/project-wallet.typeorm-entity';
 import { config } from '~/config';
 
 // Константа для имени подключения к базе данных capital
@@ -19,12 +26,35 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
         password: config.postgres.password,
         database: config.postgres.database,
 
-        entities: [ProjectTypeormEntity, ContributorTypeormEntity],
+        entities: [
+          ProjectTypeormEntity,
+          ContributorTypeormEntity,
+          AppendixTypeormEntity,
+          ProgramInvestTypeormEntity,
+          ProgramPropertyTypeormEntity,
+          ProgramWithdrawTypeormEntity,
+          ProjectPropertyTypeormEntity,
+          ProgramWalletTypeormEntity,
+          ProjectWalletTypeormEntity,
+        ],
         synchronize: config.env === 'development', // Используем миграции для production
         logging: false,
       }),
     }),
-    TypeOrmModule.forFeature([ProjectTypeormEntity, ContributorTypeormEntity], CAPITAL_DATABASE_CONNECTION), // Указываем connection name
+    TypeOrmModule.forFeature(
+      [
+        ProjectTypeormEntity,
+        ContributorTypeormEntity,
+        AppendixTypeormEntity,
+        ProgramInvestTypeormEntity,
+        ProgramPropertyTypeormEntity,
+        ProgramWithdrawTypeormEntity,
+        ProjectPropertyTypeormEntity,
+        ProgramWalletTypeormEntity,
+        ProjectWalletTypeormEntity,
+      ],
+      CAPITAL_DATABASE_CONNECTION
+    ), // Указываем connection name
   ],
   exports: [TypeOrmModule],
 })

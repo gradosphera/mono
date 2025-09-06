@@ -1,6 +1,8 @@
 import { ResultStatus } from '../enums/result-status.enum';
 import type { IResultDatabaseData } from '../interfaces/result-database.interface';
 import type { IResultBlockchainData } from '../interfaces/result-blockchain.interface';
+import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 /**
  * Доменная сущность результата
@@ -9,34 +11,36 @@ import type { IResultBlockchainData } from '../interfaces/result-blockchain.inte
  * - База данных: внутренний ID, ссылка на блокчейн
  * - Блокчейн: все данные результата из таблицы results
  */
-export class ResultDomainEntity {
+export class ResultDomainEntity implements IBlockchainSynchronizable {
   // Поля из базы данных
-  public readonly _id: string; // Внутренний ID базы данных
-  public readonly id: number; // ID в блокчейне
+  public id: string; // Внутренний ID базы данных
+  public blockchain_id: string; // ID в блокчейне
+  public block_num: number | null; // Номер блока последнего обновления
+  public present = true; // Существует ли запись в блокчейне
 
   // Доменные поля (расширения)
-  public readonly status: ResultStatus;
+  public status: ResultStatus;
 
   // Поля из блокчейна (results.hpp)
-  public readonly project_hash: IResultBlockchainData['project_hash'];
-  public readonly result_hash: IResultBlockchainData['result_hash'];
-  public readonly coopname: IResultBlockchainData['coopname'];
-  public readonly username: IResultBlockchainData['username'];
-  public readonly blockchainStatus: IResultBlockchainData['status']; // Статус из блокчейна
-  public readonly created_at: IResultBlockchainData['created_at'];
-  public readonly creator_base_amount: IResultBlockchainData['creator_base_amount'];
-  public readonly author_base_amount: IResultBlockchainData['author_base_amount'];
-  public readonly debt_amount: IResultBlockchainData['debt_amount'];
-  public readonly creator_bonus_amount: IResultBlockchainData['creator_bonus_amount'];
-  public readonly author_bonus_amount: IResultBlockchainData['author_bonus_amount'];
-  public readonly generation_amount: IResultBlockchainData['generation_amount'];
-  public readonly capitalist_bonus_amount: IResultBlockchainData['capitalist_bonus_amount'];
-  public readonly total_amount: IResultBlockchainData['total_amount'];
-  public readonly available_for_return: IResultBlockchainData['available_for_return'];
-  public readonly available_for_convert: IResultBlockchainData['available_for_convert'];
-  public readonly statement: IResultBlockchainData['statement'];
-  public readonly authorization: IResultBlockchainData['authorization'];
-  public readonly act: IResultBlockchainData['act'];
+  public project_hash: IResultBlockchainData['project_hash'];
+  public result_hash: IResultBlockchainData['result_hash'];
+  public coopname: IResultBlockchainData['coopname'];
+  public username: IResultBlockchainData['username'];
+  public blockchainStatus: IResultBlockchainData['status']; // Статус из блокчейна
+  public created_at: IResultBlockchainData['created_at'];
+  public creator_base_amount: IResultBlockchainData['creator_base_amount'];
+  public author_base_amount: IResultBlockchainData['author_base_amount'];
+  public debt_amount: IResultBlockchainData['debt_amount'];
+  public creator_bonus_amount: IResultBlockchainData['creator_bonus_amount'];
+  public author_bonus_amount: IResultBlockchainData['author_bonus_amount'];
+  public generation_amount: IResultBlockchainData['generation_amount'];
+  public capitalist_bonus_amount: IResultBlockchainData['capitalist_bonus_amount'];
+  public total_amount: IResultBlockchainData['total_amount'];
+  public available_for_return: IResultBlockchainData['available_for_return'];
+  public available_for_convert: IResultBlockchainData['available_for_convert'];
+  public statement: ISignedDocumentDomainInterface;
+  public authorization: ISignedDocumentDomainInterface;
+  public act: ISignedDocumentDomainInterface;
 
   /**
    * Конструктор для сборки композитной сущности
@@ -46,8 +50,9 @@ export class ResultDomainEntity {
    */
   constructor(databaseData: IResultDatabaseData, blockchainData: IResultBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
-    this.id = Number(blockchainData.id);
+    this.id = databaseData.id;
+    this.blockchain_id = blockchainData.id.toString();
+    this.block_num = databaseData.block_num;
 
     // Данные из блокчейна
     this.project_hash = blockchainData.project_hash;
@@ -72,6 +77,50 @@ export class ResultDomainEntity {
 
     // Синхронизация статуса с блокчейн данными
     this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+  }
+
+  /**
+   * Получение ID сущности в блокчейне
+   */
+  getBlockchainId(): string {
+    return this.blockchain_id;
+  }
+
+  /**
+   * Получение номера блока последнего обновления
+   */
+  getBlockNum(): number | null {
+    return this.block_num;
+  }
+
+  /**
+   * Обновление данных из блокчейна
+   * Обновляет текущий экземпляр
+   */
+  updateFromBlockchain(blockchainData: IResultBlockchainData, blockNum: number, present = true): void {
+    // Обновляем все поля из блокчейна
+    this.project_hash = blockchainData.project_hash;
+    this.result_hash = blockchainData.result_hash;
+    this.coopname = blockchainData.coopname;
+    this.username = blockchainData.username;
+    this.blockchainStatus = blockchainData.status;
+    this.created_at = blockchainData.created_at;
+    this.creator_base_amount = blockchainData.creator_base_amount;
+    this.author_base_amount = blockchainData.author_base_amount;
+    this.debt_amount = blockchainData.debt_amount;
+    this.creator_bonus_amount = blockchainData.creator_bonus_amount;
+    this.author_bonus_amount = blockchainData.author_bonus_amount;
+    this.generation_amount = blockchainData.generation_amount;
+    this.capitalist_bonus_amount = blockchainData.capitalist_bonus_amount;
+    this.total_amount = blockchainData.total_amount;
+    this.available_for_return = blockchainData.available_for_return;
+    this.available_for_convert = blockchainData.available_for_convert;
+    this.statement = blockchainData.statement;
+    this.authorization = blockchainData.authorization;
+    this.act = blockchainData.act;
+    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+    this.block_num = blockNum;
+    this.present = present;
   }
 
   /**

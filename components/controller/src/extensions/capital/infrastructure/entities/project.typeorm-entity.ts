@@ -4,10 +4,10 @@ import { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/p
 
 const EntityName = 'capital_projects';
 @Entity(EntityName)
-// @Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
-// @Index(`idx_${EntityName}_hash`, ['project_hash'])
-// @Index(`idx_${EntityName}_coopname`, ['coopname'])
-// @Index(`idx_${EntityName}_status`, ['status'])
+@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+@Index(`idx_${EntityName}_hash`, ['project_hash'])
+@Index(`idx_${EntityName}_coopname`, ['coopname'])
+@Index(`idx_${EntityName}_status`, ['status'])
 export class ProjectTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

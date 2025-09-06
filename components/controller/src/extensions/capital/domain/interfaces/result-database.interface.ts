@@ -1,9 +1,5 @@
+import type { IBaseDatabaseData } from './base-database.interface';
 /**
  * Интерфейс данных результата из базы данных
  */
-export interface IResultDatabaseData {
-  /** Внутренний ID базы данных */
-  _id: string;
-  /** ID результата в блокчейне */
-  id: string;
-}
+export type IResultDatabaseData = IBaseDatabaseData;

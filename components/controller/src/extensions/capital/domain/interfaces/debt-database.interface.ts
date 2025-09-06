@@ -1,9 +1,5 @@
+import type { IBaseDatabaseData } from './base-database.interface';
 /**
  * Интерфейс данных долга из базы данных
  */
-export interface IDebtDatabaseData {
-  /** Внутренний ID базы данных */
-  _id: string;
-  /** ID долга в блокчейне */
-  id: string;
-}
+export type IDebtDatabaseData = IBaseDatabaseData;

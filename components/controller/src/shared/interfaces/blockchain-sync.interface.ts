@@ -12,6 +12,18 @@ export interface IBlockchainSyncData {
  * Интерфейс для сущностей, которые могут быть синхронизированы с блокчейном
  */
 export interface IBlockchainSynchronizable {
+  /** Внутренний идентификатор сущности */
+  id: string;
+
+  /** ID в блокчейне */
+  blockchain_id: string;
+
+  /** Номер блока последнего обновления */
+  block_num: number | null;
+
+  /** Существует ли запись в блокчейне */
+  present: boolean;
+
   /** Уникальный идентификатор сущности в блокчейне */
   getBlockchainId(): string;
 
@@ -34,9 +46,6 @@ export interface IBlockchainDeltaMapper<TBlockchainData = any, TDomainEntity = a
 
   /** Проверка, относится ли дельта к данному типу сущности */
   isRelevantDelta(delta: IDelta): boolean;
-
-  /** Получение паттерна для подписки на события */
-  getSubscriptionPattern(): string;
 
   /** Получение всех возможных паттернов событий  */
   getAllEventPatterns(): string[];

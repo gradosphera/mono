@@ -1,13 +1,5 @@
+import type { IBaseDatabaseData } from './base-database.interface';
 /**
  * Интерфейс данных вкладчика из базы данных
  */
-export interface IContributorDatabaseData {
-  /** Внутренний ID базы данных */
-  id: string;
-  /** ID вкладчика в блокчейне */
-  blockchain_id: string;
-  /** Номер блока последнего обновления */
-  block_num: number | null;
-  /** Существует ли запись в блокчейне */
-  present: boolean;
-}
+export type IContributorDatabaseData = IBaseDatabaseData;
