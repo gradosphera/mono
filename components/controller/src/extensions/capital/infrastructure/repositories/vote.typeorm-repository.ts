@@ -8,6 +8,8 @@ import { VoteMapper } from '../mappers/vote.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IVoteDatabaseData } from '../../domain/interfaces/vote-database.interface';
+import type { IVoteBlockchainData } from '../../domain/interfaces/vote-blockchain.interface';
 
 @Injectable()
 export class VoteTypeormRepository
@@ -28,27 +30,14 @@ export class VoteTypeormRepository
     };
   }
 
-  protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
-  ): VoteDomainEntity {
+  protected createDomainEntity(databaseData: IVoteDatabaseData, blockchainData: IVoteBlockchainData): VoteDomainEntity {
     return new VoteDomainEntity(databaseData, blockchainData);
   }
 
-  async create(vote: Omit<VoteDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<VoteDomainEntity> {
+  async create(vote: VoteDomainEntity): Promise<VoteDomainEntity> {
     const entity = this.repository.create(VoteMapper.toEntity(vote));
     const savedEntity = await this.repository.save(entity);
     return VoteMapper.toDomain(savedEntity);
-  }
-
-  async findById(_id: string): Promise<VoteDomainEntity | null> {
-    const entity = await this.repository.findOne({ where: { id } });
-    return entity ? VoteMapper.toDomain(entity) : null;
-  }
-
-  async findAll(): Promise<VoteDomainEntity[]> {
-    const entities = await this.repository.find();
-    return entities.map((entity) => VoteMapper.toDomain(entity));
   }
 
   async findByVoter(voter: string): Promise<VoteDomainEntity[]> {
@@ -75,19 +64,15 @@ export class VoteTypeormRepository
     const updateData = VoteMapper.toUpdateEntity(entity);
 
     // Обновляем запись в базе данных
-    await this.repository.update(entity.id, updateData);
+    await this.repository.update(entity._id, updateData);
 
     // Получаем обновленную сущность из базы данных
-    const updatedEntity = await this.repository.findOne({ where: { id: entity.id } });
+    const updatedEntity = await this.repository.findOne({ where: { _id: entity._id } });
     if (!updatedEntity) {
       throw new Error(`Vote with id ${entity.id} not found after update`);
     }
 
     // Возвращаем обновленную доменную сущность
     return VoteMapper.toDomain(updatedEntity);
-  }
-
-  async delete(_id: string): Promise<void> {
-    await this.repository.delete(id);
   }
 }

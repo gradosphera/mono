@@ -7,6 +7,8 @@ import { ProgramWithdrawMapper } from '../mappers/program-withdraw.mapper';
 import type { ProgramWithdrawRepository } from '../../domain/repositories/program-withdraw.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IProgramWithdrawDatabaseData } from '../../domain/interfaces/program-withdraw-database.interface';
+import type { IProgramWithdrawBlockchainData } from '../../domain/interfaces/program-withdraw-blockchain.interface';
 
 /**
  * TypeORM реализация репозитория возвратов из программы
@@ -31,8 +33,8 @@ export class ProgramWithdrawTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IProgramWithdrawDatabaseData,
+    blockchainData: IProgramWithdrawBlockchainData
   ): ProgramWithdrawDomainEntity {
     return new ProgramWithdrawDomainEntity(databaseData, blockchainData);
   }

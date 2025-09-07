@@ -8,6 +8,8 @@ import { StateMapper } from '../mappers/state.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IStateBlockchainData } from '../../domain/interfaces/state-blockchain.interface';
+import type { IStateDatabaseData } from '../../domain/interfaces/state-database.interface';
 
 @Injectable()
 export class StateTypeormRepository
@@ -28,10 +30,7 @@ export class StateTypeormRepository
     };
   }
 
-  protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
-  ): StateDomainEntity {
+  protected createDomainEntity(databaseData: IStateDatabaseData, blockchainData: IStateBlockchainData): StateDomainEntity {
     return new StateDomainEntity(databaseData, blockchainData);
   }
 
@@ -62,8 +61,8 @@ export class StateTypeormRepository
 
     // Создаем новую сущность
     const minimalDatabaseData = {
-      id: '', // Будет сгенерирован базой данных
-      id: blockchainId,
+      _id: '', // Будет сгенерирован базой данных
+      coopname: blockchainId,
       block_num: blockNum,
       present: present,
     };

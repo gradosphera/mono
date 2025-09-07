@@ -33,9 +33,7 @@ export class ContributorTypeormRepository
     return new ContributorDomainEntity(databaseData, blockchainData);
   }
 
-  async create(
-    contributor: Omit<ContributorDomainEntity, 'id' | 'createdAt' | 'updatedAt'>
-  ): Promise<ContributorDomainEntity> {
+  async create(contributor: ContributorDomainEntity): Promise<ContributorDomainEntity> {
     const entity = this.repository.create(ContributorMapper.toEntity(contributor));
     const savedEntity = await this.repository.save(entity);
     return ContributorMapper.toDomain(savedEntity);

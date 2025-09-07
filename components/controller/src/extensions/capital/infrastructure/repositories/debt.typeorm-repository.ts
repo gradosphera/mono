@@ -8,6 +8,8 @@ import { DebtMapper } from '../mappers/debt.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IDebtDatabaseData } from '../../domain/interfaces/debt-database.interface';
+import type { IDebtBlockchainData } from '../../domain/interfaces/debt-blockchain.interface';
 
 @Injectable()
 export class DebtTypeormRepository
@@ -28,14 +30,11 @@ export class DebtTypeormRepository
     };
   }
 
-  protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
-  ): DebtDomainEntity {
+  protected createDomainEntity(databaseData: IDebtDatabaseData, blockchainData: IDebtBlockchainData): DebtDomainEntity {
     return new DebtDomainEntity(databaseData, blockchainData);
   }
 
-  async create(debt: Omit<DebtDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<DebtDomainEntity> {
+  async create(debt: DebtDomainEntity): Promise<DebtDomainEntity> {
     const entity = this.repository.create(DebtMapper.toEntity(debt));
     const savedEntity = await this.repository.save(entity);
     return DebtMapper.toDomain(savedEntity);

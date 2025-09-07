@@ -7,6 +7,8 @@ import { ProjectPropertyMapper } from '../mappers/project-property.mapper';
 import type { ProjectPropertyRepository } from '../../domain/repositories/project-property.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IProjectPropertyBlockchainData } from '../../domain/interfaces/project-property-blockchain.interface';
+import type { IProjectPropertyDatabaseData } from '../../domain/interfaces/project-property-database.interface';
 
 /**
  * TypeORM реализация репозитория проектных имущественных взносов
@@ -31,8 +33,8 @@ export class ProjectPropertyTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IProjectPropertyDatabaseData,
+    blockchainData: IProjectPropertyBlockchainData
   ): ProjectPropertyDomainEntity {
     return new ProjectPropertyDomainEntity(databaseData, blockchainData);
   }

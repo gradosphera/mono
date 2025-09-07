@@ -8,6 +8,8 @@ import { ExpenseMapper } from '../mappers/expense.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IExpenseBlockchainData } from '../../domain/interfaces/expense-blockchain.interface';
+import type { IExpenseDatabaseData } from '../../domain/interfaces/expense-database.interface';
 
 @Injectable()
 export class ExpenseTypeormRepository
@@ -29,13 +31,13 @@ export class ExpenseTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IExpenseDatabaseData,
+    blockchainData: IExpenseBlockchainData
   ): ExpenseDomainEntity {
     return new ExpenseDomainEntity(databaseData, blockchainData);
   }
 
-  async create(expense: Omit<ExpenseDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ExpenseDomainEntity> {
+  async create(expense: ExpenseDomainEntity): Promise<ExpenseDomainEntity> {
     const entity = this.repository.create(ExpenseMapper.toEntity(expense));
     const savedEntity = await this.repository.save(entity);
     return ExpenseMapper.toDomain(savedEntity);

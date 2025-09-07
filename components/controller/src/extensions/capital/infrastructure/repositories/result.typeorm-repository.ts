@@ -8,6 +8,8 @@ import { ResultMapper } from '../mappers/result.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IResultBlockchainData } from '../../domain/interfaces/result-blockchain.interface';
+import type { IResultDatabaseData } from '../../domain/interfaces/result-database.interface';
 
 @Injectable()
 export class ResultTypeormRepository
@@ -29,13 +31,13 @@ export class ResultTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IResultDatabaseData,
+    blockchainData: IResultBlockchainData
   ): ResultDomainEntity {
     return new ResultDomainEntity(databaseData, blockchainData);
   }
 
-  async create(result: Omit<ResultDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ResultDomainEntity> {
+  async create(result: ResultDomainEntity): Promise<ResultDomainEntity> {
     const entity = this.repository.create(ResultMapper.toEntity(result));
     const savedEntity = await this.repository.save(entity);
     return ResultMapper.toDomain(savedEntity);

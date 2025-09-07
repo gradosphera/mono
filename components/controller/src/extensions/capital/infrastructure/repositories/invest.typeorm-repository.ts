@@ -8,6 +8,8 @@ import { InvestMapper } from '../mappers/invest.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IInvestDatabaseData } from '../../domain/interfaces/invest-database.interface';
+import type { IInvestBlockchainData } from '../../domain/interfaces/invest-blockchain.interface';
 
 @Injectable()
 export class InvestTypeormRepository
@@ -29,13 +31,13 @@ export class InvestTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IInvestDatabaseData,
+    blockchainData: IInvestBlockchainData
   ): InvestDomainEntity {
     return new InvestDomainEntity(databaseData, blockchainData);
   }
 
-  async create(invest: Omit<InvestDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<InvestDomainEntity> {
+  async create(invest: InvestDomainEntity): Promise<InvestDomainEntity> {
     const entity = this.repository.create(InvestMapper.toEntity(invest));
     const savedEntity = await this.repository.save(entity);
     return InvestMapper.toDomain(savedEntity);

@@ -7,6 +7,8 @@ import { ProgramPropertyMapper } from '../mappers/program-property.mapper';
 import type { ProgramPropertyRepository } from '../../domain/repositories/program-property.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IProgramPropertyDatabaseData } from '../../domain/interfaces/program-property-database.interface';
+import type { IProgramPropertyBlockchainData } from '../../domain/interfaces/program-property-blockchain.interface';
 
 /**
  * TypeORM реализация репозитория программных имущественных взносов
@@ -31,8 +33,8 @@ export class ProgramPropertyTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IProgramPropertyDatabaseData,
+    blockchainData: IProgramPropertyBlockchainData
   ): ProgramPropertyDomainEntity {
     return new ProgramPropertyDomainEntity(databaseData, blockchainData);
   }

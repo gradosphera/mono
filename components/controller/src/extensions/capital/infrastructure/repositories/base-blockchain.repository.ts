@@ -26,7 +26,7 @@ export abstract class BaseBlockchainRepository<
    */
   protected abstract getMapper(): {
     toDomain: (typeormEntity: TTypeormEntity) => TDomainEntity;
-    toEntity: (domainEntity: Partial<TDomainEntity>) => Partial<TTypeormEntity>;
+    toEntity: (domainEntity: TDomainEntity) => Partial<TTypeormEntity>;
   };
 
   /**
@@ -68,7 +68,7 @@ export abstract class BaseBlockchainRepository<
 
     // Создаем новую сущность
     const minimalDatabaseData = {
-      id: '', // Будет сгенерирован базой данных
+      _id: '', // Будет сгенерирован базой данных
       id: blockchainId,
       block_num: blockNum,
       present: present,
@@ -118,7 +118,7 @@ export abstract class BaseBlockchainRepository<
    */
   async findById(_id: string): Promise<TDomainEntity | null> {
     const entity = await this.repository.findOne({
-      where: { id } as any,
+      where: { _id } as any,
     });
 
     return entity ? this.getMapper().toDomain(entity) : null;
@@ -128,15 +128,12 @@ export abstract class BaseBlockchainRepository<
    * Удалить сущность по внутреннему ID базы данных
    */
   async delete(_id: string): Promise<void> {
-    await this.repository.delete(id);
+    await this.repository.delete(_id);
   }
 
   /**
    * Создать доменную сущность
    * Должен быть реализован в наследниках для создания конкретного типа сущности
    */
-  protected abstract createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
-  ): TDomainEntity;
+  protected abstract createDomainEntity(databaseData: any, blockchainData: any): TDomainEntity;
 }

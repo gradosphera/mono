@@ -7,6 +7,8 @@ import { AppendixMapper } from '../mappers/appendix.mapper';
 import type { AppendixRepository } from '../../domain/repositories/appendix.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IAppendixDatabaseData } from '../../domain/interfaces/appendix-database.interface';
+import type { IAppendixBlockchainData } from '../../domain/interfaces/appendix-blockchain.interface';
 
 /**
  * TypeORM реализация репозитория приложений
@@ -31,8 +33,8 @@ export class AppendixTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IAppendixDatabaseData,
+    blockchainData: IAppendixBlockchainData
   ): AppendixDomainEntity {
     return new AppendixDomainEntity(databaseData, blockchainData);
   }

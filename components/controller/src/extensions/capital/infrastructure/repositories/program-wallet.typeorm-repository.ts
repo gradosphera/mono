@@ -7,6 +7,8 @@ import { ProgramWalletMapper } from '../mappers/program-wallet.mapper';
 import type { ProgramWalletRepository } from '../../domain/repositories/program-wallet.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IProgramWalletDatabaseData } from '../../domain/interfaces/program-wallet-database.interface';
+import type { IProgramWalletBlockchainData } from '../../domain/interfaces/program-wallet-blockchain.interface';
 
 /**
  * TypeORM реализация репозитория программных кошельков
@@ -31,8 +33,8 @@ export class ProgramWalletTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IProgramWalletDatabaseData,
+    blockchainData: IProgramWalletBlockchainData
   ): ProgramWalletDomainEntity {
     return new ProgramWalletDomainEntity(databaseData, blockchainData);
   }

@@ -39,7 +39,7 @@ export class CommitTypeormRepository
 
   // Специфичные методы для CommitRepository
 
-  async create(commit: Omit<CommitDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<CommitDomainEntity> {
+  async create(commit: CommitDomainEntity): Promise<CommitDomainEntity> {
     const entity = this.repository.create(CommitMapper.toEntity(commit));
     const savedEntity = await this.repository.save(entity);
     return CommitMapper.toDomain(savedEntity);

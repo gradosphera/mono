@@ -7,6 +7,8 @@ import { ProgramInvestMapper } from '../mappers/program-invest.mapper';
 import type { ProgramInvestRepository } from '../../domain/repositories/program-invest.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IProgramInvestDatabaseData } from '../../domain/interfaces/program-invest-database.interface';
+import type { IProgramInvestBlockchainData } from '../../domain/interfaces/program-invest-blockchain.interface';
 
 /**
  * TypeORM реализация репозитория программных инвестиций
@@ -31,8 +33,8 @@ export class ProgramInvestTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IProgramInvestDatabaseData,
+    blockchainData: IProgramInvestBlockchainData
   ): ProgramInvestDomainEntity {
     return new ProgramInvestDomainEntity(databaseData, blockchainData);
   }

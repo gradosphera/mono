@@ -7,6 +7,8 @@ import { ProjectWalletMapper } from '../mappers/project-wallet.mapper';
 import type { ProjectWalletRepository } from '../../domain/repositories/project-wallet.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IProjectWalletBlockchainData } from '../../domain/interfaces/project-wallet-blockchain.interface';
+import type { IProjectWalletDatabaseData } from '../../domain/interfaces/project-wallet-database.interface';
 
 /**
  * TypeORM реализация репозитория проектных кошельков
@@ -31,8 +33,8 @@ export class ProjectWalletTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IProjectWalletDatabaseData,
+    blockchainData: IProjectWalletBlockchainData
   ): ProjectWalletDomainEntity {
     return new ProjectWalletDomainEntity(databaseData, blockchainData);
   }

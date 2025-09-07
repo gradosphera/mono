@@ -8,6 +8,8 @@ import { ProjectMapper } from '../mappers/project.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/project-blockchain.interface';
+import type { IProjectDomainInterfaceDatabaseData } from '../../domain/interfaces/project-database.interface';
 
 @Injectable()
 export class ProjectTypeormRepository
@@ -29,13 +31,13 @@ export class ProjectTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { _id: string; id: string; block_num: number; present: boolean },
-    blockchainData: any
+    databaseData: IProjectDomainInterfaceDatabaseData,
+    blockchainData: IProjectDomainInterfaceBlockchainData
   ): ProjectDomainEntity {
     return new ProjectDomainEntity(databaseData, blockchainData);
   }
 
-  async create(project: Omit<ProjectDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ProjectDomainEntity> {
+  async create(project: ProjectDomainEntity): Promise<ProjectDomainEntity> {
     const entity = this.repository.create(ProjectMapper.toEntity(project));
     const savedEntity = await this.repository.save(entity);
     return ProjectMapper.toDomain(savedEntity);
