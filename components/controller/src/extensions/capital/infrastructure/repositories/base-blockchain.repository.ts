@@ -6,12 +6,9 @@ import type { IBaseDatabaseData } from '../../domain/interfaces/base-database.in
 /**
  * Базовый абстрактный класс для репозиториев блокчейн-сущностей
  *
- * Предоставляет общую реализацию методов синхронизации с блокчейном:
- * - findByBlockchainId
- * - findByBlockNumGreaterThan
- * - createIfNotExists
- * - deleteByBlockNumGreaterThan
- * - update
+ * Предоставляет общую реализацию методов:
+ * - Синхронизации с блокчейном: findByBlockchainId, findByBlockNumGreaterThan, createIfNotExists, deleteByBlockNumGreaterThan
+ * - CRUD операций: findAll, findById, save, update, delete
  */
 @Injectable()
 export abstract class BaseBlockchainRepository<
@@ -37,7 +34,7 @@ export abstract class BaseBlockchainRepository<
    */
   async findByBlockchainId(blockchainId: string): Promise<TDomainEntity | null> {
     const entity = await this.repository.findOne({
-      where: { blockchain_id: blockchainId } as any,
+      where: { id: blockchainId } as any,
     });
 
     return entity ? this.getMapper().toDomain(entity) : null;
@@ -72,7 +69,7 @@ export abstract class BaseBlockchainRepository<
     // Создаем новую сущность
     const minimalDatabaseData = {
       id: '', // Будет сгенерирован базой данных
-      blockchain_id: blockchainId,
+      id: blockchainId,
       block_num: blockNum,
       present: present,
     };
@@ -109,11 +106,37 @@ export abstract class BaseBlockchainRepository<
   }
 
   /**
+   * Найти все сущности
+   */
+  async findAll(): Promise<TDomainEntity[]> {
+    const entities = await this.repository.find();
+    return entities.map((entity) => this.getMapper().toDomain(entity));
+  }
+
+  /**
+   * Найти сущность по внутреннему ID базы данных
+   */
+  async findById(_id: string): Promise<TDomainEntity | null> {
+    const entity = await this.repository.findOne({
+      where: { id } as any,
+    });
+
+    return entity ? this.getMapper().toDomain(entity) : null;
+  }
+
+  /**
+   * Удалить сущность по внутреннему ID базы данных
+   */
+  async delete(_id: string): Promise<void> {
+    await this.repository.delete(id);
+  }
+
+  /**
    * Создать доменную сущность
    * Должен быть реализован в наследниках для создания конкретного типа сущности
    */
   protected abstract createDomainEntity(
-    databaseData: { id: string; blockchain_id: string; block_num: number; present: boolean },
+    databaseData: { _id: string; id: string; block_num: number; present: boolean },
     blockchainData: any
   ): TDomainEntity;
 }

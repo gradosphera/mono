@@ -4,20 +4,20 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 
 const EntityName = 'capital_invests';
 @Entity(EntityName)
-@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+@Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_invest_hash`, ['invest_hash'])
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_status`, ['status'])
 export class InvestTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  _id!: string;
 
-  @Column({ type: 'varchar', nullable: true, unique: true })
-  blockchain_id?: string;
+  @Column({ type: 'integer', nullable: true, unique: true })
+  id!: number;
 
   @Column({ type: 'integer', nullable: true })
-  block_num?: number;
+  block_num!: number;
 
   @Column({ type: 'boolean', default: true })
   present!: boolean;
@@ -48,10 +48,10 @@ export class InvestTypeormEntity {
   statement!: ISignedDocumentDomainInterface;
 
   @Column({ type: 'varchar', length: 12, nullable: true })
-  coordinator?: string;
+  coordinator!: string;
 
   @Column({ type: 'bigint', nullable: true })
-  coordinator_amount?: string;
+  coordinator_amount!: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   created_at!: Date;

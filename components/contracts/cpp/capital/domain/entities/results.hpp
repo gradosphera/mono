@@ -41,19 +41,9 @@ namespace Capital {
     eosio::name status = Capital::Results::Status::CREATED; ///< Статус результата: created | approved | authorized | declined | act1 | act2
     time_point_sec created_at = current_time_point(); ///< Время создания результата
 
-    eosio::asset creator_base_amount = asset(0, _root_govern_symbol); ///< Базовая сумма создателя
-    eosio::asset author_base_amount = asset(0, _root_govern_symbol);   ///< Базовая сумма автора
     eosio::asset debt_amount = asset(0, _root_govern_symbol);          ///< Сумма долга
-    
-    eosio::asset creator_bonus_amount = asset(0, _root_govern_symbol); ///< Бонусная сумма создателя
-    eosio::asset author_bonus_amount = asset(0, _root_govern_symbol);  ///< Бонусная сумма автора
-    eosio::asset generation_amount = asset(0, _root_govern_symbol);    ///< Сумма генерации
-    eosio::asset capitalist_bonus_amount = asset(0, _root_govern_symbol); ///< Бонусная сумма капиталиста
-    
     eosio::asset total_amount = asset(0, _root_govern_symbol);         ///< Общая сумма
-    eosio::asset available_for_return = asset(0, _root_govern_symbol); ///< Доступно для возврата
-    eosio::asset available_for_convert = asset(0, _root_govern_symbol); ///< Доступно для конвертации
-      
+    
     document2 statement;                            ///< Заявление
     document2 authorization;                        ///< Решение совета
     document2 act;                                  ///< Акт

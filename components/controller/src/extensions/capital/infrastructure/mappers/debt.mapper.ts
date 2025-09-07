@@ -2,6 +2,14 @@ import { DebtDomainEntity } from '../../domain/entities/debt.entity';
 import { DebtTypeormEntity } from '../entities/debt.typeorm-entity';
 import type { IDebtDatabaseData } from '../../domain/interfaces/debt-database.interface';
 import type { IDebtBlockchainData } from '../../domain/interfaces/debt-blockchain.interface';
+import type { RequireFields } from '~/shared/utils/require-fields';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+
+type toEntityDatabasePart = RequireFields<Partial<DebtTypeormEntity>, keyof IDebtDatabaseData>;
+type toEntityBlockchainPart = RequireFields<Partial<DebtTypeormEntity>, keyof IDebtBlockchainData>;
+
+type toDomainDatabasePart = RequireFields<Partial<DebtDomainEntity>, keyof IDebtDatabaseData>;
+type toDomainBlockchainPart = RequireFields<Partial<DebtDomainEntity>, keyof IDebtBlockchainData>;
 
 /**
  * Маппер для преобразования между доменной сущностью долга и TypeORM сущностью
@@ -11,28 +19,34 @@ export class DebtMapper {
    * Преобразование TypeORM сущности в доменную сущность
    */
   static toDomain(entity: DebtTypeormEntity): DebtDomainEntity {
-    const databaseData: IDebtDatabaseData = {
-      id: entity.id,
-      blockchain_id: entity.blockchain_id || '',
-      block_num: entity.block_num || null,
+    const databaseData: toDomainDatabasePart = {
+      _id: entity._id,
+      block_num: entity.block_num,
       present: entity.present,
+      debt_hash: entity.debt_hash,
+      status: entity.status,
+      blockchain_status: entity.blockchain_status,
     };
 
-    // Используем данные из TypeORM сущности
-    const blockchainData: IDebtBlockchainData = {
-      id: entity.blockchain_id || '',
-      coopname: entity.coopname,
-      username: entity.username,
-      debt_hash: entity.debt_hash,
-      project_hash: entity.project_hash,
-      status: entity.blockchain_status,
-      repaid_at: entity.repaid_at?.toISOString() || '',
-      amount: entity.amount,
-      statement: entity.statement,
-      approved_statement: entity.approved_statement,
-      authorization: entity.authorization,
-      memo: entity.memo || '',
-    };
+    let blockchainData: toDomainBlockchainPart | undefined;
+
+    if (entity[DebtDomainEntity.getPrimaryKey()] !== undefined) {
+      // Используем данные из TypeORM сущности
+      blockchainData = {
+        id: entity.id,
+        coopname: entity.coopname,
+        username: entity.username,
+        debt_hash: entity.debt_hash,
+        project_hash: entity.project_hash,
+        status: entity.status,
+        repaid_at: entity.repaid_at.toISOString(),
+        amount: entity.amount,
+        statement: entity.statement,
+        approved_statement: entity.approved_statement,
+        authorization: entity.authorization,
+        memo: entity.memo,
+      };
+    }
 
     return new DebtDomainEntity(databaseData, blockchainData);
   }
@@ -40,30 +54,36 @@ export class DebtMapper {
   /**
    * Преобразование доменной сущности в TypeORM сущность для создания
    */
-  static toEntity(domain: Partial<DebtDomainEntity>): Partial<DebtTypeormEntity> {
-    const entity: Partial<DebtTypeormEntity> = {
-      blockchain_id: domain.blockchain_id ? domain.blockchain_id : '',
-      block_num: domain.block_num || undefined,
+  static toEntity(domain: DebtDomainEntity): Partial<DebtTypeormEntity> {
+    const dbPart: toEntityDatabasePart = {
+      _id: domain._id,
+      block_num: domain.block_num ?? 0,
       present: domain.present,
+      debt_hash: domain.debt_hash,
+      status: domain.status,
+      blockchain_status: domain.blockchain_status as string,
     };
 
-    // Поля из блокчейна
-    if (domain.coopname !== undefined) entity.coopname = domain.coopname;
-    if (domain.username !== undefined) entity.username = domain.username;
-    if (domain.debt_hash !== undefined) entity.debt_hash = domain.debt_hash;
-    if (domain.project_hash !== undefined) entity.project_hash = domain.project_hash;
-    if (domain.blockchainStatus !== undefined) entity.blockchain_status = domain.blockchainStatus;
-    if (domain.repaid_at !== undefined) entity.repaid_at = domain.repaid_at ? new Date(domain.repaid_at) : undefined;
-    if (domain.amount !== undefined) entity.amount = domain.amount;
-    if (domain.statement !== undefined) entity.statement = domain.statement;
-    if (domain.approved_statement !== undefined) entity.approved_statement = domain.approved_statement;
-    if (domain.authorization !== undefined) entity.authorization = domain.authorization;
-    if (domain.memo !== undefined) entity.memo = domain.memo || undefined;
+    let blockchainPart: toEntityBlockchainPart | undefined;
 
-    // Доменные поля
-    if (domain.status !== undefined) entity.status = domain.status;
+    if (domain[DebtDomainEntity.getPrimaryKey()] !== undefined) {
+      blockchainPart = {
+        id: domain.id as number,
+        coopname: domain.coopname as string,
+        username: domain.username as string,
+        debt_hash: domain.debt_hash,
+        project_hash: domain.project_hash as string,
+        status: domain.blockchain_status as any,
+        repaid_at: domain.repaid_at ? new Date(domain.repaid_at) : new Date(),
+        amount: domain.amount as string,
+        statement: domain.statement as ISignedDocumentDomainInterface,
+        approved_statement: domain.approved_statement as ISignedDocumentDomainInterface,
+        authorization: domain.authorization as ISignedDocumentDomainInterface,
+        memo: domain.memo as string,
+      };
+    }
 
-    return entity;
+    return { ...dbPart, ...blockchainPart };
   }
 
   /**
@@ -74,7 +94,7 @@ export class DebtMapper {
     const updateData: Partial<DebtTypeormEntity> = {};
 
     // Поля из базы данных (локальные)
-    if (domain.block_num !== undefined) updateData.block_num = domain.block_num || undefined;
+    if (domain.block_num !== undefined) updateData.block_num = domain.block_num;
     if (domain.present !== undefined) updateData.present = domain.present;
 
     // Примечание: Все поля из блокчейна (coopname, debt_hash, status, amount, etc.)

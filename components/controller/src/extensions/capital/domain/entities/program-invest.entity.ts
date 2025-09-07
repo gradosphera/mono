@@ -1,8 +1,8 @@
 import { ProgramInvestStatus } from '../enums/program-invest-status.enum';
 import type { IProgramInvestDatabaseData } from '../interfaces/program-invest-database.interface';
 import type { IProgramInvestBlockchainData } from '../interfaces/program-invest-blockchain.interface';
-import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 
 /**
  * Доменная сущность программной инвестиции
@@ -11,24 +11,31 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
  * - База данных: внутренний ID, ссылка на блокчейн
  * - Блокчейн: все данные программной инвестиции из таблицы progrinvests
  */
-export class ProgramInvestDomainEntity implements IBlockchainSynchronizable {
+export class ProgramInvestDomainEntity
+  implements IBlockchainSynchronizable, IProgramInvestDatabaseData, Partial<IProgramInvestBlockchainData>
+{
+  // Статические поля ключей для поиска и синхронизации
+  private static primary_key = 'id';
+  private static sync_key = 'invest_hash';
+
   // Поля из базы данных
-  public id: string; // Внутренний ID базы данных
-  public blockchain_id: string; // ID в блокчейне
-  public block_num: number | null; // Номер блока последнего обновления
-  public present = true; // Существует ли запись в блокчейне
+  public _id: string; // Внутренний ID базы данных
+  public id?: number; // ID в блокчейне
+  public block_num: number | undefined; // Номер блока последнего обновления
+  public present = false; // Существует ли запись в блокчейне
 
   // Доменные поля (расширения)
   public status: ProgramInvestStatus;
 
   // Поля из блокчейна (program_invests.hpp)
-  public coopname: IProgramInvestBlockchainData['coopname'];
-  public username: IProgramInvestBlockchainData['username'];
   public invest_hash: IProgramInvestBlockchainData['invest_hash'];
-  public blockchainStatus: IProgramInvestBlockchainData['status']; // Статус из блокчейна
-  public invested_at: IProgramInvestBlockchainData['invested_at'];
-  public statement: ISignedDocumentDomainInterface;
-  public amount: IProgramInvestBlockchainData['amount'];
+
+  public coopname?: IProgramInvestBlockchainData['coopname'];
+  public username?: IProgramInvestBlockchainData['username'];
+  public blockchain_status?: IProgramInvestBlockchainData['status']; // Статус из блокчейна
+  public invested_at?: IProgramInvestBlockchainData['invested_at'];
+  public statement?: ISignedDocumentDomainInterface;
+  public amount?: IProgramInvestBlockchainData['amount'];
 
   /**
    * Конструктор для сборки композитной сущности
@@ -36,57 +43,96 @@ export class ProgramInvestDomainEntity implements IBlockchainSynchronizable {
    * @param databaseData - данные из базы данных
    * @param blockchainData - данные из блокчейна
    */
-  constructor(databaseData: IProgramInvestDatabaseData, blockchainData: IProgramInvestBlockchainData) {
+  constructor(databaseData: IProgramInvestDatabaseData, blockchainData?: IProgramInvestBlockchainData) {
     // Данные из базы данных
-    this.id = databaseData.id;
-    this.blockchain_id = blockchainData.id.toString();
+    this._id = databaseData._id;
+    this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
+    this.invest_hash = databaseData.invest_hash;
+    this.present = databaseData.present;
 
     // Данные из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.invest_hash = blockchainData.invest_hash;
-    this.blockchainStatus = blockchainData.status;
-    this.invested_at = blockchainData.invested_at;
-    this.statement = blockchainData.statement;
-    this.amount = blockchainData.amount;
+    if (blockchainData) {
+      if (this.invest_hash != blockchainData.invest_hash) throw new Error('Program invest hash mismatch');
 
-    // Синхронизация статуса с блокчейн данными
-    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+      this.id = Number(blockchainData.id);
+      this.coopname = blockchainData.coopname;
+      this.username = blockchainData.username;
+      this.invest_hash = blockchainData.invest_hash;
+      this.blockchain_status = blockchainData.status;
+      this.invested_at = blockchainData.invested_at;
+      this.statement = blockchainData.statement;
+      this.amount = blockchainData.amount;
+
+      // Синхронизация статуса с блокчейн данными
+      this.status = this.mapStatusToDomain(blockchainData.status);
+    }
   }
 
-  // Реализация IBlockchainSynchronizable
-  getBlockchainId(): string {
-    return this.blockchain_id;
-  }
-
-  getBlockNum(): number | null {
+  /**
+   * Получение номера блока последнего обновления
+   */
+  getBlockNum(): number | undefined {
     return this.block_num;
   }
 
+  /**
+   * Получение ключа для поиска сущности в блокчейне (статический метод)
+   */
+  public static getPrimaryKey(): string {
+    return ProgramInvestDomainEntity.primary_key;
+  }
+
+  /**
+   * Получение ключа для синхронизации сущности в блокчейне и базе данных (статический метод)
+   */
+  public static getSyncKey(): string {
+    return ProgramInvestDomainEntity.sync_key;
+  }
+
+  /**
+   * Получение ключа для поиска сущности в блокчейне
+   */
+  getPrimaryKey(): string {
+    return ProgramInvestDomainEntity.primary_key;
+  }
+
+  /**
+   * Получение ключа для синхронизации сущности в блокчейне и базе данных
+   */
+  getSyncKey(): string {
+    return ProgramInvestDomainEntity.sync_key;
+  }
+
+  /**
+   * Обновление данных из блокчейна
+   * Обновляет текущий экземпляр
+   */
   updateFromBlockchain(blockchainData: IProgramInvestBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
     this.coopname = blockchainData.coopname;
     this.username = blockchainData.username;
     this.invest_hash = blockchainData.invest_hash;
-    this.blockchainStatus = blockchainData.status;
+    this.blockchain_status = blockchainData.status;
     this.invested_at = blockchainData.invested_at;
     this.statement = blockchainData.statement;
     this.amount = blockchainData.amount;
-    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+    this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
   }
 
-  private mapBlockchainStatusToDomain(blockchainStatus: IProgramInvestBlockchainData['status']): ProgramInvestStatus {
-    const statusValue = blockchainStatus.toString();
-
-    switch (statusValue) {
+  /**
+   * Маппинг статуса из блокчейна в доменный статус
+   * Синхронизировано с константами из program_invests.hpp
+   */
+  private mapStatusToDomain(blockchainStatus?: string): ProgramInvestStatus {
+    switch (blockchainStatus) {
       case 'created':
         return ProgramInvestStatus.CREATED;
       default:
-        console.warn(`Неизвестный статус блокчейна: ${statusValue}, устанавливаем CREATED`);
-        return ProgramInvestStatus.CREATED;
+        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+        return ProgramInvestStatus.UNDEFINED;
     }
   }
 }

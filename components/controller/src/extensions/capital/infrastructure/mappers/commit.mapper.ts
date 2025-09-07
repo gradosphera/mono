@@ -2,6 +2,13 @@ import { CommitDomainEntity } from '../../domain/entities/commit.entity';
 import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
 import type { ICommitDatabaseData } from '../../domain/interfaces/commit-database.interface';
 import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
+import type { RequireFields } from '~/shared/utils/require-fields';
+
+type toEntityDatabasePart = RequireFields<Partial<CommitTypeormEntity>, keyof ICommitDatabaseData>;
+type toEntityBlockchainPart = RequireFields<Partial<CommitTypeormEntity>, keyof ICommitBlockchainData>;
+
+type toDomainDatabasePart = RequireFields<Partial<CommitDomainEntity>, keyof ICommitDatabaseData>;
+type toDomainBlockchainPart = RequireFields<Partial<CommitDomainEntity>, keyof ICommitBlockchainData>;
 
 /**
  * Маппер для преобразования между доменной сущностью коммита и TypeORM сущностью
@@ -11,24 +18,30 @@ export class CommitMapper {
    * Преобразование TypeORM сущности в доменную сущность
    */
   static toDomain(entity: CommitTypeormEntity): CommitDomainEntity {
-    const databaseData: ICommitDatabaseData = {
-      id: entity.id,
-      blockchain_id: entity.blockchain_id || '',
-      block_num: entity.block_num || null,
+    const databaseData: toDomainDatabasePart = {
+      _id: entity._id,
+      block_num: entity.block_num,
       present: entity.present,
+      commit_hash: entity.commit_hash,
+      status: entity.status,
+      blockchain_status: entity.blockchain_status,
     };
 
-    // Используем данные из TypeORM сущности
-    const blockchainData: ICommitBlockchainData = {
-      id: entity.blockchain_id || '',
-      coopname: entity.coopname,
-      username: entity.username,
-      project_hash: entity.project_hash,
-      commit_hash: entity.commit_hash,
-      amounts: entity.amounts,
-      status: entity.blockchain_status,
-      created_at: entity.created_at.toISOString(),
-    };
+    let blockchainData: toDomainBlockchainPart | undefined;
+
+    if (entity[CommitDomainEntity.getPrimaryKey()] !== undefined) {
+      // Используем данные из TypeORM сущности
+      blockchainData = {
+        id: entity.id,
+        coopname: entity.coopname,
+        username: entity.username,
+        project_hash: entity.project_hash,
+        commit_hash: entity.commit_hash,
+        amounts: entity.amounts,
+        status: entity.status,
+        created_at: entity.created_at.toISOString(),
+      };
+    }
 
     return new CommitDomainEntity(databaseData, blockchainData);
   }
@@ -36,26 +49,32 @@ export class CommitMapper {
   /**
    * Преобразование доменной сущности в TypeORM сущность для создания
    */
-  static toEntity(domain: Partial<CommitDomainEntity>): Partial<CommitTypeormEntity> {
-    const entity: Partial<CommitTypeormEntity> = {
-      blockchain_id: domain.blockchain_id ? domain.blockchain_id : '',
-      block_num: domain.block_num || undefined,
+  static toEntity(domain: CommitDomainEntity): Partial<CommitTypeormEntity> {
+    const dbPart: toEntityDatabasePart = {
+      _id: domain._id,
+      block_num: domain.block_num ?? 0,
       present: domain.present,
+      commit_hash: domain.commit_hash,
+      status: domain.status,
+      blockchain_status: domain.blockchain_status as string,
     };
 
-    // Поля из блокчейна
-    if (domain.coopname !== undefined) entity.coopname = domain.coopname;
-    if (domain.username !== undefined) entity.username = domain.username;
-    if (domain.project_hash !== undefined) entity.project_hash = domain.project_hash;
-    if (domain.commit_hash !== undefined) entity.commit_hash = domain.commit_hash;
-    if (domain.amounts !== undefined) entity.amounts = domain.amounts;
-    if (domain.blockchainStatus !== undefined) entity.blockchain_status = domain.blockchainStatus;
-    if (domain.created_at !== undefined) entity.created_at = new Date(domain.created_at);
+    let blockchainPart: toEntityBlockchainPart | undefined;
 
-    // Доменные поля
-    if (domain.status !== undefined) entity.status = domain.status;
+    if (domain[CommitDomainEntity.getPrimaryKey()] !== undefined) {
+      blockchainPart = {
+        id: domain.id as number,
+        coopname: domain.coopname as string,
+        username: domain.username as string,
+        project_hash: domain.project_hash as string,
+        commit_hash: domain.commit_hash,
+        amounts: domain.amounts as any,
+        status: domain.blockchain_status as any,
+        created_at: new Date(domain.created_at ?? new Date()),
+      };
+    }
 
-    return entity;
+    return { ...dbPart, ...blockchainPart };
   }
 
   /**
@@ -66,7 +85,7 @@ export class CommitMapper {
     const updateData: Partial<CommitTypeormEntity> = {};
 
     // Поля из базы данных (локальные)
-    if (domain.block_num !== undefined) updateData.block_num = domain.block_num || undefined;
+    if (domain.block_num !== undefined) updateData.block_num = domain.block_num;
     if (domain.present !== undefined) updateData.present = domain.present;
 
     // Примечание: Все поля из блокчейна (coopname, commit_hash, status, amounts, etc.)

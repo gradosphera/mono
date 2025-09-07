@@ -197,6 +197,7 @@
     "prettier": "^2.0.5",
     "supertest": "^6.0.1",
     "tsconfig-paths": "^4.2.0",
+    "type-fest": "^4.41.0",
     "typescript": "^5.4.2"
   },
   "gitHead": "b05c17bee481d90c4cd82aa2a34ac428f8263a5f"

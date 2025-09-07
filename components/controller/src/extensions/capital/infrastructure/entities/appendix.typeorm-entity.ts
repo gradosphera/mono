@@ -4,17 +4,17 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 
 const EntityName = 'capital_appendixes';
 @Entity(EntityName)
-@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+@Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_appendix_hash`, ['appendix_hash'])
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_status`, ['status'])
 export class AppendixTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  _id!: string;
 
-  @Column({ type: 'varchar', nullable: true, unique: true })
-  blockchain_id!: string;
+  @Column({ type: 'integer', nullable: true, unique: true })
+  id!: number;
 
   @Column({ type: 'integer', nullable: true })
   block_num!: number;

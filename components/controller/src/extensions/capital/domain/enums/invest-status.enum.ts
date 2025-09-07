@@ -5,4 +5,5 @@ export enum InvestStatus {
   ACTIVE = 'active', // Инвестиция активна
   RETURNED = 'returned', // Инвестиция возвращена
   CANCELLED = 'cancelled', // Инвестиция отменена
+  UNDEFINED = 'undefined', // Статус не определен
 }

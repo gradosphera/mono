@@ -1,7 +1,7 @@
 import { CommitStatus } from '../enums/commit-status.enum';
 import type { ICommitDatabaseData } from '../interfaces/commit-database.interface';
 import type { ICommitBlockchainData } from '../interfaces/commit-blockchain.interface';
-import type { IBlockchainSynchronizable } from '../../../../shared/interfaces/blockchain-sync.interface';
+import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 
 /**
  * Доменная сущность коммита
@@ -10,24 +10,29 @@ import type { IBlockchainSynchronizable } from '../../../../shared/interfaces/bl
  * - База данных: внутренний ID, ссылка на блокчейн
  * - Блокчейн: все данные коммита из таблицы commits
  */
-export class CommitDomainEntity implements IBlockchainSynchronizable {
+export class CommitDomainEntity implements IBlockchainSynchronizable, ICommitDatabaseData, Partial<ICommitBlockchainData> {
+  // Статические поля ключей для поиска и синхронизации
+  private static primary_key = 'id';
+  private static sync_key = 'commit_hash';
+
   // Поля из базы данных
-  public id: string; // Внутренний ID базы данных
-  public blockchain_id: string; // ID в блокчейне
-  public block_num: number | null; // Номер блока последнего обновления
-  public present = true; // Существует ли запись в блокчейне
+  public _id: string; // Внутренний ID базы данных
+  public id?: number; // ID в блокчейне
+  public block_num: number | undefined; // Номер блока последнего обновления
+  public present = false; // Существует ли запись в блокчейне
 
   // Доменные поля (расширения)
   public status: CommitStatus;
 
   // Поля из блокчейна (commits.hpp)
-  public coopname: ICommitBlockchainData['coopname'];
-  public username: ICommitBlockchainData['username'];
-  public project_hash: ICommitBlockchainData['project_hash'];
   public commit_hash: ICommitBlockchainData['commit_hash'];
-  public amounts: ICommitBlockchainData['amounts'];
-  public blockchainStatus: ICommitBlockchainData['status']; // Статус из блокчейна
-  public created_at: ICommitBlockchainData['created_at'];
+
+  public coopname?: ICommitBlockchainData['coopname'];
+  public username?: ICommitBlockchainData['username'];
+  public project_hash?: ICommitBlockchainData['project_hash'];
+  public amounts?: ICommitBlockchainData['amounts'];
+  public blockchain_status?: ICommitBlockchainData['status']; // Статус из блокчейна
+  public created_at?: ICommitBlockchainData['created_at'];
 
   /**
    * Конструктор для сборки композитной сущности
@@ -35,37 +40,65 @@ export class CommitDomainEntity implements IBlockchainSynchronizable {
    * @param databaseData - данные из базы данных
    * @param blockchainData - данные из блокчейна
    */
-  constructor(databaseData: ICommitDatabaseData, blockchainData: ICommitBlockchainData) {
+  constructor(databaseData: ICommitDatabaseData, blockchainData?: ICommitBlockchainData) {
     // Данные из базы данных
-    this.id = databaseData.id;
-    this.blockchain_id = blockchainData.id.toString();
+    this._id = databaseData._id;
+    this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
+    this.commit_hash = databaseData.commit_hash;
+    this.present = databaseData.present;
 
     // Данные из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.project_hash = blockchainData.project_hash;
-    this.commit_hash = blockchainData.commit_hash;
-    this.amounts = blockchainData.amounts;
-    this.blockchainStatus = blockchainData.status;
-    this.created_at = blockchainData.created_at;
+    if (blockchainData) {
+      if (this.commit_hash != blockchainData.commit_hash) throw new Error('Commit hash mismatch');
 
-    // Синхронизация статуса с блокчейн данными
-    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
-  }
+      this.id = Number(blockchainData.id);
+      this.coopname = blockchainData.coopname;
+      this.username = blockchainData.username;
+      this.project_hash = blockchainData.project_hash;
+      this.commit_hash = blockchainData.commit_hash;
+      this.amounts = blockchainData.amounts;
+      this.blockchain_status = blockchainData.status;
+      this.created_at = blockchainData.created_at;
 
-  /**
-   * Получение ID сущности в блокчейне
-   */
-  getBlockchainId(): string {
-    return this.blockchain_id;
+      // Синхронизация статуса с блокчейн данными
+      this.status = this.mapStatusToDomain(blockchainData.status);
+    }
   }
 
   /**
    * Получение номера блока последнего обновления
    */
-  getBlockNum(): number | null {
+  getBlockNum(): number | undefined {
     return this.block_num;
+  }
+
+  /**
+   * Получение ключа для поиска сущности в блокчейне (статический метод)
+   */
+  public static getPrimaryKey(): string {
+    return CommitDomainEntity.primary_key;
+  }
+
+  /**
+   * Получение ключа для синхронизации сущности в блокчейне и базе данных (статический метод)
+   */
+  public static getSyncKey(): string {
+    return CommitDomainEntity.sync_key;
+  }
+
+  /**
+   * Получение ключа для поиска сущности в блокчейне
+   */
+  getPrimaryKey(): string {
+    return CommitDomainEntity.primary_key;
+  }
+
+  /**
+   * Получение ключа для синхронизации сущности в блокчейне и базе данных
+   */
+  getSyncKey(): string {
+    return CommitDomainEntity.sync_key;
   }
 
   /**
@@ -79,9 +112,9 @@ export class CommitDomainEntity implements IBlockchainSynchronizable {
     this.project_hash = blockchainData.project_hash;
     this.commit_hash = blockchainData.commit_hash;
     this.amounts = blockchainData.amounts;
-    this.blockchainStatus = blockchainData.status;
+    this.blockchain_status = blockchainData.status;
     this.created_at = blockchainData.created_at;
-    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+    this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
   }
@@ -90,10 +123,8 @@ export class CommitDomainEntity implements IBlockchainSynchronizable {
    * Маппинг статуса из блокчейна в доменный статус
    * Синхронизировано с константами из commits.hpp
    */
-  private mapBlockchainStatusToDomain(blockchainStatus: ICommitBlockchainData['status']): CommitStatus {
-    const statusValue = blockchainStatus.toString();
-
-    switch (statusValue) {
+  private mapStatusToDomain(blockchainStatus?: string): CommitStatus {
+    switch (blockchainStatus) {
       case 'pending':
         return CommitStatus.PENDING;
       case 'approved':
@@ -101,9 +132,9 @@ export class CommitDomainEntity implements IBlockchainSynchronizable {
       case 'declined':
         return CommitStatus.DECLINED;
       default:
-        // По умолчанию считаем коммит отклоненным для безопасности
-        console.warn(`Неизвестный статус блокчейна: ${statusValue}, устанавливаем DECLINED`);
-        return CommitStatus.DECLINED;
+        // По умолчанию считаем статус неопределенным
+        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+        return CommitStatus.UNDEFINED;
     }
   }
 }

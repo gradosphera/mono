@@ -5,4 +5,5 @@ export enum DebtStatus {
   ACTIVE = 'active', // Долг активен
   SETTLED = 'settled', // Долг погашен
   CANCELLED = 'cancelled', // Долг отменен
+  UNDEFINED = 'undefined', // Статус не определен
 }

@@ -2,4 +2,7 @@ import type { IBaseDatabaseData } from './base-database.interface';
 /**
  * Интерфейс данных проекта из базы данных
  */
-export type IProjectDomainInterfaceDatabaseData = IBaseDatabaseData;
+export type IProjectDomainInterfaceDatabaseData = IBaseDatabaseData & {
+  project_hash: string;
+  blockchain_status?: string;
+};

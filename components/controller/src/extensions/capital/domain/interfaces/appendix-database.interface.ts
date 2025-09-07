@@ -3,4 +3,7 @@ import type { IBaseDatabaseData } from './base-database.interface';
 /**
  * Интерфейс данных приложения из базы данных
  */
-export type IAppendixDatabaseData = IBaseDatabaseData;
+export type IAppendixDatabaseData = IBaseDatabaseData & {
+  appendix_hash: string;
+  blockchain_status?: string;
+};

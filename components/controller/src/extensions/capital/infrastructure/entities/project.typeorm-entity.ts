@@ -4,19 +4,19 @@ import { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/p
 
 const EntityName = 'capital_projects';
 @Entity(EntityName)
-@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+@Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_coopname`, ['coopname'])
 @Index(`idx_${EntityName}_status`, ['status'])
 export class ProjectTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  _id!: string;
 
-  @Column({ type: 'varchar', nullable: true, unique: true })
-  blockchain_id?: string;
+  @Column({ type: 'integer', nullable: true, unique: true })
+  id!: number;
 
   @Column({ type: 'integer', nullable: true })
-  block_num?: number;
+  block_num!: number;
 
   @Column({ type: 'boolean', default: true })
   present!: boolean;
@@ -29,7 +29,7 @@ export class ProjectTypeormEntity {
   project_hash!: string;
 
   @Column({ type: 'varchar', length: 64, nullable: true })
-  parent_hash?: string;
+  parent_hash!: string;
 
   @Column({ type: 'varchar', length: 20 })
   blockchain_status!: string;
@@ -53,7 +53,7 @@ export class ProjectTypeormEntity {
   description!: string;
 
   @Column({ type: 'text', nullable: true })
-  meta?: string;
+  meta!: string;
 
   @Column({ type: 'json' })
   counts!: IProjectDomainInterfaceBlockchainData['counts'];

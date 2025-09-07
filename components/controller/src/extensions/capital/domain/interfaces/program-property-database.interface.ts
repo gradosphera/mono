@@ -3,4 +3,7 @@ import type { IBaseDatabaseData } from './base-database.interface';
 /**
  * Интерфейс данных программного имущественного взноса из базы данных
  */
-export type IProgramPropertyDatabaseData = IBaseDatabaseData;
+export type IProgramPropertyDatabaseData = IBaseDatabaseData & {
+  property_hash: string;
+  blockchain_status?: string;
+};

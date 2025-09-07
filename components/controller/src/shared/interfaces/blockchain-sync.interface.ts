@@ -12,23 +12,14 @@ export interface IBlockchainSyncData {
  * Интерфейс для сущностей, которые могут быть синхронизированы с блокчейном
  */
 export interface IBlockchainSynchronizable {
-  /** Внутренний идентификатор сущности */
-  id: string;
-
-  /** ID в блокчейне */
-  blockchain_id: string;
-
   /** Номер блока последнего обновления */
-  block_num: number | null;
+  getBlockNum(): number | undefined;
 
-  /** Существует ли запись в блокчейне */
-  present: boolean;
+  /** Ключ для поиска сущности в блокчейне */
+  getPrimaryKey(): string;
 
-  /** Уникальный идентификатор сущности в блокчейне */
-  getBlockchainId(): string;
-
-  /** Номер блока последнего обновления */
-  getBlockNum(): number | null;
+  /** Ключ для синхронизации сущности в блокчейне и базе данных */
+  getSyncKey(): string;
 
   /** Обновление данных из блокчейна */
   updateFromBlockchain(blockchainData: any, blockNum: number, present?: boolean): void;

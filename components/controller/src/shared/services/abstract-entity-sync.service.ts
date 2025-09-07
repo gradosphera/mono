@@ -75,8 +75,8 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
 
     if (existingEntity) {
       // Проверяем, не является ли это устаревшим обновлением
-      const currentBlockNum = existingEntity.getBlockNum();
-      if (currentBlockNum !== null && blockNum <= currentBlockNum) {
+      const currentBlockNum = existingEntity.block_num;
+      if (currentBlockNum && blockNum <= currentBlockNum) {
         this.logger.debug(
           `Skipping outdated update for ${this.entityName} ${blockchainId}: block ${blockNum} <= ${currentBlockNum}`
         );

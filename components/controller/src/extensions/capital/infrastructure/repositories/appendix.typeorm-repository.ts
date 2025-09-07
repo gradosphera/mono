@@ -31,28 +31,12 @@ export class AppendixTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { id: string; blockchain_id: string; block_num: number; present: boolean },
+    databaseData: { _id: string; id: string; block_num: number; present: boolean },
     blockchainData: any
   ): AppendixDomainEntity {
     return new AppendixDomainEntity(databaseData, blockchainData);
   }
 
   // Специфичные методы для AppendixRepository
-
-  async findAll(): Promise<AppendixDomainEntity[]> {
-    const entities = await this.repository.find();
-    return entities.map(AppendixMapper.toDomain);
-  }
-
-  async findById(id: string): Promise<AppendixDomainEntity | null> {
-    const entity = await this.repository.findOne({
-      where: { id },
-    });
-
-    return entity ? AppendixMapper.toDomain(entity) : null;
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.repository.delete(id);
-  }
+  // Все типовые CRUD методы наследуются от BaseBlockchainRepository
 }

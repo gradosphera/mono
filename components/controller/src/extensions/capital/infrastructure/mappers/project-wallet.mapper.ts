@@ -2,6 +2,13 @@ import { ProjectWalletDomainEntity } from '../../domain/entities/project-wallet.
 import { ProjectWalletTypeormEntity } from '../entities/project-wallet.typeorm-entity';
 import type { IProjectWalletDatabaseData } from '../../domain/interfaces/project-wallet-database.interface';
 import type { IProjectWalletBlockchainData } from '../../domain/interfaces/project-wallet-blockchain.interface';
+import type { RequireFields } from '~/shared/utils/require-fields';
+
+type toEntityDatabasePart = RequireFields<Partial<ProjectWalletTypeormEntity>, keyof IProjectWalletDatabaseData>;
+type toEntityBlockchainPart = RequireFields<Partial<ProjectWalletTypeormEntity>, keyof IProjectWalletBlockchainData>;
+
+type toDomainDatabasePart = RequireFields<Partial<ProjectWalletDomainEntity>, keyof IProjectWalletDatabaseData>;
+type toDomainBlockchainPart = RequireFields<Partial<ProjectWalletDomainEntity>, keyof IProjectWalletBlockchainData>;
 
 /**
  * Маппер для преобразования между доменной сущностью проектного кошелька и TypeORM сущностью
@@ -11,23 +18,27 @@ export class ProjectWalletMapper {
    * Преобразование TypeORM сущности в доменную сущность
    */
   static toDomain(entity: ProjectWalletTypeormEntity): ProjectWalletDomainEntity {
-    const databaseData: IProjectWalletDatabaseData = {
-      id: entity.id,
-      blockchain_id: entity.blockchain_id || '',
-      block_num: entity.block_num || null,
+    const databaseData: toDomainDatabasePart = {
+      _id: entity._id,
+      block_num: entity.block_num,
       present: entity.present,
+      username: entity.username,
     };
 
-    // Используем данные из TypeORM сущности
-    const blockchainData: IProjectWalletBlockchainData = {
-      id: entity.blockchain_id || '',
-      coopname: entity.coopname,
-      project_hash: entity.project_hash,
-      username: entity.username,
-      shares: entity.shares,
-      last_membership_reward_per_share: entity.last_membership_reward_per_share,
-      membership_available: entity.membership_available,
-    };
+    let blockchainData: toDomainBlockchainPart | undefined;
+
+    if (entity[ProjectWalletDomainEntity.getPrimaryKey()] !== undefined) {
+      // Используем данные из TypeORM сущности
+      blockchainData = {
+        id: entity.id,
+        coopname: entity.coopname,
+        project_hash: entity.project_hash,
+        username: entity.username,
+        shares: entity.shares,
+        last_membership_reward_per_share: entity.last_membership_reward_per_share,
+        membership_available: entity.membership_available,
+      };
+    }
 
     return new ProjectWalletDomainEntity(databaseData, blockchainData);
   }
@@ -35,22 +46,28 @@ export class ProjectWalletMapper {
   /**
    * Преобразование доменной сущности в TypeORM сущность для создания
    */
-  static toEntity(domain: Partial<ProjectWalletDomainEntity>): Partial<ProjectWalletTypeormEntity> {
-    const entity: Partial<ProjectWalletTypeormEntity> = {
-      blockchain_id: domain.blockchain_id || '',
-      block_num: domain.block_num || undefined,
+  static toEntity(domain: ProjectWalletDomainEntity): Partial<ProjectWalletTypeormEntity> {
+    const dbPart: toEntityDatabasePart = {
+      _id: domain._id,
+      block_num: domain.block_num ?? 0,
       present: domain.present,
+      username: domain.username,
     };
 
-    // Поля из блокчейна
-    if (domain.coopname !== undefined) entity.coopname = domain.coopname;
-    if (domain.project_hash !== undefined) entity.project_hash = domain.project_hash;
-    if (domain.username !== undefined) entity.username = domain.username;
-    if (domain.shares !== undefined) entity.shares = domain.shares;
-    if (domain.last_membership_reward_per_share !== undefined)
-      entity.last_membership_reward_per_share = domain.last_membership_reward_per_share;
-    if (domain.membership_available !== undefined) entity.membership_available = domain.membership_available;
+    let blockchainPart: toEntityBlockchainPart | undefined;
 
-    return entity;
+    if (domain[ProjectWalletDomainEntity.getPrimaryKey()] !== undefined) {
+      blockchainPart = {
+        id: domain.id as number,
+        coopname: domain.coopname as string,
+        project_hash: domain.project_hash as string,
+        username: domain.username,
+        shares: domain.shares as string,
+        last_membership_reward_per_share: domain.last_membership_reward_per_share as number,
+        membership_available: domain.membership_available as string,
+      };
+    }
+
+    return { ...dbPart, ...blockchainPart };
   }
 }

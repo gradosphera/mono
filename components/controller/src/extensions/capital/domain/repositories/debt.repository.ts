@@ -3,13 +3,13 @@ import { DebtDomainEntity } from '../entities/debt.entity';
 
 export interface DebtRepository extends IBlockchainSyncRepository<DebtDomainEntity> {
   create(debt: Omit<DebtDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<DebtDomainEntity>;
-  findById(id: string): Promise<DebtDomainEntity | null>;
+  findById(_id: string): Promise<DebtDomainEntity | null>;
   findAll(): Promise<DebtDomainEntity[]>;
   findByUsername(username: string): Promise<DebtDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<DebtDomainEntity[]>;
   findByStatus(status: string): Promise<DebtDomainEntity[]>;
   update(entity: DebtDomainEntity): Promise<DebtDomainEntity>;
-  delete(id: string): Promise<void>;
+  delete(_id: string): Promise<void>;
 }
 
 export const DEBT_REPOSITORY = Symbol('DebtRepository');

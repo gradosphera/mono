@@ -9,6 +9,7 @@ import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import type { ICommitDatabaseData } from '../../domain/interfaces/commit-database.interface';
 
 @Injectable()
 export class CommitTypeormRepository
@@ -30,7 +31,7 @@ export class CommitTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { id: string; blockchain_id: string; block_num: number; present: boolean },
+    databaseData: ICommitDatabaseData,
     blockchainData: ICommitBlockchainData
   ): CommitDomainEntity {
     return new CommitDomainEntity(databaseData, blockchainData);
@@ -42,16 +43,6 @@ export class CommitTypeormRepository
     const entity = this.repository.create(CommitMapper.toEntity(commit));
     const savedEntity = await this.repository.save(entity);
     return CommitMapper.toDomain(savedEntity);
-  }
-
-  async findById(id: string): Promise<CommitDomainEntity | null> {
-    const entity = await this.repository.findOne({ where: { id } });
-    return entity ? CommitMapper.toDomain(entity) : null;
-  }
-
-  async findAll(): Promise<CommitDomainEntity[]> {
-    const entities = await this.repository.find();
-    return entities.map((entity) => CommitMapper.toDomain(entity));
   }
 
   async findByUsername(username: string): Promise<CommitDomainEntity[]> {
@@ -67,30 +58,5 @@ export class CommitTypeormRepository
   async findByStatus(status: string): Promise<CommitDomainEntity[]> {
     const entities = await this.repository.find({ where: { status: status as any } });
     return entities.map((entity) => CommitMapper.toDomain(entity));
-  }
-
-  /**
-   * Обновление коммита в базе данных
-   * Принимает доменную сущность и обновляет соответствующие поля в TypeORM сущности
-   */
-  async update(entity: CommitDomainEntity): Promise<CommitDomainEntity> {
-    // Преобразуем доменную сущность в данные для обновления
-    const updateData = CommitMapper.toUpdateEntity(entity);
-
-    // Обновляем запись в базе данных
-    await this.repository.update(entity.id, updateData);
-
-    // Получаем обновленную сущность из базы данных
-    const updatedEntity = await this.repository.findOne({ where: { id: entity.id } });
-    if (!updatedEntity) {
-      throw new Error(`Commit with id ${entity.id} not found after update`);
-    }
-
-    // Возвращаем обновленную доменную сущность
-    return CommitMapper.toDomain(updatedEntity);
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.repository.delete(id);
   }
 }

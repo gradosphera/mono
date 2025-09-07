@@ -2,6 +2,13 @@ import { StateDomainEntity } from '../../domain/entities/state.entity';
 import { StateTypeormEntity } from '../entities/state.typeorm-entity';
 import type { IStateDatabaseData } from '../../domain/interfaces/state-database.interface';
 import type { IStateBlockchainData } from '../../domain/interfaces/state-blockchain.interface';
+import type { RequireFields } from '~/shared/utils/require-fields';
+
+type toEntityDatabasePart = RequireFields<Partial<StateTypeormEntity>, keyof IStateDatabaseData>;
+type toEntityBlockchainPart = RequireFields<Partial<StateTypeormEntity>, keyof IStateBlockchainData>;
+
+type toDomainDatabasePart = RequireFields<Partial<StateDomainEntity>, keyof IStateDatabaseData>;
+type toDomainBlockchainPart = RequireFields<Partial<StateDomainEntity>, keyof IStateBlockchainData>;
 
 /**
  * Маппер для преобразования между доменной сущностью состояния и TypeORM сущностью
@@ -11,23 +18,27 @@ export class StateMapper {
    * Преобразование TypeORM сущности в доменную сущность
    */
   static toDomain(entity: StateTypeormEntity): StateDomainEntity {
-    const databaseData: IStateDatabaseData = {
-      id: entity.id,
-      blockchain_id: entity.blockchain_id || '',
-      block_num: entity.block_num || null,
+    const databaseData: toDomainDatabasePart = {
+      _id: entity._id,
+      block_num: entity.block_num,
       present: entity.present,
+      coopname: entity.coopname,
     };
 
-    // Используем данные из TypeORM сущности
-    const blockchainData: IStateBlockchainData = {
-      coopname: entity.coopname,
-      global_available_invest_pool: entity.global_available_invest_pool,
-      program_membership_funded: entity.program_membership_funded,
-      program_membership_available: entity.program_membership_available,
-      program_membership_distributed: entity.program_membership_distributed,
-      program_membership_cumulative_reward_per_share: entity.program_membership_cumulative_reward_per_share,
-      config: entity.config,
-    };
+    let blockchainData: toDomainBlockchainPart | undefined;
+
+    if (entity[StateDomainEntity.getPrimaryKey()] !== undefined) {
+      // Используем данные из TypeORM сущности
+      blockchainData = {
+        coopname: entity.coopname,
+        global_available_invest_pool: entity.global_available_invest_pool,
+        program_membership_funded: entity.program_membership_funded,
+        program_membership_available: entity.program_membership_available,
+        program_membership_distributed: entity.program_membership_distributed,
+        program_membership_cumulative_reward_per_share: entity.program_membership_cumulative_reward_per_share,
+        config: entity.config,
+      };
+    }
 
     return new StateDomainEntity(databaseData, blockchainData);
   }
@@ -35,27 +46,29 @@ export class StateMapper {
   /**
    * Преобразование доменной сущности в TypeORM сущность для создания
    */
-  static toEntity(domain: Partial<StateDomainEntity>): Partial<StateTypeormEntity> {
-    const entity: Partial<StateTypeormEntity> = {
-      blockchain_id: domain.blockchain_id ? domain.blockchain_id : '',
-      block_num: domain.block_num || undefined,
+  static toEntity(domain: StateDomainEntity): Partial<StateTypeormEntity> {
+    const dbPart: toEntityDatabasePart = {
+      _id: domain._id,
+      block_num: domain.block_num ?? 0,
       present: domain.present,
+      coopname: domain.coopname,
     };
 
-    // Поля из блокчейна
-    if (domain.coopname !== undefined) entity.coopname = domain.coopname;
-    if (domain.global_available_invest_pool !== undefined)
-      entity.global_available_invest_pool = domain.global_available_invest_pool;
-    if (domain.program_membership_funded !== undefined) entity.program_membership_funded = domain.program_membership_funded;
-    if (domain.program_membership_available !== undefined)
-      entity.program_membership_available = domain.program_membership_available;
-    if (domain.program_membership_distributed !== undefined)
-      entity.program_membership_distributed = domain.program_membership_distributed;
-    if (domain.program_membership_cumulative_reward_per_share !== undefined)
-      entity.program_membership_cumulative_reward_per_share = domain.program_membership_cumulative_reward_per_share;
-    if (domain.config !== undefined) entity.config = domain.config;
+    let blockchainPart: toEntityBlockchainPart | undefined;
 
-    return entity;
+    if (domain[StateDomainEntity.getPrimaryKey()] !== undefined) {
+      blockchainPart = {
+        coopname: domain.coopname,
+        global_available_invest_pool: domain.global_available_invest_pool as string,
+        program_membership_funded: domain.program_membership_funded as string,
+        program_membership_available: domain.program_membership_available as string,
+        program_membership_distributed: domain.program_membership_distributed as string,
+        program_membership_cumulative_reward_per_share: domain.program_membership_cumulative_reward_per_share as number,
+        config: domain.config as toEntityBlockchainPart['config'],
+      };
+    }
+
+    return { ...dbPart, ...blockchainPart };
   }
 
   /**
@@ -66,7 +79,7 @@ export class StateMapper {
     const updateData: Partial<StateTypeormEntity> = {};
 
     // Поля из базы данных (локальные)
-    if (domain.block_num !== undefined) updateData.block_num = domain.block_num || undefined;
+    if (domain.block_num !== undefined) updateData.block_num = domain.block_num;
     if (domain.present !== undefined) updateData.present = domain.present;
 
     // Примечание: Все поля из блокчейна (coopname, global_available_invest_pool, program_membership_funded, etc.)

@@ -2,6 +2,13 @@ import { ProgramWalletDomainEntity } from '../../domain/entities/program-wallet.
 import { ProgramWalletTypeormEntity } from '../entities/program-wallet.typeorm-entity';
 import type { IProgramWalletDatabaseData } from '../../domain/interfaces/program-wallet-database.interface';
 import type { IProgramWalletBlockchainData } from '../../domain/interfaces/program-wallet-blockchain.interface';
+import type { RequireFields } from '~/shared/utils/require-fields';
+
+type toEntityDatabasePart = RequireFields<Partial<ProgramWalletTypeormEntity>, keyof IProgramWalletDatabaseData>;
+type toEntityBlockchainPart = RequireFields<Partial<ProgramWalletTypeormEntity>, keyof IProgramWalletBlockchainData>;
+
+type toDomainDatabasePart = RequireFields<Partial<ProgramWalletDomainEntity>, keyof IProgramWalletDatabaseData>;
+type toDomainBlockchainPart = RequireFields<Partial<ProgramWalletDomainEntity>, keyof IProgramWalletBlockchainData>;
 
 /**
  * Маппер для преобразования между доменной сущностью программного кошелька и TypeORM сущностью
@@ -11,21 +18,25 @@ export class ProgramWalletMapper {
    * Преобразование TypeORM сущности в доменную сущность
    */
   static toDomain(entity: ProgramWalletTypeormEntity): ProgramWalletDomainEntity {
-    const databaseData: IProgramWalletDatabaseData = {
-      id: entity.id,
-      blockchain_id: entity.blockchain_id || '',
-      block_num: entity.block_num || null,
+    const databaseData: toDomainDatabasePart = {
+      _id: entity._id,
+      block_num: entity.block_num,
       present: entity.present,
+      username: entity.username,
     };
 
-    // Используем данные из TypeORM сущности
-    const blockchainData: IProgramWalletBlockchainData = {
-      id: entity.blockchain_id || '',
-      coopname: entity.coopname,
-      username: entity.username,
-      last_program_crps: entity.last_program_crps,
-      capital_available: entity.capital_available,
-    };
+    let blockchainData: toDomainBlockchainPart | undefined;
+
+    if (entity[ProgramWalletDomainEntity.getPrimaryKey()] !== undefined) {
+      // Используем данные из TypeORM сущности
+      blockchainData = {
+        id: entity.id,
+        coopname: entity.coopname,
+        username: entity.username,
+        last_program_crps: entity.last_program_crps,
+        capital_available: entity.capital_available,
+      };
+    }
 
     return new ProgramWalletDomainEntity(databaseData, blockchainData);
   }
@@ -33,19 +44,26 @@ export class ProgramWalletMapper {
   /**
    * Преобразование доменной сущности в TypeORM сущность для создания
    */
-  static toEntity(domain: Partial<ProgramWalletDomainEntity>): Partial<ProgramWalletTypeormEntity> {
-    const entity: Partial<ProgramWalletTypeormEntity> = {
-      blockchain_id: domain.blockchain_id || '',
-      block_num: domain.block_num || undefined,
+  static toEntity(domain: ProgramWalletDomainEntity): Partial<ProgramWalletTypeormEntity> {
+    const dbPart: toEntityDatabasePart = {
+      _id: domain._id,
+      block_num: domain.block_num ?? 0,
       present: domain.present,
+      username: domain.username,
     };
 
-    // Поля из блокчейна
-    if (domain.coopname !== undefined) entity.coopname = domain.coopname;
-    if (domain.username !== undefined) entity.username = domain.username;
-    if (domain.last_program_crps !== undefined) entity.last_program_crps = domain.last_program_crps;
-    if (domain.capital_available !== undefined) entity.capital_available = domain.capital_available;
+    let blockchainPart: toEntityBlockchainPart | undefined;
 
-    return entity;
+    if (domain[ProgramWalletDomainEntity.getPrimaryKey()] !== undefined) {
+      blockchainPart = {
+        id: domain.id as number,
+        coopname: domain.coopname as string,
+        username: domain.username,
+        last_program_crps: domain.last_program_crps as number,
+        capital_available: domain.capital_available as string,
+      };
+    }
+
+    return { ...dbPart, ...blockchainPart };
   }
 }

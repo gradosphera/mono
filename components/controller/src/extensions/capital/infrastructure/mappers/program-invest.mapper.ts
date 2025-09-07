@@ -2,6 +2,14 @@ import { ProgramInvestDomainEntity } from '../../domain/entities/program-invest.
 import { ProgramInvestTypeormEntity } from '../entities/program-invest.typeorm-entity';
 import type { IProgramInvestDatabaseData } from '../../domain/interfaces/program-invest-database.interface';
 import type { IProgramInvestBlockchainData } from '../../domain/interfaces/program-invest-blockchain.interface';
+import type { RequireFields } from '~/shared/utils/require-fields';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+
+type toEntityDatabasePart = RequireFields<Partial<ProgramInvestTypeormEntity>, keyof IProgramInvestDatabaseData>;
+type toEntityBlockchainPart = RequireFields<Partial<ProgramInvestTypeormEntity>, keyof IProgramInvestBlockchainData>;
+
+type toDomainDatabasePart = RequireFields<Partial<ProgramInvestDomainEntity>, keyof IProgramInvestDatabaseData>;
+type toDomainBlockchainPart = RequireFields<Partial<ProgramInvestDomainEntity>, keyof IProgramInvestBlockchainData>;
 
 /**
  * Маппер для преобразования между доменной сущностью программной инвестиции и TypeORM сущностью
@@ -11,24 +19,30 @@ export class ProgramInvestMapper {
    * Преобразование TypeORM сущности в доменную сущность
    */
   static toDomain(entity: ProgramInvestTypeormEntity): ProgramInvestDomainEntity {
-    const databaseData: IProgramInvestDatabaseData = {
-      id: entity.id,
-      blockchain_id: entity.blockchain_id || '',
-      block_num: entity.block_num || null,
+    const databaseData: toDomainDatabasePart = {
+      _id: entity._id,
+      block_num: entity.block_num,
       present: entity.present,
+      invest_hash: entity.invest_hash,
+      status: entity.status,
+      blockchain_status: entity.blockchain_status,
     };
 
-    // Используем данные из TypeORM сущности
-    const blockchainData: IProgramInvestBlockchainData = {
-      id: entity.blockchain_id || '',
-      coopname: entity.coopname,
-      username: entity.username,
-      invest_hash: entity.invest_hash,
-      status: entity.blockchain_status,
-      invested_at: entity.invested_at.toISOString(),
-      statement: entity.statement,
-      amount: entity.amount,
-    };
+    let blockchainData: toDomainBlockchainPart | undefined;
+
+    if (entity[ProgramInvestDomainEntity.getPrimaryKey()] !== undefined) {
+      // Используем данные из TypeORM сущности
+      blockchainData = {
+        id: entity.id,
+        coopname: entity.coopname,
+        username: entity.username,
+        invest_hash: entity.invest_hash,
+        status: entity.blockchain_status as any,
+        invested_at: entity.invested_at.toISOString(),
+        statement: entity.statement,
+        amount: entity.amount,
+      };
+    }
 
     return new ProgramInvestDomainEntity(databaseData, blockchainData);
   }
@@ -36,22 +50,31 @@ export class ProgramInvestMapper {
   /**
    * Преобразование доменной сущности в TypeORM сущность для создания
    */
-  static toEntity(domain: Partial<ProgramInvestDomainEntity>): Partial<ProgramInvestTypeormEntity> {
-    const entity: Partial<ProgramInvestTypeormEntity> = {
-      blockchain_id: domain.blockchain_id || '',
-      block_num: domain.block_num || undefined,
+  static toEntity(domain: ProgramInvestDomainEntity): Partial<ProgramInvestTypeormEntity> {
+    const dbPart: toEntityDatabasePart = {
+      _id: domain._id,
+      block_num: domain.block_num ?? 0,
       present: domain.present,
+      invest_hash: domain.invest_hash,
+      status: domain.status,
+      blockchain_status: domain.blockchain_status as string,
     };
 
-    // Поля из блокчейна
-    if (domain.coopname !== undefined) entity.coopname = domain.coopname;
-    if (domain.username !== undefined) entity.username = domain.username;
-    if (domain.invest_hash !== undefined) entity.invest_hash = domain.invest_hash;
-    if (domain.blockchainStatus !== undefined) entity.blockchain_status = domain.blockchainStatus.toString();
-    if (domain.invested_at !== undefined) entity.invested_at = new Date(domain.invested_at);
-    if (domain.statement !== undefined) entity.statement = domain.statement;
-    if (domain.amount !== undefined) entity.amount = domain.amount;
+    let blockchainPart: toEntityBlockchainPart | undefined;
 
-    return entity;
+    if (domain[ProgramInvestDomainEntity.getPrimaryKey()] !== undefined) {
+      blockchainPart = {
+        id: domain.id as number,
+        coopname: domain.coopname as string,
+        username: domain.username as string,
+        invest_hash: domain.invest_hash,
+        status: domain.blockchain_status as any,
+        invested_at: new Date(domain.invested_at ?? new Date()),
+        statement: domain.statement as ISignedDocumentDomainInterface,
+        amount: domain.amount as string,
+      };
+    }
+
+    return { ...dbPart, ...blockchainPart };
   }
 }

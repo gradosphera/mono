@@ -4,4 +4,5 @@ export enum ContributorStatus {
   APPROVED = 'approved', // Вкладчик одобрен
   ACTIVE = 'active', // Вкладчик активен
   INACTIVE = 'inactive', // Вкладчик неактивен
+  UNDEFINED = 'undefined', // Статус не определен
 }

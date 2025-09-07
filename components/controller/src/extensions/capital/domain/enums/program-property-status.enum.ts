@@ -5,4 +5,5 @@ export enum ProgramPropertyStatus {
   AUTHORIZED = 'authorized', // Программный имущественный взнос авторизован
   ACT1 = 'act1', // Первый акт подписан
   ACT2 = 'act2', // Второй акт подписан
+  UNDEFINED = 'undefined', // Статус не определен
 }

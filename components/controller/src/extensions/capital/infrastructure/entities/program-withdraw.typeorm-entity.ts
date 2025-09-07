@@ -4,19 +4,19 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 
 const EntityName = 'capital_program_withdraws';
 @Entity(EntityName)
-@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+@Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_withdraw_hash`, ['withdraw_hash'])
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_status`, ['status'])
 export class ProgramWithdrawTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  _id!: string;
 
-  @Column({ type: 'varchar', nullable: true, unique: true })
-  blockchain_id?: string;
+  @Column({ type: 'integer', nullable: true, unique: true })
+  id!: number;
 
   @Column({ type: 'integer', nullable: true })
-  block_num?: number;
+  block_num!: number;
 
   @Column({ type: 'boolean', default: true })
   present!: boolean;

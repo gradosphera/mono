@@ -839,12 +839,136 @@ const stats = await expenseSync.getSyncStatistics();
 
 ---
 
+## 🏗️ Шаг 3: Использование BaseBlockchainRepository (Рекомендуемый подход)
+
+### 3.1 Обзор базового репозитория
+
+Начиная с версии системы синхронизации, **все репозитории должны наследоваться от `BaseBlockchainRepository`**. Это обеспечивает:
+
+- ✅ Единообразие кода синхронизации
+- ✅ Автоматическую реализацию стандартных методов
+- ✅ Упрощение поддержки и расширение
+- ✅ Снижение дублирования кода
+
+### 3.2 Структура базового репозитория
+
+**Файл:** `infrastructure/repositories/base-blockchain.repository.ts`
+
+```typescript
+@Injectable()
+export abstract class BaseBlockchainRepository<
+  TDomainEntity extends IBlockchainSynchronizable,
+  TTypeormEntity extends IBaseDatabaseData
+> implements IBlockchainSyncRepository<TDomainEntity>
+{
+  protected constructor(protected readonly repository: Repository<TTypeormEntity>) {}
+
+  // Абстрактные методы для реализации в наследниках
+  protected abstract getMapper(): {
+    toDomain: (typeormEntity: TTypeormEntity) => TDomainEntity;
+    toEntity: (domainEntity: Partial<TDomainEntity>) => Partial<TTypeormEntity>;
+  };
+
+  protected abstract createDomainEntity(
+    databaseData: { id: string; blockchain_id: string; block_num: number; present: boolean },
+    blockchainData: any
+  ): TDomainEntity;
+
+  // Готовые реализации методов синхронизации
+  async findByBlockchainId(blockchainId: string): Promise<TDomainEntity | null>
+  async findByBlockNumGreaterThan(blockNum: number): Promise<TDomainEntity[]>
+  async createIfNotExists(blockchainData: any, blockNum: number, present = true): Promise<TDomainEntity>
+  async deleteByBlockNumGreaterThan(blockNum: number): Promise<void>
+  async update(entity: TDomainEntity): Promise<TDomainEntity>
+  async save(entity: TDomainEntity): Promise<TDomainEntity>
+}
+```
+
+### 3.3 Пример использования базового репозитория
+
+**Файл:** `infrastructure/repositories/expense.typeorm-repository.ts`
+
+```typescript
+@Injectable()
+export class ExpenseTypeormRepository
+  extends BaseBlockchainRepository<ExpenseDomainEntity, ExpenseTypeormEntity>
+  implements ExpenseRepository, IBlockchainSyncRepository<ExpenseDomainEntity>
+{
+  constructor(
+    @InjectRepository(ExpenseTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    repository: Repository<ExpenseTypeormEntity>
+  ) {
+    super(repository);
+  }
+
+  protected getMapper() {
+    return {
+      toDomain: ExpenseMapper.toDomain,
+      toEntity: ExpenseMapper.toEntity,
+    };
+  }
+
+  protected createDomainEntity(
+    databaseData: { id: string; blockchain_id: string; block_num: number; present: boolean },
+    blockchainData: any
+  ): ExpenseDomainEntity {
+    return new ExpenseDomainEntity(databaseData, blockchainData);
+  }
+
+  // Специфичные методы репозитория расходов
+  async findByProjectHash(projectHash: string): Promise<ExpenseDomainEntity[]> {
+    // Специфичная логика для расходов
+  }
+}
+```
+
+### 3.4 Особенности для разных типов сущностей
+
+#### Для State сущности (использует coopname вместо id):
+```typescript
+// Переопределить метод createIfNotExists
+async createIfNotExists(blockchainData: any, blockNum: number, present = true): Promise<StateDomainEntity> {
+  const blockchainId = blockchainData.coopname; // Особенность state
+
+  // ... остальная логика
+}
+```
+
+#### Для Program сущностей:
+```typescript
+// Используют стандартную реализацию без изменений
+// Все методы синхронизации наследуются от базового класса
+```
+
+### 3.5 Преимущества использования базового репозитория
+
+1. **Стандартизация**: Все репозитории имеют одинаковый интерфейс синхронизации
+2. **Автоматизация**: Методы `findByBlockchainId`, `createIfNotExists` и др. реализованы автоматически
+3. **Упрощение**: Меньше кода для написания и поддержки
+4. **Надежность**: Общая логика тестируется и отлаживается один раз
+5. **Расширяемость**: Легко добавить новую функциональность во все репозитории
+
+### 3.6 Миграция существующих репозиториев
+
+При переводе существующего репозитория на использование `BaseBlockchainRepository`:
+
+1. **Наследуйтесь** от `BaseBlockchainRepository<TDomain, TEntity>`
+2. **Реализуйте** абстрактные методы `getMapper()` и `createDomainEntity()`
+3. **Удалите** дублированные методы синхронизации
+4. **Замените** `this.repositoryName` на `this.repository`
+5. **Протестируйте** работу синхронизации
+
+---
+
 ## 🎯 Следующие шаги
 
 1. **Создайте все файлы по шаблону выше**
-2. **Проверьте TypeScript типы**
-3. **Зарегистрируйте компоненты в модулях**
-4. **Протестируйте синхронизацию**
-5. **Добавьте в документацию BLOCKCHAIN_SYNC.md**
+2. **Наследуйтесь от BaseBlockchainRepository** (см. Шаг 3)
+3. **Проверьте TypeScript типы**
+4. **Зарегистрируйте компоненты в модулях**
+5. **Протестируйте синхронизацию**
+6. **Добавьте в документацию BLOCKCHAIN_SYNC.md**
 
 **При изменении названий документов в блокчейне - проверяйте все дельта-мапперы!**
+
+**Все новые репозитории ДОЛЖНЫ использовать BaseBlockchainRepository для обеспечения единообразия и надежности системы синхронизации.**

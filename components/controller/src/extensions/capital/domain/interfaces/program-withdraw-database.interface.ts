@@ -3,4 +3,7 @@ import type { IBaseDatabaseData } from './base-database.interface';
 /**
  * Интерфейс данных возврата из программы из базы данных
  */
-export type IProgramWithdrawDatabaseData = IBaseDatabaseData;
+export type IProgramWithdrawDatabaseData = IBaseDatabaseData & {
+  withdraw_hash: string;
+  blockchain_status?: string;
+};

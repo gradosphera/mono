@@ -10,25 +10,31 @@ import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-s
  * - База данных: внутренний ID, ссылка на блокчейн
  * - Блокчейн: все данные проектного имущественного взноса из таблицы pjproperties
  */
-export class ProjectPropertyDomainEntity implements IBlockchainSynchronizable {
+export class ProjectPropertyDomainEntity
+  implements IBlockchainSynchronizable, IProjectPropertyDatabaseData, Partial<IProjectPropertyBlockchainData>
+{
+  // Статические поля ключей для поиска и синхронизации
+  private static primary_key = 'id';
+  private static sync_key = 'property_hash';
   // Поля из базы данных
-  public id: string; // Внутренний ID базы данных
-  public blockchain_id: string; // ID в блокчейне
-  public block_num: number | null; // Номер блока последнего обновления
-  public present = true; // Существует ли запись в блокчейне
+  public _id: string; // Внутренний ID базы данных
+  public id?: number; // ID в блокчейне
+  public block_num: number | undefined; // Номер блока последнего обновления
+  public present = false; // Существует ли запись в блокчейне
 
   // Доменные поля (расширения)
   public status: ProjectPropertyStatus;
 
   // Поля из блокчейна (project_properties.hpp)
-  public coopname: IProjectPropertyBlockchainData['coopname'];
-  public username: IProjectPropertyBlockchainData['username'];
-  public blockchainStatus: IProjectPropertyBlockchainData['status']; // Статус из блокчейна
-  public project_hash: IProjectPropertyBlockchainData['project_hash'];
   public property_hash: IProjectPropertyBlockchainData['property_hash'];
-  public property_amount: IProjectPropertyBlockchainData['property_amount'];
-  public property_description: IProjectPropertyBlockchainData['property_description'];
-  public created_at: IProjectPropertyBlockchainData['created_at'];
+
+  public coopname?: IProjectPropertyBlockchainData['coopname'];
+  public username?: IProjectPropertyBlockchainData['username'];
+  public blockchain_status?: IProjectPropertyBlockchainData['status']; // Статус из блокчейна
+  public project_hash?: IProjectPropertyBlockchainData['project_hash'];
+  public property_amount?: IProjectPropertyBlockchainData['property_amount'];
+  public property_description?: IProjectPropertyBlockchainData['property_description'];
+  public created_at?: IProjectPropertyBlockchainData['created_at'];
 
   /**
    * Конструктор для сборки композитной сущности
@@ -36,59 +42,98 @@ export class ProjectPropertyDomainEntity implements IBlockchainSynchronizable {
    * @param databaseData - данные из базы данных
    * @param blockchainData - данные из блокчейна
    */
-  constructor(databaseData: IProjectPropertyDatabaseData, blockchainData: IProjectPropertyBlockchainData) {
+  constructor(databaseData: IProjectPropertyDatabaseData, blockchainData?: IProjectPropertyBlockchainData) {
     // Данные из базы данных
-    this.id = databaseData.id;
-    this.blockchain_id = blockchainData.id.toString();
+    this._id = databaseData._id;
+    this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
+    this.property_hash = databaseData.property_hash;
+    this.present = databaseData.present;
 
     // Данные из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.blockchainStatus = blockchainData.status;
-    this.project_hash = blockchainData.project_hash;
-    this.property_hash = blockchainData.property_hash;
-    this.property_amount = blockchainData.property_amount;
-    this.property_description = blockchainData.property_description;
-    this.created_at = blockchainData.created_at;
+    if (blockchainData) {
+      if (this.property_hash != blockchainData.property_hash) throw new Error('Project property hash mismatch');
 
-    // Синхронизация статуса с блокчейн данными
-    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+      this.id = Number(blockchainData.id);
+      this.coopname = blockchainData.coopname;
+      this.username = blockchainData.username;
+      this.blockchain_status = blockchainData.status;
+      this.project_hash = blockchainData.project_hash;
+      this.property_hash = blockchainData.property_hash;
+      this.property_amount = blockchainData.property_amount;
+      this.property_description = blockchainData.property_description;
+      this.created_at = blockchainData.created_at;
+
+      // Синхронизация статуса с блокчейн данными
+      this.status = this.mapStatusToDomain(blockchainData.status);
+    }
   }
 
-  // Реализация IBlockchainSynchronizable
-  getBlockchainId(): string {
-    return this.blockchain_id;
-  }
-
-  getBlockNum(): number | null {
+  /**
+   * Получение номера блока последнего обновления
+   */
+  getBlockNum(): number | undefined {
     return this.block_num;
   }
 
+  /**
+   * Получение ключа для поиска сущности в блокчейне (статический метод)
+   */
+  public static getPrimaryKey(): string {
+    return ProjectPropertyDomainEntity.primary_key;
+  }
+
+  /**
+   * Получение ключа для синхронизации сущности в блокчейне и базе данных (статический метод)
+   */
+  public static getSyncKey(): string {
+    return ProjectPropertyDomainEntity.sync_key;
+  }
+
+  /**
+   * Получение ключа для поиска сущности в блокчейне
+   */
+  getPrimaryKey(): string {
+    return ProjectPropertyDomainEntity.primary_key;
+  }
+
+  /**
+   * Получение ключа для синхронизации сущности в блокчейне и базе данных
+   */
+  getSyncKey(): string {
+    return ProjectPropertyDomainEntity.sync_key;
+  }
+
+  /**
+   * Обновление данных из блокчейна
+   * Обновляет текущий экземпляр
+   */
   updateFromBlockchain(blockchainData: IProjectPropertyBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
     this.coopname = blockchainData.coopname;
     this.username = blockchainData.username;
-    this.blockchainStatus = blockchainData.status;
+    this.blockchain_status = blockchainData.status;
     this.project_hash = blockchainData.project_hash;
     this.property_hash = blockchainData.property_hash;
     this.property_amount = blockchainData.property_amount;
     this.property_description = blockchainData.property_description;
     this.created_at = blockchainData.created_at;
-    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+    this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
   }
 
-  private mapBlockchainStatusToDomain(blockchainStatus: IProjectPropertyBlockchainData['status']): ProjectPropertyStatus {
-    const statusValue = blockchainStatus.toString();
-
-    switch (statusValue) {
+  /**
+   * Маппинг статуса из блокчейна в доменный статус
+   * Синхронизировано с константами из project_properties.hpp
+   */
+  private mapStatusToDomain(blockchainStatus?: string): ProjectPropertyStatus {
+    switch (blockchainStatus) {
       case 'created':
         return ProjectPropertyStatus.CREATED;
       default:
-        console.warn(`Неизвестный статус блокчейна: ${statusValue}, устанавливаем CREATED`);
-        return ProjectPropertyStatus.CREATED;
+        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+        return ProjectPropertyStatus.UNDEFINED;
     }
   }
 }

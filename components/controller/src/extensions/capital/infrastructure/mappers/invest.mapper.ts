@@ -2,6 +2,14 @@ import { InvestDomainEntity } from '../../domain/entities/invest.entity';
 import { InvestTypeormEntity } from '../entities/invest.typeorm-entity';
 import type { IInvestDatabaseData } from '../../domain/interfaces/invest-database.interface';
 import type { IInvestBlockchainData } from '../../domain/interfaces/invest-blockchain.interface';
+import type { RequireFields } from '~/shared/utils/require-fields';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+
+type toEntityDatabasePart = RequireFields<Partial<InvestTypeormEntity>, keyof IInvestDatabaseData>;
+type toEntityBlockchainPart = RequireFields<Partial<InvestTypeormEntity>, keyof IInvestBlockchainData>;
+
+type toDomainDatabasePart = RequireFields<Partial<InvestDomainEntity>, keyof IInvestDatabaseData>;
+type toDomainBlockchainPart = RequireFields<Partial<InvestDomainEntity>, keyof IInvestBlockchainData>;
 
 /**
  * Маппер для преобразования между доменной сущностью инвестиции и TypeORM сущностью
@@ -11,27 +19,33 @@ export class InvestMapper {
    * Преобразование TypeORM сущности в доменную сущность
    */
   static toDomain(entity: InvestTypeormEntity): InvestDomainEntity {
-    const databaseData: IInvestDatabaseData = {
-      id: entity.id,
-      blockchain_id: entity.blockchain_id || '',
-      block_num: entity.block_num || null,
+    const databaseData: toDomainDatabasePart = {
+      _id: entity._id,
+      block_num: entity.block_num,
       present: entity.present,
+      invest_hash: entity.invest_hash,
+      status: entity.status,
+      blockchain_status: entity.blockchain_status,
     };
 
-    // Используем данные из TypeORM сущности
-    const blockchainData: IInvestBlockchainData = {
-      id: entity.blockchain_id || '',
-      coopname: entity.coopname,
-      username: entity.username,
-      invest_hash: entity.invest_hash,
-      project_hash: entity.project_hash,
-      status: entity.blockchain_status,
-      amount: entity.amount,
-      invested_at: entity.invested_at.toISOString(),
-      statement: entity.statement,
-      coordinator: entity.coordinator || '',
-      coordinator_amount: entity.coordinator_amount || '',
-    };
+    let blockchainData: toDomainBlockchainPart | undefined;
+
+    if (entity[InvestDomainEntity.getPrimaryKey()] !== undefined) {
+      // Используем данные из TypeORM сущности
+      blockchainData = {
+        id: entity.id,
+        coopname: entity.coopname,
+        username: entity.username,
+        invest_hash: entity.invest_hash,
+        project_hash: entity.project_hash,
+        status: entity.status,
+        amount: entity.amount,
+        invested_at: entity.invested_at.toISOString(),
+        statement: entity.statement,
+        coordinator: entity.coordinator,
+        coordinator_amount: entity.coordinator_amount,
+      };
+    }
 
     return new InvestDomainEntity(databaseData, blockchainData);
   }
@@ -39,29 +53,35 @@ export class InvestMapper {
   /**
    * Преобразование доменной сущности в TypeORM сущность для создания
    */
-  static toEntity(domain: Partial<InvestDomainEntity>): Partial<InvestTypeormEntity> {
-    const entity: Partial<InvestTypeormEntity> = {
-      blockchain_id: domain.blockchain_id ? domain.blockchain_id : '',
-      block_num: domain.block_num || undefined,
+  static toEntity(domain: InvestDomainEntity): Partial<InvestTypeormEntity> {
+    const dbPart: toEntityDatabasePart = {
+      _id: domain._id,
+      block_num: domain.block_num ?? 0,
       present: domain.present,
+      invest_hash: domain.invest_hash,
+      status: domain.status,
+      blockchain_status: domain.blockchain_status as string,
     };
 
-    // Поля из блокчейна
-    if (domain.coopname !== undefined) entity.coopname = domain.coopname;
-    if (domain.username !== undefined) entity.username = domain.username;
-    if (domain.invest_hash !== undefined) entity.invest_hash = domain.invest_hash;
-    if (domain.project_hash !== undefined) entity.project_hash = domain.project_hash;
-    if (domain.blockchain_status !== undefined) entity.blockchain_status = domain.blockchain_status;
-    if (domain.amount !== undefined) entity.amount = domain.amount;
-    if (domain.invested_at !== undefined) entity.invested_at = new Date(domain.invested_at);
-    if (domain.statement !== undefined) entity.statement = domain.statement;
-    if (domain.coordinator !== undefined) entity.coordinator = domain.coordinator || undefined;
-    if (domain.coordinator_amount !== undefined) entity.coordinator_amount = domain.coordinator_amount || undefined;
+    let blockchainPart: toEntityBlockchainPart | undefined;
 
-    // Доменные поля
-    if (domain.status !== undefined) entity.status = domain.status;
+    if (domain[InvestDomainEntity.getPrimaryKey()] !== undefined) {
+      blockchainPart = {
+        id: domain.id as number,
+        coopname: domain.coopname as string,
+        username: domain.username as string,
+        invest_hash: domain.invest_hash,
+        project_hash: domain.project_hash as string,
+        status: domain.blockchain_status as any,
+        amount: domain.amount as string,
+        invested_at: new Date(domain.invested_at ?? new Date()),
+        statement: domain.statement as ISignedDocumentDomainInterface,
+        coordinator: domain.coordinator as string,
+        coordinator_amount: domain.coordinator_amount as string,
+      };
+    }
 
-    return entity;
+    return { ...dbPart, ...blockchainPart };
   }
 
   /**
@@ -72,8 +92,9 @@ export class InvestMapper {
     const updateData: Partial<InvestTypeormEntity> = {};
 
     // Поля из базы данных (локальные)
-    if (domain.id !== undefined) updateData.blockchain_id = domain.blockchain_id;
-    if (domain.block_num !== undefined) updateData.block_num = domain.block_num || undefined;
+    if (domain._id !== undefined) updateData._id = domain._id;
+    if (domain.id !== undefined) updateData.id = domain.id;
+    if (domain.block_num !== undefined) updateData.block_num = domain.block_num;
     if (domain.present !== undefined) updateData.present = domain.present;
 
     // Примечание: Все поля из блокчейна (coopname, invest_hash, status, amount, invested_at, statement, coordinator, coordinator_amount)

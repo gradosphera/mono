@@ -2,7 +2,15 @@ import { AppendixDomainEntity } from '../../domain/entities/appendix.entity';
 import { AppendixTypeormEntity } from '../entities/appendix.typeorm-entity';
 import type { IAppendixDatabaseData } from '../../domain/interfaces/appendix-database.interface';
 import type { IAppendixBlockchainData } from '../../domain/interfaces/appendix-blockchain.interface';
+import type { RequireFields } from '~/shared/utils/require-fields';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { AppendixStatus } from '../../domain/enums/appendix-status.enum';
 
+type toEntityDatabasePart = RequireFields<Partial<AppendixTypeormEntity>, keyof IAppendixDatabaseData>;
+type toEntityBlockchainPart = RequireFields<Partial<AppendixTypeormEntity>, keyof IAppendixBlockchainData>;
+
+type toDomainDatabasePart = RequireFields<Partial<AppendixDomainEntity>, keyof IAppendixDatabaseData>;
+type toDomainBlockchainPart = RequireFields<Partial<AppendixDomainEntity>, keyof IAppendixBlockchainData>;
 /**
  * Маппер для преобразования между доменной сущностью приложения и TypeORM сущностью
  */
@@ -11,24 +19,30 @@ export class AppendixMapper {
    * Преобразование TypeORM сущности в доменную сущность
    */
   static toDomain(entity: AppendixTypeormEntity): AppendixDomainEntity {
-    const databaseData: IAppendixDatabaseData = {
-      id: entity.id,
-      blockchain_id: entity.blockchain_id || '',
-      block_num: entity.block_num || null,
+    const databaseData: toDomainDatabasePart = {
+      _id: entity._id,
+      block_num: entity.block_num,
       present: entity.present,
+      appendix_hash: entity.appendix_hash,
+      status: entity.status,
+      blockchain_status: entity.blockchain_status,
     };
 
-    // Используем данные из TypeORM сущности
-    const blockchainData: IAppendixBlockchainData = {
-      id: entity.blockchain_id || '',
-      coopname: entity.coopname,
-      username: entity.username,
-      project_hash: entity.project_hash,
-      appendix_hash: entity.appendix_hash,
-      status: entity.blockchain_status,
-      created_at: entity.created_at.toISOString(),
-      appendix: entity.appendix,
-    };
+    let blockchainData: toDomainBlockchainPart | undefined;
+
+    if (entity[AppendixDomainEntity.getPrimaryKey()] !== undefined) {
+      // Используем данные из TypeORM сущности
+      blockchainData = {
+        id: entity.id,
+        coopname: entity.coopname,
+        username: entity.username,
+        status: entity.status,
+        project_hash: entity.project_hash,
+        appendix_hash: entity.appendix_hash,
+        created_at: entity.created_at.toISOString(),
+        appendix: entity.appendix,
+      };
+    }
 
     return new AppendixDomainEntity(databaseData, blockchainData);
   }
@@ -36,22 +50,31 @@ export class AppendixMapper {
   /**
    * Преобразование доменной сущности в TypeORM сущность для создания
    */
-  static toEntity(domain: Partial<AppendixDomainEntity>): Partial<AppendixTypeormEntity> {
-    const entity: Partial<AppendixTypeormEntity> = {
-      blockchain_id: domain.blockchain_id || '',
-      block_num: domain.block_num || undefined,
+  static toEntity(domain: AppendixDomainEntity): Partial<AppendixTypeormEntity> {
+    const dbPart: toEntityDatabasePart = {
+      _id: domain._id,
+      block_num: domain.block_num ?? 0,
       present: domain.present,
+      status: domain.status,
+      appendix_hash: domain.appendix_hash,
+      blockchain_status: domain.blockchain_status as string,
     };
 
-    // Поля из блокчейна
-    if (domain.coopname !== undefined) entity.coopname = domain.coopname;
-    if (domain.username !== undefined) entity.username = domain.username;
-    if (domain.project_hash !== undefined) entity.project_hash = domain.project_hash;
-    if (domain.appendix_hash !== undefined) entity.appendix_hash = domain.appendix_hash;
-    if (domain.blockchainStatus !== undefined) entity.blockchain_status = domain.blockchainStatus.toString();
-    if (domain.created_at !== undefined) entity.created_at = new Date(domain.created_at);
-    if (domain.appendix !== undefined) entity.appendix = domain.appendix;
+    let blockchainPart: toEntityBlockchainPart | undefined;
 
-    return entity;
+    if (domain[AppendixDomainEntity.getPrimaryKey()] !== undefined) {
+      blockchainPart = {
+        id: domain.id as number,
+        coopname: domain.coopname as string,
+        username: domain.username as string,
+        project_hash: domain.project_hash as string,
+        appendix_hash: domain.appendix_hash,
+        status: domain.blockchain_status as AppendixStatus,
+        created_at: new Date(domain.created_at ?? new Date()),
+        appendix: domain.appendix as ISignedDocumentDomainInterface,
+      };
+    }
+
+    return { ...dbPart, ...blockchainPart };
   }
 }

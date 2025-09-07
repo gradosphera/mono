@@ -1,8 +1,8 @@
 import { DebtStatus } from '../enums/debt-status.enum';
 import type { IDebtDatabaseData } from '../interfaces/debt-database.interface';
 import type { IDebtBlockchainData } from '../interfaces/debt-blockchain.interface';
-import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 
 /**
  * Доменная сущность долга
@@ -11,28 +11,33 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
  * - База данных: внутренний ID, ссылка на блокчейн
  * - Блокчейн: все данные долга из таблицы debts
  */
-export class DebtDomainEntity implements IBlockchainSynchronizable {
+export class DebtDomainEntity implements IBlockchainSynchronizable, IDebtDatabaseData, Partial<IDebtBlockchainData> {
+  // Статические поля ключей для поиска и синхронизации
+  private static primary_key = 'id';
+  private static sync_key = 'debt_hash';
+
   // Поля из базы данных
-  public id: string; // Внутренний ID базы данных
-  public blockchain_id: string; // ID в блокчейне
-  public block_num: number | null; // Номер блока последнего обновления
-  public present = true; // Существует ли запись в блокчейне
+  public _id: string; // Внутренний ID базы данных
+  public id?: number; // ID в блокчейне
+  public block_num: number | undefined; // Номер блока последнего обновления
+  public present = false; // Существует ли запись в блокчейне
 
   // Доменные поля (расширения)
   public status: DebtStatus;
 
   // Поля из блокчейна (debts.hpp)
-  public coopname: IDebtBlockchainData['coopname'];
-  public username: IDebtBlockchainData['username'];
   public debt_hash: IDebtBlockchainData['debt_hash'];
-  public project_hash: IDebtBlockchainData['project_hash'];
-  public blockchainStatus: IDebtBlockchainData['status']; // Статус из блокчейна
-  public repaid_at: IDebtBlockchainData['repaid_at'];
-  public amount: IDebtBlockchainData['amount'];
-  public statement: ISignedDocumentDomainInterface;
-  public approved_statement: ISignedDocumentDomainInterface;
-  public authorization: ISignedDocumentDomainInterface;
-  public memo: IDebtBlockchainData['memo'];
+
+  public coopname?: IDebtBlockchainData['coopname'];
+  public username?: IDebtBlockchainData['username'];
+  public project_hash?: IDebtBlockchainData['project_hash'];
+  public blockchain_status?: IDebtBlockchainData['status']; // Статус из блокчейна
+  public repaid_at?: IDebtBlockchainData['repaid_at'];
+  public amount?: IDebtBlockchainData['amount'];
+  public statement?: ISignedDocumentDomainInterface;
+  public approved_statement?: ISignedDocumentDomainInterface;
+  public authorization?: ISignedDocumentDomainInterface;
+  public memo?: IDebtBlockchainData['memo'];
 
   /**
    * Конструктор для сборки композитной сущности
@@ -40,41 +45,69 @@ export class DebtDomainEntity implements IBlockchainSynchronizable {
    * @param databaseData - данные из базы данных
    * @param blockchainData - данные из блокчейна
    */
-  constructor(databaseData: IDebtDatabaseData, blockchainData: IDebtBlockchainData) {
+  constructor(databaseData: IDebtDatabaseData, blockchainData?: IDebtBlockchainData) {
     // Данные из базы данных
-    this.id = databaseData.id;
-    this.blockchain_id = blockchainData.id.toString();
+    this._id = databaseData._id;
+    this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
+    this.debt_hash = databaseData.debt_hash;
+    this.present = databaseData.present;
 
     // Данные из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.debt_hash = blockchainData.debt_hash;
-    this.project_hash = blockchainData.project_hash;
-    this.blockchainStatus = blockchainData.status;
-    this.repaid_at = blockchainData.repaid_at;
-    this.amount = blockchainData.amount;
-    this.statement = blockchainData.statement;
-    this.approved_statement = blockchainData.approved_statement;
-    this.authorization = blockchainData.authorization;
-    this.memo = blockchainData.memo;
+    if (blockchainData) {
+      if (this.debt_hash != blockchainData.debt_hash) throw new Error('Debt hash mismatch');
 
-    // Синхронизация статуса с блокчейн данными
-    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
-  }
+      this.id = Number(blockchainData.id);
+      this.coopname = blockchainData.coopname;
+      this.username = blockchainData.username;
+      this.debt_hash = blockchainData.debt_hash;
+      this.project_hash = blockchainData.project_hash;
+      this.blockchain_status = blockchainData.status;
+      this.repaid_at = blockchainData.repaid_at;
+      this.amount = blockchainData.amount;
+      this.statement = blockchainData.statement;
+      this.approved_statement = blockchainData.approved_statement;
+      this.authorization = blockchainData.authorization;
+      this.memo = blockchainData.memo;
 
-  /**
-   * Получение ID сущности в блокчейне
-   */
-  getBlockchainId(): string {
-    return this.blockchain_id;
+      // Синхронизация статуса с блокчейн данными
+      this.status = this.mapStatusToDomain(blockchainData.status);
+    }
   }
 
   /**
    * Получение номера блока последнего обновления
    */
-  getBlockNum(): number | null {
+  getBlockNum(): number | undefined {
     return this.block_num;
+  }
+
+  /**
+   * Получение ключа для поиска сущности в блокчейне (статический метод)
+   */
+  public static getPrimaryKey(): string {
+    return DebtDomainEntity.primary_key;
+  }
+
+  /**
+   * Получение ключа для синхронизации сущности в блокчейне и базе данных (статический метод)
+   */
+  public static getSyncKey(): string {
+    return DebtDomainEntity.sync_key;
+  }
+
+  /**
+   * Получение ключа для поиска сущности в блокчейне
+   */
+  getPrimaryKey(): string {
+    return DebtDomainEntity.primary_key;
+  }
+
+  /**
+   * Получение ключа для синхронизации сущности в блокчейне и базе данных
+   */
+  getSyncKey(): string {
+    return DebtDomainEntity.sync_key;
   }
 
   /**
@@ -87,14 +120,14 @@ export class DebtDomainEntity implements IBlockchainSynchronizable {
     this.username = blockchainData.username;
     this.debt_hash = blockchainData.debt_hash;
     this.project_hash = blockchainData.project_hash;
-    this.blockchainStatus = blockchainData.status;
+    this.blockchain_status = blockchainData.status;
     this.repaid_at = blockchainData.repaid_at;
     this.amount = blockchainData.amount;
     this.statement = blockchainData.statement;
     this.approved_statement = blockchainData.approved_statement;
     this.authorization = blockchainData.authorization;
     this.memo = blockchainData.memo;
-    this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
+    this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
   }
@@ -103,10 +136,8 @@ export class DebtDomainEntity implements IBlockchainSynchronizable {
    * Маппинг статуса из блокчейна в доменный статус
    * Синхронизировано с константами из debts.hpp
    */
-  private mapBlockchainStatusToDomain(blockchainStatus: IDebtBlockchainData['status']): DebtStatus {
-    const statusValue = blockchainStatus.toString();
-
-    switch (statusValue) {
+  private mapStatusToDomain(blockchainStatus?: string): DebtStatus {
+    switch (blockchainStatus) {
       case 'pending':
         return DebtStatus.PENDING;
       case 'approved':
@@ -118,9 +149,9 @@ export class DebtDomainEntity implements IBlockchainSynchronizable {
       case 'cancelled':
         return DebtStatus.CANCELLED;
       default:
-        // По умолчанию считаем долг отмененным для безопасности
-        console.warn(`Неизвестный статус блокчейна: ${statusValue}, устанавливаем CANCELLED`);
-        return DebtStatus.CANCELLED;
+        // По умолчанию считаем статус неопределенным
+        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+        return DebtStatus.UNDEFINED;
     }
   }
 }

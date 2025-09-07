@@ -5,4 +5,5 @@ export enum ProjectStatus {
   VOTING = 'voting', // Проект на голосовании
   COMPLETED = 'completed', // Проект завершен
   CLOSED = 'closed', // Проект закрыт
+  UNDEFINED = 'undefined', // Статус не определен
 }

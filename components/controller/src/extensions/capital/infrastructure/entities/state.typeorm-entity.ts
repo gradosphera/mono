@@ -6,13 +6,13 @@ const EntityName = 'capital_state';
 @Index(`idx_${EntityName}_coopname`, ['coopname'])
 export class StateTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  _id!: string;
 
-  @Column({ type: 'varchar', length: 12, nullable: true })
-  blockchain_id?: string;
+  @Column({ type: 'integer', nullable: true, unique: true })
+  id!: number;
 
   @Column({ type: 'integer', nullable: true })
-  block_num?: number;
+  block_num!: number;
 
   @Column({ type: 'boolean', default: true })
   present!: boolean;

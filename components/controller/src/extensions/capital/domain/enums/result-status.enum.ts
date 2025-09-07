@@ -5,4 +5,5 @@ export enum ResultStatus {
   AUTHORIZED = 'authorized', // Результат авторизован
   COMPLETED = 'completed', // Результат завершен
   DECLINED = 'declined', // Результат отклонен
+  UNDEFINED = 'undefined', // Статус не определен
 }

@@ -3,20 +3,20 @@ import { ProjectPropertyStatus } from '../../domain/enums/project-property-statu
 
 const EntityName = 'capital_project_properties';
 @Entity(EntityName)
-@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+@Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_property_hash`, ['property_hash'])
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_status`, ['status'])
 export class ProjectPropertyTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  _id!: string;
 
-  @Column({ type: 'varchar', nullable: true, unique: true })
-  blockchain_id?: string;
+  @Column({ type: 'integer', nullable: true, unique: true })
+  id!: number;
 
   @Column({ type: 'integer', nullable: true })
-  block_num?: number;
+  block_num!: number;
 
   @Column({ type: 'boolean', default: true })
   present!: boolean;

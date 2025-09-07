@@ -742,16 +742,8 @@ export interface IResult {
   username: IName
   status: IName
   created_at: ITimePointSec
-  creator_base_amount: IAsset
-  author_base_amount: IAsset
   debt_amount: IAsset
-  creator_bonus_amount: IAsset
-  author_bonus_amount: IAsset
-  generation_amount: IAsset
-  capitalist_bonus_amount: IAsset
   total_amount: IAsset
-  available_for_return: IAsset
-  available_for_convert: IAsset
   statement: IDocument2
   authorization: IDocument2
   act: IDocument2

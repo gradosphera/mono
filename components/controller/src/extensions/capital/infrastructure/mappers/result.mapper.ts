@@ -2,6 +2,14 @@ import { ResultDomainEntity } from '../../domain/entities/result.entity';
 import { ResultTypeormEntity } from '../entities/result.typeorm-entity';
 import type { IResultDatabaseData } from '../../domain/interfaces/result-database.interface';
 import type { IResultBlockchainData } from '../../domain/interfaces/result-blockchain.interface';
+import type { RequireFields } from '~/shared/utils/require-fields';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+
+type toEntityDatabasePart = RequireFields<Partial<ResultTypeormEntity>, keyof IResultDatabaseData>;
+type toEntityBlockchainPart = RequireFields<Partial<ResultTypeormEntity>, keyof IResultBlockchainData>;
+
+type toDomainDatabasePart = RequireFields<Partial<ResultDomainEntity>, keyof IResultDatabaseData>;
+type toDomainBlockchainPart = RequireFields<Partial<ResultDomainEntity>, keyof IResultBlockchainData>;
 
 /**
  * Маппер для преобразования между доменной сущностью результата и TypeORM сущностью
@@ -11,36 +19,35 @@ export class ResultMapper {
    * Преобразование TypeORM сущности в доменную сущность
    */
   static toDomain(entity: ResultTypeormEntity): ResultDomainEntity {
-    const databaseData: IResultDatabaseData = {
-      id: entity.id,
-      blockchain_id: entity.blockchain_id || '',
-      block_num: entity.block_num || null,
+    const databaseData: toDomainDatabasePart = {
+      _id: entity._id,
+      block_num: entity.block_num,
       present: entity.present,
+      result_hash: entity.result_hash,
+      status: entity.status,
+      blockchain_status: entity.blockchain_status,
     };
 
-    // Используем данные из TypeORM сущности
-    const blockchainData: IResultBlockchainData = {
-      id: entity.blockchain_id || '',
-      project_hash: entity.project_hash,
-      result_hash: entity.result_hash,
-      coopname: entity.coopname,
-      username: entity.username,
-      status: entity.blockchain_status,
-      created_at: entity.created_at.toISOString(),
-      creator_base_amount: entity.creator_base_amount,
-      author_base_amount: entity.author_base_amount,
-      debt_amount: entity.debt_amount,
-      creator_bonus_amount: entity.creator_bonus_amount,
-      author_bonus_amount: entity.author_bonus_amount,
-      generation_amount: entity.generation_amount,
-      capitalist_bonus_amount: entity.capitalist_bonus_amount,
-      total_amount: entity.total_amount,
-      available_for_return: entity.available_for_return,
-      available_for_convert: entity.available_for_convert,
-      statement: entity.statement,
-      authorization: entity.authorization,
-      act: entity.act,
-    };
+    let blockchainData: toDomainBlockchainPart | undefined;
+
+    if (entity[ResultDomainEntity.getPrimaryKey()] !== undefined) {
+      // Используем данные из TypeORM сущности
+      blockchainData = {
+        id: entity.id,
+        project_hash: entity.project_hash,
+        result_hash: entity.result_hash,
+        coopname: entity.coopname,
+        username: entity.username,
+        status: entity.status,
+        blockchain_status: entity.blockchain_status,
+        created_at: entity.created_at.toISOString(),
+        debt_amount: entity.debt_amount,
+        total_amount: entity.total_amount,
+        statement: entity.statement,
+        authorization: entity.authorization,
+        act: entity.act,
+      };
+    }
 
     return new ResultDomainEntity(databaseData, blockchainData);
   }
@@ -48,38 +55,36 @@ export class ResultMapper {
   /**
    * Преобразование доменной сущности в TypeORM сущность для создания
    */
-  static toEntity(domain: Partial<ResultDomainEntity>): Partial<ResultTypeormEntity> {
-    const entity: Partial<ResultTypeormEntity> = {
-      blockchain_id: domain.blockchain_id ? domain.blockchain_id : '',
-      block_num: domain.block_num || undefined,
+  static toEntity(domain: ResultDomainEntity): Partial<ResultTypeormEntity> {
+    const dbPart: toEntityDatabasePart = {
+      _id: domain._id,
+      block_num: domain.block_num ?? 0,
       present: domain.present,
+      result_hash: domain.result_hash,
+      status: domain.status,
+      blockchain_status: domain.blockchain_status as string,
     };
 
-    // Поля из блокчейна
-    if (domain.project_hash !== undefined) entity.project_hash = domain.project_hash;
-    if (domain.result_hash !== undefined) entity.result_hash = domain.result_hash;
-    if (domain.coopname !== undefined) entity.coopname = domain.coopname;
-    if (domain.username !== undefined) entity.username = domain.username;
-    if (domain.blockchainStatus !== undefined) entity.blockchain_status = domain.blockchainStatus;
-    if (domain.created_at !== undefined) entity.created_at = new Date(domain.created_at);
-    if (domain.creator_base_amount !== undefined) entity.creator_base_amount = domain.creator_base_amount;
-    if (domain.author_base_amount !== undefined) entity.author_base_amount = domain.author_base_amount;
-    if (domain.debt_amount !== undefined) entity.debt_amount = domain.debt_amount;
-    if (domain.creator_bonus_amount !== undefined) entity.creator_bonus_amount = domain.creator_bonus_amount;
-    if (domain.author_bonus_amount !== undefined) entity.author_bonus_amount = domain.author_bonus_amount;
-    if (domain.generation_amount !== undefined) entity.generation_amount = domain.generation_amount;
-    if (domain.capitalist_bonus_amount !== undefined) entity.capitalist_bonus_amount = domain.capitalist_bonus_amount;
-    if (domain.total_amount !== undefined) entity.total_amount = domain.total_amount;
-    if (domain.available_for_return !== undefined) entity.available_for_return = domain.available_for_return;
-    if (domain.available_for_convert !== undefined) entity.available_for_convert = domain.available_for_convert;
-    if (domain.statement !== undefined) entity.statement = domain.statement;
-    if (domain.authorization !== undefined) entity.authorization = domain.authorization;
-    if (domain.act !== undefined) entity.act = domain.act;
+    let blockchainPart: toEntityBlockchainPart | undefined;
 
-    // Доменные поля
-    if (domain.status !== undefined) entity.status = domain.status;
+    if (domain[ResultDomainEntity.getPrimaryKey()] !== undefined) {
+      blockchainPart = {
+        id: domain.id as number,
+        project_hash: domain.project_hash as string,
+        result_hash: domain.result_hash,
+        coopname: domain.coopname as string,
+        username: domain.username as string,
+        status: domain.blockchain_status as any,
+        created_at: new Date(domain.created_at ?? new Date()),
+        debt_amount: domain.debt_amount as string,
+        total_amount: domain.total_amount as string,
+        statement: domain.statement as ISignedDocumentDomainInterface,
+        authorization: domain.authorization as ISignedDocumentDomainInterface,
+        act: domain.act as ISignedDocumentDomainInterface,
+      };
+    }
 
-    return entity;
+    return { ...dbPart, ...blockchainPart };
   }
 
   /**
@@ -90,7 +95,7 @@ export class ResultMapper {
     const updateData: Partial<ResultTypeormEntity> = {};
 
     // Поля из базы данных (локальные)
-    if (domain.block_num !== undefined) updateData.block_num = domain.block_num || undefined;
+    if (domain.block_num !== undefined) updateData.block_num = domain.block_num;
     if (domain.present !== undefined) updateData.present = domain.present;
 
     // Примечание: Все поля из блокчейна (project_hash, result_hash, status, amounts, etc.)

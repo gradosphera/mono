@@ -5,4 +5,5 @@ export enum ExpenseStatus {
   PAID = 'paid', // Расход оплачен
   DECLINED = 'declined', // Расход отклонен
   CANCELLED = 'cancelled', // Расход отменен
+  UNDEFINED = 'undefined', // Статус не определен
 }
