@@ -131,24 +131,8 @@ export class ProjectDomainEntity
    */
   updateFromBlockchain(blockchainData: IProjectDomainInterfaceBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.project_hash = blockchainData.project_hash;
-    this.parent_hash = blockchainData.parent_hash;
+    Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
-    this.is_opened = blockchainData.is_opened;
-    this.is_planed = blockchainData.is_planed;
-    this.can_convert_to_project = blockchainData.can_convert_to_project;
-    this.master = blockchainData.master;
-    this.title = blockchainData.title;
-    this.description = blockchainData.description;
-    this.meta = blockchainData.meta;
-    this.counts = blockchainData.counts;
-    this.plan = blockchainData.plan;
-    this.fact = blockchainData.fact;
-    this.crps = blockchainData.crps;
-    this.voting = blockchainData.voting;
-    this.membership = blockchainData.membership;
-    this.created_at = blockchainData.created_at;
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
@@ -172,7 +156,7 @@ export class ProjectDomainEntity
         return ProjectStatus.CLOSED;
       default:
         // По умолчанию считаем статус неопределенным
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+
         return ProjectStatus.UNDEFINED;
     }
   }

@@ -113,16 +113,8 @@ export class InvestDomainEntity implements IBlockchainSynchronizable, IInvestDat
    */
   updateFromBlockchain(blockchainData: IInvestBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.invest_hash = blockchainData.invest_hash;
-    this.project_hash = blockchainData.project_hash;
+    Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
-    this.amount = blockchainData.amount;
-    this.invested_at = blockchainData.invested_at;
-    this.statement = blockchainData.statement;
-    this.coordinator = blockchainData.coordinator;
-    this.coordinator_amount = blockchainData.coordinator_amount;
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
@@ -146,7 +138,7 @@ export class InvestDomainEntity implements IBlockchainSynchronizable, IInvestDat
         return InvestStatus.CANCELLED;
       default:
         // По умолчанию считаем статус неопределенным
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+
         return InvestStatus.UNDEFINED;
     }
   }

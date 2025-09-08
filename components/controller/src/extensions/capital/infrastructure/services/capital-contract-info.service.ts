@@ -14,10 +14,30 @@ export class CapitalContractInfoService {
   private readonly supportedContractNames: string[] = ['capital'];
 
   /**
-   * Поддерживаемые таблицы для Capital модуля
-   * При добавлении новой таблицы - добавьте её сюда
+   * Паттерны таблиц для каждой сущности
+   * Каждая сущность имеет базовое имя таблицы и паттерн с маской
    */
-  private readonly supportedTableNames: string[] = ['projects', 'contributors'];
+  private readonly tablePatterns: Record<string, string[]> = {
+    // Сущности с именами ≤ 12 символов
+    commits: ['commits', 'commits*'],
+    appendixes: ['appendixes', 'appendixes*'],
+    expenses: ['expenses', 'expenses*'],
+    pgproperties: ['pgproperties', 'pgproperties*'],
+    pjproperties: ['pjproperties', 'pjproperties*'],
+    results: ['results', 'results*'],
+    projwallets: ['projwallets', 'projwallets*'],
+    invests: ['invests', 'invests*'],
+    capwallets: ['capwallets', 'capwallets*'],
+    projects: ['projects', 'projects*'],
+    debts: ['debts', 'debts*'],
+    votes: ['votes', 'votes*'],
+    contributors: ['contributors', 'contributor*'], // Особый случай - укороченный паттерн
+    state: ['state', 'state*'],
+
+    // Сущности с именами = 12 символов (удаляем последний символ и добавляем *)
+    prgwithdraws: ['prgwithdraws', 'prgwithdraw*'],
+    progrinvests: ['progrinvests', 'progrinvest*'],
+  };
 
   /**
    * Получение всех поддерживаемых имен контрактов
@@ -27,37 +47,16 @@ export class CapitalContractInfoService {
   }
 
   /**
-   * Получение всех поддерживаемых имен таблиц
+   * Получение паттернов таблиц для указанной сущности
+   * @param entityName - имя сущности
    */
-  getSupportedTableNames(): string[] {
-    return [...this.supportedTableNames];
-  }
-
-  /**
-   * Получение текущего (основного) имени контракта
-   */
-  getCurrentContractName(): string {
-    return this.supportedContractNames[0];
-  }
-
-  /**
-   * Получение текущего (основного) имени таблицы
-   */
-  getCurrentTableName(): string {
-    return this.supportedTableNames[0];
-  }
-
-  /**
-   * Проверка, поддерживается ли указанный контракт
-   */
-  isContractSupported(contractName: string): boolean {
-    return this.supportedContractNames.includes(contractName);
-  }
-
-  /**
-   * Проверка, поддерживается ли указанная таблица
-   */
-  isTableSupported(tableName: string): boolean {
-    return this.supportedTableNames.includes(tableName);
+  getTablePatterns(entityName: string): string[] {
+    const patterns = this.tablePatterns[entityName];
+    if (!patterns) {
+      throw new Error(
+        `Unknown entity name: ${entityName}. Supported entities: ${Object.keys(this.tablePatterns).join(', ')}`
+      );
+    }
+    return [...patterns];
   }
 }

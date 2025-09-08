@@ -38,4 +38,8 @@ export class ProgramInvestTypeormRepository
   ): ProgramInvestDomainEntity {
     return new ProgramInvestDomainEntity(databaseData, blockchainData);
   }
+
+  protected getSyncKey(): string {
+    return ProgramInvestDomainEntity.getSyncKey();
+  }
 }

@@ -3,8 +3,8 @@ import type { IDelta } from '~/types/common';
 import { ExpenseDomainEntity } from '../../../domain/entities/expense.entity';
 import type { IExpenseBlockchainData } from '../../../domain/interfaces/expense-blockchain.interface';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import type { IBlockchainDeltaMapper } from '~/shared/interfaces/blockchain-sync.interface';
 import { CapitalContractInfoService } from '../../services/capital-contract-info.service';
+import { AbstractBlockchainDeltaMapper } from '~/shared/abstract-blockchain-delta.mapper';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import type { CapitalContract } from 'cooptypes';
 
@@ -12,8 +12,9 @@ import type { CapitalContract } from 'cooptypes';
  * Маппер для преобразования дельт блокчейна в данные расхода
  */
 @Injectable()
-export class ExpenseDeltaMapper implements IBlockchainDeltaMapper<IExpenseBlockchainData, ExpenseDomainEntity> {
+export class ExpenseDeltaMapper extends AbstractBlockchainDeltaMapper<IExpenseBlockchainData, ExpenseDomainEntity> {
   constructor(private readonly logger: WinstonLoggerService, private readonly contractInfo: CapitalContractInfoService) {
+    super();
     this.logger.setContext(ExpenseDeltaMapper.name);
   }
 
@@ -22,20 +23,10 @@ export class ExpenseDeltaMapper implements IBlockchainDeltaMapper<IExpenseBlockc
    */
   mapDeltaToBlockchainData(delta: IDelta): IExpenseBlockchainData | null {
     try {
-      if (!this.isRelevantDelta(delta)) {
-        return null;
-      }
-
       // Дельта содержит данные в поле value
       const value = delta.value as CapitalContract.Tables.Expenses.IExpense;
       if (!value) {
         this.logger.warn(`Delta has no value: table=${delta.table}, key=${delta.primary_key}`);
-        return null;
-      }
-
-      // Валидируем обязательные поля
-      if (!this.validateBlockchainData(value)) {
-        this.logger.warn(`Invalid blockchain data in delta: table=${delta.table}, key=${delta.primary_key}`);
         return null;
       }
 
@@ -53,62 +44,19 @@ export class ExpenseDeltaMapper implements IBlockchainDeltaMapper<IExpenseBlockc
   /**
    * Извлечение ID сущности из дельты
    */
-  extractEntityId(delta: IDelta): string {
-    // В таблице expenses primary_key является ID расхода
-    return delta.primary_key.toString();
-  }
-
-  /**
-   * Проверка, относится ли дельта к расходам
-   * Теперь поддерживает все версии таблиц и контрактов
-   */
-  isRelevantDelta(delta: IDelta): boolean {
-    const isRelevantContract = this.contractInfo.isContractSupported(delta.code);
-    const isRelevantTable = delta.table === 'expenses' || delta.table === 'expenses*' || delta.table.includes('expenses');
-
-    return isRelevantContract && isRelevantTable;
-  }
-
-  /**
-   * Валидация данных блокчейна
-   */
-  private validateBlockchainData(data: any): boolean {
-    if (!data || typeof data !== 'object') {
-      return false;
+  extractSyncValue(delta: IDelta): string {
+    if (!delta.value || !delta.value[this.extractSyncKey()]) {
+      throw new Error(`Delta has no value: table=${delta.table}, key=${this.extractSyncKey()}`);
     }
 
-    // Проверяем обязательные поля
-    const requiredFields = [
-      'id',
-      'coopname',
-      'username',
-      'project_hash',
-      'expense_hash',
-      'fund_id',
-      'status',
-      'amount',
-      'description',
-      'expense_statement',
-      'approved_statement',
-      'authorization',
-      'spended_at',
-    ];
-
-    for (const field of requiredFields) {
-      if (!(field in data)) {
-        this.logger.warn(`Missing required field '${field}' in blockchain data`);
-        return false;
-      }
-    }
-
-    return true;
+    return delta.value[this.extractSyncKey()];
   }
 
   /**
-   * Получение всех поддерживаемых имен таблиц
+   * Извлечение ключа для синхронизации сущности в блокчейне и базе данных
    */
-  getSupportedTableNames(): string[] {
-    return ['expenses', 'expenses*'];
+  extractSyncKey(): string {
+    return ExpenseDomainEntity.getSyncKey();
   }
 
   /**
@@ -119,20 +67,9 @@ export class ExpenseDeltaMapper implements IBlockchainDeltaMapper<IExpenseBlockc
   }
 
   /**
-   * Получение всех возможных паттернов событий для подписки
-   * Возвращает массив паттернов типа "delta::contract::table"
+   * Получение всех поддерживаемых имен таблиц
    */
-  getAllEventPatterns(): string[] {
-    const patterns: string[] = [];
-    const supportedContracts = this.contractInfo.getSupportedContractNames();
-    const supportedTables = this.getSupportedTableNames();
-
-    for (const contractName of supportedContracts) {
-      for (const tableName of supportedTables) {
-        patterns.push(`delta::${contractName}::${tableName}`);
-      }
-    }
-
-    return patterns;
+  getSupportedTableNames(): string[] {
+    return this.contractInfo.getTablePatterns('expenses');
   }
 }

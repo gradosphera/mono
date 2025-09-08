@@ -34,6 +34,10 @@ export class DebtTypeormRepository
     return new DebtDomainEntity(databaseData, blockchainData);
   }
 
+  protected getSyncKey(): string {
+    return DebtDomainEntity.getSyncKey();
+  }
+
   async create(debt: DebtDomainEntity): Promise<DebtDomainEntity> {
     const entity = this.repository.create(DebtMapper.toEntity(debt));
     const savedEntity = await this.repository.save(entity);

@@ -3,8 +3,8 @@ import type { IDelta } from '~/types/common';
 import { ProgramInvestDomainEntity } from '../../../domain/entities/program-invest.entity';
 import type { IProgramInvestBlockchainData } from '../../../domain/interfaces/program-invest-blockchain.interface';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import type { IBlockchainDeltaMapper } from '~/shared/interfaces/blockchain-sync.interface';
 import { CapitalContractInfoService } from '../../services/capital-contract-info.service';
+import { AbstractBlockchainDeltaMapper } from '~/shared/abstract-blockchain-delta.mapper';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import type { CapitalContract } from 'cooptypes';
 
@@ -12,29 +12,21 @@ import type { CapitalContract } from 'cooptypes';
  * Маппер для преобразования дельт блокчейна в данные программной инвестиции
  */
 @Injectable()
-export class ProgramInvestDeltaMapper
-  implements IBlockchainDeltaMapper<IProgramInvestBlockchainData, ProgramInvestDomainEntity>
-{
+export class ProgramInvestDeltaMapper extends AbstractBlockchainDeltaMapper<
+  IProgramInvestBlockchainData,
+  ProgramInvestDomainEntity
+> {
   constructor(private readonly logger: WinstonLoggerService, private readonly contractInfo: CapitalContractInfoService) {
+    super();
     this.logger.setContext(ProgramInvestDeltaMapper.name);
   }
 
   mapDeltaToBlockchainData(delta: IDelta): IProgramInvestBlockchainData | null {
     try {
-      if (!this.isRelevantDelta(delta)) {
-        return null;
-      }
-
       // Дельта содержит данные в поле value
       const value = delta.value as CapitalContract.Tables.ProgramInvests.IProgramInvest;
       if (!value) {
         this.logger.warn(`Delta has no value: table=${delta.table}, key=${delta.primary_key}`);
-        return null;
-      }
-
-      // Валидируем обязательные поля
-      if (!this.validateBlockchainData(value)) {
-        this.logger.warn(`Invalid blockchain data in delta: table=${delta.table}, key=${delta.primary_key}`);
         return null;
       }
 
@@ -49,56 +41,23 @@ export class ProgramInvestDeltaMapper
     }
   }
 
-  extractEntityId(delta: IDelta): string {
-    // В таблице progrinvests primary_key является ID программной инвестиции
-    return delta.primary_key.toString();
-  }
-
-  isRelevantDelta(delta: IDelta): boolean {
-    const isRelevantContract = this.contractInfo.isContractSupported(delta.code);
-    const isRelevantTable =
-      delta.table === 'progrinvests' || delta.table === 'progrinvests*' || delta.table.includes('progrinvests');
-
-    return isRelevantContract && isRelevantTable;
-  }
-
-  private validateBlockchainData(data: any): boolean {
-    if (!data || typeof data !== 'object') {
-      return false;
+  extractSyncValue(delta: IDelta): string {
+    if (!delta.value || !delta.value[this.extractSyncKey()]) {
+      throw new Error(`Delta has no value: table=${delta.table}, key=${this.extractSyncKey()}`);
     }
 
-    // Проверяем обязательные поля
-    const requiredFields = ['id', 'coopname', 'username', 'invest_hash', 'status', 'invested_at', 'statement', 'amount'];
-
-    for (const field of requiredFields) {
-      if (!(field in data)) {
-        this.logger.warn(`Missing required field '${field}' in blockchain data`);
-        return false;
-      }
-    }
-
-    return true;
+    return delta.value[this.extractSyncKey()];
   }
 
-  getSupportedTableNames(): string[] {
-    return ['progrinvests', 'progrinvests*'];
+  extractSyncKey(): string {
+    return ProgramInvestDomainEntity.getSyncKey();
   }
 
   getSupportedContractNames(): string[] {
     return this.contractInfo.getSupportedContractNames();
   }
 
-  getAllEventPatterns(): string[] {
-    const patterns: string[] = [];
-    const supportedContracts = this.contractInfo.getSupportedContractNames();
-    const supportedTables = this.getSupportedTableNames();
-
-    for (const contractName of supportedContracts) {
-      for (const tableName of supportedTables) {
-        patterns.push(`delta::${contractName}::${tableName}`);
-      }
-    }
-
-    return patterns;
+  getSupportedTableNames(): string[] {
+    return this.contractInfo.getTablePatterns('progrinvests');
   }
 }

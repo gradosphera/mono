@@ -37,6 +37,10 @@ export class ExpenseTypeormRepository
     return new ExpenseDomainEntity(databaseData, blockchainData);
   }
 
+  protected getSyncKey(): string {
+    return ExpenseDomainEntity.getSyncKey();
+  }
+
   async create(expense: ExpenseDomainEntity): Promise<ExpenseDomainEntity> {
     const entity = this.repository.create(ExpenseMapper.toEntity(expense));
     const savedEntity = await this.repository.save(entity);

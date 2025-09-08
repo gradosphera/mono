@@ -29,6 +29,10 @@ export class ContributorTypeormRepository
     };
   }
 
+  protected getSyncKey(): string {
+    return ContributorDomainEntity.getSyncKey();
+  }
+
   protected createDomainEntity(databaseData: IContributorDatabaseData, blockchainData: any): ContributorDomainEntity {
     return new ContributorDomainEntity(databaseData, blockchainData);
   }

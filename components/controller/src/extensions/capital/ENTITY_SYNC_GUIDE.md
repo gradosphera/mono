@@ -31,11 +31,15 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
  * - Блокчейн: все данные расхода из таблицы expenses
  */
 export class ExpenseDomainEntity implements IBlockchainSynchronizable {
+  // Статические ключи для синхронизации
+  private static primary_key = 'id'; // Ключ для поиска в блокчейне
+  private static sync_key = 'expense_hash'; // Ключ для синхронизации с БД
+
   // Поля из базы данных
-  public id: string; // Внутренний ID базы данных
-  public blockchain_id: string; // ID в блокчейне
-  public block_num: number | null; // Номер блока последнего обновления
-  public present = true; // Существует ли запись в блокчейне
+  public _id: string; // Внутренний ID базы данных
+  public id?: number; // ID в блокчейне
+  public block_num: number | undefined; // Номер блока последнего обновления
+  public present = false; // Существует ли запись в блокчейне
 
   // Доменные поля (расширения)
   public status: ExpenseStatus;
@@ -56,8 +60,8 @@ export class ExpenseDomainEntity implements IBlockchainSynchronizable {
 
   constructor(databaseData: IExpenseDatabaseData, blockchainData: IExpenseBlockchainData) {
     // Данные из базы данных
-    this.id = databaseData.id;
-    this.blockchain_id = blockchainData.id.toString();
+    this._id = databaseData._id;
+    this.id = blockchainData.id;
     this.block_num = databaseData.block_num;
 
     // Данные из блокчейна
@@ -78,12 +82,25 @@ export class ExpenseDomainEntity implements IBlockchainSynchronizable {
     this.status = this.mapBlockchainStatusToDomain(blockchainData.status);
   }
 
-  // Реализация IBlockchainSynchronizable
-  getBlockchainId(): string {
-    return this.blockchain_id;
+  // Статические методы для получения ключей
+  public static getPrimaryKey(): string {
+    return ExpenseDomainEntity.primary_key;
   }
 
-  getBlockNum(): number | null {
+  public static getSyncKey(): string {
+    return ExpenseDomainEntity.sync_key;
+  }
+
+  // Реализация IBlockchainSynchronizable
+  getPrimaryKey(): string {
+    return this.id?.toString() || '';
+  }
+
+  getSyncKey(): string {
+    return this.expense_hash;
+  }
+
+  getBlockNum(): number | undefined {
     return this.block_num;
   }
 
@@ -159,6 +176,7 @@ import type { IBaseDatabaseData } from './base-database.interface';
  */
 export interface IExpenseDatabaseData extends IBaseDatabaseData {
   // Дополнительные поля базы данных, если нужны
+  expense_hash?: string; // Ключ синхронизации
 }
 ```
 
@@ -169,10 +187,10 @@ export interface IExpenseDatabaseData extends IBaseDatabaseData {
  * Базовый интерфейс данных из базы данных для всех синхронизируемых сущностей
  */
 export interface IBaseDatabaseData {
-  id: string;
-  blockchain_id: string;
-  block_num: number | null;
-  present: boolean;
+  _id: string; // Внутренний ID базы данных
+  id?: number; // ID в блокчейне (опциональный)
+  block_num: number | undefined; // Номер блока последнего обновления
+  present: boolean; // Существует ли запись в блокчейне
 }
 ```
 
@@ -237,17 +255,17 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 
 const EntityName = 'capital_expenses';
 @Entity(EntityName)
-@Index(`idx_${EntityName}_blockchain_id`, ['blockchain_id'])
+@Index(`idx_${EntityName}_id`, ['id'])
 @Index(`idx_${EntityName}_expense_hash`, ['expense_hash'])
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_status`, ['status'])
 export class ExpenseTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  _id!: string;
 
-  @Column({ type: 'varchar', nullable: true, unique: true })
-  blockchain_id?: string;
+  @Column({ type: 'integer', nullable: true })
+  id?: number;
 
   @Column({ type: 'integer', nullable: true })
   block_num?: number;
@@ -329,15 +347,16 @@ export class ExpenseMapper {
    */
   static toDomain(entity: ExpenseTypeormEntity): ExpenseDomainEntity {
     const databaseData: IExpenseDatabaseData = {
+      _id: entity._id,
       id: entity.id,
-      blockchain_id: entity.blockchain_id || '',
-      block_num: entity.block_num || null,
+      block_num: entity.block_num,
       present: entity.present,
+      expense_hash: entity.expense_hash,
     };
 
     // Используем данные из TypeORM сущности
     const blockchainData: IExpenseBlockchainData = {
-      id: entity.blockchain_id || '',
+      id: entity.id || 0,
       coopname: entity.coopname,
       username: entity.username,
       project_hash: entity.project_hash,
@@ -360,8 +379,9 @@ export class ExpenseMapper {
    */
   static toEntity(domain: Partial<ExpenseDomainEntity>): Partial<ExpenseTypeormEntity> {
     const entity: Partial<ExpenseTypeormEntity> = {
-      blockchain_id: domain.blockchain_id || '',
-      block_num: domain.block_num || undefined,
+      _id: domain._id,
+      id: domain.id,
+      block_num: domain.block_num,
       present: domain.present,
     };
 
@@ -443,7 +463,7 @@ export class ExpenseDeltaMapper implements IBlockchainDeltaMapper<IExpenseBlockc
     }
   }
 
-  extractEntityId(delta: IDelta): string {
+  extractSyncValue(delta: IDelta): string {
     // В таблице expenses primary_key является ID расхода
     return delta.primary_key.toString();
   }
@@ -909,10 +929,14 @@ export class ExpenseTypeormRepository
   }
 
   protected createDomainEntity(
-    databaseData: { id: string; blockchain_id: string; block_num: number; present: boolean },
+    databaseData: { _id: string; id?: number; block_num: number | undefined; present: boolean },
     blockchainData: any
   ): ExpenseDomainEntity {
     return new ExpenseDomainEntity(databaseData, blockchainData);
+  }
+
+  protected getSyncKey(): string {
+    return ExpenseDomainEntity.getSyncKey();
   }
 
   // Специфичные методы репозитория расходов

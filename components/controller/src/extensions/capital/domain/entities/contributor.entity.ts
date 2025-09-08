@@ -140,7 +140,7 @@ export class ContributorDomainEntity
         return ContributorStatus.INACTIVE;
       default:
         // По умолчанию считаем статус неопределенным
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+
         return ContributorStatus.UNDEFINED;
     }
   }
@@ -151,23 +151,8 @@ export class ContributorDomainEntity
    */
   updateFromBlockchain(blockchainData: IContributorBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.contributor_hash = blockchainData.contributor_hash;
-    this.blockchain_status = blockchainData.status as any;
-    this.memo = blockchainData.memo;
-    this.is_external_contract = blockchainData.is_external_contract;
-    this.contract = blockchainData.contract;
-    this.appendixes = blockchainData.appendixes;
-    this.rate_per_hour = blockchainData.rate_per_hour;
-    this.debt_amount = blockchainData.debt_amount;
-    this.contributed_as_investor = blockchainData.contributed_as_investor;
-    this.contributed_as_creator = blockchainData.contributed_as_creator;
-    this.contributed_as_author = blockchainData.contributed_as_author;
-    this.contributed_as_coordinator = blockchainData.contributed_as_coordinator;
-    this.contributed_as_contributor = blockchainData.contributed_as_contributor;
-    this.contributed_as_propertor = blockchainData.contributed_as_propertor;
-    this.created_at = blockchainData.created_at;
+    Object.assign(this, blockchainData);
+    this.blockchain_status = blockchainData.status;
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;

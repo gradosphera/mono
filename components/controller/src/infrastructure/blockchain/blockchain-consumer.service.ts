@@ -18,8 +18,6 @@ export interface BlockchainEventData {
 // Выносим исключения в конфиг или отдельный файл
 const ACTION_EXCEPTIONS = {
   'eosio.token': ['transfer', 'issue'],
-  'some.other.contract': ['mint', 'burn'],
-  'another.contract': ['*'], // все действия для этого контракта
 };
 
 /**

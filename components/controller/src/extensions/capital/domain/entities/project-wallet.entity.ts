@@ -99,12 +99,7 @@ export class ProjectWalletDomainEntity
    */
   updateFromBlockchain(blockchainData: IProjectWalletBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.project_hash = blockchainData.project_hash;
-    this.username = blockchainData.username;
-    this.shares = blockchainData.shares;
-    this.last_membership_reward_per_share = blockchainData.last_membership_reward_per_share;
-    this.membership_available = blockchainData.membership_available;
+    Object.assign(this, blockchainData);
     this.block_num = blockNum;
     this.present = present;
   }

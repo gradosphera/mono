@@ -110,14 +110,8 @@ export class ProjectPropertyDomainEntity
    */
   updateFromBlockchain(blockchainData: IProjectPropertyBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
+    Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
-    this.project_hash = blockchainData.project_hash;
-    this.property_hash = blockchainData.property_hash;
-    this.property_amount = blockchainData.property_amount;
-    this.property_description = blockchainData.property_description;
-    this.created_at = blockchainData.created_at;
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
@@ -132,7 +126,6 @@ export class ProjectPropertyDomainEntity
       case 'created':
         return ProjectPropertyStatus.CREATED;
       default:
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
         return ProjectPropertyStatus.UNDEFINED;
     }
   }

@@ -37,6 +37,10 @@ export class ResultTypeormRepository
     return new ResultDomainEntity(databaseData, blockchainData);
   }
 
+  protected getSyncKey(): string {
+    return ResultDomainEntity.getSyncKey();
+  }
+
   async create(result: ResultDomainEntity): Promise<ResultDomainEntity> {
     const entity = this.repository.create(ResultMapper.toEntity(result));
     const savedEntity = await this.repository.save(entity);

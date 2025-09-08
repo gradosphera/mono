@@ -38,4 +38,8 @@ export class ProgramPropertyTypeormRepository
   ): ProgramPropertyDomainEntity {
     return new ProgramPropertyDomainEntity(databaseData, blockchainData);
   }
+
+  protected getSyncKey(): string {
+    return ProgramPropertyDomainEntity.getSyncKey();
+  }
 }

@@ -12,7 +12,7 @@ import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-s
 export class VoteDomainEntity implements IBlockchainSynchronizable, IVoteDatabaseData, Partial<IVoteBlockchainData> {
   // Статические поля ключей для поиска и синхронизации
   private static primary_key = 'id';
-  private static sync_key = ''; // Пустая строка - не ведем синхронизацию
+  private static sync_key = 'id'; //id - ключ синхронизации
 
   // Поля из базы данных
   public _id: string; // Внутренний ID базы данных
@@ -91,11 +91,7 @@ export class VoteDomainEntity implements IBlockchainSynchronizable, IVoteDatabas
    */
   updateFromBlockchain(blockchainData: IVoteBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.project_hash = blockchainData.project_hash;
-    this.voter = blockchainData.voter;
-    this.recipient = blockchainData.recipient;
-    this.amount = blockchainData.amount;
-    this.voted_at = blockchainData.voted_at;
+    Object.assign(this, blockchainData);
     this.block_num = blockNum;
     this.present = present;
   }

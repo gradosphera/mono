@@ -37,6 +37,10 @@ export class ProjectTypeormRepository
     return new ProjectDomainEntity(databaseData, blockchainData);
   }
 
+  protected getSyncKey(): string {
+    return ProjectDomainEntity.getSyncKey();
+  }
+
   async create(project: ProjectDomainEntity): Promise<ProjectDomainEntity> {
     const entity = this.repository.create(ProjectMapper.toEntity(project));
     const savedEntity = await this.repository.save(entity);

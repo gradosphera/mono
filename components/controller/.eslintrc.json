@@ -11,16 +11,22 @@
   "parserOptions": {
     "ecmaVersion": 2018,
     "sourceType": "module"
-    // "project": "./tsconfig.json"
   },
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
     "no-console": "off",
     "func-names": "off",
     "no-underscore-dangle": "off",
     "consistent-return": "off",
     "jest/expect-expect": "off",
-    "security/detect-object-injection": "off",
-    "@typescript-eslint/no-unused-vars": "warn"
+    "security/detect-object-injection": "off"
   }
 }

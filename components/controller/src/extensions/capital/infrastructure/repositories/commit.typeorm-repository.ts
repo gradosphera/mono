@@ -37,6 +37,10 @@ export class CommitTypeormRepository
     return new CommitDomainEntity(databaseData, blockchainData);
   }
 
+  protected getSyncKey(): string {
+    return CommitDomainEntity.getSyncKey();
+  }
+
   // Специфичные методы для CommitRepository
 
   async create(commit: CommitDomainEntity): Promise<CommitDomainEntity> {

@@ -3,8 +3,8 @@ import type { IDelta } from '~/types/common';
 import { ProgramWithdrawDomainEntity } from '../../../domain/entities/program-withdraw.entity';
 import type { IProgramWithdrawBlockchainData } from '../../../domain/interfaces/program-withdraw-blockchain.interface';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import type { IBlockchainDeltaMapper } from '~/shared/interfaces/blockchain-sync.interface';
 import { CapitalContractInfoService } from '../../services/capital-contract-info.service';
+import { AbstractBlockchainDeltaMapper } from '~/shared/abstract-blockchain-delta.mapper';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import type { CapitalContract } from 'cooptypes';
 
@@ -12,29 +12,21 @@ import type { CapitalContract } from 'cooptypes';
  * Маппер для преобразования дельт блокчейна в данные возврата из программы
  */
 @Injectable()
-export class ProgramWithdrawDeltaMapper
-  implements IBlockchainDeltaMapper<IProgramWithdrawBlockchainData, ProgramWithdrawDomainEntity>
-{
+export class ProgramWithdrawDeltaMapper extends AbstractBlockchainDeltaMapper<
+  IProgramWithdrawBlockchainData,
+  ProgramWithdrawDomainEntity
+> {
   constructor(private readonly logger: WinstonLoggerService, private readonly contractInfo: CapitalContractInfoService) {
+    super();
     this.logger.setContext(ProgramWithdrawDeltaMapper.name);
   }
 
   mapDeltaToBlockchainData(delta: IDelta): IProgramWithdrawBlockchainData | null {
     try {
-      if (!this.isRelevantDelta(delta)) {
-        return null;
-      }
-
       // Дельта содержит данные в поле value
       const value = delta.value as CapitalContract.Tables.ProgramWithdraws.IProgramWithdraw;
       if (!value) {
         this.logger.warn(`Delta has no value: table=${delta.table}, key=${delta.primary_key}`);
-        return null;
-      }
-
-      // Валидируем обязательные поля
-      if (!this.validateBlockchainData(value)) {
-        this.logger.warn(`Invalid blockchain data in delta: table=${delta.table}, key=${delta.primary_key}`);
         return null;
       }
 
@@ -49,56 +41,23 @@ export class ProgramWithdrawDeltaMapper
     }
   }
 
-  extractEntityId(delta: IDelta): string {
-    // В таблице prgwithdraws primary_key является ID возврата из программы
-    return delta.primary_key.toString();
-  }
-
-  isRelevantDelta(delta: IDelta): boolean {
-    const isRelevantContract = this.contractInfo.isContractSupported(delta.code);
-    const isRelevantTable =
-      delta.table === 'prgwithdraws' || delta.table === 'prgwithdraws*' || delta.table.includes('prgwithdraws');
-
-    return isRelevantContract && isRelevantTable;
-  }
-
-  private validateBlockchainData(data: any): boolean {
-    if (!data || typeof data !== 'object') {
-      return false;
+  extractSyncValue(delta: IDelta): string {
+    if (!delta.value || !delta.value[this.extractSyncKey()]) {
+      throw new Error(`Delta has no value: table=${delta.table}, key=${this.extractSyncKey()}`);
     }
 
-    // Проверяем обязательные поля
-    const requiredFields = ['id', 'coopname', 'withdraw_hash', 'username', 'status', 'amount', 'statement', 'created_at'];
-
-    for (const field of requiredFields) {
-      if (!(field in data)) {
-        this.logger.warn(`Missing required field '${field}' in blockchain data`);
-        return false;
-      }
-    }
-
-    return true;
+    return delta.value[this.extractSyncKey()];
   }
 
-  getSupportedTableNames(): string[] {
-    return ['prgwithdraws', 'prgwithdraws*'];
+  extractSyncKey(): string {
+    return ProgramWithdrawDomainEntity.getSyncKey();
   }
 
   getSupportedContractNames(): string[] {
     return this.contractInfo.getSupportedContractNames();
   }
 
-  getAllEventPatterns(): string[] {
-    const patterns: string[] = [];
-    const supportedContracts = this.contractInfo.getSupportedContractNames();
-    const supportedTables = this.getSupportedTableNames();
-
-    for (const contractName of supportedContracts) {
-      for (const tableName of supportedTables) {
-        patterns.push(`delta::${contractName}::${tableName}`);
-      }
-    }
-
-    return patterns;
+  getSupportedTableNames(): string[] {
+    return this.contractInfo.getTablePatterns('prgwithdraws');
   }
 }

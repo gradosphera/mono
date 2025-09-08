@@ -97,12 +97,7 @@ export class StateDomainEntity implements IBlockchainSynchronizable, IStateDatab
     if (this.coopname !== blockchainData.coopname) throw new Error('Coopname mismatch');
 
     // Обновляем все поля из блокчейна
-    this.global_available_invest_pool = blockchainData.global_available_invest_pool;
-    this.program_membership_funded = blockchainData.program_membership_funded;
-    this.program_membership_available = blockchainData.program_membership_available;
-    this.program_membership_distributed = blockchainData.program_membership_distributed;
-    this.program_membership_cumulative_reward_per_share = blockchainData.program_membership_cumulative_reward_per_share;
-    this.config = blockchainData.config;
+    Object.assign(this, blockchainData);
     this.block_num = blockNum;
     this.present = present;
   }

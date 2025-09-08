@@ -109,14 +109,8 @@ export class ProgramWithdrawDomainEntity
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: IProgramWithdrawBlockchainData, blockNum: number, present = true): void {
-    // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.withdraw_hash = blockchainData.withdraw_hash;
-    this.username = blockchainData.username;
+    Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
-    this.amount = blockchainData.amount;
-    this.statement = blockchainData.statement;
-    this.created_at = blockchainData.created_at;
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
@@ -133,7 +127,6 @@ export class ProgramWithdrawDomainEntity
       case 'approved':
         return ProgramWithdrawStatus.APPROVED;
       default:
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
         return ProgramWithdrawStatus.UNDEFINED;
     }
   }

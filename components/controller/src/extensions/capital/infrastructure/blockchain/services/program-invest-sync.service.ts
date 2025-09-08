@@ -1,6 +1,5 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
-import type { IDelta } from '~/types/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
 import { ProgramInvestDomainEntity } from '../../../domain/entities/program-invest.entity';
@@ -45,40 +44,15 @@ export class ProgramInvestSyncService
 
     // Подписываемся на каждый паттерн программно
     allPatterns.forEach((pattern) => {
-      this.eventEmitter.on(pattern, this.handleProgramInvestDelta.bind(this));
+      this.eventEmitter.on(pattern, this.processDelta.bind(this));
     });
-  }
-
-  /**
-   * Обработчик дельт программных инвестиций
-   */
-  @OnEvent('capital::delta::progrinvests')
-  async handleProgramInvestDelta(delta: IDelta): Promise<void> {
-    await this.processDelta(delta);
   }
 
   /**
    * Обработчик форков для программных инвестиций
    */
-  @OnEvent('capital::fork')
-  async handleFork(blockNum: number): Promise<void> {
-    await this.handleFork(blockNum);
-  }
-
-  /**
-   * Получение поддерживаемых версий контрактов и таблиц
-   */
-  public getSupportedVersions(): { contracts: string[]; tables: string[] } {
-    return {
-      contracts: this.mapper.getSupportedContractNames(),
-      tables: this.mapper.getSupportedTableNames(),
-    };
-  }
-
-  /**
-   * Получение всех паттернов событий для подписки
-   */
-  public getAllEventPatterns(): string[] {
-    return this.mapper.getAllEventPatterns();
+  @OnEvent('fork::*')
+  async handleProgramInvestFork(forkData: { block_num: number }): Promise<void> {
+    await this.handleFork(forkData.block_num);
   }
 }

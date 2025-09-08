@@ -120,18 +120,8 @@ export class ExpenseDomainEntity
    */
   updateFromBlockchain(blockchainData: IExpenseBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.project_hash = blockchainData.project_hash;
-    this.expense_hash = blockchainData.expense_hash;
-    this.fund_id = blockchainData.fund_id;
+    Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
-    this.amount = blockchainData.amount;
-    this.description = blockchainData.description;
-    this.expense_statement = blockchainData.expense_statement;
-    this.approved_statement = blockchainData.approved_statement;
-    this.authorization = blockchainData.authorization;
-    this.spended_at = blockchainData.spended_at;
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
@@ -155,7 +145,7 @@ export class ExpenseDomainEntity
         return ExpenseStatus.CANCELLED;
       default:
         // По умолчанию считаем статус неопределенным
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+
         return ExpenseStatus.UNDEFINED;
     }
   }

@@ -1,6 +1,5 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
-import type { IDelta } from '~/types/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
 import { ProjectWalletDomainEntity } from '../../../domain/entities/project-wallet.entity';
@@ -34,51 +33,26 @@ export class ProjectWalletSyncService
   async onModuleInit() {
     const supportedVersions = this.getSupportedVersions();
     this.logger.log(
-      `ProjectWallet sync service initialized. Supporting contracts: [${supportedVersions.contracts.join(
+      `Сервис синхронизации проектных кошельков инициализирован. Поддерживаемые контракты: [${supportedVersions.contracts.join(
         ', '
-      )}], tables: [${supportedVersions.tables.join(', ')}]`
+      )}], таблицы: [${supportedVersions.tables.join(', ')}]`
     );
 
     // Программная подписка на все поддерживаемые паттерны событий
     const allPatterns = this.getAllEventPatterns();
-    this.logger.log(`Subscribing to ${allPatterns.length} event patterns: ${allPatterns.join(', ')}`);
+    this.logger.log(`Подписка на ${allPatterns.length} паттернов событий: ${allPatterns.join(', ')}`);
 
     // Подписываемся на каждый паттерн программно
     allPatterns.forEach((pattern) => {
-      this.eventEmitter.on(pattern, this.handleProjectWalletDelta.bind(this));
+      this.eventEmitter.on(pattern, this.processDelta.bind(this));
     });
-  }
-
-  /**
-   * Обработчик дельт проектных кошельков
-   */
-  @OnEvent('capital::delta::projwallets')
-  async handleProjectWalletDelta(delta: IDelta): Promise<void> {
-    await this.processDelta(delta);
   }
 
   /**
    * Обработчик форков для проектных кошельков
    */
-  @OnEvent('capital::fork')
-  async handleFork(blockNum: number): Promise<void> {
-    await this.handleFork(blockNum);
-  }
-
-  /**
-   * Получение поддерживаемых версий контрактов и таблиц
-   */
-  public getSupportedVersions(): { contracts: string[]; tables: string[] } {
-    return {
-      contracts: this.mapper.getSupportedContractNames(),
-      tables: this.mapper.getSupportedTableNames(),
-    };
-  }
-
-  /**
-   * Получение всех паттернов событий для подписки
-   */
-  public getAllEventPatterns(): string[] {
-    return this.mapper.getAllEventPatterns();
+  @OnEvent('fork::*')
+  async handleProjectWalletFork(forkData: { block_num: number }): Promise<void> {
+    await this.handleFork(forkData.block_num);
   }
 }

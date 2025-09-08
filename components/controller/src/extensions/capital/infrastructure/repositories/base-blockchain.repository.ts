@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repository, MoreThan } from 'typeorm';
+import { randomUUID } from 'crypto';
 import type { IBlockchainSyncRepository, IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 import type { IBaseDatabaseData } from '../../domain/interfaces/base-database.interface';
 
@@ -30,11 +31,12 @@ export abstract class BaseBlockchainRepository<
   };
 
   /**
-   * Найти сущность по ID блокчейна
+   * Найти сущность по кастомному ключу синхронизации
    */
-  async findByBlockchainId(blockchainId: string): Promise<TDomainEntity | null> {
+  async findBySyncKey(syncKey: string, syncValue: string): Promise<TDomainEntity | null> {
+    const whereCondition = { [syncKey]: syncValue } as any;
     const entity = await this.repository.findOne({
-      where: { id: blockchainId } as any,
+      where: whereCondition,
     });
 
     return entity ? this.getMapper().toDomain(entity) : null;
@@ -56,26 +58,28 @@ export abstract class BaseBlockchainRepository<
    * Используется для синхронизации данных из блокчейна
    */
   async createIfNotExists(blockchainData: any, blockNum: number, present = true): Promise<TDomainEntity> {
-    const blockchainId = blockchainData.id.toString();
+    // Получаем ключ синхронизации из доменной сущности
+    const syncKey = this.getSyncKey();
+    const syncValue = this.extractSyncValueFromBlockchainData(blockchainData, syncKey);
 
-    // Проверяем, существует ли уже
-    const existing = await this.findByBlockchainId(blockchainId);
+    // Проверяем, существует ли уже по кастомному ключу
+    const existing = await this.findBySyncKey(syncKey, syncValue);
     if (existing) {
       // Обновляем существующую сущность
       existing.updateFromBlockchain(blockchainData, blockNum, present);
       return await this.save(existing);
+    } else {
+      // Создаем новую сущность
+      const minimalDatabaseData: IBaseDatabaseData = {
+        _id: randomUUID().toString(),
+        block_num: blockNum,
+        present: present,
+        [syncKey]: syncValue, // ключ синхронизации
+      };
+
+      const newEntity = this.createDomainEntity(minimalDatabaseData, blockchainData);
+      return await this.save(newEntity);
     }
-
-    // Создаем новую сущность
-    const minimalDatabaseData = {
-      _id: '', // Будет сгенерирован базой данных
-      id: blockchainId,
-      block_num: blockNum,
-      present: present,
-    };
-
-    const newEntity = this.createDomainEntity(minimalDatabaseData, blockchainData);
-    return await this.save(newEntity);
   }
 
   /**
@@ -136,4 +140,21 @@ export abstract class BaseBlockchainRepository<
    * Должен быть реализован в наследниках для создания конкретного типа сущности
    */
   protected abstract createDomainEntity(databaseData: any, blockchainData: any): TDomainEntity;
+
+  /**
+   * Получить ключ синхронизации для данной сущности
+   * Должен быть реализован в наследниках для возврата правильного ключа
+   */
+  protected abstract getSyncKey(): string;
+
+  /**
+   * Извлечь значение ключа синхронизации из блокчейн данных
+   */
+  protected extractSyncValueFromBlockchainData(blockchainData: any, syncKey: string): string {
+    const value = blockchainData[syncKey];
+    if (value === null || value === undefined) {
+      throw new Error(`Sync key '${syncKey}' not found in blockchain data`);
+    }
+    return value.toString();
+  }
 }

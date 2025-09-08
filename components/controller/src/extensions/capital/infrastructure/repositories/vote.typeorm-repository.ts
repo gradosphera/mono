@@ -34,6 +34,10 @@ export class VoteTypeormRepository
     return new VoteDomainEntity(databaseData, blockchainData);
   }
 
+  protected getSyncKey(): string {
+    return VoteDomainEntity.getSyncKey();
+  }
+
   async create(vote: VoteDomainEntity): Promise<VoteDomainEntity> {
     const entity = this.repository.create(VoteMapper.toEntity(vote));
     const savedEntity = await this.repository.save(entity);

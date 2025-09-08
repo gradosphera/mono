@@ -107,15 +107,10 @@ export class CommitDomainEntity implements IBlockchainSynchronizable, ICommitDat
    */
   updateFromBlockchain(blockchainData: ICommitBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.project_hash = blockchainData.project_hash;
-    this.commit_hash = blockchainData.commit_hash;
-    this.amounts = blockchainData.amounts;
-    this.blockchain_status = blockchainData.status;
-    this.created_at = blockchainData.created_at;
+    Object.assign(this, blockchainData);
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
+    this.blockchain_status = blockchainData.status;
     this.present = present;
   }
 
@@ -133,7 +128,7 @@ export class CommitDomainEntity implements IBlockchainSynchronizable, ICommitDat
         return CommitStatus.DECLINED;
       default:
         // По умолчанию считаем статус неопределенным
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+
         return CommitStatus.UNDEFINED;
     }
   }

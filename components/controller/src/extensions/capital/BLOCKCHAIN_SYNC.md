@@ -6,10 +6,9 @@
 
 ### Основные компоненты
 
-1. **BlockchainDeltaTrackerService** - отслеживает дельты от capital контракта и эмитирует специфичные события
-2. **AbstractEntitySyncService** - базовый класс для синхронизации сущностей
-3. **ProjectSyncService** - конкретная реализация синхронизации проектов
-4. **CapitalSyncInteractor** - координирует синхронизацию всех сущностей
+1. **AbstractEntitySyncService** - базовый класс для синхронизации сущностей
+2. **ProjectSyncService** - конкретная реализация синхронизации проектов
+3. **CapitalSyncInteractor** - координирует синхронизацию всех сущностей
 
 ### Принципы работы
 
@@ -21,14 +20,13 @@
 ## Поток данных
 
 ```
-Блокчейн → BlockchainConsumerService → BlockchainDeltaTrackerService → ProjectSyncService → База данных
+Блокчейн → BlockchainConsumerService → ProjectSyncService → База данных
 ```
 
 ### События
 
-- `delta::capital::*` - все дельты capital контракта
-- `capital::delta::projects` - дельты таблицы projects
-- `capital::fork` - события форка для capital
+- `delta::capital::*` - все дельты capital контракта (от BlockchainConsumerService)
+- `fork::*` - события форка для всех контрактов (от BlockchainConsumerService)
 
 ## Использование
 
@@ -37,9 +35,16 @@
 1. **Создайте доменную сущность** с реализацией `IBlockchainSynchronizable`:
 ```typescript
 export class NewEntityDomain implements IBlockchainSynchronizable {
-  getBlockchainId(): string { return this.id.toString(); }
+  // Статические ключи для синхронизации
+  private static primary_key = 'id'; // Ключ для поиска в блокчейне
+  private static sync_key = 'custom_field'; // Ключ для синхронизации с БД
+
+  getPrimaryKey(): string { return this.id.toString(); }
+  getSyncKey(): string { return this.custom_field; }
   getBlockNum(): number | null { return this.block_num; }
   updateFromBlockchain(data: any, blockNum: number): void { /* логика обновления */ }
+
+  static getSyncKey(): string { return NewEntityDomain.sync_key; }
 }
 ```
 
@@ -53,7 +58,17 @@ blockNum?: number;
 ```typescript
 @Injectable()
 export class NewEntityDeltaMapper implements IBlockchainDeltaMapper<INewEntityBlockchainData> {
-  // реализация методов
+  extractSyncValue(delta: IDelta): string {
+    // Извлекаем значение из дельты для синхронизации
+    return delta.primary_key.toString();
+  }
+
+  extractSyncKey(): string {
+    // Возвращаем ключ синхронизации из доменной сущности
+    return NewEntityDomain.getSyncKey();
+  }
+
+  // остальные методы
 }
 ```
 
@@ -122,6 +137,27 @@ statement!: ISignedDocumentDomainInterface;
 
 @Column({ type: 'json' })
 approved_statement!: ISignedDocumentDomainInterface;
+```
+
+### Кастомные ключи синхронизации
+
+Система поддерживает гибкую настройку ключей для синхронизации:
+
+**Primary Key** - ключ для поиска сущности в блокчейне:
+- Определяется в доменной сущности как `primary_key`
+- Обычно это поле `id` из таблицы блокчейна
+
+**Sync Key** - ключ для синхронизации между блокчейном и БД:
+- Определяется в доменной сущности как `sync_key`
+- Может быть любое уникальное поле (например, `project_hash`)
+- Используется для поиска существующих записей в БД при синхронизации
+
+Пример для проектов:
+```typescript
+export class ProjectDomainEntity {
+  private static primary_key = 'id';        // Поиск в блокчейне по id
+  private static sync_key = 'project_hash'; // Синхронизация по project_hash
+}
 ```
 
 ### Номера блоков

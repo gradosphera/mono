@@ -38,4 +38,8 @@ export class ProgramWithdrawTypeormRepository
   ): ProgramWithdrawDomainEntity {
     return new ProgramWithdrawDomainEntity(databaseData, blockchainData);
   }
+
+  protected getSyncKey(): string {
+    return ProgramWithdrawDomainEntity.getSyncKey();
+  }
 }

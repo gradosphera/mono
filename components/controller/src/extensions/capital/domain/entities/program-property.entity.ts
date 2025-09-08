@@ -116,16 +116,8 @@ export class ProgramPropertyDomainEntity
    */
   updateFromBlockchain(blockchainData: IProgramPropertyBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
+    Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
-    this.property_hash = blockchainData.property_hash;
-    this.property_amount = blockchainData.property_amount;
-    this.property_description = blockchainData.property_description;
-    this.statement = blockchainData.statement;
-    this.authorization = blockchainData.authorization;
-    this.act = blockchainData.act;
-    this.created_at = blockchainData.created_at;
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
@@ -148,7 +140,6 @@ export class ProgramPropertyDomainEntity
       case 'act2':
         return ProgramPropertyStatus.ACT2;
       default:
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
         return ProgramPropertyStatus.UNDEFINED;
     }
   }

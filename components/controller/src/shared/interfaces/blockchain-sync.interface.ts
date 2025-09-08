@@ -28,15 +28,15 @@ export interface IBlockchainSynchronizable {
 /**
  * Интерфейс для маппинга дельт блокчейна в доменные данные
  */
-export interface IBlockchainDeltaMapper<TBlockchainData = any, TDomainEntity = any> {
+export interface IBlockchainDeltaMapper<TBlockchainData = any, _TDomainEntity = any> {
   /** Маппинг данных дельты в блокчейн-данные */
   mapDeltaToBlockchainData(delta: IDelta): TBlockchainData | null;
 
   /** Получение идентификатора сущности из дельты */
-  extractEntityId(delta: IDelta): string;
+  extractSyncValue(delta: IDelta): string;
 
-  /** Проверка, относится ли дельта к данному типу сущности */
-  isRelevantDelta(delta: IDelta): boolean;
+  /** Получение ключа для синхронизации сущности в блокчейне и базе данных */
+  extractSyncKey(): string;
 
   /** Получение всех возможных паттернов событий  */
   getAllEventPatterns(): string[];
@@ -52,8 +52,8 @@ export interface IBlockchainDeltaMapper<TBlockchainData = any, TDomainEntity = a
  * Интерфейс для репозиториев с поддержкой синхронизации блокчейна
  */
 export interface IBlockchainSyncRepository<TEntity extends IBlockchainSynchronizable> {
-  /** Найти сущность по ID блокчейна */
-  findByBlockchainId(blockchainId: string): Promise<TEntity | null>;
+  /** Найти сущность по кастомному ключу синхронизации */
+  findBySyncKey(syncKey: string, syncValue: string): Promise<TEntity | null>;
 
   /** Найти сущности с номером блока больше указанного */
   findByBlockNumGreaterThan(blockNum: number): Promise<TEntity[]>;

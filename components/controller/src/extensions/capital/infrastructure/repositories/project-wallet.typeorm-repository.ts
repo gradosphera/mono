@@ -32,6 +32,10 @@ export class ProjectWalletTypeormRepository
     };
   }
 
+  protected getSyncKey(): string {
+    return ProjectWalletDomainEntity.getSyncKey();
+  }
+
   protected createDomainEntity(
     databaseData: IProjectWalletDatabaseData,
     blockchainData: IProjectWalletBlockchainData

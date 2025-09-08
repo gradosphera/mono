@@ -39,6 +39,9 @@ export class AppendixTypeormRepository
     return new AppendixDomainEntity(databaseData, blockchainData);
   }
 
+  protected getSyncKey(): string {
+    return AppendixDomainEntity.getSyncKey();
+  }
   // Специфичные методы для AppendixRepository
   // Все типовые CRUD методы наследуются от BaseBlockchainRepository
 }

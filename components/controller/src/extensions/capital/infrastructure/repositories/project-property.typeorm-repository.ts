@@ -32,6 +32,10 @@ export class ProjectPropertyTypeormRepository
     };
   }
 
+  protected getSyncKey(): string {
+    return ProjectPropertyDomainEntity.getSyncKey();
+  }
+
   protected createDomainEntity(
     databaseData: IProjectPropertyDatabaseData,
     blockchainData: IProjectPropertyBlockchainData

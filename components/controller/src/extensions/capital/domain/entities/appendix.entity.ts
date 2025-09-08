@@ -110,14 +110,9 @@ export class AppendixDomainEntity
    */
   updateFromBlockchain(blockchainData: IAppendixBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.project_hash = blockchainData.project_hash;
-    this.appendix_hash = blockchainData.appendix_hash;
-    this.blockchain_status = blockchainData.status;
-    this.created_at = blockchainData.created_at;
-    this.appendix = blockchainData.appendix;
+    Object.assign(this, blockchainData);
     this.status = this.mapStatusToDomain(blockchainData.status);
+    this.blockchain_status = blockchainData.status;
     this.block_num = blockNum;
     this.present = present;
   }
@@ -132,7 +127,6 @@ export class AppendixDomainEntity
         return AppendixStatus.CREATED;
       default:
         // По умолчанию считаем статус неопределенным
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
         return AppendixStatus.UNDEFINED;
     }
   }

@@ -37,6 +37,10 @@ export class InvestTypeormRepository
     return new InvestDomainEntity(databaseData, blockchainData);
   }
 
+  protected getSyncKey(): string {
+    return InvestDomainEntity.getSyncKey();
+  }
+
   async create(invest: InvestDomainEntity): Promise<InvestDomainEntity> {
     const entity = this.repository.create(InvestMapper.toEntity(invest));
     const savedEntity = await this.repository.save(entity);

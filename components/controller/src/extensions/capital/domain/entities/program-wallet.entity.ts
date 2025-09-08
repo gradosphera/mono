@@ -95,10 +95,7 @@ export class ProgramWalletDomainEntity
    */
   updateFromBlockchain(blockchainData: IProgramWalletBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.last_program_crps = blockchainData.last_program_crps;
-    this.capital_available = blockchainData.capital_available;
+    Object.assign(this, blockchainData);
     this.block_num = blockNum;
     this.present = present;
   }

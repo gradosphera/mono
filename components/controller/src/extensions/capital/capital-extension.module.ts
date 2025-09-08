@@ -17,7 +17,6 @@ import { ProgramWalletTypeormRepository } from './infrastructure/repositories/pr
 import { ProjectWalletTypeormRepository } from './infrastructure/repositories/project-wallet.typeorm-repository';
 
 // Blockchain синхронизация
-import { BlockchainDeltaTrackerService } from './infrastructure/blockchain/services/blockchain-delta-tracker.service';
 import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
 import { ProjectSyncService } from './infrastructure/blockchain/services/project-sync.service';
 import { ContributorDeltaMapper } from './infrastructure/blockchain/mappers/contributor-delta.mapper';
@@ -110,7 +109,6 @@ export class CapitalPlugin extends BaseExtModule {
     CapitalContractInfoService,
 
     // Blockchain Sync Services
-    BlockchainDeltaTrackerService,
     ProjectDeltaMapper,
     ProjectSyncService,
     ContributorDeltaMapper,

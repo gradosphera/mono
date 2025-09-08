@@ -116,17 +116,8 @@ export class DebtDomainEntity implements IBlockchainSynchronizable, IDebtDatabas
    */
   updateFromBlockchain(blockchainData: IDebtBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.debt_hash = blockchainData.debt_hash;
-    this.project_hash = blockchainData.project_hash;
+    Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
-    this.repaid_at = blockchainData.repaid_at;
-    this.amount = blockchainData.amount;
-    this.statement = blockchainData.statement;
-    this.approved_statement = blockchainData.approved_statement;
-    this.authorization = blockchainData.authorization;
-    this.memo = blockchainData.memo;
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
@@ -150,7 +141,7 @@ export class DebtDomainEntity implements IBlockchainSynchronizable, IDebtDatabas
         return DebtStatus.CANCELLED;
       default:
         // По умолчанию считаем статус неопределенным
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+
         return DebtStatus.UNDEFINED;
     }
   }

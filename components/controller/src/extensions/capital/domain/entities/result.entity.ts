@@ -115,17 +115,8 @@ export class ResultDomainEntity implements IBlockchainSynchronizable, IResultDat
    */
   updateFromBlockchain(blockchainData: IResultBlockchainData, blockNum: number, present = true): void {
     // Обновляем все поля из блокчейна
-    this.project_hash = blockchainData.project_hash;
-    this.result_hash = blockchainData.result_hash;
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
+    Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
-    this.created_at = blockchainData.created_at;
-    this.debt_amount = blockchainData.debt_amount;
-    this.total_amount = blockchainData.total_amount;
-    this.statement = blockchainData.statement;
-    this.authorization = blockchainData.authorization;
-    this.act = blockchainData.act;
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
@@ -149,7 +140,7 @@ export class ResultDomainEntity implements IBlockchainSynchronizable, IResultDat
         return ResultStatus.DECLINED;
       default:
         // По умолчанию считаем результат отклоненным для безопасности
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
+
         return ResultStatus.UNDEFINED;
     }
   }

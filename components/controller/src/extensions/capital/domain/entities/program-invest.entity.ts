@@ -109,14 +109,8 @@ export class ProgramInvestDomainEntity
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: IProgramInvestBlockchainData, blockNum: number, present = true): void {
-    // Обновляем все поля из блокчейна
-    this.coopname = blockchainData.coopname;
-    this.username = blockchainData.username;
-    this.invest_hash = blockchainData.invest_hash;
+    Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
-    this.invested_at = blockchainData.invested_at;
-    this.statement = blockchainData.statement;
-    this.amount = blockchainData.amount;
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
@@ -131,7 +125,6 @@ export class ProgramInvestDomainEntity
       case 'created':
         return ProgramInvestStatus.CREATED;
       default:
-        console.warn(`Неизвестный статус: ${blockchainStatus}, устанавливаем UNDEFINED`);
         return ProgramInvestStatus.UNDEFINED;
     }
   }
