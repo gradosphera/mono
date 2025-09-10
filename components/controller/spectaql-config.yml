@@ -2,7 +2,7 @@ spectaql:
   targetDir: ./docs
 introspection:
   # schemaFile: ./schema.gql
-  url: 'https://testnet.coopenomics.world/api/v1/graphql'
+  url: 'https://testnet.coopenomics.world/backend/v1/graphql'
 
 info:
   title: 'API-Документация'
@@ -33,3 +33,4 @@ info:
   # If you really want to hide the "Documentation by" at the bottom of your output, you can do so here
   # Default: false
   x-hidePoweredBy: true
+  # x-url: https://testnet.coopenomics.world/backend/v1/graphql

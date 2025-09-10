@@ -110,6 +110,17 @@ type ActionReceipt {
   recv_sequence: String!
 }
 
+input AddAuthorInput {
+  """Имя автора"""
+  author: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+}
+
 input AddParticipantInput {
   """
   Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500)
@@ -1233,6 +1244,17 @@ type Branch {
   type: String!
 }
 
+input CalculateVotesInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Имя пользователя"""
+  username: String!
+}
+
 input CancelRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -1289,6 +1311,34 @@ input CompleteRequestInput {
   username: String!
 }
 
+input CompleteVotingInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+}
+
+input ConfigInput {
+  """Процент голосования авторов"""
+  authors_voting_percent: Float!
+
+  """Процент бонуса координатора"""
+  coordinator_bonus_percent: Float!
+
+  """Срок действия приглашения координатора в днях"""
+  coordinator_invite_validity_days: Float!
+
+  """Процент голосования создателей"""
+  creators_voting_percent: Float!
+
+  """Процент расходов"""
+  expense_pool_percent: Float!
+
+  """Период голосования в днях"""
+  voting_period_in_days: Float!
+}
+
 """
 Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи
 """
@@ -1332,6 +1382,60 @@ type ContactsDTO {
   full_address: String!
   full_name: String!
   phone: String!
+}
+
+input ContractDocumentInput {
+  """Хэш подписи"""
+  hash: String!
+
+  """Время подписи"""
+  signed_at: String!
+
+  """Подписывающий"""
+  signer: String!
+
+  """Тип подписи"""
+  type: String!
+}
+
+input ContractInput {
+  """Содержимое контракта"""
+  content: String!
+
+  """Хэш контракта"""
+  hash: String!
+
+  """Подписи контракта"""
+  signatures: [ContractDocumentInput!]!
+
+  """Заголовок контракта"""
+  title: String!
+}
+
+input ConvertSegmentInput {
+  """Сумма для конвертации в капитализацию"""
+  capital_amount: String!
+
+  """Хэш конвертации"""
+  convert_hash: String!
+
+  """Заявление"""
+  convert_statement: ContractInput!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Сумма для конвертации в кошелек проекта"""
+  project_amount: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Имя пользователя"""
+  username: String!
+
+  """Сумма для конвертации в главный кошелек"""
+  wallet_amount: String!
 }
 
 type CooperativeOperatorAccount {
@@ -1520,6 +1624,46 @@ input CreateChildOrderInput {
   username: String!
 }
 
+input CreateCommitInput {
+  """Хэш коммита"""
+  commit_hash: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Количество часов создателя"""
+  creator_hours: Float!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Имя пользователя"""
+  username: String!
+}
+
+input CreateDebtInput {
+  """Сумма долга"""
+  amount: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш долга"""
+  debt_hash: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Дата возврата"""
+  repaid_at: String!
+
+  """Заявление"""
+  statement: ContractInput!
+
+  """Имя пользователя"""
+  username: String!
+}
+
 input CreateDepositPaymentInput {
   """Сумма взноса"""
   quantity: Float!
@@ -1657,12 +1801,95 @@ input CreateParentOfferInput {
   username: String!
 }
 
+input CreateProgramPropertyInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Сумма имущества"""
+  property_amount: String!
+
+  """Описание имущества"""
+  property_description: String!
+
+  """Хэш имущества"""
+  property_hash: String!
+
+  """Заявление"""
+  statement: ContractInput!
+
+  """Имя пользователя"""
+  username: String!
+}
+
 input CreateProjectFreeDecisionInput {
   """Проект решения, которое предлагается принять"""
   decision: String!
 
   """Вопрос, который выносится на повестку"""
   question: String!
+}
+
+input CreateProjectInput {
+  """Флаг возможности конвертации в проект"""
+  can_convert_to_project: Boolean!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Описание проекта"""
+  description: String!
+
+  """Мета-данные проекта"""
+  meta: String!
+
+  """Хэш родительского проекта"""
+  parent_hash: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Название проекта"""
+  title: String!
+}
+
+input CreateProjectInvestInput {
+  """Сумма инвестиции"""
+  amount: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш инвестиции"""
+  invest_hash: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Заявление на инвестирование"""
+  statement: ContractInput!
+
+  """Имя инвестора"""
+  username: String!
+}
+
+input CreateProjectPropertyInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Сумма имущества"""
+  property_amount: String!
+
+  """Описание имущества"""
+  property_description: String!
+
+  """Хэш имущества"""
+  property_hash: String!
+
+  """Имя пользователя"""
+  username: String!
 }
 
 input CreateSubscriptionInput {
@@ -1774,6 +2001,14 @@ input DeletePaymentMethodInput {
 
   """Имя пользователя, чей метод оплаты нужно удалить"""
   username: String!
+}
+
+input DeleteProjectInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
 }
 
 input DeleteTrustedAccountInput {
@@ -2150,6 +2385,31 @@ input FreeDecisionGenerateDocumentInput {
   version: String
 }
 
+input FundProgramInput {
+  """Сумма финансирования"""
+  amount: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Memo"""
+  memo: String!
+}
+
+input FundProjectInput {
+  """Сумма финансирования"""
+  amount: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Memo"""
+  memo: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+}
+
 type GatewayPayment {
   """Данные из блокчейна"""
   blockchain_data: JSON
@@ -2397,6 +2657,23 @@ input GetUserSubscriptionsInput {
   username: String!
 }
 
+input ImportContributorInput {
+  """Сумма вклада"""
+  contribution_amount: String!
+
+  """Хэш вкладчика"""
+  contributor_hash: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Примечание"""
+  memo: String
+
+  """Имя аккаунта пользователя"""
+  username: String!
+}
+
 type Individual {
   """Дата рождения"""
   birthdate: String!
@@ -2540,6 +2817,23 @@ input LogoutInput {
 
   """Токен доступа"""
   refresh_token: String!
+}
+
+input MakeClearanceInput {
+  """Хэш приложения"""
+  appendix_hash: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Документ"""
+  document: ContractInput!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Имя пользователя"""
+  username: String!
 }
 
 """Данные о собрании кооператива"""
@@ -2860,6 +3154,9 @@ type Mutation {
   """Подтвердить поставку имущества на заявку"""
   acceptChildOrder(data: AcceptChildOrderInput!): Transaction!
 
+  """Добавление автора проекта в CAPITAL контракте"""
+  addCapitalAuthor(data: AddAuthorInput!): String!
+
   """
   Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета)
   """
@@ -2868,8 +3165,14 @@ type Mutation {
   """Добавить доверенное лицо кооперативного участка"""
   addTrustedAccount(data: AddTrustedAccountInput!): Branch!
 
+  """Расчет голосов в CAPITAL контракте"""
+  calculateCapitalVotes(data: CalculateVotesInput!): String!
+
   """Отменить заявку"""
   cancelRequest(data: CancelRequestInput!): Transaction!
+
+  """Завершение голосования в CAPITAL контракте"""
+  completeCapitalVoting(data: CompleteVotingInput!): String!
 
   """Завершить заявку по истечению гарантийного срока"""
   completeRequest(data: CompleteRequestInput!): Transaction!
@@ -2884,6 +3187,9 @@ type Mutation {
   """
   confirmSupplyOnRequest(data: ConfirmSupplyOnRequestInput!): Transaction!
 
+  """Конвертация сегмента в CAPITAL контракте"""
+  convertCapitalSegment(data: ConvertSegmentInput!): String!
+
   """
   Сгенерировать документ предложения повестки очередного общего собрания пайщиков
   """
@@ -2894,6 +3200,24 @@ type Mutation {
 
   """Создать кооперативный участок"""
   createBranch(data: CreateBranchInput!): Branch!
+
+  """Создание коммита в CAPITAL контракте"""
+  createCapitalCommit(data: CreateCommitInput!): String!
+
+  """Получение ссуды в CAPITAL контракте"""
+  createCapitalDebt(data: CreateDebtInput!): String!
+
+  """Создание программного имущественного взноса в CAPITAL контракте"""
+  createCapitalProgramProperty(data: CreateProgramPropertyInput!): String!
+
+  """Создание проекта в CAPITAL контракте"""
+  createCapitalProject(data: CreateProjectInput!): String!
+
+  """Инвестирование в проект CAPITAL контракта"""
+  createCapitalProjectInvest(data: CreateProjectInvestInput!): String!
+
+  """Создание проектного имущественного взноса в CAPITAL контракте"""
+  createCapitalProjectProperty(data: CreateProjectPropertyInput!): String!
 
   """Создать заявку на поставку имущества по предложению Поставщика"""
   createChildOrder(data: CreateChildOrderInput!): Transaction!
@@ -2931,6 +3255,9 @@ type Mutation {
   """Удалить кооперативный участок"""
   deleteBranch(data: DeleteBranchInput!): Boolean!
 
+  """Удаление проекта в CAPITAL контракте"""
+  deleteCapitalProject(data: DeleteProjectInput!): String!
+
   """Удалить метод оплаты"""
   deletePaymentMethod(data: DeletePaymentMethodInput!): Boolean!
 
@@ -2945,6 +3272,12 @@ type Mutation {
 
   """Изменить кооперативный участок"""
   editBranch(data: EditBranchInput!): Branch!
+
+  """Финансирование программы CAPITAL контракта"""
+  fundCapitalProgram(data: FundProgramInput!): String!
+
+  """Финансирование проекта CAPITAL контракта"""
+  fundCapitalProject(data: FundProjectInput!): String!
 
   """Сгенерировать предложение повестки общего собрания пайщиков"""
   generateAnnualGeneralMeetAgendaDocument(data: AnnualGeneralMeetingAgendaGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -3020,6 +3353,9 @@ type Mutation {
   """
   generateWalletAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
+  """Импорт вкладчика в CAPITAL контракт"""
+  importCapitalContributor(data: ImportContributorInput!): String!
+
   """
   Произвести инициализацию программного обеспечения перед установкой совета методом install
   """
@@ -3039,11 +3375,17 @@ type Mutation {
   """Выйти из системы и заблокировать JWT-токены"""
   logout(data: LogoutInput!): Boolean!
 
+  """Подписание приложения в CAPITAL контракте"""
+  makeCapitalClearance(data: MakeClearanceInput!): String!
+
   """Модерировать заявку"""
   moderateRequest(data: ModerateRequestInput!): Transaction!
 
   """Уведомление о проведении общего собрания пайщиков"""
   notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInput!): MeetAggregate!
+
+  """Открытие проекта для инвестиций в CAPITAL контракте"""
+  openCapitalProject(data: OpenProjectInput!): String!
 
   """Отклонить модерацию по заявке"""
   prohibitRequest(data: ProhibitRequestInput!): Transaction!
@@ -3056,6 +3398,9 @@ type Mutation {
   """Опубликовать заявку"""
   publishRequest(data: PublishRequestInput!): Transaction!
 
+  """Внесение результата в CAPITAL контракте"""
+  pushCapitalResult(data: PushResultInput!): String!
+
   """
   Подтвердить получение имущества Уполномоченным лицом от Заказчика по акту приёмки-передачи
   """
@@ -3064,8 +3409,20 @@ type Mutation {
   """Обновить токен доступа аккаунта"""
   refresh(data: RefreshInput!): RegisteredAccount!
 
+  """Обновление CRPS пайщика в программе CAPITAL контракта"""
+  refreshCapitalProgram(data: RefreshProgramInput!): String!
+
+  """Обновление CRPS пайщика в проекте CAPITAL контракта"""
+  refreshCapitalProject(data: RefreshProjectInput!): String!
+
+  """Обновление сегмента в CAPITAL контракте"""
+  refreshCapitalSegment(data: RefreshSegmentInput!): String!
+
   """Зарегистрировать аккаунт пользователя в системе"""
   registerAccount(data: RegisterAccountInput!): RegisteredAccount!
+
+  """Регистрация вкладчика в CAPITAL контракте"""
+  registerCapitalContributor(data: RegisterContributorInput!): String!
 
   """
   Зарегистрировать заявление и подписанные положения, подготовив пакет документов к отправке в совет на голосование после поступления оплаты.
@@ -3081,6 +3438,15 @@ type Mutation {
   """Выбрать кооперативный участок"""
   selectBranch(data: SelectBranchInput!): Boolean!
 
+  """Установка конфигурации CAPITAL контракта"""
+  setCapitalConfig(data: SetConfigInput!): String!
+
+  """Установка мастера проекта в CAPITAL контракте"""
+  setCapitalMaster(data: SetMasterInput!): String!
+
+  """Установка плана проекта в CAPITAL контракте"""
+  setCapitalPlan(data: SetPlanInput!): String!
+
   """
   Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне.
   """
@@ -3095,10 +3461,19 @@ type Mutation {
   """Подписание решения секретарём на общем собрании пайщиков"""
   signBySecretaryOnAnnualGeneralMeet(data: SignBySecretaryOnAnnualGeneralMeetInput!): MeetAggregate!
 
+  """Запуск проекта в CAPITAL контракте"""
+  startCapitalProject(data: StartProjectInput!): String!
+
+  """Запуск голосования в CAPITAL контракте"""
+  startCapitalVoting(data: StartVotingInput!): String!
+
   """
   Выслать токен для замены приватного ключа аккаунта на электронную почту
   """
   startResetKey(data: StartResetKeyInput!): Boolean!
+
+  """Голосование в CAPITAL контракте"""
+  submitCapitalVote(data: SubmitVoteInput!): String!
 
   """
   Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи
@@ -3137,6 +3512,14 @@ input NotifyOnAnnualGeneralMeetInput {
   meet_hash: String!
   notification: AnnualGeneralMeetingNotificationSignedDocumentInput!
   username: String!
+}
+
+input OpenProjectInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
 }
 
 type Organization {
@@ -3758,6 +4141,32 @@ input PublishRequestInput {
   username: String!
 }
 
+input PushResultInput {
+  """Сумма взноса"""
+  contribution_amount: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Сумма долга к погашению"""
+  debt_amount: String!
+
+  """Хэши долгов для погашения"""
+  debt_hashes: [String!]!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Хэш результата"""
+  result_hash: String!
+
+  """Заявление"""
+  statement: ContractInput!
+
+  """Имя пользователя"""
+  username: String!
+}
+
 type Query {
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!
@@ -3895,6 +4304,36 @@ input RefreshInput {
   refresh_token: String!
 }
 
+input RefreshProgramInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Имя пользователя"""
+  username: String!
+}
+
+input RefreshProjectInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Имя пользователя"""
+  username: String!
+}
+
+input RefreshSegmentInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Имя пользователя"""
+  username: String!
+}
+
 type RefundRequest {
   """Сумма CPU"""
   cpu_amount: String!
@@ -3930,6 +4369,26 @@ input RegisterAccountInput {
 
   """Тип аккаунта"""
   type: AccountType!
+
+  """Имя пользователя"""
+  username: String!
+}
+
+input RegisterContributorInput {
+  """Документ контракта"""
+  contract: ContractInput!
+
+  """Хэш вкладчика"""
+  contributor_hash: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Флаг внешнего контракта"""
+  is_external_contract: Boolean!
+
+  """Ставка за час работы"""
+  rate_per_hour: String!
 
   """Имя пользователя"""
   username: String!
@@ -4583,12 +5042,51 @@ input SelectBranchSignedMetaDocumentInput {
   version: String!
 }
 
+input SetConfigInput {
+  """Конфигурация контракта"""
+  config: ConfigInput!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+}
+
+input SetMasterInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Имя мастера проекта"""
+  master: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+}
+
 input SetPaymentStatusInput {
   """Идентификатор платежа, для которого устанавливается статус"""
   id: String!
 
   """Новый статус платежа"""
   status: PaymentStatus!
+}
+
+input SetPlanInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Имя мастера проекта"""
+  master: String!
+
+  """Плановое количество часов создателей"""
+  plan_creators_hours: Float!
+
+  """Плановые расходы"""
+  plan_expenses: String!
+
+  """Стоимость часа работы"""
+  plan_hour_cost: String!
+
+  """Хэш проекта"""
+  project_hash: String!
 }
 
 input SetWifInput {
@@ -4723,9 +5221,25 @@ input SovietMemberInput {
   role: String!
 }
 
+input StartProjectInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+}
+
 input StartResetKeyInput {
   """Электронная почта"""
   email: String!
+}
+
+input StartVotingInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
 }
 
 """
@@ -4734,6 +5248,20 @@ input StartResetKeyInput {
 type StatementDetailAggregate {
   action: ExtendedBlockchainAction!
   documentAggregate: DocumentAggregate!
+}
+
+input SubmitVoteInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Имя голосующего"""
+  voter: String!
+
+  """Распределение голосов"""
+  votes: [VoteDistributionInput!]!
 }
 
 type SubscriptionStatsDto {
@@ -5128,6 +5656,14 @@ type Verification {
 
   """Имя верификатора"""
   verificator: String!
+}
+
+input VoteDistributionInput {
+  """Сумма голосов"""
+  amount: String!
+
+  """Получатель голосов"""
+  recipient: String!
 }
 
 """Пункт голосования для ежегодного общего собрания"""
