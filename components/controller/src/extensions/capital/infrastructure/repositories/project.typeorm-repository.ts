@@ -55,4 +55,37 @@ export class ProjectTypeormRepository
     const entities = await this.repository.find({ where: { status: status as any } });
     return entities.map((entity) => ProjectMapper.toDomain(entity));
   }
+
+  /**
+   * Найти проект с задачами
+   */
+  async findByIdWithIssues(projectHash: string): Promise<ProjectDomainEntity | null> {
+    const entity = await this.repository.findOne({
+      where: { project_hash: projectHash },
+      relations: ['issues'],
+    });
+    return entity ? ProjectMapper.toDomain(entity) : null;
+  }
+
+  /**
+   * Найти проект с историями
+   */
+  async findByIdWithStories(projectHash: string): Promise<ProjectDomainEntity | null> {
+    const entity = await this.repository.findOne({
+      where: { project_hash: projectHash },
+      relations: ['stories'],
+    });
+    return entity ? ProjectMapper.toDomain(entity) : null;
+  }
+
+  /**
+   * Найти проект со всеми связанными данными
+   */
+  async findByIdWithAllRelations(projectHash: string): Promise<ProjectDomainEntity | null> {
+    const entity = await this.repository.findOne({
+      where: { project_hash: projectHash },
+      relations: ['issues', 'stories', 'issues.comments', 'issues.stories'],
+    });
+    return entity ? ProjectMapper.toDomain(entity) : null;
+  }
 }

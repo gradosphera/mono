@@ -22,16 +22,16 @@ export class ProgramInvestTypeormEntity {
   present!: boolean;
 
   // Поля из блокчейна (program_invests.hpp)
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar' })
   coopname!: string;
 
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar' })
   username!: string;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar' })
   invest_hash!: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar' })
   blockchain_status!: string;
 
   @Column({ type: 'timestamp' })
@@ -40,7 +40,7 @@ export class ProgramInvestTypeormEntity {
   @Column({ type: 'json' })
   statement!: ISignedDocumentDomainInterface;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar' })
   amount!: string;
 
   @CreateDateColumn({ type: 'timestamp' })

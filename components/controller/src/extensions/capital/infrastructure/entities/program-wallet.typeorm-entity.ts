@@ -18,16 +18,16 @@ export class ProgramWalletTypeormEntity {
   present!: boolean;
 
   // Поля из блокчейна (wallets.hpp)
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar' })
   coopname!: string;
 
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar' })
   username!: string;
 
   @Column({ type: 'float' })
   last_program_crps!: number;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar' })
   capital_available!: string;
 
   @CreateDateColumn({ type: 'timestamp' })

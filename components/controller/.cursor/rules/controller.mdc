@@ -1,0 +1,151 @@
+---
+description: 
+globs: components/controller/**
+alwaysApply: false
+---
+ # NestJS Controller и Чистая архитектура
+
+## Основные принципы
+1. Чистая архитектура - главный архитектурный подход. Пиши код с комментариями.
+2. Типы IName, IChecksum256, ITimePointSec - это просто строки.
+3. Домен должен быть полностью изолирован от инфраструктурных деталей.
+4. Направление зависимостей - внутрь (к ядру, домену).
+5. Домен, инфраструктура и приложение связаны через App.module, НЕ НУЖНО импортировать их друг в друга, а достаточно просто импортировать домен на уровне приложения чтобы использовать все экспорты домена. 
+
+## Структура проекта
+- `domain/` - доменный слой (бизнес-логика, независимая от инфраструктуры)
+- `infrastructure/` - инфраструктурный слой (адаптеры к внешним системам)
+- `modules/` - слой приложения (DTO, резолверы, сервисы)
+
+## Слои и их взаимодействие
+1. **Домен**:
+   - Содержит чистые доменные интерфейсы и реализованные на них сущности
+   - НЕ должен зависеть от `cooptypes` (инфраструктурный контракт)
+   - Использует собственные доменные типы (например, Date вместо строковых timestamp)
+   - Интерфейсы портов описывают взаимодействие с внешними системами
+
+2. **Инфраструктура**:
+   - Содержит адаптеры к внешним системам (блокчейн, БД и т.д.)
+   - Осуществляет преобразование между доменными и инфраструктурными типами
+   - Общая логика преобразования выносится в утилитарные классы (например, `DomainToBlockchainUtils`)
+
+3. **Модули (приложение)**:
+   - DTO имплементируют доменные интерфейсы напрямую
+   - Резолвер вызывает сервис, который принимает DTO
+   - Сервис передает объекты DTO в интерактор домена
+
+## Поток данных
+1. Резолвер принимает входные данные и передает их в сервис
+2. Сервис вызывает интерактор домена, передавая ему объекты DTO (имплементирующие доменный интерфейс)
+3. Интерактор выполняет бизнес-логику и взаимодействует с портами домена
+4. Адаптеры (инфраструктурный слой) преобразуют доменные объекты в формат внешних систем (JSON для хранения мета-данных, ISO для дат и т.д.)
+5. Адаптеры возвращают результаты в домен, домен возвращает данные в сервис, который возвращает их в резолвер
+
+## Правила преобразования данных
+1. Преобразование DTO → доменный объект: не требуется, если DTO имплементирует доменный интерфейс
+2. Преобразование доменный объект → инфраструктурный тип: происходит в адаптерах
+3. Преобразование документов, дат и других сложных объектов: используются утилитарные классы уровня инфраструктуры
+
+## Работа с типами данных
+1. **Даты**:
+   - В доменных интерфейсах используется тип `Date`
+   - В DTO используется тип `Date` с декораторами `@IsDate()` и `@Type(() => Date)`
+   - В инфраструктурном слое происходит преобразование `Date` → `string` (ISO формат)
+   ```typescript
+   // Доменный интерфейс
+   interface MeetDomainInterface {
+     open_at: Date;
+   }
+   
+   // DTO
+   @Field(() => Date)
+   @IsDate()
+   @Type(() => Date)
+   open_at!: Date;
+   
+   // Адаптер
+   const blockchainData = {
+     open_at: domainToBlockchainUtils.convertDateToBlockchainFormat(data.open_at)
+   };
+   ```
+
+2. **Документы**:
+   - В доменных интерфейсах используется собственный тип `SignedDocumentDomainInterface<T>`
+   - В DTO используется соответствующий DTO-класс (например, `SignedDigitalDocumentInputDTO`)
+   - В инфраструктурном слое происходит преобразование между форматами (meta-поля в JSON и т.д.)
+
+## Типовые ошибки
+1. **Нарушение изоляции домена**: домен должен быть изолирован от инфраструктуры. Не используйте импорты из `cooptypes` в доменных интерфейсах.
+   ```typescript
+   // Неправильно
+   import { MeetContract } from 'cooptypes';
+   export type VoteDomainInterface = MeetContract.Actions.Vote.IInput;
+   
+   // Правильно
+   export interface VoteDomainInterface {
+     coopname: string;
+     hash: string;
+     // ... доменные поля
+   }
+   ```
+
+2. **Преобразование в неправильном слое**: преобразование доменных объектов в инфраструктурные типы должно происходить в адаптерах, а не в доменном слое или сервисе.
+   ```typescript
+   // Неправильно (в доменном интеракторе)
+   async vote(data: VoteDomainInterface) {
+     const blockchainData = { ...data, meta: JSON.stringify(data.meta) };
+     // ...
+   }
+   
+   // Правильно (в адаптере)
+   async vote(data: VoteDomainInterface) {
+     const blockchainData = this.convertToBlockchainFormat(data);
+     // ...
+   }
+   ```
+
+3. **Дублирование логики преобразования**: общая логика преобразования должна быть вынесена в утилитарные классы.
+   ```typescript
+   // Неправильно (дублирование в разных адаптерах)
+   // В MeetAdapter
+   private convertDoc(doc) { return { ...doc, meta: JSON.stringify(doc.meta) }; }
+   // В BranchAdapter
+   private convertDoc(doc) { return { ...doc, meta: JSON.stringify(doc.meta) }; }
+   
+   // Правильно (общий утилитарный класс)
+   // DomainToBlockchainUtils
+   convertSignedDocumentToBlockchainFormat(doc) { 
+     return { ...doc, meta: JSON.stringify(doc.meta) }; 
+   }
+   ```
+
+## Примеры
+```typescript
+// Доменный интерфейс - чистый, без зависимостей от инфраструктуры
+export interface VoteOnAnnualGeneralMeetInputDomainInterface {
+  coopname: string;
+  hash: string;
+  member: string;
+  ballot: VoteItemInputDomainInterface[];
+}
+
+// DTO имплементирует доменный интерфейс напрямую
+@InputType('VoteOnAnnualGeneralMeetInput')
+export class VoteOnAnnualGeneralMeetInputDTO implements VoteOnAnnualGeneralMeetInputDomainInterface {
+  @Field(() => String)
+  @IsString()
+  coopname!: string;
+  // ... остальные поля
+}
+
+// Адаптер преобразует доменный объект в инфраструктурный тип
+async vote(data: VoteOnAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult> {
+  // Преобразуем доменный объект в инфраструктурный тип
+  const blockchainData: MeetContract.Actions.Vote.IInput = {
+    coopname: data.coopname,
+    hash: data.hash,
+    // ... преобразование других полей
+  };
+  // ... отправка данных во внешнюю систему
+}
+```

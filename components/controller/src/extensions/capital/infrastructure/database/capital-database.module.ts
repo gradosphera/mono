@@ -9,6 +9,10 @@ import { ProgramWithdrawTypeormEntity } from '../entities/program-withdraw.typeo
 import { ProjectPropertyTypeormEntity } from '../entities/project-property.typeorm-entity';
 import { ProgramWalletTypeormEntity } from '../entities/program-wallet.typeorm-entity';
 import { ProjectWalletTypeormEntity } from '../entities/project-wallet.typeorm-entity';
+import { CycleTypeormEntity } from '../entities/cycle.typeorm-entity';
+import { IssueTypeormEntity } from '../entities/issue.typeorm-entity';
+import { CommentTypeormEntity } from '../entities/comment.typeorm-entity';
+import { StoryTypeormEntity } from '../entities/story.typeorm-entity';
 import { config } from '~/config';
 
 // Константа для имени подключения к базе данных capital
@@ -36,6 +40,10 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
           ProjectPropertyTypeormEntity,
           ProgramWalletTypeormEntity,
           ProjectWalletTypeormEntity,
+          CycleTypeormEntity,
+          IssueTypeormEntity,
+          CommentTypeormEntity,
+          StoryTypeormEntity,
         ],
         synchronize: config.env === 'development', // Используем миграции для production
         logging: false,
@@ -52,6 +60,10 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
         ProjectPropertyTypeormEntity,
         ProgramWalletTypeormEntity,
         ProjectWalletTypeormEntity,
+        CycleTypeormEntity,
+        IssueTypeormEntity,
+        CommentTypeormEntity,
+        StoryTypeormEntity,
       ],
       CAPITAL_DATABASE_CONNECTION
     ), // Указываем connection name

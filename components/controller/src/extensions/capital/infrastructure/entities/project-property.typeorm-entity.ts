@@ -22,22 +22,22 @@ export class ProjectPropertyTypeormEntity {
   present!: boolean;
 
   // Поля из блокчейна (project_properties.hpp)
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar' })
   coopname!: string;
 
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar' })
   username!: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar' })
   blockchain_status!: string;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar' })
   project_hash!: string;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar' })
   property_hash!: string;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar' })
   property_amount!: string;
 
   @Column({ type: 'text' })

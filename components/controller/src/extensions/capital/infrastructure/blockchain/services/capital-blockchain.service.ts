@@ -1,0 +1,482 @@
+import { Injectable } from '@nestjs/common';
+import { CapitalContract } from 'cooptypes';
+import { CapitalBlockchainPort } from '../../../domain/interfaces/capital-blockchain.port';
+import type { TransactResult } from '@wharfkit/session';
+import { BlockchainService } from '~/infrastructure/blockchain/blockchain.service';
+import Vault from '~/models/vault.model';
+import httpStatus from 'http-status';
+import { HttpApiError } from '~/errors/http-api-error';
+
+/**
+ * Инфраструктурный сервис для реализации блокчейн порта CAPITAL
+ * Осуществляет взаимодействие с блокчейном через BlockchainService
+ */
+@Injectable()
+export class CapitalBlockchainService implements CapitalBlockchainPort {
+  constructor(private readonly blockchainService: BlockchainService) {}
+
+  /**
+   * Установка конфигурации CAPITAL контракта
+   */
+  async setConfig(data: CapitalContract.Actions.SetConfig.ISetConfig): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.SetConfig.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Импорт вкладчика в CAPITAL контракт
+   */
+  async importContributor(data: CapitalContract.Actions.ImportContributor.IImportContributor): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.ImportContributor.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Создание проекта в CAPITAL контракте
+   */
+  async createProject(data: CapitalContract.Actions.CreateProject.ICreateProject): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CreateProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Регистрация вкладчика в CAPITAL контракте
+   */
+  async registerContributor(
+    data: CapitalContract.Actions.RegisterContributor.IRegisterContributor
+  ): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.RegisterContributor.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Подписание приложения в CAPITAL контракте
+   */
+  async makeClearance(data: CapitalContract.Actions.GetClearance.IGetClearance): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.GetClearance.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Создание коммита в CAPITAL контракте
+   */
+  async createCommit(data: CapitalContract.Actions.CreateCommit.ICommit): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CreateCommit.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Обновление сегмента в CAPITAL контракте
+   */
+  async refreshSegment(data: CapitalContract.Actions.RefreshSegment.IRefreshSegment): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.RefreshSegment.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Инвестирование в проект CAPITAL контракта
+   */
+  async createProjectInvest(data: CapitalContract.Actions.CreateProjectInvest.ICreateInvest): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CreateProjectInvest.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Создание долга в CAPITAL контракте
+   */
+  async createDebt(data: CapitalContract.Actions.CreateDebt.ICreateDebt): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CreateDebt.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Создание проектного имущественного взноса в CAPITAL контракте
+   */
+  async createProjectProperty(
+    data: CapitalContract.Actions.CreateProjectProperty.ICreateProjectProperty
+  ): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CreateProjectProperty.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Создание программного имущественного взноса в CAPITAL контракте
+   */
+  async createProgramProperty(
+    data: CapitalContract.Actions.CreateProgramProperty.ICreateProgramProperty
+  ): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CreateProgramProperty.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Запуск голосования в CAPITAL контракте
+   */
+  async startVoting(data: CapitalContract.Actions.StartVoting.IStartVoting): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.StartVoting.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Голосование в CAPITAL контракте
+   */
+  async submitVote(data: CapitalContract.Actions.SubmitVote.ISubmitVote): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.SubmitVote.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Завершение голосования в CAPITAL контракте
+   */
+  async completeVoting(data: CapitalContract.Actions.CompleteVoting.ICompleteVoting): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CompleteVoting.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Расчет голосов в CAPITAL контракте
+   */
+  async calculateVotes(data: CapitalContract.Actions.CalculateVotes.IFinalVoting): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CalculateVotes.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Внесение результата в CAPITAL контракте
+   */
+  async pushResult(data: CapitalContract.Actions.PushResult.IPushResult): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.PushResult.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Конвертация сегмента в CAPITAL контракте
+   */
+  async convertSegment(data: CapitalContract.Actions.ConvertSegment.IConvertSegment): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.ConvertSegment.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Финансирование программы в CAPITAL контракте
+   */
+  async fundProgram(data: CapitalContract.Actions.FundProgram.IFundProgram): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.FundProgram.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Финансирование проекта в CAPITAL контракте
+   */
+  async fundProject(data: CapitalContract.Actions.FundProject.IFundProject): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.FundProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Обновление CRPS пайщика в программе CAPITAL контракта
+   */
+  async refreshProgram(data: CapitalContract.Actions.RefreshProgram.IRefreshProgram): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.RefreshProgram.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Обновление CRPS пайщика в проекте CAPITAL контракта
+   */
+  async refreshProject(data: CapitalContract.Actions.RefreshProject.IRefreshProject): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.RefreshProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Установка мастера проекта CAPITAL контракта
+   */
+  async setMaster(data: CapitalContract.Actions.SetMaster.ISetMaster): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.SetMaster.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Добавление автора проекта CAPITAL контракта
+   */
+  async addAuthor(data: CapitalContract.Actions.AddAuthor.IAddAuthor): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.AddAuthor.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Установка плана проекта CAPITAL контракта
+   */
+  async setPlan(data: CapitalContract.Actions.SetPlan.ISetPlan): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.SetPlan.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Запуск проекта CAPITAL контракта
+   */
+  async startProject(data: CapitalContract.Actions.StartProject.IStartProject): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.StartProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Открытие проекта для инвестиций CAPITAL контракта
+   */
+  async openProject(data: CapitalContract.Actions.OpenProject.IOpenProject): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.OpenProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Удаление проекта CAPITAL контракта
+   */
+  async deleteProject(data: CapitalContract.Actions.DeleteProject.IDeleteProject): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.DeleteProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+}

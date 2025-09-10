@@ -15,6 +15,10 @@ import { ProgramWithdrawTypeormRepository } from './infrastructure/repositories/
 import { ProjectPropertyTypeormRepository } from './infrastructure/repositories/project-property.typeorm-repository';
 import { ProgramWalletTypeormRepository } from './infrastructure/repositories/program-wallet.typeorm-repository';
 import { ProjectWalletTypeormRepository } from './infrastructure/repositories/project-wallet.typeorm-repository';
+import { CycleTypeormRepository } from './infrastructure/repositories/cycle.typeorm-repository';
+import { IssueTypeormRepository } from './infrastructure/repositories/issue.typeorm-repository';
+import { CommentTypeormRepository } from './infrastructure/repositories/comment.typeorm-repository';
+import { StoryTypeormRepository } from './infrastructure/repositories/story.typeorm-repository';
 
 // Blockchain синхронизация
 import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
@@ -40,6 +44,10 @@ import { CapitalSyncInteractor } from './domain/interactors/capital-sync.interac
 // Services
 import { CapitalContractInfoService } from './infrastructure/services/capital-contract-info.service';
 
+// CAPITAL Application Dependencies
+import { CapitalBlockchainService } from './infrastructure/blockchain/services/capital-blockchain.service';
+import { CAPITAL_BLOCKCHAIN_PORT } from './domain/interfaces/capital-blockchain.port';
+
 // Символы для DI
 import { PROJECT_REPOSITORY } from './domain/repositories/project.repository';
 import { CONTRIBUTOR_REPOSITORY } from './domain/repositories/contributor.repository';
@@ -50,8 +58,35 @@ import { PROGRAM_WITHDRAW_REPOSITORY } from './domain/repositories/program-withd
 import { PROJECT_PROPERTY_REPOSITORY } from './domain/repositories/project-property.repository';
 import { PROGRAM_WALLET_REPOSITORY } from './domain/repositories/program-wallet.repository';
 import { PROJECT_WALLET_REPOSITORY } from './domain/repositories/project-wallet.repository';
+import { CYCLE_REPOSITORY } from './domain/repositories/cycle.repository';
+import { ISSUE_REPOSITORY } from './domain/repositories/issue.repository';
+import { COMMENT_REPOSITORY } from './domain/repositories/comment.repository';
+import { STORY_REPOSITORY } from './domain/repositories/story.repository';
 
 import { z } from 'zod';
+import { CapitalService } from './application/services/capital.service';
+
+import { ContractManagementResolver } from './application/resolvers/contract-management.resolver';
+import { ParticipationManagementResolver } from './application/resolvers/participation-management.resolver';
+import { ProjectManagementResolver } from './application/resolvers/project-management.resolver';
+import { GenerationResolver } from './application/resolvers/generation.resolver';
+import { InvestsManagementResolver } from './application/resolvers/invests-management.resolver';
+import { DebtManagementResolver } from './application/resolvers/debt-management.resolver';
+import { PropertyManagementResolver } from './application/resolvers/property-management.resolver';
+import { VotingResolver } from './application/resolvers/voting.resolver';
+import { ResultSubmissionResolver } from './application/resolvers/result-submission.resolver';
+import { DistributionManagementResolver } from './application/resolvers/distribution-management.resolver';
+
+import { ParticipationManagementInteractor } from './domain/interactors/participation-management.interactor';
+import { ProjectManagementInteractor } from './domain/interactors/project-management.interactor';
+import { GenerationInteractor } from './domain/interactors/generation.interactor';
+import { InvestsManagementInteractor } from './domain/interactors/invests-management.interactor';
+import { DebtManagementInteractor } from './domain/interactors/debt-management.interactor';
+import { PropertyManagementInteractor } from './domain/interactors/property-management.interactor';
+import { VotingInteractor } from './domain/interactors/voting.interactor';
+import { ResultSubmissionInteractor } from './domain/interactors/result-submission.interactor';
+import { DistributionManagementInteractor } from './domain/interactors/distribution-management.interactor';
+import { ContractManagementInteractor } from './domain/interactors/contract-management.interactor';
 
 // Конфигурация модуля
 interface ICapitalConfig {
@@ -107,6 +142,13 @@ export class CapitalPlugin extends BaseExtModule {
 
     // Services
     CapitalContractInfoService,
+    CapitalService,
+
+    // CAPITAL Application Layer Dependencies
+    {
+      provide: CAPITAL_BLOCKCHAIN_PORT,
+      useClass: CapitalBlockchainService,
+    },
 
     // Blockchain Sync Services
     ProjectDeltaMapper,
@@ -127,8 +169,27 @@ export class CapitalPlugin extends BaseExtModule {
     ProgramWalletSyncService,
     ProjectWalletDeltaMapper,
     ProjectWalletSyncService,
-
+    ContractManagementResolver,
+    ParticipationManagementResolver,
+    ProjectManagementResolver,
+    GenerationResolver,
+    InvestsManagementResolver,
+    DebtManagementResolver,
+    PropertyManagementResolver,
+    VotingResolver,
+    ResultSubmissionResolver,
+    DistributionManagementResolver,
     // Domain Interactors
+    ContractManagementInteractor,
+    ParticipationManagementInteractor,
+    ProjectManagementInteractor,
+    GenerationInteractor,
+    InvestsManagementInteractor,
+    DebtManagementInteractor,
+    PropertyManagementInteractor,
+    VotingInteractor,
+    ResultSubmissionInteractor,
+    DistributionManagementInteractor,
     CapitalSyncInteractor,
 
     // Repositories
@@ -167,6 +228,22 @@ export class CapitalPlugin extends BaseExtModule {
     {
       provide: PROJECT_WALLET_REPOSITORY,
       useClass: ProjectWalletTypeormRepository,
+    },
+    {
+      provide: CYCLE_REPOSITORY,
+      useClass: CycleTypeormRepository,
+    },
+    {
+      provide: ISSUE_REPOSITORY,
+      useClass: IssueTypeormRepository,
+    },
+    {
+      provide: COMMENT_REPOSITORY,
+      useClass: CommentTypeormRepository,
+    },
+    {
+      provide: STORY_REPOSITORY,
+      useClass: StoryTypeormRepository,
     },
   ],
   exports: [CapitalPlugin],

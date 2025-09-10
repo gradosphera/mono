@@ -1,6 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index, OneToMany } from 'typeorm';
 import { ProjectStatus } from '../../domain/enums/project-status.enum';
 import { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/project-blockchain.interface';
+import { IssueTypeormEntity } from './issue.typeorm-entity';
+import { StoryTypeormEntity } from './story.typeorm-entity';
 
 const EntityName = 'capital_projects';
 @Entity(EntityName)
@@ -25,7 +27,7 @@ export class ProjectTypeormEntity {
   @Column({ type: 'varchar', length: 12 })
   coopname!: string;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar', length: 64, unique: true })
   project_hash!: string;
 
   @Column({ type: 'varchar', length: 64, nullable: true })
@@ -83,4 +85,11 @@ export class ProjectTypeormEntity {
     default: ProjectStatus.PENDING,
   })
   status!: ProjectStatus;
+
+  // Связи
+  @OneToMany(() => IssueTypeormEntity, (issue) => issue.project, { cascade: true })
+  issues!: IssueTypeormEntity[];
+
+  @OneToMany(() => StoryTypeormEntity, (story) => story.project, { cascade: true })
+  stories!: StoryTypeormEntity[];
 }

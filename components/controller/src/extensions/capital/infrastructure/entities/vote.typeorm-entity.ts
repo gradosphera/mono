@@ -20,13 +20,13 @@ export class VoteTypeormEntity {
   present!: boolean;
 
   // Поля из блокчейна (votes.hpp)
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar' })
   project_hash!: string;
 
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar' })
   voter!: string;
 
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar' })
   recipient!: string;
 
   @Column({ type: 'bigint' })

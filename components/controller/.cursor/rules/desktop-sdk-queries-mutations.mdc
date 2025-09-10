@@ -1,0 +1,41 @@
+---
+description: SDK мутации и запросы для подключения на рабочем столе
+globs: 
+alwaysApply: false
+---
+
+Бэкенд реализован здесь components/controller, sdk здесь components/sdk. 
+
+Пример создания Query к API через SDK: 
+
+``` ts
+async function loadBranches(data: IGetBranchesInput): Promise<IBranch[]> {
+  const { [Queries.Branches.GetBranches.name]: output } = await client.Query(
+    Queries.Branches.GetBranches.query,
+    {
+      variables: {
+        data
+      }
+    }
+  );
+  return output;
+}
+```
+
+Такие запросы обычно хранятся в папке Entities и вызываются из его store. 
+
+Пример мутации:
+
+``` ts
+async function selectBranch(data: ISelectBranchInput): Promise<boolean>{
+  const {[Mutations.Branches.SelectBranch.name]: result} = await client.Mutation(Mutations.Branches.SelectBranch.mutation, {variables: {
+    data
+  }})
+
+  return result
+}
+```
+
+Мутации обычно храним в папке features. 
+
+Как можешь обратить внимание, все мутации и запросы строятся по одному шаблону. Вся необходимая информация уже есть в SDK. 

@@ -19,22 +19,22 @@ export class ProjectWalletTypeormEntity {
   present!: boolean;
 
   // Поля из блокчейна (wallets.hpp)
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar' })
   coopname!: string;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar' })
   project_hash!: string;
 
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar' })
   username!: string;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar' })
   shares!: string;
 
   @Column({ type: 'float' })
   last_membership_reward_per_share!: number;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar' })
   membership_available!: string;
 
   @CreateDateColumn({ type: 'timestamp' })
