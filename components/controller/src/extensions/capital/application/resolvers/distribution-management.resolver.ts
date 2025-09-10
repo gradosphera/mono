@@ -20,7 +20,7 @@ export class DistributionManagementResolver {
    * Мутация для финансирования программы CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'fundCapitalProgram',
+    name: 'capitalFundProgram',
     description: 'Финансирование программы CAPITAL контракта',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -34,7 +34,7 @@ export class DistributionManagementResolver {
    * Мутация для финансирования проекта CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'fundCapitalProject',
+    name: 'capitalFundProject',
     description: 'Финансирование проекта CAPITAL контракта',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -48,7 +48,7 @@ export class DistributionManagementResolver {
    * Мутация для обновления CRPS пайщика в программе CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'refreshCapitalProgram',
+    name: 'capitalRefreshProgram',
     description: 'Обновление CRPS пайщика в программе CAPITAL контракта',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -64,7 +64,7 @@ export class DistributionManagementResolver {
    * Мутация для обновления CRPS пайщика в проекте CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'refreshCapitalProject',
+    name: 'capitalRefreshProject',
     description: 'Обновление CRPS пайщика в проекте CAPITAL контракта',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

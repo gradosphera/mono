@@ -18,7 +18,7 @@ export class ContractManagementResolver {
    * Мутация для установки конфигурации CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'setCapitalConfig',
+    name: 'capitalSetConfig',
     description: 'Установка конфигурации CAPITAL контракта',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -32,7 +32,7 @@ export class ContractManagementResolver {
    * Мутация для создания проекта в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'createCapitalProject',
+    name: 'capitalCreateProject',
     description: 'Создание проекта в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

@@ -24,7 +24,7 @@ export class ProjectManagementResolver {
    * Мутация для установки мастера проекта CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'setCapitalMaster',
+    name: 'capitalSetMaster',
     description: 'Установка мастера проекта в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -38,7 +38,7 @@ export class ProjectManagementResolver {
    * Мутация для добавления автора проекта CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'addCapitalAuthor',
+    name: 'capitalAddAuthor',
     description: 'Добавление автора проекта в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -52,7 +52,7 @@ export class ProjectManagementResolver {
    * Мутация для установки плана проекта CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'setCapitalPlan',
+    name: 'capitalSetPlan',
     description: 'Установка плана проекта в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -66,7 +66,7 @@ export class ProjectManagementResolver {
    * Мутация для запуска проекта CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'startCapitalProject',
+    name: 'capitalStartProject',
     description: 'Запуск проекта в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -82,7 +82,7 @@ export class ProjectManagementResolver {
    * Мутация для открытия проекта для инвестиций CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'openCapitalProject',
+    name: 'capitalOpenProject',
     description: 'Открытие проекта для инвестиций в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -96,7 +96,7 @@ export class ProjectManagementResolver {
    * Мутация для удаления проекта CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'deleteCapitalProject',
+    name: 'capitalDeleteProject',
     description: 'Удаление проекта в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

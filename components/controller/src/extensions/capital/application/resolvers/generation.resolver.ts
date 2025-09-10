@@ -18,7 +18,7 @@ export class GenerationResolver {
    * Мутация для создания коммита в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'createCapitalCommit',
+    name: 'capitalCreateCommit',
     description: 'Создание коммита в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -34,7 +34,7 @@ export class GenerationResolver {
    * Мутация для обновления сегмента в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'refreshCapitalSegment',
+    name: 'capitalRefreshSegment',
     description: 'Обновление сегмента в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

@@ -17,7 +17,7 @@ export class InvestsManagementResolver {
    * Мутация для инвестирования в проект CAPITAL контракта
    */
   @Mutation(() => String, {
-    name: 'createCapitalProjectInvest',
+    name: 'capitalCreateProjectInvest',
     description: 'Инвестирование в проект CAPITAL контракта',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

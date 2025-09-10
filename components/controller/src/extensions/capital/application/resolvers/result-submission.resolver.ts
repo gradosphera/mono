@@ -18,7 +18,7 @@ export class ResultSubmissionResolver {
    * Мутация для внесения результата в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'pushCapitalResult',
+    name: 'capitalPushResult',
     description: 'Внесение результата в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -32,7 +32,7 @@ export class ResultSubmissionResolver {
    * Мутация для конвертации сегмента в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'convertCapitalSegment',
+    name: 'capitalConvertSegment',
     description: 'Конвертация сегмента в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

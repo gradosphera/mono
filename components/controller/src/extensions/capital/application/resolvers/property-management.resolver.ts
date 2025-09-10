@@ -18,7 +18,7 @@ export class PropertyManagementResolver {
    * Мутация для создания проектного имущественного взноса в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'createCapitalProjectProperty',
+    name: 'capitalCreateProjectProperty',
     description: 'Создание проектного имущественного взноса в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -34,7 +34,7 @@ export class PropertyManagementResolver {
    * Мутация для создания программного имущественного взноса в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'createCapitalProgramProperty',
+    name: 'capitalCreateProgramProperty',
     description: 'Создание программного имущественного взноса в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

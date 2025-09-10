@@ -20,12 +20,12 @@ export class VotingResolver {
    * Мутация для запуска голосования в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'startCapitalVoting',
+    name: 'capitalStartVoting',
     description: 'Запуск голосования в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
-  async startCapitalVoting(@Args('data', { type: () => StartVotingInputDTO }) data: StartVotingInputDTO): Promise<string> {
+  async StartVoting(@Args('data', { type: () => StartVotingInputDTO }) data: StartVotingInputDTO): Promise<string> {
     const result = await this.capitalService.startVoting(data);
     return result.resolved?.transaction?.id?.toString() || 'неизвестно';
   }
@@ -34,7 +34,7 @@ export class VotingResolver {
    * Мутация для голосования в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'submitCapitalVote',
+    name: 'capitalSubmitVote',
     description: 'Голосование в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -48,7 +48,7 @@ export class VotingResolver {
    * Мутация для завершения голосования в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'completeCapitalVoting',
+    name: 'capitalCompleteVoting',
     description: 'Завершение голосования в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -64,7 +64,7 @@ export class VotingResolver {
    * Мутация для расчета голосов в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'calculateCapitalVotes',
+    name: 'capitalCalculateVotes',
     description: 'Расчет голосов в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

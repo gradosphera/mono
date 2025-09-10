@@ -19,7 +19,7 @@ export class ParticipationManagementResolver {
    * Мутация для регистрации вкладчика в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'registerCapitalContributor',
+    name: 'capitalRegisterContributor',
     description: 'Регистрация вкладчика в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -35,7 +35,7 @@ export class ParticipationManagementResolver {
    * Мутация для импорта вкладчика в CAPITAL контракт
    */
   @Mutation(() => String, {
-    name: 'importCapitalContributor',
+    name: 'capitalImportContributor',
     description: 'Импорт вкладчика в CAPITAL контракт',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -51,7 +51,7 @@ export class ParticipationManagementResolver {
    * Мутация для подписания приложения в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'makeCapitalClearance',
+    name: 'capitalMakeClearance',
     description: 'Подписание приложения в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

@@ -17,7 +17,7 @@ export class DebtManagementResolver {
    * Мутация для получения ссуды в CAPITAL контракте
    */
   @Mutation(() => String, {
-    name: 'createCapitalDebt',
+    name: 'capitalCreateDebt',
     description: 'Получение ссуды в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
