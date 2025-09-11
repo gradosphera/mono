@@ -1,6 +1,6 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { ExpensesManagementService } from '../services/expenses-management.service';
-import { CreateExpenseInputDTO } from '../dto/expenses_management';
+import { CreateExpenseInputDTO } from '../dto/expenses_management/create-expense-input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';

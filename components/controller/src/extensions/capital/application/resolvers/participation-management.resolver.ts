@@ -10,6 +10,7 @@ import { MakeClearanceInputDTO } from '../dto/participation_management/make-clea
 import { RegisterContributorInputDTO } from '../dto/participation_management/register-contributor-input.dto';
 import { ContributorOutputDTO } from '../dto/participation_management/contributor.dto';
 import { ContributorFilterInputDTO } from '../dto/participation_management/contributor-filter.input';
+import { GetContributorInputDTO } from '../dto/participation_management/get-contributor-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 
 /**
@@ -97,7 +98,7 @@ export class ParticipationManagementResolver {
     description: 'Получение вкладчика по внутреннему ID базы данных',
     nullable: true,
   })
-  async getContributor(@Args('_id') _id: string): Promise<ContributorOutputDTO | null> {
-    return await this.participationManagementService.getContributorById(_id);
+  async getContributor(@Args('data') data: GetContributorInputDTO): Promise<ContributorOutputDTO | null> {
+    return await this.participationManagementService.getContributorById(data._id);
   }
 }

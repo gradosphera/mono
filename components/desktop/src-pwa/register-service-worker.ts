@@ -1,39 +1,124 @@
 import { register } from 'register-service-worker';
 
-console.log('=== register-service-worker.ts загружен ===');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('SERVICE_WORKER_FILE:', process.env.SERVICE_WORKER_FILE);
-console.log('ENABLE_PWA_DEV:', process.env.ENABLE_PWA_DEV);
+// Логирование только в production или при явном включении PWA в dev
+const isVerbose =
+  process.env.NODE_ENV === 'production' ||
+  process.env.ENABLE_PWA_DEV === 'true';
+
+if (isVerbose) {
+  console.log('=== register-service-worker.ts загружен ===');
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('ENABLE_PWA_DEV:', process.env.ENABLE_PWA_DEV);
+  console.log('PWA_MODE: generateSW (автоматическая генерация)');
+}
 
 // Определяем, нужно ли регистрировать Service Worker
 const shouldRegisterSW =
   process.env.NODE_ENV === 'production' ||
   process.env.ENABLE_PWA_DEV === 'true';
 
+// Объявляем глобальные переменные
+declare global {
+  interface Window {
+    applyUpdate: () => void;
+    checkForUpdate: () => void;
+  }
+}
+
 if (!shouldRegisterSW) {
-  console.log('Development режим без PWA - отключаем Service Worker');
+  if (isVerbose)
+    console.log('Development режим без PWA - отключаем Service Worker');
 
   // Отключаем существующий service worker если он есть
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(function (registrations) {
-      console.log('Найдено регистраций Service Worker:', registrations.length);
+      if (isVerbose)
+        console.log(
+          'Найдено регистраций Service Worker:',
+          registrations.length,
+        );
       for (const registration of registrations) {
-        console.log('Отключаем регистрацию:', registration);
+        if (isVerbose) console.log('Отключаем регистрацию:', registration);
         registration.unregister();
       }
     });
   }
   // Не регистрируем новый service worker
-  console.log('Service Worker не будет зарегистрирован');
+  if (isVerbose) console.log('Service Worker не будет зарегистрирован');
 } else {
-  console.log('Регистрируем Service Worker (Production или PWA в Development)');
-  console.log('Файл Service Worker:', process.env.SERVICE_WORKER_FILE);
+  if (isVerbose)
+    console.log(
+      'Регистрируем Service Worker (Production или PWA в Development)',
+    );
+  if (isVerbose)
+    console.log('Файл Service Worker: генерируется автоматически (generateSW)');
 
   // Переменная для отслеживания обновлений
   let refreshing = false;
+  let updateAvailable = false;
+  let registrationInstance: any;
 
-  // Регистрируем Service Worker
-  register(process.env.SERVICE_WORKER_FILE, {
+  // Функция для применения обновления (доступна глобально)
+  const applyUpdate = function () {
+    if (!updateAvailable || !registrationInstance) {
+      if (isVerbose)
+        console.log('Обновление не доступно или регистрация не найдена');
+      return;
+    }
+
+    if (!refreshing) {
+      refreshing = true;
+      updateAvailable = false;
+
+      if (isVerbose) console.log('Применяем обновление Service Worker...');
+
+      // Ждём активации нового Service Worker
+      if (registrationInstance.waiting) {
+        // Сообщаем новому SW что он может активироваться
+        registrationInstance.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+
+      // Слушаем событие активации нового SW (только один слушатель)
+      const handleControllerChange = () => {
+        if (refreshing) {
+          refreshing = false;
+          if (isVerbose)
+            console.log(
+              'Новый Service Worker активирован, перезагружаем страницу',
+            );
+
+          // Убираем слушатель после использования
+          navigator.serviceWorker.removeEventListener(
+            'controllerchange',
+            handleControllerChange,
+          );
+
+          // Мягкая перезагрузка с небольшой задержкой
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }
+      };
+
+      navigator.serviceWorker.addEventListener(
+        'controllerchange',
+        handleControllerChange,
+      );
+    }
+  };
+
+  // Функция для проверки доступности обновления
+  const checkForUpdate = function () {
+    if (registrationInstance) {
+      if (isVerbose) console.log('Проверяем обновления...');
+      registrationInstance.update();
+    } else {
+      if (isVerbose) console.log('Service Worker не зарегистрирован');
+    }
+  };
+
+  // Регистрируем Service Worker (указываем явный путь для SSR режима)
+  register('/service-worker.js', {
     // The registrationOptions object will be passed as the second argument
     // to ServiceWorkerContainer.register()
     // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/register#Parameter
@@ -41,24 +126,50 @@ if (!shouldRegisterSW) {
     // registrationOptions: { scope: './' },
 
     ready(registration) {
-      console.log('Service Worker готов:', registration);
+      if (isVerbose) console.log('Service Worker готов:', registration);
+      registrationInstance = registration;
     },
 
     registered(registration) {
-      console.log('Service Worker зарегистрирован:', registration);
+      if (isVerbose)
+        console.log('Service Worker зарегистрирован:', registration);
 
-      // Проверяем обновления каждые 30 секунд
-      setInterval(() => {
-        registration.update();
-      }, 30000);
+      // Проверяем обновления только при фокусе окна
+      let updateInterval;
+
+      const checkForUpdates = () => {
+        if (document.visibilityState === 'visible') {
+          registration.update();
+        }
+      };
+
+      // Проверяем обновления при фокусе окна, но не чаще чем раз в 5 минут
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          if (!updateInterval) {
+            checkForUpdates();
+            updateInterval = setTimeout(
+              () => {
+                updateInterval = null;
+              },
+              5 * 60 * 1000,
+            ); // 5 минут
+          }
+        }
+      });
     },
 
     cached(registration) {
-      console.log('Контент кэширован для офлайн использования:', registration);
+      if (isVerbose)
+        console.log(
+          'Контент кэширован для офлайн использования:',
+          registration,
+        );
     },
 
     updatefound(registration) {
-      console.log('Найдено обновление Service Worker:', registration);
+      if (isVerbose)
+        console.log('Найдено обновление Service Worker:', registration);
 
       // Показываем уведомление пользователю о доступном обновлении
       if ('Notification' in window && Notification.permission === 'granted') {
@@ -70,42 +181,51 @@ if (!shouldRegisterSW) {
     },
 
     updated(registration) {
-      console.log(
-        'Новый контент доступен, требуется перезагрузка:',
-        registration,
-      );
+      if (isVerbose)
+        console.log(
+          'Новый контент доступен, требуется обновление:',
+          registration,
+        );
 
-      // Вместо принудительной перезагрузки, обрабатываем обновление мягче
-      if (!refreshing) {
-        refreshing = true;
+      updateAvailable = true;
 
-        // Ждём активации нового Service Worker
-        if (registration.waiting) {
-          // Сообщаем новому SW что он может активироваться
-          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      // Показываем уведомление пользователю
+      if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+          new Notification('Обновление доступно', {
+            body: 'Новая версия приложения готова. Нажмите для обновления.',
+            icon: '/icons/icon-192x192.png',
+            requireInteraction: true,
+          }).onclick = () => {
+            applyUpdate();
+          };
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then((permission) => {
+            if (permission === 'granted') {
+              new Notification('Обновление доступно', {
+                body: 'Новая версия приложения готова. Нажмите для обновления.',
+                icon: '/icons/icon-192x192.png',
+                requireInteraction: true,
+              }).onclick = () => {
+                applyUpdate();
+              };
+            }
+          });
         }
-
-        // Слушаем событие активации нового SW
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (refreshing) {
-            refreshing = false;
-            console.log(
-              'Новый Service Worker активирован, перезагружаем страницу',
-            );
-
-            // Мягкая перезагрузка с небольшой задержкой
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
-          }
-        });
       }
+
+      // Также можно показать сообщение в консоли
+      if (isVerbose)
+        console.log(
+          '🔄 Обновление доступно! Вызовите applyUpdate() для применения обновления.',
+        );
     },
 
     offline() {
-      console.log(
-        'Нет подключения к интернету. Приложение работает в офлайн режиме.',
-      );
+      if (isVerbose)
+        console.log(
+          'Нет подключения к интернету. Приложение работает в офлайн режиме.',
+        );
 
       // Показываем уведомление об офлайн режиме
       if ('Notification' in window && Notification.permission === 'granted') {
@@ -120,17 +240,22 @@ if (!shouldRegisterSW) {
       console.error('Ошибка регистрации Service Worker:', err);
 
       // Если Service Worker не может быть зарегистрирован, продолжаем работу без него
-      console.log('Приложение будет работать без Service Worker');
+      if (isVerbose)
+        console.log('Приложение будет работать без Service Worker');
     },
   });
+
+  // Присваиваем функции глобальному объекту window
+  window.applyUpdate = applyUpdate;
+  window.checkForUpdate = checkForUpdate;
 
   // Обработка сообщений от Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', (event) => {
-      console.log('Сообщение от Service Worker:', event.data);
+      if (isVerbose) console.log('Сообщение от Service Worker:', event.data);
 
       if (event.data && event.data.type === 'OFFLINE_STATUS') {
-        console.log('Статус офлайн:', event.data.offline);
+        if (isVerbose) console.log('Статус офлайн:', event.data.offline);
       }
     });
   }
@@ -139,7 +264,8 @@ if (!shouldRegisterSW) {
 // Функция для проверки сетевого соединения
 function checkNetworkStatus() {
   if ('navigator' in window && 'onLine' in navigator) {
-    console.log('Статус сети:', navigator.onLine ? 'онлайн' : 'офлайн');
+    if (isVerbose)
+      console.log('Статус сети:', navigator.onLine ? 'онлайн' : 'офлайн');
 
     // Отправляем статус в Service Worker
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {

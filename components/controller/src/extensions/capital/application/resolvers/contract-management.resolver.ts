@@ -1,6 +1,6 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { ContractManagementService } from '../services/contract-management.service';
-import { SetConfigInputDTO } from '../dto/contract_management';
+import { SetConfigInputDTO } from '../dto/contract_management/set-config-input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';

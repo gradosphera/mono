@@ -211,13 +211,13 @@ module.exports = configure(function (ctx) {
     pwa: !isPWAEnabled
       ? {}
       : {
-          workboxMode: 'injectManifest', // or 'generateSW'
+          workboxMode: 'generateSW', // Генерируем service worker и manifest.json автоматически
           injectPwaMetaTags: true,
-          swFilename: 'sw.js',
+          swFilename: 'service-worker.js',
           manifestFilename: 'manifest.json',
           useCredentialsForManifestTag: false,
           useFilenameHashes: true, // Включаем хеширование файлов
-          extendInjectManifestOptions(cfg) {
+          extendGenerateSWOptions(cfg) {
             // Увеличиваем максимальный размер файла для кэширования
             cfg.maximumFileSizeToCacheInBytes = 5 * 1024 * 1024; // 5MB
             // Не включаем ревизию для определенных файлов

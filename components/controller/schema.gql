@@ -1266,6 +1266,411 @@ input CancelRequestInput {
   username: String!
 }
 
+"""Вкладчик кооператива в системе CAPITAL"""
+type CapitalContributor {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Приложения к контракту"""
+  appendixes: [String!]
+
+  """Номер блока последнего обновления"""
+  block_num: Int
+
+  """Статус из блокчейна"""
+  blockchain_status: String
+
+  """Контракт вкладчика"""
+  contract: DocumentAggregate
+
+  """Вклад как автор"""
+  contributed_as_author: Float
+
+  """Вклад как вкладчик"""
+  contributed_as_contributor: Float
+
+  """Вклад как координатор"""
+  contributed_as_coordinator: Float
+
+  """Вклад как создатель"""
+  contributed_as_creator: Float
+
+  """Вклад как инвестор"""
+  contributed_as_investor: Float
+
+  """Вклад как собственник имущества"""
+  contributed_as_propertor: Float
+
+  """Хеш вкладчика"""
+  contributor_hash: String!
+
+  """Название кооператива"""
+  coopname: String
+
+  """Дата создания"""
+  created_at: String
+
+  """Сумма долга"""
+  debt_amount: Float
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Является ли внешним контрактом"""
+  is_external_contract: Boolean
+
+  """Мемо/комментарий"""
+  memo: String
+
+  """Существует ли запись в блокчейне"""
+  present: Boolean!
+
+  """Ставка за час работы"""
+  rate_per_hour: Float
+
+  """Статус вкладчика"""
+  status: ContributorStatus!
+
+  """Имя пользователя"""
+  username: String
+}
+
+"""Параметры фильтрации для запросов вкладчиков CAPITAL"""
+input CapitalContributorFilter {
+  """Фильтр по хешу вкладчика"""
+  contributor_hash: String
+
+  """Фильтр по названию кооператива"""
+  coopname: String
+
+  """Фильтр по наличию внешнего контракта"""
+  is_external_contract: Boolean
+
+  """Фильтр по статусу вкладчика"""
+  status: ContributorStatus
+
+  """Фильтр по имени пользователя"""
+  username: String
+}
+
+"""Долг в системе CAPITAL"""
+type CapitalDebt {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Сумма долга"""
+  amount: Float
+
+  """Одобренное заявление"""
+  approved_statement: DocumentAggregate
+
+  """Протокол решения совета"""
+  authorization: DocumentAggregate
+
+  """Номер блока последнего обновления"""
+  block_num: Int
+
+  """Статус из блокчейна"""
+  blockchain_status: String
+
+  """Название кооператива"""
+  coopname: String
+
+  """Хеш долга"""
+  debt_hash: String!
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Мемо/комментарий"""
+  memo: String
+
+  """Существует ли запись в блокчейне"""
+  present: Boolean!
+
+  """Хеш проекта"""
+  project_hash: String
+
+  """Дата погашения"""
+  repaid_at: String
+
+  """Заявление на получение ссуды"""
+  statement: DocumentAggregate
+
+  """Статус долга"""
+  status: DebtStatus!
+
+  """Имя пользователя"""
+  username: String
+}
+
+"""Инвестиция в системе CAPITAL"""
+type CapitalInvest {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Сумма инвестиции"""
+  amount: Float
+
+  """Номер блока последнего обновления"""
+  block_num: Int
+
+  """Статус из блокчейна"""
+  blockchain_status: String
+
+  """Название кооператива"""
+  coopname: String
+
+  """Координатор"""
+  coordinator: String
+
+  """Сумма координатора"""
+  coordinator_amount: Float
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Хеш инвестиции"""
+  invest_hash: String!
+
+  """Дата инвестирования"""
+  invested_at: String
+
+  """Существует ли запись в блокчейне"""
+  present: Boolean!
+
+  """Хеш проекта"""
+  project_hash: String
+
+  """Заявление"""
+  statement: String
+
+  """Статус инвестиции"""
+  status: InvestStatus!
+
+  """Имя пользователя"""
+  username: String
+}
+
+"""Параметры фильтрации для запросов инвестиций CAPITAL"""
+input CapitalInvestFilter {
+  """Фильтр по названию кооператива"""
+  coopname: String
+
+  """Фильтр по координатору"""
+  coordinator: String
+
+  """Фильтр по хешу инвестиции"""
+  invest_hash: String
+
+  """Фильтр по хешу проекта"""
+  project_hash: String
+
+  """Фильтр по статусу инвестиции"""
+  status: InvestStatus
+
+  """Фильтр по имени пользователя"""
+  username: String
+}
+
+"""Программная инвестиция в системе CAPITAL"""
+type CapitalProgramInvest {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Сумма инвестиции"""
+  amount: Float
+
+  """Номер блока последнего обновления"""
+  block_num: Int
+
+  """Статус из блокчейна"""
+  blockchain_status: String
+
+  """Название кооператива"""
+  coopname: String
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Хеш инвестиции"""
+  invest_hash: String!
+
+  """Дата инвестирования"""
+  invested_at: String
+
+  """Существует ли запись в блокчейне"""
+  present: Boolean!
+
+  """Заявление об инвестиции"""
+  statement: DocumentAggregate
+
+  """Статус программной инвестиции"""
+  status: ProgramInvestStatus!
+
+  """Имя пользователя"""
+  username: String
+}
+
+"""Проект в системе CAPITAL"""
+type CapitalProject {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Номер блока последнего обновления"""
+  block_num: Int
+
+  """Статус из блокчейна"""
+  blockchain_status: String
+
+  """Можно ли конвертировать в проект"""
+  can_convert_to_project: Boolean
+
+  """Название кооператива"""
+  coopname: String
+
+  """Дата создания"""
+  created_at: String
+
+  """Описание проекта"""
+  description: String
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Открыт ли проект"""
+  is_opened: Boolean
+
+  """Запланирован ли проект"""
+  is_planed: Boolean
+
+  """Мастер проекта"""
+  master: String
+
+  """Мета-информация проекта"""
+  meta: String
+
+  """Хеш родительского проекта"""
+  parent_hash: String
+
+  """Существует ли запись в блокчейне"""
+  present: Boolean!
+
+  """Хеш проекта"""
+  project_hash: String!
+
+  """Статус проекта"""
+  status: ProjectStatus!
+
+  """Название проекта"""
+  title: String
+}
+
+"""Параметры фильтрации для запросов проектов CAPITAL"""
+input CapitalProjectFilter {
+  """Фильтр по названию кооператива"""
+  coopname: String
+
+  """Фильтр по открытому проекту"""
+  is_opened: Boolean
+
+  """Фильтр по запланированному проекту"""
+  is_planed: Boolean
+
+  """Фильтр по мастеру проекта"""
+  master: String
+
+  """Фильтр по хешу родительского проекта"""
+  parent_hash: String
+
+  """Фильтр по хешу проекта"""
+  project_hash: String
+
+  """Фильтр по статусу проекта"""
+  status: ProjectStatus
+}
+
+"""Результат в системе CAPITAL"""
+type CapitalResult {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Акт приёма-передачи результата"""
+  act: DocumentAggregate
+
+  """Авторизация результата"""
+  authorization: DocumentAggregate
+
+  """Номер блока последнего обновления"""
+  block_num: Int
+
+  """Статус из блокчейна"""
+  blockchain_status: String
+
+  """Название кооператива"""
+  coopname: String
+
+  """Дата создания"""
+  created_at: String
+
+  """Сумма долга"""
+  debt_amount: Float
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Существует ли запись в блокчейне"""
+  present: Boolean!
+
+  """Хеш проекта"""
+  project_hash: String
+
+  """Хеш результата"""
+  result_hash: String!
+
+  """Заявление на внесение результата интеллектуальной деятельности"""
+  statement: DocumentAggregate
+
+  """Статус результата"""
+  status: ResultStatus!
+
+  """Общая сумма"""
+  total_amount: Float
+
+  """Имя пользователя"""
+  username: String
+}
+
+"""Голос в системе CAPITAL"""
+type CapitalVote {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Количество голосов"""
+  amount: Float
+
+  """Номер блока последнего обновления"""
+  block_num: Int
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Существует ли запись в блокчейне"""
+  present: Boolean!
+
+  """Хеш проекта"""
+  project_hash: String
+
+  """Получатель"""
+  recipient: String
+
+  """Дата голосования"""
+  voted_at: String
+
+  """Голосующий"""
+  voter: String
+}
+
 type ChartOfAccountsItem {
   """Доступные средства"""
   available: String!
@@ -1384,32 +1789,13 @@ type ContactsDTO {
   phone: String!
 }
 
-input ContractDocumentInput {
-  """Хэш подписи"""
-  hash: String!
-
-  """Время подписи"""
-  signed_at: String!
-
-  """Подписывающий"""
-  signer: String!
-
-  """Тип подписи"""
-  type: String!
-}
-
-input ContractInput {
-  """Содержимое контракта"""
-  content: String!
-
-  """Хэш контракта"""
-  hash: String!
-
-  """Подписи контракта"""
-  signatures: [ContractDocumentInput!]!
-
-  """Заголовок контракта"""
-  title: String!
+"""Статус вкладчика в системе CAPITAL"""
+enum ContributorStatus {
+  ACTIVE
+  APPROVED
+  INACTIVE
+  PENDING
+  UNDEFINED
 }
 
 input ConvertSegmentInput {
@@ -1420,7 +1806,7 @@ input ConvertSegmentInput {
   convert_hash: String!
 
   """Заявление"""
-  convert_statement: ContractInput!
+  convert_statement: SignedDigitalDocumentInput!
 
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -1657,8 +2043,8 @@ input CreateDebtInput {
   """Дата возврата"""
   repaid_at: String!
 
-  """Заявление"""
-  statement: ContractInput!
+  """Заявление на получение ссуды"""
+  statement: SignedDigitalDocumentInput!
 
   """Имя пользователя"""
   username: String!
@@ -1705,6 +2091,29 @@ input CreateEntrepreneurDataInput {
 
   """Телефон"""
   phone: String!
+}
+
+input CreateExpenseInput {
+  """Сумма расхода"""
+  amount: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Создатель расхода"""
+  creator: String!
+
+  """Описание расхода"""
+  description: String!
+
+  """Хэш расхода"""
+  expense_hash: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Служебная записка о расходе"""
+  statement: SignedDigitalDocumentInput!
 }
 
 input CreateIndividualDataInput {
@@ -1815,7 +2224,7 @@ input CreateProgramPropertyInput {
   property_hash: String!
 
   """Заявление"""
-  statement: ContractInput!
+  statement: SignedDigitalDocumentInput!
 
   """Имя пользователя"""
   username: String!
@@ -1866,7 +2275,7 @@ input CreateProjectInvestInput {
   project_hash: String!
 
   """Заявление на инвестирование"""
-  statement: ContractInput!
+  statement: SignedDigitalDocumentInput!
 
   """Имя инвестора"""
   username: String!
@@ -1961,6 +2370,27 @@ scalar DateTime
 input DeactivateSubscriptionInput {
   """ID подписки для деактивации"""
   subscriptionId: String!
+}
+
+input DebtFilter {
+  """Фильтр по хешу проекта"""
+  projectHash: String
+
+  """Фильтр по статусу долга"""
+  status: String
+
+  """Фильтр по имени пользователя"""
+  username: String
+}
+
+"""Статус долга в системе CAPITAL"""
+enum DebtStatus {
+  ACTIVE
+  APPROVED
+  CANCELLED
+  PENDING
+  SETTLED
+  UNDEFINED
 }
 
 """
@@ -2570,6 +3000,16 @@ input GetBranchesInput {
   coopname: String!
 }
 
+input GetContributorInput {
+  """ID вкладчика"""
+  _id: String!
+}
+
+input GetDebtInput {
+  """ID долга"""
+  _id: String!
+}
+
 input GetDocumentsInput {
   filter: JSON!
   limit: Int
@@ -2593,6 +3033,11 @@ input GetExtensionsInput {
 
   """Фильтр по имени"""
   name: String
+}
+
+input GetInvestInput {
+  """ID инвестиции"""
+  _id: String!
 }
 
 input GetLedgerHistoryInput {
@@ -2652,9 +3097,34 @@ input GetPaymentMethodsInput {
   username: String
 }
 
+input GetProgramInvestInput {
+  """ID программной инвестиции"""
+  _id: String!
+}
+
+input GetProjectInput {
+  """ID проекта"""
+  _id: String!
+}
+
+input GetProjectWithRelationsInput {
+  """Хеш проекта"""
+  projectHash: String!
+}
+
+input GetResultInput {
+  """ID результата"""
+  _id: String!
+}
+
 input GetUserSubscriptionsInput {
   """Username пользователя"""
   username: String!
+}
+
+input GetVoteInput {
+  """ID голоса"""
+  _id: String!
 }
 
 input ImportContributorInput {
@@ -2735,6 +3205,16 @@ input Init {
 input Install {
   soviet: [SovietMemberInput!]!
   wif: String!
+}
+
+"""Статусы инвестиции в системе CAPITAL"""
+enum InvestStatus {
+  ACTIVE
+  APPROVED
+  CANCELLED
+  PENDING
+  RETURNED
+  UNDEFINED
 }
 
 """
@@ -2827,7 +3307,7 @@ input MakeClearanceInput {
   coopname: String!
 
   """Документ"""
-  document: ContractInput!
+  document: SignedDigitalDocumentInput!
 
   """Хэш проекта"""
   project_hash: String!
@@ -3166,85 +3646,88 @@ type Mutation {
   cancelRequest(data: CancelRequestInput!): Transaction!
 
   """Добавление автора проекта в CAPITAL контракте"""
-  capitalAddAuthor(data: AddAuthorInput!): String!
+  capitalAddAuthor(data: AddAuthorInput!): Transaction!
 
   """Расчет голосов в CAPITAL контракте"""
-  capitalCalculateVotes(data: CalculateVotesInput!): String!
+  capitalCalculateVotes(data: CalculateVotesInput!): Transaction!
 
   """Завершение голосования в CAPITAL контракте"""
-  capitalCompleteVoting(data: CompleteVotingInput!): String!
+  capitalCompleteVoting(data: CompleteVotingInput!): Transaction!
 
   """Конвертация сегмента в CAPITAL контракте"""
-  capitalConvertSegment(data: ConvertSegmentInput!): String!
+  capitalConvertSegment(data: ConvertSegmentInput!): Transaction!
 
   """Создание коммита в CAPITAL контракте"""
-  capitalCreateCommit(data: CreateCommitInput!): String!
+  capitalCreateCommit(data: CreateCommitInput!): Transaction!
 
   """Получение ссуды в CAPITAL контракте"""
-  capitalCreateDebt(data: CreateDebtInput!): String!
+  capitalCreateDebt(data: CreateDebtInput!): Transaction!
+
+  """Создание расхода в CAPITAL контракте"""
+  capitalCreateExpense(data: CreateExpenseInput!): Transaction!
 
   """Создание программного имущественного взноса в CAPITAL контракте"""
-  capitalCreateProgramProperty(data: CreateProgramPropertyInput!): String!
+  capitalCreateProgramProperty(data: CreateProgramPropertyInput!): Transaction!
 
   """Создание проекта в CAPITAL контракте"""
-  capitalCreateProject(data: CreateProjectInput!): String!
+  capitalCreateProject(data: CreateProjectInput!): Transaction!
 
   """Инвестирование в проект CAPITAL контракта"""
-  capitalCreateProjectInvest(data: CreateProjectInvestInput!): String!
+  capitalCreateProjectInvest(data: CreateProjectInvestInput!): Transaction!
 
   """Создание проектного имущественного взноса в CAPITAL контракте"""
-  capitalCreateProjectProperty(data: CreateProjectPropertyInput!): String!
+  capitalCreateProjectProperty(data: CreateProjectPropertyInput!): Transaction!
 
   """Удаление проекта в CAPITAL контракте"""
-  capitalDeleteProject(data: DeleteProjectInput!): String!
+  capitalDeleteProject(data: DeleteProjectInput!): Transaction!
 
   """Финансирование программы CAPITAL контракта"""
-  capitalFundProgram(data: FundProgramInput!): String!
+  capitalFundProgram(data: FundProgramInput!): Transaction!
 
   """Финансирование проекта CAPITAL контракта"""
-  capitalFundProject(data: FundProjectInput!): String!
+  capitalFundProject(data: FundProjectInput!): Transaction!
 
   """Импорт вкладчика в CAPITAL контракт"""
-  capitalImportContributor(data: ImportContributorInput!): String!
+  capitalImportContributor(data: ImportContributorInput!): Transaction!
 
   """Подписание приложения в CAPITAL контракте"""
-  capitalMakeClearance(data: MakeClearanceInput!): String!
+  capitalMakeClearance(data: MakeClearanceInput!): Transaction!
 
   """Открытие проекта для инвестиций в CAPITAL контракте"""
-  capitalOpenProject(data: OpenProjectInput!): String!
+  capitalOpenProject(data: OpenProjectInput!): Transaction!
 
   """Внесение результата в CAPITAL контракте"""
-  capitalPushResult(data: PushResultInput!): String!
+  capitalPushResult(data: PushResultInput!): Transaction!
 
   """Обновление CRPS пайщика в программе CAPITAL контракта"""
-  capitalRefreshProgram(data: RefreshProgramInput!): String!
+  capitalRefreshProgram(data: RefreshProgramInput!): Transaction!
 
   """Обновление CRPS пайщика в проекте CAPITAL контракта"""
-  capitalRefreshProject(data: RefreshProjectInput!): String!
+  capitalRefreshProject(data: RefreshProjectInput!): Transaction!
 
   """Обновление сегмента в CAPITAL контракте"""
-  capitalRefreshSegment(data: RefreshSegmentInput!): String!
+  capitalRefreshSegment(data: RefreshSegmentInput!): Transaction!
 
   """Регистрация вкладчика в CAPITAL контракте"""
-  capitalRegisterContributor(data: RegisterContributorInput!): String!
+  capitalRegisterContributor(data: RegisterContributorInput!): Transaction!
 
   """Установка конфигурации CAPITAL контракта"""
-  capitalSetConfig(data: SetConfigInput!): String!
+  capitalSetConfig(data: SetConfigInput!): Transaction!
 
   """Установка мастера проекта в CAPITAL контракте"""
-  capitalSetMaster(data: SetMasterInput!): String!
+  capitalSetMaster(data: SetMasterInput!): Transaction!
 
   """Установка плана проекта в CAPITAL контракте"""
-  capitalSetPlan(data: SetPlanInput!): String!
+  capitalSetPlan(data: SetPlanInput!): Transaction!
 
   """Запуск проекта в CAPITAL контракте"""
-  capitalStartProject(data: StartProjectInput!): String!
+  capitalStartProject(data: StartProjectInput!): Transaction!
 
   """Запуск голосования в CAPITAL контракте"""
-  capitalStartVoting(data: StartVotingInput!): String!
+  capitalStartVoting(data: StartVotingInput!): Transaction!
 
   """Голосование в CAPITAL контракте"""
-  capitalSubmitVote(data: SubmitVoteInput!): String!
+  capitalSubmitVote(data: SubmitVoteInput!): Transaction!
 
   """Завершить заявку по истечению гарантийного срока"""
   completeRequest(data: CompleteRequestInput!): Transaction!
@@ -3606,6 +4089,104 @@ enum OrganizationType {
   PAO
   PRODCOOP
   ZAO
+}
+
+type PaginatedCapitalContributorsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalContributor!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalDebtsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalDebt!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalInvestsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalInvest!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalProgramInvestsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalProgramInvest!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalProjectsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalProject!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalResultsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalResult!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalVotesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalVote!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
 }
 
 type PaginatedGatewayPaymentsPaginationResult {
@@ -4003,6 +4584,12 @@ type PrivateAccountSearchResult {
   type: String!
 }
 
+"""Статус программной инвестиции в системе CAPITAL"""
+enum ProgramInvestStatus {
+  CREATED
+  UNDEFINED
+}
+
 input ProhibitRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -4110,6 +4697,16 @@ input ProjectFreeDecisionSignedMetaDocumentInput {
   version: String!
 }
 
+"""Статусы проекта в системе CAPITAL"""
+enum ProjectStatus {
+  ACTIVE
+  CLOSED
+  COMPLETED
+  PENDING
+  UNDEFINED
+  VOTING
+}
+
 type PublicChairman {
   first_name: String!
   last_name: String!
@@ -4161,13 +4758,58 @@ input PushResultInput {
   result_hash: String!
 
   """Заявление"""
-  statement: ContractInput!
+  statement: SignedDigitalDocumentInput!
 
   """Имя пользователя"""
   username: String!
 }
 
 type Query {
+  """Получение вкладчика по внутреннему ID базы данных"""
+  capitalContributor(data: GetContributorInput!): CapitalContributor
+
+  """Получение списка вкладчиков кооператива с фильтрацией"""
+  capitalContributors(filter: CapitalContributorFilter, options: PaginationInput): PaginatedCapitalContributorsPaginationResult!
+
+  """Получение долга по внутреннему ID базы данных"""
+  capitalDebt(data: GetDebtInput!): CapitalDebt
+
+  """Получение списка долгов кооператива с фильтрацией"""
+  capitalDebts(filter: DebtFilter, options: PaginationInput): PaginatedCapitalDebtsPaginationResult!
+
+  """Получение инвестиции по внутреннему ID базы данных"""
+  capitalInvest(data: GetInvestInput!): CapitalInvest
+
+  """Получение списка инвестиций кооператива с фильтрацией"""
+  capitalInvests(filter: CapitalInvestFilter, options: PaginationInput): PaginatedCapitalInvestsPaginationResult!
+
+  """Получение программной инвестиции по внутреннему ID базы данных"""
+  capitalProgramInvest(data: GetProgramInvestInput!): CapitalProgramInvest
+
+  """Получение списка программных инвестиций кооператива с фильтрацией"""
+  capitalProgramInvests(filter: CapitalInvestFilter, options: PaginationInput): PaginatedCapitalProgramInvestsPaginationResult!
+
+  """Получение проекта по внутреннему ID базы данных"""
+  capitalProject(data: GetProjectInput!): CapitalProject
+
+  """Получение проекта с полными отношениями по хешу проекта"""
+  capitalProjectWithRelations(data: GetProjectWithRelationsInput!): CapitalProject
+
+  """Получение списка проектов кооператива с фильтрацией"""
+  capitalProjects(filter: CapitalProjectFilter, options: PaginationInput): PaginatedCapitalProjectsPaginationResult!
+
+  """Получение результата по внутреннему ID базы данных"""
+  capitalResult(data: GetResultInput!): CapitalResult
+
+  """Получение списка результатов кооператива с фильтрацией"""
+  capitalResults(filter: ResultFilter, options: PaginationInput): PaginatedCapitalResultsPaginationResult!
+
+  """Получение голоса по внутреннему ID базы данных"""
+  capitalVote(data: GetVoteInput!): CapitalVote
+
+  """Получение списка голосов кооператива с фильтрацией"""
+  capitalVotes(filter: VoteFilter, options: PaginationInput): PaginatedCapitalVotesPaginationResult!
+
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!
 
@@ -4376,7 +5018,7 @@ input RegisterAccountInput {
 
 input RegisterContributorInput {
   """Документ контракта"""
-  contract: ContractInput!
+  contract: SignedDigitalDocumentInput!
 
   """Хэш вкладчика"""
   contributor_hash: String!
@@ -4518,6 +5160,27 @@ input RestartAnnualGeneralMeetInput {
 
   """Новое предложение повестки ежегодного общего собрания"""
   newproposal: AnnualGeneralMeetingAgendaSignedDocumentInput!
+}
+
+input ResultFilter {
+  """Фильтр по хешу проекта"""
+  projectHash: String
+
+  """Фильтр по статусу результата"""
+  status: String
+
+  """Фильтр по имени пользователя"""
+  username: String
+}
+
+"""Статус результата в системе CAPITAL"""
+enum ResultStatus {
+  APPROVED
+  AUTHORIZED
+  COMPLETED
+  DECLINED
+  PENDING
+  UNDEFINED
 }
 
 input ReturnByAssetActGenerateDocumentInput {
@@ -5664,6 +6327,17 @@ input VoteDistributionInput {
 
   """Получатель голосов"""
   recipient: String!
+}
+
+input VoteFilter {
+  """Фильтр по хешу проекта"""
+  projectHash: String
+
+  """Фильтр по получателю"""
+  recipient: String
+
+  """Фильтр по имени пользователя"""
+  voter: String
 }
 
 """Пункт голосования для ежегодного общего собрания"""

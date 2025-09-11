@@ -112,6 +112,15 @@ export const AllTypesProps: Record<string,any> = {
 	CancelRequestInput:{
 
 	},
+	CapitalContributorFilter:{
+		status:"ContributorStatus"
+	},
+	CapitalInvestFilter:{
+		status:"InvestStatus"
+	},
+	CapitalProjectFilter:{
+		status:"ProjectStatus"
+	},
 	CommonRequestInput:{
 
 	},
@@ -130,14 +139,9 @@ export const AllTypesProps: Record<string,any> = {
 	ConfirmSupplyOnRequestInput:{
 		document:"AssetContributionActSignedDocumentInput"
 	},
-	ContractDocumentInput:{
-
-	},
-	ContractInput:{
-		signatures:"ContractDocumentInput"
-	},
+	ContributorStatus: "enum" as const,
 	ConvertSegmentInput:{
-		convert_statement:"ContractInput"
+		convert_statement:"SignedDigitalDocumentInput"
 	},
 	Country: "enum" as const,
 	CreateAnnualGeneralMeetInput:{
@@ -159,7 +163,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	CreateDebtInput:{
-		statement:"ContractInput"
+		statement:"SignedDigitalDocumentInput"
 	},
 	CreateDepositPaymentInput:{
 
@@ -168,6 +172,9 @@ export const AllTypesProps: Record<string,any> = {
 		bank_account:"BankAccountInput",
 		country:"Country",
 		details:"EntrepreneurDetailsInput"
+	},
+	CreateExpenseInput:{
+		statement:"SignedDigitalDocumentInput"
 	},
 	CreateIndividualDataInput:{
 		passport:"PassportInput"
@@ -185,7 +192,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	CreateProgramPropertyInput:{
-		statement:"ContractInput"
+		statement:"SignedDigitalDocumentInput"
 	},
 	CreateProjectFreeDecisionInput:{
 
@@ -194,7 +201,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	CreateProjectInvestInput:{
-		statement:"ContractInput"
+		statement:"SignedDigitalDocumentInput"
 	},
 	CreateProjectPropertyInput:{
 
@@ -209,6 +216,10 @@ export const AllTypesProps: Record<string,any> = {
 	DeactivateSubscriptionInput:{
 
 	},
+	DebtFilter:{
+
+	},
+	DebtStatus: "enum" as const,
 	DeclineRequestInput:{
 
 	},
@@ -266,10 +277,19 @@ export const AllTypesProps: Record<string,any> = {
 	GetBranchesInput:{
 
 	},
+	GetContributorInput:{
+
+	},
+	GetDebtInput:{
+
+	},
 	GetDocumentsInput:{
 		filter:"JSON"
 	},
 	GetExtensionsInput:{
+
+	},
+	GetInvestInput:{
 
 	},
 	GetLedgerHistoryInput:{
@@ -287,7 +307,22 @@ export const AllTypesProps: Record<string,any> = {
 	GetPaymentMethodsInput:{
 
 	},
+	GetProgramInvestInput:{
+
+	},
+	GetProjectInput:{
+
+	},
+	GetProjectWithRelationsInput:{
+
+	},
+	GetResultInput:{
+
+	},
 	GetUserSubscriptionsInput:{
+
+	},
+	GetVoteInput:{
 
 	},
 	ImportContributorInput:{
@@ -300,6 +335,7 @@ export const AllTypesProps: Record<string,any> = {
 	Install:{
 		soviet:"SovietMemberInput"
 	},
+	InvestStatus: "enum" as const,
 	JSON: `scalar.JSON` as const,
 	JSONObject: `scalar.JSONObject` as const,
 	LoginInput:{
@@ -309,7 +345,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	MakeClearanceInput:{
-		document:"ContractInput"
+		document:"SignedDigitalDocumentInput"
 	},
 	MetaDocumentInput:{
 
@@ -347,6 +383,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalCreateDebt:{
 			data:"CreateDebtInput"
+		},
+		capitalCreateExpense:{
+			data:"CreateExpenseInput"
 		},
 		capitalCreateProgramProperty:{
 			data:"CreateProgramPropertyInput"
@@ -693,6 +732,7 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	PaymentStatus: "enum" as const,
 	PaymentType: "enum" as const,
+	ProgramInvestStatus: "enum" as const,
 	ProhibitRequestInput:{
 
 	},
@@ -706,6 +746,7 @@ export const AllTypesProps: Record<string,any> = {
 	ProjectFreeDecisionSignedMetaDocumentInput:{
 
 	},
+	ProjectStatus: "enum" as const,
 	PublishProjectFreeDecisionInput:{
 		document:"ProjectFreeDecisionSignedDocumentInput"
 	},
@@ -713,9 +754,61 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	PushResultInput:{
-		statement:"ContractInput"
+		statement:"SignedDigitalDocumentInput"
 	},
 	Query:{
+		capitalContributor:{
+			data:"GetContributorInput"
+		},
+		capitalContributors:{
+			filter:"CapitalContributorFilter",
+			options:"PaginationInput"
+		},
+		capitalDebt:{
+			data:"GetDebtInput"
+		},
+		capitalDebts:{
+			filter:"DebtFilter",
+			options:"PaginationInput"
+		},
+		capitalInvest:{
+			data:"GetInvestInput"
+		},
+		capitalInvests:{
+			filter:"CapitalInvestFilter",
+			options:"PaginationInput"
+		},
+		capitalProgramInvest:{
+			data:"GetProgramInvestInput"
+		},
+		capitalProgramInvests:{
+			filter:"CapitalInvestFilter",
+			options:"PaginationInput"
+		},
+		capitalProject:{
+			data:"GetProjectInput"
+		},
+		capitalProjectWithRelations:{
+			data:"GetProjectWithRelationsInput"
+		},
+		capitalProjects:{
+			filter:"CapitalProjectFilter",
+			options:"PaginationInput"
+		},
+		capitalResult:{
+			data:"GetResultInput"
+		},
+		capitalResults:{
+			filter:"ResultFilter",
+			options:"PaginationInput"
+		},
+		capitalVote:{
+			data:"GetVoteInput"
+		},
+		capitalVotes:{
+			filter:"VoteFilter",
+			options:"PaginationInput"
+		},
 		getAccount:{
 			data:"GetAccountInput"
 		},
@@ -780,7 +873,7 @@ export const AllTypesProps: Record<string,any> = {
 		type:"AccountType"
 	},
 	RegisterContributorInput:{
-		contract:"ContractInput"
+		contract:"SignedDigitalDocumentInput"
 	},
 	RegisterParticipantInput:{
 		privacy_agreement:"SignedDigitalDocumentInput",
@@ -800,6 +893,10 @@ export const AllTypesProps: Record<string,any> = {
 		new_open_at:"DateTime",
 		newproposal:"AnnualGeneralMeetingAgendaSignedDocumentInput"
 	},
+	ResultFilter:{
+
+	},
+	ResultStatus: "enum" as const,
 	ReturnByAssetActGenerateDocumentInput:{
 
 	},
@@ -941,6 +1038,9 @@ export const AllTypesProps: Record<string,any> = {
 		wallet_agreement:"AgreementInput"
 	},
 	VoteDistributionInput:{
+
+	},
+	VoteFilter:{
 
 	},
 	VoteItemInput:{
@@ -1146,6 +1246,127 @@ export const ReturnTypes: Record<string,any> = {
 		trusted:"Individual",
 		trustee:"Individual",
 		type:"String"
+	},
+	CapitalContributor:{
+		_id:"String",
+		appendixes:"String",
+		block_num:"Int",
+		blockchain_status:"String",
+		contract:"DocumentAggregate",
+		contributed_as_author:"Float",
+		contributed_as_contributor:"Float",
+		contributed_as_coordinator:"Float",
+		contributed_as_creator:"Float",
+		contributed_as_investor:"Float",
+		contributed_as_propertor:"Float",
+		contributor_hash:"String",
+		coopname:"String",
+		created_at:"String",
+		debt_amount:"Float",
+		id:"Int",
+		is_external_contract:"Boolean",
+		memo:"String",
+		present:"Boolean",
+		rate_per_hour:"Float",
+		status:"ContributorStatus",
+		username:"String"
+	},
+	CapitalDebt:{
+		_id:"String",
+		amount:"Float",
+		approved_statement:"DocumentAggregate",
+		authorization:"DocumentAggregate",
+		block_num:"Int",
+		blockchain_status:"String",
+		coopname:"String",
+		debt_hash:"String",
+		id:"Int",
+		memo:"String",
+		present:"Boolean",
+		project_hash:"String",
+		repaid_at:"String",
+		statement:"DocumentAggregate",
+		status:"DebtStatus",
+		username:"String"
+	},
+	CapitalInvest:{
+		_id:"String",
+		amount:"Float",
+		block_num:"Int",
+		blockchain_status:"String",
+		coopname:"String",
+		coordinator:"String",
+		coordinator_amount:"Float",
+		id:"Int",
+		invest_hash:"String",
+		invested_at:"String",
+		present:"Boolean",
+		project_hash:"String",
+		statement:"String",
+		status:"InvestStatus",
+		username:"String"
+	},
+	CapitalProgramInvest:{
+		_id:"String",
+		amount:"Float",
+		block_num:"Int",
+		blockchain_status:"String",
+		coopname:"String",
+		id:"Int",
+		invest_hash:"String",
+		invested_at:"String",
+		present:"Boolean",
+		statement:"DocumentAggregate",
+		status:"ProgramInvestStatus",
+		username:"String"
+	},
+	CapitalProject:{
+		_id:"String",
+		block_num:"Int",
+		blockchain_status:"String",
+		can_convert_to_project:"Boolean",
+		coopname:"String",
+		created_at:"String",
+		description:"String",
+		id:"Int",
+		is_opened:"Boolean",
+		is_planed:"Boolean",
+		master:"String",
+		meta:"String",
+		parent_hash:"String",
+		present:"Boolean",
+		project_hash:"String",
+		status:"ProjectStatus",
+		title:"String"
+	},
+	CapitalResult:{
+		_id:"String",
+		act:"DocumentAggregate",
+		authorization:"DocumentAggregate",
+		block_num:"Int",
+		blockchain_status:"String",
+		coopname:"String",
+		created_at:"String",
+		debt_amount:"Float",
+		id:"Int",
+		present:"Boolean",
+		project_hash:"String",
+		result_hash:"String",
+		statement:"DocumentAggregate",
+		status:"ResultStatus",
+		total_amount:"Float",
+		username:"String"
+	},
+	CapitalVote:{
+		_id:"String",
+		amount:"Float",
+		block_num:"Int",
+		id:"Int",
+		present:"Boolean",
+		project_hash:"String",
+		recipient:"String",
+		voted_at:"String",
+		voter:"String"
 	},
 	ChartOfAccountsItem:{
 		available:"String",
@@ -1483,33 +1704,34 @@ export const ReturnTypes: Record<string,any> = {
 		addParticipant:"Account",
 		addTrustedAccount:"Branch",
 		cancelRequest:"Transaction",
-		capitalAddAuthor:"String",
-		capitalCalculateVotes:"String",
-		capitalCompleteVoting:"String",
-		capitalConvertSegment:"String",
-		capitalCreateCommit:"String",
-		capitalCreateDebt:"String",
-		capitalCreateProgramProperty:"String",
-		capitalCreateProject:"String",
-		capitalCreateProjectInvest:"String",
-		capitalCreateProjectProperty:"String",
-		capitalDeleteProject:"String",
-		capitalFundProgram:"String",
-		capitalFundProject:"String",
-		capitalImportContributor:"String",
-		capitalMakeClearance:"String",
-		capitalOpenProject:"String",
-		capitalPushResult:"String",
-		capitalRefreshProgram:"String",
-		capitalRefreshProject:"String",
-		capitalRefreshSegment:"String",
-		capitalRegisterContributor:"String",
-		capitalSetConfig:"String",
-		capitalSetMaster:"String",
-		capitalSetPlan:"String",
-		capitalStartProject:"String",
-		capitalStartVoting:"String",
-		capitalSubmitVote:"String",
+		capitalAddAuthor:"Transaction",
+		capitalCalculateVotes:"Transaction",
+		capitalCompleteVoting:"Transaction",
+		capitalConvertSegment:"Transaction",
+		capitalCreateCommit:"Transaction",
+		capitalCreateDebt:"Transaction",
+		capitalCreateExpense:"Transaction",
+		capitalCreateProgramProperty:"Transaction",
+		capitalCreateProject:"Transaction",
+		capitalCreateProjectInvest:"Transaction",
+		capitalCreateProjectProperty:"Transaction",
+		capitalDeleteProject:"Transaction",
+		capitalFundProgram:"Transaction",
+		capitalFundProject:"Transaction",
+		capitalImportContributor:"Transaction",
+		capitalMakeClearance:"Transaction",
+		capitalOpenProject:"Transaction",
+		capitalPushResult:"Transaction",
+		capitalRefreshProgram:"Transaction",
+		capitalRefreshProject:"Transaction",
+		capitalRefreshSegment:"Transaction",
+		capitalRegisterContributor:"Transaction",
+		capitalSetConfig:"Transaction",
+		capitalSetMaster:"Transaction",
+		capitalSetPlan:"Transaction",
+		capitalStartProject:"Transaction",
+		capitalStartVoting:"Transaction",
+		capitalSubmitVote:"Transaction",
 		completeRequest:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
@@ -1612,6 +1834,48 @@ export const ReturnTypes: Record<string,any> = {
 		kpp:"String",
 		ogrn:"String"
 	},
+	PaginatedCapitalContributorsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalContributor",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalDebtsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalDebt",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalInvestsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalInvest",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalProgramInvestsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalProgramInvest",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalProjectsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalProject",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalResultsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalResult",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalVotesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalVote",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedGatewayPaymentsPaginationResult:{
 		currentPage:"Int",
 		items:"GatewayPayment",
@@ -1703,6 +1967,21 @@ export const ReturnTypes: Record<string,any> = {
 		middle_name:"String"
 	},
 	Query:{
+		capitalContributor:"CapitalContributor",
+		capitalContributors:"PaginatedCapitalContributorsPaginationResult",
+		capitalDebt:"CapitalDebt",
+		capitalDebts:"PaginatedCapitalDebtsPaginationResult",
+		capitalInvest:"CapitalInvest",
+		capitalInvests:"PaginatedCapitalInvestsPaginationResult",
+		capitalProgramInvest:"CapitalProgramInvest",
+		capitalProgramInvests:"PaginatedCapitalProgramInvestsPaginationResult",
+		capitalProject:"CapitalProject",
+		capitalProjectWithRelations:"CapitalProject",
+		capitalProjects:"PaginatedCapitalProjectsPaginationResult",
+		capitalResult:"CapitalResult",
+		capitalResults:"PaginatedCapitalResultsPaginationResult",
+		capitalVote:"CapitalVote",
+		capitalVotes:"PaginatedCapitalVotesPaginationResult",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getAgenda:"AgendaWithDocuments",

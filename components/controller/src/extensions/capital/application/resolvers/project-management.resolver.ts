@@ -1,14 +1,14 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { ProjectManagementService } from '../services/project-management.service';
-import {
-  SetMasterInputDTO,
-  AddAuthorInputDTO,
-  SetPlanInputDTO,
-  StartProjectInputDTO,
-  OpenProjectInputDTO,
-  DeleteProjectInputDTO,
-  CreateProjectInputDTO,
-} from '../dto/project_management';
+import { SetMasterInputDTO } from '../dto/project_management/set-master-input.dto';
+import { AddAuthorInputDTO } from '../dto/project_management/add-author-input.dto';
+import { SetPlanInputDTO } from '../dto/project_management/set-plan-input.dto';
+import { StartProjectInputDTO } from '../dto/project_management/start-project-input.dto';
+import { OpenProjectInputDTO } from '../dto/project_management/open-project-input.dto';
+import { DeleteProjectInputDTO } from '../dto/project_management/delete-project-input.dto';
+import { CreateProjectInputDTO } from '../dto/project_management/create-project-input.dto';
+import { GetProjectInputDTO } from '../dto/project_management/get-project-input.dto';
+import { GetProjectWithRelationsInputDTO } from '../dto/project_management/get-project-with-relations-input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -156,8 +156,8 @@ export class ProjectManagementResolver {
     description: 'Получение проекта по внутреннему ID базы данных',
     nullable: true,
   })
-  async getProject(@Args('_id') _id: string): Promise<ProjectOutputDTO | null> {
-    return await this.projectManagementService.getProjectById(_id);
+  async getProject(@Args('data') data: GetProjectInputDTO): Promise<ProjectOutputDTO | null> {
+    return await this.projectManagementService.getProjectById(data._id);
   }
 
   /**
@@ -168,7 +168,7 @@ export class ProjectManagementResolver {
     description: 'Получение проекта с полными отношениями по хешу проекта',
     nullable: true,
   })
-  async getProjectWithRelations(@Args('projectHash') projectHash: string): Promise<ProjectOutputDTO | null> {
-    return await this.projectManagementService.getProjectWithRelations(projectHash);
+  async getProjectWithRelations(@Args('data') data: GetProjectWithRelationsInputDTO): Promise<ProjectOutputDTO | null> {
+    return await this.projectManagementService.getProjectWithRelations(data.projectHash);
   }
 }

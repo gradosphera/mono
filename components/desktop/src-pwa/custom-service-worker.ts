@@ -1,227 +1,116 @@
-/*
- * This file (which will be your service worker)
- * is picked up by the build system ONLY if
- * quasar.config.js > pwa > workboxMode is set to "injectManifest"
- */
+// Импортируем workbox
+import { precacheAndRoute } from 'workbox-precaching';
+import { registerRoute } from 'workbox-routing';
+import { StaleWhileRevalidate, CacheFirst } from 'workbox-strategies';
+import { ExpirationPlugin } from 'workbox-expiration';
+import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 
-// Отключаем логи workbox в development режиме
-if (process.env.NODE_ENV === 'development') {
-  self.__WB_DISABLE_DEV_LOGS = true;
+// Отключаем шумное логирование Workbox
+// Используем self.__WB_DISABLE_DEV_LOGS для отключения логирования в development
+(self as any).__WB_DISABLE_DEV_LOGS = true;
+
+// Типы для push уведомлений
+interface NotificationAction {
+  action: string;
+  title: string;
+  icon?: string;
 }
 
-// Типы для Workbox
-declare const self: ServiceWorkerGlobalScope &
-  typeof globalThis & {
-    skipWaiting: () => void;
-    __WB_MANIFEST: Array<{ url: string; revision: string }>;
-    __WB_DISABLE_DEV_LOGS: boolean;
-  };
-
-import { clientsClaim } from 'workbox-core';
-import {
-  precacheAndRoute,
-  cleanupOutdatedCaches,
-  createHandlerBoundToURL,
-} from 'workbox-precaching';
-import { registerRoute, NavigationRoute } from 'workbox-routing';
-import {
-  NetworkFirst,
-  CacheFirst,
-  StaleWhileRevalidate,
-} from 'workbox-strategies';
-
-self.skipWaiting();
-clientsClaim();
-
-// Use with precache injection
-precacheAndRoute(self.__WB_MANIFEST);
-
-// Очистка устаревших кэшей - вызываем после precacheAndRoute
-cleanupOutdatedCaches();
-
-// Улучшенная обработка ошибок сети
-const handleNetworkError = (request: Request, error: Error) => {
-  console.warn('Сетевая ошибка для:', request.url, error);
-
-  // Для API запросов возвращаем JSON с ошибкой
-  if (request.url.includes('/api/') || request.url.includes('/v1/')) {
-    return new Response(
-      JSON.stringify({
-        error: 'Network unavailable',
-        message: 'Сервер недоступен. Проверьте подключение к интернету.',
-        timestamp: new Date().toISOString(),
-      }),
-      {
-        status: 503,
-        statusText: 'Service Unavailable',
-        headers: { 'Content-Type': 'application/json' },
-      },
-    );
-  }
-
-  // Для других ресурсов возвращаем пустой ответ
-  return new Response('', {
-    status: 404,
-    statusText: 'Not Found',
-    headers: { 'Content-Type': 'text/plain' },
-  });
-};
-
-// Обработка ошибок с улучшенной логикой
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Пропускаем обработку для некоторых типов запросов
-  if (
-    request.method !== 'GET' ||
-    url.protocol === 'chrome-extension:' ||
-    url.protocol === 'moz-extension:' ||
-    (url.hostname === 'localhost' && url.port === '3000') // Пропускаем SSR сервер
-  ) {
-    return;
-  }
-
-  // Специальная обработка для .vue файлов и других проблематичных ресурсов
-  if (url.pathname.includes('.vue') || url.pathname.includes('.map')) {
-    event.respondWith(
-      fetch(request, {
-        signal: AbortSignal.timeout(10000), // 10 секунд таймаут
-      }).catch((error) => handleNetworkError(request, error)),
-    );
-    return;
-  }
-
-  // Обработка API запросов с увеличенным таймаутом
-  if (url.pathname.includes('/api/') || url.pathname.includes('/v1/')) {
-    event.respondWith(
-      fetch(request, {
-        signal: AbortSignal.timeout(15000), // 15 секунд для API
-      }).catch((error) => handleNetworkError(request, error)),
-    );
-    return;
-  }
-});
-
-// Специальные маршруты для конфигурационных файлов с увеличенным таймаутом
-registerRoute(
-  ({ url }) =>
-    url.pathname === '/config.js' || url.pathname === '/config.default.js',
-  new NetworkFirst({
-    cacheName: 'config-cache',
-    networkTimeoutSeconds: 10, // Увеличиваем таймаут до 10 секунд
-    plugins: [
-      {
-        cacheKeyWillBeUsed: async ({ request }) => {
-          // Добавляем timestamp чтобы избежать кэширования
-          const url = new URL(request.url);
-          url.searchParams.set('t', Date.now().toString());
-          return url.toString();
-        },
-        fetchDidFail: async ({ error }) => {
-          console.error('Ошибка загрузки конфигурации:', error);
-          // fetchDidFail не должен возвращать Response, только логировать
-        },
-      },
-    ],
-  }),
-);
-
-// Стратегия кэширования для статических ресурсов
-registerRoute(
-  ({ url }) => {
-    return url.pathname.match(
-      /\.(js|css|png|jpg|jpeg|svg|gif|ico|woff|woff2|ttf|eot)$/,
-    );
-  },
-  new CacheFirst({
-    cacheName: 'static-resources',
-    plugins: [
-      {
-        cacheWillUpdate: async ({ response }) => {
-          // Кэшируем только успешные ответы
-          return response.status === 200 ? response : null;
-        },
-        fetchDidFail: async ({ request, error }) => {
-          console.warn(
-            'Ошибка загрузки статического ресурса:',
-            request.url,
-            error,
-          );
-          return null; // Позволяем Workbox обработать ошибку
-        },
-      },
-    ],
-  }),
-);
-
-// Стратегия для HTML страниц
-registerRoute(
-  ({ request }) => request.destination === 'document',
-  new StaleWhileRevalidate({
-    cacheName: 'html-cache',
-    plugins: [
-      {
-        fetchDidFail: async ({ request, error }) => {
-          console.warn('Ошибка загрузки HTML:', request.url, error);
-        },
-      },
-    ],
-  }),
-);
-
-// Non-SSR fallback to index.html
-// Production SSR fallback to offline.html (except for dev)
-if (process.env.MODE !== 'ssr' || process.env.PROD) {
-  registerRoute(
-    new NavigationRoute(
-      createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
-      {
-        denylist: [
-          // Service Worker и Workbox файлы
-          /sw\.js$/,
-          /workbox-(.)*\.js$/,
-          // Конфигурационные файлы
-          /config\.js$/,
-          /config\.default\.js$/,
-          // Все статические ресурсы
-          /\/assets\//,
-          /\.js$/,
-          /\.css$/,
-          /\.woff2?$/,
-          /\.png$/,
-          /\.jpg$/,
-          /\.jpeg$/,
-          /\.gif$/,
-          /\.svg$/,
-          /\.ico$/,
-          /\.json$/,
-          /\.xml$/,
-          /\.map$/,
-          // API routes
-          /\/api\//,
-          /\/v1\//,
-        ],
-      },
-    ),
-  );
-}
-
-// Push уведомления
 interface PushNotificationData {
   title: string;
   body: string;
   icon?: string;
   badge?: string;
-  image?: string;
-  tag?: string;
   url?: string;
-  actions?: Array<{
-    action: string;
-    title: string;
-    icon?: string;
-  }>;
+  tag?: string;
+  actions?: NotificationAction[];
 }
+
+interface PushEvent extends ExtendableEvent {
+  data: {
+    text(): string;
+    json(): any;
+  } | null;
+}
+
+// Precache all assets generated by the build process.
+precacheAndRoute((self as any).__WB_MANIFEST);
+
+// Cache images with a Cache First strategy
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'images',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 60,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+      }),
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+    ],
+  }),
+);
+
+// Cache CSS, JS, and Web Worker requests with a Stale While Revalidate strategy
+registerRoute(
+  ({ request }) =>
+    request.destination === 'style' ||
+    request.destination === 'script' ||
+    request.destination === 'worker',
+  new StaleWhileRevalidate({
+    cacheName: 'static-resources',
+  }),
+);
+
+// Cache Google Fonts with a Cache First strategy
+registerRoute(
+  ({ request }) =>
+    request.url.includes('fonts.googleapis.com') ||
+    request.url.includes('fonts.gstatic.com'),
+  new CacheFirst({
+    cacheName: 'google-fonts',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 30,
+        maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+      }),
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+    ],
+  }),
+);
+
+// Handle messages from the main thread
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// Handle service worker activation
+self.addEventListener('activate', () => {
+  // console.log отключен для уменьшения шума в консоли
+
+  // Take control of all pages immediately
+  (self as any).clients.claim();
+});
+
+// Handle service worker installation
+self.addEventListener('install', () => {
+  // console.log отключен для уменьшения шума в консоли
+
+  // Skip waiting to activate immediately
+  (self as any).skipWaiting();
+});
+
+// Handle fetch events for offline functionality
+self.addEventListener('fetch', () => {
+  // You can add custom fetch handling here if needed
+  // For now, let the default behavior handle requests
+});
 
 /**
  * Обработка входящих push уведомлений
@@ -290,58 +179,4 @@ self.addEventListener('push', (event: PushEvent) => {
     });
 
   event.waitUntil(showNotificationPromise);
-});
-
-/**
- * Обработка клика по уведомлению
- */
-self.addEventListener('notificationclick', (event: NotificationEvent) => {
-  console.log('Клик по уведомлению:', event);
-  console.log('Notification data:', event.notification.data);
-
-  // Закрываем уведомление
-  event.notification.close();
-
-  // Получаем URL для перехода
-  const urlToOpen = event.notification.data?.url || '/';
-
-  // Открываем или фокусируем окно браузера
-  const openWindow = async () => {
-    const clientList = await self.clients.matchAll({
-      type: 'window',
-      includeUncontrolled: true,
-    });
-
-    // Ищем уже открытое окно с нашим приложением
-    for (const client of clientList) {
-      if (client.url.includes(self.location.origin) && 'focus' in client) {
-        console.log('Фокусируем существующее окно');
-        await client.focus();
-        if ('navigate' in client) {
-          await (client as any).navigate(urlToOpen);
-        }
-        return;
-      }
-    }
-
-    // Если окна нет, открываем новое
-    console.log('Открываем новое окно');
-    await self.clients.openWindow(urlToOpen);
-  };
-
-  event.waitUntil(openWindow());
-});
-
-// Обработка активации Service Worker
-self.addEventListener('activate', () => {
-  console.log('Service Worker активирован');
-});
-
-// Обработка ошибок Service Worker
-self.addEventListener('error', (event) => {
-  console.error('Service Worker ошибка:', event.error);
-});
-
-self.addEventListener('unhandledrejection', (event) => {
-  console.error('Service Worker необработанная ошибка Promise:', event.reason);
 });

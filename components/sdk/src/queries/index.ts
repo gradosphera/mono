@@ -1,6 +1,7 @@
 export * as Accounts from './accounts'
 export * as Agenda from './agenda'
 export * as Branches from './branches'
+export * as Capital from './capital'
 export * as Desktop from './desktop'
 export * as Documents from './documents'
 export * as Extensions from './extensions'

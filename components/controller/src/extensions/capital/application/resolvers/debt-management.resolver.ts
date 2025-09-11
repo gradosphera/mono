@@ -8,6 +8,7 @@ import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { DebtOutputDTO } from '../dto/debt_management/debt.dto';
 import { DebtFilterInputDTO } from '../dto/debt_management/debt-filter.input';
+import { GetDebtInputDTO } from '../dto/debt_management/get-debt-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 
 // Пагинированные результаты
@@ -60,7 +61,7 @@ export class DebtManagementResolver {
     description: 'Получение долга по внутреннему ID базы данных',
     nullable: true,
   })
-  async getDebt(@Args('_id') _id: string): Promise<DebtOutputDTO | null> {
-    return await this.debtManagementService.getDebtById(_id);
+  async getDebt(@Args('data') data: GetDebtInputDTO): Promise<DebtOutputDTO | null> {
+    return await this.debtManagementService.getDebtById(data._id);
   }
 }

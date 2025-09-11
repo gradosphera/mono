@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ExpensesManagementInteractor } from '../use-cases/expenses-management.interactor';
-import type { CreateExpenseInputDTO } from '../dto/expenses_management';
 import type { TransactResult } from '@wharfkit/session';
+import type { CreateExpenseInputDTO } from '../dto/expenses_management/create-expense-input.dto';
 
 /**
  * Сервис уровня приложения для управления расходами CAPITAL

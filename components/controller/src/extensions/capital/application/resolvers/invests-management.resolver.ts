@@ -7,6 +7,8 @@ import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { InvestFilterInputDTO } from '../dto/invests_management/invest-filter.input';
+import { GetInvestInputDTO } from '../dto/invests_management/get-invest-input.dto';
+import { GetProgramInvestInputDTO } from '../dto/invests_management/get-program-invest-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { InvestOutputDTO } from '../dto/invests_management/invest.dto';
 import { ProgramInvestOutputDTO } from '../dto/invests_management/program-invest.dto';
@@ -62,8 +64,8 @@ export class InvestsManagementResolver {
     description: 'Получение инвестиции по внутреннему ID базы данных',
     nullable: true,
   })
-  async getInvest(@Args('_id') _id: string): Promise<InvestOutputDTO | null> {
-    return await this.investsManagementService.getInvestById(_id);
+  async getInvest(@Args('data') data: GetInvestInputDTO): Promise<InvestOutputDTO | null> {
+    return await this.investsManagementService.getInvestById(data._id);
   }
 
   /**
@@ -88,7 +90,7 @@ export class InvestsManagementResolver {
     description: 'Получение программной инвестиции по внутреннему ID базы данных',
     nullable: true,
   })
-  async getProgramInvest(@Args('_id') _id: string): Promise<ProgramInvestOutputDTO | null> {
-    return await this.investsManagementService.getProgramInvestById(_id);
+  async getProgramInvest(@Args('data') data: GetProgramInvestInputDTO): Promise<ProgramInvestOutputDTO | null> {
+    return await this.investsManagementService.getProgramInvestById(data._id);
   }
 }

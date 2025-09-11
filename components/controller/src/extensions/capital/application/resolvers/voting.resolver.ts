@@ -11,6 +11,7 @@ import { StartVotingInputDTO } from '../dto/voting/start-voting-input.dto';
 import { SubmitVoteInputDTO } from '../dto/voting/submit-vote-input.dto';
 import { VoteOutputDTO } from '../dto/voting/vote.dto';
 import { VoteFilterInputDTO } from '../dto/voting/vote-filter.input';
+import { GetVoteInputDTO } from '../dto/voting/get-vote-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 
 // Пагинированные результаты
@@ -46,7 +47,9 @@ export class VotingResolver {
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['participant'])
-  async submitCapitalVote(@Args('data', { type: () => SubmitVoteInputDTO }) data: SubmitVoteInputDTO): Promise<TransactionDTO> {
+  async submitCapitalVote(
+    @Args('data', { type: () => SubmitVoteInputDTO }) data: SubmitVoteInputDTO
+  ): Promise<TransactionDTO> {
     const result = await this.votingService.submitVote(data);
     return result;
   }
@@ -107,7 +110,7 @@ export class VotingResolver {
     description: 'Получение голоса по внутреннему ID базы данных',
     nullable: true,
   })
-  async getVote(@Args('_id') _id: string): Promise<VoteOutputDTO | null> {
-    return await this.votingService.getVoteById(_id);
+  async getVote(@Args('data') data: GetVoteInputDTO): Promise<VoteOutputDTO | null> {
+    return await this.votingService.getVoteById(data._id);
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ContractManagementInteractor } from '../use-cases/contract-management.interactor';
-import type { SetConfigInputDTO } from '../dto/contract_management';
+import type { SetConfigInputDTO } from '../dto/contract_management/set-config-input.dto';
 import type { TransactResult } from '@wharfkit/session';
 
 /**

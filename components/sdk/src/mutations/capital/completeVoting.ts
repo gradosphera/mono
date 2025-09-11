@@ -1,9 +1,10 @@
+import { rawTransactionSelector } from '../../selectors'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'capitalCompleteVoting'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'CompleteVotingInput!') }, true],
+  [name]: [{ data: $('data', 'CompleteVotingInput!') }, rawTransactionSelector],
 })
 
 export interface IInput {

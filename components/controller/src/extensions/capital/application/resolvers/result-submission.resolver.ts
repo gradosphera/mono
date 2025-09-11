@@ -9,6 +9,7 @@ import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { ResultOutputDTO } from '../dto/result_submission/result.dto';
 import { ResultFilterInputDTO } from '../dto/result_submission/result-filter.input';
+import { GetResultInputDTO } from '../dto/result_submission/get-result-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 
 // Пагинированные результаты
@@ -77,7 +78,7 @@ export class ResultSubmissionResolver {
     description: 'Получение результата по внутреннему ID базы данных',
     nullable: true,
   })
-  async getResult(@Args('_id') _id: string): Promise<ResultOutputDTO | null> {
-    return await this.resultSubmissionService.getResultById(_id);
+  async getResult(@Args('data') data: GetResultInputDTO): Promise<ResultOutputDTO | null> {
+    return await this.resultSubmissionService.getResultById(data._id);
   }
 }
