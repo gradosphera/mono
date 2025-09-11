@@ -8,6 +8,12 @@ import { IssueMapper } from '../mappers/issue.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IssuePriority } from '../../domain/enums/issue-priority.enum';
 import type { IssueStatus } from '../../domain/enums/issue-status.enum';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import type { IssueFilterInputDTO } from '../../application/dto/generation/issue-filter.input';
+import { PaginationUtils } from '~/shared/utils/pagination.utils';
 
 @Injectable()
 export class IssueTypeormRepository implements IssueRepository {
@@ -16,7 +22,7 @@ export class IssueTypeormRepository implements IssueRepository {
     private readonly issueTypeormRepository: Repository<IssueTypeormEntity>
   ) {}
 
-  async create(issue: Omit<IssueDomainEntity, '_id'>): Promise<IssueDomainEntity> {
+  async create(issue: IssueDomainEntity): Promise<IssueDomainEntity> {
     const entity = this.issueTypeormRepository.create(IssueMapper.toEntity(issue));
     const savedEntity = await this.issueTypeormRepository.save(entity);
     return IssueMapper.toDomain(savedEntity);
@@ -151,5 +157,71 @@ export class IssueTypeormRepository implements IssueRepository {
       order: { sort_order: 'ASC' },
     });
     return entities.map(IssueMapper.toDomain);
+  }
+
+  async findAllPaginated(
+    filter?: IssueFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<IssueDomainEntity>> {
+    // Валидируем параметры пагинации
+    const validatedOptions: PaginationInputDomainInterface = options
+      ? PaginationUtils.validatePaginationOptions(options)
+      : {
+          page: 1,
+          limit: 10,
+          sortBy: undefined,
+          sortOrder: 'ASC' as const,
+        };
+
+    // Получаем параметры для SQL запроса
+    const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
+
+    // Строим условия поиска
+    const where: any = {};
+    if (filter?.title) {
+      where.title = filter.title;
+    }
+    if (filter?.priority) {
+      where.priority = filter.priority;
+    }
+    if (filter?.status) {
+      where.status = filter.status;
+    }
+    if (filter?.project_hash) {
+      where.project_hash = filter.project_hash;
+    }
+    if (filter?.created_by) {
+      where.created_by = filter.created_by;
+    }
+    if (filter?.submaster_id) {
+      where.submaster_id = filter.submaster_id;
+    }
+    if (filter?.cycle_id) {
+      where.cycle_id = filter.cycle_id;
+    }
+
+    // Получаем общее количество записей
+    const totalCount = await this.issueTypeormRepository.count({ where });
+
+    // Получаем записи с пагинацией
+    const orderBy: any = {};
+    if (validatedOptions.sortBy) {
+      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+    } else {
+      orderBy.sort_order = 'ASC';
+    }
+
+    const entities = await this.issueTypeormRepository.find({
+      where,
+      skip: offset,
+      take: limit,
+      order: orderBy,
+    });
+
+    // Преобразуем в доменные сущности
+    const items = entities.map((entity) => IssueMapper.toDomain(entity));
+
+    // Возвращаем результат с пагинацией
+    return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
   }
 }

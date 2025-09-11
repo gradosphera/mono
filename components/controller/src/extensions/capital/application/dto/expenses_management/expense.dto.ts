@@ -60,11 +60,11 @@ export class ExpenseOutputDTO {
   })
   project_hash?: string;
 
-  @Field(() => String, {
+  @Field(() => Number, {
     nullable: true,
     description: 'ID фонда',
   })
-  fund_id?: string;
+  fund_id?: number;
 
   @Field(() => String, {
     nullable: true,
@@ -72,11 +72,11 @@ export class ExpenseOutputDTO {
   })
   blockchain_status?: string;
 
-  @Field(() => Float, {
+  @Field(() => String, {
     nullable: true,
     description: 'Сумма расхода',
   })
-  amount?: number;
+  amount?: string;
 
   @Field(() => String, {
     nullable: true,
@@ -94,17 +94,17 @@ export class ExpenseOutputDTO {
     nullable: true,
     description: 'Служебная записка о расходе',
   })
-  expense_statement?: DocumentAggregateDTO;
+  expense_statement!: DocumentAggregateDTO | null;
 
   @Field(() => DocumentAggregateDTO, {
     nullable: true,
     description: 'Одобренная записка',
   })
-  approved_statement?: DocumentAggregateDTO;
+  approved_statement!: DocumentAggregateDTO | null;
 
   @Field(() => DocumentAggregateDTO, {
     nullable: true,
     description: 'Авторизация расхода',
   })
-  authorization?: DocumentAggregateDTO;
+  authorization!: DocumentAggregateDTO | null;
 }

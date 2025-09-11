@@ -8,6 +8,11 @@ import { rawInvestSelector } from './investSelector'
 import { rawProgramInvestSelector } from './programInvestSelector'
 import { rawDebtSelector } from './debtSelector'
 import { rawResultSelector } from './resultSelector'
+import { rawStorySelector } from './storySelector'
+import { rawIssueSelector } from './issueSelector'
+import { rawCommitSelector } from './commitSelector'
+import { rawCycleSelector } from './cycleSelector'
+import { rawExpenseSelector } from './expenseSelector'
 
 // Пагинированный селектор для голосований
 const rawVotesPaginationSelector = { ...paginationSelector, items: rawVoteSelector }
@@ -50,3 +55,33 @@ const rawResultsPaginationSelector = { ...paginationSelector, items: rawResultSe
 const _validateResults: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalResultsPaginationResult']> = rawResultsPaginationSelector
 export type resultsPaginationModel = ModelTypes['PaginatedCapitalResultsPaginationResult']
 export const resultsPaginationSelector = Selector('PaginatedCapitalResultsPaginationResult')(rawResultsPaginationSelector)
+
+// Пагинированный селектор для историй
+const rawStoriesPaginationSelector = { ...paginationSelector, items: rawStorySelector }
+const _validateStories: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalStoriesPaginationResult']> = rawStoriesPaginationSelector
+export type storiesPaginationModel = ModelTypes['PaginatedCapitalStoriesPaginationResult']
+export const storiesPaginationSelector = Selector('PaginatedCapitalStoriesPaginationResult')(rawStoriesPaginationSelector)
+
+// Пагинированный селектор для задач
+const rawIssuesPaginationSelector = { ...paginationSelector, items: rawIssueSelector }
+const _validateIssues: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalIssuesPaginationResult']> = rawIssuesPaginationSelector
+export type issuesPaginationModel = ModelTypes['PaginatedCapitalIssuesPaginationResult']
+export const issuesPaginationSelector = Selector('PaginatedCapitalIssuesPaginationResult')(rawIssuesPaginationSelector)
+
+// Пагинированный селектор для коммитов
+const rawCommitsPaginationSelector = { ...paginationSelector, items: rawCommitSelector }
+const _validateCommits: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalCommitsPaginationResult']> = rawCommitsPaginationSelector
+export type commitsPaginationModel = ModelTypes['PaginatedCapitalCommitsPaginationResult']
+export const commitsPaginationSelector = Selector('PaginatedCapitalCommitsPaginationResult')(rawCommitsPaginationSelector)
+
+// Пагинированный селектор для циклов
+const rawCyclesPaginationSelector = { ...paginationSelector, items: rawCycleSelector }
+const _validateCycles: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalCyclesPaginationResult']> = rawCyclesPaginationSelector
+export type cyclesPaginationModel = ModelTypes['PaginatedCapitalCyclesPaginationResult']
+export const cyclesPaginationSelector = Selector('PaginatedCapitalCyclesPaginationResult')(rawCyclesPaginationSelector)
+
+// Пагинированный селектор для расходов
+const rawExpensesPaginationSelector = { ...paginationSelector, items: rawExpenseSelector }
+const _validateExpenses: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalExpensesPaginationResult']> = rawExpensesPaginationSelector
+export type expensesPaginationModel = ModelTypes['PaginatedCapitalExpensesPaginationResult']
+export const expensesPaginationSelector = Selector('PaginatedCapitalExpensesPaginationResult')(rawExpensesPaginationSelector)

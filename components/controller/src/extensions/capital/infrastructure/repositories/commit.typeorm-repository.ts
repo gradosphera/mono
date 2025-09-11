@@ -10,6 +10,12 @@ import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-s
 import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
 import type { ICommitDatabaseData } from '../../domain/interfaces/commit-database.interface';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import type { CommitFilterInputDTO } from '../../application/dto/generation/commit-filter.input';
+import { PaginationUtils } from '~/shared/utils/pagination.utils';
 
 @Injectable()
 export class CommitTypeormRepository
@@ -62,5 +68,72 @@ export class CommitTypeormRepository
   async findByStatus(status: string): Promise<CommitDomainEntity[]> {
     const entities = await this.repository.find({ where: { status: status as any } });
     return entities.map((entity) => CommitMapper.toDomain(entity));
+  }
+
+  async findAllPaginated(
+    filter?: CommitFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<CommitDomainEntity>> {
+    // Валидируем параметры пагинации
+    const validatedOptions: PaginationInputDomainInterface = options
+      ? PaginationUtils.validatePaginationOptions(options)
+      : {
+          page: 1,
+          limit: 10,
+          sortBy: undefined,
+          sortOrder: 'ASC' as const,
+        };
+
+    // Получаем параметры для SQL запроса
+    const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
+
+    // Строим условия поиска
+    const where: any = {};
+    if (filter?.commit_hash) {
+      where.commit_hash = filter.commit_hash;
+    }
+    if (filter?.status) {
+      where.status = filter.status;
+    }
+    if (filter?.coopname) {
+      where.coopname = filter.coopname;
+    }
+    if (filter?.username) {
+      where.username = filter.username;
+    }
+    if (filter?.project_hash) {
+      where.project_hash = filter.project_hash;
+    }
+    if (filter?.blockchain_status) {
+      where.blockchain_status = filter.blockchain_status;
+    }
+    if (filter?.created_date) {
+      // Фильтр по дате создания
+      where.created_at = filter.created_date;
+    }
+
+    // Получаем общее количество записей
+    const totalCount = await this.repository.count({ where });
+
+    // Получаем записи с пагинацией
+    const orderBy: any = {};
+    if (validatedOptions.sortBy) {
+      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+    } else {
+      orderBy.created_at = 'DESC';
+    }
+
+    const entities = await this.repository.find({
+      where,
+      skip: offset,
+      take: limit,
+      order: orderBy,
+    });
+
+    // Преобразуем в доменные сущности
+    const items = entities.map((entity) => CommitMapper.toDomain(entity));
+
+    // Возвращаем результат с пагинацией
+    return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
   }
 }

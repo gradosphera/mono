@@ -1,6 +1,7 @@
 import type { IProgramWalletDatabaseData } from '../interfaces/program-wallet-database.interface';
 import type { IProgramWalletBlockchainData } from '../interfaces/program-wallet-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
+import { randomUUID } from 'crypto';
 
 /**
  * Доменная сущность программного кошелька
@@ -37,7 +38,7 @@ export class ProgramWalletDomainEntity
    */
   constructor(databaseData: IProgramWalletDatabaseData, blockchainData?: IProgramWalletBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.block_num = databaseData.block_num;
     this.username = databaseData.username;
     this.present = databaseData.present;

@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { IssuePriority } from '../enums/issue-priority.enum';
 import { IssueStatus } from '../enums/issue-status.enum';
 import type { IIssueDatabaseData } from '../interfaces/issue-database.interface';
@@ -33,7 +34,7 @@ export class IssueDomainEntity {
    */
   constructor(databaseData: IIssueDatabaseData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.title = databaseData.title;
     this.description = databaseData.description;
     this.priority = databaseData.priority;

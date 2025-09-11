@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import type { ICommentDatabaseData } from '../interfaces/comment-database.interface';
 
 /**
@@ -21,7 +22,7 @@ export class CommentDomainEntity {
    */
   constructor(databaseData: ICommentDatabaseData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.content = databaseData.content;
     this.commentor_id = databaseData.commentor_id;
     this.issue_id = databaseData.issue_id;

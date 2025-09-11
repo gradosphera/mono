@@ -1266,6 +1266,90 @@ input CancelRequestInput {
   username: String!
 }
 
+"""Коммит в системе CAPITAL"""
+type CapitalCommit {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Номер блока последнего обновления"""
+  block_num: Int
+
+  """Статус из блокчейна"""
+  blockchain_status: String
+
+  """Хеш коммита"""
+  commit_hash: String!
+
+  """Название кооператива"""
+  coopname: String
+
+  """Дата создания"""
+  created_at: String
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Существует ли запись в блокчейне"""
+  present: Boolean!
+
+  """Хеш проекта"""
+  project_hash: String
+
+  """Статус коммита"""
+  status: CommitStatus!
+
+  """Имя пользователя"""
+  username: String
+}
+
+"""Параметры фильтрации для запросов коммитов CAPITAL"""
+input CapitalCommitFilter {
+  """Фильтр по статусу из блокчейна"""
+  blockchain_status: String
+
+  """Фильтр по хешу коммита"""
+  commit_hash: String
+
+  """Фильтр по названию кооператива"""
+  coopname: String
+
+  """Фильтр по дате создания (YYYY-MM-DD)"""
+  created_date: String
+
+  """Фильтр по хешу проекта"""
+  project_hash: String
+
+  """Фильтр по статусу коммита"""
+  status: CommitStatus
+
+  """Фильтр по имени пользователя"""
+  username: String
+}
+
+"""Конфигурация CAPITAL контракта кооператива"""
+type CapitalConfig {
+  """Процент голосования авторов"""
+  authors_voting_percent: Float!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Процент бонуса координатора"""
+  coordinator_bonus_percent: Float!
+
+  """Срок действия приглашения координатора в днях"""
+  coordinator_invite_validity_days: Int!
+
+  """Процент голосования создателей"""
+  creators_voting_percent: Float!
+
+  """Процент расходов"""
+  expense_pool_percent: Float!
+
+  """Период голосования в днях"""
+  voting_period_in_days: Int!
+}
+
 """Вкладчик кооператива в системе CAPITAL"""
 type CapitalContributor {
   """Внутренний ID базы данных"""
@@ -1353,6 +1437,42 @@ input CapitalContributorFilter {
   username: String
 }
 
+"""Цикл разработки в системе CAPITAL"""
+type CapitalCycle {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Дата окончания"""
+  end_date: DateTime!
+
+  """Название цикла"""
+  name: String!
+
+  """Дата начала"""
+  start_date: DateTime!
+
+  """Статус цикла"""
+  status: CycleStatus!
+}
+
+"""Параметры фильтрации для запросов циклов CAPITAL"""
+input CapitalCycleFilter {
+  """Фильтр по дате окончания (YYYY-MM-DD)"""
+  end_date: String
+
+  """Показать только активные циклы"""
+  is_active: Boolean
+
+  """Фильтр по названию цикла"""
+  name: String
+
+  """Фильтр по дате начала (YYYY-MM-DD)"""
+  start_date: String
+
+  """Фильтр по статусу цикла"""
+  status: CycleStatus
+}
+
 """Долг в системе CAPITAL"""
 type CapitalDebt {
   """Внутренний ID базы данных"""
@@ -1399,6 +1519,60 @@ type CapitalDebt {
 
   """Статус долга"""
   status: DebtStatus!
+
+  """Имя пользователя"""
+  username: String
+}
+
+"""Расход в системе CAPITAL"""
+type CapitalExpense {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Сумма расхода"""
+  amount: String
+
+  """Одобренная записка"""
+  approved_statement: DocumentAggregate
+
+  """Авторизация расхода"""
+  authorization: DocumentAggregate
+
+  """Номер блока последнего обновления"""
+  block_num: Int
+
+  """Статус из блокчейна"""
+  blockchain_status: String
+
+  """Название кооператива"""
+  coopname: String
+
+  """Описание расхода"""
+  description: String
+
+  """Хеш расхода"""
+  expense_hash: String!
+
+  """Служебная записка о расходе"""
+  expense_statement: DocumentAggregate
+
+  """ID фонда"""
+  fund_id: Float
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Существует ли запись в блокчейне"""
+  present: Boolean!
+
+  """Хеш проекта"""
+  project_hash: String
+
+  """Дата расхода"""
+  spended_at: String
+
+  """Статус расхода"""
+  status: ExpenseStatus!
 
   """Имя пользователя"""
   username: String
@@ -1471,6 +1645,78 @@ input CapitalInvestFilter {
 
   """Фильтр по имени пользователя"""
   username: String
+}
+
+"""Задача в системе CAPITAL"""
+type CapitalIssue {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """ID создателя задачи (contributor)"""
+  created_by: String!
+
+  """Массив ID создателей (contributors)"""
+  creators_ids: [String!]!
+
+  """ID цикла"""
+  cycle_id: String
+
+  """Описание задачи"""
+  description: String
+
+  """Оценка в story points или часах"""
+  estimate: Int!
+
+  """Метаданные задачи"""
+  metadata: String!
+
+  """Приоритет задачи"""
+  priority: IssuePriority!
+
+  """Хеш проекта"""
+  project_hash: String!
+
+  """Порядок сортировки"""
+  sort_order: Int!
+
+  """Статус задачи"""
+  status: IssueStatus!
+
+  """ID подмастерья (contributor)"""
+  submaster_id: String
+
+  """Название задачи"""
+  title: String!
+}
+
+"""Параметры фильтрации для запросов задач CAPITAL"""
+input CapitalIssueFilter {
+  """Фильтр по названию кооператива"""
+  coopname: String
+
+  """Фильтр по ID создателя"""
+  created_by: String
+
+  """Фильтр по массиву ID создателей"""
+  creators_ids: [String!]
+
+  """Фильтр по ID цикла"""
+  cycle_id: String
+
+  """Фильтр по приоритету задачи"""
+  priority: IssuePriority
+
+  """Фильтр по хешу проекта"""
+  project_hash: String
+
+  """Фильтр по статусу задачи"""
+  status: IssueStatus
+
+  """Фильтр по ID подмастерья"""
+  submaster_id: String
+
+  """Фильтр по названию задачи"""
+  title: String
 }
 
 """Программная инвестиция в системе CAPITAL"""
@@ -1641,6 +1887,54 @@ type CapitalResult {
   username: String
 }
 
+"""История (критерий выполнения) в системе CAPITAL"""
+type CapitalStory {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """ID создателя (contributor)"""
+  created_by: String!
+
+  """Описание истории"""
+  description: String
+
+  """ID задачи (если история привязана к задаче)"""
+  issue_id: String
+
+  """Хеш проекта (если история привязана к проекту)"""
+  project_hash: String
+
+  """Порядок сортировки"""
+  sort_order: Int!
+
+  """Статус истории"""
+  status: StoryStatus!
+
+  """Название истории"""
+  title: String!
+}
+
+"""Параметры фильтрации для запросов историй CAPITAL"""
+input CapitalStoryFilter {
+  """Фильтр по названию кооператива"""
+  coopname: String
+
+  """Фильтр по ID создателя"""
+  created_by: String
+
+  """Фильтр по ID задачи"""
+  issue_id: String
+
+  """Фильтр по хешу проекта"""
+  project_hash: String
+
+  """Фильтр по статусу истории"""
+  status: StoryStatus
+
+  """Фильтр по названию истории"""
+  title: String
+}
+
 """Голос в системе CAPITAL"""
 type CapitalVote {
   """Внутренний ID базы данных"""
@@ -1691,6 +1985,14 @@ type ChartOfAccountsItem {
 
   """Списанные средства"""
   writeoff: String!
+}
+
+"""Статус коммита в системе CAPITAL"""
+enum CommitStatus {
+  APPROVED
+  DECLINED
+  PENDING
+  UNDEFINED
 }
 
 input CommonRequestInput {
@@ -2027,6 +2329,20 @@ input CreateCommitInput {
   username: String!
 }
 
+input CreateCycleInput {
+  """Дата окончания цикла (ISO 8601)"""
+  end_date: String!
+
+  """Название цикла"""
+  name: String!
+
+  """Дата начала цикла (ISO 8601)"""
+  start_date: String!
+
+  """Статус цикла"""
+  status: CycleStatus = FUTURE
+}
+
 input CreateDebtInput {
   """Сумма долга"""
   amount: String!
@@ -2142,6 +2458,47 @@ input CreateIndividualDataInput {
 input CreateInitialPaymentInput {
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+input CreateIssueInput {
+  """Вложения задачи (JSON строка)"""
+  attachments: String
+
+  """ID создателя задачи (contributor)"""
+  created_by: String!
+
+  """Массив ID создателей (contributors)"""
+  creators_ids: [String!]
+
+  """ID цикла"""
+  cycle_id: String
+
+  """Описание задачи"""
+  description: String
+
+  """Оценка в story points или часах"""
+  estimate: Int = 0
+
+  """Метки задачи (JSON строка)"""
+  labels: String
+
+  """Приоритет задачи"""
+  priority: IssuePriority = MEDIUM
+
+  """Хеш проекта"""
+  project_hash: String!
+
+  """Порядок сортировки"""
+  sort_order: Int = 0
+
+  """Статус задачи"""
+  status: IssueStatus = BACKLOG
+
+  """ID подмастерья (contributor)"""
+  submaster_id: String
+
+  """Название задачи"""
+  title: String!
 }
 
 input CreateOrganizationDataInput {
@@ -2301,6 +2658,29 @@ input CreateProjectPropertyInput {
   username: String!
 }
 
+input CreateStoryInput {
+  """ID создателя (contributor)"""
+  created_by: String!
+
+  """Описание истории"""
+  description: String
+
+  """ID задачи (если история привязана к задаче)"""
+  issue_id: String
+
+  """Хеш проекта (если история привязана к проекту)"""
+  project_hash: String
+
+  """Порядок сортировки"""
+  sort_order: Int = 0
+
+  """Статус истории"""
+  status: StoryStatus = PENDING
+
+  """Название истории"""
+  title: String!
+}
+
 input CreateSubscriptionInput {
   """Данные подписки"""
   subscription: WebPushSubscriptionDataInput!
@@ -2360,6 +2740,13 @@ type CreatedProjectFreeDecision {
 
   """Вопрос, который выносится на повестку"""
   question: String!
+}
+
+"""Статус цикла в системе CAPITAL"""
+enum CycleStatus {
+  ACTIVE
+  COMPLETED
+  FUTURE
 }
 
 """
@@ -2641,6 +3028,30 @@ input EntrepreneurDetailsInput {
 
   """ОГРН"""
   ogrn: String!
+}
+
+input ExpenseFilter {
+  """Фильтр по ID фонда"""
+  fundId: String
+
+  """Фильтр по хешу проекта"""
+  projectHash: String
+
+  """Фильтр по статусу расхода"""
+  status: String
+
+  """Фильтр по имени пользователя"""
+  username: String
+}
+
+"""Статус расхода в системе CAPITAL"""
+enum ExpenseStatus {
+  APPROVED
+  CANCELLED
+  DECLINED
+  PAID
+  PENDING
+  UNDEFINED
 }
 
 """
@@ -3000,6 +3411,11 @@ input GetBranchesInput {
   coopname: String!
 }
 
+input GetCapitalConfigInput {
+  """Название кооператива"""
+  coopname: String!
+}
+
 input GetContributorInput {
   """ID вкладчика"""
   _id: String!
@@ -3016,6 +3432,11 @@ input GetDocumentsInput {
   page: Int
   type: String
   username: String!
+}
+
+input GetExpenseInput {
+  """Внутренний ID базы данных"""
+  _id: String!
 }
 
 input GetExtensionsInput {
@@ -3215,6 +3636,23 @@ enum InvestStatus {
   PENDING
   RETURNED
   UNDEFINED
+}
+
+"""Приоритет задачи в системе CAPITAL"""
+enum IssuePriority {
+  HIGH
+  LOW
+  MEDIUM
+  URGENT
+}
+
+"""Статус задачи в системе CAPITAL"""
+enum IssueStatus {
+  BACKLOG
+  CANCELED
+  DONE
+  IN_PROGRESS
+  TODO
 }
 
 """
@@ -3660,11 +4098,17 @@ type Mutation {
   """Создание коммита в CAPITAL контракте"""
   capitalCreateCommit(data: CreateCommitInput!): Transaction!
 
+  """Создание цикла в CAPITAL контракте"""
+  capitalCreateCycle(data: CreateCycleInput!): CapitalCycle!
+
   """Получение ссуды в CAPITAL контракте"""
   capitalCreateDebt(data: CreateDebtInput!): Transaction!
 
   """Создание расхода в CAPITAL контракте"""
   capitalCreateExpense(data: CreateExpenseInput!): Transaction!
+
+  """Создание задачи в CAPITAL контракте"""
+  capitalCreateIssue(data: CreateIssueInput!): CapitalIssue!
 
   """Создание программного имущественного взноса в CAPITAL контракте"""
   capitalCreateProgramProperty(data: CreateProgramPropertyInput!): Transaction!
@@ -3677,6 +4121,9 @@ type Mutation {
 
   """Создание проектного имущественного взноса в CAPITAL контракте"""
   capitalCreateProjectProperty(data: CreateProjectPropertyInput!): Transaction!
+
+  """Создание истории в CAPITAL контракте"""
+  capitalCreateStory(data: CreateStoryInput!): CapitalStory!
 
   """Удаление проекта в CAPITAL контракте"""
   capitalDeleteProject(data: DeleteProjectInput!): Transaction!
@@ -4091,12 +4538,40 @@ enum OrganizationType {
   ZAO
 }
 
+type PaginatedCapitalCommitsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalCommit!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 type PaginatedCapitalContributorsPaginationResult {
   """Текущая страница"""
   currentPage: Int!
 
   """Элементы текущей страницы"""
   items: [CapitalContributor!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalCyclesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalCycle!]!
 
   """Общее количество элементов"""
   totalCount: Int!
@@ -4119,12 +4594,40 @@ type PaginatedCapitalDebtsPaginationResult {
   totalPages: Int!
 }
 
+type PaginatedCapitalExpensesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalExpense!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 type PaginatedCapitalInvestsPaginationResult {
   """Текущая страница"""
   currentPage: Int!
 
   """Элементы текущей страницы"""
   items: [CapitalInvest!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalIssuesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalIssue!]!
 
   """Общее количество элементов"""
   totalCount: Int!
@@ -4167,6 +4670,20 @@ type PaginatedCapitalResultsPaginationResult {
 
   """Элементы текущей страницы"""
   items: [CapitalResult!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalStoriesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalStory!]!
 
   """Общее количество элементов"""
   totalCount: Int!
@@ -4765,11 +5282,20 @@ input PushResultInput {
 }
 
 type Query {
+  """Получение списка коммитов кооператива с фильтрацией"""
+  capitalCommits(filter: CapitalCommitFilter, options: PaginationInput): PaginatedCapitalCommitsPaginationResult!
+
+  """Получение конфигурации CAPITAL контракта кооператива"""
+  capitalConfig(data: GetCapitalConfigInput!): CapitalConfig
+
   """Получение вкладчика по внутреннему ID базы данных"""
   capitalContributor(data: GetContributorInput!): CapitalContributor
 
   """Получение списка вкладчиков кооператива с фильтрацией"""
   capitalContributors(filter: CapitalContributorFilter, options: PaginationInput): PaginatedCapitalContributorsPaginationResult!
+
+  """Получение списка циклов кооператива с фильтрацией"""
+  capitalCycles(filter: CapitalCycleFilter, options: PaginationInput): PaginatedCapitalCyclesPaginationResult!
 
   """Получение долга по внутреннему ID базы данных"""
   capitalDebt(data: GetDebtInput!): CapitalDebt
@@ -4777,11 +5303,20 @@ type Query {
   """Получение списка долгов кооператива с фильтрацией"""
   capitalDebts(filter: DebtFilter, options: PaginationInput): PaginatedCapitalDebtsPaginationResult!
 
+  """Получение расхода по внутреннему ID базы данных"""
+  capitalExpense(data: GetExpenseInput!): CapitalExpense
+
+  """Получение списка расходов кооператива с фильтрацией"""
+  capitalExpenses(filter: ExpenseFilter, options: PaginationInput): PaginatedCapitalExpensesPaginationResult!
+
   """Получение инвестиции по внутреннему ID базы данных"""
   capitalInvest(data: GetInvestInput!): CapitalInvest
 
   """Получение списка инвестиций кооператива с фильтрацией"""
   capitalInvests(filter: CapitalInvestFilter, options: PaginationInput): PaginatedCapitalInvestsPaginationResult!
+
+  """Получение списка задач кооператива с фильтрацией"""
+  capitalIssues(filter: CapitalIssueFilter, options: PaginationInput): PaginatedCapitalIssuesPaginationResult!
 
   """Получение программной инвестиции по внутреннему ID базы данных"""
   capitalProgramInvest(data: GetProgramInvestInput!): CapitalProgramInvest
@@ -4803,6 +5338,9 @@ type Query {
 
   """Получение списка результатов кооператива с фильтрацией"""
   capitalResults(filter: ResultFilter, options: PaginationInput): PaginatedCapitalResultsPaginationResult!
+
+  """Получение списка историй кооператива с фильтрацией"""
+  capitalStories(filter: CapitalStoryFilter, options: PaginationInput): PaginatedCapitalStoriesPaginationResult!
 
   """Получение голоса по внутреннему ID базы данных"""
   capitalVote(data: GetVoteInput!): CapitalVote
@@ -5911,6 +6449,13 @@ input StartVotingInput {
 type StatementDetailAggregate {
   action: ExtendedBlockchainAction!
   documentAggregate: DocumentAggregate!
+}
+
+"""Статус истории в системе CAPITAL"""
+enum StoryStatus {
+  CANCELLED
+  COMPLETED
+  PENDING
 }
 
 input SubmitVoteInput {

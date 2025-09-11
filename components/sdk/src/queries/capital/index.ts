@@ -44,3 +44,24 @@ export * as GetResults from './getResults'
 
 /** Получить результат по ID */
 export * as GetResult from './getResult'
+
+/** Получить все расходы с фильтрацией */
+export * as GetExpenses from './getExpenses'
+
+/** Получить расход по ID */
+export * as GetExpense from './getExpense'
+
+/** Получить все истории с фильтрацией */
+export * as GetStories from './getStories'
+
+/** Получить все задачи с фильтрацией */
+export * as GetIssues from './getIssues'
+
+/** Получить все коммиты с фильтрацией */
+export * as GetCommits from './getCommits'
+
+/** Получить все циклы с фильтрацией */
+export * as GetCycles from './getCycles'
+
+/** Получить конфигурацию CAPITAL контракта */
+export * as GetConfig from './getConfig'

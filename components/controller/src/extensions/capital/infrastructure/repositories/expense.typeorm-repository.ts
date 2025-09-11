@@ -10,6 +10,12 @@ import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-s
 import { BaseBlockchainRepository } from './base-blockchain.repository';
 import type { IExpenseBlockchainData } from '../../domain/interfaces/expense-blockchain.interface';
 import type { IExpenseDatabaseData } from '../../domain/interfaces/expense-database.interface';
+import type { ExpenseFilterInputDTO } from '../../application/dto/expenses_management/expense-filter.input';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import { PaginationUtils } from '~/shared/utils/pagination.utils';
 
 @Injectable()
 export class ExpenseTypeormRepository
@@ -60,5 +66,60 @@ export class ExpenseTypeormRepository
   async findByStatus(status: string): Promise<ExpenseDomainEntity[]> {
     const entities = await this.repository.find({ where: { status: status as any } });
     return entities.map((entity) => ExpenseMapper.toDomain(entity));
+  }
+
+  async findAllPaginated(
+    filter?: ExpenseFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<ExpenseDomainEntity>> {
+    // Валидируем параметры пагинации
+    const validatedOptions: PaginationInputDomainInterface = options
+      ? PaginationUtils.validatePaginationOptions(options)
+      : {
+          page: 1,
+          limit: 10,
+          sortBy: undefined,
+          sortOrder: 'ASC' as const,
+        };
+
+    // Получаем параметры для SQL запроса
+    const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
+
+    // Строим условия поиска
+    const where: any = {};
+    if (filter?.username) {
+      where.username = filter.username;
+    }
+    if (filter?.projectHash) {
+      where.project_hash = filter.projectHash;
+    }
+    if (filter?.status) {
+      where.status = filter.status;
+    }
+    if (filter?.fundId) {
+      where.fund_id = filter.fundId;
+    }
+
+    // Строим параметры сортировки
+    const order: any = {};
+    if (validatedOptions.sortBy) {
+      order[validatedOptions.sortBy] = validatedOptions.sortOrder;
+    } else {
+      order.created_at = 'DESC';
+    }
+
+    // Выполняем запрос с пагинацией
+    const [entities, total] = await this.repository.findAndCount({
+      where,
+      order,
+      skip: offset,
+      take: limit,
+    });
+
+    // Конвертируем в доменные сущности
+    const items = entities.map((entity) => ExpenseMapper.toDomain(entity));
+
+    // Возвращаем результат с пагинацией
+    return PaginationUtils.createPaginationResult(items, total, validatedOptions);
   }
 }

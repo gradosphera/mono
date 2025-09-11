@@ -1,9 +1,14 @@
 import { IssueDomainEntity } from '../entities/issue.entity';
 import type { IssuePriority } from '../enums/issue-priority.enum';
 import type { IssueStatus } from '../enums/issue-status.enum';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import type { IssueFilterInputDTO } from '../../application/dto/generation/issue-filter.input';
 
 export interface IssueRepository {
-  create(issue: Omit<IssueDomainEntity, '_id'>): Promise<IssueDomainEntity>;
+  create(issue: IssueDomainEntity): Promise<IssueDomainEntity>;
   findById(_id: string): Promise<IssueDomainEntity | null>;
   findAll(): Promise<IssueDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<IssueDomainEntity[]>;
@@ -18,6 +23,10 @@ export interface IssueRepository {
   findByIdWithAllRelations(issueId: string): Promise<IssueDomainEntity | null>;
   findByProjectHashWithComments(projectHash: string): Promise<IssueDomainEntity[]>;
   findByProjectHashWithStories(projectHash: string): Promise<IssueDomainEntity[]>;
+  findAllPaginated(
+    filter?: IssueFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<IssueDomainEntity>>;
   update(entity: IssueDomainEntity): Promise<IssueDomainEntity>;
   delete(_id: string): Promise<void>;
 }

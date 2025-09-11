@@ -4,6 +4,7 @@ import { CapitalDatabaseModule } from './infrastructure/database/capital-databas
 import { EventsInfrastructureModule } from '~/infrastructure/events/events.module';
 import { Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
+import { DocumentDomainModule } from '~/domain/document/document.module';
 
 // Репозитории
 import { ProjectTypeormRepository } from './infrastructure/repositories/project.typeorm-repository';
@@ -161,7 +162,7 @@ export class CapitalPlugin extends BaseExtModule {
 }
 
 @Module({
-  imports: [CapitalDatabaseModule, EventsInfrastructureModule],
+  imports: [CapitalDatabaseModule, EventsInfrastructureModule, DocumentDomainModule],
   providers: [
     // Plugin
     CapitalPlugin,

@@ -3,6 +3,7 @@ import type { IProgramPropertyDatabaseData } from '../interfaces/program-propert
 import type { IProgramPropertyBlockchainData } from '../interfaces/program-property-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
+import { randomUUID } from 'crypto';
 
 /**
  * Доменная сущность программного имущественного взноса
@@ -48,7 +49,7 @@ export class ProgramPropertyDomainEntity
    */
   constructor(databaseData: IProgramPropertyDatabaseData, blockchainData?: IProgramPropertyBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
     this.property_hash = databaseData.property_hash;

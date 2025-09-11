@@ -2,6 +2,7 @@ import { CommitStatus } from '../enums/commit-status.enum';
 import type { ICommitDatabaseData } from '../interfaces/commit-database.interface';
 import type { ICommitBlockchainData } from '../interfaces/commit-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
+import { randomUUID } from 'crypto';
 
 /**
  * Доменная сущность коммита
@@ -42,7 +43,7 @@ export class CommitDomainEntity implements IBlockchainSynchronizable, ICommitDat
    */
   constructor(databaseData: ICommitDatabaseData, blockchainData?: ICommitBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
     this.commit_hash = databaseData.commit_hash;

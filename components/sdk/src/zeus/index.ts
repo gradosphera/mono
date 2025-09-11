@@ -1820,6 +1820,67 @@ export type ValueTypes = {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	/** Коммит в системе CAPITAL */
+["CapitalCommit"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Номер блока последнего обновления */
+	block_num?:boolean | `@${string}`,
+	/** Статус из блокчейна */
+	blockchain_status?:boolean | `@${string}`,
+	/** Хеш коммита */
+	commit_hash?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** ID в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Существует ли запись в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Статус коммита */
+	status?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры фильтрации для запросов коммитов CAPITAL */
+["CapitalCommitFilter"]: {
+	/** Фильтр по статусу из блокчейна */
+	blockchain_status?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по хешу коммита */
+	commit_hash?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по дате создания (YYYY-MM-DD) */
+	created_date?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по статусу коммита */
+	status?: ValueTypes["CommitStatus"] | undefined | null | Variable<any, string>,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null | Variable<any, string>
+};
+	/** Конфигурация CAPITAL контракта кооператива */
+["CapitalConfig"]: AliasType<{
+	/** Процент голосования авторов */
+	authors_voting_percent?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Процент бонуса координатора */
+	coordinator_bonus_percent?:boolean | `@${string}`,
+	/** Срок действия приглашения координатора в днях */
+	coordinator_invite_validity_days?:boolean | `@${string}`,
+	/** Процент голосования создателей */
+	creators_voting_percent?:boolean | `@${string}`,
+	/** Процент расходов */
+	expense_pool_percent?:boolean | `@${string}`,
+	/** Период голосования в днях */
+	voting_period_in_days?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Вкладчик кооператива в системе CAPITAL */
 ["CapitalContributor"]: AliasType<{
 	/** Внутренний ID базы данных */
@@ -1881,6 +1942,33 @@ export type ValueTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null | Variable<any, string>
 };
+	/** Цикл разработки в системе CAPITAL */
+["CapitalCycle"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Дата окончания */
+	end_date?:boolean | `@${string}`,
+	/** Название цикла */
+	name?:boolean | `@${string}`,
+	/** Дата начала */
+	start_date?:boolean | `@${string}`,
+	/** Статус цикла */
+	status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры фильтрации для запросов циклов CAPITAL */
+["CapitalCycleFilter"]: {
+	/** Фильтр по дате окончания (YYYY-MM-DD) */
+	end_date?: string | undefined | null | Variable<any, string>,
+	/** Показать только активные циклы */
+	is_active?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по названию цикла */
+	name?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по дате начала (YYYY-MM-DD) */
+	start_date?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по статусу цикла */
+	status?: ValueTypes["CycleStatus"] | undefined | null | Variable<any, string>
+};
 	/** Долг в системе CAPITAL */
 ["CapitalDebt"]: AliasType<{
 	/** Внутренний ID базы данных */
@@ -1912,6 +2000,44 @@ export type ValueTypes = {
 	/** Заявление на получение ссуды */
 	statement?:ValueTypes["DocumentAggregate"],
 	/** Статус долга */
+	status?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Расход в системе CAPITAL */
+["CapitalExpense"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Сумма расхода */
+	amount?:boolean | `@${string}`,
+	/** Одобренная записка */
+	approved_statement?:ValueTypes["DocumentAggregate"],
+	/** Авторизация расхода */
+	authorization?:ValueTypes["DocumentAggregate"],
+	/** Номер блока последнего обновления */
+	block_num?:boolean | `@${string}`,
+	/** Статус из блокчейна */
+	blockchain_status?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Описание расхода */
+	description?:boolean | `@${string}`,
+	/** Хеш расхода */
+	expense_hash?:boolean | `@${string}`,
+	/** Служебная записка о расходе */
+	expense_statement?:ValueTypes["DocumentAggregate"],
+	/** ID фонда */
+	fund_id?:boolean | `@${string}`,
+	/** ID в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Существует ли запись в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Дата расхода */
+	spended_at?:boolean | `@${string}`,
+	/** Статус расхода */
 	status?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
@@ -1965,6 +2091,57 @@ export type ValueTypes = {
 	status?: ValueTypes["InvestStatus"] | undefined | null | Variable<any, string>,
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null | Variable<any, string>
+};
+	/** Задача в системе CAPITAL */
+["CapitalIssue"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** ID создателя задачи (contributor) */
+	created_by?:boolean | `@${string}`,
+	/** Массив ID создателей (contributors) */
+	creators_ids?:boolean | `@${string}`,
+	/** ID цикла */
+	cycle_id?:boolean | `@${string}`,
+	/** Описание задачи */
+	description?:boolean | `@${string}`,
+	/** Оценка в story points или часах */
+	estimate?:boolean | `@${string}`,
+	/** Метаданные задачи */
+	metadata?:boolean | `@${string}`,
+	/** Приоритет задачи */
+	priority?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Порядок сортировки */
+	sort_order?:boolean | `@${string}`,
+	/** Статус задачи */
+	status?:boolean | `@${string}`,
+	/** ID подмастерья (contributor) */
+	submaster_id?:boolean | `@${string}`,
+	/** Название задачи */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры фильтрации для запросов задач CAPITAL */
+["CapitalIssueFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по ID создателя */
+	created_by?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по массиву ID создателей */
+	creators_ids?: Array<string> | undefined | null | Variable<any, string>,
+	/** Фильтр по ID цикла */
+	cycle_id?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по приоритету задачи */
+	priority?: ValueTypes["IssuePriority"] | undefined | null | Variable<any, string>,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по статусу задачи */
+	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
+	/** Фильтр по ID подмастерья */
+	submaster_id?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по названию задачи */
+	title?: string | undefined | null | Variable<any, string>
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: AliasType<{
@@ -2085,6 +2262,41 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** История (критерий выполнения) в системе CAPITAL */
+["CapitalStory"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** ID создателя (contributor) */
+	created_by?:boolean | `@${string}`,
+	/** Описание истории */
+	description?:boolean | `@${string}`,
+	/** ID задачи (если история привязана к задаче) */
+	issue_id?:boolean | `@${string}`,
+	/** Хеш проекта (если история привязана к проекту) */
+	project_hash?:boolean | `@${string}`,
+	/** Порядок сортировки */
+	sort_order?:boolean | `@${string}`,
+	/** Статус истории */
+	status?:boolean | `@${string}`,
+	/** Название истории */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры фильтрации для запросов историй CAPITAL */
+["CapitalStoryFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по ID создателя */
+	created_by?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по ID задачи */
+	issue_id?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по статусу истории */
+	status?: ValueTypes["StoryStatus"] | undefined | null | Variable<any, string>,
+	/** Фильтр по названию истории */
+	title?: string | undefined | null | Variable<any, string>
+};
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: AliasType<{
 	/** Внутренний ID базы данных */
@@ -2122,6 +2334,8 @@ export type ValueTypes = {
 	writeoff?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Статус коммита в системе CAPITAL */
+["CommitStatus"]:CommitStatus;
 	["CommonRequestInput"]: {
 	currency: string | Variable<any, string>,
 	hash: string | Variable<any, string>,
@@ -2347,6 +2561,16 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	["CreateCycleInput"]: {
+	/** Дата окончания цикла (ISO 8601) */
+	end_date: string | Variable<any, string>,
+	/** Название цикла */
+	name: string | Variable<any, string>,
+	/** Дата начала цикла (ISO 8601) */
+	start_date: string | Variable<any, string>,
+	/** Статус цикла */
+	status?: ValueTypes["CycleStatus"] | undefined | null | Variable<any, string>
+};
 	["CreateDebtInput"]: {
 	/** Сумма долга */
 	amount: string | Variable<any, string>,
@@ -2428,6 +2652,34 @@ export type ValueTypes = {
 	["CreateInitialPaymentInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
+};
+	["CreateIssueInput"]: {
+	/** Вложения задачи (JSON строка) */
+	attachments?: string | undefined | null | Variable<any, string>,
+	/** ID создателя задачи (contributor) */
+	created_by: string | Variable<any, string>,
+	/** Массив ID создателей (contributors) */
+	creators_ids?: Array<string> | undefined | null | Variable<any, string>,
+	/** ID цикла */
+	cycle_id?: string | undefined | null | Variable<any, string>,
+	/** Описание задачи */
+	description?: string | undefined | null | Variable<any, string>,
+	/** Оценка в story points или часах */
+	estimate?: number | undefined | null | Variable<any, string>,
+	/** Метки задачи (JSON строка) */
+	labels?: string | undefined | null | Variable<any, string>,
+	/** Приоритет задачи */
+	priority?: ValueTypes["IssuePriority"] | undefined | null | Variable<any, string>,
+	/** Хеш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Порядок сортировки */
+	sort_order?: number | undefined | null | Variable<any, string>,
+	/** Статус задачи */
+	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
+	/** ID подмастерья (contributor) */
+	submaster_id?: string | undefined | null | Variable<any, string>,
+	/** Название задачи */
+	title: string | Variable<any, string>
 };
 	["CreateOrganizationDataInput"]: {
 	/** Банковский счет организации */
@@ -2537,6 +2789,22 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	["CreateStoryInput"]: {
+	/** ID создателя (contributor) */
+	created_by: string | Variable<any, string>,
+	/** Описание истории */
+	description?: string | undefined | null | Variable<any, string>,
+	/** ID задачи (если история привязана к задаче) */
+	issue_id?: string | undefined | null | Variable<any, string>,
+	/** Хеш проекта (если история привязана к проекту) */
+	project_hash?: string | undefined | null | Variable<any, string>,
+	/** Порядок сортировки */
+	sort_order?: number | undefined | null | Variable<any, string>,
+	/** Статус истории */
+	status?: ValueTypes["StoryStatus"] | undefined | null | Variable<any, string>,
+	/** Название истории */
+	title: string | Variable<any, string>
+};
 	["CreateSubscriptionInput"]: {
 	/** Данные подписки */
 	subscription: ValueTypes["WebPushSubscriptionDataInput"] | Variable<any, string>,
@@ -2584,6 +2852,8 @@ export type ValueTypes = {
 	question?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Статус цикла в системе CAPITAL */
+["CycleStatus"]:CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
 	["DeactivateSubscriptionInput"]: {
@@ -2784,6 +3054,18 @@ export type ValueTypes = {
 	/** ОГРН */
 	ogrn: string | Variable<any, string>
 };
+	["ExpenseFilter"]: {
+	/** Фильтр по ID фонда */
+	fundId?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по хешу проекта */
+	projectHash?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по статусу расхода */
+	status?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null | Variable<any, string>
+};
+	/** Статус расхода в системе CAPITAL */
+["ExpenseStatus"]:ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
 ["ExtendedBlockchainAction"]: AliasType<{
 	account?:boolean | `@${string}`,
@@ -3018,6 +3300,10 @@ export type ValueTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>
 };
+	["GetCapitalConfigInput"]: {
+	/** Название кооператива */
+	coopname: string | Variable<any, string>
+};
 	["GetContributorInput"]: {
 	/** ID вкладчика */
 	_id: string | Variable<any, string>
@@ -3032,6 +3318,10 @@ export type ValueTypes = {
 	page?: number | undefined | null | Variable<any, string>,
 	type?: string | undefined | null | Variable<any, string>,
 	username: string | Variable<any, string>
+};
+	["GetExpenseInput"]: {
+	/** Внутренний ID базы данных */
+	_id: string | Variable<any, string>
 };
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
@@ -3171,6 +3461,10 @@ export type ValueTypes = {
 };
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]:InvestStatus;
+	/** Приоритет задачи в системе CAPITAL */
+["IssuePriority"]:IssuePriority;
+	/** Статус задачи в системе CAPITAL */
+["IssueStatus"]:IssueStatus;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
 	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
@@ -3476,12 +3770,15 @@ capitalCalculateVotes?: [{	data: ValueTypes["CalculateVotesInput"] | Variable<an
 capitalCompleteVoting?: [{	data: ValueTypes["CompleteVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalConvertSegment?: [{	data: ValueTypes["ConvertSegmentInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateCommit?: [{	data: ValueTypes["CreateCommitInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalCreateCycle?: [{	data: ValueTypes["CreateCycleInput"] | Variable<any, string>},ValueTypes["CapitalCycle"]],
 capitalCreateDebt?: [{	data: ValueTypes["CreateDebtInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateExpense?: [{	data: ValueTypes["CreateExpenseInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalCreateIssue?: [{	data: ValueTypes["CreateIssueInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
 capitalCreateProgramProperty?: [{	data: ValueTypes["CreateProgramPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProject?: [{	data: ValueTypes["CreateProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProjectInvest?: [{	data: ValueTypes["CreateProjectInvestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProjectProperty?: [{	data: ValueTypes["CreateProjectPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalCreateStory?: [{	data: ValueTypes["CreateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
 capitalDeleteProject?: [{	data: ValueTypes["DeleteProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProject?: [{	data: ValueTypes["FundProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -3645,11 +3942,33 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 };
 	/** Тип юридического лица */
 ["OrganizationType"]:OrganizationType;
+	["PaginatedCapitalCommitsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["CapitalCommit"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalContributorsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ValueTypes["CapitalContributor"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCapitalCyclesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["CapitalCycle"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -3667,11 +3986,33 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PaginatedCapitalExpensesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["CapitalExpense"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalInvestsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ValueTypes["CapitalInvest"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCapitalIssuesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["CapitalIssue"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -3705,6 +4046,17 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ValueTypes["CapitalResult"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCapitalStoriesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["CapitalStory"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -4124,12 +4476,18 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	username: string | Variable<any, string>
 };
 	["Query"]: AliasType<{
+capitalCommits?: [{	filter?: ValueTypes["CapitalCommitFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCommitsPaginationResult"]],
+capitalConfig?: [{	data: ValueTypes["GetCapitalConfigInput"] | Variable<any, string>},ValueTypes["CapitalConfig"]],
 capitalContributor?: [{	data: ValueTypes["GetContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
 capitalContributors?: [{	filter?: ValueTypes["CapitalContributorFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalContributorsPaginationResult"]],
+capitalCycles?: [{	filter?: ValueTypes["CapitalCycleFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCyclesPaginationResult"]],
 capitalDebt?: [{	data: ValueTypes["GetDebtInput"] | Variable<any, string>},ValueTypes["CapitalDebt"]],
 capitalDebts?: [{	filter?: ValueTypes["DebtFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalDebtsPaginationResult"]],
+capitalExpense?: [{	data: ValueTypes["GetExpenseInput"] | Variable<any, string>},ValueTypes["CapitalExpense"]],
+capitalExpenses?: [{	filter?: ValueTypes["ExpenseFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalExpensesPaginationResult"]],
 capitalInvest?: [{	data: ValueTypes["GetInvestInput"] | Variable<any, string>},ValueTypes["CapitalInvest"]],
 capitalInvests?: [{	filter?: ValueTypes["CapitalInvestFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalInvestsPaginationResult"]],
+capitalIssues?: [{	filter?: ValueTypes["CapitalIssueFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalIssuesPaginationResult"]],
 capitalProgramInvest?: [{	data: ValueTypes["GetProgramInvestInput"] | Variable<any, string>},ValueTypes["CapitalProgramInvest"]],
 capitalProgramInvests?: [{	filter?: ValueTypes["CapitalInvestFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalProgramInvestsPaginationResult"]],
 capitalProject?: [{	data: ValueTypes["GetProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
@@ -4137,6 +4495,7 @@ capitalProjectWithRelations?: [{	data: ValueTypes["GetProjectWithRelationsInput"
 capitalProjects?: [{	filter?: ValueTypes["CapitalProjectFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalProjectsPaginationResult"]],
 capitalResult?: [{	data: ValueTypes["GetResultInput"] | Variable<any, string>},ValueTypes["CapitalResult"]],
 capitalResults?: [{	filter?: ValueTypes["ResultFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalResultsPaginationResult"]],
+capitalStories?: [{	filter?: ValueTypes["CapitalStoryFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalStoriesPaginationResult"]],
 capitalVote?: [{	data: ValueTypes["GetVoteInput"] | Variable<any, string>},ValueTypes["CapitalVote"]],
 capitalVotes?: [{	filter?: ValueTypes["VoteFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalVotesPaginationResult"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
@@ -4894,6 +5253,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	documentAggregate?:ValueTypes["DocumentAggregate"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Статус истории в системе CAPITAL */
+["StoryStatus"]:StoryStatus;
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -6164,6 +6525,67 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	/** Коммит в системе CAPITAL */
+["CapitalCommit"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Номер блока последнего обновления */
+	block_num?:boolean | `@${string}`,
+	/** Статус из блокчейна */
+	blockchain_status?:boolean | `@${string}`,
+	/** Хеш коммита */
+	commit_hash?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** ID в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Существует ли запись в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Статус коммита */
+	status?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры фильтрации для запросов коммитов CAPITAL */
+["CapitalCommitFilter"]: {
+	/** Фильтр по статусу из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Фильтр по хешу коммита */
+	commit_hash?: string | undefined | null,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по дате создания (YYYY-MM-DD) */
+	created_date?: string | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу коммита */
+	status?: ResolverInputTypes["CommitStatus"] | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	/** Конфигурация CAPITAL контракта кооператива */
+["CapitalConfig"]: AliasType<{
+	/** Процент голосования авторов */
+	authors_voting_percent?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Процент бонуса координатора */
+	coordinator_bonus_percent?:boolean | `@${string}`,
+	/** Срок действия приглашения координатора в днях */
+	coordinator_invite_validity_days?:boolean | `@${string}`,
+	/** Процент голосования создателей */
+	creators_voting_percent?:boolean | `@${string}`,
+	/** Процент расходов */
+	expense_pool_percent?:boolean | `@${string}`,
+	/** Период голосования в днях */
+	voting_period_in_days?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Вкладчик кооператива в системе CAPITAL */
 ["CapitalContributor"]: AliasType<{
 	/** Внутренний ID базы данных */
@@ -6225,6 +6647,33 @@ export type ResolverInputTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
+	/** Цикл разработки в системе CAPITAL */
+["CapitalCycle"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Дата окончания */
+	end_date?:boolean | `@${string}`,
+	/** Название цикла */
+	name?:boolean | `@${string}`,
+	/** Дата начала */
+	start_date?:boolean | `@${string}`,
+	/** Статус цикла */
+	status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры фильтрации для запросов циклов CAPITAL */
+["CapitalCycleFilter"]: {
+	/** Фильтр по дате окончания (YYYY-MM-DD) */
+	end_date?: string | undefined | null,
+	/** Показать только активные циклы */
+	is_active?: boolean | undefined | null,
+	/** Фильтр по названию цикла */
+	name?: string | undefined | null,
+	/** Фильтр по дате начала (YYYY-MM-DD) */
+	start_date?: string | undefined | null,
+	/** Фильтр по статусу цикла */
+	status?: ResolverInputTypes["CycleStatus"] | undefined | null
+};
 	/** Долг в системе CAPITAL */
 ["CapitalDebt"]: AliasType<{
 	/** Внутренний ID базы данных */
@@ -6256,6 +6705,44 @@ export type ResolverInputTypes = {
 	/** Заявление на получение ссуды */
 	statement?:ResolverInputTypes["DocumentAggregate"],
 	/** Статус долга */
+	status?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Расход в системе CAPITAL */
+["CapitalExpense"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Сумма расхода */
+	amount?:boolean | `@${string}`,
+	/** Одобренная записка */
+	approved_statement?:ResolverInputTypes["DocumentAggregate"],
+	/** Авторизация расхода */
+	authorization?:ResolverInputTypes["DocumentAggregate"],
+	/** Номер блока последнего обновления */
+	block_num?:boolean | `@${string}`,
+	/** Статус из блокчейна */
+	blockchain_status?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Описание расхода */
+	description?:boolean | `@${string}`,
+	/** Хеш расхода */
+	expense_hash?:boolean | `@${string}`,
+	/** Служебная записка о расходе */
+	expense_statement?:ResolverInputTypes["DocumentAggregate"],
+	/** ID фонда */
+	fund_id?:boolean | `@${string}`,
+	/** ID в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Существует ли запись в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Дата расхода */
+	spended_at?:boolean | `@${string}`,
+	/** Статус расхода */
 	status?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
@@ -6309,6 +6796,57 @@ export type ResolverInputTypes = {
 	status?: ResolverInputTypes["InvestStatus"] | undefined | null,
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
+};
+	/** Задача в системе CAPITAL */
+["CapitalIssue"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** ID создателя задачи (contributor) */
+	created_by?:boolean | `@${string}`,
+	/** Массив ID создателей (contributors) */
+	creators_ids?:boolean | `@${string}`,
+	/** ID цикла */
+	cycle_id?:boolean | `@${string}`,
+	/** Описание задачи */
+	description?:boolean | `@${string}`,
+	/** Оценка в story points или часах */
+	estimate?:boolean | `@${string}`,
+	/** Метаданные задачи */
+	metadata?:boolean | `@${string}`,
+	/** Приоритет задачи */
+	priority?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Порядок сортировки */
+	sort_order?:boolean | `@${string}`,
+	/** Статус задачи */
+	status?:boolean | `@${string}`,
+	/** ID подмастерья (contributor) */
+	submaster_id?:boolean | `@${string}`,
+	/** Название задачи */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры фильтрации для запросов задач CAPITAL */
+["CapitalIssueFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по ID создателя */
+	created_by?: string | undefined | null,
+	/** Фильтр по массиву ID создателей */
+	creators_ids?: Array<string> | undefined | null,
+	/** Фильтр по ID цикла */
+	cycle_id?: string | undefined | null,
+	/** Фильтр по приоритету задачи */
+	priority?: ResolverInputTypes["IssuePriority"] | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу задачи */
+	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
+	/** Фильтр по ID подмастерья */
+	submaster_id?: string | undefined | null,
+	/** Фильтр по названию задачи */
+	title?: string | undefined | null
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: AliasType<{
@@ -6429,6 +6967,41 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** История (критерий выполнения) в системе CAPITAL */
+["CapitalStory"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** ID создателя (contributor) */
+	created_by?:boolean | `@${string}`,
+	/** Описание истории */
+	description?:boolean | `@${string}`,
+	/** ID задачи (если история привязана к задаче) */
+	issue_id?:boolean | `@${string}`,
+	/** Хеш проекта (если история привязана к проекту) */
+	project_hash?:boolean | `@${string}`,
+	/** Порядок сортировки */
+	sort_order?:boolean | `@${string}`,
+	/** Статус истории */
+	status?:boolean | `@${string}`,
+	/** Название истории */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры фильтрации для запросов историй CAPITAL */
+["CapitalStoryFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по ID создателя */
+	created_by?: string | undefined | null,
+	/** Фильтр по ID задачи */
+	issue_id?: string | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу истории */
+	status?: ResolverInputTypes["StoryStatus"] | undefined | null,
+	/** Фильтр по названию истории */
+	title?: string | undefined | null
+};
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: AliasType<{
 	/** Внутренний ID базы данных */
@@ -6466,6 +7039,8 @@ export type ResolverInputTypes = {
 	writeoff?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Статус коммита в системе CAPITAL */
+["CommitStatus"]:CommitStatus;
 	["CommonRequestInput"]: {
 	currency: string,
 	hash: string,
@@ -6691,6 +7266,16 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CreateCycleInput"]: {
+	/** Дата окончания цикла (ISO 8601) */
+	end_date: string,
+	/** Название цикла */
+	name: string,
+	/** Дата начала цикла (ISO 8601) */
+	start_date: string,
+	/** Статус цикла */
+	status?: ResolverInputTypes["CycleStatus"] | undefined | null
+};
 	["CreateDebtInput"]: {
 	/** Сумма долга */
 	amount: string,
@@ -6772,6 +7357,34 @@ export type ResolverInputTypes = {
 	["CreateInitialPaymentInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["CreateIssueInput"]: {
+	/** Вложения задачи (JSON строка) */
+	attachments?: string | undefined | null,
+	/** ID создателя задачи (contributor) */
+	created_by: string,
+	/** Массив ID создателей (contributors) */
+	creators_ids?: Array<string> | undefined | null,
+	/** ID цикла */
+	cycle_id?: string | undefined | null,
+	/** Описание задачи */
+	description?: string | undefined | null,
+	/** Оценка в story points или часах */
+	estimate?: number | undefined | null,
+	/** Метки задачи (JSON строка) */
+	labels?: string | undefined | null,
+	/** Приоритет задачи */
+	priority?: ResolverInputTypes["IssuePriority"] | undefined | null,
+	/** Хеш проекта */
+	project_hash: string,
+	/** Порядок сортировки */
+	sort_order?: number | undefined | null,
+	/** Статус задачи */
+	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
+	/** ID подмастерья (contributor) */
+	submaster_id?: string | undefined | null,
+	/** Название задачи */
+	title: string
 };
 	["CreateOrganizationDataInput"]: {
 	/** Банковский счет организации */
@@ -6881,6 +7494,22 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CreateStoryInput"]: {
+	/** ID создателя (contributor) */
+	created_by: string,
+	/** Описание истории */
+	description?: string | undefined | null,
+	/** ID задачи (если история привязана к задаче) */
+	issue_id?: string | undefined | null,
+	/** Хеш проекта (если история привязана к проекту) */
+	project_hash?: string | undefined | null,
+	/** Порядок сортировки */
+	sort_order?: number | undefined | null,
+	/** Статус истории */
+	status?: ResolverInputTypes["StoryStatus"] | undefined | null,
+	/** Название истории */
+	title: string
+};
 	["CreateSubscriptionInput"]: {
 	/** Данные подписки */
 	subscription: ResolverInputTypes["WebPushSubscriptionDataInput"],
@@ -6928,6 +7557,8 @@ export type ResolverInputTypes = {
 	question?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Статус цикла в системе CAPITAL */
+["CycleStatus"]:CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:unknown;
 	["DeactivateSubscriptionInput"]: {
@@ -7128,6 +7759,18 @@ export type ResolverInputTypes = {
 	/** ОГРН */
 	ogrn: string
 };
+	["ExpenseFilter"]: {
+	/** Фильтр по ID фонда */
+	fundId?: string | undefined | null,
+	/** Фильтр по хешу проекта */
+	projectHash?: string | undefined | null,
+	/** Фильтр по статусу расхода */
+	status?: string | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	/** Статус расхода в системе CAPITAL */
+["ExpenseStatus"]:ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
 ["ExtendedBlockchainAction"]: AliasType<{
 	account?:boolean | `@${string}`,
@@ -7362,6 +8005,10 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
+	["GetCapitalConfigInput"]: {
+	/** Название кооператива */
+	coopname: string
+};
 	["GetContributorInput"]: {
 	/** ID вкладчика */
 	_id: string
@@ -7376,6 +8023,10 @@ export type ResolverInputTypes = {
 	page?: number | undefined | null,
 	type?: string | undefined | null,
 	username: string
+};
+	["GetExpenseInput"]: {
+	/** Внутренний ID базы данных */
+	_id: string
 };
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
@@ -7515,6 +8166,10 @@ export type ResolverInputTypes = {
 };
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]:InvestStatus;
+	/** Приоритет задачи в системе CAPITAL */
+["IssuePriority"]:IssuePriority;
+	/** Статус задачи в системе CAPITAL */
+["IssueStatus"]:IssueStatus;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
 	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
@@ -7820,12 +8475,15 @@ capitalCalculateVotes?: [{	data: ResolverInputTypes["CalculateVotesInput"]},Reso
 capitalCompleteVoting?: [{	data: ResolverInputTypes["CompleteVotingInput"]},ResolverInputTypes["Transaction"]],
 capitalConvertSegment?: [{	data: ResolverInputTypes["ConvertSegmentInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateCommit?: [{	data: ResolverInputTypes["CreateCommitInput"]},ResolverInputTypes["Transaction"]],
+capitalCreateCycle?: [{	data: ResolverInputTypes["CreateCycleInput"]},ResolverInputTypes["CapitalCycle"]],
 capitalCreateDebt?: [{	data: ResolverInputTypes["CreateDebtInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateExpense?: [{	data: ResolverInputTypes["CreateExpenseInput"]},ResolverInputTypes["Transaction"]],
+capitalCreateIssue?: [{	data: ResolverInputTypes["CreateIssueInput"]},ResolverInputTypes["CapitalIssue"]],
 capitalCreateProgramProperty?: [{	data: ResolverInputTypes["CreateProgramPropertyInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProject?: [{	data: ResolverInputTypes["CreateProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProjectInvest?: [{	data: ResolverInputTypes["CreateProjectInvestInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProjectProperty?: [{	data: ResolverInputTypes["CreateProjectPropertyInput"]},ResolverInputTypes["Transaction"]],
+capitalCreateStory?: [{	data: ResolverInputTypes["CreateStoryInput"]},ResolverInputTypes["CapitalStory"]],
 capitalDeleteProject?: [{	data: ResolverInputTypes["DeleteProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProject?: [{	data: ResolverInputTypes["FundProjectInput"]},ResolverInputTypes["Transaction"]],
@@ -7989,11 +8647,33 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 };
 	/** Тип юридического лица */
 ["OrganizationType"]:OrganizationType;
+	["PaginatedCapitalCommitsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["CapitalCommit"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalContributorsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ResolverInputTypes["CapitalContributor"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCapitalCyclesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["CapitalCycle"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -8011,11 +8691,33 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PaginatedCapitalExpensesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["CapitalExpense"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalInvestsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ResolverInputTypes["CapitalInvest"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCapitalIssuesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["CapitalIssue"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -8049,6 +8751,17 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ResolverInputTypes["CapitalResult"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCapitalStoriesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["CapitalStory"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -8470,12 +9183,18 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	username: string
 };
 	["Query"]: AliasType<{
+capitalCommits?: [{	filter?: ResolverInputTypes["CapitalCommitFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCommitsPaginationResult"]],
+capitalConfig?: [{	data: ResolverInputTypes["GetCapitalConfigInput"]},ResolverInputTypes["CapitalConfig"]],
 capitalContributor?: [{	data: ResolverInputTypes["GetContributorInput"]},ResolverInputTypes["CapitalContributor"]],
 capitalContributors?: [{	filter?: ResolverInputTypes["CapitalContributorFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalContributorsPaginationResult"]],
+capitalCycles?: [{	filter?: ResolverInputTypes["CapitalCycleFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCyclesPaginationResult"]],
 capitalDebt?: [{	data: ResolverInputTypes["GetDebtInput"]},ResolverInputTypes["CapitalDebt"]],
 capitalDebts?: [{	filter?: ResolverInputTypes["DebtFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalDebtsPaginationResult"]],
+capitalExpense?: [{	data: ResolverInputTypes["GetExpenseInput"]},ResolverInputTypes["CapitalExpense"]],
+capitalExpenses?: [{	filter?: ResolverInputTypes["ExpenseFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalExpensesPaginationResult"]],
 capitalInvest?: [{	data: ResolverInputTypes["GetInvestInput"]},ResolverInputTypes["CapitalInvest"]],
 capitalInvests?: [{	filter?: ResolverInputTypes["CapitalInvestFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalInvestsPaginationResult"]],
+capitalIssues?: [{	filter?: ResolverInputTypes["CapitalIssueFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalIssuesPaginationResult"]],
 capitalProgramInvest?: [{	data: ResolverInputTypes["GetProgramInvestInput"]},ResolverInputTypes["CapitalProgramInvest"]],
 capitalProgramInvests?: [{	filter?: ResolverInputTypes["CapitalInvestFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalProgramInvestsPaginationResult"]],
 capitalProject?: [{	data: ResolverInputTypes["GetProjectInput"]},ResolverInputTypes["CapitalProject"]],
@@ -8483,6 +9202,7 @@ capitalProjectWithRelations?: [{	data: ResolverInputTypes["GetProjectWithRelatio
 capitalProjects?: [{	filter?: ResolverInputTypes["CapitalProjectFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalProjectsPaginationResult"]],
 capitalResult?: [{	data: ResolverInputTypes["GetResultInput"]},ResolverInputTypes["CapitalResult"]],
 capitalResults?: [{	filter?: ResolverInputTypes["ResultFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalResultsPaginationResult"]],
+capitalStories?: [{	filter?: ResolverInputTypes["CapitalStoryFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalStoriesPaginationResult"]],
 capitalVote?: [{	data: ResolverInputTypes["GetVoteInput"]},ResolverInputTypes["CapitalVote"]],
 capitalVotes?: [{	filter?: ResolverInputTypes["VoteFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalVotesPaginationResult"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
@@ -9240,6 +9960,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	documentAggregate?:ResolverInputTypes["DocumentAggregate"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Статус истории в системе CAPITAL */
+["StoryStatus"]:StoryStatus;
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -10495,6 +11217,65 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	/** Коммит в системе CAPITAL */
+["CapitalCommit"]: {
+		/** Внутренний ID базы данных */
+	_id: string,
+	/** Номер блока последнего обновления */
+	block_num?: number | undefined | null,
+	/** Статус из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Хеш коммита */
+	commit_hash: string,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Дата создания */
+	created_at?: string | undefined | null,
+	/** ID в блокчейне */
+	id?: number | undefined | null,
+	/** Существует ли запись в блокчейне */
+	present: boolean,
+	/** Хеш проекта */
+	project_hash?: string | undefined | null,
+	/** Статус коммита */
+	status: ModelTypes["CommitStatus"],
+	/** Имя пользователя */
+	username?: string | undefined | null
+};
+	/** Параметры фильтрации для запросов коммитов CAPITAL */
+["CapitalCommitFilter"]: {
+	/** Фильтр по статусу из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Фильтр по хешу коммита */
+	commit_hash?: string | undefined | null,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по дате создания (YYYY-MM-DD) */
+	created_date?: string | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу коммита */
+	status?: ModelTypes["CommitStatus"] | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	/** Конфигурация CAPITAL контракта кооператива */
+["CapitalConfig"]: {
+		/** Процент голосования авторов */
+	authors_voting_percent: number,
+	/** Название кооператива */
+	coopname: string,
+	/** Процент бонуса координатора */
+	coordinator_bonus_percent: number,
+	/** Срок действия приглашения координатора в днях */
+	coordinator_invite_validity_days: number,
+	/** Процент голосования создателей */
+	creators_voting_percent: number,
+	/** Процент расходов */
+	expense_pool_percent: number,
+	/** Период голосования в днях */
+	voting_period_in_days: number
+};
 	/** Вкладчик кооператива в системе CAPITAL */
 ["CapitalContributor"]: {
 		/** Внутренний ID базы данных */
@@ -10555,6 +11336,32 @@ export type ModelTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
+	/** Цикл разработки в системе CAPITAL */
+["CapitalCycle"]: {
+		/** Внутренний ID базы данных */
+	_id: string,
+	/** Дата окончания */
+	end_date: ModelTypes["DateTime"],
+	/** Название цикла */
+	name: string,
+	/** Дата начала */
+	start_date: ModelTypes["DateTime"],
+	/** Статус цикла */
+	status: ModelTypes["CycleStatus"]
+};
+	/** Параметры фильтрации для запросов циклов CAPITAL */
+["CapitalCycleFilter"]: {
+	/** Фильтр по дате окончания (YYYY-MM-DD) */
+	end_date?: string | undefined | null,
+	/** Показать только активные циклы */
+	is_active?: boolean | undefined | null,
+	/** Фильтр по названию цикла */
+	name?: string | undefined | null,
+	/** Фильтр по дате начала (YYYY-MM-DD) */
+	start_date?: string | undefined | null,
+	/** Фильтр по статусу цикла */
+	status?: ModelTypes["CycleStatus"] | undefined | null
+};
 	/** Долг в системе CAPITAL */
 ["CapitalDebt"]: {
 		/** Внутренний ID базы данных */
@@ -10587,6 +11394,43 @@ export type ModelTypes = {
 	statement?: ModelTypes["DocumentAggregate"] | undefined | null,
 	/** Статус долга */
 	status: ModelTypes["DebtStatus"],
+	/** Имя пользователя */
+	username?: string | undefined | null
+};
+	/** Расход в системе CAPITAL */
+["CapitalExpense"]: {
+		/** Внутренний ID базы данных */
+	_id: string,
+	/** Сумма расхода */
+	amount?: string | undefined | null,
+	/** Одобренная записка */
+	approved_statement?: ModelTypes["DocumentAggregate"] | undefined | null,
+	/** Авторизация расхода */
+	authorization?: ModelTypes["DocumentAggregate"] | undefined | null,
+	/** Номер блока последнего обновления */
+	block_num?: number | undefined | null,
+	/** Статус из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Описание расхода */
+	description?: string | undefined | null,
+	/** Хеш расхода */
+	expense_hash: string,
+	/** Служебная записка о расходе */
+	expense_statement?: ModelTypes["DocumentAggregate"] | undefined | null,
+	/** ID фонда */
+	fund_id?: number | undefined | null,
+	/** ID в блокчейне */
+	id?: number | undefined | null,
+	/** Существует ли запись в блокчейне */
+	present: boolean,
+	/** Хеш проекта */
+	project_hash?: string | undefined | null,
+	/** Дата расхода */
+	spended_at?: string | undefined | null,
+	/** Статус расхода */
+	status: ModelTypes["ExpenseStatus"],
 	/** Имя пользователя */
 	username?: string | undefined | null
 };
@@ -10637,6 +11481,56 @@ export type ModelTypes = {
 	status?: ModelTypes["InvestStatus"] | undefined | null,
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
+};
+	/** Задача в системе CAPITAL */
+["CapitalIssue"]: {
+		/** Внутренний ID базы данных */
+	_id: string,
+	/** ID создателя задачи (contributor) */
+	created_by: string,
+	/** Массив ID создателей (contributors) */
+	creators_ids: Array<string>,
+	/** ID цикла */
+	cycle_id?: string | undefined | null,
+	/** Описание задачи */
+	description?: string | undefined | null,
+	/** Оценка в story points или часах */
+	estimate: number,
+	/** Метаданные задачи */
+	metadata: string,
+	/** Приоритет задачи */
+	priority: ModelTypes["IssuePriority"],
+	/** Хеш проекта */
+	project_hash: string,
+	/** Порядок сортировки */
+	sort_order: number,
+	/** Статус задачи */
+	status: ModelTypes["IssueStatus"],
+	/** ID подмастерья (contributor) */
+	submaster_id?: string | undefined | null,
+	/** Название задачи */
+	title: string
+};
+	/** Параметры фильтрации для запросов задач CAPITAL */
+["CapitalIssueFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по ID создателя */
+	created_by?: string | undefined | null,
+	/** Фильтр по массиву ID создателей */
+	creators_ids?: Array<string> | undefined | null,
+	/** Фильтр по ID цикла */
+	cycle_id?: string | undefined | null,
+	/** Фильтр по приоритету задачи */
+	priority?: ModelTypes["IssuePriority"] | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу задачи */
+	status?: ModelTypes["IssueStatus"] | undefined | null,
+	/** Фильтр по ID подмастерья */
+	submaster_id?: string | undefined | null,
+	/** Фильтр по названию задачи */
+	title?: string | undefined | null
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: {
@@ -10754,6 +11648,40 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username?: string | undefined | null
 };
+	/** История (критерий выполнения) в системе CAPITAL */
+["CapitalStory"]: {
+		/** Внутренний ID базы данных */
+	_id: string,
+	/** ID создателя (contributor) */
+	created_by: string,
+	/** Описание истории */
+	description?: string | undefined | null,
+	/** ID задачи (если история привязана к задаче) */
+	issue_id?: string | undefined | null,
+	/** Хеш проекта (если история привязана к проекту) */
+	project_hash?: string | undefined | null,
+	/** Порядок сортировки */
+	sort_order: number,
+	/** Статус истории */
+	status: ModelTypes["StoryStatus"],
+	/** Название истории */
+	title: string
+};
+	/** Параметры фильтрации для запросов историй CAPITAL */
+["CapitalStoryFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по ID создателя */
+	created_by?: string | undefined | null,
+	/** Фильтр по ID задачи */
+	issue_id?: string | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу истории */
+	status?: ModelTypes["StoryStatus"] | undefined | null,
+	/** Фильтр по названию истории */
+	title?: string | undefined | null
+};
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: {
 		/** Внутренний ID базы данных */
@@ -10789,6 +11717,7 @@ export type ModelTypes = {
 	/** Списанные средства */
 	writeoff: string
 };
+	["CommitStatus"]:CommitStatus;
 	["CommonRequestInput"]: {
 	currency: string,
 	hash: string,
@@ -11010,6 +11939,16 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CreateCycleInput"]: {
+	/** Дата окончания цикла (ISO 8601) */
+	end_date: string,
+	/** Название цикла */
+	name: string,
+	/** Дата начала цикла (ISO 8601) */
+	start_date: string,
+	/** Статус цикла */
+	status?: ModelTypes["CycleStatus"] | undefined | null
+};
 	["CreateDebtInput"]: {
 	/** Сумма долга */
 	amount: string,
@@ -11091,6 +12030,34 @@ export type ModelTypes = {
 	["CreateInitialPaymentInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["CreateIssueInput"]: {
+	/** Вложения задачи (JSON строка) */
+	attachments?: string | undefined | null,
+	/** ID создателя задачи (contributor) */
+	created_by: string,
+	/** Массив ID создателей (contributors) */
+	creators_ids?: Array<string> | undefined | null,
+	/** ID цикла */
+	cycle_id?: string | undefined | null,
+	/** Описание задачи */
+	description?: string | undefined | null,
+	/** Оценка в story points или часах */
+	estimate?: number | undefined | null,
+	/** Метки задачи (JSON строка) */
+	labels?: string | undefined | null,
+	/** Приоритет задачи */
+	priority?: ModelTypes["IssuePriority"] | undefined | null,
+	/** Хеш проекта */
+	project_hash: string,
+	/** Порядок сортировки */
+	sort_order?: number | undefined | null,
+	/** Статус задачи */
+	status?: ModelTypes["IssueStatus"] | undefined | null,
+	/** ID подмастерья (contributor) */
+	submaster_id?: string | undefined | null,
+	/** Название задачи */
+	title: string
 };
 	["CreateOrganizationDataInput"]: {
 	/** Банковский счет организации */
@@ -11200,6 +12167,22 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CreateStoryInput"]: {
+	/** ID создателя (contributor) */
+	created_by: string,
+	/** Описание истории */
+	description?: string | undefined | null,
+	/** ID задачи (если история привязана к задаче) */
+	issue_id?: string | undefined | null,
+	/** Хеш проекта (если история привязана к проекту) */
+	project_hash?: string | undefined | null,
+	/** Порядок сортировки */
+	sort_order?: number | undefined | null,
+	/** Статус истории */
+	status?: ModelTypes["StoryStatus"] | undefined | null,
+	/** Название истории */
+	title: string
+};
 	["CreateSubscriptionInput"]: {
 	/** Данные подписки */
 	subscription: ModelTypes["WebPushSubscriptionDataInput"],
@@ -11244,6 +12227,7 @@ export type ModelTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	["CycleStatus"]:CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
 	["DeactivateSubscriptionInput"]: {
@@ -11434,6 +12418,17 @@ export type ModelTypes = {
 	/** ОГРН */
 	ogrn: string
 };
+	["ExpenseFilter"]: {
+	/** Фильтр по ID фонда */
+	fundId?: string | undefined | null,
+	/** Фильтр по хешу проекта */
+	projectHash?: string | undefined | null,
+	/** Фильтр по статусу расхода */
+	status?: string | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	["ExpenseStatus"]:ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
 ["ExtendedBlockchainAction"]: {
 		account: string,
@@ -11663,6 +12658,10 @@ export type ModelTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
+	["GetCapitalConfigInput"]: {
+	/** Название кооператива */
+	coopname: string
+};
 	["GetContributorInput"]: {
 	/** ID вкладчика */
 	_id: string
@@ -11677,6 +12676,10 @@ export type ModelTypes = {
 	page?: number | undefined | null,
 	type?: string | undefined | null,
 	username: string
+};
+	["GetExpenseInput"]: {
+	/** Внутренний ID базы данных */
+	_id: string
 };
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
@@ -11813,6 +12816,8 @@ export type ModelTypes = {
 	wif: string
 };
 	["InvestStatus"]:InvestStatus;
+	["IssuePriority"]:IssuePriority;
+	["IssueStatus"]:IssueStatus;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:any;
 	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
@@ -12116,10 +13121,14 @@ export type ModelTypes = {
 	capitalConvertSegment: ModelTypes["Transaction"],
 	/** Создание коммита в CAPITAL контракте */
 	capitalCreateCommit: ModelTypes["Transaction"],
+	/** Создание цикла в CAPITAL контракте */
+	capitalCreateCycle: ModelTypes["CapitalCycle"],
 	/** Получение ссуды в CAPITAL контракте */
 	capitalCreateDebt: ModelTypes["Transaction"],
 	/** Создание расхода в CAPITAL контракте */
 	capitalCreateExpense: ModelTypes["Transaction"],
+	/** Создание задачи в CAPITAL контракте */
+	capitalCreateIssue: ModelTypes["CapitalIssue"],
 	/** Создание программного имущественного взноса в CAPITAL контракте */
 	capitalCreateProgramProperty: ModelTypes["Transaction"],
 	/** Создание проекта в CAPITAL контракте */
@@ -12128,6 +13137,8 @@ export type ModelTypes = {
 	capitalCreateProjectInvest: ModelTypes["Transaction"],
 	/** Создание проектного имущественного взноса в CAPITAL контракте */
 	capitalCreateProjectProperty: ModelTypes["Transaction"],
+	/** Создание истории в CAPITAL контракте */
+	capitalCreateStory: ModelTypes["CapitalStory"],
 	/** Удаление проекта в CAPITAL контракте */
 	capitalDeleteProject: ModelTypes["Transaction"],
 	/** Финансирование программы CAPITAL контракта */
@@ -12377,11 +13388,31 @@ export type ModelTypes = {
 	ogrn: string
 };
 	["OrganizationType"]:OrganizationType;
+	["PaginatedCapitalCommitsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["CapitalCommit"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalContributorsPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<ModelTypes["CapitalContributor"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCapitalCyclesPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["CapitalCycle"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -12397,11 +13428,31 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["PaginatedCapitalExpensesPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["CapitalExpense"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalInvestsPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<ModelTypes["CapitalInvest"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCapitalIssuesPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["CapitalIssue"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -12432,6 +13483,16 @@ export type ModelTypes = {
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<ModelTypes["CapitalResult"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCapitalStoriesPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["CapitalStory"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -12825,18 +13886,30 @@ export type ModelTypes = {
 	username: string
 };
 	["Query"]: {
-		/** Получение вкладчика по внутреннему ID базы данных */
+		/** Получение списка коммитов кооператива с фильтрацией */
+	capitalCommits: ModelTypes["PaginatedCapitalCommitsPaginationResult"],
+	/** Получение конфигурации CAPITAL контракта кооператива */
+	capitalConfig?: ModelTypes["CapitalConfig"] | undefined | null,
+	/** Получение вкладчика по внутреннему ID базы данных */
 	capitalContributor?: ModelTypes["CapitalContributor"] | undefined | null,
 	/** Получение списка вкладчиков кооператива с фильтрацией */
 	capitalContributors: ModelTypes["PaginatedCapitalContributorsPaginationResult"],
+	/** Получение списка циклов кооператива с фильтрацией */
+	capitalCycles: ModelTypes["PaginatedCapitalCyclesPaginationResult"],
 	/** Получение долга по внутреннему ID базы данных */
 	capitalDebt?: ModelTypes["CapitalDebt"] | undefined | null,
 	/** Получение списка долгов кооператива с фильтрацией */
 	capitalDebts: ModelTypes["PaginatedCapitalDebtsPaginationResult"],
+	/** Получение расхода по внутреннему ID базы данных */
+	capitalExpense?: ModelTypes["CapitalExpense"] | undefined | null,
+	/** Получение списка расходов кооператива с фильтрацией */
+	capitalExpenses: ModelTypes["PaginatedCapitalExpensesPaginationResult"],
 	/** Получение инвестиции по внутреннему ID базы данных */
 	capitalInvest?: ModelTypes["CapitalInvest"] | undefined | null,
 	/** Получение списка инвестиций кооператива с фильтрацией */
 	capitalInvests: ModelTypes["PaginatedCapitalInvestsPaginationResult"],
+	/** Получение списка задач кооператива с фильтрацией */
+	capitalIssues: ModelTypes["PaginatedCapitalIssuesPaginationResult"],
 	/** Получение программной инвестиции по внутреннему ID базы данных */
 	capitalProgramInvest?: ModelTypes["CapitalProgramInvest"] | undefined | null,
 	/** Получение списка программных инвестиций кооператива с фильтрацией */
@@ -12851,6 +13924,8 @@ export type ModelTypes = {
 	capitalResult?: ModelTypes["CapitalResult"] | undefined | null,
 	/** Получение списка результатов кооператива с фильтрацией */
 	capitalResults: ModelTypes["PaginatedCapitalResultsPaginationResult"],
+	/** Получение списка историй кооператива с фильтрацией */
+	capitalStories: ModelTypes["PaginatedCapitalStoriesPaginationResult"],
 	/** Получение голоса по внутреннему ID базы данных */
 	capitalVote?: ModelTypes["CapitalVote"] | undefined | null,
 	/** Получение списка голосов кооператива с фильтрацией */
@@ -13608,6 +14683,7 @@ export type ModelTypes = {
 		action: ModelTypes["ExtendedBlockchainAction"],
 	documentAggregate: ModelTypes["DocumentAggregate"]
 };
+	["StoryStatus"]:StoryStatus;
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -14869,6 +15945,67 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	/** Коммит в системе CAPITAL */
+["CapitalCommit"]: {
+	__typename: "CapitalCommit",
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Номер блока последнего обновления */
+	block_num?: number | undefined | null,
+	/** Статус из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Хеш коммита */
+	commit_hash: string,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Дата создания */
+	created_at?: string | undefined | null,
+	/** ID в блокчейне */
+	id?: number | undefined | null,
+	/** Существует ли запись в блокчейне */
+	present: boolean,
+	/** Хеш проекта */
+	project_hash?: string | undefined | null,
+	/** Статус коммита */
+	status: GraphQLTypes["CommitStatus"],
+	/** Имя пользователя */
+	username?: string | undefined | null
+};
+	/** Параметры фильтрации для запросов коммитов CAPITAL */
+["CapitalCommitFilter"]: {
+		/** Фильтр по статусу из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Фильтр по хешу коммита */
+	commit_hash?: string | undefined | null,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по дате создания (YYYY-MM-DD) */
+	created_date?: string | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу коммита */
+	status?: GraphQLTypes["CommitStatus"] | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	/** Конфигурация CAPITAL контракта кооператива */
+["CapitalConfig"]: {
+	__typename: "CapitalConfig",
+	/** Процент голосования авторов */
+	authors_voting_percent: number,
+	/** Название кооператива */
+	coopname: string,
+	/** Процент бонуса координатора */
+	coordinator_bonus_percent: number,
+	/** Срок действия приглашения координатора в днях */
+	coordinator_invite_validity_days: number,
+	/** Процент голосования создателей */
+	creators_voting_percent: number,
+	/** Процент расходов */
+	expense_pool_percent: number,
+	/** Период голосования в днях */
+	voting_period_in_days: number
+};
 	/** Вкладчик кооператива в системе CAPITAL */
 ["CapitalContributor"]: {
 	__typename: "CapitalContributor",
@@ -14930,6 +16067,33 @@ export type GraphQLTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
+	/** Цикл разработки в системе CAPITAL */
+["CapitalCycle"]: {
+	__typename: "CapitalCycle",
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Дата окончания */
+	end_date: GraphQLTypes["DateTime"],
+	/** Название цикла */
+	name: string,
+	/** Дата начала */
+	start_date: GraphQLTypes["DateTime"],
+	/** Статус цикла */
+	status: GraphQLTypes["CycleStatus"]
+};
+	/** Параметры фильтрации для запросов циклов CAPITAL */
+["CapitalCycleFilter"]: {
+		/** Фильтр по дате окончания (YYYY-MM-DD) */
+	end_date?: string | undefined | null,
+	/** Показать только активные циклы */
+	is_active?: boolean | undefined | null,
+	/** Фильтр по названию цикла */
+	name?: string | undefined | null,
+	/** Фильтр по дате начала (YYYY-MM-DD) */
+	start_date?: string | undefined | null,
+	/** Фильтр по статусу цикла */
+	status?: GraphQLTypes["CycleStatus"] | undefined | null
+};
 	/** Долг в системе CAPITAL */
 ["CapitalDebt"]: {
 	__typename: "CapitalDebt",
@@ -14963,6 +16127,44 @@ export type GraphQLTypes = {
 	statement?: GraphQLTypes["DocumentAggregate"] | undefined | null,
 	/** Статус долга */
 	status: GraphQLTypes["DebtStatus"],
+	/** Имя пользователя */
+	username?: string | undefined | null
+};
+	/** Расход в системе CAPITAL */
+["CapitalExpense"]: {
+	__typename: "CapitalExpense",
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Сумма расхода */
+	amount?: string | undefined | null,
+	/** Одобренная записка */
+	approved_statement?: GraphQLTypes["DocumentAggregate"] | undefined | null,
+	/** Авторизация расхода */
+	authorization?: GraphQLTypes["DocumentAggregate"] | undefined | null,
+	/** Номер блока последнего обновления */
+	block_num?: number | undefined | null,
+	/** Статус из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Описание расхода */
+	description?: string | undefined | null,
+	/** Хеш расхода */
+	expense_hash: string,
+	/** Служебная записка о расходе */
+	expense_statement?: GraphQLTypes["DocumentAggregate"] | undefined | null,
+	/** ID фонда */
+	fund_id?: number | undefined | null,
+	/** ID в блокчейне */
+	id?: number | undefined | null,
+	/** Существует ли запись в блокчейне */
+	present: boolean,
+	/** Хеш проекта */
+	project_hash?: string | undefined | null,
+	/** Дата расхода */
+	spended_at?: string | undefined | null,
+	/** Статус расхода */
+	status: GraphQLTypes["ExpenseStatus"],
 	/** Имя пользователя */
 	username?: string | undefined | null
 };
@@ -15014,6 +16216,57 @@ export type GraphQLTypes = {
 	status?: GraphQLTypes["InvestStatus"] | undefined | null,
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
+};
+	/** Задача в системе CAPITAL */
+["CapitalIssue"]: {
+	__typename: "CapitalIssue",
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** ID создателя задачи (contributor) */
+	created_by: string,
+	/** Массив ID создателей (contributors) */
+	creators_ids: Array<string>,
+	/** ID цикла */
+	cycle_id?: string | undefined | null,
+	/** Описание задачи */
+	description?: string | undefined | null,
+	/** Оценка в story points или часах */
+	estimate: number,
+	/** Метаданные задачи */
+	metadata: string,
+	/** Приоритет задачи */
+	priority: GraphQLTypes["IssuePriority"],
+	/** Хеш проекта */
+	project_hash: string,
+	/** Порядок сортировки */
+	sort_order: number,
+	/** Статус задачи */
+	status: GraphQLTypes["IssueStatus"],
+	/** ID подмастерья (contributor) */
+	submaster_id?: string | undefined | null,
+	/** Название задачи */
+	title: string
+};
+	/** Параметры фильтрации для запросов задач CAPITAL */
+["CapitalIssueFilter"]: {
+		/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по ID создателя */
+	created_by?: string | undefined | null,
+	/** Фильтр по массиву ID создателей */
+	creators_ids?: Array<string> | undefined | null,
+	/** Фильтр по ID цикла */
+	cycle_id?: string | undefined | null,
+	/** Фильтр по приоритету задачи */
+	priority?: GraphQLTypes["IssuePriority"] | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу задачи */
+	status?: GraphQLTypes["IssueStatus"] | undefined | null,
+	/** Фильтр по ID подмастерья */
+	submaster_id?: string | undefined | null,
+	/** Фильтр по названию задачи */
+	title?: string | undefined | null
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: {
@@ -15134,6 +16387,41 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username?: string | undefined | null
 };
+	/** История (критерий выполнения) в системе CAPITAL */
+["CapitalStory"]: {
+	__typename: "CapitalStory",
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** ID создателя (contributor) */
+	created_by: string,
+	/** Описание истории */
+	description?: string | undefined | null,
+	/** ID задачи (если история привязана к задаче) */
+	issue_id?: string | undefined | null,
+	/** Хеш проекта (если история привязана к проекту) */
+	project_hash?: string | undefined | null,
+	/** Порядок сортировки */
+	sort_order: number,
+	/** Статус истории */
+	status: GraphQLTypes["StoryStatus"],
+	/** Название истории */
+	title: string
+};
+	/** Параметры фильтрации для запросов историй CAPITAL */
+["CapitalStoryFilter"]: {
+		/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по ID создателя */
+	created_by?: string | undefined | null,
+	/** Фильтр по ID задачи */
+	issue_id?: string | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу истории */
+	status?: GraphQLTypes["StoryStatus"] | undefined | null,
+	/** Фильтр по названию истории */
+	title?: string | undefined | null
+};
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: {
 	__typename: "CapitalVote",
@@ -15171,6 +16459,8 @@ export type GraphQLTypes = {
 	/** Списанные средства */
 	writeoff: string
 };
+	/** Статус коммита в системе CAPITAL */
+["CommitStatus"]: CommitStatus;
 	["CommonRequestInput"]: {
 		currency: string,
 	hash: string,
@@ -15396,6 +16686,16 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CreateCycleInput"]: {
+		/** Дата окончания цикла (ISO 8601) */
+	end_date: string,
+	/** Название цикла */
+	name: string,
+	/** Дата начала цикла (ISO 8601) */
+	start_date: string,
+	/** Статус цикла */
+	status?: GraphQLTypes["CycleStatus"] | undefined | null
+};
 	["CreateDebtInput"]: {
 		/** Сумма долга */
 	amount: string,
@@ -15477,6 +16777,34 @@ export type GraphQLTypes = {
 	["CreateInitialPaymentInput"]: {
 		/** Имя аккаунта пользователя */
 	username: string
+};
+	["CreateIssueInput"]: {
+		/** Вложения задачи (JSON строка) */
+	attachments?: string | undefined | null,
+	/** ID создателя задачи (contributor) */
+	created_by: string,
+	/** Массив ID создателей (contributors) */
+	creators_ids?: Array<string> | undefined | null,
+	/** ID цикла */
+	cycle_id?: string | undefined | null,
+	/** Описание задачи */
+	description?: string | undefined | null,
+	/** Оценка в story points или часах */
+	estimate?: number | undefined | null,
+	/** Метки задачи (JSON строка) */
+	labels?: string | undefined | null,
+	/** Приоритет задачи */
+	priority?: GraphQLTypes["IssuePriority"] | undefined | null,
+	/** Хеш проекта */
+	project_hash: string,
+	/** Порядок сортировки */
+	sort_order?: number | undefined | null,
+	/** Статус задачи */
+	status?: GraphQLTypes["IssueStatus"] | undefined | null,
+	/** ID подмастерья (contributor) */
+	submaster_id?: string | undefined | null,
+	/** Название задачи */
+	title: string
 };
 	["CreateOrganizationDataInput"]: {
 		/** Банковский счет организации */
@@ -15586,6 +16914,22 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CreateStoryInput"]: {
+		/** ID создателя (contributor) */
+	created_by: string,
+	/** Описание истории */
+	description?: string | undefined | null,
+	/** ID задачи (если история привязана к задаче) */
+	issue_id?: string | undefined | null,
+	/** Хеш проекта (если история привязана к проекту) */
+	project_hash?: string | undefined | null,
+	/** Порядок сортировки */
+	sort_order?: number | undefined | null,
+	/** Статус истории */
+	status?: GraphQLTypes["StoryStatus"] | undefined | null,
+	/** Название истории */
+	title: string
+};
 	["CreateSubscriptionInput"]: {
 		/** Данные подписки */
 	subscription: GraphQLTypes["WebPushSubscriptionDataInput"],
@@ -15633,6 +16977,8 @@ export type GraphQLTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	/** Статус цикла в системе CAPITAL */
+["CycleStatus"]: CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]: "scalar" & { name: "DateTime" };
 	["DeactivateSubscriptionInput"]: {
@@ -15833,6 +17179,18 @@ export type GraphQLTypes = {
 	/** ОГРН */
 	ogrn: string
 };
+	["ExpenseFilter"]: {
+		/** Фильтр по ID фонда */
+	fundId?: string | undefined | null,
+	/** Фильтр по хешу проекта */
+	projectHash?: string | undefined | null,
+	/** Фильтр по статусу расхода */
+	status?: string | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	/** Статус расхода в системе CAPITAL */
+["ExpenseStatus"]: ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
 ["ExtendedBlockchainAction"]: {
 	__typename: "ExtendedBlockchainAction",
@@ -16067,6 +17425,10 @@ export type GraphQLTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
+	["GetCapitalConfigInput"]: {
+		/** Название кооператива */
+	coopname: string
+};
 	["GetContributorInput"]: {
 		/** ID вкладчика */
 	_id: string
@@ -16081,6 +17443,10 @@ export type GraphQLTypes = {
 	page?: number | undefined | null,
 	type?: string | undefined | null,
 	username: string
+};
+	["GetExpenseInput"]: {
+		/** Внутренний ID базы данных */
+	_id: string
 };
 	["GetExtensionsInput"]: {
 		/** Фильтр включенных расширений */
@@ -16220,6 +17586,10 @@ export type GraphQLTypes = {
 };
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]: InvestStatus;
+	/** Приоритет задачи в системе CAPITAL */
+["IssuePriority"]: IssuePriority;
+	/** Статус задачи в системе CAPITAL */
+["IssueStatus"]: IssueStatus;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]: "scalar" & { name: "JSON" };
 	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
@@ -16535,10 +17905,14 @@ export type GraphQLTypes = {
 	capitalConvertSegment: GraphQLTypes["Transaction"],
 	/** Создание коммита в CAPITAL контракте */
 	capitalCreateCommit: GraphQLTypes["Transaction"],
+	/** Создание цикла в CAPITAL контракте */
+	capitalCreateCycle: GraphQLTypes["CapitalCycle"],
 	/** Получение ссуды в CAPITAL контракте */
 	capitalCreateDebt: GraphQLTypes["Transaction"],
 	/** Создание расхода в CAPITAL контракте */
 	capitalCreateExpense: GraphQLTypes["Transaction"],
+	/** Создание задачи в CAPITAL контракте */
+	capitalCreateIssue: GraphQLTypes["CapitalIssue"],
 	/** Создание программного имущественного взноса в CAPITAL контракте */
 	capitalCreateProgramProperty: GraphQLTypes["Transaction"],
 	/** Создание проекта в CAPITAL контракте */
@@ -16547,6 +17921,8 @@ export type GraphQLTypes = {
 	capitalCreateProjectInvest: GraphQLTypes["Transaction"],
 	/** Создание проектного имущественного взноса в CAPITAL контракте */
 	capitalCreateProjectProperty: GraphQLTypes["Transaction"],
+	/** Создание истории в CAPITAL контракте */
+	capitalCreateStory: GraphQLTypes["CapitalStory"],
 	/** Удаление проекта в CAPITAL контракте */
 	capitalDeleteProject: GraphQLTypes["Transaction"],
 	/** Финансирование программы CAPITAL контракта */
@@ -16800,12 +18176,34 @@ export type GraphQLTypes = {
 };
 	/** Тип юридического лица */
 ["OrganizationType"]: OrganizationType;
+	["PaginatedCapitalCommitsPaginationResult"]: {
+	__typename: "PaginatedCapitalCommitsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["CapitalCommit"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalContributorsPaginationResult"]: {
 	__typename: "PaginatedCapitalContributorsPaginationResult",
 	/** Текущая страница */
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<GraphQLTypes["CapitalContributor"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCapitalCyclesPaginationResult"]: {
+	__typename: "PaginatedCapitalCyclesPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["CapitalCycle"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -16822,12 +18220,34 @@ export type GraphQLTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["PaginatedCapitalExpensesPaginationResult"]: {
+	__typename: "PaginatedCapitalExpensesPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["CapitalExpense"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalInvestsPaginationResult"]: {
 	__typename: "PaginatedCapitalInvestsPaginationResult",
 	/** Текущая страница */
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<GraphQLTypes["CapitalInvest"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCapitalIssuesPaginationResult"]: {
+	__typename: "PaginatedCapitalIssuesPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["CapitalIssue"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -16861,6 +18281,17 @@ export type GraphQLTypes = {
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<GraphQLTypes["CapitalResult"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCapitalStoriesPaginationResult"]: {
+	__typename: "PaginatedCapitalStoriesPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["CapitalStory"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -17282,18 +18713,30 @@ export type GraphQLTypes = {
 };
 	["Query"]: {
 	__typename: "Query",
+	/** Получение списка коммитов кооператива с фильтрацией */
+	capitalCommits: GraphQLTypes["PaginatedCapitalCommitsPaginationResult"],
+	/** Получение конфигурации CAPITAL контракта кооператива */
+	capitalConfig?: GraphQLTypes["CapitalConfig"] | undefined | null,
 	/** Получение вкладчика по внутреннему ID базы данных */
 	capitalContributor?: GraphQLTypes["CapitalContributor"] | undefined | null,
 	/** Получение списка вкладчиков кооператива с фильтрацией */
 	capitalContributors: GraphQLTypes["PaginatedCapitalContributorsPaginationResult"],
+	/** Получение списка циклов кооператива с фильтрацией */
+	capitalCycles: GraphQLTypes["PaginatedCapitalCyclesPaginationResult"],
 	/** Получение долга по внутреннему ID базы данных */
 	capitalDebt?: GraphQLTypes["CapitalDebt"] | undefined | null,
 	/** Получение списка долгов кооператива с фильтрацией */
 	capitalDebts: GraphQLTypes["PaginatedCapitalDebtsPaginationResult"],
+	/** Получение расхода по внутреннему ID базы данных */
+	capitalExpense?: GraphQLTypes["CapitalExpense"] | undefined | null,
+	/** Получение списка расходов кооператива с фильтрацией */
+	capitalExpenses: GraphQLTypes["PaginatedCapitalExpensesPaginationResult"],
 	/** Получение инвестиции по внутреннему ID базы данных */
 	capitalInvest?: GraphQLTypes["CapitalInvest"] | undefined | null,
 	/** Получение списка инвестиций кооператива с фильтрацией */
 	capitalInvests: GraphQLTypes["PaginatedCapitalInvestsPaginationResult"],
+	/** Получение списка задач кооператива с фильтрацией */
+	capitalIssues: GraphQLTypes["PaginatedCapitalIssuesPaginationResult"],
 	/** Получение программной инвестиции по внутреннему ID базы данных */
 	capitalProgramInvest?: GraphQLTypes["CapitalProgramInvest"] | undefined | null,
 	/** Получение списка программных инвестиций кооператива с фильтрацией */
@@ -17308,6 +18751,8 @@ export type GraphQLTypes = {
 	capitalResult?: GraphQLTypes["CapitalResult"] | undefined | null,
 	/** Получение списка результатов кооператива с фильтрацией */
 	capitalResults: GraphQLTypes["PaginatedCapitalResultsPaginationResult"],
+	/** Получение списка историй кооператива с фильтрацией */
+	capitalStories: GraphQLTypes["PaginatedCapitalStoriesPaginationResult"],
 	/** Получение голоса по внутреннему ID базы данных */
 	capitalVote?: GraphQLTypes["CapitalVote"] | undefined | null,
 	/** Получение списка голосов кооператива с фильтрацией */
@@ -18078,6 +19523,8 @@ export type GraphQLTypes = {
 	action: GraphQLTypes["ExtendedBlockchainAction"],
 	documentAggregate: GraphQLTypes["DocumentAggregate"]
 };
+	/** Статус истории в системе CAPITAL */
+["StoryStatus"]: StoryStatus;
 	["SubmitVoteInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -18456,6 +19903,13 @@ export enum AccountType {
 	individual = "individual",
 	organization = "organization"
 }
+/** Статус коммита в системе CAPITAL */
+export enum CommitStatus {
+	APPROVED = "APPROVED",
+	DECLINED = "DECLINED",
+	PENDING = "PENDING",
+	UNDEFINED = "UNDEFINED"
+}
 /** Статус вкладчика в системе CAPITAL */
 export enum ContributorStatus {
 	ACTIVE = "ACTIVE",
@@ -18468,6 +19922,12 @@ export enum ContributorStatus {
 export enum Country {
 	Russia = "Russia"
 }
+/** Статус цикла в системе CAPITAL */
+export enum CycleStatus {
+	ACTIVE = "ACTIVE",
+	COMPLETED = "COMPLETED",
+	FUTURE = "FUTURE"
+}
 /** Статус долга в системе CAPITAL */
 export enum DebtStatus {
 	ACTIVE = "ACTIVE",
@@ -18475,6 +19935,15 @@ export enum DebtStatus {
 	CANCELLED = "CANCELLED",
 	PENDING = "PENDING",
 	SETTLED = "SETTLED",
+	UNDEFINED = "UNDEFINED"
+}
+/** Статус расхода в системе CAPITAL */
+export enum ExpenseStatus {
+	APPROVED = "APPROVED",
+	CANCELLED = "CANCELLED",
+	DECLINED = "DECLINED",
+	PAID = "PAID",
+	PENDING = "PENDING",
 	UNDEFINED = "UNDEFINED"
 }
 /** Расширенный статус собрания на основе дат и состояния */
@@ -18498,6 +19967,21 @@ export enum InvestStatus {
 	PENDING = "PENDING",
 	RETURNED = "RETURNED",
 	UNDEFINED = "UNDEFINED"
+}
+/** Приоритет задачи в системе CAPITAL */
+export enum IssuePriority {
+	HIGH = "HIGH",
+	LOW = "LOW",
+	MEDIUM = "MEDIUM",
+	URGENT = "URGENT"
+}
+/** Статус задачи в системе CAPITAL */
+export enum IssueStatus {
+	BACKLOG = "BACKLOG",
+	CANCELED = "CANCELED",
+	DONE = "DONE",
+	IN_PROGRESS = "IN_PROGRESS",
+	TODO = "TODO"
 }
 /** Тип юридического лица */
 export enum OrganizationType {
@@ -18554,6 +20038,12 @@ export enum ResultStatus {
 	PENDING = "PENDING",
 	UNDEFINED = "UNDEFINED"
 }
+/** Статус истории в системе CAPITAL */
+export enum StoryStatus {
+	CANCELLED = "CANCELLED",
+	COMPLETED = "COMPLETED",
+	PENDING = "PENDING"
+}
 /** Состояние контроллера кооператива */
 export enum SystemStatus {
 	active = "active",
@@ -18607,9 +20097,14 @@ type ZEUS_VARIABLES = {
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["CalculateVotesInput"]: ValueTypes["CalculateVotesInput"];
 	["CancelRequestInput"]: ValueTypes["CancelRequestInput"];
+	["CapitalCommitFilter"]: ValueTypes["CapitalCommitFilter"];
 	["CapitalContributorFilter"]: ValueTypes["CapitalContributorFilter"];
+	["CapitalCycleFilter"]: ValueTypes["CapitalCycleFilter"];
 	["CapitalInvestFilter"]: ValueTypes["CapitalInvestFilter"];
+	["CapitalIssueFilter"]: ValueTypes["CapitalIssueFilter"];
 	["CapitalProjectFilter"]: ValueTypes["CapitalProjectFilter"];
+	["CapitalStoryFilter"]: ValueTypes["CapitalStoryFilter"];
+	["CommitStatus"]: ValueTypes["CommitStatus"];
 	["CommonRequestInput"]: ValueTypes["CommonRequestInput"];
 	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
 	["CompleteVotingInput"]: ValueTypes["CompleteVotingInput"];
@@ -18624,12 +20119,14 @@ type ZEUS_VARIABLES = {
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
 	["CreateChildOrderInput"]: ValueTypes["CreateChildOrderInput"];
 	["CreateCommitInput"]: ValueTypes["CreateCommitInput"];
+	["CreateCycleInput"]: ValueTypes["CreateCycleInput"];
 	["CreateDebtInput"]: ValueTypes["CreateDebtInput"];
 	["CreateDepositPaymentInput"]: ValueTypes["CreateDepositPaymentInput"];
 	["CreateEntrepreneurDataInput"]: ValueTypes["CreateEntrepreneurDataInput"];
 	["CreateExpenseInput"]: ValueTypes["CreateExpenseInput"];
 	["CreateIndividualDataInput"]: ValueTypes["CreateIndividualDataInput"];
 	["CreateInitialPaymentInput"]: ValueTypes["CreateInitialPaymentInput"];
+	["CreateIssueInput"]: ValueTypes["CreateIssueInput"];
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateParentOfferInput"]: ValueTypes["CreateParentOfferInput"];
 	["CreateProgramPropertyInput"]: ValueTypes["CreateProgramPropertyInput"];
@@ -18637,8 +20134,10 @@ type ZEUS_VARIABLES = {
 	["CreateProjectInput"]: ValueTypes["CreateProjectInput"];
 	["CreateProjectInvestInput"]: ValueTypes["CreateProjectInvestInput"];
 	["CreateProjectPropertyInput"]: ValueTypes["CreateProjectPropertyInput"];
+	["CreateStoryInput"]: ValueTypes["CreateStoryInput"];
 	["CreateSubscriptionInput"]: ValueTypes["CreateSubscriptionInput"];
 	["CreateWithdrawInput"]: ValueTypes["CreateWithdrawInput"];
+	["CycleStatus"]: ValueTypes["CycleStatus"];
 	["DateTime"]: ValueTypes["DateTime"];
 	["DeactivateSubscriptionInput"]: ValueTypes["DeactivateSubscriptionInput"];
 	["DebtFilter"]: ValueTypes["DebtFilter"];
@@ -18652,6 +20151,8 @@ type ZEUS_VARIABLES = {
 	["DisputeOnRequestInput"]: ValueTypes["DisputeOnRequestInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
 	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];
+	["ExpenseFilter"]: ValueTypes["ExpenseFilter"];
+	["ExpenseStatus"]: ValueTypes["ExpenseStatus"];
 	["ExtendedMeetStatus"]: ValueTypes["ExtendedMeetStatus"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
 	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
@@ -18662,9 +20163,11 @@ type ZEUS_VARIABLES = {
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
+	["GetCapitalConfigInput"]: ValueTypes["GetCapitalConfigInput"];
 	["GetContributorInput"]: ValueTypes["GetContributorInput"];
 	["GetDebtInput"]: ValueTypes["GetDebtInput"];
 	["GetDocumentsInput"]: ValueTypes["GetDocumentsInput"];
+	["GetExpenseInput"]: ValueTypes["GetExpenseInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
 	["GetInvestInput"]: ValueTypes["GetInvestInput"];
 	["GetLedgerHistoryInput"]: ValueTypes["GetLedgerHistoryInput"];
@@ -18682,6 +20185,8 @@ type ZEUS_VARIABLES = {
 	["Init"]: ValueTypes["Init"];
 	["Install"]: ValueTypes["Install"];
 	["InvestStatus"]: ValueTypes["InvestStatus"];
+	["IssuePriority"]: ValueTypes["IssuePriority"];
+	["IssueStatus"]: ValueTypes["IssueStatus"];
 	["JSON"]: ValueTypes["JSON"];
 	["JSONObject"]: ValueTypes["JSONObject"];
 	["LoginInput"]: ValueTypes["LoginInput"];
@@ -18754,6 +20259,7 @@ type ZEUS_VARIABLES = {
 	["StartProjectInput"]: ValueTypes["StartProjectInput"];
 	["StartResetKeyInput"]: ValueTypes["StartResetKeyInput"];
 	["StartVotingInput"]: ValueTypes["StartVotingInput"];
+	["StoryStatus"]: ValueTypes["StoryStatus"];
 	["SubmitVoteInput"]: ValueTypes["SubmitVoteInput"];
 	["SupplyOnRequestInput"]: ValueTypes["SupplyOnRequestInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];

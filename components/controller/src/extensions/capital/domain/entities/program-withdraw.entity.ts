@@ -3,7 +3,7 @@ import type { IProgramWithdrawDatabaseData } from '../interfaces/program-withdra
 import type { IProgramWithdrawBlockchainData } from '../interfaces/program-withdraw-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-
+import { randomUUID } from 'crypto';
 /**
  * Доменная сущность возврата из программы
  *
@@ -45,7 +45,7 @@ export class ProgramWithdrawDomainEntity
    */
   constructor(databaseData: IProgramWithdrawDatabaseData, blockchainData?: IProgramWithdrawBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
     this.withdraw_hash = databaseData.withdraw_hash;

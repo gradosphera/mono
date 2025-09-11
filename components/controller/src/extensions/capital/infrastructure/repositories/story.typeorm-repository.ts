@@ -7,6 +7,12 @@ import { StoryTypeormEntity } from '../entities/story.typeorm-entity';
 import { StoryMapper } from '../mappers/story.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { StoryStatus } from '../../domain/enums/story-status.enum';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import type { StoryFilterInputDTO } from '../../application/dto/generation/story-filter.input';
+import { PaginationUtils } from '~/shared/utils/pagination.utils';
 
 @Injectable()
 export class StoryTypeormRepository implements StoryRepository {
@@ -15,7 +21,7 @@ export class StoryTypeormRepository implements StoryRepository {
     private readonly storyTypeormRepository: Repository<StoryTypeormEntity>
   ) {}
 
-  async create(story: Omit<StoryDomainEntity, '_id'>): Promise<StoryDomainEntity> {
+  async create(story: StoryDomainEntity): Promise<StoryDomainEntity> {
     const entity = this.storyTypeormRepository.create(StoryMapper.toEntity(story));
     const savedEntity = await this.storyTypeormRepository.save(entity);
     return StoryMapper.toDomain(savedEntity);
@@ -108,5 +114,65 @@ export class StoryTypeormRepository implements StoryRepository {
 
   async delete(_id: string): Promise<void> {
     await this.storyTypeormRepository.delete(_id);
+  }
+
+  async findAllPaginated(
+    filter?: StoryFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<StoryDomainEntity>> {
+    // Валидируем параметры пагинации
+    const validatedOptions: PaginationInputDomainInterface = options
+      ? PaginationUtils.validatePaginationOptions(options)
+      : {
+          page: 1,
+          limit: 10,
+          sortBy: undefined,
+          sortOrder: 'ASC' as const,
+        };
+
+    // Получаем параметры для SQL запроса
+    const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
+
+    // Строим условия поиска
+    const where: any = {};
+    if (filter?.title) {
+      where.title = filter.title;
+    }
+    if (filter?.status) {
+      where.status = filter.status;
+    }
+    if (filter?.project_hash) {
+      where.project_hash = filter.project_hash;
+    }
+    if (filter?.issue_id) {
+      where.issue_id = filter.issue_id;
+    }
+    if (filter?.created_by) {
+      where.created_by = filter.created_by;
+    }
+
+    // Получаем общее количество записей
+    const totalCount = await this.storyTypeormRepository.count({ where });
+
+    // Получаем записи с пагинацией
+    const orderBy: any = {};
+    if (validatedOptions.sortBy) {
+      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+    } else {
+      orderBy.sort_order = 'ASC';
+    }
+
+    const entities = await this.storyTypeormRepository.find({
+      where,
+      skip: offset,
+      take: limit,
+      order: orderBy,
+    });
+
+    // Преобразуем в доменные сущности
+    const items = entities.map((entity) => StoryMapper.toDomain(entity));
+
+    // Возвращаем результат с пагинацией
+    return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
   }
 }

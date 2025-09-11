@@ -25,19 +25,19 @@ export class StoryMapper {
   }
 
   /**
-   * Преобразование доменной сущности в TypeORM сущность для создания
+   * Преобразование доменной сущности в TypeORM сущность
    */
-  static toEntity(domain: Partial<StoryDomainEntity>): Partial<StoryTypeormEntity> {
-    const entity: Partial<StoryTypeormEntity> = {};
-
-    if (domain._id !== undefined) entity._id = domain._id;
-    if (domain.title !== undefined) entity.title = domain.title;
-    if (domain.description !== undefined) entity.description = domain.description;
-    if (domain.status !== undefined) entity.status = domain.status;
-    if (domain.project_hash !== undefined) entity.project_hash = domain.project_hash;
-    if (domain.issue_id !== undefined) entity.issue_id = domain.issue_id;
-    if (domain.created_by !== undefined) entity.created_by = domain.created_by;
-    if (domain.sort_order !== undefined) entity.sort_order = domain.sort_order;
+  static toEntity(domain: StoryDomainEntity): Partial<StoryTypeormEntity> {
+    const entity: Partial<StoryTypeormEntity> = {
+      _id: domain._id,
+      title: domain.title,
+      description: domain.description,
+      status: domain.status,
+      project_hash: domain.project_hash,
+      issue_id: domain.issue_id,
+      created_by: domain.created_by,
+      sort_order: domain.sort_order,
+    };
 
     return entity;
   }

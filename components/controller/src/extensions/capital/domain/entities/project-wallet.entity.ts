@@ -1,7 +1,7 @@
 import type { IProjectWalletDatabaseData } from '../interfaces/project-wallet-database.interface';
 import type { IProjectWalletBlockchainData } from '../interfaces/project-wallet-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-
+import { randomUUID } from 'crypto';
 /**
  * Доменная сущность проектного кошелька
  *
@@ -39,7 +39,7 @@ export class ProjectWalletDomainEntity
    */
   constructor(databaseData: IProjectWalletDatabaseData, blockchainData?: IProjectWalletBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.block_num = databaseData.block_num;
     this.username = databaseData.username;
     this.present = databaseData.present;

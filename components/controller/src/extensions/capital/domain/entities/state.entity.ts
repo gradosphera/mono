@@ -1,7 +1,7 @@
 import type { IStateDatabaseData } from '../interfaces/state-database.interface';
 import type { IStateBlockchainData } from '../interfaces/state-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-
+import { randomUUID } from 'crypto';
 /**
  * Доменная сущность состояния кооператива
  *
@@ -36,7 +36,7 @@ export class StateDomainEntity implements IBlockchainSynchronizable, IStateDatab
    */
   constructor(databaseData: IStateDatabaseData, blockchainData?: IStateBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
 
     this.present = databaseData.present;
     this.block_num = databaseData.block_num;

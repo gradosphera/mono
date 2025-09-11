@@ -3,6 +3,7 @@ import type { IProgramInvestDatabaseData } from '../interfaces/program-invest-da
 import type { IProgramInvestBlockchainData } from '../interfaces/program-invest-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
+import { randomUUID } from 'crypto';
 
 /**
  * Доменная сущность программной инвестиции
@@ -45,7 +46,7 @@ export class ProgramInvestDomainEntity
    */
   constructor(databaseData: IProgramInvestDatabaseData, blockchainData?: IProgramInvestBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
     this.invest_hash = databaseData.invest_hash;

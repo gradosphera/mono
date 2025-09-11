@@ -2,7 +2,7 @@ import { ProjectPropertyStatus } from '../enums/project-property-status.enum';
 import type { IProjectPropertyDatabaseData } from '../interfaces/project-property-database.interface';
 import type { IProjectPropertyBlockchainData } from '../interfaces/project-property-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-
+import { randomUUID } from 'crypto';
 /**
  * Доменная сущность проектного имущественного взноса
  *
@@ -44,7 +44,7 @@ export class ProjectPropertyDomainEntity
    */
   constructor(databaseData: IProjectPropertyDatabaseData, blockchainData?: IProjectPropertyBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
     this.property_hash = databaseData.property_hash;

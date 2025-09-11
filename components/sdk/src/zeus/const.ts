@@ -112,15 +112,29 @@ export const AllTypesProps: Record<string,any> = {
 	CancelRequestInput:{
 
 	},
+	CapitalCommitFilter:{
+		status:"CommitStatus"
+	},
 	CapitalContributorFilter:{
 		status:"ContributorStatus"
+	},
+	CapitalCycleFilter:{
+		status:"CycleStatus"
 	},
 	CapitalInvestFilter:{
 		status:"InvestStatus"
 	},
+	CapitalIssueFilter:{
+		priority:"IssuePriority",
+		status:"IssueStatus"
+	},
 	CapitalProjectFilter:{
 		status:"ProjectStatus"
 	},
+	CapitalStoryFilter:{
+		status:"StoryStatus"
+	},
+	CommitStatus: "enum" as const,
 	CommonRequestInput:{
 
 	},
@@ -162,6 +176,9 @@ export const AllTypesProps: Record<string,any> = {
 	CreateCommitInput:{
 
 	},
+	CreateCycleInput:{
+		status:"CycleStatus"
+	},
 	CreateDebtInput:{
 		statement:"SignedDigitalDocumentInput"
 	},
@@ -181,6 +198,10 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	CreateInitialPaymentInput:{
 
+	},
+	CreateIssueInput:{
+		priority:"IssuePriority",
+		status:"IssueStatus"
 	},
 	CreateOrganizationDataInput:{
 		bank_account:"BankAccountInput",
@@ -206,12 +227,16 @@ export const AllTypesProps: Record<string,any> = {
 	CreateProjectPropertyInput:{
 
 	},
+	CreateStoryInput:{
+		status:"StoryStatus"
+	},
 	CreateSubscriptionInput:{
 		subscription:"WebPushSubscriptionDataInput"
 	},
 	CreateWithdrawInput:{
 		statement:"ReturnByMoneySignedDocumentInput"
 	},
+	CycleStatus: "enum" as const,
 	DateTime: `scalar.DateTime` as const,
 	DeactivateSubscriptionInput:{
 
@@ -247,6 +272,10 @@ export const AllTypesProps: Record<string,any> = {
 	EntrepreneurDetailsInput:{
 
 	},
+	ExpenseFilter:{
+
+	},
+	ExpenseStatus: "enum" as const,
 	ExtendedMeetStatus: "enum" as const,
 	ExtensionInput:{
 		config:"JSON",
@@ -277,6 +306,9 @@ export const AllTypesProps: Record<string,any> = {
 	GetBranchesInput:{
 
 	},
+	GetCapitalConfigInput:{
+
+	},
 	GetContributorInput:{
 
 	},
@@ -285,6 +317,9 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	GetDocumentsInput:{
 		filter:"JSON"
+	},
+	GetExpenseInput:{
+
 	},
 	GetExtensionsInput:{
 
@@ -336,6 +371,8 @@ export const AllTypesProps: Record<string,any> = {
 		soviet:"SovietMemberInput"
 	},
 	InvestStatus: "enum" as const,
+	IssuePriority: "enum" as const,
+	IssueStatus: "enum" as const,
 	JSON: `scalar.JSON` as const,
 	JSONObject: `scalar.JSONObject` as const,
 	LoginInput:{
@@ -381,11 +418,17 @@ export const AllTypesProps: Record<string,any> = {
 		capitalCreateCommit:{
 			data:"CreateCommitInput"
 		},
+		capitalCreateCycle:{
+			data:"CreateCycleInput"
+		},
 		capitalCreateDebt:{
 			data:"CreateDebtInput"
 		},
 		capitalCreateExpense:{
 			data:"CreateExpenseInput"
+		},
+		capitalCreateIssue:{
+			data:"CreateIssueInput"
 		},
 		capitalCreateProgramProperty:{
 			data:"CreateProgramPropertyInput"
@@ -398,6 +441,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalCreateProjectProperty:{
 			data:"CreateProjectPropertyInput"
+		},
+		capitalCreateStory:{
+			data:"CreateStoryInput"
 		},
 		capitalDeleteProject:{
 			data:"DeleteProjectInput"
@@ -757,11 +803,22 @@ export const AllTypesProps: Record<string,any> = {
 		statement:"SignedDigitalDocumentInput"
 	},
 	Query:{
+		capitalCommits:{
+			filter:"CapitalCommitFilter",
+			options:"PaginationInput"
+		},
+		capitalConfig:{
+			data:"GetCapitalConfigInput"
+		},
 		capitalContributor:{
 			data:"GetContributorInput"
 		},
 		capitalContributors:{
 			filter:"CapitalContributorFilter",
+			options:"PaginationInput"
+		},
+		capitalCycles:{
+			filter:"CapitalCycleFilter",
 			options:"PaginationInput"
 		},
 		capitalDebt:{
@@ -771,11 +828,22 @@ export const AllTypesProps: Record<string,any> = {
 			filter:"DebtFilter",
 			options:"PaginationInput"
 		},
+		capitalExpense:{
+			data:"GetExpenseInput"
+		},
+		capitalExpenses:{
+			filter:"ExpenseFilter",
+			options:"PaginationInput"
+		},
 		capitalInvest:{
 			data:"GetInvestInput"
 		},
 		capitalInvests:{
 			filter:"CapitalInvestFilter",
+			options:"PaginationInput"
+		},
+		capitalIssues:{
+			filter:"CapitalIssueFilter",
 			options:"PaginationInput"
 		},
 		capitalProgramInvest:{
@@ -800,6 +868,10 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalResults:{
 			filter:"ResultFilter",
+			options:"PaginationInput"
+		},
+		capitalStories:{
+			filter:"CapitalStoryFilter",
 			options:"PaginationInput"
 		},
 		capitalVote:{
@@ -989,6 +1061,7 @@ export const AllTypesProps: Record<string,any> = {
 	StartVotingInput:{
 
 	},
+	StoryStatus: "enum" as const,
 	SubmitVoteInput:{
 		votes:"VoteDistributionInput"
 	},
@@ -1247,6 +1320,28 @@ export const ReturnTypes: Record<string,any> = {
 		trustee:"Individual",
 		type:"String"
 	},
+	CapitalCommit:{
+		_id:"String",
+		block_num:"Int",
+		blockchain_status:"String",
+		commit_hash:"String",
+		coopname:"String",
+		created_at:"String",
+		id:"Int",
+		present:"Boolean",
+		project_hash:"String",
+		status:"CommitStatus",
+		username:"String"
+	},
+	CapitalConfig:{
+		authors_voting_percent:"Float",
+		coopname:"String",
+		coordinator_bonus_percent:"Float",
+		coordinator_invite_validity_days:"Int",
+		creators_voting_percent:"Float",
+		expense_pool_percent:"Float",
+		voting_period_in_days:"Int"
+	},
 	CapitalContributor:{
 		_id:"String",
 		appendixes:"String",
@@ -1271,6 +1366,13 @@ export const ReturnTypes: Record<string,any> = {
 		status:"ContributorStatus",
 		username:"String"
 	},
+	CapitalCycle:{
+		_id:"String",
+		end_date:"DateTime",
+		name:"String",
+		start_date:"DateTime",
+		status:"CycleStatus"
+	},
 	CapitalDebt:{
 		_id:"String",
 		amount:"Float",
@@ -1289,6 +1391,25 @@ export const ReturnTypes: Record<string,any> = {
 		status:"DebtStatus",
 		username:"String"
 	},
+	CapitalExpense:{
+		_id:"String",
+		amount:"String",
+		approved_statement:"DocumentAggregate",
+		authorization:"DocumentAggregate",
+		block_num:"Int",
+		blockchain_status:"String",
+		coopname:"String",
+		description:"String",
+		expense_hash:"String",
+		expense_statement:"DocumentAggregate",
+		fund_id:"Float",
+		id:"Int",
+		present:"Boolean",
+		project_hash:"String",
+		spended_at:"String",
+		status:"ExpenseStatus",
+		username:"String"
+	},
 	CapitalInvest:{
 		_id:"String",
 		amount:"Float",
@@ -1305,6 +1426,21 @@ export const ReturnTypes: Record<string,any> = {
 		statement:"String",
 		status:"InvestStatus",
 		username:"String"
+	},
+	CapitalIssue:{
+		_id:"String",
+		created_by:"String",
+		creators_ids:"String",
+		cycle_id:"String",
+		description:"String",
+		estimate:"Int",
+		metadata:"String",
+		priority:"IssuePriority",
+		project_hash:"String",
+		sort_order:"Int",
+		status:"IssueStatus",
+		submaster_id:"String",
+		title:"String"
 	},
 	CapitalProgramInvest:{
 		_id:"String",
@@ -1356,6 +1492,16 @@ export const ReturnTypes: Record<string,any> = {
 		status:"ResultStatus",
 		total_amount:"Float",
 		username:"String"
+	},
+	CapitalStory:{
+		_id:"String",
+		created_by:"String",
+		description:"String",
+		issue_id:"String",
+		project_hash:"String",
+		sort_order:"Int",
+		status:"StoryStatus",
+		title:"String"
 	},
 	CapitalVote:{
 		_id:"String",
@@ -1709,12 +1855,15 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCompleteVoting:"Transaction",
 		capitalConvertSegment:"Transaction",
 		capitalCreateCommit:"Transaction",
+		capitalCreateCycle:"CapitalCycle",
 		capitalCreateDebt:"Transaction",
 		capitalCreateExpense:"Transaction",
+		capitalCreateIssue:"CapitalIssue",
 		capitalCreateProgramProperty:"Transaction",
 		capitalCreateProject:"Transaction",
 		capitalCreateProjectInvest:"Transaction",
 		capitalCreateProjectProperty:"Transaction",
+		capitalCreateStory:"CapitalStory",
 		capitalDeleteProject:"Transaction",
 		capitalFundProgram:"Transaction",
 		capitalFundProject:"Transaction",
@@ -1834,9 +1983,21 @@ export const ReturnTypes: Record<string,any> = {
 		kpp:"String",
 		ogrn:"String"
 	},
+	PaginatedCapitalCommitsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalCommit",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedCapitalContributorsPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalContributor",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalCyclesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalCycle",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -1846,9 +2007,21 @@ export const ReturnTypes: Record<string,any> = {
 		totalCount:"Int",
 		totalPages:"Int"
 	},
+	PaginatedCapitalExpensesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalExpense",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedCapitalInvestsPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalInvest",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalIssuesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalIssue",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -1867,6 +2040,12 @@ export const ReturnTypes: Record<string,any> = {
 	PaginatedCapitalResultsPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalResult",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalStoriesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalStory",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -1967,12 +2146,18 @@ export const ReturnTypes: Record<string,any> = {
 		middle_name:"String"
 	},
 	Query:{
+		capitalCommits:"PaginatedCapitalCommitsPaginationResult",
+		capitalConfig:"CapitalConfig",
 		capitalContributor:"CapitalContributor",
 		capitalContributors:"PaginatedCapitalContributorsPaginationResult",
+		capitalCycles:"PaginatedCapitalCyclesPaginationResult",
 		capitalDebt:"CapitalDebt",
 		capitalDebts:"PaginatedCapitalDebtsPaginationResult",
+		capitalExpense:"CapitalExpense",
+		capitalExpenses:"PaginatedCapitalExpensesPaginationResult",
 		capitalInvest:"CapitalInvest",
 		capitalInvests:"PaginatedCapitalInvestsPaginationResult",
+		capitalIssues:"PaginatedCapitalIssuesPaginationResult",
 		capitalProgramInvest:"CapitalProgramInvest",
 		capitalProgramInvests:"PaginatedCapitalProgramInvestsPaginationResult",
 		capitalProject:"CapitalProject",
@@ -1980,6 +2165,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalProjects:"PaginatedCapitalProjectsPaginationResult",
 		capitalResult:"CapitalResult",
 		capitalResults:"PaginatedCapitalResultsPaginationResult",
+		capitalStories:"PaginatedCapitalStoriesPaginationResult",
 		capitalVote:"CapitalVote",
 		capitalVotes:"PaginatedCapitalVotesPaginationResult",
 		getAccount:"Account",

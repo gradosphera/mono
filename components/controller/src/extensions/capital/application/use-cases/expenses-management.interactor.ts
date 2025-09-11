@@ -4,6 +4,12 @@ import { ExpenseRepository, EXPENSE_REPOSITORY } from '../../domain/repositories
 import type { TransactResult } from '@wharfkit/session';
 import type { CreateExpenseDomainInput } from '../../domain/actions/create-expense-domain-input.interface';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import type { ExpenseFilterInputDTO } from '../dto/expenses_management/expense-filter.input';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import { ExpenseDomainEntity } from '../../domain/entities/expense.entity';
 
 /**
  * Интерактор домена для управления расходами CAPITAL контракта
@@ -31,5 +37,22 @@ export class ExpensesManagementInteractor {
 
     // Вызываем блокчейн порт
     return await this.capitalBlockchainPort.createExpense(blockchainData);
+  }
+
+  /**
+   * Получение расходов с пагинацией
+   */
+  async getExpenses(
+    filter?: ExpenseFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<ExpenseDomainEntity>> {
+    return await this.expenseRepository.findAllPaginated(filter, options);
+  }
+
+  /**
+   * Получение расхода по ID
+   */
+  async getExpenseById(_id: string): Promise<ExpenseDomainEntity | null> {
+    return await this.expenseRepository.findById(_id);
   }
 }

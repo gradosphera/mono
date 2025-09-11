@@ -12,6 +12,11 @@ export interface CapitalBlockchainPort {
   setConfig(data: CapitalContract.Actions.SetConfig.ISetConfig): Promise<TransactResult>;
 
   /**
+   * Получение состояния CAPITAL контракта (включая конфигурацию)
+   */
+  getConfig(coopname: string): Promise<CapitalContract.Tables.State.IState | null>;
+
+  /**
    * Импорт вкладчика в CAPITAL контракт
    */
   importContributor(data: CapitalContract.Actions.ImportContributor.IImportContributor): Promise<TransactResult>;

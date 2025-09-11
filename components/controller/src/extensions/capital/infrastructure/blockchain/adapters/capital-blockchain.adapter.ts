@@ -33,6 +33,22 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
+   * Получение состояния CAPITAL контракта (включая конфигурацию)
+   */
+  async getConfig(coopname: string): Promise<CapitalContract.Tables.State.IState | null> {
+    // Получаем состояние из таблицы state контракта capital
+    // scope = coopname, primary_key = coopname
+    const state = await this.blockchainService.getSingleRow<CapitalContract.Tables.State.IState>(
+      CapitalContract.contractName.production,
+      coopname,
+      CapitalContract.Tables.State.tableName,
+      coopname as any
+    );
+
+    return state;
+  }
+
+  /**
    * Импорт вкладчика в CAPITAL контракт
    */
   async importContributor(data: CapitalContract.Actions.ImportContributor.IImportContributor): Promise<TransactResult> {

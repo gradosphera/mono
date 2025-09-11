@@ -1,6 +1,8 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { ContractManagementService } from '../services/contract-management.service';
 import { SetConfigInputDTO } from '../dto/contract_management/set-config-input.dto';
+import { GetCapitalConfigInputDTO } from '../dto/contract_management/get-config-input.dto';
+import { ConfigOutputDTO } from '../dto/contract_management/config-output.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -25,6 +27,19 @@ export class ContractManagementResolver {
   @AuthRoles(['chairman'])
   async setCapitalConfig(@Args('data', { type: () => SetConfigInputDTO }) data: SetConfigInputDTO): Promise<TransactionDTO> {
     const result = await this.contractManagementService.setConfig(data);
+    return result;
+  }
+
+  /**
+   * Запрос для получения конфигурации CAPITAL контракта
+   */
+  @Query(() => ConfigOutputDTO, {
+    name: 'capitalConfig',
+    description: 'Получение конфигурации CAPITAL контракта кооператива',
+    nullable: true,
+  })
+  async getCapitalConfig(@Args('data') data: GetCapitalConfigInputDTO): Promise<ConfigOutputDTO | null> {
+    const result = await this.contractManagementService.getConfig(data);
     return result;
   }
 }

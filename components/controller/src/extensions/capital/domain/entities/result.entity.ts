@@ -3,7 +3,7 @@ import type { IResultDatabaseData } from '../interfaces/result-database.interfac
 import type { IResultBlockchainData } from '../interfaces/result-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-
+import { randomUUID } from 'crypto';
 /**
  * Доменная сущность результата
  *
@@ -46,7 +46,7 @@ export class ResultDomainEntity implements IBlockchainSynchronizable, IResultDat
    */
   constructor(databaseData: IResultDatabaseData, blockchainData?: IResultBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
     this.result_hash = databaseData.result_hash;

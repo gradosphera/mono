@@ -1,7 +1,7 @@
 import type { IVoteDatabaseData } from '../interfaces/vote-database.interface';
 import type { IVoteBlockchainData } from '../interfaces/vote-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-
+import { randomUUID } from 'crypto';
 /**
  * Доменная сущность голоса
  *
@@ -35,7 +35,7 @@ export class VoteDomainEntity implements IBlockchainSynchronizable, IVoteDatabas
    */
   constructor(databaseData: IVoteDatabaseData, blockchainData?: IVoteBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.block_num = databaseData.block_num;
     this.present = databaseData.present;
 

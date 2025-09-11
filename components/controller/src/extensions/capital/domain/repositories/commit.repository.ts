@@ -1,5 +1,10 @@
 import { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { CommitDomainEntity } from '../entities/commit.entity';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import type { CommitFilterInputDTO } from '../../application/dto/generation/commit-filter.input';
 
 export interface CommitRepository extends IBlockchainSyncRepository<CommitDomainEntity> {
   create(commit: Omit<CommitDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<CommitDomainEntity>;
@@ -8,6 +13,10 @@ export interface CommitRepository extends IBlockchainSyncRepository<CommitDomain
   findByUsername(username: string): Promise<CommitDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<CommitDomainEntity[]>;
   findByStatus(status: string): Promise<CommitDomainEntity[]>;
+  findAllPaginated(
+    filter?: CommitFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<CommitDomainEntity>>;
   update(entity: CommitDomainEntity): Promise<CommitDomainEntity>;
   delete(_id: string): Promise<void>;
 }

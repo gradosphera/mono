@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Repository, MoreThan } from 'typeorm';
-import { randomUUID } from 'crypto';
 import type { IBlockchainSyncRepository, IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 import type { IBaseDatabaseData } from '../../domain/interfaces/base-database.interface';
 
@@ -71,7 +70,7 @@ export abstract class BaseBlockchainRepository<
     } else {
       // Создаем новую сущность
       const minimalDatabaseData: IBaseDatabaseData = {
-        _id: randomUUID().toString(),
+        _id: '',
         block_num: blockNum,
         present: present,
         [syncKey]: syncValue, // ключ синхронизации

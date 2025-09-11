@@ -2,6 +2,7 @@ import { InvestStatus } from '../enums/invest-status.enum';
 import type { IInvestDatabaseData } from '../interfaces/invest-database.interface';
 import type { IInvestBlockchainData } from '../interfaces/invest-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
+import { randomUUID } from 'crypto';
 
 /**
  * Доменная сущность инвестиции
@@ -45,7 +46,7 @@ export class InvestDomainEntity implements IBlockchainSynchronizable, IInvestDat
    */
   constructor(databaseData: IInvestDatabaseData, blockchainData?: IInvestBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
     this.invest_hash = databaseData.invest_hash;

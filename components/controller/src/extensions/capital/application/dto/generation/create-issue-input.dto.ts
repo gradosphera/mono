@@ -1,0 +1,116 @@
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { IsNotEmpty, IsString, IsOptional, IsEnum, Min, IsArray, ArrayNotEmpty } from 'class-validator';
+import { IssuePriority } from '../../../domain/enums/issue-priority.enum';
+import { IssueStatus } from '../../../domain/enums/issue-status.enum';
+
+/**
+ * GraphQL Input DTO для создания задачи
+ */
+@InputType('CreateIssueInput')
+export class CreateIssueInputDTO {
+  @Field(() => String, {
+    description: 'Название задачи',
+  })
+  @IsNotEmpty({ message: 'Название задачи не должно быть пустым' })
+  @IsString({ message: 'Название задачи должно быть строкой' })
+  title!: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Описание задачи',
+  })
+  @IsOptional()
+  @IsString({ message: 'Описание задачи должно быть строкой' })
+  description?: string;
+
+  @Field(() => IssuePriority, {
+    nullable: true,
+    description: 'Приоритет задачи',
+    defaultValue: IssuePriority.MEDIUM,
+  })
+  @IsOptional()
+  @IsEnum(IssuePriority, { message: 'Неверный приоритет задачи' })
+  priority?: IssuePriority;
+
+  @Field(() => IssueStatus, {
+    nullable: true,
+    description: 'Статус задачи',
+    defaultValue: IssueStatus.BACKLOG,
+  })
+  @IsOptional()
+  @IsEnum(IssueStatus, { message: 'Неверный статус задачи' })
+  status?: IssueStatus;
+
+  @Field(() => Int, {
+    nullable: true,
+    description: 'Оценка в story points или часах',
+    defaultValue: 0,
+  })
+  @IsOptional()
+  @Min(0, { message: 'Оценка не может быть отрицательной' })
+  estimate?: number;
+
+  @Field(() => Int, {
+    nullable: true,
+    description: 'Порядок сортировки',
+    defaultValue: 0,
+  })
+  @IsOptional()
+  @Min(0, { message: 'Порядок сортировки не может быть отрицательным' })
+  sort_order?: number;
+
+  @Field(() => String, {
+    description: 'ID создателя задачи (contributor)',
+  })
+  @IsNotEmpty({ message: 'ID создателя не должен быть пустым' })
+  @IsString({ message: 'ID создателя должен быть строкой' })
+  created_by!: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'ID подмастерья (contributor)',
+  })
+  @IsOptional()
+  @IsString({ message: 'ID подмастерья должен быть строкой' })
+  submaster_id?: string;
+
+  @Field(() => [String], {
+    nullable: true,
+    description: 'Массив ID создателей (contributors)',
+  })
+  @IsOptional()
+  @IsArray({ message: 'Создатели должны быть массивом строк' })
+  @ArrayNotEmpty({ message: 'Массив создателей не должен быть пустым' })
+  creators_ids?: string[];
+
+  @Field(() => String, {
+    description: 'Хеш проекта',
+  })
+  @IsNotEmpty({ message: 'Хеш проекта не должен быть пустым' })
+  @IsString({ message: 'Хеш проекта должен быть строкой' })
+  project_hash!: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'ID цикла',
+  })
+  @IsOptional()
+  @IsString({ message: 'ID цикла должен быть строкой' })
+  cycle_id?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Метки задачи (JSON строка)',
+  })
+  @IsOptional()
+  @IsString({ message: 'Метки должны быть строкой' })
+  labels?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Вложения задачи (JSON строка)',
+  })
+  @IsOptional()
+  @IsString({ message: 'Вложения должны быть строкой' })
+  attachments?: string;
+}

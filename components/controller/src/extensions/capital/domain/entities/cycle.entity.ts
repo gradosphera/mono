@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { CycleStatus } from '../enums/cycle-status.enum';
 import type { ICycleDatabaseData } from '../interfaces/cycle-database.interface';
 
@@ -21,7 +22,7 @@ export class CycleDomainEntity {
    */
   constructor(databaseData: ICycleDatabaseData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.name = databaseData.name;
     this.start_date = databaseData.start_date;
     this.end_date = databaseData.end_date;

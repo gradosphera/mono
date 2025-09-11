@@ -1,6 +1,6 @@
 import { StoryStatus } from '../enums/story-status.enum';
 import type { IStoryDatabaseData } from '../interfaces/story-database.interface';
-
+import { randomUUID } from 'crypto';
 /**
  * Доменная сущность истории (критерия выполнения)
  *
@@ -25,7 +25,7 @@ export class StoryDomainEntity {
    */
   constructor(databaseData: IStoryDatabaseData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.title = databaseData.title;
     this.description = databaseData.description;
     this.status = databaseData.status;
