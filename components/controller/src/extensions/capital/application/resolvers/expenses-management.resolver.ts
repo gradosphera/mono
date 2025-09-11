@@ -5,6 +5,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 
 /**
  * GraphQL резолвер для действий управления расходами CAPITAL контракта
@@ -16,7 +17,7 @@ export class ExpensesManagementResolver {
   /**
    * Мутация для создания расхода в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalCreateExpense',
     description: 'Создание расхода в CAPITAL контракте',
   })
@@ -24,8 +25,8 @@ export class ExpensesManagementResolver {
   @AuthRoles(['chairman'])
   async createCapitalExpense(
     @Args('data', { type: () => CreateExpenseInputDTO }) data: CreateExpenseInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.expensesManagementService.createExpense(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 }

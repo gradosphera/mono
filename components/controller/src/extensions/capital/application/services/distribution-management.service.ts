@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DistributionManagementInteractor } from '../../domain/interactors/distribution-management.interactor';
+import { DistributionManagementInteractor } from '../use-cases/distribution-management.interactor';
 import type { FundProgramInputDTO } from '../dto/distribution_management/fund-program-input.dto';
 import type { FundProjectInputDTO } from '../dto/distribution_management/fund-project-input.dto';
 import type { RefreshProgramInputDTO } from '../dto/distribution_management/refresh-program-input.dto';

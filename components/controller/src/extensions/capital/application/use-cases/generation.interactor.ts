@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
-import type { CreateCommitDomainInput } from '../actions/create-commit-domain-input.interface';
-import type { RefreshSegmentDomainInput } from '../actions/refresh-segment-domain-input.interface';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
+import type { CreateCommitDomainInput } from '../../domain/actions/create-commit-domain-input.interface';
+import type { RefreshSegmentDomainInput } from '../../domain/actions/refresh-segment-domain-input.interface';
 import type { TransactResult } from '@wharfkit/session';
 
 /**

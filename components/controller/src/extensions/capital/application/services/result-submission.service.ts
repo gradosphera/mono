@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ResultSubmissionInteractor } from '../../domain/interactors/result-submission.interactor';
+import { ResultSubmissionInteractor } from '../use-cases/result-submission.interactor';
 import type { PushResultInputDTO } from '../dto/result_submission/push-result-input.dto';
 import type { ConvertSegmentInputDTO } from '../dto/result_submission/convert-segment-input.dto';
 import type { TransactResult } from '@wharfkit/session';

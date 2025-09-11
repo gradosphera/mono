@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InvestsManagementInteractor } from '../../domain/interactors/invests-management.interactor';
+import { InvestsManagementInteractor } from '../use-cases/invests-management.interactor';
 import type { CreateProjectInvestInputDTO } from '../dto/invests_management/create-project-invest-input.dto';
 import type { TransactResult } from '@wharfkit/session';
 import { InvestOutputDTO } from '../dto/invests_management/invest.dto';

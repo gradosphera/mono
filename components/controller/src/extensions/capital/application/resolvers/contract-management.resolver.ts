@@ -5,6 +5,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 
 /**
  * GraphQL резолвер для действий управления контрактом CAPITAL
@@ -16,14 +17,14 @@ export class ContractManagementResolver {
   /**
    * Мутация для установки конфигурации CAPITAL контракта
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalSetConfig',
     description: 'Установка конфигурации CAPITAL контракта',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
-  async setCapitalConfig(@Args('data', { type: () => SetConfigInputDTO }) data: SetConfigInputDTO): Promise<string> {
+  async setCapitalConfig(@Args('data', { type: () => SetConfigInputDTO }) data: SetConfigInputDTO): Promise<TransactionDTO> {
     const result = await this.contractManagementService.setConfig(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 }

@@ -4,6 +4,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { CalculateVotesInputDTO } from '../dto/voting/calculate-votes-input.dto';
 import { CompleteVotingInputDTO } from '../dto/voting/complete-voting-input.dto';
 import { StartVotingInputDTO } from '../dto/voting/start-voting-input.dto';
@@ -25,35 +26,35 @@ export class VotingResolver {
   /**
    * Мутация для запуска голосования в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalStartVoting',
     description: 'Запуск голосования в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
-  async StartVoting(@Args('data', { type: () => StartVotingInputDTO }) data: StartVotingInputDTO): Promise<string> {
+  async StartVoting(@Args('data', { type: () => StartVotingInputDTO }) data: StartVotingInputDTO): Promise<TransactionDTO> {
     const result = await this.votingService.startVoting(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для голосования в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalSubmitVote',
     description: 'Голосование в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['participant'])
-  async submitCapitalVote(@Args('data', { type: () => SubmitVoteInputDTO }) data: SubmitVoteInputDTO): Promise<string> {
+  async submitCapitalVote(@Args('data', { type: () => SubmitVoteInputDTO }) data: SubmitVoteInputDTO): Promise<TransactionDTO> {
     const result = await this.votingService.submitVote(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для завершения голосования в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalCompleteVoting',
     description: 'Завершение голосования в CAPITAL контракте',
   })
@@ -61,15 +62,15 @@ export class VotingResolver {
   @AuthRoles(['chairman'])
   async completeCapitalVoting(
     @Args('data', { type: () => CompleteVotingInputDTO }) data: CompleteVotingInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.votingService.completeVoting(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для расчета голосов в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalCalculateVotes',
     description: 'Расчет голосов в CAPITAL контракте',
   })
@@ -77,9 +78,9 @@ export class VotingResolver {
   @AuthRoles(['chairman'])
   async calculateCapitalVotes(
     @Args('data', { type: () => CalculateVotesInputDTO }) data: CalculateVotesInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.votingService.calculateVotes(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   // ============ ЗАПРОСЫ ГОЛОСОВ ============

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PropertyManagementInteractor } from '../../domain/interactors/property-management.interactor';
+import { PropertyManagementInteractor } from '../use-cases/property-management.interactor';
 import type { CreateProgramPropertyInputDTO } from '../dto/property_management/create-program-property-input.dto';
 import type { CreateProjectPropertyInputDTO } from '../dto/property_management/create-project-property-input.dto';
 import type { TransactResult } from '@wharfkit/session';

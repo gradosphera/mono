@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
-import { ExpenseRepository, EXPENSE_REPOSITORY } from '../repositories/expense.repository';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
+import { ExpenseRepository, EXPENSE_REPOSITORY } from '../../domain/repositories/expense.repository';
 import type { TransactResult } from '@wharfkit/session';
-import type { CreateExpenseDomainInput } from '../actions/create-expense-domain-input.interface';
+import type { CreateExpenseDomainInput } from '../../domain/actions/create-expense-domain-input.interface';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 
 /**

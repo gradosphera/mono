@@ -6,6 +6,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 
 /**
  * GraphQL резолвер для действий генерации CAPITAL контракта
@@ -17,7 +18,7 @@ export class GenerationResolver {
   /**
    * Мутация для создания коммита в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalCreateCommit',
     description: 'Создание коммита в CAPITAL контракте',
   })
@@ -25,15 +26,15 @@ export class GenerationResolver {
   @AuthRoles(['participant'])
   async createCapitalCommit(
     @Args('data', { type: () => CreateCommitInputDTO }) data: CreateCommitInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.generationService.createCommit(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для обновления сегмента в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalRefreshSegment',
     description: 'Обновление сегмента в CAPITAL контракте',
   })
@@ -41,8 +42,8 @@ export class GenerationResolver {
   @AuthRoles(['participant'])
   async refreshCapitalSegment(
     @Args('data', { type: () => RefreshSegmentInputDTO }) data: RefreshSegmentInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.generationService.refreshSegment(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 }

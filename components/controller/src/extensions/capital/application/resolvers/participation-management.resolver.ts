@@ -5,6 +5,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { MakeClearanceInputDTO } from '../dto/participation_management/make-clearance-input.dto';
 import { RegisterContributorInputDTO } from '../dto/participation_management/register-contributor-input.dto';
 import { ContributorOutputDTO } from '../dto/participation_management/contributor.dto';
@@ -27,7 +28,7 @@ export class ParticipationManagementResolver {
   /**
    * Мутация для регистрации вкладчика в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalRegisterContributor',
     description: 'Регистрация вкладчика в CAPITAL контракте',
   })
@@ -35,15 +36,15 @@ export class ParticipationManagementResolver {
   @AuthRoles(['chairman'])
   async registerCapitalContributor(
     @Args('data', { type: () => RegisterContributorInputDTO }) data: RegisterContributorInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.participationManagementService.registerContributor(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для импорта вкладчика в CAPITAL контракт
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalImportContributor',
     description: 'Импорт вкладчика в CAPITAL контракт',
   })
@@ -51,15 +52,15 @@ export class ParticipationManagementResolver {
   @AuthRoles(['chairman'])
   async importCapitalContributor(
     @Args('data', { type: () => ImportContributorInputDTO }) data: ImportContributorInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.participationManagementService.importContributor(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для подписания приложения в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalMakeClearance',
     description: 'Подписание приложения в CAPITAL контракте',
   })
@@ -67,9 +68,9 @@ export class ParticipationManagementResolver {
   @AuthRoles(['chairman'])
   async makeCapitalClearance(
     @Args('data', { type: () => MakeClearanceInputDTO }) data: MakeClearanceInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.participationManagementService.makeClearance(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   // ============ ЗАПРОСЫ ВКЛАДЧИКОВ ============

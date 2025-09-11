@@ -46,7 +46,7 @@ import { ProgramWalletDeltaMapper } from './infrastructure/blockchain/mappers/pr
 import { ProgramWalletSyncService } from './infrastructure/blockchain/services/program-wallet-sync.service';
 import { ProjectWalletDeltaMapper } from './infrastructure/blockchain/mappers/project-wallet-delta.mapper';
 import { ProjectWalletSyncService } from './infrastructure/blockchain/services/project-wallet-sync.service';
-import { CapitalSyncInteractor } from './domain/interactors/capital-sync.interactor';
+import { CapitalSyncInteractor } from './application/use-cases/capital-sync.interactor';
 
 // Services
 import { CapitalContractInfoService } from './infrastructure/services/capital-contract-info.service';
@@ -102,17 +102,17 @@ import { ResultSubmissionResolver } from './application/resolvers/result-submiss
 import { DistributionManagementResolver } from './application/resolvers/distribution-management.resolver';
 import { ExpensesManagementResolver } from './application/resolvers/expenses-management.resolver';
 
-import { ParticipationManagementInteractor } from './domain/interactors/participation-management.interactor';
-import { ProjectManagementInteractor } from './domain/interactors/project-management.interactor';
-import { GenerationInteractor } from './domain/interactors/generation.interactor';
-import { InvestsManagementInteractor } from './domain/interactors/invests-management.interactor';
-import { DebtManagementInteractor } from './domain/interactors/debt-management.interactor';
-import { PropertyManagementInteractor } from './domain/interactors/property-management.interactor';
-import { VotingInteractor } from './domain/interactors/voting.interactor';
-import { ResultSubmissionInteractor } from './domain/interactors/result-submission.interactor';
-import { DistributionManagementInteractor } from './domain/interactors/distribution-management.interactor';
-import { ContractManagementInteractor } from './domain/interactors/contract-management.interactor';
-import { ExpensesManagementInteractor } from './domain/interactors/expenses-management.interactor';
+import { ParticipationManagementInteractor } from './application/use-cases/participation-management.interactor';
+import { ProjectManagementInteractor } from './application/use-cases/project-management.interactor';
+import { GenerationInteractor } from './application/use-cases/generation.interactor';
+import { InvestsManagementInteractor } from './application/use-cases/invests-management.interactor';
+import { DebtManagementInteractor } from './application/use-cases/debt-management.interactor';
+import { PropertyManagementInteractor } from './application/use-cases/property-management.interactor';
+import { VotingInteractor } from './application/use-cases/voting.interactor';
+import { ResultSubmissionInteractor } from './application/use-cases/result-submission.interactor';
+import { DistributionManagementInteractor } from './application/use-cases/distribution-management.interactor';
+import { ContractManagementInteractor } from './application/use-cases/contract-management.interactor';
+import { ExpensesManagementInteractor } from './application/use-cases/expenses-management.interactor';
 
 // Конфигурация модуля
 interface ICapitalConfig {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ExpensesManagementInteractor } from '../../domain/interactors/expenses-management.interactor';
+import { ExpensesManagementInteractor } from '../use-cases/expenses-management.interactor';
 import type { CreateExpenseInputDTO } from '../dto/expenses_management';
 import type { TransactResult } from '@wharfkit/session';
 

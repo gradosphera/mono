@@ -1,11 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
-import type { PushResultDomainInput } from '../actions/push-result-domain-input.interface';
-import type { ConvertSegmentDomainInput } from '../actions/convert-segment-domain-input.interface';
-import { RESULT_REPOSITORY, ResultRepository } from '../repositories/result.repository';
-import { ResultDomainEntity } from '../entities/result.entity';
-import type { ResultFilterInputDTO } from '../../application/dto/result_submission/result-filter.input';
+import type { PushResultDomainInput } from '../../domain/actions/push-result-domain-input.interface';
+import type { ConvertSegmentDomainInput } from '../../domain/actions/convert-segment-domain-input.interface';
+import { RESULT_REPOSITORY, ResultRepository } from '../../domain/repositories/result.repository';
+import { ResultDomainEntity } from '../../domain/entities/result.entity';
+import type { ResultFilterInputDTO } from '../dto/result_submission/result-filter.input';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DebtManagementInteractor } from '../../domain/interactors/debt-management.interactor';
+import { DebtManagementInteractor } from '../use-cases/debt-management.interactor';
 import type { CreateDebtInputDTO } from '../dto/debt_management/create-debt-input.dto';
 import type { TransactResult } from '@wharfkit/session';
 import { DebtOutputDTO } from '../dto/debt_management/debt.dto';

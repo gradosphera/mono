@@ -6,6 +6,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 
 /**
  * GraphQL резолвер для действий управления имущественными взносами CAPITAL контракта
@@ -17,7 +18,7 @@ export class PropertyManagementResolver {
   /**
    * Мутация для создания проектного имущественного взноса в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalCreateProjectProperty',
     description: 'Создание проектного имущественного взноса в CAPITAL контракте',
   })
@@ -25,15 +26,15 @@ export class PropertyManagementResolver {
   @AuthRoles(['participant'])
   async createCapitalProjectProperty(
     @Args('data', { type: () => CreateProjectPropertyInputDTO }) data: CreateProjectPropertyInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.propertyManagementService.createProjectProperty(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для создания программного имущественного взноса в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalCreateProgramProperty',
     description: 'Создание программного имущественного взноса в CAPITAL контракте',
   })
@@ -41,8 +42,8 @@ export class PropertyManagementResolver {
   @AuthRoles(['participant'])
   async createCapitalProgramProperty(
     @Args('data', { type: () => CreateProgramPropertyInputDTO }) data: CreateProgramPropertyInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.propertyManagementService.createProgramProperty(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 }

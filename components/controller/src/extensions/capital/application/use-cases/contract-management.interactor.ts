@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
-import type { SetConfigDomainInput } from '../actions/set-config-domain-input.interface';
+import type { SetConfigDomainInput } from '../../domain/actions/set-config-domain-input.interface';
 
 /**
  * Интерактор домена для управления контрактом CAPITAL

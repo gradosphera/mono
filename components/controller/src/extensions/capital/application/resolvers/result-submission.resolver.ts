@@ -6,6 +6,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { ResultOutputDTO } from '../dto/result_submission/result.dto';
 import { ResultFilterInputDTO } from '../dto/result_submission/result-filter.input';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
@@ -23,21 +24,23 @@ export class ResultSubmissionResolver {
   /**
    * Мутация для внесения результата в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalPushResult',
     description: 'Внесение результата в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['participant'])
-  async pushCapitalResult(@Args('data', { type: () => PushResultInputDTO }) data: PushResultInputDTO): Promise<string> {
+  async pushCapitalResult(
+    @Args('data', { type: () => PushResultInputDTO }) data: PushResultInputDTO
+  ): Promise<TransactionDTO> {
     const result = await this.resultSubmissionService.pushResult(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для конвертации сегмента в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalConvertSegment',
     description: 'Конвертация сегмента в CAPITAL контракте',
   })
@@ -45,9 +48,9 @@ export class ResultSubmissionResolver {
   @AuthRoles(['participant'])
   async convertCapitalSegment(
     @Args('data', { type: () => ConvertSegmentInputDTO }) data: ConvertSegmentInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.resultSubmissionService.convertSegment(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   // ============ ЗАПРОСЫ РЕЗУЛЬТАТОВ ============

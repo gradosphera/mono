@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ProjectManagementInteractor } from '../../domain/interactors/project-management.interactor';
+import { ProjectManagementInteractor } from '../use-cases/project-management.interactor';
 import type { CreateProjectInputDTO } from '../dto/project_management';
 import type { TransactResult } from '@wharfkit/session';
 import type {

@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
-import type { CreateProgramPropertyDomainInput } from '../actions/create-program-property-domain-input.interface';
-import type { CreateProjectPropertyDomainInput } from '../actions/create-project-property-domain-input.interface';
+import type { CreateProgramPropertyDomainInput } from '../../domain/actions/create-program-property-domain-input.interface';
+import type { CreateProjectPropertyDomainInput } from '../../domain/actions/create-project-property-domain-input.interface';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 
 /**

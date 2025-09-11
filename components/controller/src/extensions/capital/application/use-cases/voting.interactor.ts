@@ -1,17 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
-import type { StartVotingDomainInput } from '../actions/start-voting-domain-input.interface';
-import type { SubmitVoteDomainInput } from '../actions/submit-vote-domain-input.interface';
-import type { CompleteVotingDomainInput } from '../actions/complete-voting-domain-input.interface';
-import type { CalculateVotesDomainInput } from '../actions/calculate-votes-domain-input.interface';
-import { VOTE_REPOSITORY, VoteRepository } from '../repositories/vote.repository';
-import { VoteDomainEntity } from '../entities/vote.entity';
+import type { StartVotingDomainInput } from '../../domain/actions/start-voting-domain-input.interface';
+import type { SubmitVoteDomainInput } from '../../domain/actions/submit-vote-domain-input.interface';
+import type { CompleteVotingDomainInput } from '../../domain/actions/complete-voting-domain-input.interface';
+import type { CalculateVotesDomainInput } from '../../domain/actions/calculate-votes-domain-input.interface';
+import { VOTE_REPOSITORY, VoteRepository } from '../../domain/repositories/vote.repository';
+import { VoteDomainEntity } from '../../domain/entities/vote.entity';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
-import type { VoteFilterInputDTO } from '../../application/dto/voting/vote-filter.input';
+import type { VoteFilterInputDTO } from '../dto/voting/vote-filter.input';
 
 /**
  * Интерактор домена для голосования в CAPITAL контракте

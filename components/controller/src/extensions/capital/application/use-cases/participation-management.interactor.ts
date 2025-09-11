@@ -1,12 +1,12 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
-import type { ImportContributorDomainInput } from '../actions/import-contributor-domain-input.interface';
-import type { RegisterContributorDomainInput } from '../actions/register-contributor-domain-input.interface';
-import type { MakeClearanceDomainInput } from '../actions/make-clearance-domain-input.interface';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
+import type { ImportContributorDomainInput } from '../../domain/actions/import-contributor-domain-input.interface';
+import type { RegisterContributorDomainInput } from '../../domain/actions/register-contributor-domain-input.interface';
+import type { MakeClearanceDomainInput } from '../../domain/actions/make-clearance-domain-input.interface';
 import type { TransactResult } from '@wharfkit/session';
-import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../repositories/contributor.repository';
-import { ContributorDomainEntity } from '../entities/contributor.entity';
-import type { ContributorFilterInputDTO } from '../../application/dto/participation_management/contributor-filter.input';
+import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../../domain/repositories/contributor.repository';
+import { ContributorDomainEntity } from '../../domain/entities/contributor.entity';
+import type { ContributorFilterInputDTO } from '../dto/participation_management/contributor-filter.input';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,

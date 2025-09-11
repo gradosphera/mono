@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
-import type { CreateDebtDomainInput } from '../actions/create-debt-domain-input.interface';
-import { DEBT_REPOSITORY, DebtRepository } from '../repositories/debt.repository';
-import { DebtDomainEntity } from '../entities/debt.entity';
-import type { DebtFilterInputDTO } from '../../application/dto/debt_management/debt-filter.input';
+import type { CreateDebtDomainInput } from '../../domain/actions/create-debt-domain-input.interface';
+import { DEBT_REPOSITORY, DebtRepository } from '../../domain/repositories/debt.repository';
+import { DebtDomainEntity } from '../../domain/entities/debt.entity';
+import type { DebtFilterInputDTO } from '../dto/debt_management/debt-filter.input';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ParticipationManagementInteractor } from '../../domain/interactors/participation-management.interactor';
+import { ParticipationManagementInteractor } from '../use-cases/participation-management.interactor';
 import type { ImportContributorInputDTO } from '../dto/participation_management/import-contributor-input.dto';
 import type { RegisterContributorInputDTO } from '../dto/participation_management/register-contributor-input.dto';
 import type { MakeClearanceInputDTO } from '../dto/participation_management/make-clearance-input.dto';

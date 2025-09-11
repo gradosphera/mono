@@ -5,6 +5,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { InvestFilterInputDTO } from '../dto/invests_management/invest-filter.input';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { InvestOutputDTO } from '../dto/invests_management/invest.dto';
@@ -24,7 +25,7 @@ export class InvestsManagementResolver {
   /**
    * Мутация для инвестирования в проект CAPITAL контракта
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalCreateProjectInvest',
     description: 'Инвестирование в проект CAPITAL контракта',
   })
@@ -32,9 +33,9 @@ export class InvestsManagementResolver {
   @AuthRoles(['participant'])
   async createCapitalProjectInvest(
     @Args('data', { type: () => CreateProjectInvestInputDTO }) data: CreateProjectInvestInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.investsManagementService.createProjectInvest(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   // ============ ЗАПРОСЫ ИНВЕСТИЦИЙ ============

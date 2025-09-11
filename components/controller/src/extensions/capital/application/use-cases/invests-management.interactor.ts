@@ -1,12 +1,12 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
-import type { CreateProjectInvestDomainInput } from '../actions/create-project-invest-domain-input.interface';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
+import type { CreateProjectInvestDomainInput } from '../../domain/actions/create-project-invest-domain-input.interface';
 import type { TransactResult } from '@wharfkit/session';
-import { INVEST_REPOSITORY, InvestRepository } from '../repositories/invest.repository';
-import { PROGRAM_INVEST_REPOSITORY, ProgramInvestRepository } from '../repositories/program-invest.repository';
-import { InvestDomainEntity } from '../entities/invest.entity';
-import { ProgramInvestDomainEntity } from '../entities/program-invest.entity';
-import type { InvestFilterInputDTO } from '../../application/dto/invests_management/invest-filter.input';
+import { INVEST_REPOSITORY, InvestRepository } from '../../domain/repositories/invest.repository';
+import { PROGRAM_INVEST_REPOSITORY, ProgramInvestRepository } from '../../domain/repositories/program-invest.repository';
+import { InvestDomainEntity } from '../../domain/entities/invest.entity';
+import { ProgramInvestDomainEntity } from '../../domain/entities/program-invest.entity';
+import type { InvestFilterInputDTO } from '../dto/invests_management/invest-filter.input';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,

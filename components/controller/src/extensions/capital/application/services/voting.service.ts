@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { VotingInteractor } from '../../domain/interactors/voting.interactor';
+import { VotingInteractor } from '../use-cases/voting.interactor';
 import type { StartVotingInputDTO } from '../dto/voting/start-voting-input.dto';
 import type { SubmitVoteInputDTO } from '../dto/voting/submit-vote-input.dto';
 import type { CompleteVotingInputDTO } from '../dto/voting/complete-voting-input.dto';

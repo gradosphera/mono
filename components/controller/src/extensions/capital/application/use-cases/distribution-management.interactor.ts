@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
-import type { RefreshProjectDomainInput } from '../actions/refresh-project-domain-input.interface';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
+import type { RefreshProjectDomainInput } from '../../domain/actions/refresh-project-domain-input.interface';
 import type { TransactResult } from '@wharfkit/session';
-import type { FundProgramDomainInput } from '../actions/fund-program-domain-input.interface';
-import type { FundProjectDomainInput } from '../actions/fund-project-domain-input.interface';
-import type { RefreshProgramDomainInput } from '../actions/refresh-program-domain-input.interface';
+import type { FundProgramDomainInput } from '../../domain/actions/fund-program-domain-input.interface';
+import type { FundProjectDomainInput } from '../../domain/actions/fund-project-domain-input.interface';
+import type { RefreshProgramDomainInput } from '../../domain/actions/refresh-program-domain-input.interface';
 
 /**
  * Интерактор домена для распределения средств в CAPITAL контракте

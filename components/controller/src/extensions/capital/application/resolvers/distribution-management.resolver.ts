@@ -8,6 +8,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 
 /**
  * GraphQL резолвер для действий распределения средств CAPITAL контракта
@@ -19,35 +20,39 @@ export class DistributionManagementResolver {
   /**
    * Мутация для финансирования программы CAPITAL контракта
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalFundProgram',
     description: 'Финансирование программы CAPITAL контракта',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
-  async fundCapitalProgram(@Args('data', { type: () => FundProgramInputDTO }) data: FundProgramInputDTO): Promise<string> {
+  async fundCapitalProgram(
+    @Args('data', { type: () => FundProgramInputDTO }) data: FundProgramInputDTO
+  ): Promise<TransactionDTO> {
     const result = await this.distributionManagementService.fundProgram(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для финансирования проекта CAPITAL контракта
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalFundProject',
     description: 'Финансирование проекта CAPITAL контракта',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
-  async fundCapitalProject(@Args('data', { type: () => FundProjectInputDTO }) data: FundProjectInputDTO): Promise<string> {
+  async fundCapitalProject(
+    @Args('data', { type: () => FundProjectInputDTO }) data: FundProjectInputDTO
+  ): Promise<TransactionDTO> {
     const result = await this.distributionManagementService.fundProject(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для обновления CRPS пайщика в программе CAPITAL контракта
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalRefreshProgram',
     description: 'Обновление CRPS пайщика в программе CAPITAL контракта',
   })
@@ -55,15 +60,15 @@ export class DistributionManagementResolver {
   @AuthRoles(['chairman'])
   async refreshCapitalProgram(
     @Args('data', { type: () => RefreshProgramInputDTO }) data: RefreshProgramInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.distributionManagementService.refreshProgram(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   /**
    * Мутация для обновления CRPS пайщика в проекте CAPITAL контракта
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalRefreshProject',
     description: 'Обновление CRPS пайщика в проекте CAPITAL контракта',
   })
@@ -71,8 +76,8 @@ export class DistributionManagementResolver {
   @AuthRoles(['chairman'])
   async refreshCapitalProject(
     @Args('data', { type: () => RefreshProjectInputDTO }) data: RefreshProjectInputDTO
-  ): Promise<string> {
+  ): Promise<TransactionDTO> {
     const result = await this.distributionManagementService.refreshProject(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 }

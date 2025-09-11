@@ -1,20 +1,20 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
-import { PROJECT_REPOSITORY, ProjectRepository } from '../repositories/project.repository';
-import { ProjectDomainEntity } from '../entities/project.entity';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
+import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories/project.repository';
+import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import type { TransactResult } from '@wharfkit/session';
-import type { CreateProjectDomainInput } from '../actions/create-project-domain-input.interface';
-import type { AddAuthorDomainInput } from '../actions/add-author-domain-input.interface';
-import type { DeleteProjectDomainInput } from '../actions/delete-project-domain-input.interface';
-import type { OpenProjectDomainInput } from '../actions/open-project-domain-input.interface';
-import type { SetMasterDomainInput } from '../actions/set-master-domain-input.interface';
-import type { SetPlanDomainInput } from '../actions/set-plan-domain-input.interface';
-import type { StartProjectDomainInput } from '../actions/start-project-domain-input.interface';
+import type { CreateProjectDomainInput } from '../../domain/actions/create-project-domain-input.interface';
+import type { AddAuthorDomainInput } from '../../domain/actions/add-author-domain-input.interface';
+import type { DeleteProjectDomainInput } from '../../domain/actions/delete-project-domain-input.interface';
+import type { OpenProjectDomainInput } from '../../domain/actions/open-project-domain-input.interface';
+import type { SetMasterDomainInput } from '../../domain/actions/set-master-domain-input.interface';
+import type { SetPlanDomainInput } from '../../domain/actions/set-plan-domain-input.interface';
+import type { StartProjectDomainInput } from '../../domain/actions/start-project-domain-input.interface';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
-import type { ProjectFilterInputDTO } from '../../application/dto/property_management/project-filter.input';
+import type { ProjectFilterInputDTO } from '../dto/property_management/project-filter.input';
 
 /**
  * Интерактор домена для управления проектами CAPITAL контракта

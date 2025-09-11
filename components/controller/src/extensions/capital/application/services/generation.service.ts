@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GenerationInteractor } from '../../domain/interactors/generation.interactor';
+import { GenerationInteractor } from '../use-cases/generation.interactor';
 import type { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
 import type { RefreshSegmentInputDTO } from '../dto/generation/refresh-segment-input.dto';
 import type { TransactResult } from '@wharfkit/session';

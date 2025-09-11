@@ -5,6 +5,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { DebtOutputDTO } from '../dto/debt_management/debt.dto';
 import { DebtFilterInputDTO } from '../dto/debt_management/debt-filter.input';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
@@ -22,15 +23,17 @@ export class DebtManagementResolver {
   /**
    * Мутация для получения ссуды в CAPITAL контракте
    */
-  @Mutation(() => String, {
+  @Mutation(() => TransactionDTO, {
     name: 'capitalCreateDebt',
     description: 'Получение ссуды в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['participant'])
-  async createCapitalDebt(@Args('data', { type: () => CreateDebtInputDTO }) data: CreateDebtInputDTO): Promise<string> {
+  async createCapitalDebt(
+    @Args('data', { type: () => CreateDebtInputDTO }) data: CreateDebtInputDTO
+  ): Promise<TransactionDTO> {
     const result = await this.debtManagementService.createDebt(data);
-    return result.resolved?.transaction?.id?.toString() || 'неизвестно';
+    return result;
   }
 
   // ============ ЗАПРОСЫ ДОЛГОВ ============
