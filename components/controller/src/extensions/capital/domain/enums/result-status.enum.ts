@@ -1,3 +1,4 @@
+import { registerEnumType } from '@nestjs/graphql';
 // Статусы результата синхронизированные с блокчейн контрактом
 export enum ResultStatus {
   PENDING = 'pending', // Результат создан, ожидает обработки
@@ -7,3 +8,8 @@ export enum ResultStatus {
   DECLINED = 'declined', // Результат отклонен
   UNDEFINED = 'undefined', // Статус не определен
 }
+
+registerEnumType(ResultStatus, {
+  name: 'ResultStatus',
+  description: 'Статус результата в системе CAPITAL',
+});

@@ -1,3 +1,4 @@
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 /**
  * Доменный интерфейс для действия инвестирования в проект CAPITAL контракта
  */
@@ -18,5 +19,5 @@ export interface CreateProjectInvestDomainInput {
   amount: string;
 
   /** Заявление на инвестирование */
-  statement: any;
+  statement: ISignedDocumentDomainInterface;
 }

@@ -1,5 +1,5 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
-import { CapitalService } from '../services/capital.service';
+import { GenerationService } from '../services/generation.service';
 import { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
 import { RefreshSegmentInputDTO } from '../dto/generation/refresh-segment-input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
@@ -12,7 +12,7 @@ import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
  */
 @Resolver()
 export class GenerationResolver {
-  constructor(private readonly capitalService: CapitalService) {}
+  constructor(private readonly generationService: GenerationService) {}
 
   /**
    * Мутация для создания коммита в CAPITAL контракте
@@ -26,7 +26,7 @@ export class GenerationResolver {
   async createCapitalCommit(
     @Args('data', { type: () => CreateCommitInputDTO }) data: CreateCommitInputDTO
   ): Promise<string> {
-    const result = await this.capitalService.createCommit(data);
+    const result = await this.generationService.createCommit(data);
     return result.resolved?.transaction?.id?.toString() || 'неизвестно';
   }
 
@@ -42,7 +42,7 @@ export class GenerationResolver {
   async refreshCapitalSegment(
     @Args('data', { type: () => RefreshSegmentInputDTO }) data: RefreshSegmentInputDTO
   ): Promise<string> {
-    const result = await this.capitalService.refreshSegment(data);
+    const result = await this.generationService.refreshSegment(data);
     return result.resolved?.transaction?.id?.toString() || 'неизвестно';
   }
 }

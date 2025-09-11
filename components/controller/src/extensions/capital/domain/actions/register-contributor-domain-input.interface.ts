@@ -1,3 +1,4 @@
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 /**
  * Доменный интерфейс для действия регистрации вкладчика CAPITAL контракта
  */
@@ -17,6 +18,6 @@ export interface RegisterContributorDomainInput {
   /** Флаг внешнего контракта */
   is_external_contract: boolean;
 
-  /** Документ контракта */
-  contract: any;
+  /** Документ договора УХД */
+  contract: ISignedDocumentDomainInterface;
 }

@@ -2,7 +2,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { PushResultDomainInput } from '~/extensions/capital/domain/actions/push-result-domain-input.interface';
-import { ContractInputDTO } from '../participation_management/contract-input.dto';
+import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 
 /**
  * GraphQL DTO для внесения результата CAPITAL контракта
@@ -39,9 +39,9 @@ export class PushResultInputDTO implements PushResultDomainInput {
   @IsString({ message: 'Сумма долга к погашению должна быть строкой' })
   debt_amount!: string;
 
-  @Field(() => ContractInputDTO, { description: 'Заявление' })
-  @Type(() => ContractInputDTO)
-  statement!: ContractInputDTO;
+  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Заявление' })
+  @Type(() => SignedDigitalDocumentInputDTO)
+  statement!: SignedDigitalDocumentInputDTO;
 
   @Field(() => [String], { description: 'Хэши долгов для погашения' })
   @IsArray({ message: 'Хэши долгов должны быть массивом' })

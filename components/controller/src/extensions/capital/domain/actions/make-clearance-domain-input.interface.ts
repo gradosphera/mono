@@ -1,3 +1,4 @@
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 /**
  * Доменный интерфейс для действия подписания приложения CAPITAL контракта
  */
@@ -15,5 +16,5 @@ export interface MakeClearanceDomainInput {
   appendix_hash: string;
 
   /** Документ */
-  document: any;
+  document: ISignedDocumentDomainInterface;
 }

@@ -12,7 +12,7 @@ import { HttpApiError } from '~/errors/http-api-error';
  * Осуществляет взаимодействие с блокчейном через BlockchainService
  */
 @Injectable()
-export class CapitalBlockchainService implements CapitalBlockchainPort {
+export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   constructor(private readonly blockchainService: BlockchainService) {}
 
   /**
@@ -475,6 +475,23 @@ export class CapitalBlockchainService implements CapitalBlockchainPort {
     return await this.blockchainService.transact({
       account: CapitalContract.contractName.production,
       name: CapitalContract.Actions.DeleteProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Создание расхода CAPITAL контракта
+   */
+  async createExpense(data: CapitalContract.Actions.CreateExpense.ICreateExpense): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CreateExpense.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     });

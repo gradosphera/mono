@@ -2,7 +2,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { CreateProgramPropertyDomainInput } from '~/extensions/capital/domain/actions/create-program-property-domain-input.interface';
-import { ContractInputDTO } from '../participation_management/contract-input.dto';
+import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 
 /**
  * GraphQL DTO для создания программного имущественного взноса CAPITAL контракта
@@ -34,7 +34,7 @@ export class CreateProgramPropertyInputDTO implements CreateProgramPropertyDomai
   @IsString({ message: 'Описание имущества должно быть строкой' })
   property_description!: string;
 
-  @Field(() => ContractInputDTO, { description: 'Заявление' })
-  @Type(() => ContractInputDTO)
-  statement!: ContractInputDTO;
+  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Заявление' })
+  @Type(() => SignedDigitalDocumentInputDTO)
+  statement!: SignedDigitalDocumentInputDTO;
 }

@@ -1,3 +1,4 @@
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 /**
  * Доменный интерфейс для действия создания программного имущественного взноса CAPITAL контракта
  */
@@ -18,5 +19,5 @@ export interface CreateProgramPropertyDomainInput {
   property_description: string;
 
   /** Заявление */
-  statement: any;
+  statement: ISignedDocumentDomainInterface;
 }

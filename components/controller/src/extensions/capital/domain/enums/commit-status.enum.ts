@@ -1,3 +1,4 @@
+import { registerEnumType } from '@nestjs/graphql';
 // Статусы коммита синхронизированные с блокчейн контрактом
 export enum CommitStatus {
   PENDING = 'pending', // Коммит создан, ожидает подтверждения
@@ -5,3 +6,8 @@ export enum CommitStatus {
   DECLINED = 'declined', // Коммит отклонен
   UNDEFINED = 'undefined', // Статус не определен
 }
+
+registerEnumType(CommitStatus, {
+  name: 'CommitStatus',
+  description: 'Статус коммита в системе CAPITAL',
+});

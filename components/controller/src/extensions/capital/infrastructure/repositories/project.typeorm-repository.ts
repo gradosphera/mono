@@ -10,6 +10,12 @@ import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-s
 import { BaseBlockchainRepository } from './base-blockchain.repository';
 import type { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/project-blockchain.interface';
 import type { IProjectDomainInterfaceDatabaseData } from '../../domain/interfaces/project-database.interface';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import type { ProjectFilterInputDTO } from '../../application/dto/property_management/project-filter.input';
+import { PaginationUtils } from '~/shared/utils/pagination.utils';
 
 @Injectable()
 export class ProjectTypeormRepository
@@ -87,5 +93,71 @@ export class ProjectTypeormRepository
       relations: ['issues', 'stories', 'issues.comments', 'issues.stories'],
     });
     return entity ? ProjectMapper.toDomain(entity) : null;
+  }
+
+  async findAllPaginated(
+    filter?: ProjectFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<ProjectDomainEntity>> {
+    // Валидируем параметры пагинации
+    const validatedOptions: PaginationInputDomainInterface = options
+      ? PaginationUtils.validatePaginationOptions(options)
+      : {
+          page: 1,
+          limit: 10,
+          sortBy: undefined,
+          sortOrder: 'ASC' as const,
+        };
+
+    // Получаем параметры для SQL запроса
+    const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
+
+    // Строим условия поиска
+    const where: any = {};
+    if (filter?.coopname) {
+      where.coopname = filter.coopname;
+    }
+    if (filter?.master) {
+      where.master = filter.master;
+    }
+    if (filter?.status) {
+      where.status = filter.status;
+    }
+    if (filter?.project_hash) {
+      where.project_hash = filter.project_hash;
+    }
+    if (filter?.parent_hash) {
+      where.parent_hash = filter.parent_hash;
+    }
+    if (filter?.is_opened !== undefined) {
+      where.is_opened = filter.is_opened;
+    }
+    if (filter?.is_planed !== undefined) {
+      where.is_planed = filter.is_planed;
+    }
+
+    // Получаем общее количество записей
+    const totalCount = await this.repository.count({ where });
+
+    // Получаем записи с пагинацией
+    const orderBy: any = {};
+    if (validatedOptions.sortBy) {
+      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+    } else {
+      orderBy.created_at = 'DESC';
+    }
+
+    const entities = await this.repository.find({
+      where,
+      skip: offset,
+      take: limit,
+      order: orderBy,
+    });
+
+    // Преобразуем в доменные сущности
+    const items = entities.map((entity) => ProjectMapper.toDomain(entity));
+
+    // Возвращаем результат с пагинацией
+    return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
   }
 }

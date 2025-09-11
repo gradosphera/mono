@@ -1,3 +1,5 @@
+import { registerEnumType } from '@nestjs/graphql';
+
 // Статусы проекта синхронизированные с блокчейн контрактом
 export enum ProjectStatus {
   PENDING = 'pending', // Проект создан
@@ -7,3 +9,8 @@ export enum ProjectStatus {
   CLOSED = 'closed', // Проект закрыт
   UNDEFINED = 'undefined', // Статус не определен
 }
+
+registerEnumType(ProjectStatus, {
+  name: 'ProjectStatus',
+  description: 'Статусы проекта в системе CAPITAL',
+});

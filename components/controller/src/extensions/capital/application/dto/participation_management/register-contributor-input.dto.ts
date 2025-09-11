@@ -2,7 +2,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { RegisterContributorDomainInput } from '../../../domain/actions/register-contributor-domain-input.interface';
-import { ContractInputDTO } from './contract-input.dto';
+import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 
 /**
  * GraphQL DTO для регистрации вкладчика CAPITAL контракта
@@ -33,7 +33,7 @@ export class RegisterContributorInputDTO implements RegisterContributorDomainInp
   @IsBoolean({ message: 'Флаг внешнего контракта должен быть булевым' })
   is_external_contract!: boolean;
 
-  @Field(() => ContractInputDTO, { description: 'Документ контракта' })
-  @Type(() => ContractInputDTO)
-  contract!: ContractInputDTO;
+  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Документ контракта' })
+  @Type(() => SignedDigitalDocumentInputDTO)
+  contract!: SignedDigitalDocumentInputDTO;
 }

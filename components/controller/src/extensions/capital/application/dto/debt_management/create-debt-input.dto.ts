@@ -2,7 +2,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { CreateDebtDomainInput } from '~/extensions/capital/domain/actions/create-debt-domain-input.interface';
-import { ContractInputDTO } from '../participation_management/contract-input.dto';
+import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 
 /**
  * GraphQL DTO для создания долга CAPITAL контракта
@@ -39,7 +39,7 @@ export class CreateDebtInputDTO implements CreateDebtDomainInput {
   @IsString({ message: 'Дата возврата должна быть строкой' })
   repaid_at!: string;
 
-  @Field(() => ContractInputDTO, { description: 'Заявление' })
-  @Type(() => ContractInputDTO)
-  statement!: ContractInputDTO;
+  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Заявление на получение ссуды' })
+  @Type(() => SignedDigitalDocumentInputDTO)
+  statement!: SignedDigitalDocumentInputDTO;
 }

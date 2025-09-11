@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
 import { ContributorTypeormEntity } from '../entities/contributor.typeorm-entity';
 import { AppendixTypeormEntity } from '../entities/appendix.typeorm-entity';
+import { InvestTypeormEntity } from '../entities/invest.typeorm-entity';
 import { ProgramInvestTypeormEntity } from '../entities/program-invest.typeorm-entity';
 import { ProgramPropertyTypeormEntity } from '../entities/program-property.typeorm-entity';
 import { ProgramWithdrawTypeormEntity } from '../entities/program-withdraw.typeorm-entity';
@@ -13,6 +14,12 @@ import { CycleTypeormEntity } from '../entities/cycle.typeorm-entity';
 import { IssueTypeormEntity } from '../entities/issue.typeorm-entity';
 import { CommentTypeormEntity } from '../entities/comment.typeorm-entity';
 import { StoryTypeormEntity } from '../entities/story.typeorm-entity';
+import { VoteTypeormEntity } from '../entities/vote.typeorm-entity';
+import { DebtTypeormEntity } from '../entities/debt.typeorm-entity';
+import { ResultTypeormEntity } from '../entities/result.typeorm-entity';
+import { ExpenseTypeormEntity } from '../entities/expense.typeorm-entity';
+import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
+import { StateTypeormEntity } from '../entities/state.typeorm-entity';
 import { config } from '~/config';
 
 // Константа для имени подключения к базе данных capital
@@ -34,6 +41,7 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
           ProjectTypeormEntity,
           ContributorTypeormEntity,
           AppendixTypeormEntity,
+          InvestTypeormEntity,
           ProgramInvestTypeormEntity,
           ProgramPropertyTypeormEntity,
           ProgramWithdrawTypeormEntity,
@@ -44,6 +52,12 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
           IssueTypeormEntity,
           CommentTypeormEntity,
           StoryTypeormEntity,
+          VoteTypeormEntity,
+          DebtTypeormEntity,
+          ResultTypeormEntity,
+          ExpenseTypeormEntity,
+          CommitTypeormEntity,
+          StateTypeormEntity,
         ],
         synchronize: config.env === 'development', // Используем миграции для production
         logging: false,
@@ -54,6 +68,7 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
         ProjectTypeormEntity,
         ContributorTypeormEntity,
         AppendixTypeormEntity,
+        InvestTypeormEntity,
         ProgramInvestTypeormEntity,
         ProgramPropertyTypeormEntity,
         ProgramWithdrawTypeormEntity,
@@ -64,6 +79,12 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
         IssueTypeormEntity,
         CommentTypeormEntity,
         StoryTypeormEntity,
+        VoteTypeormEntity,
+        DebtTypeormEntity,
+        ResultTypeormEntity,
+        ExpenseTypeormEntity,
+        CommitTypeormEntity,
+        StateTypeormEntity,
       ],
       CAPITAL_DATABASE_CONNECTION
     ), // Указываем connection name

@@ -3154,9 +3154,6 @@ type Mutation {
   """Подтвердить поставку имущества на заявку"""
   acceptChildOrder(data: AcceptChildOrderInput!): Transaction!
 
-  """Добавление автора проекта в CAPITAL контракте"""
-  addCapitalAuthor(data: AddAuthorInput!): String!
-
   """
   Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета)
   """
@@ -3165,14 +3162,89 @@ type Mutation {
   """Добавить доверенное лицо кооперативного участка"""
   addTrustedAccount(data: AddTrustedAccountInput!): Branch!
 
-  """Расчет голосов в CAPITAL контракте"""
-  calculateCapitalVotes(data: CalculateVotesInput!): String!
-
   """Отменить заявку"""
   cancelRequest(data: CancelRequestInput!): Transaction!
 
+  """Добавление автора проекта в CAPITAL контракте"""
+  capitalAddAuthor(data: AddAuthorInput!): String!
+
+  """Расчет голосов в CAPITAL контракте"""
+  capitalCalculateVotes(data: CalculateVotesInput!): String!
+
   """Завершение голосования в CAPITAL контракте"""
-  completeCapitalVoting(data: CompleteVotingInput!): String!
+  capitalCompleteVoting(data: CompleteVotingInput!): String!
+
+  """Конвертация сегмента в CAPITAL контракте"""
+  capitalConvertSegment(data: ConvertSegmentInput!): String!
+
+  """Создание коммита в CAPITAL контракте"""
+  capitalCreateCommit(data: CreateCommitInput!): String!
+
+  """Получение ссуды в CAPITAL контракте"""
+  capitalCreateDebt(data: CreateDebtInput!): String!
+
+  """Создание программного имущественного взноса в CAPITAL контракте"""
+  capitalCreateProgramProperty(data: CreateProgramPropertyInput!): String!
+
+  """Создание проекта в CAPITAL контракте"""
+  capitalCreateProject(data: CreateProjectInput!): String!
+
+  """Инвестирование в проект CAPITAL контракта"""
+  capitalCreateProjectInvest(data: CreateProjectInvestInput!): String!
+
+  """Создание проектного имущественного взноса в CAPITAL контракте"""
+  capitalCreateProjectProperty(data: CreateProjectPropertyInput!): String!
+
+  """Удаление проекта в CAPITAL контракте"""
+  capitalDeleteProject(data: DeleteProjectInput!): String!
+
+  """Финансирование программы CAPITAL контракта"""
+  capitalFundProgram(data: FundProgramInput!): String!
+
+  """Финансирование проекта CAPITAL контракта"""
+  capitalFundProject(data: FundProjectInput!): String!
+
+  """Импорт вкладчика в CAPITAL контракт"""
+  capitalImportContributor(data: ImportContributorInput!): String!
+
+  """Подписание приложения в CAPITAL контракте"""
+  capitalMakeClearance(data: MakeClearanceInput!): String!
+
+  """Открытие проекта для инвестиций в CAPITAL контракте"""
+  capitalOpenProject(data: OpenProjectInput!): String!
+
+  """Внесение результата в CAPITAL контракте"""
+  capitalPushResult(data: PushResultInput!): String!
+
+  """Обновление CRPS пайщика в программе CAPITAL контракта"""
+  capitalRefreshProgram(data: RefreshProgramInput!): String!
+
+  """Обновление CRPS пайщика в проекте CAPITAL контракта"""
+  capitalRefreshProject(data: RefreshProjectInput!): String!
+
+  """Обновление сегмента в CAPITAL контракте"""
+  capitalRefreshSegment(data: RefreshSegmentInput!): String!
+
+  """Регистрация вкладчика в CAPITAL контракте"""
+  capitalRegisterContributor(data: RegisterContributorInput!): String!
+
+  """Установка конфигурации CAPITAL контракта"""
+  capitalSetConfig(data: SetConfigInput!): String!
+
+  """Установка мастера проекта в CAPITAL контракте"""
+  capitalSetMaster(data: SetMasterInput!): String!
+
+  """Установка плана проекта в CAPITAL контракте"""
+  capitalSetPlan(data: SetPlanInput!): String!
+
+  """Запуск проекта в CAPITAL контракте"""
+  capitalStartProject(data: StartProjectInput!): String!
+
+  """Запуск голосования в CAPITAL контракте"""
+  capitalStartVoting(data: StartVotingInput!): String!
+
+  """Голосование в CAPITAL контракте"""
+  capitalSubmitVote(data: SubmitVoteInput!): String!
 
   """Завершить заявку по истечению гарантийного срока"""
   completeRequest(data: CompleteRequestInput!): Transaction!
@@ -3187,9 +3259,6 @@ type Mutation {
   """
   confirmSupplyOnRequest(data: ConfirmSupplyOnRequestInput!): Transaction!
 
-  """Конвертация сегмента в CAPITAL контракте"""
-  convertCapitalSegment(data: ConvertSegmentInput!): String!
-
   """
   Сгенерировать документ предложения повестки очередного общего собрания пайщиков
   """
@@ -3200,24 +3269,6 @@ type Mutation {
 
   """Создать кооперативный участок"""
   createBranch(data: CreateBranchInput!): Branch!
-
-  """Создание коммита в CAPITAL контракте"""
-  createCapitalCommit(data: CreateCommitInput!): String!
-
-  """Получение ссуды в CAPITAL контракте"""
-  createCapitalDebt(data: CreateDebtInput!): String!
-
-  """Создание программного имущественного взноса в CAPITAL контракте"""
-  createCapitalProgramProperty(data: CreateProgramPropertyInput!): String!
-
-  """Создание проекта в CAPITAL контракте"""
-  createCapitalProject(data: CreateProjectInput!): String!
-
-  """Инвестирование в проект CAPITAL контракта"""
-  createCapitalProjectInvest(data: CreateProjectInvestInput!): String!
-
-  """Создание проектного имущественного взноса в CAPITAL контракте"""
-  createCapitalProjectProperty(data: CreateProjectPropertyInput!): String!
 
   """Создать заявку на поставку имущества по предложению Поставщика"""
   createChildOrder(data: CreateChildOrderInput!): Transaction!
@@ -3255,9 +3306,6 @@ type Mutation {
   """Удалить кооперативный участок"""
   deleteBranch(data: DeleteBranchInput!): Boolean!
 
-  """Удаление проекта в CAPITAL контракте"""
-  deleteCapitalProject(data: DeleteProjectInput!): String!
-
   """Удалить метод оплаты"""
   deletePaymentMethod(data: DeletePaymentMethodInput!): Boolean!
 
@@ -3272,12 +3320,6 @@ type Mutation {
 
   """Изменить кооперативный участок"""
   editBranch(data: EditBranchInput!): Branch!
-
-  """Финансирование программы CAPITAL контракта"""
-  fundCapitalProgram(data: FundProgramInput!): String!
-
-  """Финансирование проекта CAPITAL контракта"""
-  fundCapitalProject(data: FundProjectInput!): String!
 
   """Сгенерировать предложение повестки общего собрания пайщиков"""
   generateAnnualGeneralMeetAgendaDocument(data: AnnualGeneralMeetingAgendaGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -3353,9 +3395,6 @@ type Mutation {
   """
   generateWalletAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
-  """Импорт вкладчика в CAPITAL контракт"""
-  importCapitalContributor(data: ImportContributorInput!): String!
-
   """
   Произвести инициализацию программного обеспечения перед установкой совета методом install
   """
@@ -3375,17 +3414,11 @@ type Mutation {
   """Выйти из системы и заблокировать JWT-токены"""
   logout(data: LogoutInput!): Boolean!
 
-  """Подписание приложения в CAPITAL контракте"""
-  makeCapitalClearance(data: MakeClearanceInput!): String!
-
   """Модерировать заявку"""
   moderateRequest(data: ModerateRequestInput!): Transaction!
 
   """Уведомление о проведении общего собрания пайщиков"""
   notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInput!): MeetAggregate!
-
-  """Открытие проекта для инвестиций в CAPITAL контракте"""
-  openCapitalProject(data: OpenProjectInput!): String!
 
   """Отклонить модерацию по заявке"""
   prohibitRequest(data: ProhibitRequestInput!): Transaction!
@@ -3398,9 +3431,6 @@ type Mutation {
   """Опубликовать заявку"""
   publishRequest(data: PublishRequestInput!): Transaction!
 
-  """Внесение результата в CAPITAL контракте"""
-  pushCapitalResult(data: PushResultInput!): String!
-
   """
   Подтвердить получение имущества Уполномоченным лицом от Заказчика по акту приёмки-передачи
   """
@@ -3409,20 +3439,8 @@ type Mutation {
   """Обновить токен доступа аккаунта"""
   refresh(data: RefreshInput!): RegisteredAccount!
 
-  """Обновление CRPS пайщика в программе CAPITAL контракта"""
-  refreshCapitalProgram(data: RefreshProgramInput!): String!
-
-  """Обновление CRPS пайщика в проекте CAPITAL контракта"""
-  refreshCapitalProject(data: RefreshProjectInput!): String!
-
-  """Обновление сегмента в CAPITAL контракте"""
-  refreshCapitalSegment(data: RefreshSegmentInput!): String!
-
   """Зарегистрировать аккаунт пользователя в системе"""
   registerAccount(data: RegisterAccountInput!): RegisteredAccount!
-
-  """Регистрация вкладчика в CAPITAL контракте"""
-  registerCapitalContributor(data: RegisterContributorInput!): String!
 
   """
   Зарегистрировать заявление и подписанные положения, подготовив пакет документов к отправке в совет на голосование после поступления оплаты.
@@ -3438,15 +3456,6 @@ type Mutation {
   """Выбрать кооперативный участок"""
   selectBranch(data: SelectBranchInput!): Boolean!
 
-  """Установка конфигурации CAPITAL контракта"""
-  setCapitalConfig(data: SetConfigInput!): String!
-
-  """Установка мастера проекта в CAPITAL контракте"""
-  setCapitalMaster(data: SetMasterInput!): String!
-
-  """Установка плана проекта в CAPITAL контракте"""
-  setCapitalPlan(data: SetPlanInput!): String!
-
   """
   Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне.
   """
@@ -3461,19 +3470,10 @@ type Mutation {
   """Подписание решения секретарём на общем собрании пайщиков"""
   signBySecretaryOnAnnualGeneralMeet(data: SignBySecretaryOnAnnualGeneralMeetInput!): MeetAggregate!
 
-  """Запуск проекта в CAPITAL контракте"""
-  startCapitalProject(data: StartProjectInput!): String!
-
-  """Запуск голосования в CAPITAL контракте"""
-  startCapitalVoting(data: StartVotingInput!): String!
-
   """
   Выслать токен для замены приватного ключа аккаунта на электронную почту
   """
   startResetKey(data: StartResetKeyInput!): Boolean!
-
-  """Голосование в CAPITAL контракте"""
-  submitCapitalVote(data: SubmitVoteInput!): String!
 
   """
   Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи

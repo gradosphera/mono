@@ -140,6 +140,11 @@ export interface CapitalBlockchainPort {
    * Удаление проекта CAPITAL контракта
    */
   deleteProject(data: CapitalContract.Actions.DeleteProject.IDeleteProject): Promise<TransactResult>;
+
+  /**
+   * Создание расхода CAPITAL контракта
+   */
+  createExpense(data: CapitalContract.Actions.CreateExpense.ICreateExpense): Promise<TransactResult>;
 }
 
 /**

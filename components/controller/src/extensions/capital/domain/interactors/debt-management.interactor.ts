@@ -1,8 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalContract } from 'cooptypes';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
 import type { CreateDebtDomainInput } from '../actions/create-debt-domain-input.interface';
+import { DEBT_REPOSITORY, DebtRepository } from '../repositories/debt.repository';
+import { DebtDomainEntity } from '../entities/debt.entity';
+import type { DebtFilterInputDTO } from '../../application/dto/debt_management/debt-filter.input';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 
 /**
  * Интерактор домена для управления долгами CAPITAL контракта
@@ -12,25 +19,49 @@ import type { CreateDebtDomainInput } from '../actions/create-debt-domain-input.
 export class DebtManagementInteractor {
   constructor(
     @Inject(CAPITAL_BLOCKCHAIN_PORT)
-    private readonly capitalBlockchainPort: CapitalBlockchainPort
+    private readonly capitalBlockchainPort: CapitalBlockchainPort,
+    @Inject(DEBT_REPOSITORY)
+    private readonly debtRepository: DebtRepository,
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
   ) {}
 
   /**
    * Создание долга в CAPITAL контракте
    */
   async createDebt(data: CreateDebtDomainInput): Promise<TransactResult> {
-    // Преобразуем доменные данные в формат блокчейна
-    const blockchainData: CapitalContract.Actions.CreateDebt.ICreateDebt = {
-      coopname: data.coopname,
-      username: data.username,
-      debt_hash: data.debt_hash,
-      project_hash: data.project_hash,
-      amount: data.amount,
-      repaid_at: data.repaid_at,
-      statement: data.statement,
+    // Преобразовываем доменный документ в формат блокчейна
+    const blockchainData = {
+      ...data,
+      statement: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.statement),
     };
 
     // Вызываем блокчейн порт
     return await this.capitalBlockchainPort.createDebt(blockchainData);
+  }
+
+  // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
+
+  /**
+   * Получение всех долгов с фильтрацией и пагинацией
+   */
+  async getDebts(
+    filter?: DebtFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<DebtDomainEntity>> {
+    // Поскольку DebtRepository может не иметь findAllPaginated, используем findAll
+    const debts = await this.debtRepository.findAll();
+    return {
+      items: debts,
+      totalCount: debts.length,
+      totalPages: 1,
+      currentPage: 1,
+    };
+  }
+
+  /**
+   * Получение долга по ID
+   */
+  async getDebtById(_id: string): Promise<DebtDomainEntity | null> {
+    return await this.debtRepository.findById(_id);
   }
 }

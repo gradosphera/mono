@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ContractInputDTO } from '../participation_management/contract-input.dto';
+import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 import type { ConvertSegmentDomainInput } from '~/extensions/capital/domain/actions/convert-segment-domain-input.interface';
 
 /**
@@ -44,7 +44,7 @@ export class ConvertSegmentInputDTO implements ConvertSegmentDomainInput {
   @IsString({ message: 'Сумма для конвертации в кошелек проекта должна быть строкой' })
   project_amount!: string;
 
-  @Field(() => ContractInputDTO, { description: 'Заявление' })
-  @Type(() => ContractInputDTO)
-  convert_statement!: ContractInputDTO;
+  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Заявление' })
+  @Type(() => SignedDigitalDocumentInputDTO)
+  convert_statement!: SignedDigitalDocumentInputDTO;
 }

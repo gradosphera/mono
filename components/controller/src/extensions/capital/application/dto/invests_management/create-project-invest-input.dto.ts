@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString } from 'class-validator';
 import type { CreateProjectInvestDomainInput } from '~/extensions/capital/domain/actions/create-project-invest-domain-input.interface';
-import { ContractInputDTO } from '../participation_management/contract-input.dto';
+import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 import { Type } from 'class-transformer';
 
 /**
@@ -34,7 +34,7 @@ export class CreateProjectInvestInputDTO implements CreateProjectInvestDomainInp
   @IsString({ message: 'Сумма инвестиции должна быть строкой' })
   amount!: string;
 
-  @Field(() => ContractInputDTO, { description: 'Заявление на инвестирование' })
-  @Type(() => ContractInputDTO)
-  statement!: ContractInputDTO;
+  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Заявление на инвестирование' })
+  @Type(() => SignedDigitalDocumentInputDTO)
+  statement!: SignedDigitalDocumentInputDTO;
 }

@@ -1,0 +1,18 @@
+import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
+
+export const name = 'capitalCompleteVoting'
+
+export const mutation = Selector('Mutation')({
+  [name]: [{ data: $('data', 'CompleteVotingInput!') }, true],
+})
+
+export interface IInput {
+  /**
+   * @private
+   */
+  [key: string]: unknown
+
+  data: ModelTypes['CompleteVotingInput']
+}
+
+export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

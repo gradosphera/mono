@@ -5,6 +5,9 @@ export const AllTypesProps: Record<string,any> = {
 		document:"AssetContributionStatementSignedDocumentInput"
 	},
 	AccountType: "enum" as const,
+	AddAuthorInput:{
+
+	},
 	AddParticipantInput:{
 		entrepreneur_data:"CreateEntrepreneurDataInput",
 		individual_data:"CreateIndividualDataInput",
@@ -103,6 +106,9 @@ export const AllTypesProps: Record<string,any> = {
 	BankAccountInput:{
 		details:"BankAccountDetailsInput"
 	},
+	CalculateVotesInput:{
+
+	},
 	CancelRequestInput:{
 
 	},
@@ -112,11 +118,26 @@ export const AllTypesProps: Record<string,any> = {
 	CompleteRequestInput:{
 
 	},
+	CompleteVotingInput:{
+
+	},
+	ConfigInput:{
+
+	},
 	ConfirmReceiveOnRequestInput:{
 		document:"ReturnByAssetActSignedDocumentInput"
 	},
 	ConfirmSupplyOnRequestInput:{
 		document:"AssetContributionActSignedDocumentInput"
+	},
+	ContractDocumentInput:{
+
+	},
+	ContractInput:{
+		signatures:"ContractDocumentInput"
+	},
+	ConvertSegmentInput:{
+		convert_statement:"ContractInput"
 	},
 	Country: "enum" as const,
 	CreateAnnualGeneralMeetInput:{
@@ -133,6 +154,12 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	CreateChildOrderInput:{
 		document:"ReturnByAssetStatementSignedDocumentInput"
+	},
+	CreateCommitInput:{
+
+	},
+	CreateDebtInput:{
+		statement:"ContractInput"
 	},
 	CreateDepositPaymentInput:{
 
@@ -157,7 +184,19 @@ export const AllTypesProps: Record<string,any> = {
 	CreateParentOfferInput:{
 
 	},
+	CreateProgramPropertyInput:{
+		statement:"ContractInput"
+	},
 	CreateProjectFreeDecisionInput:{
+
+	},
+	CreateProjectInput:{
+
+	},
+	CreateProjectInvestInput:{
+		statement:"ContractInput"
+	},
+	CreateProjectPropertyInput:{
 
 	},
 	CreateSubscriptionInput:{
@@ -177,6 +216,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	DeletePaymentMethodInput:{
+
+	},
+	DeleteProjectInput:{
 
 	},
 	DeleteTrustedAccountInput:{
@@ -201,6 +243,12 @@ export const AllTypesProps: Record<string,any> = {
 		updated_at:"DateTime"
 	},
 	FreeDecisionGenerateDocumentInput:{
+
+	},
+	FundProgramInput:{
+
+	},
+	FundProjectInput:{
 
 	},
 	GenerateDocumentInput:{
@@ -242,6 +290,9 @@ export const AllTypesProps: Record<string,any> = {
 	GetUserSubscriptionsInput:{
 
 	},
+	ImportContributorInput:{
+
+	},
 	Init:{
 		organization_data:"CreateOrganizationDataInput",
 		vars:"VarsInput"
@@ -256,6 +307,9 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	LogoutInput:{
 
+	},
+	MakeClearanceInput:{
+		document:"ContractInput"
 	},
 	MetaDocumentInput:{
 
@@ -275,6 +329,87 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		cancelRequest:{
 			data:"CancelRequestInput"
+		},
+		capitalAddAuthor:{
+			data:"AddAuthorInput"
+		},
+		capitalCalculateVotes:{
+			data:"CalculateVotesInput"
+		},
+		capitalCompleteVoting:{
+			data:"CompleteVotingInput"
+		},
+		capitalConvertSegment:{
+			data:"ConvertSegmentInput"
+		},
+		capitalCreateCommit:{
+			data:"CreateCommitInput"
+		},
+		capitalCreateDebt:{
+			data:"CreateDebtInput"
+		},
+		capitalCreateProgramProperty:{
+			data:"CreateProgramPropertyInput"
+		},
+		capitalCreateProject:{
+			data:"CreateProjectInput"
+		},
+		capitalCreateProjectInvest:{
+			data:"CreateProjectInvestInput"
+		},
+		capitalCreateProjectProperty:{
+			data:"CreateProjectPropertyInput"
+		},
+		capitalDeleteProject:{
+			data:"DeleteProjectInput"
+		},
+		capitalFundProgram:{
+			data:"FundProgramInput"
+		},
+		capitalFundProject:{
+			data:"FundProjectInput"
+		},
+		capitalImportContributor:{
+			data:"ImportContributorInput"
+		},
+		capitalMakeClearance:{
+			data:"MakeClearanceInput"
+		},
+		capitalOpenProject:{
+			data:"OpenProjectInput"
+		},
+		capitalPushResult:{
+			data:"PushResultInput"
+		},
+		capitalRefreshProgram:{
+			data:"RefreshProgramInput"
+		},
+		capitalRefreshProject:{
+			data:"RefreshProjectInput"
+		},
+		capitalRefreshSegment:{
+			data:"RefreshSegmentInput"
+		},
+		capitalRegisterContributor:{
+			data:"RegisterContributorInput"
+		},
+		capitalSetConfig:{
+			data:"SetConfigInput"
+		},
+		capitalSetMaster:{
+			data:"SetMasterInput"
+		},
+		capitalSetPlan:{
+			data:"SetPlanInput"
+		},
+		capitalStartProject:{
+			data:"StartProjectInput"
+		},
+		capitalStartVoting:{
+			data:"StartVotingInput"
+		},
+		capitalSubmitVote:{
+			data:"SubmitVoteInput"
 		},
 		completeRequest:{
 			data:"CompleteRequestInput"
@@ -524,6 +659,9 @@ export const AllTypesProps: Record<string,any> = {
 	NotifyOnAnnualGeneralMeetInput:{
 		notification:"AnnualGeneralMeetingNotificationSignedDocumentInput"
 	},
+	OpenProjectInput:{
+
+	},
 	OrganizationDetailsInput:{
 
 	},
@@ -574,6 +712,9 @@ export const AllTypesProps: Record<string,any> = {
 	PublishRequestInput:{
 
 	},
+	PushResultInput:{
+		statement:"ContractInput"
+	},
 	Query:{
 		getAccount:{
 			data:"GetAccountInput"
@@ -623,11 +764,23 @@ export const AllTypesProps: Record<string,any> = {
 	RefreshInput:{
 
 	},
+	RefreshProgramInput:{
+
+	},
+	RefreshProjectInput:{
+
+	},
+	RefreshSegmentInput:{
+
+	},
 	RegisterAccountInput:{
 		entrepreneur_data:"CreateEntrepreneurDataInput",
 		individual_data:"CreateIndividualDataInput",
 		organization_data:"CreateOrganizationDataInput",
 		type:"AccountType"
+	},
+	RegisterContributorInput:{
+		contract:"ContractInput"
 	},
 	RegisterParticipantInput:{
 		privacy_agreement:"SignedDigitalDocumentInput",
@@ -699,8 +852,17 @@ export const AllTypesProps: Record<string,any> = {
 	SelectBranchSignedMetaDocumentInput:{
 
 	},
+	SetConfigInput:{
+		config:"ConfigInput"
+	},
+	SetMasterInput:{
+
+	},
 	SetPaymentStatusInput:{
 		status:"PaymentStatus"
+	},
+	SetPlanInput:{
+
 	},
 	SetWifInput:{
 
@@ -721,8 +883,17 @@ export const AllTypesProps: Record<string,any> = {
 	SovietMemberInput:{
 		individual_data:"CreateIndividualDataInput"
 	},
+	StartProjectInput:{
+
+	},
 	StartResetKeyInput:{
 
+	},
+	StartVotingInput:{
+
+	},
+	SubmitVoteInput:{
+		votes:"VoteDistributionInput"
 	},
 	SupplyOnRequestInput:{
 		document:"AssetContributionActSignedDocumentInput"
@@ -768,6 +939,9 @@ export const AllTypesProps: Record<string,any> = {
 		signature_agreement:"AgreementInput",
 		user_agreement:"AgreementInput",
 		wallet_agreement:"AgreementInput"
+	},
+	VoteDistributionInput:{
+
 	},
 	VoteItemInput:{
 
@@ -1309,6 +1483,33 @@ export const ReturnTypes: Record<string,any> = {
 		addParticipant:"Account",
 		addTrustedAccount:"Branch",
 		cancelRequest:"Transaction",
+		capitalAddAuthor:"String",
+		capitalCalculateVotes:"String",
+		capitalCompleteVoting:"String",
+		capitalConvertSegment:"String",
+		capitalCreateCommit:"String",
+		capitalCreateDebt:"String",
+		capitalCreateProgramProperty:"String",
+		capitalCreateProject:"String",
+		capitalCreateProjectInvest:"String",
+		capitalCreateProjectProperty:"String",
+		capitalDeleteProject:"String",
+		capitalFundProgram:"String",
+		capitalFundProject:"String",
+		capitalImportContributor:"String",
+		capitalMakeClearance:"String",
+		capitalOpenProject:"String",
+		capitalPushResult:"String",
+		capitalRefreshProgram:"String",
+		capitalRefreshProject:"String",
+		capitalRefreshSegment:"String",
+		capitalRegisterContributor:"String",
+		capitalSetConfig:"String",
+		capitalSetMaster:"String",
+		capitalSetPlan:"String",
+		capitalStartProject:"String",
+		capitalStartVoting:"String",
+		capitalSubmitVote:"String",
 		completeRequest:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",

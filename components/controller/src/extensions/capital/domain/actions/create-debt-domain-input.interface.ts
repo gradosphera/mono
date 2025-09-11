@@ -1,3 +1,4 @@
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 /**
  * Доменный интерфейс для действия создания долга CAPITAL контракта
  */
@@ -21,5 +22,5 @@ export interface CreateDebtDomainInput {
   repaid_at: string;
 
   /** Заявление */
-  statement: any;
+  statement: ISignedDocumentDomainInterface;
 }

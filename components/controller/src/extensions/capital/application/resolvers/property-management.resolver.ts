@@ -1,5 +1,5 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
-import { CapitalService } from '../services/capital.service';
+import { PropertyManagementService } from '../services/property-management.service';
 import { CreateProjectPropertyInputDTO } from '../dto/property_management/create-project-property-input.dto';
 import { CreateProgramPropertyInputDTO } from '../dto/property_management/create-program-property-input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
@@ -12,7 +12,7 @@ import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
  */
 @Resolver()
 export class PropertyManagementResolver {
-  constructor(private readonly capitalService: CapitalService) {}
+  constructor(private readonly propertyManagementService: PropertyManagementService) {}
 
   /**
    * Мутация для создания проектного имущественного взноса в CAPITAL контракте
@@ -26,7 +26,7 @@ export class PropertyManagementResolver {
   async createCapitalProjectProperty(
     @Args('data', { type: () => CreateProjectPropertyInputDTO }) data: CreateProjectPropertyInputDTO
   ): Promise<string> {
-    const result = await this.capitalService.createProjectProperty(data);
+    const result = await this.propertyManagementService.createProjectProperty(data);
     return result.resolved?.transaction?.id?.toString() || 'неизвестно';
   }
 
@@ -42,7 +42,7 @@ export class PropertyManagementResolver {
   async createCapitalProgramProperty(
     @Args('data', { type: () => CreateProgramPropertyInputDTO }) data: CreateProgramPropertyInputDTO
   ): Promise<string> {
-    const result = await this.capitalService.createProgramProperty(data);
+    const result = await this.propertyManagementService.createProgramProperty(data);
     return result.resolved?.transaction?.id?.toString() || 'неизвестно';
   }
 }

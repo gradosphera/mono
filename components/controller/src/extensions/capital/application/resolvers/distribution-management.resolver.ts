@@ -1,5 +1,5 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
-import { CapitalService } from '../services/capital.service';
+import { DistributionManagementService } from '../services/distribution-management.service';
 import { FundProgramInputDTO } from '../dto/distribution_management/fund-program-input.dto';
 import { FundProjectInputDTO } from '../dto/distribution_management/fund-project-input.dto';
 import { RefreshProgramInputDTO } from '../dto/distribution_management/refresh-program-input.dto';
@@ -14,7 +14,7 @@ import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
  */
 @Resolver()
 export class DistributionManagementResolver {
-  constructor(private readonly capitalService: CapitalService) {}
+  constructor(private readonly distributionManagementService: DistributionManagementService) {}
 
   /**
    * Мутация для финансирования программы CAPITAL контракта
@@ -26,7 +26,7 @@ export class DistributionManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async fundCapitalProgram(@Args('data', { type: () => FundProgramInputDTO }) data: FundProgramInputDTO): Promise<string> {
-    const result = await this.capitalService.fundProgram(data);
+    const result = await this.distributionManagementService.fundProgram(data);
     return result.resolved?.transaction?.id?.toString() || 'неизвестно';
   }
 
@@ -40,7 +40,7 @@ export class DistributionManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async fundCapitalProject(@Args('data', { type: () => FundProjectInputDTO }) data: FundProjectInputDTO): Promise<string> {
-    const result = await this.capitalService.fundProject(data);
+    const result = await this.distributionManagementService.fundProject(data);
     return result.resolved?.transaction?.id?.toString() || 'неизвестно';
   }
 
@@ -56,7 +56,7 @@ export class DistributionManagementResolver {
   async refreshCapitalProgram(
     @Args('data', { type: () => RefreshProgramInputDTO }) data: RefreshProgramInputDTO
   ): Promise<string> {
-    const result = await this.capitalService.refreshProgram(data);
+    const result = await this.distributionManagementService.refreshProgram(data);
     return result.resolved?.transaction?.id?.toString() || 'неизвестно';
   }
 
@@ -72,7 +72,7 @@ export class DistributionManagementResolver {
   async refreshCapitalProject(
     @Args('data', { type: () => RefreshProjectInputDTO }) data: RefreshProjectInputDTO
   ): Promise<string> {
-    const result = await this.capitalService.refreshProject(data);
+    const result = await this.distributionManagementService.refreshProject(data);
     return result.resolved?.transaction?.id?.toString() || 'неизвестно';
   }
 }

@@ -10,6 +10,12 @@ import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-s
 import { BaseBlockchainRepository } from './base-blockchain.repository';
 import type { IVoteDatabaseData } from '../../domain/interfaces/vote-database.interface';
 import type { IVoteBlockchainData } from '../../domain/interfaces/vote-blockchain.interface';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import type { VoteFilterInputDTO } from '../../application/dto/voting/vote-filter.input';
+import { PaginationUtils } from '~/shared/utils/pagination.utils';
 
 @Injectable()
 export class VoteTypeormRepository
@@ -78,5 +84,59 @@ export class VoteTypeormRepository
 
     // Возвращаем обновленную доменную сущность
     return VoteMapper.toDomain(updatedEntity);
+  }
+
+  async findAllPaginated(
+    filter?: VoteFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<VoteDomainEntity>> {
+    // Валидируем параметры пагинации
+    const validatedOptions: PaginationInputDomainInterface = options
+      ? PaginationUtils.validatePaginationOptions(options)
+      : {
+          page: 1,
+          limit: 10,
+          sortBy: undefined,
+          sortOrder: 'ASC' as const,
+        };
+
+    // Получаем параметры для SQL запроса
+    const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
+
+    // Строим условия поиска
+    const where: any = {};
+    if (filter?.voter) {
+      where.voter = filter.voter;
+    }
+    if (filter?.recipient) {
+      where.recipient = filter.recipient;
+    }
+    if (filter?.projectHash) {
+      where.project_hash = filter.projectHash;
+    }
+
+    // Получаем общее количество записей
+    const totalCount = await this.repository.count({ where });
+
+    // Получаем записи с пагинацией
+    const orderBy: any = {};
+    if (validatedOptions.sortBy) {
+      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+    } else {
+      orderBy.created_at = 'DESC';
+    }
+
+    const entities = await this.repository.find({
+      where,
+      skip: offset,
+      take: limit,
+      order: orderBy,
+    });
+
+    // Преобразуем в доменные сущности
+    const items = entities.map((entity) => VoteMapper.toDomain(entity));
+
+    // Возвращаем результат с пагинацией
+    return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
   }
 }

@@ -1,3 +1,4 @@
+import { registerEnumType } from '@nestjs/graphql';
 /**
  * Перечисление статусов задач
  */
@@ -8,3 +9,8 @@ export enum IssueStatus {
   DONE = 'done', // Выполнена
   CANCELED = 'canceled', // Отменена
 }
+
+registerEnumType(IssueStatus, {
+  name: 'IssueStatus',
+  description: 'Статус задачи в системе CAPITAL',
+});

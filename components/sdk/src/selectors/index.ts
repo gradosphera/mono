@@ -1,5 +1,6 @@
 export * from './accounts'
 export * from './branches'
+export * from './capital'
 export * from './common'
 export * from './cooplace'
 export * from './extensions'

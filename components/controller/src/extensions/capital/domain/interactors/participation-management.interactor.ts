@@ -1,10 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalContract } from 'cooptypes';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
 import type { ImportContributorDomainInput } from '../actions/import-contributor-domain-input.interface';
 import type { RegisterContributorDomainInput } from '../actions/register-contributor-domain-input.interface';
 import type { MakeClearanceDomainInput } from '../actions/make-clearance-domain-input.interface';
 import type { TransactResult } from '@wharfkit/session';
+import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../repositories/contributor.repository';
+import { ContributorDomainEntity } from '../entities/contributor.entity';
+import type { ContributorFilterInputDTO } from '../../application/dto/participation_management/contributor-filter.input';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 
 /**
  * Интерактор домена для управления участием в CAPITAL контракте
@@ -14,38 +21,28 @@ import type { TransactResult } from '@wharfkit/session';
 export class ParticipationManagementInteractor {
   constructor(
     @Inject(CAPITAL_BLOCKCHAIN_PORT)
-    private readonly capitalBlockchainPort: CapitalBlockchainPort
+    private readonly capitalBlockchainPort: CapitalBlockchainPort,
+    @Inject(CONTRIBUTOR_REPOSITORY)
+    private readonly contributorRepository: ContributorRepository,
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
   ) {}
 
   /**
    * Импорт вкладчика в CAPITAL контракт
    */
   async importContributor(data: ImportContributorDomainInput): Promise<TransactResult> {
-    // Преобразуем доменные данные в формат блокчейна
-    const blockchainData: CapitalContract.Actions.ImportContributor.IImportContributor = {
-      coopname: data.coopname,
-      username: data.username,
-      contributor_hash: data.contributor_hash,
-      contribution_amount: data.contribution_amount,
-      memo: data.memo,
-    };
-
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.importContributor(blockchainData);
+    return await this.capitalBlockchainPort.importContributor(data);
   }
 
   /**
    * Регистрация вкладчика в CAPITAL контракте
    */
   async registerContributor(data: RegisterContributorDomainInput): Promise<TransactResult> {
-    // Преобразуем доменные данные в формат блокчейна
-    const blockchainData: CapitalContract.Actions.RegisterContributor.IRegisterContributor = {
-      coopname: data.coopname,
-      username: data.username,
-      contributor_hash: data.contributor_hash,
-      rate_per_hour: data.rate_per_hour,
-      is_external_contract: data.is_external_contract,
-      contract: data.contract,
+    // Преобразовываем доменный документ в формат блокчейна
+    const blockchainData = {
+      ...data,
+      contract: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.contract),
     };
 
     // Вызываем блокчейн порт
@@ -56,16 +53,32 @@ export class ParticipationManagementInteractor {
    * Подписание приложения в CAPITAL контракте
    */
   async makeClearance(data: MakeClearanceDomainInput): Promise<TransactResult> {
-    // Преобразуем доменные данные в формат блокчейна
-    const blockchainData: CapitalContract.Actions.GetClearance.IGetClearance = {
-      coopname: data.coopname,
-      username: data.username,
-      project_hash: data.project_hash,
-      appendix_hash: data.appendix_hash,
-      document: data.document,
+    // Преобразовываем доменный документ в формат блокчейна
+    const blockchainData = {
+      ...data,
+      document: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.document),
     };
 
     // Вызываем блокчейн порт
     return await this.capitalBlockchainPort.makeClearance(blockchainData);
+  }
+
+  // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
+
+  /**
+   * Получение всех вкладчиков с фильтрацией и пагинацией
+   */
+  async getContributors(
+    filter?: ContributorFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<ContributorDomainEntity>> {
+    return await this.contributorRepository.findAllPaginated(filter, options);
+  }
+
+  /**
+   * Получение вкладчика по ID
+   */
+  async getContributorById(_id: string): Promise<ContributorDomainEntity | null> {
+    return await this.contributorRepository.findById(_id);
   }
 }

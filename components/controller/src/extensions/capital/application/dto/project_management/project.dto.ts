@@ -1,0 +1,111 @@
+import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { ProjectStatus } from '../../../domain/enums/project-status.enum';
+
+/**
+ * GraphQL Output DTO для сущности Project
+ */
+@ObjectType('CapitalProject', {
+  description: 'Проект в системе CAPITAL',
+})
+export class ProjectOutputDTO {
+  @Field(() => String, {
+    description: 'Внутренний ID базы данных',
+  })
+  _id!: string;
+
+  @Field(() => Int, {
+    nullable: true,
+    description: 'ID в блокчейне',
+  })
+  id?: number;
+
+  @Field(() => Int, {
+    nullable: true,
+    description: 'Номер блока последнего обновления',
+  })
+  block_num?: number;
+
+  @Field(() => Boolean, {
+    description: 'Существует ли запись в блокчейне',
+    defaultValue: false,
+  })
+  present!: boolean;
+
+  @Field(() => ProjectStatus, {
+    description: 'Статус проекта',
+  })
+  status!: ProjectStatus;
+
+  @Field(() => String, {
+    description: 'Хеш проекта',
+  })
+  project_hash!: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Название кооператива',
+  })
+  coopname?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Хеш родительского проекта',
+  })
+  parent_hash?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Статус из блокчейна',
+  })
+  blockchain_status?: string;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Открыт ли проект',
+  })
+  is_opened?: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Запланирован ли проект',
+  })
+  is_planed?: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Можно ли конвертировать в проект',
+  })
+  can_convert_to_project?: boolean;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Мастер проекта',
+  })
+  master?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Название проекта',
+  })
+  title?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Описание проекта',
+  })
+  description?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Мета-информация проекта',
+  })
+  meta?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Дата создания',
+  })
+  created_at?: string;
+
+  // TODO: Добавить поля counts, plan, fact, crps, voting, membership когда будут определены соответствующие DTO
+}

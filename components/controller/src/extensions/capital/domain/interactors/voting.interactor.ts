@@ -1,11 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CapitalContract } from 'cooptypes';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
 import type { StartVotingDomainInput } from '../actions/start-voting-domain-input.interface';
 import type { SubmitVoteDomainInput } from '../actions/submit-vote-domain-input.interface';
 import type { CompleteVotingDomainInput } from '../actions/complete-voting-domain-input.interface';
 import type { CalculateVotesDomainInput } from '../actions/calculate-votes-domain-input.interface';
+import { VOTE_REPOSITORY, VoteRepository } from '../repositories/vote.repository';
+import { VoteDomainEntity } from '../entities/vote.entity';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import type { VoteFilterInputDTO } from '../../application/dto/voting/vote-filter.input';
 
 /**
  * Интерактор домена для голосования в CAPITAL контракте
@@ -15,65 +21,59 @@ import type { CalculateVotesDomainInput } from '../actions/calculate-votes-domai
 export class VotingInteractor {
   constructor(
     @Inject(CAPITAL_BLOCKCHAIN_PORT)
-    private readonly capitalBlockchainPort: CapitalBlockchainPort
+    private readonly capitalBlockchainPort: CapitalBlockchainPort,
+    @Inject(VOTE_REPOSITORY)
+    private readonly voteRepository: VoteRepository
   ) {}
 
   /**
    * Запуск голосования в CAPITAL контракте
    */
   async startVoting(data: StartVotingDomainInput): Promise<TransactResult> {
-    // Преобразуем доменные данные в формат блокчейна
-    const blockchainData: CapitalContract.Actions.StartVoting.IStartVoting = {
-      coopname: data.coopname,
-      project_hash: data.project_hash,
-    };
-
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.startVoting(blockchainData);
+    return await this.capitalBlockchainPort.startVoting(data);
   }
 
   /**
    * Голосование в CAPITAL контракте
    */
   async submitVote(data: SubmitVoteDomainInput): Promise<TransactResult> {
-    // Преобразуем доменные данные в формат блокчейна
-    const blockchainData: CapitalContract.Actions.SubmitVote.ISubmitVote = {
-      coopname: data.coopname,
-      voter: data.voter,
-      project_hash: data.project_hash,
-      votes: data.votes,
-    };
-
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.submitVote(blockchainData);
+    return await this.capitalBlockchainPort.submitVote(data);
   }
 
   /**
    * Завершение голосования в CAPITAL контракте
    */
   async completeVoting(data: CompleteVotingDomainInput): Promise<TransactResult> {
-    // Преобразуем доменные данные в формат блокчейна
-    const blockchainData: CapitalContract.Actions.CompleteVoting.ICompleteVoting = {
-      coopname: data.coopname,
-      project_hash: data.project_hash,
-    };
-
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.completeVoting(blockchainData);
+    return await this.capitalBlockchainPort.completeVoting(data);
   }
 
   /**
    * Расчет голосов в CAPITAL контракте
    */
   async calculateVotes(data: CalculateVotesDomainInput): Promise<TransactResult> {
-    // Преобразуем доменные данные в формат блокчейна
-    const blockchainData: CapitalContract.Actions.CalculateVotes.IFinalVoting = {
-      coopname: data.coopname,
-      username: data.username,
-      project_hash: data.project_hash,
-    };
-
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.calculateVotes(blockchainData);
+    return await this.capitalBlockchainPort.calculateVotes(data);
+  }
+
+  // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
+
+  /**
+   * Получение всех голосов
+   */
+  async getVotes(
+    filter?: VoteFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<VoteDomainEntity>> {
+    return await this.voteRepository.findAllPaginated(filter, options);
+  }
+
+  /**
+   * Получение голоса по ID
+   */
+  async getVoteById(_id: string): Promise<VoteDomainEntity | null> {
+    return await this.voteRepository.findById(_id);
   }
 }

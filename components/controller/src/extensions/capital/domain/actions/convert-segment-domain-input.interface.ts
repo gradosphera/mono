@@ -1,3 +1,5 @@
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+
 /**
  * Доменный интерфейс для действия конвертации сегмента CAPITAL контракта
  */
@@ -24,5 +26,5 @@ export interface ConvertSegmentDomainInput {
   project_amount: string;
 
   /** Заявление */
-  convert_statement: any;
+  convert_statement: ISignedDocumentDomainInterface;
 }

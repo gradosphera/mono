@@ -9,6 +9,7 @@ import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { ProjectTypeormRepository } from './infrastructure/repositories/project.typeorm-repository';
 import { ContributorTypeormRepository } from './infrastructure/repositories/contributor.typeorm-repository';
 import { AppendixTypeormRepository } from './infrastructure/repositories/appendix.typeorm-repository';
+import { InvestTypeormRepository } from './infrastructure/repositories/invest.typeorm-repository';
 import { ProgramInvestTypeormRepository } from './infrastructure/repositories/program-invest.typeorm-repository';
 import { ProgramPropertyTypeormRepository } from './infrastructure/repositories/program-property.typeorm-repository';
 import { ProgramWithdrawTypeormRepository } from './infrastructure/repositories/program-withdraw.typeorm-repository';
@@ -19,6 +20,12 @@ import { CycleTypeormRepository } from './infrastructure/repositories/cycle.type
 import { IssueTypeormRepository } from './infrastructure/repositories/issue.typeorm-repository';
 import { CommentTypeormRepository } from './infrastructure/repositories/comment.typeorm-repository';
 import { StoryTypeormRepository } from './infrastructure/repositories/story.typeorm-repository';
+import { VoteTypeormRepository } from './infrastructure/repositories/vote.typeorm-repository';
+import { DebtTypeormRepository } from './infrastructure/repositories/debt.typeorm-repository';
+import { ResultTypeormRepository } from './infrastructure/repositories/result.typeorm-repository';
+import { ExpenseTypeormRepository } from './infrastructure/repositories/expense.typeorm-repository';
+import { CommitTypeormRepository } from './infrastructure/repositories/commit.typeorm-repository';
+import { StateTypeormRepository } from './infrastructure/repositories/state.typeorm-repository';
 
 // Blockchain синхронизация
 import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
@@ -43,15 +50,27 @@ import { CapitalSyncInteractor } from './domain/interactors/capital-sync.interac
 
 // Services
 import { CapitalContractInfoService } from './infrastructure/services/capital-contract-info.service';
+import { ContractManagementService } from './application/services/contract-management.service';
+import { ParticipationManagementService } from './application/services/participation-management.service';
+import { ProjectManagementService } from './application/services/project-management.service';
+import { GenerationService } from './application/services/generation.service';
+import { InvestsManagementService } from './application/services/invests-management.service';
+import { DebtManagementService } from './application/services/debt-management.service';
+import { PropertyManagementService } from './application/services/property-management.service';
+import { VotingService } from './application/services/voting.service';
+import { ResultSubmissionService } from './application/services/result-submission.service';
+import { DistributionManagementService } from './application/services/distribution-management.service';
+import { ExpensesManagementService } from './application/services/expenses-management.service';
 
 // CAPITAL Application Dependencies
-import { CapitalBlockchainService } from './infrastructure/blockchain/services/capital-blockchain.service';
+import { CapitalBlockchainAdapter } from './infrastructure/blockchain/adapters/capital-blockchain.adapter';
 import { CAPITAL_BLOCKCHAIN_PORT } from './domain/interfaces/capital-blockchain.port';
 
 // Символы для DI
 import { PROJECT_REPOSITORY } from './domain/repositories/project.repository';
 import { CONTRIBUTOR_REPOSITORY } from './domain/repositories/contributor.repository';
 import { APPENDIX_REPOSITORY } from './domain/repositories/appendix.repository';
+import { INVEST_REPOSITORY } from './domain/repositories/invest.repository';
 import { PROGRAM_INVEST_REPOSITORY } from './domain/repositories/program-invest.repository';
 import { PROGRAM_PROPERTY_REPOSITORY } from './domain/repositories/program-property.repository';
 import { PROGRAM_WITHDRAW_REPOSITORY } from './domain/repositories/program-withdraw.repository';
@@ -62,9 +81,14 @@ import { CYCLE_REPOSITORY } from './domain/repositories/cycle.repository';
 import { ISSUE_REPOSITORY } from './domain/repositories/issue.repository';
 import { COMMENT_REPOSITORY } from './domain/repositories/comment.repository';
 import { STORY_REPOSITORY } from './domain/repositories/story.repository';
+import { VOTE_REPOSITORY } from './domain/repositories/vote.repository';
+import { DEBT_REPOSITORY } from './domain/repositories/debt.repository';
+import { RESULT_REPOSITORY } from './domain/repositories/result.repository';
+import { EXPENSE_REPOSITORY } from './domain/repositories/expense.repository';
+import { COMMIT_REPOSITORY } from './domain/repositories/commit.repository';
+import { STATE_REPOSITORY } from './domain/repositories/state.repository';
 
 import { z } from 'zod';
-import { CapitalService } from './application/services/capital.service';
 
 import { ContractManagementResolver } from './application/resolvers/contract-management.resolver';
 import { ParticipationManagementResolver } from './application/resolvers/participation-management.resolver';
@@ -76,6 +100,7 @@ import { PropertyManagementResolver } from './application/resolvers/property-man
 import { VotingResolver } from './application/resolvers/voting.resolver';
 import { ResultSubmissionResolver } from './application/resolvers/result-submission.resolver';
 import { DistributionManagementResolver } from './application/resolvers/distribution-management.resolver';
+import { ExpensesManagementResolver } from './application/resolvers/expenses-management.resolver';
 
 import { ParticipationManagementInteractor } from './domain/interactors/participation-management.interactor';
 import { ProjectManagementInteractor } from './domain/interactors/project-management.interactor';
@@ -87,6 +112,7 @@ import { VotingInteractor } from './domain/interactors/voting.interactor';
 import { ResultSubmissionInteractor } from './domain/interactors/result-submission.interactor';
 import { DistributionManagementInteractor } from './domain/interactors/distribution-management.interactor';
 import { ContractManagementInteractor } from './domain/interactors/contract-management.interactor';
+import { ExpensesManagementInteractor } from './domain/interactors/expenses-management.interactor';
 
 // Конфигурация модуля
 interface ICapitalConfig {
@@ -142,12 +168,22 @@ export class CapitalPlugin extends BaseExtModule {
 
     // Services
     CapitalContractInfoService,
-    CapitalService,
+    ContractManagementService,
+    ParticipationManagementService,
+    ProjectManagementService,
+    GenerationService,
+    InvestsManagementService,
+    DebtManagementService,
+    PropertyManagementService,
+    VotingService,
+    ResultSubmissionService,
+    DistributionManagementService,
+    ExpensesManagementService,
 
     // CAPITAL Application Layer Dependencies
     {
       provide: CAPITAL_BLOCKCHAIN_PORT,
-      useClass: CapitalBlockchainService,
+      useClass: CapitalBlockchainAdapter,
     },
 
     // Blockchain Sync Services
@@ -179,6 +215,7 @@ export class CapitalPlugin extends BaseExtModule {
     VotingResolver,
     ResultSubmissionResolver,
     DistributionManagementResolver,
+    ExpensesManagementResolver,
     // Domain Interactors
     ContractManagementInteractor,
     ParticipationManagementInteractor,
@@ -190,6 +227,7 @@ export class CapitalPlugin extends BaseExtModule {
     VotingInteractor,
     ResultSubmissionInteractor,
     DistributionManagementInteractor,
+    ExpensesManagementInteractor,
     CapitalSyncInteractor,
 
     // Repositories
@@ -204,6 +242,10 @@ export class CapitalPlugin extends BaseExtModule {
     {
       provide: APPENDIX_REPOSITORY,
       useClass: AppendixTypeormRepository,
+    },
+    {
+      provide: INVEST_REPOSITORY,
+      useClass: InvestTypeormRepository,
     },
     {
       provide: PROGRAM_INVEST_REPOSITORY,
@@ -244,6 +286,30 @@ export class CapitalPlugin extends BaseExtModule {
     {
       provide: STORY_REPOSITORY,
       useClass: StoryTypeormRepository,
+    },
+    {
+      provide: VOTE_REPOSITORY,
+      useClass: VoteTypeormRepository,
+    },
+    {
+      provide: DEBT_REPOSITORY,
+      useClass: DebtTypeormRepository,
+    },
+    {
+      provide: RESULT_REPOSITORY,
+      useClass: ResultTypeormRepository,
+    },
+    {
+      provide: EXPENSE_REPOSITORY,
+      useClass: ExpenseTypeormRepository,
+    },
+    {
+      provide: COMMIT_REPOSITORY,
+      useClass: CommitTypeormRepository,
+    },
+    {
+      provide: STATE_REPOSITORY,
+      useClass: StateTypeormRepository,
     },
   ],
   exports: [CapitalPlugin],

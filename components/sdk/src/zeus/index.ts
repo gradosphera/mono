@@ -1000,6 +1000,14 @@ export type ValueTypes = {
 	recv_sequence?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["AddAuthorInput"]: {
+	/** Имя автора */
+	author: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
+};
 	["AddParticipantInput"]: {
 	/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
 	created_at: string | Variable<any, string>,
@@ -1796,6 +1804,14 @@ export type ValueTypes = {
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CalculateVotesInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
 	["CancelRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -1838,6 +1854,26 @@ export type ValueTypes = {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["CompleteVotingInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
+};
+	["ConfigInput"]: {
+	/** Процент голосования авторов */
+	authors_voting_percent: number | Variable<any, string>,
+	/** Процент бонуса координатора */
+	coordinator_bonus_percent: number | Variable<any, string>,
+	/** Срок действия приглашения координатора в днях */
+	coordinator_invite_validity_days: number | Variable<any, string>,
+	/** Процент голосования создателей */
+	creators_voting_percent: number | Variable<any, string>,
+	/** Процент расходов */
+	expense_pool_percent: number | Variable<any, string>,
+	/** Период голосования в днях */
+	voting_period_in_days: number | Variable<any, string>
+};
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 ["ConfirmReceiveOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -1869,6 +1905,44 @@ export type ValueTypes = {
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ContractDocumentInput"]: {
+	/** Хэш подписи */
+	hash: string | Variable<any, string>,
+	/** Время подписи */
+	signed_at: string | Variable<any, string>,
+	/** Подписывающий */
+	signer: string | Variable<any, string>,
+	/** Тип подписи */
+	type: string | Variable<any, string>
+};
+	["ContractInput"]: {
+	/** Содержимое контракта */
+	content: string | Variable<any, string>,
+	/** Хэш контракта */
+	hash: string | Variable<any, string>,
+	/** Подписи контракта */
+	signatures: Array<ValueTypes["ContractDocumentInput"]> | Variable<any, string>,
+	/** Заголовок контракта */
+	title: string | Variable<any, string>
+};
+	["ConvertSegmentInput"]: {
+	/** Сумма для конвертации в капитализацию */
+	capital_amount: string | Variable<any, string>,
+	/** Хэш конвертации */
+	convert_hash: string | Variable<any, string>,
+	/** Заявление */
+	convert_statement: ValueTypes["ContractInput"] | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Сумма для конвертации в кошелек проекта */
+	project_amount: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>,
+	/** Сумма для конвертации в главный кошелек */
+	wallet_amount: string | Variable<any, string>
+};
 	["CooperativeOperatorAccount"]: AliasType<{
 	/** Количество активных участников */
 	active_participants_count?:boolean | `@${string}`,
@@ -1992,6 +2066,34 @@ export type ValueTypes = {
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string | Variable<any, string>
 };
+	["CreateCommitInput"]: {
+	/** Хэш коммита */
+	commit_hash: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Количество часов создателя */
+	creator_hours: number | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
+	["CreateDebtInput"]: {
+	/** Сумма долга */
+	amount: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш долга */
+	debt_hash: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Дата возврата */
+	repaid_at: string | Variable<any, string>,
+	/** Заявление */
+	statement: ValueTypes["ContractInput"] | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
 	["CreateDepositPaymentInput"]: {
 	/** Сумма взноса */
 	quantity: number | Variable<any, string>,
@@ -2086,11 +2188,69 @@ export type ValueTypes = {
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string | Variable<any, string>
 };
+	["CreateProgramPropertyInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Сумма имущества */
+	property_amount: string | Variable<any, string>,
+	/** Описание имущества */
+	property_description: string | Variable<any, string>,
+	/** Хэш имущества */
+	property_hash: string | Variable<any, string>,
+	/** Заявление */
+	statement: ValueTypes["ContractInput"] | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string | Variable<any, string>,
 	/** Вопрос, который выносится на повестку */
 	question: string | Variable<any, string>
+};
+	["CreateProjectInput"]: {
+	/** Флаг возможности конвертации в проект */
+	can_convert_to_project: boolean | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Описание проекта */
+	description: string | Variable<any, string>,
+	/** Мета-данные проекта */
+	meta: string | Variable<any, string>,
+	/** Хэш родительского проекта */
+	parent_hash: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Название проекта */
+	title: string | Variable<any, string>
+};
+	["CreateProjectInvestInput"]: {
+	/** Сумма инвестиции */
+	amount: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш инвестиции */
+	invest_hash: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Заявление на инвестирование */
+	statement: ValueTypes["ContractInput"] | Variable<any, string>,
+	/** Имя инвестора */
+	username: string | Variable<any, string>
+};
+	["CreateProjectPropertyInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Сумма имущества */
+	property_amount: string | Variable<any, string>,
+	/** Описание имущества */
+	property_description: string | Variable<any, string>,
+	/** Хэш имущества */
+	property_hash: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
 };
 	["CreateSubscriptionInput"]: {
 	/** Данные подписки */
@@ -2174,6 +2334,12 @@ export type ValueTypes = {
 	method_id: string | Variable<any, string>,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
 	username: string | Variable<any, string>
+};
+	["DeleteProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
 };
 	["DeleteTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -2426,6 +2592,24 @@ export type ValueTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null | Variable<any, string>
 };
+	["FundProgramInput"]: {
+	/** Сумма финансирования */
+	amount: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Memo */
+	memo: string | Variable<any, string>
+};
+	["FundProjectInput"]: {
+	/** Сумма финансирования */
+	amount: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Memo */
+	memo: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
+};
 	["GatewayPayment"]: AliasType<{
 	/** Данные из блокчейна */
 	blockchain_data?:boolean | `@${string}`,
@@ -2602,6 +2786,18 @@ export type ValueTypes = {
 	/** Username пользователя */
 	username: string | Variable<any, string>
 };
+	["ImportContributorInput"]: {
+	/** Сумма вклада */
+	contribution_amount: string | Variable<any, string>,
+	/** Хэш вкладчика */
+	contributor_hash: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Примечание */
+	memo?: string | undefined | null | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["Individual"]: AliasType<{
 	/** Дата рождения */
 	birthdate?:boolean | `@${string}`,
@@ -2705,6 +2901,18 @@ export type ValueTypes = {
 	access_token: string | Variable<any, string>,
 	/** Токен доступа */
 	refresh_token: string | Variable<any, string>
+};
+	["MakeClearanceInput"]: {
+	/** Хэш приложения */
+	appendix_hash: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Документ */
+	document: ValueTypes["ContractInput"] | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
 };
 	/** Данные о собрании кооператива */
 ["Meet"]: AliasType<{
@@ -2934,6 +3142,33 @@ acceptChildOrder?: [{	data: ValueTypes["AcceptChildOrderInput"] | Variable<any, 
 addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalCalculateVotes?: [{	data: ValueTypes["CalculateVotesInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalCompleteVoting?: [{	data: ValueTypes["CompleteVotingInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalConvertSegment?: [{	data: ValueTypes["ConvertSegmentInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalCreateCommit?: [{	data: ValueTypes["CreateCommitInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalCreateDebt?: [{	data: ValueTypes["CreateDebtInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalCreateProgramProperty?: [{	data: ValueTypes["CreateProgramPropertyInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalCreateProject?: [{	data: ValueTypes["CreateProjectInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalCreateProjectInvest?: [{	data: ValueTypes["CreateProjectInvestInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalCreateProjectProperty?: [{	data: ValueTypes["CreateProjectPropertyInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalDeleteProject?: [{	data: ValueTypes["DeleteProjectInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalFundProject?: [{	data: ValueTypes["FundProjectInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalImportContributor?: [{	data: ValueTypes["ImportContributorInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalMakeClearance?: [{	data: ValueTypes["MakeClearanceInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalOpenProject?: [{	data: ValueTypes["OpenProjectInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalPushResult?: [{	data: ValueTypes["PushResultInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalRefreshProgram?: [{	data: ValueTypes["RefreshProgramInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalRefreshProject?: [{	data: ValueTypes["RefreshProjectInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalRefreshSegment?: [{	data: ValueTypes["RefreshSegmentInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalRegisterContributor?: [{	data: ValueTypes["RegisterContributorInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalSetConfig?: [{	data: ValueTypes["SetConfigInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalSetMaster?: [{	data: ValueTypes["SetMasterInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalStartProject?: [{	data: ValueTypes["StartProjectInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalStartVoting?: [{	data: ValueTypes["StartVotingInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalSubmitVote?: [{	data: ValueTypes["SubmitVoteInput"] | Variable<any, string>},boolean | `@${string}`],
 completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ValueTypes["ConfirmSupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -3015,6 +3250,12 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	meet_hash: string | Variable<any, string>,
 	notification: ValueTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"] | Variable<any, string>,
 	username: string | Variable<any, string>
+};
+	["OpenProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
 };
 	["Organization"]: AliasType<{
 	/** Город */
@@ -3453,6 +3694,24 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["PushResultInput"]: {
+	/** Сумма взноса */
+	contribution_amount: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Сумма долга к погашению */
+	debt_amount: string | Variable<any, string>,
+	/** Хэши долгов для погашения */
+	debt_hashes: Array<string> | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Хэш результата */
+	result_hash: string | Variable<any, string>,
+	/** Заявление */
+	statement: ValueTypes["ContractInput"] | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
 	["Query"]: AliasType<{
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
@@ -3523,6 +3782,28 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Токен обновления */
 	refresh_token: string | Variable<any, string>
 };
+	["RefreshProgramInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
+	["RefreshProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
+	["RefreshSegmentInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
 	["RefundRequest"]: AliasType<{
 	/** Сумма CPU */
 	cpu_amount?:boolean | `@${string}`,
@@ -3549,6 +3830,20 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	referer?: string | undefined | null | Variable<any, string>,
 	/** Тип аккаунта */
 	type: ValueTypes["AccountType"] | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
+	["RegisterContributorInput"]: {
+	/** Документ контракта */
+	contract: ValueTypes["ContractInput"] | Variable<any, string>,
+	/** Хэш вкладчика */
+	contributor_hash: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Флаг внешнего контракта */
+	is_external_contract: boolean | Variable<any, string>,
+	/** Ставка за час работы */
+	rate_per_hour: string | Variable<any, string>,
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
@@ -4006,11 +4301,39 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
+	["SetConfigInput"]: {
+	/** Конфигурация контракта */
+	config: ValueTypes["ConfigInput"] | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>
+};
+	["SetMasterInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Имя мастера проекта */
+	master: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
+};
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string | Variable<any, string>,
 	/** Новый статус платежа */
 	status: ValueTypes["PaymentStatus"] | Variable<any, string>
+};
+	["SetPlanInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Имя мастера проекта */
+	master: string | Variable<any, string>,
+	/** Плановое количество часов создателей */
+	plan_creators_hours: number | Variable<any, string>,
+	/** Плановые расходы */
+	plan_expenses: string | Variable<any, string>,
+	/** Стоимость часа работы */
+	plan_hour_cost: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
 };
 	["SetWifInput"]: {
 	/** Тип разрешения ключа */
@@ -4113,9 +4436,21 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	individual_data: ValueTypes["CreateIndividualDataInput"] | Variable<any, string>,
 	role: string | Variable<any, string>
 };
+	["StartProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
+};
 	["StartResetKeyInput"]: {
 	/** Электронная почта */
 	email: string | Variable<any, string>
+};
+	["StartVotingInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
 };
 	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) с агрегатом документа */
 ["StatementDetailAggregate"]: AliasType<{
@@ -4123,6 +4458,16 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	documentAggregate?:ValueTypes["DocumentAggregate"],
 		__typename?: boolean | `@${string}`
 }>;
+	["SubmitVoteInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Имя голосующего */
+	voter: string | Variable<any, string>,
+	/** Распределение голосов */
+	votes: Array<ValueTypes["VoteDistributionInput"]> | Variable<any, string>
+};
 	["SubscriptionStatsDto"]: AliasType<{
 	/** Количество активных подписок */
 	active?:boolean | `@${string}`,
@@ -4409,6 +4754,12 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	verificator?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["VoteDistributionInput"]: {
+	/** Сумма голосов */
+	amount: string | Variable<any, string>,
+	/** Получатель голосов */
+	recipient: string | Variable<any, string>
+};
 	/** Пункт голосования для ежегодного общего собрания */
 ["VoteItemInput"]: {
 	/** Идентификатор вопроса повестки */
@@ -4549,6 +4900,14 @@ export type ResolverInputTypes = {
 	recv_sequence?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["AddAuthorInput"]: {
+	/** Имя автора */
+	author: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["AddParticipantInput"]: {
 	/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
 	created_at: string,
@@ -5345,6 +5704,14 @@ export type ResolverInputTypes = {
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CalculateVotesInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
 	["CancelRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -5387,6 +5754,26 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["CompleteVotingInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
+	["ConfigInput"]: {
+	/** Процент голосования авторов */
+	authors_voting_percent: number,
+	/** Процент бонуса координатора */
+	coordinator_bonus_percent: number,
+	/** Срок действия приглашения координатора в днях */
+	coordinator_invite_validity_days: number,
+	/** Процент голосования создателей */
+	creators_voting_percent: number,
+	/** Процент расходов */
+	expense_pool_percent: number,
+	/** Период голосования в днях */
+	voting_period_in_days: number
+};
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 ["ConfirmReceiveOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -5418,6 +5805,44 @@ export type ResolverInputTypes = {
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ContractDocumentInput"]: {
+	/** Хэш подписи */
+	hash: string,
+	/** Время подписи */
+	signed_at: string,
+	/** Подписывающий */
+	signer: string,
+	/** Тип подписи */
+	type: string
+};
+	["ContractInput"]: {
+	/** Содержимое контракта */
+	content: string,
+	/** Хэш контракта */
+	hash: string,
+	/** Подписи контракта */
+	signatures: Array<ResolverInputTypes["ContractDocumentInput"]>,
+	/** Заголовок контракта */
+	title: string
+};
+	["ConvertSegmentInput"]: {
+	/** Сумма для конвертации в капитализацию */
+	capital_amount: string,
+	/** Хэш конвертации */
+	convert_hash: string,
+	/** Заявление */
+	convert_statement: ResolverInputTypes["ContractInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Сумма для конвертации в кошелек проекта */
+	project_amount: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string,
+	/** Сумма для конвертации в главный кошелек */
+	wallet_amount: string
+};
 	["CooperativeOperatorAccount"]: AliasType<{
 	/** Количество активных участников */
 	active_participants_count?:boolean | `@${string}`,
@@ -5541,6 +5966,34 @@ export type ResolverInputTypes = {
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
 };
+	["CreateCommitInput"]: {
+	/** Хэш коммита */
+	commit_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Количество часов создателя */
+	creator_hours: number,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
+	["CreateDebtInput"]: {
+	/** Сумма долга */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш долга */
+	debt_hash: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Дата возврата */
+	repaid_at: string,
+	/** Заявление */
+	statement: ResolverInputTypes["ContractInput"],
+	/** Имя пользователя */
+	username: string
+};
 	["CreateDepositPaymentInput"]: {
 	/** Сумма взноса */
 	quantity: number,
@@ -5635,11 +6088,69 @@ export type ResolverInputTypes = {
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
 };
+	["CreateProgramPropertyInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Сумма имущества */
+	property_amount: string,
+	/** Описание имущества */
+	property_description: string,
+	/** Хэш имущества */
+	property_hash: string,
+	/** Заявление */
+	statement: ResolverInputTypes["ContractInput"],
+	/** Имя пользователя */
+	username: string
+};
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string,
 	/** Вопрос, который выносится на повестку */
 	question: string
+};
+	["CreateProjectInput"]: {
+	/** Флаг возможности конвертации в проект */
+	can_convert_to_project: boolean,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Описание проекта */
+	description: string,
+	/** Мета-данные проекта */
+	meta: string,
+	/** Хэш родительского проекта */
+	parent_hash: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Название проекта */
+	title: string
+};
+	["CreateProjectInvestInput"]: {
+	/** Сумма инвестиции */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш инвестиции */
+	invest_hash: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Заявление на инвестирование */
+	statement: ResolverInputTypes["ContractInput"],
+	/** Имя инвестора */
+	username: string
+};
+	["CreateProjectPropertyInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Сумма имущества */
+	property_amount: string,
+	/** Описание имущества */
+	property_description: string,
+	/** Хэш имущества */
+	property_hash: string,
+	/** Имя пользователя */
+	username: string
 };
 	["CreateSubscriptionInput"]: {
 	/** Данные подписки */
@@ -5723,6 +6234,12 @@ export type ResolverInputTypes = {
 	method_id: string,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
 	username: string
+};
+	["DeleteProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["DeleteTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -5975,6 +6492,24 @@ export type ResolverInputTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
+	["FundProgramInput"]: {
+	/** Сумма финансирования */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Memo */
+	memo: string
+};
+	["FundProjectInput"]: {
+	/** Сумма финансирования */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Memo */
+	memo: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["GatewayPayment"]: AliasType<{
 	/** Данные из блокчейна */
 	blockchain_data?:boolean | `@${string}`,
@@ -6151,6 +6686,18 @@ export type ResolverInputTypes = {
 	/** Username пользователя */
 	username: string
 };
+	["ImportContributorInput"]: {
+	/** Сумма вклада */
+	contribution_amount: string,
+	/** Хэш вкладчика */
+	contributor_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Примечание */
+	memo?: string | undefined | null,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["Individual"]: AliasType<{
 	/** Дата рождения */
 	birthdate?:boolean | `@${string}`,
@@ -6254,6 +6801,18 @@ export type ResolverInputTypes = {
 	access_token: string,
 	/** Токен доступа */
 	refresh_token: string
+};
+	["MakeClearanceInput"]: {
+	/** Хэш приложения */
+	appendix_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Документ */
+	document: ResolverInputTypes["ContractInput"],
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
 };
 	/** Данные о собрании кооператива */
 ["Meet"]: AliasType<{
@@ -6483,6 +7042,33 @@ acceptChildOrder?: [{	data: ResolverInputTypes["AcceptChildOrderInput"]},Resolve
 addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInputTypes["Account"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
+capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},boolean | `@${string}`],
+capitalCalculateVotes?: [{	data: ResolverInputTypes["CalculateVotesInput"]},boolean | `@${string}`],
+capitalCompleteVoting?: [{	data: ResolverInputTypes["CompleteVotingInput"]},boolean | `@${string}`],
+capitalConvertSegment?: [{	data: ResolverInputTypes["ConvertSegmentInput"]},boolean | `@${string}`],
+capitalCreateCommit?: [{	data: ResolverInputTypes["CreateCommitInput"]},boolean | `@${string}`],
+capitalCreateDebt?: [{	data: ResolverInputTypes["CreateDebtInput"]},boolean | `@${string}`],
+capitalCreateProgramProperty?: [{	data: ResolverInputTypes["CreateProgramPropertyInput"]},boolean | `@${string}`],
+capitalCreateProject?: [{	data: ResolverInputTypes["CreateProjectInput"]},boolean | `@${string}`],
+capitalCreateProjectInvest?: [{	data: ResolverInputTypes["CreateProjectInvestInput"]},boolean | `@${string}`],
+capitalCreateProjectProperty?: [{	data: ResolverInputTypes["CreateProjectPropertyInput"]},boolean | `@${string}`],
+capitalDeleteProject?: [{	data: ResolverInputTypes["DeleteProjectInput"]},boolean | `@${string}`],
+capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},boolean | `@${string}`],
+capitalFundProject?: [{	data: ResolverInputTypes["FundProjectInput"]},boolean | `@${string}`],
+capitalImportContributor?: [{	data: ResolverInputTypes["ImportContributorInput"]},boolean | `@${string}`],
+capitalMakeClearance?: [{	data: ResolverInputTypes["MakeClearanceInput"]},boolean | `@${string}`],
+capitalOpenProject?: [{	data: ResolverInputTypes["OpenProjectInput"]},boolean | `@${string}`],
+capitalPushResult?: [{	data: ResolverInputTypes["PushResultInput"]},boolean | `@${string}`],
+capitalRefreshProgram?: [{	data: ResolverInputTypes["RefreshProgramInput"]},boolean | `@${string}`],
+capitalRefreshProject?: [{	data: ResolverInputTypes["RefreshProjectInput"]},boolean | `@${string}`],
+capitalRefreshSegment?: [{	data: ResolverInputTypes["RefreshSegmentInput"]},boolean | `@${string}`],
+capitalRegisterContributor?: [{	data: ResolverInputTypes["RegisterContributorInput"]},boolean | `@${string}`],
+capitalSetConfig?: [{	data: ResolverInputTypes["SetConfigInput"]},boolean | `@${string}`],
+capitalSetMaster?: [{	data: ResolverInputTypes["SetMasterInput"]},boolean | `@${string}`],
+capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},boolean | `@${string}`],
+capitalStartProject?: [{	data: ResolverInputTypes["StartProjectInput"]},boolean | `@${string}`],
+capitalStartVoting?: [{	data: ResolverInputTypes["StartVotingInput"]},boolean | `@${string}`],
+capitalSubmitVote?: [{	data: ResolverInputTypes["SubmitVoteInput"]},boolean | `@${string}`],
 completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ResolverInputTypes["ConfirmSupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
@@ -6564,6 +7150,12 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	meet_hash: string,
 	notification: ResolverInputTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
 	username: string
+};
+	["OpenProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["Organization"]: AliasType<{
 	/** Город */
@@ -7004,6 +7596,24 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["PushResultInput"]: {
+	/** Сумма взноса */
+	contribution_amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Сумма долга к погашению */
+	debt_amount: string,
+	/** Хэши долгов для погашения */
+	debt_hashes: Array<string>,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Хэш результата */
+	result_hash: string,
+	/** Заявление */
+	statement: ResolverInputTypes["ContractInput"],
+	/** Имя пользователя */
+	username: string
+};
 	["Query"]: AliasType<{
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
@@ -7074,6 +7684,28 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Токен обновления */
 	refresh_token: string
 };
+	["RefreshProgramInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя пользователя */
+	username: string
+};
+	["RefreshProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
+	["RefreshSegmentInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
 	["RefundRequest"]: AliasType<{
 	/** Сумма CPU */
 	cpu_amount?:boolean | `@${string}`,
@@ -7100,6 +7732,20 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	referer?: string | undefined | null,
 	/** Тип аккаунта */
 	type: ResolverInputTypes["AccountType"],
+	/** Имя пользователя */
+	username: string
+};
+	["RegisterContributorInput"]: {
+	/** Документ контракта */
+	contract: ResolverInputTypes["ContractInput"],
+	/** Хэш вкладчика */
+	contributor_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Флаг внешнего контракта */
+	is_external_contract: boolean,
+	/** Ставка за час работы */
+	rate_per_hour: string,
 	/** Имя пользователя */
 	username: string
 };
@@ -7557,11 +8203,39 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["SetConfigInput"]: {
+	/** Конфигурация контракта */
+	config: ResolverInputTypes["ConfigInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string
+};
+	["SetMasterInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя мастера проекта */
+	master: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
 	/** Новый статус платежа */
 	status: ResolverInputTypes["PaymentStatus"]
+};
+	["SetPlanInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя мастера проекта */
+	master: string,
+	/** Плановое количество часов создателей */
+	plan_creators_hours: number,
+	/** Плановые расходы */
+	plan_expenses: string,
+	/** Стоимость часа работы */
+	plan_hour_cost: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["SetWifInput"]: {
 	/** Тип разрешения ключа */
@@ -7664,9 +8338,21 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	individual_data: ResolverInputTypes["CreateIndividualDataInput"],
 	role: string
 };
+	["StartProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["StartResetKeyInput"]: {
 	/** Электронная почта */
 	email: string
+};
+	["StartVotingInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) с агрегатом документа */
 ["StatementDetailAggregate"]: AliasType<{
@@ -7674,6 +8360,16 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	documentAggregate?:ResolverInputTypes["DocumentAggregate"],
 		__typename?: boolean | `@${string}`
 }>;
+	["SubmitVoteInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя голосующего */
+	voter: string,
+	/** Распределение голосов */
+	votes: Array<ResolverInputTypes["VoteDistributionInput"]>
+};
 	["SubscriptionStatsDto"]: AliasType<{
 	/** Количество активных подписок */
 	active?:boolean | `@${string}`,
@@ -7961,6 +8657,12 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	verificator?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["VoteDistributionInput"]: {
+	/** Сумма голосов */
+	amount: string,
+	/** Получатель голосов */
+	recipient: string
+};
 	/** Пункт голосования для ежегодного общего собрания */
 ["VoteItemInput"]: {
 	/** Идентификатор вопроса повестки */
@@ -8097,6 +8799,14 @@ export type ModelTypes = {
 	global_sequence: string,
 	receiver: string,
 	recv_sequence: string
+};
+	["AddAuthorInput"]: {
+	/** Имя автора */
+	author: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["AddParticipantInput"]: {
 	/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
@@ -8881,6 +9591,14 @@ export type ModelTypes = {
 	/** Тип организации */
 	type: string
 };
+	["CalculateVotesInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
 	["CancelRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -8922,6 +9640,26 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["CompleteVotingInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
+	["ConfigInput"]: {
+	/** Процент голосования авторов */
+	authors_voting_percent: number,
+	/** Процент бонуса координатора */
+	coordinator_bonus_percent: number,
+	/** Срок действия приглашения координатора в днях */
+	coordinator_invite_validity_days: number,
+	/** Процент голосования создателей */
+	creators_voting_percent: number,
+	/** Процент расходов */
+	expense_pool_percent: number,
+	/** Период голосования в днях */
+	voting_period_in_days: number
+};
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 ["ConfirmReceiveOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -8951,6 +9689,44 @@ export type ModelTypes = {
 	full_address: string,
 	full_name: string,
 	phone: string
+};
+	["ContractDocumentInput"]: {
+	/** Хэш подписи */
+	hash: string,
+	/** Время подписи */
+	signed_at: string,
+	/** Подписывающий */
+	signer: string,
+	/** Тип подписи */
+	type: string
+};
+	["ContractInput"]: {
+	/** Содержимое контракта */
+	content: string,
+	/** Хэш контракта */
+	hash: string,
+	/** Подписи контракта */
+	signatures: Array<ModelTypes["ContractDocumentInput"]>,
+	/** Заголовок контракта */
+	title: string
+};
+	["ConvertSegmentInput"]: {
+	/** Сумма для конвертации в капитализацию */
+	capital_amount: string,
+	/** Хэш конвертации */
+	convert_hash: string,
+	/** Заявление */
+	convert_statement: ModelTypes["ContractInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Сумма для конвертации в кошелек проекта */
+	project_amount: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string,
+	/** Сумма для конвертации в главный кошелек */
+	wallet_amount: string
 };
 	["CooperativeOperatorAccount"]: {
 		/** Количество активных участников */
@@ -9073,6 +9849,34 @@ export type ModelTypes = {
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
 };
+	["CreateCommitInput"]: {
+	/** Хэш коммита */
+	commit_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Количество часов создателя */
+	creator_hours: number,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
+	["CreateDebtInput"]: {
+	/** Сумма долга */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш долга */
+	debt_hash: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Дата возврата */
+	repaid_at: string,
+	/** Заявление */
+	statement: ModelTypes["ContractInput"],
+	/** Имя пользователя */
+	username: string
+};
 	["CreateDepositPaymentInput"]: {
 	/** Сумма взноса */
 	quantity: number,
@@ -9167,11 +9971,69 @@ export type ModelTypes = {
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
 };
+	["CreateProgramPropertyInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Сумма имущества */
+	property_amount: string,
+	/** Описание имущества */
+	property_description: string,
+	/** Хэш имущества */
+	property_hash: string,
+	/** Заявление */
+	statement: ModelTypes["ContractInput"],
+	/** Имя пользователя */
+	username: string
+};
 	["CreateProjectFreeDecisionInput"]: {
 	/** Проект решения, которое предлагается принять */
 	decision: string,
 	/** Вопрос, который выносится на повестку */
 	question: string
+};
+	["CreateProjectInput"]: {
+	/** Флаг возможности конвертации в проект */
+	can_convert_to_project: boolean,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Описание проекта */
+	description: string,
+	/** Мета-данные проекта */
+	meta: string,
+	/** Хэш родительского проекта */
+	parent_hash: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Название проекта */
+	title: string
+};
+	["CreateProjectInvestInput"]: {
+	/** Сумма инвестиции */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш инвестиции */
+	invest_hash: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Заявление на инвестирование */
+	statement: ModelTypes["ContractInput"],
+	/** Имя инвестора */
+	username: string
+};
+	["CreateProjectPropertyInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Сумма имущества */
+	property_amount: string,
+	/** Описание имущества */
+	property_description: string,
+	/** Хэш имущества */
+	property_hash: string,
+	/** Имя пользователя */
+	username: string
 };
 	["CreateSubscriptionInput"]: {
 	/** Данные подписки */
@@ -9251,6 +10113,12 @@ export type ModelTypes = {
 	method_id: string,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
 	username: string
+};
+	["DeleteProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["DeleteTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -9492,6 +10360,24 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
+	["FundProgramInput"]: {
+	/** Сумма финансирования */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Memo */
+	memo: string
+};
+	["FundProjectInput"]: {
+	/** Сумма финансирования */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Memo */
+	memo: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["GatewayPayment"]: {
 		/** Данные из блокчейна */
 	blockchain_data?: ModelTypes["JSON"] | undefined | null,
@@ -9666,6 +10552,18 @@ export type ModelTypes = {
 	/** Username пользователя */
 	username: string
 };
+	["ImportContributorInput"]: {
+	/** Сумма вклада */
+	contribution_amount: string,
+	/** Хэш вкладчика */
+	contributor_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Примечание */
+	memo?: string | undefined | null,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["Individual"]: {
 		/** Дата рождения */
 	birthdate: string,
@@ -9763,6 +10661,18 @@ export type ModelTypes = {
 	access_token: string,
 	/** Токен доступа */
 	refresh_token: string
+};
+	["MakeClearanceInput"]: {
+	/** Хэш приложения */
+	appendix_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Документ */
+	document: ModelTypes["ContractInput"],
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
 };
 	/** Данные о собрании кооператива */
 ["Meet"]: {
@@ -9989,6 +10899,60 @@ export type ModelTypes = {
 	addTrustedAccount: ModelTypes["Branch"],
 	/** Отменить заявку */
 	cancelRequest: ModelTypes["Transaction"],
+	/** Добавление автора проекта в CAPITAL контракте */
+	capitalAddAuthor: string,
+	/** Расчет голосов в CAPITAL контракте */
+	capitalCalculateVotes: string,
+	/** Завершение голосования в CAPITAL контракте */
+	capitalCompleteVoting: string,
+	/** Конвертация сегмента в CAPITAL контракте */
+	capitalConvertSegment: string,
+	/** Создание коммита в CAPITAL контракте */
+	capitalCreateCommit: string,
+	/** Получение ссуды в CAPITAL контракте */
+	capitalCreateDebt: string,
+	/** Создание программного имущественного взноса в CAPITAL контракте */
+	capitalCreateProgramProperty: string,
+	/** Создание проекта в CAPITAL контракте */
+	capitalCreateProject: string,
+	/** Инвестирование в проект CAPITAL контракта */
+	capitalCreateProjectInvest: string,
+	/** Создание проектного имущественного взноса в CAPITAL контракте */
+	capitalCreateProjectProperty: string,
+	/** Удаление проекта в CAPITAL контракте */
+	capitalDeleteProject: string,
+	/** Финансирование программы CAPITAL контракта */
+	capitalFundProgram: string,
+	/** Финансирование проекта CAPITAL контракта */
+	capitalFundProject: string,
+	/** Импорт вкладчика в CAPITAL контракт */
+	capitalImportContributor: string,
+	/** Подписание приложения в CAPITAL контракте */
+	capitalMakeClearance: string,
+	/** Открытие проекта для инвестиций в CAPITAL контракте */
+	capitalOpenProject: string,
+	/** Внесение результата в CAPITAL контракте */
+	capitalPushResult: string,
+	/** Обновление CRPS пайщика в программе CAPITAL контракта */
+	capitalRefreshProgram: string,
+	/** Обновление CRPS пайщика в проекте CAPITAL контракта */
+	capitalRefreshProject: string,
+	/** Обновление сегмента в CAPITAL контракте */
+	capitalRefreshSegment: string,
+	/** Регистрация вкладчика в CAPITAL контракте */
+	capitalRegisterContributor: string,
+	/** Установка конфигурации CAPITAL контракта */
+	capitalSetConfig: string,
+	/** Установка мастера проекта в CAPITAL контракте */
+	capitalSetMaster: string,
+	/** Установка плана проекта в CAPITAL контракте */
+	capitalSetPlan: string,
+	/** Запуск проекта в CAPITAL контракте */
+	capitalStartProject: string,
+	/** Запуск голосования в CAPITAL контракте */
+	capitalStartVoting: string,
+	/** Голосование в CAPITAL контракте */
+	capitalSubmitVote: string,
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: ModelTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
@@ -10143,6 +11107,12 @@ export type ModelTypes = {
 	meet_hash: string,
 	notification: ModelTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
 	username: string
+};
+	["OpenProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["Organization"]: {
 		/** Город */
@@ -10555,6 +11525,24 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["PushResultInput"]: {
+	/** Сумма взноса */
+	contribution_amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Сумма долга к погашению */
+	debt_amount: string,
+	/** Хэши долгов для погашения */
+	debt_hashes: Array<string>,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Хэш результата */
+	result_hash: string,
+	/** Заявление */
+	statement: ModelTypes["ContractInput"],
+	/** Имя пользователя */
+	username: string
+};
 	["Query"]: {
 		/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
@@ -10635,6 +11623,28 @@ export type ModelTypes = {
 	/** Токен обновления */
 	refresh_token: string
 };
+	["RefreshProgramInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя пользователя */
+	username: string
+};
+	["RefreshProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
+	["RefreshSegmentInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
 	["RefundRequest"]: {
 		/** Сумма CPU */
 	cpu_amount: string,
@@ -10660,6 +11670,20 @@ export type ModelTypes = {
 	referer?: string | undefined | null,
 	/** Тип аккаунта */
 	type: ModelTypes["AccountType"],
+	/** Имя пользователя */
+	username: string
+};
+	["RegisterContributorInput"]: {
+	/** Документ контракта */
+	contract: ModelTypes["ContractInput"],
+	/** Хэш вкладчика */
+	contributor_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Флаг внешнего контракта */
+	is_external_contract: boolean,
+	/** Ставка за час работы */
+	rate_per_hour: string,
 	/** Имя пользователя */
 	username: string
 };
@@ -11111,11 +12135,39 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["SetConfigInput"]: {
+	/** Конфигурация контракта */
+	config: ModelTypes["ConfigInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string
+};
+	["SetMasterInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя мастера проекта */
+	master: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
 	/** Новый статус платежа */
 	status: ModelTypes["PaymentStatus"]
+};
+	["SetPlanInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя мастера проекта */
+	master: string,
+	/** Плановое количество часов создателей */
+	plan_creators_hours: number,
+	/** Плановые расходы */
+	plan_expenses: string,
+	/** Стоимость часа работы */
+	plan_hour_cost: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["SetWifInput"]: {
 	/** Тип разрешения ключа */
@@ -11215,14 +12267,36 @@ export type ModelTypes = {
 	individual_data: ModelTypes["CreateIndividualDataInput"],
 	role: string
 };
+	["StartProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["StartResetKeyInput"]: {
 	/** Электронная почта */
 	email: string
+};
+	["StartVotingInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) с агрегатом документа */
 ["StatementDetailAggregate"]: {
 		action: ModelTypes["ExtendedBlockchainAction"],
 	documentAggregate: ModelTypes["DocumentAggregate"]
+};
+	["SubmitVoteInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя голосующего */
+	voter: string,
+	/** Распределение голосов */
+	votes: Array<ModelTypes["VoteDistributionInput"]>
 };
 	["SubscriptionStatsDto"]: {
 		/** Количество активных подписок */
@@ -11496,6 +12570,12 @@ export type ModelTypes = {
 	/** Имя верификатора */
 	verificator: string
 };
+	["VoteDistributionInput"]: {
+	/** Сумма голосов */
+	amount: string,
+	/** Получатель голосов */
+	recipient: string
+};
 	/** Пункт голосования для ежегодного общего собрания */
 ["VoteItemInput"]: {
 	/** Идентификатор вопроса повестки */
@@ -11640,6 +12720,14 @@ export type GraphQLTypes = {
 	global_sequence: string,
 	receiver: string,
 	recv_sequence: string
+};
+	["AddAuthorInput"]: {
+		/** Имя автора */
+	author: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["AddParticipantInput"]: {
 		/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
@@ -12437,6 +13525,14 @@ export type GraphQLTypes = {
 	/** Тип организации */
 	type: string
 };
+	["CalculateVotesInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
 	["CancelRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -12479,6 +13575,26 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["CompleteVotingInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
+	["ConfigInput"]: {
+		/** Процент голосования авторов */
+	authors_voting_percent: number,
+	/** Процент бонуса координатора */
+	coordinator_bonus_percent: number,
+	/** Срок действия приглашения координатора в днях */
+	coordinator_invite_validity_days: number,
+	/** Процент голосования создателей */
+	creators_voting_percent: number,
+	/** Процент расходов */
+	expense_pool_percent: number,
+	/** Период голосования в днях */
+	voting_period_in_days: number
+};
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 ["ConfirmReceiveOnRequestInput"]: {
 		/** Имя аккаунта кооператива */
@@ -12509,6 +13625,44 @@ export type GraphQLTypes = {
 	full_address: string,
 	full_name: string,
 	phone: string
+};
+	["ContractDocumentInput"]: {
+		/** Хэш подписи */
+	hash: string,
+	/** Время подписи */
+	signed_at: string,
+	/** Подписывающий */
+	signer: string,
+	/** Тип подписи */
+	type: string
+};
+	["ContractInput"]: {
+		/** Содержимое контракта */
+	content: string,
+	/** Хэш контракта */
+	hash: string,
+	/** Подписи контракта */
+	signatures: Array<GraphQLTypes["ContractDocumentInput"]>,
+	/** Заголовок контракта */
+	title: string
+};
+	["ConvertSegmentInput"]: {
+		/** Сумма для конвертации в капитализацию */
+	capital_amount: string,
+	/** Хэш конвертации */
+	convert_hash: string,
+	/** Заявление */
+	convert_statement: GraphQLTypes["ContractInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Сумма для конвертации в кошелек проекта */
+	project_amount: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string,
+	/** Сумма для конвертации в главный кошелек */
+	wallet_amount: string
 };
 	["CooperativeOperatorAccount"]: {
 	__typename: "CooperativeOperatorAccount",
@@ -12633,6 +13787,34 @@ export type GraphQLTypes = {
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
 };
+	["CreateCommitInput"]: {
+		/** Хэш коммита */
+	commit_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Количество часов создателя */
+	creator_hours: number,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
+	["CreateDebtInput"]: {
+		/** Сумма долга */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш долга */
+	debt_hash: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Дата возврата */
+	repaid_at: string,
+	/** Заявление */
+	statement: GraphQLTypes["ContractInput"],
+	/** Имя пользователя */
+	username: string
+};
 	["CreateDepositPaymentInput"]: {
 		/** Сумма взноса */
 	quantity: number,
@@ -12727,11 +13909,69 @@ export type GraphQLTypes = {
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
 };
+	["CreateProgramPropertyInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Сумма имущества */
+	property_amount: string,
+	/** Описание имущества */
+	property_description: string,
+	/** Хэш имущества */
+	property_hash: string,
+	/** Заявление */
+	statement: GraphQLTypes["ContractInput"],
+	/** Имя пользователя */
+	username: string
+};
 	["CreateProjectFreeDecisionInput"]: {
 		/** Проект решения, которое предлагается принять */
 	decision: string,
 	/** Вопрос, который выносится на повестку */
 	question: string
+};
+	["CreateProjectInput"]: {
+		/** Флаг возможности конвертации в проект */
+	can_convert_to_project: boolean,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Описание проекта */
+	description: string,
+	/** Мета-данные проекта */
+	meta: string,
+	/** Хэш родительского проекта */
+	parent_hash: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Название проекта */
+	title: string
+};
+	["CreateProjectInvestInput"]: {
+		/** Сумма инвестиции */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш инвестиции */
+	invest_hash: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Заявление на инвестирование */
+	statement: GraphQLTypes["ContractInput"],
+	/** Имя инвестора */
+	username: string
+};
+	["CreateProjectPropertyInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Сумма имущества */
+	property_amount: string,
+	/** Описание имущества */
+	property_description: string,
+	/** Хэш имущества */
+	property_hash: string,
+	/** Имя пользователя */
+	username: string
 };
 	["CreateSubscriptionInput"]: {
 		/** Данные подписки */
@@ -12815,6 +14055,12 @@ export type GraphQLTypes = {
 	method_id: string,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
 	username: string
+};
+	["DeleteProjectInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["DeleteTrustedAccountInput"]: {
 		/** Имя аккаунта кооперативного участка */
@@ -13067,6 +14313,24 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
+	["FundProgramInput"]: {
+		/** Сумма финансирования */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Memo */
+	memo: string
+};
+	["FundProjectInput"]: {
+		/** Сумма финансирования */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Memo */
+	memo: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["GatewayPayment"]: {
 	__typename: "GatewayPayment",
 	/** Данные из блокчейна */
@@ -13243,6 +14507,18 @@ export type GraphQLTypes = {
 		/** Username пользователя */
 	username: string
 };
+	["ImportContributorInput"]: {
+		/** Сумма вклада */
+	contribution_amount: string,
+	/** Хэш вкладчика */
+	contributor_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Примечание */
+	memo?: string | undefined | null,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["Individual"]: {
 	__typename: "Individual",
 	/** Дата рождения */
@@ -13346,6 +14622,18 @@ export type GraphQLTypes = {
 	access_token: string,
 	/** Токен доступа */
 	refresh_token: string
+};
+	["MakeClearanceInput"]: {
+		/** Хэш приложения */
+	appendix_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Документ */
+	document: GraphQLTypes["ContractInput"],
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
 };
 	/** Данные о собрании кооператива */
 ["Meet"]: {
@@ -13580,6 +14868,60 @@ export type GraphQLTypes = {
 	addTrustedAccount: GraphQLTypes["Branch"],
 	/** Отменить заявку */
 	cancelRequest: GraphQLTypes["Transaction"],
+	/** Добавление автора проекта в CAPITAL контракте */
+	capitalAddAuthor: string,
+	/** Расчет голосов в CAPITAL контракте */
+	capitalCalculateVotes: string,
+	/** Завершение голосования в CAPITAL контракте */
+	capitalCompleteVoting: string,
+	/** Конвертация сегмента в CAPITAL контракте */
+	capitalConvertSegment: string,
+	/** Создание коммита в CAPITAL контракте */
+	capitalCreateCommit: string,
+	/** Получение ссуды в CAPITAL контракте */
+	capitalCreateDebt: string,
+	/** Создание программного имущественного взноса в CAPITAL контракте */
+	capitalCreateProgramProperty: string,
+	/** Создание проекта в CAPITAL контракте */
+	capitalCreateProject: string,
+	/** Инвестирование в проект CAPITAL контракта */
+	capitalCreateProjectInvest: string,
+	/** Создание проектного имущественного взноса в CAPITAL контракте */
+	capitalCreateProjectProperty: string,
+	/** Удаление проекта в CAPITAL контракте */
+	capitalDeleteProject: string,
+	/** Финансирование программы CAPITAL контракта */
+	capitalFundProgram: string,
+	/** Финансирование проекта CAPITAL контракта */
+	capitalFundProject: string,
+	/** Импорт вкладчика в CAPITAL контракт */
+	capitalImportContributor: string,
+	/** Подписание приложения в CAPITAL контракте */
+	capitalMakeClearance: string,
+	/** Открытие проекта для инвестиций в CAPITAL контракте */
+	capitalOpenProject: string,
+	/** Внесение результата в CAPITAL контракте */
+	capitalPushResult: string,
+	/** Обновление CRPS пайщика в программе CAPITAL контракта */
+	capitalRefreshProgram: string,
+	/** Обновление CRPS пайщика в проекте CAPITAL контракта */
+	capitalRefreshProject: string,
+	/** Обновление сегмента в CAPITAL контракте */
+	capitalRefreshSegment: string,
+	/** Регистрация вкладчика в CAPITAL контракте */
+	capitalRegisterContributor: string,
+	/** Установка конфигурации CAPITAL контракта */
+	capitalSetConfig: string,
+	/** Установка мастера проекта в CAPITAL контракте */
+	capitalSetMaster: string,
+	/** Установка плана проекта в CAPITAL контракте */
+	capitalSetPlan: string,
+	/** Запуск проекта в CAPITAL контракте */
+	capitalStartProject: string,
+	/** Запуск голосования в CAPITAL контракте */
+	capitalStartVoting: string,
+	/** Голосование в CAPITAL контракте */
+	capitalSubmitVote: string,
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
@@ -13734,6 +15076,12 @@ export type GraphQLTypes = {
 	meet_hash: string,
 	notification: GraphQLTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
 	username: string
+};
+	["OpenProjectInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["Organization"]: {
 	__typename: "Organization",
@@ -14174,6 +15522,24 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["PushResultInput"]: {
+		/** Сумма взноса */
+	contribution_amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Сумма долга к погашению */
+	debt_amount: string,
+	/** Хэши долгов для погашения */
+	debt_hashes: Array<string>,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Хэш результата */
+	result_hash: string,
+	/** Заявление */
+	statement: GraphQLTypes["ContractInput"],
+	/** Имя пользователя */
+	username: string
+};
 	["Query"]: {
 	__typename: "Query",
 	/** Получить сводную информацию о аккаунте */
@@ -14256,6 +15622,28 @@ export type GraphQLTypes = {
 	/** Токен обновления */
 	refresh_token: string
 };
+	["RefreshProgramInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя пользователя */
+	username: string
+};
+	["RefreshProjectInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
+	["RefreshSegmentInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
+};
 	["RefundRequest"]: {
 	__typename: "RefundRequest",
 	/** Сумма CPU */
@@ -14282,6 +15670,20 @@ export type GraphQLTypes = {
 	referer?: string | undefined | null,
 	/** Тип аккаунта */
 	type: GraphQLTypes["AccountType"],
+	/** Имя пользователя */
+	username: string
+};
+	["RegisterContributorInput"]: {
+		/** Документ контракта */
+	contract: GraphQLTypes["ContractInput"],
+	/** Хэш вкладчика */
+	contributor_hash: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Флаг внешнего контракта */
+	is_external_contract: boolean,
+	/** Ставка за час работы */
+	rate_per_hour: string,
 	/** Имя пользователя */
 	username: string
 };
@@ -14739,11 +16141,39 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["SetConfigInput"]: {
+		/** Конфигурация контракта */
+	config: GraphQLTypes["ConfigInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string
+};
+	["SetMasterInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя мастера проекта */
+	master: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["SetPaymentStatusInput"]: {
 		/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
 	/** Новый статус платежа */
 	status: GraphQLTypes["PaymentStatus"]
+};
+	["SetPlanInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя мастера проекта */
+	master: string,
+	/** Плановое количество часов создателей */
+	plan_creators_hours: number,
+	/** Плановые расходы */
+	plan_expenses: string,
+	/** Стоимость часа работы */
+	plan_hour_cost: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	["SetWifInput"]: {
 		/** Тип разрешения ключа */
@@ -14846,15 +16276,37 @@ export type GraphQLTypes = {
 		individual_data: GraphQLTypes["CreateIndividualDataInput"],
 	role: string
 };
+	["StartProjectInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["StartResetKeyInput"]: {
 		/** Электронная почта */
 	email: string
+};
+	["StartVotingInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
 };
 	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) с агрегатом документа */
 ["StatementDetailAggregate"]: {
 	__typename: "StatementDetailAggregate",
 	action: GraphQLTypes["ExtendedBlockchainAction"],
 	documentAggregate: GraphQLTypes["DocumentAggregate"]
+};
+	["SubmitVoteInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя голосующего */
+	voter: string,
+	/** Распределение голосов */
+	votes: Array<GraphQLTypes["VoteDistributionInput"]>
 };
 	["SubscriptionStatsDto"]: {
 	__typename: "SubscriptionStatsDto",
@@ -15143,6 +16595,12 @@ export type GraphQLTypes = {
 	/** Имя верификатора */
 	verificator: string
 };
+	["VoteDistributionInput"]: {
+		/** Сумма голосов */
+	amount: string,
+	/** Получатель голосов */
+	recipient: string
+};
 	/** Пункт голосования для ежегодного общего собрания */
 ["VoteItemInput"]: {
 		/** Идентификатор вопроса повестки */
@@ -15280,6 +16738,7 @@ export enum UserStatus {
 type ZEUS_VARIABLES = {
 	["AcceptChildOrderInput"]: ValueTypes["AcceptChildOrderInput"];
 	["AccountType"]: ValueTypes["AccountType"];
+	["AddAuthorInput"]: ValueTypes["AddAuthorInput"];
 	["AddParticipantInput"]: ValueTypes["AddParticipantInput"];
 	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
 	["AgendaGeneralMeetPointInput"]: ValueTypes["AgendaGeneralMeetPointInput"];
@@ -15309,23 +16768,35 @@ type ZEUS_VARIABLES = {
 	["AssetContributionStatementSignedMetaDocumentInput"]: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"];
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
+	["CalculateVotesInput"]: ValueTypes["CalculateVotesInput"];
 	["CancelRequestInput"]: ValueTypes["CancelRequestInput"];
 	["CommonRequestInput"]: ValueTypes["CommonRequestInput"];
 	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
+	["CompleteVotingInput"]: ValueTypes["CompleteVotingInput"];
+	["ConfigInput"]: ValueTypes["ConfigInput"];
 	["ConfirmReceiveOnRequestInput"]: ValueTypes["ConfirmReceiveOnRequestInput"];
 	["ConfirmSupplyOnRequestInput"]: ValueTypes["ConfirmSupplyOnRequestInput"];
+	["ContractDocumentInput"]: ValueTypes["ContractDocumentInput"];
+	["ContractInput"]: ValueTypes["ContractInput"];
+	["ConvertSegmentInput"]: ValueTypes["ConvertSegmentInput"];
 	["Country"]: ValueTypes["Country"];
 	["CreateAnnualGeneralMeetInput"]: ValueTypes["CreateAnnualGeneralMeetInput"];
 	["CreateBankAccountInput"]: ValueTypes["CreateBankAccountInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
 	["CreateChildOrderInput"]: ValueTypes["CreateChildOrderInput"];
+	["CreateCommitInput"]: ValueTypes["CreateCommitInput"];
+	["CreateDebtInput"]: ValueTypes["CreateDebtInput"];
 	["CreateDepositPaymentInput"]: ValueTypes["CreateDepositPaymentInput"];
 	["CreateEntrepreneurDataInput"]: ValueTypes["CreateEntrepreneurDataInput"];
 	["CreateIndividualDataInput"]: ValueTypes["CreateIndividualDataInput"];
 	["CreateInitialPaymentInput"]: ValueTypes["CreateInitialPaymentInput"];
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateParentOfferInput"]: ValueTypes["CreateParentOfferInput"];
+	["CreateProgramPropertyInput"]: ValueTypes["CreateProgramPropertyInput"];
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
+	["CreateProjectInput"]: ValueTypes["CreateProjectInput"];
+	["CreateProjectInvestInput"]: ValueTypes["CreateProjectInvestInput"];
+	["CreateProjectPropertyInput"]: ValueTypes["CreateProjectPropertyInput"];
 	["CreateSubscriptionInput"]: ValueTypes["CreateSubscriptionInput"];
 	["CreateWithdrawInput"]: ValueTypes["CreateWithdrawInput"];
 	["DateTime"]: ValueTypes["DateTime"];
@@ -15333,6 +16804,7 @@ type ZEUS_VARIABLES = {
 	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
+	["DeleteProjectInput"]: ValueTypes["DeleteProjectInput"];
 	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
 	["DeliverOnRequestInput"]: ValueTypes["DeliverOnRequestInput"];
 	["DisputeOnRequestInput"]: ValueTypes["DisputeOnRequestInput"];
@@ -15341,6 +16813,8 @@ type ZEUS_VARIABLES = {
 	["ExtendedMeetStatus"]: ValueTypes["ExtendedMeetStatus"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
 	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
+	["FundProgramInput"]: ValueTypes["FundProgramInput"];
+	["FundProjectInput"]: ValueTypes["FundProjectInput"];
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
@@ -15354,15 +16828,18 @@ type ZEUS_VARIABLES = {
 	["GetMeetsInput"]: ValueTypes["GetMeetsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
 	["GetUserSubscriptionsInput"]: ValueTypes["GetUserSubscriptionsInput"];
+	["ImportContributorInput"]: ValueTypes["ImportContributorInput"];
 	["Init"]: ValueTypes["Init"];
 	["Install"]: ValueTypes["Install"];
 	["JSON"]: ValueTypes["JSON"];
 	["JSONObject"]: ValueTypes["JSONObject"];
 	["LoginInput"]: ValueTypes["LoginInput"];
 	["LogoutInput"]: ValueTypes["LogoutInput"];
+	["MakeClearanceInput"]: ValueTypes["MakeClearanceInput"];
 	["MetaDocumentInput"]: ValueTypes["MetaDocumentInput"];
 	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
 	["NotifyOnAnnualGeneralMeetInput"]: ValueTypes["NotifyOnAnnualGeneralMeetInput"];
+	["OpenProjectInput"]: ValueTypes["OpenProjectInput"];
 	["OrganizationDetailsInput"]: ValueTypes["OrganizationDetailsInput"];
 	["OrganizationType"]: ValueTypes["OrganizationType"];
 	["PaginationInput"]: ValueTypes["PaginationInput"];
@@ -15381,9 +16858,14 @@ type ZEUS_VARIABLES = {
 	["ProjectFreeDecisionSignedMetaDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedMetaDocumentInput"];
 	["PublishProjectFreeDecisionInput"]: ValueTypes["PublishProjectFreeDecisionInput"];
 	["PublishRequestInput"]: ValueTypes["PublishRequestInput"];
+	["PushResultInput"]: ValueTypes["PushResultInput"];
 	["ReceiveOnRequestInput"]: ValueTypes["ReceiveOnRequestInput"];
 	["RefreshInput"]: ValueTypes["RefreshInput"];
+	["RefreshProgramInput"]: ValueTypes["RefreshProgramInput"];
+	["RefreshProjectInput"]: ValueTypes["RefreshProjectInput"];
+	["RefreshSegmentInput"]: ValueTypes["RefreshSegmentInput"];
 	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];
+	["RegisterContributorInput"]: ValueTypes["RegisterContributorInput"];
 	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
 	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
 	["ResetKeyInput"]: ValueTypes["ResetKeyInput"];
@@ -15404,14 +16886,20 @@ type ZEUS_VARIABLES = {
 	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];
 	["SelectBranchSignedDocumentInput"]: ValueTypes["SelectBranchSignedDocumentInput"];
 	["SelectBranchSignedMetaDocumentInput"]: ValueTypes["SelectBranchSignedMetaDocumentInput"];
+	["SetConfigInput"]: ValueTypes["SetConfigInput"];
+	["SetMasterInput"]: ValueTypes["SetMasterInput"];
 	["SetPaymentStatusInput"]: ValueTypes["SetPaymentStatusInput"];
+	["SetPlanInput"]: ValueTypes["SetPlanInput"];
 	["SetWifInput"]: ValueTypes["SetWifInput"];
 	["SignByPresiderOnAnnualGeneralMeetInput"]: ValueTypes["SignByPresiderOnAnnualGeneralMeetInput"];
 	["SignBySecretaryOnAnnualGeneralMeetInput"]: ValueTypes["SignBySecretaryOnAnnualGeneralMeetInput"];
 	["SignatureInfoInput"]: ValueTypes["SignatureInfoInput"];
 	["SignedDigitalDocumentInput"]: ValueTypes["SignedDigitalDocumentInput"];
 	["SovietMemberInput"]: ValueTypes["SovietMemberInput"];
+	["StartProjectInput"]: ValueTypes["StartProjectInput"];
 	["StartResetKeyInput"]: ValueTypes["StartResetKeyInput"];
+	["StartVotingInput"]: ValueTypes["StartVotingInput"];
+	["SubmitVoteInput"]: ValueTypes["SubmitVoteInput"];
 	["SupplyOnRequestInput"]: ValueTypes["SupplyOnRequestInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];
 	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
@@ -15425,6 +16913,7 @@ type ZEUS_VARIABLES = {
 	["UpdateRequestInput"]: ValueTypes["UpdateRequestInput"];
 	["UserStatus"]: ValueTypes["UserStatus"];
 	["VarsInput"]: ValueTypes["VarsInput"];
+	["VoteDistributionInput"]: ValueTypes["VoteDistributionInput"];
 	["VoteItemInput"]: ValueTypes["VoteItemInput"];
 	["VoteOnAnnualGeneralMeetInput"]: ValueTypes["VoteOnAnnualGeneralMeetInput"];
 	["WebPushSubscriptionDataInput"]: ValueTypes["WebPushSubscriptionDataInput"];
