@@ -3,12 +3,10 @@
   border-radius: 16px;
   width: 100%;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   background-color: var(--q-surface);
 
   .q-dark & {
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     background-color: rgba(255, 255, 255, 0.05);
   }
 }
@@ -37,8 +35,6 @@
   &:hover {
     background-color: rgba(0, 0, 0, 0.05);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-
     .q-dark & {
       background-color: rgba(255, 255, 255, 0.1);
     }
@@ -47,14 +43,8 @@
 
 // Главная карточка страницы с заголовком
 .page-main-card {
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  background-color: var(--q-surface);
-
   .q-dark & {
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     background-color: rgba(255, 255, 255, 0.05);
   }
 
@@ -85,12 +75,10 @@
 .section-card {
   border-radius: 16px;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   background-color: var(--q-surface);
 
   .q-dark & {
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     background-color: rgba(255, 255, 255, 0.05);
   }
 
@@ -130,8 +118,6 @@
       &:hover {
         background-color: rgba(0, 0, 0, 0.05);
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-
         .q-dark & {
           background-color: rgba(255, 255, 255, 0.1);
         }
@@ -380,12 +366,10 @@
 .section-card-warning {
   border-radius: 16px;
   border: 1px solid rgba(255, 152, 0, 0.2);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   background: rgba(255, 152, 0, 0.05);
 
   .q-dark & {
     border: 1px solid rgba(255, 152, 0, 0.3);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     background: rgba(255, 152, 0, 0.08);
   }
 
@@ -425,7 +409,6 @@
       &:hover {
         background: rgba(255, 152, 0, 0.12);
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
         .q-dark & {
           background: rgba(255, 152, 0, 0.18);

@@ -1,1 +1,2 @@
-export * from './model'
+export * from './model';
+export { UninstallButton } from './ui';

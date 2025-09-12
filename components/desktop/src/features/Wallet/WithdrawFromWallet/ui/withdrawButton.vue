@@ -53,7 +53,6 @@ import { useWalletStore } from 'src/entities/Wallet';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { useReturnByMoney } from '../model';
-import { Notify } from 'quasar';
 import type { IPaymentMethodData } from 'src/entities/Wallet/model/types';
 import type {
   ISBPData,
@@ -163,10 +162,7 @@ watch(showDialog, async (newValue) => {
       });
     } catch (error) {
       console.error('Ошибка загрузки методов платежа:', error);
-      Notify.create({
-        message: 'Ошибка загрузки методов платежа',
-        type: 'negative',
-      });
+      FailAlert('Ошибка загрузки методов платежа');
     } finally {
       loadingMethods.value = false;
     }
@@ -182,10 +178,7 @@ const clear = (): void => {
 
 const handlerSubmit = async (): Promise<void> => {
   if (!selectedMethod.value) {
-    Notify.create({
-      message: 'Выберите способ получения средств',
-      type: 'negative',
-    });
+    FailAlert('Выберите способ получения средств');
     return;
   }
 

@@ -25,8 +25,7 @@ import { createMeetWithAgenda } from '../model';
 import { useSessionStore } from 'src/entities/Session';
 import { useMeetStore } from 'src/entities/Meet';
 import { useRoute } from 'vue-router';
-import { Notify } from 'quasar';
-import { FailAlert } from 'src/shared/api';
+import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useWindowSize } from 'src/shared/hooks';
 
 // Определяем пропсы
@@ -57,10 +56,7 @@ const handleCreate = async (formData: any) => {
       agenda_points: formData.agenda_points,
     });
 
-    Notify.create({
-      message: 'Собрание успешно создано',
-      type: 'positive',
-    });
+    SuccessAlert('Собрание успешно создано');
 
     // Закрываем диалог
     showCreateMeetDialog.value = false;

@@ -10,7 +10,7 @@ q-page.padding
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { Notify } from 'quasar';
+import { FailAlert } from 'src/shared/api';
 import { useAccountStore } from 'src/entities/Account/model';
 import { AddUserButton } from 'src/features/User/AddUser/ui';
 import { ParticipantsTable } from 'src/widgets/Participants';
@@ -51,7 +51,7 @@ const loadParticipants = async () => {
       options: { page: 1, limit: 1000, sortOrder: 'DESC' },
     });
   } catch (e: any) {
-    Notify.create({ message: e.message, type: 'negative' });
+    FailAlert(e);
   } finally {
     onLoading.value = false;
   }

@@ -153,7 +153,8 @@ import type {
 } from 'src/shared/lib/types/user/IUserData';
 import { computed } from 'vue';
 import { useDisplayName } from 'src/shared/lib/composables/useDisplayName';
-import { copyToClipboard, Notify } from 'quasar';
+import { copyToClipboard } from 'quasar';
+import { SuccessAlert, FailAlert } from 'src/shared/api';
 import 'src/shared/ui/CardStyles/index.scss';
 
 const currentUser = useCurrentUser();
@@ -243,17 +244,9 @@ const copyUsername = async () => {
   const username = currentUser.username || '';
   try {
     await copyToClipboard(username);
-    Notify.create({
-      message: 'Имя аккаунта скопировано в буфер обмена',
-      type: 'positive',
-      position: 'top',
-    });
+    SuccessAlert('Имя аккаунта скопировано в буфер обмена');
   } catch (err) {
-    Notify.create({
-      message: 'Ошибка при копировании',
-      type: 'negative',
-      position: 'top',
-    });
+    FailAlert('Ошибка при копировании');
   }
 };
 

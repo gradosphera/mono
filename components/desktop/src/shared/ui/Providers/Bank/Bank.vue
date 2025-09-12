@@ -5,7 +5,8 @@ import type {
 } from 'src/shared/lib/types/payments';
 import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
 import QRCode from 'qrcode';
-import { copyToClipboard, Notify } from 'quasar';
+import { copyToClipboard } from 'quasar';
+import { SuccessAlert } from 'src/shared/api';
 
 // Определяем интерфейс для orderData
 interface IOrderData {
@@ -98,12 +99,7 @@ const copyAll = () => {
 
 const copy = (data: any) => {
   copyToClipboard(data)
-    .then(() =>
-      Notify.create({
-        message: 'Реквизиты скопированы в буфер обмена',
-        type: 'positive',
-      }),
-    )
+    .then(() => SuccessAlert('Реквизиты скопированы в буфер обмена'))
     .catch(console.log);
 };
 

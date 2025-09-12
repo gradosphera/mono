@@ -87,7 +87,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, ref, computed, reactive, nextTick } from 'vue';
-import { Notify } from 'quasar';
+import { FailAlert } from 'src/shared/api';
 import { usePaymentStore } from 'src/entities/Payment/model';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
 import PaymentCard from './PaymentCard.vue';
@@ -191,10 +191,7 @@ const loadPayments = async (page = 1) => {
   } catch (e: any) {
     onLoading.value = false;
     console.log(e);
-    Notify.create({
-      message: e.message,
-      type: 'negative',
-    });
+    FailAlert(e);
   }
 };
 

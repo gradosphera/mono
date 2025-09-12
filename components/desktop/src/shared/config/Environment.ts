@@ -59,25 +59,25 @@ function loadConfigSync(): boolean {
     console.warn('DEBUG: Ошибка синхронной загрузки config.js:', error);
   }
 
-  // Пробуем загрузить резервную конфигурацию
-  try {
-    console.log('DEBUG: Загружаем резервную конфигурацию синхронно');
+  // // Пробуем загрузить резервную конфигурацию
+  // try {
+  //   console.log('DEBUG: Загружаем резервную конфигурацию синхронно');
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', '/config.default.js', false);
-    xhr.send();
+  //   const xhr = new XMLHttpRequest();
+  //   xhr.open('GET', '/config.default.js', false);
+  //   xhr.send();
 
-    if (xhr.status === 200) {
-      eval(xhr.responseText);
+  //   if (xhr.status === 200) {
+  //     eval(xhr.responseText);
 
-      if (window.__APP_CONFIG__) {
-        console.log('DEBUG: config.default.js загружен синхронно');
-        return true;
-      }
-    }
-  } catch (error) {
-    console.warn('DEBUG: Ошибка загрузки резервной конфигурации:', error);
-  }
+  //     if (window.__APP_CONFIG__) {
+  //       console.log('DEBUG: config.default.js загружен синхронно');
+  //       return true;
+  //     }
+  //   }
+  // } catch (error) {
+  //   console.warn('DEBUG: Ошибка загрузки резервной конфигурации:', error);
+  // }
 
   return false;
 }

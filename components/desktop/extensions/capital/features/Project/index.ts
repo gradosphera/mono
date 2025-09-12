@@ -1,2 +1,12 @@
 // Фичи для работы с проектами
 export * as CreateProject from './CreateProject';
+export * as AddAuthor from './AddAuthor';
+export * as ConvertSegment from './ConvertSegment';
+export * as DeleteProject from './DeleteProject';
+export * as FundProject from './FundProject';
+export * as OpenProject from './OpenProject';
+export * as RefreshProject from './RefreshProject';
+export * as RefreshSegment from './RefreshSegment';
+export * as SetMaster from './SetMaster';
+export * as SetPlan from './SetPlan';
+export * as StartProject from './StartProject';

@@ -63,12 +63,12 @@ export const AppRegistry: INamedExtension = {
     readme: getReadmeContent('./yookassa'),
     instructions: getInstructionsContent('./yookassa'),
   },
-  contributor: {
+  capital: {
     is_builtin: false,
     is_internal: true,
-    is_available: false,
+    is_available: true,
     is_desktop: true,
-    title: 'Стол Вкладчика',
+    title: 'Контракт CAPITAL',
     description: 'Расширение для управления интеллектуальными и имущественными вкладами по целевой программе "Благорост".',
     image: 'https://i.ibb.co/HRW1nFY/Chat-GPT-Image-10-2025-20-40-57.png',
     class: CapitalPluginModule,

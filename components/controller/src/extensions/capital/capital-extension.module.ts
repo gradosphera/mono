@@ -116,23 +116,12 @@ import { ContractManagementInteractor } from './application/use-cases/contract-m
 import { ExpensesManagementInteractor } from './application/use-cases/expenses-management.interactor';
 
 // Конфигурация модуля
-interface ICapitalConfig {
-  defaultHourCost: number;
-  coordinatorPercent: number;
-  authorPercent: number;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ICapitalConfig {}
 
-const defaultConfig: ICapitalConfig = {
-  defaultHourCost: 2000,
-  coordinatorPercent: 4,
-  authorPercent: 61.8,
-};
+const defaultConfig: ICapitalConfig = {};
 
-export const Schema = z.object({
-  defaultHourCost: z.number().min(0),
-  coordinatorPercent: z.number().min(0).max(100),
-  authorPercent: z.number().min(0).max(100),
-});
+export const Schema = z.object({});
 
 @Injectable()
 export class CapitalPlugin extends BaseExtModule {

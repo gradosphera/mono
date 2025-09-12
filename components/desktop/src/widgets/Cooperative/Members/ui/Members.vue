@@ -57,8 +57,8 @@ div
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Notify } from 'quasar';
 import { readBlockchain } from 'src/shared/api';
+import { SuccessAlert, FailAlert } from 'src/shared/api';
 import { useSessionStore } from 'src/entities/Session';
 import {
   useUpdateBoard,
@@ -88,11 +88,7 @@ const addMember = async (username: string) => {
   const verified = await verify(username);
 
   if (!verified) {
-    Notify.create({
-      message: 'Имя аккаунта на найдено',
-      type: 'negative',
-    });
-
+    FailAlert('Имя аккаунта не найдено');
     return;
   }
 
@@ -181,18 +177,12 @@ const updateBoard = async (new_members: any) => {
 
     await sleep(3000);
 
-    Notify.create({
-      message: 'Совет обновлен',
-      type: 'positive',
-    });
+    SuccessAlert('Совет обновлен');
 
     loadMembers();
   } catch (e: any) {
     loadMembers();
-    Notify.create({
-      message: e.message,
-      type: 'negative',
-    });
+    FailAlert(e);
   }
 };
 
