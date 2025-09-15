@@ -5,6 +5,9 @@ export const AllTypesProps: Record<string,any> = {
 		document:"AssetContributionStatementSignedDocumentInput"
 	},
 	AccountType: "enum" as const,
+	ActionFiltersInput:{
+
+	},
 	AddAuthorInput:{
 
 	},
@@ -236,6 +239,9 @@ export const AllTypesProps: Record<string,any> = {
 	CreateWithdrawInput:{
 		statement:"ReturnByMoneySignedDocumentInput"
 	},
+	CurrentTableStatesFiltersInput:{
+
+	},
 	CycleStatus: "enum" as const,
 	DateTime: `scalar.DateTime` as const,
 	DeactivateSubscriptionInput:{
@@ -261,6 +267,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	DeliverOnRequestInput:{
+
+	},
+	DeltaFiltersInput:{
 
 	},
 	DisputeOnRequestInput:{
@@ -888,8 +897,20 @@ export const AllTypesProps: Record<string,any> = {
 			data:"GetAccountsInput",
 			options:"PaginationInput"
 		},
+		getActions:{
+			filters:"ActionFiltersInput",
+			pagination:"PaginationInput"
+		},
 		getBranches:{
 			data:"GetBranchesInput"
+		},
+		getCurrentTableStates:{
+			filters:"CurrentTableStatesFiltersInput",
+			pagination:"PaginationInput"
+		},
+		getDeltas:{
+			filters:"DeltaFiltersInput",
+			pagination:"PaginationInput"
 		},
 		getDocuments:{
 			data:"GetDocumentsInput"
@@ -1570,12 +1591,34 @@ export const ReturnTypes: Record<string,any> = {
 		id:"String",
 		question:"String"
 	},
+	CurrentTableState:{
+		block_num:"Float",
+		code:"String",
+		created_at:"DateTime",
+		primary_key:"String",
+		scope:"String",
+		table:"String",
+		value:"JSON"
+	},
 	DateTime: `scalar.DateTime` as const,
 	DecisionDetailAggregate:{
 		action:"ExtendedBlockchainAction",
 		documentAggregate:"DocumentAggregate",
 		votes_against:"ExtendedBlockchainAction",
 		votes_for:"ExtendedBlockchainAction"
+	},
+	Delta:{
+		block_id:"String",
+		block_num:"Float",
+		chain_id:"String",
+		code:"String",
+		created_at:"DateTime",
+		id:"String",
+		present:"Boolean",
+		primary_key:"String",
+		scope:"String",
+		table:"String",
+		value:"JSON"
 	},
 	Desktop:{
 		authorizedHome:"String",
@@ -1983,6 +2026,12 @@ export const ReturnTypes: Record<string,any> = {
 		kpp:"String",
 		ogrn:"String"
 	},
+	PaginatedActionsPaginationResult:{
+		currentPage:"Int",
+		items:"BlockchainAction",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedCapitalCommitsPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalCommit",
@@ -2052,6 +2101,18 @@ export const ReturnTypes: Record<string,any> = {
 	PaginatedCapitalVotesPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalVote",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCurrentTableStatesPaginationResult:{
+		currentPage:"Int",
+		items:"CurrentTableState",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedDeltasPaginationResult:{
+		currentPage:"Int",
+		items:"Delta",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -2170,8 +2231,11 @@ export const ReturnTypes: Record<string,any> = {
 		capitalVotes:"PaginatedCapitalVotesPaginationResult",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
+		getActions:"PaginatedActionsPaginationResult",
 		getAgenda:"AgendaWithDocuments",
 		getBranches:"Branch",
+		getCurrentTableStates:"PaginatedCurrentTableStatesPaginationResult",
+		getDeltas:"PaginatedDeltasPaginationResult",
 		getDesktop:"Desktop",
 		getDocuments:"DocumentsAggregatePaginationResult",
 		getExtensions:"Extension",

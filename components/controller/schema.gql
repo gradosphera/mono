@@ -100,6 +100,20 @@ type ActionAuthorization {
   permission: String!
 }
 
+input ActionFiltersInput {
+  """Аккаунт отправителя"""
+  account: String
+
+  """Номер блока"""
+  block_num: Float
+
+  """Глобальная последовательность"""
+  global_sequence: String
+
+  """Имя действия"""
+  name: String
+}
+
 type ActionReceipt {
   abi_sequence: Int!
   act_digest: String!
@@ -2742,6 +2756,40 @@ type CreatedProjectFreeDecision {
   question: String!
 }
 
+type CurrentTableState {
+  """Номер блока, в котором была последняя запись"""
+  block_num: Float!
+
+  """Код контракта"""
+  code: String!
+
+  """Дата создания последней записи"""
+  created_at: DateTime!
+
+  """Первичный ключ"""
+  primary_key: String!
+
+  """Область действия"""
+  scope: String!
+
+  """Имя таблицы"""
+  table: String!
+
+  """Данные записи в формате JSON"""
+  value: JSON
+}
+
+input CurrentTableStatesFiltersInput {
+  """Код контракта"""
+  code: String
+
+  """Область действия"""
+  scope: String
+
+  """Имя таблицы"""
+  table: String
+}
+
 """Статус цикла в системе CAPITAL"""
 enum CycleStatus {
   ACTIVE
@@ -2850,6 +2898,61 @@ input DeliverOnRequestInput {
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+type Delta {
+  """ID блока"""
+  block_id: String!
+
+  """Номер блока"""
+  block_num: Float!
+
+  """ID блокчейна"""
+  chain_id: String!
+
+  """Код контракта"""
+  code: String!
+
+  """Дата создания"""
+  created_at: DateTime!
+
+  """Уникальный идентификатор"""
+  id: String!
+
+  """Флаг присутствия записи"""
+  present: Boolean!
+
+  """Первичный ключ"""
+  primary_key: String!
+
+  """Область действия"""
+  scope: String!
+
+  """Имя таблицы"""
+  table: String!
+
+  """Данные записи в формате JSON"""
+  value: JSON
+}
+
+input DeltaFiltersInput {
+  """Номер блока"""
+  block_num: Float
+
+  """Код контракта"""
+  code: String
+
+  """Флаг присутствия записи"""
+  present: Boolean
+
+  """Первичный ключ"""
+  primary_key: String
+
+  """Область действия"""
+  scope: String
+
+  """Имя таблицы"""
+  table: String
 }
 
 type Desktop {
@@ -3524,8 +3627,8 @@ input GetProgramInvestInput {
 }
 
 input GetProjectInput {
-  """ID проекта"""
-  _id: String!
+  """Хеш проекта"""
+  hash: String!
 }
 
 input GetProjectWithRelationsInput {
@@ -4538,6 +4641,20 @@ enum OrganizationType {
   ZAO
 }
 
+type PaginatedActionsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [BlockchainAction!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 type PaginatedCapitalCommitsPaginationResult {
   """Текущая страница"""
   currentPage: Int!
@@ -4698,6 +4815,34 @@ type PaginatedCapitalVotesPaginationResult {
 
   """Элементы текущей страницы"""
   items: [CapitalVote!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCurrentTableStatesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CurrentTableState!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedDeltasPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [Delta!]!
 
   """Общее количество элементов"""
   totalCount: Int!
@@ -5354,11 +5499,26 @@ type Query {
   """Получить сводную информацию о аккаунтах системы"""
   getAccounts(data: GetAccountsInput, options: PaginationInput): AccountsPaginationResult!
 
+  """
+  Получить список действий блокчейна с возможностью фильтрации по аккаунту, имени действия, блоку и другим параметрам.
+  """
+  getActions(filters: ActionFiltersInput, pagination: PaginationInput): PaginatedActionsPaginationResult!
+
   """Получить список вопросов совета кооператива для голосования"""
   getAgenda: [AgendaWithDocuments!]!
 
   """Получить список кооперативных участков"""
   getBranches(data: GetBranchesInput!): [Branch!]!
+
+  """
+  Получить текущие состояния таблиц блокчейна с фильтрацией по контракту, области и таблице.
+  """
+  getCurrentTableStates(filters: CurrentTableStatesFiltersInput, pagination: PaginationInput): PaginatedCurrentTableStatesPaginationResult!
+
+  """
+  Получить список дельт блокчейна с возможностью фильтрации по контракту, таблице, блоку и другим параметрам.
+  """
+  getDeltas(filters: DeltaFiltersInput, pagination: PaginationInput): PaginatedDeltasPaginationResult!
 
   """Получить состав приложений рабочего стола"""
   getDesktop: Desktop!

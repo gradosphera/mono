@@ -21,6 +21,7 @@ import { GatewayModule } from './gateway/gateway.module';
 import { WalletModule } from './wallet/wallet.module';
 import { NotificationModule } from './notification/notification.module';
 import { LedgerModule } from './ledger/ledger.module';
+import { BlockchainExplorerModule } from './blockchain-explorer/blockchain-explorer.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { LedgerModule } from './ledger/ledger.module';
     WalletModule,
     NotificationModule,
     LedgerModule,
+    BlockchainExplorerModule,
   ],
   exports: [
     AccountModule,
@@ -68,6 +70,7 @@ import { LedgerModule } from './ledger/ledger.module';
     WalletModule,
     NotificationModule,
     LedgerModule,
+    BlockchainExplorerModule,
   ],
 })
 export class ApplicationModule {}

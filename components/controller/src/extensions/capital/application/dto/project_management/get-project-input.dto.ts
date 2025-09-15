@@ -6,7 +6,7 @@ import { IsString } from 'class-validator';
  */
 @InputType('GetProjectInput')
 export class GetProjectInputDTO {
-  @Field(() => String, { description: 'ID проекта' })
+  @Field(() => String, { description: 'Хеш проекта' })
   @IsString()
-  _id!: string;
+  hash!: string;
 }

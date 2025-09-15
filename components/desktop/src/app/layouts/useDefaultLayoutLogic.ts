@@ -1,4 +1,4 @@
-import { computed, onMounted, watch } from 'vue';
+import { computed, onMounted, watch, ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRoute } from 'vue-router';
 import { useWindowSize } from 'vue-window-size';
@@ -25,6 +25,9 @@ export function useDefaultLayoutLogic() {
     get: () => desktop.leftDrawerOpen,
     set: (value: boolean) => desktop.setLeftDrawerOpen(value),
   });
+
+  // Переменная для управления видимостью правого drawer
+  const rightDrawerOpen = ref(true);
 
   const isMobile = computed(() => width.value < 768);
   const isDark = computed(() => $q.dark.isActive);
@@ -62,8 +65,13 @@ export function useDefaultLayoutLogic() {
     desktop.toggleLeftDrawer();
   };
 
+  const toggleRightDrawer = () => {
+    rightDrawerOpen.value = !rightDrawerOpen.value;
+  };
+
   return {
     leftDrawerOpen,
+    rightDrawerOpen,
     isMobile,
     loggedIn,
     isRegistrationComplete,
@@ -71,5 +79,6 @@ export function useDefaultLayoutLogic() {
     headerClass,
     footerText,
     toggleLeftDrawer,
+    toggleRightDrawer,
   };
 }

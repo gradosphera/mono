@@ -3,6 +3,7 @@ import type {
   DeltaFilterDomainInterface,
   PaginatedResultDomainInterface,
 } from '../interfaces/parser-config-domain.interface';
+import type { TableStateDomainInterface } from '../interfaces/table-state-domain.interface';
 
 /**
  * Порт для репозитория дельт блокчейна
@@ -41,6 +42,22 @@ export interface DeltaRepositoryPort {
    * Получение последней дельты по номеру блока
    */
   findLastByBlock(): Promise<DeltaDomainInterface | null>;
+
+  /**
+   * Получение текущих состояний таблиц с фильтрами
+   * Возвращает только последние записи с present: true для каждой группы (code, scope, table, primary_key)
+   */
+  findCurrentTableStates(filters?: { code?: string; scope?: string; table?: string }): Promise<TableStateDomainInterface[]>;
+
+  /**
+   * Получение текущих состояний таблиц с фильтрами и пагинацией
+   * Возвращает только последние записи с present: true для каждой группы (code, scope, table, primary_key)
+   */
+  findCurrentTableStatesPaginated(
+    filters: { code?: string; scope?: string; table?: string },
+    page: number,
+    limit: number
+  ): Promise<PaginatedResultDomainInterface<TableStateDomainInterface>>;
 }
 
 // Экспорт символа для внедрения зависимостей

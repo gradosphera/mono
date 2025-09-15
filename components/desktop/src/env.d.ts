@@ -6,7 +6,6 @@ declare namespace NodeJS {
     VUE_ROUTER_MODE: 'hash' | 'history' | 'abstract' | undefined;
     VUE_ROUTER_BASE: string | undefined;
   }
-
 }
 
 declare global {
@@ -14,7 +13,6 @@ declare global {
     YooMoneyCheckoutWidget: any;
     chatwootSDK: any;
   }
-
 }
 
 import 'vue-router';
@@ -24,9 +22,9 @@ declare module 'vue-router' {
   interface RouteMeta {
     roles?: string[];
     conditions?: string;
-    agreements?: string[]
-    title: string
-    icon: string
-    requiresAuth?: boolean
+    agreements?: string[];
+    title: string;
+    icon: string;
+    requiresAuth?: boolean;
   }
 }

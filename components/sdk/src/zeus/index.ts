@@ -990,6 +990,16 @@ export type ValueTypes = {
 	permission?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ActionFiltersInput"]: {
+	/** Аккаунт отправителя */
+	account?: string | undefined | null | Variable<any, string>,
+	/** Номер блока */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Глобальная последовательность */
+	global_sequence?: string | undefined | null | Variable<any, string>,
+	/** Имя действия */
+	name?: string | undefined | null | Variable<any, string>
+};
 	["ActionReceipt"]: AliasType<{
 	abi_sequence?:boolean | `@${string}`,
 	act_digest?:boolean | `@${string}`,
@@ -2852,6 +2862,31 @@ export type ValueTypes = {
 	question?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CurrentTableState"]: AliasType<{
+	/** Номер блока, в котором была последняя запись */
+	block_num?:boolean | `@${string}`,
+	/** Код контракта */
+	code?:boolean | `@${string}`,
+	/** Дата создания последней записи */
+	created_at?:boolean | `@${string}`,
+	/** Первичный ключ */
+	primary_key?:boolean | `@${string}`,
+	/** Область действия */
+	scope?:boolean | `@${string}`,
+	/** Имя таблицы */
+	table?:boolean | `@${string}`,
+	/** Данные записи в формате JSON */
+	value?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CurrentTableStatesFiltersInput"]: {
+	/** Код контракта */
+	code?: string | undefined | null | Variable<any, string>,
+	/** Область действия */
+	scope?: string | undefined | null | Variable<any, string>,
+	/** Имя таблицы */
+	table?: string | undefined | null | Variable<any, string>
+};
 	/** Статус цикла в системе CAPITAL */
 ["CycleStatus"]:CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
@@ -2921,6 +2956,45 @@ export type ValueTypes = {
 	exchange_id: number | Variable<any, string>,
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
+};
+	["Delta"]: AliasType<{
+	/** ID блока */
+	block_id?:boolean | `@${string}`,
+	/** Номер блока */
+	block_num?:boolean | `@${string}`,
+	/** ID блокчейна */
+	chain_id?:boolean | `@${string}`,
+	/** Код контракта */
+	code?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Уникальный идентификатор */
+	id?:boolean | `@${string}`,
+	/** Флаг присутствия записи */
+	present?:boolean | `@${string}`,
+	/** Первичный ключ */
+	primary_key?:boolean | `@${string}`,
+	/** Область действия */
+	scope?:boolean | `@${string}`,
+	/** Имя таблицы */
+	table?:boolean | `@${string}`,
+	/** Данные записи в формате JSON */
+	value?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["DeltaFiltersInput"]: {
+	/** Номер блока */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Код контракта */
+	code?: string | undefined | null | Variable<any, string>,
+	/** Флаг присутствия записи */
+	present?: boolean | undefined | null | Variable<any, string>,
+	/** Первичный ключ */
+	primary_key?: string | undefined | null | Variable<any, string>,
+	/** Область действия */
+	scope?: string | undefined | null | Variable<any, string>,
+	/** Имя таблицы */
+	table?: string | undefined | null | Variable<any, string>
 };
 	["Desktop"]: AliasType<{
 	/** Имя шаблона рабочих столов */
@@ -3384,8 +3458,8 @@ export type ValueTypes = {
 	_id: string | Variable<any, string>
 };
 	["GetProjectInput"]: {
-	/** ID проекта */
-	_id: string | Variable<any, string>
+	/** Хеш проекта */
+	hash: string | Variable<any, string>
 };
 	["GetProjectWithRelationsInput"]: {
 	/** Хеш проекта */
@@ -3942,6 +4016,17 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 };
 	/** Тип юридического лица */
 ["OrganizationType"]:OrganizationType;
+	["PaginatedActionsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["BlockchainAction"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalCommitsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -4068,6 +4153,28 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ValueTypes["CapitalVote"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCurrentTableStatesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["CurrentTableState"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedDeltasPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["Delta"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -4500,9 +4607,12 @@ capitalVote?: [{	data: ValueTypes["GetVoteInput"] | Variable<any, string>},Value
 capitalVotes?: [{	filter?: ValueTypes["VoteFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalVotesPaginationResult"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
+getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
+getCurrentTableStates?: [{	filters?: ValueTypes["CurrentTableStatesFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCurrentTableStatesPaginationResult"]],
+getDeltas?: [{	filters?: ValueTypes["DeltaFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedDeltasPaginationResult"]],
 	/** Получить состав приложений рабочего стола */
 	getDesktop?:ValueTypes["Desktop"],
 getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>},ValueTypes["DocumentsAggregatePaginationResult"]],
@@ -5695,6 +5805,16 @@ export type ResolverInputTypes = {
 	permission?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ActionFiltersInput"]: {
+	/** Аккаунт отправителя */
+	account?: string | undefined | null,
+	/** Номер блока */
+	block_num?: number | undefined | null,
+	/** Глобальная последовательность */
+	global_sequence?: string | undefined | null,
+	/** Имя действия */
+	name?: string | undefined | null
+};
 	["ActionReceipt"]: AliasType<{
 	abi_sequence?:boolean | `@${string}`,
 	act_digest?:boolean | `@${string}`,
@@ -7557,6 +7677,31 @@ export type ResolverInputTypes = {
 	question?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CurrentTableState"]: AliasType<{
+	/** Номер блока, в котором была последняя запись */
+	block_num?:boolean | `@${string}`,
+	/** Код контракта */
+	code?:boolean | `@${string}`,
+	/** Дата создания последней записи */
+	created_at?:boolean | `@${string}`,
+	/** Первичный ключ */
+	primary_key?:boolean | `@${string}`,
+	/** Область действия */
+	scope?:boolean | `@${string}`,
+	/** Имя таблицы */
+	table?:boolean | `@${string}`,
+	/** Данные записи в формате JSON */
+	value?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CurrentTableStatesFiltersInput"]: {
+	/** Код контракта */
+	code?: string | undefined | null,
+	/** Область действия */
+	scope?: string | undefined | null,
+	/** Имя таблицы */
+	table?: string | undefined | null
+};
 	/** Статус цикла в системе CAPITAL */
 ["CycleStatus"]:CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
@@ -7626,6 +7771,45 @@ export type ResolverInputTypes = {
 	exchange_id: number,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["Delta"]: AliasType<{
+	/** ID блока */
+	block_id?:boolean | `@${string}`,
+	/** Номер блока */
+	block_num?:boolean | `@${string}`,
+	/** ID блокчейна */
+	chain_id?:boolean | `@${string}`,
+	/** Код контракта */
+	code?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Уникальный идентификатор */
+	id?:boolean | `@${string}`,
+	/** Флаг присутствия записи */
+	present?:boolean | `@${string}`,
+	/** Первичный ключ */
+	primary_key?:boolean | `@${string}`,
+	/** Область действия */
+	scope?:boolean | `@${string}`,
+	/** Имя таблицы */
+	table?:boolean | `@${string}`,
+	/** Данные записи в формате JSON */
+	value?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["DeltaFiltersInput"]: {
+	/** Номер блока */
+	block_num?: number | undefined | null,
+	/** Код контракта */
+	code?: string | undefined | null,
+	/** Флаг присутствия записи */
+	present?: boolean | undefined | null,
+	/** Первичный ключ */
+	primary_key?: string | undefined | null,
+	/** Область действия */
+	scope?: string | undefined | null,
+	/** Имя таблицы */
+	table?: string | undefined | null
 };
 	["Desktop"]: AliasType<{
 	/** Имя шаблона рабочих столов */
@@ -8089,8 +8273,8 @@ export type ResolverInputTypes = {
 	_id: string
 };
 	["GetProjectInput"]: {
-	/** ID проекта */
-	_id: string
+	/** Хеш проекта */
+	hash: string
 };
 	["GetProjectWithRelationsInput"]: {
 	/** Хеш проекта */
@@ -8647,6 +8831,17 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 };
 	/** Тип юридического лица */
 ["OrganizationType"]:OrganizationType;
+	["PaginatedActionsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["BlockchainAction"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalCommitsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -8773,6 +8968,28 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ResolverInputTypes["CapitalVote"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCurrentTableStatesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["CurrentTableState"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedDeltasPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["Delta"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -9207,9 +9424,12 @@ capitalVote?: [{	data: ResolverInputTypes["GetVoteInput"]},ResolverInputTypes["C
 capitalVotes?: [{	filter?: ResolverInputTypes["VoteFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalVotesPaginationResult"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
+getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
+getCurrentTableStates?: [{	filters?: ResolverInputTypes["CurrentTableStatesFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCurrentTableStatesPaginationResult"]],
+getDeltas?: [{	filters?: ResolverInputTypes["DeltaFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedDeltasPaginationResult"]],
 	/** Получить состав приложений рабочего стола */
 	getDesktop?:ResolverInputTypes["Desktop"],
 getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTypes["DocumentsAggregatePaginationResult"]],
@@ -10400,6 +10620,16 @@ export type ModelTypes = {
 	["ActionAuthorization"]: {
 		actor: string,
 	permission: string
+};
+	["ActionFiltersInput"]: {
+	/** Аккаунт отправителя */
+	account?: string | undefined | null,
+	/** Номер блока */
+	block_num?: number | undefined | null,
+	/** Глобальная последовательность */
+	global_sequence?: string | undefined | null,
+	/** Имя действия */
+	name?: string | undefined | null
 };
 	["ActionReceipt"]: {
 		abi_sequence: number,
@@ -12227,6 +12457,30 @@ export type ModelTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	["CurrentTableState"]: {
+		/** Номер блока, в котором была последняя запись */
+	block_num: number,
+	/** Код контракта */
+	code: string,
+	/** Дата создания последней записи */
+	created_at: ModelTypes["DateTime"],
+	/** Первичный ключ */
+	primary_key: string,
+	/** Область действия */
+	scope: string,
+	/** Имя таблицы */
+	table: string,
+	/** Данные записи в формате JSON */
+	value?: ModelTypes["JSON"] | undefined | null
+};
+	["CurrentTableStatesFiltersInput"]: {
+	/** Код контракта */
+	code?: string | undefined | null,
+	/** Область действия */
+	scope?: string | undefined | null,
+	/** Имя таблицы */
+	table?: string | undefined | null
+};
 	["CycleStatus"]:CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
@@ -12293,6 +12547,44 @@ export type ModelTypes = {
 	exchange_id: number,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["Delta"]: {
+		/** ID блока */
+	block_id: string,
+	/** Номер блока */
+	block_num: number,
+	/** ID блокчейна */
+	chain_id: string,
+	/** Код контракта */
+	code: string,
+	/** Дата создания */
+	created_at: ModelTypes["DateTime"],
+	/** Уникальный идентификатор */
+	id: string,
+	/** Флаг присутствия записи */
+	present: boolean,
+	/** Первичный ключ */
+	primary_key: string,
+	/** Область действия */
+	scope: string,
+	/** Имя таблицы */
+	table: string,
+	/** Данные записи в формате JSON */
+	value?: ModelTypes["JSON"] | undefined | null
+};
+	["DeltaFiltersInput"]: {
+	/** Номер блока */
+	block_num?: number | undefined | null,
+	/** Код контракта */
+	code?: string | undefined | null,
+	/** Флаг присутствия записи */
+	present?: boolean | undefined | null,
+	/** Первичный ключ */
+	primary_key?: string | undefined | null,
+	/** Область действия */
+	scope?: string | undefined | null,
+	/** Имя таблицы */
+	table?: string | undefined | null
 };
 	["Desktop"]: {
 		/** Имя шаблона рабочих столов */
@@ -12742,8 +13034,8 @@ export type ModelTypes = {
 	_id: string
 };
 	["GetProjectInput"]: {
-	/** ID проекта */
-	_id: string
+	/** Хеш проекта */
+	hash: string
 };
 	["GetProjectWithRelationsInput"]: {
 	/** Хеш проекта */
@@ -13388,6 +13680,16 @@ export type ModelTypes = {
 	ogrn: string
 };
 	["OrganizationType"]:OrganizationType;
+	["PaginatedActionsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["BlockchainAction"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalCommitsPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
@@ -13503,6 +13805,26 @@ export type ModelTypes = {
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<ModelTypes["CapitalVote"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCurrentTableStatesPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["CurrentTableState"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedDeltasPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["Delta"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -13934,10 +14256,16 @@ export type ModelTypes = {
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
 	getAccounts: ModelTypes["AccountsPaginationResult"],
+	/** Получить список действий блокчейна с возможностью фильтрации по аккаунту, имени действия, блоку и другим параметрам. */
+	getActions: ModelTypes["PaginatedActionsPaginationResult"],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
+	/** Получить текущие состояния таблиц блокчейна с фильтрацией по контракту, области и таблице. */
+	getCurrentTableStates: ModelTypes["PaginatedCurrentTableStatesPaginationResult"],
+	/** Получить список дельт блокчейна с возможностью фильтрации по контракту, таблице, блоку и другим параметрам. */
+	getDeltas: ModelTypes["PaginatedDeltasPaginationResult"],
 	/** Получить состав приложений рабочего стола */
 	getDesktop: ModelTypes["Desktop"],
 	getDocuments: ModelTypes["DocumentsAggregatePaginationResult"],
@@ -15114,6 +15442,16 @@ export type GraphQLTypes = {
 	__typename: "ActionAuthorization",
 	actor: string,
 	permission: string
+};
+	["ActionFiltersInput"]: {
+		/** Аккаунт отправителя */
+	account?: string | undefined | null,
+	/** Номер блока */
+	block_num?: number | undefined | null,
+	/** Глобальная последовательность */
+	global_sequence?: string | undefined | null,
+	/** Имя действия */
+	name?: string | undefined | null
 };
 	["ActionReceipt"]: {
 	__typename: "ActionReceipt",
@@ -16977,6 +17315,31 @@ export type GraphQLTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	["CurrentTableState"]: {
+	__typename: "CurrentTableState",
+	/** Номер блока, в котором была последняя запись */
+	block_num: number,
+	/** Код контракта */
+	code: string,
+	/** Дата создания последней записи */
+	created_at: GraphQLTypes["DateTime"],
+	/** Первичный ключ */
+	primary_key: string,
+	/** Область действия */
+	scope: string,
+	/** Имя таблицы */
+	table: string,
+	/** Данные записи в формате JSON */
+	value?: GraphQLTypes["JSON"] | undefined | null
+};
+	["CurrentTableStatesFiltersInput"]: {
+		/** Код контракта */
+	code?: string | undefined | null,
+	/** Область действия */
+	scope?: string | undefined | null,
+	/** Имя таблицы */
+	table?: string | undefined | null
+};
 	/** Статус цикла в системе CAPITAL */
 ["CycleStatus"]: CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
@@ -17046,6 +17409,45 @@ export type GraphQLTypes = {
 	exchange_id: number,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["Delta"]: {
+	__typename: "Delta",
+	/** ID блока */
+	block_id: string,
+	/** Номер блока */
+	block_num: number,
+	/** ID блокчейна */
+	chain_id: string,
+	/** Код контракта */
+	code: string,
+	/** Дата создания */
+	created_at: GraphQLTypes["DateTime"],
+	/** Уникальный идентификатор */
+	id: string,
+	/** Флаг присутствия записи */
+	present: boolean,
+	/** Первичный ключ */
+	primary_key: string,
+	/** Область действия */
+	scope: string,
+	/** Имя таблицы */
+	table: string,
+	/** Данные записи в формате JSON */
+	value?: GraphQLTypes["JSON"] | undefined | null
+};
+	["DeltaFiltersInput"]: {
+		/** Номер блока */
+	block_num?: number | undefined | null,
+	/** Код контракта */
+	code?: string | undefined | null,
+	/** Флаг присутствия записи */
+	present?: boolean | undefined | null,
+	/** Первичный ключ */
+	primary_key?: string | undefined | null,
+	/** Область действия */
+	scope?: string | undefined | null,
+	/** Имя таблицы */
+	table?: string | undefined | null
 };
 	["Desktop"]: {
 	__typename: "Desktop",
@@ -17509,8 +17911,8 @@ export type GraphQLTypes = {
 	_id: string
 };
 	["GetProjectInput"]: {
-		/** ID проекта */
-	_id: string
+		/** Хеш проекта */
+	hash: string
 };
 	["GetProjectWithRelationsInput"]: {
 		/** Хеш проекта */
@@ -18176,6 +18578,17 @@ export type GraphQLTypes = {
 };
 	/** Тип юридического лица */
 ["OrganizationType"]: OrganizationType;
+	["PaginatedActionsPaginationResult"]: {
+	__typename: "PaginatedActionsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["BlockchainAction"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalCommitsPaginationResult"]: {
 	__typename: "PaginatedCapitalCommitsPaginationResult",
 	/** Текущая страница */
@@ -18303,6 +18716,28 @@ export type GraphQLTypes = {
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<GraphQLTypes["CapitalVote"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCurrentTableStatesPaginationResult"]: {
+	__typename: "PaginatedCurrentTableStatesPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["CurrentTableState"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedDeltasPaginationResult"]: {
+	__typename: "PaginatedDeltasPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["Delta"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -18761,10 +19196,16 @@ export type GraphQLTypes = {
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
 	getAccounts: GraphQLTypes["AccountsPaginationResult"],
+	/** Получить список действий блокчейна с возможностью фильтрации по аккаунту, имени действия, блоку и другим параметрам. */
+	getActions: GraphQLTypes["PaginatedActionsPaginationResult"],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
+	/** Получить текущие состояния таблиц блокчейна с фильтрацией по контракту, области и таблице. */
+	getCurrentTableStates: GraphQLTypes["PaginatedCurrentTableStatesPaginationResult"],
+	/** Получить список дельт блокчейна с возможностью фильтрации по контракту, таблице, блоку и другим параметрам. */
+	getDeltas: GraphQLTypes["PaginatedDeltasPaginationResult"],
 	/** Получить состав приложений рабочего стола */
 	getDesktop: GraphQLTypes["Desktop"],
 	getDocuments: GraphQLTypes["DocumentsAggregatePaginationResult"],
@@ -20065,6 +20506,7 @@ export enum UserStatus {
 type ZEUS_VARIABLES = {
 	["AcceptChildOrderInput"]: ValueTypes["AcceptChildOrderInput"];
 	["AccountType"]: ValueTypes["AccountType"];
+	["ActionFiltersInput"]: ValueTypes["ActionFiltersInput"];
 	["AddAuthorInput"]: ValueTypes["AddAuthorInput"];
 	["AddParticipantInput"]: ValueTypes["AddParticipantInput"];
 	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
@@ -20137,6 +20579,7 @@ type ZEUS_VARIABLES = {
 	["CreateStoryInput"]: ValueTypes["CreateStoryInput"];
 	["CreateSubscriptionInput"]: ValueTypes["CreateSubscriptionInput"];
 	["CreateWithdrawInput"]: ValueTypes["CreateWithdrawInput"];
+	["CurrentTableStatesFiltersInput"]: ValueTypes["CurrentTableStatesFiltersInput"];
 	["CycleStatus"]: ValueTypes["CycleStatus"];
 	["DateTime"]: ValueTypes["DateTime"];
 	["DeactivateSubscriptionInput"]: ValueTypes["DeactivateSubscriptionInput"];
@@ -20148,6 +20591,7 @@ type ZEUS_VARIABLES = {
 	["DeleteProjectInput"]: ValueTypes["DeleteProjectInput"];
 	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
 	["DeliverOnRequestInput"]: ValueTypes["DeliverOnRequestInput"];
+	["DeltaFiltersInput"]: ValueTypes["DeltaFiltersInput"];
 	["DisputeOnRequestInput"]: ValueTypes["DisputeOnRequestInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
 	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];

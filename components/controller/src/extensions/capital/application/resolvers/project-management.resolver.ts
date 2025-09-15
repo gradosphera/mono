@@ -157,7 +157,7 @@ export class ProjectManagementResolver {
     nullable: true,
   })
   async getProject(@Args('data') data: GetProjectInputDTO): Promise<ProjectOutputDTO | null> {
-    return await this.projectManagementService.getProjectById(data._id);
+    return await this.projectManagementService.getProjectByHash(data.hash);
   }
 
   /**

@@ -9,6 +9,7 @@ import type { ProjectFilterInputDTO } from '../../application/dto/property_manag
 export interface ProjectRepository extends IBlockchainSyncRepository<ProjectDomainEntity> {
   create(project: Omit<ProjectDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ProjectDomainEntity>;
   findById(_id: string): Promise<ProjectDomainEntity | null>;
+  findByHash(hash: string): Promise<ProjectDomainEntity | null>;
   findAll(): Promise<ProjectDomainEntity[]>;
   findByMaster(master: string): Promise<ProjectDomainEntity[]>;
   findByStatus(status: string): Promise<ProjectDomainEntity[]>;

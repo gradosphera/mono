@@ -103,6 +103,13 @@ export class ProjectManagementInteractor {
   }
 
   /**
+   * Получение проекта по хешу проекта
+   */
+  async getProjectByHash(hash: string): Promise<ProjectDomainEntity | null> {
+    return await this.projectRepository.findByHash(hash);
+  }
+
+  /**
    * Получение проекта со всеми связанными данными по хешу проекта
    */
   async getProjectWithRelations(projectHash: string): Promise<ProjectDomainEntity | null> {

@@ -105,6 +105,14 @@ export class ProjectManagementService {
   }
 
   /**
+   * Получение проекта по ID
+   */
+  async getProjectByHash(hash: string): Promise<ProjectOutputDTO | null> {
+    const project = await this.projectManagementInteractor.getProjectByHash(hash);
+    return project as ProjectOutputDTO | null;
+  }
+
+  /**
    * Получение проекта с отношениями
    */
   async getProjectWithRelations(projectHash: string): Promise<ProjectOutputDTO | null> {

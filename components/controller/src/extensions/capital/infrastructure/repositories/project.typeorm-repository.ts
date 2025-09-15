@@ -52,6 +52,10 @@ export class ProjectTypeormRepository
     const savedEntity = await this.repository.save(entity);
     return ProjectMapper.toDomain(savedEntity);
   }
+  async findByHash(hash: string): Promise<ProjectDomainEntity | null> {
+    const entity = await this.repository.findOneBy({ project_hash: hash });
+    return entity ? ProjectMapper.toDomain(entity) : null;
+  }
   async findByMaster(master: string): Promise<ProjectDomainEntity[]> {
     const entities = await this.repository.find({ where: { master } });
     return entities.map((entity) => ProjectMapper.toDomain(entity));

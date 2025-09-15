@@ -4,7 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* Стили для полосы прокрутки содержимого drawer */
 .q-drawer__content::-webkit-scrollbar {
   width: 0px;
@@ -45,7 +44,6 @@
 .document {
   white-space: pre-wrap;
 }
-
 
 .bordered {
   border: 1px solid grey;
@@ -382,7 +380,9 @@ pre {
 
 .card {
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 
   &:hover {

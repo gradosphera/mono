@@ -2,7 +2,7 @@
 <template lang="pug">
 q-header.header(bordered, :class='headerClass')
   q-toolbar
-    q-btn(
+    q-btn.q-mr-sm(
       v-if='loggedIn',
       stretch,
       icon='menu',
