@@ -120,4 +120,8 @@ export class DomainToBlockchainUtils {
       signatures: chainDoc.signatures,
     };
   }
+
+  static getEmptyHash(): string {
+    return '0000000000000000000000000000000000000000000000000000000000000000';
+  }
 }

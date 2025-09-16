@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ContractManagementInteractor } from '../use-cases/contract-management.interactor';
 import type { SetConfigInputDTO } from '../dto/contract_management/set-config-input.dto';
 import type { GetCapitalConfigInputDTO } from '../dto/contract_management/get-config-input.dto';
-import { ConfigOutputDTO } from '../dto/contract_management/config-output.dto';
+import { StateOutputDTO } from '../dto/contract_management/config-output.dto';
 import type { TransactResult } from '@wharfkit/session';
 
 /**
@@ -21,9 +21,9 @@ export class ContractManagementService {
   }
 
   /**
-   * Получение конфигурации CAPITAL контракта
+   * Получение полного состояния CAPITAL контракта
    */
-  async getConfig(data: GetCapitalConfigInputDTO): Promise<ConfigOutputDTO | null> {
-    return await this.contractManagementInteractor.getConfig(data);
+  async getState(data: GetCapitalConfigInputDTO): Promise<StateOutputDTO | null> {
+    return await this.contractManagementInteractor.getState(data);
   }
 }

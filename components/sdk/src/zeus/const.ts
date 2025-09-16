@@ -278,6 +278,9 @@ export const AllTypesProps: Record<string,any> = {
 	EditBranchInput:{
 
 	},
+	EditProjectInput:{
+
+	},
 	EntrepreneurDetailsInput:{
 
 	},
@@ -456,6 +459,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalDeleteProject:{
 			data:"DeleteProjectInput"
+		},
+		capitalEditProject:{
+			data:"EditProjectInput"
 		},
 		capitalFundProgram:{
 			data:"FundProgramInput"
@@ -816,9 +822,6 @@ export const AllTypesProps: Record<string,any> = {
 			filter:"CapitalCommitFilter",
 			options:"PaginationInput"
 		},
-		capitalConfig:{
-			data:"GetCapitalConfigInput"
-		},
 		capitalContributor:{
 			data:"GetContributorInput"
 		},
@@ -878,6 +881,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalResults:{
 			filter:"ResultFilter",
 			options:"PaginationInput"
+		},
+		capitalState:{
+			data:"GetCapitalConfigInput"
 		},
 		capitalStories:{
 			filter:"CapitalStoryFilter",
@@ -1354,14 +1360,13 @@ export const ReturnTypes: Record<string,any> = {
 		status:"CommitStatus",
 		username:"String"
 	},
-	CapitalConfig:{
+	CapitalConfigObject:{
 		authors_voting_percent:"Float",
-		coopname:"String",
 		coordinator_bonus_percent:"Float",
-		coordinator_invite_validity_days:"Int",
+		coordinator_invite_validity_days:"Float",
 		creators_voting_percent:"Float",
 		expense_pool_percent:"Float",
-		voting_period_in_days:"Int"
+		voting_period_in_days:"Float"
 	},
 	CapitalContributor:{
 		_id:"String",
@@ -1513,6 +1518,15 @@ export const ReturnTypes: Record<string,any> = {
 		status:"ResultStatus",
 		total_amount:"Float",
 		username:"String"
+	},
+	CapitalState:{
+		config:"CapitalConfigObject",
+		coopname:"String",
+		global_available_invest_pool:"String",
+		program_membership_available:"String",
+		program_membership_cumulative_reward_per_share:"Float",
+		program_membership_distributed:"String",
+		program_membership_funded:"String"
 	},
 	CapitalStory:{
 		_id:"String",
@@ -1908,6 +1922,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCreateProjectProperty:"Transaction",
 		capitalCreateStory:"CapitalStory",
 		capitalDeleteProject:"Transaction",
+		capitalEditProject:"Transaction",
 		capitalFundProgram:"Transaction",
 		capitalFundProject:"Transaction",
 		capitalImportContributor:"Transaction",
@@ -2208,7 +2223,6 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	Query:{
 		capitalCommits:"PaginatedCapitalCommitsPaginationResult",
-		capitalConfig:"CapitalConfig",
 		capitalContributor:"CapitalContributor",
 		capitalContributors:"PaginatedCapitalContributorsPaginationResult",
 		capitalCycles:"PaginatedCapitalCyclesPaginationResult",
@@ -2226,6 +2240,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalProjects:"PaginatedCapitalProjectsPaginationResult",
 		capitalResult:"CapitalResult",
 		capitalResults:"PaginatedCapitalResultsPaginationResult",
+		capitalState:"CapitalState",
 		capitalStories:"PaginatedCapitalStoriesPaginationResult",
 		capitalVote:"CapitalVote",
 		capitalVotes:"PaginatedCapitalVotesPaginationResult",
@@ -2358,15 +2373,15 @@ export const ReturnTypes: Record<string,any> = {
 		refresh:"Token"
 	},
 	Transaction:{
-		chain:"JSONObject",
-		request:"JSONObject",
-		resolved:"JSONObject",
-		response:"JSONObject",
-		returns:"JSONObject",
-		revisions:"JSONObject",
-		signatures:"JSONObject",
-		signer:"JSONObject",
-		transaction:"JSONObject"
+		chain:"JSON",
+		request:"JSON",
+		resolved:"JSON",
+		response:"JSON",
+		returns:"JSON",
+		revisions:"JSON",
+		signatures:"JSON",
+		signer:"JSON",
+		transaction:"JSON"
 	},
 	UserAccount:{
 		meta:"String",

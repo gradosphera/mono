@@ -63,5 +63,5 @@ export * as GetCommits from './getCommits'
 /** Получить все циклы с фильтрацией */
 export * as GetCycles from './getCycles'
 
-/** Получить конфигурацию CAPITAL контракта */
-export * as GetConfig from './getConfig'
+/** Получить состояние CAPITAL контракта */
+export * as GetState from './getState'

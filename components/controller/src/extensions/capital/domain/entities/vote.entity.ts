@@ -42,7 +42,7 @@ export class VoteDomainEntity implements IBlockchainSynchronizable, IVoteDatabas
     // Данные из блокчейна
     if (blockchainData) {
       this.id = Number(blockchainData.id);
-      this.project_hash = blockchainData.project_hash;
+      this.project_hash = blockchainData.project_hash.toLowerCase();
       this.voter = blockchainData.voter;
       this.recipient = blockchainData.recipient;
       this.amount = blockchainData.amount;
@@ -94,5 +94,8 @@ export class VoteDomainEntity implements IBlockchainSynchronizable, IVoteDatabas
     Object.assign(this, blockchainData);
     this.block_num = blockNum;
     this.present = present;
+
+    // Нормализация hash полей
+    if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
   }
 }

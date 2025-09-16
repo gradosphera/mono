@@ -2,9 +2,10 @@ import { defineStore } from 'pinia';
 import { ref, Ref } from 'vue';
 import { api } from '../api';
 import type {
-  IProject,
+  IGetProjectOutput,
   IProjectsPagination,
   IProjectWithRelations,
+  IProject,
   IGetProjectInput,
   IGetProjectsInput,
   IGetProjectWithRelationsInput,
@@ -15,7 +16,8 @@ const namespace = 'projectStore';
 interface IProjectStore {
   projects: Ref<IProjectsPagination | null>;
   loadProjects: (data: IGetProjectsInput) => Promise<void>;
-  project: Ref<IProject | null>;
+  addProjectToList: (projectData: IProject) => void;
+  project: Ref<IGetProjectOutput | null>;
   loadProject: (data: IGetProjectInput) => Promise<void>;
   projectWithRelations: Ref<IProjectWithRelations | null>;
   loadProjectWithRelations: (
@@ -25,12 +27,21 @@ interface IProjectStore {
 
 export const useProjectStore = defineStore(namespace, (): IProjectStore => {
   const projects = ref<IProjectsPagination | null>(null);
-  const project = ref<IProject | null>(null);
+  const project = ref<IGetProjectOutput | null>(null);
   const projectWithRelations = ref<IProjectWithRelations | null>(null);
 
   const loadProjects = async (data: IGetProjectsInput) => {
     const loadedData = await api.loadProjects(data);
     projects.value = loadedData;
+  };
+
+  const addProjectToList = (projectData: IProject) => {
+    if (projects.value) {
+      // Добавляем проект в начало списка
+      projects.value.items = [projectData, ...projects.value.items];
+      // Увеличиваем общее количество
+      projects.value.totalCount += 1;
+    }
   };
 
   const loadProject = async (data: IGetProjectInput) => {
@@ -50,6 +61,7 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
     project,
     projectWithRelations,
     loadProjects,
+    addProjectToList,
     loadProject,
     loadProjectWithRelations,
   };

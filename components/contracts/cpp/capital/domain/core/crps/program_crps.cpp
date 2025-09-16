@@ -11,7 +11,7 @@ namespace Capital::Core {
   void distribute_program_membership_funds(eosio::name coopname, asset amount) {
     eosio::asset total_shares = get_capital_program_share_balance(coopname);
         
-    auto state = Capital::get_global_state(coopname);
+    auto state = Capital::State::get_global_state(coopname);
     
     state.program_membership_funded += amount; 
     state.program_membership_available += amount;
@@ -22,7 +22,7 @@ namespace Capital::Core {
       state.program_membership_cumulative_reward_per_share += delta;
     }
 
-    update_global_state(state);
+    Capital::State::update_global_state(state);
   }
 
   /**
@@ -37,7 +37,7 @@ namespace Capital::Core {
     // Получаем или создаём capital_wallet
     auto capital_wallet_opt = Capital::Wallets::get_capital_wallet_by_username(coopname, username);
     
-    auto state = Capital::get_global_state(coopname);
+    auto state = Capital::State::get_global_state(coopname);
     
     // Считаем дельту CRPS
     double current_crps = state.program_membership_cumulative_reward_per_share;
@@ -74,10 +74,10 @@ namespace Capital::Core {
     Capital::Wallets::upsert_capital_wallet(coopname, username, 0, negative_amount);
 
     // Обновляем глобальное состояние - увеличиваем распределенную сумму
-    auto state = Capital::get_global_state(coopname);
+    auto state = Capital::State::get_global_state(coopname);
     state.program_membership_distributed += amount;
     state.program_membership_available -= amount;
-    update_global_state(state);
+    Capital::State::update_global_state(state);
   }
 
 } // namespace Capital::Core

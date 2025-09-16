@@ -8,12 +8,27 @@ q-btn(
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useOpenProject } from '../model';
 import { FailAlert } from 'src/shared/api/alerts';
+import type { IProject } from '../../../../entities/Project/model';
+
+const props = defineProps<{ project: IProject | null }>();
 
 const { openProject, openProjectInput } = useOpenProject();
 const loading = ref(false);
+
+// Обновляем входные данные при изменении проекта
+watch(
+  () => props.project,
+  (newProject) => {
+    if (newProject) {
+      openProjectInput.value.coopname = newProject.coopname || '';
+      openProjectInput.value.project_hash = newProject.project_hash;
+    }
+  },
+  { immediate: true },
+);
 
 const handleOpenProject = async () => {
   loading.value = true;

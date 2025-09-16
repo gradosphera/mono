@@ -48,16 +48,17 @@ export class ProgramWithdrawDomainEntity
     this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
-    this.withdraw_hash = databaseData.withdraw_hash;
+    this.withdraw_hash = databaseData.withdraw_hash.toLowerCase();
     this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
-      if (this.withdraw_hash != blockchainData.withdraw_hash) throw new Error('Program withdraw hash mismatch');
+      if (this.withdraw_hash != blockchainData.withdraw_hash.toLowerCase())
+        throw new Error('Program withdraw hash mismatch');
 
       this.id = Number(blockchainData.id);
       this.coopname = blockchainData.coopname;
-      this.withdraw_hash = blockchainData.withdraw_hash;
+      this.withdraw_hash = blockchainData.withdraw_hash.toLowerCase();
       this.username = blockchainData.username;
       this.blockchain_status = blockchainData.status;
       this.amount = blockchainData.amount;
@@ -114,6 +115,9 @@ export class ProgramWithdrawDomainEntity
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
+
+    // Нормализация hash полей
+    if (this.withdraw_hash) this.withdraw_hash = this.withdraw_hash.toLowerCase();
   }
 
   /**

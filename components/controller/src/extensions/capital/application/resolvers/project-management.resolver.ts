@@ -7,6 +7,7 @@ import { StartProjectInputDTO } from '../dto/project_management/start-project-in
 import { OpenProjectInputDTO } from '../dto/project_management/open-project-input.dto';
 import { DeleteProjectInputDTO } from '../dto/project_management/delete-project-input.dto';
 import { CreateProjectInputDTO } from '../dto/project_management/create-project-input.dto';
+import { EditProjectInputDTO } from '../dto/project_management/edit-project-input.dto';
 import { GetProjectInputDTO } from '../dto/project_management/get-project-input.dto';
 import { GetProjectWithRelationsInputDTO } from '../dto/project_management/get-project-with-relations-input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
@@ -40,6 +41,22 @@ export class ProjectManagementResolver {
     @Args('data', { type: () => CreateProjectInputDTO }) data: CreateProjectInputDTO
   ): Promise<TransactionDTO> {
     const result = await this.projectManagementService.createProject(data);
+    return result;
+  }
+
+  /**
+   * Мутация для редактирования проекта в CAPITAL контракте
+   */
+  @Mutation(() => TransactionDTO, {
+    name: 'capitalEditProject',
+    description: 'Редактирование проекта в CAPITAL контракте',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async editCapitalProject(
+    @Args('data', { type: () => EditProjectInputDTO }) data: EditProjectInputDTO
+  ): Promise<TransactionDTO> {
+    const result = await this.projectManagementService.editProject(data);
     return result;
   }
   /**

@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CapitalContract } from 'cooptypes';
 import { CapitalBlockchainPort } from '../../../domain/interfaces/capital-blockchain.port';
-import type { TransactResult } from '@wharfkit/session';
+import { Checksum256, Name, type TransactResult } from '@wharfkit/session';
 import { BlockchainService } from '~/infrastructure/blockchain/blockchain.service';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/errors/http-api-error';
+import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 
 /**
  * Инфраструктурный сервис для реализации блокчейн порта CAPITAL
@@ -40,9 +41,9 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
     // scope = coopname, primary_key = coopname
     const state = await this.blockchainService.getSingleRow<CapitalContract.Tables.State.IState>(
       CapitalContract.contractName.production,
-      coopname,
+      CapitalContract.contractName.production,
       CapitalContract.Tables.State.tableName,
-      coopname as any
+      Name.from(coopname)
     );
 
     return state;
@@ -73,10 +74,45 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
+    if (data.parent_hash === '') data.parent_hash = DomainToBlockchainUtils.getEmptyHash();
 
     return await this.blockchainService.transact({
       account: CapitalContract.contractName.production,
       name: CapitalContract.Actions.CreateProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Получение проекта из CAPITAL контракта по хешу
+   */
+  async getProject(coopname: string, projectHash: string): Promise<CapitalContract.Tables.Projects.IProject | null> {
+    // Получаем проект из таблицы projects контракта capital
+    const project = await this.blockchainService.getSingleRow<CapitalContract.Tables.Projects.IProject>(
+      CapitalContract.contractName.production,
+      coopname,
+      CapitalContract.Tables.Projects.tableName,
+      Checksum256.from(projectHash),
+      'tertiary',
+      'sha256'
+    );
+
+    return project;
+  }
+
+  /**
+   * Редактирование проекта в CAPITAL контракте
+   */
+  async editProject(data: CapitalContract.Actions.EditProject.IEditProject): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.EditProject.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     });

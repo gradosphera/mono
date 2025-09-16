@@ -26,6 +26,7 @@
 #include "app/project_managment/add_author/addauthor.cpp"
 #include "app/project_managment/complete_voting/cmpltvoting.cpp"
 #include "app/project_managment/create_project/createproj.cpp"
+#include "app/project_managment/edit_project/editproj.cpp"
 #include "app/project_managment/delete_project/delproject.cpp"
 #include "app/project_managment/open_project/openproject.cpp"
 #include "app/project_managment/set_master/setmaster.cpp"

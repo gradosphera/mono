@@ -214,7 +214,7 @@ const configStore = useConfigStore();
 const { info } = useSystemStore();
 
 // Проверка наличия конфигурации
-const hasConfig = computed(() => configStore.config !== null);
+const hasConfig = computed(() => configStore.state?.config !== null);
 
 // Состояние импорта
 const isImportCompleted = ref(false);
@@ -234,12 +234,12 @@ const {
   resetImport,
 } = useBatchImport();
 
-// Загружаем конфигурацию при монтировании
+// Загружаем состояние при монтировании
 onMounted(async () => {
   try {
-    await configStore.loadConfig({ coopname: info.coopname });
+    await configStore.loadState({ coopname: info.coopname });
   } catch (error) {
-    console.error('Ошибка при загрузке конфигурации:', error);
+    console.error('Ошибка при загрузке состояния:', error);
   }
 });
 

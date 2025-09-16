@@ -59,17 +59,18 @@ export class ContributorDomainEntity
     this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
-    this.contributor_hash = databaseData.contributor_hash;
+    this.contributor_hash = databaseData.contributor_hash.toLowerCase();
     this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
-      if (this.contributor_hash != blockchainData.contributor_hash) throw new Error('Contributor hash mismatch');
+      if (this.contributor_hash != blockchainData.contributor_hash.toLowerCase())
+        throw new Error('Contributor hash mismatch');
 
       this.id = Number(blockchainData.id);
       this.coopname = blockchainData.coopname;
       this.username = blockchainData.username;
-      this.contributor_hash = blockchainData.contributor_hash;
+      this.contributor_hash = blockchainData.contributor_hash.toLowerCase();
       this.blockchain_status = blockchainData.status;
       this.memo = blockchainData.memo;
       this.is_external_contract = blockchainData.is_external_contract;
@@ -157,5 +158,8 @@ export class ContributorDomainEntity
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
+
+    // Нормализация hash полей
+    if (this.contributor_hash) this.contributor_hash = this.contributor_hash.toLowerCase();
   }
 }

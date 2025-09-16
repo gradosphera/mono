@@ -51,18 +51,18 @@ export class DebtDomainEntity implements IBlockchainSynchronizable, IDebtDatabas
     this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
-    this.debt_hash = databaseData.debt_hash;
+    this.debt_hash = databaseData.debt_hash.toLowerCase();
     this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
-      if (this.debt_hash != blockchainData.debt_hash) throw new Error('Debt hash mismatch');
+      if (this.debt_hash != blockchainData.debt_hash.toLowerCase()) throw new Error('Debt hash mismatch');
 
       this.id = Number(blockchainData.id);
       this.coopname = blockchainData.coopname;
       this.username = blockchainData.username;
-      this.debt_hash = blockchainData.debt_hash;
-      this.project_hash = blockchainData.project_hash;
+      this.debt_hash = blockchainData.debt_hash.toLowerCase();
+      this.project_hash = blockchainData.project_hash.toLowerCase();
       this.blockchain_status = blockchainData.status;
       this.repaid_at = blockchainData.repaid_at;
       this.amount = blockchainData.amount;
@@ -122,6 +122,10 @@ export class DebtDomainEntity implements IBlockchainSynchronizable, IDebtDatabas
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
+
+    // Нормализация hash полей
+    if (this.debt_hash) this.debt_hash = this.debt_hash.toLowerCase();
+    if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
   }
 
   /**

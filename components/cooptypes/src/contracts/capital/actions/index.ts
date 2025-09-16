@@ -8,6 +8,7 @@ export * as SetConfig from './setConfig'
 
 // Управление проектами
 export * as CreateProject from './createProject'
+export * as EditProject from './editProject'
 export * as OpenProject from './openProject'
 export * as StartProject from './startProject'
 export * as StartVoting from './startVoting'

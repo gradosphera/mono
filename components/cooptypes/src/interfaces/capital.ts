@@ -320,7 +320,20 @@ export interface ICreateproj {
   parent_hash: IChecksum256
   title: string
   description: string
+  invite: string
   meta: string
+  data: string
+  can_convert_to_project: boolean
+}
+
+export interface IEditproj {
+  coopname: IName
+  project_hash: IChecksum256
+  title: string
+  description: string
+  invite: string
+  meta: string
+  data: string
   can_convert_to_project: boolean
 }
 

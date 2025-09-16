@@ -30,7 +30,7 @@ q-layout(view='lHh LpR fff')
     :width='250'
   )
     // Кнопка закрытия drawer (внутри)
-    .full-width.q-pb-md
+    .full-width.text-right.q-pb-md
       q-btn(
         dense,
         style='width: 56px; height: 50px',
@@ -97,7 +97,7 @@ const {
   position: fixed !important;
   top: 51px; // Под header'ом
   right: 0px;
-  z-index: 2000;
+  z-index: 10;
 }
 
 .drawer-close-btn {

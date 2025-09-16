@@ -7,7 +7,7 @@ namespace Capital::Core::Voting {
 
     void initialize_project_voting(name coopname, checksum256 project_hash) {
         auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-        auto st = Capital::get_global_state(coopname);
+        auto st = Capital::State::get_global_state(coopname);
 
         auto amounts = calculate_voting_amounts(
           project.fact.authors_bonus_pool,

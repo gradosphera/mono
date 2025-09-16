@@ -1,7 +1,10 @@
-import type { Queries, Mutations } from '@coopenomics/sdk';
+import type { Queries, Mutations, Zeus } from '@coopenomics/sdk';
 
-export type IProject =
+export type IGetProjectOutput =
   Queries.Capital.GetProject.IOutput[typeof Queries.Capital.GetProject.name];
+
+export type IProject = Zeus.ModelTypes['CapitalProject'];
+
 export type IProjectsPagination =
   Queries.Capital.GetProjects.IOutput[typeof Queries.Capital.GetProjects.name];
 export type IProjectWithRelations =

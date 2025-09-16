@@ -90,7 +90,7 @@ void upsert_coordinator_segment(eosio::name coopname, const checksum256 &project
     }
     
     // Получаем конфигурацию кооператива для процента координатора
-    auto global_state = Capital::get_global_state(coopname);
+    auto global_state = Capital::State::get_global_state(coopname);
     double referal_percent = global_state.config.coordinator_bonus_percent / 100.0; // Конвертируем из процентов в доли
     
     // Прямой расчет: coordinator_base = Yn * referal_percent / (1 + referal_percent)

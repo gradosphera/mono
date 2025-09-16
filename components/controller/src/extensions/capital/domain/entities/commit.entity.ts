@@ -46,18 +46,18 @@ export class CommitDomainEntity implements IBlockchainSynchronizable, ICommitDat
     this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
-    this.commit_hash = databaseData.commit_hash;
+    this.commit_hash = databaseData.commit_hash.toLowerCase();
     this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
-      if (this.commit_hash != blockchainData.commit_hash) throw new Error('Commit hash mismatch');
+      if (this.commit_hash != blockchainData.commit_hash.toLowerCase()) throw new Error('Commit hash mismatch');
 
       this.id = Number(blockchainData.id);
       this.coopname = blockchainData.coopname;
       this.username = blockchainData.username;
-      this.project_hash = blockchainData.project_hash;
-      this.commit_hash = blockchainData.commit_hash;
+      this.project_hash = blockchainData.project_hash.toLowerCase();
+      this.commit_hash = blockchainData.commit_hash.toLowerCase();
       this.amounts = blockchainData.amounts;
       this.blockchain_status = blockchainData.status;
       this.created_at = blockchainData.created_at;
@@ -113,6 +113,10 @@ export class CommitDomainEntity implements IBlockchainSynchronizable, ICommitDat
     this.block_num = blockNum;
     this.blockchain_status = blockchainData.status;
     this.present = present;
+
+    // Нормализация hash полей
+    if (this.commit_hash) this.commit_hash = this.commit_hash.toLowerCase();
+    if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
   }
 
   /**

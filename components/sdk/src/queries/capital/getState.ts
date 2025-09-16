@@ -1,7 +1,7 @@
 import { configSelector } from '../../selectors'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
-export const name = 'capitalConfig'
+export const name = 'capitalState'
 
 /**
  * Получение конфигурации CAPITAL контракта

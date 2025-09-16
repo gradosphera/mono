@@ -18,7 +18,6 @@ export class CreateProjectInputDTO implements CreateProjectDomainInput {
   project_hash!: string;
 
   @Field(() => String, { description: 'Хэш родительского проекта' })
-  @IsNotEmpty({ message: 'Хэш родительского проекта не должен быть пустым' })
   @IsString({ message: 'Хэш родительского проекта должен быть строкой' })
   parent_hash!: string;
 
@@ -32,9 +31,17 @@ export class CreateProjectInputDTO implements CreateProjectDomainInput {
   @IsString({ message: 'Описание проекта должно быть строкой' })
   description!: string;
 
+  @Field(() => String, { description: 'Приглашение к проекту' })
+  @IsString({ message: 'Приглашение к проекту должно быть строкой' })
+  invite!: string;
+
   @Field(() => String, { description: 'Мета-данные проекта' })
   @IsString({ message: 'Мета-данные проекта должны быть строкой' })
   meta!: string;
+
+  @Field(() => String, { description: 'Данные/шаблон проекта' })
+  @IsString({ message: 'Данные/шаблон проекта должны быть строкой' })
+  data!: string;
 
   @Field(() => Boolean, { description: 'Флаг возможности конвертации в проект' })
   @IsBoolean({ message: 'Флаг возможности конвертации должен быть булевым' })

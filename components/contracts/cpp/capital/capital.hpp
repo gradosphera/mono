@@ -74,14 +74,29 @@ public:
     // Создать проект
     [[eosio::action]]
     void createproj (
-      eosio::name coopname, 
+      eosio::name coopname,
       checksum256 project_hash,
       checksum256 parent_hash,
-      std::string title, 
+      std::string title,
       std::string description,
+      std::string invite,
       std::string meta,
+      std::string data,
       bool can_convert_to_project
     );
+    
+    // Редактировать проект
+    void editproj (
+      eosio::name coopname,
+      checksum256 project_hash,
+      std::string title,
+      std::string description,
+      std::string invite,
+      std::string meta,
+      std::string data,
+      bool can_convert_to_project
+    );
+    
     
     // Открыть проект на приём инвестиций
     [[eosio::action]]

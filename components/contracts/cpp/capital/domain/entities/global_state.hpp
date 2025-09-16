@@ -43,7 +43,7 @@ namespace Capital {
   
   
 
-
+namespace State {
 /**
   * @brief Обновляет глобальное состояние новыми значениями.
   *
@@ -69,5 +69,17 @@ inline global_state get_global_state(name coopname) {
     eosio::check(itr != global_state_inst.end(), "Контракт не инициализирован");
     return *itr;
 }
+
+/**
+ * @brief Проверяет что контракт инициализирован.
+ * 
+ * @param coopname Имя кооператива.
+ */
+inline void is_initialized(name coopname) {
+  global_state_table global_state_inst(_capital, _capital.value);
+  auto itr = global_state_inst.find(coopname.value);
+  eosio::check(itr != global_state_inst.end(), "Контракт не инициализирован");
+}
+}// namespace State
 
 }// namespace Capital

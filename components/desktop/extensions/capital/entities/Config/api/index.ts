@@ -1,10 +1,10 @@
 import { client } from 'src/shared/api/client';
 import { Queries } from '@coopenomics/sdk';
-import type { IGetConfigInput, IConfig } from '../model';
+import type { IGetStateInput, IState } from '../model';
 
-async function loadConfig(data: IGetConfigInput): Promise<IConfig> {
-  const { [Queries.Capital.GetConfig.name]: output } = await client.Query(
-    Queries.Capital.GetConfig.query,
+async function loadState(data: IGetStateInput): Promise<IState> {
+  const { [Queries.Capital.GetState.name]: output } = await client.Query(
+    Queries.Capital.GetState.query,
     {
       variables: {
         data,
@@ -15,5 +15,5 @@ async function loadConfig(data: IGetConfigInput): Promise<IConfig> {
 }
 
 export const api = {
-  loadConfig,
+  loadState,
 };

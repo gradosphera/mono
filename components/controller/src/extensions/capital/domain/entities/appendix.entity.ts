@@ -3,6 +3,7 @@ import type { IAppendixDatabaseData } from '../interfaces/appendix-database.inte
 import type { IAppendixBlockchainData } from '../interfaces/appendix-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
+import { randomUUID } from 'crypto';
 
 /**
  * Доменная сущность приложения
@@ -45,21 +46,22 @@ export class AppendixDomainEntity
    */
   constructor(databaseData: IAppendixDatabaseData, blockchainData?: IAppendixBlockchainData) {
     // Данные из базы данных
-    this._id = databaseData._id;
+
+    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
-    this.appendix_hash = databaseData.appendix_hash;
+    this.appendix_hash = databaseData.appendix_hash.toLowerCase();
     this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
-      if (this.appendix_hash != blockchainData.appendix_hash) throw new Error('Appendix hash mismatch');
+      if (this.appendix_hash != blockchainData.appendix_hash.toLowerCase()) throw new Error('Appendix hash mismatch');
 
       this.id = Number(blockchainData.id);
       this.coopname = blockchainData.coopname;
       this.username = blockchainData.username;
-      this.project_hash = blockchainData.project_hash;
-      this.appendix_hash = blockchainData.appendix_hash;
+      this.project_hash = blockchainData.project_hash.toLowerCase();
+      this.appendix_hash = blockchainData.appendix_hash.toLowerCase();
       this.blockchain_status = blockchainData.status;
       this.created_at = blockchainData.created_at;
       this.appendix = blockchainData.appendix;
@@ -115,6 +117,10 @@ export class AppendixDomainEntity
     this.blockchain_status = blockchainData.status;
     this.block_num = blockNum;
     this.present = present;
+
+    // Нормализация hash полей
+    if (this.appendix_hash) this.appendix_hash = this.appendix_hash.toLowerCase();
+    if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
   }
 
   /**

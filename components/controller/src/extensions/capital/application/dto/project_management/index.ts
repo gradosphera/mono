@@ -5,3 +5,4 @@ export { StartProjectInputDTO } from './start-project-input.dto';
 export { OpenProjectInputDTO } from './open-project-input.dto';
 export { DeleteProjectInputDTO } from './delete-project-input.dto';
 export { CreateProjectInputDTO } from './create-project-input.dto';
+export { EditProjectInputDTO } from './edit-project-input.dto';

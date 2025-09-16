@@ -17,8 +17,14 @@ export interface CreateProjectDomainInput {
   /** Описание проекта */
   description: string;
 
+  /** Приглашение к проекту */
+  invite: string;
+
   /** Мета-данные проекта */
   meta: string;
+
+  /** Данные/шаблон проекта */
+  data: string;
 
   /** Флаг возможности конвертации в проект */
   can_convert_to_project: boolean;

@@ -37,10 +37,10 @@ void capital::capdeclwthd3(name coopname, checksum256 withdraw_hash, std::string
       });
       
       // Обновляем глобальное состояние - возвращаем средства
-      auto state = Capital::get_global_state(coopname);
+      auto state = Capital::State::get_global_state(coopname);
       state.program_membership_distributed -= withdraw->amount;
       state.program_membership_available += withdraw->amount;
-      update_global_state(state);
+      Capital::State::update_global_state(state);
     }
   }
 

@@ -1,7 +1,7 @@
 import { client } from 'src/shared/api/client';
 import { Queries } from '@coopenomics/sdk';
 import type {
-  IProject,
+  IGetProjectOutput,
   IProjectsPagination,
   IProjectWithRelations,
   IGetProjectInput,
@@ -21,7 +21,7 @@ async function loadProjects(
   return output;
 }
 
-async function loadProject(data: IGetProjectInput): Promise<IProject> {
+async function loadProject(data: IGetProjectInput): Promise<IGetProjectOutput> {
   const { [Queries.Capital.GetProject.name]: output } = await client.Query(
     Queries.Capital.GetProject.query,
     {

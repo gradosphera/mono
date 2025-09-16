@@ -27,6 +27,16 @@ export interface CapitalBlockchainPort {
   createProject(data: CapitalContract.Actions.CreateProject.ICreateProject): Promise<TransactResult>;
 
   /**
+   * Получение проекта из CAPITAL контракта по хешу
+   */
+  getProject(coopname: string, projectHash: string): Promise<CapitalContract.Tables.Projects.IProject | null>;
+
+  /**
+   * Редактирование проекта в CAPITAL контракте
+   */
+  editProject(data: CapitalContract.Actions.EditProject.IEditProject): Promise<TransactResult>;
+
+  /**
    * Регистрация вкладчика в CAPITAL контракте
    */
   registerContributor(data: CapitalContract.Actions.RegisterContributor.IRegisterContributor): Promise<TransactResult>;

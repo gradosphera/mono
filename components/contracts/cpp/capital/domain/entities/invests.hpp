@@ -107,7 +107,7 @@ inline std::optional<std::pair<eosio::name, eosio::asset>> get_coordinator_amoun
   
   auto time_since_registration = current_time.sec_since_epoch() - registration_time.sec_since_epoch();
   
-  auto coop_config_seconds = Capital::get_global_state(coopname).config.coordinator_invite_validity_days * 24 * 60 * 60;
+  auto coop_config_seconds = Capital::State::get_global_state(coopname).config.coordinator_invite_validity_days * 24 * 60 * 60;
   if (time_since_registration >= coop_config_seconds) {
       return std::nullopt;
   }

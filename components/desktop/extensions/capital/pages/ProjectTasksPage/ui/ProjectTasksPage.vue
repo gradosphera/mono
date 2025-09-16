@@ -195,11 +195,7 @@ const loadProject = async () => {
         id: 'project-lifecycle-' + projectHash.value,
         component: ProjectLifecycleWidget,
         props: {
-          project: {
-            hash: project.value.project_hash || '',
-            status: project.value.status || '',
-            name: project.value.title || '',
-          },
+          project,
           onProjectUpdated: onProjectUpdated,
         },
         order: 1,

@@ -7,6 +7,7 @@ import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { EventsService } from '~/infrastructure/events/events.service';
 import { ParserInteractor } from '~/domain/parser/interactors/parser.interactor';
 import { config } from '~/config';
+import { sleep } from '~/shared/utils/sleep';
 
 export interface BlockchainEventData {
   type: string;
@@ -103,7 +104,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
    * Выполняет минимальную предварительную фильтрацию, сохраняет в базу и публикует событие во внутреннюю шину
    */
   private async processAction(action: IAction): Promise<void> {
-    this.logger.debug(`Processing action: ${action.name} from ${action.account}: ${JSON.stringify(action.data)}`);
+    this.logger.debug(`Обработка действия: ${action.name} от ${action.account}: ${JSON.stringify(action.data)}`);
 
     // Проверяем, является ли действие исключением
     const isException = this.isActionException(action.account, action.name);
@@ -129,7 +130,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
     const eventName = `action::${action.account}::${action.name}`;
     this.eventsService.emit(eventName, action);
 
-    this.logger.debug(`Action published to event bus: ${eventName} with sequence ${action.global_sequence}`);
+    this.logger.debug(`Действие опубликовано в событийную шину: ${eventName} с sequence ${action.global_sequence}`);
   }
 
   private isActionException(account: string, actionName: string): boolean {
@@ -148,7 +149,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
    * Выполняет минимальную предварительную фильтрацию, сохраняет в базу и публикует событие во внутреннюю шину
    */
   private async processDelta(delta: IDelta): Promise<void> {
-    this.logger.debug(`Processing delta: ${delta.table} from ${delta.code}`);
+    this.logger.debug(`Обработка дельты: ${delta.table} от ${delta.code}`);
 
     if (delta.value?.coopname != config.coopname) {
       return;
@@ -157,7 +158,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
     try {
       // Сохраняем дельту в базу данных через интерактор
       await this.parserInteractor.saveDelta(delta);
-      this.logger.debug(`Delta saved to database: ${delta.code}::${delta.table} with primary_key ${delta.primary_key}`);
+      this.logger.log(`Дельта сохранена в базу: ${delta.code}::${delta.table} с primary_key ${delta.primary_key}`);
     } catch (error: any) {
       this.logger.error(`Failed to save delta ${delta.code}::${delta.table}: ${error.message}`, error.stack);
       throw error; // Перебрасываем ошибку чтобы сообщение не было подтверждено
@@ -167,7 +168,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
     const eventName = `delta::${delta.code}::${delta.table}`;
     this.eventsService.emit(eventName, delta);
 
-    this.logger.debug(`Delta published to event bus: ${eventName} with primary_key ${delta.primary_key}`);
+    this.logger.debug(`Дельта опубликована в событийную шину: ${eventName} с primary_key ${delta.primary_key}`);
   }
 
   /**
@@ -175,7 +176,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
    * Сохраняет форк в базу и публикует событие форка во внутреннюю шину
    */
   private async processFork(block_num: number): Promise<void> {
-    this.logger.debug(`Processing fork at block: ${block_num}`);
+    this.logger.debug(`Обработка форка на блоке: ${block_num}`);
 
     try {
       // Сохраняем форк в базу данных через интерактор
@@ -183,7 +184,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
         chain_id: config.blockchain.id, // Используем chain id из конфига
         block_num: block_num,
       });
-      this.logger.debug(`Fork saved to database at block: ${block_num}`);
+      this.logger.debug(`Форк сохранен в базу данных на блоке: ${block_num}`);
     } catch (error: any) {
       this.logger.error(`Failed to save fork at block ${block_num}: ${error.message}`, error.stack);
       throw error; // Перебрасываем ошибку чтобы сообщение не было подтверждено
@@ -193,6 +194,6 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
     const eventName = `fork::${block_num}`;
     this.eventsService.emit(eventName, { block_num });
 
-    this.logger.debug(`Fork published to event bus: ${eventName}`);
+    this.logger.debug(`Форк опубликован в событийную шину: ${eventName}`);
   }
 }

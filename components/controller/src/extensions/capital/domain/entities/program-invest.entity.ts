@@ -49,17 +49,17 @@ export class ProgramInvestDomainEntity
     this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
-    this.invest_hash = databaseData.invest_hash;
+    this.invest_hash = databaseData.invest_hash.toLowerCase();
     this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
-      if (this.invest_hash != blockchainData.invest_hash) throw new Error('Program invest hash mismatch');
+      if (this.invest_hash != blockchainData.invest_hash.toLowerCase()) throw new Error('Program invest hash mismatch');
 
       this.id = Number(blockchainData.id);
       this.coopname = blockchainData.coopname;
       this.username = blockchainData.username;
-      this.invest_hash = blockchainData.invest_hash;
+      this.invest_hash = blockchainData.invest_hash.toLowerCase();
       this.blockchain_status = blockchainData.status;
       this.invested_at = blockchainData.invested_at;
       this.statement = blockchainData.statement;
@@ -115,6 +115,9 @@ export class ProgramInvestDomainEntity
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
+
+    // Нормализация hash полей
+    if (this.invest_hash) this.invest_hash = this.invest_hash.toLowerCase();
   }
 
   /**

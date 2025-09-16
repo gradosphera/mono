@@ -1,17 +1,12 @@
-import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Float } from '@nestjs/graphql';
 
 /**
- * GraphQL Output DTO для конфигурации CAPITAL контракта
+ * GraphQL DTO для конфигурации CAPITAL контракта
  */
-@ObjectType('CapitalConfig', {
+@ObjectType('CapitalConfigObject', {
   description: 'Конфигурация CAPITAL контракта кооператива',
 })
-export class ConfigOutputDTO {
-  @Field(() => String, {
-    description: 'Название кооператива',
-  })
-  coopname!: string;
-
+export class ConfigDTO {
   @Field(() => Float, {
     description: 'Процент бонуса координатора',
   })
@@ -22,12 +17,12 @@ export class ConfigOutputDTO {
   })
   expense_pool_percent!: number;
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     description: 'Срок действия приглашения координатора в днях',
   })
   coordinator_invite_validity_days!: number;
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     description: 'Период голосования в днях',
   })
   voting_period_in_days!: number;
@@ -41,4 +36,47 @@ export class ConfigOutputDTO {
     description: 'Процент голосования создателей',
   })
   creators_voting_percent!: number;
+}
+
+/**
+ * GraphQL Output DTO для полного состояния CAPITAL контракта
+ */
+@ObjectType('CapitalState', {
+  description: 'Полное состояние CAPITAL контракта кооператива',
+})
+export class StateOutputDTO {
+  @Field(() => String, {
+    description: 'Название кооператива',
+  })
+  coopname!: string;
+
+  @Field(() => String, {
+    description: 'Глобальный пул доступных для аллокации инвестиций в программу',
+  })
+  global_available_invest_pool!: string;
+
+  @Field(() => String, {
+    description: 'Общая сумма членских взносов по программе',
+  })
+  program_membership_funded!: string;
+
+  @Field(() => String, {
+    description: 'Доступная сумма членских взносов по программе',
+  })
+  program_membership_available!: string;
+
+  @Field(() => String, {
+    description: 'Распределенная сумма членских взносов по программе',
+  })
+  program_membership_distributed!: string;
+
+  @Field(() => Float, {
+    description: 'Накопительное вознаграждение на долю в членских взносах',
+  })
+  program_membership_cumulative_reward_per_share?: number;
+
+  @Field(() => ConfigDTO, {
+    description: 'Управляемая конфигурация контракта',
+  })
+  config!: ConfigDTO;
 }

@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue';
+import { ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
 import {
@@ -11,7 +11,7 @@ export type ISetConfigInput = Mutations.Capital.SetConfig.IInput['data'];
 export function useSetConfig() {
   const store = useConfigStore();
 
-  const initialSetConfigInput: ISetConfigInput = {
+  const setConfigInput = ref<ISetConfigInput>({
     config: {
       authors_voting_percent: 0,
       coordinator_bonus_percent: 0,
@@ -21,25 +21,15 @@ export function useSetConfig() {
       voting_period_in_days: 0,
     },
     coopname: '',
-  };
-
-  const setConfigInput = ref<ISetConfigInput>({
-    ...initialSetConfigInput,
   });
-
-  // Универсальная функция для сброса объекта к начальному состоянию
-  function resetInput(input: Ref<ISetConfigInput>, initial: ISetConfigInput) {
-    Object.assign(input.value, initial);
-  }
 
   async function setConfig(data: ISetConfigInput): Promise<ISetConfigOutput> {
     const transaction = await api.setConfig(data);
 
-    // Обновляем конфигурацию после установки
-    await store.loadConfig({ coopname: data.coopname });
+    // Обновляем состояние после установки
+    await store.loadState({ coopname: data.coopname });
 
-    // Сбрасываем setConfigInput после выполнения setConfig
-    resetInput(setConfigInput, initialSetConfigInput);
+    // НЕ сбрасываем setConfigInput автоматически - пусть компонент сам решает
 
     return transaction;
   }

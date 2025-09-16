@@ -9,6 +9,7 @@ import type {
   StartProjectInputDTO,
   OpenProjectInputDTO,
   DeleteProjectInputDTO,
+  EditProjectInputDTO,
 } from '../dto/project_management';
 import { ProjectOutputDTO } from '../dto/project_management/project.dto';
 import { ProjectFilterInputDTO } from '../dto/property_management/project-filter.input';
@@ -28,6 +29,13 @@ export class ProjectManagementService {
    */
   async createProject(data: CreateProjectInputDTO): Promise<TransactResult> {
     return await this.projectManagementInteractor.createProject(data);
+  }
+
+  /**
+   * Редактирование проекта в CAPITAL контракте
+   */
+  async editProject(data: EditProjectInputDTO): Promise<TransactResult> {
+    return await this.projectManagementInteractor.editProject(data);
   }
 
   /**

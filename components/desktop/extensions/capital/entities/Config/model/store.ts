@@ -1,25 +1,25 @@
 import { defineStore } from 'pinia';
 import { ref, Ref } from 'vue';
 import { api } from '../api';
-import type { IConfig, IGetConfigInput } from './types';
+import type { IState, IGetStateInput } from './types';
 
 const namespace = 'configStore';
 
 interface IConfigStore {
-  config: Ref<IConfig | null>;
-  loadConfig: (data: IGetConfigInput) => Promise<void>;
+  state: Ref<IState | null>;
+  loadState: (data: IGetStateInput) => Promise<void>;
 }
 
 export const useConfigStore = defineStore(namespace, (): IConfigStore => {
-  const config = ref<IConfig | null>(null);
+  const state = ref<IState | null>(null);
 
-  const loadConfig = async (data: IGetConfigInput): Promise<void> => {
-    const loadedData = await api.loadConfig(data);
-    config.value = loadedData;
+  const loadState = async (data: IGetStateInput): Promise<void> => {
+    const loadedData = await api.loadState(data);
+    state.value = loadedData;
   };
 
   return {
-    config,
-    loadConfig,
+    state,
+    loadState,
   };
 });

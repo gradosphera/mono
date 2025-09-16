@@ -47,19 +47,20 @@ export class ProjectPropertyDomainEntity
     this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
-    this.property_hash = databaseData.property_hash;
+    this.property_hash = databaseData.property_hash.toLowerCase();
     this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
-      if (this.property_hash != blockchainData.property_hash) throw new Error('Project property hash mismatch');
+      if (this.property_hash != blockchainData.property_hash.toLowerCase())
+        throw new Error('Project property hash mismatch');
 
       this.id = Number(blockchainData.id);
       this.coopname = blockchainData.coopname;
       this.username = blockchainData.username;
       this.blockchain_status = blockchainData.status;
-      this.project_hash = blockchainData.project_hash;
-      this.property_hash = blockchainData.property_hash;
+      this.project_hash = blockchainData.project_hash.toLowerCase();
+      this.property_hash = blockchainData.property_hash.toLowerCase();
       this.property_amount = blockchainData.property_amount;
       this.property_description = blockchainData.property_description;
       this.created_at = blockchainData.created_at;
@@ -115,6 +116,10 @@ export class ProjectPropertyDomainEntity
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
+
+    // Нормализация hash полей
+    if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
+    if (this.property_hash) this.property_hash = this.property_hash.toLowerCase();
   }
 
   /**

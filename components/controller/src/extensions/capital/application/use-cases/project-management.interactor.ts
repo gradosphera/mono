@@ -4,6 +4,7 @@ import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import type { TransactResult } from '@wharfkit/session';
 import type { CreateProjectDomainInput } from '../../domain/actions/create-project-domain-input.interface';
+import type { EditProjectDomainInput } from '../../domain/actions/edit-project-domain-input.interface';
 import type { AddAuthorDomainInput } from '../../domain/actions/add-author-domain-input.interface';
 import type { DeleteProjectDomainInput } from '../../domain/actions/delete-project-domain-input.interface';
 import type { OpenProjectDomainInput } from '../../domain/actions/open-project-domain-input.interface';
@@ -15,6 +16,8 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import type { ProjectFilterInputDTO } from '../dto/property_management/project-filter.input';
+import { CapitalContract } from 'cooptypes';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 /**
  * Интерактор домена для управления проектами CAPITAL контракта
@@ -26,14 +29,63 @@ export class ProjectManagementInteractor {
     @Inject(CAPITAL_BLOCKCHAIN_PORT)
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
     @Inject(PROJECT_REPOSITORY)
-    private readonly projectRepository: ProjectRepository
-  ) {}
+    private readonly projectRepository: ProjectRepository,
+    private readonly logger: WinstonLoggerService
+  ) {
+    this.logger.setContext(ProjectManagementInteractor.name);
+  }
   /**
    * Создание проекта в CAPITAL контракте
    */
   async createProject(data: CreateProjectDomainInput): Promise<TransactResult> {
+    // Вызываем блокчейн порт для создания проекта
+    const transactResult = await this.capitalBlockchainPort.createProject(data);
+
+    try {
+      // Извлекаем данные проекта из блокчейна
+      const blockchainProject = await this.capitalBlockchainPort.getProject(data.coopname, data.project_hash);
+
+      if (!blockchainProject) {
+        this.logger.warn(`Не удалось получить данные проекта ${data.project_hash} из блокчейна после создания`);
+        return transactResult;
+      }
+
+      // Преобразуем документы из блокчейна в доменный формат
+      const processedBlockchainProject: CapitalContract.Tables.Projects.IProject = {
+        ...blockchainProject,
+        // Здесь можно добавить преобразование документов если нужно (а нам сейчас не нужно)
+        // statement: DomainToBlockchainUtils.convertChainDocumentToDomainFormat(blockchainProject.statement),
+      };
+
+      const databaseData = {
+        _id: '', // Будет сгенерирован автоматически
+        id: processedBlockchainProject.id,
+        block_num: 0, // Пока не знаем номер блока, будет обновлено при следующей синхронизации
+        present: true,
+        project_hash: processedBlockchainProject.project_hash,
+      };
+
+      const projectDomainEntity = new ProjectDomainEntity(databaseData, processedBlockchainProject);
+
+      // Сохраняем в базу данных
+      this.logger.log(`Сохранение проекта ${data.project_hash} в базу данных`);
+      await this.projectRepository.create(projectDomainEntity);
+
+      this.logger.log(`Проект ${data.project_hash} успешно создан и сохранен в базу данных`);
+    } catch (error: any) {
+      // Логируем ошибку, но не прерываем выполнение, так как проект уже создан в блокчейне
+      this.logger.error(`Ошибка при сохранении проекта ${data.project_hash} в базу данных: ${error.message}`, error.stack);
+    }
+
+    return transactResult;
+  }
+
+  /**
+   * Редактирование проекта в CAPITAL контракте
+   */
+  async editProject(data: EditProjectDomainInput): Promise<TransactResult> {
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.createProject(data);
+    return await this.capitalBlockchainPort.editProject(data);
   }
   /**
    * Установка мастера проекта CAPITAL контракта

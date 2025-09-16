@@ -102,7 +102,7 @@ namespace Capital::Core::Generation {
     const eosio::asset& plan_expenses
   ) {
     // читаем конфиг
-    auto st = Capital::get_global_state(coopname);
+    auto st = Capital::State::get_global_state(coopname);
     
     plan_pool plan;
     
@@ -205,7 +205,7 @@ namespace Capital::Core::Generation {
   * @brief Функция расчета премий координаторов от инвестиций
   */
   eosio::asset calculate_coordinator_bonus_from_investment(name coopname, const eosio::asset& investment_amount) {
-    auto st = Capital::get_global_state(coopname);
+    auto st = Capital::State::get_global_state(coopname);
     double amount = static_cast<double>(investment_amount.amount);
     eosio::symbol sym = investment_amount.symbol;
     

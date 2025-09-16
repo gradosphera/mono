@@ -7,12 +7,12 @@ namespace Capital::Core {
    * @brief Добавляет средства в глобальный пул доступных инвестиций программы
    */
   void add_program_investment_funds(eosio::name coopname, asset amount) {
-    auto state = Capital::get_global_state(coopname);
+    auto state = Capital::State::get_global_state(coopname);
     
     // Добавляем средства в глобальный пул доступных для аллокации инвестиций
     state.global_available_invest_pool += amount;
 
-    update_global_state(state);
+    Capital::State::update_global_state(state);
   }
 
   /**
@@ -22,7 +22,7 @@ namespace Capital::Core {
    * @param amount Сумма для аллокации
    */
   void allocate_program_investment_to_project(eosio::name coopname, const checksum256 &project_hash, eosio::asset amount) {
-    auto state = Capital::get_global_state(coopname);
+    auto state = Capital::State::get_global_state(coopname);
     
     // Проверяем что в глобальном пуле достаточно средств
     eosio::check(state.global_available_invest_pool >= amount, "Недостаточно средств в глобальном пуле инвестиций");
@@ -42,7 +42,7 @@ namespace Capital::Core {
       
       if (expense_gap.amount > 0) {
         // Рассчитываем процент от инвестиций для пула расходов
-        auto st = Capital::get_global_state(coopname);
+        auto st = Capital::State::get_global_state(coopname);
         eosio::asset potential_to_expense = amount * st.config.expense_pool_percent / 100;
         
         // Но не больше, чем нужно для достижения цели
@@ -67,7 +67,7 @@ namespace Capital::Core {
     
     // Списываем средства из глобального пула
     state.global_available_invest_pool -= amount;
-    update_global_state(state);
+    Capital::State::update_global_state(state);
   }
 
   /**
@@ -93,9 +93,9 @@ namespace Capital::Core {
     });
     
     // Возвращаем средства в глобальный пул
-    auto state = Capital::get_global_state(coopname);
+    auto state = Capital::State::get_global_state(coopname);
     state.global_available_invest_pool += amount;
-    update_global_state(state);
+    Capital::State::update_global_state(state);
   }
 
 } // namespace Capital::Core

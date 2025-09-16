@@ -3,7 +3,7 @@ import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/int
 import type { TransactResult } from '@wharfkit/session';
 import type { SetConfigDomainInput } from '../../domain/actions/set-config-domain-input.interface';
 import type { GetCapitalConfigInputDTO } from '../dto/contract_management/get-config-input.dto';
-import { ConfigOutputDTO } from '../dto/contract_management/config-output.dto';
+import { StateOutputDTO, ConfigDTO } from '../dto/contract_management/config-output.dto';
 
 /**
  * Интерактор домена для управления контрактом CAPITAL
@@ -24,26 +24,36 @@ export class ContractManagementInteractor {
   }
 
   /**
-   * Получение конфигурации CAPITAL контракта
+   * Получение состояния CAPITAL контракта (включая конфигурацию)
    */
-  async getConfig(data: GetCapitalConfigInputDTO): Promise<ConfigOutputDTO | null> {
+  async getState(data: GetCapitalConfigInputDTO): Promise<StateOutputDTO | null> {
     // Получаем состояние из блокчейна (включая конфигурацию)
     const blockchainState = await this.capitalBlockchainPort.getConfig(data.coopname);
+    console.log('blockchainState', blockchainState);
 
-    // Извлекаем конфигурацию из состояния
-    const config = blockchainState?.config;
+    if (!blockchainState) {
+      return null;
+    }
 
-    // Конвертируем в DTO
-    return config
-      ? {
-          coopname: data.coopname,
-          coordinator_bonus_percent: config.coordinator_bonus_percent,
-          expense_pool_percent: config.expense_pool_percent,
-          coordinator_invite_validity_days: config.coordinator_invite_validity_days,
-          voting_period_in_days: config.voting_period_in_days,
-          authors_voting_percent: config.authors_voting_percent,
-          creators_voting_percent: config.creators_voting_percent,
-        }
-      : null;
+    // Конвертируем конфигурацию в DTO
+    const configDto: ConfigDTO = {
+      coordinator_bonus_percent: blockchainState.config.coordinator_bonus_percent,
+      expense_pool_percent: blockchainState.config.expense_pool_percent,
+      coordinator_invite_validity_days: blockchainState.config.coordinator_invite_validity_days,
+      voting_period_in_days: blockchainState.config.voting_period_in_days,
+      authors_voting_percent: blockchainState.config.authors_voting_percent,
+      creators_voting_percent: blockchainState.config.creators_voting_percent,
+    };
+
+    // Возвращаем полный state
+    return {
+      coopname: blockchainState.coopname,
+      global_available_invest_pool: blockchainState.global_available_invest_pool,
+      program_membership_funded: blockchainState.program_membership_funded,
+      program_membership_available: blockchainState.program_membership_available,
+      program_membership_distributed: blockchainState.program_membership_distributed,
+      program_membership_cumulative_reward_per_share: blockchainState.program_membership_cumulative_reward_per_share,
+      config: configDto,
+    };
   }
 }

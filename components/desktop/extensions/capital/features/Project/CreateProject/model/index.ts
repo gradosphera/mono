@@ -20,6 +20,8 @@ export function useCreateProject() {
     can_convert_to_project: false,
     meta: '',
     project_hash: '',
+    data: '',
+    invite: '',
   };
 
   const createProjectInput = ref<ICreateProjectInput>({
@@ -39,8 +41,15 @@ export function useCreateProject() {
   ): Promise<ICreateProjectOutput> {
     const transaction = await api.createProject(data);
 
-    // Обновляем список проектов после создания
-    await store.loadProjects({});
+    // Получаем данные только что созданного проекта
+    await store.loadProject({
+      hash: data.project_hash,
+    });
+    console.log('store.project', store.project, data);
+    // Добавляем проект в начало списка без перезагрузки всего списка
+    if (store.project) {
+      store.addProjectToList(store.project);
+    }
 
     // Сбрасываем createProjectInput после выполнения createProject
     resetInput(createProjectInput, initialCreateProjectInput);

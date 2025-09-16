@@ -4,7 +4,7 @@ div
     div
       // Таблица проектов
       q-table(
-        :rows='projects?.items || []',
+        :rows='projectStore.projects?.items || []',
         :columns='columns',
         row-key='project_hash',
         :loading='loading',
@@ -42,7 +42,7 @@ div
     q-card-actions(align='center')
       q-pagination(
         v-model='pagination.page',
-        :max='Math.ceil((projects?.totalCount || 0) / pagination.rowsPerPage)',
+        :max='Math.ceil((projectStore.projects?.totalCount || 0) / pagination.rowsPerPage)',
         :max-pages='5',
         direction-links,
         boundary-links,
@@ -62,7 +62,6 @@ import {
 } from 'app/extensions/capital/shared/lib/projectStatus';
 import { useHeaderActions } from 'src/shared/hooks';
 import { CreateProjectButton } from 'app/extensions/capital/features/Project/CreateProject';
-import type { IProjectsPagination } from 'app/extensions/capital/entities/Project/model/types';
 
 const router = useRouter();
 const projectStore = useProjectStore();
@@ -72,7 +71,6 @@ const { info } = useSystemStore();
 const { registerAction } = useHeaderActions();
 
 const loading = ref(false);
-const projects = ref<IProjectsPagination | null>(null);
 
 // Определяем столбцы таблицы
 const columns = [
@@ -137,7 +135,6 @@ const loadProjects = async () => {
         descending: pagination.value.descending,
       },
     });
-    projects.value = projectStore.projects;
   } catch (error) {
     console.error('Ошибка при загрузке проектов:', error);
     FailAlert('Не удалось загрузить список проектов');

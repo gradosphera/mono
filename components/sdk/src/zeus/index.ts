@@ -1874,11 +1874,9 @@ export type ValueTypes = {
 	username?: string | undefined | null | Variable<any, string>
 };
 	/** Конфигурация CAPITAL контракта кооператива */
-["CapitalConfig"]: AliasType<{
+["CapitalConfigObject"]: AliasType<{
 	/** Процент голосования авторов */
 	authors_voting_percent?:boolean | `@${string}`,
-	/** Название кооператива */
-	coopname?:boolean | `@${string}`,
 	/** Процент бонуса координатора */
 	coordinator_bonus_percent?:boolean | `@${string}`,
 	/** Срок действия приглашения координатора в днях */
@@ -2270,6 +2268,24 @@ export type ValueTypes = {
 	total_amount?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Полное состояние CAPITAL контракта кооператива */
+["CapitalState"]: AliasType<{
+	/** Управляемая конфигурация контракта */
+	config?:ValueTypes["CapitalConfigObject"],
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Глобальный пул доступных для аллокации инвестиций в программу */
+	global_available_invest_pool?:boolean | `@${string}`,
+	/** Доступная сумма членских взносов по программе */
+	program_membership_available?:boolean | `@${string}`,
+	/** Накопительное вознаграждение на долю в членских взносах */
+	program_membership_cumulative_reward_per_share?:boolean | `@${string}`,
+	/** Распределенная сумма членских взносов по программе */
+	program_membership_distributed?:boolean | `@${string}`,
+	/** Общая сумма членских взносов по программе */
+	program_membership_funded?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** История (критерий выполнения) в системе CAPITAL */
@@ -2760,8 +2776,12 @@ export type ValueTypes = {
 	can_convert_to_project: boolean | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
+	/** Данные/шаблон проекта */
+	data: string | Variable<any, string>,
 	/** Описание проекта */
 	description: string | Variable<any, string>,
+	/** Приглашение к проекту */
+	invite: string | Variable<any, string>,
 	/** Мета-данные проекта */
 	meta: string | Variable<any, string>,
 	/** Хэш родительского проекта */
@@ -3074,6 +3094,24 @@ export type ValueTypes = {
 	short_name: string | Variable<any, string>,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string | Variable<any, string>
+};
+	["EditProjectInput"]: {
+	/** Флаг возможности конвертации в проект */
+	can_convert_to_project?: boolean | undefined | null | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Новые данные/шаблон проекта */
+	data: string | Variable<any, string>,
+	/** Новое описание проекта */
+	description: string | Variable<any, string>,
+	/** Новое приглашение к проекту */
+	invite: string | Variable<any, string>,
+	/** Новые мета-данные проекта */
+	meta: string | Variable<any, string>,
+	/** Хэш проекта для редактирования */
+	project_hash: string | Variable<any, string>,
+	/** Новое название проекта */
+	title: string | Variable<any, string>
 };
 	["Entrepreneur"]: AliasType<{
 	/** Дата рождения */
@@ -3854,6 +3892,7 @@ capitalCreateProjectInvest?: [{	data: ValueTypes["CreateProjectInvestInput"] | V
 capitalCreateProjectProperty?: [{	data: ValueTypes["CreateProjectPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateStory?: [{	data: ValueTypes["CreateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
 capitalDeleteProject?: [{	data: ValueTypes["DeleteProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalEditProject?: [{	data: ValueTypes["EditProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProject?: [{	data: ValueTypes["FundProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalImportContributor?: [{	data: ValueTypes["ImportContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -4584,7 +4623,6 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 };
 	["Query"]: AliasType<{
 capitalCommits?: [{	filter?: ValueTypes["CapitalCommitFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCommitsPaginationResult"]],
-capitalConfig?: [{	data: ValueTypes["GetCapitalConfigInput"] | Variable<any, string>},ValueTypes["CapitalConfig"]],
 capitalContributor?: [{	data: ValueTypes["GetContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
 capitalContributors?: [{	filter?: ValueTypes["CapitalContributorFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalContributorsPaginationResult"]],
 capitalCycles?: [{	filter?: ValueTypes["CapitalCycleFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCyclesPaginationResult"]],
@@ -4602,6 +4640,7 @@ capitalProjectWithRelations?: [{	data: ValueTypes["GetProjectWithRelationsInput"
 capitalProjects?: [{	filter?: ValueTypes["CapitalProjectFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalProjectsPaginationResult"]],
 capitalResult?: [{	data: ValueTypes["GetResultInput"] | Variable<any, string>},ValueTypes["CapitalResult"]],
 capitalResults?: [{	filter?: ValueTypes["ResultFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalResultsPaginationResult"]],
+capitalState?: [{	data: ValueTypes["GetCapitalConfigInput"] | Variable<any, string>},ValueTypes["CapitalState"]],
 capitalStories?: [{	filter?: ValueTypes["CapitalStoryFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalStoriesPaginationResult"]],
 capitalVote?: [{	data: ValueTypes["GetVoteInput"] | Variable<any, string>},ValueTypes["CapitalVote"]],
 capitalVotes?: [{	filter?: ValueTypes["VoteFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalVotesPaginationResult"]],
@@ -6689,11 +6728,9 @@ export type ResolverInputTypes = {
 	username?: string | undefined | null
 };
 	/** Конфигурация CAPITAL контракта кооператива */
-["CapitalConfig"]: AliasType<{
+["CapitalConfigObject"]: AliasType<{
 	/** Процент голосования авторов */
 	authors_voting_percent?:boolean | `@${string}`,
-	/** Название кооператива */
-	coopname?:boolean | `@${string}`,
 	/** Процент бонуса координатора */
 	coordinator_bonus_percent?:boolean | `@${string}`,
 	/** Срок действия приглашения координатора в днях */
@@ -7085,6 +7122,24 @@ export type ResolverInputTypes = {
 	total_amount?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Полное состояние CAPITAL контракта кооператива */
+["CapitalState"]: AliasType<{
+	/** Управляемая конфигурация контракта */
+	config?:ResolverInputTypes["CapitalConfigObject"],
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Глобальный пул доступных для аллокации инвестиций в программу */
+	global_available_invest_pool?:boolean | `@${string}`,
+	/** Доступная сумма членских взносов по программе */
+	program_membership_available?:boolean | `@${string}`,
+	/** Накопительное вознаграждение на долю в членских взносах */
+	program_membership_cumulative_reward_per_share?:boolean | `@${string}`,
+	/** Распределенная сумма членских взносов по программе */
+	program_membership_distributed?:boolean | `@${string}`,
+	/** Общая сумма членских взносов по программе */
+	program_membership_funded?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** История (критерий выполнения) в системе CAPITAL */
@@ -7575,8 +7630,12 @@ export type ResolverInputTypes = {
 	can_convert_to_project: boolean,
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Данные/шаблон проекта */
+	data: string,
 	/** Описание проекта */
 	description: string,
+	/** Приглашение к проекту */
+	invite: string,
 	/** Мета-данные проекта */
 	meta: string,
 	/** Хэш родительского проекта */
@@ -7889,6 +7948,24 @@ export type ResolverInputTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
+};
+	["EditProjectInput"]: {
+	/** Флаг возможности конвертации в проект */
+	can_convert_to_project?: boolean | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Новые данные/шаблон проекта */
+	data: string,
+	/** Новое описание проекта */
+	description: string,
+	/** Новое приглашение к проекту */
+	invite: string,
+	/** Новые мета-данные проекта */
+	meta: string,
+	/** Хэш проекта для редактирования */
+	project_hash: string,
+	/** Новое название проекта */
+	title: string
 };
 	["Entrepreneur"]: AliasType<{
 	/** Дата рождения */
@@ -8669,6 +8746,7 @@ capitalCreateProjectInvest?: [{	data: ResolverInputTypes["CreateProjectInvestInp
 capitalCreateProjectProperty?: [{	data: ResolverInputTypes["CreateProjectPropertyInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateStory?: [{	data: ResolverInputTypes["CreateStoryInput"]},ResolverInputTypes["CapitalStory"]],
 capitalDeleteProject?: [{	data: ResolverInputTypes["DeleteProjectInput"]},ResolverInputTypes["Transaction"]],
+capitalEditProject?: [{	data: ResolverInputTypes["EditProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProject?: [{	data: ResolverInputTypes["FundProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalImportContributor?: [{	data: ResolverInputTypes["ImportContributorInput"]},ResolverInputTypes["Transaction"]],
@@ -9401,7 +9479,6 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 };
 	["Query"]: AliasType<{
 capitalCommits?: [{	filter?: ResolverInputTypes["CapitalCommitFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCommitsPaginationResult"]],
-capitalConfig?: [{	data: ResolverInputTypes["GetCapitalConfigInput"]},ResolverInputTypes["CapitalConfig"]],
 capitalContributor?: [{	data: ResolverInputTypes["GetContributorInput"]},ResolverInputTypes["CapitalContributor"]],
 capitalContributors?: [{	filter?: ResolverInputTypes["CapitalContributorFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalContributorsPaginationResult"]],
 capitalCycles?: [{	filter?: ResolverInputTypes["CapitalCycleFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCyclesPaginationResult"]],
@@ -9419,6 +9496,7 @@ capitalProjectWithRelations?: [{	data: ResolverInputTypes["GetProjectWithRelatio
 capitalProjects?: [{	filter?: ResolverInputTypes["CapitalProjectFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalProjectsPaginationResult"]],
 capitalResult?: [{	data: ResolverInputTypes["GetResultInput"]},ResolverInputTypes["CapitalResult"]],
 capitalResults?: [{	filter?: ResolverInputTypes["ResultFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalResultsPaginationResult"]],
+capitalState?: [{	data: ResolverInputTypes["GetCapitalConfigInput"]},ResolverInputTypes["CapitalState"]],
 capitalStories?: [{	filter?: ResolverInputTypes["CapitalStoryFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalStoriesPaginationResult"]],
 capitalVote?: [{	data: ResolverInputTypes["GetVoteInput"]},ResolverInputTypes["CapitalVote"]],
 capitalVotes?: [{	filter?: ResolverInputTypes["VoteFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalVotesPaginationResult"]],
@@ -11490,11 +11568,9 @@ export type ModelTypes = {
 	username?: string | undefined | null
 };
 	/** Конфигурация CAPITAL контракта кооператива */
-["CapitalConfig"]: {
+["CapitalConfigObject"]: {
 		/** Процент голосования авторов */
 	authors_voting_percent: number,
-	/** Название кооператива */
-	coopname: string,
 	/** Процент бонуса координатора */
 	coordinator_bonus_percent: number,
 	/** Срок действия приглашения координатора в днях */
@@ -11877,6 +11953,23 @@ export type ModelTypes = {
 	total_amount?: number | undefined | null,
 	/** Имя пользователя */
 	username?: string | undefined | null
+};
+	/** Полное состояние CAPITAL контракта кооператива */
+["CapitalState"]: {
+		/** Управляемая конфигурация контракта */
+	config: ModelTypes["CapitalConfigObject"],
+	/** Название кооператива */
+	coopname: string,
+	/** Глобальный пул доступных для аллокации инвестиций в программу */
+	global_available_invest_pool: string,
+	/** Доступная сумма членских взносов по программе */
+	program_membership_available: string,
+	/** Накопительное вознаграждение на долю в членских взносах */
+	program_membership_cumulative_reward_per_share: number,
+	/** Распределенная сумма членских взносов по программе */
+	program_membership_distributed: string,
+	/** Общая сумма членских взносов по программе */
+	program_membership_funded: string
 };
 	/** История (критерий выполнения) в системе CAPITAL */
 ["CapitalStory"]: {
@@ -12358,8 +12451,12 @@ export type ModelTypes = {
 	can_convert_to_project: boolean,
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Данные/шаблон проекта */
+	data: string,
 	/** Описание проекта */
 	description: string,
+	/** Приглашение к проекту */
+	invite: string,
 	/** Мета-данные проекта */
 	meta: string,
 	/** Хэш родительского проекта */
@@ -12659,6 +12756,24 @@ export type ModelTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
+};
+	["EditProjectInput"]: {
+	/** Флаг возможности конвертации в проект */
+	can_convert_to_project?: boolean | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Новые данные/шаблон проекта */
+	data: string,
+	/** Новое описание проекта */
+	description: string,
+	/** Новое приглашение к проекту */
+	invite: string,
+	/** Новые мета-данные проекта */
+	meta: string,
+	/** Хэш проекта для редактирования */
+	project_hash: string,
+	/** Новое название проекта */
+	title: string
 };
 	["Entrepreneur"]: {
 		/** Дата рождения */
@@ -13433,6 +13548,8 @@ export type ModelTypes = {
 	capitalCreateStory: ModelTypes["CapitalStory"],
 	/** Удаление проекта в CAPITAL контракте */
 	capitalDeleteProject: ModelTypes["Transaction"],
+	/** Редактирование проекта в CAPITAL контракте */
+	capitalEditProject: ModelTypes["Transaction"],
 	/** Финансирование программы CAPITAL контракта */
 	capitalFundProgram: ModelTypes["Transaction"],
 	/** Финансирование проекта CAPITAL контракта */
@@ -14210,8 +14327,6 @@ export type ModelTypes = {
 	["Query"]: {
 		/** Получение списка коммитов кооператива с фильтрацией */
 	capitalCommits: ModelTypes["PaginatedCapitalCommitsPaginationResult"],
-	/** Получение конфигурации CAPITAL контракта кооператива */
-	capitalConfig?: ModelTypes["CapitalConfig"] | undefined | null,
 	/** Получение вкладчика по внутреннему ID базы данных */
 	capitalContributor?: ModelTypes["CapitalContributor"] | undefined | null,
 	/** Получение списка вкладчиков кооператива с фильтрацией */
@@ -14246,6 +14361,8 @@ export type ModelTypes = {
 	capitalResult?: ModelTypes["CapitalResult"] | undefined | null,
 	/** Получение списка результатов кооператива с фильтрацией */
 	capitalResults: ModelTypes["PaginatedCapitalResultsPaginationResult"],
+	/** Получение полного состояния CAPITAL контракта кооператива */
+	capitalState?: ModelTypes["CapitalState"] | undefined | null,
 	/** Получение списка историй кооператива с фильтрацией */
 	capitalStories: ModelTypes["PaginatedCapitalStoriesPaginationResult"],
 	/** Получение голоса по внутреннему ID базы данных */
@@ -15073,23 +15190,23 @@ export type ModelTypes = {
 };
 	["Transaction"]: {
 		/** Блокчейн, который использовался */
-	chain: ModelTypes["JSONObject"],
+	chain?: ModelTypes["JSON"] | undefined | null,
 	/** Запрос на подписание транзакции */
-	request: ModelTypes["JSONObject"],
+	request?: ModelTypes["JSON"] | undefined | null,
 	/** Разрешенный запрос на подписание транзакции */
-	resolved?: ModelTypes["JSONObject"] | undefined | null,
+	resolved?: ModelTypes["JSON"] | undefined | null,
 	/** Ответ от API после отправки транзакции (если был выполнен бродкаст) */
-	response?: ModelTypes["JSONObject"] | undefined | null,
+	response?: ModelTypes["JSON"] | undefined | null,
 	/** Возвращаемые значения после выполнения транзакции */
-	returns: ModelTypes["JSONObject"],
+	returns?: ModelTypes["JSON"] | undefined | null,
 	/** Ревизии транзакции, измененные плагинами в ESR формате */
-	revisions: ModelTypes["JSONObject"],
+	revisions?: ModelTypes["JSON"] | undefined | null,
 	/** Подписи транзакции */
-	signatures: ModelTypes["JSONObject"],
+	signatures?: ModelTypes["JSON"] | undefined | null,
 	/** Авторизованный подписант */
-	signer: ModelTypes["JSONObject"],
+	signer?: ModelTypes["JSON"] | undefined | null,
 	/** Итоговая транзакция */
-	transaction?: ModelTypes["JSONObject"] | undefined | null
+	transaction?: ModelTypes["JSON"] | undefined | null
 };
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
@@ -16327,12 +16444,10 @@ export type GraphQLTypes = {
 	username?: string | undefined | null
 };
 	/** Конфигурация CAPITAL контракта кооператива */
-["CapitalConfig"]: {
-	__typename: "CapitalConfig",
+["CapitalConfigObject"]: {
+	__typename: "CapitalConfigObject",
 	/** Процент голосования авторов */
 	authors_voting_percent: number,
-	/** Название кооператива */
-	coopname: string,
 	/** Процент бонуса координатора */
 	coordinator_bonus_percent: number,
 	/** Срок действия приглашения координатора в днях */
@@ -16724,6 +16839,24 @@ export type GraphQLTypes = {
 	total_amount?: number | undefined | null,
 	/** Имя пользователя */
 	username?: string | undefined | null
+};
+	/** Полное состояние CAPITAL контракта кооператива */
+["CapitalState"]: {
+	__typename: "CapitalState",
+	/** Управляемая конфигурация контракта */
+	config: GraphQLTypes["CapitalConfigObject"],
+	/** Название кооператива */
+	coopname: string,
+	/** Глобальный пул доступных для аллокации инвестиций в программу */
+	global_available_invest_pool: string,
+	/** Доступная сумма членских взносов по программе */
+	program_membership_available: string,
+	/** Накопительное вознаграждение на долю в членских взносах */
+	program_membership_cumulative_reward_per_share: number,
+	/** Распределенная сумма членских взносов по программе */
+	program_membership_distributed: string,
+	/** Общая сумма членских взносов по программе */
+	program_membership_funded: string
 };
 	/** История (критерий выполнения) в системе CAPITAL */
 ["CapitalStory"]: {
@@ -17213,8 +17346,12 @@ export type GraphQLTypes = {
 	can_convert_to_project: boolean,
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Данные/шаблон проекта */
+	data: string,
 	/** Описание проекта */
 	description: string,
+	/** Приглашение к проекту */
+	invite: string,
 	/** Мета-данные проекта */
 	meta: string,
 	/** Хэш родительского проекта */
@@ -17527,6 +17664,24 @@ export type GraphQLTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
+};
+	["EditProjectInput"]: {
+		/** Флаг возможности конвертации в проект */
+	can_convert_to_project?: boolean | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Новые данные/шаблон проекта */
+	data: string,
+	/** Новое описание проекта */
+	description: string,
+	/** Новое приглашение к проекту */
+	invite: string,
+	/** Новые мета-данные проекта */
+	meta: string,
+	/** Хэш проекта для редактирования */
+	project_hash: string,
+	/** Новое название проекта */
+	title: string
 };
 	["Entrepreneur"]: {
 	__typename: "Entrepreneur",
@@ -18327,6 +18482,8 @@ export type GraphQLTypes = {
 	capitalCreateStory: GraphQLTypes["CapitalStory"],
 	/** Удаление проекта в CAPITAL контракте */
 	capitalDeleteProject: GraphQLTypes["Transaction"],
+	/** Редактирование проекта в CAPITAL контракте */
+	capitalEditProject: GraphQLTypes["Transaction"],
 	/** Финансирование программы CAPITAL контракта */
 	capitalFundProgram: GraphQLTypes["Transaction"],
 	/** Финансирование проекта CAPITAL контракта */
@@ -19150,8 +19307,6 @@ export type GraphQLTypes = {
 	__typename: "Query",
 	/** Получение списка коммитов кооператива с фильтрацией */
 	capitalCommits: GraphQLTypes["PaginatedCapitalCommitsPaginationResult"],
-	/** Получение конфигурации CAPITAL контракта кооператива */
-	capitalConfig?: GraphQLTypes["CapitalConfig"] | undefined | null,
 	/** Получение вкладчика по внутреннему ID базы данных */
 	capitalContributor?: GraphQLTypes["CapitalContributor"] | undefined | null,
 	/** Получение списка вкладчиков кооператива с фильтрацией */
@@ -19186,6 +19341,8 @@ export type GraphQLTypes = {
 	capitalResult?: GraphQLTypes["CapitalResult"] | undefined | null,
 	/** Получение списка результатов кооператива с фильтрацией */
 	capitalResults: GraphQLTypes["PaginatedCapitalResultsPaginationResult"],
+	/** Получение полного состояния CAPITAL контракта кооператива */
+	capitalState?: GraphQLTypes["CapitalState"] | undefined | null,
 	/** Получение списка историй кооператива с фильтрацией */
 	capitalStories: GraphQLTypes["PaginatedCapitalStoriesPaginationResult"],
 	/** Получение голоса по внутреннему ID базы данных */
@@ -20033,23 +20190,23 @@ export type GraphQLTypes = {
 	["Transaction"]: {
 	__typename: "Transaction",
 	/** Блокчейн, который использовался */
-	chain: GraphQLTypes["JSONObject"],
+	chain?: GraphQLTypes["JSON"] | undefined | null,
 	/** Запрос на подписание транзакции */
-	request: GraphQLTypes["JSONObject"],
+	request?: GraphQLTypes["JSON"] | undefined | null,
 	/** Разрешенный запрос на подписание транзакции */
-	resolved?: GraphQLTypes["JSONObject"] | undefined | null,
+	resolved?: GraphQLTypes["JSON"] | undefined | null,
 	/** Ответ от API после отправки транзакции (если был выполнен бродкаст) */
-	response?: GraphQLTypes["JSONObject"] | undefined | null,
+	response?: GraphQLTypes["JSON"] | undefined | null,
 	/** Возвращаемые значения после выполнения транзакции */
-	returns: GraphQLTypes["JSONObject"],
+	returns?: GraphQLTypes["JSON"] | undefined | null,
 	/** Ревизии транзакции, измененные плагинами в ESR формате */
-	revisions: GraphQLTypes["JSONObject"],
+	revisions?: GraphQLTypes["JSON"] | undefined | null,
 	/** Подписи транзакции */
-	signatures: GraphQLTypes["JSONObject"],
+	signatures?: GraphQLTypes["JSON"] | undefined | null,
 	/** Авторизованный подписант */
-	signer: GraphQLTypes["JSONObject"],
+	signer?: GraphQLTypes["JSON"] | undefined | null,
 	/** Итоговая транзакция */
-	transaction?: GraphQLTypes["JSONObject"] | undefined | null
+	transaction?: GraphQLTypes["JSON"] | undefined | null
 };
 	["UninstallExtensionInput"]: {
 		/** Фильтр по имени */
@@ -20594,6 +20751,7 @@ type ZEUS_VARIABLES = {
 	["DeltaFiltersInput"]: ValueTypes["DeltaFiltersInput"];
 	["DisputeOnRequestInput"]: ValueTypes["DisputeOnRequestInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
+	["EditProjectInput"]: ValueTypes["EditProjectInput"];
 	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];
 	["ExpenseFilter"]: ValueTypes["ExpenseFilter"];
 	["ExpenseStatus"]: ValueTypes["ExpenseStatus"];

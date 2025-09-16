@@ -50,7 +50,7 @@ export class ProjectWalletDomainEntity
 
       this.id = Number(blockchainData.id);
       this.coopname = blockchainData.coopname;
-      this.project_hash = blockchainData.project_hash;
+      this.project_hash = blockchainData.project_hash.toLowerCase();
       this.username = blockchainData.username;
       this.shares = blockchainData.shares;
       this.last_membership_reward_per_share = blockchainData.last_membership_reward_per_share;
@@ -102,5 +102,8 @@ export class ProjectWalletDomainEntity
     Object.assign(this, blockchainData);
     this.block_num = blockNum;
     this.present = present;
+
+    // Нормализация hash полей
+    if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
   }
 }

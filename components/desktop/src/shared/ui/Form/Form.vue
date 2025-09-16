@@ -27,7 +27,7 @@ const cancel = (): void => {
 </script>
 
 <template lang="pug">
-q-form(@submit.prevent='handlerSubmit')
+q-form.q-gutter-sm(@submit.prevent='handlerSubmit')
   template(#default)
     slot
     .flex

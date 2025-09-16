@@ -293,6 +293,8 @@ describe('тест контракта CAPITAL', () => {
       parent_hash: parentHash,
       title: `Мета-проект ${metaHash.slice(0, 10)}`,
       description: `Описание мета-проекта ${metaHash.slice(0, 10)}`,
+      invite: '',
+      data: '',
       meta: '',
       can_convert_to_project: true,
     }
@@ -334,6 +336,8 @@ describe('тест контракта CAPITAL', () => {
       title: `Компонент-проект ${componentHash.slice(0, 10)}`,
       description: `Описание компонент-проекта ${componentHash.slice(0, 10)}`,
       meta: '',
+      data: '',
+      invite: '',
       can_convert_to_project: true,
     }
 
@@ -1743,6 +1747,8 @@ describe('тест контракта CAPITAL', () => {
       title: `Новый компонент-проект ${newComponentHash.slice(0, 10)}`,
       description: `Описание нового компонент-проекта ${newComponentHash.slice(0, 10)}`,
       meta: '',
+      invite: '',
+      data: '',
       can_convert_to_project: true,
     }
 

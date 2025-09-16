@@ -54,18 +54,18 @@ export class ExpenseDomainEntity
     this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
     this.status = this.mapStatusToDomain(databaseData.status);
     this.block_num = databaseData.block_num;
-    this.expense_hash = databaseData.expense_hash;
+    this.expense_hash = databaseData.expense_hash.toLowerCase();
     this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
-      if (this.expense_hash != blockchainData.expense_hash) throw new Error('Expense hash mismatch');
+      if (this.expense_hash != blockchainData.expense_hash.toLowerCase()) throw new Error('Expense hash mismatch');
 
       this.id = Number(blockchainData.id);
       this.coopname = blockchainData.coopname;
       this.username = blockchainData.username;
-      this.project_hash = blockchainData.project_hash;
-      this.expense_hash = blockchainData.expense_hash;
+      this.project_hash = blockchainData.project_hash.toLowerCase();
+      this.expense_hash = blockchainData.expense_hash.toLowerCase();
       this.fund_id = blockchainData.fund_id;
       this.blockchain_status = blockchainData.status;
       this.amount = blockchainData.amount;
@@ -126,6 +126,10 @@ export class ExpenseDomainEntity
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.block_num = blockNum;
     this.present = present;
+
+    // Нормализация hash полей
+    if (this.expense_hash) this.expense_hash = this.expense_hash.toLowerCase();
+    if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
   }
 
   /**

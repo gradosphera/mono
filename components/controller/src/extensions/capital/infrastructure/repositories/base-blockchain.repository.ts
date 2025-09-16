@@ -33,7 +33,7 @@ export abstract class BaseBlockchainRepository<
    * Найти сущность по кастомному ключу синхронизации
    */
   async findBySyncKey(syncKey: string, syncValue: string): Promise<TDomainEntity | null> {
-    const whereCondition = { [syncKey]: syncValue } as any;
+    const whereCondition = { [syncKey]: syncValue.toLowerCase() } as any;
     const entity = await this.repository.findOne({
       where: whereCondition,
     });
@@ -73,7 +73,7 @@ export abstract class BaseBlockchainRepository<
         _id: '',
         block_num: blockNum,
         present: present,
-        [syncKey]: syncValue, // ключ синхронизации
+        [syncKey]: syncValue.toLowerCase(), // ключ синхронизации
       };
 
       const newEntity = this.createDomainEntity(minimalDatabaseData, blockchainData);
@@ -150,10 +150,10 @@ export abstract class BaseBlockchainRepository<
    * Извлечь значение ключа синхронизации из блокчейн данных
    */
   protected extractSyncValueFromBlockchainData(blockchainData: any, syncKey: string): string {
-    const value = blockchainData[syncKey];
+    const value = blockchainData[syncKey].toLowerCase();
     if (value === null || value === undefined) {
       throw new Error(`Sync key '${syncKey}' not found in blockchain data`);
     }
-    return value.toString();
+    return value.toString().toLowerCase();
   }
 }

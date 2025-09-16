@@ -1,104 +1,70 @@
 <template lang="pug">
 .row.items-center.q-gutter-sm
   // Статус проекта
-  q-chip(
-    :color='getProjectStatusColor(project.status)',
-    text-color='white',
-    dense,
-    :label='getProjectStatusLabel(project.status)'
-  )
 
-  // Разделитель
-  q-separator(vertical)
+  //- p {{ project }}
+  //- q-chip(
+  //-   :color='getProjectStatusColor(project.status)',
+  //-   text-color='white',
+  //-   :label='getProjectStatusLabel(project.status)'
+  //- )
 
   // Кнопки управления проектами
-  Project.StartProject.StartProjectButton(
-    v-if='canStartProject',
-    size='sm',
-    dense
-  )
+  StartProjectButton(size='sm', v-if='canStartProject', :project='project')
 
-  Project.OpenProject.OpenProjectButton(
-    v-if='canOpenProject',
-    size='sm',
-    dense
-  )
+  OpenProjectButton(v-if='canOpenProject', size='sm', :project='project')
 
-  Project.AddAuthor.AddAuthorButton(v-if='canAddAuthor', size='sm', dense)
+  AddAuthorButton(v-if='canAddAuthor', size='sm', :project='project')
 
-  Project.DeleteProject.DeleteProjectButton(
-    v-if='canDeleteProject',
-    size='sm',
-    dense
-  )
+  //- DeleteProjectButton(v-if='canDeleteProject', size='sm', dense)
 
-  Project.FundProject.FundProjectButton(
-    v-if='canFundProject',
-    size='sm',
-    dense
-  )
+  SetMasterButton(v-if='canSetMaster', size='sm', :project='project')
 
-  Project.RefreshProject.RefreshProjectButton(
-    v-if='canRefreshProject',
-    size='sm',
-    dense
-  )
-
-  Project.SetMaster.SetMasterButton(v-if='canSetMaster', size='sm', dense)
-
-  Project.SetPlan.SetPlanButton(v-if='canSetPlan', size='sm', dense)
+  SetPlanButton(v-if='canSetPlan', size='sm', :project='project')
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { Project } from 'app/extensions/capital/features';
-import {
-  getProjectStatusColor,
-  getProjectStatusLabel,
-} from 'app/extensions/capital/shared/lib/projectStatus';
+import { Zeus } from '@coopenomics/sdk';
+import { StartProjectButton } from 'app/extensions/capital/features/Project/StartProject';
+import { OpenProjectButton } from 'app/extensions/capital/features/Project/OpenProject';
+import { AddAuthorButton } from 'app/extensions/capital/features/Project/AddAuthor';
+import { SetMasterButton } from 'app/extensions/capital/features/Project/SetMaster';
+import { SetPlanButton } from 'app/extensions/capital/features/Project/SetPlan';
+import type { IProject } from '../../entities/Project/model';
 
-// Props
-interface Props {
-  project: {
-    hash: string;
-    status: string;
-    name: string;
-  };
-}
+// import {
+//   getProjectStatusColor,
+//   getProjectStatusLabel,
+// } from 'app/extensions/capital/shared/lib/projectStatus';
 
-const props = defineProps<Props>();
+const props = defineProps<{ project: IProject }>();
 
 // Вычисляемые свойства для доступности действий
 const canStartProject = computed(() => {
-  return props.project.status === 'pending' || props.project.status === 'draft';
+  return props.project?.status === Zeus.ProjectStatus.PENDING;
 });
 
 const canOpenProject = computed(() => {
-  return props.project.status === 'active';
+  return props.project?.is_opened === false;
 });
 
 const canAddAuthor = computed(() => {
-  return ['pending', 'active', 'draft'].includes(props.project.status);
-});
-
-const canDeleteProject = computed(() => {
-  return ['pending', 'draft', 'cancelled'].includes(props.project.status);
-});
-
-const canFundProject = computed(() => {
-  return props.project.status === 'active';
-});
-
-const canRefreshProject = computed(() => {
-  return ['active', 'pending'].includes(props.project.status);
+  return [Zeus.ProjectStatus.PENDING, Zeus.ProjectStatus.ACTIVE].includes(
+    props.project?.status as Zeus.ProjectStatus,
+  );
 });
 
 const canSetMaster = computed(() => {
-  return ['pending', 'active', 'draft'].includes(props.project.status);
+  return [Zeus.ProjectStatus.PENDING, Zeus.ProjectStatus.ACTIVE].includes(
+    props.project?.status as Zeus.ProjectStatus,
+  );
 });
 
 const canSetPlan = computed(() => {
-  return ['pending', 'active', 'draft'].includes(props.project.status);
+  return [Zeus.ProjectStatus.PENDING, Zeus.ProjectStatus.ACTIVE].includes(
+    props.project?.status as Zeus.ProjectStatus,
+  );
 });
 </script>
 

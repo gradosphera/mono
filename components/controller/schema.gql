@@ -1341,18 +1341,15 @@ input CapitalCommitFilter {
 }
 
 """Конфигурация CAPITAL контракта кооператива"""
-type CapitalConfig {
+type CapitalConfigObject {
   """Процент голосования авторов"""
   authors_voting_percent: Float!
-
-  """Название кооператива"""
-  coopname: String!
 
   """Процент бонуса координатора"""
   coordinator_bonus_percent: Float!
 
   """Срок действия приглашения координатора в днях"""
-  coordinator_invite_validity_days: Int!
+  coordinator_invite_validity_days: Float!
 
   """Процент голосования создателей"""
   creators_voting_percent: Float!
@@ -1361,7 +1358,7 @@ type CapitalConfig {
   expense_pool_percent: Float!
 
   """Период голосования в днях"""
-  voting_period_in_days: Int!
+  voting_period_in_days: Float!
 }
 
 """Вкладчик кооператива в системе CAPITAL"""
@@ -1899,6 +1896,30 @@ type CapitalResult {
 
   """Имя пользователя"""
   username: String
+}
+
+"""Полное состояние CAPITAL контракта кооператива"""
+type CapitalState {
+  """Управляемая конфигурация контракта"""
+  config: CapitalConfigObject!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Глобальный пул доступных для аллокации инвестиций в программу"""
+  global_available_invest_pool: String!
+
+  """Доступная сумма членских взносов по программе"""
+  program_membership_available: String!
+
+  """Накопительное вознаграждение на долю в членских взносах"""
+  program_membership_cumulative_reward_per_share: Float!
+
+  """Распределенная сумма членских взносов по программе"""
+  program_membership_distributed: String!
+
+  """Общая сумма членских взносов по программе"""
+  program_membership_funded: String!
 }
 
 """История (критерий выполнения) в системе CAPITAL"""
@@ -2616,8 +2637,14 @@ input CreateProjectInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
+  """Данные/шаблон проекта"""
+  data: String!
+
   """Описание проекта"""
   description: String!
+
+  """Приглашение к проекту"""
+  invite: String!
 
   """Мета-данные проекта"""
   meta: String!
@@ -3060,6 +3087,32 @@ input EditBranchInput {
 
   """Имя аккаунта уполномоченного (председателя) кооперативного участка"""
   trustee: String!
+}
+
+input EditProjectInput {
+  """Флаг возможности конвертации в проект"""
+  can_convert_to_project: Boolean
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Новые данные/шаблон проекта"""
+  data: String!
+
+  """Новое описание проекта"""
+  description: String!
+
+  """Новое приглашение к проекту"""
+  invite: String!
+
+  """Новые мета-данные проекта"""
+  meta: String!
+
+  """Хэш проекта для редактирования"""
+  project_hash: String!
+
+  """Новое название проекта"""
+  title: String!
 }
 
 type Entrepreneur {
@@ -4230,6 +4283,9 @@ type Mutation {
 
   """Удаление проекта в CAPITAL контракте"""
   capitalDeleteProject(data: DeleteProjectInput!): Transaction!
+
+  """Редактирование проекта в CAPITAL контракте"""
+  capitalEditProject(data: EditProjectInput!): Transaction!
 
   """Финансирование программы CAPITAL контракта"""
   capitalFundProgram(data: FundProgramInput!): Transaction!
@@ -5430,9 +5486,6 @@ type Query {
   """Получение списка коммитов кооператива с фильтрацией"""
   capitalCommits(filter: CapitalCommitFilter, options: PaginationInput): PaginatedCapitalCommitsPaginationResult!
 
-  """Получение конфигурации CAPITAL контракта кооператива"""
-  capitalConfig(data: GetCapitalConfigInput!): CapitalConfig
-
   """Получение вкладчика по внутреннему ID базы данных"""
   capitalContributor(data: GetContributorInput!): CapitalContributor
 
@@ -5483,6 +5536,9 @@ type Query {
 
   """Получение списка результатов кооператива с фильтрацией"""
   capitalResults(filter: ResultFilter, options: PaginationInput): PaginatedCapitalResultsPaginationResult!
+
+  """Получение полного состояния CAPITAL контракта кооператива"""
+  capitalState(data: GetCapitalConfigInput!): CapitalState
 
   """Получение списка историй кооператива с фильтрацией"""
   capitalStories(filter: CapitalStoryFilter, options: PaginationInput): PaginatedCapitalStoriesPaginationResult!
@@ -6708,31 +6764,31 @@ type Tokens {
 
 type Transaction {
   """Блокчейн, который использовался"""
-  chain: JSONObject!
+  chain: JSON
 
   """Запрос на подписание транзакции"""
-  request: JSONObject!
+  request: JSON
 
   """Разрешенный запрос на подписание транзакции"""
-  resolved: JSONObject
+  resolved: JSON
 
   """Ответ от API после отправки транзакции (если был выполнен бродкаст)"""
-  response: JSONObject
+  response: JSON
 
   """Возвращаемые значения после выполнения транзакции"""
-  returns: JSONObject!
+  returns: JSON
 
   """Ревизии транзакции, измененные плагинами в ESR формате"""
-  revisions: JSONObject!
+  revisions: JSON
 
   """Подписи транзакции"""
-  signatures: JSONObject!
+  signatures: JSON
 
   """Авторизованный подписант"""
-  signer: JSONObject!
+  signer: JSON
 
   """Итоговая транзакция"""
-  transaction: JSONObject
+  transaction: JSON
 }
 
 input UninstallExtensionInput {

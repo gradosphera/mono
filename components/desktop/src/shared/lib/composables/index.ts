@@ -1,1 +1,1 @@
-export { useMeetStatus } from './useMeetStatus'
+export { useMeetStatus } from './useMeetStatus';

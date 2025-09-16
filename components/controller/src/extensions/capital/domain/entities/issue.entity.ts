@@ -44,7 +44,7 @@ export class IssueDomainEntity {
     this.created_by = databaseData.created_by;
     this.creators_ids = databaseData.creators_ids;
     this.submaster_id = databaseData.submaster_id;
-    this.project_hash = databaseData.project_hash;
+    this.project_hash = databaseData.project_hash.toLowerCase();
     this.cycle_id = databaseData.cycle_id;
     this.metadata = databaseData.metadata;
   }
@@ -62,7 +62,7 @@ export class IssueDomainEntity {
     if (data.created_by !== undefined) this.created_by = data.created_by;
     if (data.creators_ids !== undefined) this.creators_ids = data.creators_ids;
     if (data.submaster_id !== undefined) this.submaster_id = data.submaster_id;
-    if (data.project_hash !== undefined) this.project_hash = data.project_hash;
+    if (data.project_hash !== undefined) this.project_hash = data.project_hash.toLowerCase();
     if (data.cycle_id !== undefined) this.cycle_id = data.cycle_id;
     if (data.metadata !== undefined) this.metadata = data.metadata;
   }

@@ -2,15 +2,6 @@
 .q-pa-md
   q-card(flat)
     q-card-section
-      .row.items-center.q-gutter-sm
-        q-icon(name='settings', size='24px')
-        div
-          .text-h6 Конфигурация контракта
-          .text-subtitle2 Настройка параметров кооператива
-
-    q-separator
-
-    q-card-section
       .q-gutter-md
         .config-field
           .field-description
@@ -138,17 +129,18 @@ onMounted(() => {
   setConfigInput.value.coopname = info.coopname;
 });
 
-// Загружаем текущую конфигурацию при монтировании
+// Загружаем текущее состояние при монтировании
 onMounted(async () => {
   try {
-    await configStore.loadConfig({ coopname: info.coopname });
-    if (configStore.config) {
-      // Заполняем форму текущими значениями
-      setConfigInput.value.config = { ...configStore.config };
+    await configStore.loadState({ coopname: info.coopname });
+    console.log('loaded state: ', configStore.state);
+    if (configStore.state?.config) {
+      // Заполняем форму текущими значениями из конфигурации состояния
+      setConfigInput.value.config = { ...configStore.state.config };
     }
   } catch (error) {
-    console.error('Ошибка при загрузке конфигурации:', error);
-    FailAlert('Не удалось загрузить текущую конфигурацию');
+    console.error('Ошибка при загрузке состояния:', error);
+    FailAlert('Не удалось загрузить текущее состояние кооператива');
   }
 });
 
@@ -159,15 +151,16 @@ const handleSave = async () => {
     await setConfig(setConfigInput.value);
     SuccessAlert('Конфигурация успешно сохранена');
 
-    // Перезагружаем конфигурацию после сохранения
-    await configStore.loadConfig({ coopname: info.coopname });
+    // Перезагружаем состояние после сохранения
+    await configStore.loadState({ coopname: info.coopname });
 
-    NotifyAlert('Конфигурация контракта обновлена');
+    // Обновляем форму актуальными значениями из состояния
+    if (configStore.state?.config) {
+      setConfigInput.value.config = { ...configStore.state.config };
+    }
   } catch (error: any) {
     console.error('Ошибка при сохранении конфигурации:', error);
-    FailAlert(
-      `Ошибка при сохранении конфигурации: ${error.message || 'Неизвестная ошибка'}`,
-    );
+    FailAlert(error);
   } finally {
     loading.value = false;
   }
@@ -176,16 +169,16 @@ const handleSave = async () => {
 // Обработчик сброса
 const handleReset = () => {
   // Сбрасываем к значениям из store или к пустым значениям
-  if (configStore.config) {
-    setConfigInput.value.config = { ...configStore.config };
+  if (configStore.state?.config) {
+    setConfigInput.value.config = { ...configStore.state.config };
   } else {
     setConfigInput.value.config = {
-      authors_voting_percent: 0,
-      coordinator_bonus_percent: 0,
-      coordinator_invite_validity_days: 0,
-      creators_voting_percent: 0,
-      expense_pool_percent: 0,
-      voting_period_in_days: 0,
+      authors_voting_percent: 38.2,
+      coordinator_bonus_percent: 5,
+      coordinator_invite_validity_days: 30,
+      creators_voting_percent: 38.2,
+      expense_pool_percent: 100,
+      voting_period_in_days: 2,
     };
   }
 

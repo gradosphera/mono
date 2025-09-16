@@ -55,8 +55,10 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
   
   std::string title; ///< Название проекта
   std::string description; ///< Описание проекта
+  std::string invite; ///< Приглашение к проекту
+  std::string data; ///< Шаблон/данные проекта
   std::string meta; ///< Метаданные проекта
-
+  
   counts_data counts; ///< Счетчики участников проекта
   
   plan_pool plan; ///< Плановые показатели
@@ -137,16 +139,18 @@ namespace Capital::Projects {
 
   /**
    * @brief Создает проект
-   * 
+   *
    * @param coopname Имя кооператива
    * @param project_hash Хэш проекта
    * @param parent_hash Хэш родительского проекта (если есть)
-   * @param title Название проекта  
+   * @param title Название проекта
    * @param description Описание проекта
+   * @param invite Приглашение к проекту
    * @param meta Метаданные проекта
+   * @param data Шаблон/данные проекта
    * @param can_convert_to_project Разрешена ли конвертация в кошелек проекта
    */
-  inline void create_project(eosio::name coopname, const checksum256 &project_hash, const checksum256 &parent_hash, const std::string &title, const std::string &description, const std::string &meta, bool can_convert_to_project) {
+  inline void create_project(eosio::name coopname, const checksum256 &project_hash, const checksum256 &parent_hash, const std::string &title, const std::string &description, const std::string &invite, const std::string &meta, const std::string &data, bool can_convert_to_project) {
     
     project_index projects(_capital, coopname.value);    
     
@@ -158,9 +162,42 @@ namespace Capital::Projects {
       row.coopname = coopname;
       row.title = title;
       row.description = description;
+      row.invite = invite;
       row.meta = meta;
+      row.data = data;
       row.is_planed = false; // Изначально проект не запланирован
       row.can_convert_to_project = can_convert_to_project; // Разрешена ли конвертация в кошелек проекта
+    });
+  }
+
+  /**
+   * @brief Редактирует существующий проект
+   *
+   * @param coopname Имя кооператива
+   * @param project_hash Хэш проекта для редактирования
+   * @param title Новое название проекта
+   * @param description Новое описание проекта
+   * @param invite Новое приглашение к проекту
+   * @param meta Новые метаданные проекта
+   * @param data Новые данные/шаблон проекта
+   * @param can_convert_to_project Разрешена ли конвертация в кошелек данного проекта (nullopt если не изменять)
+   */
+  inline void edit_project(eosio::name coopname, const checksum256 &project_hash, const std::string &title, const std::string &description, const std::string &invite, const std::string &meta, const std::string &data, bool can_convert_to_project) {
+
+    project_index projects(_capital, coopname.value);
+    auto project_hash_index = projects.get_index<"byhash"_n>();
+    auto project_itr = project_hash_index.find(project_hash);
+
+    project_hash_index.modify(project_itr, coopname, [&](auto& row) {
+      // Всегда обновляем строковые поля
+      row.title = title;
+      row.description = description;
+      row.invite = invite;
+      row.meta = meta;
+      row.data = data;
+
+      row.can_convert_to_project = can_convert_to_project;
+      
     });
   }
 
@@ -302,7 +339,7 @@ namespace Capital::Projects {
           
           if (expense_gap.amount > 0) {
               // Рассчитываем процент от инвестиций для пула расходов
-              auto st = Capital::get_global_state(coopname);
+              auto st = Capital::State::get_global_state(coopname);
               eosio::asset potential_to_expense = amount * st.config.expense_pool_percent / 100;
               
               // Но не больше, чем нужно для достижения цели
