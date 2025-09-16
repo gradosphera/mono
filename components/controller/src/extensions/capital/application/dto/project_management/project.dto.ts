@@ -2,12 +2,13 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { ProjectStatus } from '../../../domain/enums/project-status.enum';
 
 /**
- * GraphQL Output DTO для сущности Project
+ * Базовый GraphQL Output DTO для сущности Project
+ * Не содержит рекурсивных полей для избежания циклических зависимостей
  */
-@ObjectType('CapitalProject', {
-  description: 'Проект в системе CAPITAL',
+@ObjectType('BaseCapitalProject', {
+  description: 'Базовый проект в системе CAPITAL',
 })
-export class ProjectOutputDTO {
+export class BaseProjectOutputDTO {
   @Field(() => String, {
     description: 'Внутренний ID базы данных',
   })
@@ -108,4 +109,31 @@ export class ProjectOutputDTO {
   created_at?: string;
 
   // TODO: Добавить поля counts, plan, fact, crps, voting, membership когда будут определены соответствующие DTO
+}
+
+/**
+ * GraphQL Output DTO для проекта-компонента
+ * Наследуется от базового типа без дополнительных полей для избежания рекурсии
+ */
+@ObjectType('CapitalProjectComponent', {
+  description: 'Проект-компонент в системе CAPITAL',
+})
+export class ProjectComponentOutputDTO extends BaseProjectOutputDTO {
+  // Наследуется от BaseProjectOutputDTO без дополнительных полей
+  // Это предотвращает циклические зависимости в GraphQL схеме
+}
+
+/**
+ * GraphQL Output DTO для полного проекта с компонентами
+ * Наследуется от базового типа и добавляет массив компонентов
+ */
+@ObjectType('CapitalProject', {
+  description: 'Проект в системе CAPITAL с компонентами',
+})
+export class ProjectOutputDTO extends BaseProjectOutputDTO {
+  @Field(() => [ProjectComponentOutputDTO], {
+    description: 'Массив проектов-компонентов',
+    defaultValue: [],
+  })
+  components?: ProjectComponentOutputDTO[];
 }

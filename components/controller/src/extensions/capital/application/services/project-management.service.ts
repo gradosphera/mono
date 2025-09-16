@@ -105,6 +105,28 @@ export class ProjectManagementService {
   }
 
   /**
+   * Получение проектов с компонентами с фильтрацией
+   */
+  async getProjectsWithComponents(
+    filter?: ProjectFilterInputDTO,
+    options?: PaginationInputDTO
+  ): Promise<PaginationResult<ProjectOutputDTO>> {
+    // Конвертируем параметры пагинации в доменные
+    const domainOptions: PaginationInputDomainInterface | undefined = options;
+
+    // Получаем результат с пагинацией из домена
+    const result = await this.projectManagementInteractor.getProjectsWithComponents(filter, domainOptions);
+
+    // Конвертируем результат в DTO
+    return {
+      items: result.items as ProjectOutputDTO[],
+      totalCount: result.totalCount,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+    };
+  }
+
+  /**
    * Получение проекта по ID
    */
   async getProjectById(_id: string): Promise<ProjectOutputDTO | null> {
@@ -117,6 +139,14 @@ export class ProjectManagementService {
    */
   async getProjectByHash(hash: string): Promise<ProjectOutputDTO | null> {
     const project = await this.projectManagementInteractor.getProjectByHash(hash);
+    return project as ProjectOutputDTO | null;
+  }
+
+  /**
+   * Получение проекта по хешу с компонентами
+   */
+  async getProjectByHashWithComponents(hash: string): Promise<ProjectOutputDTO | null> {
+    const project = await this.projectManagementInteractor.getProjectByHashWithComponents(hash);
     return project as ProjectOutputDTO | null;
   }
 

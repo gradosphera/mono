@@ -18,6 +18,7 @@ import type {
 import type { ProjectFilterInputDTO } from '../dto/property_management/project-filter.input';
 import { CapitalContract } from 'cooptypes';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
+import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 
 /**
  * Интерактор домена для управления проектами CAPITAL контракта
@@ -148,6 +149,21 @@ export class ProjectManagementInteractor {
   }
 
   /**
+   * Получение проектов с компонентами с фильтрацией и пагинацией
+   */
+  async getProjectsWithComponents(
+    filter?: ProjectFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<ProjectDomainEntity>> {
+    console.log('BEFORE FILTER', filter);
+    if (filter?.parent_hash === '') {
+      filter.parent_hash = DomainToBlockchainUtils.getEmptyHash();
+    }
+    console.log('AFTER FILTER', filter);
+    return await this.projectRepository.findAllPaginatedWithComponents(filter, options);
+  }
+
+  /**
    * Получение проекта по внутреннему ID базы данных
    */
   async getProjectById(_id: string): Promise<ProjectDomainEntity | null> {
@@ -159,6 +175,13 @@ export class ProjectManagementInteractor {
    */
   async getProjectByHash(hash: string): Promise<ProjectDomainEntity | null> {
     return await this.projectRepository.findByHash(hash);
+  }
+
+  /**
+   * Получение проекта по хешу с компонентами
+   */
+  async getProjectByHashWithComponents(hash: string): Promise<ProjectDomainEntity | null> {
+    return await this.projectRepository.findByHashWithComponents(hash);
   }
 
   /**

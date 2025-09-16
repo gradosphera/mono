@@ -1,0 +1,99 @@
+<template lang="pug">
+q-btn(
+  color='primary',
+  @click='showDialog = true',
+  :loading='loading',
+  label='Создать компонент'
+)
+
+q-dialog(v-model='showDialog', @hide='clear')
+  ModalBase(:title='"Создать компонент"')
+    Form.q-pa-md(
+      :handler-submit='handleCreateComponent',
+      :is-submitting='isSubmitting',
+      :button-submit-txt='"Создать"',
+      :button-cancel-txt='"Отмена"',
+      @cancel='clear'
+    )
+      q-input(
+        v-model='formData.title',
+        standout='bg-teal text-white',
+        label='Название компонента',
+        :rules='[(val) => notEmpty(val)]',
+        autocomplete='off'
+      )
+
+      q-input(
+        v-model='formData.description',
+        standout='bg-teal text-white',
+        label='Описание компонента',
+        :rules='[(val) => notEmpty(val)]',
+        autocomplete='off',
+        type='textarea'
+      )
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useCreateComponent } from '../model';
+import { useSystemStore } from 'src/entities/System/model';
+import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
+import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
+import { ModalBase } from 'src/shared/ui/ModalBase';
+import { Form } from 'src/shared/ui/Form';
+import type { IProject } from 'app/extensions/capital/entities/Project/model';
+
+const props = defineProps<{ project: IProject }>();
+
+const system = useSystemStore();
+const { createComponent } = useCreateComponent();
+
+const loading = ref(false);
+const showDialog = ref(false);
+const isSubmitting = ref(false);
+
+const formData = ref({
+  title: '',
+  description: '',
+});
+
+const notEmpty = (val: any) => {
+  return !!val || 'Это поле обязательно для заполнения';
+};
+
+const clear = () => {
+  showDialog.value = false;
+  formData.value = {
+    title: '',
+    description: '',
+  };
+};
+
+const handleCreateComponent = async () => {
+  try {
+    isSubmitting.value = true;
+
+    const projectHash = await generateUniqueHash();
+
+    const inputData = {
+      coopname: system.info.coopname,
+      project_hash: projectHash,
+      parent_hash: props.project.project_hash,
+      title: formData.value.title,
+      description: formData.value.description,
+      meta: JSON.stringify({}),
+      can_convert_to_project: false,
+      data: '',
+      invite: '',
+    };
+
+    await createComponent(inputData);
+    SuccessAlert('Компонент успешно создан');
+    clear();
+  } catch (error) {
+    FailAlert(error);
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+</script>

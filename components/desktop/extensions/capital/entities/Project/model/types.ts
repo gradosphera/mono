@@ -1,9 +1,13 @@
 import type { Queries, Mutations, Zeus } from '@coopenomics/sdk';
 
+// Тип проекта-компонента (без вложенных компонентов)
+export type IProjectComponent = Zeus.ModelTypes['CapitalProjectComponent'];
+
+// Тип полного проекта (с компонентами)
+export type IProject = Zeus.ModelTypes['CapitalProject'];
+
 export type IGetProjectOutput =
   Queries.Capital.GetProject.IOutput[typeof Queries.Capital.GetProject.name];
-
-export type IProject = Zeus.ModelTypes['CapitalProject'];
 
 export type IProjectsPagination =
   Queries.Capital.GetProjects.IOutput[typeof Queries.Capital.GetProjects.name];

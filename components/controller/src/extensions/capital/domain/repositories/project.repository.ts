@@ -20,6 +20,12 @@ export interface ProjectRepository extends IBlockchainSyncRepository<ProjectDoma
     filter?: ProjectFilterInputDTO,
     options?: PaginationInputDomainInterface
   ): Promise<PaginationResultDomainInterface<ProjectDomainEntity>>;
+  findAllPaginatedWithComponents(
+    filter?: ProjectFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<ProjectDomainEntity>>;
+  findByHashWithComponents(hash: string): Promise<ProjectDomainEntity | null>;
+  findComponentsByParentHash(parentHash: string): Promise<ProjectDomainEntity[]>;
   update(entity: ProjectDomainEntity): Promise<ProjectDomainEntity>;
   delete(_id: string): Promise<void>;
 }

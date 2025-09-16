@@ -1769,8 +1769,65 @@ type CapitalProgramInvest {
   username: String
 }
 
-"""Проект в системе CAPITAL"""
+"""Проект в системе CAPITAL с компонентами"""
 type CapitalProject {
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Номер блока последнего обновления"""
+  block_num: Int
+
+  """Статус из блокчейна"""
+  blockchain_status: String
+
+  """Можно ли конвертировать в проект"""
+  can_convert_to_project: Boolean
+
+  """Массив проектов-компонентов"""
+  components: [CapitalProjectComponent!]!
+
+  """Название кооператива"""
+  coopname: String
+
+  """Дата создания"""
+  created_at: String
+
+  """Описание проекта"""
+  description: String
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Открыт ли проект"""
+  is_opened: Boolean
+
+  """Запланирован ли проект"""
+  is_planed: Boolean
+
+  """Мастер проекта"""
+  master: String
+
+  """Мета-информация проекта"""
+  meta: String
+
+  """Хеш родительского проекта"""
+  parent_hash: String
+
+  """Существует ли запись в блокчейне"""
+  present: Boolean!
+
+  """Хеш проекта"""
+  project_hash: String!
+
+  """Статус проекта"""
+  status: ProjectStatus!
+
+  """Название проекта"""
+  title: String
+}
+
+"""Проект-компонент в системе CAPITAL"""
+type CapitalProjectComponent {
   """Внутренний ID базы данных"""
   _id: String!
 
@@ -3682,6 +3739,9 @@ input GetProgramInvestInput {
 input GetProjectInput {
   """Хеш проекта"""
   hash: String!
+
+  """Хеш родительского проекта для фильтрации компонентов"""
+  parent_hash: String
 }
 
 input GetProjectWithRelationsInput {
@@ -5522,13 +5582,13 @@ type Query {
   """Получение списка программных инвестиций кооператива с фильтрацией"""
   capitalProgramInvests(filter: CapitalInvestFilter, options: PaginationInput): PaginatedCapitalProgramInvestsPaginationResult!
 
-  """Получение проекта по внутреннему ID базы данных"""
+  """Получение проекта по хешу с компонентами"""
   capitalProject(data: GetProjectInput!): CapitalProject
 
   """Получение проекта с полными отношениями по хешу проекта"""
   capitalProjectWithRelations(data: GetProjectWithRelationsInput!): CapitalProject
 
-  """Получение списка проектов кооператива с фильтрацией"""
+  """Получение списка проектов кооператива с фильтрацией и компонентами"""
   capitalProjects(filter: CapitalProjectFilter, options: PaginationInput): PaginatedCapitalProjectsPaginationResult!
 
   """Получение результата по внутреннему ID базы данных"""

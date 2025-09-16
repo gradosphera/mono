@@ -38,6 +38,10 @@ div
           q-td(:props='props')
             div {{ formatDate(props.value) }}
 
+        template(#body-cell-actions='props')
+          q-td(:props='props')
+            ProjectMenuWidget(:project='props.row')
+
     // Пагинация
     q-card-actions(align='center')
       q-pagination(
@@ -62,6 +66,7 @@ import {
 } from 'app/extensions/capital/shared/lib/projectStatus';
 import { useHeaderActions } from 'src/shared/hooks';
 import { CreateProjectButton } from 'app/extensions/capital/features/Project/CreateProject';
+import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
 
 const router = useRouter();
 const projectStore = useProjectStore();
@@ -109,6 +114,13 @@ const columns = [
     field: 'created_at' as const,
     sortable: true,
   },
+  {
+    name: 'actions',
+    label: '',
+    align: 'center' as const,
+    field: '' as const,
+    sortable: false,
+  },
 ];
 
 // Пагинация
@@ -125,8 +137,9 @@ const loadProjects = async () => {
   loading.value = true;
   try {
     await projectStore.loadProjects({
-      data: {
+      filter: {
         coopname: info.coopname,
+        parent_hash: '',
       },
       pagination: {
         page: pagination.value.page,
@@ -135,6 +148,7 @@ const loadProjects = async () => {
         descending: pagination.value.descending,
       },
     });
+    console.log(projectStore.projects?.items);
   } catch (error) {
     console.error('Ошибка при загрузке проектов:', error);
     FailAlert('Не удалось загрузить список проектов');

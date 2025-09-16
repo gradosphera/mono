@@ -164,4 +164,121 @@ export class ProjectTypeormRepository
     // Возвращаем результат с пагинацией
     return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
   }
+
+  /**
+   * Получение проектов с пагинацией и компонентами
+   * Если parent_hash не указан - возвращает проекты верхнего уровня
+   * Если parent_hash указан - фильтрует по нему
+   */
+  async findAllPaginatedWithComponents(
+    filter?: ProjectFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<ProjectDomainEntity>> {
+    // Валидируем параметры пагинации
+    const validatedOptions: PaginationInputDomainInterface = options
+      ? PaginationUtils.validatePaginationOptions(options)
+      : {
+          page: 1,
+          limit: 10,
+          sortBy: undefined,
+          sortOrder: 'ASC' as const,
+        };
+
+    // Получаем параметры для SQL запроса
+    const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
+
+    // Строим условия поиска для проектов верхнего уровня или с указанным parent_hash
+    const where: any = {};
+    if (filter?.coopname) {
+      where.coopname = filter.coopname;
+    }
+    if (filter?.master) {
+      where.master = filter.master;
+    }
+    if (filter?.status) {
+      where.status = filter.status;
+    }
+    if (filter?.project_hash) {
+      where.project_hash = filter.project_hash;
+    }
+    if (filter?.is_opened !== undefined) {
+      where.is_opened = filter.is_opened;
+    }
+    if (filter?.is_planed !== undefined) {
+      where.is_planed = filter.is_planed;
+    }
+
+    // Логика для parent_hash:
+    // - Если parent_hash указан - фильтруем по нему
+    // - Если parent_hash не указан - ищем проекты без parent_hash (проекты верхнего уровня)
+    if (filter?.parent_hash !== undefined) {
+      where.parent_hash = filter.parent_hash;
+    } else {
+      where.parent_hash = null; // Проекты верхнего уровня
+    }
+
+    console.log('where', where);
+    console.log('filter', filter);
+
+    // Получаем общее количество записей
+    const totalCount = await this.repository.count({ where });
+
+    // Получаем записи с пагинацией
+    const orderBy: any = {};
+    if (validatedOptions.sortBy) {
+      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+    } else {
+      orderBy.created_at = 'DESC';
+    }
+
+    const entities = await this.repository.find({
+      where,
+      skip: offset,
+      take: limit,
+      order: orderBy,
+    });
+
+    // Преобразуем в доменные сущности
+    const items = entities.map((entity) => ProjectMapper.toDomain(entity));
+
+    // Для каждого проекта получаем его компоненты
+    for (const project of items) {
+      const components = await this.findComponentsByParentHash(project.project_hash);
+      // Добавляем компоненты к проекту
+      (project as any).components = components;
+    }
+
+    // Возвращаем результат с пагинацией
+    return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
+  }
+
+  /**
+   * Получение проекта по хешу с его компонентами
+   */
+  async findByHashWithComponents(hash: string): Promise<ProjectDomainEntity | null> {
+    const entity = await this.repository.findOneBy({ project_hash: hash });
+    if (!entity) {
+      return null;
+    }
+
+    const project = ProjectMapper.toDomain(entity);
+
+    // Получаем компоненты проекта
+    const components = await this.findComponentsByParentHash(hash);
+    (project as any).components = components;
+
+    return project;
+  }
+
+  /**
+   * Получение компонентов проекта по хешу родительского проекта
+   */
+  async findComponentsByParentHash(parentHash: string): Promise<ProjectDomainEntity[]> {
+    const entities = await this.repository.find({
+      where: { parent_hash: parentHash },
+      order: { created_at: 'DESC' },
+    });
+
+    return entities.map((entity) => ProjectMapper.toDomain(entity));
+  }
 }

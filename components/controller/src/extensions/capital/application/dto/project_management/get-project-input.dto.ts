@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 /**
  * DTO для получения проекта
@@ -9,4 +9,12 @@ export class GetProjectInputDTO {
   @Field(() => String, { description: 'Хеш проекта' })
   @IsString()
   hash!: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Хеш родительского проекта для фильтрации компонентов',
+  })
+  @IsOptional()
+  @IsString()
+  parent_hash?: string;
 }

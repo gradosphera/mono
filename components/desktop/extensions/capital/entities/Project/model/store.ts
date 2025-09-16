@@ -37,10 +37,23 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
 
   const addProjectToList = (projectData: IProject) => {
     if (projects.value) {
-      // Добавляем проект в начало списка
-      projects.value.items = [projectData, ...projects.value.items];
-      // Увеличиваем общее количество
-      projects.value.totalCount += 1;
+      // Ищем существующий проект по _id
+      const existingIndex = projects.value.items.findIndex(
+        (project) => project._id === projectData._id,
+      );
+
+      if (existingIndex !== -1) {
+        // Заменяем существующий проект
+        projects.value.items[existingIndex] = projectData;
+      } else {
+        // Добавляем новый проект в начало списка
+        projects.value.items = [
+          projectData as IProject,
+          ...projects.value.items,
+        ];
+        // Увеличиваем общее количество
+        projects.value.totalCount += 1;
+      }
     }
   };
 

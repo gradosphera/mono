@@ -1,7 +1,7 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 
-const rawProjectSelector = {
+const rawBaseProjectSelector = {
   _id: true,
   id: true,
   block_num: true,
@@ -19,6 +19,11 @@ const rawProjectSelector = {
   description: true,
   meta: true,
   created_at: true,
+}
+
+const rawProjectSelector = {
+  ...rawBaseProjectSelector,
+  components: rawBaseProjectSelector,
 }
 
 // Проверка валидности

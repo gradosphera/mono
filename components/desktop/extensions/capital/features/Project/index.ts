@@ -1,5 +1,6 @@
 // Фичи для работы с проектами
 export * as CreateProject from './CreateProject';
+export * as CreateComponent from './CreateComponent';
 export * as AddAuthor from './AddAuthor';
 export * as ConvertSegment from './ConvertSegment';
 export * as DeleteProject from './DeleteProject';

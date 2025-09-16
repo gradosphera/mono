@@ -2179,8 +2179,48 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Проект в системе CAPITAL */
+	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Номер блока последнего обновления */
+	block_num?:boolean | `@${string}`,
+	/** Статус из блокчейна */
+	blockchain_status?:boolean | `@${string}`,
+	/** Можно ли конвертировать в проект */
+	can_convert_to_project?:boolean | `@${string}`,
+	/** Массив проектов-компонентов */
+	components?:ValueTypes["CapitalProjectComponent"],
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Описание проекта */
+	description?:boolean | `@${string}`,
+	/** ID в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Открыт ли проект */
+	is_opened?:boolean | `@${string}`,
+	/** Запланирован ли проект */
+	is_planed?:boolean | `@${string}`,
+	/** Мастер проекта */
+	master?:boolean | `@${string}`,
+	/** Мета-информация проекта */
+	meta?:boolean | `@${string}`,
+	/** Хеш родительского проекта */
+	parent_hash?:boolean | `@${string}`,
+	/** Существует ли запись в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Статус проекта */
+	status?:boolean | `@${string}`,
+	/** Название проекта */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Проект-компонент в системе CAPITAL */
+["CapitalProjectComponent"]: AliasType<{
 	/** Внутренний ID базы данных */
 	_id?:boolean | `@${string}`,
 	/** Номер блока последнего обновления */
@@ -3497,7 +3537,9 @@ export type ValueTypes = {
 };
 	["GetProjectInput"]: {
 	/** Хеш проекта */
-	hash: string | Variable<any, string>
+	hash: string | Variable<any, string>,
+	/** Хеш родительского проекта для фильтрации компонентов */
+	parent_hash?: string | undefined | null | Variable<any, string>
 };
 	["GetProjectWithRelationsInput"]: {
 	/** Хеш проекта */
@@ -7033,8 +7075,48 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Проект в системе CAPITAL */
+	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: AliasType<{
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Номер блока последнего обновления */
+	block_num?:boolean | `@${string}`,
+	/** Статус из блокчейна */
+	blockchain_status?:boolean | `@${string}`,
+	/** Можно ли конвертировать в проект */
+	can_convert_to_project?:boolean | `@${string}`,
+	/** Массив проектов-компонентов */
+	components?:ResolverInputTypes["CapitalProjectComponent"],
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Описание проекта */
+	description?:boolean | `@${string}`,
+	/** ID в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Открыт ли проект */
+	is_opened?:boolean | `@${string}`,
+	/** Запланирован ли проект */
+	is_planed?:boolean | `@${string}`,
+	/** Мастер проекта */
+	master?:boolean | `@${string}`,
+	/** Мета-информация проекта */
+	meta?:boolean | `@${string}`,
+	/** Хеш родительского проекта */
+	parent_hash?:boolean | `@${string}`,
+	/** Существует ли запись в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Статус проекта */
+	status?:boolean | `@${string}`,
+	/** Название проекта */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Проект-компонент в системе CAPITAL */
+["CapitalProjectComponent"]: AliasType<{
 	/** Внутренний ID базы данных */
 	_id?:boolean | `@${string}`,
 	/** Номер блока последнего обновления */
@@ -8351,7 +8433,9 @@ export type ResolverInputTypes = {
 };
 	["GetProjectInput"]: {
 	/** Хеш проекта */
-	hash: string
+	hash: string,
+	/** Хеш родительского проекта для фильтрации компонентов */
+	parent_hash?: string | undefined | null
 };
 	["GetProjectWithRelationsInput"]: {
 	/** Хеш проекта */
@@ -11865,8 +11949,47 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username?: string | undefined | null
 };
-	/** Проект в системе CAPITAL */
+	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: {
+		/** Внутренний ID базы данных */
+	_id: string,
+	/** Номер блока последнего обновления */
+	block_num?: number | undefined | null,
+	/** Статус из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Можно ли конвертировать в проект */
+	can_convert_to_project?: boolean | undefined | null,
+	/** Массив проектов-компонентов */
+	components: Array<ModelTypes["CapitalProjectComponent"]>,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Дата создания */
+	created_at?: string | undefined | null,
+	/** Описание проекта */
+	description?: string | undefined | null,
+	/** ID в блокчейне */
+	id?: number | undefined | null,
+	/** Открыт ли проект */
+	is_opened?: boolean | undefined | null,
+	/** Запланирован ли проект */
+	is_planed?: boolean | undefined | null,
+	/** Мастер проекта */
+	master?: string | undefined | null,
+	/** Мета-информация проекта */
+	meta?: string | undefined | null,
+	/** Хеш родительского проекта */
+	parent_hash?: string | undefined | null,
+	/** Существует ли запись в блокчейне */
+	present: boolean,
+	/** Хеш проекта */
+	project_hash: string,
+	/** Статус проекта */
+	status: ModelTypes["ProjectStatus"],
+	/** Название проекта */
+	title?: string | undefined | null
+};
+	/** Проект-компонент в системе CAPITAL */
+["CapitalProjectComponent"]: {
 		/** Внутренний ID базы данных */
 	_id: string,
 	/** Номер блока последнего обновления */
@@ -13150,7 +13273,9 @@ export type ModelTypes = {
 };
 	["GetProjectInput"]: {
 	/** Хеш проекта */
-	hash: string
+	hash: string,
+	/** Хеш родительского проекта для фильтрации компонентов */
+	parent_hash?: string | undefined | null
 };
 	["GetProjectWithRelationsInput"]: {
 	/** Хеш проекта */
@@ -14351,11 +14476,11 @@ export type ModelTypes = {
 	capitalProgramInvest?: ModelTypes["CapitalProgramInvest"] | undefined | null,
 	/** Получение списка программных инвестиций кооператива с фильтрацией */
 	capitalProgramInvests: ModelTypes["PaginatedCapitalProgramInvestsPaginationResult"],
-	/** Получение проекта по внутреннему ID базы данных */
+	/** Получение проекта по хешу с компонентами */
 	capitalProject?: ModelTypes["CapitalProject"] | undefined | null,
 	/** Получение проекта с полными отношениями по хешу проекта */
 	capitalProjectWithRelations?: ModelTypes["CapitalProject"] | undefined | null,
-	/** Получение списка проектов кооператива с фильтрацией */
+	/** Получение списка проектов кооператива с фильтрацией и компонентами */
 	capitalProjects: ModelTypes["PaginatedCapitalProjectsPaginationResult"],
 	/** Получение результата по внутреннему ID базы данных */
 	capitalResult?: ModelTypes["CapitalResult"] | undefined | null,
@@ -16749,9 +16874,49 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username?: string | undefined | null
 };
-	/** Проект в системе CAPITAL */
+	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: {
 	__typename: "CapitalProject",
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Номер блока последнего обновления */
+	block_num?: number | undefined | null,
+	/** Статус из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Можно ли конвертировать в проект */
+	can_convert_to_project?: boolean | undefined | null,
+	/** Массив проектов-компонентов */
+	components: Array<GraphQLTypes["CapitalProjectComponent"]>,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Дата создания */
+	created_at?: string | undefined | null,
+	/** Описание проекта */
+	description?: string | undefined | null,
+	/** ID в блокчейне */
+	id?: number | undefined | null,
+	/** Открыт ли проект */
+	is_opened?: boolean | undefined | null,
+	/** Запланирован ли проект */
+	is_planed?: boolean | undefined | null,
+	/** Мастер проекта */
+	master?: string | undefined | null,
+	/** Мета-информация проекта */
+	meta?: string | undefined | null,
+	/** Хеш родительского проекта */
+	parent_hash?: string | undefined | null,
+	/** Существует ли запись в блокчейне */
+	present: boolean,
+	/** Хеш проекта */
+	project_hash: string,
+	/** Статус проекта */
+	status: GraphQLTypes["ProjectStatus"],
+	/** Название проекта */
+	title?: string | undefined | null
+};
+	/** Проект-компонент в системе CAPITAL */
+["CapitalProjectComponent"]: {
+	__typename: "CapitalProjectComponent",
 	/** Внутренний ID базы данных */
 	_id: string,
 	/** Номер блока последнего обновления */
@@ -18067,7 +18232,9 @@ export type GraphQLTypes = {
 };
 	["GetProjectInput"]: {
 		/** Хеш проекта */
-	hash: string
+	hash: string,
+	/** Хеш родительского проекта для фильтрации компонентов */
+	parent_hash?: string | undefined | null
 };
 	["GetProjectWithRelationsInput"]: {
 		/** Хеш проекта */
@@ -19331,11 +19498,11 @@ export type GraphQLTypes = {
 	capitalProgramInvest?: GraphQLTypes["CapitalProgramInvest"] | undefined | null,
 	/** Получение списка программных инвестиций кооператива с фильтрацией */
 	capitalProgramInvests: GraphQLTypes["PaginatedCapitalProgramInvestsPaginationResult"],
-	/** Получение проекта по внутреннему ID базы данных */
+	/** Получение проекта по хешу с компонентами */
 	capitalProject?: GraphQLTypes["CapitalProject"] | undefined | null,
 	/** Получение проекта с полными отношениями по хешу проекта */
 	capitalProjectWithRelations?: GraphQLTypes["CapitalProject"] | undefined | null,
-	/** Получение списка проектов кооператива с фильтрацией */
+	/** Получение списка проектов кооператива с фильтрацией и компонентами */
 	capitalProjects: GraphQLTypes["PaginatedCapitalProjectsPaginationResult"],
 	/** Получение результата по внутреннему ID базы данных */
 	capitalResult?: GraphQLTypes["CapitalResult"] | undefined | null,

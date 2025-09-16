@@ -152,29 +152,29 @@ export class ProjectManagementResolver {
   // ============ ЗАПРОСЫ ПРОЕКТОВ ============
 
   /**
-   * Получение всех проектов с фильтрацией
+   * Получение всех проектов с фильтрацией и компонентами
    */
   @Query(() => paginatedProjectsResult, {
     name: 'capitalProjects',
-    description: 'Получение списка проектов кооператива с фильтрацией',
+    description: 'Получение списка проектов кооператива с фильтрацией и компонентами',
   })
   async getProjects(
     @Args('filter', { nullable: true }) filter?: ProjectFilterInputDTO,
     @Args('options', { nullable: true }) options?: PaginationInputDTO
   ): Promise<PaginationResult<ProjectOutputDTO>> {
-    return await this.projectManagementService.getProjects(filter, options);
+    return await this.projectManagementService.getProjectsWithComponents(filter, options);
   }
 
   /**
-   * Получение проекта по ID
+   * Получение проекта по хешу с компонентами
    */
   @Query(() => ProjectOutputDTO, {
     name: 'capitalProject',
-    description: 'Получение проекта по внутреннему ID базы данных',
+    description: 'Получение проекта по хешу с компонентами',
     nullable: true,
   })
   async getProject(@Args('data') data: GetProjectInputDTO): Promise<ProjectOutputDTO | null> {
-    return await this.projectManagementService.getProjectByHash(data.hash);
+    return await this.projectManagementService.getProjectByHashWithComponents(data.hash);
   }
 
   /**
