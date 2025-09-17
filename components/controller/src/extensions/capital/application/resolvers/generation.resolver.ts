@@ -9,6 +9,10 @@ import { StoryFilterInputDTO } from '../dto/generation/story-filter.input';
 import { IssueFilterInputDTO } from '../dto/generation/issue-filter.input';
 import { CommitFilterInputDTO } from '../dto/generation/commit-filter.input';
 import { CycleFilterInputDTO } from '../dto/generation/cycle-filter.input';
+import { GetIssueByIdInputDTO } from '../dto/generation/get-issue-by-id.input';
+import { GetCommitByIdInputDTO } from '../dto/generation/get-commit-by-id.input';
+import { GetIssueByHashInputDTO } from '../dto/generation/get-issue-by-hash.input';
+import { GetCommitByHashInputDTO } from '../dto/generation/get-commit-by-hash.input';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -41,7 +45,7 @@ export class GenerationResolver {
     description: 'Создание коммита в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['participant'])
+  @AuthRoles(['chairman'])
   async createCapitalCommit(
     @Args('data', { type: () => CreateCommitInputDTO }) data: CreateCommitInputDTO
   ): Promise<TransactionDTO> {
@@ -57,7 +61,7 @@ export class GenerationResolver {
     description: 'Обновление сегмента в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['participant'])
+  @AuthRoles(['chairman'])
   async refreshCapitalSegment(
     @Args('data', { type: () => RefreshSegmentInputDTO }) data: RefreshSegmentInputDTO
   ): Promise<TransactionDTO> {
@@ -75,7 +79,7 @@ export class GenerationResolver {
     description: 'Создание истории в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['participant'])
+  @AuthRoles(['chairman'])
   async createCapitalStory(
     @Args('data', { type: () => CreateStoryInputDTO }) data: CreateStoryInputDTO
   ): Promise<StoryOutputDTO> {
@@ -93,7 +97,7 @@ export class GenerationResolver {
     description: 'Создание задачи в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['participant'])
+  @AuthRoles(['chairman'])
   async createCapitalIssue(
     @Args('data', { type: () => CreateIssueInputDTO }) data: CreateIssueInputDTO
   ): Promise<IssueOutputDTO> {
@@ -181,5 +185,31 @@ export class GenerationResolver {
     @Args('options', { nullable: true }) options?: PaginationInputDTO
   ): Promise<PaginationResult<CycleOutputDTO>> {
     return await this.generationService.getCycles(filter, options);
+  }
+
+  // ============ GET BY HASH QUERIES ============
+
+  /**
+   * Получение задачи по хэшу
+   */
+  @Query(() => IssueOutputDTO, {
+    name: 'capitalIssue',
+    description: 'Получение задачи по хэшу',
+    nullable: true,
+  })
+  async getCapitalIssue(@Args('data') data: GetIssueByHashInputDTO): Promise<IssueOutputDTO | null> {
+    return await this.generationService.getIssueByHash(data.issue_hash);
+  }
+
+  /**
+   * Получение коммита по хэшу
+   */
+  @Query(() => CommitOutputDTO, {
+    name: 'capitalCommit',
+    description: 'Получение коммита по хэшу',
+    nullable: true,
+  })
+  async getCapitalCommit(@Args('data') data: GetCommitByHashInputDTO): Promise<CommitOutputDTO | null> {
+    return await this.generationService.getCommitByHash(data.commit_hash);
   }
 }

@@ -33,6 +33,11 @@ export class IssueTypeormRepository implements IssueRepository {
     return entity ? IssueMapper.toDomain(entity) : null;
   }
 
+  async findByIssueHash(issueHash: string): Promise<IssueDomainEntity | null> {
+    const entity = await this.issueTypeormRepository.findOne({ where: { issue_hash: issueHash } });
+    return entity ? IssueMapper.toDomain(entity) : null;
+  }
+
   async findAll(): Promise<IssueDomainEntity[]> {
     const entities = await this.issueTypeormRepository.find();
     return entities.map(IssueMapper.toDomain);
@@ -180,6 +185,9 @@ export class IssueTypeormRepository implements IssueRepository {
     const where: any = {};
     if (filter?.title) {
       where.title = filter.title;
+    }
+    if (filter?.coopname) {
+      where.coopname = filter.coopname;
     }
     if (filter?.priority) {
       where.priority = filter.priority;

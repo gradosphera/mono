@@ -9,6 +9,7 @@ import { StoryTypeormEntity } from './story.typeorm-entity';
 const EntityName = 'capital_issues';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
+@Index(`idx_${EntityName}_issue_hash`, ['issue_hash'])
 @Index(`idx_${EntityName}_created_by`, ['created_by'])
 @Index(`idx_${EntityName}_submaster_id`, ['submaster_id'])
 @Index(`idx_${EntityName}_cycle_id`, ['cycle_id'])
@@ -17,6 +18,12 @@ const EntityName = 'capital_issues';
 export class IssueTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
   _id!: string;
+
+  @Column({ type: 'varchar', length: 64 })
+  issue_hash!: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  coopname!: string;
 
   @Column({ type: 'varchar', length: 255 })
   title!: string;

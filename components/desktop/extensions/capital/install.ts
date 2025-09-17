@@ -5,7 +5,8 @@ import { ImportContributorsPage } from './pages';
 import { ConfigPage } from './pages/ConfigPage';
 import { ProjectsBase } from './pages/ProjectsBase';
 import { ProjectsPage } from './pages/ProjectsPage';
-import { ProjectTasksPage } from './pages/ProjectTasksPage';
+import { ProjectIssuesPage } from './pages/ProjectIssuesPage';
+import { IssuePage } from './pages/IssuePage';
 
 export default async function (): Promise<IWorkspaceConfig> {
   return {
@@ -74,12 +75,25 @@ export default async function (): Promise<IWorkspaceConfig> {
                 children: [],
               },
               {
-                path: ':hash/tasks',
+                path: ':project_hash/tasks',
                 name: 'project-tasks',
-                component: markRaw(ProjectTasksPage),
+                component: markRaw(ProjectIssuesPage),
                 meta: {
                   title: 'Задачи проекта',
                   icon: 'fa-solid fa-tasks',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                },
+                children: [],
+              },
+              {
+                path: ':project_hash/tasks/:issue_hash',
+                name: 'project-issue',
+                component: markRaw(IssuePage),
+                meta: {
+                  title: 'Задача',
+                  icon: 'fa-solid fa-task',
                   roles: [],
                   agreements: agreementsBase,
                   requiresAuth: true,

@@ -9,6 +9,8 @@ import type { StoryFilterInputDTO } from '../dto/generation/story-filter.input';
 import type { IssueFilterInputDTO } from '../dto/generation/issue-filter.input';
 import type { CommitFilterInputDTO } from '../dto/generation/commit-filter.input';
 import type { CycleFilterInputDTO } from '../dto/generation/cycle-filter.input';
+import type { GetIssueByIdInputDTO } from '../dto/generation/get-issue-by-id.input';
+import type { GetCommitByIdInputDTO } from '../dto/generation/get-commit-by-id.input';
 import { STORY_REPOSITORY, StoryRepository } from '../../domain/repositories/story.repository';
 import { ISSUE_REPOSITORY, IssueRepository } from '../../domain/repositories/issue.repository';
 import { COMMIT_REPOSITORY, CommitRepository } from '../../domain/repositories/commit.repository';
@@ -113,6 +115,8 @@ export class GenerationService {
     // Создаем данные для доменной сущности
     const issueDatabaseData: IIssueDatabaseData = {
       _id: '',
+      issue_hash: data.issue_hash,
+      coopname: data.coopname,
       title: data.title,
       description: data.description,
       priority: data.priority || IssuePriority.MEDIUM,
@@ -125,8 +129,8 @@ export class GenerationService {
       project_hash: data.project_hash,
       cycle_id: data.cycle_id,
       metadata: {
-        labels: data.labels ? JSON.parse(data.labels) : [],
-        attachments: data.attachments ? JSON.parse(data.attachments) : [],
+        labels: data.labels || [],
+        attachments: data.attachments || [],
       },
     };
 
@@ -154,6 +158,22 @@ export class GenerationService {
     };
   }
 
+  /**
+   * Получение задачи по ID
+   */
+  async getIssueById(data: GetIssueByIdInputDTO): Promise<IssueOutputDTO | null> {
+    const issueEntity = await this.issueRepository.findById(data.id);
+    return issueEntity ? (issueEntity as IssueOutputDTO) : null;
+  }
+
+  /**
+   * Получение задачи по хэшу
+   */
+  async getIssueByHash(issueHash: string): Promise<IssueOutputDTO | null> {
+    const issueEntity = await this.issueRepository.findByIssueHash(issueHash);
+    return issueEntity ? (issueEntity as IssueOutputDTO) : null;
+  }
+
   // ============ COMMIT METHODS ============
 
   /**
@@ -170,6 +190,22 @@ export class GenerationService {
       currentPage: result.currentPage,
       totalPages: result.totalPages,
     };
+  }
+
+  /**
+   * Получение коммита по ID
+   */
+  async getCommitById(data: GetCommitByIdInputDTO): Promise<CommitOutputDTO | null> {
+    const commitEntity = await this.commitRepository.findById(data.id);
+    return commitEntity ? (commitEntity as CommitOutputDTO) : null;
+  }
+
+  /**
+   * Получение коммита по хэшу
+   */
+  async getCommitByHash(commitHash: string): Promise<CommitOutputDTO | null> {
+    const commitEntity = await this.commitRepository.findByCommitHash(commitHash);
+    return commitEntity ? (commitEntity as CommitOutputDTO) : null;
   }
 
   // ============ CYCLE METHODS ============

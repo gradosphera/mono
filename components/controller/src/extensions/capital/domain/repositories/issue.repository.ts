@@ -10,6 +10,7 @@ import type { IssueFilterInputDTO } from '../../application/dto/generation/issue
 export interface IssueRepository {
   create(issue: IssueDomainEntity): Promise<IssueDomainEntity>;
   findById(_id: string): Promise<IssueDomainEntity | null>;
+  findByIssueHash(issueHash: string): Promise<IssueDomainEntity | null>;
   findAll(): Promise<IssueDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<IssueDomainEntity[]>;
   findByCreatedBy(createdBy: string): Promise<IssueDomainEntity[]>;

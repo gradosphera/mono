@@ -1,7 +1,7 @@
 <template lang="pug">
 q-btn(
   color='primary',
-  @click='showDialog = true',
+  @click.stop='handleButtonClick',
   :loading='loading',
   label='Создать компонент'
 )
@@ -44,6 +44,9 @@ import { Form } from 'src/shared/ui/Form';
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
 
 const props = defineProps<{ project: IProject }>();
+const emit = defineEmits<{
+  onClick: [];
+}>();
 
 const system = useSystemStore();
 const { createComponent } = useCreateComponent();
@@ -69,6 +72,12 @@ const clear = () => {
   };
 };
 
+const handleButtonClick = () => {
+  // Сначала отправляем событие для закрытия меню
+  // Потом открываем диалог
+  showDialog.value = true;
+};
+
 const handleCreateComponent = async () => {
   try {
     isSubmitting.value = true;
@@ -90,6 +99,8 @@ const handleCreateComponent = async () => {
     await createComponent(inputData);
     SuccessAlert('Компонент успешно создан');
     clear();
+    // После успешного создания компонента отправляем событие для закрытия меню
+    emit('onClick');
   } catch (error) {
     FailAlert(error);
   } finally {

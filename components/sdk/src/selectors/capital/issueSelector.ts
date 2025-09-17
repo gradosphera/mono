@@ -3,6 +3,7 @@ import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 
 const rawIssueSelector = {
   _id: true,
+  issue_hash: true,
   title: true,
   description: true,
   priority: true,

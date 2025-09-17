@@ -155,11 +155,9 @@ export class ProjectManagementInteractor {
     filter?: ProjectFilterInputDTO,
     options?: PaginationInputDomainInterface
   ): Promise<PaginationResultDomainInterface<ProjectDomainEntity>> {
-    console.log('BEFORE FILTER', filter);
     if (filter?.parent_hash === '') {
       filter.parent_hash = DomainToBlockchainUtils.getEmptyHash();
     }
-    console.log('AFTER FILTER', filter);
     return await this.projectRepository.findAllPaginatedWithComponents(filter, options);
   }
 

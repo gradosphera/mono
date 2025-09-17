@@ -12,35 +12,40 @@ div
         @request='onRequest',
         binary-state-sort,
         flat,
-        square
+        square,
+        hide-bottom,
+        hide-header
       )
-        template(#body-cell-hash='props')
-          q-td(:props='props')
-            q-btn(
-              @click='openProject(props.row.project_hash)',
-              flat,
-              dense,
-              color='primary',
-              icon='visibility',
-              :label='props.row.project_hash ? props.row.project_hash.substring(0, 8) + "..." : ""'
-            )
+        template(#body='props')
+          q-tr(
+            :props='props',
+            @click='toggleExpand(props.row.project_hash)',
+            style='cursor: pointer'
+          )
+            q-td(style='width: 55px')
+              q-btn(
+                size='sm',
+                color='primary',
+                dense,
+                round,
+                :icon='expanded.get(props.row.project_hash) ? "expand_more" : "chevron_right"',
+                @click.stop='toggleExpand(props.row.project_hash)'
+              )
+            q-td
+              .title-container {{ props.row.title }}
+            q-td.text-right
+              ProjectMenuWidget(:project='props.row')
 
-        template(#body-cell-status='props')
-          q-td(:props='props')
-            q-chip(
-              :color='getProjectStatusColor(props.value)',
-              text-color='white',
-              dense,
-              :label='getProjectStatusLabel(props.value)'
-            )
-
-        template(#body-cell-created_at='props')
-          q-td(:props='props')
-            div {{ formatDate(props.value) }}
-
-        template(#body-cell-actions='props')
-          q-td(:props='props')
-            ProjectMenuWidget(:project='props.row')
+          q-tr.q-virtual-scroll--with-prev(
+            no-hover,
+            v-if='expanded.get(props.row.project_hash)',
+            :key='`e_${props.row.project_hash}`'
+          )
+            q-td(colspan='100%', style='padding: 0px !important')
+              ProjectComponentsWidget(
+                :components='props.row.components',
+                @open-component='openProject'
+              )
 
     // Пагинация
     q-card-actions(align='center')
@@ -57,16 +62,15 @@ div
 <script lang="ts" setup>
 import { ref, onMounted, markRaw } from 'vue';
 import { useRouter } from 'vue-router';
-import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
-import {
-  getProjectStatusColor,
-  getProjectStatusLabel,
-} from 'app/extensions/capital/shared/lib/projectStatus';
 import { useHeaderActions } from 'src/shared/hooks';
+import { useExpandableState } from 'src/shared/lib/composables';
+import 'src/shared/ui/TitleStyles';
 import { CreateProjectButton } from 'app/extensions/capital/features/Project/CreateProject';
 import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
+import { ProjectComponentsWidget } from 'app/extensions/capital/widgets/ProjectComponentsWidget';
+import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 
 const router = useRouter();
 const projectStore = useProjectStore();
@@ -77,14 +81,22 @@ const { registerAction } = useHeaderActions();
 
 const loading = ref(false);
 
+// Композабл для управления состоянием развернутости проектов
+const { expanded, loadExpandedState, cleanupExpandedState, toggleExpanded } =
+  useExpandableState(
+    'capital_projects_expanded',
+    () => projectStore.projects?.items,
+    (project) => project.project_hash,
+  );
+
 // Определяем столбцы таблицы
 const columns = [
   {
-    name: 'hash',
-    label: 'ID проекта',
-    align: 'left' as const,
-    field: 'project_hash' as const,
-    sortable: true,
+    name: 'expand',
+    label: '',
+    align: 'center' as const,
+    field: '' as const,
+    sortable: false,
   },
   {
     name: 'name',
@@ -94,34 +106,18 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'description',
-    label: 'Описание',
-    align: 'left' as const,
-    field: 'description' as const,
-    sortable: false,
-  },
-  {
-    name: 'status',
-    label: 'Статус',
-    align: 'center' as const,
-    field: 'status' as const,
-    sortable: true,
-  },
-  {
-    name: 'created_at',
-    label: 'Создан',
-    align: 'center' as const,
-    field: 'created_at' as const,
-    sortable: true,
-  },
-  {
     name: 'actions',
     label: '',
-    align: 'center' as const,
+    align: 'right' as const,
     field: '' as const,
     sortable: false,
   },
 ];
+
+// UI методы
+const toggleExpand = (projectHash: string) => {
+  toggleExpanded(projectHash);
+};
 
 // Пагинация
 const pagination = ref({
@@ -149,6 +145,9 @@ const loadProjects = async () => {
       },
     });
     console.log(projectStore.projects?.items);
+
+    // Очищаем устаревшие записи expanded после загрузки проектов
+    cleanupExpandedState();
   } catch (error) {
     console.error('Ошибка при загрузке проектов:', error);
     FailAlert('Не удалось загрузить список проектов');
@@ -175,29 +174,17 @@ const openProject = (projectHash: string) => {
     router.push({
       name: 'project-tasks',
       params: {
-        hash: projectHash,
+        project_hash: projectHash,
       },
     });
   }
 };
 
-// Форматирование даты
-const formatDate = (dateString: string) => {
-  if (!dateString) return '';
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  } catch (error) {
-    return '';
-  }
-};
-
 // Инициализация
 onMounted(async () => {
+  // Загружаем сохраненное состояние expanded из LocalStorage
+  loadExpandedState();
+
   registerAction({
     id: 'create-project',
     component: markRaw(CreateProjectButton),

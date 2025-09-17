@@ -11,6 +11,8 @@ import type { IIssueDatabaseData } from '../interfaces/issue-database.interface'
 export class IssueDomainEntity {
   // Поля из базы данных
   public _id: string; // Внутренний ID базы данных
+  public issue_hash: string; // Хеш задачи для внешних ссылок
+  public coopname: string; // Имя аккаунта кооператива
   public title: string; // Название задачи
   public description?: string; // Описание задачи
   public priority: IssuePriority; // Приоритет задачи
@@ -35,6 +37,8 @@ export class IssueDomainEntity {
   constructor(databaseData: IIssueDatabaseData) {
     // Данные из базы данных
     this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
+    this.issue_hash = databaseData.issue_hash.toLowerCase();
+    this.coopname = databaseData.coopname;
     this.title = databaseData.title;
     this.description = databaseData.description;
     this.priority = databaseData.priority;
@@ -53,6 +57,8 @@ export class IssueDomainEntity {
    * Обновление данных сущности
    */
   update(data: Partial<IIssueDatabaseData>): void {
+    if (data.issue_hash !== undefined) this.issue_hash = data.issue_hash.toLowerCase();
+    if (data.coopname !== undefined) this.coopname = data.coopname;
     if (data.title !== undefined) this.title = data.title;
     if (data.description !== undefined) this.description = data.description;
     if (data.priority !== undefined) this.priority = data.priority;

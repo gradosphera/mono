@@ -1,28 +1,160 @@
 <template lang="pug">
 q-btn(
   color='primary',
-  @click='handleCreateIssue',
+  @click='showDialog = true',
   :loading='loading',
   label='Создать задачу'
 )
+
+q-dialog(v-model='showDialog', @hide='clear')
+  ModalBase(:title='"Создать задачу"')
+    Form.q-pa-md(
+      :handler-submit='handleCreateIssue',
+      :is-submitting='isSubmitting',
+      :button-submit-txt='"Создать"',
+      :button-cancel-txt='"Отмена"',
+      @cancel='clear'
+    )
+      q-input(
+        v-model='formData.title',
+        standout='bg-teal text-white',
+        label='Название задачи',
+        :rules='[(val) => notEmpty(val)]',
+        autocomplete='off'
+      )
+
+      q-input(
+        v-model='formData.description',
+        standout='bg-teal text-white',
+        label='Описание задачи',
+        :rules='[(val) => notEmpty(val)]',
+        autocomplete='off',
+        type='textarea'
+      )
+
+      q-select(
+        v-model='formData.priority',
+        standout='bg-teal text-white',
+        label='Приоритет',
+        :options='priorityOptions',
+        option-value='value',
+        option-label='label',
+        emit-value,
+        map-options
+      )
+
+      q-select(
+        v-model='formData.status',
+        standout='bg-teal text-white',
+        label='Статус',
+        :options='statusOptions',
+        option-value='value',
+        option-label='label',
+        emit-value,
+        map-options
+      )
+
+      q-input(
+        v-model.number='formData.estimate',
+        standout='bg-teal text-white',
+        label='Оценка (часы)',
+        type='number',
+        :rules='[(val) => val >= 0 || "Оценка не может быть отрицательной"]',
+        autocomplete='off'
+      )
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useCreateIssue } from '../model';
-import { FailAlert } from 'src/shared/api/alerts';
+import { ref, computed } from 'vue';
+import { type ICreateIssueInput, useCreateIssue } from '../model';
+import { useSystemStore } from 'src/entities/System/model';
+import { useRoute } from 'vue-router';
+import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
+import { ModalBase } from 'src/shared/ui/ModalBase';
+import { Form } from 'src/shared/ui/Form';
+import { Zeus } from '@coopenomics/sdk';
+import { useSessionStore } from 'src/entities/Session';
+import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 
-const { createIssue, createIssueInput } = useCreateIssue();
+const route = useRoute();
+const system = useSystemStore();
+const { createIssue } = useCreateIssue();
+const session = useSessionStore();
 const loading = ref(false);
+const showDialog = ref(false);
+const isSubmitting = ref(false);
+
+// Получаем project_hash из маршрута
+const projectHash = computed(() => route.params.project_hash as string);
+
+const formData = ref({
+  title: '',
+  description: '',
+  priority: Zeus.IssuePriority.MEDIUM,
+  status: Zeus.IssueStatus.BACKLOG,
+  estimate: 0,
+  labels: [] as string[],
+  attachments: [] as string[],
+});
+
+const priorityOptions = [
+  { value: Zeus.IssuePriority.LOW, label: 'Низкий' },
+  { value: Zeus.IssuePriority.MEDIUM, label: 'Средний' },
+  { value: Zeus.IssuePriority.HIGH, label: 'Высокий' },
+  { value: Zeus.IssuePriority.URGENT, label: 'Срочный' },
+];
+
+const statusOptions = [
+  { value: Zeus.IssueStatus.BACKLOG, label: 'Бэклог' },
+  { value: Zeus.IssueStatus.TODO, label: 'К выполнению' },
+  { value: Zeus.IssueStatus.IN_PROGRESS, label: 'В работе' },
+  { value: Zeus.IssueStatus.DONE, label: 'Выполнена' },
+  { value: Zeus.IssueStatus.CANCELED, label: 'Отменена' },
+];
+
+const notEmpty = (val: any) => {
+  return !!val || 'Это поле обязательно для заполнения';
+};
+
+const clear = () => {
+  showDialog.value = false;
+  formData.value = {
+    title: '',
+    description: '',
+    priority: Zeus.IssuePriority.MEDIUM,
+    status: Zeus.IssueStatus.BACKLOG,
+    estimate: 0,
+    labels: [],
+    attachments: [],
+  };
+};
 
 const handleCreateIssue = async () => {
-  loading.value = true;
   try {
-    await createIssue(createIssueInput.value);
+    isSubmitting.value = true;
+    const issueHash = await generateUniqueHash();
+
+    const inputData: ICreateIssueInput = {
+      issue_hash: issueHash,
+      coopname: system.info.coopname,
+      created_by: session.username,
+      project_hash: projectHash.value,
+      title: formData.value.title,
+      description: formData.value.description,
+      priority: formData.value.priority,
+      status: formData.value.status,
+      estimate: formData.value.estimate,
+      labels: formData.value.labels,
+      attachments: formData.value.attachments,
+    };
+
+    await createIssue(inputData);
+    SuccessAlert('Задача успешно создана');
+    clear();
   } catch (error) {
     FailAlert(error);
   } finally {
-    loading.value = false;
+    isSubmitting.value = false;
   }
 };
 </script>

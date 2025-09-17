@@ -51,11 +51,17 @@ export * as GetExpenses from './getExpenses'
 /** Получить расход по ID */
 export * as GetExpense from './getExpense'
 
+/** Получить коммит по HASH */
+export * as GetCommit from './getCommit'
+
 /** Получить все истории с фильтрацией */
 export * as GetStories from './getStories'
 
 /** Получить все задачи с фильтрацией */
 export * as GetIssues from './getIssues'
+
+/** Получить задачу по HASH */
+export * as GetIssue from './getIssue'
 
 /** Получить все коммиты с фильтрацией */
 export * as GetCommits from './getCommits'

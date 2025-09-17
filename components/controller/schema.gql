@@ -1678,8 +1678,11 @@ type CapitalIssue {
   """Оценка в story points или часах"""
   estimate: Int!
 
+  """Хеш задачи"""
+  issue_hash: String!
+
   """Метаданные задачи"""
-  metadata: String!
+  metadata: JSON!
 
   """Приоритет задачи"""
   priority: IssuePriority!
@@ -1702,7 +1705,7 @@ type CapitalIssue {
 
 """Параметры фильтрации для запросов задач CAPITAL"""
 input CapitalIssueFilter {
-  """Фильтр по названию кооператива"""
+  """Фильтр по имени аккаунта кооператива"""
   coopname: String
 
   """Фильтр по ID создателя"""
@@ -2553,8 +2556,11 @@ input CreateInitialPaymentInput {
 }
 
 input CreateIssueInput {
-  """Вложения задачи (JSON строка)"""
-  attachments: String
+  """Вложения задачи"""
+  attachments: [String!]
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
 
   """ID создателя задачи (contributor)"""
   created_by: String!
@@ -2571,8 +2577,11 @@ input CreateIssueInput {
   """Оценка в story points или часах"""
   estimate: Int = 0
 
-  """Метки задачи (JSON строка)"""
-  labels: String
+  """Хеш задачи для внешних ссылок"""
+  issue_hash: String!
+
+  """Метки задачи"""
+  labels: [String!]
 
   """Приоритет задачи"""
   priority: IssuePriority = MEDIUM
@@ -3624,9 +3633,21 @@ input GetBranchesInput {
   coopname: String!
 }
 
+"""Входные данные для получения коммита по хэшу"""
+input GetCapitalCommitByHashInput {
+  """Хеш коммита для получения"""
+  commit_hash: String!
+}
+
 input GetCapitalConfigInput {
   """Название кооператива"""
   coopname: String!
+}
+
+"""Входные данные для получения задачи по хэшу"""
+input GetCapitalIssueByHashInput {
+  """Хеш задачи для получения"""
+  issue_hash: String!
 }
 
 input GetContributorInput {
@@ -5543,6 +5564,9 @@ input PushResultInput {
 }
 
 type Query {
+  """Получение коммита по хэшу"""
+  capitalCommit(data: GetCapitalCommitByHashInput!): CapitalCommit
+
   """Получение списка коммитов кооператива с фильтрацией"""
   capitalCommits(filter: CapitalCommitFilter, options: PaginationInput): PaginatedCapitalCommitsPaginationResult!
 
@@ -5572,6 +5596,9 @@ type Query {
 
   """Получение списка инвестиций кооператива с фильтрацией"""
   capitalInvests(filter: CapitalInvestFilter, options: PaginationInput): PaginatedCapitalInvestsPaginationResult!
+
+  """Получение задачи по хэшу"""
+  capitalIssue(data: GetCapitalIssueByHashInput!): CapitalIssue
 
   """Получение списка задач кооператива с фильтрацией"""
   capitalIssues(filter: CapitalIssueFilter, options: PaginationInput): PaginatedCapitalIssuesPaginationResult!

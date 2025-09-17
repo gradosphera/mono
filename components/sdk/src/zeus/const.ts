@@ -318,7 +318,13 @@ export const AllTypesProps: Record<string,any> = {
 	GetBranchesInput:{
 
 	},
+	GetCapitalCommitByHashInput:{
+
+	},
 	GetCapitalConfigInput:{
+
+	},
+	GetCapitalIssueByHashInput:{
 
 	},
 	GetContributorInput:{
@@ -818,6 +824,9 @@ export const AllTypesProps: Record<string,any> = {
 		statement:"SignedDigitalDocumentInput"
 	},
 	Query:{
+		capitalCommit:{
+			data:"GetCapitalCommitByHashInput"
+		},
 		capitalCommits:{
 			filter:"CapitalCommitFilter",
 			options:"PaginationInput"
@@ -853,6 +862,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalInvests:{
 			filter:"CapitalInvestFilter",
 			options:"PaginationInput"
+		},
+		capitalIssue:{
+			data:"GetCapitalIssueByHashInput"
 		},
 		capitalIssues:{
 			filter:"CapitalIssueFilter",
@@ -1460,7 +1472,8 @@ export const ReturnTypes: Record<string,any> = {
 		cycle_id:"String",
 		description:"String",
 		estimate:"Int",
-		metadata:"String",
+		issue_hash:"String",
+		metadata:"JSON",
 		priority:"IssuePriority",
 		project_hash:"String",
 		sort_order:"Int",
@@ -2242,6 +2255,7 @@ export const ReturnTypes: Record<string,any> = {
 		middle_name:"String"
 	},
 	Query:{
+		capitalCommit:"CapitalCommit",
 		capitalCommits:"PaginatedCapitalCommitsPaginationResult",
 		capitalContributor:"CapitalContributor",
 		capitalContributors:"PaginatedCapitalContributorsPaginationResult",
@@ -2252,6 +2266,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalExpenses:"PaginatedCapitalExpensesPaginationResult",
 		capitalInvest:"CapitalInvest",
 		capitalInvests:"PaginatedCapitalInvestsPaginationResult",
+		capitalIssue:"CapitalIssue",
 		capitalIssues:"PaginatedCapitalIssuesPaginationResult",
 		capitalProgramInvest:"CapitalProgramInvest",
 		capitalProgramInvests:"PaginatedCapitalProgramInvestsPaginationResult",

@@ -9,6 +9,20 @@ import { IssueStatus } from '../../../domain/enums/issue-status.enum';
 @InputType('CreateIssueInput')
 export class CreateIssueInputDTO {
   @Field(() => String, {
+    description: 'Хеш задачи для внешних ссылок',
+  })
+  @IsNotEmpty({ message: 'Хеш задачи не должен быть пустым' })
+  @IsString({ message: 'Хеш задачи должен быть строкой' })
+  issue_hash!: string;
+
+  @Field(() => String, {
+    description: 'Имя аккаунта кооператива',
+  })
+  @IsNotEmpty({ message: 'Имя аккаунта кооператива не должно быть пустым' })
+  @IsString({ message: 'Имя аккаунта кооператива должно быть строкой' })
+  coopname!: string;
+
+  @Field(() => String, {
     description: 'Название задачи',
   })
   @IsNotEmpty({ message: 'Название задачи не должно быть пустым' })
@@ -98,19 +112,19 @@ export class CreateIssueInputDTO {
   @IsString({ message: 'ID цикла должен быть строкой' })
   cycle_id?: string;
 
-  @Field(() => String, {
+  @Field(() => [String], {
     nullable: true,
-    description: 'Метки задачи (JSON строка)',
+    description: 'Метки задачи',
   })
   @IsOptional()
-  @IsString({ message: 'Метки должны быть строкой' })
-  labels?: string;
+  @IsArray({ message: 'Метки должны быть массивом строк' })
+  labels?: string[];
 
-  @Field(() => String, {
+  @Field(() => [String], {
     nullable: true,
-    description: 'Вложения задачи (JSON строка)',
+    description: 'Вложения задачи',
   })
   @IsOptional()
-  @IsString({ message: 'Вложения должны быть строкой' })
-  attachments?: string;
+  @IsArray({ message: 'Вложения должны быть массивом строк' })
+  attachments?: string[];
 }

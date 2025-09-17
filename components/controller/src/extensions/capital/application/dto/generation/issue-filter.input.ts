@@ -11,6 +11,12 @@ import { IssueStatus } from '../../../domain/enums/issue-status.enum';
 export class IssueFilterInputDTO {
   @Field(() => String, {
     nullable: true,
+    description: 'Фильтр по имени аккаунта кооператива',
+  })
+  coopname?: string;
+
+  @Field(() => String, {
+    nullable: true,
     description: 'Фильтр по названию задачи',
   })
   title?: string;
@@ -50,12 +56,6 @@ export class IssueFilterInputDTO {
     description: 'Фильтр по ID цикла',
   })
   cycle_id?: string;
-
-  @Field(() => String, {
-    nullable: true,
-    description: 'Фильтр по названию кооператива',
-  })
-  coopname?: string;
 
   @Field(() => [String], {
     nullable: true,

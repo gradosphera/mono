@@ -21,35 +21,45 @@ div
         .text-h6 Задачи
 
       q-table(
-        :rows='stories?.items || []',
+        :rows='issues?.items || []',
         :columns='columns',
-        row-key='hash',
+        row-key='_id',
         :loading='loading',
         :pagination='pagination',
         @request='onRequest',
+        @row-click='onRowClick',
         binary-state-sort,
         flat,
-        square
+        square,
+        style='cursor: pointer'
       )
         template(#body-cell-title='props')
           q-td(:props='props')
             .row.items-center.q-gutter-sm
               q-icon(
-                :name='getPriorityIcon(props.row.priority)',
-                :color='getPriorityColor(props.row.priority)',
+                :name='getIssuePriorityIcon(props.row.priority)',
+                :color='getIssuePriorityColor(props.row.priority)',
                 size='sm'
               )
-              div
+              .title-container
                 .text-body2.font-weight-medium {{ props.value }}
-                .text-caption.text-grey-7 {{ props.row.description }}
 
         template(#body-cell-status='props')
           q-td(:props='props')
             q-chip(
-              :color='getTaskStatusColor(props.value)',
+              :color='getIssueStatusColor(props.value)',
               text-color='white',
               dense,
-              :label='getTaskStatusLabel(props.value)'
+              :label='getIssueStatusLabel(props.value)'
+            )
+
+        template(#body-cell-priority='props')
+          q-td(:props='props')
+            q-chip(
+              :color='getIssuePriorityColor(props.value)',
+              text-color='white',
+              dense,
+              :label='getIssuePriorityLabel(props.value)'
             )
 
         template(#body-cell-assignee='props')
@@ -63,15 +73,22 @@ div
             )
             span.text-grey-5(v-else) Не назначен
 
-        template(#body-cell-created_at='props')
+        template(#body-cell-created_by='props')
           q-td(:props='props')
-            div {{ formatDate(props.value) }}
+            q-chip(
+              v-if='props.value',
+              color='blue-grey-2',
+              text-color='blue-grey-9',
+              dense,
+              :label='props.value'
+            )
+            span.text-grey-5(v-else) Не указан
 
     // Пагинация
     q-card-actions.q-mt-md(align='center')
       q-pagination(
         v-model='pagination.page',
-        :max='Math.ceil((stories?.totalCount || 0) / pagination.rowsPerPage)',
+        :max='Math.ceil((issues?.totalCount || 0) / pagination.rowsPerPage)',
         :max-pages='5',
         direction-links,
         boundary-links,
@@ -80,16 +97,17 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, markRaw } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, onMounted, computed, markRaw, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import {
   type IProject,
   useProjectStore,
 } from 'app/extensions/capital/entities/Project/model';
 import {
-  type IStoriesPagination,
-  useStoryStore,
-} from 'app/extensions/capital/entities/Story/model';
+  type IIssue,
+  type IIssuesPagination,
+  useIssueStore,
+} from 'app/extensions/capital/entities/Issue/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { ProjectLifecycleWidget } from 'app/extensions/capital/widgets/ProjectLifecycleWidget';
 import { useBackButton } from 'src/shared/lib/navigation';
@@ -97,20 +115,27 @@ import { useHeaderActions } from 'src/shared/hooks';
 import { useRightDrawer } from 'src/shared/hooks/useRightDrawer';
 import { FailAlert } from 'src/shared/api';
 import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
-import { Zeus } from '@coopenomics/sdk';
+import 'src/shared/ui/TitleStyles';
+import {
+  getIssueStatusColor,
+  getIssueStatusLabel,
+  getIssuePriorityIcon,
+  getIssuePriorityColor,
+  getIssuePriorityLabel,
+} from 'app/extensions/capital/shared/lib';
 
 const route = useRoute();
 const projectStore = useProjectStore();
-const storyStore = useStoryStore();
+const issueStore = useIssueStore();
 const { info } = useSystemStore();
 
 const loading = ref(false);
 const project = ref<IProject | null | undefined>(null);
-const stories = ref<IStoriesPagination | null>(null);
+const issues = ref<IIssuesPagination | null>(null);
 
 // Получаем hash проекта из параметров маршрута
-const projectHash = computed(() => route.params.hash as string);
-
+const projectHash = computed(() => route.params.project_hash as string);
+const router = useRouter();
 // Настраиваем кнопку "Назад"
 useBackButton({
   text: 'К проектам',
@@ -158,17 +183,17 @@ const columns = [
   },
   {
     name: 'assignee',
-    label: 'Исполнитель',
+    label: 'Создатель',
     align: 'center' as const,
     field: 'assignee' as const,
     sortable: false,
   },
   {
-    name: 'created_at',
-    label: 'Создана',
+    name: 'created_by',
+    label: 'Предложивший',
     align: 'center' as const,
-    field: 'created_at' as const,
-    sortable: true,
+    field: 'created_by' as const,
+    sortable: false,
   },
 ];
 
@@ -208,23 +233,23 @@ const loadProject = async () => {
 };
 
 // Загрузка задач проекта
-const loadStories = async () => {
+const loadIssues = async () => {
   loading.value = true;
   try {
-    await storyStore.loadStories({
-      data: {
+    await issueStore.loadIssues({
+      filter: {
         coopname: info.coopname,
         project_hash: projectHash.value,
       },
-      pagination: {
+      options: {
         page: pagination.value.page,
         limit: pagination.value.rowsPerPage,
         sortBy: pagination.value.sortBy,
-        descending: pagination.value.descending,
+        sortOrder: pagination.value.descending ? 'DESC' : 'ASC',
       },
     });
 
-    stories.value = storyStore.stories;
+    issues.value = issueStore.issues;
   } catch (error) {
     console.error('Ошибка при загрузке задач:', error);
     FailAlert('Не удалось загрузить задачи проекта');
@@ -242,7 +267,7 @@ const onRequest = async (props) => {
   pagination.value.sortBy = sortBy;
   pagination.value.descending = descending;
 
-  await loadStories();
+  await loadIssues();
 };
 
 // Функция goBack больше не нужна - используется useBackButton
@@ -252,83 +277,34 @@ const onProjectUpdated = async () => {
   await loadProject();
 };
 
-// Получение иконки приоритета
-const getPriorityIcon = (priority: string) => {
-  switch (priority) {
-    case 'high':
-      return 'arrow_upward';
-    case 'medium':
-      return 'remove';
-    case 'low':
-      return 'arrow_downward';
-    default:
-      return 'radio_button_unchecked';
-  }
-};
-
-// Получение цвета приоритета
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'high':
-      return 'red';
-    case 'medium':
-      return 'orange';
-    case 'low':
-      return 'green';
-    default:
-      return 'grey';
-  }
-};
-
-// Получение цвета статуса задачи
-const getTaskStatusColor = (status: string) => {
-  switch (status) {
-    case 'todo':
-      return 'grey';
-    case 'in_progress':
-      return 'blue';
-    case 'in_review':
-      return 'purple';
-    case 'done':
-      return 'green';
-    default:
-      return 'grey';
-  }
-};
-
-// Получение текста статуса задачи
-const getTaskStatusLabel = (status: string) => {
-  switch (status) {
-    case Zeus.IssueStatus.TODO:
-      return 'К выполнению';
-    case Zeus.IssueStatus.IN_PROGRESS:
-      return 'В работе';
-    case Zeus.IssueStatus.BACKLOG:
-      return 'Бэклог';
-    case Zeus.IssueStatus.DONE:
-      return 'Выполнена';
-    case Zeus.IssueStatus.CANCELED:
-      return 'Отменена';
-    default:
-      return status;
-  }
-};
-
-// Форматирование даты
-const formatDate = (dateString: string) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
+// Обработчик клика по строке задачи
+const onRowClick = (evt: Event, row: IIssue) => {
+  router.push({
+    name: 'project-issue',
+    params: {
+      project_hash: projectHash.value,
+      issue_hash: row.issue_hash,
+    },
   });
 };
+
+// Watcher для отслеживания изменения projectHash
+watch(projectHash, async (newHash, oldHash) => {
+  if (newHash && newHash !== oldHash) {
+    // Сбрасываем пагинацию при переходе к другому проекту
+    pagination.value.page = 1;
+    pagination.value.sortBy = 'created_at';
+    pagination.value.descending = true;
+
+    await loadProject();
+    await loadIssues();
+  }
+});
 
 // Инициализация
 onMounted(async () => {
   await loadProject();
-  await loadStories();
+  await loadIssues();
 });
 </script>
 

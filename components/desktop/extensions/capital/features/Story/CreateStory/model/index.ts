@@ -33,8 +33,8 @@ export function useCreateStory() {
   ): Promise<ICreateStoryOutput> {
     const transaction = await api.createStory(data);
 
-    // Обновляем список историй после создания
-    await store.loadStories({});
+    // Добавляем историю в начало списка без перезагрузки всего списка
+    store.addStoryToList(transaction);
 
     // Сбрасываем createStoryInput после выполнения createStory
     resetInput(createStoryInput, initialCreateStoryInput);

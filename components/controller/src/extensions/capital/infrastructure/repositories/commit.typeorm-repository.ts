@@ -55,6 +55,11 @@ export class CommitTypeormRepository
     return CommitMapper.toDomain(savedEntity);
   }
 
+  async findByCommitHash(commitHash: string): Promise<CommitDomainEntity | null> {
+    const entity = await this.repository.findOne({ where: { commit_hash: commitHash } });
+    return entity ? CommitMapper.toDomain(entity) : null;
+  }
+
   async findByUsername(username: string): Promise<CommitDomainEntity[]> {
     const entities = await this.repository.find({ where: { username } });
     return entities.map((entity) => CommitMapper.toDomain(entity));

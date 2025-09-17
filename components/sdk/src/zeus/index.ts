@@ -2114,6 +2114,8 @@ export type ValueTypes = {
 	description?:boolean | `@${string}`,
 	/** Оценка в story points или часах */
 	estimate?:boolean | `@${string}`,
+	/** Хеш задачи */
+	issue_hash?:boolean | `@${string}`,
 	/** Метаданные задачи */
 	metadata?:boolean | `@${string}`,
 	/** Приоритет задачи */
@@ -2132,7 +2134,7 @@ export type ValueTypes = {
 }>;
 	/** Параметры фильтрации для запросов задач CAPITAL */
 ["CapitalIssueFilter"]: {
-	/** Фильтр по названию кооператива */
+	/** Фильтр по имени аккаунта кооператива */
 	coopname?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null | Variable<any, string>,
@@ -2720,8 +2722,10 @@ export type ValueTypes = {
 	username: string | Variable<any, string>
 };
 	["CreateIssueInput"]: {
-	/** Вложения задачи (JSON строка) */
-	attachments?: string | undefined | null | Variable<any, string>,
+	/** Вложения задачи */
+	attachments?: Array<string> | undefined | null | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
 	/** ID создателя задачи (contributor) */
 	created_by: string | Variable<any, string>,
 	/** Массив ID создателей (contributors) */
@@ -2732,8 +2736,10 @@ export type ValueTypes = {
 	description?: string | undefined | null | Variable<any, string>,
 	/** Оценка в story points или часах */
 	estimate?: number | undefined | null | Variable<any, string>,
-	/** Метки задачи (JSON строка) */
-	labels?: string | undefined | null | Variable<any, string>,
+	/** Хеш задачи для внешних ссылок */
+	issue_hash: string | Variable<any, string>,
+	/** Метки задачи */
+	labels?: Array<string> | undefined | null | Variable<any, string>,
 	/** Приоритет задачи */
 	priority?: ValueTypes["IssuePriority"] | undefined | null | Variable<any, string>,
 	/** Хеш проекта */
@@ -3452,9 +3458,19 @@ export type ValueTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>
 };
+	/** Входные данные для получения коммита по хэшу */
+["GetCapitalCommitByHashInput"]: {
+	/** Хеш коммита для получения */
+	commit_hash: string | Variable<any, string>
+};
 	["GetCapitalConfigInput"]: {
 	/** Название кооператива */
 	coopname: string | Variable<any, string>
+};
+	/** Входные данные для получения задачи по хэшу */
+["GetCapitalIssueByHashInput"]: {
+	/** Хеш задачи для получения */
+	issue_hash: string | Variable<any, string>
 };
 	["GetContributorInput"]: {
 	/** ID вкладчика */
@@ -4664,6 +4680,7 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	username: string | Variable<any, string>
 };
 	["Query"]: AliasType<{
+capitalCommit?: [{	data: ValueTypes["GetCapitalCommitByHashInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
 capitalCommits?: [{	filter?: ValueTypes["CapitalCommitFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCommitsPaginationResult"]],
 capitalContributor?: [{	data: ValueTypes["GetContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
 capitalContributors?: [{	filter?: ValueTypes["CapitalContributorFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalContributorsPaginationResult"]],
@@ -4674,6 +4691,7 @@ capitalExpense?: [{	data: ValueTypes["GetExpenseInput"] | Variable<any, string>}
 capitalExpenses?: [{	filter?: ValueTypes["ExpenseFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalExpensesPaginationResult"]],
 capitalInvest?: [{	data: ValueTypes["GetInvestInput"] | Variable<any, string>},ValueTypes["CapitalInvest"]],
 capitalInvests?: [{	filter?: ValueTypes["CapitalInvestFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalInvestsPaginationResult"]],
+capitalIssue?: [{	data: ValueTypes["GetCapitalIssueByHashInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
 capitalIssues?: [{	filter?: ValueTypes["CapitalIssueFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalIssuesPaginationResult"]],
 capitalProgramInvest?: [{	data: ValueTypes["GetProgramInvestInput"] | Variable<any, string>},ValueTypes["CapitalProgramInvest"]],
 capitalProgramInvests?: [{	filter?: ValueTypes["CapitalInvestFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalProgramInvestsPaginationResult"]],
@@ -7010,6 +7028,8 @@ export type ResolverInputTypes = {
 	description?:boolean | `@${string}`,
 	/** Оценка в story points или часах */
 	estimate?:boolean | `@${string}`,
+	/** Хеш задачи */
+	issue_hash?:boolean | `@${string}`,
 	/** Метаданные задачи */
 	metadata?:boolean | `@${string}`,
 	/** Приоритет задачи */
@@ -7028,7 +7048,7 @@ export type ResolverInputTypes = {
 }>;
 	/** Параметры фильтрации для запросов задач CAPITAL */
 ["CapitalIssueFilter"]: {
-	/** Фильтр по названию кооператива */
+	/** Фильтр по имени аккаунта кооператива */
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
@@ -7616,8 +7636,10 @@ export type ResolverInputTypes = {
 	username: string
 };
 	["CreateIssueInput"]: {
-	/** Вложения задачи (JSON строка) */
-	attachments?: string | undefined | null,
+	/** Вложения задачи */
+	attachments?: Array<string> | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
 	/** ID создателя задачи (contributor) */
 	created_by: string,
 	/** Массив ID создателей (contributors) */
@@ -7628,8 +7650,10 @@ export type ResolverInputTypes = {
 	description?: string | undefined | null,
 	/** Оценка в story points или часах */
 	estimate?: number | undefined | null,
-	/** Метки задачи (JSON строка) */
-	labels?: string | undefined | null,
+	/** Хеш задачи для внешних ссылок */
+	issue_hash: string,
+	/** Метки задачи */
+	labels?: Array<string> | undefined | null,
 	/** Приоритет задачи */
 	priority?: ResolverInputTypes["IssuePriority"] | undefined | null,
 	/** Хеш проекта */
@@ -8348,9 +8372,19 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
+	/** Входные данные для получения коммита по хэшу */
+["GetCapitalCommitByHashInput"]: {
+	/** Хеш коммита для получения */
+	commit_hash: string
+};
 	["GetCapitalConfigInput"]: {
 	/** Название кооператива */
 	coopname: string
+};
+	/** Входные данные для получения задачи по хэшу */
+["GetCapitalIssueByHashInput"]: {
+	/** Хеш задачи для получения */
+	issue_hash: string
 };
 	["GetContributorInput"]: {
 	/** ID вкладчика */
@@ -9562,6 +9596,7 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	username: string
 };
 	["Query"]: AliasType<{
+capitalCommit?: [{	data: ResolverInputTypes["GetCapitalCommitByHashInput"]},ResolverInputTypes["CapitalCommit"]],
 capitalCommits?: [{	filter?: ResolverInputTypes["CapitalCommitFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCommitsPaginationResult"]],
 capitalContributor?: [{	data: ResolverInputTypes["GetContributorInput"]},ResolverInputTypes["CapitalContributor"]],
 capitalContributors?: [{	filter?: ResolverInputTypes["CapitalContributorFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalContributorsPaginationResult"]],
@@ -9572,6 +9607,7 @@ capitalExpense?: [{	data: ResolverInputTypes["GetExpenseInput"]},ResolverInputTy
 capitalExpenses?: [{	filter?: ResolverInputTypes["ExpenseFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalExpensesPaginationResult"]],
 capitalInvest?: [{	data: ResolverInputTypes["GetInvestInput"]},ResolverInputTypes["CapitalInvest"]],
 capitalInvests?: [{	filter?: ResolverInputTypes["CapitalInvestFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalInvestsPaginationResult"]],
+capitalIssue?: [{	data: ResolverInputTypes["GetCapitalIssueByHashInput"]},ResolverInputTypes["CapitalIssue"]],
 capitalIssues?: [{	filter?: ResolverInputTypes["CapitalIssueFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalIssuesPaginationResult"]],
 capitalProgramInvest?: [{	data: ResolverInputTypes["GetProgramInvestInput"]},ResolverInputTypes["CapitalProgramInvest"]],
 capitalProgramInvests?: [{	filter?: ResolverInputTypes["CapitalInvestFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalProgramInvestsPaginationResult"]],
@@ -11886,8 +11922,10 @@ export type ModelTypes = {
 	description?: string | undefined | null,
 	/** Оценка в story points или часах */
 	estimate: number,
+	/** Хеш задачи */
+	issue_hash: string,
 	/** Метаданные задачи */
-	metadata: string,
+	metadata: ModelTypes["JSON"],
 	/** Приоритет задачи */
 	priority: ModelTypes["IssuePriority"],
 	/** Хеш проекта */
@@ -11903,7 +11941,7 @@ export type ModelTypes = {
 };
 	/** Параметры фильтрации для запросов задач CAPITAL */
 ["CapitalIssueFilter"]: {
-	/** Фильтр по названию кооператива */
+	/** Фильтр по имени аккаунта кооператива */
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
@@ -12478,8 +12516,10 @@ export type ModelTypes = {
 	username: string
 };
 	["CreateIssueInput"]: {
-	/** Вложения задачи (JSON строка) */
-	attachments?: string | undefined | null,
+	/** Вложения задачи */
+	attachments?: Array<string> | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
 	/** ID создателя задачи (contributor) */
 	created_by: string,
 	/** Массив ID создателей (contributors) */
@@ -12490,8 +12530,10 @@ export type ModelTypes = {
 	description?: string | undefined | null,
 	/** Оценка в story points или часах */
 	estimate?: number | undefined | null,
-	/** Метки задачи (JSON строка) */
-	labels?: string | undefined | null,
+	/** Хеш задачи для внешних ссылок */
+	issue_hash: string,
+	/** Метки задачи */
+	labels?: Array<string> | undefined | null,
 	/** Приоритет задачи */
 	priority?: ModelTypes["IssuePriority"] | undefined | null,
 	/** Хеш проекта */
@@ -13188,9 +13230,19 @@ export type ModelTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
+	/** Входные данные для получения коммита по хэшу */
+["GetCapitalCommitByHashInput"]: {
+	/** Хеш коммита для получения */
+	commit_hash: string
+};
 	["GetCapitalConfigInput"]: {
 	/** Название кооператива */
 	coopname: string
+};
+	/** Входные данные для получения задачи по хэшу */
+["GetCapitalIssueByHashInput"]: {
+	/** Хеш задачи для получения */
+	issue_hash: string
 };
 	["GetContributorInput"]: {
 	/** ID вкладчика */
@@ -14450,7 +14502,9 @@ export type ModelTypes = {
 	username: string
 };
 	["Query"]: {
-		/** Получение списка коммитов кооператива с фильтрацией */
+		/** Получение коммита по хэшу */
+	capitalCommit?: ModelTypes["CapitalCommit"] | undefined | null,
+	/** Получение списка коммитов кооператива с фильтрацией */
 	capitalCommits: ModelTypes["PaginatedCapitalCommitsPaginationResult"],
 	/** Получение вкладчика по внутреннему ID базы данных */
 	capitalContributor?: ModelTypes["CapitalContributor"] | undefined | null,
@@ -14470,6 +14524,8 @@ export type ModelTypes = {
 	capitalInvest?: ModelTypes["CapitalInvest"] | undefined | null,
 	/** Получение списка инвестиций кооператива с фильтрацией */
 	capitalInvests: ModelTypes["PaginatedCapitalInvestsPaginationResult"],
+	/** Получение задачи по хэшу */
+	capitalIssue?: ModelTypes["CapitalIssue"] | undefined | null,
 	/** Получение списка задач кооператива с фильтрацией */
 	capitalIssues: ModelTypes["PaginatedCapitalIssuesPaginationResult"],
 	/** Получение программной инвестиции по внутреннему ID базы данных */
@@ -16810,8 +16866,10 @@ export type GraphQLTypes = {
 	description?: string | undefined | null,
 	/** Оценка в story points или часах */
 	estimate: number,
+	/** Хеш задачи */
+	issue_hash: string,
 	/** Метаданные задачи */
-	metadata: string,
+	metadata: GraphQLTypes["JSON"],
 	/** Приоритет задачи */
 	priority: GraphQLTypes["IssuePriority"],
 	/** Хеш проекта */
@@ -16827,7 +16885,7 @@ export type GraphQLTypes = {
 };
 	/** Параметры фильтрации для запросов задач CAPITAL */
 ["CapitalIssueFilter"]: {
-		/** Фильтр по названию кооператива */
+		/** Фильтр по имени аккаунта кооператива */
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
@@ -17415,8 +17473,10 @@ export type GraphQLTypes = {
 	username: string
 };
 	["CreateIssueInput"]: {
-		/** Вложения задачи (JSON строка) */
-	attachments?: string | undefined | null,
+		/** Вложения задачи */
+	attachments?: Array<string> | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
 	/** ID создателя задачи (contributor) */
 	created_by: string,
 	/** Массив ID создателей (contributors) */
@@ -17427,8 +17487,10 @@ export type GraphQLTypes = {
 	description?: string | undefined | null,
 	/** Оценка в story points или часах */
 	estimate?: number | undefined | null,
-	/** Метки задачи (JSON строка) */
-	labels?: string | undefined | null,
+	/** Хеш задачи для внешних ссылок */
+	issue_hash: string,
+	/** Метки задачи */
+	labels?: Array<string> | undefined | null,
 	/** Приоритет задачи */
 	priority?: GraphQLTypes["IssuePriority"] | undefined | null,
 	/** Хеш проекта */
@@ -18147,9 +18209,19 @@ export type GraphQLTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
+	/** Входные данные для получения коммита по хэшу */
+["GetCapitalCommitByHashInput"]: {
+		/** Хеш коммита для получения */
+	commit_hash: string
+};
 	["GetCapitalConfigInput"]: {
 		/** Название кооператива */
 	coopname: string
+};
+	/** Входные данные для получения задачи по хэшу */
+["GetCapitalIssueByHashInput"]: {
+		/** Хеш задачи для получения */
+	issue_hash: string
 };
 	["GetContributorInput"]: {
 		/** ID вкладчика */
@@ -19472,6 +19544,8 @@ export type GraphQLTypes = {
 };
 	["Query"]: {
 	__typename: "Query",
+	/** Получение коммита по хэшу */
+	capitalCommit?: GraphQLTypes["CapitalCommit"] | undefined | null,
 	/** Получение списка коммитов кооператива с фильтрацией */
 	capitalCommits: GraphQLTypes["PaginatedCapitalCommitsPaginationResult"],
 	/** Получение вкладчика по внутреннему ID базы данных */
@@ -19492,6 +19566,8 @@ export type GraphQLTypes = {
 	capitalInvest?: GraphQLTypes["CapitalInvest"] | undefined | null,
 	/** Получение списка инвестиций кооператива с фильтрацией */
 	capitalInvests: GraphQLTypes["PaginatedCapitalInvestsPaginationResult"],
+	/** Получение задачи по хэшу */
+	capitalIssue?: GraphQLTypes["CapitalIssue"] | undefined | null,
 	/** Получение списка задач кооператива с фильтрацией */
 	capitalIssues: GraphQLTypes["PaginatedCapitalIssuesPaginationResult"],
 	/** Получение программной инвестиции по внутреннему ID базы данных */
@@ -20932,7 +21008,9 @@ type ZEUS_VARIABLES = {
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
+	["GetCapitalCommitByHashInput"]: ValueTypes["GetCapitalCommitByHashInput"];
 	["GetCapitalConfigInput"]: ValueTypes["GetCapitalConfigInput"];
+	["GetCapitalIssueByHashInput"]: ValueTypes["GetCapitalIssueByHashInput"];
 	["GetContributorInput"]: ValueTypes["GetContributorInput"];
 	["GetDebtInput"]: ValueTypes["GetDebtInput"];
 	["GetDocumentsInput"]: ValueTypes["GetDocumentsInput"];

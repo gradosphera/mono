@@ -9,6 +9,7 @@ import type { CommitFilterInputDTO } from '../../application/dto/generation/comm
 export interface CommitRepository extends IBlockchainSyncRepository<CommitDomainEntity> {
   create(commit: Omit<CommitDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<CommitDomainEntity>;
   findById(_id: string): Promise<CommitDomainEntity | null>;
+  findByCommitHash(commitHash: string): Promise<CommitDomainEntity | null>;
   findAll(): Promise<CommitDomainEntity[]>;
   findByUsername(username: string): Promise<CommitDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<CommitDomainEntity[]>;

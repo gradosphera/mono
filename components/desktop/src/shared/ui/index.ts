@@ -6,3 +6,4 @@ export * from './PaymentDetails';
 export * from './ClientOnly';
 export * from './Loader';
 export * from './MeetCompactCard';
+export * from './TitleStyles';

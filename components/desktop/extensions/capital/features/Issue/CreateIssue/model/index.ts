@@ -12,9 +12,13 @@ export function useCreateIssue() {
   const store = useIssueStore();
 
   const initialCreateIssueInput: ICreateIssueInput = {
+    issue_hash: '',
+    coopname: '',
     created_by: '',
     project_hash: '',
     title: '',
+    labels: [],
+    attachments: [],
   };
 
   const createIssueInput = ref<ICreateIssueInput>({
@@ -34,8 +38,8 @@ export function useCreateIssue() {
   ): Promise<ICreateIssueOutput> {
     const transaction = await api.createIssue(data);
 
-    // Обновляем список задач после создания
-    await store.loadIssues({});
+    // Добавляем задачу в начало списка без перезагрузки всего списка
+    store.addIssueToList(transaction);
 
     // Сбрасываем createIssueInput после выполнения createIssue
     resetInput(createIssueInput, initialCreateIssueInput);

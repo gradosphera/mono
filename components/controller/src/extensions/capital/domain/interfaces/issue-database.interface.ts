@@ -6,6 +6,8 @@ import type { IssueStatus } from '../enums/issue-status.enum';
  */
 export interface IIssueDatabaseData {
   _id: string; // Внутренний ID базы данных
+  issue_hash: string; // Хеш задачи для внешних ссылок
+  coopname: string; // Имя аккаунта кооператива
   title: string; // Название задачи
   description?: string; // Описание задачи
   priority: IssuePriority; // Приоритет задачи
