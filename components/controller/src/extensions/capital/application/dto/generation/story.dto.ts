@@ -50,4 +50,16 @@ export class StoryOutputDTO {
     description: 'Порядок сортировки',
   })
   sort_order!: number;
+
+  @Field(() => Date, {
+    nullable: true,
+    description: 'Дата создания в базе данных',
+  })
+  _created_at?: Date;
+
+  @Field(() => Date, {
+    nullable: true,
+    description: 'Дата последнего обновления в базе данных',
+  })
+  _updated_at?: Date;
 }

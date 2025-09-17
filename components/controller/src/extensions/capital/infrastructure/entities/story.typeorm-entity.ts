@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { StoryStatus } from '../../domain/enums/story-status.enum';
 import { ProjectTypeormEntity } from './project.typeorm-entity';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
@@ -12,6 +21,12 @@ const EntityName = 'capital_stories';
 export class StoryTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
   _id!: string;
+
+  @Column({ type: 'integer', nullable: true })
+  block_num?: number;
+
+  @Column({ type: 'boolean', default: true })
+  present!: boolean;
 
   @Column({ type: 'varchar', length: 255 })
   title!: string;
@@ -39,7 +54,10 @@ export class StoryTypeormEntity {
   sort_order!: number;
 
   @CreateDateColumn({ type: 'timestamp' })
-  created_at!: Date;
+  _created_at!: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  _updated_at!: Date;
 
   // Связи
   @ManyToOne(() => ProjectTypeormEntity, (project) => project.stories, { onDelete: 'CASCADE' })

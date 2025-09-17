@@ -10,6 +10,8 @@ const rawStorySelector = {
   issue_id: true,
   created_by: true,
   sort_order: true,
+  _created_at: true,
+  _updated_at: true,
 }
 
 // Проверка валидности

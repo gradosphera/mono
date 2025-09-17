@@ -1984,8 +1984,14 @@ type CapitalState {
 
 """История (критерий выполнения) в системе CAPITAL"""
 type CapitalStory {
+  """Дата создания в базе данных"""
+  _created_at: DateTime
+
   """Внутренний ID базы данных"""
   _id: String!
+
+  """Дата последнего обновления в базе данных"""
+  _updated_at: DateTime
 
   """ID создателя (contributor)"""
   created_by: String!

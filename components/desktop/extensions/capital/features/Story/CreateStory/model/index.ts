@@ -1,12 +1,9 @@
 import { ref, type Ref } from 'vue';
-import type { Mutations } from '@coopenomics/sdk';
-import { api } from '../api';
 import {
   useStoryStore,
+  type ICreateStoryInput,
   type ICreateStoryOutput,
 } from 'app/extensions/capital/entities/Story/model';
-
-export type ICreateStoryInput = Mutations.Capital.CreateStory.IInput['data'];
 
 export function useCreateStory() {
   const store = useStoryStore();
@@ -31,10 +28,7 @@ export function useCreateStory() {
   async function createStory(
     data: ICreateStoryInput,
   ): Promise<ICreateStoryOutput> {
-    const transaction = await api.createStory(data);
-
-    // Добавляем историю в начало списка без перезагрузки всего списка
-    store.addStoryToList(transaction);
+    const transaction = await store.createStory(data);
 
     // Сбрасываем createStoryInput после выполнения createStory
     resetInput(createStoryInput, initialCreateStoryInput);

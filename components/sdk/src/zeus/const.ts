@@ -1562,7 +1562,9 @@ export const ReturnTypes: Record<string,any> = {
 		program_membership_funded:"String"
 	},
 	CapitalStory:{
+		_created_at:"DateTime",
 		_id:"String",
+		_updated_at:"DateTime",
 		created_by:"String",
 		description:"String",
 		issue_id:"String",

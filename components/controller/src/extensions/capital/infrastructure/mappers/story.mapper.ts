@@ -19,6 +19,10 @@ export class StoryMapper {
       issue_id: entity.issue_id,
       created_by: entity.created_by,
       sort_order: entity.sort_order,
+      block_num: 0,
+      present: true,
+      _created_at: entity._created_at,
+      _updated_at: entity._updated_at,
     };
 
     return new StoryDomainEntity(databaseData);
@@ -37,6 +41,10 @@ export class StoryMapper {
       issue_id: domain.issue_id,
       created_by: domain.created_by,
       sort_order: domain.sort_order,
+      block_num: 0,
+      present: true,
+      _created_at: domain._created_at,
+      _updated_at: domain._updated_at,
     };
 
     return entity;

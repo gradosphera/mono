@@ -1,10 +1,10 @@
 import type { StoryStatus } from '../enums/story-status.enum';
+import type { IBaseDatabaseData } from './base-database.interface';
 
 /**
  * Интерфейс данных истории из базы данных
  */
-export interface IStoryDatabaseData {
-  _id: string; // Внутренний ID базы данных
+export interface IStoryDatabaseData extends IBaseDatabaseData {
   title: string; // Название истории
   description?: string; // Описание истории
   status: StoryStatus; // Статус истории

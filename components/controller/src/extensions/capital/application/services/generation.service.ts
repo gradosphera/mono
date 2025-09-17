@@ -80,6 +80,8 @@ export class GenerationService {
       issue_id: data.issue_id,
       created_by: data.created_by,
       sort_order: data.sort_order || 0,
+      block_num: 0,
+      present: false,
     };
 
     // Создаем доменную сущность

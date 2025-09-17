@@ -1,7 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref, Ref } from 'vue';
 import { api } from '../api';
-import type { IStoriesPagination, IGetStoriesInput, IStory } from './types';
+import type {
+  IStoriesPagination,
+  IGetStoriesInput,
+  IStory,
+  ICreateStoryInput,
+  ICreateStoryOutput,
+} from './types';
 
 const namespace = 'storyStore';
 
@@ -9,6 +15,7 @@ interface IStoryStore {
   stories: Ref<IStoriesPagination | null>;
   loadStories: (data: IGetStoriesInput) => Promise<void>;
   addStoryToList: (storyData: IStory) => void;
+  createStory: (data: ICreateStoryInput) => Promise<ICreateStoryOutput>;
 }
 
 export const useStoryStore = defineStore(namespace, (): IStoryStore => {
@@ -38,9 +45,21 @@ export const useStoryStore = defineStore(namespace, (): IStoryStore => {
     }
   };
 
+  const createStory = async (
+    data: ICreateStoryInput,
+  ): Promise<ICreateStoryOutput> => {
+    const result = await api.createStory(data);
+
+    // Добавляем созданную историю в список
+    addStoryToList(result);
+
+    return result;
+  };
+
   return {
     stories,
     loadStories,
     addStoryToList,
+    createStory,
   };
 });

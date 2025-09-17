@@ -109,7 +109,7 @@ import {
   useIssueStore,
 } from 'app/extensions/capital/entities/Issue/model';
 import { useSystemStore } from 'src/entities/System/model';
-import { ProjectLifecycleWidget } from 'app/extensions/capital/widgets/ProjectLifecycleWidget';
+import { StoriesWidget } from 'app/extensions/capital/widgets/StoryWidget';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
 import { useRightDrawer } from 'src/shared/hooks/useRightDrawer';
@@ -214,14 +214,19 @@ const loadProject = async () => {
     });
     project.value = projectStore.project;
 
-    // Регистрируем ProjectLifecycleWidget в правом drawer
+    // Регистрируем StoriesWidget в правом drawer
     if (project.value) {
       registerRightDrawerAction({
-        id: 'project-lifecycle-' + projectHash.value,
-        component: ProjectLifecycleWidget,
+        id: 'project-stories-' + projectHash.value,
+        component: StoriesWidget,
         props: {
-          project,
-          onProjectUpdated: onProjectUpdated,
+          filter: {
+            project_hash: projectHash.value,
+            issue_id: undefined, // Только истории проекта, не задач
+          },
+          canCreate: true,
+          maxItems: 20,
+          emptyMessage: 'Историй проекта пока нет',
         },
         order: 1,
       });
@@ -271,11 +276,6 @@ const onRequest = async (props) => {
 };
 
 // Функция goBack больше не нужна - используется useBackButton
-
-// Обработчик обновления проекта
-const onProjectUpdated = async () => {
-  await loadProject();
-};
 
 // Обработчик клика по строке задачи
 const onRowClick = (evt: Event, row: IIssue) => {

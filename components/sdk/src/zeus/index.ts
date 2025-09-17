@@ -2332,8 +2332,12 @@ export type ValueTypes = {
 }>;
 	/** История (критерий выполнения) в системе CAPITAL */
 ["CapitalStory"]: AliasType<{
+	/** Дата создания в базе данных */
+	_created_at?:boolean | `@${string}`,
 	/** Внутренний ID базы данных */
 	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления в базе данных */
+	_updated_at?:boolean | `@${string}`,
 	/** ID создателя (contributor) */
 	created_by?:boolean | `@${string}`,
 	/** Описание истории */
@@ -7246,8 +7250,12 @@ export type ResolverInputTypes = {
 }>;
 	/** История (критерий выполнения) в системе CAPITAL */
 ["CapitalStory"]: AliasType<{
+	/** Дата создания в базе данных */
+	_created_at?:boolean | `@${string}`,
 	/** Внутренний ID базы данных */
 	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления в базе данных */
+	_updated_at?:boolean | `@${string}`,
 	/** ID создателя (contributor) */
 	created_by?:boolean | `@${string}`,
 	/** Описание истории */
@@ -12134,8 +12142,12 @@ export type ModelTypes = {
 };
 	/** История (критерий выполнения) в системе CAPITAL */
 ["CapitalStory"]: {
-		/** Внутренний ID базы данных */
+		/** Дата создания в базе данных */
+	_created_at?: ModelTypes["DateTime"] | undefined | null,
+	/** Внутренний ID базы данных */
 	_id: string,
+	/** Дата последнего обновления в базе данных */
+	_updated_at?: ModelTypes["DateTime"] | undefined | null,
 	/** ID создателя (contributor) */
 	created_by: string,
 	/** Описание истории */
@@ -17084,8 +17096,12 @@ export type GraphQLTypes = {
 	/** История (критерий выполнения) в системе CAPITAL */
 ["CapitalStory"]: {
 	__typename: "CapitalStory",
+	/** Дата создания в базе данных */
+	_created_at?: GraphQLTypes["DateTime"] | undefined | null,
 	/** Внутренний ID базы данных */
 	_id: string,
+	/** Дата последнего обновления в базе данных */
+	_updated_at?: GraphQLTypes["DateTime"] | undefined | null,
 	/** ID создателя (contributor) */
 	created_by: string,
 	/** Описание истории */

@@ -1,18 +1,18 @@
 import { StoryStatus } from '../enums/story-status.enum';
 import type { IStoryDatabaseData } from '../interfaces/story-database.interface';
-import { randomUUID } from 'crypto';
+import { BaseDomainEntity } from './base.entity';
+
 /**
  * Доменная сущность истории (критерия выполнения)
  *
  * Представляет пользовательскую историю или критерий выполнения,
  * которая может быть привязана к проекту или задаче
  */
-export class StoryDomainEntity {
-  // Поля из базы данных
-  public _id: string; // Внутренний ID базы данных
+export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
+  // Специфичные поля для истории
   public title: string; // Название истории
   public description?: string; // Описание истории
-  public status: StoryStatus; // Статус истории
+  public status: StoryStatus; // Статус истории (переопределяем тип)
   public project_hash?: string; // Хеш проекта (если история привязана к проекту)
   public issue_id?: string; // ID задачи (если история привязана к задаче)
   public created_by: string; // ID создателя (contributor)
@@ -24,11 +24,13 @@ export class StoryDomainEntity {
    * @param databaseData - данные из базы данных
    */
   constructor(databaseData: IStoryDatabaseData) {
-    // Данные из базы данных
-    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
+    // Вызываем конструктор базового класса
+    super(databaseData, StoryStatus.PENDING);
+
+    // Устанавливаем специфичные поля истории
     this.title = databaseData.title;
     this.description = databaseData.description;
-    this.status = databaseData.status;
+    this.status = databaseData.status; // Переопределяем статус с правильным типом
     this.project_hash = databaseData.project_hash?.toLowerCase();
     this.issue_id = databaseData.issue_id;
     this.created_by = databaseData.created_by;
@@ -39,6 +41,10 @@ export class StoryDomainEntity {
    * Обновление данных сущности
    */
   update(data: Partial<IStoryDatabaseData>): void {
+    // Обновляем базовые поля через родительский метод
+    super.updateBase(data);
+
+    // Обновляем специфичные поля истории
     if (data.title !== undefined) this.title = data.title;
     if (data.description !== undefined) this.description = data.description;
     if (data.status !== undefined) this.status = data.status;

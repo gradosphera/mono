@@ -90,7 +90,7 @@ export class StoryTypeormRepository implements StoryRepository {
   async findByCreatedBy(createdBy: string): Promise<StoryDomainEntity[]> {
     const entities = await this.storyTypeormRepository.find({
       where: { created_by: createdBy },
-      order: { created_at: 'DESC' },
+      order: { _created_at: 'DESC' },
     });
     return entities.map(StoryMapper.toDomain);
   }
