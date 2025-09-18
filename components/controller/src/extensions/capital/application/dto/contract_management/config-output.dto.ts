@@ -1,4 +1,5 @@
 import { ObjectType, Field, Float } from '@nestjs/graphql';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL DTO для конфигурации CAPITAL контракта
@@ -44,7 +45,7 @@ export class ConfigDTO {
 @ObjectType('CapitalState', {
   description: 'Полное состояние CAPITAL контракта кооператива',
 })
-export class StateOutputDTO {
+export class StateOutputDTO extends BaseOutputDTO {
   @Field(() => String, {
     description: 'Название кооператива',
   })

@@ -1,7 +1,9 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
+import { baseCapitalSelector } from './baseCapitalSelector'
 
 const rawConfigSelector = {
+  ...baseCapitalSelector,
   coopname: true,
   global_available_invest_pool: true,
   program_membership_available: true,

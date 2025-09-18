@@ -1,11 +1,10 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
+import { baseCapitalSelector } from './baseCapitalSelector'
 
 const rawCommitSelector = {
-  _id: true,
+  ...baseCapitalSelector,
   id: true,
-  block_num: true,
-  present: true,
   status: true,
   commit_hash: true,
   coopname: true,

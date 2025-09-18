@@ -199,7 +199,7 @@ const columns = [
 
 // Пагинация
 const pagination = ref({
-  sortBy: 'created_at',
+  sortBy: '_created_at',
   descending: true,
   page: 1,
   rowsPerPage: 10,
@@ -227,6 +227,9 @@ const loadProject = async () => {
           canCreate: true,
           maxItems: 20,
           emptyMessage: 'Историй проекта пока нет',
+          currentProjectHash: projectHash.value,
+          onIssueClick: handleIssueClick,
+          onStoryClick: handleStoryClick,
         },
         order: 1,
       });
@@ -288,12 +291,33 @@ const onRowClick = (evt: Event, row: IIssue) => {
   });
 };
 
+// Обработчик клика по задаче из истории
+const handleIssueClick = (issueId: string) => {
+  // Находим задачу по ID и переходим к ней
+  const issue = issues.value?.items.find((i) => i._id === issueId);
+  if (issue) {
+    router.push({
+      name: 'project-issue',
+      params: {
+        project_hash: projectHash.value,
+        issue_hash: issue.issue_hash,
+      },
+    });
+  }
+};
+
+// Обработчик клика по истории (может быть использован для дополнительных действий)
+const handleStoryClick = (story) => {
+  // Заглушка для будущих расширений
+  console.log('Story clicked:', story);
+};
+
 // Watcher для отслеживания изменения projectHash
 watch(projectHash, async (newHash, oldHash) => {
   if (newHash && newHash !== oldHash) {
     // Сбрасываем пагинацию при переходе к другому проекту
     pagination.value.page = 1;
-    pagination.value.sortBy = 'created_at';
+    pagination.value.sortBy = '_created_at';
     pagination.value.descending = true;
 
     await loadProject();

@@ -2,6 +2,7 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { IssuePriority } from '../../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../../domain/enums/issue-status.enum';
 import GraphQLJSON from 'graphql-type-json';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности Issue
@@ -9,12 +10,7 @@ import GraphQLJSON from 'graphql-type-json';
 @ObjectType('CapitalIssue', {
   description: 'Задача в системе CAPITAL',
 })
-export class IssueOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class IssueOutputDTO extends BaseOutputDTO {
   @Field(() => String, {
     description: 'Хеш задачи',
   })

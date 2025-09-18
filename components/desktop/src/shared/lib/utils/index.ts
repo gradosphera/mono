@@ -8,3 +8,4 @@ export * from './validatePersonalNameRule';
 export * from './account';
 export * from './theme';
 export * from './parseLinks';
+export * from './dates';

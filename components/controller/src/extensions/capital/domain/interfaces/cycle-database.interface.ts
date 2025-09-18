@@ -1,10 +1,10 @@
 import type { CycleStatus } from '../enums/cycle-status.enum';
+import type { IBaseDatabaseData } from './base-database.interface';
 
 /**
  * Интерфейс данных цикла из базы данных
  */
-export interface ICycleDatabaseData {
-  _id: string; // Внутренний ID базы данных
+export interface ICycleDatabaseData extends IBaseDatabaseData {
   name: string; // Название цикла
   start_date: Date; // Дата начала
   end_date: Date; // Дата окончания

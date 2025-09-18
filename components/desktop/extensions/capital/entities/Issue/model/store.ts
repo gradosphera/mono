@@ -9,6 +9,7 @@ interface IIssueStore {
   issues: Ref<IIssuesPagination | null>;
   loadIssues: (data: IGetIssuesInput) => Promise<void>;
   addIssueToList: (issueData: IIssue) => void;
+  removeIssueFromList: (issueHash: string) => void;
 }
 
 export const useIssueStore = defineStore(namespace, (): IIssueStore => {
@@ -38,9 +39,26 @@ export const useIssueStore = defineStore(namespace, (): IIssueStore => {
     }
   };
 
+  const removeIssueFromList = (issueHash: string) => {
+    if (issues.value) {
+      // Ищем задачу по issue_hash
+      const issueIndex = issues.value.items.findIndex(
+        (issue) => issue.issue_hash === issueHash,
+      );
+
+      if (issueIndex !== -1) {
+        // Удаляем задачу из списка
+        issues.value.items.splice(issueIndex, 1);
+        // Уменьшаем общее количество
+        issues.value.totalCount -= 1;
+      }
+    }
+  };
+
   return {
     issues,
     loadIssues,
     addIssueToList,
+    removeIssueFromList,
   };
 });

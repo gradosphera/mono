@@ -5,14 +5,17 @@ import { RefreshSegmentInputDTO } from '../dto/generation/refresh-segment-input.
 import { CreateStoryInputDTO } from '../dto/generation/create-story-input.dto';
 import { CreateIssueInputDTO } from '../dto/generation/create-issue-input.dto';
 import { CreateCycleInputDTO } from '../dto/generation/create-cycle-input.dto';
+import { UpdateStoryInputDTO } from '../dto/generation/update-story-input.dto';
+import { UpdateIssueInputDTO } from '../dto/generation/update-issue-input.dto';
 import { StoryFilterInputDTO } from '../dto/generation/story-filter.input';
 import { IssueFilterInputDTO } from '../dto/generation/issue-filter.input';
 import { CommitFilterInputDTO } from '../dto/generation/commit-filter.input';
 import { CycleFilterInputDTO } from '../dto/generation/cycle-filter.input';
-import { GetIssueByIdInputDTO } from '../dto/generation/get-issue-by-id.input';
-import { GetCommitByIdInputDTO } from '../dto/generation/get-commit-by-id.input';
 import { GetIssueByHashInputDTO } from '../dto/generation/get-issue-by-hash.input';
 import { GetCommitByHashInputDTO } from '../dto/generation/get-commit-by-hash.input';
+import { GetStoryByHashInputDTO } from '../dto/generation/get-story-by-hash.input';
+import { DeleteStoryByHashInputDTO } from '../dto/generation/delete-story-by-hash.input';
+import { DeleteIssueByHashInputDTO } from '../dto/generation/delete-issue-by-hash.input';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -87,6 +90,22 @@ export class GenerationResolver {
     return result;
   }
 
+  /**
+   * Мутация для обновления истории
+   */
+  @Mutation(() => StoryOutputDTO, {
+    name: 'capitalUpdateStory',
+    description: 'Обновление истории в CAPITAL контракте',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async updateCapitalStory(
+    @Args('data', { type: () => UpdateStoryInputDTO }) data: UpdateStoryInputDTO
+  ): Promise<StoryOutputDTO> {
+    const result = await this.generationService.updateStory(data);
+    return result;
+  }
+
   // ============ ISSUE MUTATIONS ============
 
   /**
@@ -102,6 +121,22 @@ export class GenerationResolver {
     @Args('data', { type: () => CreateIssueInputDTO }) data: CreateIssueInputDTO
   ): Promise<IssueOutputDTO> {
     const result = await this.generationService.createIssue(data);
+    return result;
+  }
+
+  /**
+   * Мутация для обновления задачи
+   */
+  @Mutation(() => IssueOutputDTO, {
+    name: 'capitalUpdateIssue',
+    description: 'Обновление задачи в CAPITAL контракте',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async updateCapitalIssue(
+    @Args('data', { type: () => UpdateIssueInputDTO }) data: UpdateIssueInputDTO
+  ): Promise<IssueOutputDTO> {
+    const result = await this.generationService.updateIssue(data);
     return result;
   }
 
@@ -190,6 +225,18 @@ export class GenerationResolver {
   // ============ GET BY HASH QUERIES ============
 
   /**
+   * Получение истории по хэшу
+   */
+  @Query(() => StoryOutputDTO, {
+    name: 'capitalStory',
+    description: 'Получение истории по хэшу',
+    nullable: true,
+  })
+  async getCapitalStory(@Args('data') data: GetStoryByHashInputDTO): Promise<StoryOutputDTO | null> {
+    return await this.generationService.getStoryByHash(data.story_hash);
+  }
+
+  /**
    * Получение задачи по хэшу
    */
   @Query(() => IssueOutputDTO, {
@@ -211,5 +258,37 @@ export class GenerationResolver {
   })
   async getCapitalCommit(@Args('data') data: GetCommitByHashInputDTO): Promise<CommitOutputDTO | null> {
     return await this.generationService.getCommitByHash(data.commit_hash);
+  }
+
+  // ============ DELETE MUTATIONS ============
+
+  /**
+   * Мутация для удаления истории по хэшу
+   */
+  @Mutation(() => Boolean, {
+    name: 'capitalDeleteStory',
+    description: 'Удаление истории по хэшу',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async deleteCapitalStory(
+    @Args('data', { type: () => DeleteStoryByHashInputDTO }) data: DeleteStoryByHashInputDTO
+  ): Promise<boolean> {
+    return await this.generationService.deleteStoryByHash(data.story_hash);
+  }
+
+  /**
+   * Мутация для удаления задачи по хэшу
+   */
+  @Mutation(() => Boolean, {
+    name: 'capitalDeleteIssue',
+    description: 'Удаление задачи по хэшу',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async deleteCapitalIssue(
+    @Args('data', { type: () => DeleteIssueByHashInputDTO }) data: DeleteIssueByHashInputDTO
+  ): Promise<boolean> {
+    return await this.generationService.deleteIssueByHash(data.issue_hash);
   }
 }

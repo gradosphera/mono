@@ -22,7 +22,10 @@ export class ProgramWalletMapper {
       _id: entity._id,
       block_num: entity.block_num,
       present: entity.present,
+      status: entity.status,
       username: entity.username,
+      _created_at: entity._created_at,
+      _updated_at: entity._updated_at,
     };
 
     let blockchainData: toDomainBlockchainPart | undefined;
@@ -49,7 +52,10 @@ export class ProgramWalletMapper {
       _id: domain._id,
       block_num: domain.block_num ?? 0,
       present: domain.present,
+      status: domain.status as string,
       username: domain.username,
+      _created_at: domain._created_at as Date,
+      _updated_at: domain._updated_at as Date,
     };
 
     let blockchainPart: toEntityBlockchainPart | undefined;

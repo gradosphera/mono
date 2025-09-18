@@ -12,3 +12,11 @@ export type IGetIssueOutput =
 export type ICreateIssueInput = Mutations.Capital.CreateIssue.IInput['data'];
 export type ICreateIssueOutput =
   Mutations.Capital.CreateIssue.IOutput[typeof Mutations.Capital.CreateIssue.name];
+
+export type IUpdateIssueInput = Mutations.Capital.UpdateIssue.IInput['data'];
+export type IUpdateIssueOutput =
+  Mutations.Capital.UpdateIssue.IOutput[typeof Mutations.Capital.UpdateIssue.name];
+
+export type IDeleteIssueInput = Mutations.Capital.DeleteIssue.IInput['data'];
+export type IDeleteIssueOutput =
+  Mutations.Capital.DeleteIssue.IOutput[typeof Mutations.Capital.DeleteIssue.name];

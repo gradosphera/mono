@@ -54,8 +54,16 @@ export * as CompleteVoting from './completeVoting'
 export * as CalculateVotes from './calculateVotes'
 /** Создать историю в CAPITAL контракте */
 export * as CreateStory from './createStory'
+/** Обновить историю в CAPITAL контракте */
+export * as UpdateStory from './updateStory'
+/** Удалить историю в CAPITAL контракте */
+export * as DeleteStory from './deleteStory'
 /** Создать задачу в CAPITAL контракте */
 export * as CreateIssue from './createIssue'
+/** Обновить задачу в CAPITAL контракте */
+export * as UpdateIssue from './updateIssue'
+/** Удалить задачу в CAPITAL контракте */
+export * as DeleteIssue from './deleteIssue'
 /** Создать цикл в CAPITAL контракте */
 export * as CreateCycle from './createCycle'
 /** Создать расход в CAPITAL контракте */

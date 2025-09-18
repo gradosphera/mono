@@ -1,13 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, Ref } from 'vue';
 import { api } from '../api';
-import type {
-  IStoriesPagination,
-  IGetStoriesInput,
-  IStory,
-  ICreateStoryInput,
-  ICreateStoryOutput,
-} from './types';
+import type { IStoriesPagination, IGetStoriesInput, IStory } from './types';
 
 const namespace = 'storyStore';
 
@@ -15,7 +9,8 @@ interface IStoryStore {
   stories: Ref<IStoriesPagination | null>;
   loadStories: (data: IGetStoriesInput) => Promise<void>;
   addStoryToList: (storyData: IStory) => void;
-  createStory: (data: ICreateStoryInput) => Promise<ICreateStoryOutput>;
+  removeStoryFromList: (storyHash: string) => void;
+  updateStoryInPlace: (storyData: IStory) => void;
 }
 
 export const useStoryStore = defineStore(namespace, (): IStoryStore => {
@@ -45,21 +40,41 @@ export const useStoryStore = defineStore(namespace, (): IStoryStore => {
     }
   };
 
-  const createStory = async (
-    data: ICreateStoryInput,
-  ): Promise<ICreateStoryOutput> => {
-    const result = await api.createStory(data);
+  const updateStoryInPlace = (storyData: IStory) => {
+    if (stories.value) {
+      // Ищем историю по _id и заменяем её на месте
+      const existingIndex = stories.value.items.findIndex(
+        (story) => story._id === storyData._id,
+      );
 
-    // Добавляем созданную историю в список
-    addStoryToList(result);
+      if (existingIndex !== -1) {
+        // Заменяем объект на месте, без пересортировки
+        stories.value.items[existingIndex] = storyData;
+      }
+    }
+  };
 
-    return result;
+  const removeStoryFromList = (storyHash: string) => {
+    if (stories.value) {
+      // Ищем историю по story_hash
+      const storyIndex = stories.value.items.findIndex(
+        (story) => story.story_hash === storyHash,
+      );
+
+      if (storyIndex !== -1) {
+        // Удаляем историю из списка
+        stories.value.items.splice(storyIndex, 1);
+        // Уменьшаем общее количество
+        stories.value.totalCount -= 1;
+      }
+    }
   };
 
   return {
     stories,
     loadStories,
     addStoryToList,
-    createStory,
+    updateStoryInPlace,
+    removeStoryFromList,
   };
 });

@@ -33,7 +33,7 @@ export class CommentTypeormRepository implements CommentRepository {
   async findByIssueId(issueId: string): Promise<CommentDomainEntity[]> {
     const entities = await this.commentTypeormRepository.find({
       where: { issue_id: issueId },
-      order: { created_at: 'ASC' },
+      order: { _created_at: 'ASC' },
     });
     return entities.map(CommentMapper.toDomain);
   }
@@ -41,7 +41,7 @@ export class CommentTypeormRepository implements CommentRepository {
   async findByCommentorId(commentorId: string): Promise<CommentDomainEntity[]> {
     const entities = await this.commentTypeormRepository.find({
       where: { commentor_id: commentorId },
-      order: { created_at: 'DESC' },
+      order: { _created_at: 'DESC' },
     });
     return entities.map(CommentMapper.toDomain);
   }
@@ -77,7 +77,7 @@ export class CommentTypeormRepository implements CommentRepository {
     const entities = await this.commentTypeormRepository.find({
       where: { issue_id: issueId },
       relations: [], // Можно добавить связь с Contributor если нужно
-      order: { created_at: 'ASC' },
+      order: { _created_at: 'ASC' },
     });
     return entities.map(CommentMapper.toDomain);
   }

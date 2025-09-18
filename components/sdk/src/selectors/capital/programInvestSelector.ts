@@ -1,12 +1,10 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 import { rawDocumentAggregateSelector } from '../documents/documentAggregateSelector'
-
+import { baseCapitalSelector } from './baseCapitalSelector'
 const rawProgramInvestSelector = {
-  _id: true,
+  ...baseCapitalSelector,
   id: true,
-  block_num: true,
-  present: true,
   status: true,
   invest_hash: true,
   coopname: true,

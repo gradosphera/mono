@@ -27,6 +27,8 @@ export class ProgramWithdrawMapper {
       withdraw_hash: entity.withdraw_hash,
       blockchain_status: entity.blockchain_status,
       status: entity.status,
+      _created_at: entity._created_at,
+      _updated_at: entity._updated_at,
     };
 
     let blockchainData: toDomainBlockchainPart | undefined;
@@ -59,6 +61,8 @@ export class ProgramWithdrawMapper {
       withdraw_hash: domain.withdraw_hash,
       status: domain.status,
       blockchain_status: domain.blockchain_status as string,
+      _created_at: domain._created_at as Date,
+      _updated_at: domain._updated_at as Date,
     };
 
     let blockchainPart: toEntityBlockchainPart | undefined;

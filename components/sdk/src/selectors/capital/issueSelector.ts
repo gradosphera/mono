@@ -1,8 +1,8 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
-
+import { baseCapitalSelector } from './baseCapitalSelector'
 const rawIssueSelector = {
-  _id: true,
+  ...baseCapitalSelector,
   issue_hash: true,
   title: true,
   description: true,

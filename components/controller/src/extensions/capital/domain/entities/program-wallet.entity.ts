@@ -2,6 +2,7 @@ import type { IProgramWalletDatabaseData } from '../interfaces/program-wallet-da
 import type { IProgramWalletBlockchainData } from '../interfaces/program-wallet-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 import { randomUUID } from 'crypto';
+import { BaseDomainEntity } from './base.entity';
 
 /**
  * Доменная сущность программного кошелька
@@ -11,17 +12,15 @@ import { randomUUID } from 'crypto';
  * - Блокчейн: все данные программного кошелька из таблицы capwallets
  */
 export class ProgramWalletDomainEntity
-  implements IBlockchainSynchronizable, IProgramWalletDatabaseData, Partial<IProgramWalletBlockchainData>
+  extends BaseDomainEntity<IProgramWalletDatabaseData>
+  implements IBlockchainSynchronizable, Partial<IProgramWalletBlockchainData>
 {
   // Статические поля ключей для поиска и синхронизации
   private static primary_key = 'id';
   private static sync_key = 'username';
 
-  // Поля из базы данных
-  public _id: string; // Внутренний ID базы данных
+  // Специфичные поля для program-wallet
   public id?: number; // ID в блокчейне
-  public block_num: number | undefined; // Номер блока последнего обновления
-  public present = false; // Существует ли запись в блокчейне
 
   // Поля из блокчейна (wallets.hpp)
   public username: IProgramWalletBlockchainData['username'];
@@ -37,11 +36,11 @@ export class ProgramWalletDomainEntity
    * @param blockchainData - данные из блокчейна
    */
   constructor(databaseData: IProgramWalletDatabaseData, blockchainData?: IProgramWalletBlockchainData) {
-    // Данные из базы данных
-    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
-    this.block_num = databaseData.block_num;
+    // Вызываем конструктор базового класса с данными
+    super(databaseData);
+
+    // Специфичные поля для program-wallet
     this.username = databaseData.username;
-    this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -95,9 +94,10 @@ export class ProgramWalletDomainEntity
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: IProgramWalletBlockchainData, blockNum: number, present = true): void {
-    // Обновляем все поля из блокчейна
-    Object.assign(this, blockchainData);
     this.block_num = blockNum;
     this.present = present;
+
+    // Обновляем все поля из блокчейна
+    Object.assign(this, blockchainData);
   }
 }

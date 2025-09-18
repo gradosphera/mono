@@ -1,6 +1,7 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { ProgramPropertyStatus } from '../../../domain/enums/program-property-status.enum';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности ProgramProperty
@@ -8,12 +9,7 @@ import { DocumentAggregateDTO } from '~/application/document/dto/document-aggreg
 @ObjectType('CapitalProgramProperty', {
   description: 'Программный имущественный взнос в системе CAPITAL',
 })
-export class ProgramPropertyOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class ProgramPropertyOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     nullable: true,
     description: 'ID в блокчейне',

@@ -5,6 +5,8 @@ import type { RefreshSegmentInputDTO } from '../dto/generation/refresh-segment-i
 import type { CreateStoryInputDTO } from '../dto/generation/create-story-input.dto';
 import type { CreateIssueInputDTO } from '../dto/generation/create-issue-input.dto';
 import type { CreateCycleInputDTO } from '../dto/generation/create-cycle-input.dto';
+import type { UpdateStoryInputDTO } from '../dto/generation/update-story-input.dto';
+import type { UpdateIssueInputDTO } from '../dto/generation/update-issue-input.dto';
 import type { StoryFilterInputDTO } from '../dto/generation/story-filter.input';
 import type { IssueFilterInputDTO } from '../dto/generation/issue-filter.input';
 import type { CommitFilterInputDTO } from '../dto/generation/commit-filter.input';
@@ -73,6 +75,7 @@ export class GenerationService {
     // Создаем данные для доменной сущности
     const storyDatabaseData: IStoryDatabaseData = {
       _id: '',
+      story_hash: data.story_hash,
       title: data.title,
       description: data.description,
       status: data.status || StoryStatus.PENDING,
@@ -93,6 +96,40 @@ export class GenerationService {
   }
 
   /**
+   * Обновление истории
+   */
+  async updateStory(data: UpdateStoryInputDTO): Promise<StoryOutputDTO> {
+    // Получаем существующую историю
+    const existingStory = await this.storyRepository.findByStoryHash(data.story_hash);
+
+    if (!existingStory) {
+      throw new Error(`История с хэшем ${data.story_hash} не найдена`);
+    }
+
+    // Создаем обновленные данные для доменной сущности
+    const updatedStoryDatabaseData: IStoryDatabaseData = {
+      _id: existingStory._id,
+      story_hash: existingStory.story_hash,
+      title: data.title ?? existingStory.title,
+      description: data.description ?? existingStory.description,
+      status: data.status ?? existingStory.status,
+      project_hash: data.project_hash ?? existingStory.project_hash,
+      issue_id: data.issue_id ?? existingStory.issue_id,
+      created_by: existingStory.created_by,
+      sort_order: data.sort_order ?? existingStory.sort_order,
+      block_num: existingStory.block_num,
+      present: existingStory.present,
+    };
+
+    // Создаем доменную сущность с обновленными данными
+    const storyEntity = new StoryDomainEntity(updatedStoryDatabaseData);
+
+    // Сохраняем через репозиторий
+    const updatedStory = await this.storyRepository.update(storyEntity);
+    return updatedStory;
+  }
+
+  /**
    * Получение историй с фильтрацией
    */
   async getStories(filter?: StoryFilterInputDTO, options?: PaginationInputDTO): Promise<PaginationResult<StoryOutputDTO>> {
@@ -106,6 +143,26 @@ export class GenerationService {
       currentPage: result.currentPage,
       totalPages: result.totalPages,
     };
+  }
+
+  /**
+   * Получение истории по хэшу
+   */
+  async getStoryByHash(storyHash: string): Promise<StoryOutputDTO | null> {
+    const storyEntity = await this.storyRepository.findByStoryHash(storyHash);
+    return storyEntity ? (storyEntity as StoryOutputDTO) : null;
+  }
+
+  /**
+   * Удаление истории по хэшу
+   */
+  async deleteStoryByHash(storyHash: string): Promise<boolean> {
+    const storyEntity = await this.storyRepository.findByStoryHash(storyHash);
+    if (!storyEntity) {
+      throw new Error(`История с хэшем ${storyHash} не найдена`);
+    }
+    await this.storyRepository.delete(storyEntity._id);
+    return true;
   }
 
   // ============ ISSUE METHODS ============
@@ -134,6 +191,7 @@ export class GenerationService {
         labels: data.labels || [],
         attachments: data.attachments || [],
       },
+      present: false,
     };
 
     // Создаем доменную сущность
@@ -145,6 +203,48 @@ export class GenerationService {
   }
 
   /**
+   * Обновление задачи
+   */
+  async updateIssue(data: UpdateIssueInputDTO): Promise<IssueOutputDTO> {
+    // Получаем существующую задачу
+    const existingIssue = await this.issueRepository.findByIssueHash(data.issue_hash);
+
+    if (!existingIssue) {
+      throw new Error(`Задача с хэшем ${data.issue_hash} не найдена`);
+    }
+
+    // Создаем обновленные данные для доменной сущности
+    const updatedIssueDatabaseData: IIssueDatabaseData = {
+      _id: existingIssue._id,
+      issue_hash: existingIssue.issue_hash,
+      coopname: existingIssue.coopname,
+      title: data.title ?? existingIssue.title,
+      description: data.description ?? existingIssue.description,
+      priority: data.priority ?? existingIssue.priority,
+      status: data.status ?? existingIssue.status,
+      estimate: data.estimate ?? existingIssue.estimate,
+      sort_order: data.sort_order ?? existingIssue.sort_order,
+      created_by: existingIssue.created_by,
+      submaster_id: data.submaster_id ?? existingIssue.submaster_id,
+      creators_ids: data.creators_ids ?? existingIssue.creators_ids,
+      project_hash: existingIssue.project_hash,
+      cycle_id: data.cycle_id ?? existingIssue.cycle_id,
+      metadata: {
+        labels: data.labels ?? existingIssue.metadata.labels,
+        attachments: data.attachments ?? existingIssue.metadata.attachments,
+      },
+      present: existingIssue.present,
+    };
+
+    // Создаем доменную сущность с обновленными данными
+    const issueEntity = new IssueDomainEntity(updatedIssueDatabaseData);
+
+    // Сохраняем через репозиторий
+    const updatedIssue = await this.issueRepository.update(issueEntity);
+    return updatedIssue;
+  }
+
+  /**
    * Получение задач с фильтрацией
    */
   async getIssues(filter?: IssueFilterInputDTO, options?: PaginationInputDTO): Promise<PaginationResult<IssueOutputDTO>> {
@@ -153,7 +253,7 @@ export class GenerationService {
 
     // Конвертируем результат в DTO
     return {
-      items: result.items as IssueOutputDTO[],
+      items: result.items,
       totalCount: result.totalCount,
       currentPage: result.currentPage,
       totalPages: result.totalPages,
@@ -174,6 +274,18 @@ export class GenerationService {
   async getIssueByHash(issueHash: string): Promise<IssueOutputDTO | null> {
     const issueEntity = await this.issueRepository.findByIssueHash(issueHash);
     return issueEntity ? (issueEntity as IssueOutputDTO) : null;
+  }
+
+  /**
+   * Удаление задачи по хэшу
+   */
+  async deleteIssueByHash(issueHash: string): Promise<boolean> {
+    const issueEntity = await this.issueRepository.findByIssueHash(issueHash);
+    if (!issueEntity) {
+      throw new Error(`Задача с хэшем ${issueHash} не найдена`);
+    }
+    await this.issueRepository.delete(issueEntity._id);
+    return true;
   }
 
   // ============ COMMIT METHODS ============
@@ -223,6 +335,7 @@ export class GenerationService {
       start_date: new Date(data.start_date),
       end_date: new Date(data.end_date),
       status: data.status || CycleStatus.FUTURE,
+      present: false,
     };
 
     // Создаем доменную сущность

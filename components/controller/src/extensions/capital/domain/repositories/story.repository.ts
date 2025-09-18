@@ -9,6 +9,7 @@ import type { StoryFilterInputDTO } from '../../application/dto/generation/story
 export interface StoryRepository {
   create(story: StoryDomainEntity): Promise<StoryDomainEntity>;
   findById(_id: string): Promise<StoryDomainEntity | null>;
+  findByStoryHash(storyHash: string): Promise<StoryDomainEntity | null>;
   findAll(): Promise<StoryDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<StoryDomainEntity[]>; // Только проектные истории
   findAllByProjectHash(projectHash: string): Promise<StoryDomainEntity[]>; // Все истории проекта

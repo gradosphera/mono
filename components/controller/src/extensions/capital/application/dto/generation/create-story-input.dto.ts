@@ -8,6 +8,13 @@ import { StoryStatus } from '../../../domain/enums/story-status.enum';
 @InputType('CreateStoryInput')
 export class CreateStoryInputDTO {
   @Field(() => String, {
+    description: 'Хеш истории для внешних ссылок',
+  })
+  @IsNotEmpty({ message: 'Хеш истории не должен быть пустым' })
+  @IsString({ message: 'Хеш истории должен быть строкой' })
+  story_hash!: string;
+
+  @Field(() => String, {
     description: 'Название истории',
   })
   @IsNotEmpty({ message: 'Название истории не должно быть пустым' })

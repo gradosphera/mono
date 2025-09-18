@@ -121,7 +121,7 @@ const toggleExpand = (projectHash: string) => {
 
 // Пагинация
 const pagination = ref({
-  sortBy: 'created_at',
+  sortBy: '_created_at',
   descending: true,
   page: 1,
   rowsPerPage: 10,

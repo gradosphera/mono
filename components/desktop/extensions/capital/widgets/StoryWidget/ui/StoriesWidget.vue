@@ -1,53 +1,34 @@
 <template lang="pug">
 div
-  // Заголовок виджета
+  //- // Заголовок виджета
   q-card-section.q-pb-sm
     .row.items-center.q-gutter-sm
-      q-icon(name='history', size='20px')
-      .text-h6 Истории
-      q-space
-      q-btn(
-        v-if='canCreate',
-        icon='add',
-        flat,
-        round,
-        dense,
-        color='primary',
-        @click='showCreateForm = !showCreateForm'
-      )
+      //- q-icon(name='history', size='20px')
+      span.text-bold.full-width.text-center Пользовательские Истории
 
   // Форма создания истории
-  q-card-section.q-pa-none.q-mb-md(v-if='showCreateForm')
-    .row.items-center.q-gutter-sm
-      q-input(
-        ref='titleInput',
-        v-model='newStoryTitle',
-        placeholder='Введите название истории...',
-        dense,
-        outlined,
-        hide-bottom-space,
-        autofocus,
-        @keydown.enter='handleCreateStory',
-        @keydown.escape='cancelCreate',
-        :loading='creating'
-      )
-      q-btn(
-        icon='check',
-        flat,
-        round,
-        dense,
-        color='positive',
-        @click='handleCreateStory',
-        :loading='creating'
-      )
-      q-btn(
-        icon='close',
-        flat,
-        round,
-        dense,
-        color='negative',
-        @click='cancelCreate'
-      )
+  q-card-section.q-pa-none.q-mb-md
+    q-input.q-pa-sm(
+      ref='titleInput',
+      v-model='newStoryTitle',
+      placeholder='Введите историю...',
+      dense,
+      flat,
+      hide-bottom-space,
+      @keydown.enter='handleCreateStory',
+      @keydown.escape='newStoryTitle = ""',
+      type='textarea',
+      rows='1'
+    )
+      template(#append)
+        q-btn(
+          icon='check',
+          flat,
+          dense,
+          color='positive',
+          @click='handleCreateStory',
+          :loading='creating'
+        )
 
   // Список историй
   q-card-section.q-pa-none
@@ -59,18 +40,33 @@ div
         v-ripple,
         @click='onStoryClick(story)'
       )
-        q-item-section(avatar)
-          q-icon(name='history', color='primary')
+        q-item-section(side)
+          q-checkbox(
+            :model-value='story.status',
+            :true-value='Zeus.StoryStatus.COMPLETED',
+            :false-value='Zeus.StoryStatus.PENDING',
+            dense,
+            @update:model-value='handleStatusChange(story, $event)',
+            @click.stop,
+            color='positive'
+          )
+
         q-item-section
           .text-body2.font-weight-medium {{ story.title }}
-          .text-caption.text-grey-6 {{ formatDate(story.created_at) }}
+            .full-width
+              // Индикатор типа истории
+              q-badge(
+                :color='getStoryTypeColor(story)',
+                :label='getStoryTypeLabel(story)'
+              )
+
         q-item-section(side)
-          q-chip(
-            :color='getStoryStatusColor(story.status)',
-            text-color='white',
-            dense,
-            size='sm',
-            :label='getStoryStatusLabel(story.status)'
+          DeleteStoryButton(
+            :story-hash='story.story_hash',
+            :story-title='story.title',
+            @deleted='onStoryDeleted',
+            @close='onDeleteDialogClose',
+            @click.stop
           )
 
       // Заглушка если нет историй
@@ -88,17 +84,21 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { Zeus } from '@coopenomics/sdk';
 import {
   useStoryStore,
   type IStory,
   type IGetStoriesInput,
   type ICreateStoryInput,
+  type IUpdateStoryInput,
 } from 'app/extensions/capital/entities/Story/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { date } from 'quasar';
+import { useCreateStory } from 'app/extensions/capital/features/Story/CreateStory';
+import { DeleteStoryButton } from 'app/extensions/capital/features/Story/DeleteStory';
+import { useUpdateStory } from 'app/extensions/capital/features/Story/UpdateStory';
 
 // Props для конфигурации виджета
 interface Props {
@@ -112,6 +112,10 @@ interface Props {
   emptyMessage?: string;
   // Callback при клике на историю
   onStoryClick?: (story: IStory) => void | undefined;
+  // Callback при клике на задачу
+  onIssueClick?: (issueId: string) => void | undefined;
+  // Хэш текущего открытого проекта
+  currentProjectHash?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -119,6 +123,8 @@ const props = withDefaults(defineProps<Props>(), {
   maxItems: 50,
   emptyMessage: 'Историй пока нет',
   onStoryClick: undefined,
+  onIssueClick: undefined,
+  currentProjectHash: undefined,
 });
 
 const { info } = useSystemStore();
@@ -128,54 +134,55 @@ const storyStore = useStoryStore();
 // Реактивные переменные
 const loading = ref(false);
 const creating = ref(false);
-const showCreateForm = ref(false);
 const newStoryTitle = ref('');
 const titleInput = ref();
+const updatingStoryId = ref<string | null>(null);
 
 // Вычисляемые свойства
 const stories = computed(() => {
   if (!storyStore.stories) return null;
 
+  // Сортируем истории: сперва проектные без issue, затем остальные
+  const sortedItems = [...storyStore.stories.items].sort((a, b) => {
+    // Определяем приоритет группы для каждой истории
+    const getGroupPriority = (story: IStory): number => {
+      if (story.project_hash && !story.issue_id) {
+        // Проектная история без issue - высший приоритет (группа 1)
+        return 1;
+      }
+      // Все остальные истории (группа 2)
+      return 2;
+    };
+
+    const aPriority = getGroupPriority(a);
+    const bPriority = getGroupPriority(b);
+
+    // Если приоритеты разные - сортируем по приоритету
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+
+    // Если приоритеты одинаковые - сортируем по sort_order, затем по _created_at
+    if (a.sort_order !== b.sort_order) {
+      return a.sort_order - b.sort_order;
+    }
+
+    return 0;
+  });
+
   // Ограничиваем количество элементов если указано maxItems
-  if (props.maxItems && storyStore.stories.items.length > props.maxItems) {
+  if (props.maxItems && sortedItems.length > props.maxItems) {
     return {
       ...storyStore.stories,
-      items: storyStore.stories.items.slice(0, props.maxItems),
+      items: sortedItems.slice(0, props.maxItems),
     };
   }
 
-  return storyStore.stories;
+  return {
+    ...storyStore.stories,
+    items: sortedItems,
+  };
 });
-
-// Утилиты для статусов историй (пока используем простые цвета)
-const getStoryStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    PENDING: 'orange',
-    IN_PROGRESS: 'blue',
-    COMPLETED: 'green',
-    CANCELLED: 'red',
-  };
-  return colors[status] || 'grey';
-};
-
-const getStoryStatusLabel = (status: string) => {
-  const labels: Record<string, string> = {
-    PENDING: 'Ожидает',
-    IN_PROGRESS: 'В работе',
-    COMPLETED: 'Завершена',
-    CANCELLED: 'Отменена',
-  };
-  return labels[status] || status;
-};
-
-// Форматирование даты
-const formatDate = (dateStr: string) => {
-  try {
-    return date.formatDate(new Date(dateStr), 'DD.MM.YYYY HH:mm');
-  } catch {
-    return dateStr;
-  }
-};
 
 // Загрузка историй
 const loadStories = async () => {
@@ -189,7 +196,7 @@ const loadStories = async () => {
     const options: IGetStoriesInput['options'] = {
       page: 1,
       limit: props.maxItems,
-      sortBy: 'created_at',
+      sortBy: '_created_at',
       sortOrder: 'DESC',
     };
 
@@ -224,14 +231,14 @@ const handleCreateStory = async () => {
       ...props.filter, // Добавляем фильтр (project_hash или issue_id)
     } as ICreateStoryInput;
 
-    await storyStore.createStory(storyData);
+    const newStory = await useCreateStory().createStory(storyData);
     SuccessAlert('История создана');
+
+    // Добавляем новую историю в локальный store
+    storyStore.addStoryToList(newStory);
 
     // Сбрасываем форму
     newStoryTitle.value = '';
-    showCreateForm.value = false;
-
-    // Список обновится автоматически через store
   } catch (error) {
     console.error('Ошибка при создании истории:', error);
     FailAlert('Не удалось создать историю');
@@ -240,26 +247,81 @@ const handleCreateStory = async () => {
   }
 };
 
-// Отмена создания
-const cancelCreate = () => {
-  newStoryTitle.value = '';
-  showCreateForm.value = false;
+// Функция для получения цвета бейджа типа истории
+const getStoryTypeColor = (story: IStory): string => {
+  if (story.project_hash && !story.issue_id) {
+    return 'blue'; // Проектная история
+  }
+  if (story.issue_id) {
+    return 'orange'; // Задачная история
+  }
+  return 'grey'; // Обычная история
+};
+
+// Функция для получения текста бейджа типа истории
+const getStoryTypeLabel = (story: IStory): string => {
+  if (story.project_hash && !story.issue_id) {
+    return 'проект'; // Проектная история
+  }
+  if (story.issue_id) {
+    // Для задачной истории берем первые 6 символов issue_id
+    const shortId = story.issue_id.substring(0, 6);
+    return `задача #${shortId}`;
+  }
+  return 'история'; // Обычная история
 };
 
 // Обработчик клика по истории
 const onStoryClick = (story: IStory) => {
+  // Если у истории есть issue_id - переходим к задаче
+  if (story.issue_id && props.onIssueClick) {
+    props.onIssueClick(story.issue_id);
+    return;
+  }
+
+  // Если у истории есть project_hash и это текущий открытый проект - ничего не делаем
+  if (story.project_hash && story.project_hash === props.currentProjectHash) {
+    return;
+  }
+
+  // В остальных случаях вызываем стандартный обработчик
   if (props.onStoryClick) {
     props.onStoryClick(story);
   }
 };
 
-// Фокус на поле ввода при показе формы
-watch(showCreateForm, async (newValue) => {
-  if (newValue && titleInput.value) {
-    await nextTick();
-    titleInput.value.focus();
+// Обработчики для DeleteStoryButton
+const onStoryDeleted = () => {
+  // История будет автоматически удалена из списка через store
+};
+
+const onDeleteDialogClose = () => {
+  // Обработка закрытия диалога
+};
+
+// Изменение статуса истории
+const handleStatusChange = async (
+  story: IStory,
+  newStatus: Zeus.StoryStatus,
+) => {
+  updatingStoryId.value = story._id;
+  try {
+    const updateData: IUpdateStoryInput = {
+      story_hash: story.story_hash,
+      status: newStatus,
+    };
+
+    // Обновляем историю через API
+    await useUpdateStory().updateStory(updateData);
+
+    SuccessAlert('Статус истории обновлен');
+  } catch (error) {
+    console.error('Ошибка при обновлении статуса истории:', error);
+    FailAlert('Не удалось обновить статус истории');
+  } finally {
+    updatingStoryId.value = null;
   }
-});
+};
 
 // Инициализация
 onMounted(async () => {
@@ -269,9 +331,6 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .stories-list {
-  max-height: 400px;
-  overflow-y: auto;
-
   .q-item {
     border-radius: 8px;
     margin-bottom: 4px;
@@ -284,5 +343,13 @@ onMounted(async () => {
 
 .text-h6 {
   margin-bottom: 8px;
+}
+
+// Стили для бейджей типов историй
+.q-badge {
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 8px;
 }
 </style>

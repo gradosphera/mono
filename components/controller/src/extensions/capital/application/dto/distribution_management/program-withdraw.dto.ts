@@ -1,6 +1,7 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { ProgramWithdrawStatus } from '../../../domain/enums/program-withdraw-status.enum';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности ProgramWithdraw
@@ -8,12 +9,7 @@ import { DocumentAggregateDTO } from '~/application/document/dto/document-aggreg
 @ObjectType('CapitalProgramWithdraw', {
   description: 'Возврат из программы в системе CAPITAL',
 })
-export class ProgramWithdrawOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class ProgramWithdrawOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     nullable: true,
     description: 'ID в блокчейне',

@@ -4,11 +4,14 @@ import {
   type ICreateStoryInput,
   type ICreateStoryOutput,
 } from 'app/extensions/capital/entities/Story/model';
+import { api } from '../api';
+import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 
 export function useCreateStory() {
   const store = useStoryStore();
 
   const initialCreateStoryInput: ICreateStoryInput = {
+    story_hash: '',
     created_by: '',
     title: '',
   };
@@ -28,8 +31,9 @@ export function useCreateStory() {
   async function createStory(
     data: ICreateStoryInput,
   ): Promise<ICreateStoryOutput> {
-    const transaction = await store.createStory(data);
-
+    data.story_hash = await generateUniqueHash();
+    const transaction = await api.createStory(data);
+    store.addStoryToList(transaction);
     // Сбрасываем createStoryInput после выполнения createStory
     resetInput(createStoryInput, initialCreateStoryInput);
 

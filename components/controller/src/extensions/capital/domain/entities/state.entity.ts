@@ -1,7 +1,7 @@
 import type { IStateDatabaseData } from '../interfaces/state-database.interface';
 import type { IStateBlockchainData } from '../interfaces/state-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { randomUUID } from 'crypto';
+import { BaseDomainEntity } from './base.entity';
 /**
  * Доменная сущность состояния кооператива
  *
@@ -9,15 +9,15 @@ import { randomUUID } from 'crypto';
  * - База данных: внутренний ID, ссылка на блокчейн
  * - Блокчейн: все данные состояния из таблицы state
  */
-export class StateDomainEntity implements IBlockchainSynchronizable, IStateDatabaseData, Partial<IStateBlockchainData> {
+export class StateDomainEntity
+  extends BaseDomainEntity<IStateDatabaseData>
+  implements IBlockchainSynchronizable, Partial<IStateBlockchainData>
+{
   // Статические поля ключей для поиска и синхронизации
   private static primary_key = 'coopname';
   private static sync_key = 'coopname';
 
-  // Поля из базы данных
-  public _id: string; // Внутренний ID базы данных
-  public block_num?: number; // Номер блока последнего обновления
-  public present = false; // Существует ли запись в блокчейне
+  // Специфичные поля для state
 
   // Поля из блокчейна (state.hpp)
   public coopname: IStateBlockchainData['coopname'];
@@ -35,11 +35,10 @@ export class StateDomainEntity implements IBlockchainSynchronizable, IStateDatab
    * @param blockchainData - данные из блокчейна
    */
   constructor(databaseData: IStateDatabaseData, blockchainData?: IStateBlockchainData) {
-    // Данные из базы данных
-    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
+    // Вызываем конструктор базового класса с данными
+    super(databaseData);
 
-    this.present = databaseData.present;
-    this.block_num = databaseData.block_num;
+    // Специфичные поля для state
     this.coopname = databaseData.coopname;
 
     // Данные из блокчейна
@@ -95,6 +94,10 @@ export class StateDomainEntity implements IBlockchainSynchronizable, IStateDatab
    */
   updateFromBlockchain(blockchainData: IStateBlockchainData, blockNum: number, present = true): void {
     if (this.coopname !== blockchainData.coopname) throw new Error('Coopname mismatch');
+
+    // Обновляем базовые поля через метод базового класса
+    this.block_num = blockNum;
+    this.present = present;
 
     // Обновляем все поля из блокчейна
     Object.assign(this, blockchainData);

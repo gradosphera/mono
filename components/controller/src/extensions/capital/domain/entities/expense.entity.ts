@@ -3,7 +3,7 @@ import type { IExpenseDatabaseData } from '../interfaces/expense-database.interf
 import type { IExpenseBlockchainData } from '../interfaces/expense-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { randomUUID } from 'crypto';
+import { BaseDomainEntity } from './base.entity';
 
 /**
  * Доменная сущность расхода
@@ -13,19 +13,15 @@ import { randomUUID } from 'crypto';
  * - Блокчейн: все данные расхода из таблицы expenses
  */
 export class ExpenseDomainEntity
-  implements IBlockchainSynchronizable, IExpenseDatabaseData, Partial<IExpenseBlockchainData>
+  extends BaseDomainEntity<IExpenseDatabaseData>
+  implements IBlockchainSynchronizable, Partial<IExpenseBlockchainData>
 {
   // Статические поля ключей для поиска и синхронизации
   private static primary_key = 'id';
   private static sync_key = 'expense_hash';
 
-  // Поля из базы данных
-  public _id: string; // Внутренний ID базы данных
+  // Специфичные поля для expense
   public id?: number; // ID в блокчейне
-  public block_num: number | undefined; // Номер блока последнего обновления
-  public present = false; // Существует ли запись в блокчейне
-
-  // Доменные поля (расширения)
   public status: ExpenseStatus;
 
   // Поля из блокчейна (expenses.hpp)
@@ -50,12 +46,12 @@ export class ExpenseDomainEntity
    * @param blockchainData - данные из блокчейна
    */
   constructor(databaseData: IExpenseDatabaseData, blockchainData?: IExpenseBlockchainData) {
-    // Данные из базы данных
-    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
+    // Вызываем конструктор базового класса с данными
+    super(databaseData, ExpenseStatus.PENDING);
+
+    // Специфичные поля для expense
     this.status = this.mapStatusToDomain(databaseData.status);
-    this.block_num = databaseData.block_num;
     this.expense_hash = databaseData.expense_hash.toLowerCase();
-    this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -120,12 +116,13 @@ export class ExpenseDomainEntity
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: IExpenseBlockchainData, blockNum: number, present = true): void {
-    // Обновляем все поля из блокчейна
+    this.block_num = blockNum;
+    this.present = present;
+
+    // Обновляем специфичные поля из блокчейна
     Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
     this.status = this.mapStatusToDomain(blockchainData.status);
-    this.block_num = blockNum;
-    this.present = present;
 
     // Нормализация hash полей
     if (this.expense_hash) this.expense_hash = this.expense_hash.toLowerCase();

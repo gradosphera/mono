@@ -1,0 +1,1 @@
+export { useDeleteIssue } from './model';

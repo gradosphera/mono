@@ -80,7 +80,7 @@ export class CycleTypeormRepository implements CycleRepository {
     const entity = await this.cycleTypeormRepository.findOne({
       where: { status: CycleStatus.ACTIVE },
       relations: ['issues'],
-      order: { created_at: 'DESC' },
+      order: { _created_at: 'DESC' },
     });
     return entity ? CycleMapper.toDomain(entity) : null;
   }

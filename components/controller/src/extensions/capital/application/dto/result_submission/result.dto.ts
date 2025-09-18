@@ -1,6 +1,7 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { ResultStatus } from '../../../domain/enums/result-status.enum';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности Result
@@ -8,29 +9,12 @@ import { DocumentAggregateDTO } from '~/application/document/dto/document-aggreg
 @ObjectType('CapitalResult', {
   description: 'Результат в системе CAPITAL',
 })
-export class ResultOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class ResultOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     nullable: true,
     description: 'ID в блокчейне',
   })
   id?: number;
-
-  @Field(() => Int, {
-    nullable: true,
-    description: 'Номер блока последнего обновления',
-  })
-  block_num?: number;
-
-  @Field(() => Boolean, {
-    description: 'Существует ли запись в блокчейне',
-    defaultValue: false,
-  })
-  present!: boolean;
 
   @Field(() => ResultStatus, {
     description: 'Статус результата',

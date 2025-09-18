@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index, OneToMany } from 'typeorm';
+import { Entity, Column, Index, OneToMany } from 'typeorm';
 import { ProjectStatus } from '../../domain/enums/project-status.enum';
 import { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/project-blockchain.interface';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
 import { StoryTypeormEntity } from './story.typeorm-entity';
+import { BaseTypeormEntity } from './base.typeorm-entity';
 
 const EntityName = 'capital_projects';
 @Entity(EntityName)
@@ -10,18 +11,9 @@ const EntityName = 'capital_projects';
 @Index(`idx_${EntityName}_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_coopname`, ['coopname'])
 @Index(`idx_${EntityName}_status`, ['status'])
-export class ProjectTypeormEntity {
-  @PrimaryGeneratedColumn('uuid')
-  _id!: string;
-
+export class ProjectTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
-
-  @Column({ type: 'integer', nullable: true })
-  block_num!: number;
-
-  @Column({ type: 'boolean', default: true })
-  present!: boolean;
 
   // Поля из блокчейна (projects.hpp)
   @Column({ type: 'varchar', length: 12 })
@@ -75,7 +67,7 @@ export class ProjectTypeormEntity {
   @Column({ type: 'json' })
   membership!: IProjectDomainInterfaceBlockchainData['membership'];
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @Column({ type: 'timestamp' })
   created_at!: Date;
 
   // Доменные поля (расширения)

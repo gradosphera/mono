@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
 import { InvestStatus } from '../../domain/enums/invest-status.enum';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import { BaseTypeormEntity } from './base.typeorm-entity';
 
 const EntityName = 'capital_invests';
 @Entity(EntityName)
@@ -9,18 +10,10 @@ const EntityName = 'capital_invests';
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_status`, ['status'])
-export class InvestTypeormEntity {
-  @PrimaryGeneratedColumn('uuid')
-  _id!: string;
-
+@Index(`idx_${EntityName}_created_at`, ['_created_at'])
+export class InvestTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
-
-  @Column({ type: 'integer', nullable: true })
-  block_num!: number;
-
-  @Column({ type: 'boolean', default: true })
-  present!: boolean;
 
   // Поля из блокчейна (invests.hpp)
   @Column({ type: 'varchar', length: 12 })
@@ -53,7 +46,7 @@ export class InvestTypeormEntity {
   @Column({ type: 'bigint', nullable: true })
   coordinator_amount!: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @Column({ type: 'timestamp' })
   created_at!: Date;
 
   // Доменные поля (расширения)

@@ -1,14 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index, OneToMany } from 'typeorm';
+import { Entity, Column, CreateDateColumn, Index, OneToMany } from 'typeorm';
 import { CycleStatus } from '../../domain/enums/cycle-status.enum';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
+import { BaseTypeormEntity } from './base.typeorm-entity';
 
 const EntityName = 'capital_cycles';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_status`, ['status'])
-export class CycleTypeormEntity {
-  @PrimaryGeneratedColumn('uuid')
-  _id!: string;
-
+@Index(`idx_${EntityName}_created_at`, ['_created_at'])
+export class CycleTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar' })
   name!: string;
 
@@ -24,9 +23,6 @@ export class CycleTypeormEntity {
     default: CycleStatus.FUTURE,
   })
   status!: CycleStatus;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  created_at!: Date;
 
   // Связи
   @OneToMany(() => IssueTypeormEntity, (issue) => issue.cycle, { cascade: true })

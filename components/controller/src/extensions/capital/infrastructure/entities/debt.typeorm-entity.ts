@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
 import { DebtStatus } from '../../domain/enums/debt-status.enum';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import { BaseTypeormEntity } from './base.typeorm-entity';
 
 const EntityName = 'capital_debts';
 @Entity(EntityName)
@@ -9,18 +10,11 @@ const EntityName = 'capital_debts';
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_status`, ['status'])
-export class DebtTypeormEntity {
-  @PrimaryGeneratedColumn('uuid')
-  _id!: string;
-
+@Index(`idx_${EntityName}_created_at`, ['_created_at'])
+@Index(`idx_${EntityName}_repaid_at`, ['repaid_at'])
+export class DebtTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
-
-  @Column({ type: 'integer', nullable: true })
-  block_num!: number;
-
-  @Column({ type: 'boolean', default: true })
-  present!: boolean;
 
   // Поля из блокчейна (debts.hpp)
   @Column({ type: 'varchar', length: 12 })
@@ -56,7 +50,7 @@ export class DebtTypeormEntity {
   @Column({ type: 'text', nullable: true })
   memo!: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @Column({ type: 'timestamp' })
   created_at!: Date;
 
   // Доменные поля (расширения)

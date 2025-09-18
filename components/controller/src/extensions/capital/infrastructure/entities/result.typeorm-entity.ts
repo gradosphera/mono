@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
 import { ResultStatus } from '../../domain/enums/result-status.enum';
 import { IResultBlockchainData } from '../../domain/interfaces/result-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import { BaseTypeormEntity } from './base.typeorm-entity';
 
 const EntityName = 'capital_results';
 @Entity(EntityName)
@@ -10,18 +11,10 @@ const EntityName = 'capital_results';
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_status`, ['status'])
-export class ResultTypeormEntity {
-  @PrimaryGeneratedColumn('uuid')
-  _id!: string;
-
+@Index(`idx_${EntityName}_created_at`, ['_created_at'])
+export class ResultTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
-
-  @Column({ type: 'integer', nullable: true })
-  block_num!: number;
-
-  @Column({ type: 'boolean', default: true })
-  present!: boolean;
 
   // Поля из блокчейна (results.hpp)
   @Column({ type: 'varchar' })

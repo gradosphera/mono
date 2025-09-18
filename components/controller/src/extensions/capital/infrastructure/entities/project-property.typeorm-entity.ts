@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
 import { ProjectPropertyStatus } from '../../domain/enums/project-property-status.enum';
+import { BaseTypeormEntity } from './base.typeorm-entity';
 
 const EntityName = 'capital_project_properties';
 @Entity(EntityName)
@@ -8,18 +9,9 @@ const EntityName = 'capital_project_properties';
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_status`, ['status'])
-export class ProjectPropertyTypeormEntity {
-  @PrimaryGeneratedColumn('uuid')
-  _id!: string;
-
+export class ProjectPropertyTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
-
-  @Column({ type: 'integer', nullable: true })
-  block_num!: number;
-
-  @Column({ type: 'boolean', default: true })
-  present!: boolean;
 
   // Поля из блокчейна (project_properties.hpp)
   @Column({ type: 'varchar' })
@@ -45,9 +37,6 @@ export class ProjectPropertyTypeormEntity {
 
   @Column({ type: 'timestamp' })
   created_at!: Date;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  created_at_db!: Date;
 
   // Доменные поля (расширения)
   @Column({

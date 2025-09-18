@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { ProjectStatus } from '../../../domain/enums/project-status.enum';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * Базовый GraphQL Output DTO для сущности Project
@@ -8,29 +9,12 @@ import { ProjectStatus } from '../../../domain/enums/project-status.enum';
 @ObjectType('BaseCapitalProject', {
   description: 'Базовый проект в системе CAPITAL',
 })
-export class BaseProjectOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class BaseProjectOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     nullable: true,
     description: 'ID в блокчейне',
   })
   id?: number;
-
-  @Field(() => Int, {
-    nullable: true,
-    description: 'Номер блока последнего обновления',
-  })
-  block_num?: number;
-
-  @Field(() => Boolean, {
-    description: 'Существует ли запись в блокчейне',
-    defaultValue: false,
-  })
-  present!: boolean;
 
   @Field(() => ProjectStatus, {
     description: 'Статус проекта',

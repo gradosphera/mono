@@ -2,7 +2,7 @@ import { ProjectStatus } from '../enums/project-status.enum';
 import type { IProjectDomainInterfaceDatabaseData } from '../interfaces/project-database.interface';
 import type { IProjectDomainInterfaceBlockchainData } from '../interfaces/project-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { randomUUID } from 'crypto';
+import { BaseDomainEntity } from './base.entity';
 /**
  * Доменная сущность проекта
  *
@@ -11,17 +11,15 @@ import { randomUUID } from 'crypto';
  * - Блокчейн: все данные проекта из таблицы projects
  */
 export class ProjectDomainEntity
-  implements IBlockchainSynchronizable, IProjectDomainInterfaceDatabaseData, Partial<IProjectDomainInterfaceBlockchainData>
+  extends BaseDomainEntity<IProjectDomainInterfaceDatabaseData>
+  implements IBlockchainSynchronizable, Partial<IProjectDomainInterfaceBlockchainData>
 {
   // Статические поля ключей для поиска и синхронизации
   private static primary_key = 'id';
   private static sync_key = 'project_hash';
 
   // Поля из базы данных
-  public _id: string; // Внутренний ID базы данных
   public id?: number; // ID в блокчейне
-  public block_num: number | undefined; // Номер блока последнего обновления
-  public present = false; // Существует ли запись в блокчейне
 
   // Доменные поля (расширения)
   public status: ProjectStatus;
@@ -54,12 +52,12 @@ export class ProjectDomainEntity
    * @param blockchainData - данные из блокчейна
    */
   constructor(databaseData: IProjectDomainInterfaceDatabaseData, blockchainData?: IProjectDomainInterfaceBlockchainData) {
-    // Данные из базы данных
-    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
+    // Вызываем конструктор базового класса с данными
+    super(databaseData, ProjectStatus.PENDING);
+
+    // Специфичные поля для project
     this.status = this.mapStatusToDomain(databaseData.status);
-    this.block_num = databaseData.block_num;
     this.project_hash = databaseData.project_hash.toLowerCase();
-    this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -130,12 +128,14 @@ export class ProjectDomainEntity
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: IProjectDomainInterfaceBlockchainData, blockNum: number, present = true): void {
-    // Обновляем все поля из блокчейна
+    // Обновляем базовые поля через метод базового класса
+    this.block_num = blockNum;
+    this.present = present;
+
+    // Обновляем специфичные поля из блокчейна
     Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
     this.status = this.mapStatusToDomain(blockchainData.status);
-    this.block_num = blockNum;
-    this.present = present;
 
     // Нормализация hash полей
     if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();

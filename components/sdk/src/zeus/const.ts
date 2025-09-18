@@ -257,6 +257,12 @@ export const AllTypesProps: Record<string,any> = {
 	DeleteBranchInput:{
 
 	},
+	DeleteCapitalIssueByHashInput:{
+
+	},
+	DeleteCapitalStoryByHashInput:{
+
+	},
 	DeletePaymentMethodInput:{
 
 	},
@@ -325,6 +331,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	GetCapitalIssueByHashInput:{
+
+	},
+	GetCapitalStoryByHashInput:{
 
 	},
 	GetContributorInput:{
@@ -463,8 +472,14 @@ export const AllTypesProps: Record<string,any> = {
 		capitalCreateStory:{
 			data:"CreateStoryInput"
 		},
+		capitalDeleteIssue:{
+			data:"DeleteCapitalIssueByHashInput"
+		},
 		capitalDeleteProject:{
 			data:"DeleteProjectInput"
+		},
+		capitalDeleteStory:{
+			data:"DeleteCapitalStoryByHashInput"
 		},
 		capitalEditProject:{
 			data:"EditProjectInput"
@@ -516,6 +531,12 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalSubmitVote:{
 			data:"SubmitVoteInput"
+		},
+		capitalUpdateIssue:{
+			data:"UpdateIssueInput"
+		},
+		capitalUpdateStory:{
+			data:"UpdateStoryInput"
 		},
 		completeRequest:{
 			data:"CompleteRequestInput"
@@ -901,6 +922,9 @@ export const AllTypesProps: Record<string,any> = {
 			filter:"CapitalStoryFilter",
 			options:"PaginationInput"
 		},
+		capitalStory:{
+			data:"GetCapitalStoryByHashInput"
+		},
 		capitalVote:{
 			data:"GetVoteInput"
 		},
@@ -1133,12 +1157,19 @@ export const AllTypesProps: Record<string,any> = {
 	UpdateIndividualDataInput:{
 		passport:"PassportInput"
 	},
+	UpdateIssueInput:{
+		priority:"IssuePriority",
+		status:"IssueStatus"
+	},
 	UpdateOrganizationDataInput:{
 		details:"OrganizationDetailsInput",
 		represented_by:"RepresentedByInput"
 	},
 	UpdateRequestInput:{
 
+	},
+	UpdateStoryInput:{
+		status:"StoryStatus"
 	},
 	UserStatus: "enum" as const,
 	VarsInput:{
@@ -1360,8 +1391,10 @@ export const ReturnTypes: Record<string,any> = {
 		type:"String"
 	},
 	CapitalCommit:{
+		_created_at:"DateTime",
 		_id:"String",
-		block_num:"Int",
+		_updated_at:"DateTime",
+		block_num:"Float",
 		blockchain_status:"String",
 		commit_hash:"String",
 		coopname:"String",
@@ -1381,7 +1414,9 @@ export const ReturnTypes: Record<string,any> = {
 		voting_period_in_days:"Float"
 	},
 	CapitalContributor:{
+		_created_at:"DateTime",
 		_id:"String",
+		_updated_at:"DateTime",
 		appendixes:"String",
 		block_num:"Int",
 		blockchain_status:"String",
@@ -1405,14 +1440,20 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	CapitalCycle:{
+		_created_at:"DateTime",
 		_id:"String",
+		_updated_at:"DateTime",
+		block_num:"Float",
 		end_date:"DateTime",
 		name:"String",
+		present:"Boolean",
 		start_date:"DateTime",
 		status:"CycleStatus"
 	},
 	CapitalDebt:{
+		_created_at:"DateTime",
 		_id:"String",
+		_updated_at:"DateTime",
 		amount:"Float",
 		approved_statement:"DocumentAggregate",
 		authorization:"DocumentAggregate",
@@ -1430,7 +1471,9 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	CapitalExpense:{
+		_created_at:"DateTime",
 		_id:"String",
+		_updated_at:"DateTime",
 		amount:"String",
 		approved_statement:"DocumentAggregate",
 		authorization:"DocumentAggregate",
@@ -1449,7 +1492,9 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	CapitalInvest:{
+		_created_at:"DateTime",
 		_id:"String",
+		_updated_at:"DateTime",
 		amount:"Float",
 		block_num:"Int",
 		blockchain_status:"String",
@@ -1466,7 +1511,10 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	CapitalIssue:{
+		_created_at:"DateTime",
 		_id:"String",
+		_updated_at:"DateTime",
+		block_num:"Float",
 		created_by:"String",
 		creators_ids:"String",
 		cycle_id:"String",
@@ -1474,6 +1522,7 @@ export const ReturnTypes: Record<string,any> = {
 		estimate:"Int",
 		issue_hash:"String",
 		metadata:"JSON",
+		present:"Boolean",
 		priority:"IssuePriority",
 		project_hash:"String",
 		sort_order:"Int",
@@ -1482,7 +1531,9 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String"
 	},
 	CapitalProgramInvest:{
+		_created_at:"DateTime",
 		_id:"String",
+		_updated_at:"DateTime",
 		amount:"Float",
 		block_num:"Int",
 		blockchain_status:"String",
@@ -1496,8 +1547,10 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	CapitalProject:{
+		_created_at:"DateTime",
 		_id:"String",
-		block_num:"Int",
+		_updated_at:"DateTime",
+		block_num:"Float",
 		blockchain_status:"String",
 		can_convert_to_project:"Boolean",
 		components:"CapitalProjectComponent",
@@ -1516,8 +1569,10 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String"
 	},
 	CapitalProjectComponent:{
+		_created_at:"DateTime",
 		_id:"String",
-		block_num:"Int",
+		_updated_at:"DateTime",
+		block_num:"Float",
 		blockchain_status:"String",
 		can_convert_to_project:"Boolean",
 		coopname:"String",
@@ -1535,10 +1590,12 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String"
 	},
 	CapitalResult:{
+		_created_at:"DateTime",
 		_id:"String",
+		_updated_at:"DateTime",
 		act:"DocumentAggregate",
 		authorization:"DocumentAggregate",
-		block_num:"Int",
+		block_num:"Float",
 		blockchain_status:"String",
 		coopname:"String",
 		created_at:"String",
@@ -1553,9 +1610,14 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	CapitalState:{
+		_created_at:"DateTime",
+		_id:"String",
+		_updated_at:"DateTime",
+		block_num:"Float",
 		config:"CapitalConfigObject",
 		coopname:"String",
 		global_available_invest_pool:"String",
+		present:"Boolean",
 		program_membership_available:"String",
 		program_membership_cumulative_reward_per_share:"Float",
 		program_membership_distributed:"String",
@@ -1565,18 +1627,23 @@ export const ReturnTypes: Record<string,any> = {
 		_created_at:"DateTime",
 		_id:"String",
 		_updated_at:"DateTime",
+		block_num:"Float",
 		created_by:"String",
 		description:"String",
 		issue_id:"String",
+		present:"Boolean",
 		project_hash:"String",
 		sort_order:"Int",
 		status:"StoryStatus",
+		story_hash:"String",
 		title:"String"
 	},
 	CapitalVote:{
+		_created_at:"DateTime",
 		_id:"String",
+		_updated_at:"DateTime",
 		amount:"Float",
-		block_num:"Int",
+		block_num:"Float",
 		id:"Int",
 		present:"Boolean",
 		project_hash:"String",
@@ -1956,7 +2023,9 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCreateProjectInvest:"Transaction",
 		capitalCreateProjectProperty:"Transaction",
 		capitalCreateStory:"CapitalStory",
+		capitalDeleteIssue:"Boolean",
 		capitalDeleteProject:"Transaction",
+		capitalDeleteStory:"Boolean",
 		capitalEditProject:"Transaction",
 		capitalFundProgram:"Transaction",
 		capitalFundProject:"Transaction",
@@ -1974,6 +2043,8 @@ export const ReturnTypes: Record<string,any> = {
 		capitalStartProject:"Transaction",
 		capitalStartVoting:"Transaction",
 		capitalSubmitVote:"Transaction",
+		capitalUpdateIssue:"CapitalIssue",
+		capitalUpdateStory:"CapitalStory",
 		completeRequest:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
@@ -2279,6 +2350,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalResults:"PaginatedCapitalResultsPaginationResult",
 		capitalState:"CapitalState",
 		capitalStories:"PaginatedCapitalStoriesPaginationResult",
+		capitalStory:"CapitalStory",
 		capitalVote:"CapitalVote",
 		capitalVotes:"PaginatedCapitalVotesPaginationResult",
 		getAccount:"Account",

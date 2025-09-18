@@ -26,6 +26,9 @@ export class IssueMapper {
       project_hash: entity.project_hash,
       cycle_id: entity.cycle_id,
       metadata: entity.metadata,
+      _created_at: entity._created_at,
+      _updated_at: entity._updated_at,
+      present: entity.present,
     };
 
     return new IssueDomainEntity(databaseData);
@@ -52,7 +55,9 @@ export class IssueMapper {
     if (domain.project_hash !== undefined) entity.project_hash = domain.project_hash;
     if (domain.cycle_id !== undefined) entity.cycle_id = domain.cycle_id;
     if (domain.metadata !== undefined) entity.metadata = domain.metadata;
-
+    if (domain._created_at !== undefined) entity._created_at = domain._created_at as Date;
+    if (domain._updated_at !== undefined) entity._updated_at = domain._updated_at as Date;
+    if (domain.present !== undefined) entity.present = domain.present;
     return entity;
   }
 }

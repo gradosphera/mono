@@ -1,19 +1,14 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { ProgramInvestStatus } from '../../../domain/enums/program-invest-status.enum';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
-
+import { BaseOutputDTO } from '../base.dto';
 /**
  * GraphQL Output DTO для сущности ProgramInvest
  */
 @ObjectType('CapitalProgramInvest', {
   description: 'Программная инвестиция в системе CAPITAL',
 })
-export class ProgramInvestOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class ProgramInvestOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     nullable: true,
     description: 'ID в блокчейне',

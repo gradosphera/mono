@@ -16,6 +16,9 @@ export class CycleMapper {
       start_date: entity.start_date,
       end_date: entity.end_date,
       status: entity.status,
+      _created_at: entity._created_at,
+      _updated_at: entity._updated_at,
+      present: entity.present,
     };
 
     return new CycleDomainEntity(databaseData);
@@ -32,7 +35,8 @@ export class CycleMapper {
     if (domain.start_date !== undefined) entity.start_date = domain.start_date;
     if (domain.end_date !== undefined) entity.end_date = domain.end_date;
     if (domain.status !== undefined) entity.status = domain.status;
-
+    if (domain._created_at !== undefined) entity._created_at = domain._created_at as Date;
+    if (domain._updated_at !== undefined) entity._updated_at = domain._updated_at as Date;
     return entity;
   }
 }

@@ -1,6 +1,7 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { DebtStatus } from '../../../domain/enums/debt-status.enum';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности Debt
@@ -8,12 +9,7 @@ import { DocumentAggregateDTO } from '~/application/document/dto/document-aggreg
 @ObjectType('CapitalDebt', {
   description: 'Долг в системе CAPITAL',
 })
-export class DebtOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class DebtOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     nullable: true,
     description: 'ID в блокчейне',

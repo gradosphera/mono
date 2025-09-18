@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { AppendixStatus } from '../../../domain/enums/appendix-status.enum';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности Appendix
@@ -7,12 +8,7 @@ import { AppendixStatus } from '../../../domain/enums/appendix-status.enum';
 @ObjectType('CapitalAppendix', {
   description: 'Приложение в системе CAPITAL',
 })
-export class AppendixOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class AppendixOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     nullable: true,
     description: 'ID в блокчейне',

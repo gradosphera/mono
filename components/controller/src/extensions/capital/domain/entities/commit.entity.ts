@@ -2,7 +2,7 @@ import { CommitStatus } from '../enums/commit-status.enum';
 import type { ICommitDatabaseData } from '../interfaces/commit-database.interface';
 import type { ICommitBlockchainData } from '../interfaces/commit-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { randomUUID } from 'crypto';
+import { BaseDomainEntity } from './base.entity';
 
 /**
  * Доменная сущность коммита
@@ -11,18 +11,16 @@ import { randomUUID } from 'crypto';
  * - База данных: внутренний ID, ссылка на блокчейн
  * - Блокчейн: все данные коммита из таблицы commits
  */
-export class CommitDomainEntity implements IBlockchainSynchronizable, ICommitDatabaseData, Partial<ICommitBlockchainData> {
+export class CommitDomainEntity
+  extends BaseDomainEntity<ICommitDatabaseData>
+  implements IBlockchainSynchronizable, Partial<ICommitBlockchainData>
+{
   // Статические поля ключей для поиска и синхронизации
   private static primary_key = 'id';
   private static sync_key = 'commit_hash';
 
-  // Поля из базы данных
-  public _id: string; // Внутренний ID базы данных
+  // Специфичные поля для commit
   public id?: number; // ID в блокчейне
-  public block_num: number | undefined; // Номер блока последнего обновления
-  public present = false; // Существует ли запись в блокчейне
-
-  // Доменные поля (расширения)
   public status: CommitStatus;
 
   // Поля из блокчейна (commits.hpp)
@@ -42,12 +40,12 @@ export class CommitDomainEntity implements IBlockchainSynchronizable, ICommitDat
    * @param blockchainData - данные из блокчейна
    */
   constructor(databaseData: ICommitDatabaseData, blockchainData?: ICommitBlockchainData) {
-    // Данные из базы данных
-    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
+    // Вызываем конструктор базового класса с данными
+    super(databaseData, CommitStatus.PENDING);
+
+    // Специфичные поля для commit
     this.status = this.mapStatusToDomain(databaseData.status);
-    this.block_num = databaseData.block_num;
     this.commit_hash = databaseData.commit_hash.toLowerCase();
-    this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -107,12 +105,14 @@ export class CommitDomainEntity implements IBlockchainSynchronizable, ICommitDat
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: ICommitBlockchainData, blockNum: number, present = true): void {
-    // Обновляем все поля из блокчейна
+    // Обновляем базовые поля через метод базового класса
+    this.block_num = blockNum;
+    this.present = present;
+
+    // Обновляем специфичные поля из блокчейна
     Object.assign(this, blockchainData);
     this.status = this.mapStatusToDomain(blockchainData.status);
-    this.block_num = blockNum;
     this.blockchain_status = blockchainData.status;
-    this.present = present;
 
     // Нормализация hash полей
     if (this.commit_hash) this.commit_hash = this.commit_hash.toLowerCase();

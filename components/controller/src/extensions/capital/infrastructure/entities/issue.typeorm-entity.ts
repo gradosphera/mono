@@ -1,10 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, Index, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { IssuePriority } from '../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../domain/enums/issue-status.enum';
 import { ProjectTypeormEntity } from './project.typeorm-entity';
 import { CycleTypeormEntity } from './cycle.typeorm-entity';
 import { CommentTypeormEntity } from './comment.typeorm-entity';
 import { StoryTypeormEntity } from './story.typeorm-entity';
+import { BaseTypeormEntity } from './base.typeorm-entity';
 
 const EntityName = 'capital_issues';
 @Entity(EntityName)
@@ -15,10 +16,8 @@ const EntityName = 'capital_issues';
 @Index(`idx_${EntityName}_cycle_id`, ['cycle_id'])
 @Index(`idx_${EntityName}_status`, ['status'])
 @Index(`idx_${EntityName}_priority`, ['priority'])
-export class IssueTypeormEntity {
-  @PrimaryGeneratedColumn('uuid')
-  _id!: string;
-
+@Index(`idx_${EntityName}_created_at`, ['_created_at'])
+export class IssueTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar', length: 64 })
   issue_hash!: string;
 
@@ -71,9 +70,6 @@ export class IssueTypeormEntity {
     labels: string[];
     attachments: string[];
   };
-
-  @CreateDateColumn({ type: 'timestamp' })
-  created_at!: Date;
 
   // Связи
   @ManyToOne(() => ProjectTypeormEntity, (project) => project.issues, { onDelete: 'CASCADE' })

@@ -10,6 +10,7 @@ import { BaseDomainEntity } from './base.entity';
  */
 export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
   // Специфичные поля для истории
+  public story_hash: string; // Хеш истории для внешних ссылок
   public title: string; // Название истории
   public description?: string; // Описание истории
   public status: StoryStatus; // Статус истории (переопределяем тип)
@@ -28,6 +29,7 @@ export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
     super(databaseData, StoryStatus.PENDING);
 
     // Устанавливаем специфичные поля истории
+    this.story_hash = databaseData.story_hash.toLowerCase();
     this.title = databaseData.title;
     this.description = databaseData.description;
     this.status = databaseData.status; // Переопределяем статус с правильным типом
@@ -35,22 +37,5 @@ export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
     this.issue_id = databaseData.issue_id;
     this.created_by = databaseData.created_by;
     this.sort_order = databaseData.sort_order;
-  }
-
-  /**
-   * Обновление данных сущности
-   */
-  update(data: Partial<IStoryDatabaseData>): void {
-    // Обновляем базовые поля через родительский метод
-    super.updateBase(data);
-
-    // Обновляем специфичные поля истории
-    if (data.title !== undefined) this.title = data.title;
-    if (data.description !== undefined) this.description = data.description;
-    if (data.status !== undefined) this.status = data.status;
-    if (data.project_hash !== undefined) this.project_hash = data.project_hash.toLowerCase();
-    if (data.issue_id !== undefined) this.issue_id = data.issue_id;
-    if (data.created_by !== undefined) this.created_by = data.created_by;
-    if (data.sort_order !== undefined) this.sort_order = data.sort_order;
   }
 }

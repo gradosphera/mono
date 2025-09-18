@@ -1,7 +1,7 @@
 import type { IProjectWalletDatabaseData } from '../interfaces/project-wallet-database.interface';
 import type { IProjectWalletBlockchainData } from '../interfaces/project-wallet-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { randomUUID } from 'crypto';
+import { BaseDomainEntity } from './base.entity';
 /**
  * Доменная сущность проектного кошелька
  *
@@ -10,17 +10,15 @@ import { randomUUID } from 'crypto';
  * - Блокчейн: все данные проектного кошелька из таблицы projwallets
  */
 export class ProjectWalletDomainEntity
-  implements IBlockchainSynchronizable, IProjectWalletDatabaseData, Partial<IProjectWalletBlockchainData>
+  extends BaseDomainEntity<IProjectWalletDatabaseData>
+  implements IBlockchainSynchronizable, Partial<IProjectWalletBlockchainData>
 {
   // Статические поля ключей для поиска и синхронизации
   private static primary_key = 'id';
   private static sync_key = 'username';
 
-  // Поля из базы данных
-  public _id: string; // Внутренний ID базы данных
+  // Специфичные поля для project-wallet
   public id?: number; // ID в блокчейне
-  public block_num: number | undefined; // Номер блока последнего обновления
-  public present = false; // Существует ли запись в блокчейне
 
   // Поля из блокчейна (wallets.hpp)
   public username: IProjectWalletBlockchainData['username'];
@@ -38,11 +36,11 @@ export class ProjectWalletDomainEntity
    * @param blockchainData - данные из блокчейна
    */
   constructor(databaseData: IProjectWalletDatabaseData, blockchainData?: IProjectWalletBlockchainData) {
-    // Данные из базы данных
-    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
-    this.block_num = databaseData.block_num;
+    // Вызываем конструктор базового класса с данными
+    super(databaseData);
+
+    // Специфичные поля для project-wallet
     this.username = databaseData.username;
-    this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -98,10 +96,12 @@ export class ProjectWalletDomainEntity
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: IProjectWalletBlockchainData, blockNum: number, present = true): void {
-    // Обновляем все поля из блокчейна
-    Object.assign(this, blockchainData);
+    // Обновляем базовые поля через метод базового класса
     this.block_num = blockNum;
     this.present = present;
+
+    // Обновляем специфичные поля из блокчейна
+    Object.assign(this, blockchainData);
 
     // Нормализация hash полей
     if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();

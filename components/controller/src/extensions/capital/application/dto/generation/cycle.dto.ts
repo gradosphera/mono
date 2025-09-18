@@ -1,5 +1,6 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { CycleStatus } from '../../../domain/enums/cycle-status.enum';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности Cycle
@@ -7,12 +8,7 @@ import { CycleStatus } from '../../../domain/enums/cycle-status.enum';
 @ObjectType('CapitalCycle', {
   description: 'Цикл разработки в системе CAPITAL',
 })
-export class CycleOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class CycleOutputDTO extends BaseOutputDTO {
   @Field(() => String, {
     description: 'Название цикла',
   })

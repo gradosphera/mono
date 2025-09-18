@@ -1,22 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
+import { BaseTypeormEntity } from './base.typeorm-entity';
 
 const EntityName = 'capital_project_wallets';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
-export class ProjectWalletTypeormEntity {
-  @PrimaryGeneratedColumn('uuid')
-  _id!: string;
-
+export class ProjectWalletTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
-
-  @Column({ type: 'integer', nullable: true })
-  block_num!: number;
-
-  @Column({ type: 'boolean', default: true })
-  present!: boolean;
 
   // Поля из блокчейна (wallets.hpp)
   @Column({ type: 'varchar' })
@@ -36,7 +28,4 @@ export class ProjectWalletTypeormEntity {
 
   @Column({ type: 'varchar' })
   membership_available!: string;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  created_at_db!: Date;
 }

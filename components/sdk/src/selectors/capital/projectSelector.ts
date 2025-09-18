@@ -1,11 +1,9 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
-
+import { baseCapitalSelector } from './baseCapitalSelector'
 const rawBaseProjectSelector = {
-  _id: true,
+  ...baseCapitalSelector,
   id: true,
-  block_num: true,
-  present: true,
   status: true,
   project_hash: true,
   coopname: true,

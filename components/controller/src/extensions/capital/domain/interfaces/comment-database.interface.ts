@@ -1,8 +1,9 @@
+import type { IBaseDatabaseData } from './base-database.interface';
+
 /**
  * Интерфейс данных комментария из базы данных
  */
-export interface ICommentDatabaseData {
-  _id: string; // Внутренний ID базы данных
+export interface ICommentDatabaseData extends IBaseDatabaseData {
   content: string; // Содержимое комментария
   commentor_id: string; // ID комментатора (contributor)
   issue_id: string; // ID задачи

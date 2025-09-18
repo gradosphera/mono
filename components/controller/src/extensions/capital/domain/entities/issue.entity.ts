@@ -1,16 +1,15 @@
-import { randomUUID } from 'crypto';
 import { IssuePriority } from '../enums/issue-priority.enum';
 import { IssueStatus } from '../enums/issue-status.enum';
 import type { IIssueDatabaseData } from '../interfaces/issue-database.interface';
+import { BaseDomainEntity } from './base.entity';
 
 /**
  * Доменная сущность задачи
  *
  * Представляет задачу в системе управления задачами
  */
-export class IssueDomainEntity {
-  // Поля из базы данных
-  public _id: string; // Внутренний ID базы данных
+export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
+  // Специфичные поля для задачи
   public issue_hash: string; // Хеш задачи для внешних ссылок
   public coopname: string; // Имя аккаунта кооператива
   public title: string; // Название задачи
@@ -35,14 +34,16 @@ export class IssueDomainEntity {
    * @param databaseData - данные из базы данных
    */
   constructor(databaseData: IIssueDatabaseData) {
-    // Данные из базы данных
-    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
+    // Вызываем конструктор базового класса
+    super(databaseData, IssueStatus.BACKLOG);
+
+    // Устанавливаем специфичные поля задачи
     this.issue_hash = databaseData.issue_hash.toLowerCase();
     this.coopname = databaseData.coopname;
     this.title = databaseData.title;
     this.description = databaseData.description;
     this.priority = databaseData.priority;
-    this.status = databaseData.status;
+    this.status = databaseData.status; // Переопределяем статус с правильным типом
     this.estimate = databaseData.estimate;
     this.sort_order = databaseData.sort_order;
     this.created_by = databaseData.created_by;
@@ -51,26 +52,6 @@ export class IssueDomainEntity {
     this.project_hash = databaseData.project_hash.toLowerCase();
     this.cycle_id = databaseData.cycle_id;
     this.metadata = databaseData.metadata;
-  }
-
-  /**
-   * Обновление данных сущности
-   */
-  update(data: Partial<IIssueDatabaseData>): void {
-    if (data.issue_hash !== undefined) this.issue_hash = data.issue_hash.toLowerCase();
-    if (data.coopname !== undefined) this.coopname = data.coopname;
-    if (data.title !== undefined) this.title = data.title;
-    if (data.description !== undefined) this.description = data.description;
-    if (data.priority !== undefined) this.priority = data.priority;
-    if (data.status !== undefined) this.status = data.status;
-    if (data.estimate !== undefined) this.estimate = data.estimate;
-    if (data.sort_order !== undefined) this.sort_order = data.sort_order;
-    if (data.created_by !== undefined) this.created_by = data.created_by;
-    if (data.creators_ids !== undefined) this.creators_ids = data.creators_ids;
-    if (data.submaster_id !== undefined) this.submaster_id = data.submaster_id;
-    if (data.project_hash !== undefined) this.project_hash = data.project_hash.toLowerCase();
-    if (data.cycle_id !== undefined) this.cycle_id = data.cycle_id;
-    if (data.metadata !== undefined) this.metadata = data.metadata;
   }
 
   /**

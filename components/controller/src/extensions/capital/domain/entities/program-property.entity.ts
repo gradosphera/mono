@@ -4,6 +4,7 @@ import type { IProgramPropertyBlockchainData } from '../interfaces/program-prope
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 import { randomUUID } from 'crypto';
+import { BaseDomainEntity } from './base.entity';
 
 /**
  * Доменная сущность программного имущественного взноса
@@ -13,19 +14,15 @@ import { randomUUID } from 'crypto';
  * - Блокчейн: все данные программного имущественного взноса из таблицы pgproperties
  */
 export class ProgramPropertyDomainEntity
-  implements IBlockchainSynchronizable, IProgramPropertyDatabaseData, Partial<IProgramPropertyBlockchainData>
+  extends BaseDomainEntity<IProgramPropertyDatabaseData>
+  implements IBlockchainSynchronizable, Partial<IProgramPropertyBlockchainData>
 {
   // Статические поля ключей для поиска и синхронизации
   private static primary_key = 'id';
   private static sync_key = 'property_hash';
 
-  // Поля из базы данных
-  public _id: string; // Внутренний ID базы данных
+  // Специфичные поля для program-property
   public id?: number; // ID в блокчейне
-  public block_num: number | undefined; // Номер блока последнего обновления
-  public present = false; // Существует ли запись в блокчейне
-
-  // Доменные поля (расширения)
   public status: ProgramPropertyStatus;
 
   // Поля из блокчейна (program_properties.hpp)
@@ -48,12 +45,12 @@ export class ProgramPropertyDomainEntity
    * @param blockchainData - данные из блокчейна
    */
   constructor(databaseData: IProgramPropertyDatabaseData, blockchainData?: IProgramPropertyBlockchainData) {
-    // Данные из базы данных
-    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
+    // Вызываем конструктор базового класса с данными
+    super(databaseData, ProgramPropertyStatus.UNDEFINED);
+
+    // Специфичные поля для program-property
     this.status = this.mapStatusToDomain(databaseData.status);
-    this.block_num = databaseData.block_num;
     this.property_hash = databaseData.property_hash.toLowerCase();
-    this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -117,12 +114,14 @@ export class ProgramPropertyDomainEntity
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: IProgramPropertyBlockchainData, blockNum: number, present = true): void {
-    // Обновляем все поля из блокчейна
+    // Обновляем базовые поля через метод базового класса
+    this.block_num = blockNum;
+    this.present = present;
+
+    // Обновляем специфичные поля из блокчейна
     Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
     this.status = this.mapStatusToDomain(blockchainData.status);
-    this.block_num = blockNum;
-    this.present = present;
 
     // Нормализация hash полей
     if (this.property_hash) this.property_hash = this.property_hash.toLowerCase();

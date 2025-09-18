@@ -17,6 +17,9 @@ export class CommentMapper {
       issue_id: entity.issue_id,
       reactions: entity.reactions,
       edited_at: entity.edited_at,
+      _created_at: entity._created_at,
+      _updated_at: entity._updated_at,
+      present: entity.present,
     };
 
     return new CommentDomainEntity(databaseData);
@@ -34,7 +37,9 @@ export class CommentMapper {
     if (domain.issue_id !== undefined) entity.issue_id = domain.issue_id;
     if (domain.reactions !== undefined) entity.reactions = domain.reactions;
     if (domain.edited_at !== undefined) entity.edited_at = domain.edited_at;
-
+    if (domain.present !== undefined) entity.present = domain.present;
+    if (domain._created_at !== undefined) entity._created_at = domain._created_at as Date;
+    if (domain._updated_at !== undefined) entity._updated_at = domain._updated_at as Date;
     return entity;
   }
 }

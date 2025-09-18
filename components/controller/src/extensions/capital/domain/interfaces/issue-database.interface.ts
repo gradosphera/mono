@@ -1,11 +1,11 @@
 import type { IssuePriority } from '../enums/issue-priority.enum';
 import type { IssueStatus } from '../enums/issue-status.enum';
+import type { IBaseDatabaseData } from './base-database.interface';
 
 /**
  * Интерфейс данных задачи из базы данных
  */
-export interface IIssueDatabaseData {
-  _id: string; // Внутренний ID базы данных
+export interface IIssueDatabaseData extends IBaseDatabaseData {
   issue_hash: string; // Хеш задачи для внешних ссылок
   coopname: string; // Имя аккаунта кооператива
   title: string; // Название задачи

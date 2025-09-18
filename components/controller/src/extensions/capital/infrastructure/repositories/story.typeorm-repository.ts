@@ -32,6 +32,11 @@ export class StoryTypeormRepository implements StoryRepository {
     return entity ? StoryMapper.toDomain(entity) : null;
   }
 
+  async findByStoryHash(storyHash: string): Promise<StoryDomainEntity | null> {
+    const entity = await this.storyTypeormRepository.findOne({ where: { story_hash: storyHash } });
+    return entity ? StoryMapper.toDomain(entity) : null;
+  }
+
   async findAll(): Promise<StoryDomainEntity[]> {
     const entities = await this.storyTypeormRepository.find();
     return entities.map(StoryMapper.toDomain);

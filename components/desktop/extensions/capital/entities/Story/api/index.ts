@@ -1,10 +1,10 @@
 import { client } from 'src/shared/api/client';
-import { Queries, Mutations } from '@coopenomics/sdk';
+import { Queries } from '@coopenomics/sdk';
 import type {
   IGetStoriesInput,
   IStoriesPagination,
-  ICreateStoryInput,
-  ICreateStoryOutput,
+  IGetStoryInput,
+  IGetStoryOutput,
 } from '../model';
 
 async function loadStories(
@@ -19,20 +19,19 @@ async function loadStories(
   return output;
 }
 
-async function createStory(
-  data: ICreateStoryInput,
-): Promise<ICreateStoryOutput> {
-  const { [Mutations.Capital.CreateStory.name]: result } =
-    await client.Mutation(Mutations.Capital.CreateStory.mutation, {
+async function loadStory(data: IGetStoryInput): Promise<IGetStoryOutput> {
+  const { [Queries.Capital.GetStory.name]: output } = await client.Query(
+    Queries.Capital.GetStory.query,
+    {
       variables: {
         data,
       },
-    });
-
-  return result;
+    },
+  );
+  return output;
 }
 
 export const api = {
   loadStories,
-  createStory,
+  loadStory,
 };

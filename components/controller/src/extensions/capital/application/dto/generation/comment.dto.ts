@@ -1,4 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности Comment
@@ -6,12 +7,7 @@ import { ObjectType, Field } from '@nestjs/graphql';
 @ObjectType('CapitalComment', {
   description: 'Комментарий в системе CAPITAL',
 })
-export class CommentOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class CommentOutputDTO extends BaseOutputDTO {
   @Field(() => String, {
     description: 'Содержимое комментария',
   })

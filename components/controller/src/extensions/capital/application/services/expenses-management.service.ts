@@ -88,6 +88,8 @@ export class ExpensesManagementService {
       expense_statement,
       approved_statement,
       authorization,
+      _created_at: expense._created_at,
+      _updated_at: expense._updated_at,
     };
   }
 }

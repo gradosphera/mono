@@ -1,14 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
+import { BaseTypeormEntity } from './base.typeorm-entity';
 
 const EntityName = 'capital_comments';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_commentor_id`, ['commentor_id'])
 @Index(`idx_${EntityName}_issue_id`, ['issue_id'])
-export class CommentTypeormEntity {
-  @PrimaryGeneratedColumn('uuid')
-  _id!: string;
-
+@Index(`idx_${EntityName}_created_at`, ['_created_at'])
+export class CommentTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'text' })
   content!: string;
 
@@ -23,9 +22,6 @@ export class CommentTypeormEntity {
 
   @Column({ type: 'timestamp', nullable: true })
   edited_at?: Date;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  created_at!: Date;
 
   // Связи
   @ManyToOne(() => IssueTypeormEntity, (issue) => issue.comments, { onDelete: 'CASCADE' })

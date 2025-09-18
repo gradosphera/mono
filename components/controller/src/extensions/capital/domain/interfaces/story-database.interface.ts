@@ -5,6 +5,7 @@ import type { IBaseDatabaseData } from './base-database.interface';
  * Интерфейс данных истории из базы данных
  */
 export interface IStoryDatabaseData extends IBaseDatabaseData {
+  story_hash: string; // Хеш истории для внешних ссылок
   title: string; // Название истории
   description?: string; // Описание истории
   status: StoryStatus; // Статус истории

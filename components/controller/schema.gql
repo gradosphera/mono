@@ -1282,11 +1282,17 @@ input CancelRequestInput {
 
 """Коммит в системе CAPITAL"""
 type CapitalCommit {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
 
-  """Номер блока последнего обновления"""
-  block_num: Int
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
 
   """Статус из блокчейна"""
   blockchain_status: String
@@ -1303,7 +1309,7 @@ type CapitalCommit {
   """ID в блокчейне"""
   id: Int
 
-  """Существует ли запись в блокчейне"""
+  """Флаг присутствия записи в блокчейне"""
   present: Boolean!
 
   """Хеш проекта"""
@@ -1363,8 +1369,14 @@ type CapitalConfigObject {
 
 """Вкладчик кооператива в системе CAPITAL"""
 type CapitalContributor {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
 
   """Приложения к контракту"""
   appendixes: [String!]
@@ -1450,14 +1462,26 @@ input CapitalContributorFilter {
 
 """Цикл разработки в системе CAPITAL"""
 type CapitalCycle {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
 
   """Дата окончания"""
   end_date: DateTime!
 
   """Название цикла"""
   name: String!
+
+  """Флаг присутствия записи в блокчейне"""
+  present: Boolean!
 
   """Дата начала"""
   start_date: DateTime!
@@ -1486,8 +1510,14 @@ input CapitalCycleFilter {
 
 """Долг в системе CAPITAL"""
 type CapitalDebt {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
 
   """Сумма долга"""
   amount: Float
@@ -1537,8 +1567,14 @@ type CapitalDebt {
 
 """Расход в системе CAPITAL"""
 type CapitalExpense {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
 
   """Сумма расхода"""
   amount: String
@@ -1591,8 +1627,14 @@ type CapitalExpense {
 
 """Инвестиция в системе CAPITAL"""
 type CapitalInvest {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
 
   """Сумма инвестиции"""
   amount: Float
@@ -1660,8 +1702,17 @@ input CapitalInvestFilter {
 
 """Задача в системе CAPITAL"""
 type CapitalIssue {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
 
   """ID создателя задачи (contributor)"""
   created_by: String!
@@ -1683,6 +1734,9 @@ type CapitalIssue {
 
   """Метаданные задачи"""
   metadata: JSON!
+
+  """Флаг присутствия записи в блокчейне"""
+  present: Boolean!
 
   """Приоритет задачи"""
   priority: IssuePriority!
@@ -1735,8 +1789,14 @@ input CapitalIssueFilter {
 
 """Программная инвестиция в системе CAPITAL"""
 type CapitalProgramInvest {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
 
   """Сумма инвестиции"""
   amount: Float
@@ -1774,11 +1834,17 @@ type CapitalProgramInvest {
 
 """Проект в системе CAPITAL с компонентами"""
 type CapitalProject {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
 
-  """Номер блока последнего обновления"""
-  block_num: Int
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
 
   """Статус из блокчейна"""
   blockchain_status: String
@@ -1816,7 +1882,7 @@ type CapitalProject {
   """Хеш родительского проекта"""
   parent_hash: String
 
-  """Существует ли запись в блокчейне"""
+  """Флаг присутствия записи в блокчейне"""
   present: Boolean!
 
   """Хеш проекта"""
@@ -1831,11 +1897,17 @@ type CapitalProject {
 
 """Проект-компонент в системе CAPITAL"""
 type CapitalProjectComponent {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
 
-  """Номер блока последнего обновления"""
-  block_num: Int
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
 
   """Статус из блокчейна"""
   blockchain_status: String
@@ -1870,7 +1942,7 @@ type CapitalProjectComponent {
   """Хеш родительского проекта"""
   parent_hash: String
 
-  """Существует ли запись в блокчейне"""
+  """Флаг присутствия записи в блокчейне"""
   present: Boolean!
 
   """Хеш проекта"""
@@ -1909,8 +1981,14 @@ input CapitalProjectFilter {
 
 """Результат в системе CAPITAL"""
 type CapitalResult {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
 
   """Акт приёма-передачи результата"""
   act: DocumentAggregate
@@ -1918,8 +1996,8 @@ type CapitalResult {
   """Авторизация результата"""
   authorization: DocumentAggregate
 
-  """Номер блока последнего обновления"""
-  block_num: Int
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
 
   """Статус из блокчейна"""
   blockchain_status: String
@@ -1936,7 +2014,7 @@ type CapitalResult {
   """ID в блокчейне"""
   id: Int
 
-  """Существует ли запись в блокчейне"""
+  """Флаг присутствия записи в блокчейне"""
   present: Boolean!
 
   """Хеш проекта"""
@@ -1960,6 +2038,18 @@ type CapitalResult {
 
 """Полное состояние CAPITAL контракта кооператива"""
 type CapitalState {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
+
   """Управляемая конфигурация контракта"""
   config: CapitalConfigObject!
 
@@ -1968,6 +2058,9 @@ type CapitalState {
 
   """Глобальный пул доступных для аллокации инвестиций в программу"""
   global_available_invest_pool: String!
+
+  """Флаг присутствия записи в блокчейне"""
+  present: Boolean!
 
   """Доступная сумма членских взносов по программе"""
   program_membership_available: String!
@@ -1984,14 +2077,17 @@ type CapitalState {
 
 """История (критерий выполнения) в системе CAPITAL"""
 type CapitalStory {
-  """Дата создания в базе данных"""
-  _created_at: DateTime
+  """Дата создания записи"""
+  _created_at: DateTime!
 
   """Внутренний ID базы данных"""
   _id: String!
 
-  """Дата последнего обновления в базе данных"""
-  _updated_at: DateTime
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
 
   """ID создателя (contributor)"""
   created_by: String!
@@ -2002,6 +2098,9 @@ type CapitalStory {
   """ID задачи (если история привязана к задаче)"""
   issue_id: String
 
+  """Флаг присутствия записи в блокчейне"""
+  present: Boolean!
+
   """Хеш проекта (если история привязана к проекту)"""
   project_hash: String
 
@@ -2010,6 +2109,9 @@ type CapitalStory {
 
   """Статус истории"""
   status: StoryStatus!
+
+  """Хеш истории"""
+  story_hash: String!
 
   """Название истории"""
   title: String!
@@ -2038,19 +2140,25 @@ input CapitalStoryFilter {
 
 """Голос в системе CAPITAL"""
 type CapitalVote {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
   """Внутренний ID базы данных"""
   _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
 
   """Количество голосов"""
   amount: Float
 
-  """Номер блока последнего обновления"""
-  block_num: Int
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
 
   """ID в блокчейне"""
   id: Int
 
-  """Существует ли запись в блокчейне"""
+  """Флаг присутствия записи в блокчейне"""
   present: Boolean!
 
   """Хеш проекта"""
@@ -2790,6 +2898,9 @@ input CreateStoryInput {
   """Статус истории"""
   status: StoryStatus = PENDING
 
+  """Хеш истории для внешних ссылок"""
+  story_hash: String!
+
   """Название истории"""
   title: String!
 }
@@ -2957,6 +3068,18 @@ input DeleteBranchInput {
 
   """Имя аккаунта кооператива"""
   coopname: String!
+}
+
+"""Входные данные для удаления задачи по хэшу"""
+input DeleteCapitalIssueByHashInput {
+  """Хеш задачи для удаления"""
+  issue_hash: String!
+}
+
+"""Входные данные для удаления истории по хэшу"""
+input DeleteCapitalStoryByHashInput {
+  """Хеш истории для удаления"""
+  story_hash: String!
 }
 
 input DeletePaymentMethodInput {
@@ -3654,6 +3777,12 @@ input GetCapitalConfigInput {
 input GetCapitalIssueByHashInput {
   """Хеш задачи для получения"""
   issue_hash: String!
+}
+
+"""Входные данные для получения истории по хэшу"""
+input GetCapitalStoryByHashInput {
+  """Хеш истории для получения"""
+  story_hash: String!
 }
 
 input GetContributorInput {
@@ -4368,8 +4497,14 @@ type Mutation {
   """Создание истории в CAPITAL контракте"""
   capitalCreateStory(data: CreateStoryInput!): CapitalStory!
 
+  """Удаление задачи по хэшу"""
+  capitalDeleteIssue(data: DeleteCapitalIssueByHashInput!): Boolean!
+
   """Удаление проекта в CAPITAL контракте"""
   capitalDeleteProject(data: DeleteProjectInput!): Transaction!
+
+  """Удаление истории по хэшу"""
+  capitalDeleteStory(data: DeleteCapitalStoryByHashInput!): Boolean!
 
   """Редактирование проекта в CAPITAL контракте"""
   capitalEditProject(data: EditProjectInput!): Transaction!
@@ -4421,6 +4556,12 @@ type Mutation {
 
   """Голосование в CAPITAL контракте"""
   capitalSubmitVote(data: SubmitVoteInput!): Transaction!
+
+  """Обновление задачи в CAPITAL контракте"""
+  capitalUpdateIssue(data: UpdateIssueInput!): CapitalIssue!
+
+  """Обновление истории в CAPITAL контракте"""
+  capitalUpdateStory(data: UpdateStoryInput!): CapitalStory!
 
   """Завершить заявку по истечению гарантийного срока"""
   completeRequest(data: CompleteRequestInput!): Transaction!
@@ -5635,6 +5776,9 @@ type Query {
 
   """Получение списка историй кооператива с фильтрацией"""
   capitalStories(filter: CapitalStoryFilter, options: PaginationInput): PaginatedCapitalStoriesPaginationResult!
+
+  """Получение истории по хэшу"""
+  capitalStory(data: GetCapitalStoryByHashInput!): CapitalStory
 
   """Получение голоса по внутреннему ID базы данных"""
   capitalVote(data: GetVoteInput!): CapitalVote
@@ -7008,6 +7152,44 @@ input UpdateIndividualDataInput {
   username: String!
 }
 
+input UpdateIssueInput {
+  """Вложения задачи"""
+  attachments: [String!]
+
+  """Массив ID создателей (contributors)"""
+  creators_ids: [String!]
+
+  """ID цикла"""
+  cycle_id: String
+
+  """Описание задачи"""
+  description: String
+
+  """Оценка в story points или часах"""
+  estimate: Int
+
+  """Хэш задачи для обновления"""
+  issue_hash: String!
+
+  """Метки задачи"""
+  labels: [String!]
+
+  """Приоритет задачи"""
+  priority: IssuePriority
+
+  """Порядок сортировки"""
+  sort_order: Int
+
+  """Статус задачи"""
+  status: IssueStatus
+
+  """ID подмастерья (contributor)"""
+  submaster_id: String
+
+  """Название задачи"""
+  title: String
+}
+
 input UpdateOrganizationDataInput {
   """Город"""
   city: String!
@@ -7069,6 +7251,29 @@ input UpdateRequestInput {
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+input UpdateStoryInput {
+  """Описание истории"""
+  description: String
+
+  """ID задачи (если история привязана к задаче)"""
+  issue_id: String
+
+  """Хеш проекта (если история привязана к проекту)"""
+  project_hash: String
+
+  """Порядок сортировки"""
+  sort_order: Int
+
+  """Статус истории"""
+  status: StoryStatus
+
+  """Хэш истории для обновления"""
+  story_hash: String!
+
+  """Название истории"""
+  title: String
 }
 
 type UserAccount {

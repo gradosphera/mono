@@ -1,32 +1,20 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Index,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { StoryStatus } from '../../domain/enums/story-status.enum';
 import { ProjectTypeormEntity } from './project.typeorm-entity';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
+import { BaseTypeormEntity } from './base.typeorm-entity';
 
 const EntityName = 'capital_stories';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
+@Index(`idx_${EntityName}_story_hash`, ['story_hash'])
 @Index(`idx_${EntityName}_issue_id`, ['issue_id'])
 @Index(`idx_${EntityName}_created_by`, ['created_by'])
 @Index(`idx_${EntityName}_status`, ['status'])
-export class StoryTypeormEntity {
-  @PrimaryGeneratedColumn('uuid')
-  _id!: string;
-
-  @Column({ type: 'integer', nullable: true })
-  block_num?: number;
-
-  @Column({ type: 'boolean', default: true })
-  present!: boolean;
+@Index(`idx_${EntityName}_created_at`, ['_created_at'])
+export class StoryTypeormEntity extends BaseTypeormEntity {
+  @Column({ type: 'varchar', length: 64, unique: true })
+  story_hash!: string;
 
   @Column({ type: 'varchar', length: 255 })
   title!: string;
@@ -52,12 +40,6 @@ export class StoryTypeormEntity {
 
   @Column({ type: 'integer', default: 0 })
   sort_order!: number;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  _created_at!: Date;
-
-  @UpdateDateColumn({ type: 'timestamp' })
-  _updated_at!: Date;
 
   // Связи
   @ManyToOne(() => ProjectTypeormEntity, (project) => project.stories, { onDelete: 'CASCADE' })

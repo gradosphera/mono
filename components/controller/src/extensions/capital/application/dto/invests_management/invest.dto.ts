@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { InvestStatus } from '../../../domain/enums/invest-status.enum';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности Invest
@@ -7,12 +8,7 @@ import { InvestStatus } from '../../../domain/enums/invest-status.enum';
 @ObjectType('CapitalInvest', {
   description: 'Инвестиция в системе CAPITAL',
 })
-export class InvestOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class InvestOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     nullable: true,
     description: 'ID в блокчейне',

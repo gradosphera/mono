@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { CommitStatus } from '../../../domain/enums/commit-status.enum';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности Commit
@@ -7,29 +8,12 @@ import { CommitStatus } from '../../../domain/enums/commit-status.enum';
 @ObjectType('CapitalCommit', {
   description: 'Коммит в системе CAPITAL',
 })
-export class CommitOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class CommitOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     nullable: true,
     description: 'ID в блокчейне',
   })
   id?: number;
-
-  @Field(() => Int, {
-    nullable: true,
-    description: 'Номер блока последнего обновления',
-  })
-  block_num?: number;
-
-  @Field(() => Boolean, {
-    description: 'Существует ли запись в блокчейне',
-    defaultValue: false,
-  })
-  present!: boolean;
 
   @Field(() => CommitStatus, {
     description: 'Статус коммита',

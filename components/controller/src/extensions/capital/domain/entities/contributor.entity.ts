@@ -3,7 +3,7 @@ import type { IContributorDatabaseData } from '../interfaces/contributor-databas
 import type { IContributorBlockchainData } from '../interfaces/contributor-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { randomUUID } from 'crypto';
+import { BaseDomainEntity } from './base.entity';
 
 /**
  * Доменная сущность вкладчика
@@ -13,17 +13,15 @@ import { randomUUID } from 'crypto';
  * - Блокчейн: все данные вкладчика из таблицы contributors
  */
 export class ContributorDomainEntity
-  implements IBlockchainSynchronizable, IContributorDatabaseData, Partial<IContributorBlockchainData>
+  extends BaseDomainEntity<IContributorDatabaseData>
+  implements IBlockchainSynchronizable, Partial<IContributorBlockchainData>
 {
   // Статические поля ключей для поиска и синхронизации
   private static primary_key = 'id';
   private static sync_key = 'contributor_hash';
 
   // Поля из базы данных
-  public _id: string; // Внутренний ID базы данных
   public id?: number; // ID в блокчейне
-  public block_num: number | undefined; // Номер блока последнего обновления
-  public present = false; // Существует ли запись в блокчейне
 
   // Доменные поля (расширения)
   public status: ContributorStatus;
@@ -55,12 +53,13 @@ export class ContributorDomainEntity
    * @param blockchainData - данные из блокчейна
    */
   constructor(databaseData: IContributorDatabaseData, blockchainData?: IContributorBlockchainData) {
-    // Данные из базы данных
-    this._id = databaseData._id == '' ? randomUUID().toString() : databaseData._id;
+    // Вызываем конструктор базового класса без данных (инициализируем поля вручную)
+    super(databaseData, ContributorStatus.PENDING);
+
     this.status = this.mapStatusToDomain(databaseData.status);
-    this.block_num = databaseData.block_num;
+
+    // Специфичные поля для contributor
     this.contributor_hash = databaseData.contributor_hash.toLowerCase();
-    this.present = databaseData.present;
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -152,12 +151,14 @@ export class ContributorDomainEntity
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: IContributorBlockchainData, blockNum: number, present = true): void {
-    // Обновляем все поля из блокчейна
+    // Обновляем базовые поля через метод базового класса
+    this.block_num = blockNum;
+    this.present = present;
+
+    // Обновляем специфичные поля из блокчейна
     Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
     this.status = this.mapStatusToDomain(blockchainData.status);
-    this.block_num = blockNum;
-    this.present = present;
 
     // Нормализация hash полей
     if (this.contributor_hash) this.contributor_hash = this.contributor_hash.toLowerCase();

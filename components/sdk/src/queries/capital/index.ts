@@ -57,6 +57,9 @@ export * as GetCommit from './getCommit'
 /** Получить все истории с фильтрацией */
 export * as GetStories from './getStories'
 
+/** Получить историю по HASH */
+export * as GetStory from './getStory'
+
 /** Получить все задачи с фильтрацией */
 export * as GetIssues from './getIssues'
 

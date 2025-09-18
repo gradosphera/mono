@@ -54,6 +54,10 @@ export class ContractManagementInteractor {
       program_membership_distributed: blockchainState.program_membership_distributed,
       program_membership_cumulative_reward_per_share: blockchainState.program_membership_cumulative_reward_per_share,
       config: configDto,
+      _id: '',
+      present: true,
+      _created_at: new Date(),
+      _updated_at: new Date(),
     };
   }
 }

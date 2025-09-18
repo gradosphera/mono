@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности ProjectWallet
@@ -6,12 +7,7 @@ import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 @ObjectType('CapitalProjectWallet', {
   description: 'Проектный кошелек в системе CAPITAL',
 })
-export class ProjectWalletOutputDTO {
-  @Field(() => String, {
-    description: 'Внутренний ID базы данных',
-  })
-  _id!: string;
-
+export class ProjectWalletOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     nullable: true,
     description: 'ID в блокчейне',

@@ -23,6 +23,9 @@ export class StateMapper {
       block_num: entity.block_num,
       present: entity.present,
       coopname: entity.coopname,
+      _created_at: entity._created_at,
+      _updated_at: entity._updated_at,
+      status: entity.status,
     };
 
     let blockchainData: toDomainBlockchainPart | undefined;
@@ -52,6 +55,9 @@ export class StateMapper {
       block_num: domain.block_num ?? 0,
       present: domain.present,
       coopname: domain.coopname,
+      status: domain.status as string,
+      _created_at: domain._created_at as Date,
+      _updated_at: domain._updated_at as Date,
     };
 
     let blockchainPart: toEntityBlockchainPart | undefined;

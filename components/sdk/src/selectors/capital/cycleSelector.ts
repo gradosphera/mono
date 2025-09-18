@@ -1,8 +1,8 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
-
+import { baseCapitalSelector } from './baseCapitalSelector'
 const rawCycleSelector = {
-  _id: true,
+  ...baseCapitalSelector,
   name: true,
   start_date: true,
   end_date: true,

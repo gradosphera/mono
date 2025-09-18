@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { StoryStatus } from '../../../domain/enums/story-status.enum';
+import { BaseOutputDTO } from '../base.dto';
 
 /**
  * GraphQL Output DTO для сущности Story
@@ -7,11 +8,11 @@ import { StoryStatus } from '../../../domain/enums/story-status.enum';
 @ObjectType('CapitalStory', {
   description: 'История (критерий выполнения) в системе CAPITAL',
 })
-export class StoryOutputDTO {
+export class StoryOutputDTO extends BaseOutputDTO {
   @Field(() => String, {
-    description: 'Внутренний ID базы данных',
+    description: 'Хеш истории',
   })
-  _id!: string;
+  story_hash!: string;
 
   @Field(() => String, {
     description: 'Название истории',
@@ -50,16 +51,4 @@ export class StoryOutputDTO {
     description: 'Порядок сортировки',
   })
   sort_order!: number;
-
-  @Field(() => Date, {
-    nullable: true,
-    description: 'Дата создания в базе данных',
-  })
-  _created_at?: Date;
-
-  @Field(() => Date, {
-    nullable: true,
-    description: 'Дата последнего обновления в базе данных',
-  })
-  _updated_at?: Date;
 }
