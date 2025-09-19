@@ -3,7 +3,10 @@ q-btn(
   color='primary',
   @click.stop='handleButtonClick',
   :loading='loading',
-  label='Создать компонент'
+  :label='mini ? "" : "Создать компонент"',
+  :icon='mini ? "add" : "add"',
+  :size='mini ? "sm" : "md"',
+  :outline='mini'
 )
 
 q-dialog(v-model='showDialog', @hide='clear')
@@ -42,7 +45,10 @@ import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
 import { Editor } from 'src/shared/ui';
-const props = defineProps<{ project: IProject }>();
+const props = defineProps<{
+  project: IProject;
+  mini?: boolean;
+}>();
 const emit = defineEmits<{
   onClick: [];
 }>();

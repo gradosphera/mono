@@ -1,3 +1,5 @@
+export * from './ComponentIssuesWidget';
+export * from './ContributorsWidget';
 export * from './CsvUploader';
 export * from './ImportResultsTable';
 export * from './IssueControls';

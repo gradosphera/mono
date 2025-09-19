@@ -3,7 +3,10 @@ q-btn(
   color='primary',
   @click='showDialog = true',
   :loading='loading',
-  label='Создать проект'
+  :label='mini ? "" : "Создать проект"',
+  :icon='mini ? "add" : "add"',
+  :size='mini ? "sm" : "md"',
+  :outline='mini'
 )
 
 q-dialog(v-model='showDialog', @hide='clear')
@@ -41,6 +44,10 @@ import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import { Editor } from 'src/shared/ui';
+
+defineProps<{
+  mini?: boolean;
+}>();
 
 const system = useSystemStore();
 const { createProject } = useCreateProject();

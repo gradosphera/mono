@@ -16,15 +16,40 @@ q-card(flat)
         @click='emit("openComponent", props.row.project_hash)',
         style='cursor: pointer'
       )
+        q-td(style='width: 80px; padding-left: 40px')
+          q-btn(
+            size='sm',
+            color='primary',
+            dense,
+            round,
+            :icon='expanded.get(props.row.project_hash) ? "expand_more" : "chevron_right"',
+            @click.stop='handleToggleComponent(props.row.project_hash)'
+          )
         q-td(
-          style='max-width: 200px; word-wrap: break-word; white-space: normal'
+          style='max-width: 200px; word-wrap: break-word; white-space: normal; cursor: pointer'
+          @click='handleComponentClick(props.row.project_hash)'
         ) {{ props.row.title }}
-        q-td(style='text-align: right')
+        q-td(style='width: 120px; text-align: right')
           q-chip(
             :color='getProjectStatusColor(props.row.status)',
             text-color='white',
             :label='getProjectStatusLabel(props.row.status)'
           )
+          CreateIssueButton(
+            :mini='true',
+            :project-hash='props.row.project_hash',
+            style='margin-right: 8px'
+          )
+          ProjectMenuWidget(:project='props.row')
+
+      // Слот для дополнительного контента компонента
+      q-tr.q-virtual-scroll--with-prev(
+        no-hover,
+        v-if='expanded.get(props.row.project_hash)',
+        :key='`e_${props.row.project_hash}`'
+      )
+        q-td(colspan='100%', style='padding: 0px 0px 0px 80px !important')
+          slot(name='component-content', :component='props.row')
 </template>
 
 <script lang="ts" setup>
@@ -33,23 +58,35 @@ import {
   getProjectStatusColor,
   getProjectStatusLabel,
 } from 'app/extensions/capital/shared/lib/projectStatus';
+import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
+import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
 
 defineProps<{
   components: IProjectComponent[] | undefined;
+  expanded: Map<string, boolean>;
 }>();
 
 const emit = defineEmits<{
   openComponent: [projectHash: string];
+  toggleComponent: [componentHash: string];
 }>();
+
+const handleToggleComponent = (componentHash: string) => {
+  emit('toggleComponent', componentHash);
+};
+
+const handleComponentClick = (componentHash: string) => {
+  emit('openComponent', componentHash);
+};
 
 // Определяем столбцы таблицы
 const columns = [
   {
-    name: 'status',
-    label: 'Статус',
-    align: 'left' as const,
-    field: 'status' as const,
-    sortable: true,
+    name: 'expand',
+    label: '',
+    align: 'center' as const,
+    field: '' as const,
+    sortable: false,
   },
   {
     name: 'name',
@@ -57,6 +94,13 @@ const columns = [
     align: 'left' as const,
     field: 'title' as const,
     sortable: true,
+  },
+  {
+    name: 'actions',
+    label: '',
+    align: 'right' as const,
+    field: '' as const,
+    sortable: false,
   },
 ];
 </script>

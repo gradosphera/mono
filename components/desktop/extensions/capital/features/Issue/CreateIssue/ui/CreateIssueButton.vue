@@ -3,7 +3,10 @@ q-btn(
   color='primary',
   @click='showDialog = true',
   :loading='loading',
-  label='Создать задачу'
+  :label='mini ? "" : "Создать задачу"',
+  :icon='mini ? "add" : "add"',
+  :size='mini ? "sm" : "md"',
+  :outline='mini'
 )
 
 q-dialog(v-model='showDialog', @hide='clear')
@@ -75,6 +78,11 @@ q-dialog(v-model='showDialog', @hide='clear')
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+
+const props = defineProps<{
+  mini?: boolean;
+  projectHash?: string;
+}>();
 import { type ICreateIssueInput, useCreateIssue } from '../model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useRoute } from 'vue-router';
@@ -99,8 +107,8 @@ const isSubmitting = ref(false);
 const textDescription = ref('');
 const hiddenEditor = ref();
 
-// Получаем project_hash из маршрута
-const projectHash = computed(() => route.params.project_hash as string);
+// Получаем project_hash из пропса или маршрута
+const currentProjectHash = computed(() => props.projectHash || (route.params.project_hash as string));
 
 const formData = ref({
   title: '',
@@ -192,7 +200,7 @@ const handleCreateIssue = async () => {
       issue_hash: issueHash,
       coopname: system.info.coopname,
       created_by: session.username,
-      project_hash: projectHash.value,
+      project_hash: currentProjectHash.value,
       title: formData.value.title,
       description: formData.value.description,
       priority: formData.value.priority,

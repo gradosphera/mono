@@ -4,10 +4,9 @@ div
   q-card.q-mb-md(flat)
     q-card-section
       .row.items-center.q-gutter-sm
-        q-icon(name='task', size='24px')
+        q-icon(name='folder', size='24px')
         div
           .text-h6 {{ project?.title || 'Загрузка...' }}
-
 
     q-card-section
       .row.items-center.q-gutter-md
@@ -18,11 +17,19 @@ div
             label='Описание проекта',
             placeholder='',
           )
-  // Таблица задач
-  ComponentIssuesWidget(
-    :project-hash='projectHash',
-    @issue-click='handleIssueClick'
+
+  // Список компонентов проекта
+  ProjectComponentsWidget(
+    :components='project?.components || []',
+    :expanded='expandedComponents',
+    @open-component='handleComponentClick',
+    @toggle-component='handleComponentToggle'
   )
+    template(#component-content='{ component }')
+      ComponentIssuesWidget(
+        :project-hash='component.project_hash',
+        @issue-click='handleIssueClick'
+      )
 </template>
 
 <script lang="ts" setup>
@@ -40,26 +47,32 @@ import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
 import { useRightDrawer } from 'src/shared/hooks/useRightDrawer';
 import { FailAlert } from 'src/shared/api';
-import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
+import { CreateComponentButton } from 'app/extensions/capital/features/Project/CreateComponent';
 import 'src/shared/ui/TitleStyles';
 import {Editor} from 'src/shared/ui';
+import { ProjectComponentsWidget } from 'app/extensions/capital/widgets/ProjectComponentsWidget';
 import { ComponentIssuesWidget } from 'app/extensions/capital/widgets/ComponentIssuesWidget';
+
 const route = useRoute();
 const projectStore = useProjectStore();
+
+// Состояние развернутости компонентов
+const expandedComponents = ref(new Map<string, boolean>());
 
 const project = ref<IProject | null | undefined>(null);
 
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
 const router = useRouter();
+
 // Настраиваем кнопку "Назад"
 useBackButton({
   text: 'К проектам',
   routeName: 'projects',
-  componentId: 'project-tasks-' + projectHash.value,
+  componentId: 'project-components-' + projectHash.value,
 });
 
-// Регистрируем кнопку создания задачи в header
+// Регистрируем кнопку создания компонента в header
 const { registerAction: registerHeaderAction } = useHeaderActions();
 
 // Регистрируем контент в правом drawer
@@ -68,12 +81,14 @@ const { registerAction: registerRightDrawerAction } = useRightDrawer();
 // Регистрируем действие в header
 onMounted(() => {
   registerHeaderAction({
-    id: 'create-task-' + projectHash.value,
-    component: markRaw(CreateIssueButton),
+    id: 'create-component-' + projectHash.value,
+    component: markRaw(CreateComponentButton),
+    props: {
+      project: project.value,
+    },
     order: 1,
   });
 });
-
 
 // Загрузка проекта
 const loadProject = async () => {
@@ -109,20 +124,33 @@ const loadProject = async () => {
   }
 };
 
-// Функция goBack больше не нужна - используется useBackButton
+// Обработчик клика по компоненту
+const handleComponentClick = (componentHash: string) => {
+  router.push({
+    name: 'project-tasks',
+    params: {
+      project_hash: componentHash,
+    },
+  });
+};
+
+// Обработчик переключения компонентов
+const handleComponentToggle = (componentHash: string) => {
+  expandedComponents.value.set(componentHash, !expandedComponents.value.get(componentHash));
+};
 
 // Обработчик клика по задаче
 const handleIssueClick = (issue: IIssue) => {
   router.push({
     name: 'project-issue',
     params: {
-      project_hash: projectHash.value,
+      project_hash: issue.project_hash,
       issue_hash: issue.issue_hash,
     },
   });
 };
 
-// Обработчик клика по истории (может быть использован для дополнительных действий)
+// Обработчик клика по истории
 const handleStoryClick = (story) => {
   // Заглушка для будущих расширений
   console.log('Story clicked:', story);

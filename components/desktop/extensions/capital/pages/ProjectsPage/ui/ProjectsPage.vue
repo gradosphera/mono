@@ -19,8 +19,7 @@ div
         template(#body='props')
           q-tr(
             :props='props',
-            @click='toggleExpand(props.row.project_hash)',
-            style='cursor: pointer'
+            @click='toggleExpand(props.row.project_hash)'
           )
             q-td(style='width: 55px')
               q-btn(
@@ -31,11 +30,18 @@ div
                 :icon='expanded.get(props.row.project_hash) ? "expand_more" : "chevron_right"',
                 @click.stop='toggleExpand(props.row.project_hash)'
               )
-            q-td
+            q-td(
+              style='cursor: pointer'
+              @click='() => router.push({ name: "project-components", params: { project_hash: props.row.project_hash } })'
+            )
               .title-container {{ props.row.title }}
             q-td.text-right
+              CreateComponentButton(
+                :project='props.row',
+                :mini='true',
+                style='margin-right: 8px'
+              )
               ProjectMenuWidget(:project='props.row')
-
           q-tr.q-virtual-scroll--with-prev(
             no-hover,
             v-if='expanded.get(props.row.project_hash)',
@@ -44,8 +50,15 @@ div
             q-td(colspan='100%', style='padding: 0px !important')
               ProjectComponentsWidget(
                 :components='props.row.components',
-                @open-component='openProject'
+                :expanded='expandedComponents',
+                @open-component='(componentHash) => router.push({ name: "project-tasks", params: { project_hash: componentHash } })',
+                @toggle-component='(componentHash) => expandedComponents.set(componentHash, !expandedComponents.get(componentHash))'
               )
+                template(#component-content='{ component }')
+                  ComponentIssuesWidget(
+                    :project-hash='component.project_hash',
+                    @issue-click='(issue) => router.push({ name: "project-issue", params: { project_hash: issue.project_hash, issue_hash: issue.issue_hash } })'
+                  )
 
     // Пагинация
     q-card-actions(align='center')
@@ -70,6 +83,8 @@ import 'src/shared/ui/TitleStyles';
 import { CreateProjectButton } from 'app/extensions/capital/features/Project/CreateProject';
 import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
 import { ProjectComponentsWidget } from 'app/extensions/capital/widgets/ProjectComponentsWidget';
+import { ComponentIssuesWidget } from 'app/extensions/capital/widgets/ComponentIssuesWidget';
+import { CreateComponentButton } from 'app/extensions/capital/features/Project/CreateComponent';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 
 const router = useRouter();
@@ -88,6 +103,10 @@ const { expanded, loadExpandedState, cleanupExpandedState, toggleExpanded } =
     () => projectStore.projects?.items,
     (project) => project.project_hash,
   );
+
+// Состояние развернутости компонентов
+const expandedComponents = ref(new Map<string, boolean>());
+
 
 // Определяем столбцы таблицы
 const columns = [
@@ -168,17 +187,8 @@ const onRequest = async (props) => {
   await loadProjects();
 };
 
-// Переход к задачам проекта
-const openProject = (projectHash: string) => {
-  if (projectHash) {
-    router.push({
-      name: 'project-tasks',
-      params: {
-        project_hash: projectHash,
-      },
-    });
-  }
-};
+
+
 
 // Инициализация
 onMounted(async () => {

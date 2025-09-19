@@ -2,9 +2,11 @@ import { markRaw } from 'vue';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 import { ImportContributorsPage } from './pages';
+import { ContributorsPage } from './pages';
 import { ConfigPage } from './pages/ConfigPage';
 import { ProjectsBase } from './pages/ProjectsBase';
 import { ProjectsPage } from './pages/ProjectsPage';
+import { ProjectComponentsPage } from './pages/ProjectComponentsPage';
 import { ProjectIssuesPage } from './pages/ProjectIssuesPage';
 import { IssuePage } from './pages/IssuePage';
 
@@ -50,6 +52,19 @@ export default async function (): Promise<IWorkspaceConfig> {
             children: [],
           },
           {
+            path: 'contributors',
+            name: 'contributors',
+            component: markRaw(ContributorsPage),
+            meta: {
+              title: 'Вкладчики',
+              icon: 'fa-solid fa-users',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [],
+          },
+          {
             path: 'projects',
             name: 'projects',
             component: markRaw(ProjectsBase),
@@ -68,6 +83,19 @@ export default async function (): Promise<IWorkspaceConfig> {
                 meta: {
                   title: 'Список проектов',
                   icon: 'fa-solid fa-list',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                },
+                children: [],
+              },
+              {
+                path: ':project_hash/components',
+                name: 'project-components',
+                component: markRaw(ProjectComponentsPage),
+                meta: {
+                  title: 'Компоненты проекта',
+                  icon: 'fa-solid fa-folder-tree',
                   roles: [],
                   agreements: agreementsBase,
                   requiresAuth: true,
