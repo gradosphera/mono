@@ -21,11 +21,12 @@ export const getIssuePriorityIcon = (priority: string) => {
  */
 export const getIssuePriorityColor = (priority: string) => {
   switch (priority) {
-    case Zeus.IssuePriority.HIGH:
     case Zeus.IssuePriority.URGENT:
       return 'red';
+    case Zeus.IssuePriority.HIGH:
+      return 'deep-orange';
     case Zeus.IssuePriority.MEDIUM:
-      return 'orange';
+      return 'blue';
     case Zeus.IssuePriority.LOW:
       return 'green';
     default:

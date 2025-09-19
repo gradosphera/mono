@@ -17,19 +17,18 @@ q-dialog(v-model='showDialog', @hide='clear')
     )
       q-input(
         v-model='formData.title',
-        standout='bg-teal text-white',
+        outline
         label='Название проекта',
         :rules='[(val) => notEmpty(val)]',
         autocomplete='off'
       )
 
-      q-input(
+      Editor(
         v-model='formData.description',
-        standout='bg-teal text-white',
         label='Описание проекта',
-        :rules='[(val) => notEmpty(val)]',
         autocomplete='off',
-        type='textarea'
+        placeholder='Опишите проект подробно...',
+        style="border: 1px solid grey; padding: 5px;"
       )
 </template>
 
@@ -41,6 +40,7 @@ import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
+import { Editor } from 'src/shared/ui';
 
 const system = useSystemStore();
 const { createProject } = useCreateProject();

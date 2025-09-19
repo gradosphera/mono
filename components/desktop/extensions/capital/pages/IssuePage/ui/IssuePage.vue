@@ -8,28 +8,30 @@ div
         div
           .text-h6 {{ issue?.title || 'Загрузка...' }}
 
+        IssueControls(
+          :issue='issue'
+          @update:status='handleStatusUpdate'
+          @update:priority='handlePriorityUpdate'
+          @update:estimate='handleEstimateUpdate'
+        ).full-width.q-pt-md
     q-card-section
       .row.items-center.q-gutter-md.q-mb-sm
         .col
-          .text-body2 Описание: {{ issue?.description || '—' }}
+          // Индикатор авто-сохранения
+          AutoSaveIndicator(
+            :is-auto-saving="isAutoSaving"
+            :auto-save-error="autoSaveError"
+          )
 
-      .row.items-center.q-gutter-md
-        .col-auto
-          q-chip(
-            :color='getIssueStatusColor(issue?.status || "")',
-            text-color='white',
-            dense,
-            :label='getIssueStatusLabel(issue?.status || "")'
+          Editor(
+            v-if="issue"
+            v-model='issue.description',
+            label='Описание задачи',
+            placeholder='Опишите задачу подробно...',
+            @change='handleDescriptionChange'
           )
-        .col-auto
-          q-chip(
-            :color='getIssuePriorityColor(issue?.priority || "")',
-            text-color='white',
-            dense,
-            :label='getIssuePriorityLabel(issue?.priority || "")'
-          )
-        .col-auto
-          .text-body2 Оценка: {{ issue?.estimate || '—' }} ч
+
+
 </template>
 
 <script lang="ts" setup>
@@ -41,22 +43,61 @@ import type { IIssue } from 'app/extensions/capital/entities/Issue/model';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useRightDrawer } from 'src/shared/hooks/useRightDrawer';
 import { StoriesWidget } from 'app/extensions/capital/widgets/StoryWidget';
-import {
-  getIssueStatusColor,
-  getIssueStatusLabel,
-  // getIssuePriorityIcon,
-  getIssuePriorityColor,
-  getIssuePriorityLabel,
-} from 'app/extensions/capital/shared/lib';
-
+// Утилиты для статусов и приоритетов теперь используются в компонентах UpdateStatus и UpdatePriority
+import { Editor, AutoSaveIndicator } from 'src/shared/ui';
+import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
+import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
+import { IssueControls } from 'app/extensions/capital/widgets';
 const route = useRoute();
 
 const issue = ref<IIssue | null>(null);
 const loading = ref(false);
 
+// Используем composable для обновления задач
+const { debounceSave, isAutoSaving, autoSaveError } = useUpdateIssue();
+
 // Получаем параметры из маршрута
 const issueHash = computed(() => route.params.issue_hash as string);
 const projectHash = computed(() => route.params.project_hash as string);
+
+
+// Проверяем и конвертируем описание в EditorJS формат если необходимо
+const ensureEditorJSFormat = (description: any) => {
+  if (!description) return '{}';
+
+  // Если это уже строка, пробуем распарсить как JSON
+  if (typeof description === 'string') {
+    try {
+      JSON.parse(description);
+      return description; // Уже валидный JSON
+    } catch {
+      // Не JSON, конвертируем из текста
+      return textToEditorJS(description);
+    }
+  }
+
+  // Если объект, конвертируем в строку
+  if (typeof description === 'object') {
+    return JSON.stringify(description);
+  }
+
+  // Если что-то другое, конвертируем как текст
+  return textToEditorJS(String(description));
+};
+
+// Обработчик изменения описания задачи
+const handleDescriptionChange = () => {
+  if (!issue.value) return;
+
+  const updateData = {
+    issue_hash: issue.value.issue_hash,
+    description: issue.value.description,
+  };
+
+  // Запускаем авто-сохранение с задержкой
+  debounceSave(updateData);
+};
+
 
 // Хук для правого drawer'а
 const { registerAction: registerRightDrawerAction } = useRightDrawer();
@@ -81,6 +122,11 @@ const loadIssue = async () => {
 
     issue.value = issueData || null;
 
+    // Конвертируем описание в EditorJS формат если необходимо
+    if (issue.value?.description) {
+      issue.value.description = ensureEditorJSFormat(issue.value.description);
+    }
+
     // Регистрируем StoriesWidget в правом drawer после загрузки задачи
     if (issue.value) {
       registerRightDrawerAction({
@@ -103,6 +149,25 @@ const loadIssue = async () => {
     FailAlert('Не удалось загрузить задачу');
   } finally {
     loading.value = false;
+  }
+};
+
+// Обработчики обновления полей задачи
+const handleStatusUpdate = (value: any) => {
+  if (issue.value) {
+    issue.value.status = value;
+  }
+};
+
+const handlePriorityUpdate = (value: any) => {
+  if (issue.value) {
+    issue.value.priority = value;
+  }
+};
+
+const handleEstimateUpdate = (value: number) => {
+  if (issue.value) {
+    issue.value.estimate = value;
   }
 };
 

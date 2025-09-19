@@ -5,6 +5,7 @@ import {
   useIssueStore,
   type IUpdateIssueOutput,
 } from 'app/extensions/capital/entities/Issue/model';
+import { FailAlert } from 'src/shared/api/alerts';
 
 export type IUpdateIssueInput = Mutations.Capital.UpdateIssue.IInput['data'];
 
@@ -16,6 +17,55 @@ export function useUpdateIssue() {
   const updateIssueInput = ref<Partial<IUpdateIssueInput>>({
     ...initialUpdateIssueInput,
   });
+
+  // Состояния для авто-сохранения
+  const isAutoSaving = ref(false);
+  const autoSaveError = ref<string | null>(null);
+
+  // Таймер для debounce
+  let autoSaveTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  // Функция debounce для отложенного сохранения
+  function debounceSave(data: IUpdateIssueInput, delay = 2000) {
+    // Очищаем предыдущий таймер
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+    }
+
+    // Устанавливаем новый таймер
+    autoSaveTimeout = setTimeout(async () => {
+      await performAutoSave(data);
+    }, delay);
+  }
+
+  // Выполнение авто-сохранения
+  async function performAutoSave(data: IUpdateIssueInput) {
+    if (isAutoSaving.value) return;
+
+    try {
+      isAutoSaving.value = true;
+      autoSaveError.value = null;
+
+      await updateIssue(data);
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+      autoSaveError.value = 'Ошибка авто-сохранения';
+      FailAlert('Не удалось автоматически сохранить изменения');
+    } finally {
+      isAutoSaving.value = false;
+    }
+  }
+
+  // Функция для немедленного сохранения (отменяет debounce)
+  async function saveImmediately(data: IUpdateIssueInput) {
+    // Очищаем таймер debounce
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+      autoSaveTimeout = null;
+    }
+
+    return await performAutoSave(data);
+  }
 
   // Универсальная функция для сброса объекта к начальному состоянию
   function resetInput(
@@ -39,5 +89,13 @@ export function useUpdateIssue() {
     return transaction;
   }
 
-  return { updateIssue, updateIssueInput };
+  return {
+    updateIssue,
+    updateIssueInput,
+    // Авто-сохранение
+    debounceSave,
+    saveImmediately,
+    isAutoSaving,
+    autoSaveError,
+  };
 }

@@ -16,21 +16,20 @@ q-dialog(v-model='showDialog', @hide='clear')
       @cancel='clear'
     )
       q-input(
+        outline
         v-model='formData.title',
-        standout='bg-teal text-white',
         label='Название компонента',
         :rules='[(val) => notEmpty(val)]',
         autocomplete='off'
       )
 
-      q-input(
+      Editor(
         v-model='formData.description',
-        standout='bg-teal text-white',
         label='Описание компонента',
-        :rules='[(val) => notEmpty(val)]',
-        autocomplete='off',
-        type='textarea'
+        placeholder='Опишите компонент подробно...',
+        style="border: 1px solid grey; padding: 5px;"
       )
+
 </template>
 
 <script setup lang="ts">
@@ -42,7 +41,7 @@ import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
-
+import { Editor } from 'src/shared/ui';
 const props = defineProps<{ project: IProject }>();
 const emit = defineEmits<{
   onClick: [];

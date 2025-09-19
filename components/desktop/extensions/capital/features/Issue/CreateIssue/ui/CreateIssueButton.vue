@@ -24,13 +24,22 @@ q-dialog(v-model='showDialog', @hide='clear')
       )
 
       q-input(
-        v-model='formData.description',
         standout='bg-teal text-white',
+        v-model='textDescription',
         label='Описание задачи',
-        :rules='[(val) => notEmpty(val)]',
-        autocomplete='off',
-        type='textarea'
+        placeholder='Опишите задачу подробно...',
+        type="textarea"
+        rows=3
+        @input='convertToEditorFormat'
       )
+
+      // Скрытый Editor для конвертации текста в EditorJS формат
+      div(style='display: none')
+        Editor(
+          ref='hiddenEditor',
+          v-model='formData.description',
+          @ready='onEditorReady'
+        )
 
       q-select(
         v-model='formData.priority',
@@ -72,9 +81,11 @@ import { useRoute } from 'vue-router';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
+import { Editor } from 'src/shared/ui';
 import { Zeus } from '@coopenomics/sdk';
 import { useSessionStore } from 'src/entities/Session';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
+import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 
 const route = useRoute();
 const system = useSystemStore();
@@ -83,6 +94,10 @@ const session = useSessionStore();
 const loading = ref(false);
 const showDialog = ref(false);
 const isSubmitting = ref(false);
+
+// Для работы с текстовым описанием и конвертацией в EditorJS
+const textDescription = ref('');
+const hiddenEditor = ref();
 
 // Получаем project_hash из маршрута
 const projectHash = computed(() => route.params.project_hash as string);
@@ -116,8 +131,28 @@ const notEmpty = (val: any) => {
   return !!val || 'Это поле обязательно для заполнения';
 };
 
+// Конвертация текста в EditorJS формат
+const convertToEditorFormat = async () => {
+  if (hiddenEditor.value) {
+    try {
+      // Создаем EditorJS данные из текста
+      const editorJSData = textToEditorJS(textDescription.value);
+      formData.value.description = editorJSData;
+    } catch (error) {
+      console.error('Error converting text to EditorJS:', error);
+    }
+  }
+};
+
+// Обработчик готовности скрытого редактора
+const onEditorReady = () => {
+  // Инициализируем конвертацию при готовности редактора
+  convertToEditorFormat();
+};
+
 const clear = () => {
   showDialog.value = false;
+  textDescription.value = '';
   formData.value = {
     title: '',
     description: '',
@@ -129,8 +164,27 @@ const clear = () => {
   };
 };
 
+// Валидация для описания (проверяем что текстовое поле не пустое)
+const validateDescription = (val: string) => {
+  if (!val || val.trim() === '') {
+    return 'Описание задачи обязательно для заполнения';
+  }
+  return true;
+};
+
+
 const handleCreateIssue = async () => {
   try {
+    // Финальная конвертация текста в EditorJS формат перед отправкой
+    await convertToEditorFormat();
+
+    // Валидация перед отправкой
+    const descriptionError = validateDescription(textDescription.value);
+    if (descriptionError !== true) {
+      FailAlert(descriptionError);
+      return;
+    }
+
     isSubmitting.value = true;
     const issueHash = await generateUniqueHash();
 

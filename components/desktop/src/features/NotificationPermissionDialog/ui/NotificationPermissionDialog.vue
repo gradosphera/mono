@@ -71,12 +71,11 @@ const { isDialogVisible, isProcessing, handleAllow, handleDeny } =
 
   .dialog-title {
     font-weight: 600;
-    color: var(--q-dark);
+
     line-height: 1.3;
   }
 
   .dialog-description {
-    color: var(--q-dark);
     line-height: 1.5;
     max-width: 400px;
     margin: 0 auto;
@@ -93,7 +92,6 @@ const { isDialogVisible, isProcessing, handleAllow, handleDeny } =
 
     .disclaimer {
       font-size: 13px;
-      color: var(--q-grey-8);
       opacity: 0.8;
     }
   }

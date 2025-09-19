@@ -8,11 +8,16 @@ div
         div
           .text-h6 {{ project?.title || 'Загрузка...' }}
 
+
     q-card-section
       .row.items-center.q-gutter-md
         .col
-          .text-body2 Описание: {{ project?.description || '—' }}
-
+          Editor(
+            v-if="project"
+            v-model='project.description',
+            label='Описание проекта',
+            placeholder='',
+          )
   // Таблица задач
   q-card(flat)
     q-card-section
@@ -123,7 +128,7 @@ import {
   getIssuePriorityColor,
   getIssuePriorityLabel,
 } from 'app/extensions/capital/shared/lib';
-
+import {Editor} from 'src/shared/ui';
 const route = useRoute();
 const projectStore = useProjectStore();
 const issueStore = useIssueStore();

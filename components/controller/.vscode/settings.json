@@ -1,8 +1,6 @@
 {
-  "cSpell.words": [
-    "subcode"
-  ],
-  "editor.formatOnSave": true,
+  "cSpell.words": ["subcode"],
+  "editor.formatOnSave": false,
   "typescript.tsdk": "node_modules/typescript/lib",
   "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
