@@ -7,6 +7,7 @@ import {
   NOTIFICATION_DOMAIN_SERVICE,
   NotificationDomainService,
 } from '~/domain/notification/services/notification-domain.service';
+import { EventsService } from '~/infrastructure/events/events.service';
 import type { MonoAccountDomainInterface } from '../interfaces/mono-account-domain.interface';
 import type { GetAccountsInputDomainInterface } from '../interfaces/get-accounts-input.interface';
 import type {
@@ -48,7 +49,8 @@ export class AccountDomainInteractor {
     private readonly searchPrivateAccountsRepository: SearchPrivateAccountsRepository,
     @Inject(ACCOUNT_BLOCKCHAIN_PORT) private readonly accountBlockchainPort: AccountBlockchainPort,
     @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository,
-    @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService
+    @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService,
+    private readonly eventsService: EventsService
   ) {}
 
   private readonly logger = new Logger(AccountDomainInteractor.name);
@@ -86,6 +88,12 @@ export class AccountDomainInteractor {
     const account = await this.getAccount(user.username);
 
     this.logger.log(`Успешно обновлен аккаунт ${data.username}`);
+
+    // Эмитим событие об обновлении аккаунта для синхронизации с вкладчиками
+    this.eventsService.emit('account::updated', {
+      username: data.username,
+      account,
+    });
 
     const result = new AccountDomainEntity(account);
     return result;
@@ -228,5 +236,14 @@ export class AccountDomainInteractor {
     this.logger.log(`Найдено ${results.length} приватных аккаунтов`);
 
     return results;
+  }
+
+  /**
+   * Получить отображаемое имя пользователя
+   * @param username Имя пользователя
+   * @returns Отображаемое имя (ФИО или название организации)
+   */
+  async getDisplayName(username: string): Promise<string> {
+    return await this.accountDomainService.getDisplayName(username);
   }
 }

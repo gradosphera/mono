@@ -26,6 +26,9 @@ export class ContributorDomainEntity
   // Доменные поля (расширения)
   public status: ContributorStatus;
 
+  // Поля для отображения информации об аккаунте
+  public display_name: string; // ФИО или название организации
+
   // Поля из блокчейна (contributors.hpp)
   public contributor_hash: IContributorBlockchainData['contributor_hash'];
 
@@ -60,6 +63,7 @@ export class ContributorDomainEntity
 
     // Специфичные поля для contributor
     this.contributor_hash = databaseData.contributor_hash.toLowerCase();
+    this.display_name = databaseData.display_name;
 
     // Данные из блокчейна
     if (blockchainData) {

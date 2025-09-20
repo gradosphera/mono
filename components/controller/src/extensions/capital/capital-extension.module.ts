@@ -5,6 +5,7 @@ import { EventsInfrastructureModule } from '~/infrastructure/events/events.modul
 import { Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DocumentDomainModule } from '~/domain/document/document.module';
+import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
 
 // Репозитории
 import { ProjectTypeormRepository } from './infrastructure/repositories/project.typeorm-repository';
@@ -62,6 +63,7 @@ import { VotingService } from './application/services/voting.service';
 import { ResultSubmissionService } from './application/services/result-submission.service';
 import { DistributionManagementService } from './application/services/distribution-management.service';
 import { ExpensesManagementService } from './application/services/expenses-management.service';
+import { ContributorAccountSyncService } from './application/services/contributor-account-sync.service';
 
 // CAPITAL Application Dependencies
 import { CapitalBlockchainAdapter } from './infrastructure/blockchain/adapters/capital-blockchain.adapter';
@@ -151,7 +153,7 @@ export class CapitalPlugin extends BaseExtModule {
 }
 
 @Module({
-  imports: [CapitalDatabaseModule, EventsInfrastructureModule, DocumentDomainModule],
+  imports: [CapitalDatabaseModule, EventsInfrastructureModule, DocumentDomainModule, ExtensionPortsModule],
   providers: [
     // Plugin
     CapitalPlugin,
@@ -169,6 +171,7 @@ export class CapitalPlugin extends BaseExtModule {
     ResultSubmissionService,
     DistributionManagementService,
     ExpensesManagementService,
+    ContributorAccountSyncService,
 
     // CAPITAL Application Layer Dependencies
     {

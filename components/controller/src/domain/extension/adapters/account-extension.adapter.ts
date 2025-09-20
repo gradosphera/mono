@@ -22,4 +22,8 @@ export class AccountExtensionAdapter implements AccountExtensionPort {
   async getAccount(username: string): Promise<AccountDomainEntity> {
     return this.accountInteractor.getAccount(username);
   }
+
+  async getDisplayName(username: string): Promise<string> {
+    return this.accountInteractor.getDisplayName(username);
+  }
 }

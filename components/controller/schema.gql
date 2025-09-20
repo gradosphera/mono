@@ -1420,6 +1420,9 @@ type CapitalContributor {
   """Сумма долга"""
   debt_amount: Float
 
+  """Отображаемое имя"""
+  display_name: String
+
   """ID в блокчейне"""
   id: Int
 
@@ -1450,8 +1453,16 @@ input CapitalContributorFilter {
   """Фильтр по названию кооператива"""
   coopname: String
 
+  """Поиск по ФИО или названию организации (частичное совпадение)"""
+  display_name: String
+
   """Фильтр по наличию внешнего контракта"""
   is_external_contract: Boolean
+
+  """
+  Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash
+  """
+  project_hash: String
 
   """Фильтр по статусу вкладчика"""
   status: ContributorStatus
@@ -1717,8 +1728,8 @@ type CapitalIssue {
   """ID создателя задачи (contributor)"""
   created_by: String!
 
-  """Массив ID создателей (contributors)"""
-  creators_ids: [String!]!
+  """Массив хэшей создателей (contributors)"""
+  creators_hashs: [String!]!
 
   """ID цикла"""
   cycle_id: String
@@ -1750,8 +1761,8 @@ type CapitalIssue {
   """Статус задачи"""
   status: IssueStatus!
 
-  """ID подмастерья (contributor)"""
-  submaster_id: String
+  """Хэш подмастерья (contributor)"""
+  submaster_hash: String
 
   """Название задачи"""
   title: String!
@@ -1765,8 +1776,8 @@ input CapitalIssueFilter {
   """Фильтр по ID создателя"""
   created_by: String
 
-  """Фильтр по массиву ID создателей"""
-  creators_ids: [String!]
+  """Фильтр по массиву хэшей создателей"""
+  creators_hashs: [String!]
 
   """Фильтр по ID цикла"""
   cycle_id: String
@@ -1780,8 +1791,8 @@ input CapitalIssueFilter {
   """Фильтр по статусу задачи"""
   status: IssueStatus
 
-  """Фильтр по ID подмастерья"""
-  submaster_id: String
+  """Фильтр по хэшу подмастерья"""
+  submaster_hash: String
 
   """Фильтр по названию задачи"""
   title: String
@@ -2679,8 +2690,8 @@ input CreateIssueInput {
   """ID создателя задачи (contributor)"""
   created_by: String!
 
-  """Массив ID создателей (contributors)"""
-  creators_ids: [String!]
+  """Массив хэшей создателей (contributors)"""
+  creators_hashs: [String!]
 
   """ID цикла"""
   cycle_id: String
@@ -2709,8 +2720,8 @@ input CreateIssueInput {
   """Статус задачи"""
   status: IssueStatus = BACKLOG
 
-  """ID подмастерья (contributor)"""
-  submaster_id: String
+  """Хэш подмастерья (contributor)"""
+  submaster_hash: String
 
   """Название задачи"""
   title: String!
@@ -3787,7 +3798,13 @@ input GetCapitalStoryByHashInput {
 
 input GetContributorInput {
   """ID вкладчика"""
-  _id: String!
+  _id: String
+
+  """Хеш вкладчика"""
+  contributor_hash: String
+
+  """Имя пользователя"""
+  username: String
 }
 
 input GetDebtInput {
@@ -5717,7 +5734,7 @@ type Query {
   """Получение списка коммитов кооператива с фильтрацией"""
   capitalCommits(filter: CapitalCommitFilter, options: PaginationInput): PaginatedCapitalCommitsPaginationResult!
 
-  """Получение вкладчика по внутреннему ID базы данных"""
+  """Получение вкладчика по ID, имени пользователя или хешу вкладчика"""
   capitalContributor(data: GetContributorInput!): CapitalContributor
 
   """Получение списка вкладчиков кооператива с фильтрацией"""
@@ -7156,8 +7173,8 @@ input UpdateIssueInput {
   """Вложения задачи"""
   attachments: [String!]
 
-  """Массив ID создателей (contributors)"""
-  creators_ids: [String!]
+  """Массив хэшей создателей (contributors)"""
+  creators_hashs: [String!]
 
   """ID цикла"""
   cycle_id: String
@@ -7183,8 +7200,8 @@ input UpdateIssueInput {
   """Статус задачи"""
   status: IssueStatus
 
-  """ID подмастерья (contributor)"""
-  submaster_id: String
+  """Хэш подмастерья (contributor)"""
+  submaster_hash: String
 
   """Название задачи"""
   title: String

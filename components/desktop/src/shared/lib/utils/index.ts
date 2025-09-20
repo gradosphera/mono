@@ -10,3 +10,5 @@ export * from './theme';
 export * from './parseLinks';
 export * from './dates';
 export * from './editorjs';
+export * from './generateInitials';
+export * from './formatContributorName';

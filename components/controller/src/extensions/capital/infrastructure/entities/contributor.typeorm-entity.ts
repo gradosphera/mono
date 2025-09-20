@@ -11,6 +11,7 @@ const EntityName = 'capital_contributors';
 @Index(`idx_${EntityName}_coopname`, ['coopname'])
 @Index(`idx_${EntityName}_status`, ['status'])
 @Index(`idx_${EntityName}_created_at`, ['_created_at'])
+@Index(`idx_${EntityName}_display_name`, ['display_name'])
 export class ContributorTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
@@ -22,7 +23,7 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar', length: 12 })
   username!: string;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar', length: 64, unique: true })
   contributor_hash!: string;
 
   @Column({ type: 'varchar', length: 20 })
@@ -77,4 +78,8 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
     default: ContributorStatus.PENDING,
   })
   status!: ContributorStatus;
+
+  // Поля для отображения информации об аккаунте
+  @Column({ type: 'varchar', length: 255 })
+  display_name!: string; // ФИО или название организации
 }

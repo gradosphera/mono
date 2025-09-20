@@ -69,4 +69,16 @@ export class ParticipationManagementService {
     const contributor = await this.participationManagementInteractor.getContributorById(_id);
     return contributor as ContributorOutputDTO | null;
   }
+
+  /**
+   * Получение вкладчика по критериям поиска
+   */
+  async getContributorByCriteria(criteria: {
+    _id?: string;
+    username?: string;
+    contributor_hash?: string;
+  }): Promise<ContributorOutputDTO | null> {
+    const contributor = await this.participationManagementInteractor.getContributorByCriteria(criteria);
+    return contributor as ContributorOutputDTO | null;
+  }
 }

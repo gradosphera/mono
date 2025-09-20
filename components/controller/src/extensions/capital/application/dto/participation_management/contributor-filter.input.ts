@@ -37,4 +37,16 @@ export class ContributorFilterInputDTO {
     description: 'Фильтр по наличию внешнего контракта',
   })
   is_external_contract?: boolean;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Поиск по ФИО или названию организации (частичное совпадение)',
+  })
+  display_name?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash',
+  })
+  project_hash?: string;
 }

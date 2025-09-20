@@ -28,6 +28,7 @@ export class ContributorMapper {
       blockchain_status: entity.blockchain_status,
       _created_at: entity._created_at,
       _updated_at: entity._updated_at,
+      display_name: entity.display_name,
     };
 
     let blockchainData: toDomainBlockchainPart | undefined;
@@ -72,6 +73,7 @@ export class ContributorMapper {
       blockchain_status: domain.blockchain_status as string,
       _created_at: domain._created_at as Date,
       _updated_at: domain._updated_at as Date,
+      display_name: domain.display_name,
     };
 
     let blockchainPart: toEntityBlockchainPart | undefined;
@@ -114,6 +116,7 @@ export class ContributorMapper {
       coopname: domain.coopname,
       username: domain.username,
       contributor_hash: domain.contributor_hash,
+      display_name: domain.display_name,
       blockchain_status: domain.blockchain_status,
       memo: domain.memo,
       is_external_contract: domain.is_external_contract,

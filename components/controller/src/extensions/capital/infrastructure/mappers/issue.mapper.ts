@@ -21,8 +21,8 @@ export class IssueMapper {
       estimate: entity.estimate,
       sort_order: entity.sort_order,
       created_by: entity.created_by,
-      creators_ids: entity.creators_ids,
-      submaster_id: entity.submaster_id,
+      creators_hashs: entity.creators_hashs,
+      submaster_hash: entity.submaster_hash,
       project_hash: entity.project_hash,
       cycle_id: entity.cycle_id,
       metadata: entity.metadata,
@@ -50,8 +50,8 @@ export class IssueMapper {
     if (domain.estimate !== undefined) entity.estimate = domain.estimate;
     if (domain.sort_order !== undefined) entity.sort_order = domain.sort_order;
     if (domain.created_by !== undefined) entity.created_by = domain.created_by;
-    if (domain.creators_ids !== undefined) entity.creators_ids = domain.creators_ids;
-    if (domain.submaster_id !== undefined) entity.submaster_id = domain.submaster_id;
+    if (domain.creators_hashs !== undefined) entity.creators_hashs = domain.creators_hashs;
+    if (domain.submaster_hash !== undefined) entity.submaster_hash = domain.submaster_hash;
     if (domain.project_hash !== undefined) entity.project_hash = domain.project_hash;
     if (domain.cycle_id !== undefined) entity.cycle_id = domain.cycle_id;
     if (domain.metadata !== undefined) entity.metadata = domain.metadata;

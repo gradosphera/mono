@@ -10,12 +10,17 @@ export interface ContributorRepository extends IBlockchainSyncRepository<Contrib
   create(contributor: Omit<ContributorDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContributorDomainEntity>;
   findById(_id: string): Promise<ContributorDomainEntity | null>;
   findAll(): Promise<ContributorDomainEntity[]>;
-  findByUsername(username: string): Promise<ContributorDomainEntity[]>;
+  findByUsername(username: string): Promise<ContributorDomainEntity | null>;
   findByStatus(status: string): Promise<ContributorDomainEntity[]>;
   findAllPaginated(
     filter?: ContributorFilterInputDTO,
     options?: PaginationInputDomainInterface
   ): Promise<PaginationResultDomainInterface<ContributorDomainEntity>>;
+  /**
+   * Поиск contributor по любому из полей: _id, username, contributor_hash
+   * Возвращает первого найденного contributor
+   */
+  findOne(criteria: { _id?: string; username?: string; contributor_hash?: string }): Promise<ContributorDomainEntity | null>;
   update(entity: ContributorDomainEntity): Promise<ContributorDomainEntity>;
   delete(_id: string): Promise<void>;
 }

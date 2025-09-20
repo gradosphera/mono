@@ -45,14 +45,11 @@ div
 
         template(#body-cell-assignee='props')
           q-td(:props='props')
-            q-chip(
-              v-if='props.value',
-              color='blue-grey-2',
-              text-color='blue-grey-9',
-              dense,
-              :label='props.value'
+            SetCreatorButton(
+              :dense='true'
+              :issue='props.row'
+              @click.stop
             )
-            span.text-grey-5(v-else) Не назначен
 
         template(#body-cell-created_by='props')
           q-td(:props='props')
@@ -76,6 +73,7 @@ import {
 } from 'app/extensions/capital/entities/Issue/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
+import { SetCreatorButton } from '../../../features/Issue/SetCreator';
 import {
   getIssueStatusColor,
   getIssueStatusLabel,
@@ -163,6 +161,7 @@ const loadIssues = async () => {
     loading.value = false;
   }
 };
+
 
 // Обработчик клика по строке задачи
 const onRowClick = (evt: Event, row: IIssue) => {

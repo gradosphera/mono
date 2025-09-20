@@ -10,6 +10,8 @@ export interface AccountExtensionPort {
   ): Promise<PaginationResultDomainInterface<AccountDomainEntity>>;
 
   getAccount(username: string): Promise<AccountDomainEntity>;
+
+  getDisplayName(username: string): Promise<string>;
 }
 
 export const ACCOUNT_EXTENSION_PORT = Symbol('AccountExtensionPort');

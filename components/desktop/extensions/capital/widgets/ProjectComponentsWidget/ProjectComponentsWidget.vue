@@ -38,7 +38,6 @@ q-card(flat)
           CreateIssueButton(
             :mini='true',
             :project-hash='props.row.project_hash',
-            style='margin-right: 8px'
           )
           ProjectMenuWidget(:project='props.row')
 

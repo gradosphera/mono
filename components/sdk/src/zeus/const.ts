@@ -1431,6 +1431,7 @@ export const ReturnTypes: Record<string,any> = {
 		coopname:"String",
 		created_at:"String",
 		debt_amount:"Float",
+		display_name:"String",
 		id:"Int",
 		is_external_contract:"Boolean",
 		memo:"String",
@@ -1516,7 +1517,7 @@ export const ReturnTypes: Record<string,any> = {
 		_updated_at:"DateTime",
 		block_num:"Float",
 		created_by:"String",
-		creators_ids:"String",
+		creators_hashs:"String",
 		cycle_id:"String",
 		description:"String",
 		estimate:"Int",
@@ -1527,7 +1528,7 @@ export const ReturnTypes: Record<string,any> = {
 		project_hash:"String",
 		sort_order:"Int",
 		status:"IssueStatus",
-		submaster_id:"String",
+		submaster_hash:"String",
 		title:"String"
 	},
 	CapitalProgramInvest:{

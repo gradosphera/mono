@@ -65,19 +65,19 @@ export class UpdateIssueInputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'ID подмастерья (contributor)',
+    description: 'Хэш подмастерья (contributor)',
   })
   @IsOptional()
-  @IsString({ message: 'ID подмастерья должен быть строкой' })
-  submaster_id?: string;
+  @IsString({ message: 'Хэш подмастерья должен быть строкой' })
+  submaster_hash?: string;
 
   @Field(() => [String], {
     nullable: true,
-    description: 'Массив ID создателей (contributors)',
+    description: 'Массив хэшей создателей (contributors)',
   })
   @IsOptional()
   @IsArray({ message: 'Создатели должны быть массивом строк' })
-  creators_ids?: string[];
+  creators_hashs?: string[];
 
   @Field(() => String, {
     nullable: true,

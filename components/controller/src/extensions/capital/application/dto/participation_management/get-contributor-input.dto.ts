@@ -1,12 +1,31 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { IsString, IsOptional, ValidateIf } from 'class-validator';
 
 /**
  * DTO для получения вкладчика
  */
 @InputType('GetContributorInput')
 export class GetContributorInputDTO {
-  @Field(() => String, { description: 'ID вкладчика' })
+  @Field(() => String, { nullable: true, description: 'ID вкладчика' })
   @IsString()
-  _id!: string;
+  @IsOptional()
+  _id?: string;
+
+  @Field(() => String, { nullable: true, description: 'Имя пользователя' })
+  @IsString()
+  @IsOptional()
+  username?: string;
+
+  @Field(() => String, { nullable: true, description: 'Хеш вкладчика' })
+  @IsString()
+  @IsOptional()
+  contributor_hash?: string;
+
+  /**
+   * Валидация: хотя бы одно поле должно быть заполнено
+   */
+  @ValidateIf((o: GetContributorInputDTO) => !o._id && !o.username && !o.contributor_hash)
+  validateAtLeastOneField(): boolean {
+    throw new Error('Необходимо указать хотя бы одно из полей: _id, username или contributor_hash');
+  }
 }

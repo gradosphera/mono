@@ -1929,6 +1929,8 @@ export type ValueTypes = {
 	created_at?:boolean | `@${string}`,
 	/** Сумма долга */
 	debt_amount?:boolean | `@${string}`,
+	/** Отображаемое имя */
+	display_name?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Является ли внешним контрактом */
@@ -1951,8 +1953,12 @@ export type ValueTypes = {
 	contributor_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null | Variable<any, string>,
+	/** Поиск по ФИО или названию организации (частичное совпадение) */
+	display_name?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по наличию внешнего контракта */
 	is_external_contract?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash */
+	project_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по статусу вкладчика */
 	status?: ValueTypes["ContributorStatus"] | undefined | null | Variable<any, string>,
 	/** Фильтр по имени пользователя */
@@ -2140,8 +2146,8 @@ export type ValueTypes = {
 	block_num?:boolean | `@${string}`,
 	/** ID создателя задачи (contributor) */
 	created_by?:boolean | `@${string}`,
-	/** Массив ID создателей (contributors) */
-	creators_ids?:boolean | `@${string}`,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs?:boolean | `@${string}`,
 	/** ID цикла */
 	cycle_id?:boolean | `@${string}`,
 	/** Описание задачи */
@@ -2162,8 +2168,8 @@ export type ValueTypes = {
 	sort_order?:boolean | `@${string}`,
 	/** Статус задачи */
 	status?:boolean | `@${string}`,
-	/** ID подмастерья (contributor) */
-	submaster_id?:boolean | `@${string}`,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -2174,8 +2180,8 @@ export type ValueTypes = {
 	coopname?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по массиву ID создателей */
-	creators_ids?: Array<string> | undefined | null | Variable<any, string>,
+	/** Фильтр по массиву хэшей создателей */
+	creators_hashs?: Array<string> | undefined | null | Variable<any, string>,
 	/** Фильтр по ID цикла */
 	cycle_id?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по приоритету задачи */
@@ -2184,8 +2190,8 @@ export type ValueTypes = {
 	project_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по статусу задачи */
 	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** Фильтр по ID подмастерья */
-	submaster_id?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по хэшу подмастерья */
+	submaster_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null | Variable<any, string>
 };
@@ -2804,8 +2810,8 @@ export type ValueTypes = {
 	coopname: string | Variable<any, string>,
 	/** ID создателя задачи (contributor) */
 	created_by: string | Variable<any, string>,
-	/** Массив ID создателей (contributors) */
-	creators_ids?: Array<string> | undefined | null | Variable<any, string>,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs?: Array<string> | undefined | null | Variable<any, string>,
 	/** ID цикла */
 	cycle_id?: string | undefined | null | Variable<any, string>,
 	/** Описание задачи */
@@ -2824,8 +2830,8 @@ export type ValueTypes = {
 	sort_order?: number | undefined | null | Variable<any, string>,
 	/** Статус задачи */
 	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** ID подмастерья (contributor) */
-	submaster_id?: string | undefined | null | Variable<any, string>,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?: string | undefined | null | Variable<any, string>,
 	/** Название задачи */
 	title: string | Variable<any, string>
 };
@@ -3567,7 +3573,11 @@ export type ValueTypes = {
 };
 	["GetContributorInput"]: {
 	/** ID вкладчика */
-	_id: string | Variable<any, string>
+	_id?: string | undefined | null | Variable<any, string>,
+	/** Хеш вкладчика */
+	contributor_hash?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя */
+	username?: string | undefined | null | Variable<any, string>
 };
 	["GetDebtInput"]: {
 	/** ID долга */
@@ -5736,8 +5746,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	["UpdateIssueInput"]: {
 	/** Вложения задачи */
 	attachments?: Array<string> | undefined | null | Variable<any, string>,
-	/** Массив ID создателей (contributors) */
-	creators_ids?: Array<string> | undefined | null | Variable<any, string>,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs?: Array<string> | undefined | null | Variable<any, string>,
 	/** ID цикла */
 	cycle_id?: string | undefined | null | Variable<any, string>,
 	/** Описание задачи */
@@ -5754,8 +5764,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	sort_order?: number | undefined | null | Variable<any, string>,
 	/** Статус задачи */
 	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** ID подмастерья (contributor) */
-	submaster_id?: string | undefined | null | Variable<any, string>,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?: string | undefined | null | Variable<any, string>,
 	/** Название задачи */
 	title?: string | undefined | null | Variable<any, string>
 };
@@ -6983,6 +6993,8 @@ export type ResolverInputTypes = {
 	created_at?:boolean | `@${string}`,
 	/** Сумма долга */
 	debt_amount?:boolean | `@${string}`,
+	/** Отображаемое имя */
+	display_name?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Является ли внешним контрактом */
@@ -7005,8 +7017,12 @@ export type ResolverInputTypes = {
 	contributor_hash?: string | undefined | null,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
+	/** Поиск по ФИО или названию организации (частичное совпадение) */
+	display_name?: string | undefined | null,
 	/** Фильтр по наличию внешнего контракта */
 	is_external_contract?: boolean | undefined | null,
+	/** Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash */
+	project_hash?: string | undefined | null,
 	/** Фильтр по статусу вкладчика */
 	status?: ResolverInputTypes["ContributorStatus"] | undefined | null,
 	/** Фильтр по имени пользователя */
@@ -7194,8 +7210,8 @@ export type ResolverInputTypes = {
 	block_num?:boolean | `@${string}`,
 	/** ID создателя задачи (contributor) */
 	created_by?:boolean | `@${string}`,
-	/** Массив ID создателей (contributors) */
-	creators_ids?:boolean | `@${string}`,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs?:boolean | `@${string}`,
 	/** ID цикла */
 	cycle_id?:boolean | `@${string}`,
 	/** Описание задачи */
@@ -7216,8 +7232,8 @@ export type ResolverInputTypes = {
 	sort_order?:boolean | `@${string}`,
 	/** Статус задачи */
 	status?:boolean | `@${string}`,
-	/** ID подмастерья (contributor) */
-	submaster_id?:boolean | `@${string}`,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -7228,8 +7244,8 @@ export type ResolverInputTypes = {
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
-	/** Фильтр по массиву ID создателей */
-	creators_ids?: Array<string> | undefined | null,
+	/** Фильтр по массиву хэшей создателей */
+	creators_hashs?: Array<string> | undefined | null,
 	/** Фильтр по ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Фильтр по приоритету задачи */
@@ -7238,8 +7254,8 @@ export type ResolverInputTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу задачи */
 	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** Фильтр по ID подмастерья */
-	submaster_id?: string | undefined | null,
+	/** Фильтр по хэшу подмастерья */
+	submaster_hash?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
@@ -7858,8 +7874,8 @@ export type ResolverInputTypes = {
 	coopname: string,
 	/** ID создателя задачи (contributor) */
 	created_by: string,
-	/** Массив ID создателей (contributors) */
-	creators_ids?: Array<string> | undefined | null,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -7878,8 +7894,8 @@ export type ResolverInputTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** ID подмастерья (contributor) */
-	submaster_id?: string | undefined | null,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?: string | undefined | null,
 	/** Название задачи */
 	title: string
 };
@@ -8621,7 +8637,11 @@ export type ResolverInputTypes = {
 };
 	["GetContributorInput"]: {
 	/** ID вкладчика */
-	_id: string
+	_id?: string | undefined | null,
+	/** Хеш вкладчика */
+	contributor_hash?: string | undefined | null,
+	/** Имя пользователя */
+	username?: string | undefined | null
 };
 	["GetDebtInput"]: {
 	/** ID долга */
@@ -10792,8 +10812,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	["UpdateIssueInput"]: {
 	/** Вложения задачи */
 	attachments?: Array<string> | undefined | null,
-	/** Массив ID создателей (contributors) */
-	creators_ids?: Array<string> | undefined | null,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -10810,8 +10830,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** ID подмастерья (contributor) */
-	submaster_id?: string | undefined | null,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
 };
@@ -12022,6 +12042,8 @@ export type ModelTypes = {
 	created_at?: string | undefined | null,
 	/** Сумма долга */
 	debt_amount?: number | undefined | null,
+	/** Отображаемое имя */
+	display_name?: string | undefined | null,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
 	/** Является ли внешним контрактом */
@@ -12043,8 +12065,12 @@ export type ModelTypes = {
 	contributor_hash?: string | undefined | null,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
+	/** Поиск по ФИО или названию организации (частичное совпадение) */
+	display_name?: string | undefined | null,
 	/** Фильтр по наличию внешнего контракта */
 	is_external_contract?: boolean | undefined | null,
+	/** Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash */
+	project_hash?: string | undefined | null,
 	/** Фильтр по статусу вкладчика */
 	status?: ModelTypes["ContributorStatus"] | undefined | null,
 	/** Фильтр по имени пользователя */
@@ -12228,8 +12254,8 @@ export type ModelTypes = {
 	block_num?: number | undefined | null,
 	/** ID создателя задачи (contributor) */
 	created_by: string,
-	/** Массив ID создателей (contributors) */
-	creators_ids: Array<string>,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs: Array<string>,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -12250,8 +12276,8 @@ export type ModelTypes = {
 	sort_order: number,
 	/** Статус задачи */
 	status: ModelTypes["IssueStatus"],
-	/** ID подмастерья (contributor) */
-	submaster_id?: string | undefined | null,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?: string | undefined | null,
 	/** Название задачи */
 	title: string
 };
@@ -12261,8 +12287,8 @@ export type ModelTypes = {
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
-	/** Фильтр по массиву ID создателей */
-	creators_ids?: Array<string> | undefined | null,
+	/** Фильтр по массиву хэшей создателей */
+	creators_hashs?: Array<string> | undefined | null,
 	/** Фильтр по ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Фильтр по приоритету задачи */
@@ -12271,8 +12297,8 @@ export type ModelTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу задачи */
 	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** Фильтр по ID подмастерья */
-	submaster_id?: string | undefined | null,
+	/** Фильтр по хэшу подмастерья */
+	submaster_hash?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
@@ -12878,8 +12904,8 @@ export type ModelTypes = {
 	coopname: string,
 	/** ID создателя задачи (contributor) */
 	created_by: string,
-	/** Массив ID создателей (contributors) */
-	creators_ids?: Array<string> | undefined | null,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -12898,8 +12924,8 @@ export type ModelTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** ID подмастерья (contributor) */
-	submaster_id?: string | undefined | null,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?: string | undefined | null,
 	/** Название задачи */
 	title: string
 };
@@ -13619,7 +13645,11 @@ export type ModelTypes = {
 };
 	["GetContributorInput"]: {
 	/** ID вкладчика */
-	_id: string
+	_id?: string | undefined | null,
+	/** Хеш вкладчика */
+	contributor_hash?: string | undefined | null,
+	/** Имя пользователя */
+	username?: string | undefined | null
 };
 	["GetDebtInput"]: {
 	/** ID долга */
@@ -14887,7 +14917,7 @@ export type ModelTypes = {
 	capitalCommit?: ModelTypes["CapitalCommit"] | undefined | null,
 	/** Получение списка коммитов кооператива с фильтрацией */
 	capitalCommits: ModelTypes["PaginatedCapitalCommitsPaginationResult"],
-	/** Получение вкладчика по внутреннему ID базы данных */
+	/** Получение вкладчика по ID, имени пользователя или хешу вкладчика */
 	capitalContributor?: ModelTypes["CapitalContributor"] | undefined | null,
 	/** Получение списка вкладчиков кооператива с фильтрацией */
 	capitalContributors: ModelTypes["PaginatedCapitalContributorsPaginationResult"],
@@ -15861,8 +15891,8 @@ export type ModelTypes = {
 	["UpdateIssueInput"]: {
 	/** Вложения задачи */
 	attachments?: Array<string> | undefined | null,
-	/** Массив ID создателей (contributors) */
-	creators_ids?: Array<string> | undefined | null,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -15879,8 +15909,8 @@ export type ModelTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** ID подмастерья (contributor) */
-	submaster_id?: string | undefined | null,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
 };
@@ -17106,6 +17136,8 @@ export type GraphQLTypes = {
 	created_at?: string | undefined | null,
 	/** Сумма долга */
 	debt_amount?: number | undefined | null,
+	/** Отображаемое имя */
+	display_name?: string | undefined | null,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
 	/** Является ли внешним контрактом */
@@ -17127,8 +17159,12 @@ export type GraphQLTypes = {
 	contributor_hash?: string | undefined | null,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
+	/** Поиск по ФИО или названию организации (частичное совпадение) */
+	display_name?: string | undefined | null,
 	/** Фильтр по наличию внешнего контракта */
 	is_external_contract?: boolean | undefined | null,
+	/** Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash */
+	project_hash?: string | undefined | null,
 	/** Фильтр по статусу вкладчика */
 	status?: GraphQLTypes["ContributorStatus"] | undefined | null,
 	/** Фильтр по имени пользователя */
@@ -17317,8 +17353,8 @@ export type GraphQLTypes = {
 	block_num?: number | undefined | null,
 	/** ID создателя задачи (contributor) */
 	created_by: string,
-	/** Массив ID создателей (contributors) */
-	creators_ids: Array<string>,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs: Array<string>,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -17339,8 +17375,8 @@ export type GraphQLTypes = {
 	sort_order: number,
 	/** Статус задачи */
 	status: GraphQLTypes["IssueStatus"],
-	/** ID подмастерья (contributor) */
-	submaster_id?: string | undefined | null,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?: string | undefined | null,
 	/** Название задачи */
 	title: string
 };
@@ -17350,8 +17386,8 @@ export type GraphQLTypes = {
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
-	/** Фильтр по массиву ID создателей */
-	creators_ids?: Array<string> | undefined | null,
+	/** Фильтр по массиву хэшей создателей */
+	creators_hashs?: Array<string> | undefined | null,
 	/** Фильтр по ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Фильтр по приоритету задачи */
@@ -17360,8 +17396,8 @@ export type GraphQLTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу задачи */
 	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** Фильтр по ID подмастерья */
-	submaster_id?: string | undefined | null,
+	/** Фильтр по хэшу подмастерья */
+	submaster_hash?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
@@ -17980,8 +18016,8 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** ID создателя задачи (contributor) */
 	created_by: string,
-	/** Массив ID создателей (contributors) */
-	creators_ids?: Array<string> | undefined | null,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -18000,8 +18036,8 @@ export type GraphQLTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** ID подмастерья (contributor) */
-	submaster_id?: string | undefined | null,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?: string | undefined | null,
 	/** Название задачи */
 	title: string
 };
@@ -18743,7 +18779,11 @@ export type GraphQLTypes = {
 };
 	["GetContributorInput"]: {
 		/** ID вкладчика */
-	_id: string
+	_id?: string | undefined | null,
+	/** Хеш вкладчика */
+	contributor_hash?: string | undefined | null,
+	/** Имя пользователя */
+	username?: string | undefined | null
 };
 	["GetDebtInput"]: {
 		/** ID долга */
@@ -20074,7 +20114,7 @@ export type GraphQLTypes = {
 	capitalCommit?: GraphQLTypes["CapitalCommit"] | undefined | null,
 	/** Получение списка коммитов кооператива с фильтрацией */
 	capitalCommits: GraphQLTypes["PaginatedCapitalCommitsPaginationResult"],
-	/** Получение вкладчика по внутреннему ID базы данных */
+	/** Получение вкладчика по ID, имени пользователя или хешу вкладчика */
 	capitalContributor?: GraphQLTypes["CapitalContributor"] | undefined | null,
 	/** Получение списка вкладчиков кооператива с фильтрацией */
 	capitalContributors: GraphQLTypes["PaginatedCapitalContributorsPaginationResult"],
@@ -21068,8 +21108,8 @@ export type GraphQLTypes = {
 	["UpdateIssueInput"]: {
 		/** Вложения задачи */
 	attachments?: Array<string> | undefined | null,
-	/** Массив ID создателей (contributors) */
-	creators_ids?: Array<string> | undefined | null,
+	/** Массив хэшей создателей (contributors) */
+	creators_hashs?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -21086,8 +21126,8 @@ export type GraphQLTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** ID подмастерья (contributor) */
-	submaster_id?: string | undefined | null,
+	/** Хэш подмастерья (contributor) */
+	submaster_hash?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
 };

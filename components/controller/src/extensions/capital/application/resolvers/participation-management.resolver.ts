@@ -91,14 +91,18 @@ export class ParticipationManagementResolver {
   }
 
   /**
-   * Получение вкладчика по ID
+   * Получение вкладчика по критериям поиска
    */
   @Query(() => ContributorOutputDTO, {
     name: 'capitalContributor',
-    description: 'Получение вкладчика по внутреннему ID базы данных',
+    description: 'Получение вкладчика по ID, имени пользователя или хешу вкладчика',
     nullable: true,
   })
   async getContributor(@Args('data') data: GetContributorInputDTO): Promise<ContributorOutputDTO | null> {
-    return await this.participationManagementService.getContributorById(data._id);
+    return await this.participationManagementService.getContributorByCriteria({
+      _id: data._id,
+      username: data.username,
+      contributor_hash: data.contributor_hash,
+    });
   }
 }

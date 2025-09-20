@@ -133,4 +133,10 @@ export class ContributorOutputDTO extends BaseOutputDTO {
     description: 'Приложения к контракту',
   })
   appendixes?: string[];
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Отображаемое имя',
+  })
+  display_name?: string;
 }

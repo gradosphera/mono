@@ -57,18 +57,18 @@ export class IssueTypeormRepository implements IssueRepository {
     return entities.map(IssueMapper.toDomain);
   }
 
-  async findByCreatorsIds(creatorsIds: string[]): Promise<IssueDomainEntity[]> {
+  async findByCreatorsHashs(creatorsHashs: string[]): Promise<IssueDomainEntity[]> {
     const entities = await this.issueTypeormRepository
       .createQueryBuilder('issue')
-      .where('issue.creators_ids && :creatorsIds', { creatorsIds })
+      .where('issue.creators_hashs && :creatorsHashs', { creatorsHashs })
       .getMany();
 
     return entities.map(IssueMapper.toDomain);
   }
 
-  async findBySubmasterId(submasterId: string): Promise<IssueDomainEntity[]> {
+  async findBySubmasterHash(submasterHash: string): Promise<IssueDomainEntity[]> {
     const entities = await this.issueTypeormRepository.find({
-      where: { submaster_id: submasterId },
+      where: { submaster_hash: submasterHash },
     });
     return entities.map(IssueMapper.toDomain);
   }
@@ -201,8 +201,8 @@ export class IssueTypeormRepository implements IssueRepository {
     if (filter?.created_by) {
       where.created_by = filter.created_by;
     }
-    if (filter?.submaster_id) {
-      where.submaster_id = filter.submaster_id;
+    if (filter?.submaster_hash) {
+      where.submaster_hash = filter.submaster_hash;
     }
     if (filter?.cycle_id) {
       where.cycle_id = filter.cycle_id;

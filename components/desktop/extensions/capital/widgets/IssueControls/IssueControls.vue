@@ -24,10 +24,19 @@
       label='Оценка (ч)'
       @update:modelValue='handleEstimateUpdate'
     )
+  .col-auto
+
+    SetCreatorButton(
+      v-if='issue'
+      :issue='issue'
+      :dense='true'
+      @creators-set='handleCreatorsSet'
+    )
 </template>
 
 <script setup lang="ts">
 import { UpdateStatus, UpdatePriority, UpdateEstimate } from '../../features/Issue/UpdateIssue'
+import { SetCreatorButton } from '../../features/Issue/SetCreator'
 
 interface Props {
   issue: any // IIssue тип
@@ -37,6 +46,7 @@ interface Emits {
   (e: 'update:status', value: any): void
   (e: 'update:priority', value: any): void
   (e: 'update:estimate', value: number): void
+  (e: 'creators-set', creators: any[]): void
 }
 
 defineProps<Props>()
@@ -52,5 +62,9 @@ const handlePriorityUpdate = (value: any) => {
 
 const handleEstimateUpdate = (value: number) => {
   emit('update:estimate', value)
+}
+
+const handleCreatorsSet = (creators: any[]) => {
+  emit('creators-set', creators)
 }
 </script>

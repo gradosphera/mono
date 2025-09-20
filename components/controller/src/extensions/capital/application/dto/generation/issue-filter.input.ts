@@ -47,9 +47,9 @@ export class IssueFilterInputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Фильтр по ID подмастерья',
+    description: 'Фильтр по хэшу подмастерья',
   })
-  submaster_id?: string;
+  submaster_hash?: string;
 
   @Field(() => String, {
     nullable: true,
@@ -59,7 +59,7 @@ export class IssueFilterInputDTO {
 
   @Field(() => [String], {
     nullable: true,
-    description: 'Фильтр по массиву ID создателей',
+    description: 'Фильтр по массиву хэшей создателей',
   })
-  creators_ids?: string[];
+  creators_hashs?: string[];
 }

@@ -196,6 +196,33 @@ export class AccountDomainService {
 
     return null;
   }
+
+  /**
+   * Извлекает отображаемое имя из аккаунта пользователя
+   * @param username Имя пользователя
+   * @returns Отображаемое имя (ФИО или название организации)
+   */
+  async getDisplayName(username: string): Promise<string> {
+    const account = await this.getAccount(username);
+    const privateAccount = account.private_account;
+
+    if (!privateAccount) {
+      throw new Error(`Private account not found for user ${username}`);
+    }
+
+    // Определяем тип аккаунта и извлекаем соответствующее имя
+    if (privateAccount.type === 'individual' && privateAccount.individual_data) {
+      const { first_name, last_name, middle_name } = privateAccount.individual_data;
+      return `${last_name} ${first_name} ${middle_name || ''}`.trim();
+    } else if (privateAccount.type === 'organization' && privateAccount.organization_data) {
+      return privateAccount.organization_data.short_name;
+    } else if (privateAccount.type === 'entrepreneur' && privateAccount.entrepreneur_data) {
+      const { first_name, last_name, middle_name } = privateAccount.entrepreneur_data;
+      return `${last_name} ${first_name} ${middle_name || ''}`.trim();
+    }
+
+    throw new Error(`Invalid account type for user ${username}`);
+  }
 }
 
 export const ACCOUNT_DOMAIN_SERVICE = Symbol('ACCOUNT_DOMAIN_SERVICE');

@@ -36,10 +36,14 @@ div
             )
               .title-container {{ props.row.title }}
             q-td.text-right
+              SetMasterButton(
+                :project='props.row',
+                dense,
+                flat,
+              )
               CreateComponentButton(
                 :project='props.row',
                 :mini='true',
-                style='margin-right: 8px'
               )
               ProjectMenuWidget(:project='props.row')
           q-tr.q-virtual-scroll--with-prev(
@@ -52,7 +56,7 @@ div
                 :components='props.row.components',
                 :expanded='expandedComponents',
                 @open-component='(componentHash) => router.push({ name: "project-tasks", params: { project_hash: componentHash } })',
-                @toggle-component='(componentHash) => expandedComponents.set(componentHash, !expandedComponents.get(componentHash))'
+                @toggle-component='toggleComponentExpanded'
               )
                 template(#component-content='{ component }')
                   ComponentIssuesWidget(
@@ -81,6 +85,7 @@ import { useHeaderActions } from 'src/shared/hooks';
 import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
 import { CreateProjectButton } from 'app/extensions/capital/features/Project/CreateProject';
+import { SetMasterButton } from 'app/extensions/capital/features/Project/SetMaster';
 import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
 import { ProjectComponentsWidget } from 'app/extensions/capital/widgets/ProjectComponentsWidget';
 import { ComponentIssuesWidget } from 'app/extensions/capital/widgets/ComponentIssuesWidget';
@@ -104,8 +109,26 @@ const { expanded, loadExpandedState, cleanupExpandedState, toggleExpanded } =
     (project) => project.project_hash,
   );
 
-// Состояние развернутости компонентов
-const expandedComponents = ref(new Map<string, boolean>());
+// Композабл для управления состоянием развернутости компонентов
+const {
+  expanded: expandedComponents,
+  loadExpandedState: loadComponentsExpandedState,
+  cleanupExpandedState: cleanupComponentsExpandedState,
+  toggleExpanded: toggleComponentExpanded
+} = useExpandableState(
+  'capital_project_components_expanded',
+  () => {
+    // Собираем все компоненты из всех проектов
+    const allComponents: any[] = [];
+    projectStore.projects?.items?.forEach(project => {
+      if (project.components) {
+        allComponents.push(...project.components);
+      }
+    });
+    return allComponents;
+  },
+  (component) => component.project_hash,
+);
 
 
 // Определяем столбцы таблицы
@@ -167,6 +190,8 @@ const loadProjects = async () => {
 
     // Очищаем устаревшие записи expanded после загрузки проектов
     cleanupExpandedState();
+    // Очищаем устаревшие записи expanded компонентов после загрузки проектов
+    cleanupComponentsExpandedState();
   } catch (error) {
     console.error('Ошибка при загрузке проектов:', error);
     FailAlert('Не удалось загрузить список проектов');
@@ -194,6 +219,7 @@ const onRequest = async (props) => {
 onMounted(async () => {
   // Загружаем сохраненное состояние expanded из LocalStorage
   loadExpandedState();
+  loadComponentsExpandedState();
 
   registerAction({
     id: 'create-project',

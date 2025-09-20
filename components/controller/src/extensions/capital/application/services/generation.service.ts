@@ -183,8 +183,8 @@ export class GenerationService {
       estimate: data.estimate || 0,
       sort_order: data.sort_order || 0,
       created_by: data.created_by,
-      submaster_id: data.submaster_id,
-      creators_ids: data.creators_ids || [],
+      submaster_hash: data.submaster_hash,
+      creators_hashs: data.creators_hashs || [],
       project_hash: data.project_hash,
       cycle_id: data.cycle_id,
       metadata: {
@@ -225,8 +225,8 @@ export class GenerationService {
       estimate: data.estimate ?? existingIssue.estimate,
       sort_order: data.sort_order ?? existingIssue.sort_order,
       created_by: existingIssue.created_by,
-      submaster_id: data.submaster_id ?? existingIssue.submaster_id,
-      creators_ids: data.creators_ids ?? existingIssue.creators_ids,
+      submaster_hash: data.submaster_hash ?? existingIssue.submaster_hash,
+      creators_hashs: data.creators_hashs ?? existingIssue.creators_hashs,
       project_hash: existingIssue.project_hash,
       cycle_id: data.cycle_id ?? existingIssue.cycle_id,
       metadata: {
