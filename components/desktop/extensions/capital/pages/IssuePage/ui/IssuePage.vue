@@ -35,7 +35,7 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, markRaw } from 'vue';
 import { useRoute } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import { api as IssueApi } from 'app/extensions/capital/entities/Issue/api';
@@ -48,6 +48,8 @@ import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
 import { IssueControls } from 'app/extensions/capital/widgets';
+import { CreateCommitButton } from 'app/extensions/capital/features/Commit/CreateCommit';
+import { useHeaderActions } from 'src/shared/hooks';
 const route = useRoute();
 
 const issue = ref<IIssue | null>(null);
@@ -55,6 +57,9 @@ const loading = ref(false);
 
 // Используем composable для обновления задач
 const { debounceSave, isAutoSaving, autoSaveError } = useUpdateIssue();
+
+// Регистрируем кнопку создания коммита в header
+const { registerAction } = useHeaderActions();
 
 // Получаем параметры из маршрута
 const issueHash = computed(() => route.params.issue_hash as string);
@@ -142,6 +147,17 @@ const loadIssue = async () => {
           emptyMessage: 'Историй задачи пока нет',
         },
         order: 1,
+      });
+
+      // Регистрируем кнопку создания коммита в header
+      registerAction({
+        id: 'create-commit-' + issueHash.value,
+        component: markRaw(CreateCommitButton),
+        props: {
+          projectHash: projectHash.value,
+          mini: true,
+        },
+        order: 2,
       });
     }
   } catch (error) {

@@ -52,14 +52,14 @@ div
             :key='`e_${props.row.project_hash}`'
           )
             q-td(colspan='100%', style='padding: 0px !important')
-              ProjectComponentsWidget(
+              ComponentsListWidget(
                 :components='props.row.components',
                 :expanded='expandedComponents',
                 @open-component='(componentHash) => router.push({ name: "project-tasks", params: { project_hash: componentHash } })',
                 @toggle-component='toggleComponentExpanded'
               )
                 template(#component-content='{ component }')
-                  ComponentIssuesWidget(
+                  IssuesListWidget(
                     :project-hash='component.project_hash',
                     @issue-click='(issue) => router.push({ name: "project-issue", params: { project_hash: issue.project_hash, issue_hash: issue.issue_hash } })'
                   )
@@ -87,8 +87,8 @@ import 'src/shared/ui/TitleStyles';
 import { CreateProjectButton } from 'app/extensions/capital/features/Project/CreateProject';
 import { SetMasterButton } from 'app/extensions/capital/features/Project/SetMaster';
 import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
-import { ProjectComponentsWidget } from 'app/extensions/capital/widgets/ProjectComponentsWidget';
-import { ComponentIssuesWidget } from 'app/extensions/capital/widgets/ComponentIssuesWidget';
+import { ComponentsListWidget } from 'app/extensions/capital/widgets/ComponentsListWidget';
+import { IssuesListWidget } from 'app/extensions/capital/widgets/IssuesListWidget';
 import { CreateComponentButton } from 'app/extensions/capital/features/Project/CreateComponent';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 

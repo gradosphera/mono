@@ -6,7 +6,7 @@ div
     //-   h5.q-my-none Вкладчики кооператива
 
     // Таблица вкладчиков
-    ContributorsWidget(
+    ContributorsListWidget(
       :contributors='contributorStore.contributors?.items || []',
       :loading='loading',
       :pagination='pagination',
@@ -29,7 +29,7 @@ div
 import { ref, onMounted } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
-import { ContributorsWidget } from 'app/extensions/capital/widgets/ContributorsWidget';
+import { ContributorsListWidget } from 'app/extensions/capital/widgets/ContributorsListWidget';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 
 const contributorStore = useContributorStore();

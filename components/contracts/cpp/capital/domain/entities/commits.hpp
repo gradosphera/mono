@@ -34,6 +34,8 @@ namespace Capital::Commits {
     name status;                                    ///< Статус коммита (created | approved | authorized | act1 | act2)
     checksum256 project_hash;                       ///< Хэш проекта, связанного с действием
     checksum256 commit_hash;                        ///< Хэш действия
+    std::string description;                        ///< Описание действия
+    std::string meta;                               ///< Метаданные коммита
     generation_amounts amounts;                     ///< Рассчитанные показатели генерации
     time_point_sec created_at;                      ///< Дата и время создания действия
 
@@ -113,6 +115,8 @@ inline void create_commit(
   eosio::name username,
   checksum256 project_hash,
   checksum256 commit_hash,
+  std::string description,
+  std::string meta,
   const generation_amounts &calculated_fact
 ) {
   // Создаем коммит
@@ -127,6 +131,8 @@ inline void create_commit(
     c.username = username;
     c.project_hash = project_hash;
     c.commit_hash = commit_hash;
+    c.description = description;
+    c.meta = meta;
     c.amounts = calculated_fact;
     c.created_at = current_time_point();
   });

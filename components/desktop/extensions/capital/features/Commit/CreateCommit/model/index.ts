@@ -8,15 +8,15 @@ import {
 
 export type ICreateCommitInput = Mutations.Capital.CreateCommit.IInput['data'];
 
-export function useCreateCommit() {
+export function useCreateCommit(projectHash?: string, username?: string) {
   const store = useCommitStore();
 
   const initialCreateCommitInput: ICreateCommitInput = {
     commit_hash: '',
     coopname: '',
     creator_hours: 0,
-    project_hash: '',
-    username: '',
+    project_hash: projectHash || '',
+    username: username || '',
   };
 
   const createCommitInput = ref<ICreateCommitInput>({

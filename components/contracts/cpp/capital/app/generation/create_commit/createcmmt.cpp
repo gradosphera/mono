@@ -14,12 +14,14 @@
  * @param project_hash Хеш проекта
  * @param commit_hash Хеш коммита
  * @param creator_hours Количество часов создателя
+ * @param description Описание коммита
+ * @param meta Метаданные коммита
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
  * @note Авторизация требуется от аккаунта: @p coopname
  */
-void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours){
+void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours, std::string description, std::string meta){
   require_auth(coopname);
   
   // Проверяем существование проекта и получаем его
@@ -57,7 +59,9 @@ void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256
     username,
     project_hash,
     commit_hash,
-    delta_amounts
+    description,
+    meta,
+    delta_amounts,
   );
 
 }

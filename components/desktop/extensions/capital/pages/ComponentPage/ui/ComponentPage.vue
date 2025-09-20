@@ -12,14 +12,21 @@ div
     q-card-section
       .row.items-center.q-gutter-md
         .col
+          // Индикатор авто-сохранения
+          AutoSaveIndicator(
+            :is-auto-saving="isAutoSaving"
+            :auto-save-error="autoSaveError"
+          )
+
           Editor(
             v-if="project"
             v-model='project.description',
-            label='Описание проекта',
+            label='Описание компонента',
             placeholder='',
+            @change='handleDescriptionChange'
           )
   // Таблица задач
-  ComponentIssuesWidget(
+  IssuesListWidget(
     :project-hash='projectHash',
     @issue-click='handleIssueClick'
   )
@@ -42,15 +49,63 @@ import { useRightDrawer } from 'src/shared/hooks/useRightDrawer';
 import { FailAlert } from 'src/shared/api';
 import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
 import 'src/shared/ui/TitleStyles';
-import {Editor} from 'src/shared/ui';
-import { ComponentIssuesWidget } from 'app/extensions/capital/widgets/ComponentIssuesWidget';
+import {Editor, AutoSaveIndicator} from 'src/shared/ui';
+import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
+import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
+import { IssuesListWidget } from 'app/extensions/capital/widgets/IssuesListWidget';
 const route = useRoute();
 const projectStore = useProjectStore();
 
 const project = ref<IProject | null | undefined>(null);
 
+// Используем composable для редактирования проекта
+const { debounceSave, isAutoSaving, autoSaveError } = useEditProject();
+
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
+
+// Проверяем и конвертируем описание в EditorJS формат если необходимо
+const ensureEditorJSFormat = (description: any) => {
+  if (!description) return '{}';
+
+  // Если это уже строка, пробуем распарсить как JSON
+  if (typeof description === 'string') {
+    try {
+      JSON.parse(description);
+      return description; // Уже валидный JSON
+    } catch {
+      // Не JSON, конвертируем из текста
+      return textToEditorJS(description);
+    }
+  }
+
+  // Если объект, конвертируем в строку
+  if (typeof description === 'object') {
+    return JSON.stringify(description);
+  }
+
+  // Если что-то другое, конвертируем как текст
+  return textToEditorJS(String(description));
+};
+
+// Обработчик изменения описания проекта
+const handleDescriptionChange = () => {
+  if (!project.value) return;
+
+  const updateData = {
+    project_hash: project.value.project_hash || '',
+    title: project.value.title || '',
+    description: project.value.description || '',
+    coopname: (project.value as any).coopname || '',
+    invite: '',
+    meta: '',
+    data: '',
+    can_convert_to_project: false,
+  };
+
+  // Запускаем авто-сохранение с задержкой
+  debounceSave(updateData);
+};
 const router = useRouter();
 // Настраиваем кнопку "Назад"
 useBackButton({
@@ -82,6 +137,11 @@ const loadProject = async () => {
       hash: projectHash.value,
     });
     project.value = projectStore.project;
+
+    // Конвертируем описание в EditorJS формат если необходимо
+    if (project.value?.description) {
+      project.value.description = ensureEditorJSFormat(project.value.description);
+    }
 
     // Регистрируем StoriesWidget в правом drawer
     if (project.value) {

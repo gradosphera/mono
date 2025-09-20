@@ -5,9 +5,9 @@ import { ImportContributorsPage } from './pages';
 import { ContributorsPage } from './pages';
 import { ConfigPage } from './pages/ConfigPage';
 import { ProjectsBase } from './pages/ProjectsBase';
-import { ProjectsPage } from './pages/ProjectsPage';
-import { ProjectComponentsPage } from './pages/ProjectComponentsPage';
-import { ProjectIssuesPage } from './pages/ProjectIssuesPage';
+import { ProjectsListPage } from './pages/ProjectsListPage';
+import { ProjectPage } from './pages/ProjectPage';
+import { ComponentPage } from './pages/ComponentPage';
 import { IssuePage } from './pages/IssuePage';
 
 export default async function (): Promise<IWorkspaceConfig> {
@@ -79,7 +79,7 @@ export default async function (): Promise<IWorkspaceConfig> {
               {
                 path: '',
                 name: 'projects-list',
-                component: markRaw(ProjectsPage),
+                component: markRaw(ProjectsListPage),
                 meta: {
                   title: 'Список проектов',
                   icon: 'fa-solid fa-list',
@@ -92,7 +92,7 @@ export default async function (): Promise<IWorkspaceConfig> {
               {
                 path: ':project_hash/components',
                 name: 'project-components',
-                component: markRaw(ProjectComponentsPage),
+                component: markRaw(ProjectPage),
                 meta: {
                   title: 'Компоненты проекта',
                   icon: 'fa-solid fa-folder-tree',
@@ -105,7 +105,7 @@ export default async function (): Promise<IWorkspaceConfig> {
               {
                 path: ':project_hash/tasks',
                 name: 'project-tasks',
-                component: markRaw(ProjectIssuesPage),
+                component: markRaw(ComponentPage),
                 meta: {
                   title: 'Задачи проекта',
                   icon: 'fa-solid fa-tasks',

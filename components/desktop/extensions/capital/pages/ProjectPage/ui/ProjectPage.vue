@@ -19,14 +19,14 @@ div
           )
 
   // Список компонентов проекта
-  ProjectComponentsWidget(
+  ComponentsListWidget(
     :components='project?.components || []',
     :expanded='expandedComponents',
     @open-component='handleComponentClick',
     @toggle-component='handleComponentToggle'
   )
     template(#component-content='{ component }')
-      ComponentIssuesWidget(
+      IssuesListWidget(
         :project-hash='component.project_hash',
         @issue-click='handleIssueClick'
       )
@@ -50,8 +50,8 @@ import { FailAlert } from 'src/shared/api';
 import { CreateComponentButton } from 'app/extensions/capital/features/Project/CreateComponent';
 import 'src/shared/ui/TitleStyles';
 import {Editor} from 'src/shared/ui';
-import { ProjectComponentsWidget } from 'app/extensions/capital/widgets/ProjectComponentsWidget';
-import { ComponentIssuesWidget } from 'app/extensions/capital/widgets/ComponentIssuesWidget';
+import { ComponentsListWidget } from 'app/extensions/capital/widgets/ComponentsListWidget';
+import { IssuesListWidget } from 'app/extensions/capital/widgets/IssuesListWidget';
 
 const route = useRoute();
 const projectStore = useProjectStore();

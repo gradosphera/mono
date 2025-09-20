@@ -36,6 +36,8 @@ export * as StartProject from './startProject'
 export * as OpenProject from './openProject'
 /** Удалить проект в CAPITAL контракте */
 export * as DeleteProject from './deleteProject'
+/** Редактировать проект в CAPITAL контракте */
+export * as EditProject from './editProject'
 /** Создать проектный имущественный взнос в CAPITAL контракте */
 export * as CreateProjectProperty from './createProjectProperty'
 /** Создать программный имущественный взнос в CAPITAL контракте */

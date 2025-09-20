@@ -86,6 +86,7 @@ public:
     );
     
     // Редактировать проект
+    [[eosio::action]]
     void editproj (
       eosio::name coopname,
       checksum256 project_hash,
@@ -183,7 +184,7 @@ public:
     
     // Коммиты
     [[eosio::action]]
-    void createcmmt(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours);
+    void createcmmt(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours, std::string description, std::string meta);
     [[eosio::action]]
     void approvecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash);
     [[eosio::action]]

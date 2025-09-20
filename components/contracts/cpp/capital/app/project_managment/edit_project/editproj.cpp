@@ -28,10 +28,10 @@ void capital::editproj (
   bool can_convert_to_project
 ) {
     require_auth(coopname);
-
+  
     // Проверяем что проект существует
     auto exist = Capital::Projects::get_project(coopname, project_hash);
-    eosio::check(exist.has_value(), "Проект с указанным хэшем не найден");
+    eosio::check(exist.has_value(), "Проект с указанным хэшем не найден.");
 
     // Проверяем что проект не завершен
     eosio::check(exist->status != Capital::Projects::Status::COMPLETED &&
