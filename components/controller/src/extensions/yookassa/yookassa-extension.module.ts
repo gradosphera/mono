@@ -151,7 +151,7 @@ export class YookassaPlugin extends IPNProvider {
       const payment = payments.items[0];
 
       if (payment) {
-        this.logger.info('Payment found', { source: 'handleIPN', id: payment.id });
+        this.logger.info('Платеж найден', { source: 'handleIPN', id: payment.id });
 
         if (event === 'payment.succeeded') {
           const symbol = payment.symbol;
@@ -159,7 +159,7 @@ export class YookassaPlugin extends IPNProvider {
           const symbol_result = checkPaymentSymbol(request.object.income_amount.currency, symbol);
 
           if (symbol_result.status == 'error') {
-            this.logger.warn('Payment symbol verification failed', {
+            this.logger.warn('Проверка символа платежа не удалась', {
               source: 'handleIPN',
               id: payment.id,
               message: symbol_result.message,
@@ -186,7 +186,7 @@ export class YookassaPlugin extends IPNProvider {
 
           if (result.status === 'success') {
             // Обработка успешного платежа
-            this.logger.info('Payment amount verified, updating payment status to paid', {
+            this.logger.info('Сумма платежа проверена, обновляется статус платежа на оплаченный', {
               source: 'handleIPN',
               id: payment.id,
             });
@@ -200,7 +200,7 @@ export class YookassaPlugin extends IPNProvider {
             }
           } else {
             // Обработка неудачного платежа
-            this.logger.warn('Payment amount verification failed', {
+            this.logger.warn('Проверка суммы платежа не удалась', {
               source: 'handleIPN',
               id: payment.id,
               message: result.message,
@@ -219,7 +219,7 @@ export class YookassaPlugin extends IPNProvider {
           }
         } else if (event === 'payment.failed') {
           // Обработка неудачного платежа
-          this.logger.warn('Payment failed event received', { source: 'handleIPN', id: payment.id });
+          this.logger.warn('Получено событие неудачного платежа', { source: 'handleIPN', id: payment.id });
 
           if (payment.id) {
             await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.FAILED });
@@ -231,13 +231,13 @@ export class YookassaPlugin extends IPNProvider {
         }
       } else {
         //TODO платеж есть, а ордера на него нет. Что делаем?
-        this.logger.error('Payment exists, but order not found', undefined, {
+        this.logger.error('Платеж существует, но заказ не найден', undefined, {
           source: 'handleIPN',
           requestId: request.object.id,
         });
       }
     } else {
-      this.logger.warn('IPN already processed', { source: 'handleIPN', requestId: request.object.id });
+      this.logger.warn('IPN уже обработан', { source: 'handleIPN', requestId: request.object.id });
     }
   }
 

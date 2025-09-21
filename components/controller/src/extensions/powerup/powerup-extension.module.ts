@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import { blockchainService } from '../../services';
 import { default as coopConfig } from '../../config/config';
-import { Inject, Module } from '@nestjs/common';
+import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
 import {
   EXTENSION_REPOSITORY,
@@ -130,7 +130,10 @@ export interface ILog {
   };
 }
 
-export class PowerupPlugin extends BaseExtModule {
+export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
+  private dailyCronJob: cron.ScheduledTask | null = null;
+  private resourceCronJob: cron.ScheduledTask | null = null;
+
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>,
@@ -175,15 +178,29 @@ export class PowerupPlugin extends BaseExtModule {
     }
 
     // Регистрация cron-задачи для ежедневного пополнения
-    cron.schedule('0 0 * * *', () => {
+    this.dailyCronJob = cron.schedule('0 0 * * *', () => {
       this.logger.info('Запуск ежедневной задачи пополнения');
       this.runDailyTask();
     });
 
     // Регистрация cron-задачи для проверки ресурсов каждую минуту
-    cron.schedule('* * * * *', () => {
+    this.resourceCronJob = cron.schedule('* * * * *', () => {
       this.runTask();
     });
+  }
+
+  onModuleDestroy() {
+    if (this.dailyCronJob) {
+      this.dailyCronJob.stop();
+      this.dailyCronJob = null;
+      this.logger.info('node-cron задача ежедневного пополнения остановлена');
+    }
+
+    if (this.resourceCronJob) {
+      this.resourceCronJob.stop();
+      this.resourceCronJob = null;
+      this.logger.info('node-cron задача проверки ресурсов остановлена');
+    }
   }
 
   private getQuantity(amount: number): string {

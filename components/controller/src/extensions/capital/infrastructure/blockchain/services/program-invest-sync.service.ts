@@ -33,14 +33,14 @@ export class ProgramInvestSyncService
   async onModuleInit() {
     const supportedVersions = this.getSupportedVersions();
     this.logger.log(
-      `ProgramInvest sync service initialized. Supporting contracts: [${supportedVersions.contracts.join(
+      `Сервис синхронизации программных инвестиций инициализирован. Поддерживаемые контракты: [${supportedVersions.contracts.join(
         ', '
-      )}], tables: [${supportedVersions.tables.join(', ')}]`
+      )}], таблицы: [${supportedVersions.tables.join(', ')}]`
     );
 
     // Программная подписка на все поддерживаемые паттерны событий
     const allPatterns = this.getAllEventPatterns();
-    this.logger.log(`Subscribing to ${allPatterns.length} event patterns: ${allPatterns.join(', ')}`);
+    this.logger.log(`Подписка на ${allPatterns.length} паттернов событий: ${allPatterns.join(', ')}`);
 
     // Подписываемся на каждый паттерн программно
     allPatterns.forEach((pattern) => {

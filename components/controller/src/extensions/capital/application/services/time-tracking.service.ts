@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import * as cron from 'node-cron';
 import { TimeEntryDomainEntity } from '../../domain/entities/time-entry.entity';
 import { TimeEntryRepository, TIME_ENTRY_REPOSITORY } from '../../domain/repositories/time-entry.repository';
@@ -13,7 +13,7 @@ import { ContributorStatus } from '../../domain/enums/contributor-status.enum';
  * Сервис для автоматического учёта и распределения времени работы над задачами
  */
 @Injectable()
-export class TimeTrackingService implements OnModuleInit {
+export class TimeTrackingService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(TimeTrackingService.name);
   private cronJob: cron.ScheduledTask | null = null;
 
@@ -32,14 +32,14 @@ export class TimeTrackingService implements OnModuleInit {
    * Инициализация сервиса при старте модуля
    */
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing TimeTrackingService...');
+    this.logger.log('Инициализация сервиса учёта времени...');
 
     // Запускаем учёт времени каждый час
     this.cronJob = cron.schedule('0 * * * *', async () => {
       try {
         await this.trackTime();
       } catch (error) {
-        this.logger.error('Error in time tracking cron job', error);
+        this.logger.error('Ошибка в задаче учёта времени по расписанию', error);
       }
     });
 
@@ -47,10 +47,13 @@ export class TimeTrackingService implements OnModuleInit {
     try {
       await this.trackTime();
     } catch (error) {
-      this.logger.warn('Initial time tracking failed, will retry on next cron run', error);
+      this.logger.warn(
+        'Первичный учёт времени не удался, будет повторена попытка при следующем запуске по расписанию',
+        error
+      );
     }
 
-    this.logger.log('TimeTrackingService initialized successfully');
+    this.logger.log('Сервис учёта времени успешно инициализирован');
   }
 
   /**
@@ -60,15 +63,19 @@ export class TimeTrackingService implements OnModuleInit {
     if (this.cronJob) {
       this.cronJob.stop();
       this.cronJob = null;
-      this.logger.log('TimeTrackingService stopped');
+      this.logger.log('Сервис учёта времени остановлен');
     }
+  }
+
+  onModuleDestroy() {
+    return this.stop();
   }
 
   /**
    * Основная логика учёта времени - выполняется периодически
    */
   private async trackTime(): Promise<void> {
-    this.logger.debug('Starting time tracking...');
+    this.logger.debug('Запуск учёта времени...');
 
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
@@ -79,11 +86,11 @@ export class TimeTrackingService implements OnModuleInit {
       try {
         await this.trackTimeForContributor(contributor, today);
       } catch (error) {
-        this.logger.error(`Error tracking time for contributor ${contributor.username}:`, error);
+        this.logger.error(`Ошибка учёта времени для вкладчика ${contributor.username}:`, error);
       }
     }
 
-    this.logger.debug('Time tracking completed');
+    this.logger.debug('Учёт времени завершён');
   }
 
   /**
@@ -103,7 +110,7 @@ export class TimeTrackingService implements OnModuleInit {
         );
         allContributors.push(...contributors);
       } catch (error) {
-        this.logger.error(`Error getting contributors for coop ${coopname}:`, error);
+        this.logger.error(`Ошибка получения вкладчиков для кооператива ${coopname}:`, error);
       }
     }
 
@@ -167,8 +174,7 @@ export class TimeTrackingService implements OnModuleInit {
    */
   private async getContributorActiveIssues(contributor: ContributorDomainEntity): Promise<any[]> {
     // Получаем все активные задачи, где вкладчик является создателем
-    const allActiveIssues = await this.issueRepository.findByStatus(IssueStatus.IN_PROGRESS);
-    return allActiveIssues.filter((issue) => issue.creators_hashs.includes(contributor.contributor_hash));
+    return await this.issueRepository.findByStatusAndCreatorsHashs(IssueStatus.IN_PROGRESS, [contributor.contributor_hash]);
   }
 
   /**

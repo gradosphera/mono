@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import cron from 'node-cron';
 import { userService } from '~/services';
 import { generateSubscriberId, generateSubscriberHash } from '~/utils/novu.utils';
@@ -7,9 +7,10 @@ import { NotificationDomainService } from '~/domain/notification/services/notifi
 import { AccountDomainService } from './account-domain.service';
 
 @Injectable()
-export class NotificationSubscriberSyncService implements OnModuleInit {
+export class NotificationSubscriberSyncService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(NotificationSubscriberSyncService.name);
   private isProcessing = false;
+  private cronJob: cron.ScheduledTask | null = null;
 
   constructor(
     private readonly notificationDomainService: NotificationDomainService,
@@ -18,11 +19,19 @@ export class NotificationSubscriberSyncService implements OnModuleInit {
 
   onModuleInit() {
     // Синхронизация подписчиков каждые 30 минут
-    cron.schedule('*/30 * * * *', async () => {
+    this.cronJob = cron.schedule('*/30 * * * *', async () => {
       await this.syncNotificationSubscribers();
     });
 
     this.logger.log('node-cron задача для синхронизации подписчиков уведомлений запущена (каждые 30 минут)');
+  }
+
+  onModuleDestroy() {
+    if (this.cronJob) {
+      this.cronJob.stop();
+      this.cronJob = null;
+      this.logger.log('node-cron задача для синхронизации подписчиков уведомлений остановлена');
+    }
   }
 
   /**
@@ -58,13 +67,13 @@ export class NotificationSubscriberSyncService implements OnModuleInit {
           this.logger.log(`Подписчик создан для пользователя: ${user.username}`);
         } catch (error: any) {
           errorCount++;
-          this.logger.error(`Ошибка создания подписчика для ${user.username}: ${error.message}`);
+          this.logger.error(`Не удалось создать подписчика для пользователя ${user.username}: ${error.message}`);
         }
       }
 
       this.logger.log(`Синхронизация завершена. Успешно: ${successCount}, Ошибок: ${errorCount}`);
     } catch (error: any) {
-      this.logger.error(`Ошибка синхронизации подписчиков: ${error.message}`, error.stack);
+      this.logger.error(`Не удалось выполнить синхронизацию подписчиков: ${error.message}`, error.stack);
     } finally {
       this.isProcessing = false;
     }
@@ -90,7 +99,7 @@ export class NotificationSubscriberSyncService implements OnModuleInit {
       const account = await this.accountDomainService.getAccount(username);
       await this.notificationDomainService.createSubscriberFromAccount(account);
     } catch (error: any) {
-      this.logger.error(`Ошибка настройки подписчика для ${username}: ${error.message}`);
+      this.logger.error(`Не удалось настроить подписчика для пользователя ${username}: ${error.message}`);
       throw error;
     }
   }

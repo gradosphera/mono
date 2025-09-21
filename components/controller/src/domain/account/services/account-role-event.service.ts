@@ -68,7 +68,7 @@ export class AccountRoleEventService {
           await user.save();
           this.logger.debug(`Set member role for user: ${member.username}`);
         } catch (error: any) {
-          this.logger.error(`Failed to set member role for user ${member.username}: ${error.message}`);
+          this.logger.error(`Не удалось установить роль члена для пользователя ${member.username}: ${error.message}`);
         }
       }
 
@@ -82,15 +82,17 @@ export class AccountRoleEventService {
           await chairman.save();
           this.logger.info(`Set chairman role for user: ${chairman_username}`);
         } catch (error: any) {
-          this.logger.error(`Failed to set chairman role for user ${chairman_username}: ${error.message}`);
+          this.logger.error(
+            `Не удалось установить роль председателя для пользователя ${chairman_username}: ${error.message}`
+          );
         }
       } else {
-        this.logger.warn('No chairman found in board members');
+        this.logger.warn('Председатель не найден среди членов совета');
       }
 
       this.logger.info(`Board roles updated successfully for ${action.members.length} members`);
     } catch (error: any) {
-      this.logger.error(`Error processing board update: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка обработки обновления совета: ${error.message}`, error.stack);
     }
   }
 }

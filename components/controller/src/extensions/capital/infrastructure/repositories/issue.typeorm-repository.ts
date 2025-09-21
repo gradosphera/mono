@@ -66,6 +66,16 @@ export class IssueTypeormRepository implements IssueRepository {
     return entities.map(IssueMapper.toDomain);
   }
 
+  async findByStatusAndCreatorsHashs(status: IssueStatus, creatorsHashs: string[]): Promise<IssueDomainEntity[]> {
+    const entities = await this.issueTypeormRepository
+      .createQueryBuilder('issue')
+      .where('issue.status = :status', { status })
+      .andWhere('issue.creators_hashs && :creatorsHashs', { creatorsHashs })
+      .getMany();
+
+    return entities.map(IssueMapper.toDomain);
+  }
+
   async findBySubmasterHash(submasterHash: string): Promise<IssueDomainEntity[]> {
     const entities = await this.issueTypeormRepository.find({
       where: { submaster_hash: submasterHash },

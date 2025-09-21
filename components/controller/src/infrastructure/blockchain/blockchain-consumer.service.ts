@@ -43,7 +43,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
   }
 
   async onModuleInit() {
-    this.logger.log('Initializing blockchain consumer service');
+    this.logger.log('Инициализация сервиса потребителя блокчейна');
 
     // Создаем consumer group
     await this.redisStreamService.createConsumerGroup(this.streamName, this.consumerGroup);
@@ -53,7 +53,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
   }
 
   onModuleDestroy() {
-    this.logger.log('Stopping blockchain consumer service');
+    this.logger.log('Остановка сервиса потребителя блокчейна');
     this.redisStreamService.stopConsumer(this.streamName, this.consumerGroup, this.consumerName);
   }
 
@@ -94,7 +94,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
         this.logger.warn(`Unknown message format: ${JSON.stringify(message.fields)}`);
       }
     } catch (error: any) {
-      this.logger.error(`Error processing message ${message.messageId}: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка обработки сообщения ${message.messageId}: ${error.message}`, error.stack);
       throw error; // Перебрасываем ошибку чтобы сообщение не было подтверждено
     }
   }
@@ -122,7 +122,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
         `Action saved to database: ${action.account}::${action.name} with sequence ${action.global_sequence}`
       );
     } catch (error: any) {
-      this.logger.error(`Failed to save action ${action.account}::${action.name}: ${error.message}`, error.stack);
+      this.logger.error(`Не удалось сохранить действие ${action.account}::${action.name}: ${error.message}`, error.stack);
       throw error; // Перебрасываем ошибку чтобы сообщение не было подтверждено
     }
 
@@ -160,7 +160,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
       await this.parserInteractor.saveDelta(delta);
       this.logger.log(`Дельта сохранена в базу: ${delta.code}::${delta.table} с primary_key ${delta.primary_key}`);
     } catch (error: any) {
-      this.logger.error(`Failed to save delta ${delta.code}::${delta.table}: ${error.message}`, error.stack);
+      this.logger.error(`Не удалось сохранить дельту ${delta.code}::${delta.table}: ${error.message}`, error.stack);
       throw error; // Перебрасываем ошибку чтобы сообщение не было подтверждено
     }
 
@@ -186,7 +186,7 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
       });
       this.logger.debug(`Форк сохранен в базу данных на блоке: ${block_num}`);
     } catch (error: any) {
-      this.logger.error(`Failed to save fork at block ${block_num}: ${error.message}`, error.stack);
+      this.logger.error(`Не удалось сохранить форк на блоке ${block_num}: ${error.message}`, error.stack);
       throw error; // Перебрасываем ошибку чтобы сообщение не было подтверждено
     }
 

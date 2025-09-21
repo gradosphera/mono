@@ -15,6 +15,7 @@ export interface IssueRepository {
   findByProjectHash(projectHash: string): Promise<IssueDomainEntity[]>;
   findByCreatedBy(createdBy: string): Promise<IssueDomainEntity[]>;
   findByCreatorsHashs(creatorsHashs: string[]): Promise<IssueDomainEntity[]>;
+  findByStatusAndCreatorsHashs(status: IssueStatus, creatorsHashs: string[]): Promise<IssueDomainEntity[]>;
   findBySubmasterHash(submasterHash: string): Promise<IssueDomainEntity[]>;
   findByCycleId(cycleId: string): Promise<IssueDomainEntity[]>;
   findByStatus(status: IssueStatus): Promise<IssueDomainEntity[]>;

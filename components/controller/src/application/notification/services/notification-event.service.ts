@@ -30,7 +30,7 @@ export class NotificationEventService {
     try {
       await this.sendIncomingTransferNotification(event);
     } catch (error: any) {
-      this.logger.error(`Error sending transfer notification: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка отправки уведомления о переводе: ${error.message}`, error.stack);
       // Не перебрасываем ошибку чтобы не блокировать обработку других событий
     }
   }
@@ -43,7 +43,7 @@ export class NotificationEventService {
     const transferData = action.data as TokenContract.Actions.Transfer.ITransfer;
 
     if (!transferData.to || !transferData.quantity) {
-      this.logger.warn('Incomplete transfer data, skipping notification', { transferData });
+      this.logger.warn('Неполные данные перевода, пропускаем уведомление', { transferData });
       return;
     }
 
@@ -83,7 +83,10 @@ export class NotificationEventService {
 
       this.logger.info(`Transfer notification sent to user: ${recipientUsername}`);
     } catch (error: any) {
-      this.logger.error(`Error sending transfer notification to user ${recipientUsername}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Ошибка отправки уведомления о переводе пользователю ${recipientUsername}: ${error.message}`,
+        error.stack
+      );
       // Не перебрасываем ошибку, чтобы не прерывать обработку других событий
     }
   }

@@ -13,7 +13,7 @@ export interface ContributorRepository extends IBlockchainSyncRepository<Contrib
   findAll(): Promise<ContributorDomainEntity[]>;
   findByUsername(username: string): Promise<ContributorDomainEntity | null>;
   findByUsernameAndCoopname(username: string, coopname: string): Promise<ContributorDomainEntity | null>;
-  findByStatusAndCoopname(status: string, coopname: string): Promise<ContributorDomainEntity[]>;
+  findByStatusAndCoopname(status: ContributorStatus, coopname: string): Promise<ContributorDomainEntity[]>;
   findByHashesAndStatus(contributorHashes: string[], status: ContributorStatus): Promise<ContributorDomainEntity[]>;
   findByStatus(status: string): Promise<ContributorDomainEntity[]>;
   findAllPaginated(

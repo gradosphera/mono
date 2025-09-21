@@ -142,14 +142,17 @@ export class CapitalPlugin extends BaseExtModule {
   public defaultConfig = defaultConfig;
 
   async initialize(): Promise<void> {
-    this.logger.log('Capital module initialized');
+    this.logger.log('Модуль капитализации инициализирован');
 
     // Инициализируем синхронизацию с блокчейном
     try {
       await this.syncInteractor.initializeSync();
-      this.logger.log('Capital blockchain sync initialized');
+      this.logger.log('Синхронизация капитализации с блокчейном инициализирована');
     } catch (error: any) {
-      this.logger.error(`Failed to initialize Capital blockchain sync: ${error.message}`, error.stack);
+      this.logger.error(
+        `Не удалось инициализировать синхронизацию капитализации с блокчейном: ${error.message}`,
+        error.stack
+      );
       // Не бросаем ошибку, чтобы не блокировать запуск модуля
     }
   }

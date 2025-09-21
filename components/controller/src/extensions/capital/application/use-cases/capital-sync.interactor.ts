@@ -35,7 +35,7 @@ export class CapitalSyncInteractor {
 
       this.logger.log(`Force sync after fork completed for block ${fromBlock}`);
     } catch (error: any) {
-      this.logger.error(`Error during force sync after fork: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка принудительной синхронизации после форка: ${error.message}`, error.stack);
       throw error;
     }
   }
@@ -46,9 +46,9 @@ export class CapitalSyncInteractor {
    */
   async initializeSync(): Promise<void> {
     try {
-      this.logger.log('Capital sync initialized successfully');
+      this.logger.log('Синхронизация капитализации успешно инициализирована');
     } catch (error: any) {
-      this.logger.error(`Error initializing sync: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка инициализации синхронизации: ${error.message}`, error.stack);
       throw error;
     }
   }

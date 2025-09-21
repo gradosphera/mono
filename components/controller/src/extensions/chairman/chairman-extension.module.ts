@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { Inject, Module } from '@nestjs/common';
+import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
 import config from '~/config/config';
 import {
@@ -71,7 +71,9 @@ export interface ILog {
   timestamp?: string; // Делаем опциональным, так как будет добавляться внутри метода log
 }
 
-export class ChairmanPlugin extends BaseExtModule {
+export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
+  private cronJob: cron.ScheduledTask | null = null;
+
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>,
@@ -124,7 +126,7 @@ export class ChairmanPlugin extends BaseExtModule {
 
     // Регистрация cron-задачи для проверки истекших решений
     const cronExpression = `*/${this.plugin.config.checkInterval || 5} * * * *`; // каждые N минут, значение по умолчанию 5
-    cron.schedule(cronExpression, async () => {
+    this.cronJob = cron.schedule(cronExpression, async () => {
       this.logger.info('Запуск задачи проверки истекших решений');
       try {
         await this.checkExpiredDecisions();
@@ -136,6 +138,14 @@ export class ChairmanPlugin extends BaseExtModule {
         );
       }
     });
+  }
+
+  onModuleDestroy() {
+    if (this.cronJob) {
+      this.cronJob.stop();
+      this.cronJob = null;
+      this.logger.info('node-cron задача проверки истекших решений остановлена');
+    }
   }
 
   // Логирование действий

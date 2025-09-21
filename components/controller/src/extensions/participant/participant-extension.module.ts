@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { Inject, Injectable, Module } from '@nestjs/common';
+import { Inject, Injectable, Module, OnModuleDestroy } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
 import {
   EXTENSION_REPOSITORY,
@@ -21,7 +21,8 @@ import { MeetTrackerService } from './meet-tracker.service';
 import { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 
 @Injectable()
-export class ParticipantPlugin extends BaseExtModule {
+export class ParticipantPlugin extends BaseExtModule implements OnModuleDestroy {
+  private cronJob: cron.ScheduledTask | null = null;
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>,
@@ -81,9 +82,17 @@ export class ParticipantPlugin extends BaseExtModule {
 
     // Регистрация cron-задачи для проверки собраний
     const cronExpression = `*/${this.plugin.config.checkIntervalMinutes} * * * *`;
-    cron.schedule(cronExpression, () => {
+    this.cronJob = cron.schedule(cronExpression, () => {
       this.meetTracker.checkMeets();
     });
+  }
+
+  onModuleDestroy() {
+    if (this.cronJob) {
+      this.cronJob.stop();
+      this.cronJob = null;
+      this.logger.info('node-cron задача проверки собраний остановлена');
+    }
   }
 }
 

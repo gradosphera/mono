@@ -69,10 +69,10 @@ export class NotificationWebhookController {
     const isValid = WebhookValidationUtil.validateHmacSignatureSafe(payload, novuSignature, this.secretKey);
 
     if (!isValid) {
-      this.logger.warn('Webhook signature validation failed');
+      this.logger.warn('Валидация подписи webhook не удалась');
       throw new Error('Invalid signature');
     }
 
-    this.logger.debug('Webhook signature validation successful');
+    this.logger.debug('Валидация подписи webhook успешна');
   }
 }

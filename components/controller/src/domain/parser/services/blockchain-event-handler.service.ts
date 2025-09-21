@@ -16,7 +16,7 @@ export class BlockchainEventHandlerService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    this.logger.log('Blockchain event handler service initialized');
+    this.logger.log('Сервис обработчика событий блокчейна инициализирован');
   }
 
   /**
@@ -60,7 +60,7 @@ export class BlockchainEventHandlerService implements OnModuleInit {
       await this.parserInteractor.saveAction(actionData);
       this.logger.debug(`Action saved: ${action.account}::${action.name} with global_sequence ${action.global_sequence}`);
     } catch (error: any) {
-      this.logger.error(`Error handling action event: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка обработки события действия: ${error.message}`, error.stack);
       throw error; // Перебрасываем ошибку для корректной обработки
     }
   }
@@ -90,7 +90,7 @@ export class BlockchainEventHandlerService implements OnModuleInit {
       await this.parserInteractor.saveDelta(deltaData);
       this.logger.debug(`Delta saved: ${delta.code}::${delta.table} with primary_key ${delta.primary_key}`);
     } catch (error: any) {
-      this.logger.error(`Error handling delta event: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка обработки события дельты: ${error.message}`, error.stack);
       throw error; // Перебрасываем ошибку для корректной обработки
     }
   }
@@ -113,7 +113,7 @@ export class BlockchainEventHandlerService implements OnModuleInit {
       await this.parserInteractor.saveFork(forkData);
       this.logger.debug(`Fork saved at block: ${data.block_num} for chain: ${config.blockchain.id}`);
     } catch (error: any) {
-      this.logger.error(`Error handling fork event: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка обработки события форка: ${error.message}`, error.stack);
       throw error; // Перебрасываем ошибку для корректной обработки
     }
   }

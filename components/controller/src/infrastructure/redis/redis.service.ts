@@ -28,7 +28,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async publish(channel: string, message: any): Promise<void> {
     if (this.redisClient.publisher.status !== 'ready') {
-      this.logger.error('Publisher Redis client is not ready');
+      this.logger.error('Клиент Publisher Redis не готов');
       return;
     }
     await this.redisClient.publisher.publish(channel, JSON.stringify(message));
@@ -36,7 +36,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   subscribe(channel: string, handler: (message: any) => void) {
     if (this.redisClient.subscriber.status !== 'ready') {
-      this.logger.error('Subscriber Redis client is not ready');
+      this.logger.error('Клиент Subscriber Redis не готов');
       return;
     }
     this.redisClient.subscriber.subscribe(channel);

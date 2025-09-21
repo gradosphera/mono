@@ -1,16 +1,18 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import cron from 'node-cron';
 import { WebPushSubscriptionService } from './web-push-subscription.service';
 
 @Injectable()
-export class CleanupService implements OnModuleInit {
+export class CleanupService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CleanupService.name);
+  private cleanupCronJob: cron.ScheduledTask | null = null;
+  private statsCronJob: cron.ScheduledTask | null = null;
 
   constructor(private readonly webPushSubscriptionService: WebPushSubscriptionService) {}
 
   onModuleInit() {
     // Автоматическая очистка неактивных подписок каждый день в 2:00
-    cron.schedule('0 2 * * *', async () => {
+    this.cleanupCronJob = cron.schedule('0 2 * * *', async () => {
       this.logger.log('Запуск автоматической очистки неактивных push подписок...');
 
       try {
@@ -22,7 +24,7 @@ export class CleanupService implements OnModuleInit {
     });
 
     // Еженедельная статистика push подписок (каждое воскресенье в 12:00)
-    cron.schedule('0 12 * * 0', async () => {
+    this.statsCronJob = cron.schedule('0 12 * * 0', async () => {
       this.logger.log('Генерация еженедельной статистики push подписок...');
 
       try {
@@ -42,6 +44,20 @@ export class CleanupService implements OnModuleInit {
     });
 
     this.logger.log('node-cron задачи для веб-пуш подписок запущены');
+  }
+
+  onModuleDestroy() {
+    if (this.cleanupCronJob) {
+      this.cleanupCronJob.stop();
+      this.cleanupCronJob = null;
+      this.logger.log('node-cron задача автоматической очистки остановлена');
+    }
+
+    if (this.statsCronJob) {
+      this.statsCronJob.stop();
+      this.statsCronJob = null;
+      this.logger.log('node-cron задача еженедельной статистики остановлена');
+    }
   }
 
   /**
