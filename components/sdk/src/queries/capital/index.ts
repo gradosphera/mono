@@ -51,6 +51,12 @@ export * as GetExpenses from './getExpenses'
 /** Получить расход по ID */
 export * as GetExpense from './getExpense'
 
+/** Получить гибкую статистику времени с пагинацией */
+export * as GetTimeStats from './getTimeStats'
+
+/** Получить пагинированный список записей времени */
+export * as GetTimeEntries from './getTimeEntries'
+
 /** Получить коммит по HASH */
 export * as GetCommit from './getCommit'
 

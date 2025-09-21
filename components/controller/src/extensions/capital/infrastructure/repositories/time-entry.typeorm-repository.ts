@@ -5,6 +5,11 @@ import { TimeEntryEntity } from '../entities/time-entry.entity';
 import { TimeEntryRepository } from '../../domain/repositories/time-entry.repository';
 import { TimeEntryDomainEntity } from '../../domain/entities/time-entry.entity';
 import type { ITimeEntryDatabaseData } from '../../domain/interfaces/time-entry-database.interface';
+import type { TimeEntriesFilterDomainInterface } from '../../domain/interfaces/time-entries-filter-domain.interface';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 
 /**
@@ -125,6 +130,93 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
 
   async delete(id: string): Promise<void> {
     await this.repository.delete(id);
+  }
+
+  async findProjectsByContributor(contributorHash: string): Promise<{ project_hash: string; project_name?: string }[]> {
+    // Получаем уникальные project_hash из записей времени вкладчика
+    const result = await this.repository
+      .createQueryBuilder('te')
+      .select('DISTINCT te.project_hash', 'project_hash')
+      .where('te.contributor_hash = :contributorHash', { contributorHash })
+      .getRawMany();
+
+    const projectHashes = result.map((row) => row.project_hash);
+
+    // Если нет проектов, возвращаем пустой массив
+    if (projectHashes.length === 0) {
+      return [];
+    }
+
+    // Получаем данные о проектах из блокчейна через deltas
+    // Пока что вернём просто project_hash без имени, так как это требует сложного запроса к deltas
+    // В будущем можно будет добавить join с таблицей deltas для получения названия проекта
+    return projectHashes.map((project_hash) => ({
+      project_hash,
+      project_name: undefined, // Временно undefined, можно получить из deltas по необходимости
+    }));
+  }
+
+  async findContributorsByProject(projectHash: string): Promise<{ contributor_hash: string }[]> {
+    // Получаем уникальные contributor_hash из записей времени по проекту
+    const result = await this.repository
+      .createQueryBuilder('te')
+      .select('DISTINCT te.contributor_hash', 'contributor_hash')
+      .where('te.project_hash = :projectHash', { projectHash })
+      .getRawMany();
+
+    return result.map((row) => ({ contributor_hash: row.contributor_hash }));
+  }
+
+  async findByProjectWithPagination(
+    filter: TimeEntriesFilterDomainInterface,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<TimeEntryDomainEntity>> {
+    const query = this.repository.createQueryBuilder('te');
+
+    // Добавляем условие по project_hash только если он указан
+    if (filter.projectHash) {
+      query.where('te.project_hash = :projectHash', { projectHash: filter.projectHash });
+    }
+
+    if (filter.contributorHash) {
+      query.andWhere('te.contributor_hash = :contributorHash', { contributorHash: filter.contributorHash });
+    }
+
+    if (filter.isCommitted !== undefined) {
+      query.andWhere('te.is_committed = :isCommitted', { isCommitted: filter.isCommitted });
+    }
+
+    if (filter.coopname) {
+      query.andWhere('te.coopname = :coopname', { coopname: filter.coopname });
+    }
+
+    // Применяем сортировку
+    if (options?.sortBy) {
+      const sortOrder = options.sortOrder || 'DESC';
+      query.orderBy(`te.${options.sortBy}`, sortOrder);
+    } else {
+      query.orderBy('te.date', 'DESC').addOrderBy('te._created_at', 'DESC');
+    }
+
+    // Получаем общее количество
+    const totalCount = await query.getCount();
+
+    // Применяем пагинацию
+    const page = options?.page || 1;
+    const limit = options?.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const entities = await query.skip(skip).take(limit).getMany();
+
+    const totalPages = Math.ceil(totalCount / limit);
+    const currentPage = page;
+
+    return {
+      items: entities.map((entity) => this.toDomain(entity)),
+      totalCount,
+      totalPages,
+      currentPage,
+    };
   }
 
   private toEntity(domain: TimeEntryDomainEntity): TimeEntryEntity {

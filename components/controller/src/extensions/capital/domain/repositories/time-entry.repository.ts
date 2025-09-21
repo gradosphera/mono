@@ -1,4 +1,9 @@
 import { TimeEntryDomainEntity } from '../entities/time-entry.entity';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import type { TimeEntriesFilterDomainInterface } from '../interfaces/time-entries-filter-domain.interface';
 
 /**
  * Репозиторий для работы с записями времени
@@ -60,6 +65,24 @@ export interface TimeEntryRepository {
    * Удалить запись времени
    */
   delete(id: string): Promise<void>;
+
+  /**
+   * Найти проекты с записями времени для вкладчика
+   */
+  findProjectsByContributor(contributorHash: string): Promise<{ project_hash: string; project_name?: string }[]>;
+
+  /**
+   * Найти вкладчиков с записями времени для проекта
+   */
+  findContributorsByProject(projectHash: string): Promise<{ contributor_hash: string }[]>;
+
+  /**
+   * Найти записи времени по проекту с пагинацией (projectHash опционален)
+   */
+  findByProjectWithPagination(
+    filter: TimeEntriesFilterDomainInterface,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<TimeEntryDomainEntity>>;
 }
 
 export const TIME_ENTRY_REPOSITORY = Symbol('TIME_ENTRY_REPOSITORY');

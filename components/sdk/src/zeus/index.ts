@@ -2330,6 +2330,22 @@ export type ValueTypes = {
 	/** Фильтр по статусу проекта */
 	status?: ValueTypes["ProjectStatus"] | undefined | null | Variable<any, string>
 };
+	/** Статистика времени вкладчика по проекту */
+["CapitalProjectTimeStats"]: AliasType<{
+	/** Доступное время для коммита (часы, ограничено 8 часами) */
+	available_hours?:boolean | `@${string}`,
+	/** Хеш вкладчика */
+	contributor_hash?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Название проекта */
+	project_name?:boolean | `@${string}`,
+	/** Сумма закоммиченного времени (часы) */
+	total_committed_hours?:boolean | `@${string}`,
+	/** Сумма незакоммиченного времени (часы) */
+	total_uncommitted_hours?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Результат в системе CAPITAL */
 ["CapitalResult"]: AliasType<{
 	/** Дата создания записи */
@@ -2442,6 +2458,64 @@ export type ValueTypes = {
 	status?: ValueTypes["StoryStatus"] | undefined | null | Variable<any, string>,
 	/** Фильтр по названию истории */
 	title?: string | undefined | null | Variable<any, string>
+};
+	/** Параметры фильтрации для запросов записей времени CAPITAL */
+["CapitalTimeEntriesFilter"]: {
+	/** Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта) */
+	contributor_hash?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по закоммиченным записям (опционально) */
+	is_committed?: boolean | undefined | null | Variable<any, string>,
+	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
+	project_hash?: string | undefined | null | Variable<any, string>
+};
+	/** Запись времени вкладчика */
+["CapitalTimeEntry"]: AliasType<{
+	/** Дата создания записи */
+	_created_at?:boolean | `@${string}`,
+	/** Уникальный идентификатор записи */
+	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	_updated_at?:boolean | `@${string}`,
+	/** Хеш коммита */
+	commit_hash?:boolean | `@${string}`,
+	/** Хеш вкладчика */
+	contributor_hash?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата записи времени (YYYY-MM-DD) */
+	date?:boolean | `@${string}`,
+	/** Количество часов */
+	hours?:boolean | `@${string}`,
+	/** Флаг, указывающий, закоммичена ли запись */
+	is_committed?:boolean | `@${string}`,
+	/** Хеш задачи */
+	issue_hash?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Результат гибкого запроса статистики времени с пагинацией */
+["CapitalTimeStats"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Список результатов статистики времени */
+	items?:ValueTypes["CapitalProjectTimeStats"],
+	/** Общее количество результатов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Входные данные для гибкого запроса статистики времени */
+["CapitalTimeStatsInput"]: {
+	/** Хеш вкладчика (опционально) */
+	contributor_hash?: string | undefined | null | Variable<any, string>,
+	/** Название кооператива (опционально) */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Хеш проекта (опционально) */
+	project_hash?: string | undefined | null | Variable<any, string>
 };
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: AliasType<{
@@ -2704,8 +2778,6 @@ export type ValueTypes = {
 	commit_hash: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Количество часов создателя */
-	creator_hours: number | Variable<any, string>,
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>,
 	/** Имя пользователя */
@@ -4352,6 +4424,17 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PaginatedCapitalTimeEntriesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["CapitalTimeEntry"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalVotesPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -4810,6 +4893,8 @@ capitalResults?: [{	filter?: ValueTypes["ResultFilter"] | undefined | null | Var
 capitalState?: [{	data: ValueTypes["GetCapitalConfigInput"] | Variable<any, string>},ValueTypes["CapitalState"]],
 capitalStories?: [{	filter?: ValueTypes["CapitalStoryFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalStoriesPaginationResult"]],
 capitalStory?: [{	data: ValueTypes["GetCapitalStoryByHashInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
+capitalTimeEntries?: [{	filter?: ValueTypes["CapitalTimeEntriesFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalTimeEntriesPaginationResult"]],
+capitalTimeStats?: [{	data?: ValueTypes["CapitalTimeStatsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["CapitalTimeStats"]],
 capitalVote?: [{	data: ValueTypes["GetVoteInput"] | Variable<any, string>},ValueTypes["CapitalVote"]],
 capitalVotes?: [{	filter?: ValueTypes["VoteFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalVotesPaginationResult"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
@@ -7394,6 +7479,22 @@ export type ResolverInputTypes = {
 	/** Фильтр по статусу проекта */
 	status?: ResolverInputTypes["ProjectStatus"] | undefined | null
 };
+	/** Статистика времени вкладчика по проекту */
+["CapitalProjectTimeStats"]: AliasType<{
+	/** Доступное время для коммита (часы, ограничено 8 часами) */
+	available_hours?:boolean | `@${string}`,
+	/** Хеш вкладчика */
+	contributor_hash?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Название проекта */
+	project_name?:boolean | `@${string}`,
+	/** Сумма закоммиченного времени (часы) */
+	total_committed_hours?:boolean | `@${string}`,
+	/** Сумма незакоммиченного времени (часы) */
+	total_uncommitted_hours?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Результат в системе CAPITAL */
 ["CapitalResult"]: AliasType<{
 	/** Дата создания записи */
@@ -7506,6 +7607,64 @@ export type ResolverInputTypes = {
 	status?: ResolverInputTypes["StoryStatus"] | undefined | null,
 	/** Фильтр по названию истории */
 	title?: string | undefined | null
+};
+	/** Параметры фильтрации для запросов записей времени CAPITAL */
+["CapitalTimeEntriesFilter"]: {
+	/** Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта) */
+	contributor_hash?: string | undefined | null,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по закоммиченным записям (опционально) */
+	is_committed?: boolean | undefined | null,
+	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
+	project_hash?: string | undefined | null
+};
+	/** Запись времени вкладчика */
+["CapitalTimeEntry"]: AliasType<{
+	/** Дата создания записи */
+	_created_at?:boolean | `@${string}`,
+	/** Уникальный идентификатор записи */
+	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	_updated_at?:boolean | `@${string}`,
+	/** Хеш коммита */
+	commit_hash?:boolean | `@${string}`,
+	/** Хеш вкладчика */
+	contributor_hash?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата записи времени (YYYY-MM-DD) */
+	date?:boolean | `@${string}`,
+	/** Количество часов */
+	hours?:boolean | `@${string}`,
+	/** Флаг, указывающий, закоммичена ли запись */
+	is_committed?:boolean | `@${string}`,
+	/** Хеш задачи */
+	issue_hash?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Результат гибкого запроса статистики времени с пагинацией */
+["CapitalTimeStats"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Список результатов статистики времени */
+	items?:ResolverInputTypes["CapitalProjectTimeStats"],
+	/** Общее количество результатов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Входные данные для гибкого запроса статистики времени */
+["CapitalTimeStatsInput"]: {
+	/** Хеш вкладчика (опционально) */
+	contributor_hash?: string | undefined | null,
+	/** Название кооператива (опционально) */
+	coopname?: string | undefined | null,
+	/** Хеш проекта (опционально) */
+	project_hash?: string | undefined | null
 };
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: AliasType<{
@@ -7768,8 +7927,6 @@ export type ResolverInputTypes = {
 	commit_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Количество часов создателя */
-	creator_hours: number,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -9416,6 +9573,17 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PaginatedCapitalTimeEntriesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["CapitalTimeEntry"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalVotesPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -9876,6 +10044,8 @@ capitalResults?: [{	filter?: ResolverInputTypes["ResultFilter"] | undefined | nu
 capitalState?: [{	data: ResolverInputTypes["GetCapitalConfigInput"]},ResolverInputTypes["CapitalState"]],
 capitalStories?: [{	filter?: ResolverInputTypes["CapitalStoryFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalStoriesPaginationResult"]],
 capitalStory?: [{	data: ResolverInputTypes["GetCapitalStoryByHashInput"]},ResolverInputTypes["CapitalStory"]],
+capitalTimeEntries?: [{	filter?: ResolverInputTypes["CapitalTimeEntriesFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalTimeEntriesPaginationResult"]],
+capitalTimeStats?: [{	data?: ResolverInputTypes["CapitalTimeStatsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["CapitalTimeStats"]],
 capitalVote?: [{	data: ResolverInputTypes["GetVoteInput"]},ResolverInputTypes["CapitalVote"]],
 capitalVotes?: [{	filter?: ResolverInputTypes["VoteFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalVotesPaginationResult"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
@@ -12434,6 +12604,21 @@ export type ModelTypes = {
 	/** Фильтр по статусу проекта */
 	status?: ModelTypes["ProjectStatus"] | undefined | null
 };
+	/** Статистика времени вкладчика по проекту */
+["CapitalProjectTimeStats"]: {
+		/** Доступное время для коммита (часы, ограничено 8 часами) */
+	available_hours: number,
+	/** Хеш вкладчика */
+	contributor_hash: string,
+	/** Хеш проекта */
+	project_hash: string,
+	/** Название проекта */
+	project_name: string,
+	/** Сумма закоммиченного времени (часы) */
+	total_committed_hours: number,
+	/** Сумма незакоммиченного времени (часы) */
+	total_uncommitted_hours: number
+};
 	/** Результат в системе CAPITAL */
 ["CapitalResult"]: {
 		/** Дата создания записи */
@@ -12543,6 +12728,62 @@ export type ModelTypes = {
 	status?: ModelTypes["StoryStatus"] | undefined | null,
 	/** Фильтр по названию истории */
 	title?: string | undefined | null
+};
+	/** Параметры фильтрации для запросов записей времени CAPITAL */
+["CapitalTimeEntriesFilter"]: {
+	/** Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта) */
+	contributor_hash?: string | undefined | null,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по закоммиченным записям (опционально) */
+	is_committed?: boolean | undefined | null,
+	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
+	project_hash?: string | undefined | null
+};
+	/** Запись времени вкладчика */
+["CapitalTimeEntry"]: {
+		/** Дата создания записи */
+	_created_at: string,
+	/** Уникальный идентификатор записи */
+	_id: string,
+	/** Дата последнего обновления записи */
+	_updated_at: string,
+	/** Хеш коммита */
+	commit_hash?: string | undefined | null,
+	/** Хеш вкладчика */
+	contributor_hash: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Дата записи времени (YYYY-MM-DD) */
+	date: string,
+	/** Количество часов */
+	hours: number,
+	/** Флаг, указывающий, закоммичена ли запись */
+	is_committed: boolean,
+	/** Хеш задачи */
+	issue_hash: string,
+	/** Хеш проекта */
+	project_hash: string
+};
+	/** Результат гибкого запроса статистики времени с пагинацией */
+["CapitalTimeStats"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Список результатов статистики времени */
+	items: Array<ModelTypes["CapitalProjectTimeStats"]>,
+	/** Общее количество результатов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	/** Входные данные для гибкого запроса статистики времени */
+["CapitalTimeStatsInput"]: {
+	/** Хеш вкладчика (опционально) */
+	contributor_hash?: string | undefined | null,
+	/** Название кооператива (опционально) */
+	coopname?: string | undefined | null,
+	/** Хеш проекта (опционально) */
+	project_hash?: string | undefined | null
 };
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: {
@@ -12798,8 +13039,6 @@ export type ModelTypes = {
 	commit_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Количество часов создателя */
-	creator_hours: number,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -14505,6 +14744,16 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["PaginatedCapitalTimeEntriesPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["CapitalTimeEntry"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalVotesPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
@@ -14959,6 +15208,10 @@ export type ModelTypes = {
 	capitalStories: ModelTypes["PaginatedCapitalStoriesPaginationResult"],
 	/** Получение истории по хэшу */
 	capitalStory?: ModelTypes["CapitalStory"] | undefined | null,
+	/** Получение пагинированного списка записей времени */
+	capitalTimeEntries: ModelTypes["PaginatedCapitalTimeEntriesPaginationResult"],
+	/** Гибкий запрос статистики времени вкладчиков по проектам с пагинацией */
+	capitalTimeStats: ModelTypes["CapitalTimeStats"],
 	/** Получение голоса по внутреннему ID базы данных */
 	capitalVote?: ModelTypes["CapitalVote"] | undefined | null,
 	/** Получение списка голосов кооператива с фильтрацией */
@@ -17536,6 +17789,22 @@ export type GraphQLTypes = {
 	/** Фильтр по статусу проекта */
 	status?: GraphQLTypes["ProjectStatus"] | undefined | null
 };
+	/** Статистика времени вкладчика по проекту */
+["CapitalProjectTimeStats"]: {
+	__typename: "CapitalProjectTimeStats",
+	/** Доступное время для коммита (часы, ограничено 8 часами) */
+	available_hours: number,
+	/** Хеш вкладчика */
+	contributor_hash: string,
+	/** Хеш проекта */
+	project_hash: string,
+	/** Название проекта */
+	project_name: string,
+	/** Сумма закоммиченного времени (часы) */
+	total_committed_hours: number,
+	/** Сумма незакоммиченного времени (часы) */
+	total_uncommitted_hours: number
+};
 	/** Результат в системе CAPITAL */
 ["CapitalResult"]: {
 	__typename: "CapitalResult",
@@ -17648,6 +17917,64 @@ export type GraphQLTypes = {
 	status?: GraphQLTypes["StoryStatus"] | undefined | null,
 	/** Фильтр по названию истории */
 	title?: string | undefined | null
+};
+	/** Параметры фильтрации для запросов записей времени CAPITAL */
+["CapitalTimeEntriesFilter"]: {
+		/** Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта) */
+	contributor_hash?: string | undefined | null,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по закоммиченным записям (опционально) */
+	is_committed?: boolean | undefined | null,
+	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
+	project_hash?: string | undefined | null
+};
+	/** Запись времени вкладчика */
+["CapitalTimeEntry"]: {
+	__typename: "CapitalTimeEntry",
+	/** Дата создания записи */
+	_created_at: string,
+	/** Уникальный идентификатор записи */
+	_id: string,
+	/** Дата последнего обновления записи */
+	_updated_at: string,
+	/** Хеш коммита */
+	commit_hash?: string | undefined | null,
+	/** Хеш вкладчика */
+	contributor_hash: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Дата записи времени (YYYY-MM-DD) */
+	date: string,
+	/** Количество часов */
+	hours: number,
+	/** Флаг, указывающий, закоммичена ли запись */
+	is_committed: boolean,
+	/** Хеш задачи */
+	issue_hash: string,
+	/** Хеш проекта */
+	project_hash: string
+};
+	/** Результат гибкого запроса статистики времени с пагинацией */
+["CapitalTimeStats"]: {
+	__typename: "CapitalTimeStats",
+	/** Текущая страница */
+	currentPage: number,
+	/** Список результатов статистики времени */
+	items: Array<GraphQLTypes["CapitalProjectTimeStats"]>,
+	/** Общее количество результатов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	/** Входные данные для гибкого запроса статистики времени */
+["CapitalTimeStatsInput"]: {
+		/** Хеш вкладчика (опционально) */
+	contributor_hash?: string | undefined | null,
+	/** Название кооператива (опционально) */
+	coopname?: string | undefined | null,
+	/** Хеш проекта (опционально) */
+	project_hash?: string | undefined | null
 };
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: {
@@ -17910,8 +18237,6 @@ export type GraphQLTypes = {
 	commit_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Количество часов создателя */
-	creator_hours: number,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -19672,6 +19997,17 @@ export type GraphQLTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["PaginatedCapitalTimeEntriesPaginationResult"]: {
+	__typename: "PaginatedCapitalTimeEntriesPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["CapitalTimeEntry"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalVotesPaginationResult"]: {
 	__typename: "PaginatedCapitalVotesPaginationResult",
 	/** Текущая страница */
@@ -20156,6 +20492,10 @@ export type GraphQLTypes = {
 	capitalStories: GraphQLTypes["PaginatedCapitalStoriesPaginationResult"],
 	/** Получение истории по хэшу */
 	capitalStory?: GraphQLTypes["CapitalStory"] | undefined | null,
+	/** Получение пагинированного списка записей времени */
+	capitalTimeEntries: GraphQLTypes["PaginatedCapitalTimeEntriesPaginationResult"],
+	/** Гибкий запрос статистики времени вкладчиков по проектам с пагинацией */
+	capitalTimeStats: GraphQLTypes["CapitalTimeStats"],
 	/** Получение голоса по внутреннему ID базы данных */
 	capitalVote?: GraphQLTypes["CapitalVote"] | undefined | null,
 	/** Получение списка голосов кооператива с фильтрацией */
@@ -21556,6 +21896,8 @@ type ZEUS_VARIABLES = {
 	["CapitalIssueFilter"]: ValueTypes["CapitalIssueFilter"];
 	["CapitalProjectFilter"]: ValueTypes["CapitalProjectFilter"];
 	["CapitalStoryFilter"]: ValueTypes["CapitalStoryFilter"];
+	["CapitalTimeEntriesFilter"]: ValueTypes["CapitalTimeEntriesFilter"];
+	["CapitalTimeStatsInput"]: ValueTypes["CapitalTimeStatsInput"];
 	["CommitStatus"]: ValueTypes["CommitStatus"];
 	["CommonRequestInput"]: ValueTypes["CommonRequestInput"];
 	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];

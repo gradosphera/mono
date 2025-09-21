@@ -103,6 +103,7 @@ import { GenerationResolver } from './application/resolvers/generation.resolver'
 import { InvestsManagementResolver } from './application/resolvers/invests-management.resolver';
 import { DebtManagementResolver } from './application/resolvers/debt-management.resolver';
 import { PropertyManagementResolver } from './application/resolvers/property-management.resolver';
+import { TimeTrackerResolver } from './application/resolvers/time-tracker.resolver';
 import { VotingResolver } from './application/resolvers/voting.resolver';
 import { ResultSubmissionResolver } from './application/resolvers/result-submission.resolver';
 import { DistributionManagementResolver } from './application/resolvers/distribution-management.resolver';
@@ -111,6 +112,7 @@ import { ExpensesManagementResolver } from './application/resolvers/expenses-man
 import { ParticipationManagementInteractor } from './application/use-cases/participation-management.interactor';
 import { ProjectManagementInteractor } from './application/use-cases/project-management.interactor';
 import { GenerationInteractor } from './application/use-cases/generation.interactor';
+import { TimeTrackingInteractor } from './application/use-cases/time-tracking.interactor';
 import { InvestsManagementInteractor } from './application/use-cases/invests-management.interactor';
 import { DebtManagementInteractor } from './application/use-cases/debt-management.interactor';
 import { PropertyManagementInteractor } from './application/use-cases/property-management.interactor';
@@ -215,7 +217,7 @@ export class CapitalPlugin extends BaseExtModule {
     ResultSubmissionResolver,
     DistributionManagementResolver,
     ExpensesManagementResolver,
-
+    TimeTrackerResolver,
     // Repositories
     {
       provide: PROJECT_REPOSITORY,
@@ -310,6 +312,7 @@ export class CapitalPlugin extends BaseExtModule {
     ParticipationManagementInteractor,
     ProjectManagementInteractor,
     GenerationInteractor,
+    TimeTrackingInteractor,
     InvestsManagementInteractor,
     DebtManagementInteractor,
     PropertyManagementInteractor,

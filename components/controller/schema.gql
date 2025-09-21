@@ -1990,6 +1990,27 @@ input CapitalProjectFilter {
   status: ProjectStatus
 }
 
+"""Статистика времени вкладчика по проекту"""
+type CapitalProjectTimeStats {
+  """Доступное время для коммита (часы, ограничено 8 часами)"""
+  available_hours: Float!
+
+  """Хеш вкладчика"""
+  contributor_hash: String!
+
+  """Хеш проекта"""
+  project_hash: String!
+
+  """Название проекта"""
+  project_name: String!
+
+  """Сумма закоммиченного времени (часы)"""
+  total_committed_hours: Float!
+
+  """Сумма незакоммиченного времени (часы)"""
+  total_uncommitted_hours: Float!
+}
+
 """Результат в системе CAPITAL"""
 type CapitalResult {
   """Дата создания записи"""
@@ -2147,6 +2168,88 @@ input CapitalStoryFilter {
 
   """Фильтр по названию истории"""
   title: String
+}
+
+"""Параметры фильтрации для запросов записей времени CAPITAL"""
+input CapitalTimeEntriesFilter {
+  """
+  Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта)
+  """
+  contributor_hash: String
+
+  """Фильтр по названию кооператива"""
+  coopname: String
+
+  """Фильтр по закоммиченным записям (опционально)"""
+  is_committed: Boolean
+
+  """
+  Хеш проекта (опционально, если не указан - вернёт записи по всем проектам)
+  """
+  project_hash: String
+}
+
+"""Запись времени вкладчика"""
+type CapitalTimeEntry {
+  """Дата создания записи"""
+  _created_at: String!
+
+  """Уникальный идентификатор записи"""
+  _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: String!
+
+  """Хеш коммита"""
+  commit_hash: String
+
+  """Хеш вкладчика"""
+  contributor_hash: String!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Дата записи времени (YYYY-MM-DD)"""
+  date: String!
+
+  """Количество часов"""
+  hours: Float!
+
+  """Флаг, указывающий, закоммичена ли запись"""
+  is_committed: Boolean!
+
+  """Хеш задачи"""
+  issue_hash: String!
+
+  """Хеш проекта"""
+  project_hash: String!
+}
+
+"""Результат гибкого запроса статистики времени с пагинацией"""
+type CapitalTimeStats {
+  """Текущая страница"""
+  currentPage: Float!
+
+  """Список результатов статистики времени"""
+  items: [CapitalProjectTimeStats!]!
+
+  """Общее количество результатов"""
+  totalCount: Float!
+
+  """Общее количество страниц"""
+  totalPages: Float!
+}
+
+"""Входные данные для гибкого запроса статистики времени"""
+input CapitalTimeStatsInput {
+  """Хеш вкладчика (опционально)"""
+  contributor_hash: String
+
+  """Название кооператива (опционально)"""
+  coopname: String
+
+  """Хеш проекта (опционально)"""
+  project_hash: String
 }
 
 """Голос в системе CAPITAL"""
@@ -2538,9 +2641,6 @@ input CreateCommitInput {
 
   """Имя аккаунта кооператива"""
   coopname: String!
-
-  """Количество часов создателя"""
-  creator_hours: Float!
 
   """Хэш проекта"""
   project_hash: String!
@@ -5110,6 +5210,20 @@ type PaginatedCapitalStoriesPaginationResult {
   totalPages: Int!
 }
 
+type PaginatedCapitalTimeEntriesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalTimeEntry!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 type PaginatedCapitalVotesPaginationResult {
   """Текущая страница"""
   currentPage: Int!
@@ -5796,6 +5910,12 @@ type Query {
 
   """Получение истории по хэшу"""
   capitalStory(data: GetCapitalStoryByHashInput!): CapitalStory
+
+  """Получение пагинированного списка записей времени"""
+  capitalTimeEntries(filter: CapitalTimeEntriesFilter, options: PaginationInput): PaginatedCapitalTimeEntriesPaginationResult!
+
+  """Гибкий запрос статистики времени вкладчиков по проектам с пагинацией"""
+  capitalTimeStats(data: CapitalTimeStatsInput, options: PaginationInput): CapitalTimeStats!
 
   """Получение голоса по внутреннему ID базы данных"""
   capitalVote(data: GetVoteInput!): CapitalVote

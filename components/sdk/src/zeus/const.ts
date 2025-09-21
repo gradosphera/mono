@@ -137,6 +137,12 @@ export const AllTypesProps: Record<string,any> = {
 	CapitalStoryFilter:{
 		status:"StoryStatus"
 	},
+	CapitalTimeEntriesFilter:{
+
+	},
+	CapitalTimeStatsInput:{
+
+	},
 	CommitStatus: "enum" as const,
 	CommonRequestInput:{
 
@@ -925,6 +931,14 @@ export const AllTypesProps: Record<string,any> = {
 		capitalStory:{
 			data:"GetCapitalStoryByHashInput"
 		},
+		capitalTimeEntries:{
+			filter:"CapitalTimeEntriesFilter",
+			options:"PaginationInput"
+		},
+		capitalTimeStats:{
+			data:"CapitalTimeStatsInput",
+			options:"PaginationInput"
+		},
 		capitalVote:{
 			data:"GetVoteInput"
 		},
@@ -1590,6 +1604,14 @@ export const ReturnTypes: Record<string,any> = {
 		status:"ProjectStatus",
 		title:"String"
 	},
+	CapitalProjectTimeStats:{
+		available_hours:"Float",
+		contributor_hash:"String",
+		project_hash:"String",
+		project_name:"String",
+		total_committed_hours:"Float",
+		total_uncommitted_hours:"Float"
+	},
 	CapitalResult:{
 		_created_at:"DateTime",
 		_id:"String",
@@ -1638,6 +1660,25 @@ export const ReturnTypes: Record<string,any> = {
 		status:"StoryStatus",
 		story_hash:"String",
 		title:"String"
+	},
+	CapitalTimeEntry:{
+		_created_at:"String",
+		_id:"String",
+		_updated_at:"String",
+		commit_hash:"String",
+		contributor_hash:"String",
+		coopname:"String",
+		date:"String",
+		hours:"Float",
+		is_committed:"Boolean",
+		issue_hash:"String",
+		project_hash:"String"
+	},
+	CapitalTimeStats:{
+		currentPage:"Float",
+		items:"CapitalProjectTimeStats",
+		totalCount:"Float",
+		totalPages:"Float"
 	},
 	CapitalVote:{
 		_created_at:"DateTime",
@@ -2220,6 +2261,12 @@ export const ReturnTypes: Record<string,any> = {
 		totalCount:"Int",
 		totalPages:"Int"
 	},
+	PaginatedCapitalTimeEntriesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalTimeEntry",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedCapitalVotesPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalVote",
@@ -2352,6 +2399,8 @@ export const ReturnTypes: Record<string,any> = {
 		capitalState:"CapitalState",
 		capitalStories:"PaginatedCapitalStoriesPaginationResult",
 		capitalStory:"CapitalStory",
+		capitalTimeEntries:"PaginatedCapitalTimeEntriesPaginationResult",
+		capitalTimeStats:"CapitalTimeStats",
 		capitalVote:"CapitalVote",
 		capitalVotes:"PaginatedCapitalVotesPaginationResult",
 		getAccount:"Account",

@@ -1,5 +1,6 @@
 import { Injectable, Inject, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import * as cron from 'node-cron';
+import { TimeTrackingInteractor } from '../use-cases/time-tracking.interactor';
 import { TimeEntryDomainEntity } from '../../domain/entities/time-entry.entity';
 import { TimeEntryRepository, TIME_ENTRY_REPOSITORY } from '../../domain/repositories/time-entry.repository';
 import { ContributorRepository, CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
@@ -8,6 +9,14 @@ import { ProjectRepository, PROJECT_REPOSITORY } from '../../domain/repositories
 import { IssueStatus } from '../../domain/enums/issue-status.enum';
 import type { ContributorDomainEntity } from '../../domain/entities/contributor.entity';
 import { ContributorStatus } from '../../domain/enums/contributor-status.enum';
+import type { ContributorProjectsTimeStatsInputDTO } from '../dto/time_tracker/project-time-stats.dto';
+import type { ContributorProjectsTimeStatsOutputDTO } from '../dto/time_tracker/project-time-stats.dto';
+import type { TimeStatsInputDTO } from '../dto/time_tracker/flexible-time-stats.dto';
+import type { FlexibleTimeStatsOutputDTO } from '../dto/time_tracker/flexible-time-stats.dto';
+import type { TimeEntryOutputDTO } from '../dto/time_tracker/time-entries.dto';
+import type { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
+import type { TimeEntriesFilterInputDTO } from '../dto/time_tracker';
+import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 
 /**
  * Сервис для автоматического учёта и распределения времени работы над задачами
@@ -18,6 +27,7 @@ export class TimeTrackingService implements OnModuleInit, OnModuleDestroy {
   private cronJob: cron.ScheduledTask | null = null;
 
   constructor(
+    private readonly timeTrackingInteractor: TimeTrackingInteractor,
     @Inject(TIME_ENTRY_REPOSITORY)
     private readonly timeEntryRepository: TimeEntryRepository,
     @Inject(CONTRIBUTOR_REPOSITORY)
@@ -300,14 +310,128 @@ export class TimeTrackingService implements OnModuleInit, OnModuleDestroy {
    * Получить статистику времени для вкладчика по проекту (DTO версия)
    */
   async getTimeStats(contributorHash: string, projectHash: string) {
-    const stats = await this.getContributorProjectStats(contributorHash, projectHash);
-
-    return {
+    const domainResult = await this.timeTrackingInteractor.getTimeStats({
       contributor_hash: contributorHash,
       project_hash: projectHash,
-      total_committed_hours: stats.total_committed_hours,
-      total_uncommitted_hours: stats.total_uncommitted_hours,
-      available_hours: stats.available_hours,
+    });
+
+    return {
+      contributor_hash: domainResult.contributor_hash,
+      project_hash: domainResult.project_hash,
+      total_committed_hours: domainResult.total_committed_hours,
+      total_uncommitted_hours: domainResult.total_uncommitted_hours,
+      available_hours: domainResult.available_hours,
+    };
+  }
+
+  /**
+   * Получить список проектов с статистикой времени для вкладчика
+   */
+  async getContributorProjectsTimeStats(
+    data: ContributorProjectsTimeStatsInputDTO
+  ): Promise<ContributorProjectsTimeStatsOutputDTO> {
+    const domainResult = await this.timeTrackingInteractor.getContributorProjectsTimeStats({
+      contributor_hash: data.contributor_hash,
+    });
+
+    return {
+      contributor_hash: domainResult.contributor_hash,
+      projects: domainResult.projects.map((project) => ({
+        project_hash: project.project_hash,
+        project_name: project.project_name,
+        contributor_hash: project.contributor_hash,
+        total_committed_hours: project.total_committed_hours,
+        total_uncommitted_hours: project.total_uncommitted_hours,
+        available_hours: project.available_hours,
+      })),
+    };
+  }
+
+  /**
+   * Получить пагинированные записи времени по проекту
+   */
+  async getTimeEntriesByProject(
+    filter: TimeEntriesFilterInputDTO,
+    options?: PaginationInputDTO
+  ): Promise<PaginationResult<TimeEntryOutputDTO>> {
+    // Конвертируем PaginationInputDTO в PaginationInputDomainInterface
+    const domainOptions: PaginationInputDomainInterface | undefined = options
+      ? {
+          page: options.page,
+          limit: options.limit,
+          sortBy: options.sortBy,
+          sortOrder: options.sortOrder,
+        }
+      : undefined;
+
+    const domainResult = await this.timeTrackingInteractor.getTimeEntries(
+      {
+        project_hash: filter.project_hash,
+        contributor_hash: filter.contributor_hash,
+        is_committed: filter.is_committed,
+        coopname: filter.coopname,
+      },
+      domainOptions
+    );
+
+    return {
+      items: domainResult.items.map(this.mapTimeEntryToDTO),
+      totalCount: domainResult.totalCount,
+      currentPage: domainResult.currentPage,
+      totalPages: domainResult.totalPages,
+    };
+  }
+
+  /**
+   * Гибкий запрос статистики времени с пагинацией
+   */
+  async getFlexibleTimeStats(
+    data: TimeStatsInputDTO,
+    options?: PaginationInputDTO
+  ): Promise<FlexibleTimeStatsOutputDTO> {
+    // Конвертируем PaginationInputDTO в PaginationInputDomainInterface
+    const domainOptions: PaginationInputDomainInterface | undefined = options
+      ? {
+          page: options.page,
+          limit: options.limit,
+          sortBy: options.sortBy,
+          sortOrder: options.sortOrder,
+        }
+      : undefined;
+
+    const domainResult = await this.timeTrackingInteractor.getFlexibleTimeStats(
+      {
+        contributor_hash: data.contributor_hash,
+        project_hash: data.project_hash,
+        coopname: data.coopname,
+      },
+      domainOptions
+    );
+
+    return {
+      items: domainResult.items,
+      totalCount: domainResult.totalCount,
+      currentPage: domainResult.currentPage,
+      totalPages: domainResult.totalPages,
+    };
+  }
+
+  /**
+   * Преобразование доменной сущности TimeEntry в DTO
+   */
+  private mapTimeEntryToDTO(entity: TimeEntryDomainEntity): TimeEntryOutputDTO {
+    return {
+      _id: entity._id,
+      contributor_hash: entity.contributor_hash,
+      issue_hash: entity.issue_hash,
+      project_hash: entity.project_hash,
+      coopname: entity.coopname,
+      date: entity.date,
+      hours: entity.hours,
+      commit_hash: entity.commit_hash,
+      is_committed: entity.is_committed,
+      _created_at: entity._created_at.toISOString(),
+      _updated_at: entity._updated_at.toISOString(),
     };
   }
 }
