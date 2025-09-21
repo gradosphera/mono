@@ -66,6 +66,7 @@ import { DistributionManagementService } from './application/services/distributi
 import { ExpensesManagementService } from './application/services/expenses-management.service';
 import { ContributorAccountSyncService } from './application/services/contributor-account-sync.service';
 import { TimeTrackingService } from './application/services/time-tracking.service';
+import { TimeTrackingSchedulerService } from './infrastructure/services/time-tracking-scheduler.service';
 
 // CAPITAL Application Dependencies
 import { CapitalBlockchainAdapter } from './infrastructure/blockchain/adapters/capital-blockchain.adapter';
@@ -306,6 +307,7 @@ export class CapitalPlugin extends BaseExtModule {
 
     // Services that depend on repositories
     TimeTrackingService,
+    TimeTrackingSchedulerService,
 
     // Use Cases
     ContractManagementInteractor,

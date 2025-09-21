@@ -10,6 +10,7 @@ import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
+import type { ContributorProjectBasicTimeStatsDomainInterface } from '../../domain/interfaces/time-stats-domain.interface';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 
 /**
@@ -86,11 +87,7 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
   async getContributorProjectStats(
     contributorHash: string,
     projectHash: string
-  ): Promise<{
-    total_committed_hours: number;
-    total_uncommitted_hours: number;
-    available_hours: number;
-  }> {
+  ): Promise<ContributorProjectBasicTimeStatsDomainInterface> {
     // Получаем суммарное закоммиченное время
     const committedResult = await this.repository
       .createQueryBuilder('te')
@@ -112,14 +109,10 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
     const total_committed_hours = parseFloat(committedResult?.total || '0');
     const total_uncommitted_hours = parseFloat(uncommittedResult?.total || '0');
 
-    // Доступное время = незакоммиченное время (ограничено 8 часами в день)
-    // Для простоты считаем общее незакоммиченное время, но в будущем можно добавить логику с лимитом
-    const available_hours = Math.min(total_uncommitted_hours, 8); // Пока что просто ограничиваем 8 часами
-
+    // Репозиторий возвращает только базовую статистику (committed/uncommitted)
     return {
       total_committed_hours,
       total_uncommitted_hours,
-      available_hours,
     };
   }
 

@@ -24,14 +24,14 @@ export class GenerationInteractor {
 
   /**
    * Создание коммита в CAPITAL контракте
-   * Автоматически рассчитывает время на основе незакоммиченных записей
+   * Проверяет доступность указанного количества часов и фиксирует время
    */
   async createCommit(data: CreateCommitDomainInput): Promise<TransactResult> {
     // Получаем вкладчика по username
     const contributor = await this.contributorRepository.findByUsernameAndCoopname(data.username, data.coopname);
 
     if (!contributor) {
-      throw new Error(`Contributor not found: ${data.username} in coop ${data.coopname}`);
+      throw new Error(`Вкладчик не найден: ${data.username} в кооперативе ${data.coopname}`);
     }
 
     // Получаем доступное время для коммита
@@ -41,21 +41,32 @@ export class GenerationInteractor {
     );
 
     if (availableHours <= 0) {
-      throw new Error('No available time for commit. Please work on active issues first.');
+      throw new Error('Нет доступного времени для коммита. Пожалуйста, сначала поработайте над завершенными задачами.');
     }
 
-    // Фиксируем время в коммите
+    // Проверяем что запрошенное количество часов не превышает доступное
+    if (data.commit_hours > availableHours) {
+      throw new Error(
+        `Запрошенное количество часов коммита (${data.commit_hours}) превышает доступное время (${availableHours}). ` +
+          'Пожалуйста, уменьшите количество часов коммита или завершите больше задач.'
+      );
+    }
+
+    // Фиксируем указанное количество времени в коммите
     await this.timeTrackingService.commitTime(
       contributor.contributor_hash,
       data.project_hash,
-      availableHours,
+      data.commit_hours,
       data.commit_hash
     );
 
-    // Создаём данные для блокчейна с рассчитанным временем
+    // Создаём данные для блокчейна с указанным временем
     const blockchainData: CapitalContract.Actions.CreateCommit.ICommit = {
-      ...data,
-      creator_hours: `${availableHours.toFixed(config.blockchain.root_govern_precision)} ${
+      coopname: data.coopname,
+      username: data.username,
+      project_hash: data.project_hash,
+      commit_hash: data.commit_hash,
+      creator_hours: `${data.commit_hours.toFixed(config.blockchain.root_govern_precision)} ${
         config.blockchain.root_govern_symbol
       }`,
     };

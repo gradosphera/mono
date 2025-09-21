@@ -17,6 +17,9 @@ export interface ProjectTimeStatsDomainInterface {
   /** Сумма незакоммиченного времени (часы) */
   total_uncommitted_hours: number;
 
-  /** Доступное время для коммита (часы, ограничено 8 часами) */
+  /** Доступное время для коммита (по завершённым задачам) */
   available_hours: number;
+
+  /** Время в ожидании (по незавершённым задачам) */
+  pending_hours: number;
 }

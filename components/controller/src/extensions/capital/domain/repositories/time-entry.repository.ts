@@ -4,6 +4,7 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import type { TimeEntriesFilterDomainInterface } from '../interfaces/time-entries-filter-domain.interface';
+import type { ContributorProjectBasicTimeStatsDomainInterface } from '../interfaces/time-stats-domain.interface';
 
 /**
  * Репозиторий для работы с записями времени
@@ -45,16 +46,12 @@ export interface TimeEntryRepository {
   getTotalUncommittedHours(contributorHash: string, projectHash: string): Promise<number>;
 
   /**
-   * Получить статистику времени по вкладчику и проекту
+   * Получить базовую статистику времени по вкладчику и проекту (только committed/uncommitted)
    */
   getContributorProjectStats(
     contributorHash: string,
     projectHash: string
-  ): Promise<{
-    total_committed_hours: number;
-    total_uncommitted_hours: number;
-    available_hours: number;
-  }>;
+  ): Promise<ContributorProjectBasicTimeStatsDomainInterface>;
 
   /**
    * Поместить время в коммит (отметить как закоммиченное)

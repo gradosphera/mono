@@ -1,6 +1,6 @@
 /**
  * Доменный интерфейс для действия создания коммита CAPITAL контракта
- * Время рассчитывается автоматически через TimeTrackingService
+ * Пользователь указывает количество часов для коммита
  */
 export interface CreateCommitDomainInput {
   /** Имя аккаунта кооператива */
@@ -15,5 +15,6 @@ export interface CreateCommitDomainInput {
   /** Хэш коммита */
   commit_hash: string;
 
-  // creator_hours удалено - время рассчитывается автоматически
+  /** Количество часов для коммита */
+  commit_hours: number;
 }

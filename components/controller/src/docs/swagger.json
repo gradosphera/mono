@@ -326,92 +326,6 @@
         }
       }
     },
-    "/orders/ipn": {
-      "post": {
-        "tags": [
-          "Orders"
-        ],
-        "summary": "Обработка IPN уведомления",
-        "description": "Маршрут для обработки IPN уведомления.",
-        "responses": {
-          "200": {
-            "description": "Успешное выполнение запроса."
-          }
-        }
-      }
-    },
-    "/orders/initial": {
-      "post": {
-        "tags": [
-          "Orders"
-        ],
-        "summary": "Создание регистрационного платежа",
-        "description": "Маршрут для создания регистрационного платежа.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ICreateInitialPayment"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Успешное выполнение запроса.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ICreatedPayment"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/orders/deposit": {
-      "post": {
-        "tags": [
-          "Orders"
-        ],
-        "summary": "Создание депозита в кошелёк",
-        "description": "Маршрут для создания депозита.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ICreateDeposit"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Успешное выполнение запроса.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ICreatedPayment"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/users": {
       "post": {
         "summary": "Создать пользователя",
@@ -771,21 +685,6 @@
               }
             ],
             "nullable": true
-          }
-        }
-      },
-      "ICreatedPayment": {
-        "type": "object",
-        "required": [
-          "order_num",
-          "confirmation_token"
-        ],
-        "properties": {
-          "order_num": {
-            "type": "number"
-          },
-          "confirmation_token": {
-            "type": "string"
           }
         }
       },
@@ -1224,10 +1123,6 @@
     {
       "name": "Auth",
       "description": "Управление аудентификацией"
-    },
-    {
-      "name": "Orders",
-      "description": "Управление платежами"
     },
     {
       "name": "Users",

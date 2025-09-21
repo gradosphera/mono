@@ -1,10 +1,10 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, Min } from 'class-validator';
 import type { CreateCommitDomainInput } from '../../../domain/actions/create-commit-domain-input.interface';
 
 /**
  * GraphQL DTO для создания коммита CAPITAL контракта
- * Время рассчитывается автоматически на основе записей time-tracking
+ * Пользователь указывает количество часов для коммита
  */
 @InputType('CreateCommitInput')
 export class CreateCommitInputDTO implements CreateCommitDomainInput {
@@ -28,5 +28,8 @@ export class CreateCommitInputDTO implements CreateCommitDomainInput {
   @IsString({ message: 'Хэш коммита должен быть строкой' })
   commit_hash!: string;
 
-  // Поле creator_hours удалено - время рассчитывается автоматически
+  @Field(() => Number, { description: 'Количество часов для коммита' })
+  @IsNumber({}, { message: 'Количество часов должно быть числом' })
+  @Min(0.1, { message: 'Количество часов должно быть больше 0' })
+  commit_hours!: number;
 }

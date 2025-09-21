@@ -1607,6 +1607,7 @@ export const ReturnTypes: Record<string,any> = {
 	CapitalProjectTimeStats:{
 		available_hours:"Float",
 		contributor_hash:"String",
+		pending_hours:"Float",
 		project_hash:"String",
 		project_name:"String",
 		total_committed_hours:"Float",

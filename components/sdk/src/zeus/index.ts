@@ -2332,10 +2332,12 @@ export type ValueTypes = {
 };
 	/** Статистика времени вкладчика по проекту */
 ["CapitalProjectTimeStats"]: AliasType<{
-	/** Доступное время для коммита (часы, ограничено 8 часами) */
+	/** Доступное время для коммита (по завершённым задачам) */
 	available_hours?:boolean | `@${string}`,
 	/** Хеш вкладчика */
 	contributor_hash?:boolean | `@${string}`,
+	/** Время в ожидании (по незавершённым задачам) */
+	pending_hours?:boolean | `@${string}`,
 	/** Хеш проекта */
 	project_hash?:boolean | `@${string}`,
 	/** Название проекта */
@@ -2776,6 +2778,8 @@ export type ValueTypes = {
 	["CreateCommitInput"]: {
 	/** Хэш коммита */
 	commit_hash: string | Variable<any, string>,
+	/** Количество часов для коммита */
+	commit_hours: number | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
 	/** Хэш проекта */
@@ -7481,10 +7485,12 @@ export type ResolverInputTypes = {
 };
 	/** Статистика времени вкладчика по проекту */
 ["CapitalProjectTimeStats"]: AliasType<{
-	/** Доступное время для коммита (часы, ограничено 8 часами) */
+	/** Доступное время для коммита (по завершённым задачам) */
 	available_hours?:boolean | `@${string}`,
 	/** Хеш вкладчика */
 	contributor_hash?:boolean | `@${string}`,
+	/** Время в ожидании (по незавершённым задачам) */
+	pending_hours?:boolean | `@${string}`,
 	/** Хеш проекта */
 	project_hash?:boolean | `@${string}`,
 	/** Название проекта */
@@ -7925,6 +7931,8 @@ export type ResolverInputTypes = {
 	["CreateCommitInput"]: {
 	/** Хэш коммита */
 	commit_hash: string,
+	/** Количество часов для коммита */
+	commit_hours: number,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Хэш проекта */
@@ -12606,10 +12614,12 @@ export type ModelTypes = {
 };
 	/** Статистика времени вкладчика по проекту */
 ["CapitalProjectTimeStats"]: {
-		/** Доступное время для коммита (часы, ограничено 8 часами) */
+		/** Доступное время для коммита (по завершённым задачам) */
 	available_hours: number,
 	/** Хеш вкладчика */
 	contributor_hash: string,
+	/** Время в ожидании (по незавершённым задачам) */
+	pending_hours: number,
 	/** Хеш проекта */
 	project_hash: string,
 	/** Название проекта */
@@ -13037,6 +13047,8 @@ export type ModelTypes = {
 	["CreateCommitInput"]: {
 	/** Хэш коммита */
 	commit_hash: string,
+	/** Количество часов для коммита */
+	commit_hours: number,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Хэш проекта */
@@ -17792,10 +17804,12 @@ export type GraphQLTypes = {
 	/** Статистика времени вкладчика по проекту */
 ["CapitalProjectTimeStats"]: {
 	__typename: "CapitalProjectTimeStats",
-	/** Доступное время для коммита (часы, ограничено 8 часами) */
+	/** Доступное время для коммита (по завершённым задачам) */
 	available_hours: number,
 	/** Хеш вкладчика */
 	contributor_hash: string,
+	/** Время в ожидании (по незавершённым задачам) */
+	pending_hours: number,
 	/** Хеш проекта */
 	project_hash: string,
 	/** Название проекта */
@@ -18235,6 +18249,8 @@ export type GraphQLTypes = {
 	["CreateCommitInput"]: {
 		/** Хэш коммита */
 	commit_hash: string,
+	/** Количество часов для коммита */
+	commit_hours: number,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Хэш проекта */

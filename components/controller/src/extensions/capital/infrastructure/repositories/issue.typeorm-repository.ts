@@ -7,7 +7,7 @@ import { IssueTypeormEntity } from '../entities/issue.typeorm-entity';
 import { IssueMapper } from '../mappers/issue.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IssuePriority } from '../../domain/enums/issue-priority.enum';
-import type { IssueStatus } from '../../domain/enums/issue-status.enum';
+import { IssueStatus } from '../../domain/enums/issue-status.enum';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
@@ -70,6 +70,17 @@ export class IssueTypeormRepository implements IssueRepository {
     const entities = await this.issueTypeormRepository
       .createQueryBuilder('issue')
       .where('issue.status = :status', { status })
+      .andWhere('issue.creators_hashs && :creatorsHashs', { creatorsHashs })
+      .getMany();
+
+    return entities.map(IssueMapper.toDomain);
+  }
+
+  async findCompletedByProjectAndCreatorsHashs(projectHash: string, creatorsHashs: string[]): Promise<IssueDomainEntity[]> {
+    const entities = await this.issueTypeormRepository
+      .createQueryBuilder('issue')
+      .where('issue.status = :status', { status: IssueStatus.DONE })
+      .andWhere('issue.project_hash = :projectHash', { projectHash })
       .andWhere('issue.creators_hashs && :creatorsHashs', { creatorsHashs })
       .getMany();
 

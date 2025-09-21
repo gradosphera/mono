@@ -1992,11 +1992,14 @@ input CapitalProjectFilter {
 
 """Статистика времени вкладчика по проекту"""
 type CapitalProjectTimeStats {
-  """Доступное время для коммита (часы, ограничено 8 часами)"""
+  """Доступное время для коммита (по завершённым задачам)"""
   available_hours: Float!
 
   """Хеш вкладчика"""
   contributor_hash: String!
+
+  """Время в ожидании (по незавершённым задачам)"""
+  pending_hours: Float!
 
   """Хеш проекта"""
   project_hash: String!
@@ -2638,6 +2641,9 @@ input CreateChildOrderInput {
 input CreateCommitInput {
   """Хэш коммита"""
   commit_hash: String!
+
+  """Количество часов для коммита"""
+  commit_hours: Float!
 
   """Имя аккаунта кооператива"""
   coopname: String!
