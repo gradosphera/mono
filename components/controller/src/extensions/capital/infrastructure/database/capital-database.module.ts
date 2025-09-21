@@ -20,6 +20,7 @@ import { ResultTypeormEntity } from '../entities/result.typeorm-entity';
 import { ExpenseTypeormEntity } from '../entities/expense.typeorm-entity';
 import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
 import { StateTypeormEntity } from '../entities/state.typeorm-entity';
+import { TimeEntryEntity } from '../entities/time-entry.entity';
 import { config } from '~/config';
 
 // Константа для имени подключения к базе данных capital
@@ -58,6 +59,7 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
           ExpenseTypeormEntity,
           CommitTypeormEntity,
           StateTypeormEntity,
+          TimeEntryEntity,
         ],
         synchronize: config.env === 'development', // Используем миграции для production
         logging: false,
@@ -85,6 +87,7 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
         ExpenseTypeormEntity,
         CommitTypeormEntity,
         StateTypeormEntity,
+        TimeEntryEntity,
       ],
       CAPITAL_DATABASE_CONNECTION
     ), // Указываем connection name

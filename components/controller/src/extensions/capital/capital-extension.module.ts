@@ -28,6 +28,7 @@ import { ResultTypeormRepository } from './infrastructure/repositories/result.ty
 import { ExpenseTypeormRepository } from './infrastructure/repositories/expense.typeorm-repository';
 import { CommitTypeormRepository } from './infrastructure/repositories/commit.typeorm-repository';
 import { StateTypeormRepository } from './infrastructure/repositories/state.typeorm-repository';
+import { TimeEntryTypeormRepository } from './infrastructure/repositories/time-entry.typeorm-repository';
 
 // Blockchain синхронизация
 import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
@@ -64,6 +65,7 @@ import { ResultSubmissionService } from './application/services/result-submissio
 import { DistributionManagementService } from './application/services/distribution-management.service';
 import { ExpensesManagementService } from './application/services/expenses-management.service';
 import { ContributorAccountSyncService } from './application/services/contributor-account-sync.service';
+import { TimeTrackingService } from './application/services/time-tracking.service';
 
 // CAPITAL Application Dependencies
 import { CapitalBlockchainAdapter } from './infrastructure/blockchain/adapters/capital-blockchain.adapter';
@@ -90,6 +92,7 @@ import { RESULT_REPOSITORY } from './domain/repositories/result.repository';
 import { EXPENSE_REPOSITORY } from './domain/repositories/expense.repository';
 import { COMMIT_REPOSITORY } from './domain/repositories/commit.repository';
 import { STATE_REPOSITORY } from './domain/repositories/state.repository';
+import { TIME_ENTRY_REPOSITORY } from './domain/repositories/time-entry.repository';
 
 import { z } from 'zod';
 
@@ -209,19 +212,6 @@ export class CapitalPlugin extends BaseExtModule {
     ResultSubmissionResolver,
     DistributionManagementResolver,
     ExpensesManagementResolver,
-    // Domain Interactors
-    ContractManagementInteractor,
-    ParticipationManagementInteractor,
-    ProjectManagementInteractor,
-    GenerationInteractor,
-    InvestsManagementInteractor,
-    DebtManagementInteractor,
-    PropertyManagementInteractor,
-    VotingInteractor,
-    ResultSubmissionInteractor,
-    DistributionManagementInteractor,
-    ExpensesManagementInteractor,
-    CapitalSyncInteractor,
 
     // Repositories
     {
@@ -304,6 +294,27 @@ export class CapitalPlugin extends BaseExtModule {
       provide: STATE_REPOSITORY,
       useClass: StateTypeormRepository,
     },
+    {
+      provide: TIME_ENTRY_REPOSITORY,
+      useClass: TimeEntryTypeormRepository,
+    },
+
+    // Services that depend on repositories
+    TimeTrackingService,
+
+    // Use Cases
+    ContractManagementInteractor,
+    ParticipationManagementInteractor,
+    ProjectManagementInteractor,
+    GenerationInteractor,
+    InvestsManagementInteractor,
+    DebtManagementInteractor,
+    PropertyManagementInteractor,
+    VotingInteractor,
+    ResultSubmissionInteractor,
+    DistributionManagementInteractor,
+    ExpensesManagementInteractor,
+    CapitalSyncInteractor,
   ],
   exports: [CapitalPlugin],
 })

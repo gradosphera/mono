@@ -5,12 +5,16 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import type { ContributorFilterInputDTO } from '../../application/dto/participation_management/contributor-filter.input';
+import { ContributorStatus } from '../enums/contributor-status.enum';
 
 export interface ContributorRepository extends IBlockchainSyncRepository<ContributorDomainEntity> {
   create(contributor: Omit<ContributorDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContributorDomainEntity>;
   findById(_id: string): Promise<ContributorDomainEntity | null>;
   findAll(): Promise<ContributorDomainEntity[]>;
   findByUsername(username: string): Promise<ContributorDomainEntity | null>;
+  findByUsernameAndCoopname(username: string, coopname: string): Promise<ContributorDomainEntity | null>;
+  findByStatusAndCoopname(status: string, coopname: string): Promise<ContributorDomainEntity[]>;
+  findByHashesAndStatus(contributorHashes: string[], status: ContributorStatus): Promise<ContributorDomainEntity[]>;
   findByStatus(status: string): Promise<ContributorDomainEntity[]>;
   findAllPaginated(
     filter?: ContributorFilterInputDTO,

@@ -1,5 +1,6 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { GenerationService } from '../services/generation.service';
+import { TimeTrackingService } from '../services/time-tracking.service';
 import { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
 import { RefreshSegmentInputDTO } from '../dto/generation/refresh-segment-input.dto';
 import { CreateStoryInputDTO } from '../dto/generation/create-story-input.dto';
@@ -25,6 +26,7 @@ import { StoryOutputDTO } from '../dto/generation/story.dto';
 import { IssueOutputDTO } from '../dto/generation/issue.dto';
 import { CommitOutputDTO } from '../dto/generation/commit.dto';
 import { CycleOutputDTO } from '../dto/generation/cycle.dto';
+import { TimeStatsOutputDTO, TimeStatsInputDTO } from '../dto/generation/time-stats.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 
 // Пагинированные результаты
@@ -38,7 +40,10 @@ const paginatedCyclesResult = createPaginationResult(CycleOutputDTO, 'PaginatedC
  */
 @Resolver()
 export class GenerationResolver {
-  constructor(private readonly generationService: GenerationService) {}
+  constructor(
+    private readonly generationService: GenerationService,
+    private readonly timeTrackingService: TimeTrackingService
+  ) {}
 
   /**
    * Мутация для создания коммита в CAPITAL контракте
@@ -290,5 +295,21 @@ export class GenerationResolver {
     @Args('data', { type: () => DeleteIssueByHashInputDTO }) data: DeleteIssueByHashInputDTO
   ): Promise<boolean> {
     return await this.generationService.deleteIssueByHash(data.issue_hash);
+  }
+
+  // ============ TIME TRACKING QUERIES ============
+
+  /**
+   * Получение статистики времени вкладчика по проекту
+   */
+  @Query(() => TimeStatsOutputDTO, {
+    name: 'capitalTimeStats',
+    description: 'Получение статистики времени вкладчика по проекту',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async getCapitalTimeStats(@Args('data') data: TimeStatsInputDTO): Promise<TimeStatsOutputDTO> {
+    const stats = await this.timeTrackingService.getTimeStats(data.contributor_hash, data.project_hash);
+    return stats;
   }
 }

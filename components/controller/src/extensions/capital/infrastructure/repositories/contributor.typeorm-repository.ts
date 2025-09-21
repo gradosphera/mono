@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ContributorRepository } from '../../domain/repositories/contributor.repository';
 import { ContributorDomainEntity } from '../../domain/entities/contributor.entity';
 import { ContributorTypeormEntity } from '../entities/contributor.typeorm-entity';
@@ -15,6 +15,7 @@ import type {
 } from '~/domain/common/interfaces/pagination.interface';
 import type { ContributorFilterInputDTO } from '../../application/dto/participation_management/contributor-filter.input';
 import { PaginationUtils } from '~/shared/utils/pagination.utils';
+import type { ContributorStatus } from '../../domain/enums/contributor-status.enum';
 
 @Injectable()
 export class ContributorTypeormRepository
@@ -52,6 +53,26 @@ export class ContributorTypeormRepository
   async findByUsername(username: string): Promise<ContributorDomainEntity | null> {
     const entities = await this.repository.find({ where: { username } });
     return entities.length > 0 ? ContributorMapper.toDomain(entities[0]) : null;
+  }
+
+  async findByUsernameAndCoopname(username: string, coopname: string): Promise<ContributorDomainEntity | null> {
+    const entities = await this.repository.find({ where: { username, coopname } });
+    return entities.length > 0 ? ContributorMapper.toDomain(entities[0]) : null;
+  }
+
+  async findByStatusAndCoopname(status: ContributorStatus, coopname: string): Promise<ContributorDomainEntity[]> {
+    const entities = await this.repository.find({ where: { status: status, coopname } });
+    return entities.map((entity) => ContributorMapper.toDomain(entity));
+  }
+
+  async findByHashesAndStatus(contributorHashes: string[], status: string): Promise<ContributorDomainEntity[]> {
+    const entities = await this.repository.find({
+      where: {
+        contributor_hash: In(contributorHashes),
+        status: status as ContributorStatus,
+      },
+    });
+    return entities.map((entity) => ContributorMapper.toDomain(entity));
   }
 
   async findOne(criteria: {
