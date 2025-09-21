@@ -8,6 +8,7 @@ const rawProjectTimeStatsSelector = {
   total_committed_hours: true,
   total_uncommitted_hours: true,
   available_hours: true,
+  pending_hours: true
 }
 
 // Проверка валидности
