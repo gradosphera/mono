@@ -39,7 +39,7 @@ export class IssueMapper {
    */
   static toEntity(domain: Partial<IssueDomainEntity>): Partial<IssueTypeormEntity> {
     const entity: Partial<IssueTypeormEntity> = {};
-
+    // Object.assign(entity, domain);
     if (domain._id !== undefined) entity._id = domain._id;
     if (domain.issue_hash !== undefined) entity.issue_hash = domain.issue_hash;
     if (domain.coopname !== undefined) entity.coopname = domain.coopname;

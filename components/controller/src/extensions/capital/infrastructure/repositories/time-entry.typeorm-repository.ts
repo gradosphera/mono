@@ -11,6 +11,7 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import type { ContributorProjectBasicTimeStatsDomainInterface } from '../../domain/interfaces/time-stats-domain.interface';
+import type { TimeEntriesByIssuesDomainInterface } from '../../domain/interfaces/time-entries-by-issues-domain.interface';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 
 /**
@@ -218,6 +219,93 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
     return entity;
   }
 
+  async getAggregatedTimeEntriesByIssues(
+    filter: TimeEntriesFilterDomainInterface,
+    limit: number,
+    offset: number
+  ): Promise<TimeEntriesByIssuesDomainInterface[]> {
+    const queryBuilder = this.repository
+      .createQueryBuilder('te')
+      .select([
+        'te.issue_hash',
+        'i.title as issue_title',
+        'te.project_hash',
+        'p.title as project_name',
+        'te.contributor_hash',
+        'c.display_name as contributor_name',
+        'te.coopname',
+        'SUM(te.hours) as total_hours',
+        'SUM(CASE WHEN te.is_committed = true THEN te.hours ELSE 0 END) as committed_hours',
+        'SUM(CASE WHEN te.is_committed = false THEN te.hours ELSE 0 END) as uncommitted_hours',
+      ])
+      .innerJoin('capital_issues', 'i', 'te.issue_hash = i.issue_hash')
+      .innerJoin('capital_projects', 'p', 'te.project_hash = p.project_hash')
+      .innerJoin('capital_contributors', 'c', 'te.contributor_hash = c.contributor_hash')
+      .groupBy('te.issue_hash, i.title, te.project_hash, p.title, te.contributor_hash, c.display_name, te.coopname')
+      .orderBy('total_hours', 'DESC')
+      .limit(limit)
+      .offset(offset);
+
+    // Применяем фильтры
+    if (filter.projectHash) {
+      queryBuilder.andWhere('te.project_hash = :projectHash', { projectHash: filter.projectHash });
+    }
+    if (filter.contributorHash) {
+      queryBuilder.andWhere('te.contributor_hash = :contributorHash', { contributorHash: filter.contributorHash });
+    }
+    if (filter.issueHash) {
+      queryBuilder.andWhere('te.issue_hash = :issueHash', { issueHash: filter.issueHash });
+    }
+    if (filter.isCommitted !== undefined) {
+      queryBuilder.andWhere('te.is_committed = :isCommitted', { isCommitted: filter.isCommitted });
+    }
+    if (filter.coopname) {
+      queryBuilder.andWhere('te.coopname = :coopname', { coopname: filter.coopname });
+    }
+
+    const results = await queryBuilder.getRawMany();
+
+    return results.map((row) => ({
+      issue_hash: row.te_issue_hash,
+      issue_title: row.issue_title,
+      project_hash: row.te_project_hash,
+      project_name: row.project_name,
+      contributor_hash: row.te_contributor_hash,
+      contributor_name: row.contributor_name,
+      coopname: row.te_coopname,
+      total_hours: Number(row.total_hours),
+      committed_hours: Number(row.committed_hours),
+      uncommitted_hours: Number(row.uncommitted_hours),
+    }));
+  }
+
+  async getAggregatedTimeEntriesCount(filter: TimeEntriesFilterDomainInterface): Promise<number> {
+    const queryBuilder = this.repository
+      .createQueryBuilder('te')
+      .select("COUNT(DISTINCT (te.issue_hash || '-' || te.project_hash || '-' || te.contributor_hash))", 'count');
+
+    // Применяем фильтры
+    if (filter.projectHash) {
+      queryBuilder.andWhere('te.project_hash = :projectHash', { projectHash: filter.projectHash });
+    }
+    if (filter.contributorHash) {
+      queryBuilder.andWhere('te.contributor_hash = :contributorHash', { contributorHash: filter.contributorHash });
+    }
+    if (filter.issueHash) {
+      queryBuilder.andWhere('te.issue_hash = :issueHash', { issueHash: filter.issueHash });
+    }
+    if (filter.isCommitted !== undefined) {
+      queryBuilder.andWhere('te.is_committed = :isCommitted', { isCommitted: filter.isCommitted });
+    }
+    if (filter.coopname) {
+      queryBuilder.andWhere('te.coopname = :coopname', { coopname: filter.coopname });
+    }
+
+    const result = await queryBuilder.getRawOne();
+
+    return Number(result.count);
+  }
+
   private toDomain(entity: TimeEntryEntity): TimeEntryDomainEntity {
     const databaseData: ITimeEntryDatabaseData = {
       _id: entity._id,
@@ -231,7 +319,7 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
       project_hash: entity.project_hash,
       coopname: entity.coopname,
       date: entity.date,
-      hours: entity.hours,
+      hours: Number(entity.hours),
       commit_hash: entity.commit_hash,
       is_committed: entity.is_committed,
     };

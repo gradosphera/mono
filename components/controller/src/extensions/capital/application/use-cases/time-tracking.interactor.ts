@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { TIME_ENTRY_REPOSITORY, TimeEntryRepository } from '../../domain/repositories/time-entry.repository';
 import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories/project.repository';
 import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../../domain/repositories/contributor.repository';
@@ -18,11 +18,13 @@ import type { TimeEntriesFilterDomainInterface } from '../../domain/interfaces/t
 import type { FlexibleTimeStatsResultDomainInterface } from '../../domain/interfaces/flexible-time-stats-domain.interface';
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { ProjectTimeStatsDomainInterface } from '../../domain/interfaces/project-time-stats-domain.interface';
+import type { TimeEntriesByIssuesResultDomainInterface } from '../../domain/interfaces/time-entries-by-issues-domain.interface';
 import type {
   ContributorProjectBasicTimeStatsDomainInterface,
   ContributorProjectTimeStatsDomainInterface,
 } from '../../domain/interfaces/time-stats-domain.interface';
 import { IssueDomainEntity } from '../../domain/entities/issue.entity';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 /**
  * Интерактор домена для учёта времени в CAPITAL контракте
@@ -30,8 +32,6 @@ import { IssueDomainEntity } from '../../domain/entities/issue.entity';
  */
 @Injectable()
 export class TimeTrackingInteractor {
-  private readonly logger = new Logger(TimeTrackingInteractor.name);
-
   constructor(
     @Inject(TIME_ENTRY_REPOSITORY)
     private readonly timeEntryRepository: TimeEntryRepository,
@@ -40,8 +40,11 @@ export class TimeTrackingInteractor {
     @Inject(CONTRIBUTOR_REPOSITORY)
     private readonly contributorRepository: ContributorRepository,
     @Inject(ISSUE_REPOSITORY)
-    private readonly issueRepository: IssueRepository
-  ) {}
+    private readonly issueRepository: IssueRepository,
+    private readonly logger: WinstonLoggerService
+  ) {
+    this.logger.setContext(TimeTrackingInteractor.name);
+  }
 
   /**
    * Получение статистики времени вкладчика по проекту
@@ -119,6 +122,7 @@ export class TimeTrackingInteractor {
     const filter: TimeEntriesFilterDomainInterface = {
       projectHash: data.project_hash,
       contributorHash: data.contributor_hash,
+      issueHash: data.issue_hash,
       isCommitted: data.is_committed,
       coopname: data.coopname,
     };
@@ -287,7 +291,7 @@ export class TimeTrackingInteractor {
       try {
         await this.trackTimeForContributor(contributor, today);
       } catch (error) {
-        this.logger.error(`Ошибка учёта времени для вкладчика ${contributor.username}:`, error);
+        this.logger.error(`Ошибка учёта времени для вкладчика ${contributor.username}:`, (error as Error).stack);
       }
     }
 
@@ -311,7 +315,7 @@ export class TimeTrackingInteractor {
         );
         allContributors.push(...contributors);
       } catch (error) {
-        this.logger.error(`Ошибка получения вкладчиков для кооператива ${coopname}:`, error);
+        this.logger.error(`Ошибка получения вкладчиков для кооператива ${coopname}:`, (error as Error).stack);
       }
     }
 
@@ -328,21 +332,16 @@ export class TimeTrackingInteractor {
     if (activeIssues.length === 0) {
       return;
     }
-
     // Рассчитываем время на каждую задачу вкладчика
     const hoursPerIssue = await this.calculateTimeDistributionPerIssue(contributor, activeIssues, date);
-
     // Создаём записи времени для каждой задачи
     for (const issue of activeIssues) {
       const hours = hoursPerIssue[issue.issue_hash] || 0;
-
       if (hours <= 0) continue;
 
       // Проверяем, есть ли уже запись за сегодня для этой задачи
       const existingEntries = await this.timeEntryRepository.findByContributorAndDate(contributor.contributor_hash, date);
-
       const todayEntry = existingEntries.find((entry) => entry.issue_hash === issue.issue_hash && !entry.is_committed);
-
       if (todayEntry) {
         // Обновляем существующую запись
         todayEntry.hours += hours;
@@ -359,12 +358,9 @@ export class TimeTrackingInteractor {
           hours,
           is_committed: false,
           block_num: 0,
-          present: true,
+          present: false,
           status: 'active',
-          _created_at: new Date(),
-          _updated_at: new Date(),
         });
-
         await this.timeEntryRepository.create(timeEntry);
       }
     }
@@ -556,5 +552,46 @@ export class TimeTrackingInteractor {
     const detailedStats = await this.calculateDetailedProjectStats(contributorHash, projectHash, basicStats);
 
     return detailedStats.available_hours; // Без ограничения - можно использовать всё накопленное время по завершённым задачам
+  }
+
+  /**
+   * Получить агрегированные записи времени по задачам с пагинацией
+   */
+  async getTimeEntriesByIssues(
+    data: GetTimeEntriesDomainInput,
+    options?: PaginationInputDomainInterface
+  ): Promise<TimeEntriesByIssuesResultDomainInterface> {
+    const page = options?.page || 1;
+    const limit = options?.limit || 10;
+    const offset = (page - 1) * limit;
+
+    // Получаем агрегированные данные из репозитория
+    const aggregatedData = await this.timeEntryRepository.getAggregatedTimeEntriesByIssues(
+      {
+        projectHash: data.project_hash,
+        contributorHash: data.contributor_hash,
+        isCommitted: data.is_committed,
+        coopname: data.coopname,
+      },
+      limit,
+      offset
+    );
+
+    // Получаем общее количество для пагинации
+    const totalCount = await this.timeEntryRepository.getAggregatedTimeEntriesCount({
+      projectHash: data.project_hash,
+      contributorHash: data.contributor_hash,
+      isCommitted: data.is_committed,
+      coopname: data.coopname,
+    });
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return {
+      items: aggregatedData,
+      totalCount,
+      currentPage: page,
+      totalPages,
+    };
   }
 }

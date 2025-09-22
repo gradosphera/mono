@@ -6,3 +6,6 @@ export * from './IssueControls';
 export * from './ComponentsListWidget';
 export * from './ProjectMenuWidget';
 export * from './StoryWidget';
+export * from './TimeStatsWidget';
+export * from './TimeIssuesWidget';
+export * from './TimeEntriesWidget';

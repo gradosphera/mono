@@ -9,6 +9,7 @@ import { ProjectsListPage } from './pages/ProjectsListPage';
 import { ProjectPage } from './pages/ProjectPage';
 import { ComponentPage } from './pages/ComponentPage';
 import { IssuePage } from './pages/IssuePage';
+import { TrackerPage } from './pages';
 
 export default async function (): Promise<IWorkspaceConfig> {
   return {
@@ -58,6 +59,19 @@ export default async function (): Promise<IWorkspaceConfig> {
             meta: {
               title: 'Вкладчики',
               icon: 'fa-solid fa-users',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [],
+          },
+          {
+            path: 'tracker',
+            name: 'tracker',
+            component: markRaw(TrackerPage),
+            meta: {
+              title: 'Трекер времени',
+              icon: 'fa-solid fa-clock',
               roles: [],
               agreements: agreementsBase,
               requiresAuth: true,

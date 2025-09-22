@@ -1,0 +1,30 @@
+---
+globs: **/controller/**/*.ts
+alwaysApply: false
+---
+# Logger Rule
+
+## Правильное использование логгера:
+
+1. **Импорт**: `import { WinstonLoggerService } from '~/application/logger/logger-app.service';`
+
+2. **Инъекция**: Добавить в конструктор как `private readonly logger: WinstonLoggerService`
+
+3. **Контекст**: В конструкторе `this.logger.setContext(ClassName.name);`
+
+4. **Использование**: `this.logger.debug/info/error('message', meta?)`
+
+5. **НЕ использовать**: `new Logger()` из `@nestjs/common`
+# Logger Rule
+
+## Правильное использование логгера:
+
+1. **Импорт**: `import { WinstonLoggerService } from '~/application/logger/logger-app.service';`
+
+2. **Инъекция**: Добавить в конструктор как `private readonly logger: WinstonLoggerService`
+
+3. **Контекст**: В конструкторе `this.logger.setContext(ClassName.name);`
+
+4. **Использование**: `this.logger.debug/info/error('message', meta?)`
+
+5. **НЕ использовать**: `new Logger()` из `@nestjs/common`

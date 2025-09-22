@@ -121,6 +121,7 @@ export class IssueTypeormRepository implements IssueRepository {
     const updatedEntity = await this.issueTypeormRepository.findOne({
       where: { _id: entity._id },
     });
+    console.log('updatedEntity', updatedEntity);
     return updatedEntity ? IssueMapper.toDomain(updatedEntity) : entity;
   }
 

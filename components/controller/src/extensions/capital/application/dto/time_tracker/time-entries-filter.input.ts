@@ -19,6 +19,12 @@ export class TimeEntriesFilterInputDTO {
   })
   contributor_hash?: string;
 
+  @Field(() => String, {
+    nullable: true,
+    description: 'Хеш задачи (опционально, если не указан - вернёт записи по всем задачам)',
+  })
+  issue_hash?: string;
+
   @Field(() => Boolean, {
     nullable: true,
     description: 'Фильтр по закоммиченным записям (опционально)',

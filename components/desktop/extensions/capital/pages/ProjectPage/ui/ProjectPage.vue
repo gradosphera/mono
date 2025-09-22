@@ -46,6 +46,7 @@ import { StoriesWidget } from 'app/extensions/capital/widgets/StoryWidget';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
 import { useRightDrawer } from 'src/shared/hooks/useRightDrawer';
+import { useExpandableState } from 'src/shared/lib/composables';
 import { FailAlert } from 'src/shared/api';
 import { CreateComponentButton } from 'app/extensions/capital/features/Project/CreateComponent';
 import 'src/shared/ui/TitleStyles';
@@ -56,10 +57,14 @@ import { IssuesListWidget } from 'app/extensions/capital/widgets/IssuesListWidge
 const route = useRoute();
 const projectStore = useProjectStore();
 
-// Состояние развернутости компонентов
-const expandedComponents = ref(new Map<string, boolean>());
-
 const project = ref<IProject | null | undefined>(null);
+
+// Композабл для управления состоянием развернутости компонентов
+const {
+  expanded: expandedComponents,
+  loadExpandedState: loadComponentsExpandedState,
+  toggleExpanded: toggleComponentExpanded,
+} = useExpandableState('capital_project_components_expanded');
 
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
@@ -80,6 +85,9 @@ const { registerAction: registerRightDrawerAction } = useRightDrawer();
 
 // Регистрируем действие в header
 onMounted(() => {
+  // Загружаем сохраненное состояние expanded из LocalStorage
+  loadComponentsExpandedState();
+
   registerHeaderAction({
     id: 'create-component-' + projectHash.value,
     component: markRaw(CreateComponentButton),
@@ -136,7 +144,7 @@ const handleComponentClick = (componentHash: string) => {
 
 // Обработчик переключения компонентов
 const handleComponentToggle = (componentHash: string) => {
-  expandedComponents.value.set(componentHash, !expandedComponents.value.get(componentHash));
+  toggleComponentExpanded(componentHash);
 };
 
 // Обработчик клика по задаче

@@ -8,6 +8,9 @@ export interface TimeEntriesFilterDomainInterface {
   /** Хеш вкладчика (опционально, если не указан - вернет записи всех вкладчиков проекта/всех проектов) */
   contributorHash?: string;
 
+  /** Хеш задачи (опционально, если не указан - вернет записи по всем задачам) */
+  issueHash?: string;
+
   /** Фильтр по закоммиченным записям (опционально) */
   isCommitted?: boolean;
 

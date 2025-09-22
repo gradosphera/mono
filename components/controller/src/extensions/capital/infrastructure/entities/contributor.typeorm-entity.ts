@@ -1,7 +1,8 @@
-import { Entity, Column, CreateDateColumn, Index } from 'typeorm';
+import { Entity, Column, CreateDateColumn, Index, ManyToMany } from 'typeorm';
 import { ContributorStatus } from '../../domain/enums/contributor-status.enum';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import { BaseTypeormEntity } from './base.typeorm-entity';
+import { IssueTypeormEntity } from './issue.typeorm-entity';
 
 const EntityName = 'capital_contributors';
 
@@ -88,4 +89,8 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
 
   @Column({ type: 'text', nullable: true })
   about?: string; // Описание вкладчика
+
+  // Обратные связи
+  @ManyToMany(() => IssueTypeormEntity, (issue) => issue.creators)
+  issues!: IssueTypeormEntity[];
 }

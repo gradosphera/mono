@@ -16,6 +16,15 @@ export class TimeEntryDomainEntity extends BaseDomainEntity<ITimeEntryDatabaseDa
 
   constructor(databaseData: ITimeEntryDatabaseData) {
     super(databaseData, 'active'); // Статус для записей времени
-    Object.assign(this, databaseData);
+
+    // Присваиваем специфичные поля записи времени
+    this.contributor_hash = databaseData.contributor_hash;
+    this.issue_hash = databaseData.issue_hash;
+    this.project_hash = databaseData.project_hash;
+    this.coopname = databaseData.coopname;
+    this.date = databaseData.date;
+    this.hours = databaseData.hours;
+    this.commit_hash = databaseData.commit_hash;
+    this.is_committed = databaseData.is_committed;
   }
 }

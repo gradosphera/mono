@@ -27,7 +27,7 @@ export class TimeEntryEntity extends BaseTypeormEntity {
   @Column({ type: 'date', comment: 'Дата работы (YYYY-MM-DD)' })
   date!: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, comment: 'Количество часов' })
+  @Column({ type: 'numeric', comment: 'Количество часов' })
   hours!: number;
 
   @Column({ type: 'varchar', length: 64, nullable: true, comment: 'Хеш коммита, если время уже закоммичено' })

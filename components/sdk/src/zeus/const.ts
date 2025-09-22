@@ -935,6 +935,10 @@ export const AllTypesProps: Record<string,any> = {
 			filter:"CapitalTimeEntriesFilter",
 			options:"PaginationInput"
 		},
+		capitalTimeEntriesByIssues:{
+			filter:"CapitalTimeEntriesFilter",
+			options:"PaginationInput"
+		},
 		capitalTimeStats:{
 			data:"CapitalTimeStatsInput",
 			options:"PaginationInput"
@@ -1662,6 +1666,18 @@ export const ReturnTypes: Record<string,any> = {
 		story_hash:"String",
 		title:"String"
 	},
+	CapitalTimeEntriesByIssues:{
+		committed_hours:"Float",
+		contributor_hash:"String",
+		contributor_name:"String",
+		coopname:"String",
+		issue_hash:"String",
+		issue_title:"String",
+		project_hash:"String",
+		project_name:"String",
+		total_hours:"Float",
+		uncommitted_hours:"Float"
+	},
 	CapitalTimeEntry:{
 		_created_at:"String",
 		_id:"String",
@@ -2262,6 +2278,12 @@ export const ReturnTypes: Record<string,any> = {
 		totalCount:"Int",
 		totalPages:"Int"
 	},
+	PaginatedCapitalTimeEntriesByIssuesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalTimeEntriesByIssues",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedCapitalTimeEntriesPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalTimeEntry",
@@ -2401,6 +2423,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalStories:"PaginatedCapitalStoriesPaginationResult",
 		capitalStory:"CapitalStory",
 		capitalTimeEntries:"PaginatedCapitalTimeEntriesPaginationResult",
+		capitalTimeEntriesByIssues:"PaginatedCapitalTimeEntriesByIssuesPaginationResult",
 		capitalTimeStats:"CapitalTimeStats",
 		capitalVote:"CapitalVote",
 		capitalVotes:"PaginatedCapitalVotesPaginationResult",

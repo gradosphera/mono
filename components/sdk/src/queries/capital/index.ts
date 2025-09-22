@@ -57,6 +57,9 @@ export * as GetTimeStats from './getTimeStats'
 /** Получить пагинированный список записей времени */
 export * as GetTimeEntries from './getTimeEntries'
 
+/** Получить пагинированный список агрегированных записей времени по задачам */
+export * as GetTimeEntriesByIssues from './getTimeEntriesByIssues'
+
 /** Получить коммит по HASH */
 export * as GetCommit from './getCommit'
 

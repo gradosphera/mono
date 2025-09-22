@@ -2173,6 +2173,41 @@ input CapitalStoryFilter {
   title: String
 }
 
+"""
+Агрегированная статистика времени по задачам с информацией о задачах и вкладчиках
+"""
+type CapitalTimeEntriesByIssues {
+  """Количество закоммиченных часов"""
+  committed_hours: Float!
+
+  """Хеш вкладчика"""
+  contributor_hash: String!
+
+  """Имя вкладчика"""
+  contributor_name: String!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Хеш задачи"""
+  issue_hash: String!
+
+  """Название задачи"""
+  issue_title: String!
+
+  """Хеш проекта"""
+  project_hash: String!
+
+  """Название проекта"""
+  project_name: String!
+
+  """Общее количество часов по задаче"""
+  total_hours: Float!
+
+  """Количество незакоммиченных часов"""
+  uncommitted_hours: Float!
+}
+
 """Параметры фильтрации для запросов записей времени CAPITAL"""
 input CapitalTimeEntriesFilter {
   """
@@ -2185,6 +2220,11 @@ input CapitalTimeEntriesFilter {
 
   """Фильтр по закоммиченным записям (опционально)"""
   is_committed: Boolean
+
+  """
+  Хеш задачи (опционально, если не указан - вернёт записи по всем задачам)
+  """
+  issue_hash: String
 
   """
   Хеш проекта (опционально, если не указан - вернёт записи по всем проектам)
@@ -5222,6 +5262,20 @@ type PaginatedCapitalStoriesPaginationResult {
   totalPages: Int!
 }
 
+type PaginatedCapitalTimeEntriesByIssuesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalTimeEntriesByIssues!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 type PaginatedCapitalTimeEntriesPaginationResult {
   """Текущая страница"""
   currentPage: Int!
@@ -5925,6 +5979,11 @@ type Query {
 
   """Получение пагинированного списка записей времени"""
   capitalTimeEntries(filter: CapitalTimeEntriesFilter, options: PaginationInput): PaginatedCapitalTimeEntriesPaginationResult!
+
+  """
+  Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и вкладчиках
+  """
+  capitalTimeEntriesByIssues(filter: CapitalTimeEntriesFilter, options: PaginationInput): PaginatedCapitalTimeEntriesByIssuesPaginationResult!
 
   """Гибкий запрос статистики времени вкладчиков по проектам с пагинацией"""
   capitalTimeStats(data: CapitalTimeStatsInput, options: PaginationInput): CapitalTimeStats!

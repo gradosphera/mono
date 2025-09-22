@@ -44,7 +44,7 @@ const logger = winston.createLogger({
     }),
     new winston.transports.Console({
       stderrLevels: ['error'],
-      level: 'info',
+      level: config.env === 'development' ? 'debug' : 'info',
     }),
   ],
 });

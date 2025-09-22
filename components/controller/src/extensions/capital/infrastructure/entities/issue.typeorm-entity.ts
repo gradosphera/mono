@@ -54,7 +54,7 @@ export class IssueTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar', length: 36 })
   created_by!: string;
 
-  @Column({ type: 'json', default: [] })
+  @Column({ type: 'text', array: true, default: [] })
   creators_hashs!: string[];
 
   @Column({ type: 'varchar', length: 64, nullable: true })
@@ -88,7 +88,7 @@ export class IssueTypeormEntity extends BaseTypeormEntity {
   stories!: StoryTypeormEntity[];
 
   // Связи с contributors
-  @ManyToMany(() => ContributorTypeormEntity, { cascade: false })
+  @ManyToMany(() => ContributorTypeormEntity, (contributor) => contributor.issues, { cascade: false })
   @JoinTable({
     name: 'capital_issue_creators',
     joinColumn: {

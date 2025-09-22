@@ -22,7 +22,7 @@ q-card(flat)
             color='primary',
             dense,
             round,
-            :icon='expanded.get(props.row.project_hash) ? "expand_more" : "chevron_right"',
+            :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
             @click.stop='handleToggleComponent(props.row.project_hash)'
           )
         q-td(
@@ -44,7 +44,7 @@ q-card(flat)
       // Слот для дополнительного контента компонента
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
-        v-if='expanded.get(props.row.project_hash)',
+        v-if='expanded[props.row.project_hash]',
         :key='`e_${props.row.project_hash}`'
       )
         q-td(colspan='100%', style='padding: 0px 0px 0px 80px !important')
@@ -62,7 +62,7 @@ import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWid
 
 defineProps<{
   components: IProjectComponent[] | undefined;
-  expanded: Map<string, boolean>;
+  expanded: Record<string, boolean>;
 }>();
 
 const emit = defineEmits<{

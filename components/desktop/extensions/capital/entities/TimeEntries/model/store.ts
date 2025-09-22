@@ -7,15 +7,16 @@ const namespace = 'timeEntriesStore';
 
 interface ITimeEntriesStore {
   timeEntries: Ref<ITimeEntriesPagination | null>;
-  loadTimeEntries: (data: IGetTimeEntriesInput) => Promise<void>;
+  loadTimeEntries: (data: IGetTimeEntriesInput) => Promise<ITimeEntriesPagination>;
 }
 
 export const useTimeEntriesStore = defineStore(namespace, (): ITimeEntriesStore => {
   const timeEntries = ref<ITimeEntriesPagination | null>(null);
 
-  const loadTimeEntries = async (data: IGetTimeEntriesInput): Promise<void> => {
+  const loadTimeEntries = async (data: IGetTimeEntriesInput): Promise<ITimeEntriesPagination> => {
     const loadedData = await api.loadTimeEntries(data);
     timeEntries.value = loadedData;
+    return loadedData;
   };
 
   return {

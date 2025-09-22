@@ -2,6 +2,7 @@ import { Resolver, Query, Args } from '@nestjs/graphql';
 import { TimeTrackingService } from '../services/time-tracking.service';
 import { TimeStatsInputDTO, FlexibleTimeStatsOutputDTO } from '../dto/time_tracker/flexible-time-stats.dto';
 import { TimeEntryOutputDTO } from '../dto/time_tracker/time-entries.dto';
+import { TimeEntriesByIssuesOutputDTO } from '../dto/time_tracker/time-entries-by-issues.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -11,6 +12,10 @@ import { TimeEntriesFilterInputDTO } from '../dto/time_tracker';
 
 // Пагинированные результаты
 const paginatedTimeEntriesResult = createPaginationResult(TimeEntryOutputDTO, 'PaginatedCapitalTimeEntries');
+const paginatedTimeEntriesByIssuesResult = createPaginationResult(
+  TimeEntriesByIssuesOutputDTO,
+  'PaginatedCapitalTimeEntriesByIssues'
+);
 
 /**
  * GraphQL резолвер для действий учёта времени CAPITAL контракта
@@ -49,5 +54,22 @@ export class TimeTrackerResolver {
     @Args('options', { nullable: true }) options?: PaginationInputDTO
   ): Promise<PaginationResult<TimeEntryOutputDTO>> {
     return await this.timeTrackingService.getTimeEntriesByProject(filter || {}, options);
+  }
+
+  /**
+   * Получение пагинированного списка агрегированных записей времени по задачам
+   */
+  @Query(() => paginatedTimeEntriesByIssuesResult, {
+    name: 'capitalTimeEntriesByIssues',
+    description:
+      'Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и вкладчиках',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async getCapitalTimeEntriesByIssues(
+    @Args('filter', { nullable: true }) filter?: TimeEntriesFilterInputDTO,
+    @Args('options', { nullable: true }) options?: PaginationInputDTO
+  ): Promise<PaginationResult<TimeEntriesByIssuesOutputDTO>> {
+    return await this.timeTrackingService.getTimeEntriesByIssues(filter || {}, options);
   }
 }

@@ -7,15 +7,16 @@ const namespace = 'timeStatsStore';
 
 interface ITimeStatsStore {
   timeStats: Ref<ITimeStatsPagination | null>;
-  loadTimeStats: (data: IGetTimeStatsInput) => Promise<void>;
+  loadTimeStats: (data: IGetTimeStatsInput) => Promise<ITimeStatsPagination>;
 }
 
 export const useTimeStatsStore = defineStore(namespace, (): ITimeStatsStore => {
   const timeStats = ref<ITimeStatsPagination | null>(null);
 
-  const loadTimeStats = async (data: IGetTimeStatsInput): Promise<void> => {
+  const loadTimeStats = async (data: IGetTimeStatsInput): Promise<ITimeStatsPagination> => {
     const loadedData = await api.loadTimeStats(data);
     timeStats.value = loadedData;
+    return loadedData;
   };
 
   return {

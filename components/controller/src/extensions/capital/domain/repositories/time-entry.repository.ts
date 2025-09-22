@@ -5,6 +5,7 @@ import type {
 } from '~/domain/common/interfaces/pagination.interface';
 import type { TimeEntriesFilterDomainInterface } from '../interfaces/time-entries-filter-domain.interface';
 import type { ContributorProjectBasicTimeStatsDomainInterface } from '../interfaces/time-stats-domain.interface';
+import type { TimeEntriesByIssuesDomainInterface } from '../interfaces/time-entries-by-issues-domain.interface';
 
 /**
  * Репозиторий для работы с записями времени
@@ -80,6 +81,20 @@ export interface TimeEntryRepository {
     filter: TimeEntriesFilterDomainInterface,
     options?: PaginationInputDomainInterface
   ): Promise<PaginationResultDomainInterface<TimeEntryDomainEntity>>;
+
+  /**
+   * Получить агрегированные записи времени по задачам с пагинацией
+   */
+  getAggregatedTimeEntriesByIssues(
+    filter: TimeEntriesFilterDomainInterface,
+    limit: number,
+    offset: number
+  ): Promise<TimeEntriesByIssuesDomainInterface[]>;
+
+  /**
+   * Получить общее количество агрегированных записей времени по задачам
+   */
+  getAggregatedTimeEntriesCount(filter: TimeEntriesFilterDomainInterface): Promise<number>;
 }
 
 export const TIME_ENTRY_REPOSITORY = Symbol('TIME_ENTRY_REPOSITORY');

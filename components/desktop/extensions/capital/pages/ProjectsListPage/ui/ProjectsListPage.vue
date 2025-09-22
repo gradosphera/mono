@@ -27,12 +27,12 @@ div
                 color='primary',
                 dense,
                 round,
-                :icon='expanded.get(props.row.project_hash) ? "expand_more" : "chevron_right"',
+                :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
                 @click.stop='toggleExpand(props.row.project_hash)'
               )
             q-td(
               style='cursor: pointer'
-              @click='() => router.push({ name: "project-components", params: { project_hash: props.row.project_hash } })'
+              @click.stop='() => router.push({ name: "project-components", params: { project_hash: props.row.project_hash } })'
             )
               .title-container {{ props.row.title }}
             q-td.text-right
@@ -48,7 +48,7 @@ div
               ProjectMenuWidget(:project='props.row')
           q-tr.q-virtual-scroll--with-prev(
             no-hover,
-            v-if='expanded.get(props.row.project_hash)',
+            v-if='expanded[props.row.project_hash]',
             :key='`e_${props.row.project_hash}`'
           )
             q-td(colspan='100%', style='padding: 0px !important')

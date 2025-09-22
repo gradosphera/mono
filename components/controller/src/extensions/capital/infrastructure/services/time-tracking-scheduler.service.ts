@@ -20,7 +20,8 @@ export class TimeTrackingSchedulerService implements OnModuleInit, OnModuleDestr
     this.logger.log('Инициализация планировщика учёта времени...');
 
     // Запускаем учёт времени каждый час
-    this.cronJob = cron.schedule('0 * * * *', async () => {
+    // this.cronJob = cron.schedule('0 * * * *', async () => {
+    this.cronJob = cron.schedule('* * * * *', async () => {
       try {
         await this.timeTrackingInteractor.trackTime();
       } catch (error) {

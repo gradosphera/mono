@@ -6,6 +6,7 @@ import type { ContributorProjectsTimeStatsOutputDTO } from '../dto/time_tracker/
 import type { TimeStatsInputDTO } from '../dto/time_tracker/flexible-time-stats.dto';
 import type { FlexibleTimeStatsOutputDTO } from '../dto/time_tracker/flexible-time-stats.dto';
 import type { TimeEntryOutputDTO } from '../dto/time_tracker/time-entries.dto';
+import type { TimeEntriesByIssuesOutputDTO } from '../dto/time_tracker/time-entries-by-issues.dto';
 import type { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import type { TimeEntriesFilterInputDTO } from '../dto/time_tracker';
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
@@ -129,6 +130,41 @@ export class TimeTrackingService {
         contributor_hash: data.contributor_hash,
         project_hash: data.project_hash,
         coopname: data.coopname,
+      },
+      domainOptions
+    );
+
+    return {
+      items: domainResult.items,
+      totalCount: domainResult.totalCount,
+      currentPage: domainResult.currentPage,
+      totalPages: domainResult.totalPages,
+    };
+  }
+
+  /**
+   * Получить агрегированные записи времени по задачам с пагинацией
+   */
+  async getTimeEntriesByIssues(
+    filter: TimeEntriesFilterInputDTO,
+    options?: PaginationInputDTO
+  ): Promise<PaginationResult<TimeEntriesByIssuesOutputDTO>> {
+    // Конвертируем PaginationInputDTO в PaginationInputDomainInterface
+    const domainOptions: PaginationInputDomainInterface | undefined = options
+      ? {
+          page: options.page,
+          limit: options.limit,
+          sortBy: options.sortBy,
+          sortOrder: options.sortOrder,
+        }
+      : undefined;
+
+    const domainResult = await this.timeTrackingInteractor.getTimeEntriesByIssues(
+      {
+        project_hash: filter.project_hash,
+        contributor_hash: filter.contributor_hash,
+        is_committed: filter.is_committed,
+        coopname: filter.coopname,
       },
       domainOptions
     );

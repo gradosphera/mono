@@ -1,4 +1,4 @@
-import { reactive } from 'vue';
+import { ref } from 'vue';
 import { LocalStorage } from 'quasar';
 
 /**
@@ -10,11 +10,11 @@ import { LocalStorage } from 'quasar';
  */
 export function useExpandableState<T>(
   storageKey: string,
-  itemsGetter: () => T[] | undefined,
-  itemKeyGetter: (item: T) => string,
+  itemsGetter?: () => T[] | undefined,
+  itemKeyGetter?: (item: T) => string,
 ) {
   // Состояние развернутости элементов
-  const expanded = reactive(new Map<string, boolean>());
+  const expanded = ref<Record<string, boolean>>({});
 
   /**
    * Загружает сохраненное состояние из LocalStorage
@@ -24,7 +24,7 @@ export function useExpandableState<T>(
     if (saved && typeof saved === 'object') {
       Object.entries(saved).forEach(([key, value]) => {
         if (typeof value === 'boolean') {
-          expanded.set(key, value);
+          expanded.value[key] = value;
         }
       });
     }
@@ -34,8 +34,7 @@ export function useExpandableState<T>(
    * Сохраняет текущее состояние в LocalStorage
    */
   const saveExpandedState = () => {
-    const state = Object.fromEntries(expanded);
-    LocalStorage.set(storageKey, state);
+    LocalStorage.set(storageKey, { ...expanded.value });
   };
 
   /**
@@ -43,16 +42,19 @@ export function useExpandableState<T>(
    * Удаляет записи для элементов, которых больше нет в текущем списке
    */
   const cleanupExpandedState = () => {
+    // Работает только если переданы itemsGetter и itemKeyGetter
+    if (!itemsGetter || !itemKeyGetter) return;
+
     const currentItems = itemsGetter();
     if (!currentItems) return;
 
     const currentItemKeys = new Set(currentItems.map(itemKeyGetter));
-    const expandedKeys = Array.from(expanded.keys());
+    const expandedKeys = Object.keys(expanded.value);
 
     // Удаляем из expanded элементы, которых больше нет в списке
     expandedKeys.forEach((key) => {
       if (!currentItemKeys.has(key)) {
-        expanded.delete(key);
+        delete expanded.value[key];
       }
     });
 
@@ -65,7 +67,7 @@ export function useExpandableState<T>(
    * @param itemKey - Ключ элемента
    */
   const toggleExpanded = (itemKey: string) => {
-    expanded.set(itemKey, !expanded.get(itemKey));
+    expanded.value[itemKey] = !(expanded.value[itemKey] || false);
     saveExpandedState();
   };
 
@@ -75,7 +77,7 @@ export function useExpandableState<T>(
    * @param isExpanded - Новое состояние
    */
   const setExpanded = (itemKey: string, isExpanded: boolean) => {
-    expanded.set(itemKey, isExpanded);
+    expanded.value[itemKey] = isExpanded;
     saveExpandedState();
   };
 
@@ -85,14 +87,33 @@ export function useExpandableState<T>(
    * @returns true если элемент развернут, false в противном случае
    */
   const isExpanded = (itemKey: string): boolean => {
-    return expanded.get(itemKey) || false;
+    return expanded.value[itemKey] || false;
+  };
+
+  /**
+   * Очищает устаревшие записи из expanded состояния по массиву актуальных ключей
+   * Удаляет записи для элементов, которых нет в переданном массиве
+   */
+  const cleanupExpandedByKeys = (currentKeys: string[]) => {
+    const currentKeysSet = new Set(currentKeys);
+    const expandedKeys = Object.keys(expanded.value);
+
+    // Удаляем из expanded элементы, которых больше нет в списке
+    expandedKeys.forEach((key) => {
+      if (!currentKeysSet.has(key)) {
+        delete expanded.value[key];
+      }
+    });
+
+    // Сохраняем очищенное состояние
+    saveExpandedState();
   };
 
   /**
    * Очищает все состояния развернутости
    */
   const clearAllExpanded = () => {
-    expanded.clear();
+    Object.keys(expanded.value).forEach(key => delete expanded.value[key]);
     LocalStorage.remove(storageKey);
   };
 
@@ -101,6 +122,7 @@ export function useExpandableState<T>(
     loadExpandedState,
     saveExpandedState,
     cleanupExpandedState,
+    cleanupExpandedByKeys,
     toggleExpanded,
     setExpanded,
     isExpanded,
