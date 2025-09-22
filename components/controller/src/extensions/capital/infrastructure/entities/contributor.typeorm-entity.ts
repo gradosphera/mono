@@ -44,6 +44,9 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar', length: 50, nullable: true })
   rate_per_hour!: string;
 
+  @Column({ type: 'integer', nullable: true })
+  hours_per_day!: number;
+
   @Column({ type: 'varchar', length: 50, nullable: true })
   debt_amount!: string;
 
@@ -82,4 +85,7 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   // Поля для отображения информации об аккаунте
   @Column({ type: 'varchar', length: 255 })
   display_name!: string; // ФИО или название организации
+
+  @Column({ type: 'text', nullable: true })
+  about?: string; // Описание вкладчика
 }

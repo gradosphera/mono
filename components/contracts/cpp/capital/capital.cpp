@@ -15,6 +15,7 @@
 #include "app/participation_management/register_contributor/approvereg.cpp"
 #include "app/participation_management/register_contributor/declinereg.cpp"
 #include "app/participation_management/register_contributor/regcontrib.cpp"
+#include "app/participation_management/edit_contributor/editcontrib.cpp"
 #include "app/participation_management/import_contributor/importcontr.cpp"
 
 // Регистрация приложений к договору

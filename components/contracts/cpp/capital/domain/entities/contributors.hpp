@@ -20,13 +20,14 @@ namespace Capital {
     checksum256 contributor_hash;                   ///< Внешний идентификатор контрибьютора
     time_point_sec created_at;                      ///< Время создания контрибьютора
     name status;                                    ///< Статус контрибьютора
+    std::string about;                               ///< О себе
     std::string memo;                                ///< Мемо для импортированных контрибьюторов
     bool is_external_contract = false;              ///< Флаг, указывающий на внешний контракт
     document2 contract;                             ///< Договор УХД
     std::vector<checksum256> appendixes;            ///< Вектор хэшей проектов, для которых подписаны приложения
     
     eosio::asset rate_per_hour = asset(0, _root_govern_symbol); ///< Ставка за час
-    
+    uint64_t hours_per_day = 0; ///< Часы в день
     eosio::asset debt_amount = asset(0, _root_govern_symbol);   ///< Сумма долга
     
     eosio::asset contributed_as_investor = asset(0, _root_govern_symbol);     ///< Сумма, вложенная в проект как инвестор
@@ -257,12 +258,27 @@ inline void increase_debt_amount(eosio::name coopname, eosio::name username, eos
   contributor_index contributors(_capital, coopname.value);
   auto username_index = contributors.get_index<"byusername"_n>();
   auto contributor_itr = username_index.find(username.value);
-  
+
   eosio::check(contributor_itr->debt_amount >= amount, "Недостаточно долга для погашения");
-  
+
   //TODO: make coopname payer
   username_index.modify(contributor_itr, _capital, [&](auto &c) {
     c.debt_amount -= amount;
+  });
+}
+
+/**
+ * @brief Обновляет параметры вкладчика (часы в день и информацию о себе)
+ */
+inline void edit_contributor(eosio::name coopname, eosio::name username, uint64_t hours_per_day) {
+  contributor_index contributors(_capital, coopname.value);
+  auto username_index = contributors.get_index<"byusername"_n>();
+  auto contributor_itr = username_index.find(username.value);
+
+  eosio::check(contributor_itr != username_index.end(), "Вкладчик не найден");
+
+  username_index.modify(contributor_itr, coopname, [&](auto &c) {
+    c.hours_per_day = hours_per_day;
   });
 }
 

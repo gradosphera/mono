@@ -241,7 +241,11 @@ public:
     void approvereg(eosio::name coopname, checksum256 contributor_hash, document2 contract);
     [[eosio::action]]
     void declinereg(eosio::name coopname, checksum256 contributor_hash, std::string reason);
-    
+
+    // Редактирование вкладчиков
+    [[eosio::action]]
+    void editcontrib(eosio::name coopname, eosio::name username, uint64_t hours_per_day);
+
     // Импорт вкладчиков
     [[eosio::action]]
     void importcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset contribution_amount, std::string memo);

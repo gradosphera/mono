@@ -2782,6 +2782,10 @@ export type ValueTypes = {
 	commit_hours: number | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
+	/** Описание коммита */
+	description: string | Variable<any, string>,
+	/** Мета-данные коммита */
+	meta: string | Variable<any, string>,
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>,
 	/** Имя пользователя */
@@ -7935,6 +7939,10 @@ export type ResolverInputTypes = {
 	commit_hours: number,
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Описание коммита */
+	description: string,
+	/** Мета-данные коммита */
+	meta: string,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -13051,6 +13059,10 @@ export type ModelTypes = {
 	commit_hours: number,
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Описание коммита */
+	description: string,
+	/** Мета-данные коммита */
+	meta: string,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -18253,6 +18265,10 @@ export type GraphQLTypes = {
 	commit_hours: number,
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Описание коммита */
+	description: string,
+	/** Мета-данные коммита */
+	meta: string,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */

@@ -47,6 +47,12 @@ export class ProjectTypeormEntity extends BaseTypeormEntity {
   description!: string;
 
   @Column({ type: 'text', nullable: true })
+  invite!: string;
+
+  @Column({ type: 'text', nullable: true })
+  data!: string;
+
+  @Column({ type: 'text', nullable: true })
   meta!: string;
 
   @Column({ type: 'json' })

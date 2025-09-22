@@ -52,6 +52,9 @@ export * as CreateDebt from './createDebt'
 // Регистрация участников
 export * as RegisterContributor from './registerContributor'
 
+// Редактирование участников
+export * as EditContributor from './editContributor'
+
 // Приложения к договору УХД
 export * as GetClearance from './getClearance'
 

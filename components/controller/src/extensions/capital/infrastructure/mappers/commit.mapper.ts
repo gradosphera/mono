@@ -40,6 +40,8 @@ export class CommitMapper {
         project_hash: entity.project_hash,
         commit_hash: entity.commit_hash,
         amounts: entity.amounts,
+        description: entity.description,
+        meta: entity.meta,
         status: entity.status,
         created_at: entity.created_at.toISOString(),
       };
@@ -73,6 +75,8 @@ export class CommitMapper {
         project_hash: domain.project_hash as string,
         commit_hash: domain.commit_hash,
         amounts: domain.amounts as any,
+        description: domain.description as string,
+        meta: domain.meta as string,
         status: domain.blockchain_status as any,
         created_at: new Date(domain.created_at ?? new Date()),
       };

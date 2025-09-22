@@ -64,6 +64,8 @@ export class GenerationInteractor {
     const blockchainData: CapitalContract.Actions.CreateCommit.ICommit = {
       coopname: data.coopname,
       username: data.username,
+      description: data.description,
+      meta: data.meta,
       project_hash: data.project_hash,
       commit_hash: data.commit_hash,
       creator_hours: `${data.commit_hours.toFixed(config.blockchain.root_govern_precision)} ${

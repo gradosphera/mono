@@ -6,4 +6,5 @@ export type IContributorDatabaseData = IBaseDatabaseData & {
   contributor_hash: string;
   blockchain_status?: string;
   display_name: string;
+  about?: string;
 };

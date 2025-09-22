@@ -2648,6 +2648,12 @@ input CreateCommitInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
+  """Описание коммита"""
+  description: String!
+
+  """Мета-данные коммита"""
+  meta: String!
+
   """Хэш проекта"""
   project_hash: String!
 

@@ -36,6 +36,8 @@ export class ProjectDomainEntity
   public master?: IProjectDomainInterfaceBlockchainData['master'];
   public title?: IProjectDomainInterfaceBlockchainData['title'];
   public description?: IProjectDomainInterfaceBlockchainData['description'];
+  public invite?: IProjectDomainInterfaceBlockchainData['invite'];
+  public data?: IProjectDomainInterfaceBlockchainData['data'];
   public meta?: IProjectDomainInterfaceBlockchainData['meta'];
   public counts?: IProjectDomainInterfaceBlockchainData['counts'];
   public plan?: IProjectDomainInterfaceBlockchainData['plan'];
@@ -74,6 +76,8 @@ export class ProjectDomainEntity
       this.master = blockchainData.master;
       this.title = blockchainData.title;
       this.description = blockchainData.description;
+      this.invite = blockchainData.invite;
+      this.data = blockchainData.data;
       this.meta = blockchainData.meta;
       this.counts = blockchainData.counts;
       this.plan = blockchainData.plan;

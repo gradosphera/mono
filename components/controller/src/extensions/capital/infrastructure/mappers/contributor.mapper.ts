@@ -29,6 +29,7 @@ export class ContributorMapper {
       _created_at: entity._created_at,
       _updated_at: entity._updated_at,
       display_name: entity.display_name,
+      about: entity.about ?? '',
     };
 
     let blockchainData: toDomainBlockchainPart | undefined;
@@ -46,6 +47,8 @@ export class ContributorMapper {
         contract: entity.contract,
         appendixes: entity.appendixes,
         rate_per_hour: entity.rate_per_hour,
+        hours_per_day: entity.hours_per_day,
+        about: entity.about,
         debt_amount: entity.debt_amount,
         contributed_as_investor: entity.contributed_as_investor,
         contributed_as_creator: entity.contributed_as_creator,
@@ -74,6 +77,7 @@ export class ContributorMapper {
       _created_at: domain._created_at as Date,
       _updated_at: domain._updated_at as Date,
       display_name: domain.display_name,
+      about: domain.about ?? '',
     };
 
     let blockchainPart: toEntityBlockchainPart | undefined;
@@ -90,6 +94,7 @@ export class ContributorMapper {
         contract: domain.contract as ISignedDocumentDomainInterface,
         appendixes: domain.appendixes as string[],
         rate_per_hour: domain.rate_per_hour as string,
+        hours_per_day: domain.hours_per_day as number,
         debt_amount: domain.debt_amount as string,
         contributed_as_investor: domain.contributed_as_investor as string,
         contributed_as_creator: domain.contributed_as_creator as string,
@@ -117,12 +122,14 @@ export class ContributorMapper {
       username: domain.username,
       contributor_hash: domain.contributor_hash,
       display_name: domain.display_name,
+      about: domain.about,
       blockchain_status: domain.blockchain_status,
       memo: domain.memo,
       is_external_contract: domain.is_external_contract,
       contract: domain.contract,
       appendixes: domain.appendixes,
       rate_per_hour: domain.rate_per_hour,
+      hours_per_day: domain.hours_per_day ? Number(domain.hours_per_day) : 0,
       debt_amount: domain.debt_amount,
       contributed_as_investor: domain.contributed_as_investor,
       contributed_as_creator: domain.contributed_as_creator,

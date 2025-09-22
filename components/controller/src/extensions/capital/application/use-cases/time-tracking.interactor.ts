@@ -380,14 +380,14 @@ export class TimeTrackingInteractor {
 
   /**
    * Расчёт распределения времени между задачами вкладчика
-   * Основная логика: равномерное распределение времени между активными задачами, но не более 8 часов в день на вкладчика
+   * Основная логика: равномерное распределение времени между активными задачами, но не более hours_per_day часов в день на вкладчика
    */
   private async calculateTimeDistributionPerIssue(
     contributor: ContributorDomainEntity,
     activeIssues: IssueDomainEntity[],
     date: string
   ): Promise<Record<string, number>> {
-    const HOURS_PER_DAY = 8;
+    const HOURS_PER_DAY = Number(contributor.hours_per_day || 0); // Используем индивидуальный лимит часов или 0 по умолчанию
     const HOURS_PER_HOUR = 1; // Каждый час добавляем 1 час работы
 
     const distribution: Record<string, number> = {};
@@ -402,7 +402,7 @@ export class TimeTrackingInteractor {
 
     // Проверяем лимит на день
     if (totalExistingHours >= HOURS_PER_DAY) {
-      return distribution; // Уже отработал 8 часов
+      return distribution; // Уже отработал лимит часов
     }
 
     // Распределяем время равномерно между активными задачами

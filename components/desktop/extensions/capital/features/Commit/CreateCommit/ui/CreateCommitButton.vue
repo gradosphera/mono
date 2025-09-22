@@ -84,10 +84,11 @@ const handleCreateCommit = async () => {
     const commitData = {
       commit_hash: commitHash,
       coopname: system.info.coopname,
-      creator_hours: formData.value.creator_hours,
+      commit_hours: formData.value.creator_hours,
       project_hash: props.projectHash || createCommitInput.value.project_hash,
       username: username || createCommitInput.value.username,
       description: formData.value.description,
+      meta: JSON.stringify({}),
     };
 
     await createCommit(commitData);

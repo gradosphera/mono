@@ -31,6 +31,12 @@ export class CommitTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'json' })
   amounts!: ICommitBlockchainData['amounts'];
 
+  @Column({ type: 'text', nullable: true })
+  description!: string;
+
+  @Column({ type: 'text', nullable: true })
+  meta!: string;
+
   @Column({ type: 'varchar', length: 20 })
   blockchain_status!: string;
 

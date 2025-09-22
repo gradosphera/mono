@@ -17,4 +17,10 @@ export interface CreateCommitDomainInput {
 
   /** Количество часов для коммита */
   commit_hours: number;
+
+  /** Описание коммита */
+  description: string;
+
+  /** Мета-данные коммита */
+  meta: string;
 }

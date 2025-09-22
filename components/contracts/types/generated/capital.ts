@@ -6,7 +6,6 @@ export type IChecksum256 = string
 export type IPublicKey = string
 export type ISignature = string
 export type ITimePointSec = string
-export type IInt64 = number | string
 export type IUint32 = number
 export type IUint64 = number | string
 export type IFloat64 = number
@@ -196,6 +195,8 @@ export interface ICommit {
   status: IName
   project_hash: IChecksum256
   commit_hash: IChecksum256
+  description: string
+  meta: string
   amounts: IGenerationAmounts
   created_at: ITimePointSec
 }
@@ -216,14 +217,14 @@ export interface IContributor {
   contributor_hash: IChecksum256
   created_at: ITimePointSec
   status: IName
+  about: string
   memo: string
   is_external_contract: boolean
   contract: IDocument2
   appendixes: IChecksum256[]
   rate_per_hour: IAsset
+  hours_per_day: IUint64
   debt_amount: IAsset
-  capital_available: IAsset
-  reward_per_share_last: IInt64
   contributed_as_investor: IAsset
   contributed_as_creator: IAsset
   contributed_as_author: IAsset
@@ -259,6 +260,8 @@ export interface ICreatecmmt {
   project_hash: IChecksum256
   commit_hash: IChecksum256
   creator_hours: IUint64
+  description: string
+  meta: string
 }
 
 export interface ICreatedebt {
@@ -322,7 +325,9 @@ export interface ICreateproj {
   parent_hash: IChecksum256
   title: string
   description: string
+  invite: string
   meta: string
+  data: string
   can_convert_to_project: boolean
 }
 
@@ -454,6 +459,24 @@ export interface IDocument2 {
   meta_hash: IChecksum256
   meta: string
   signatures: ISignatureInfo[]
+}
+
+export interface IEditcontrib {
+  coopname: IName
+  username: IName
+  hours_per_day: IUint64
+  about: string
+}
+
+export interface IEditproj {
+  coopname: IName
+  project_hash: IChecksum256
+  title: string
+  description: string
+  invite: string
+  meta: string
+  data: string
+  can_convert_to_project: boolean
 }
 
 export interface IExpandexpnss {
@@ -655,6 +678,8 @@ export interface IProject {
   master: IName
   title: string
   description: string
+  invite: string
+  data: string
   meta: string
   counts: ICountsData
   plan: IPlanPool

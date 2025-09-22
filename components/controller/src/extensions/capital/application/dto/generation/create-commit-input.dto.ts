@@ -32,4 +32,14 @@ export class CreateCommitInputDTO implements CreateCommitDomainInput {
   @IsNumber({}, { message: 'Количество часов должно быть числом' })
   @Min(0.1, { message: 'Количество часов должно быть больше 0' })
   commit_hours!: number;
+
+  @Field(() => String, { description: 'Описание коммита' })
+  @IsNotEmpty({ message: 'Описание коммита не должно быть пустым' })
+  @IsString({ message: 'Описание коммита должно быть строкой' })
+  description!: string;
+
+  @Field(() => String, { description: 'Мета-данные коммита' })
+  @IsNotEmpty({ message: 'Мета-данные коммита не должны быть пустыми' })
+  @IsString({ message: 'Мета-данные коммита должны быть строкой' })
+  meta!: string;
 }

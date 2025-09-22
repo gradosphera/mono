@@ -61,7 +61,6 @@ void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256
     commit_hash,
     description,
     meta,
-    delta_amounts,
+    delta_amounts
   );
-
-}
+};

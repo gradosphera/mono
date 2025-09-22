@@ -30,6 +30,8 @@ export class CommitDomainEntity
   public username?: ICommitBlockchainData['username'];
   public project_hash?: ICommitBlockchainData['project_hash'];
   public amounts?: ICommitBlockchainData['amounts'];
+  public description?: ICommitBlockchainData['description'];
+  public meta?: ICommitBlockchainData['meta'];
   public blockchain_status?: ICommitBlockchainData['status']; // Статус из блокчейна
   public created_at?: ICommitBlockchainData['created_at'];
 
@@ -57,6 +59,8 @@ export class CommitDomainEntity
       this.project_hash = blockchainData.project_hash.toLowerCase();
       this.commit_hash = blockchainData.commit_hash.toLowerCase();
       this.amounts = blockchainData.amounts;
+      this.description = blockchainData.description;
+      this.meta = blockchainData.meta;
       this.blockchain_status = blockchainData.status;
       this.created_at = blockchainData.created_at;
 

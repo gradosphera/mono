@@ -14,7 +14,9 @@ export function useCreateCommit(projectHash?: string, username?: string) {
   const initialCreateCommitInput: ICreateCommitInput = {
     commit_hash: '',
     coopname: '',
-    creator_hours: 0,
+    commit_hours: 0,
+    description: '',
+    meta: '',
     project_hash: projectHash || '',
     username: username || '',
   };

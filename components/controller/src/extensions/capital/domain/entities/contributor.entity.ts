@@ -28,6 +28,7 @@ export class ContributorDomainEntity
 
   // Поля для отображения информации об аккаунте
   public display_name: string; // ФИО или название организации
+  public about?: string; // Описание вкладчика
 
   // Поля из блокчейна (contributors.hpp)
   public contributor_hash: IContributorBlockchainData['contributor_hash'];
@@ -40,6 +41,7 @@ export class ContributorDomainEntity
   public contract?: ISignedDocumentDomainInterface;
   public appendixes?: IContributorBlockchainData['appendixes'];
   public rate_per_hour?: IContributorBlockchainData['rate_per_hour'];
+  public hours_per_day?: IContributorBlockchainData['hours_per_day'];
   public debt_amount?: IContributorBlockchainData['debt_amount'];
   public contributed_as_investor?: IContributorBlockchainData['contributed_as_investor'];
   public contributed_as_creator?: IContributorBlockchainData['contributed_as_creator'];
@@ -64,6 +66,7 @@ export class ContributorDomainEntity
     // Специфичные поля для contributor
     this.contributor_hash = databaseData.contributor_hash.toLowerCase();
     this.display_name = databaseData.display_name;
+    this.about = databaseData.about;
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -80,6 +83,7 @@ export class ContributorDomainEntity
       this.contract = blockchainData.contract;
       this.appendixes = blockchainData.appendixes;
       this.rate_per_hour = blockchainData.rate_per_hour;
+      this.hours_per_day = blockchainData.hours_per_day;
       this.debt_amount = blockchainData.debt_amount;
       this.contributed_as_investor = blockchainData.contributed_as_investor;
       this.contributed_as_creator = blockchainData.contributed_as_creator;
@@ -155,6 +159,9 @@ export class ContributorDomainEntity
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: IContributorBlockchainData, blockNum: number, present = true): void {
+    // Сохраняем значение about, так как оно из базы данных, а не из блокчейна
+    const savedAbout = this.about;
+
     // Обновляем базовые поля через метод базового класса
     this.block_num = blockNum;
     this.present = present;
@@ -163,6 +170,9 @@ export class ContributorDomainEntity
     Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
     this.status = this.mapStatusToDomain(blockchainData.status);
+
+    // Восстанавливаем about из базы данных
+    this.about = savedAbout;
 
     // Нормализация hash полей
     if (this.contributor_hash) this.contributor_hash = this.contributor_hash.toLowerCase();
