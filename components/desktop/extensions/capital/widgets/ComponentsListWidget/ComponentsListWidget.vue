@@ -25,10 +25,15 @@ q-card(flat)
             :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
             @click.stop='handleToggleComponent(props.row.project_hash)'
           )
+        q-td(style='width: 100px')
+          span(v-if='props.row.prefix').text-grey-7 {{ '#' + props.row.prefix }}
         q-td(
           style='max-width: 200px; word-wrap: break-word; white-space: normal; cursor: pointer'
           @click='handleComponentClick(props.row.project_hash)'
-        ) {{ props.row.title }}
+        )
+          | {{ props.row.title }}
+        q-td(style='width: 80px; text-align: center')
+          span(v-if='props.row.issue_counter').text-grey-7 {{ props.row.issue_counter }}
         q-td(style='width: 120px; text-align: right')
           q-chip(
             :color='getProjectStatusColor(props.row.status)',
@@ -88,10 +93,24 @@ const columns = [
     sortable: false,
   },
   {
+    name: 'prefix',
+    label: 'Префикс',
+    align: 'left' as const,
+    field: 'prefix' as const,
+    sortable: true,
+  },
+  {
     name: 'name',
     label: 'Название',
     align: 'left' as const,
     field: 'title' as const,
+    sortable: true,
+  },
+  {
+    name: 'issues',
+    label: 'Задачи',
+    align: 'center' as const,
+    field: 'issue_counter' as const,
     sortable: true,
   },
   {

@@ -12,6 +12,11 @@ import { BaseOutputDTO } from '../base.dto';
 })
 export class IssueOutputDTO extends BaseOutputDTO {
   @Field(() => String, {
+    description: 'Уникальный ID задачи в формате PREFIX-N (например, ABC-1)',
+  })
+  id!: string;
+
+  @Field(() => String, {
     description: 'Хеш задачи',
   })
   issue_hash!: string;

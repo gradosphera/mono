@@ -7,4 +7,15 @@ export { DeleteProjectInputDTO } from './delete-project-input.dto';
 export { CreateProjectInputDTO } from './create-project-input.dto';
 export { EditProjectInputDTO } from './edit-project-input.dto';
 export { GetProjectInputDTO } from './get-project-input.dto';
-export { BaseProjectOutputDTO, ProjectComponentOutputDTO, ProjectOutputDTO } from './project.dto';
+export {
+  BaseProjectOutputDTO,
+  ProjectComponentOutputDTO,
+  ProjectOutputDTO,
+  CapitalProjectCountsDataOutputDTO,
+  CapitalProjectPlanPoolOutputDTO,
+  CapitalProjectFactPoolOutputDTO,
+  CapitalProjectCrpsDataOutputDTO,
+  CapitalProjectVotingDataOutputDTO,
+  CapitalProjectVotingAmountsOutputDTO,
+  CapitalProjectMembershipCrpsOutputDTO,
+} from './project.dto';

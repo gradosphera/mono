@@ -10,6 +10,7 @@ import { ProjectPage } from './pages/ProjectPage';
 import { ComponentPage } from './pages/ComponentPage';
 import { IssuePage } from './pages/IssuePage';
 import { TrackerPage } from './pages';
+import { ProjectsVotingPage } from './pages';
 
 export default async function (): Promise<IWorkspaceConfig> {
   return {
@@ -70,8 +71,21 @@ export default async function (): Promise<IWorkspaceConfig> {
             name: 'tracker',
             component: markRaw(TrackerPage),
             meta: {
-              title: 'Трекер времени',
+              title: 'Трекер',
               icon: 'fa-solid fa-clock',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [],
+          },
+          {
+            path: 'voting',
+            name: 'voting',
+            component: markRaw(ProjectsVotingPage),
+            meta: {
+              title: 'Голосования',
+              icon: 'fa-solid fa-vote-yea',
               roles: [],
               agreements: agreementsBase,
               requiresAuth: true,

@@ -15,8 +15,10 @@ import type { GetIssueByIdInputDTO } from '../dto/generation/get-issue-by-id.inp
 import type { GetCommitByIdInputDTO } from '../dto/generation/get-commit-by-id.input';
 import { STORY_REPOSITORY, StoryRepository } from '../../domain/repositories/story.repository';
 import { ISSUE_REPOSITORY, IssueRepository } from '../../domain/repositories/issue.repository';
+import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories/project.repository';
 import { COMMIT_REPOSITORY, CommitRepository } from '../../domain/repositories/commit.repository';
 import { CYCLE_REPOSITORY, CycleRepository } from '../../domain/repositories/cycle.repository';
+import { IssueIdGenerationService } from '../../domain/services/issue-id-generation.service';
 import { StoryOutputDTO } from '../dto/generation/story.dto';
 import { IssueOutputDTO } from '../dto/generation/issue.dto';
 import { CommitOutputDTO } from '../dto/generation/commit.dto';
@@ -46,10 +48,13 @@ export class GenerationService {
     private readonly storyRepository: StoryRepository,
     @Inject(ISSUE_REPOSITORY)
     private readonly issueRepository: IssueRepository,
+    @Inject(PROJECT_REPOSITORY)
+    private readonly projectRepository: ProjectRepository,
     @Inject(COMMIT_REPOSITORY)
     private readonly commitRepository: CommitRepository,
     @Inject(CYCLE_REPOSITORY)
-    private readonly cycleRepository: CycleRepository
+    private readonly cycleRepository: CycleRepository,
+    private readonly issueIdGenerationService: IssueIdGenerationService
   ) {}
 
   /**
@@ -171,8 +176,14 @@ export class GenerationService {
    * Создание задачи
    */
   async createIssue(data: CreateIssueInputDTO): Promise<IssueOutputDTO> {
-    // Создаем данные для доменной сущности
-    const issueDatabaseData: IIssueDatabaseData = {
+    // Находим проект для генерации ID
+    const project = await this.projectRepository.findByHash(data.project_hash);
+    if (!project) {
+      throw new Error(`Project with hash ${data.project_hash} not found`);
+    }
+
+    // Подготавливаем данные задачи без ID
+    const issueDataWithoutId: Omit<IIssueDatabaseData, 'id'> = {
       _id: '',
       issue_hash: data.issue_hash,
       coopname: data.coopname,
@@ -194,10 +205,19 @@ export class GenerationService {
       present: false,
     };
 
-    // Создаем доменную сущность
-    const issueEntity = new IssueDomainEntity(issueDatabaseData);
+    // Генерируем ID через доменный сервис
+    const { issueData } = this.issueIdGenerationService.generateIssueId(project, issueDataWithoutId);
 
-    // Сохраняем через репозиторий
+    // Увеличиваем счетчик в проекте
+    this.issueIdGenerationService.incrementProjectIssueCounter(project);
+
+    // Сохраняем обновленный проект
+    await this.projectRepository.update(project);
+
+    // Создаем доменную сущность с готовым ID
+    const issueEntity = new IssueDomainEntity(issueData);
+
+    // Сохраняем задачу через репозиторий
     const savedIssue = await this.issueRepository.create(issueEntity);
     return savedIssue;
   }
@@ -216,6 +236,7 @@ export class GenerationService {
     // Создаем обновленные данные для доменной сущности
     const updatedIssueDatabaseData: IIssueDatabaseData = {
       _id: existingIssue._id,
+      id: existingIssue.id,
       issue_hash: existingIssue.issue_hash,
       coopname: existingIssue.coopname,
       title: data.title ?? existingIssue.title,

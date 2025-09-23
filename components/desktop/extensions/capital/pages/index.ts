@@ -7,3 +7,4 @@ export * from './ProjectsListPage';
 export * from './ComponentPage';
 export * from './IssuePage';
 export * from './TrackerPage';
+export * from './ProjectsVotingPage';

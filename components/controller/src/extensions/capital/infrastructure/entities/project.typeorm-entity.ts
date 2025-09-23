@@ -84,6 +84,15 @@ export class ProjectTypeormEntity extends BaseTypeormEntity {
   })
   status!: ProjectStatus;
 
+  @Column({ type: 'varchar', length: 3 })
+  prefix!: string;
+
+  @Column({ type: 'integer', default: 0 })
+  issue_counter!: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  voting_deadline!: Date | null;
+
   // Связи
   @OneToMany(() => IssueTypeormEntity, (issue) => issue.project, { cascade: true })
   issues!: IssueTypeormEntity[];

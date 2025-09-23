@@ -14,6 +14,10 @@ div
         hide-bottom,
         style='cursor: pointer'
       )
+        template(#body-cell-id='props')
+          q-td(:props='props')
+            .text-caption.text-grey-7 {{ '#' + props.value }}
+
         template(#body-cell-title='props')
           q-td(:props='props')
             .row.items-center.q-gutter-sm
@@ -51,16 +55,6 @@ div
               @click.stop
             )
 
-        template(#body-cell-created_by='props')
-          q-td(:props='props')
-            q-chip(
-              v-if='props.value',
-              color='blue-grey-2',
-              text-color='blue-grey-9',
-              dense,
-              :label='props.value'
-            )
-            span.text-grey-5(v-else) Не указан
 </template>
 
 <script lang="ts" setup>
@@ -100,6 +94,13 @@ const issues = ref<IIssuesPagination | null>(null);
 // Определяем столбцы таблицы задач
 const columns = [
   {
+    name: 'id',
+    label: 'ID',
+    align: 'left' as const,
+    field: 'id' as const,
+    sortable: true,
+  },
+  {
     name: 'title',
     label: 'Задача',
     align: 'left' as const,
@@ -125,13 +126,6 @@ const columns = [
     label: 'Исполнитель',
     align: 'center' as const,
     field: 'assignee' as const,
-    sortable: false,
-  },
-  {
-    name: 'created_by',
-    label: 'Создатель',
-    align: 'center' as const,
-    field: 'created_by' as const,
     sortable: false,
   },
 ];

@@ -10,6 +10,7 @@ import { BaseDomainEntity } from './base.entity';
  */
 export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
   // Специфичные поля для задачи
+  public id: string; // Уникальный ID задачи в формате PREFIX-N (например, ABC-1)
   public issue_hash: string; // Хеш задачи для внешних ссылок
   public coopname: string; // Имя аккаунта кооператива
   public title: string; // Название задачи
@@ -38,6 +39,7 @@ export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
     super(databaseData, IssueStatus.BACKLOG);
 
     // Устанавливаем специфичные поля задачи
+    this.id = databaseData.id;
     this.issue_hash = databaseData.issue_hash.toLowerCase();
     this.coopname = databaseData.coopname;
     this.title = databaseData.title;

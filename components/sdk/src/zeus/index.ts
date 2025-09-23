@@ -2154,6 +2154,8 @@ export type ValueTypes = {
 	description?:boolean | `@${string}`,
 	/** Оценка в story points или часах */
 	estimate?:boolean | `@${string}`,
+	/** Уникальный ID задачи в формате PREFIX-N (например, ABC-1) */
+	id?:boolean | `@${string}`,
 	/** Хеш задачи */
 	issue_hash?:boolean | `@${string}`,
 	/** Метаданные задачи */
@@ -2245,22 +2247,36 @@ export type ValueTypes = {
 	components?:ValueTypes["CapitalProjectComponent"],
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Счетчики участников проекта */
+	counts?:ValueTypes["CapitalProjectCountsData"],
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
+	/** Данные CRPS для распределения наград проекта */
+	crps?:ValueTypes["CapitalProjectCrpsData"],
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
+	/** Фактические показатели проекта */
+	fact?:ValueTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Открыт ли проект */
 	is_opened?:boolean | `@${string}`,
 	/** Запланирован ли проект */
 	is_planed?:boolean | `@${string}`,
+	/** Счетчик задач проекта */
+	issue_counter?:boolean | `@${string}`,
 	/** Мастер проекта */
 	master?:boolean | `@${string}`,
+	/** Данные CRPS для распределения членских взносов проекта */
+	membership?:ValueTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
 	parent_hash?:boolean | `@${string}`,
+	/** Плановые показатели проекта */
+	plan?:ValueTypes["CapitalProjectPlanPool"],
+	/** Префикс проекта */
+	prefix?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Хеш проекта */
@@ -2269,6 +2285,8 @@ export type ValueTypes = {
 	status?:boolean | `@${string}`,
 	/** Название проекта */
 	title?:boolean | `@${string}`,
+	/** Данные голосования по методу Водянова */
+	voting?:ValueTypes["CapitalProjectVotingData"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Проект-компонент в системе CAPITAL */
@@ -2287,22 +2305,36 @@ export type ValueTypes = {
 	can_convert_to_project?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Счетчики участников проекта */
+	counts?:ValueTypes["CapitalProjectCountsData"],
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
+	/** Данные CRPS для распределения наград проекта */
+	crps?:ValueTypes["CapitalProjectCrpsData"],
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
+	/** Фактические показатели проекта */
+	fact?:ValueTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Открыт ли проект */
 	is_opened?:boolean | `@${string}`,
 	/** Запланирован ли проект */
 	is_planed?:boolean | `@${string}`,
+	/** Счетчик задач проекта */
+	issue_counter?:boolean | `@${string}`,
 	/** Мастер проекта */
 	master?:boolean | `@${string}`,
+	/** Данные CRPS для распределения членских взносов проекта */
+	membership?:ValueTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
 	parent_hash?:boolean | `@${string}`,
+	/** Плановые показатели проекта */
+	plan?:ValueTypes["CapitalProjectPlanPool"],
+	/** Префикс проекта */
+	prefix?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Хеш проекта */
@@ -2311,12 +2343,94 @@ export type ValueTypes = {
 	status?:boolean | `@${string}`,
 	/** Название проекта */
 	title?:boolean | `@${string}`,
+	/** Данные голосования по методу Водянова */
+	voting?:ValueTypes["CapitalProjectVotingData"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Счетчики участников проекта */
+["CapitalProjectCountsData"]: AliasType<{
+	/** Общее количество авторов */
+	total_authors?:boolean | `@${string}`,
+	/** Общее количество коммитов */
+	total_commits?:boolean | `@${string}`,
+	/** Общее количество вкладчиков */
+	total_contributors?:boolean | `@${string}`,
+	/** Общее количество координаторов */
+	total_coordinators?:boolean | `@${string}`,
+	/** Общее количество создателей */
+	total_creators?:boolean | `@${string}`,
+	/** Общее количество инвесторов */
+	total_investors?:boolean | `@${string}`,
+	/** Общее количество проперторов */
+	total_propertors?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Данные CRPS для распределения наград проекта */
+["CapitalProjectCrpsData"]: AliasType<{
+	/** Накопительный коэффициент вознаграждения за базовый вклад авторов */
+	author_base_cumulative_reward_per_share?:boolean | `@${string}`,
+	/** Накопительный коэффициент вознаграждения за бонусный вклад авторов */
+	author_bonus_cumulative_reward_per_share?:boolean | `@${string}`,
+	/** Накопительный коэффициент вознаграждения вкладчиков */
+	contributor_cumulative_reward_per_share?:boolean | `@${string}`,
+	/** Общее количество долей вкладчиков капитала */
+	total_capital_contributors_shares?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Фактические показатели проекта */
+["CapitalProjectFactPool"]: AliasType<{
+	/** Накопленный пул расходов */
+	accumulated_expense_pool?:boolean | `@${string}`,
+	/** Базовый пул авторов */
+	authors_base_pool?:boolean | `@${string}`,
+	/** Бонусный пул авторов */
+	authors_bonus_pool?:boolean | `@${string}`,
+	/** Бонусный пул вкладчиков */
+	contributors_bonus_pool?:boolean | `@${string}`,
+	/** Базовый пул координаторов */
+	coordinators_base_pool?:boolean | `@${string}`,
+	/** Инвестиционный пул координаторов */
+	coordinators_investment_pool?:boolean | `@${string}`,
+	/** Базовый пул создателей */
+	creators_base_pool?:boolean | `@${string}`,
+	/** Бонусный пул создателей */
+	creators_bonus_pool?:boolean | `@${string}`,
+	/** Часы создателей */
+	creators_hours?:boolean | `@${string}`,
+	/** Стоимость часа работы */
+	hour_cost?:boolean | `@${string}`,
+	/** Инвестиционный пул */
+	invest_pool?:boolean | `@${string}`,
+	/** Программный инвестиционный пул */
+	program_invest_pool?:boolean | `@${string}`,
+	/** Имущественный базовый пул */
+	property_base_pool?:boolean | `@${string}`,
+	/** Процент возврата базового пула */
+	return_base_percent?:boolean | `@${string}`,
+	/** Целевой пул расходов */
+	target_expense_pool?:boolean | `@${string}`,
+	/** Общая сумма */
+	total?:boolean | `@${string}`,
+	/** Общий объем вклада */
+	total_contribution?:boolean | `@${string}`,
+	/** Общий генерационный пул */
+	total_generation_pool?:boolean | `@${string}`,
+	/** Общий объем полученных инвестиций */
+	total_received_investments?:boolean | `@${string}`,
+	/** Общий объем возвращенных инвестиций */
+	total_returned_investments?:boolean | `@${string}`,
+	/** Процент использования инвестиций */
+	use_invest_percent?:boolean | `@${string}`,
+	/** Использованный пул расходов */
+	used_expense_pool?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Параметры фильтрации для запросов проектов CAPITAL */
 ["CapitalProjectFilter"]: {
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null | Variable<any, string>,
+	/** Показывать только проекты, у которых есть или были голосования */
+	has_voting?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по открытому проекту */
 	is_opened?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по запланированному проекту */
@@ -2330,6 +2444,60 @@ export type ValueTypes = {
 	/** Фильтр по статусу проекта */
 	status?: ValueTypes["ProjectStatus"] | undefined | null | Variable<any, string>
 };
+	/** Данные CRPS для распределения членских взносов проекта */
+["CapitalProjectMembershipCrps"]: AliasType<{
+	/** Доступная сумма */
+	available?:boolean | `@${string}`,
+	/** Сконвертированные средства */
+	converted_funds?:boolean | `@${string}`,
+	/** Накопительный коэффициент вознаграждения на акцию */
+	cumulative_reward_per_share?:boolean | `@${string}`,
+	/** Распределенная сумма */
+	distributed?:boolean | `@${string}`,
+	/** Профинансированная сумма */
+	funded?:boolean | `@${string}`,
+	/** Общее количество акций */
+	total_shares?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Плановые показатели проекта */
+["CapitalProjectPlanPool"]: AliasType<{
+	/** Базовый пул авторов */
+	authors_base_pool?:boolean | `@${string}`,
+	/** Бонусный пул авторов */
+	authors_bonus_pool?:boolean | `@${string}`,
+	/** Бонусный пул вкладчиков */
+	contributors_bonus_pool?:boolean | `@${string}`,
+	/** Базовый пул координаторов */
+	coordinators_base_pool?:boolean | `@${string}`,
+	/** Инвестиционный пул координаторов */
+	coordinators_investment_pool?:boolean | `@${string}`,
+	/** Базовый пул создателей */
+	creators_base_pool?:boolean | `@${string}`,
+	/** Бонусный пул создателей */
+	creators_bonus_pool?:boolean | `@${string}`,
+	/** Плановые часы создателей */
+	creators_hours?:boolean | `@${string}`,
+	/** Плановая стоимость часа работы */
+	hour_cost?:boolean | `@${string}`,
+	/** Инвестиционный пул */
+	invest_pool?:boolean | `@${string}`,
+	/** Программный инвестиционный пул */
+	program_invest_pool?:boolean | `@${string}`,
+	/** Процент возврата базового пула */
+	return_base_percent?:boolean | `@${string}`,
+	/** Целевой пул расходов */
+	target_expense_pool?:boolean | `@${string}`,
+	/** Общая сумма */
+	total?:boolean | `@${string}`,
+	/** Общий генерационный пул */
+	total_generation_pool?:boolean | `@${string}`,
+	/** Общий объем полученных инвестиций */
+	total_received_investments?:boolean | `@${string}`,
+	/** Процент использования инвестиций */
+	use_invest_percent?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статистика времени вкладчика по проекту */
 ["CapitalProjectTimeStats"]: AliasType<{
 	/** Доступное время для коммита (по завершённым задачам) */
@@ -2346,6 +2514,42 @@ export type ValueTypes = {
 	total_committed_hours?:boolean | `@${string}`,
 	/** Сумма незакоммиченного времени (часы) */
 	total_uncommitted_hours?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Суммы голосования проекта */
+["CapitalProjectVotingAmounts"]: AliasType<{
+	/** Активная сумма голосования */
+	active_voting_amount?:boolean | `@${string}`,
+	/** Бонусы авторов при голосовании */
+	authors_bonuses_on_voting?:boolean | `@${string}`,
+	/** Равная сумма на автора */
+	authors_equal_per_author?:boolean | `@${string}`,
+	/** Равномерное распределение среди авторов */
+	authors_equal_spread?:boolean | `@${string}`,
+	/** Бонусы создателей при голосовании */
+	creators_bonuses_on_voting?:boolean | `@${string}`,
+	/** Прямое распределение среди создателей */
+	creators_direct_spread?:boolean | `@${string}`,
+	/** Равная сумма голосования */
+	equal_voting_amount?:boolean | `@${string}`,
+	/** Общий пул голосования */
+	total_voting_pool?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Данные голосования по методу Водянова */
+["CapitalProjectVotingData"]: AliasType<{
+	/** Суммы голосования */
+	amounts?:ValueTypes["CapitalProjectVotingAmounts"],
+	/** Процент голосования авторов */
+	authors_voting_percent?:boolean | `@${string}`,
+	/** Процент голосования создателей */
+	creators_voting_percent?:boolean | `@${string}`,
+	/** Общее количество участников голосования */
+	total_voters?:boolean | `@${string}`,
+	/** Количество полученных голосов */
+	votes_received?:boolean | `@${string}`,
+	/** Дата окончания голосования */
+	voting_deadline?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Результат в системе CAPITAL */
@@ -7349,6 +7553,8 @@ export type ResolverInputTypes = {
 	description?:boolean | `@${string}`,
 	/** Оценка в story points или часах */
 	estimate?:boolean | `@${string}`,
+	/** Уникальный ID задачи в формате PREFIX-N (например, ABC-1) */
+	id?:boolean | `@${string}`,
 	/** Хеш задачи */
 	issue_hash?:boolean | `@${string}`,
 	/** Метаданные задачи */
@@ -7440,22 +7646,36 @@ export type ResolverInputTypes = {
 	components?:ResolverInputTypes["CapitalProjectComponent"],
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Счетчики участников проекта */
+	counts?:ResolverInputTypes["CapitalProjectCountsData"],
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
+	/** Данные CRPS для распределения наград проекта */
+	crps?:ResolverInputTypes["CapitalProjectCrpsData"],
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
+	/** Фактические показатели проекта */
+	fact?:ResolverInputTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Открыт ли проект */
 	is_opened?:boolean | `@${string}`,
 	/** Запланирован ли проект */
 	is_planed?:boolean | `@${string}`,
+	/** Счетчик задач проекта */
+	issue_counter?:boolean | `@${string}`,
 	/** Мастер проекта */
 	master?:boolean | `@${string}`,
+	/** Данные CRPS для распределения членских взносов проекта */
+	membership?:ResolverInputTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
 	parent_hash?:boolean | `@${string}`,
+	/** Плановые показатели проекта */
+	plan?:ResolverInputTypes["CapitalProjectPlanPool"],
+	/** Префикс проекта */
+	prefix?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Хеш проекта */
@@ -7464,6 +7684,8 @@ export type ResolverInputTypes = {
 	status?:boolean | `@${string}`,
 	/** Название проекта */
 	title?:boolean | `@${string}`,
+	/** Данные голосования по методу Водянова */
+	voting?:ResolverInputTypes["CapitalProjectVotingData"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Проект-компонент в системе CAPITAL */
@@ -7482,22 +7704,36 @@ export type ResolverInputTypes = {
 	can_convert_to_project?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Счетчики участников проекта */
+	counts?:ResolverInputTypes["CapitalProjectCountsData"],
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
+	/** Данные CRPS для распределения наград проекта */
+	crps?:ResolverInputTypes["CapitalProjectCrpsData"],
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
+	/** Фактические показатели проекта */
+	fact?:ResolverInputTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Открыт ли проект */
 	is_opened?:boolean | `@${string}`,
 	/** Запланирован ли проект */
 	is_planed?:boolean | `@${string}`,
+	/** Счетчик задач проекта */
+	issue_counter?:boolean | `@${string}`,
 	/** Мастер проекта */
 	master?:boolean | `@${string}`,
+	/** Данные CRPS для распределения членских взносов проекта */
+	membership?:ResolverInputTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
 	parent_hash?:boolean | `@${string}`,
+	/** Плановые показатели проекта */
+	plan?:ResolverInputTypes["CapitalProjectPlanPool"],
+	/** Префикс проекта */
+	prefix?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Хеш проекта */
@@ -7506,12 +7742,94 @@ export type ResolverInputTypes = {
 	status?:boolean | `@${string}`,
 	/** Название проекта */
 	title?:boolean | `@${string}`,
+	/** Данные голосования по методу Водянова */
+	voting?:ResolverInputTypes["CapitalProjectVotingData"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Счетчики участников проекта */
+["CapitalProjectCountsData"]: AliasType<{
+	/** Общее количество авторов */
+	total_authors?:boolean | `@${string}`,
+	/** Общее количество коммитов */
+	total_commits?:boolean | `@${string}`,
+	/** Общее количество вкладчиков */
+	total_contributors?:boolean | `@${string}`,
+	/** Общее количество координаторов */
+	total_coordinators?:boolean | `@${string}`,
+	/** Общее количество создателей */
+	total_creators?:boolean | `@${string}`,
+	/** Общее количество инвесторов */
+	total_investors?:boolean | `@${string}`,
+	/** Общее количество проперторов */
+	total_propertors?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Данные CRPS для распределения наград проекта */
+["CapitalProjectCrpsData"]: AliasType<{
+	/** Накопительный коэффициент вознаграждения за базовый вклад авторов */
+	author_base_cumulative_reward_per_share?:boolean | `@${string}`,
+	/** Накопительный коэффициент вознаграждения за бонусный вклад авторов */
+	author_bonus_cumulative_reward_per_share?:boolean | `@${string}`,
+	/** Накопительный коэффициент вознаграждения вкладчиков */
+	contributor_cumulative_reward_per_share?:boolean | `@${string}`,
+	/** Общее количество долей вкладчиков капитала */
+	total_capital_contributors_shares?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Фактические показатели проекта */
+["CapitalProjectFactPool"]: AliasType<{
+	/** Накопленный пул расходов */
+	accumulated_expense_pool?:boolean | `@${string}`,
+	/** Базовый пул авторов */
+	authors_base_pool?:boolean | `@${string}`,
+	/** Бонусный пул авторов */
+	authors_bonus_pool?:boolean | `@${string}`,
+	/** Бонусный пул вкладчиков */
+	contributors_bonus_pool?:boolean | `@${string}`,
+	/** Базовый пул координаторов */
+	coordinators_base_pool?:boolean | `@${string}`,
+	/** Инвестиционный пул координаторов */
+	coordinators_investment_pool?:boolean | `@${string}`,
+	/** Базовый пул создателей */
+	creators_base_pool?:boolean | `@${string}`,
+	/** Бонусный пул создателей */
+	creators_bonus_pool?:boolean | `@${string}`,
+	/** Часы создателей */
+	creators_hours?:boolean | `@${string}`,
+	/** Стоимость часа работы */
+	hour_cost?:boolean | `@${string}`,
+	/** Инвестиционный пул */
+	invest_pool?:boolean | `@${string}`,
+	/** Программный инвестиционный пул */
+	program_invest_pool?:boolean | `@${string}`,
+	/** Имущественный базовый пул */
+	property_base_pool?:boolean | `@${string}`,
+	/** Процент возврата базового пула */
+	return_base_percent?:boolean | `@${string}`,
+	/** Целевой пул расходов */
+	target_expense_pool?:boolean | `@${string}`,
+	/** Общая сумма */
+	total?:boolean | `@${string}`,
+	/** Общий объем вклада */
+	total_contribution?:boolean | `@${string}`,
+	/** Общий генерационный пул */
+	total_generation_pool?:boolean | `@${string}`,
+	/** Общий объем полученных инвестиций */
+	total_received_investments?:boolean | `@${string}`,
+	/** Общий объем возвращенных инвестиций */
+	total_returned_investments?:boolean | `@${string}`,
+	/** Процент использования инвестиций */
+	use_invest_percent?:boolean | `@${string}`,
+	/** Использованный пул расходов */
+	used_expense_pool?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Параметры фильтрации для запросов проектов CAPITAL */
 ["CapitalProjectFilter"]: {
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
+	/** Показывать только проекты, у которых есть или были голосования */
+	has_voting?: boolean | undefined | null,
 	/** Фильтр по открытому проекту */
 	is_opened?: boolean | undefined | null,
 	/** Фильтр по запланированному проекту */
@@ -7525,6 +7843,60 @@ export type ResolverInputTypes = {
 	/** Фильтр по статусу проекта */
 	status?: ResolverInputTypes["ProjectStatus"] | undefined | null
 };
+	/** Данные CRPS для распределения членских взносов проекта */
+["CapitalProjectMembershipCrps"]: AliasType<{
+	/** Доступная сумма */
+	available?:boolean | `@${string}`,
+	/** Сконвертированные средства */
+	converted_funds?:boolean | `@${string}`,
+	/** Накопительный коэффициент вознаграждения на акцию */
+	cumulative_reward_per_share?:boolean | `@${string}`,
+	/** Распределенная сумма */
+	distributed?:boolean | `@${string}`,
+	/** Профинансированная сумма */
+	funded?:boolean | `@${string}`,
+	/** Общее количество акций */
+	total_shares?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Плановые показатели проекта */
+["CapitalProjectPlanPool"]: AliasType<{
+	/** Базовый пул авторов */
+	authors_base_pool?:boolean | `@${string}`,
+	/** Бонусный пул авторов */
+	authors_bonus_pool?:boolean | `@${string}`,
+	/** Бонусный пул вкладчиков */
+	contributors_bonus_pool?:boolean | `@${string}`,
+	/** Базовый пул координаторов */
+	coordinators_base_pool?:boolean | `@${string}`,
+	/** Инвестиционный пул координаторов */
+	coordinators_investment_pool?:boolean | `@${string}`,
+	/** Базовый пул создателей */
+	creators_base_pool?:boolean | `@${string}`,
+	/** Бонусный пул создателей */
+	creators_bonus_pool?:boolean | `@${string}`,
+	/** Плановые часы создателей */
+	creators_hours?:boolean | `@${string}`,
+	/** Плановая стоимость часа работы */
+	hour_cost?:boolean | `@${string}`,
+	/** Инвестиционный пул */
+	invest_pool?:boolean | `@${string}`,
+	/** Программный инвестиционный пул */
+	program_invest_pool?:boolean | `@${string}`,
+	/** Процент возврата базового пула */
+	return_base_percent?:boolean | `@${string}`,
+	/** Целевой пул расходов */
+	target_expense_pool?:boolean | `@${string}`,
+	/** Общая сумма */
+	total?:boolean | `@${string}`,
+	/** Общий генерационный пул */
+	total_generation_pool?:boolean | `@${string}`,
+	/** Общий объем полученных инвестиций */
+	total_received_investments?:boolean | `@${string}`,
+	/** Процент использования инвестиций */
+	use_invest_percent?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статистика времени вкладчика по проекту */
 ["CapitalProjectTimeStats"]: AliasType<{
 	/** Доступное время для коммита (по завершённым задачам) */
@@ -7541,6 +7913,42 @@ export type ResolverInputTypes = {
 	total_committed_hours?:boolean | `@${string}`,
 	/** Сумма незакоммиченного времени (часы) */
 	total_uncommitted_hours?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Суммы голосования проекта */
+["CapitalProjectVotingAmounts"]: AliasType<{
+	/** Активная сумма голосования */
+	active_voting_amount?:boolean | `@${string}`,
+	/** Бонусы авторов при голосовании */
+	authors_bonuses_on_voting?:boolean | `@${string}`,
+	/** Равная сумма на автора */
+	authors_equal_per_author?:boolean | `@${string}`,
+	/** Равномерное распределение среди авторов */
+	authors_equal_spread?:boolean | `@${string}`,
+	/** Бонусы создателей при голосовании */
+	creators_bonuses_on_voting?:boolean | `@${string}`,
+	/** Прямое распределение среди создателей */
+	creators_direct_spread?:boolean | `@${string}`,
+	/** Равная сумма голосования */
+	equal_voting_amount?:boolean | `@${string}`,
+	/** Общий пул голосования */
+	total_voting_pool?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Данные голосования по методу Водянова */
+["CapitalProjectVotingData"]: AliasType<{
+	/** Суммы голосования */
+	amounts?:ResolverInputTypes["CapitalProjectVotingAmounts"],
+	/** Процент голосования авторов */
+	authors_voting_percent?:boolean | `@${string}`,
+	/** Процент голосования создателей */
+	creators_voting_percent?:boolean | `@${string}`,
+	/** Общее количество участников голосования */
+	total_voters?:boolean | `@${string}`,
+	/** Количество полученных голосов */
+	votes_received?:boolean | `@${string}`,
+	/** Дата окончания голосования */
+	voting_deadline?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Результат в системе CAPITAL */
@@ -12524,6 +12932,8 @@ export type ModelTypes = {
 	description?: string | undefined | null,
 	/** Оценка в story points или часах */
 	estimate: number,
+	/** Уникальный ID задачи в формате PREFIX-N (например, ABC-1) */
+	id: string,
 	/** Хеш задачи */
 	issue_hash: string,
 	/** Метаданные задачи */
@@ -12606,29 +13016,43 @@ export type ModelTypes = {
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
+	blockchain_status: string,
 	/** Можно ли конвертировать в проект */
-	can_convert_to_project?: boolean | undefined | null,
+	can_convert_to_project: boolean,
 	/** Массив проектов-компонентов */
 	components: Array<ModelTypes["CapitalProjectComponent"]>,
 	/** Название кооператива */
-	coopname?: string | undefined | null,
+	coopname: string,
+	/** Счетчики участников проекта */
+	counts: ModelTypes["CapitalProjectCountsData"],
 	/** Дата создания */
-	created_at?: string | undefined | null,
+	created_at: string,
+	/** Данные CRPS для распределения наград проекта */
+	crps: ModelTypes["CapitalProjectCrpsData"],
 	/** Описание проекта */
-	description?: string | undefined | null,
+	description: string,
+	/** Фактические показатели проекта */
+	fact: ModelTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
-	id?: number | undefined | null,
+	id: number,
 	/** Открыт ли проект */
-	is_opened?: boolean | undefined | null,
+	is_opened: boolean,
 	/** Запланирован ли проект */
-	is_planed?: boolean | undefined | null,
+	is_planed: boolean,
+	/** Счетчик задач проекта */
+	issue_counter: number,
 	/** Мастер проекта */
-	master?: string | undefined | null,
+	master: string,
+	/** Данные CRPS для распределения членских взносов проекта */
+	membership: ModelTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
-	meta?: string | undefined | null,
+	meta: string,
 	/** Хеш родительского проекта */
-	parent_hash?: string | undefined | null,
+	parent_hash: string,
+	/** Плановые показатели проекта */
+	plan: ModelTypes["CapitalProjectPlanPool"],
+	/** Префикс проекта */
+	prefix: string,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Хеш проекта */
@@ -12636,7 +13060,9 @@ export type ModelTypes = {
 	/** Статус проекта */
 	status: ModelTypes["ProjectStatus"],
 	/** Название проекта */
-	title?: string | undefined | null
+	title: string,
+	/** Данные голосования по методу Водянова */
+	voting: ModelTypes["CapitalProjectVotingData"]
 };
 	/** Проект-компонент в системе CAPITAL */
 ["CapitalProjectComponent"]: {
@@ -12649,27 +13075,41 @@ export type ModelTypes = {
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
+	blockchain_status: string,
 	/** Можно ли конвертировать в проект */
-	can_convert_to_project?: boolean | undefined | null,
+	can_convert_to_project: boolean,
 	/** Название кооператива */
-	coopname?: string | undefined | null,
+	coopname: string,
+	/** Счетчики участников проекта */
+	counts: ModelTypes["CapitalProjectCountsData"],
 	/** Дата создания */
-	created_at?: string | undefined | null,
+	created_at: string,
+	/** Данные CRPS для распределения наград проекта */
+	crps: ModelTypes["CapitalProjectCrpsData"],
 	/** Описание проекта */
-	description?: string | undefined | null,
+	description: string,
+	/** Фактические показатели проекта */
+	fact: ModelTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
-	id?: number | undefined | null,
+	id: number,
 	/** Открыт ли проект */
-	is_opened?: boolean | undefined | null,
+	is_opened: boolean,
 	/** Запланирован ли проект */
-	is_planed?: boolean | undefined | null,
+	is_planed: boolean,
+	/** Счетчик задач проекта */
+	issue_counter: number,
 	/** Мастер проекта */
-	master?: string | undefined | null,
+	master: string,
+	/** Данные CRPS для распределения членских взносов проекта */
+	membership: ModelTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
-	meta?: string | undefined | null,
+	meta: string,
 	/** Хеш родительского проекта */
-	parent_hash?: string | undefined | null,
+	parent_hash: string,
+	/** Плановые показатели проекта */
+	plan: ModelTypes["CapitalProjectPlanPool"],
+	/** Префикс проекта */
+	prefix: string,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Хеш проекта */
@@ -12677,12 +13117,91 @@ export type ModelTypes = {
 	/** Статус проекта */
 	status: ModelTypes["ProjectStatus"],
 	/** Название проекта */
-	title?: string | undefined | null
+	title: string,
+	/** Данные голосования по методу Водянова */
+	voting: ModelTypes["CapitalProjectVotingData"]
+};
+	/** Счетчики участников проекта */
+["CapitalProjectCountsData"]: {
+		/** Общее количество авторов */
+	total_authors: number,
+	/** Общее количество коммитов */
+	total_commits: number,
+	/** Общее количество вкладчиков */
+	total_contributors: number,
+	/** Общее количество координаторов */
+	total_coordinators: number,
+	/** Общее количество создателей */
+	total_creators: number,
+	/** Общее количество инвесторов */
+	total_investors: number,
+	/** Общее количество проперторов */
+	total_propertors: number
+};
+	/** Данные CRPS для распределения наград проекта */
+["CapitalProjectCrpsData"]: {
+		/** Накопительный коэффициент вознаграждения за базовый вклад авторов */
+	author_base_cumulative_reward_per_share: number,
+	/** Накопительный коэффициент вознаграждения за бонусный вклад авторов */
+	author_bonus_cumulative_reward_per_share: number,
+	/** Накопительный коэффициент вознаграждения вкладчиков */
+	contributor_cumulative_reward_per_share: number,
+	/** Общее количество долей вкладчиков капитала */
+	total_capital_contributors_shares: string
+};
+	/** Фактические показатели проекта */
+["CapitalProjectFactPool"]: {
+		/** Накопленный пул расходов */
+	accumulated_expense_pool: string,
+	/** Базовый пул авторов */
+	authors_base_pool: string,
+	/** Бонусный пул авторов */
+	authors_bonus_pool: string,
+	/** Бонусный пул вкладчиков */
+	contributors_bonus_pool: string,
+	/** Базовый пул координаторов */
+	coordinators_base_pool: string,
+	/** Инвестиционный пул координаторов */
+	coordinators_investment_pool: string,
+	/** Базовый пул создателей */
+	creators_base_pool: string,
+	/** Бонусный пул создателей */
+	creators_bonus_pool: string,
+	/** Часы создателей */
+	creators_hours: number,
+	/** Стоимость часа работы */
+	hour_cost: string,
+	/** Инвестиционный пул */
+	invest_pool: string,
+	/** Программный инвестиционный пул */
+	program_invest_pool: string,
+	/** Имущественный базовый пул */
+	property_base_pool: string,
+	/** Процент возврата базового пула */
+	return_base_percent: number,
+	/** Целевой пул расходов */
+	target_expense_pool: string,
+	/** Общая сумма */
+	total: string,
+	/** Общий объем вклада */
+	total_contribution: string,
+	/** Общий генерационный пул */
+	total_generation_pool: string,
+	/** Общий объем полученных инвестиций */
+	total_received_investments: string,
+	/** Общий объем возвращенных инвестиций */
+	total_returned_investments: string,
+	/** Процент использования инвестиций */
+	use_invest_percent: number,
+	/** Использованный пул расходов */
+	used_expense_pool: string
 };
 	/** Параметры фильтрации для запросов проектов CAPITAL */
 ["CapitalProjectFilter"]: {
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
+	/** Показывать только проекты, у которых есть или были голосования */
+	has_voting?: boolean | undefined | null,
 	/** Фильтр по открытому проекту */
 	is_opened?: boolean | undefined | null,
 	/** Фильтр по запланированному проекту */
@@ -12695,6 +13214,58 @@ export type ModelTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу проекта */
 	status?: ModelTypes["ProjectStatus"] | undefined | null
+};
+	/** Данные CRPS для распределения членских взносов проекта */
+["CapitalProjectMembershipCrps"]: {
+		/** Доступная сумма */
+	available: string,
+	/** Сконвертированные средства */
+	converted_funds: string,
+	/** Накопительный коэффициент вознаграждения на акцию */
+	cumulative_reward_per_share: number,
+	/** Распределенная сумма */
+	distributed: string,
+	/** Профинансированная сумма */
+	funded: string,
+	/** Общее количество акций */
+	total_shares: string
+};
+	/** Плановые показатели проекта */
+["CapitalProjectPlanPool"]: {
+		/** Базовый пул авторов */
+	authors_base_pool: string,
+	/** Бонусный пул авторов */
+	authors_bonus_pool: string,
+	/** Бонусный пул вкладчиков */
+	contributors_bonus_pool: string,
+	/** Базовый пул координаторов */
+	coordinators_base_pool: string,
+	/** Инвестиционный пул координаторов */
+	coordinators_investment_pool: string,
+	/** Базовый пул создателей */
+	creators_base_pool: string,
+	/** Бонусный пул создателей */
+	creators_bonus_pool: string,
+	/** Плановые часы создателей */
+	creators_hours: number,
+	/** Плановая стоимость часа работы */
+	hour_cost: string,
+	/** Инвестиционный пул */
+	invest_pool: string,
+	/** Программный инвестиционный пул */
+	program_invest_pool: string,
+	/** Процент возврата базового пула */
+	return_base_percent: number,
+	/** Целевой пул расходов */
+	target_expense_pool: string,
+	/** Общая сумма */
+	total: string,
+	/** Общий генерационный пул */
+	total_generation_pool: string,
+	/** Общий объем полученных инвестиций */
+	total_received_investments: string,
+	/** Процент использования инвестиций */
+	use_invest_percent: number
 };
 	/** Статистика времени вкладчика по проекту */
 ["CapitalProjectTimeStats"]: {
@@ -12712,6 +13283,40 @@ export type ModelTypes = {
 	total_committed_hours: number,
 	/** Сумма незакоммиченного времени (часы) */
 	total_uncommitted_hours: number
+};
+	/** Суммы голосования проекта */
+["CapitalProjectVotingAmounts"]: {
+		/** Активная сумма голосования */
+	active_voting_amount: string,
+	/** Бонусы авторов при голосовании */
+	authors_bonuses_on_voting: string,
+	/** Равная сумма на автора */
+	authors_equal_per_author: string,
+	/** Равномерное распределение среди авторов */
+	authors_equal_spread: string,
+	/** Бонусы создателей при голосовании */
+	creators_bonuses_on_voting: string,
+	/** Прямое распределение среди создателей */
+	creators_direct_spread: string,
+	/** Равная сумма голосования */
+	equal_voting_amount: string,
+	/** Общий пул голосования */
+	total_voting_pool: string
+};
+	/** Данные голосования по методу Водянова */
+["CapitalProjectVotingData"]: {
+		/** Суммы голосования */
+	amounts: ModelTypes["CapitalProjectVotingAmounts"],
+	/** Процент голосования авторов */
+	authors_voting_percent: number,
+	/** Процент голосования создателей */
+	creators_voting_percent: number,
+	/** Общее количество участников голосования */
+	total_voters: number,
+	/** Количество полученных голосов */
+	votes_received: number,
+	/** Дата окончания голосования */
+	voting_deadline: string
 };
 	/** Результат в системе CAPITAL */
 ["CapitalResult"]: {
@@ -17751,6 +18356,8 @@ export type GraphQLTypes = {
 	description?: string | undefined | null,
 	/** Оценка в story points или часах */
 	estimate: number,
+	/** Уникальный ID задачи в формате PREFIX-N (например, ABC-1) */
+	id: string,
 	/** Хеш задачи */
 	issue_hash: string,
 	/** Метаданные задачи */
@@ -17835,29 +18442,43 @@ export type GraphQLTypes = {
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
+	blockchain_status: string,
 	/** Можно ли конвертировать в проект */
-	can_convert_to_project?: boolean | undefined | null,
+	can_convert_to_project: boolean,
 	/** Массив проектов-компонентов */
 	components: Array<GraphQLTypes["CapitalProjectComponent"]>,
 	/** Название кооператива */
-	coopname?: string | undefined | null,
+	coopname: string,
+	/** Счетчики участников проекта */
+	counts: GraphQLTypes["CapitalProjectCountsData"],
 	/** Дата создания */
-	created_at?: string | undefined | null,
+	created_at: string,
+	/** Данные CRPS для распределения наград проекта */
+	crps: GraphQLTypes["CapitalProjectCrpsData"],
 	/** Описание проекта */
-	description?: string | undefined | null,
+	description: string,
+	/** Фактические показатели проекта */
+	fact: GraphQLTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
-	id?: number | undefined | null,
+	id: number,
 	/** Открыт ли проект */
-	is_opened?: boolean | undefined | null,
+	is_opened: boolean,
 	/** Запланирован ли проект */
-	is_planed?: boolean | undefined | null,
+	is_planed: boolean,
+	/** Счетчик задач проекта */
+	issue_counter: number,
 	/** Мастер проекта */
-	master?: string | undefined | null,
+	master: string,
+	/** Данные CRPS для распределения членских взносов проекта */
+	membership: GraphQLTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
-	meta?: string | undefined | null,
+	meta: string,
 	/** Хеш родительского проекта */
-	parent_hash?: string | undefined | null,
+	parent_hash: string,
+	/** Плановые показатели проекта */
+	plan: GraphQLTypes["CapitalProjectPlanPool"],
+	/** Префикс проекта */
+	prefix: string,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Хеш проекта */
@@ -17865,7 +18486,9 @@ export type GraphQLTypes = {
 	/** Статус проекта */
 	status: GraphQLTypes["ProjectStatus"],
 	/** Название проекта */
-	title?: string | undefined | null
+	title: string,
+	/** Данные голосования по методу Водянова */
+	voting: GraphQLTypes["CapitalProjectVotingData"]
 };
 	/** Проект-компонент в системе CAPITAL */
 ["CapitalProjectComponent"]: {
@@ -17879,27 +18502,41 @@ export type GraphQLTypes = {
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
+	blockchain_status: string,
 	/** Можно ли конвертировать в проект */
-	can_convert_to_project?: boolean | undefined | null,
+	can_convert_to_project: boolean,
 	/** Название кооператива */
-	coopname?: string | undefined | null,
+	coopname: string,
+	/** Счетчики участников проекта */
+	counts: GraphQLTypes["CapitalProjectCountsData"],
 	/** Дата создания */
-	created_at?: string | undefined | null,
+	created_at: string,
+	/** Данные CRPS для распределения наград проекта */
+	crps: GraphQLTypes["CapitalProjectCrpsData"],
 	/** Описание проекта */
-	description?: string | undefined | null,
+	description: string,
+	/** Фактические показатели проекта */
+	fact: GraphQLTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
-	id?: number | undefined | null,
+	id: number,
 	/** Открыт ли проект */
-	is_opened?: boolean | undefined | null,
+	is_opened: boolean,
 	/** Запланирован ли проект */
-	is_planed?: boolean | undefined | null,
+	is_planed: boolean,
+	/** Счетчик задач проекта */
+	issue_counter: number,
 	/** Мастер проекта */
-	master?: string | undefined | null,
+	master: string,
+	/** Данные CRPS для распределения членских взносов проекта */
+	membership: GraphQLTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
-	meta?: string | undefined | null,
+	meta: string,
 	/** Хеш родительского проекта */
-	parent_hash?: string | undefined | null,
+	parent_hash: string,
+	/** Плановые показатели проекта */
+	plan: GraphQLTypes["CapitalProjectPlanPool"],
+	/** Префикс проекта */
+	prefix: string,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Хеш проекта */
@@ -17907,12 +18544,94 @@ export type GraphQLTypes = {
 	/** Статус проекта */
 	status: GraphQLTypes["ProjectStatus"],
 	/** Название проекта */
-	title?: string | undefined | null
+	title: string,
+	/** Данные голосования по методу Водянова */
+	voting: GraphQLTypes["CapitalProjectVotingData"]
+};
+	/** Счетчики участников проекта */
+["CapitalProjectCountsData"]: {
+	__typename: "CapitalProjectCountsData",
+	/** Общее количество авторов */
+	total_authors: number,
+	/** Общее количество коммитов */
+	total_commits: number,
+	/** Общее количество вкладчиков */
+	total_contributors: number,
+	/** Общее количество координаторов */
+	total_coordinators: number,
+	/** Общее количество создателей */
+	total_creators: number,
+	/** Общее количество инвесторов */
+	total_investors: number,
+	/** Общее количество проперторов */
+	total_propertors: number
+};
+	/** Данные CRPS для распределения наград проекта */
+["CapitalProjectCrpsData"]: {
+	__typename: "CapitalProjectCrpsData",
+	/** Накопительный коэффициент вознаграждения за базовый вклад авторов */
+	author_base_cumulative_reward_per_share: number,
+	/** Накопительный коэффициент вознаграждения за бонусный вклад авторов */
+	author_bonus_cumulative_reward_per_share: number,
+	/** Накопительный коэффициент вознаграждения вкладчиков */
+	contributor_cumulative_reward_per_share: number,
+	/** Общее количество долей вкладчиков капитала */
+	total_capital_contributors_shares: string
+};
+	/** Фактические показатели проекта */
+["CapitalProjectFactPool"]: {
+	__typename: "CapitalProjectFactPool",
+	/** Накопленный пул расходов */
+	accumulated_expense_pool: string,
+	/** Базовый пул авторов */
+	authors_base_pool: string,
+	/** Бонусный пул авторов */
+	authors_bonus_pool: string,
+	/** Бонусный пул вкладчиков */
+	contributors_bonus_pool: string,
+	/** Базовый пул координаторов */
+	coordinators_base_pool: string,
+	/** Инвестиционный пул координаторов */
+	coordinators_investment_pool: string,
+	/** Базовый пул создателей */
+	creators_base_pool: string,
+	/** Бонусный пул создателей */
+	creators_bonus_pool: string,
+	/** Часы создателей */
+	creators_hours: number,
+	/** Стоимость часа работы */
+	hour_cost: string,
+	/** Инвестиционный пул */
+	invest_pool: string,
+	/** Программный инвестиционный пул */
+	program_invest_pool: string,
+	/** Имущественный базовый пул */
+	property_base_pool: string,
+	/** Процент возврата базового пула */
+	return_base_percent: number,
+	/** Целевой пул расходов */
+	target_expense_pool: string,
+	/** Общая сумма */
+	total: string,
+	/** Общий объем вклада */
+	total_contribution: string,
+	/** Общий генерационный пул */
+	total_generation_pool: string,
+	/** Общий объем полученных инвестиций */
+	total_received_investments: string,
+	/** Общий объем возвращенных инвестиций */
+	total_returned_investments: string,
+	/** Процент использования инвестиций */
+	use_invest_percent: number,
+	/** Использованный пул расходов */
+	used_expense_pool: string
 };
 	/** Параметры фильтрации для запросов проектов CAPITAL */
 ["CapitalProjectFilter"]: {
 		/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
+	/** Показывать только проекты, у которых есть или были голосования */
+	has_voting?: boolean | undefined | null,
 	/** Фильтр по открытому проекту */
 	is_opened?: boolean | undefined | null,
 	/** Фильтр по запланированному проекту */
@@ -17925,6 +18644,60 @@ export type GraphQLTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу проекта */
 	status?: GraphQLTypes["ProjectStatus"] | undefined | null
+};
+	/** Данные CRPS для распределения членских взносов проекта */
+["CapitalProjectMembershipCrps"]: {
+	__typename: "CapitalProjectMembershipCrps",
+	/** Доступная сумма */
+	available: string,
+	/** Сконвертированные средства */
+	converted_funds: string,
+	/** Накопительный коэффициент вознаграждения на акцию */
+	cumulative_reward_per_share: number,
+	/** Распределенная сумма */
+	distributed: string,
+	/** Профинансированная сумма */
+	funded: string,
+	/** Общее количество акций */
+	total_shares: string
+};
+	/** Плановые показатели проекта */
+["CapitalProjectPlanPool"]: {
+	__typename: "CapitalProjectPlanPool",
+	/** Базовый пул авторов */
+	authors_base_pool: string,
+	/** Бонусный пул авторов */
+	authors_bonus_pool: string,
+	/** Бонусный пул вкладчиков */
+	contributors_bonus_pool: string,
+	/** Базовый пул координаторов */
+	coordinators_base_pool: string,
+	/** Инвестиционный пул координаторов */
+	coordinators_investment_pool: string,
+	/** Базовый пул создателей */
+	creators_base_pool: string,
+	/** Бонусный пул создателей */
+	creators_bonus_pool: string,
+	/** Плановые часы создателей */
+	creators_hours: number,
+	/** Плановая стоимость часа работы */
+	hour_cost: string,
+	/** Инвестиционный пул */
+	invest_pool: string,
+	/** Программный инвестиционный пул */
+	program_invest_pool: string,
+	/** Процент возврата базового пула */
+	return_base_percent: number,
+	/** Целевой пул расходов */
+	target_expense_pool: string,
+	/** Общая сумма */
+	total: string,
+	/** Общий генерационный пул */
+	total_generation_pool: string,
+	/** Общий объем полученных инвестиций */
+	total_received_investments: string,
+	/** Процент использования инвестиций */
+	use_invest_percent: number
 };
 	/** Статистика времени вкладчика по проекту */
 ["CapitalProjectTimeStats"]: {
@@ -17943,6 +18716,42 @@ export type GraphQLTypes = {
 	total_committed_hours: number,
 	/** Сумма незакоммиченного времени (часы) */
 	total_uncommitted_hours: number
+};
+	/** Суммы голосования проекта */
+["CapitalProjectVotingAmounts"]: {
+	__typename: "CapitalProjectVotingAmounts",
+	/** Активная сумма голосования */
+	active_voting_amount: string,
+	/** Бонусы авторов при голосовании */
+	authors_bonuses_on_voting: string,
+	/** Равная сумма на автора */
+	authors_equal_per_author: string,
+	/** Равномерное распределение среди авторов */
+	authors_equal_spread: string,
+	/** Бонусы создателей при голосовании */
+	creators_bonuses_on_voting: string,
+	/** Прямое распределение среди создателей */
+	creators_direct_spread: string,
+	/** Равная сумма голосования */
+	equal_voting_amount: string,
+	/** Общий пул голосования */
+	total_voting_pool: string
+};
+	/** Данные голосования по методу Водянова */
+["CapitalProjectVotingData"]: {
+	__typename: "CapitalProjectVotingData",
+	/** Суммы голосования */
+	amounts: GraphQLTypes["CapitalProjectVotingAmounts"],
+	/** Процент голосования авторов */
+	authors_voting_percent: number,
+	/** Процент голосования создателей */
+	creators_voting_percent: number,
+	/** Общее количество участников голосования */
+	total_voters: number,
+	/** Количество полученных голосов */
+	votes_received: number,
+	/** Дата окончания голосования */
+	voting_deadline: string
 };
 	/** Результат в системе CAPITAL */
 ["CapitalResult"]: {

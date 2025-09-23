@@ -1,9 +1,103 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 import { baseCapitalSelector } from './baseCapitalSelector'
+
+// Селекторы для вложенных объектов проекта
+const rawProjectCountsDataSelector = {
+  total_authors: true,
+  total_coordinators: true,
+  total_creators: true,
+  total_investors: true,
+  total_propertors: true,
+  total_contributors: true,
+  total_commits: true,
+}
+
+const rawProjectPlanPoolSelector = {
+  hour_cost: true,
+  creators_hours: true,
+  return_base_percent: true,
+  use_invest_percent: true,
+  creators_base_pool: true,
+  authors_base_pool: true,
+  coordinators_base_pool: true,
+  creators_bonus_pool: true,
+  authors_bonus_pool: true,
+  contributors_bonus_pool: true,
+  target_expense_pool: true,
+  invest_pool: true,
+  coordinators_investment_pool: true,
+  program_invest_pool: true,
+  total_received_investments: true,
+  total_generation_pool: true,
+  total: true,
+}
+
+const rawProjectFactPoolSelector = {
+  hour_cost: true,
+  creators_hours: true,
+  return_base_percent: true,
+  use_invest_percent: true,
+  creators_base_pool: true,
+  authors_base_pool: true,
+  coordinators_base_pool: true,
+  property_base_pool: true,
+  creators_bonus_pool: true,
+  authors_bonus_pool: true,
+  contributors_bonus_pool: true,
+  target_expense_pool: true,
+  accumulated_expense_pool: true,
+  used_expense_pool: true,
+  invest_pool: true,
+  coordinators_investment_pool: true,
+  program_invest_pool: true,
+  total_received_investments: true,
+  total_returned_investments: true,
+  total_generation_pool: true,
+  total_contribution: true,
+  total: true,
+}
+
+const rawProjectCrpsDataSelector = {
+  total_capital_contributors_shares: true,
+  author_base_cumulative_reward_per_share: true,
+  author_bonus_cumulative_reward_per_share: true,
+  contributor_cumulative_reward_per_share: true,
+}
+
+const rawProjectVotingAmountsSelector = {
+  authors_equal_spread: true,
+  creators_direct_spread: true,
+  authors_bonuses_on_voting: true,
+  creators_bonuses_on_voting: true,
+  total_voting_pool: true,
+  active_voting_amount: true,
+  equal_voting_amount: true,
+  authors_equal_per_author: true,
+}
+
+const rawProjectVotingDataSelector = {
+  total_voters: true,
+  votes_received: true,
+  authors_voting_percent: true,
+  creators_voting_percent: true,
+  voting_deadline: true,
+  amounts: rawProjectVotingAmountsSelector,
+}
+
+const rawProjectMembershipCrpsSelector = {
+  cumulative_reward_per_share: true,
+  total_shares: true,
+  funded: true,
+  available: true,
+  distributed: true,
+  converted_funds: true,
+}
 const rawBaseProjectSelector = {
   ...baseCapitalSelector,
   id: true,
+  prefix: true,
+  issue_counter: true,
   status: true,
   project_hash: true,
   coopname: true,
@@ -17,6 +111,12 @@ const rawBaseProjectSelector = {
   description: true,
   meta: true,
   created_at: true,
+  counts: rawProjectCountsDataSelector,
+  plan: rawProjectPlanPoolSelector,
+  fact: rawProjectFactPoolSelector,
+  crps: rawProjectCrpsDataSelector,
+  voting: rawProjectVotingDataSelector,
+  membership: rawProjectMembershipCrpsSelector,
 }
 
 const rawProjectSelector = {
@@ -24,10 +124,38 @@ const rawProjectSelector = {
   components: rawBaseProjectSelector,
 }
 
-// Проверка валидности
-const _validate: MakeAllFieldsRequired<ValueTypes['CapitalProject']> = rawProjectSelector
+// Проверки валидности типов
+const _validateCountsData: MakeAllFieldsRequired<ValueTypes['CapitalProjectCountsData']> = rawProjectCountsDataSelector
+const _validatePlanPool: MakeAllFieldsRequired<ValueTypes['CapitalProjectPlanPool']> = rawProjectPlanPoolSelector
+const _validateFactPool: MakeAllFieldsRequired<ValueTypes['CapitalProjectFactPool']> = rawProjectFactPoolSelector
+const _validateCrpsData: MakeAllFieldsRequired<ValueTypes['CapitalProjectCrpsData']> = rawProjectCrpsDataSelector
+const _validateVotingData: MakeAllFieldsRequired<ValueTypes['CapitalProjectVotingData']> = rawProjectVotingDataSelector
+const _validateVotingAmounts: MakeAllFieldsRequired<ValueTypes['CapitalProjectVotingAmounts']> = rawProjectVotingAmountsSelector
+const _validateMembershipCrps: MakeAllFieldsRequired<ValueTypes['CapitalProjectMembershipCrps']> = rawProjectMembershipCrpsSelector
+const _validateProject: MakeAllFieldsRequired<ValueTypes['CapitalProject']> = rawProjectSelector
 
+// Экспорт типов моделей
 export type projectModel = ModelTypes['CapitalProject']
+export type projectCountsDataModel = ModelTypes['CapitalProjectCountsData']
+export type projectPlanPoolModel = ModelTypes['CapitalProjectPlanPool']
+export type projectFactPoolModel = ModelTypes['CapitalProjectFactPool']
+export type projectCrpsDataModel = ModelTypes['CapitalProjectCrpsData']
+export type projectVotingDataModel = ModelTypes['CapitalProjectVotingData']
+export type projectVotingAmountsModel = ModelTypes['CapitalProjectVotingAmounts']
+export type projectMembershipCrpsModel = ModelTypes['CapitalProjectMembershipCrps']
 
+// Экспорт селекторов
 export const projectSelector = Selector('CapitalProject')(rawProjectSelector)
-export { rawProjectSelector }
+
+// Экспорт сырых селекторов для переиспользования
+export {
+  rawProjectSelector,
+  rawBaseProjectSelector,
+  rawProjectCountsDataSelector,
+  rawProjectPlanPoolSelector,
+  rawProjectFactPoolSelector,
+  rawProjectCrpsDataSelector,
+  rawProjectVotingDataSelector,
+  rawProjectVotingAmountsSelector,
+  rawProjectMembershipCrpsSelector,
+}

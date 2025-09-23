@@ -19,6 +19,9 @@ const EntityName = 'capital_issues';
 @Index(`idx_${EntityName}_priority`, ['priority'])
 @Index(`idx_${EntityName}_created_at`, ['_created_at'])
 export class IssueTypeormEntity extends BaseTypeormEntity {
+  @Column({ type: 'varchar', length: 12 })
+  id!: string;
+
   @Column({ type: 'varchar', length: 64 })
   issue_hash!: string;
 

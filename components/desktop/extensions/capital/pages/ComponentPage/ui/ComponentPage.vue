@@ -120,15 +120,6 @@ const { registerAction: registerHeaderAction } = useHeaderActions();
 // Регистрируем контент в правом drawer
 const { registerAction: registerRightDrawerAction } = useRightDrawer();
 
-// Регистрируем действие в header
-onMounted(() => {
-  registerHeaderAction({
-    id: 'create-task-' + projectHash.value,
-    component: markRaw(CreateIssueButton),
-    order: 1,
-  });
-});
-
 
 // Загрузка проекта
 const loadProject = async () => {
@@ -198,6 +189,11 @@ watch(projectHash, async (newHash, oldHash) => {
 // Инициализация
 onMounted(async () => {
   await loadProject();
+  registerHeaderAction({
+    id: 'create-task-' + projectHash.value,
+    component: markRaw(CreateIssueButton),
+    order: 1,
+  });
 });
 </script>
 

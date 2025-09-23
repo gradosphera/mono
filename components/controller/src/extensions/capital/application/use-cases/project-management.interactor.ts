@@ -19,6 +19,7 @@ import type { ProjectFilterInputDTO } from '../dto/property_management/project-f
 import { CapitalContract } from 'cooptypes';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import { IssueIdGenerationService } from '../../domain/services/issue-id-generation.service';
 
 /**
  * Интерактор домена для управления проектами CAPITAL контракта
@@ -62,8 +63,11 @@ export class ProjectManagementInteractor {
         _id: '', // Будет сгенерирован автоматически
         id: processedBlockchainProject.id,
         block_num: 0, // Пока не знаем номер блока, будет обновлено при следующей синхронизации
-        present: true,
+        present: false,
         project_hash: processedBlockchainProject.project_hash,
+        prefix: IssueIdGenerationService.generateProjectPrefix(processedBlockchainProject.project_hash),
+        issue_counter: 0,
+        voting_deadline: null,
       };
 
       const projectDomainEntity = new ProjectDomainEntity(databaseData, processedBlockchainProject);

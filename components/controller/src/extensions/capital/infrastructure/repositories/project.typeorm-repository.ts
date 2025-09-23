@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, IsNull } from 'typeorm';
 import { ProjectRepository } from '../../domain/repositories/project.repository';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
@@ -16,6 +16,7 @@ import type {
 } from '~/domain/common/interfaces/pagination.interface';
 import type { ProjectFilterInputDTO } from '../../application/dto/property_management/project-filter.input';
 import { PaginationUtils } from '~/shared/utils/pagination.utils';
+import { IssueIdGenerationService } from '../../domain/services/issue-id-generation.service';
 
 @Injectable()
 export class ProjectTypeormRepository
@@ -41,6 +42,42 @@ export class ProjectTypeormRepository
     blockchainData: IProjectDomainInterfaceBlockchainData
   ): ProjectDomainEntity {
     return new ProjectDomainEntity(databaseData, blockchainData);
+  }
+
+  /**
+   * Переопределяем метод создания сущности для проектов,
+   * чтобы правильно инициализировать поля для генерации ID задач
+   */
+  async createIfNotExists(
+    blockchainData: IProjectDomainInterfaceBlockchainData,
+    blockNum: number,
+    present = true
+  ): Promise<ProjectDomainEntity> {
+    // Получаем ключ синхронизации из доменной сущности
+    const syncKey = this.getSyncKey();
+    const syncValue = this.extractSyncValueFromBlockchainData(blockchainData, syncKey);
+
+    // Проверяем, существует ли уже по кастомному ключу
+    const existing = await this.findBySyncKey(syncKey, syncValue);
+    if (existing) {
+      // Обновляем существующую сущность
+      existing.updateFromBlockchain(blockchainData, blockNum, present);
+      return await this.save(existing);
+    } else {
+      // Создаем полную структуру databaseData для проекта
+      const databaseData: IProjectDomainInterfaceDatabaseData = {
+        _id: '',
+        block_num: blockNum,
+        present: present,
+        project_hash: syncValue.toLowerCase(),
+        prefix: IssueIdGenerationService.generateProjectPrefix(syncValue),
+        issue_counter: 0,
+        voting_deadline: null,
+      };
+
+      const newEntity = this.createDomainEntity(databaseData, blockchainData);
+      return await this.save(newEntity);
+    }
   }
 
   protected getSyncKey(): string {
@@ -139,6 +176,9 @@ export class ProjectTypeormRepository
     if (filter?.is_planed !== undefined) {
       where.is_planed = filter.is_planed;
     }
+    if (filter?.has_voting) {
+      where.voting_deadline = Not(IsNull());
+    }
 
     // Получаем общее количество записей
     const totalCount = await this.repository.count({ where });
@@ -206,6 +246,9 @@ export class ProjectTypeormRepository
     }
     if (filter?.is_planed !== undefined) {
       where.is_planed = filter.is_planed;
+    }
+    if (filter?.has_voting) {
+      where.voting_deadline = Not(IsNull());
     }
 
     // Логика для parent_hash:

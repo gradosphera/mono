@@ -7,6 +7,7 @@ q-btn(
   :icon='mini ? "add" : "add"',
   :size='mini ? "sm" : "md"',
   :outline='mini'
+  @click.stop
 )
 
 q-dialog(v-model='showDialog', @hide='clear')
@@ -19,6 +20,7 @@ q-dialog(v-model='showDialog', @hide='clear')
       @cancel='clear'
     )
       q-input(
+        autofocus
         v-model='formData.title',
         standout='bg-teal text-white',
         label='Название задачи',

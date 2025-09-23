@@ -32,7 +32,7 @@ export class ExpenseSyncService
 
   async onModuleInit() {
     const supportedVersions = this.getSupportedVersions();
-    this.logger.log(
+    this.logger.debug(
       `Сервис синхронизации расходов инициализирован. Поддерживаемые контракты: [${supportedVersions.contracts.join(
         ', '
       )}], таблицы: [${supportedVersions.tables.join(', ')}]`
@@ -40,14 +40,14 @@ export class ExpenseSyncService
 
     // Программная подписка на все поддерживаемые паттерны событий
     const allPatterns = this.getAllEventPatterns();
-    this.logger.log(`Подписка на ${allPatterns.length} паттернов событий: ${allPatterns.join(', ')}`);
+    this.logger.debug(`Подписка на ${allPatterns.length} паттернов событий: ${allPatterns.join(', ')}`);
 
     // Подписываемся на каждый паттерн программно
     allPatterns.forEach((pattern) => {
       this.eventEmitter.on(pattern, this.processDelta.bind(this));
     });
 
-    this.logger.log('Сервис синхронизации расходов полностью инициализирован с подписками на паттерны');
+    this.logger.debug('Сервис синхронизации расходов полностью инициализирован с подписками на паттерны');
   }
 
   /**

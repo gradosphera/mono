@@ -35,7 +35,7 @@ export class ProgramWithdrawSyncService
 
   async onModuleInit() {
     const supportedVersions = this.getSupportedVersions();
-    this.logger.log(
+    this.logger.debug(
       `Сервис синхронизации возвратов из программы инициализирован. Поддерживаемые контракты: [${supportedVersions.contracts.join(
         ', '
       )}], таблицы: [${supportedVersions.tables.join(', ')}]`
@@ -43,7 +43,7 @@ export class ProgramWithdrawSyncService
 
     // Программная подписка на все поддерживаемые паттерны событий
     const allPatterns = this.getAllEventPatterns();
-    this.logger.log(`Подписка на ${allPatterns.length} паттернов событий: ${allPatterns.join(', ')}`);
+    this.logger.debug(`Подписка на ${allPatterns.length} паттернов событий: ${allPatterns.join(', ')}`);
 
     // Подписываемся на каждый паттерн программно
     allPatterns.forEach((pattern) => {

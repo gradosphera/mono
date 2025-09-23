@@ -32,7 +32,7 @@ export class ProgramWalletSyncService
 
   async onModuleInit() {
     const supportedVersions = this.getSupportedVersions();
-    this.logger.log(
+    this.logger.debug(
       `Сервис синхронизации программных кошельков инициализирован. Поддерживаемые контракты: [${supportedVersions.contracts.join(
         ', '
       )}], таблицы: [${supportedVersions.tables.join(', ')}]`
@@ -40,7 +40,7 @@ export class ProgramWalletSyncService
 
     // Программная подписка на все поддерживаемые паттерны событий
     const allPatterns = this.getAllEventPatterns();
-    this.logger.log(`Подписка на ${allPatterns.length} паттернов событий: ${allPatterns.join(', ')}`);
+    this.logger.debug(`Подписка на ${allPatterns.length} паттернов событий: ${allPatterns.join(', ')}`);
 
     // Подписываемся на каждый паттерн программно
     allPatterns.forEach((pattern) => {

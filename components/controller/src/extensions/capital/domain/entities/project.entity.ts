@@ -3,6 +3,7 @@ import type { IProjectDomainInterfaceDatabaseData } from '../interfaces/project-
 import type { IProjectDomainInterfaceBlockchainData } from '../interfaces/project-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseDomainEntity } from './base.entity';
+import { IssueIdGenerationService } from '../services/issue-id-generation.service';
 /**
  * Доменная сущность проекта
  *
@@ -23,6 +24,9 @@ export class ProjectDomainEntity
 
   // Доменные поля (расширения)
   public status: ProjectStatus;
+  public prefix: string; // Префикс проекта из первых 3 символов project_hash в верхнем регистре
+  public issue_counter: number; // Счетчик для генерации последовательных ID задач
+  public voting_deadline: Date | null; // Денормализованное поле для быстрого поиска проектов с голосованиями
 
   // Поля из блокчейна (projects.hpp)
   public project_hash: IProjectDomainInterfaceBlockchainData['project_hash'];
@@ -60,6 +64,12 @@ export class ProjectDomainEntity
     // Специфичные поля для project
     this.status = this.mapStatusToDomain(databaseData.status);
     this.project_hash = databaseData.project_hash.toLowerCase();
+    this.prefix = databaseData.prefix;
+    this.issue_counter = databaseData.issue_counter;
+    this.voting_deadline = databaseData.voting_deadline;
+
+    // Инициализируем поля для генерации ID задач, если они не заданы
+    this.initializeIssueIdFields();
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -144,6 +154,28 @@ export class ProjectDomainEntity
     // Нормализация hash полей
     if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
     if (this.parent_hash) this.parent_hash = this.parent_hash.toLowerCase();
+
+    // Синхронизируем денормализованное поле voting_deadline
+    if (blockchainData.voting?.voting_deadline) {
+      const deadline = new Date(blockchainData.voting.voting_deadline);
+      // Если дедлайн равен 1970-01-01T00:00:00.000, значит голосования нет
+      this.voting_deadline = deadline.getTime() === 0 ? null : deadline;
+    } else {
+      this.voting_deadline = null;
+    }
+  }
+
+  /**
+   * Инициализирует поля для генерации ID задач
+   * Вызывается при первом создании проекта
+   */
+  initializeIssueIdFields(): void {
+    if (!this.prefix) {
+      this.prefix = IssueIdGenerationService.generateProjectPrefix(this.project_hash);
+    }
+    if (this.issue_counter === undefined || this.issue_counter === null) {
+      this.issue_counter = 0;
+    }
   }
 
   /**

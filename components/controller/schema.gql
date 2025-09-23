@@ -1740,6 +1740,9 @@ type CapitalIssue {
   """Оценка в story points или часах"""
   estimate: Int!
 
+  """Уникальный ID задачи в формате PREFIX-N (например, ABC-1)"""
+  id: String!
+
   """Хеш задачи"""
   issue_hash: String!
 
@@ -1858,40 +1861,61 @@ type CapitalProject {
   block_num: Float
 
   """Статус из блокчейна"""
-  blockchain_status: String
+  blockchain_status: String!
 
   """Можно ли конвертировать в проект"""
-  can_convert_to_project: Boolean
+  can_convert_to_project: Boolean!
 
   """Массив проектов-компонентов"""
   components: [CapitalProjectComponent!]!
 
   """Название кооператива"""
-  coopname: String
+  coopname: String!
+
+  """Счетчики участников проекта"""
+  counts: CapitalProjectCountsData!
 
   """Дата создания"""
-  created_at: String
+  created_at: String!
+
+  """Данные CRPS для распределения наград проекта"""
+  crps: CapitalProjectCrpsData!
 
   """Описание проекта"""
-  description: String
+  description: String!
+
+  """Фактические показатели проекта"""
+  fact: CapitalProjectFactPool!
 
   """ID в блокчейне"""
-  id: Int
+  id: Int!
 
   """Открыт ли проект"""
-  is_opened: Boolean
+  is_opened: Boolean!
 
   """Запланирован ли проект"""
-  is_planed: Boolean
+  is_planed: Boolean!
+
+  """Счетчик задач проекта"""
+  issue_counter: Int!
 
   """Мастер проекта"""
-  master: String
+  master: String!
+
+  """Данные CRPS для распределения членских взносов проекта"""
+  membership: CapitalProjectMembershipCrps!
 
   """Мета-информация проекта"""
-  meta: String
+  meta: String!
 
   """Хеш родительского проекта"""
-  parent_hash: String
+  parent_hash: String!
+
+  """Плановые показатели проекта"""
+  plan: CapitalProjectPlanPool!
+
+  """Префикс проекта"""
+  prefix: String!
 
   """Флаг присутствия записи в блокчейне"""
   present: Boolean!
@@ -1903,7 +1927,10 @@ type CapitalProject {
   status: ProjectStatus!
 
   """Название проекта"""
-  title: String
+  title: String!
+
+  """Данные голосования по методу Водянова"""
+  voting: CapitalProjectVotingData!
 }
 
 """Проект-компонент в системе CAPITAL"""
@@ -1921,37 +1948,58 @@ type CapitalProjectComponent {
   block_num: Float
 
   """Статус из блокчейна"""
-  blockchain_status: String
+  blockchain_status: String!
 
   """Можно ли конвертировать в проект"""
-  can_convert_to_project: Boolean
+  can_convert_to_project: Boolean!
 
   """Название кооператива"""
-  coopname: String
+  coopname: String!
+
+  """Счетчики участников проекта"""
+  counts: CapitalProjectCountsData!
 
   """Дата создания"""
-  created_at: String
+  created_at: String!
+
+  """Данные CRPS для распределения наград проекта"""
+  crps: CapitalProjectCrpsData!
 
   """Описание проекта"""
-  description: String
+  description: String!
+
+  """Фактические показатели проекта"""
+  fact: CapitalProjectFactPool!
 
   """ID в блокчейне"""
-  id: Int
+  id: Int!
 
   """Открыт ли проект"""
-  is_opened: Boolean
+  is_opened: Boolean!
 
   """Запланирован ли проект"""
-  is_planed: Boolean
+  is_planed: Boolean!
+
+  """Счетчик задач проекта"""
+  issue_counter: Int!
 
   """Мастер проекта"""
-  master: String
+  master: String!
+
+  """Данные CRPS для распределения членских взносов проекта"""
+  membership: CapitalProjectMembershipCrps!
 
   """Мета-информация проекта"""
-  meta: String
+  meta: String!
 
   """Хеш родительского проекта"""
-  parent_hash: String
+  parent_hash: String!
+
+  """Плановые показатели проекта"""
+  plan: CapitalProjectPlanPool!
+
+  """Префикс проекта"""
+  prefix: String!
 
   """Флаг присутствия записи в блокчейне"""
   present: Boolean!
@@ -1963,13 +2011,127 @@ type CapitalProjectComponent {
   status: ProjectStatus!
 
   """Название проекта"""
-  title: String
+  title: String!
+
+  """Данные голосования по методу Водянова"""
+  voting: CapitalProjectVotingData!
+}
+
+"""Счетчики участников проекта"""
+type CapitalProjectCountsData {
+  """Общее количество авторов"""
+  total_authors: Int!
+
+  """Общее количество коммитов"""
+  total_commits: Int!
+
+  """Общее количество вкладчиков"""
+  total_contributors: Int!
+
+  """Общее количество координаторов"""
+  total_coordinators: Int!
+
+  """Общее количество создателей"""
+  total_creators: Int!
+
+  """Общее количество инвесторов"""
+  total_investors: Int!
+
+  """Общее количество проперторов"""
+  total_propertors: Int!
+}
+
+"""Данные CRPS для распределения наград проекта"""
+type CapitalProjectCrpsData {
+  """Накопительный коэффициент вознаграждения за базовый вклад авторов"""
+  author_base_cumulative_reward_per_share: Float!
+
+  """Накопительный коэффициент вознаграждения за бонусный вклад авторов"""
+  author_bonus_cumulative_reward_per_share: Float!
+
+  """Накопительный коэффициент вознаграждения вкладчиков"""
+  contributor_cumulative_reward_per_share: Float!
+
+  """Общее количество долей вкладчиков капитала"""
+  total_capital_contributors_shares: String!
+}
+
+"""Фактические показатели проекта"""
+type CapitalProjectFactPool {
+  """Накопленный пул расходов"""
+  accumulated_expense_pool: String!
+
+  """Базовый пул авторов"""
+  authors_base_pool: String!
+
+  """Бонусный пул авторов"""
+  authors_bonus_pool: String!
+
+  """Бонусный пул вкладчиков"""
+  contributors_bonus_pool: String!
+
+  """Базовый пул координаторов"""
+  coordinators_base_pool: String!
+
+  """Инвестиционный пул координаторов"""
+  coordinators_investment_pool: String!
+
+  """Базовый пул создателей"""
+  creators_base_pool: String!
+
+  """Бонусный пул создателей"""
+  creators_bonus_pool: String!
+
+  """Часы создателей"""
+  creators_hours: Int!
+
+  """Стоимость часа работы"""
+  hour_cost: String!
+
+  """Инвестиционный пул"""
+  invest_pool: String!
+
+  """Программный инвестиционный пул"""
+  program_invest_pool: String!
+
+  """Имущественный базовый пул"""
+  property_base_pool: String!
+
+  """Процент возврата базового пула"""
+  return_base_percent: Float!
+
+  """Целевой пул расходов"""
+  target_expense_pool: String!
+
+  """Общая сумма"""
+  total: String!
+
+  """Общий объем вклада"""
+  total_contribution: String!
+
+  """Общий генерационный пул"""
+  total_generation_pool: String!
+
+  """Общий объем полученных инвестиций"""
+  total_received_investments: String!
+
+  """Общий объем возвращенных инвестиций"""
+  total_returned_investments: String!
+
+  """Процент использования инвестиций"""
+  use_invest_percent: Float!
+
+  """Использованный пул расходов"""
+  used_expense_pool: String!
 }
 
 """Параметры фильтрации для запросов проектов CAPITAL"""
 input CapitalProjectFilter {
   """Фильтр по названию кооператива"""
   coopname: String
+
+  """Показывать только проекты, у которых есть или были голосования"""
+  has_voting: Boolean
 
   """Фильтр по открытому проекту"""
   is_opened: Boolean
@@ -1988,6 +2150,81 @@ input CapitalProjectFilter {
 
   """Фильтр по статусу проекта"""
   status: ProjectStatus
+}
+
+"""Данные CRPS для распределения членских взносов проекта"""
+type CapitalProjectMembershipCrps {
+  """Доступная сумма"""
+  available: String!
+
+  """Сконвертированные средства"""
+  converted_funds: String!
+
+  """Накопительный коэффициент вознаграждения на акцию"""
+  cumulative_reward_per_share: Float!
+
+  """Распределенная сумма"""
+  distributed: String!
+
+  """Профинансированная сумма"""
+  funded: String!
+
+  """Общее количество акций"""
+  total_shares: String!
+}
+
+"""Плановые показатели проекта"""
+type CapitalProjectPlanPool {
+  """Базовый пул авторов"""
+  authors_base_pool: String!
+
+  """Бонусный пул авторов"""
+  authors_bonus_pool: String!
+
+  """Бонусный пул вкладчиков"""
+  contributors_bonus_pool: String!
+
+  """Базовый пул координаторов"""
+  coordinators_base_pool: String!
+
+  """Инвестиционный пул координаторов"""
+  coordinators_investment_pool: String!
+
+  """Базовый пул создателей"""
+  creators_base_pool: String!
+
+  """Бонусный пул создателей"""
+  creators_bonus_pool: String!
+
+  """Плановые часы создателей"""
+  creators_hours: Int!
+
+  """Плановая стоимость часа работы"""
+  hour_cost: String!
+
+  """Инвестиционный пул"""
+  invest_pool: String!
+
+  """Программный инвестиционный пул"""
+  program_invest_pool: String!
+
+  """Процент возврата базового пула"""
+  return_base_percent: Float!
+
+  """Целевой пул расходов"""
+  target_expense_pool: String!
+
+  """Общая сумма"""
+  total: String!
+
+  """Общий генерационный пул"""
+  total_generation_pool: String!
+
+  """Общий объем полученных инвестиций"""
+  total_received_investments: String!
+
+  """Процент использования инвестиций"""
+  use_invest_percent: Float!
 }
 
 """Статистика времени вкладчика по проекту"""
@@ -2012,6 +2249,54 @@ type CapitalProjectTimeStats {
 
   """Сумма незакоммиченного времени (часы)"""
   total_uncommitted_hours: Float!
+}
+
+"""Суммы голосования проекта"""
+type CapitalProjectVotingAmounts {
+  """Активная сумма голосования"""
+  active_voting_amount: String!
+
+  """Бонусы авторов при голосовании"""
+  authors_bonuses_on_voting: String!
+
+  """Равная сумма на автора"""
+  authors_equal_per_author: String!
+
+  """Равномерное распределение среди авторов"""
+  authors_equal_spread: String!
+
+  """Бонусы создателей при голосовании"""
+  creators_bonuses_on_voting: String!
+
+  """Прямое распределение среди создателей"""
+  creators_direct_spread: String!
+
+  """Равная сумма голосования"""
+  equal_voting_amount: String!
+
+  """Общий пул голосования"""
+  total_voting_pool: String!
+}
+
+"""Данные голосования по методу Водянова"""
+type CapitalProjectVotingData {
+  """Суммы голосования"""
+  amounts: CapitalProjectVotingAmounts!
+
+  """Процент голосования авторов"""
+  authors_voting_percent: Float!
+
+  """Процент голосования создателей"""
+  creators_voting_percent: Float!
+
+  """Общее количество участников голосования"""
+  total_voters: Int!
+
+  """Количество полученных голосов"""
+  votes_received: Int!
+
+  """Дата окончания голосования"""
+  voting_deadline: String!
 }
 
 """Результат в системе CAPITAL"""

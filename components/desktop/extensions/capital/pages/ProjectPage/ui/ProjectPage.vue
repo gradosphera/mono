@@ -84,7 +84,8 @@ const { registerAction: registerHeaderAction } = useHeaderActions();
 const { registerAction: registerRightDrawerAction } = useRightDrawer();
 
 // Регистрируем действие в header
-onMounted(() => {
+onMounted(async () => {
+  await loadProject();
   // Загружаем сохраненное состояние expanded из LocalStorage
   loadComponentsExpandedState();
 
@@ -171,10 +172,14 @@ watch(projectHash, async (newHash, oldHash) => {
   }
 });
 
-// Инициализация
-onMounted(async () => {
-  await loadProject();
+// Watcher для синхронизации локального состояния с store
+watch(() => projectStore.project, (newProject) => {
+  if (newProject) {
+    project.value = newProject;
+  }
 });
+
+
 </script>
 
 <style lang="scss" scoped>

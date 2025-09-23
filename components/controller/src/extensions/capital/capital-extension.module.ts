@@ -7,6 +7,9 @@ import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
 
+// Доменные сервисы
+import { IssueIdGenerationService } from './domain/services/issue-id-generation.service';
+
 // Репозитории
 import { ProjectTypeormRepository } from './infrastructure/repositories/project.typeorm-repository';
 import { ContributorTypeormRepository } from './infrastructure/repositories/contributor.typeorm-repository';
@@ -166,6 +169,9 @@ export class CapitalPlugin extends BaseExtModule {
   providers: [
     // Plugin
     CapitalPlugin,
+
+    // Domain Services
+    IssueIdGenerationService,
 
     // Services
     CapitalContractInfoService,

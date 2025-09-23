@@ -9,3 +9,5 @@ export * from './StoryWidget';
 export * from './TimeStatsWidget';
 export * from './TimeIssuesWidget';
 export * from './TimeEntriesWidget';
+export * from './ListVotingProjectWidget';
+export * from './ProjectVotesWidget';

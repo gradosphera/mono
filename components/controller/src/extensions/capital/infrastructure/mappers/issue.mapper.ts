@@ -12,6 +12,7 @@ export class IssueMapper {
   static toDomain(entity: IssueTypeormEntity): IssueDomainEntity {
     const databaseData: IIssueDatabaseData = {
       _id: entity._id,
+      id: entity.id,
       issue_hash: entity.issue_hash,
       coopname: entity.coopname,
       title: entity.title,
@@ -41,6 +42,7 @@ export class IssueMapper {
     const entity: Partial<IssueTypeormEntity> = {};
     // Object.assign(entity, domain);
     if (domain._id !== undefined) entity._id = domain._id;
+    if (domain.id !== undefined) entity.id = domain.id;
     if (domain.issue_hash !== undefined) entity.issue_hash = domain.issue_hash;
     if (domain.coopname !== undefined) entity.coopname = domain.coopname;
     if (domain.title !== undefined) entity.title = domain.title;

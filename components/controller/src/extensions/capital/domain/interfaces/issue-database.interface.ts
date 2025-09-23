@@ -6,6 +6,7 @@ import type { IBaseDatabaseData } from './base-database.interface';
  * Интерфейс данных задачи из базы данных
  */
 export interface IIssueDatabaseData extends IBaseDatabaseData {
+  id: string; // Уникальный ID задачи в формате PREFIX-N (например, ABC-1)
   issue_hash: string; // Хеш задачи для внешних ссылок
   coopname: string; // Имя аккаунта кооператива
   title: string; // Название задачи

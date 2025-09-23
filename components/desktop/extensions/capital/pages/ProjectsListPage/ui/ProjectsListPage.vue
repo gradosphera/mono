@@ -30,6 +30,8 @@ div
                 :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
                 @click.stop='toggleExpand(props.row.project_hash)'
               )
+            q-td(style='width: 100px')
+              span(v-if='props.row.prefix').text-grey-7 {{ '#' + props.row.prefix }}
             q-td(
               style='cursor: pointer'
               @click.stop='() => router.push({ name: "project-components", params: { project_hash: props.row.project_hash } })'
@@ -139,6 +141,13 @@ const columns = [
     align: 'center' as const,
     field: '' as const,
     sortable: false,
+  },
+  {
+    name: 'prefix',
+    label: 'Префикс',
+    align: 'left' as const,
+    field: 'prefix' as const,
+    sortable: true,
   },
   {
     name: 'name',

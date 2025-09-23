@@ -49,4 +49,10 @@ export class ProjectFilterInputDTO {
     description: 'Фильтр по запланированному проекту',
   })
   is_planed?: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Показывать только проекты, у которых есть или были голосования',
+  })
+  has_voting?: boolean;
 }

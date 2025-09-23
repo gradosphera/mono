@@ -59,7 +59,7 @@ export class MeetTrackerService {
       // Получаем все собрания из блокчейна через порт
       const meets = await this.meetPort.getMeets({ coopname: config.coopname }, undefined);
       if (!meets || meets.length === 0) {
-        this.logger.info('Собрания не найдены');
+        this.logger.debug('Собрания не найдены');
         return;
       }
 
@@ -292,7 +292,7 @@ export class MeetTrackerService {
       let hasMorePages = true;
       let allAccounts: AccountDomainEntity[] = [];
 
-      this.logger.info(`Начало загрузки аккаунтов с размером пакета: ${batchSize}`);
+      this.logger.debug(`Начало загрузки аккаунтов с размером пакета: ${batchSize}`);
 
       while (hasMorePages) {
         const accountsPage = await this.accountPort.getAccounts(
@@ -308,10 +308,10 @@ export class MeetTrackerService {
 
         if (accountsPage.currentPage >= accountsPage.totalPages || accountsPage.items.length === 0) {
           hasMorePages = false;
-          this.logger.info(`Загрузка аккаунтов завершена. Всего загружено: ${allAccounts.length}`);
+          this.logger.debug(`Загрузка аккаунтов завершена. Всего загружено: ${allAccounts.length}`);
         } else {
           currentPage++;
-          this.logger.info(`Загружена страница ${currentPage - 1}/${accountsPage.totalPages}, продолжаем загрузку...`);
+          this.logger.debug(`Загружена страница ${currentPage - 1}/${accountsPage.totalPages}, продолжаем загрузку...`);
         }
       }
 
