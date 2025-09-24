@@ -1881,6 +1881,9 @@ type CapitalProject {
   """Данные CRPS для распределения наград проекта"""
   crps: CapitalProjectCrpsData!
 
+  """Данные/шаблон проекта"""
+  data: String!
+
   """Описание проекта"""
   description: String!
 
@@ -1889,6 +1892,9 @@ type CapitalProject {
 
   """ID в блокчейне"""
   id: Int!
+
+  """Приглашение к проекту"""
+  invite: String!
 
   """Открыт ли проект"""
   is_opened: Boolean!
@@ -1910,6 +1916,9 @@ type CapitalProject {
 
   """Хеш родительского проекта"""
   parent_hash: String!
+
+  """Название родительского проекта"""
+  parent_title: String
 
   """Плановые показатели проекта"""
   plan: CapitalProjectPlanPool!
@@ -1965,6 +1974,9 @@ type CapitalProjectComponent {
   """Данные CRPS для распределения наград проекта"""
   crps: CapitalProjectCrpsData!
 
+  """Данные/шаблон проекта"""
+  data: String!
+
   """Описание проекта"""
   description: String!
 
@@ -1973,6 +1985,9 @@ type CapitalProjectComponent {
 
   """ID в блокчейне"""
   id: Int!
+
+  """Приглашение к проекту"""
+  invite: String!
 
   """Открыт ли проект"""
   is_opened: Boolean!
@@ -1994,6 +2009,9 @@ type CapitalProjectComponent {
 
   """Хеш родительского проекта"""
   parent_hash: String!
+
+  """Название родительского проекта"""
+  parent_title: String
 
   """Плановые показатели проекта"""
   plan: CapitalProjectPlanPool!
@@ -2130,8 +2148,16 @@ input CapitalProjectFilter {
   """Фильтр по названию кооператива"""
   coopname: String
 
+  """
+  Показывать только проекты, у которых есть установленное значение в поле invite
+  """
+  has_invite: Boolean
+
   """Показывать только проекты, у которых есть или были голосования"""
   has_voting: Boolean
+
+  """true - только компоненты проектов, false - только основные проекты"""
+  is_component: Boolean
 
   """Фильтр по открытому проекту"""
   is_opened: Boolean

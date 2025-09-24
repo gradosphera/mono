@@ -48,9 +48,9 @@ module.exports = configure(function (ctx) {
     css: [
       '../app/styles/app.scss',
       '../app/styles/style.css',
-      '../app/styles/quasar-variables.sass',
+      '../app/styles/variables.sass',
     ],
-    sassVariables: '/src/app/styles/quasar-variables.sass',
+    sassVariables: '/src/app/styles/variables.sass',
 
     // , '../app/styles/quasar-variables.sass'
     // https://github.com/quasarframework/quasar/tree/dev/extras

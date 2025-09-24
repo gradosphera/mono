@@ -4,32 +4,58 @@ div
   q-card.q-mb-md(flat)
     q-card-section
       .row.items-center.q-gutter-sm
-        q-icon(name='folder', size='24px')
-        div
-          .text-h6 {{ project?.title || 'Загрузка...' }}
-
-    q-card-section
-      .row.items-center.q-gutter-md
-        .col
-          Editor(
+        div.full-width
+          q-input(
             v-if="project"
-            v-model='project.description',
-            label='Описание проекта',
-            placeholder='',
+            v-model='project.title'
+            label='Название проекта'
+            dense
+            class="q-mb-sm"
+            @input="handleFieldChange"
+          ).full-width
+            template(#prepend)
+              q-icon(name='folder', size='24px')
+          .text-h6(v-if="!project") Загрузка...
+
+
+      div.row.items-center.q-gutter-md
+        div(style="max-height: 300px; overflow-y: auto;").col
+          ProjectInfoSelectorWidget(
+            :project='project',
+            @update:description="(value) => { if (project) project.description = value }",
+            @update:invite="(value) => { if (project) project.invite = value }",
+            @field-change="handleFieldChange"
           )
 
-  // Список компонентов проекта
-  ComponentsListWidget(
-    :components='project?.components || []',
-    :expanded='expandedComponents',
-    @open-component='handleComponentClick',
-    @toggle-component='handleComponentToggle'
-  )
-    template(#component-content='{ component }')
-      IssuesListWidget(
-        :project-hash='component.project_hash',
-        @issue-click='handleIssueClick'
-      )
+
+
+
+      div(v-if="hasChanges").row.justify-end.q-gutter-sm.q-mt-md
+        q-btn(
+          flat
+          color="negative"
+          label="Отменить изменения"
+          @click="resetChanges"
+        )
+        q-btn(
+          color="primary"
+          label="Сохранить"
+          :loading="isSaving"
+          @click="saveChanges"
+        )
+
+    // Список компонентов проекта
+    ComponentsListWidget(
+      :components='project?.components || []',
+      :expanded='expandedComponents',
+      @open-component='handleComponentClick',
+      @toggle-component='handleComponentToggle'
+    )
+      template(#component-content='{ component }')
+        IssuesListWidget(
+          :project-hash='component.project_hash',
+          @issue-click='handleIssueClick'
+        )
 </template>
 
 <script lang="ts" setup>
@@ -47,17 +73,34 @@ import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
 import { useRightDrawer } from 'src/shared/hooks/useRightDrawer';
 import { useExpandableState } from 'src/shared/lib/composables';
-import { FailAlert } from 'src/shared/api';
+import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { CreateComponentButton } from 'app/extensions/capital/features/Project/CreateComponent';
 import 'src/shared/ui/TitleStyles';
-import {Editor} from 'src/shared/ui';
 import { ComponentsListWidget } from 'app/extensions/capital/widgets/ComponentsListWidget';
 import { IssuesListWidget } from 'app/extensions/capital/widgets/IssuesListWidget';
+import { ProjectInfoSelectorWidget } from 'app/extensions/capital/widgets/ProjectInfoSelectorWidget';
+import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
 
 const route = useRoute();
 const projectStore = useProjectStore();
+const { saveImmediately } = useEditProject();
 
 const project = ref<IProject | null | undefined>(null);
+
+// Состояние для отслеживания изменений
+const originalProject = ref<IProject | null>(null);
+const isSaving = ref(false);
+
+// Вычисляемое свойство для определения наличия изменений
+const hasChanges = computed(() => {
+  if (!project.value || !originalProject.value) return false;
+
+  return (
+    project.value.title !== originalProject.value.title ||
+    project.value.description !== originalProject.value.description ||
+    project.value.invite !== originalProject.value.invite
+  );
+});
 
 // Композабл для управления состоянием развернутости компонентов
 const {
@@ -72,8 +115,7 @@ const router = useRouter();
 
 // Настраиваем кнопку "Назад"
 useBackButton({
-  text: 'К проектам',
-  routeName: 'projects',
+  text: 'Назад',
   componentId: 'project-components-' + projectHash.value,
 });
 
@@ -107,6 +149,11 @@ const loadProject = async () => {
     });
     project.value = projectStore.project;
 
+    // Сохраняем оригинальное состояние для отслеживания изменений
+    if (project.value) {
+      originalProject.value = JSON.parse(JSON.stringify(project.value));
+    }
+
     // Регистрируем StoriesWidget в правом drawer
     if (project.value) {
       registerRightDrawerAction({
@@ -131,6 +178,51 @@ const loadProject = async () => {
     console.error('Ошибка при загрузке проекта:', error);
     FailAlert('Не удалось загрузить проект');
   }
+};
+
+// Обработчик изменения полей
+const handleFieldChange = () => {
+  // Просто триггер реактивности для computed hasChanges
+};
+
+// Сохранение изменений
+const saveChanges = async () => {
+  if (!project.value) return;
+
+  try {
+    isSaving.value = true;
+
+    const updateData = {
+      project_hash: project.value.project_hash || '',
+      title: project.value.title || '',
+      description: project.value.description || '',
+      invite: project.value.invite || '',
+      coopname: (project.value as any).coopname || '',
+      meta: '',
+      data: '',
+      can_convert_to_project: false,
+    };
+
+    await saveImmediately(updateData);
+
+    // Обновляем оригинальное состояние после успешного сохранения
+    originalProject.value = JSON.parse(JSON.stringify(project.value));
+
+    SuccessAlert('Изменения сохранены успешно');
+  } catch (error) {
+    console.error('Ошибка при сохранении проекта:', error);
+    FailAlert('Не удалось сохранить изменения');
+  } finally {
+    isSaving.value = false;
+  }
+};
+
+// Сброс изменений
+const resetChanges = () => {
+  if (!originalProject.value) return;
+
+  // Восстанавливаем оригинальные значения
+  project.value = JSON.parse(JSON.stringify(originalProject.value));
 };
 
 // Обработчик клика по компоненту
@@ -176,6 +268,10 @@ watch(projectHash, async (newHash, oldHash) => {
 watch(() => projectStore.project, (newProject) => {
   if (newProject) {
     project.value = newProject;
+    // Обновляем оригинальное состояние только если нет несохраненных изменений
+    if (!hasChanges.value) {
+      originalProject.value = JSON.parse(JSON.stringify(newProject));
+    }
   }
 });
 

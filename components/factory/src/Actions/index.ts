@@ -1,4 +1,4 @@
-import type { AssetContributionStatement, InvestMembershipConvertation, InvestmentAgreement, ReturnByAssetStatement } from '../Templates'
+import type { AssetContributionStatement, ReturnByAssetStatement } from '../Templates'
 
 export * as WalletAgreement from './1.WalletAgreement'
 export * as RegulationElectronicSignature from './2.RegulationElectronicSignature'
@@ -21,11 +21,38 @@ export * as ReturnByAssetAct from './802.ReturnByAssetAct'
 export * as ReturnByMoney from './900.ReturnByMoney'
 export * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 
-export * as InvestmentAgreement from './1000.InvestmentAgreement'
-export * as InvestByResultStatement from './1001.InvestByResultStatement'
-export * as InvestByResultAct from './1002.InvestByResultAct'
-export * as InvestByMoneyStatement from './1005.InvestByMoneyStatement'
-export * as InvestMembershipConvertation from './1010.InvestMembershipConvertation'
+export * as CapitalizationAgreement from './1000.CapitalizationAgreement'
+export * as GenerationAgreement from './1001.GenerationAgreement'
+export * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
+
+export * as ExpenseStatement from './1010.ExpenseStatement'
+export * as ExpenseDecision from './1011.ExpenseDecision'
+
+export * as GenerationMoneyInvestStatement from './1020.GenerationMoneyInvestStatement'
+export * as GenerationMoneyReturnUnusedStatement from './1025.GenerationMoneyReturnUnusedStatement'
+
+export * as CapitalizationMoneyInvestStatement from './1030.CapitalizationMoneyInvestStatement'
+
+export * as ResultContributionStatement from './1040.ResultContributionStatement'
+export * as ResultContributionDecision from './1041.ResultContributionDecision'
+export * as ResultContributionAct from './1042.ResultContributionAct'
+
+export * as GetLoanStatement from './1050.GetLoanStatement'
+export * as GetLoanDecision from './1051.GetLoanDecision'
+
+export * as GenerationPropertyInvestStatement from './1060.GenerationPropertyInvestStatement'
+export * as GenerationPropertyInvestDecision from './1061.GenerationPropertyInvestDecision'
+export * as GenerationPropertyInvestAct from './1062.GenerationPropertyInvestAct'
+
+export * as CapitalizationPropertyInvestStatement from './1070.CapitalizationPropertyInvestStatement'
+export * as CapitalizationPropertyInvestDecision from './1071.CapitalizationPropertyInvestDecision'
+export * as CapitalizationPropertyInvestAct from './1072.CapitalizationPropertyInvestAct'
+
+export * as GenerationToMainWalletConvertStatement from './1080.GenerationToMainWalletConvertStatement'
+export * as GenerationToProjectConvertStatement from './1081.GenerationToProjectConvertStatement'
+export * as GenerationToCapitalizationConvertStatement from './1082.GenerationToCapitalizationConvertStatement'
+
+export * as CapitalizationToMainWalletConvertStatement from './1090.CapitalizationToMainWalletConvertStatement'
 
 // общие собрания
 export * as AnnualGeneralMeetingAgenda from './300.AnnualGeneralMeetingAgenda'

@@ -2,19 +2,20 @@
 <template lang="pug">
 q-header.header(bordered, :class='headerClass')
   q-toolbar
-    q-btn.q-mr-sm(
+    q-btn(
       v-if='loggedIn',
       stretch,
       icon='menu',
       flat,
       @click='emitToggleLeftDrawer'
     )
-    BackButton(v-if='loggedIn')
-
     // Инжектированные кнопки действий в группе
-    q-btn-group.q-ml-sm(v-if='headerActions.length > 0', :stretch='isMobile')
-      template(v-for='action in headerActions', :key='action.id')
-        component(:is='action.component', v-bind='action.props')
+    q-btn-group(stretch flat).header-actions-group
+      BackButton(v-if='loggedIn')
+      q-separator(v-if='loggedIn && headerActions.length > 0', vertical)
+      template(v-if='headerActions.length > 0')
+        component(v-for='action in headerActions', :key='action.id' :is='action.component', v-bind='action.props')
+        q-separator(v-if='loggedIn && headerActions.length > 1', vertical)
 
     q-toolbar-title
       q-btn(

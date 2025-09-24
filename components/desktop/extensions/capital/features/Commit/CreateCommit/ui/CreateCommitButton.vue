@@ -3,10 +3,10 @@ q-btn(
   color='primary',
   @click='showDialog = true',
   :loading='loading',
-  :label='mini ? "" : "Создать коммит"',
-  :icon='mini ? "add" : "add"',
+  label="Коммит",
+  icon="add",
   :size='mini ? "sm" : "md"',
-  :outline='mini'
+  :dense="isMobile"
 )
 
 q-dialog(v-model='showDialog', @hide='clear')
@@ -47,7 +47,9 @@ import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
+import { useWindowSize } from 'src/shared/hooks';
 
+const { isMobile } = useWindowSize();
 const props = defineProps<{
   mini?: boolean;
   projectHash?: string;

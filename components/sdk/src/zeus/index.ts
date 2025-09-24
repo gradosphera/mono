@@ -2253,12 +2253,16 @@ export type ValueTypes = {
 	created_at?:boolean | `@${string}`,
 	/** Данные CRPS для распределения наград проекта */
 	crps?:ValueTypes["CapitalProjectCrpsData"],
+	/** Данные/шаблон проекта */
+	data?:boolean | `@${string}`,
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
 	/** Фактические показатели проекта */
 	fact?:ValueTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
+	/** Приглашение к проекту */
+	invite?:boolean | `@${string}`,
 	/** Открыт ли проект */
 	is_opened?:boolean | `@${string}`,
 	/** Запланирован ли проект */
@@ -2273,6 +2277,8 @@ export type ValueTypes = {
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
 	parent_hash?:boolean | `@${string}`,
+	/** Название родительского проекта */
+	parent_title?:boolean | `@${string}`,
 	/** Плановые показатели проекта */
 	plan?:ValueTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -2311,12 +2317,16 @@ export type ValueTypes = {
 	created_at?:boolean | `@${string}`,
 	/** Данные CRPS для распределения наград проекта */
 	crps?:ValueTypes["CapitalProjectCrpsData"],
+	/** Данные/шаблон проекта */
+	data?:boolean | `@${string}`,
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
 	/** Фактические показатели проекта */
 	fact?:ValueTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
+	/** Приглашение к проекту */
+	invite?:boolean | `@${string}`,
 	/** Открыт ли проект */
 	is_opened?:boolean | `@${string}`,
 	/** Запланирован ли проект */
@@ -2331,6 +2341,8 @@ export type ValueTypes = {
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
 	parent_hash?:boolean | `@${string}`,
+	/** Название родительского проекта */
+	parent_title?:boolean | `@${string}`,
 	/** Плановые показатели проекта */
 	plan?:ValueTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -2429,8 +2441,12 @@ export type ValueTypes = {
 ["CapitalProjectFilter"]: {
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null | Variable<any, string>,
+	/** Показывать только проекты, у которых есть установленное значение в поле invite */
+	has_invite?: boolean | undefined | null | Variable<any, string>,
 	/** Показывать только проекты, у которых есть или были голосования */
 	has_voting?: boolean | undefined | null | Variable<any, string>,
+	/** true - только компоненты проектов, false - только основные проекты */
+	is_component?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по открытому проекту */
 	is_opened?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по запланированному проекту */
@@ -7652,12 +7668,16 @@ export type ResolverInputTypes = {
 	created_at?:boolean | `@${string}`,
 	/** Данные CRPS для распределения наград проекта */
 	crps?:ResolverInputTypes["CapitalProjectCrpsData"],
+	/** Данные/шаблон проекта */
+	data?:boolean | `@${string}`,
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
 	/** Фактические показатели проекта */
 	fact?:ResolverInputTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
+	/** Приглашение к проекту */
+	invite?:boolean | `@${string}`,
 	/** Открыт ли проект */
 	is_opened?:boolean | `@${string}`,
 	/** Запланирован ли проект */
@@ -7672,6 +7692,8 @@ export type ResolverInputTypes = {
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
 	parent_hash?:boolean | `@${string}`,
+	/** Название родительского проекта */
+	parent_title?:boolean | `@${string}`,
 	/** Плановые показатели проекта */
 	plan?:ResolverInputTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -7710,12 +7732,16 @@ export type ResolverInputTypes = {
 	created_at?:boolean | `@${string}`,
 	/** Данные CRPS для распределения наград проекта */
 	crps?:ResolverInputTypes["CapitalProjectCrpsData"],
+	/** Данные/шаблон проекта */
+	data?:boolean | `@${string}`,
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
 	/** Фактические показатели проекта */
 	fact?:ResolverInputTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
+	/** Приглашение к проекту */
+	invite?:boolean | `@${string}`,
 	/** Открыт ли проект */
 	is_opened?:boolean | `@${string}`,
 	/** Запланирован ли проект */
@@ -7730,6 +7756,8 @@ export type ResolverInputTypes = {
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
 	parent_hash?:boolean | `@${string}`,
+	/** Название родительского проекта */
+	parent_title?:boolean | `@${string}`,
 	/** Плановые показатели проекта */
 	plan?:ResolverInputTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -7828,8 +7856,12 @@ export type ResolverInputTypes = {
 ["CapitalProjectFilter"]: {
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
+	/** Показывать только проекты, у которых есть установленное значение в поле invite */
+	has_invite?: boolean | undefined | null,
 	/** Показывать только проекты, у которых есть или были голосования */
 	has_voting?: boolean | undefined | null,
+	/** true - только компоненты проектов, false - только основные проекты */
+	is_component?: boolean | undefined | null,
 	/** Фильтр по открытому проекту */
 	is_opened?: boolean | undefined | null,
 	/** Фильтр по запланированному проекту */
@@ -13029,12 +13061,16 @@ export type ModelTypes = {
 	created_at: string,
 	/** Данные CRPS для распределения наград проекта */
 	crps: ModelTypes["CapitalProjectCrpsData"],
+	/** Данные/шаблон проекта */
+	data: string,
 	/** Описание проекта */
 	description: string,
 	/** Фактические показатели проекта */
 	fact: ModelTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id: number,
+	/** Приглашение к проекту */
+	invite: string,
 	/** Открыт ли проект */
 	is_opened: boolean,
 	/** Запланирован ли проект */
@@ -13049,6 +13085,8 @@ export type ModelTypes = {
 	meta: string,
 	/** Хеш родительского проекта */
 	parent_hash: string,
+	/** Название родительского проекта */
+	parent_title?: string | undefined | null,
 	/** Плановые показатели проекта */
 	plan: ModelTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -13086,12 +13124,16 @@ export type ModelTypes = {
 	created_at: string,
 	/** Данные CRPS для распределения наград проекта */
 	crps: ModelTypes["CapitalProjectCrpsData"],
+	/** Данные/шаблон проекта */
+	data: string,
 	/** Описание проекта */
 	description: string,
 	/** Фактические показатели проекта */
 	fact: ModelTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id: number,
+	/** Приглашение к проекту */
+	invite: string,
 	/** Открыт ли проект */
 	is_opened: boolean,
 	/** Запланирован ли проект */
@@ -13106,6 +13148,8 @@ export type ModelTypes = {
 	meta: string,
 	/** Хеш родительского проекта */
 	parent_hash: string,
+	/** Название родительского проекта */
+	parent_title?: string | undefined | null,
 	/** Плановые показатели проекта */
 	plan: ModelTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -13200,8 +13244,12 @@ export type ModelTypes = {
 ["CapitalProjectFilter"]: {
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
+	/** Показывать только проекты, у которых есть установленное значение в поле invite */
+	has_invite?: boolean | undefined | null,
 	/** Показывать только проекты, у которых есть или были голосования */
 	has_voting?: boolean | undefined | null,
+	/** true - только компоненты проектов, false - только основные проекты */
+	is_component?: boolean | undefined | null,
 	/** Фильтр по открытому проекту */
 	is_opened?: boolean | undefined | null,
 	/** Фильтр по запланированному проекту */
@@ -18455,12 +18503,16 @@ export type GraphQLTypes = {
 	created_at: string,
 	/** Данные CRPS для распределения наград проекта */
 	crps: GraphQLTypes["CapitalProjectCrpsData"],
+	/** Данные/шаблон проекта */
+	data: string,
 	/** Описание проекта */
 	description: string,
 	/** Фактические показатели проекта */
 	fact: GraphQLTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id: number,
+	/** Приглашение к проекту */
+	invite: string,
 	/** Открыт ли проект */
 	is_opened: boolean,
 	/** Запланирован ли проект */
@@ -18475,6 +18527,8 @@ export type GraphQLTypes = {
 	meta: string,
 	/** Хеш родительского проекта */
 	parent_hash: string,
+	/** Название родительского проекта */
+	parent_title?: string | undefined | null,
 	/** Плановые показатели проекта */
 	plan: GraphQLTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -18513,12 +18567,16 @@ export type GraphQLTypes = {
 	created_at: string,
 	/** Данные CRPS для распределения наград проекта */
 	crps: GraphQLTypes["CapitalProjectCrpsData"],
+	/** Данные/шаблон проекта */
+	data: string,
 	/** Описание проекта */
 	description: string,
 	/** Фактические показатели проекта */
 	fact: GraphQLTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
 	id: number,
+	/** Приглашение к проекту */
+	invite: string,
 	/** Открыт ли проект */
 	is_opened: boolean,
 	/** Запланирован ли проект */
@@ -18533,6 +18591,8 @@ export type GraphQLTypes = {
 	meta: string,
 	/** Хеш родительского проекта */
 	parent_hash: string,
+	/** Название родительского проекта */
+	parent_title?: string | undefined | null,
 	/** Плановые показатели проекта */
 	plan: GraphQLTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -18630,8 +18690,12 @@ export type GraphQLTypes = {
 ["CapitalProjectFilter"]: {
 		/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
+	/** Показывать только проекты, у которых есть установленное значение в поле invite */
+	has_invite?: boolean | undefined | null,
 	/** Показывать только проекты, у которых есть или были голосования */
 	has_voting?: boolean | undefined | null,
+	/** true - только компоненты проектов, false - только основные проекты */
+	is_component?: boolean | undefined | null,
 	/** Фильтр по открытому проекту */
 	is_opened?: boolean | undefined | null,
 	/** Фильтр по запланированному проекту */

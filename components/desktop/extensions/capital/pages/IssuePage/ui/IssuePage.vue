@@ -6,7 +6,16 @@ div
       .row.items-center.q-gutter-sm
         q-icon(name='task', size='24px')
         div
-          .text-h6 {{ issue?.title || 'Загрузка...' }}
+          q-input(
+            v-if="issue"
+            v-model='issue.title'
+            label='Название задачи'
+            outlined
+            dense
+            class="q-mb-sm"
+            @input="handleTitleChange"
+          )
+          .text-h6(v-if="!issue") Загрузка...
 
         IssueControls(
           :issue='issue'
@@ -35,7 +44,7 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, markRaw } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import { api as IssueApi } from 'app/extensions/capital/entities/Issue/api';
@@ -48,8 +57,6 @@ import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
 import { IssueControls } from 'app/extensions/capital/widgets';
-import { CreateCommitButton } from 'app/extensions/capital/features/Commit/CreateCommit';
-import { useHeaderActions } from 'src/shared/hooks';
 const route = useRoute();
 
 const issue = ref<IIssue | null>(null);
@@ -57,9 +64,6 @@ const loading = ref(false);
 
 // Используем composable для обновления задач
 const { debounceSave, isAutoSaving, autoSaveError } = useUpdateIssue();
-
-// Регистрируем кнопку создания коммита в header
-const { registerAction } = useHeaderActions();
 
 // Получаем параметры из маршрута
 const issueHash = computed(() => route.params.issue_hash as string);
@@ -90,6 +94,19 @@ const ensureEditorJSFormat = (description: any) => {
   return textToEditorJS(String(description));
 };
 
+// Обработчик изменения названия задачи
+const handleTitleChange = () => {
+  if (!issue.value) return;
+
+  const updateData = {
+    issue_hash: issue.value.issue_hash,
+    title: issue.value.title,
+  };
+
+  // Запускаем авто-сохранение с задержкой
+  debounceSave(updateData);
+};
+
 // Обработчик изменения описания задачи
 const handleDescriptionChange = () => {
   if (!issue.value) return;
@@ -109,8 +126,7 @@ const { registerAction: registerRightDrawerAction } = useRightDrawer();
 
 // Настраиваем кнопку "Назад"
 useBackButton({
-  text: 'К задачам',
-  routeName: 'project-tasks',
+  text: 'Назад',
   componentId: 'issue-page-' + issueHash.value,
 });
 
@@ -150,15 +166,7 @@ const loadIssue = async () => {
       });
 
       // Регистрируем кнопку создания коммита в header
-      registerAction({
-        id: 'create-commit-' + issueHash.value,
-        component: markRaw(CreateCommitButton),
-        props: {
-          projectHash: projectHash.value,
-          mini: true,
-        },
-        order: 2,
-      });
+
     }
   } catch (error) {
     console.error('Ошибка при загрузке задачи:', error);

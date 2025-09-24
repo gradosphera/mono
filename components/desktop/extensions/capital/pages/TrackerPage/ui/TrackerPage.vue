@@ -27,17 +27,13 @@ div
 </template>
 
 <script lang="ts" setup>
-import { onMounted, markRaw } from 'vue';
+import { onMounted } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
-import { useHeaderActions } from 'src/shared/hooks';
 import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
 import { TimeStatsWidget, TimeIssuesWidget, TimeEntriesWidget } from 'app/extensions/capital/widgets';
 
 const { info } = useSystemStore();
-
-// Регистрируем кнопку создания проекта в header
-const { registerAction } = useHeaderActions();
 
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_tracker_projects_expanded';
@@ -93,11 +89,6 @@ onMounted(async () => {
   loadProjectsExpandedState();
   loadIssuesExpandedState();
 
-  registerAction({
-    id: 'create-project',
-    component: markRaw(() => null), // Можно добавить кнопку создания проекта если нужно
-    order: 1,
-  });
 });
 </script>
 

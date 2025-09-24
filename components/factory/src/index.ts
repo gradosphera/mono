@@ -100,13 +100,38 @@ export class Generator implements IGenerator {
       [Actions.ReturnByMoneyDecision.Template.registry_id]: new Actions.ReturnByMoneyDecision.Factory(this.storage), // 901
       [Actions.AssetContributionDecision.Template.registry_id]: new Actions.AssetContributionDecision.Factory(this.storage), // 701
       [Actions.AssetContributionAct.Template.registry_id]: new Actions.AssetContributionAct.Factory(this.storage), // 702
-      [Actions.InvestmentAgreement.Template.registry_id]: new Actions.InvestmentAgreement.Factory(this.storage), // 1000
+      [Actions.CapitalizationAgreement.Template.registry_id]: new Actions.CapitalizationAgreement.Factory(this.storage), // 1000
+      [Actions.GenerationAgreement.Template.registry_id]: new Actions.GenerationAgreement.Factory(this.storage), // 1001
+      [Actions.AppendixGenerationAgreement.Template.registry_id]: new Actions.AppendixGenerationAgreement.Factory(this.storage), // 1002
 
-      [Actions.InvestByResultStatement.Template.registry_id]: new Actions.InvestByResultStatement.Factory(this.storage), // 1001
-      [Actions.InvestByResultAct.Template.registry_id]: new Actions.InvestByResultAct.Factory(this.storage), // 1002
+      [Actions.ExpenseStatement.Template.registry_id]: new Actions.ExpenseStatement.Factory(this.storage), // 1010
+      [Actions.ExpenseDecision.Template.registry_id]: new Actions.ExpenseDecision.Factory(this.storage), // 1011
 
-      [Actions.InvestByMoneyStatement.Template.registry_id]: new Actions.InvestByMoneyStatement.Factory(this.storage), // 1005
-      [Actions.InvestMembershipConvertation.Template.registry_id]: new Actions.InvestMembershipConvertation.Factory(this.storage), // 1010
+      [Actions.GenerationMoneyInvestStatement.Template.registry_id]: new Actions.GenerationMoneyInvestStatement.Factory(this.storage), // 1020
+      [Actions.GenerationMoneyReturnUnusedStatement.Template.registry_id]: new Actions.GenerationMoneyReturnUnusedStatement.Factory(this.storage), // 1025
+
+      [Actions.CapitalizationMoneyInvestStatement.Template.registry_id]: new Actions.CapitalizationMoneyInvestStatement.Factory(this.storage), // 1030
+
+      [Actions.ResultContributionStatement.Template.registry_id]: new Actions.ResultContributionStatement.Factory(this.storage), // 1040
+      [Actions.ResultContributionDecision.Template.registry_id]: new Actions.ResultContributionDecision.Factory(this.storage), // 1041
+      [Actions.ResultContributionAct.Template.registry_id]: new Actions.ResultContributionAct.Factory(this.storage), // 1042
+
+      [Actions.GetLoanStatement.Template.registry_id]: new Actions.GetLoanStatement.Factory(this.storage), // 1050
+      [Actions.GetLoanDecision.Template.registry_id]: new Actions.GetLoanDecision.Factory(this.storage), // 1051
+
+      [Actions.GenerationPropertyInvestStatement.Template.registry_id]: new Actions.GenerationPropertyInvestStatement.Factory(this.storage), // 1060
+      [Actions.GenerationPropertyInvestDecision.Template.registry_id]: new Actions.GenerationPropertyInvestDecision.Factory(this.storage), // 1061
+      [Actions.GenerationPropertyInvestAct.Template.registry_id]: new Actions.GenerationPropertyInvestAct.Factory(this.storage), // 1062
+
+      [Actions.CapitalizationPropertyInvestStatement.Template.registry_id]: new Actions.CapitalizationPropertyInvestStatement.Factory(this.storage), // 1070
+      [Actions.CapitalizationPropertyInvestDecision.Template.registry_id]: new Actions.CapitalizationPropertyInvestDecision.Factory(this.storage), // 1071
+      [Actions.CapitalizationPropertyInvestAct.Template.registry_id]: new Actions.CapitalizationPropertyInvestAct.Factory(this.storage), // 1072
+
+      [Actions.GenerationToMainWalletConvertStatement.Template.registry_id]: new Actions.GenerationToMainWalletConvertStatement.Factory(this.storage), // 1080
+      [Actions.GenerationToProjectConvertStatement.Template.registry_id]: new Actions.GenerationToProjectConvertStatement.Factory(this.storage), // 1081
+      [Actions.GenerationToCapitalizationConvertStatement.Template.registry_id]: new Actions.GenerationToCapitalizationConvertStatement.Factory(this.storage), // 1082
+
+      [Actions.CapitalizationToMainWalletConvertStatement.Template.registry_id]: new Actions.CapitalizationToMainWalletConvertStatement.Factory(this.storage), // 1090
     }
     await this.storage.connect()
   }

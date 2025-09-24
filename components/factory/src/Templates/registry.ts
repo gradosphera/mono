@@ -17,11 +17,38 @@ import * as AssetContributionAct from './702.assetContributionAct'
 import * as ReturnByAssetAct from './802.returnByAssetAct'
 import * as ReturnByMoney from './900.returnByMoney'
 import * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
-import * as InvestmentAgreement from './1000.InvestmentAgreement'
-import * as InvestByResultStatement from './1001.InvestByResultStatement'
-import * as InvestByResultAct from './1002.InvestByResultAct'
-import * as InvestByMoneyStatement from './1005.InvestByMoneyStatement'
-import * as InvestMembershipConvertation from './1010.InvestMembershipConvertation'
+import * as CapitalizationAgreement from './1000.CapitalizationAgreement'
+import * as GenerationAgreement from './1001.GenerationAgreement'
+import * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
+
+import * as ExpenseStatement from './1010.ExpenseStatement'
+import * as ExpenseDecision from './1011.ExpenseDecision'
+
+import * as GenerationMoneyInvestStatement from './1020.GenerationMoneyInvestStatement'
+import * as GenerationMoneyReturnUnusedStatement from './1025.GenerationMoneyReturnUnusedStatement'
+
+import * as CapitalizationMoneyInvestStatement from './1030.CapitalizationMoneyInvestStatement'
+
+import * as ResultContributionStatement from './1040.ResultContributionStatement'
+import * as ResultContributionDecision from './1041.ResultContributionDecision'
+import * as ResultContributionAct from './1042.ResultContributionAct'
+
+import * as GetLoanStatement from './1050.GetLoanStatement'
+import * as GetLoanDecision from './1051.GetLoanDecision'
+
+import * as GenerationPropertyInvestStatement from './1060.GenerationPropertyInvestStatement'
+import * as GenerationPropertyInvestDecision from './1061.GenerationPropertyInvestDecision'
+import * as GenerationPropertyInvestAct from './1062.GenerationPropertyInvestAct'
+
+import * as CapitalizationPropertyInvestStatement from './1070.CapitalizationPropertyInvestStatement'
+import * as CapitalizationPropertyInvestDecision from './1071.CapitalizationPropertyInvestDecision'
+import * as CapitalizationPropertyInvestAct from './1072.CapitalizationPropertyInvestAct'
+
+import * as GenerationToMainWalletConvertStatement from './1080.GenerationToMainWalletConvertStatement'
+import * as GenerationToProjectConvertStatement from './1081.GenerationToProjectConvertStatement'
+import * as GenerationToCapitalizationConvertStatement from './1082.GenerationToCapitalizationConvertStatement'
+
+import * as CapitalizationToMainWalletConvertStatement from './1090.CapitalizationToMainWalletConvertStatement'
 
 import * as SosediAgreement from './699.SosediAgreement'
 
@@ -56,9 +83,27 @@ export const Registry = {
   802: ReturnByAssetAct,
   900: ReturnByMoney,
   901: ReturnByMoneyDecision,
-  1000: InvestmentAgreement,
-  1001: InvestByResultStatement,
-  1002: InvestByResultAct,
-  1005: InvestByMoneyStatement,
-  1010: InvestMembershipConvertation,
+  1000: CapitalizationAgreement,
+  1001: GenerationAgreement,
+  1002: AppendixGenerationAgreement,
+  1010: ExpenseStatement,
+  1011: ExpenseDecision,
+  1020: GenerationMoneyInvestStatement,
+  1025: GenerationMoneyReturnUnusedStatement,
+  1030: CapitalizationMoneyInvestStatement,
+  1040: ResultContributionStatement,
+  1041: ResultContributionDecision,
+  1042: ResultContributionAct,
+  1050: GetLoanStatement,
+  1051: GetLoanDecision,
+  1060: GenerationPropertyInvestStatement,
+  1061: GenerationPropertyInvestDecision,
+  1062: GenerationPropertyInvestAct,
+  1070: CapitalizationPropertyInvestStatement,
+  1071: CapitalizationPropertyInvestDecision,
+  1072: CapitalizationPropertyInvestAct,
+  1080: GenerationToMainWalletConvertStatement,
+  1081: GenerationToProjectConvertStatement,
+  1082: GenerationToCapitalizationConvertStatement,
+  1090: CapitalizationToMainWalletConvertStatement,
 }

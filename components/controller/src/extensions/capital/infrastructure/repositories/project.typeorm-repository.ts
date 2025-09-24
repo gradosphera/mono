@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Not, IsNull } from 'typeorm';
+import { Repository, Not, IsNull, Raw } from 'typeorm';
 import { ProjectRepository } from '../../domain/repositories/project.repository';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
@@ -8,6 +8,7 @@ import { ProjectMapper } from '../mappers/project.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import type { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/project-blockchain.interface';
 import type { IProjectDomainInterfaceDatabaseData } from '../../domain/interfaces/project-database.interface';
 import type {
@@ -179,6 +180,9 @@ export class ProjectTypeormRepository
     if (filter?.has_voting) {
       where.voting_deadline = Not(IsNull());
     }
+    if (filter?.has_invite) {
+      where.invite = Not('');
+    }
 
     // Получаем общее количество записей
     const totalCount = await this.repository.count({ where });
@@ -200,6 +204,9 @@ export class ProjectTypeormRepository
 
     // Преобразуем в доменные сущности
     const items = entities.map((entity) => ProjectMapper.toDomain(entity));
+
+    // Получаем parent_title для проектов, у которых есть parent_hash
+    await this.populateParentTitles(items);
 
     // Возвращаем результат с пагинацией
     return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
@@ -250,18 +257,25 @@ export class ProjectTypeormRepository
     if (filter?.has_voting) {
       where.voting_deadline = Not(IsNull());
     }
-
-    // Логика для parent_hash:
-    // - Если parent_hash указан - фильтруем по нему
-    // - Если parent_hash не указан - ищем проекты без parent_hash (проекты верхнего уровня)
-    if (filter?.parent_hash !== undefined) {
-      where.parent_hash = filter.parent_hash;
-    } else {
-      where.parent_hash = null; // Проекты верхнего уровня
+    if (filter?.has_invite) {
+      where.invite = Not('');
     }
 
-    console.log('where', where);
-    console.log('filter', filter);
+    // Логика для parent_hash и is_component:
+    const emptyHash = DomainToBlockchainUtils.getEmptyHash();
+    if (filter?.parent_hash !== undefined) {
+      // Если parent_hash указан явно - фильтруем по нему
+      where.parent_hash = filter.parent_hash;
+    } else if (filter?.is_component !== undefined) {
+      // Логика для is_component:
+      if (filter.is_component) {
+        // Компоненты: проекты с parent_hash не null и не пустым хэшем
+        where.parent_hash = Raw((alias) => `${alias} IS NOT NULL AND ${alias} != '${emptyHash}'`);
+      } else {
+        // Основные проекты: parent_hash = null ИЛИ parent_hash = emptyHash
+        where.parent_hash = Raw((alias) => `${alias} IS NULL OR ${alias} = '${emptyHash}'`);
+      }
+    }
 
     // Получаем общее количество записей
     const totalCount = await this.repository.count({ where });
@@ -284,9 +298,14 @@ export class ProjectTypeormRepository
     // Преобразуем в доменные сущности
     const items = entities.map((entity) => ProjectMapper.toDomain(entity));
 
+    // Получаем parent_title для проектов, у которых есть parent_hash
+    await this.populateParentTitles(items);
+
     // Для каждого проекта получаем его компоненты
     for (const project of items) {
       const components = await this.findComponentsByParentHash(project.project_hash);
+      // Получаем parent_title для компонентов
+      await this.populateParentTitles(components);
       // Добавляем компоненты к проекту
       (project as any).components = components;
     }
@@ -306,8 +325,13 @@ export class ProjectTypeormRepository
 
     const project = ProjectMapper.toDomain(entity);
 
+    // Получаем parent_title для проекта
+    await this.populateParentTitles([project]);
+
     // Получаем компоненты проекта
     const components = await this.findComponentsByParentHash(hash);
+    // Получаем parent_title для компонентов
+    await this.populateParentTitles(components);
     (project as any).components = components;
 
     return project;
@@ -323,5 +347,43 @@ export class ProjectTypeormRepository
     });
 
     return entities.map((entity) => ProjectMapper.toDomain(entity));
+  }
+
+  /**
+   * Заполняет поле parent_title для массива проектов на основе их parent_hash
+   */
+  private async populateParentTitles(projects: ProjectDomainEntity[]): Promise<void> {
+    // Собираем все уникальные parent_hash из проектов
+    const parentHashes = projects
+      .map((project) => project.parent_hash)
+      .filter(
+        (hash) => hash && hash.trim() !== '' && hash !== '0000000000000000000000000000000000000000000000000000000000000000'
+      )
+      .filter((hash, index, arr) => arr.indexOf(hash) === index); // Убираем дубликаты
+
+    if (parentHashes.length === 0) {
+      return; // Нет родительских проектов для обработки
+    }
+
+    // Получаем родительские проекты по их хешам
+    const parentEntities = await this.repository.find({
+      where: parentHashes.map((hash) => ({ project_hash: hash })),
+      select: ['project_hash', 'title'],
+    });
+
+    // Создаем карту хеш -> название для быстрого поиска
+    const parentTitleMap = new Map<string, string>();
+    parentEntities.forEach((entity) => {
+      if (entity.title) {
+        parentTitleMap.set(entity.project_hash, entity.title);
+      }
+    });
+
+    // Присваиваем parent_title каждому проекту
+    projects.forEach((project) => {
+      if (project.parent_hash && parentTitleMap.has(project.parent_hash)) {
+        (project as any).parent_title = parentTitleMap.get(project.parent_hash);
+      }
+    });
   }
 }

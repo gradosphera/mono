@@ -15,9 +15,10 @@ q-layout(view='lHh LpR fff')
   // Кнопка открытия drawer (снаружи)
   q-btn.fixed-top-right(
     v-if='rightDrawerActions.length > 0 && !rightDrawerOpen',
-    style='width: 56px; height: 50px',
+    :style='buttonStyle',
     dense,
-    flat,
+
+    flat
     icon='fas fa-chevron-left',
     @click='toggleRightDrawer'
   )
@@ -33,7 +34,7 @@ q-layout(view='lHh LpR fff')
     .div
       q-btn(
         dense,
-        style='width: 56px; height: 50px',
+        :style='buttonStyle',
         flat,
         icon='fas fa-chevron-right',
         @click='toggleRightDrawer'
@@ -48,24 +49,22 @@ q-layout(view='lHh LpR fff')
 
   q-page-container
     q-page
-      .absolute-full.flex.flex-center.z-top(
-        v-if='desktop?.isWorkspaceChanging'
-      )
-        Loader
-
+      WindowLoader(v-if='desktop?.isWorkspaceChanging')
       router-view(v-else)
+
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Header } from 'src/widgets/Header/CommonHeader';
 import { LeftDrawerMenu } from 'src/widgets/Desktop/LeftDrawerMenu';
 import { ContactsFooter } from 'src/shared/ui/Footer';
-import { Loader } from 'src/shared/ui/Loader';
+
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useDefaultLayoutLogic } from './useDefaultLayoutLogic';
 import { usePWAThemeColor } from 'src/shared/lib/composables/usePWAThemeColor';
 import { useRightDrawerReader } from 'src/shared/hooks/useRightDrawer';
-
+import { WindowLoader } from 'src/shared/ui/Loader';
 const desktop = useDesktopStore();
 const { rightDrawerActions } = useRightDrawerReader();
 
@@ -79,9 +78,15 @@ const {
   headerClass,
   footerText,
   loggedIn,
+  isMobile,
   toggleLeftDrawer,
   toggleRightDrawer,
 } = useDefaultLayoutLogic();
+
+const buttonStyle = computed(() => ({
+  width: isMobile.value ? '45px' : '56px',
+  height: isMobile.value ? '30px' : '50px'
+}));
 </script>
 
 <style lang="scss">

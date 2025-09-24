@@ -22,17 +22,13 @@ div
 </template>
 
 <script lang="ts" setup>
-import { onMounted, markRaw } from 'vue';
+import { onMounted } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
-import { useHeaderActions } from 'src/shared/hooks';
 import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
 import { ListVotingProjectWidget, ProjectVotesWidget } from 'app/extensions/capital/widgets';
 
 const { info } = useSystemStore();
-
-// Регистрируем кнопку создания проекта в header
-const { registerAction } = useHeaderActions();
 
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_voting_projects_expanded';
@@ -88,11 +84,6 @@ onMounted(async () => {
   loadProjectsExpandedState();
   loadVotesExpandedState();
 
-  registerAction({
-    id: 'voting-actions',
-    component: markRaw(() => null), // Можно добавить кнопки управления голосованиями если нужно
-    order: 1,
-  });
 });
 </script>
 

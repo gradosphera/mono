@@ -15,6 +15,8 @@ interface IContributorStore {
   loadContributors: (data: IGetContributorsInput) => Promise<void>;
   contributor: Ref<IContributor | null>;
   loadContributor: (data: IGetContributorInput) => Promise<IContributor | null | undefined>;
+  self: Ref<IContributor | null>;
+  loadSelf: (data: IGetContributorInput) => Promise<IContributor | null | undefined>;
 }
 
 export const useContributorStore = defineStore(
@@ -22,6 +24,7 @@ export const useContributorStore = defineStore(
   (): IContributorStore => {
     const contributors = ref<IContributorsPagination | null>(null);
     const contributor = ref<IContributor | null>(null);
+    const self = ref<IContributor | null>(null);
 
     const loadContributors = async (
       data: IGetContributorsInput,
@@ -38,11 +41,22 @@ export const useContributorStore = defineStore(
       return loadedData;
     };
 
+    const loadSelf = async (
+      data: IGetContributorInput,
+    ): Promise<IContributor> => {
+      const loadedData = await api.loadContributor(data);
+      self.value = loadedData;
+
+      return loadedData;
+    };
+
     return {
       contributors,
       contributor,
       loadContributors,
       loadContributor,
+      self,
+      loadSelf,
     };
   },
 );

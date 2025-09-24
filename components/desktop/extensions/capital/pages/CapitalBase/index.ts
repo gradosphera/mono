@@ -1,0 +1,1 @@
+export { CapitalBase } from './ui';

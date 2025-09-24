@@ -2,7 +2,7 @@
 <template lang="pug">
 q-btn.back-button(
   v-if='backNavigationButton',
-  :stretch='isMobile',
+
   push,
   color='primary',
   @click='backNavigationButton.onClick'

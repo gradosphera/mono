@@ -82,7 +82,8 @@ const filteredRoutes = computed<IRoute[]>(() => {
       const conditionMatch = r.meta?.conditions
         ? evaluateCondition(r.meta.conditions, context.value)
         : true;
-      return rolesMatch && conditionMatch;
+      const hiddenMatch = r.meta?.hidden ? !r.meta.hidden : true;
+      return rolesMatch && conditionMatch && hiddenMatch;
     },
   );
 });

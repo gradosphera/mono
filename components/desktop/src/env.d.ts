@@ -26,5 +26,6 @@ declare module 'vue-router' {
     title: string;
     icon: string;
     requiresAuth?: boolean;
+    hidden?: boolean;
   }
 }

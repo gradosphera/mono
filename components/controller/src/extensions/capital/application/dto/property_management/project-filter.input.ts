@@ -55,4 +55,16 @@ export class ProjectFilterInputDTO {
     description: 'Показывать только проекты, у которых есть или были голосования',
   })
   has_voting?: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Показывать только проекты, у которых есть установленное значение в поле invite',
+  })
+  has_invite?: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'true - только компоненты проектов, false - только основные проекты',
+  })
+  is_component?: boolean;
 }

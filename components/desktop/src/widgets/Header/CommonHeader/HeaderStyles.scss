@@ -20,3 +20,39 @@
   height: 50px !important;
   overflow-x: auto;
 }
+
+.header-actions-group {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s ease;
+
+  &:hover {
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .q-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}

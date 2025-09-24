@@ -220,19 +220,27 @@ defineExpose({
 </script>
 
 <style>
+.body--light .editor-container {
+  background: rgb(246, 247, 249);
+}
+
+.body--dark .editor-container {
+  background: rgb(40, 39, 39);
+  color: white;
+}
+
 .editor-container {
-  border-radius: 4px;
-  min-height: 200px;
+  border-radius: 10px;
+  padding: 10px;
 }
 
 /* .editor-container.editor--readonly {
   background-color: #f5f5f5;
 } */
 
-.editor {
-  min-height: 200px;
+/* .editor { */
   /* padding: 16px; */
-}
+/* } */
 
 .codex-editor__redactor{
   padding-bottom: 0px !important;

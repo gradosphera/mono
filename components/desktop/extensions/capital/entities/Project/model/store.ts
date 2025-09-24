@@ -15,14 +15,14 @@ const namespace = 'projectStore';
 
 interface IProjectStore {
   projects: Ref<IProjectsPagination | null>;
-  loadProjects: (data: IGetProjectsInput) => Promise<void>;
+  loadProjects: (data: IGetProjectsInput) => Promise<IProjectsPagination>;
   addProjectToList: (projectData: IProject) => void;
   project: Ref<IGetProjectOutput | null>;
-  loadProject: (data: IGetProjectInput) => Promise<void>;
+  loadProject: (data: IGetProjectInput) => Promise<IGetProjectOutput>;
   projectWithRelations: Ref<IProjectWithRelations | null>;
   loadProjectWithRelations: (
     data: IGetProjectWithRelationsInput,
-  ) => Promise<void>;
+  ) => Promise<IProjectWithRelations>;
 }
 
 export const useProjectStore = defineStore(namespace, (): IProjectStore => {
@@ -30,9 +30,10 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
   const project = ref<IGetProjectOutput | null>(null);
   const projectWithRelations = ref<IProjectWithRelations | null>(null);
 
-  const loadProjects = async (data: IGetProjectsInput) => {
+  const loadProjects = async (data: IGetProjectsInput): Promise<IProjectsPagination> => {
     const loadedData = await api.loadProjects(data);
     projects.value = loadedData;
+    return loadedData;
   };
 
   const addProjectToList = (projectData: IProject) => {
@@ -57,16 +58,18 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
     }
   };
 
-  const loadProject = async (data: IGetProjectInput) => {
+  const loadProject = async (data: IGetProjectInput): Promise<IGetProjectOutput> => {
     const loadedData = await api.loadProject(data);
     project.value = loadedData;
+    return loadedData;
   };
 
   const loadProjectWithRelations = async (
     data: IGetProjectWithRelationsInput,
-  ) => {
+  ): Promise<IProjectWithRelations> => {
     const loadedData = await api.loadProjectWithRelations(data);
     projectWithRelations.value = loadedData;
+    return loadedData;
   };
 
   return {

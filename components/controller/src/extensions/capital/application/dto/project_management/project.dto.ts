@@ -452,6 +452,12 @@ export class BaseProjectOutputDTO extends BaseOutputDTO {
   parent_hash!: string;
 
   @Field(() => String, {
+    description: 'Название родительского проекта',
+    nullable: true,
+  })
+  parent_title?: string;
+
+  @Field(() => String, {
     description: 'Статус из блокчейна',
   })
   blockchain_status!: string;
@@ -487,9 +493,19 @@ export class BaseProjectOutputDTO extends BaseOutputDTO {
   description!: string;
 
   @Field(() => String, {
+    description: 'Приглашение к проекту',
+  })
+  invite!: string;
+
+  @Field(() => String, {
     description: 'Мета-информация проекта',
   })
   meta!: string;
+
+  @Field(() => String, {
+    description: 'Данные/шаблон проекта',
+  })
+  data!: string;
 
   @Field(() => String, {
     description: 'Дата создания',
