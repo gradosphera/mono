@@ -21,35 +21,35 @@ export class ContributorDomainEntity
   private static sync_key = 'contributor_hash';
 
   // Поля из базы данных
-  public id?: number; // ID в блокчейне
+  public id!: number; // ID в блокчейне
 
   // Доменные поля (расширения)
   public status: ContributorStatus;
 
   // Поля для отображения информации об аккаунте
   public display_name: string; // ФИО или название организации
-  public about?: string; // Описание вкладчика
+  public about: string; // Описание вкладчика
 
   // Поля из блокчейна (contributors.hpp)
   public contributor_hash: IContributorBlockchainData['contributor_hash'];
 
-  public coopname?: IContributorBlockchainData['coopname'];
-  public username?: IContributorBlockchainData['username'];
-  public blockchain_status?: IContributorBlockchainData['status']; // Статус из блокчейна
-  public memo?: IContributorBlockchainData['memo'];
-  public is_external_contract?: IContributorBlockchainData['is_external_contract'];
-  public contract?: ISignedDocumentDomainInterface;
-  public appendixes?: IContributorBlockchainData['appendixes'];
-  public rate_per_hour?: IContributorBlockchainData['rate_per_hour'];
-  public hours_per_day?: IContributorBlockchainData['hours_per_day'];
-  public debt_amount?: IContributorBlockchainData['debt_amount'];
-  public contributed_as_investor?: IContributorBlockchainData['contributed_as_investor'];
-  public contributed_as_creator?: IContributorBlockchainData['contributed_as_creator'];
-  public contributed_as_author?: IContributorBlockchainData['contributed_as_author'];
-  public contributed_as_coordinator?: IContributorBlockchainData['contributed_as_coordinator'];
-  public contributed_as_contributor?: IContributorBlockchainData['contributed_as_contributor'];
-  public contributed_as_propertor?: IContributorBlockchainData['contributed_as_propertor'];
-  public created_at?: IContributorBlockchainData['created_at'];
+  public coopname!: IContributorBlockchainData['coopname'];
+  public username!: IContributorBlockchainData['username'];
+  public blockchain_status!: IContributorBlockchainData['status']; // Статус из блокчейна
+  public memo!: IContributorBlockchainData['memo'];
+  public is_external_contract!: IContributorBlockchainData['is_external_contract'];
+  public contract!: ISignedDocumentDomainInterface;
+  public appendixes!: IContributorBlockchainData['appendixes'];
+  public rate_per_hour!: IContributorBlockchainData['rate_per_hour'];
+  public hours_per_day!: IContributorBlockchainData['hours_per_day'];
+  public debt_amount!: IContributorBlockchainData['debt_amount'];
+  public contributed_as_investor!: IContributorBlockchainData['contributed_as_investor'];
+  public contributed_as_creator!: IContributorBlockchainData['contributed_as_creator'];
+  public contributed_as_author!: IContributorBlockchainData['contributed_as_author'];
+  public contributed_as_coordinator!: IContributorBlockchainData['contributed_as_coordinator'];
+  public contributed_as_contributor!: IContributorBlockchainData['contributed_as_contributor'];
+  public contributed_as_propertor!: IContributorBlockchainData['contributed_as_propertor'];
+  public created_at!: IContributorBlockchainData['created_at'];
 
   /**
    * Конструктор для сборки композитной сущности
@@ -66,7 +66,7 @@ export class ContributorDomainEntity
     // Специфичные поля для contributor
     this.contributor_hash = databaseData.contributor_hash.toLowerCase();
     this.display_name = databaseData.display_name;
-    this.about = databaseData.about;
+    this.about = databaseData.about ?? '';
 
     // Данные из блокчейна
     if (blockchainData) {

@@ -9,14 +9,11 @@ export interface RegisterContributorDomainInput {
   /** Имя пользователя */
   username: string;
 
-  /** Хэш вкладчика */
-  contributor_hash: string;
+  /** О себе */
+  about?: string;
 
   /** Ставка за час работы */
-  rate_per_hour: string;
-
-  /** Флаг внешнего контракта */
-  is_external_contract: boolean;
+  rate_per_hour?: string;
 
   /** Документ договора УХД */
   contract: ISignedDocumentDomainInterface;

@@ -12,3 +12,6 @@ export * as Config from './Config';
 export * as Commit from './Commit';
 export * as Cycle from './Cycle';
 export * as ProgramInvest from './ProgramInvest';
+export * as Agreement from './Agreement';
+export * as PropertyInvest from './PropertyInvest';
+export * as Distribution from './Distribution';

@@ -7,6 +7,8 @@ import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/errors/http-api-error';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import type { IContributorBlockchainData } from '../../../domain/interfaces/contributor-blockchain.interface';
+import { ContributorDeltaMapper } from '../mappers/contributor-delta.mapper';
 
 /**
  * Инфраструктурный сервис для реализации блокчейн порта CAPITAL
@@ -14,7 +16,11 @@ import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.uti
  */
 @Injectable()
 export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
-  constructor(private readonly blockchainService: BlockchainService) {}
+  constructor(
+    private readonly blockchainService: BlockchainService,
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
+    private readonly contributorDeltaMapper: ContributorDeltaMapper
+  ) {}
 
   /**
    * Установка конфигурации CAPITAL контракта
@@ -129,12 +135,37 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
 
     this.blockchainService.initialize(data.coopname, wif);
 
-    return await this.blockchainService.transact({
+    // Выполняем транзакцию регистрации
+    const result = await this.blockchainService.transact({
       account: CapitalContract.contractName.production,
       name: CapitalContract.Actions.RegisterContributor.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     });
+
+    return result;
+  }
+
+  /**
+   * Получение вкладчика из CAPITAL контракта по хешу
+   */
+  async getContributor(coopname: string, contributorHash: string): Promise<IContributorBlockchainData | null> {
+    // Получаем вкладчика из таблицы contributors контракта capital
+    const contributor = await this.blockchainService.getSingleRow<CapitalContract.Tables.Contributors.IContributor>(
+      CapitalContract.contractName.production,
+      coopname,
+      CapitalContract.Tables.Contributors.tableName,
+      Checksum256.from(contributorHash),
+      'tertiary',
+      'sha256'
+    );
+
+    if (!contributor) {
+      return null;
+    }
+
+    // Используем delta mapper для преобразования данных
+    return this.contributorDeltaMapper.mapDeltaToBlockchainData({ value: contributor });
   }
 
   /**

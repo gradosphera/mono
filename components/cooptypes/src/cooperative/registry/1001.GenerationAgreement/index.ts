@@ -1,4 +1,5 @@
 import type { IGenerate, IMetaDocument } from '../../document'
+import type { ICooperativeData } from '../../model'
 
 export const registry_id = 1001
 
@@ -12,6 +13,7 @@ export type Meta = IMetaDocument & Action
 // Модель данных документа
 export interface Model {
   meta: IMetaDocument
+  coop: ICooperativeData
 }
 
 export const title = 'Договор участия в хозяйственной деятельности'

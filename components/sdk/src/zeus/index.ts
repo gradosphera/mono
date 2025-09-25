@@ -5310,14 +5310,12 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	username: string | Variable<any, string>
 };
 	["RegisterContributorInput"]: {
+	/** О себе */
+	about?: string | undefined | null | Variable<any, string>,
 	/** Документ контракта */
 	contract: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Хэш вкладчика */
-	contributor_hash: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Флаг внешнего контракта */
-	is_external_contract: boolean | Variable<any, string>,
 	/** Ставка за час работы */
 	rate_per_hour: string | Variable<any, string>,
 	/** Имя пользователя */
@@ -10750,14 +10748,12 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	username: string
 };
 	["RegisterContributorInput"]: {
+	/** О себе */
+	about?: string | undefined | null,
 	/** Документ контракта */
 	contract: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Хэш вкладчика */
-	contributor_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Флаг внешнего контракта */
-	is_external_contract: boolean,
 	/** Ставка за час работы */
 	rate_per_hour: string,
 	/** Имя пользователя */
@@ -16234,14 +16230,12 @@ export type ModelTypes = {
 	username: string
 };
 	["RegisterContributorInput"]: {
+	/** О себе */
+	about?: string | undefined | null,
 	/** Документ контракта */
 	contract: ModelTypes["SignedDigitalDocumentInput"],
-	/** Хэш вкладчика */
-	contributor_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Флаг внешнего контракта */
-	is_external_contract: boolean,
 	/** Ставка за час работы */
 	rate_per_hour: string,
 	/** Имя пользователя */
@@ -21833,14 +21827,12 @@ export type GraphQLTypes = {
 	username: string
 };
 	["RegisterContributorInput"]: {
-		/** Документ контракта */
+		/** О себе */
+	about?: string | undefined | null,
+	/** Документ контракта */
 	contract: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Хэш вкладчика */
-	contributor_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Флаг внешнего контракта */
-	is_external_contract: boolean,
 	/** Ставка за час работы */
 	rate_per_hour: string,
 	/** Имя пользователя */

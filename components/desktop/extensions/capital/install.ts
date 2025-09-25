@@ -17,19 +17,45 @@ import { CapitalWalletPage } from './pages';
 export default async function (): Promise<IWorkspaceConfig> {
   return {
     workspace: 'capital',
-    title: 'Контракт CAPITAL',
-    defaultRoute: 'import-contributors', // Маршрут по умолчанию для рабочего стола председателя
+    title: 'Благорост',
+    defaultRoute: 'capital-wallet', // Маршрут по умолчанию для рабочего стола председателя
     routes: [
       {
         meta: {
-          title: 'Контракт CAPITAL',
+          title: 'Шаблон',
           icon: 'fa-solid fa-user-tie',
-          roles: ['chairman'],
+          roles: [],
         },
         path: '/:coopname/capital',
         name: 'capital',
         component: markRaw(CapitalBase),
         children: [
+          {
+            path: 'wallet',
+            name: 'capital-wallet',
+            component: markRaw(CapitalWalletPage),
+            meta: {
+              title: 'Кошелек',
+              icon: 'fa-solid fa-wallet',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [],
+          },
+          {
+            path: 'tracker',
+            name: 'tracker',
+            component: markRaw(TrackerPage),
+            meta: {
+              title: 'Трекер',
+              icon: 'fa-solid fa-clock',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [],
+          },
           {
             path: 'import-contributors',
             name: 'import-contributors',
@@ -69,38 +95,13 @@ export default async function (): Promise<IWorkspaceConfig> {
             },
             children: [],
           },
-          {
-            path: 'wallet',
-            name: 'capital-wallet',
-            component: markRaw(CapitalWalletPage),
-            meta: {
-              title: 'Кошелек',
-              icon: 'fa-solid fa-wallet',
-              roles: [],
-              agreements: agreementsBase,
-              requiresAuth: true,
-            },
-            children: [],
-          },
-          {
-            path: 'tracker',
-            name: 'tracker',
-            component: markRaw(TrackerPage),
-            meta: {
-              title: 'Трекер',
-              icon: 'fa-solid fa-clock',
-              roles: [],
-              agreements: agreementsBase,
-              requiresAuth: true,
-            },
-            children: [],
-          },
+
           {
             path: 'projects-invites',
             name: 'projects-invites',
             component: markRaw(ProjectsInvitesPage),
             meta: {
-              title: 'Инвайты проектов',
+              title: 'Объявления',
               icon: 'fa-solid fa-envelope-open-text',
               roles: [],
               agreements: agreementsBase,
@@ -126,7 +127,7 @@ export default async function (): Promise<IWorkspaceConfig> {
             name: 'projects-list',
             component: markRaw(ProjectsListPage),
             meta: {
-              title: 'Список проектов',
+              title: 'Проекты',
               icon: 'fa-solid fa-list',
               roles: [],
               agreements: agreementsBase,

@@ -106,6 +106,8 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
   private async processAction(action: IAction): Promise<void> {
     this.logger.debug(`Обработка действия: ${action.name} от ${action.account}: ${JSON.stringify(action.data)}`);
 
+    await sleep(3000);
+
     // Проверяем, является ли действие исключением
     const isException = this.isActionException(action.account, action.name);
 
@@ -150,6 +152,8 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
    */
   private async processDelta(delta: IDelta): Promise<void> {
     this.logger.debug(`Обработка дельты: ${delta.table} от ${delta.code}`);
+
+    await sleep(3000);
 
     if (delta.value?.coopname != config.coopname) {
       return;

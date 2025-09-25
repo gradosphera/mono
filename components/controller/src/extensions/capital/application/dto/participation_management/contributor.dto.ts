@@ -11,16 +11,14 @@ import { BaseOutputDTO } from '../base.dto';
 })
 export class ContributorOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
-    nullable: true,
     description: 'ID в блокчейне',
   })
-  id?: number;
+  id!: number;
 
   @Field(() => Int, {
-    nullable: true,
     description: 'Номер блока последнего обновления',
   })
-  block_num?: number;
+  block_num!: number;
 
   @Field(() => Boolean, {
     description: 'Существует ли запись в блокчейне',
@@ -39,22 +37,19 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   contributor_hash!: string;
 
   @Field(() => String, {
-    nullable: true,
     description: 'Название кооператива',
   })
-  coopname?: string;
+  coopname!: string;
 
   @Field(() => String, {
-    nullable: true,
     description: 'Имя пользователя',
   })
-  username?: string;
+  username!: string;
 
   @Field(() => String, {
-    nullable: true,
     description: 'Статус из блокчейна',
   })
-  blockchain_status?: string;
+  blockchain_status!: string;
 
   @Field(() => String, {
     nullable: true,
@@ -63,80 +58,68 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   memo?: string;
 
   @Field(() => Boolean, {
-    nullable: true,
     description: 'Является ли внешним контрактом',
   })
-  is_external_contract?: boolean;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Ставка за час работы',
-  })
-  rate_per_hour?: number;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Сумма долга',
-  })
-  debt_amount?: number;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Вклад как инвестор',
-  })
-  contributed_as_investor?: number;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Вклад как создатель',
-  })
-  contributed_as_creator?: number;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Вклад как автор',
-  })
-  contributed_as_author?: number;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Вклад как координатор',
-  })
-  contributed_as_coordinator?: number;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Вклад как вкладчик',
-  })
-  contributed_as_contributor?: number;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Вклад как собственник имущества',
-  })
-  contributed_as_propertor?: number;
+  is_external_contract!: boolean;
 
   @Field(() => String, {
-    nullable: true,
+    description: 'Ставка за час работы',
+  })
+  rate_per_hour!: string;
+
+  @Field(() => String, {
+    description: 'Сумма долга',
+  })
+  debt_amount!: string;
+
+  @Field(() => String, {
+    description: 'Вклад как инвестор',
+  })
+  contributed_as_investor!: string;
+
+  @Field(() => String, {
+    description: 'Вклад как создатель',
+  })
+  contributed_as_creator!: string;
+
+  @Field(() => String, {
+    description: 'Вклад как автор',
+  })
+  contributed_as_author!: string;
+
+  @Field(() => String, {
+    description: 'Вклад как координатор',
+  })
+  contributed_as_coordinator!: string;
+
+  @Field(() => String, {
+    description: 'Вклад как вкладчик',
+  })
+  contributed_as_contributor!: string;
+
+  @Field(() => String, {
+    description: 'Вклад как собственник имущества',
+  })
+  contributed_as_propertor!: string;
+
+  @Field(() => String, {
     description: 'Дата создания',
   })
-  created_at?: string;
+  created_at!: string;
 
   @Field(() => DocumentAggregateDTO, {
-    nullable: true,
     description: 'Контракт вкладчика',
+    nullable: true,
   })
-  contract?: DocumentAggregateDTO;
+  contract?: DocumentAggregateDTO | null;
 
   @Field(() => [String], {
-    nullable: true,
     description: 'Приложения к контракту',
   })
   appendixes?: string[];
 
   @Field(() => String, {
-    nullable: true,
     description: 'Отображаемое имя',
   })
-  display_name?: string;
+  display_name!: string;
 }

@@ -6598,17 +6598,14 @@ input RegisterAccountInput {
 }
 
 input RegisterContributorInput {
+  """О себе"""
+  about: String
+
   """Документ контракта"""
   contract: SignedDigitalDocumentInput!
 
-  """Хэш вкладчика"""
-  contributor_hash: String!
-
   """Имя аккаунта кооператива"""
   coopname: String!
-
-  """Флаг внешнего контракта"""
-  is_external_contract: Boolean!
 
   """Ставка за час работы"""
   rate_per_hour: String!

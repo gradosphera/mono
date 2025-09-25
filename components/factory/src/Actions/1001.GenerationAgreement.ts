@@ -22,11 +22,10 @@ export class Factory extends DocFactory<GenerationAgreement.Action> {
     }
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
+    const coop = await super.getCooperative(data.coopname, data.block_num)
 
-    const combinedData: GenerationAgreement.Model = { meta }
-
+    const combinedData: GenerationAgreement.Model = { meta, coop }
     await this.validate(combinedData, template.model)
-
     const translation = template.translations[meta.lang]
     const document: IGeneratedDocument = await this.generatePDF('', template.context, combinedData, translation, meta, options?.skip_save)
 

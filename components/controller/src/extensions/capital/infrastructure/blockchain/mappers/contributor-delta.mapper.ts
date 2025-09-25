@@ -24,12 +24,11 @@ export class ContributorDeltaMapper extends AbstractBlockchainDeltaMapper<
   /**
    * Маппинг дельты в данные вкладчика из блокчейна
    */
-  mapDeltaToBlockchainData(delta: IDelta): IContributorBlockchainData | null {
+  mapDeltaToBlockchainData(delta: IDelta | { value: any }): IContributorBlockchainData | null {
     try {
       // Дельта содержит данные в поле value
       const value = delta.value as CapitalContract.Tables.Contributors.IContributor;
       if (!value) {
-        this.logger.warn(`Delta has no value: table=${delta.table}, key=${delta.primary_key}`);
         return null;
       }
 

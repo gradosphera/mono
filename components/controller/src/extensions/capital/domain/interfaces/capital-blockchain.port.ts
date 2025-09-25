@@ -1,5 +1,6 @@
 import { CapitalContract } from 'cooptypes';
 import type { TransactResult } from '@wharfkit/session';
+import type { IContributorBlockchainData } from '../interfaces/contributor-blockchain.interface';
 
 /**
  * Блокчейн порт для CAPITAL контракта
@@ -40,6 +41,11 @@ export interface CapitalBlockchainPort {
    * Регистрация вкладчика в CAPITAL контракте
    */
   registerContributor(data: CapitalContract.Actions.RegisterContributor.IRegisterContributor): Promise<TransactResult>;
+
+  /**
+   * Получение вкладчика из CAPITAL контракта по хешу
+   */
+  getContributor(coopname: string, contributorHash: string): Promise<IContributorBlockchainData | null>;
 
   /**
    * Подписание приложения в CAPITAL контракте

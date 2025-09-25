@@ -1,5 +1,10 @@
 import type { IRegisterContributorOutput } from 'app/extensions/capital/entities/Contributor/model';
 import type { IRegisterContributorInput } from '../model';
+import type {
+  IGenerateDocumentInput,
+  IGenerateDocumentOptionsInput,
+  IGeneratedDocumentOutput,
+} from 'src/shared/lib/types/document';
 import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
 
@@ -16,6 +21,22 @@ async function registerContributor(
   return result;
 }
 
+async function generateGenerationAgreement(
+  data: IGenerateDocumentInput,
+  options?: IGenerateDocumentOptionsInput,
+): Promise<IGeneratedDocumentOutput> {
+  const { [Mutations.Capital.GenerateGenerationAgreement.name]: result } =
+    await client.Mutation(Mutations.Capital.GenerateGenerationAgreement.mutation, {
+      variables: {
+        data,
+        options,
+      },
+    });
+
+  return result;
+}
+
 export const api = {
   registerContributor,
+  generateGenerationAgreement,
 };

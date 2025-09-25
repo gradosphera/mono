@@ -70,6 +70,7 @@ export * as DeleteIssue from './deleteIssue'
 export * as CreateCycle from './createCycle'
 /** Создать расход в CAPITAL контракте */
 export * as CreateExpense from './createExpense'
+
 /** Сгенерировать соглашение о капитализации */
 export * as GenerateCapitalizationAgreement from './generateCapitalizationAgreement'
 /** Сгенерировать генерационное соглашение */

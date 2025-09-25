@@ -1,12 +1,12 @@
 ---
 description: SDK мутации и запросы для подключения на рабочем столе
-globs: 
+globs:
 alwaysApply: false
 ---
 
-Бэкенд реализован здесь components/controller, sdk здесь components/sdk. 
+Бэкенд реализован здесь components/controller, sdk здесь components/sdk.
 
-Пример создания Query к API через SDK: 
+Пример создания Query к API через SDK:
 
 ``` ts
 async function loadBranches(data: IGetBranchesInput): Promise<IBranch[]> {
@@ -22,7 +22,7 @@ async function loadBranches(data: IGetBranchesInput): Promise<IBranch[]> {
 }
 ```
 
-Такие запросы обычно хранятся в папке Entities и вызываются из его store. 
+Такие запросы обычно хранятся в папке Entities и вызываются из его store.
 
 Пример мутации:
 
@@ -36,6 +36,139 @@ async function selectBranch(data: ISelectBranchInput): Promise<boolean>{
 }
 ```
 
-Мутации обычно храним в папке features. 
+Мутации обычно храним в папке features.
 
-Как можешь обратить внимание, все мутации и запросы строятся по одному шаблону. Вся необходимая информация уже есть в SDK. 
+Как можешь обратить внимание, все мутации и запросы строятся по одному шаблону. Вся необходимая информация уже есть в SDK.
+
+## Генерация и подпись документов
+
+### Генерация документов
+
+Для генерации документов используются мутации SDK типа `Generate[DocumentName]`. Например:
+
+```ts
+import { client } from 'src/shared/api/client';
+import { Mutations } from '@coopenomics/sdk';
+
+async function generateDocument(data: IGenerateDocumentInput): Promise<IGeneratedDocumentOutput> {
+  const { [Mutations.Capital.GenerateGenerationAgreement.name]: result } =
+    await client.Mutation(Mutations.Capital.GenerateGenerationAgreement.mutation, {
+      variables: {
+        data: {
+          coopname: 'coopname',
+          username: 'username',
+          lang: 'ru'
+        },
+        options
+      }
+    });
+
+  return result;
+}
+```
+
+**Composable для генерации документов:**
+```ts
+import { ref } from 'vue';
+import { api } from '../api';
+import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session';
+
+export function useGenerateDocument() {
+  const system = useSystemStore();
+  const session = useSessionStore();
+
+  const isGenerating = ref(false);
+  const generatedDocument = ref<IGeneratedDocumentOutput | null>(null);
+
+  const generate = async () => {
+    isGenerating.value = true;
+    try {
+      const data = {
+        coopname: system.info.coopname,
+        username: session.username,
+        lang: 'ru',
+      };
+
+      generatedDocument.value = await api.generateDocument(data);
+      return generatedDocument.value;
+    } finally {
+      isGenerating.value = false;
+    }
+  };
+
+  return {
+    generate,
+    isGenerating,
+    generatedDocument,
+  };
+}
+```
+
+### Подпись документов
+
+Для подписи документов используется класс `DigitalDocument`:
+
+```ts
+import { DigitalDocument } from 'src/shared/lib/document';
+import { useSessionStore } from 'src/entities/Session';
+
+const session = useSessionStore();
+const digitalDocument = new DigitalDocument(generatedDocument);
+
+// Подпись документа
+const signedDoc = await digitalDocument.sign(session.username);
+```
+
+### Стандартный путь: генерация + подпись
+
+**Стандартный путь (без демонстрации):**
+```ts
+// 1. Генерируем документ
+const document = await generateDocument({
+  coopname: system.info.coopname,
+  username: session.username,
+  lang: 'ru'
+});
+
+// 2. Подписываем документ
+const digitalDocument = new DigitalDocument(document);
+const signedDoc = await digitalDocument.sign(session.username);
+
+// 3. Отправляем подписанный документ на бэкенд
+await submitDocumentMutation(signedDoc);
+```
+
+### Демонстрация документов (опционально)
+
+Демонстрация документов не всегда требуется. Если нужно показать документ пользователю перед подписью:
+
+```vue
+<template>
+  <DocumentHtmlReader v-if="generatedDocument" :html="generatedDocument.html" />
+  <q-btn @click="signAndSubmit" label="Подписать документ" />
+</template>
+
+<script setup>
+const { generate, isGenerating, generatedDocument } = useGenerateDocument();
+
+// Генерация при монтировании
+onMounted(async () => {
+  await generate();
+});
+
+// Подпись и отправка
+const signAndSubmit = async () => {
+  const digitalDocument = new DigitalDocument(generatedDocument.value);
+  const signedDoc = await digitalDocument.sign(session.username);
+  await submitDocumentMutation(signedDoc);
+};
+</script>
+```
+
+**Важно:**
+- Демонстрация документов опциональна
+- Стандартный путь: генерация → подпись → отправка
+- Используй `DocumentHtmlReader` для отображения HTML документов
+- Все документы подписываются через `DigitalDocument.sign()`
+- Данные для генерации обычно включают `coopname`, `username`, `lang`

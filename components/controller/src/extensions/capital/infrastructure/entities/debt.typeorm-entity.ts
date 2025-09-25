@@ -17,16 +17,16 @@ export class DebtTypeormEntity extends BaseTypeormEntity {
   id!: number;
 
   // Поля из блокчейна (debts.hpp)
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar', length: 12, nullable: true })
   coopname!: string;
 
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar', length: 12, nullable: true })
   username!: string;
 
   @Column({ type: 'varchar', length: 64 })
   debt_hash!: string;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar', length: 64, nullable: true })
   project_hash!: string;
 
   @Column({ type: 'varchar', length: 20 })

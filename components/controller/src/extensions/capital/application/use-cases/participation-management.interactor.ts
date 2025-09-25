@@ -14,6 +14,10 @@ import type {
 } from '~/domain/common/interfaces/pagination.interface';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import { AccountExtensionPort, ACCOUNT_EXTENSION_PORT } from '~/domain/extension/ports/account-extension-port';
+import { generateRandomHash } from '~/utils/generate-hash.util';
+import { config } from '~/config';
+import { HttpApiError } from '~/errors/http-api-error';
+import httpStatus from 'http-status';
 
 /**
  * Интерактор домена для управления участием в CAPITAL контракте
@@ -72,29 +76,46 @@ export class ParticipationManagementInteractor {
     // Получаем отображаемое имя из аккаунта
     const displayName = await this.getDisplayNameFromAccount(data.username);
 
-    // Создаем вкладчика в репозитории (данные базы данных)
-    const contributor = new ContributorDomainEntity({
+    // Создаем базовые данные вкладчика для базы данных
+    const databaseData = {
       _id: '', // будет сгенерирован автоматически
-      present: true,
-      contributor_hash: '', // будет заполнен через синхронизацию
+      present: false,
+      contributor_hash: generateRandomHash(),
       status: ContributorStatus.PENDING,
+      about: data.about ?? '',
       _created_at: new Date(),
       _updated_at: new Date(),
       display_name: displayName,
-    });
+    };
 
     // Преобразовываем доменный документ в формат блокчейна
-    const blockchainData = {
+    const blockchainAction = {
       ...data,
+      contributor_hash: databaseData.contributor_hash,
+      rate_per_hour: data.rate_per_hour ?? config.blockchain.root_govern_symbol,
+      is_external_contract: false,
       contract: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.contract),
     };
 
-    // Вызываем блокчейн порт
-    const result = await this.capitalBlockchainPort.registerContributor(blockchainData);
+    // Вызываем блокчейн порт для регистрации - получаем транзакцию
+    const result = await this.capitalBlockchainPort.registerContributor(blockchainAction);
 
-    await this.contributorRepository.create(contributor);
+    // Получаем данные вкладчика из блокчейна после регистрации
+    const blockchainData = await this.capitalBlockchainPort.getContributor(data.coopname, databaseData.contributor_hash);
 
-    // Синхронизация автоматически обновит данные из блокчейна
+    if (!blockchainData) {
+      throw new HttpApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        `Не удалось получить данные вкладчика ${databaseData.contributor_hash} из блокчейна после регистрации`
+      );
+    }
+
+    // Создаем полный объект вкладчика, объединяя данные базы и блокчейна
+    const fullContributor = new ContributorDomainEntity(databaseData, blockchainData);
+
+    // Сохраняем полный объект в репозиторий
+    await this.contributorRepository.create(fullContributor);
+
     return result;
   }
 

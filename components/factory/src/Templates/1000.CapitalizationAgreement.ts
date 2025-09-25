@@ -2,6 +2,7 @@ import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
+import { CooperativeSchema } from '../Schema'
 
 export const registry_id = Cooperative.Registry.CapitalizationAgreement.registry_id
 

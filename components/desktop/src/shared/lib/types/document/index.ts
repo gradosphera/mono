@@ -11,3 +11,6 @@ export type IDocument<T = any> = Omit<Zeus.ModelTypes['SignedDigitalDocumentInpu
 }
 // Для обратной совместимости
 export type IObjectedDocument = IDocument;
+export type IGenerateDocumentInput = Zeus.ModelTypes['GenerateDocumentInput'];
+export type IGenerateDocumentOptionsInput = Zeus.ModelTypes['GenerateDocumentOptionsInput'];
+export type IGeneratedDocumentOutput = Zeus.ModelTypes['GeneratedDocument'];

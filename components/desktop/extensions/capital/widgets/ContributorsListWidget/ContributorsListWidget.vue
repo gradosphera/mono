@@ -12,6 +12,7 @@ q-card(flat)
     square,
     no-data-label='У кооператива нет вкладчиков'
   )
+
     template(#body='props')
       q-tr(:props='props')
         q-td {{ props.row.username || '-' }}
@@ -22,18 +23,18 @@ q-card(flat)
             :label='getStatusLabel(props.row.status)',
             size='sm'
           )
-        q-td.text-right {{ formatCurrency(props.row.debt_amount) }}
-        q-td.text-right {{ formatCurrency(props.row.contributed_as_investor) }}
-        q-td.text-right {{ formatCurrency(props.row.contributed_as_creator) }}
-        q-td.text-right {{ formatCurrency(props.row.contributed_as_author) }}
-        q-td.text-right {{ formatCurrency(props.row.contributed_as_coordinator) }}
-        q-td.text-right {{ formatCurrency(props.row.contributed_as_contributor) }}
-        q-td.text-right {{ formatCurrency(props.row.contributed_as_propertor) }}
+        q-td.text-right {{ formatAsset2Digits(props.row.debt_amount) }}
+        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_investor) }}
+        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_creator) }}
+        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_author) }}
+        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_coordinator) }}
+        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_contributor) }}
+        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_propertor) }}
 </template>
 
 <script lang="ts" setup>
 import type { IContributor } from 'app/extensions/capital/entities/Contributor/model/types';
-
+import { formatAsset2Digits } from 'src/shared/lib/utils';
 interface Props {
   contributors: IContributor[];
   loading?: boolean;
@@ -120,6 +121,7 @@ const columns = [
     field: 'contributed_as_contributor' as const,
     sortable: true,
   },
+
   {
     name: 'propertor',
     label: 'Собственник',
@@ -129,15 +131,6 @@ const columns = [
   },
 ];
 
-// Методы форматирования
-const formatCurrency = (value: number | null | undefined) => {
-  if (value == null) return '-';
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'RUB',
-    minimumFractionDigits: 0,
-  }).format(value);
-};
 
 const getStatusColor = (status: string) => {
   switch (status) {

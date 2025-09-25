@@ -12,6 +12,8 @@ import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/gene
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
+import type { ContributorDomainEntity } from '../../domain/entities/contributor.entity';
 import { Cooperative } from 'cooptypes';
 
 /**
@@ -22,6 +24,7 @@ import { Cooperative } from 'cooptypes';
 export class ParticipationManagementService {
   constructor(
     private readonly participationManagementInteractor: ParticipationManagementInteractor,
+    private readonly documentAggregationService: DocumentAggregationService,
     private readonly documentDomainInteractor: DocumentDomainInteractor
   ) {}
 
@@ -36,7 +39,8 @@ export class ParticipationManagementService {
    * Регистрация вкладчика в CAPITAL контракте
    */
   async registerContributor(data: RegisterContributorInputDTO): Promise<TransactResult> {
-    return await this.participationManagementInteractor.registerContributor(data);
+    const result = await this.participationManagementInteractor.registerContributor(data);
+    return result;
   }
 
   /**
@@ -61,9 +65,12 @@ export class ParticipationManagementService {
     // Получаем результат с пагинацией из домена
     const result = await this.participationManagementInteractor.getContributors(filter, domainOptions);
 
+    // Асинхронная обработка каждого элемента с использованием маппера
+    const items = await Promise.all(result.items.map((item) => this.mapContributorToOutputDTO(item)));
+
     // Конвертируем результат в DTO
     return {
-      items: result.items as ContributorOutputDTO[],
+      items,
       totalCount: result.totalCount,
       totalPages: result.totalPages,
       currentPage: result.currentPage,
@@ -75,7 +82,7 @@ export class ParticipationManagementService {
    */
   async getContributorById(_id: string): Promise<ContributorOutputDTO | null> {
     const contributor = await this.participationManagementInteractor.getContributorById(_id);
-    return contributor as ContributorOutputDTO | null;
+    return contributor ? await this.mapContributorToOutputDTO(contributor) : null;
   }
 
   /**
@@ -87,7 +94,22 @@ export class ParticipationManagementService {
     contributor_hash?: string;
   }): Promise<ContributorOutputDTO | null> {
     const contributor = await this.participationManagementInteractor.getContributorByCriteria(criteria);
-    return contributor as ContributorOutputDTO | null;
+    return contributor ? await this.mapContributorToOutputDTO(contributor) : null;
+  }
+
+  /**
+   * Маппинг доменной сущности в DTO
+   */
+  private async mapContributorToOutputDTO(contributor: ContributorDomainEntity): Promise<ContributorOutputDTO> {
+    // Асинхронная обработка контракта с использованием DocumentAggregationService
+    const contract = contributor.contract
+      ? await this.documentAggregationService.buildDocumentAggregate(contributor.contract)
+      : null;
+
+    return {
+      ...contributor,
+      contract,
+    };
   }
 
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============

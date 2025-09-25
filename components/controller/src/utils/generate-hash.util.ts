@@ -9,6 +9,10 @@ export function generateUniqueHash(): string {
   return crypto.createHash('sha256').update(`${timestamp}-${randomValue}`).digest('hex');
 }
 
+export function generateRandomHash(): string {
+  return generateUniqueHash();
+}
+
 /**
  * Генерирует sha256 хэш от строки
  * @param input Входная строка для хеширования

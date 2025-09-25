@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { RegisterContributorDomainInput } from '../../../domain/actions/register-contributor-domain-input.interface';
 import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
@@ -19,19 +19,15 @@ export class RegisterContributorInputDTO implements RegisterContributorDomainInp
   @IsString({ message: 'Имя пользователя должно быть строкой' })
   username!: string;
 
-  @Field(() => String, { description: 'Хэш вкладчика' })
-  @IsNotEmpty({ message: 'Хэш вкладчика не должен быть пустым' })
-  @IsString({ message: 'Хэш вкладчика должен быть строкой' })
-  contributor_hash!: string;
+  @Field(() => String, { description: 'О себе', nullable: true })
+  @IsOptional()
+  @IsString({ message: 'О себе должно быть строкой' })
+  about?: string;
 
   @Field(() => String, { description: 'Ставка за час работы' })
-  @IsNotEmpty({ message: 'Ставка за час работы не должна быть пустой' })
+  @IsOptional()
   @IsString({ message: 'Ставка за час работы должна быть строкой' })
-  rate_per_hour!: string;
-
-  @Field(() => Boolean, { description: 'Флаг внешнего контракта' })
-  @IsBoolean({ message: 'Флаг внешнего контракта должен быть булевым' })
-  is_external_contract!: boolean;
+  rate_per_hour?: string;
 
   @Field(() => SignedDigitalDocumentInputDTO, { description: 'Документ контракта' })
   @Type(() => SignedDigitalDocumentInputDTO)
