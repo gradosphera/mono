@@ -6,6 +6,11 @@ import { DebtOutputDTO } from '../dto/debt_management/debt.dto';
 import { DebtFilterInputDTO } from '../dto/debt_management/debt-filter.input';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { Cooperative } from 'cooptypes';
 
 /**
  * Сервис уровня приложения для управления долгами CAPITAL
@@ -13,7 +18,10 @@ import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/
  */
 @Injectable()
 export class DebtManagementService {
-  constructor(private readonly debtManagementInteractor: DebtManagementInteractor) {}
+  constructor(
+    private readonly debtManagementInteractor: DebtManagementInteractor,
+    private readonly documentDomainInteractor: DocumentDomainInteractor
+  ) {}
 
   /**
    * Создание долга в CAPITAL контракте
@@ -49,5 +57,41 @@ export class DebtManagementService {
   async getDebtById(_id: string): Promise<DebtOutputDTO | null> {
     const debt = await this.debtManagementInteractor.getDebtById(_id);
     return debt as DebtOutputDTO | null;
+  }
+
+  // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
+
+  /**
+   * Генерация заявления о получении займа
+   */
+  async generateGetLoanStatement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.GetLoanStatement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Генерация решения о получении займа
+   */
+  async generateGetLoanDecision(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.GetLoanDecision.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
   }
 }

@@ -15,6 +15,11 @@ import { ProjectOutputDTO } from '../dto/project_management/project.dto';
 import { ProjectFilterInputDTO } from '../dto/property_management/project-filter.input';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { Cooperative } from 'cooptypes';
 
 /**
  * Сервис уровня приложения для управления проектами CAPITAL
@@ -22,7 +27,10 @@ import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/
  */
 @Injectable()
 export class ProjectManagementService {
-  constructor(private readonly projectManagementInteractor: ProjectManagementInteractor) {}
+  constructor(
+    private readonly projectManagementInteractor: ProjectManagementInteractor,
+    private readonly documentDomainInteractor: DocumentDomainInteractor
+  ) {}
 
   /**
    * Создание проекта в CAPITAL контракте
@@ -156,5 +164,24 @@ export class ProjectManagementService {
   async getProjectWithRelations(projectHash: string): Promise<ProjectOutputDTO | null> {
     const project = await this.projectManagementInteractor.getProjectWithRelations(projectHash);
     return project as ProjectOutputDTO | null;
+  }
+
+  // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
+
+  /**
+   * Генерация приложения к генерационному соглашению
+   */
+  async generateAppendixGenerationAgreement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.AppendixGenerationAgreement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
   }
 }

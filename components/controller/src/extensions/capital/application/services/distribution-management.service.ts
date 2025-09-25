@@ -5,6 +5,11 @@ import type { FundProjectInputDTO } from '../dto/distribution_management/fund-pr
 import type { RefreshProgramInputDTO } from '../dto/distribution_management/refresh-program-input.dto';
 import type { RefreshProjectInputDTO } from '../dto/distribution_management/refresh-project-input.dto';
 import type { TransactResult } from '@wharfkit/session';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { Cooperative } from 'cooptypes';
 
 /**
  * Сервис уровня приложения для управления распределением в CAPITAL
@@ -12,7 +17,10 @@ import type { TransactResult } from '@wharfkit/session';
  */
 @Injectable()
 export class DistributionManagementService {
-  constructor(private readonly distributionManagementInteractor: DistributionManagementInteractor) {}
+  constructor(
+    private readonly distributionManagementInteractor: DistributionManagementInteractor,
+    private readonly documentDomainInteractor: DocumentDomainInteractor
+  ) {}
 
   /**
    * Финансирование программы в CAPITAL контракте
@@ -40,5 +48,75 @@ export class DistributionManagementService {
    */
   async refreshProject(data: RefreshProjectInputDTO): Promise<TransactResult> {
     return await this.distributionManagementInteractor.refreshProject(data);
+  }
+
+  // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
+
+  /**
+   * Генерация заявления о конвертации из генерации в основной кошелек
+   */
+  async generateGenerationToMainWalletConvertStatement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.GenerationToMainWalletConvertStatement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Генерация заявления о конвертации из генерации в проектный кошелек
+   */
+  async generateGenerationToProjectConvertStatement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.GenerationToProjectConvertStatement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Генерация заявления о конвертации из генерации в капитализацию
+   */
+  async generateGenerationToCapitalizationConvertStatement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.GenerationToCapitalizationConvertStatement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Генерация заявления о конвертации из капитализации в основной кошелек
+   */
+  async generateCapitalizationToMainWalletConvertStatement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.CapitalizationToMainWalletConvertStatement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
   }
 }

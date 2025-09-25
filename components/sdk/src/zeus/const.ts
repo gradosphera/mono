@@ -496,6 +496,98 @@ export const AllTypesProps: Record<string,any> = {
 		capitalFundProject:{
 			data:"FundProjectInput"
 		},
+		capitalGenerateAppendixGenerationAgreement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationAgreement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationMoneyInvestStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationPropertyInvestAct:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationPropertyInvestDecision:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationPropertyInvestStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationToMainWalletConvertStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateExpenseDecision:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateExpenseStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationAgreement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationMoneyInvestStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationMoneyReturnUnusedStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationPropertyInvestAct:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationPropertyInvestDecision:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationPropertyInvestStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationToCapitalizationConvertStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationToMainWalletConvertStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationToProjectConvertStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGetLoanDecision:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGetLoanStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateResultContributionAct:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateResultContributionDecision:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateResultContributionStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
 		capitalImportContributor:{
 			data:"ImportContributorInput"
 		},
@@ -2195,6 +2287,29 @@ export const ReturnTypes: Record<string,any> = {
 		capitalEditProject:"Transaction",
 		capitalFundProgram:"Transaction",
 		capitalFundProject:"Transaction",
+		capitalGenerateAppendixGenerationAgreement:"GeneratedDocument",
+		capitalGenerateCapitalizationAgreement:"GeneratedDocument",
+		capitalGenerateCapitalizationMoneyInvestStatement:"GeneratedDocument",
+		capitalGenerateCapitalizationPropertyInvestAct:"GeneratedDocument",
+		capitalGenerateCapitalizationPropertyInvestDecision:"GeneratedDocument",
+		capitalGenerateCapitalizationPropertyInvestStatement:"GeneratedDocument",
+		capitalGenerateCapitalizationToMainWalletConvertStatement:"GeneratedDocument",
+		capitalGenerateExpenseDecision:"GeneratedDocument",
+		capitalGenerateExpenseStatement:"GeneratedDocument",
+		capitalGenerateGenerationAgreement:"GeneratedDocument",
+		capitalGenerateGenerationMoneyInvestStatement:"GeneratedDocument",
+		capitalGenerateGenerationMoneyReturnUnusedStatement:"GeneratedDocument",
+		capitalGenerateGenerationPropertyInvestAct:"GeneratedDocument",
+		capitalGenerateGenerationPropertyInvestDecision:"GeneratedDocument",
+		capitalGenerateGenerationPropertyInvestStatement:"GeneratedDocument",
+		capitalGenerateGenerationToCapitalizationConvertStatement:"GeneratedDocument",
+		capitalGenerateGenerationToMainWalletConvertStatement:"GeneratedDocument",
+		capitalGenerateGenerationToProjectConvertStatement:"GeneratedDocument",
+		capitalGenerateGetLoanDecision:"GeneratedDocument",
+		capitalGenerateGetLoanStatement:"GeneratedDocument",
+		capitalGenerateResultContributionAct:"GeneratedDocument",
+		capitalGenerateResultContributionDecision:"GeneratedDocument",
+		capitalGenerateResultContributionStatement:"GeneratedDocument",
 		capitalImportContributor:"Transaction",
 		capitalMakeClearance:"Transaction",
 		capitalOpenProject:"Transaction",

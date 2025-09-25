@@ -19,6 +19,7 @@ import { DeleteIssueByHashInputDTO } from '../dto/generation/delete-issue-by-has
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { StoryOutputDTO } from '../dto/generation/story.dto';
@@ -26,6 +27,9 @@ import { IssueOutputDTO } from '../dto/generation/issue.dto';
 import { CommitOutputDTO } from '../dto/generation/commit.dto';
 import { CycleOutputDTO } from '../dto/generation/cycle.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 
 // Пагинированные результаты
 const paginatedStoriesResult = createPaginationResult(StoryOutputDTO, 'PaginatedCapitalStories');
@@ -290,5 +294,45 @@ export class GenerationResolver {
     @Args('data', { type: () => DeleteIssueByHashInputDTO }) data: DeleteIssueByHashInputDTO
   ): Promise<boolean> {
     return await this.generationService.deleteIssueByHash(data.issue_hash);
+  }
+
+  // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============
+
+  /**
+   * Мутация для генерации заявления об инвестировании в генерацию
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateGenerationMoneyInvestStatement',
+    description: 'Сгенерировать заявление об инвестировании в генерацию',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateGenerationMoneyInvestStatement(
+    @Args('data', { type: () => GenerateDocumentInputDTO })
+    data: GenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.generationService.generateGenerationMoneyInvestStatement(data, options);
+  }
+
+  /**
+   * Мутация для генерации заявления о возврате неиспользованных средств генерации
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateGenerationMoneyReturnUnusedStatement',
+    description: 'Сгенерировать заявление о возврате неиспользованных средств генерации',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateGenerationMoneyReturnUnusedStatement(
+    @Args('data', { type: () => GenerateDocumentInputDTO })
+    data: GenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.generationService.generateGenerationMoneyReturnUnusedStatement(data, options);
   }
 }

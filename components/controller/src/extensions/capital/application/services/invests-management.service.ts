@@ -7,6 +7,11 @@ import { ProgramInvestOutputDTO } from '../dto/invests_management/program-invest
 import { InvestFilterInputDTO } from '../dto/invests_management/invest-filter.input';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { Cooperative } from 'cooptypes';
 
 /**
  * Сервис уровня приложения для управления инвестициями CAPITAL
@@ -14,7 +19,10 @@ import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/
  */
 @Injectable()
 export class InvestsManagementService {
-  constructor(private readonly investsManagementInteractor: InvestsManagementInteractor) {}
+  constructor(
+    private readonly investsManagementInteractor: InvestsManagementInteractor,
+    private readonly documentDomainInteractor: DocumentDomainInteractor
+  ) {}
 
   /**
    * Инвестирование в проект CAPITAL контракта
@@ -80,5 +88,24 @@ export class InvestsManagementService {
   async getProgramInvestById(_id: string): Promise<ProgramInvestOutputDTO | null> {
     const programInvest = await this.investsManagementInteractor.getProgramInvestById(_id);
     return programInvest as ProgramInvestOutputDTO | null;
+  }
+
+  // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
+
+  /**
+   * Генерация заявления об инвестировании в капитализацию
+   */
+  async generateCapitalizationMoneyInvestStatement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.CapitalizationMoneyInvestStatement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
   }
 }

@@ -5,12 +5,16 @@ import { ConvertSegmentInputDTO } from '../dto/result_submission/convert-segment
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { ResultOutputDTO } from '../dto/result_submission/result.dto';
 import { ResultFilterInputDTO } from '../dto/result_submission/result-filter.input';
 import { GetResultInputDTO } from '../dto/result_submission/get-result-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 
 // Пагинированные результаты
 const paginatedResultsResult = createPaginationResult(ResultOutputDTO, 'PaginatedCapitalResults');
@@ -80,5 +84,64 @@ export class ResultSubmissionResolver {
   })
   async getResult(@Args('data') data: GetResultInputDTO): Promise<ResultOutputDTO | null> {
     return await this.resultSubmissionService.getResultById(data._id);
+  }
+
+  // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============
+
+  /**
+   * Мутация для генерации заявления о вкладе результатов
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateResultContributionStatement',
+    description: 'Сгенерировать заявление о вкладе результатов',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateResultContributionStatement(
+    @Args('data', { type: () => GenerateDocumentInputDTO })
+    data: GenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.resultSubmissionService.generateResultContributionStatement(data, options);
+  }
+
+  /**
+   * Мутация для генерации решения о вкладе результатов
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateResultContributionDecision',
+    description: 'Сгенерировать решение о вкладе результатов',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateResultContributionDecision(
+    @Args('data', { type: () => GenerateDocumentInputDTO })
+    data: GenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.resultSubmissionService.generateResultContributionDecision(data, options);
+  }
+
+  /**
+   * Мутация для генерации акта о вкладе результатов
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateResultContributionAct',
+    description: 'Сгенерировать акт о вкладе результатов',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateResultContributionAct(
+    @Args('data', { type: () => GenerateDocumentInputDTO })
+    data: GenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.resultSubmissionService.generateResultContributionAct(data, options);
   }
 }

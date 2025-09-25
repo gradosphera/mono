@@ -4995,6 +4995,77 @@ type Mutation {
   """Финансирование проекта CAPITAL контракта"""
   capitalFundProject(data: FundProjectInput!): Transaction!
 
+  """Сгенерировать приложение к генерационному соглашению"""
+  capitalGenerateAppendixGenerationAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать соглашение о капитализации"""
+  capitalGenerateCapitalizationAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление об инвестировании в капитализацию"""
+  capitalGenerateCapitalizationMoneyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать акт об инвестировании имуществом в капитализацию"""
+  capitalGenerateCapitalizationPropertyInvestAct(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать решение об инвестировании имуществом в капитализацию"""
+  capitalGenerateCapitalizationPropertyInvestDecision(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление об инвестировании имуществом в капитализацию"""
+  capitalGenerateCapitalizationPropertyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """
+  Сгенерировать заявление о конвертации из капитализации в основной кошелек
+  """
+  capitalGenerateCapitalizationToMainWalletConvertStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать решение о расходе"""
+  capitalGenerateExpenseDecision(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление о расходе"""
+  capitalGenerateExpenseStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать генерационное соглашение"""
+  capitalGenerateGenerationAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление об инвестировании в генерацию"""
+  capitalGenerateGenerationMoneyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление о возврате неиспользованных средств генерации"""
+  capitalGenerateGenerationMoneyReturnUnusedStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать акт об инвестировании имуществом в генерацию"""
+  capitalGenerateGenerationPropertyInvestAct(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать решение об инвестировании имуществом в генерацию"""
+  capitalGenerateGenerationPropertyInvestDecision(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление об инвестировании имуществом в генерацию"""
+  capitalGenerateGenerationPropertyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление о конвертации из генерации в капитализацию"""
+  capitalGenerateGenerationToCapitalizationConvertStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление о конвертации из генерации в основной кошелек"""
+  capitalGenerateGenerationToMainWalletConvertStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление о конвертации из генерации в проектный кошелек"""
+  capitalGenerateGenerationToProjectConvertStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать решение о получении займа"""
+  capitalGenerateGetLoanDecision(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление о получении займа"""
+  capitalGenerateGetLoanStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать акт о вкладе результатов"""
+  capitalGenerateResultContributionAct(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать решение о вкладе результатов"""
+  capitalGenerateResultContributionDecision(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать заявление о вкладе результатов"""
+  capitalGenerateResultContributionStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
   """Импорт вкладчика в CAPITAL контракт"""
   capitalImportContributor(data: ImportContributorInput!): Transaction!
 

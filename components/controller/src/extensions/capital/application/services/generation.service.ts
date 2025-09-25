@@ -35,6 +35,11 @@ import { CycleDomainEntity } from '../../domain/entities/cycle.entity';
 import type { IStoryDatabaseData } from '../../domain/interfaces/story-database.interface';
 import type { IIssueDatabaseData } from '../../domain/interfaces/issue-database.interface';
 import type { ICycleDatabaseData } from '../../domain/interfaces/cycle-database.interface';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { Cooperative } from 'cooptypes';
 
 /**
  * Сервис уровня приложения для генерации в CAPITAL
@@ -54,7 +59,8 @@ export class GenerationService {
     private readonly commitRepository: CommitRepository,
     @Inject(CYCLE_REPOSITORY)
     private readonly cycleRepository: CycleRepository,
-    private readonly issueIdGenerationService: IssueIdGenerationService
+    private readonly issueIdGenerationService: IssueIdGenerationService,
+    private readonly documentDomainInteractor: DocumentDomainInteractor
   ) {}
 
   /**
@@ -381,5 +387,41 @@ export class GenerationService {
       currentPage: result.currentPage,
       totalPages: result.totalPages,
     };
+  }
+
+  // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
+
+  /**
+   * Генерация заявления об инвестировании в генерацию
+   */
+  async generateGenerationMoneyInvestStatement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.GenerationMoneyInvestStatement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Генерация заявления о возврате неиспользованных средств генерации
+   */
+  async generateGenerationMoneyReturnUnusedStatement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.GenerationMoneyReturnUnusedStatement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
   }
 }

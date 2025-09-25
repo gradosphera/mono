@@ -70,3 +70,49 @@ export * as DeleteIssue from './deleteIssue'
 export * as CreateCycle from './createCycle'
 /** Создать расход в CAPITAL контракте */
 export * as CreateExpense from './createExpense'
+/** Сгенерировать соглашение о капитализации */
+export * as GenerateCapitalizationAgreement from './generateCapitalizationAgreement'
+/** Сгенерировать генерационное соглашение */
+export * as GenerateGenerationAgreement from './generateGenerationAgreement'
+/** Сгенерировать приложение к генерационному соглашению */
+export * as GenerateAppendixGenerationAgreement from './generateAppendixGenerationAgreement'
+/** Сгенерировать заявление о расходе */
+export * as GenerateExpenseStatement from './generateExpenseStatement'
+/** Сгенерировать решение о расходе */
+export * as GenerateExpenseDecision from './generateExpenseDecision'
+/** Сгенерировать заявление об инвестировании в генерацию */
+export * as GenerateGenerationMoneyInvestStatement from './generateGenerationMoneyInvestStatement'
+/** Сгенерировать заявление о возврате неиспользованных средств генерации */
+export * as GenerateGenerationMoneyReturnUnusedStatement from './generateGenerationMoneyReturnUnusedStatement'
+/** Сгенерировать заявление об инвестировании в капитализацию */
+export * as GenerateCapitalizationMoneyInvestStatement from './generateCapitalizationMoneyInvestStatement'
+/** Сгенерировать заявление о вкладе результатов */
+export * as GenerateResultContributionStatement from './generateResultContributionStatement'
+/** Сгенерировать решение о вкладе результатов */
+export * as GenerateResultContributionDecision from './generateResultContributionDecision'
+/** Сгенерировать акт о вкладе результатов */
+export * as GenerateResultContributionAct from './generateResultContributionAct'
+/** Сгенерировать заявление о получении займа */
+export * as GenerateGetLoanStatement from './generateGetLoanStatement'
+/** Сгенерировать решение о получении займа */
+export * as GenerateGetLoanDecision from './generateGetLoanDecision'
+/** Сгенерировать заявление об инвестировании имуществом в генерацию */
+export * as GenerateGenerationPropertyInvestStatement from './generateGenerationPropertyInvestStatement'
+/** Сгенерировать решение об инвестировании имуществом в генерацию */
+export * as GenerateGenerationPropertyInvestDecision from './generateGenerationPropertyInvestDecision'
+/** Сгенерировать акт об инвестировании имуществом в генерацию */
+export * as GenerateGenerationPropertyInvestAct from './generateGenerationPropertyInvestAct'
+/** Сгенерировать заявление об инвестировании имуществом в капитализацию */
+export * as GenerateCapitalizationPropertyInvestStatement from './generateCapitalizationPropertyInvestStatement'
+/** Сгенерировать решение об инвестировании имуществом в капитализацию */
+export * as GenerateCapitalizationPropertyInvestDecision from './generateCapitalizationPropertyInvestDecision'
+/** Сгенерировать акт об инвестировании имуществом в капитализацию */
+export * as GenerateCapitalizationPropertyInvestAct from './generateCapitalizationPropertyInvestAct'
+/** Сгенерировать заявление о конвертации из генерации в основной кошелек */
+export * as GenerateGenerationToMainWalletConvertStatement from './generateGenerationToMainWalletConvertStatement'
+/** Сгенерировать заявление о конвертации из генерации в проектный кошелек */
+export * as GenerateGenerationToProjectConvertStatement from './generateGenerationToProjectConvertStatement'
+/** Сгенерировать заявление о конвертации из генерации в капитализацию */
+export * as GenerateGenerationToCapitalizationConvertStatement from './generateGenerationToCapitalizationConvertStatement'
+/** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
+export * as GenerateCapitalizationToMainWalletConvertStatement from './generateCapitalizationToMainWalletConvertStatement'

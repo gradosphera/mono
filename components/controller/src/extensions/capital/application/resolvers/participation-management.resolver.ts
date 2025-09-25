@@ -4,6 +4,7 @@ import { ImportContributorInputDTO } from '../dto/participation_management/impor
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { MakeClearanceInputDTO } from '../dto/participation_management/make-clearance-input.dto';
@@ -12,6 +13,9 @@ import { ContributorOutputDTO } from '../dto/participation_management/contributo
 import { ContributorFilterInputDTO } from '../dto/participation_management/contributor-filter.input';
 import { GetContributorInputDTO } from '../dto/participation_management/get-contributor-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 
 /**
  * GraphQL резолвер для действий управления участием в CAPITAL контракте
@@ -104,5 +108,45 @@ export class ParticipationManagementResolver {
       username: data.username,
       contributor_hash: data.contributor_hash,
     });
+  }
+
+  // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============
+
+  /**
+   * Мутация для генерации соглашения о капитализации
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateCapitalizationAgreement',
+    description: 'Сгенерировать соглашение о капитализации',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateCapitalizationAgreement(
+    @Args('data', { type: () => GenerateDocumentInputDTO })
+    data: GenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.participationManagementService.generateCapitalizationAgreement(data, options);
+  }
+
+  /**
+   * Мутация для генерации генерационного соглашения
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateGenerationAgreement',
+    description: 'Сгенерировать генерационное соглашение',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateGenerationAgreement(
+    @Args('data', { type: () => GenerateDocumentInputDTO })
+    data: GenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.participationManagementService.generateGenerationAgreement(data, options);
   }
 }

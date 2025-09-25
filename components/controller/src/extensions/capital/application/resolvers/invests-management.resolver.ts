@@ -4,6 +4,7 @@ import { CreateProjectInvestInputDTO } from '../dto/invests_management/create-pr
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { InvestFilterInputDTO } from '../dto/invests_management/invest-filter.input';
@@ -12,6 +13,9 @@ import { GetProgramInvestInputDTO } from '../dto/invests_management/get-program-
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { InvestOutputDTO } from '../dto/invests_management/invest.dto';
 import { ProgramInvestOutputDTO } from '../dto/invests_management/program-invest.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 
 // Пагинированные результаты
 const paginatedInvestsResult = createPaginationResult(InvestOutputDTO, 'PaginatedCapitalInvests');
@@ -92,5 +96,26 @@ export class InvestsManagementResolver {
   })
   async getProgramInvest(@Args('data') data: GetProgramInvestInputDTO): Promise<ProgramInvestOutputDTO | null> {
     return await this.investsManagementService.getProgramInvestById(data._id);
+  }
+
+  // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============
+
+  /**
+   * Мутация для генерации заявления об инвестировании в капитализацию
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateCapitalizationMoneyInvestStatement',
+    description: 'Сгенерировать заявление об инвестировании в капитализацию',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateCapitalizationMoneyInvestStatement(
+    @Args('data', { type: () => GenerateDocumentInputDTO })
+    data: GenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.investsManagementService.generateCapitalizationMoneyInvestStatement(data, options);
   }
 }

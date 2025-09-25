@@ -6,10 +6,14 @@ import { GetExpenseInputDTO } from '../dto/expenses_management/get-expense-input
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { ExpenseOutputDTO } from '../dto/expenses_management/expense.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 
 // Пагинированные результаты
 const paginatedExpensesResult = createPaginationResult(ExpenseOutputDTO, 'PaginatedCapitalExpenses');
@@ -63,5 +67,45 @@ export class ExpensesManagementResolver {
   })
   async getExpense(@Args('data') data: GetExpenseInputDTO): Promise<ExpenseOutputDTO | null> {
     return await this.expensesManagementService.getExpenseById(data);
+  }
+
+  // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============
+
+  /**
+   * Мутация для генерации заявления о расходе
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateExpenseStatement',
+    description: 'Сгенерировать заявление о расходе',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateExpenseStatement(
+    @Args('data', { type: () => GenerateDocumentInputDTO })
+    data: GenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.expensesManagementService.generateExpenseStatement(data, options);
+  }
+
+  /**
+   * Мутация для генерации решения о расходе
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateExpenseDecision',
+    description: 'Сгенерировать решение о расходе',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateExpenseDecision(
+    @Args('data', { type: () => GenerateDocumentInputDTO })
+    data: GenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.expensesManagementService.generateExpenseDecision(data, options);
   }
 }

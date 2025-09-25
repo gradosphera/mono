@@ -8,6 +8,11 @@ import { ContributorOutputDTO } from '../dto/participation_management/contributo
 import { ContributorFilterInputDTO } from '../dto/participation_management/contributor-filter.input';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { Cooperative } from 'cooptypes';
 
 /**
  * Сервис уровня приложения для управления участием в CAPITAL
@@ -15,7 +20,10 @@ import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/
  */
 @Injectable()
 export class ParticipationManagementService {
-  constructor(private readonly participationManagementInteractor: ParticipationManagementInteractor) {}
+  constructor(
+    private readonly participationManagementInteractor: ParticipationManagementInteractor,
+    private readonly documentDomainInteractor: DocumentDomainInteractor
+  ) {}
 
   /**
    * Импорт вкладчика в CAPITAL контракт
@@ -80,5 +88,41 @@ export class ParticipationManagementService {
   }): Promise<ContributorOutputDTO | null> {
     const contributor = await this.participationManagementInteractor.getContributorByCriteria(criteria);
     return contributor as ContributorOutputDTO | null;
+  }
+
+  // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
+
+  /**
+   * Генерация соглашения о капитализации
+   */
+  async generateCapitalizationAgreement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.CapitalizationAgreement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Генерация генерационного соглашения
+   */
+  async generateGenerationAgreement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.GenerationAgreement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
   }
 }

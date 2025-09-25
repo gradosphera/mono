@@ -8,6 +8,11 @@ import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/p
 import { ExpenseOutputDTO } from '../dto/expenses_management/expense.dto';
 import type { ExpenseDomainEntity } from '../../domain/entities/expense.entity';
 import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { Cooperative } from 'cooptypes';
 
 /**
  * Сервис уровня приложения для управления расходами CAPITAL
@@ -17,7 +22,8 @@ import { DocumentAggregationService } from '~/domain/document/services/document-
 export class ExpensesManagementService {
   constructor(
     private readonly expensesManagementInteractor: ExpensesManagementInteractor,
-    private readonly documentAggregationService: DocumentAggregationService
+    private readonly documentAggregationService: DocumentAggregationService,
+    private readonly documentDomainInteractor: DocumentDomainInteractor
   ) {}
 
   /**
@@ -91,5 +97,41 @@ export class ExpensesManagementService {
       _created_at: expense._created_at,
       _updated_at: expense._updated_at,
     };
+  }
+
+  // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
+
+  /**
+   * Генерация заявления о расходе
+   */
+  async generateExpenseStatement(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.ExpenseStatement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Генерация решения о расходе
+   */
+  async generateExpenseDecision(
+    data: GenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    const document = await this.documentDomainInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.ExpenseDecision.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
   }
 }

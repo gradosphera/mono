@@ -4384,6 +4384,29 @@ capitalDeleteStory?: [{	data: ValueTypes["DeleteCapitalStoryByHashInput"] | Vari
 capitalEditProject?: [{	data: ValueTypes["EditProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProject?: [{	data: ValueTypes["FundProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalGenerateAppendixGenerationAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationMoneyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationPropertyInvestDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationPropertyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationToMainWalletConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateExpenseDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateExpenseStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationMoneyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationMoneyReturnUnusedStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationPropertyInvestDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationPropertyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationToCapitalizationConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationToMainWalletConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationToProjectConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGetLoanDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGetLoanStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateResultContributionAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateResultContributionDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateResultContributionStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalImportContributor?: [{	data: ValueTypes["ImportContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalMakeClearance?: [{	data: ValueTypes["MakeClearanceInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalOpenProject?: [{	data: ValueTypes["OpenProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -9799,6 +9822,29 @@ capitalDeleteStory?: [{	data: ResolverInputTypes["DeleteCapitalStoryByHashInput"
 capitalEditProject?: [{	data: ResolverInputTypes["EditProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProject?: [{	data: ResolverInputTypes["FundProjectInput"]},ResolverInputTypes["Transaction"]],
+capitalGenerateAppendixGenerationAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationPropertyInvestDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationPropertyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateCapitalizationToMainWalletConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateExpenseDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateExpenseStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationMoneyReturnUnusedStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationPropertyInvestDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationPropertyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationToCapitalizationConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationToMainWalletConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationToProjectConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGetLoanDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGetLoanStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateResultContributionAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateResultContributionDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateResultContributionStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalImportContributor?: [{	data: ResolverInputTypes["ImportContributorInput"]},ResolverInputTypes["Transaction"]],
 capitalMakeClearance?: [{	data: ResolverInputTypes["MakeClearanceInput"]},ResolverInputTypes["Transaction"]],
 capitalOpenProject?: [{	data: ResolverInputTypes["OpenProjectInput"]},ResolverInputTypes["Transaction"]],
@@ -15155,6 +15201,52 @@ export type ModelTypes = {
 	capitalFundProgram: ModelTypes["Transaction"],
 	/** Финансирование проекта CAPITAL контракта */
 	capitalFundProject: ModelTypes["Transaction"],
+	/** Сгенерировать приложение к генерационному соглашению */
+	capitalGenerateAppendixGenerationAgreement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать соглашение о капитализации */
+	capitalGenerateCapitalizationAgreement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление об инвестировании в капитализацию */
+	capitalGenerateCapitalizationMoneyInvestStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать акт об инвестировании имуществом в капитализацию */
+	capitalGenerateCapitalizationPropertyInvestAct: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать решение об инвестировании имуществом в капитализацию */
+	capitalGenerateCapitalizationPropertyInvestDecision: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление об инвестировании имуществом в капитализацию */
+	capitalGenerateCapitalizationPropertyInvestStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
+	capitalGenerateCapitalizationToMainWalletConvertStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать решение о расходе */
+	capitalGenerateExpenseDecision: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о расходе */
+	capitalGenerateExpenseStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать генерационное соглашение */
+	capitalGenerateGenerationAgreement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление об инвестировании в генерацию */
+	capitalGenerateGenerationMoneyInvestStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о возврате неиспользованных средств генерации */
+	capitalGenerateGenerationMoneyReturnUnusedStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать акт об инвестировании имуществом в генерацию */
+	capitalGenerateGenerationPropertyInvestAct: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать решение об инвестировании имуществом в генерацию */
+	capitalGenerateGenerationPropertyInvestDecision: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление об инвестировании имуществом в генерацию */
+	capitalGenerateGenerationPropertyInvestStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о конвертации из генерации в капитализацию */
+	capitalGenerateGenerationToCapitalizationConvertStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о конвертации из генерации в основной кошелек */
+	capitalGenerateGenerationToMainWalletConvertStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о конвертации из генерации в проектный кошелек */
+	capitalGenerateGenerationToProjectConvertStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать решение о получении займа */
+	capitalGenerateGetLoanDecision: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о получении займа */
+	capitalGenerateGetLoanStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать акт о вкладе результатов */
+	capitalGenerateResultContributionAct: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать решение о вкладе результатов */
+	capitalGenerateResultContributionDecision: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о вкладе результатов */
+	capitalGenerateResultContributionStatement: ModelTypes["GeneratedDocument"],
 	/** Импорт вкладчика в CAPITAL контракт */
 	capitalImportContributor: ModelTypes["Transaction"],
 	/** Подписание приложения в CAPITAL контракте */
@@ -20658,6 +20750,52 @@ export type GraphQLTypes = {
 	capitalFundProgram: GraphQLTypes["Transaction"],
 	/** Финансирование проекта CAPITAL контракта */
 	capitalFundProject: GraphQLTypes["Transaction"],
+	/** Сгенерировать приложение к генерационному соглашению */
+	capitalGenerateAppendixGenerationAgreement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать соглашение о капитализации */
+	capitalGenerateCapitalizationAgreement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление об инвестировании в капитализацию */
+	capitalGenerateCapitalizationMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать акт об инвестировании имуществом в капитализацию */
+	capitalGenerateCapitalizationPropertyInvestAct: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать решение об инвестировании имуществом в капитализацию */
+	capitalGenerateCapitalizationPropertyInvestDecision: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление об инвестировании имуществом в капитализацию */
+	capitalGenerateCapitalizationPropertyInvestStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
+	capitalGenerateCapitalizationToMainWalletConvertStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать решение о расходе */
+	capitalGenerateExpenseDecision: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о расходе */
+	capitalGenerateExpenseStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать генерационное соглашение */
+	capitalGenerateGenerationAgreement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление об инвестировании в генерацию */
+	capitalGenerateGenerationMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о возврате неиспользованных средств генерации */
+	capitalGenerateGenerationMoneyReturnUnusedStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать акт об инвестировании имуществом в генерацию */
+	capitalGenerateGenerationPropertyInvestAct: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать решение об инвестировании имуществом в генерацию */
+	capitalGenerateGenerationPropertyInvestDecision: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление об инвестировании имуществом в генерацию */
+	capitalGenerateGenerationPropertyInvestStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о конвертации из генерации в капитализацию */
+	capitalGenerateGenerationToCapitalizationConvertStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о конвертации из генерации в основной кошелек */
+	capitalGenerateGenerationToMainWalletConvertStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о конвертации из генерации в проектный кошелек */
+	capitalGenerateGenerationToProjectConvertStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать решение о получении займа */
+	capitalGenerateGetLoanDecision: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о получении займа */
+	capitalGenerateGetLoanStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать акт о вкладе результатов */
+	capitalGenerateResultContributionAct: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать решение о вкладе результатов */
+	capitalGenerateResultContributionDecision: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление о вкладе результатов */
+	capitalGenerateResultContributionStatement: GraphQLTypes["GeneratedDocument"],
 	/** Импорт вкладчика в CAPITAL контракт */
 	capitalImportContributor: GraphQLTypes["Transaction"],
 	/** Подписание приложения в CAPITAL контракте */
