@@ -18,6 +18,32 @@ import { SOVIET_BLOCKCHAIN_PORT, SovietBlockchainPort } from '~/domain/common/po
 import { SovietContract } from 'cooptypes';
 import { merge } from 'lodash';
 
+// Chairman Database and Infrastructure
+import { ChairmanDatabaseModule } from './infrastructure/database/chairman-database.module';
+import { EventsInfrastructureModule } from '~/infrastructure/events/events.module';
+
+// Репозитории
+import { ApprovalTypeormRepository } from './infrastructure/repositories/approval.typeorm-repository';
+
+// Blockchain синхронизация
+import { ApprovalDeltaMapper } from './infrastructure/blockchain/mappers/approval-delta.mapper';
+import { ApprovalSyncService } from './infrastructure/blockchain/services/approval-sync.service';
+
+// Services
+import { ApprovalService } from './application/services/approval.service';
+import { ChairmanBlockchainAdapter } from './infrastructure/blockchain/adapters/chairman-blockchain.adapter';
+
+// Use Cases
+import { ChairmanSyncInteractor } from './application/use-cases/chairman-sync.interactor';
+
+// Resolvers
+import { ApprovalResolver } from './application/resolvers/approval.resolver';
+import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+
+// Символы для DI
+import { APPROVAL_REPOSITORY } from './domain/repositories/approval.repository';
+import { CHAIRMAN_BLOCKCHAIN_PORT } from './domain/interfaces/chairman-blockchain.port';
+
 // Функция для описания полей в схеме конфигурации
 function describeField(description: DeserializedDescriptionOfExtension): string {
   return JSON.stringify(description);
@@ -247,7 +273,39 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 }
 
 @Module({
-  providers: [ChairmanPlugin],
+  imports: [ChairmanDatabaseModule, EventsInfrastructureModule],
+  providers: [
+    ChairmanPlugin,
+
+    // Репозитории
+    {
+      provide: APPROVAL_REPOSITORY,
+      useClass: ApprovalTypeormRepository,
+    },
+    ApprovalTypeormRepository,
+
+    // Blockchain синхронизация
+    ApprovalDeltaMapper,
+    ApprovalSyncService,
+
+    // Services
+    ApprovalService,
+    {
+      provide: CHAIRMAN_BLOCKCHAIN_PORT,
+      useClass: ChairmanBlockchainAdapter,
+    },
+    ChairmanBlockchainAdapter,
+
+    // Use Cases
+    ChairmanSyncInteractor,
+
+    // Utils
+    DomainToBlockchainUtils,
+
+    // Resolvers
+    ApprovalResolver,
+  ],
+  exports: [ApprovalSyncService, ChairmanSyncInteractor],
 })
 export class ChairmanPluginModule {
   constructor(private readonly chairmanPlugin: ChairmanPlugin) {}

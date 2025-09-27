@@ -2,7 +2,7 @@ import { Entity, Column, Index } from 'typeorm';
 import { ResultStatus } from '../../domain/enums/result-status.enum';
 import { IResultBlockchainData } from '../../domain/interfaces/result-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
-import { BaseTypeormEntity } from './base.typeorm-entity';
+import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
 const EntityName = 'capital_results';
 @Entity(EntityName)

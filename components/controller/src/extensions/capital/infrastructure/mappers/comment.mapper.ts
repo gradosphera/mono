@@ -12,6 +12,7 @@ export class CommentMapper {
   static toDomain(entity: CommentTypeormEntity): CommentDomainEntity {
     const databaseData: ICommentDatabaseData = {
       _id: entity._id,
+      block_num: entity.block_num,
       content: entity.content,
       commentor_id: entity.commentor_id,
       issue_id: entity.issue_id,

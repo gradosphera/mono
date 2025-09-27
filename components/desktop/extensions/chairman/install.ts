@@ -8,6 +8,7 @@ import { ChangeRegisterPaymentsPage } from 'src/pages/Cooperative/ChangeRegister
 import { ChangeCooperativeContacts } from 'src/pages/Cooperative/ChangeContacts';
 import { MembersPage } from 'src/pages/Cooperative/MembersPage';
 import { CooperativeKeyPage } from 'src/pages/Cooperative/CooperativeKey';
+import { ApprovalsPage } from 'app/extensions/chairman/pages/ApprovalsPage';
 
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
@@ -16,7 +17,7 @@ export default async function (): Promise<IWorkspaceConfig> {
   return {
     workspace: 'chairman',
     title: 'Стол председателя',
-    defaultRoute: 'extensions', // Маршрут по умолчанию для рабочего стола председателя
+    defaultRoute: 'approvals', // Маршрут по умолчанию для рабочего стола председателя
     routes: [
       {
         meta: {
@@ -27,6 +28,18 @@ export default async function (): Promise<IWorkspaceConfig> {
         path: '/:coopname/chairman',
         name: 'chairman',
         children: [
+          {
+            path: 'approvals',
+            name: 'approvals',
+            component: markRaw(ApprovalsPage),
+            meta: {
+              title: 'Одобрения документов',
+              icon: 'fa-solid fa-check-circle',
+              roles: ['chairman'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+          },
           {
             path: 'extensions',
             name: 'extensions',

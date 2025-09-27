@@ -2,7 +2,7 @@ import { InvestStatus } from '../enums/invest-status.enum';
 import type { IInvestDatabaseData } from '../interfaces/invest-database.interface';
 import type { IInvestBlockchainData } from '../interfaces/invest-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
 /**
  * Доменная сущность инвестиции

@@ -1,0 +1,130 @@
+---
+description: Правила работы с одинарными подписями документов
+globs:
+alwaysApply: true
+---
+
+# Правила работы с одинарными подписями документов
+
+## Общая концепция
+
+Одинарная подпись означает, что документ подписывается одним участником процесса. Подпись имеет идентификатор `signatureId = 1` (по умолчанию).
+
+## Типы документов
+
+### ZGeneratedDocument (из cooptypes)
+Базовый документ для подписи:
+- `full_title`: полное название
+- `html`: HTML содержимое
+- `hash`: хеш документа
+- `meta`: метаданные
+- `binary`: бинарные данные (Uint8Array или string)
+
+### SignedDigitalDocument
+Подписанный документ, содержащий:
+- `doc_hash`: хеш содержимого
+- `hash`: общий хеш
+- `meta`: метаданные документа
+- `meta_hash`: хеш метаданных
+- `signatures`: массив подписей
+- `version`: версия стандарта
+
+## Способ подписания документа
+
+### Использование useSignDocument
+
+```typescript
+const { signDocument } = useSignDocument();
+
+const signedDocument = await signDocument(
+  document,        // ZGeneratedDocument - базовый документ
+  account,         // string - имя пользователя, подписывающего документ
+  1,              // signatureId - идентификатор подписи (1 для первой/единственной)
+);
+```
+
+## Параметры для подписания
+
+- **document**: `ZGeneratedDocument` - базовый документ, полученный после генерации
+- **account**: `string` - имя аккаунта подписанта (обычно `useSessionStore().username`)
+- **signatureId**: `number` - идентификатор подписи (для одинарной подписи всегда `1`)
+
+## Примеры реализации
+
+### Пример 1: Голосование на собрании
+
+```typescript
+export const useVoteOnMeet = () => {
+  const { signDocument } = useSignDocument();
+  const sessionStore = useSessionStore();
+
+  const vote = async (input: IVoteOnMeetInput): Promise<void> => {
+    // Генерируем бюллетень для голосования
+    const generatedBallot = await generateBallot({
+      coopname: input.coopname,
+      username: sessionStore.username,
+      meet_hash: input.meetHash,
+      answers: input.answers,
+    });
+
+    // Подписываем бюллетень одинарной подписью
+    const signedBallot = await signDocument(
+      generatedBallot,           // ZGeneratedDocument
+      sessionStore.username,     // string
+      1,                        // signatureId = 1
+    );
+
+    // Отправляем подписанный бюллетень
+    await api.voteOnMeet({
+      ...input,
+      ballot: signedBallot,
+    });
+  };
+
+  return { vote };
+};
+```
+
+### Пример 2: Подписание соглашения
+
+```typescript
+export const useSignAgreement = () => {
+  const { signDocument } = useSignDocument();
+  const { info } = useSystemStore();
+  const { username } = useSessionStore();
+
+  const signAgreement = async (agreement_type: string, agreement: ZGeneratedDocument) => {
+    // Подписываем документ одинарной подписью
+    const signedDocument = await signDocument(
+      agreement,      // ZGeneratedDocument
+      username,       // string
+      1,             // signatureId = 1
+    );
+
+    // Отправляем подписанное соглашение
+    await api.sendAgreement({
+      coopname: info.coopname,
+      administrator: info.coopname,
+      username,
+      agreement_type,
+      document: {...signedDocument, meta: JSON.stringify(signedDocument.meta)}
+    });
+  };
+
+  return { signAgreement };
+};
+```
+
+## Важные замечания
+
+1. **Генерация документа обязательна** - перед подписью документ должен быть сгенерирован через фабрику документов
+2. **signatureId = 1** - для одинарной подписи всегда используется идентификатор `1`
+3. **Session Store** - использовать `useSessionStore().username` для получения имени подписанта
+4. **Ключ подписи** - должен быть установлен в Global Store (`wif` ключ)
+
+## Распространенные ошибки
+
+- Попытка подписать документ без предварительной генерации
+- Использование неправильного `signatureId` (не 1 для одинарной подписи)
+- Отсутствие приватного ключа в Global Store
+- Попытка подписать уже подписанный документ (для одинарной подписи использовать только свежесгенерированные документы)

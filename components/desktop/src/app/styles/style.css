@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Стили для gap между документами */
+.documents-gap {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
 /* Стили для полосы прокрутки содержимого drawer */
 .q-drawer__content::-webkit-scrollbar {
   width: 0px;
@@ -17,11 +23,11 @@
   background-color: #999999;
 }
 
-.documents-gap {
+/* .documents-gap {
   display: flex;
   flex-direction: column;
   gap: 25px;
-}
+} */
 
 .text-wrap {
   word-wrap: break-word;

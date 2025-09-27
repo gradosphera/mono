@@ -6,7 +6,7 @@ import { ProgramWithdrawTypeormEntity } from '../entities/program-withdraw.typeo
 import { ProgramWithdrawMapper } from '../mappers/program-withdraw.mapper';
 import type { ProgramWithdrawRepository } from '../../domain/repositories/program-withdraw.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
-import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IProgramWithdrawDatabaseData } from '../../domain/interfaces/program-withdraw-database.interface';
 import type { IProgramWithdrawBlockchainData } from '../../domain/interfaces/program-withdraw-blockchain.interface';
 

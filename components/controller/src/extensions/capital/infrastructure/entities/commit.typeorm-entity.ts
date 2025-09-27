@@ -1,7 +1,7 @@
 import { Entity, Column, Index } from 'typeorm';
 import { CommitStatus } from '../../domain/enums/commit-status.enum';
 import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
-import { BaseTypeormEntity } from './base.typeorm-entity';
+import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
 const EntityName = 'capital_commits';
 @Entity(EntityName)

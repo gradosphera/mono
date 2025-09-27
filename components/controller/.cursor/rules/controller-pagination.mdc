@@ -1,0 +1,247 @@
+---
+description: Правила работы с пагинацией в контроллере
+alwaysApply: false
+---
+# Правила работы с пагинацией в Controller
+
+## Общие принципы
+
+**Всегда используйте доменные интерфейсы пагинации** вместо примитивных типов (`skip`, `take`, `limit`, `offset`).
+Расчет общего количества записей **всегда** производится через `count()` в репозитории.
+
+## Архитектурные слои и интерфейсы
+
+### 1. DTO слой (GraphQL)
+```typescript
+// Входные параметры от клиента
+PaginationInputDTO {
+  page: number;        // Номер страницы (начиная с 1)
+  limit: number;       // Количество элементов на странице
+  sortBy?: string;     // Поле сортировки
+  sortOrder: 'ASC' | 'DESC'; // Направление сортировки
+}
+
+// Результат для клиента
+PaginationResult<T> {
+  items: T[];          // Элементы текущей страницы
+  totalCount: number;  // Общее количество элементов
+  totalPages: number;  // Общее количество страниц
+  currentPage: number; // Текущая страница
+}
+```
+
+### 2. Домен слой
+```typescript
+// Входные параметры для домена
+PaginationInputDomainInterface {
+  page: number;
+  limit: number;
+  sortBy?: string;
+  sortOrder: 'ASC' | 'DESC';
+}
+
+// Результат из домена
+PaginationResultDomainInterface<T> {
+  items: T[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+}
+```
+
+## Поток данных
+
+### В Resolver (GraphQL слой)
+```typescript
+// Создание GraphQL типа для пагинированного результата
+const paginatedEntitiesResult = createPaginationResult(EntityDTO, 'PaginatedEntities');
+
+@Query(() => paginatedEntitiesResult)
+async getEntities(
+  @Args('filter') filter?: FilterDTO,
+  @Args('options') options?: PaginationInputDTO
+): Promise<PaginationResult<EntityDTO>> {
+
+  // Преобразование в доменный интерфейс
+  const domainOptions: PaginationInputDomainInterface | undefined = options
+    ? {
+        page: options.page,
+        limit: options.limit,
+        sortBy: options.sortBy,
+        sortOrder: options.sortOrder,
+      }
+    : undefined;
+
+  // Вызов сервиса
+  const result = await this.service.getEntities(filter, domainOptions);
+
+  // DTO готовится в сервисе, резолвер проксирует результат
+  return result;
+}
+```
+
+### В Service (Прикладной слой)
+```typescript
+async getEntities(
+  filter?: FilterDTO,
+  options?: PaginationInputDomainInterface
+): Promise<PaginationResult<EntityDTO>> {
+
+  // Получение результата из домена
+  const domainResult = await this.interactor.getEntities(filter, options);
+
+  // Преобразование доменных сущностей в DTO
+  const items = domainResult.items.map(item => this.mapToDTO(item));
+
+  // Возврат полного пагинированного результата с DTO
+  return {
+    items,
+    totalCount: domainResult.totalCount,
+    totalPages: domainResult.totalPages,
+    currentPage: domainResult.currentPage,
+  };
+}
+```
+
+### В Interactor/UseCase (Домен слой)
+```typescript
+async getEntities(
+  filter?: DomainFilter,
+  options?: PaginationInputDomainInterface
+): Promise<PaginationResultDomainInterface<DomainEntity>> {
+
+  // Вызов репозитория
+  return await this.repository.findAllPaginated(filter, options);
+}
+```
+
+### В Repository (Инфраструктурный слой)
+```typescript
+async findAllPaginated(
+  filter?: Filter,
+  options?: PaginationInputDomainInterface
+): Promise<PaginationResultDomainInterface<Entity>> {
+
+  // 1. Валидация параметров
+  const validatedOptions = options
+    ? PaginationUtils.validatePaginationOptions(options)
+    : { page: 1, limit: 10, sortOrder: 'ASC' };
+
+  // 2. Получение SQL параметров
+  const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
+
+  // 3. Подсчет общего количества (ОБЯЗАТЕЛЬНО!)
+  const totalCount = await this.repository.count({ where });
+
+  // 4. Получение данных с пагинацией
+  const entities = await this.repository.find({
+    where,
+    skip: offset,
+    take: limit,
+    order: orderBy,
+  });
+
+  // 5. Преобразование в доменные сущности
+  const items = entities.map(entity => this.mapper.toDomain(entity));
+
+  // 6. Создание результата через утилиту
+  return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
+}
+```
+
+## GraphQL типы пагинации
+
+Для создания GraphQL типов пагинированных результатов используйте `createPaginationResult`:
+
+```typescript
+import { createPaginationResult } from '~/application/common/dto/pagination.dto';
+
+// Создание GraphQL типа для пагинированного результата
+const paginatedEntitiesResult = createPaginationResult(EntityDTO, 'PaginatedEntities');
+
+// Использование в резолвере
+@Query(() => paginatedEntitiesResult)
+async getEntities(...) : Promise<PaginationResult<EntityDTO>>
+```
+
+Функция `createPaginationResult` создает GraphQL DTO тип для пагинированного ответа, но не готовит сами данные.
+
+## Утилиты пагинации
+
+Используйте `PaginationUtils` для стандартных операций:
+
+```typescript
+import { PaginationUtils } from '~/shared/utils/pagination.utils';
+
+// Валидация параметров
+const validatedOptions = PaginationUtils.validatePaginationOptions(options);
+
+// Получение SQL параметров (limit, offset)
+const { limit, offset } = PaginationUtils.getSqlPaginationParams(options);
+
+// Создание результата пагинации
+const result = PaginationUtils.createPaginationResult(items, totalCount, options);
+```
+
+## Валидация параметров
+
+- `page >= 1` - номер страницы должен быть положительным
+- `1 <= limit <= 1000` - ограничение на количество элементов
+- `sortOrder` должен быть `'ASC'` или `'DESC'`
+
+## Запрещенные паттерны
+
+❌ **НЕ ПРАВИЛЬНО:**
+```typescript
+// Не используйте примитивные типы
+async getApprovals(filter?: Filter, skip = 0, take = 50)
+
+// Не рассчитывайте пагинацию вручную
+const totalPages = Math.ceil(totalCount / limit); // Делайте это в утилите
+
+// Не возвращайте сырые данные без пагинации
+return await this.repository.findAll(); // Всегда используйте пагинацию
+```
+
+✅ **ПРАВИЛЬНО:**
+```typescript
+// Сервис возвращает полный пагинированный результат с DTO
+async getApprovals(
+  filter?: ApprovalFilterInput,
+  options?: PaginationInputDomainInterface
+): Promise<PaginationResult<ApprovalDTO>> {
+  // Получение доменного результата
+  const domainResult = await this.repository.findAllPaginated(filter, options);
+
+  // Преобразование в DTO
+  const items = domainResult.items.map(item => this.toDTO(item));
+
+  // Возврат полного результата
+  return {
+    items,
+    totalCount: domainResult.totalCount,
+    totalPages: domainResult.totalPages,
+    currentPage: domainResult.currentPage,
+  };
+}
+
+// Резолвер проксирует результат от сервиса
+@Query(() => paginatedApprovalsResult)
+async getApprovals(filter, options): Promise<PaginationResult<ApprovalDTO>> {
+  return await this.service.getApprovals(filter, domainOptions);
+}
+```
+
+## Ключевые моменты
+
+1. **DTO готовится в Service** - сервис получает доменные сущности и преобразует их в DTO перед возвратом
+2. **GraphQL типы создаются через createPaginationResult** - это создает схему GraphQL, а не данные
+3. **Резолвер проксирует результат** - резолвер просто вызывает сервис и возвращает результат
+4. **Полный пагинированный результат** - всегда возвращается PaginationResult<T> с items, totalCount, totalPages, currentPage
+
+## Примеры из кода
+
+- ✅ `ApprovalService` - правильная реализация с полным PaginationResult
+- ✅ `InvestsManagementService` - прямое преобразование Domain → DTO в сервисе
+- ✅ `TimeTrackingService` - явное преобразование полей в DTO
+- ✅ `InvestTypeormRepository` - полная реализация с валидацией через PaginationUtils

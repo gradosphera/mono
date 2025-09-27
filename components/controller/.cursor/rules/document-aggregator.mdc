@@ -1,0 +1,30 @@
+---
+alwaysApply: false
+globs: **/controller/**/*.resolver.ts
+---
+## 📋 Правила формирования агрегатов документов
+
+### 📝 **В сервисах**
+1. **Инжект DocumentAggregationService** в конструктор сервиса
+2. **Создай async метод toDTO** для преобразования доменных сущностей в DTO
+3. **Вызывай buildDocumentAggregate()** для поля документа:
+   ```typescript
+   const document = await this.documentAggregationService.buildDocumentAggregate(entity.documentField);
+   ```
+4. **Добавь поле document в возвращаемый объект**
+
+### 🎯 **В DTO**
+1. **Импорт DocumentAggregateDTO**
+2. **Добавь поле document** с типом `DocumentAggregateDTO | null`
+3. **nullable: true** в GraphQL декораторе
+
+### 🔄 **В резолверах**
+- **Ничего не меняй** - резолверы автоматически получают DTO с полем document
+
+### ⚡ **Чек-лист**
+- ✅ DocumentAggregationService инжектирован
+- ✅ Метод toDTO стал async
+- ✅ Все вызовы toDTO стали await
+- ✅ Поле document добавлено в DTO
+- ✅ Импорт DocumentAggregateDTO добавлен
+- ✅ Тип поля корректный (DocumentAggregateDTO | null)

@@ -1,6 +1,6 @@
 import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
-import { BaseTypeormEntity } from './base.typeorm-entity';
+import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
 const EntityName = 'capital_comments';
 @Entity(EntityName)

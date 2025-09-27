@@ -3,7 +3,7 @@ import type { IProgramWithdrawDatabaseData } from '../interfaces/program-withdra
 import type { IProgramWithdrawBlockchainData } from '../interfaces/program-withdraw-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 /**
  * Доменная сущность возврата из программы
  *

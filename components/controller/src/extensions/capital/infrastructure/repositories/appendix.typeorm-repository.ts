@@ -6,7 +6,7 @@ import { AppendixTypeormEntity } from '../entities/appendix.typeorm-entity';
 import { AppendixMapper } from '../mappers/appendix.mapper';
 import type { AppendixRepository } from '../../domain/repositories/appendix.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
-import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IAppendixDatabaseData } from '../../domain/interfaces/appendix-database.interface';
 import type { IAppendixBlockchainData } from '../../domain/interfaces/appendix-blockchain.interface';
 

@@ -6,7 +6,7 @@ import { ProjectWalletTypeormEntity } from '../entities/project-wallet.typeorm-e
 import { ProjectWalletMapper } from '../mappers/project-wallet.mapper';
 import type { ProjectWalletRepository } from '../../domain/repositories/project-wallet.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
-import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IProjectWalletBlockchainData } from '../../domain/interfaces/project-wallet-blockchain.interface';
 import type { IProjectWalletDatabaseData } from '../../domain/interfaces/project-wallet-database.interface';
 

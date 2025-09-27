@@ -13,6 +13,7 @@ export class IssueMapper {
     const databaseData: IIssueDatabaseData = {
       _id: entity._id,
       id: entity.id,
+      block_num: entity.block_num,
       issue_hash: entity.issue_hash,
       coopname: entity.coopname,
       title: entity.title,

@@ -7,7 +7,7 @@ import { StateTypeormEntity } from '../entities/state.typeorm-entity';
 import { StateMapper } from '../mappers/state.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IStateBlockchainData } from '../../domain/interfaces/state-blockchain.interface';
 import type { IStateDatabaseData } from '../../domain/interfaces/state-database.interface';
 

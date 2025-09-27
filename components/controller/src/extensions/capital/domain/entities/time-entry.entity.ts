@@ -1,4 +1,4 @@
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 import type { ITimeEntryDatabaseData } from '../interfaces/time-entry-database.interface';
 
 /**

@@ -2,7 +2,7 @@ import { ProjectPropertyStatus } from '../enums/project-property-status.enum';
 import type { IProjectPropertyDatabaseData } from '../interfaces/project-property-database.interface';
 import type { IProjectPropertyBlockchainData } from '../interfaces/project-property-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 /**
  * Доменная сущность проектного имущественного взноса
  *

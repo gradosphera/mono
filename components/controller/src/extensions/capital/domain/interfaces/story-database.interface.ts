@@ -1,5 +1,5 @@
 import type { StoryStatus } from '../enums/story-status.enum';
-import type { IBaseDatabaseData } from './base-database.interface';
+import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.interface';
 
 /**
  * Интерфейс данных истории из базы данных

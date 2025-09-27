@@ -6,7 +6,7 @@ import { ProgramPropertyTypeormEntity } from '../entities/program-property.typeo
 import { ProgramPropertyMapper } from '../mappers/program-property.mapper';
 import type { ProgramPropertyRepository } from '../../domain/repositories/program-property.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
-import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IProgramPropertyDatabaseData } from '../../domain/interfaces/program-property-database.interface';
 import type { IProgramPropertyBlockchainData } from '../../domain/interfaces/program-property-blockchain.interface';
 

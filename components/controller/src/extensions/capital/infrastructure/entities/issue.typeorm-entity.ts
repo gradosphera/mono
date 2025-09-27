@@ -6,7 +6,7 @@ import { CycleTypeormEntity } from './cycle.typeorm-entity';
 import { CommentTypeormEntity } from './comment.typeorm-entity';
 import { StoryTypeormEntity } from './story.typeorm-entity';
 import { ContributorTypeormEntity } from './contributor.typeorm-entity';
-import { BaseTypeormEntity } from './base.typeorm-entity';
+import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
 const EntityName = 'capital_issues';
 @Entity(EntityName)

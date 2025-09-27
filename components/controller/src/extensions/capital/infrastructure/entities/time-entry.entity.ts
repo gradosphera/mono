@@ -1,5 +1,5 @@
 import { Entity, Column, Index } from 'typeorm';
-import { BaseTypeormEntity } from './base.typeorm-entity';
+import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
 /**
  * Сущность для хранения записей времени работы над задачами

@@ -1,0 +1,291 @@
+---
+globs: ["**/desktop/pages/**/*.ts", "**/desktop/pages/**/*.vue"]
+alwaysApply: false
+---
+## Архитектура страниц (Pages Layer)
+
+### Общее устройство
+
+Страницы - это корневые компоненты приложения, которые используются в маршрутах. Страницы отвечают за оркестрацию виджетов, управление состоянием UI и навигацию. Они могут быть как простыми контейнерами, так и сложными композитными компонентами.
+
+### Структура папок страницы
+
+```
+pages/
+  PageName/
+    index.ts              # Экспорт страницы
+    ui/                   # Vue компонент страницы
+      PageName.vue        # Основной компонент
+      index.ts            # Экспорт из ui
+```
+
+### Типы страниц
+
+#### 1. Контейнерные страницы
+Простые страницы, которые делегируют отображение дочерним маршрутам:
+
+```vue
+<template lang="pug">
+div
+  // Лоадер пока идет предзагрузка данных
+  WindowLoader(v-if="isLoading", text="Загрузка данных...")
+
+  // Основной контент после загрузки
+  router-view(v-else)
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { WindowLoader } from 'src/shared/ui/Loader';
+import { useContributorStore } from 'entities/Contributor/model';
+
+const contributorStore = useContributorStore();
+const isLoading = ref(true);
+
+onMounted(async () => {
+  // Предзагрузка необходимых данных
+  await contributorStore.loadSelf({ username: session.username });
+  isLoading.value = false;
+});
+</script>
+```
+
+#### 2. Композитные страницы
+Страницы с сложной композицией виджетов и собственной логикой:
+
+```vue
+<template lang="pug">
+div
+  q-card(flat)
+    // Композиция виджетов
+    StoriesWidget(
+      :stories='storyStore.stories?.items || []',
+      :loading='loading'
+    )
+
+    // Собственная логика пагинации
+    q-card-actions(align='center')
+      q-pagination(
+        v-model='pagination.page',
+        :max='Math.ceil((storyStore.stories?.totalCount || 0) / pagination.rowsPerPage)',
+        @update:model-value='onPageChange'
+      )
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { StoriesWidget } from 'widgets/StoriesWidget';
+import { useStoryStore } from 'entities/Story/model';
+
+const storyStore = useStoryStore();
+const loading = ref(false);
+
+// Собственная логика пагинации
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 25,
+});
+
+const loadData = async () => {
+  loading.value = true;
+  try {
+    await storyStore.loadStories({
+      filter: { /* фильтры */ },
+      pagination: pagination.value,
+    });
+  } catch (error) {
+    FailAlert(`Ошибка загрузки: ${error.message}`);
+  } finally {
+    loading.value = false;
+  }
+};
+</script>
+```
+
+### Принципы организации страниц
+
+#### Использование слоев
+```typescript
+// ✅ Правильно: страницы используют все нижележащие слои
+import { useEntityStore } from 'entities/Entity/model';      // Данные
+import { useEntityAction } from 'features/Entity/EntityAction'; // Действия
+import { EntityWidget } from 'widgets/EntityWidget';         // Композиция UI
+
+// ❌ Неправильно: страницы не используют другие страницы
+// import { OtherPage } from 'pages/OtherPage';
+```
+
+#### Управление состоянием
+Страницы управляют:
+- **Загрузкой данных**: инициализация, фильтры, пагинация
+- **UI состоянием**: загрузка, ошибки, навигация
+- **Взаимодействием**: обработка событий от виджетов
+
+#### Композиция виджетов
+```vue
+<template lang="pug">
+// Простая композиция
+EntityWidget(:items='store.items')
+
+// Сложная композиция со слотами
+LayoutWidget
+  template(#header)
+    PageHeader(title='Заголовок страницы')
+
+  template(#content)
+    EntityWidget(:items='store.items')
+
+  template(#sidebar)
+    FiltersWidget(@filter-changed='onFilterChange')
+</template>
+```
+
+### Экспорты и индексные файлы
+
+#### Страница (pages/PageName/index.ts)
+```typescript
+export { default as PageName } from './ui/PageName.vue';
+```
+
+#### Слой страниц (pages/index.ts)
+```typescript
+export * from './PageName';
+export * from './AnotherPage';
+```
+
+#### Использование в маршрутах
+Страницы используются в `install.ts` расширения:
+
+```typescript
+routes: [{
+  path: '/:coopname/extension/page',
+  name: 'page',
+  component: markRaw(PageName), // Импорт из pages
+  meta: { /* ... */ }
+}]
+```
+
+### Принципы работы со страницами
+
+#### Разделение ответственности
+- **Entities**: Данные и их хранение
+- **Features**: Бизнес-логика и действия
+- **Widgets**: Композиция UI компонентов
+- **Pages**: Оркестрация всего вышеперечисленного
+
+#### Загрузка данных
+Страницы отвечают за:
+- Инициализацию данных при монтировании
+- Управление пагинацией и фильтрами
+- Обработку ошибок загрузки
+- Кеширование и оптимизацию запросов
+
+#### Навигация и взаимодействие
+```typescript
+const router = useRouter();
+
+const onItemClick = (item) => {
+  router.push({
+    name: 'item-details',
+    params: { id: item.id }
+  });
+};
+
+const onActionComplete = () => {
+  // Обновление данных после действия
+  loadData();
+};
+```
+
+### Примеры использования
+
+#### Простая страница списка
+```vue
+<template lang="pug">
+div
+  q-card(flat)
+    // Виджет таблицы
+    ItemsListWidget(
+      :items='store.items',
+      :loading='loading',
+      @item-click='onItemClick'
+    )
+
+    // Пагинация
+    q-pagination(
+      v-model='currentPage',
+      :max='totalPages',
+      @update:model-value='loadPage'
+    )
+</template>
+
+<script setup>
+import { ref, computed } from 'vue';
+import { ItemsListWidget } from 'widgets/ItemsListWidget';
+import { useItemStore } from 'entities/Item/model';
+
+const store = useItemStore();
+const currentPage = ref(1);
+
+const totalPages = computed(() =>
+  Math.ceil((store.items?.totalCount || 0) / 25)
+);
+
+const loadPage = async (page) => {
+  await store.loadItems({ page });
+};
+</script>
+```
+
+#### Страница с несколькими виджетами
+```vue
+<template lang="pug">
+.q-pa-md
+  // Заголовок страницы
+  PageHeader(title='Дашборд')
+
+  .row.q-gutter-md
+    .col-12.col-md-6
+      // Статистика
+      StatsWidget(:stats='stats')
+
+    .col-12.col-md-6
+      // Недавние действия
+      RecentActionsWidget(:actions='recentActions')
+
+  // Основной контент
+  MainContentWidget(
+    :data='mainData',
+    @refresh='loadData'
+  )
+</template>
+
+<script setup>
+import { onMounted } from 'vue';
+import PageHeader from 'src/shared/ui/PageHeader';
+import StatsWidget from 'widgets/StatsWidget';
+import RecentActionsWidget from 'widgets/RecentActionsWidget';
+import MainContentWidget from 'widgets/MainContentWidget';
+
+onMounted(() => {
+  loadData();
+});
+</script>
+```
+
+### Важные принципы
+
+#### Производительность
+- Ленивая загрузка данных
+- Оптимизация перерисовок
+- Эффективное управление памятью
+
+#### Доступность
+- Правильная структура заголовков
+- Клавиатурная навигация
+- Screen reader поддержка
+
+#### SEO и метаданные
+- Управление title страницы
+- Meta теги для социальных сетей
+- Структурированные данные

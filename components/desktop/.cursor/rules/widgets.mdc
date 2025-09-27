@@ -1,0 +1,388 @@
+---
+globs: ["**/desktop/widgets/**/*.ts", "**/desktop/widgets/**/*.vue"]
+alwaysApply: false
+---
+## Архитектура виджетов (Widgets Layer)
+
+### Общее устройство
+
+Виджеты - это комплексные UI компоненты, которые комбинируют данные из entities и действия из features для создания полноценных интерфейсных блоков. Виджеты отвечают за композицию и представление сложных частей интерфейса.
+
+**Запрещено**: Виджеты не переиспользуют другие виджеты. Виджеты могут использовать только фичи и shared компоненты.
+
+### Структура папок виджета
+
+```
+widgets/
+  WidgetName/
+    index.ts              # Экспорт виджета
+    WidgetName.vue        # Vue компонент виджета
+    # или
+    ui/
+      WidgetName.vue      # Vue компонент в подпапке
+      index.ts            # Экспорт из ui
+```
+
+### Принципы организации виджетов
+
+#### Использование только разрешенных слоев
+```typescript
+// ✅ Разрешено: entities для данных
+import { useEntityStore, type IEntity } from 'entities/Entity/model';
+
+// ✅ Разрешено: features для действий
+import { useEntityAction } from 'features/Entity/EntityAction';
+import { EntityActionButton } from 'features/Entity/EntityAction';
+
+// ✅ Разрешено: shared компоненты
+import { SharedComponent } from 'src/shared/ui/SharedComponent';
+
+// ❌ Запрещено: импорт других виджетов
+// import { AnotherWidget } from 'widgets/AnotherWidget';
+```
+
+#### Композиция через слоты (опционально)
+Виджеты могут содержать слоты для композиции с другими компонентами на уровне страниц:
+
+```vue
+<template lang="pug">
+.widget-container
+  .widget-header
+    slot(name='header')
+      | Заголовок по умолчанию
+
+  .widget-content
+    slot(name='content')
+      | Контент по умолчанию
+
+  .widget-actions
+    slot(name='actions')
+</template>
+```
+
+### Типы виджетов
+
+#### 1. Презентационные виджеты
+Отображают данные в виде таблиц, списков, карточек:
+
+```vue
+<template lang="pug">
+q-card(flat)
+  q-table(
+    :rows='entities',
+    :columns='columns',
+    :loading='loading'
+  )
+</template>
+
+<script setup>
+import { useEntityStore } from 'entities/Entity/model';
+
+const store = useEntityStore();
+// Логика загрузки и отображения данных
+</script>
+```
+
+#### 2. Интерактивные виджеты
+Комбинируют отображение данных с действиями:
+
+```vue
+<template lang="pug">
+.widget
+  // Отображение данных
+  .data-section
+    EntityItem(v-for='item in items', :item='item')
+
+  // Действия
+  .actions-section
+    CreateEntityButton
+    UpdateEntityButton
+</template>
+```
+
+#### 3. Композитные виджеты со слотами
+Предоставляют гибкую структуру для страниц:
+
+```vue
+<template lang="pug">
+.layout-widget
+  header
+    slot(name='header')
+  main
+    slot(name='main')
+  aside
+    slot(name='sidebar')
+  footer
+    slot(name='footer')
+</template>
+```
+
+### Props и конфигурация
+
+#### Гибкая конфигурация через props
+```typescript
+interface Props {
+  // Данные
+  items?: IEntity[];
+  loading?: boolean;
+
+  // Конфигурация отображения
+  showActions?: boolean;
+  maxItems?: number;
+  emptyMessage?: string;
+
+  // Callbacks для взаимодействия
+  onItemClick?: (item: IEntity) => void;
+  onActionComplete?: () => void;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  showActions: true,
+  maxItems: 50,
+  emptyMessage: 'Нет данных',
+});
+```
+
+#### Управление состоянием
+```typescript
+// Локальное состояние виджета
+const expandedItems = ref<Set<string>>(new Set());
+const selectedItem = ref<IEntity | null>(null);
+
+// Props для внешнего управления
+interface Props {
+  expandedItems?: string[];
+  selectedItemId?: string;
+}
+```
+
+### Использование entities в виджетах
+
+#### Чтение данных из stores
+```typescript
+import { useEntityStore } from 'entities/Entity/model';
+
+const store = useEntityStore();
+
+// Доступ к реактивным данным (уже реактивны через Pinia)
+const entities = computed(() => store.entities);
+const loading = computed(() => store.loading);
+
+// Методы загрузки
+const loadData = () => {
+  store.loadEntities({ filter: props.filter });
+};
+```
+
+#### Важно о реактивности stores
+**Store автоматически реактивен через Pinia** - не нужно использовать `storeToRefs()` или `.value`:
+```typescript
+const store = useEntityStore();
+
+// ✅ Правильно - данные уже реактивны
+const entities = computed(() => store.entities);
+
+// ❌ Неправильно - storeToRefs не нужен
+// const { entities } = storeToRefs(store);
+
+// ❌ Неправильно - данные уже реактивны, .value не нужен
+// const entities = store.entities.value;
+```
+
+### Использование features в виджетах
+
+#### Импорт и использование фич
+```typescript
+import { useEntityAction } from 'features/Entity/EntityAction';
+import { EntityActionButton } from 'features/Entity/EntityAction';
+
+const { entityAction } = useEntityAction();
+
+// Использование в обработчиках
+const handleAction = async () => {
+  try {
+    await entityAction(params);
+    // Обработка успеха
+  } catch (error) {
+    // Обработка ошибки
+  }
+};
+```
+
+#### Интеграция UI компонентов фич
+```vue
+<template>
+  <div class="widget">
+    <!-- Данные -->
+    <EntityList :items="entities" />
+
+    <!-- Действия из фич -->
+    <div class="actions">
+      <CreateEntityButton @created="onEntityCreated" />
+      <UpdateEntityButton :entity="selectedEntity" />
+    </div>
+  </div>
+</template>
+```
+
+### Обработка событий и коммуникация
+
+#### Внутренняя коммуникация
+```typescript
+const emit = defineEmits<{
+  itemSelected: [item: IEntity];
+  actionCompleted: [action: string, result: any];
+}>();
+
+// Генерация событий
+const onItemClick = (item: IEntity) => {
+  emit('itemSelected', item);
+};
+
+const onActionSuccess = (result: any) => {
+  emit('actionCompleted', 'create', result);
+};
+```
+
+#### Внешнее управление через props
+```typescript
+interface Props {
+  selectedItemId?: string;
+  onItemSelect?: (item: IEntity) => void;
+}
+
+const props = defineProps<Props>();
+
+// Синхронизация с внешним состоянием
+watch(() => props.selectedItemId, (newId) => {
+  if (newId) {
+    const item = entities.value.find(e => e.id === newId);
+    if (item) {
+      selectedItem.value = item;
+      props.onItemSelect?.(item);
+    }
+  }
+});
+```
+
+### Экспорты и индексные файлы
+
+#### Виджет (widgets/WidgetName/index.ts)
+```typescript
+export { default as WidgetName } from './WidgetName.vue';
+// или
+export { default as WidgetName } from './ui/WidgetName.vue';
+```
+
+#### Слой виджетов (widgets/index.ts)
+```typescript
+export * from './WidgetName';
+export * from './AnotherWidget';
+```
+
+#### Расширение (extensions/extension-name/index.ts)
+```typescript
+export * from './entities';
+export * from './features';
+export * from './widgets';  // Экспорт всех виджетов расширения
+export * from './pages';
+```
+
+### Примеры использования
+
+#### Простой виджет списка
+```vue
+<template lang="pug">
+q-card(flat)
+  q-card-section
+    .text-h6 Список элементов
+
+  q-card-section
+    q-list
+      q-item(
+        v-for='item in items',
+        :key='item.id',
+        clickable,
+        @click='$emit("itemClick", item)'
+      )
+        q-item-section {{ item.name }}
+
+    .text-center.q-pa-md(v-if='!items.length && !loading')
+      | {{ emptyMessage }}
+
+    .text-center.q-pa-md(v-if='loading')
+      q-spinner(color='primary')
+</template>
+
+<script setup lang="ts">
+import type { IEntity } from 'entities/Entity/model';
+
+interface Props {
+  items: IEntity[];
+  loading?: boolean;
+  emptyMessage?: string;
+}
+
+defineEmits<{
+  itemClick: [item: IEntity];
+}>();
+</script>
+```
+
+#### Виджет с действиями
+```vue
+<template lang="pug">
+.widget
+  .widget-header
+    h3 {{ title }}
+    CreateEntityButton(@created='onEntityCreated')
+
+  .widget-content
+    EntityTable(
+      :entities='entities',
+      :loading='loading',
+      @entity-selected='onEntitySelected'
+    )
+
+  .widget-footer
+    q-pagination(
+      v-model='currentPage',
+      :max='totalPages',
+      @update:model-value='onPageChange'
+    )
+</template>
+
+<script setup lang="ts">
+import { useEntityStore } from 'entities/Entity/model';
+import { CreateEntityButton } from 'features/Entity/CreateEntity';
+import EntityTable from './EntityTable.vue'; // Shared компонент
+
+const store = useEntityStore();
+const { entities, loading } = storeToRefs(store);
+
+// Логика пагинации, фильтрации и т.д.
+</script>
+```
+
+### Важные принципы
+
+#### Разделение ответственности
+- **Entities**: Данные и их хранение
+- **Features**: Бизнес-логика и действия
+- **Widgets**: Композиция UI компонентов
+- **Pages**: Оркестрация виджетов
+
+#### Композиция через слоты
+- Виджеты могут предоставлять слоты для гибкой композиции
+- Страницы используют слоты для вставки виджетов
+- Избегать жесткой связи между виджетами
+
+#### Переиспользование
+- Виджеты могут переиспользоваться в разных страницах
+- Конфигурация через props для адаптации
+- Shared компоненты для общих элементов UI
+
+#### Производительность
+- Ленивая загрузка данных
+- Виртуализация для больших списков
+- Оптимистичные обновления через features

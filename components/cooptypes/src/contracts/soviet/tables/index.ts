@@ -67,3 +67,8 @@ export * as CoopAgreements from './coopAgreements'
  * Таблица содержит реестр внутри-кооперативных соглашений/положений с пайщиками v2
  */
 export * as AgreementsLegacy from './agreements_legacy'
+
+/**
+ * Таблица хранит информацию о запросах утверждений от председателя.
+ */
+export * as Approvals from './approves'

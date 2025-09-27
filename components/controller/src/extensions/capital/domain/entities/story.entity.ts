@@ -1,6 +1,6 @@
 import { StoryStatus } from '../enums/story-status.enum';
 import type { IStoryDatabaseData } from '../interfaces/story-database.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
 /**
  * Доменная сущность истории (критерия выполнения)

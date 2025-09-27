@@ -7,7 +7,7 @@ import { ResultTypeormEntity } from '../entities/result.typeorm-entity';
 import { ResultMapper } from '../mappers/result.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IResultBlockchainData } from '../../domain/interfaces/result-blockchain.interface';
 import type { IResultDatabaseData } from '../../domain/interfaces/result-database.interface';
 

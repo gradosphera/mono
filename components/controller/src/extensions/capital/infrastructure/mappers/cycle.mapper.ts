@@ -12,6 +12,7 @@ export class CycleMapper {
   static toDomain(entity: CycleTypeormEntity): CycleDomainEntity {
     const databaseData: ICycleDatabaseData = {
       _id: entity._id,
+      block_num: entity.block_num,
       name: entity.name,
       start_date: entity.start_date,
       end_date: entity.end_date,

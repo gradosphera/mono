@@ -1,5 +1,5 @@
 import type { CycleStatus } from '../enums/cycle-status.enum';
-import type { IBaseDatabaseData } from './base-database.interface';
+import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.interface';
 
 /**
  * Интерфейс данных цикла из базы данных

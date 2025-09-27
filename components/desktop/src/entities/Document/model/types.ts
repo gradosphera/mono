@@ -5,6 +5,8 @@ export type IDocumentAggregate = Zeus.ModelTypes['DocumentAggregate'];
 export type ZGetDocumentsResult = Queries.Documents.GetDocuments.IOutput[typeof Queries.Documents.GetDocuments.name];
 export type IGetDocuments = Queries.Documents.GetDocuments.IInput['data']
 export type ISignedDocument2 = Zeus.ModelTypes['SignedDigitalDocument']
+export type ISignedChainDocument = Zeus.ModelTypes['SignedBlockchainDocument']
+
 // Информация о пагинации
 export interface IPagination {
   totalCount: number;

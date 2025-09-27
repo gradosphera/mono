@@ -1,6 +1,6 @@
 import { CycleStatus } from '../enums/cycle-status.enum';
 import type { ICycleDatabaseData } from '../interfaces/cycle-database.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
 /**
  * Доменная сущность цикла разработки

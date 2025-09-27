@@ -6,7 +6,7 @@ import { ProjectPropertyTypeormEntity } from '../entities/project-property.typeo
 import { ProjectPropertyMapper } from '../mappers/project-property.mapper';
 import type { ProjectPropertyRepository } from '../../domain/repositories/project-property.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
-import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IProjectPropertyBlockchainData } from '../../domain/interfaces/project-property-blockchain.interface';
 import type { IProjectPropertyDatabaseData } from '../../domain/interfaces/project-property-database.interface';
 

@@ -3,7 +3,7 @@ import { ProjectStatus } from '../../domain/enums/project-status.enum';
 import { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/project-blockchain.interface';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
 import { StoryTypeormEntity } from './story.typeorm-entity';
-import { BaseTypeormEntity } from './base.typeorm-entity';
+import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
 const EntityName = 'capital_projects';
 @Entity(EntityName)

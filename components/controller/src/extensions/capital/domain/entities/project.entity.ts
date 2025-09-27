@@ -2,7 +2,7 @@ import { ProjectStatus } from '../enums/project-status.enum';
 import type { IProjectDomainInterfaceDatabaseData } from '../interfaces/project-database.interface';
 import type { IProjectDomainInterfaceBlockchainData } from '../interfaces/project-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 import { IssueIdGenerationService } from '../services/issue-id-generation.service';
 /**
  * Доменная сущность проекта

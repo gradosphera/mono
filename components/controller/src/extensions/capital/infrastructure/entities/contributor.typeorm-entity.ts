@@ -1,7 +1,7 @@
 import { Entity, Column, CreateDateColumn, Index, ManyToMany } from 'typeorm';
 import { ContributorStatus } from '../../domain/enums/contributor-status.enum';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
-import { BaseTypeormEntity } from './base.typeorm-entity';
+import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
 
 const EntityName = 'capital_contributors';

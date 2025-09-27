@@ -2,7 +2,7 @@ import { CommitStatus } from '../enums/commit-status.enum';
 import type { ICommitDatabaseData } from '../interfaces/commit-database.interface';
 import type { ICommitBlockchainData } from '../interfaces/commit-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
 /**
  * Доменная сущность коммита

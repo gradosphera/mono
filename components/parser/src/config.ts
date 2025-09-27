@@ -23,59 +23,39 @@ export const redisStreamLimit = Number(getEnvVar('REDIS_STREAM_LIMIT'))
 // --------------------------
 export const subsribedTables: IDeltaConfig[] = [
   // документы
-  { code: 'draft', table: 'drafts' },
-  { code: 'draft', table: 'translations' },
+  { code: 'draft', table: 'drafts', notify: true },
+  { code: 'draft', table: 'translations', notify: true },
 
   // meet
-  { code: 'meet', table: 'meets' },
-  { code: 'meet', table: 'questions' },
+  { code: 'meet', table: 'meets', notify: true },
+  { code: 'meet', table: 'questions', notify: true },
 
   // совет
-  { code: 'soviet', table: 'decisions' },
-  { code: 'soviet', table: 'boards' },
-  { code: 'soviet', table: 'participants' },
+  { code: 'soviet', table: 'decisions', notify: true },
+  { code: 'soviet', table: 'approvals', notify: true },
+  { code: 'soviet', table: 'boards', notify: true },
+  { code: 'soviet', table: 'participants', notify: true },
 
   // registrator.joincoop
-  { code: 'soviet', table: 'joincoops' },
+  { code: 'soviet', table: 'joincoops', notify: true },
 
   // регистратор
-  { code: 'registrator', table: 'accounts' },
-  { code: 'registrator', table: 'coops' },
+  { code: 'registrator', table: 'accounts', notify: true },
+  { code: 'registrator', table: 'coops', notify: true },
 
   { code: 'eosio.token', table: 'accounts', notify: true },
   { code: 'capital', table: 'projects', notify: true },
+  { code: 'capital', table: 'contributors', notify: true },
 ]
 
 export const subsribedActions: IActionConfig[] = [
   { code: 'eosio.token', action: 'transfer', notify: true },
-  { code: 'registrator', action: 'confirmreg', notify: true },
+  { code: 'registrator', action: '*', notify: true },
 
-  { code: 'soviet', action: 'votefor' },
-  { code: 'soviet', action: 'voteagainst' },
-  { code: 'soviet', action: 'newsubmitted' },
-  { code: 'soviet', action: 'newresolved' },
-  { code: 'soviet', action: 'newdecision' },
-  { code: 'soviet', action: 'newpackage' },
-  { code: 'soviet', action: 'newact' },
-  { code: 'soviet', action: 'newlink' },
-  { code: 'soviet', action: 'newagreement' },
-  { code: 'soviet', action: 'newdeclined' },
-  // // registrator.joincoop
-  { code: 'soviet', action: 'joincoop' },
-  { code: 'soviet', action: 'joincoopdec' },
-
-  { code: 'soviet', action: 'updateboard', notify: true },
-  { code: 'soviet', action: 'createboard', notify: true },
-  { code: 'meet', action: 'newgdecision', notify: true },
-  { code: 'wallet', action: 'createwthd', notify: true },
-
-  { code: 'ledger', action: 'debet', notify: true },
-  { code: 'ledger', action: 'credit', notify: true },
-  { code: 'ledger', action: 'block', notify: true },
-  { code: 'ledger', action: 'unblock', notify: true },
-  { code: 'ledger', action: 'writeoff', notify: true },
-  { code: 'ledger', action: 'writeoffcnsl', notify: true },
-
+  { code: 'meet', action: '*', notify: true },
+  { code: 'wallet', action: '*', notify: true },
+  { code: 'ledger', action: '*', notify: true },
+  { code: 'soviet', action: '*', notify: true },
   { code: 'capital', action: '*', notify: true },
 ]
 

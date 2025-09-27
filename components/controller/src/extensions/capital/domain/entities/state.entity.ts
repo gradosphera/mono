@@ -1,7 +1,7 @@
 import type { IStateDatabaseData } from '../interfaces/state-database.interface';
 import type { IStateBlockchainData } from '../interfaces/state-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 /**
  * Доменная сущность состояния кооператива
  *

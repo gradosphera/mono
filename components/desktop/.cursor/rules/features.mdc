@@ -1,0 +1,234 @@
+---
+globs: ["**/desktop/features/**/*.ts", "**/desktop/features/**/*.vue"]
+alwaysApply: false
+---
+## Архитектура фич (Features Layer)
+
+### Общее устройство
+
+Фичи - это бизнес-логика приложения, реализованная в виде Vue composables. Каждая фича отвечает за конкретное действие или набор связанных действий. Фичи взаимодействуют с entities для получения и обновления данных.
+
+**Запрещено**: Размещать методы чтения данных в фичах. Чтение данных - задача entities.
+
+### Структура папок фичи
+
+```
+features/
+  FeatureName/
+    index.ts              # Экспорт composable и UI (если есть)
+    api/
+      index.ts            # Мутации GraphQL через SDK
+    model/
+      index.ts            # Экспорт composable функции
+    ui/                   # Опционально: UI компоненты фичи
+      index.ts            # Экспорт UI компонентов
+      Component.vue       # Компоненты фичи
+```
+
+### Типизация фич
+
+#### Импорты типов напрямую из SDK
+```typescript
+import { Mutations } from '@coopenomics/sdk';
+
+// Типы входных данных мутации
+export type IFeatureInput = Mutations.Extension.FeatureAction.IInput['data'];
+
+// Типы выходных данных мутации
+export type IFeatureOutput = Mutations.Extension.FeatureAction.IOutput[typeof Mutations.Extension.FeatureAction.name];
+```
+
+**Важно**: Ничего не переопределяем вручную! Все типы берутся напрямую из GraphQL Zeus SDK.
+
+### Организация API (api/index.ts)
+
+#### Структура API функций для мутаций
+```typescript
+import { client } from 'src/shared/api/client';
+import { Mutations } from '@coopenomics/sdk';
+import type { IFeatureInput, IFeatureOutput } from '../model';
+
+async function featureAction(
+  data: IFeatureInput,
+): Promise<IFeatureOutput> {
+  const { [Mutations.Extension.FeatureAction.name]: result } =
+    await client.Mutation(Mutations.Extension.FeatureAction.mutation, {
+      variables: {
+        data,
+      },
+    });
+
+  return result;
+}
+
+export const api = {
+  featureAction,
+};
+```
+
+#### Правила для API фич
+- **Только мутации**: API фич содержит только GraphQL мутации
+- **Строгая типизация**: Все параметры и возвраты типизированы через SDK
+- **Использование SDK**: Все мутации через GraphQL Zeus SDK
+- **Единый экспорт**: Все функции экспортируются через объект `api`
+
+### Организация Model (model/index.ts)
+
+#### Структура composable функции
+```typescript
+import { useEntityStore } from 'app/extensions/extension-name/entities/Entity/model';
+import { api } from '../api';
+import type { IFeatureInput, IFeatureOutput } from '../api';
+
+export function useFeatureAction() {
+  const store = useEntityStore();
+
+  const featureAction = async (input: IFeatureInput): Promise<IFeatureOutput> => {
+    const result = await api.featureAction(input);
+
+    if (result) {
+      // Обновляем store сущности для поддержания консистентности
+      store.updateEntityInList(result);
+      // или store.removeEntityFromList(input.entity_id);
+      // или store.addEntityToList(result);
+    }
+
+    return result;
+  };
+
+  return { featureAction };
+}
+```
+
+#### Правила для composables
+- **Использование store**: Фичи обновляют store entities после выполнения мутаций
+- **Поддержание консистентности**: Данные в store всегда актуальны после действий
+- **Возвращение результата**: Composable возвращает результат мутации
+- **Обработка ошибок**: Ошибки обрабатываются в UI компонентах
+
+### UI слой фич (опционально)
+
+#### Когда использовать UI в фичах
+- **Иногда, но не всегда**: UI слой используется только для специфических компонентов фичи
+- **Простые действия**: Для кнопок, форм, специфичных для данной фичи
+- **Не общие компоненты**: Не размещать shared компоненты в фичах
+
+#### Экспорты UI компонентов
+
+##### В ui/index.ts (первый уровень экспорта)
+```typescript
+export { default as FeatureButton } from './FeatureButton.vue';
+export { default as FeatureDialog } from './FeatureDialog.vue';
+```
+
+##### В корне фичи index.ts (второй уровень экспорта)
+```typescript
+export { useFeatureAction } from './model';
+export * from './ui';  // Экспортируем все UI компоненты
+```
+
+### Экспорты и индексные файлы
+
+#### Фича (features/FeatureName/index.ts)
+```typescript
+export { useFeatureAction } from './model';
+export * from './ui';  // Если есть UI слой
+```
+
+#### Слой фич (features/index.ts)
+```typescript
+export { useFeatureAction } from './FeatureName';
+export { useAnotherFeature } from './AnotherFeature';
+```
+
+#### Расширение (extensions/extension-name/index.ts)
+```typescript
+export * from './entities';
+export * from './features';  // Экспорт всех фич расширения
+export * from './widgets';
+export * from './pages';
+```
+
+### Принципы работы с фичами
+
+#### Разделение ответственности
+- **Entities**: Хранение и чтение данных
+- **Features**: Бизнес-логика и действия (мутации)
+- **Widgets**: Сложные UI компоненты
+- **Pages**: Корневые страницы
+
+#### Взаимодействие со stores
+- **Обязательное обновление**: После каждой мутации обновлять соответствующий store
+- **Консистентность данных**: UI всегда показывает актуальные данные из store
+- **Оптимистичные обновления**: Возможны для лучшего UX
+
+#### Типизация
+- **SDK-first**: Все типы из GraphQL Zeus SDK
+- **Не переопределять**: Никаких ручных переопределений типов
+- **Строгая типизация**: Все входы/выходы типизированы
+
+#### Организация кода
+- **Composable pattern**: Каждая фича - отдельный composable
+- **Единая ответственность**: Одна фича = одно действие или группа связанных действий
+- **Переиспользование**: Фичи могут использоваться в разных частях приложения
+
+### Примеры
+
+#### Простая фича (только composable)
+```
+DeleteStory/
+  api/
+    index.ts        # Мутация deleteStory
+  model/
+    index.ts        # useDeleteStory composable
+  index.ts          # Экспорт composable
+```
+
+#### Фича с UI компонентами
+```
+CreateProject/
+  api/
+    index.ts        # Мутация createProject
+  model/
+    index.ts        # useCreateProject composable
+  ui/
+    index.ts        # Экспорт CreateProjectButton
+    CreateProjectButton.vue
+  index.ts          # Экспорт composable + UI
+```
+
+#### Использование фичи в компоненте
+```vue
+<script setup>
+import { useDeleteStory } from 'features/Story/DeleteStory';
+
+const { deleteStory } = useDeleteStory();
+
+// Использование в обработчике
+const handleDelete = async () => {
+  try {
+    await deleteStory({ story_hash: '...' });
+    // Обработка успеха
+  } catch (error) {
+    // Обработка ошибки
+  }
+};
+</script>
+```
+
+### Важные принципы
+
+#### Четкое разделение слоев
+- **Entities** управляют данными
+- **Features** управляют действиями
+- **UI** управляет интерфейсом
+
+#### Консистентность архитектуры
+- Все фичи следуют единому паттерну
+- Типизация через SDK
+- Обновление stores после мутаций
+
+#### Производительность
+- Оптимистичные обновления где возможно
+- Минимальные перерисовки UI
+- Эффективное управление состоянием

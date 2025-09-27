@@ -80,6 +80,12 @@ export const AllTypesProps: Record<string,any> = {
 	AnswerInput:{
 
 	},
+	ApprovalFilter:{
+		created_from:"DateTime",
+		created_to:"DateTime",
+		statuses:"ApprovalStatus"
+	},
+	ApprovalStatus: "enum" as const,
 	AssetContributionActGenerateDocumentInput:{
 
 	},
@@ -155,6 +161,9 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	ConfigInput:{
 
+	},
+	ConfirmApproveInput:{
+		approved_document:"SignedDigitalDocumentInput"
 	},
 	ConfirmReceiveOnRequestInput:{
 		document:"ReturnByAssetActSignedDocumentInput"
@@ -257,6 +266,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	DebtStatus: "enum" as const,
+	DeclineApproveInput:{
+
+	},
 	DeclineRequestInput:{
 
 	},
@@ -635,6 +647,12 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalUpdateStory:{
 			data:"UpdateStoryInput"
+		},
+		chairmanConfirmApprove:{
+			data:"ConfirmApproveInput"
+		},
+		chairmanDeclineApprove:{
+			data:"DeclineApproveInput"
 		},
 		completeRequest:{
 			data:"CompleteRequestInput"
@@ -1042,6 +1060,13 @@ export const AllTypesProps: Record<string,any> = {
 			filter:"VoteFilter",
 			options:"PaginationInput"
 		},
+		chairmanApproval:{
+
+		},
+		chairmanApprovals:{
+			filter:"ApprovalFilter",
+			options:"PaginationInput"
+		},
 		getAccount:{
 			data:"GetAccountInput"
 		},
@@ -1368,6 +1393,25 @@ export const ReturnTypes: Record<string,any> = {
 		protocol_day_month_year:"String",
 		protocol_number:"String"
 	},
+	Approval:{
+		_created_at:"DateTime",
+		_id:"String",
+		_updated_at:"DateTime",
+		approval_hash:"String",
+		approved_document:"DocumentAggregate",
+		block_num:"Float",
+		callback_action_approve:"String",
+		callback_action_decline:"String",
+		callback_contract:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		document:"DocumentAggregate",
+		id:"Float",
+		meta:"String",
+		present:"Boolean",
+		status:"ApprovalStatus",
+		username:"String"
+	},
 	AuthSequence:{
 		account:"String",
 		sequence:"String"
@@ -1528,25 +1572,25 @@ export const ReturnTypes: Record<string,any> = {
 		_id:"String",
 		_updated_at:"DateTime",
 		appendixes:"String",
-		block_num:"Int",
+		block_num:"Float",
 		blockchain_status:"String",
 		contract:"DocumentAggregate",
-		contributed_as_author:"Float",
-		contributed_as_contributor:"Float",
-		contributed_as_coordinator:"Float",
-		contributed_as_creator:"Float",
-		contributed_as_investor:"Float",
-		contributed_as_propertor:"Float",
+		contributed_as_author:"String",
+		contributed_as_contributor:"String",
+		contributed_as_coordinator:"String",
+		contributed_as_creator:"String",
+		contributed_as_investor:"String",
+		contributed_as_propertor:"String",
 		contributor_hash:"String",
 		coopname:"String",
 		created_at:"String",
-		debt_amount:"Float",
+		debt_amount:"String",
 		display_name:"String",
 		id:"Int",
 		is_external_contract:"Boolean",
 		memo:"String",
 		present:"Boolean",
-		rate_per_hour:"Float",
+		rate_per_hour:"String",
 		status:"ContributorStatus",
 		username:"String"
 	},
@@ -2326,6 +2370,8 @@ export const ReturnTypes: Record<string,any> = {
 		capitalSubmitVote:"Transaction",
 		capitalUpdateIssue:"CapitalIssue",
 		capitalUpdateStory:"CapitalStory",
+		chairmanConfirmApprove:"Approval",
+		chairmanDeclineApprove:"Approval",
 		completeRequest:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
@@ -2518,6 +2564,12 @@ export const ReturnTypes: Record<string,any> = {
 		totalCount:"Int",
 		totalPages:"Int"
 	},
+	PaginatedChairmanApprovalsPaginationResult:{
+		currentPage:"Int",
+		items:"Approval",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedCurrentTableStatesPaginationResult:{
 		currentPage:"Int",
 		items:"CurrentTableState",
@@ -2649,6 +2701,8 @@ export const ReturnTypes: Record<string,any> = {
 		capitalTimeStats:"CapitalTimeStats",
 		capitalVote:"CapitalVote",
 		capitalVotes:"PaginatedCapitalVotesPaginationResult",
+		chairmanApproval:"Approval",
+		chairmanApprovals:"PaginatedChairmanApprovalsPaginationResult",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",

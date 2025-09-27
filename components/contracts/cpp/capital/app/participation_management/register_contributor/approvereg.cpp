@@ -28,7 +28,7 @@ void capital::approvereg(eosio::name coopname, checksum256 contributor_hash, doc
   eosio::check(contributor != contributors.end(), "Пайщик не зарегистрирован в контракте");
 
   // Обновляем пайщика и устанавливаем принятый договор УХД
-  contributors.modify(contributor, coopname, [&](auto &c){
+  contributors.modify(contributor, payer, [&](auto &c){
     c.status = Capital::Contributors::Status::ACTIVE;
     c.contract = contract;
   });

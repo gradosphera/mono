@@ -1,7 +1,7 @@
 import type { IProjectWalletDatabaseData } from '../interfaces/project-wallet-database.interface';
 import type { IProjectWalletBlockchainData } from '../interfaces/project-wallet-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 /**
  * Доменная сущность проектного кошелька
  *

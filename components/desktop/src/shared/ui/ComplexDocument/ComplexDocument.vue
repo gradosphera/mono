@@ -43,8 +43,5 @@ const documentData = computed(() => props.documents)
 </script>
 
 <style lang="scss" scoped>
-.documents-gap {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
+
 </style>

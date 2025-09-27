@@ -11,7 +11,7 @@ import { randomUUID } from 'crypto';
 export abstract class BaseDomainEntity<T extends IBaseDatabaseData> {
   // Базовые поля из IBaseDatabaseData
   public _id: string; // Внутренний ID базы данных
-  public block_num: number; // Номер блока последнего обновления
+  public block_num?: number; // Номер блока последнего обновления
   public present: boolean; // Существует ли запись в блокчейне
   public status?: string; // Статус сущности
   public _created_at: Date; // Дата создания в базе данных
@@ -31,8 +31,8 @@ export abstract class BaseDomainEntity<T extends IBaseDatabaseData> {
     this.block_num = databaseData.block_num ?? 0;
     this.present = databaseData.present;
     this.status = databaseData.status ?? defaultStatus;
-    this._created_at = databaseData._created_at ?? new Date();
-    this._updated_at = databaseData._updated_at ?? new Date();
+    this._created_at = databaseData._created_at ? new Date(databaseData._created_at) : new Date();
+    this._updated_at = databaseData._updated_at ? new Date(databaseData._updated_at) : new Date();
   }
 
   /**

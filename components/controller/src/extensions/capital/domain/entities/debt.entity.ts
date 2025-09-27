@@ -3,7 +3,7 @@ import type { IDebtDatabaseData } from '../interfaces/debt-database.interface';
 import type { IDebtBlockchainData } from '../interfaces/debt-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
 /**
  * Доменная сущность долга

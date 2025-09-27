@@ -1,5 +1,5 @@
 import type { ICommentDatabaseData } from '../interfaces/comment-database.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
 /**
  * Доменная сущность комментария

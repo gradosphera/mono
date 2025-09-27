@@ -6,7 +6,7 @@ import { ProgramWalletTypeormEntity } from '../entities/program-wallet.typeorm-e
 import { ProgramWalletMapper } from '../mappers/program-wallet.mapper';
 import type { ProgramWalletRepository } from '../../domain/repositories/program-wallet.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
-import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IProgramWalletDatabaseData } from '../../domain/interfaces/program-wallet-database.interface';
 import type { IProgramWalletBlockchainData } from '../../domain/interfaces/program-wallet-blockchain.interface';
 

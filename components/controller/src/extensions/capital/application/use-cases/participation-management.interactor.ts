@@ -52,6 +52,7 @@ export class ParticipationManagementInteractor {
     // Создаем вкладчика в репозитории (данные базы данных)
     const contributor = new ContributorDomainEntity({
       _id: '', // будет сгенерирован автоматически
+      block_num: 0,
       present: true,
       contributor_hash: data.contributor_hash,
       status: ContributorStatus.PENDING,
@@ -79,6 +80,7 @@ export class ParticipationManagementInteractor {
     // Создаем базовые данные вкладчика для базы данных
     const databaseData = {
       _id: '', // будет сгенерирован автоматически
+      block_num: 0,
       present: false,
       contributor_hash: generateRandomHash(),
       status: ContributorStatus.PENDING,

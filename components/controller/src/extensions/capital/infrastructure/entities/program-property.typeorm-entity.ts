@@ -1,7 +1,7 @@
 import { Entity, Column, Index } from 'typeorm';
 import { ProgramPropertyStatus } from '../../domain/enums/program-property-status.enum';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
-import { BaseTypeormEntity } from './base.typeorm-entity';
+import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
 const EntityName = 'capital_program_properties';
 @Entity(EntityName)

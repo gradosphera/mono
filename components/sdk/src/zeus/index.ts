@@ -1405,6 +1405,61 @@ export type ValueTypes = {
 	/** Голос (за/против/воздержался) */
 	vote: string | Variable<any, string>
 };
+	/** Одобрение документа председателем совета */
+["Approval"]: AliasType<{
+	/** Дата создания записи */
+	_created_at?:boolean | `@${string}`,
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	_updated_at?:boolean | `@${string}`,
+	/** Хеш одобрения для идентификации */
+	approval_hash?:boolean | `@${string}`,
+	/** Одобренный документ (заполняется при подтверждении одобрения) */
+	approved_document?:ValueTypes["DocumentAggregate"],
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?:boolean | `@${string}`,
+	/** Действие обратного вызова при одобрении */
+	callback_action_approve?:boolean | `@${string}`,
+	/** Действие обратного вызова при отклонении */
+	callback_action_decline?:boolean | `@${string}`,
+	/** Контракт обратного вызова для обработки результата */
+	callback_contract?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания одобрения */
+	created_at?:boolean | `@${string}`,
+	/** Документ, требующий одобрения */
+	document?:ValueTypes["DocumentAggregate"],
+	/** ID одобрения в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Метаданные одобрения в формате JSON */
+	meta?:boolean | `@${string}`,
+	/** Флаг присутствия записи в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Статус одобрения */
+	status?:boolean | `@${string}`,
+	/** Имя пользователя, запросившего одобрение */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Фильтр для поиска одобрений */
+["ApprovalFilter"]: {
+	/** Поиск по хешу одобрения */
+	approval_hash?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по дате создания (от) */
+	created_from?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	/** Фильтр по дате создания (до) */
+	created_to?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	/** Фильтр по статусам одобрений */
+	statuses?: Array<ValueTypes["ApprovalStatus"]> | undefined | null | Variable<any, string>,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null | Variable<any, string>
+};
+	/** Статус одобрения в системе CHAIRMAN */
+["ApprovalStatus"]:ApprovalStatus;
 	["AssetContributionActGenerateDocumentInput"]: {
 	/** Идентификатор акта */
 	act_id: string | Variable<any, string>,
@@ -1903,7 +1958,7 @@ export type ValueTypes = {
 	_updated_at?:boolean | `@${string}`,
 	/** Приложения к контракту */
 	appendixes?:boolean | `@${string}`,
-	/** Номер блока последнего обновления */
+	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
 	blockchain_status?:boolean | `@${string}`,
@@ -1937,7 +1992,7 @@ export type ValueTypes = {
 	is_external_contract?:boolean | `@${string}`,
 	/** Мемо/комментарий */
 	memo?:boolean | `@${string}`,
-	/** Существует ли запись в блокчейне */
+	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Ставка за час работы */
 	rate_per_hour?:boolean | `@${string}`,
@@ -2847,6 +2902,15 @@ export type ValueTypes = {
 	/** Период голосования в днях */
 	voting_period_in_days: number | Variable<any, string>
 };
+	/** Входные данные для подтверждения одобрения документа */
+["ConfirmApproveInput"]: {
+	/** Хеш одобрения для идентификации */
+	approval_hash: string | Variable<any, string>,
+	/** Одобренный документ в формате JSON */
+	approved_document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	/** Название кооператива */
+	coopname: string | Variable<any, string>
+};
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 ["ConfirmReceiveOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -3389,6 +3453,15 @@ export type ValueTypes = {
 	votes_for?:ValueTypes["ExtendedBlockchainAction"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Входные данные для отклонения одобрения документа */
+["DeclineApproveInput"]: {
+	/** Хеш одобрения для идентификации */
+	approval_hash: string | Variable<any, string>,
+	/** Название кооператива */
+	coopname: string | Variable<any, string>,
+	/** Причина отклонения */
+	reason: string | Variable<any, string>
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -4423,6 +4496,8 @@ capitalStartVoting?: [{	data: ValueTypes["StartVotingInput"] | Variable<any, str
 capitalSubmitVote?: [{	data: ValueTypes["SubmitVoteInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalUpdateIssue?: [{	data: ValueTypes["UpdateIssueInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
 capitalUpdateStory?: [{	data: ValueTypes["UpdateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
+chairmanConfirmApprove?: [{	data: ValueTypes["ConfirmApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
+chairmanDeclineApprove?: [{	data: ValueTypes["DeclineApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ValueTypes["ConfirmSupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -4728,6 +4803,17 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ValueTypes["CapitalVote"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedChairmanApprovalsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["Approval"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -5186,6 +5272,8 @@ capitalTimeEntriesByIssues?: [{	filter?: ValueTypes["CapitalTimeEntriesFilter"] 
 capitalTimeStats?: [{	data?: ValueTypes["CapitalTimeStatsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["CapitalTimeStats"]],
 capitalVote?: [{	data: ValueTypes["GetVoteInput"] | Variable<any, string>},ValueTypes["CapitalVote"]],
 capitalVotes?: [{	filter?: ValueTypes["VoteFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalVotesPaginationResult"]],
+chairmanApproval?: [{	id: string | Variable<any, string>},ValueTypes["Approval"]],
+chairmanApprovals?: [{	filter?: ValueTypes["ApprovalFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedChairmanApprovalsPaginationResult"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -6841,6 +6929,61 @@ export type ResolverInputTypes = {
 	/** Голос (за/против/воздержался) */
 	vote: string
 };
+	/** Одобрение документа председателем совета */
+["Approval"]: AliasType<{
+	/** Дата создания записи */
+	_created_at?:boolean | `@${string}`,
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	_updated_at?:boolean | `@${string}`,
+	/** Хеш одобрения для идентификации */
+	approval_hash?:boolean | `@${string}`,
+	/** Одобренный документ (заполняется при подтверждении одобрения) */
+	approved_document?:ResolverInputTypes["DocumentAggregate"],
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?:boolean | `@${string}`,
+	/** Действие обратного вызова при одобрении */
+	callback_action_approve?:boolean | `@${string}`,
+	/** Действие обратного вызова при отклонении */
+	callback_action_decline?:boolean | `@${string}`,
+	/** Контракт обратного вызова для обработки результата */
+	callback_contract?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания одобрения */
+	created_at?:boolean | `@${string}`,
+	/** Документ, требующий одобрения */
+	document?:ResolverInputTypes["DocumentAggregate"],
+	/** ID одобрения в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Метаданные одобрения в формате JSON */
+	meta?:boolean | `@${string}`,
+	/** Флаг присутствия записи в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Статус одобрения */
+	status?:boolean | `@${string}`,
+	/** Имя пользователя, запросившего одобрение */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Фильтр для поиска одобрений */
+["ApprovalFilter"]: {
+	/** Поиск по хешу одобрения */
+	approval_hash?: string | undefined | null,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по дате создания (от) */
+	created_from?: ResolverInputTypes["DateTime"] | undefined | null,
+	/** Фильтр по дате создания (до) */
+	created_to?: ResolverInputTypes["DateTime"] | undefined | null,
+	/** Фильтр по статусам одобрений */
+	statuses?: Array<ResolverInputTypes["ApprovalStatus"]> | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	/** Статус одобрения в системе CHAIRMAN */
+["ApprovalStatus"]:ApprovalStatus;
 	["AssetContributionActGenerateDocumentInput"]: {
 	/** Идентификатор акта */
 	act_id: string,
@@ -7339,7 +7482,7 @@ export type ResolverInputTypes = {
 	_updated_at?:boolean | `@${string}`,
 	/** Приложения к контракту */
 	appendixes?:boolean | `@${string}`,
-	/** Номер блока последнего обновления */
+	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
 	blockchain_status?:boolean | `@${string}`,
@@ -7373,7 +7516,7 @@ export type ResolverInputTypes = {
 	is_external_contract?:boolean | `@${string}`,
 	/** Мемо/комментарий */
 	memo?:boolean | `@${string}`,
-	/** Существует ли запись в блокчейне */
+	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Ставка за час работы */
 	rate_per_hour?:boolean | `@${string}`,
@@ -8283,6 +8426,15 @@ export type ResolverInputTypes = {
 	/** Период голосования в днях */
 	voting_period_in_days: number
 };
+	/** Входные данные для подтверждения одобрения документа */
+["ConfirmApproveInput"]: {
+	/** Хеш одобрения для идентификации */
+	approval_hash: string,
+	/** Одобренный документ в формате JSON */
+	approved_document: ResolverInputTypes["SignedDigitalDocumentInput"],
+	/** Название кооператива */
+	coopname: string
+};
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 ["ConfirmReceiveOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -8825,6 +8977,15 @@ export type ResolverInputTypes = {
 	votes_for?:ResolverInputTypes["ExtendedBlockchainAction"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Входные данные для отклонения одобрения документа */
+["DeclineApproveInput"]: {
+	/** Хеш одобрения для идентификации */
+	approval_hash: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Причина отклонения */
+	reason: string
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -9859,6 +10020,8 @@ capitalStartVoting?: [{	data: ResolverInputTypes["StartVotingInput"]},ResolverIn
 capitalSubmitVote?: [{	data: ResolverInputTypes["SubmitVoteInput"]},ResolverInputTypes["Transaction"]],
 capitalUpdateIssue?: [{	data: ResolverInputTypes["UpdateIssueInput"]},ResolverInputTypes["CapitalIssue"]],
 capitalUpdateStory?: [{	data: ResolverInputTypes["UpdateStoryInput"]},ResolverInputTypes["CapitalStory"]],
+chairmanConfirmApprove?: [{	data: ResolverInputTypes["ConfirmApproveInput"]},ResolverInputTypes["Approval"]],
+chairmanDeclineApprove?: [{	data: ResolverInputTypes["DeclineApproveInput"]},ResolverInputTypes["Approval"]],
 completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ResolverInputTypes["ConfirmSupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
@@ -10164,6 +10327,17 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ResolverInputTypes["CapitalVote"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedChairmanApprovalsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["Approval"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -10624,6 +10798,8 @@ capitalTimeEntriesByIssues?: [{	filter?: ResolverInputTypes["CapitalTimeEntriesF
 capitalTimeStats?: [{	data?: ResolverInputTypes["CapitalTimeStatsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["CapitalTimeStats"]],
 capitalVote?: [{	data: ResolverInputTypes["GetVoteInput"]},ResolverInputTypes["CapitalVote"]],
 capitalVotes?: [{	filter?: ResolverInputTypes["VoteFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalVotesPaginationResult"]],
+chairmanApproval?: [{	id: string},ResolverInputTypes["Approval"]],
+chairmanApprovals?: [{	filter?: ResolverInputTypes["ApprovalFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedChairmanApprovalsPaginationResult"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -12274,6 +12450,59 @@ export type ModelTypes = {
 	/** Голос (за/против/воздержался) */
 	vote: string
 };
+	/** Одобрение документа председателем совета */
+["Approval"]: {
+		/** Дата создания записи */
+	_created_at: ModelTypes["DateTime"],
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Дата последнего обновления записи */
+	_updated_at: ModelTypes["DateTime"],
+	/** Хеш одобрения для идентификации */
+	approval_hash: string,
+	/** Одобренный документ (заполняется при подтверждении одобрения) */
+	approved_document?: ModelTypes["DocumentAggregate"] | undefined | null,
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?: number | undefined | null,
+	/** Действие обратного вызова при одобрении */
+	callback_action_approve: string,
+	/** Действие обратного вызова при отклонении */
+	callback_action_decline: string,
+	/** Контракт обратного вызова для обработки результата */
+	callback_contract: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Дата создания одобрения */
+	created_at: ModelTypes["DateTime"],
+	/** Документ, требующий одобрения */
+	document?: ModelTypes["DocumentAggregate"] | undefined | null,
+	/** ID одобрения в блокчейне */
+	id?: number | undefined | null,
+	/** Метаданные одобрения в формате JSON */
+	meta: string,
+	/** Флаг присутствия записи в блокчейне */
+	present: boolean,
+	/** Статус одобрения */
+	status: ModelTypes["ApprovalStatus"],
+	/** Имя пользователя, запросившего одобрение */
+	username: string
+};
+	/** Фильтр для поиска одобрений */
+["ApprovalFilter"]: {
+	/** Поиск по хешу одобрения */
+	approval_hash?: string | undefined | null,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по дате создания (от) */
+	created_from?: ModelTypes["DateTime"] | undefined | null,
+	/** Фильтр по дате создания (до) */
+	created_to?: ModelTypes["DateTime"] | undefined | null,
+	/** Фильтр по статусам одобрений */
+	statuses?: Array<ModelTypes["ApprovalStatus"]> | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	["ApprovalStatus"]:ApprovalStatus;
 	["AssetContributionActGenerateDocumentInput"]: {
 	/** Идентификатор акта */
 	act_id: string,
@@ -12759,49 +12988,49 @@ export type ModelTypes = {
 	/** Дата последнего обновления записи */
 	_updated_at: ModelTypes["DateTime"],
 	/** Приложения к контракту */
-	appendixes?: Array<string> | undefined | null,
-	/** Номер блока последнего обновления */
+	appendixes: Array<string>,
+	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
+	blockchain_status: string,
 	/** Контракт вкладчика */
 	contract?: ModelTypes["DocumentAggregate"] | undefined | null,
 	/** Вклад как автор */
-	contributed_as_author?: number | undefined | null,
+	contributed_as_author: string,
 	/** Вклад как вкладчик */
-	contributed_as_contributor?: number | undefined | null,
+	contributed_as_contributor: string,
 	/** Вклад как координатор */
-	contributed_as_coordinator?: number | undefined | null,
+	contributed_as_coordinator: string,
 	/** Вклад как создатель */
-	contributed_as_creator?: number | undefined | null,
+	contributed_as_creator: string,
 	/** Вклад как инвестор */
-	contributed_as_investor?: number | undefined | null,
+	contributed_as_investor: string,
 	/** Вклад как собственник имущества */
-	contributed_as_propertor?: number | undefined | null,
+	contributed_as_propertor: string,
 	/** Хеш вкладчика */
 	contributor_hash: string,
 	/** Название кооператива */
-	coopname?: string | undefined | null,
+	coopname: string,
 	/** Дата создания */
-	created_at?: string | undefined | null,
+	created_at: string,
 	/** Сумма долга */
-	debt_amount?: number | undefined | null,
+	debt_amount: string,
 	/** Отображаемое имя */
-	display_name?: string | undefined | null,
+	display_name: string,
 	/** ID в блокчейне */
-	id?: number | undefined | null,
+	id: number,
 	/** Является ли внешним контрактом */
-	is_external_contract?: boolean | undefined | null,
+	is_external_contract: boolean,
 	/** Мемо/комментарий */
 	memo?: string | undefined | null,
-	/** Существует ли запись в блокчейне */
+	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Ставка за час работы */
-	rate_per_hour?: number | undefined | null,
+	rate_per_hour: string,
 	/** Статус вкладчика */
 	status: ModelTypes["ContributorStatus"],
 	/** Имя пользователя */
-	username?: string | undefined | null
+	username: string
 };
 	/** Параметры фильтрации для запросов вкладчиков CAPITAL */
 ["CapitalContributorFilter"]: {
@@ -13678,6 +13907,15 @@ export type ModelTypes = {
 	/** Период голосования в днях */
 	voting_period_in_days: number
 };
+	/** Входные данные для подтверждения одобрения документа */
+["ConfirmApproveInput"]: {
+	/** Хеш одобрения для идентификации */
+	approval_hash: string,
+	/** Одобренный документ в формате JSON */
+	approved_document: ModelTypes["SignedDigitalDocumentInput"],
+	/** Название кооператива */
+	coopname: string
+};
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 ["ConfirmReceiveOnRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -14208,6 +14446,15 @@ export type ModelTypes = {
 	documentAggregate: ModelTypes["DocumentAggregate"],
 	votes_against: Array<ModelTypes["ExtendedBlockchainAction"]>,
 	votes_for: Array<ModelTypes["ExtendedBlockchainAction"]>
+};
+	/** Входные данные для отклонения одобрения документа */
+["DeclineApproveInput"]: {
+	/** Хеш одобрения для идентификации */
+	approval_hash: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Причина отклонения */
+	reason: string
 };
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -15275,6 +15522,10 @@ export type ModelTypes = {
 	capitalUpdateIssue: ModelTypes["CapitalIssue"],
 	/** Обновление истории в CAPITAL контракте */
 	capitalUpdateStory: ModelTypes["CapitalStory"],
+	/** Подтверждение одобрения документа председателем совета */
+	chairmanConfirmApprove: ModelTypes["Approval"],
+	/** Отклонение одобрения документа председателем совета */
+	chairmanDeclineApprove: ModelTypes["Approval"],
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: ModelTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
@@ -15635,6 +15886,16 @@ export type ModelTypes = {
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<ModelTypes["CapitalVote"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedChairmanApprovalsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["Approval"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -16094,6 +16355,10 @@ export type ModelTypes = {
 	capitalVote?: ModelTypes["CapitalVote"] | undefined | null,
 	/** Получение списка голосов кооператива с фильтрацией */
 	capitalVotes: ModelTypes["PaginatedCapitalVotesPaginationResult"],
+	/** Получение одобрения по внутреннему ID базы данных */
+	chairmanApproval?: ModelTypes["Approval"] | undefined | null,
+	/** Получение списка одобрений председателя совета с фильтрацией */
+	chairmanApprovals: ModelTypes["PaginatedChairmanApprovalsPaginationResult"],
 	/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -17740,6 +18005,61 @@ export type GraphQLTypes = {
 	/** Голос (за/против/воздержался) */
 	vote: string
 };
+	/** Одобрение документа председателем совета */
+["Approval"]: {
+	__typename: "Approval",
+	/** Дата создания записи */
+	_created_at: GraphQLTypes["DateTime"],
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Дата последнего обновления записи */
+	_updated_at: GraphQLTypes["DateTime"],
+	/** Хеш одобрения для идентификации */
+	approval_hash: string,
+	/** Одобренный документ (заполняется при подтверждении одобрения) */
+	approved_document?: GraphQLTypes["DocumentAggregate"] | undefined | null,
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?: number | undefined | null,
+	/** Действие обратного вызова при одобрении */
+	callback_action_approve: string,
+	/** Действие обратного вызова при отклонении */
+	callback_action_decline: string,
+	/** Контракт обратного вызова для обработки результата */
+	callback_contract: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Дата создания одобрения */
+	created_at: GraphQLTypes["DateTime"],
+	/** Документ, требующий одобрения */
+	document?: GraphQLTypes["DocumentAggregate"] | undefined | null,
+	/** ID одобрения в блокчейне */
+	id?: number | undefined | null,
+	/** Метаданные одобрения в формате JSON */
+	meta: string,
+	/** Флаг присутствия записи в блокчейне */
+	present: boolean,
+	/** Статус одобрения */
+	status: GraphQLTypes["ApprovalStatus"],
+	/** Имя пользователя, запросившего одобрение */
+	username: string
+};
+	/** Фильтр для поиска одобрений */
+["ApprovalFilter"]: {
+		/** Поиск по хешу одобрения */
+	approval_hash?: string | undefined | null,
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по дате создания (от) */
+	created_from?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Фильтр по дате создания (до) */
+	created_to?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Фильтр по статусам одобрений */
+	statuses?: Array<GraphQLTypes["ApprovalStatus"]> | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	/** Статус одобрения в системе CHAIRMAN */
+["ApprovalStatus"]: ApprovalStatus;
 	["AssetContributionActGenerateDocumentInput"]: {
 		/** Идентификатор акта */
 	act_id: string,
@@ -18238,49 +18558,49 @@ export type GraphQLTypes = {
 	/** Дата последнего обновления записи */
 	_updated_at: GraphQLTypes["DateTime"],
 	/** Приложения к контракту */
-	appendixes?: Array<string> | undefined | null,
-	/** Номер блока последнего обновления */
+	appendixes: Array<string>,
+	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
+	blockchain_status: string,
 	/** Контракт вкладчика */
 	contract?: GraphQLTypes["DocumentAggregate"] | undefined | null,
 	/** Вклад как автор */
-	contributed_as_author?: number | undefined | null,
+	contributed_as_author: string,
 	/** Вклад как вкладчик */
-	contributed_as_contributor?: number | undefined | null,
+	contributed_as_contributor: string,
 	/** Вклад как координатор */
-	contributed_as_coordinator?: number | undefined | null,
+	contributed_as_coordinator: string,
 	/** Вклад как создатель */
-	contributed_as_creator?: number | undefined | null,
+	contributed_as_creator: string,
 	/** Вклад как инвестор */
-	contributed_as_investor?: number | undefined | null,
+	contributed_as_investor: string,
 	/** Вклад как собственник имущества */
-	contributed_as_propertor?: number | undefined | null,
+	contributed_as_propertor: string,
 	/** Хеш вкладчика */
 	contributor_hash: string,
 	/** Название кооператива */
-	coopname?: string | undefined | null,
+	coopname: string,
 	/** Дата создания */
-	created_at?: string | undefined | null,
+	created_at: string,
 	/** Сумма долга */
-	debt_amount?: number | undefined | null,
+	debt_amount: string,
 	/** Отображаемое имя */
-	display_name?: string | undefined | null,
+	display_name: string,
 	/** ID в блокчейне */
-	id?: number | undefined | null,
+	id: number,
 	/** Является ли внешним контрактом */
-	is_external_contract?: boolean | undefined | null,
+	is_external_contract: boolean,
 	/** Мемо/комментарий */
 	memo?: string | undefined | null,
-	/** Существует ли запись в блокчейне */
+	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Ставка за час работы */
-	rate_per_hour?: number | undefined | null,
+	rate_per_hour: string,
 	/** Статус вкладчика */
 	status: GraphQLTypes["ContributorStatus"],
 	/** Имя пользователя */
-	username?: string | undefined | null
+	username: string
 };
 	/** Параметры фильтрации для запросов вкладчиков CAPITAL */
 ["CapitalContributorFilter"]: {
@@ -19182,6 +19502,15 @@ export type GraphQLTypes = {
 	/** Период голосования в днях */
 	voting_period_in_days: number
 };
+	/** Входные данные для подтверждения одобрения документа */
+["ConfirmApproveInput"]: {
+		/** Хеш одобрения для идентификации */
+	approval_hash: string,
+	/** Одобренный документ в формате JSON */
+	approved_document: GraphQLTypes["SignedDigitalDocumentInput"],
+	/** Название кооператива */
+	coopname: string
+};
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 ["ConfirmReceiveOnRequestInput"]: {
 		/** Имя аккаунта кооператива */
@@ -19723,6 +20052,15 @@ export type GraphQLTypes = {
 	documentAggregate: GraphQLTypes["DocumentAggregate"],
 	votes_against: Array<GraphQLTypes["ExtendedBlockchainAction"]>,
 	votes_for: Array<GraphQLTypes["ExtendedBlockchainAction"]>
+};
+	/** Входные данные для отклонения одобрения документа */
+["DeclineApproveInput"]: {
+		/** Хеш одобрения для идентификации */
+	approval_hash: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Причина отклонения */
+	reason: string
 };
 	["DeclineRequestInput"]: {
 		/** Имя аккаунта кооператива */
@@ -20822,6 +21160,10 @@ export type GraphQLTypes = {
 	capitalUpdateIssue: GraphQLTypes["CapitalIssue"],
 	/** Обновление истории в CAPITAL контракте */
 	capitalUpdateStory: GraphQLTypes["CapitalStory"],
+	/** Подтверждение одобрения документа председателем совета */
+	chairmanConfirmApprove: GraphQLTypes["Approval"],
+	/** Отклонение одобрения документа председателем совета */
+	chairmanDeclineApprove: GraphQLTypes["Approval"],
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
@@ -21201,6 +21543,17 @@ export type GraphQLTypes = {
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<GraphQLTypes["CapitalVote"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedChairmanApprovalsPaginationResult"]: {
+	__typename: "PaginatedChairmanApprovalsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["Approval"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -21689,6 +22042,10 @@ export type GraphQLTypes = {
 	capitalVote?: GraphQLTypes["CapitalVote"] | undefined | null,
 	/** Получение списка голосов кооператива с фильтрацией */
 	capitalVotes: GraphQLTypes["PaginatedCapitalVotesPaginationResult"],
+	/** Получение одобрения по внутреннему ID базы данных */
+	chairmanApproval?: GraphQLTypes["Approval"] | undefined | null,
+	/** Получение списка одобрений председателя совета с фильтрацией */
+	chairmanApprovals: GraphQLTypes["PaginatedChairmanApprovalsPaginationResult"],
 	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -22881,6 +23238,12 @@ export enum AccountType {
 	individual = "individual",
 	organization = "organization"
 }
+/** Статус одобрения в системе CHAIRMAN */
+export enum ApprovalStatus {
+	APPROVED = "APPROVED",
+	DECLINED = "DECLINED",
+	PENDING = "PENDING"
+}
 /** Статус коммита в системе CAPITAL */
 export enum CommitStatus {
 	APPROVED = "APPROVED",
@@ -23065,6 +23428,8 @@ type ZEUS_VARIABLES = {
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedDocumentInput"];
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"];
 	["AnswerInput"]: ValueTypes["AnswerInput"];
+	["ApprovalFilter"]: ValueTypes["ApprovalFilter"];
+	["ApprovalStatus"]: ValueTypes["ApprovalStatus"];
 	["AssetContributionActGenerateDocumentInput"]: ValueTypes["AssetContributionActGenerateDocumentInput"];
 	["AssetContributionActSignedDocumentInput"]: ValueTypes["AssetContributionActSignedDocumentInput"];
 	["AssetContributionActSignedMetaDocumentInput"]: ValueTypes["AssetContributionActSignedMetaDocumentInput"];
@@ -23090,6 +23455,7 @@ type ZEUS_VARIABLES = {
 	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
 	["CompleteVotingInput"]: ValueTypes["CompleteVotingInput"];
 	["ConfigInput"]: ValueTypes["ConfigInput"];
+	["ConfirmApproveInput"]: ValueTypes["ConfirmApproveInput"];
 	["ConfirmReceiveOnRequestInput"]: ValueTypes["ConfirmReceiveOnRequestInput"];
 	["ConfirmSupplyOnRequestInput"]: ValueTypes["ConfirmSupplyOnRequestInput"];
 	["ContributorStatus"]: ValueTypes["ContributorStatus"];
@@ -23124,6 +23490,7 @@ type ZEUS_VARIABLES = {
 	["DeactivateSubscriptionInput"]: ValueTypes["DeactivateSubscriptionInput"];
 	["DebtFilter"]: ValueTypes["DebtFilter"];
 	["DebtStatus"]: ValueTypes["DebtStatus"];
+	["DeclineApproveInput"]: ValueTypes["DeclineApproveInput"];
 	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeleteCapitalIssueByHashInput"]: ValueTypes["DeleteCapitalIssueByHashInput"];

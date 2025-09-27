@@ -2,7 +2,7 @@ import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { StoryStatus } from '../../domain/enums/story-status.enum';
 import { ProjectTypeormEntity } from './project.typeorm-entity';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
-import { BaseTypeormEntity } from './base.typeorm-entity';
+import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
 const EntityName = 'capital_stories';
 @Entity(EntityName)

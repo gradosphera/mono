@@ -7,7 +7,7 @@ import { ContributorTypeormEntity } from '../entities/contributor.typeorm-entity
 import { ContributorMapper } from '../mappers/contributor.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { IContributorDatabaseData } from '../../domain/interfaces/contributor-database.interface';
 import type {
   PaginationInputDomainInterface,

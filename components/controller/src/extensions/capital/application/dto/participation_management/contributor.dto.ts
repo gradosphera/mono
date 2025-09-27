@@ -15,17 +15,6 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   })
   id!: number;
 
-  @Field(() => Int, {
-    description: 'Номер блока последнего обновления',
-  })
-  block_num!: number;
-
-  @Field(() => Boolean, {
-    description: 'Существует ли запись в блокчейне',
-    defaultValue: false,
-  })
-  present!: boolean;
-
   @Field(() => ContributorStatus, {
     description: 'Статус вкладчика',
   })

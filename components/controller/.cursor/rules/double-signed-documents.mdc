@@ -1,0 +1,112 @@
+---
+description: Правила работы с двойными подписями документов
+globs:
+alwaysApply: true
+---
+
+# Правила работы с двойными подписями документов
+
+## Общая концепция
+
+Двойная подпись означает, что документ подписывается двумя разными участниками процесса. Каждая подпись имеет свой уникальный идентификатор (`signatureId`).
+
+## Типы документов
+
+### IDocumentAggregate
+Структура агрегата документа, содержащая:
+- `document`: `SignedDigitalDocument` - подписанный документ с подписями
+- `hash`: `string` - хеш документа
+- `rawDocument`: `GeneratedDocument` - сырой (неподписанный) документ, необходимый для генерации новых подписей
+
+### SignedDigitalDocument
+Подписанный документ, содержащий:
+- `doc_hash`: хеш содержимого
+- `hash`: общий хеш
+- `meta`: метаданные документа
+- `meta_hash`: хеш метаданных
+- `signatures`: массив подписей
+- `version`: версия стандарта
+
+### ZGeneratedDocument (из cooptypes)
+Базовый документ для подписи:
+- `full_title`: полное название
+- `html`: HTML содержимое
+- `hash`: хеш документа
+- `meta`: метаданные
+- `binary`: бинарные данные (Uint8Array или string)
+
+## Процесс двойной подписи
+
+### 1. Подготовка данных
+Для добавления второй подписи к документу необходимо иметь:
+- `rawDocument` (ZGeneratedDocument) - базовый документ без подписей
+- `existingSignedDocuments` - массив уже существующих подписанных документов
+
+### 2. Вызов signDocument
+```typescript
+const doubleSignedDocument = await signDocument(
+  rawDocument,              // ZGeneratedDocument - базовый документ
+  username,                 // string - имя пользователя, подписывающего документ
+  2,                        // signatureId - идентификатор подписи (2 для второй)
+  [existingDocument]        // existingSignedDocuments - массив существующих подписей
+);
+```
+
+### 3. Параметры signDocument
+- **document**: `ZGeneratedDocument` - базовый документ (обязательно `rawDocument` из `IDocumentAggregate`)
+- **account**: `string` - имя аккаунта подписанта
+- **signatureId**: `number` - идентификатор подписи:
+  - `1` - первая подпись
+  - `2` - вторая подпись
+  - `3` - третья подпись (если необходимо)
+- **existingSignedDocuments**: `ISignedDocument2[]` - массив документов с существующими подписями
+
+## Пример реализации
+
+```typescript
+export function useConfirmApproval() {
+  const { signDocument } = useSignDocument();
+  const { username } = useSessionStore();
+
+  const confirmApproval = async (
+    coopname: string,
+    approved_document: IDocumentAggregate
+  ): Promise<IConfirmApprovalOutput> => {
+    if (!approved_document.rawDocument) {
+      throw new Error('Документ не найден');
+    }
+
+    // Подписываем документ второй подписью
+    const doubleSignedDocument = await signDocument(
+      approved_document.rawDocument,  // ZGeneratedDocument
+      username,                       // string
+      2,                              // signatureId для второй подписи
+      [approved_document.document],   // existingSignedDocuments
+    );
+
+    // Отправляем документ с двойной подписью
+    return await api.confirmApproval({
+      coopname,
+      approval_hash: approved_document.hash,
+      approved_document: doubleSignedDocument,
+    });
+  };
+
+  return { confirmApproval };
+}
+```
+
+## Важные замечания
+
+1. **rawDocument обязателен** - без него невозможно добавить новую подпись
+2. **signatureId должен быть уникальным** - каждая подпись имеет свой идентификатор
+3. **existingSignedDocuments** - содержит все предыдущие подписи документа
+4. **Типизация** - строго следить за типами `IDocumentAggregate`, `ZGeneratedDocument`, `SignedDigitalDocument`
+5. **Session Store** - использовать `useSessionStore().username` для получения имени подписанта
+
+## Распространенные ошибки
+
+- Попытка подписать `SignedDigitalDocument` напрямую (нужен `ZGeneratedDocument`)
+- Отсутствие `rawDocument` в `IDocumentAggregate`
+- Неправильный `signatureId` (не уникальный)
+- Отсутствие `existingSignedDocuments` при добавлении второй подписи

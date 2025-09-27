@@ -1,7 +1,7 @@
 import { IssuePriority } from '../enums/issue-priority.enum';
 import { IssueStatus } from '../enums/issue-status.enum';
 import type { IIssueDatabaseData } from '../interfaces/issue-database.interface';
-import { BaseDomainEntity } from './base.entity';
+import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
 /**
  * Доменная сущность задачи

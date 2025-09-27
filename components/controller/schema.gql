@@ -690,6 +690,88 @@ input AnswerInput {
   vote: String!
 }
 
+"""Одобрение документа председателем совета"""
+type Approval {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Хеш одобрения для идентификации"""
+  approval_hash: String!
+
+  """Одобренный документ (заполняется при подтверждении одобрения)"""
+  approved_document: DocumentAggregate
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
+
+  """Действие обратного вызова при одобрении"""
+  callback_action_approve: String!
+
+  """Действие обратного вызова при отклонении"""
+  callback_action_decline: String!
+
+  """Контракт обратного вызова для обработки результата"""
+  callback_contract: String!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Дата создания одобрения"""
+  created_at: DateTime!
+
+  """Документ, требующий одобрения"""
+  document: DocumentAggregate
+
+  """ID одобрения в блокчейне"""
+  id: Float
+
+  """Метаданные одобрения в формате JSON"""
+  meta: String!
+
+  """Флаг присутствия записи в блокчейне"""
+  present: Boolean!
+
+  """Статус одобрения"""
+  status: ApprovalStatus!
+
+  """Имя пользователя, запросившего одобрение"""
+  username: String!
+}
+
+"""Фильтр для поиска одобрений"""
+input ApprovalFilter {
+  """Поиск по хешу одобрения"""
+  approval_hash: String
+
+  """Фильтр по названию кооператива"""
+  coopname: String
+
+  """Фильтр по дате создания (от)"""
+  created_from: DateTime
+
+  """Фильтр по дате создания (до)"""
+  created_to: DateTime
+
+  """Фильтр по статусам одобрений"""
+  statuses: [ApprovalStatus!]
+
+  """Фильтр по имени пользователя"""
+  username: String
+}
+
+"""Статус одобрения в системе CHAIRMAN"""
+enum ApprovalStatus {
+  APPROVED
+  DECLINED
+  PENDING
+}
+
 input AssetContributionActGenerateDocumentInput {
   """Идентификатор акта"""
   act_id: String!
@@ -1379,70 +1461,70 @@ type CapitalContributor {
   _updated_at: DateTime!
 
   """Приложения к контракту"""
-  appendixes: [String!]
+  appendixes: [String!]!
 
-  """Номер блока последнего обновления"""
-  block_num: Int
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
 
   """Статус из блокчейна"""
-  blockchain_status: String
+  blockchain_status: String!
 
   """Контракт вкладчика"""
   contract: DocumentAggregate
 
   """Вклад как автор"""
-  contributed_as_author: Float
+  contributed_as_author: String!
 
   """Вклад как вкладчик"""
-  contributed_as_contributor: Float
+  contributed_as_contributor: String!
 
   """Вклад как координатор"""
-  contributed_as_coordinator: Float
+  contributed_as_coordinator: String!
 
   """Вклад как создатель"""
-  contributed_as_creator: Float
+  contributed_as_creator: String!
 
   """Вклад как инвестор"""
-  contributed_as_investor: Float
+  contributed_as_investor: String!
 
   """Вклад как собственник имущества"""
-  contributed_as_propertor: Float
+  contributed_as_propertor: String!
 
   """Хеш вкладчика"""
   contributor_hash: String!
 
   """Название кооператива"""
-  coopname: String
+  coopname: String!
 
   """Дата создания"""
-  created_at: String
+  created_at: String!
 
   """Сумма долга"""
-  debt_amount: Float
+  debt_amount: String!
 
   """Отображаемое имя"""
-  display_name: String
+  display_name: String!
 
   """ID в блокчейне"""
-  id: Int
+  id: Int!
 
   """Является ли внешним контрактом"""
-  is_external_contract: Boolean
+  is_external_contract: Boolean!
 
   """Мемо/комментарий"""
   memo: String
 
-  """Существует ли запись в блокчейне"""
+  """Флаг присутствия записи в блокчейне"""
   present: Boolean!
 
   """Ставка за час работы"""
-  rate_per_hour: Float
+  rate_per_hour: String!
 
   """Статус вкладчика"""
   status: ContributorStatus!
 
   """Имя пользователя"""
-  username: String
+  username: String!
 }
 
 """Параметры фильтрации для запросов вкладчиков CAPITAL"""
@@ -2723,6 +2805,18 @@ input ConfigInput {
   voting_period_in_days: Float!
 }
 
+"""Входные данные для подтверждения одобрения документа"""
+input ConfirmApproveInput {
+  """Хеш одобрения для идентификации"""
+  approval_hash: String!
+
+  """Одобренный документ в формате JSON"""
+  approved_document: SignedDigitalDocumentInput!
+
+  """Название кооператива"""
+  coopname: String!
+}
+
 """
 Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи
 """
@@ -3520,6 +3614,18 @@ type DecisionDetailAggregate {
   documentAggregate: DocumentAggregate!
   votes_against: [ExtendedBlockchainAction!]!
   votes_for: [ExtendedBlockchainAction!]!
+}
+
+"""Входные данные для отклонения одобрения документа"""
+input DeclineApproveInput {
+  """Хеш одобрения для идентификации"""
+  approval_hash: String!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Причина отклонения"""
+  reason: String!
 }
 
 input DeclineRequestInput {
@@ -5114,6 +5220,12 @@ type Mutation {
   """Обновление истории в CAPITAL контракте"""
   capitalUpdateStory(data: UpdateStoryInput!): CapitalStory!
 
+  """Подтверждение одобрения документа председателем совета"""
+  chairmanConfirmApprove(data: ConfirmApproveInput!): Approval!
+
+  """Отклонение одобрения документа председателем совета"""
+  chairmanDeclineApprove(data: DeclineApproveInput!): Approval!
+
   """Завершить заявку по истечению гарантийного срока"""
   completeRequest(data: CompleteRequestInput!): Transaction!
 
@@ -5678,6 +5790,20 @@ type PaginatedCapitalVotesPaginationResult {
 
   """Элементы текущей страницы"""
   items: [CapitalVote!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedChairmanApprovalsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [Approval!]!
 
   """Общее количество элементов"""
   totalCount: Int!
@@ -6375,6 +6501,12 @@ type Query {
 
   """Получение списка голосов кооператива с фильтрацией"""
   capitalVotes(filter: VoteFilter, options: PaginationInput): PaginatedCapitalVotesPaginationResult!
+
+  """Получение одобрения по внутреннему ID базы данных"""
+  chairmanApproval(id: String!): Approval
+
+  """Получение списка одобрений председателя совета с фильтрацией"""
+  chairmanApprovals(filter: ApprovalFilter, options: PaginationInput): PaginatedChairmanApprovalsPaginationResult!
 
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!

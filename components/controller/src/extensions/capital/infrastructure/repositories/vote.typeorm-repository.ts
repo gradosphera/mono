@@ -7,7 +7,7 @@ import { VoteTypeormEntity } from '../entities/vote.typeorm-entity';
 import { VoteMapper } from '../mappers/vote.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
-import { BaseBlockchainRepository } from './base-blockchain.repository';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IVoteDatabaseData } from '../../domain/interfaces/vote-database.interface';
 import type { IVoteBlockchainData } from '../../domain/interfaces/vote-blockchain.interface';
 import type {
