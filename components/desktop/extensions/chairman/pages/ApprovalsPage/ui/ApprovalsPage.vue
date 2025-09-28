@@ -1,9 +1,6 @@
 <template lang="pug">
 div
   q-card(flat)
-    // Заголовок страницы
-    .q-pa-md
-      h5.q-my-none Одобрения документов
 
     // Фильтры
     q-card-section

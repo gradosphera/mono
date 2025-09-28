@@ -10,8 +10,9 @@ div
     binary-state-sort,
     flat,
     square,
-    no-data-label='У председателя нет одобрений'
+    no-data-label='У председателя нет запросов предварительных одобрений'
   )
+
 
     template(#body='props')
       q-tr(:props='props')
@@ -25,7 +26,8 @@ div
             @click='handleToggleExpand(props.row.approval_hash)'
           )
         q-td {{ props.row.username }}
-        q-td {{ props.row.coopname }}
+        q-td {{ props.row.callback_contract }}
+        q-td {{ props.row.callback_action_approve }}
         q-td
           q-chip(
             :color='getStatusColor(props.row.status)',
@@ -129,10 +131,17 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'coopname',
-    label: 'Кооператив',
+    name: 'callback_contract',
+    label: 'Контракт',
     align: 'left' as const,
-    field: 'coopname' as const,
+    field: 'callback_contract' as const,
+    sortable: true,
+  },
+  {
+    name: 'callback_action_approve',
+    label: 'Действие',
+    align: 'left' as const,
+    field: 'callback_action_approve' as const,
     sortable: true,
   },
   {

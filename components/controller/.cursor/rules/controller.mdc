@@ -1,6 +1,6 @@
 ---
 description:
-globs: components/controller/**
+globs: **/controller/**/*.ts
 alwaysApply: false
 ---
  # NestJS Controller и Чистая архитектура

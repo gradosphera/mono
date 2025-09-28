@@ -1,1 +1,1 @@
-export { default as RegisterContributorButton } from './RegisterContributorButton.vue';
+export { default as ParticipationAgreementCard } from './ParticipationAgreementCard.vue';
