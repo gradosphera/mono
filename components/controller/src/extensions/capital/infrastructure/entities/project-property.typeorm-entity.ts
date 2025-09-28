@@ -2,7 +2,7 @@ import { Entity, Column, Index } from 'typeorm';
 import { ProjectPropertyStatus } from '../../domain/enums/project-property-status.enum';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
-const EntityName = 'capital_project_properties';
+export const EntityName = 'capital_project_properties';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_property_hash`, ['property_hash'])
@@ -10,6 +10,9 @@ const EntityName = 'capital_project_properties';
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_status`, ['status'])
 export class ProjectPropertyTypeormEntity extends BaseTypeormEntity {
+  static getTableName(): string {
+    return EntityName;
+  }
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
 

@@ -8,6 +8,7 @@ import { VoteMapper } from '../mappers/vote.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IVoteDatabaseData } from '../../domain/interfaces/vote-database.interface';
 import type { IVoteBlockchainData } from '../../domain/interfaces/vote-blockchain.interface';
 import type {
@@ -24,9 +25,10 @@ export class VoteTypeormRepository
 {
   constructor(
     @InjectRepository(VoteTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<VoteTypeormEntity>
+    repository: Repository<VoteTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -35,6 +37,7 @@ export class VoteTypeormRepository
       toEntity: VoteMapper.toEntity,
     };
   }
+
 
   protected createDomainEntity(databaseData: IVoteDatabaseData, blockchainData: IVoteBlockchainData): VoteDomainEntity {
     return new VoteDomainEntity(databaseData, blockchainData);

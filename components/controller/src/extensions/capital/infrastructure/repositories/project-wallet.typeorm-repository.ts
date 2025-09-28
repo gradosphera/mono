@@ -9,6 +9,7 @@ import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IProjectWalletBlockchainData } from '../../domain/interfaces/project-wallet-blockchain.interface';
 import type { IProjectWalletDatabaseData } from '../../domain/interfaces/project-wallet-database.interface';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 
 /**
  * TypeORM реализация репозитория проектных кошельков
@@ -20,9 +21,10 @@ export class ProjectWalletTypeormRepository
 {
   constructor(
     @InjectRepository(ProjectWalletTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<ProjectWalletTypeormEntity>
+    repository: Repository<ProjectWalletTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -31,6 +33,7 @@ export class ProjectWalletTypeormRepository
       toEntity: ProjectWalletMapper.toEntity,
     };
   }
+
 
   protected getSyncKey(): string {
     return ProjectWalletDomainEntity.getSyncKey();

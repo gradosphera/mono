@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository, MoreThan } from 'typeorm';
 import type { IBlockchainSyncRepository, IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 import type { IBaseDatabaseData } from '../interfaces/base-database.interface';
+import { EntityVersioningService } from '../services/entity-versioning.service';
 
 /**
  * Базовый абстрактный класс для репозиториев блокчейн-сущностей
@@ -16,7 +17,10 @@ export abstract class BaseBlockchainRepository<
   TTypeormEntity extends IBaseDatabaseData
 > implements IBlockchainSyncRepository<TDomainEntity>
 {
-  protected constructor(protected readonly repository: Repository<TTypeormEntity>) {}
+  protected constructor(
+    protected readonly repository: Repository<TTypeormEntity>,
+    protected readonly entityVersioningService: EntityVersioningService
+  ) {}
 
   /**
    * Маппер для преобразования между доменной и TypeORM сущностями
@@ -28,6 +32,20 @@ export abstract class BaseBlockchainRepository<
     toDomain: (typeormEntity: TTypeormEntity) => TDomainEntity;
     toEntity: (domainEntity: TDomainEntity) => Partial<TTypeormEntity>;
   };
+
+  /**
+   * Получить имя таблицы сущности
+   */
+  protected getEntityTableName(): string {
+    // Используем статический метод из TypeORM сущности
+    const entityClass = this.repository.target as any;
+    if (typeof entityClass.getTableName === 'function') {
+      return entityClass.getTableName();
+    }
+
+    // Fallback на метаданные TypeORM (для обратной совместимости)
+    return this.repository.metadata.tableName;
+  }
 
   /**
    * Найти сущность по кастомному ключу синхронизации
@@ -94,10 +112,27 @@ export abstract class BaseBlockchainRepository<
   }
 
   /**
+   * Восстановить сущности из версий после форка
+   */
+  async restoreFromVersions(forkBlockNum: number): Promise<void> {
+    await this.entityVersioningService.restoreVersionsAfterFork(this.repository, this.getEntityTableName(), forkBlockNum);
+  }
+
+  /**
    * Обновить сущность
    */
   async update(entity: TDomainEntity): Promise<TDomainEntity> {
     const typeormEntity = this.getMapper().toEntity(entity);
+
+    // Сохраняем версию перед обновлением
+    await this.entityVersioningService.saveVersionBeforeUpdate(
+      this.repository,
+      this.getEntityTableName(),
+      typeormEntity,
+      (typeormEntity as any).block_num || null,
+      'update'
+    );
+
     const savedEntity = await this.repository.save(typeormEntity as TTypeormEntity);
     return this.getMapper().toDomain(savedEntity);
   }
@@ -107,6 +142,18 @@ export abstract class BaseBlockchainRepository<
    */
   async save(entity: TDomainEntity): Promise<TDomainEntity> {
     const typeormEntity = this.getMapper().toEntity(entity);
+
+    // Сохраняем версию перед сохранением (если это обновление существующей сущности)
+    if ((typeormEntity as any)._id) {
+      await this.entityVersioningService.saveVersionBeforeUpdate(
+        this.repository,
+        this.getEntityTableName(),
+        typeormEntity,
+        (typeormEntity as any).block_num || null,
+        'save'
+      );
+    }
+
     const savedEntity = await this.repository.save(typeormEntity as TTypeormEntity);
     return this.getMapper().toDomain(savedEntity);
   }

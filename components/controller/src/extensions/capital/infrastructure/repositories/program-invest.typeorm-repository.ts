@@ -7,6 +7,7 @@ import { ProgramInvestMapper } from '../mappers/program-invest.mapper';
 import type { ProgramInvestRepository } from '../../domain/repositories/program-invest.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IProgramInvestDatabaseData } from '../../domain/interfaces/program-invest-database.interface';
 import type { IProgramInvestBlockchainData } from '../../domain/interfaces/program-invest-blockchain.interface';
 import type {
@@ -26,9 +27,10 @@ export class ProgramInvestTypeormRepository
 {
   constructor(
     @InjectRepository(ProgramInvestTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<ProgramInvestTypeormEntity>
+    repository: Repository<ProgramInvestTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -37,6 +39,7 @@ export class ProgramInvestTypeormRepository
       toEntity: ProgramInvestMapper.toEntity,
     };
   }
+
 
   protected createDomainEntity(
     databaseData: IProgramInvestDatabaseData,

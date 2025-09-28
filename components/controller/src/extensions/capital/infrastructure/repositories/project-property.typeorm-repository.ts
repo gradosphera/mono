@@ -9,6 +9,7 @@ import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IProjectPropertyBlockchainData } from '../../domain/interfaces/project-property-blockchain.interface';
 import type { IProjectPropertyDatabaseData } from '../../domain/interfaces/project-property-database.interface';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 
 /**
  * TypeORM реализация репозитория проектных имущественных взносов
@@ -20,9 +21,10 @@ export class ProjectPropertyTypeormRepository
 {
   constructor(
     @InjectRepository(ProjectPropertyTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<ProjectPropertyTypeormEntity>
+    repository: Repository<ProjectPropertyTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -31,6 +33,7 @@ export class ProjectPropertyTypeormRepository
       toEntity: ProjectPropertyMapper.toEntity,
     };
   }
+
 
   protected getSyncKey(): string {
     return ProjectPropertyDomainEntity.getSyncKey();

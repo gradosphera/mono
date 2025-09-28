@@ -8,6 +8,7 @@ import { ProjectMapper } from '../mappers/project.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import type { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/project-blockchain.interface';
 import type { IProjectDomainInterfaceDatabaseData } from '../../domain/interfaces/project-database.interface';
@@ -26,9 +27,10 @@ export class ProjectTypeormRepository
 {
   constructor(
     @InjectRepository(ProjectTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<ProjectTypeormEntity>
+    repository: Repository<ProjectTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -37,6 +39,7 @@ export class ProjectTypeormRepository
       toEntity: ProjectMapper.toEntity,
     };
   }
+
 
   protected createDomainEntity(
     databaseData: IProjectDomainInterfaceDatabaseData,

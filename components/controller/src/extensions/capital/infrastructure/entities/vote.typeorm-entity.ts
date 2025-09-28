@@ -1,7 +1,7 @@
 import { Entity, Column, Index } from 'typeorm';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
-const EntityName = 'capital_votes';
+export const EntityName = 'capital_votes';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
@@ -9,6 +9,9 @@ const EntityName = 'capital_votes';
 @Index(`idx_${EntityName}_recipient`, ['recipient'])
 @Index(`idx_${EntityName}_created_at`, ['_created_at'])
 export class VoteTypeormEntity extends BaseTypeormEntity {
+  static getTableName(): string {
+    return EntityName;
+  }
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
 

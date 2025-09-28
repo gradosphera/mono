@@ -4,7 +4,7 @@ import { IResultBlockchainData } from '../../domain/interfaces/result-blockchain
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
-const EntityName = 'capital_results';
+export const EntityName = 'capital_results';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_result_hash`, ['result_hash'])
@@ -13,6 +13,9 @@ const EntityName = 'capital_results';
 @Index(`idx_${EntityName}_status`, ['status'])
 @Index(`idx_${EntityName}_created_at`, ['_created_at'])
 export class ResultTypeormEntity extends BaseTypeormEntity {
+  static getTableName(): string {
+    return EntityName;
+  }
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
 

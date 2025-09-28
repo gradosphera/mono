@@ -8,6 +8,7 @@ import { ExpenseMapper } from '../mappers/expense.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IExpenseBlockchainData } from '../../domain/interfaces/expense-blockchain.interface';
 import type { IExpenseDatabaseData } from '../../domain/interfaces/expense-database.interface';
 import type { ExpenseFilterInputDTO } from '../../application/dto/expenses_management/expense-filter.input';
@@ -24,9 +25,10 @@ export class ExpenseTypeormRepository
 {
   constructor(
     @InjectRepository(ExpenseTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<ExpenseTypeormEntity>
+    repository: Repository<ExpenseTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -35,6 +37,7 @@ export class ExpenseTypeormRepository
       toEntity: ExpenseMapper.toEntity,
     };
   }
+
 
   protected createDomainEntity(
     databaseData: IExpenseDatabaseData,

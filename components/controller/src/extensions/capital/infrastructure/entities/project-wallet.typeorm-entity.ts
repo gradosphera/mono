@@ -1,12 +1,15 @@
 import { Entity, Column, Index } from 'typeorm';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
-const EntityName = 'capital_project_wallets';
+export const EntityName = 'capital_project_wallets';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_username`, ['username'])
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 export class ProjectWalletTypeormEntity extends BaseTypeormEntity {
+  static getTableName(): string {
+    return EntityName;
+  }
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
 

@@ -7,6 +7,7 @@ import { ProgramWithdrawMapper } from '../mappers/program-withdraw.mapper';
 import type { ProgramWithdrawRepository } from '../../domain/repositories/program-withdraw.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IProgramWithdrawDatabaseData } from '../../domain/interfaces/program-withdraw-database.interface';
 import type { IProgramWithdrawBlockchainData } from '../../domain/interfaces/program-withdraw-blockchain.interface';
 
@@ -20,9 +21,10 @@ export class ProgramWithdrawTypeormRepository
 {
   constructor(
     @InjectRepository(ProgramWithdrawTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<ProgramWithdrawTypeormEntity>
+    repository: Repository<ProgramWithdrawTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -31,6 +33,7 @@ export class ProgramWithdrawTypeormRepository
       toEntity: ProgramWithdrawMapper.toEntity,
     };
   }
+
 
   protected createDomainEntity(
     databaseData: IProgramWithdrawDatabaseData,

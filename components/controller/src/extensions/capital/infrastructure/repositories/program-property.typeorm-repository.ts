@@ -7,6 +7,7 @@ import { ProgramPropertyMapper } from '../mappers/program-property.mapper';
 import type { ProgramPropertyRepository } from '../../domain/repositories/program-property.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IProgramPropertyDatabaseData } from '../../domain/interfaces/program-property-database.interface';
 import type { IProgramPropertyBlockchainData } from '../../domain/interfaces/program-property-blockchain.interface';
 
@@ -20,9 +21,10 @@ export class ProgramPropertyTypeormRepository
 {
   constructor(
     @InjectRepository(ProgramPropertyTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<ProgramPropertyTypeormEntity>
+    repository: Repository<ProgramPropertyTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -31,6 +33,7 @@ export class ProgramPropertyTypeormRepository
       toEntity: ProgramPropertyMapper.toEntity,
     };
   }
+
 
   protected createDomainEntity(
     databaseData: IProgramPropertyDatabaseData,

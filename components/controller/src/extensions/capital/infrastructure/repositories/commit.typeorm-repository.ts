@@ -9,6 +9,7 @@ import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { ICommitDatabaseData } from '../../domain/interfaces/commit-database.interface';
 import type {
   PaginationInputDomainInterface,
@@ -24,9 +25,10 @@ export class CommitTypeormRepository
 {
   constructor(
     @InjectRepository(CommitTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<CommitTypeormEntity>
+    repository: Repository<CommitTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {

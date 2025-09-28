@@ -4,7 +4,7 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
 
-const EntityName = 'capital_contributors';
+export const EntityName = 'capital_contributors';
 
 @Entity(EntityName)
 @Index(`idx_${EntityName}_blockchain_id`, ['id'])
@@ -14,6 +14,10 @@ const EntityName = 'capital_contributors';
 @Index(`idx_${EntityName}_created_at`, ['_created_at'])
 @Index(`idx_${EntityName}_display_name`, ['display_name'])
 export class ContributorTypeormEntity extends BaseTypeormEntity {
+  static getTableName(): string {
+    return EntityName;
+  }
+
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
 

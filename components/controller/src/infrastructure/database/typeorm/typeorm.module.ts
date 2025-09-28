@@ -34,6 +34,9 @@ import { ActionEntity } from './entities/action.entity';
 import { DeltaEntity } from './entities/delta.entity';
 import { ForkEntity } from './entities/fork.entity';
 import { SyncStateEntity } from './entities/sync-state.entity';
+import { EntityVersionTypeormEntity } from '~/shared/sync/entities/entity-version.typeorm-entity';
+import { EntityVersionRepository } from '~/shared/sync/repositories/entity-version.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import { ACTION_REPOSITORY_PORT } from '~/domain/parser/ports/action-repository.port';
 import { DELTA_REPOSITORY_PORT } from '~/domain/parser/ports/delta-repository.port';
 import { FORK_REPOSITORY_PORT } from '~/domain/parser/ports/fork-repository.port';
@@ -53,7 +56,7 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       username: config.postgres.username,
       password: config.postgres.password,
       database: config.postgres.database,
-      entities: [path.join(__dirname, '**/entities/*.entity.{ts,js}')],
+      entities: [EntityVersionTypeormEntity, path.join(__dirname, '**/entities/*.entity.{ts,js}')],
       synchronize: config.env === 'development', // Используем миграции для production
       logging: false,
     }),
@@ -71,6 +74,7 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       DeltaEntity,
       ForkEntity,
       SyncStateEntity,
+      EntityVersionTypeormEntity,
     ]),
   ],
   providers: [
@@ -126,6 +130,8 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       provide: SYNC_STATE_REPOSITORY_PORT,
       useClass: TypeOrmSyncStateRepository,
     },
+    EntityVersionRepository,
+    EntityVersioningService,
   ],
   exports: [
     NestTypeOrmModule,
@@ -142,6 +148,8 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
     DELTA_REPOSITORY_PORT,
     FORK_REPOSITORY_PORT,
     SYNC_STATE_REPOSITORY_PORT,
+    EntityVersionRepository,
+    EntityVersioningService,
   ],
 })
 export class TypeOrmModule {}

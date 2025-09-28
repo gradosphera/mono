@@ -66,6 +66,9 @@ export interface IBlockchainSyncRepository<TEntity extends IBlockchainSynchroniz
 
   /** Удалить сущности с номером блока больше указанного (для обработки форков) */
   deleteByBlockNumGreaterThan(blockNum: number): Promise<void>;
+
+  /** Восстановить сущности из версий после форка */
+  restoreFromVersions?(forkBlockNum: number): Promise<void>;
 }
 
 /**

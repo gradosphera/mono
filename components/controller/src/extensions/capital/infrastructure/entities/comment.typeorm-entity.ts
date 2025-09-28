@@ -2,7 +2,7 @@ import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
-const EntityName = 'capital_comments';
+export const EntityName = 'capital_comments';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_commentor_id`, ['commentor_id'])
 @Index(`idx_${EntityName}_issue_id`, ['issue_id'])

@@ -8,6 +8,7 @@ import { ResultMapper } from '../mappers/result.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IResultBlockchainData } from '../../domain/interfaces/result-blockchain.interface';
 import type { IResultDatabaseData } from '../../domain/interfaces/result-database.interface';
 
@@ -18,9 +19,10 @@ export class ResultTypeormRepository
 {
   constructor(
     @InjectRepository(ResultTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<ResultTypeormEntity>
+    repository: Repository<ResultTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -29,6 +31,7 @@ export class ResultTypeormRepository
       toEntity: ResultMapper.toEntity,
     };
   }
+
 
   protected createDomainEntity(
     databaseData: IResultDatabaseData,

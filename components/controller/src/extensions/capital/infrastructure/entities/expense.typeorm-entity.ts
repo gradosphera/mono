@@ -3,7 +3,7 @@ import { ExpenseStatus } from '../../domain/enums/expense-status.enum';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
-const EntityName = 'capital_expenses';
+export const EntityName = 'capital_expenses';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_expense_hash`, ['expense_hash'])
@@ -12,6 +12,9 @@ const EntityName = 'capital_expenses';
 @Index(`idx_${EntityName}_status`, ['status'])
 @Index(`idx_${EntityName}_created_at`, ['_created_at'])
 export class ExpenseTypeormEntity extends BaseTypeormEntity {
+  static getTableName(): string {
+    return EntityName;
+  }
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
 

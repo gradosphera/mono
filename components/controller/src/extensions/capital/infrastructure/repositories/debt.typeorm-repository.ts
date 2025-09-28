@@ -8,6 +8,7 @@ import { DebtMapper } from '../mappers/debt.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IDebtDatabaseData } from '../../domain/interfaces/debt-database.interface';
 import type { IDebtBlockchainData } from '../../domain/interfaces/debt-blockchain.interface';
 
@@ -18,9 +19,10 @@ export class DebtTypeormRepository
 {
   constructor(
     @InjectRepository(DebtTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<DebtTypeormEntity>
+    repository: Repository<DebtTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -29,6 +31,7 @@ export class DebtTypeormRepository
       toEntity: DebtMapper.toEntity,
     };
   }
+
 
   protected createDomainEntity(databaseData: IDebtDatabaseData, blockchainData: IDebtBlockchainData): DebtDomainEntity {
     return new DebtDomainEntity(databaseData, blockchainData);

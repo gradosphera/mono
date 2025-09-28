@@ -7,6 +7,7 @@ import { ProgramWalletMapper } from '../mappers/program-wallet.mapper';
 import type { ProgramWalletRepository } from '../../domain/repositories/program-wallet.repository';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IProgramWalletDatabaseData } from '../../domain/interfaces/program-wallet-database.interface';
 import type { IProgramWalletBlockchainData } from '../../domain/interfaces/program-wallet-blockchain.interface';
 
@@ -20,9 +21,10 @@ export class ProgramWalletTypeormRepository
 {
   constructor(
     @InjectRepository(ProgramWalletTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<ProgramWalletTypeormEntity>
+    repository: Repository<ProgramWalletTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -31,6 +33,7 @@ export class ProgramWalletTypeormRepository
       toEntity: ProgramWalletMapper.toEntity,
     };
   }
+
 
   protected getSyncKey(): string {
     return ProgramWalletDomainEntity.getSyncKey();

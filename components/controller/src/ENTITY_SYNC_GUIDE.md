@@ -253,7 +253,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 
 import { ExpenseStatus } from '../../domain/enums/expense-status.enum';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
-const EntityName = 'capital_expenses';
+export const EntityName = 'capital_expenses';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_id`, ['id'])
 @Index(`idx_${EntityName}_expense_hash`, ['expense_hash'])

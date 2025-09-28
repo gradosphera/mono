@@ -8,6 +8,7 @@ import { StateMapper } from '../mappers/state.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IStateBlockchainData } from '../../domain/interfaces/state-blockchain.interface';
 import type { IStateDatabaseData } from '../../domain/interfaces/state-database.interface';
 
@@ -18,9 +19,10 @@ export class StateTypeormRepository
 {
   constructor(
     @InjectRepository(StateTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<StateTypeormEntity>
+    repository: Repository<StateTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -29,6 +31,7 @@ export class StateTypeormRepository
       toEntity: StateMapper.toEntity,
     };
   }
+
 
   protected getSyncKey(): string {
     return StateDomainEntity.getSyncKey();

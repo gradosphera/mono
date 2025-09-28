@@ -3,7 +3,7 @@ import { ApprovalStatus } from '../../domain/enums/approval-status.enum';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
-const EntityName = 'chairman_approvals';
+export const EntityName = 'chairman_approvals';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_id`, ['id'])
 @Index(`idx_${EntityName}_approval_hash`, ['approval_hash'])
@@ -11,6 +11,10 @@ const EntityName = 'chairman_approvals';
 @Index(`idx_${EntityName}_coopname`, ['coopname'])
 @Index(`idx_${EntityName}_status`, ['status'])
 export class ApprovalTypeormEntity extends BaseTypeormEntity {
+  static getTableName(): string {
+    return EntityName;
+  }
+
   @Column({ type: 'integer', unique: true })
   id!: number;
 

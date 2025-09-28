@@ -5,13 +5,16 @@ import { IssueTypeormEntity } from './issue.typeorm-entity';
 import { StoryTypeormEntity } from './story.typeorm-entity';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
-const EntityName = 'capital_projects';
+export const EntityName = 'capital_projects';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_coopname`, ['coopname'])
 @Index(`idx_${EntityName}_status`, ['status'])
 export class ProjectTypeormEntity extends BaseTypeormEntity {
+  static getTableName(): string {
+    return EntityName;
+  }
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
 

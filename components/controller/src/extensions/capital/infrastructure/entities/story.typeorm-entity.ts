@@ -4,7 +4,7 @@ import { ProjectTypeormEntity } from './project.typeorm-entity';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
-const EntityName = 'capital_stories';
+export const EntityName = 'capital_stories';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_story_hash`, ['story_hash'])

@@ -3,7 +3,7 @@ import { CommitStatus } from '../../domain/enums/commit-status.enum';
 import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
-const EntityName = 'capital_commits';
+export const EntityName = 'capital_commits';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_blockchain_id`, ['id'])
 @Index(`idx_${EntityName}_commit_hash`, ['commit_hash'])
@@ -12,6 +12,9 @@ const EntityName = 'capital_commits';
 @Index(`idx_${EntityName}_status`, ['status'])
 @Index(`idx_${EntityName}_created_at`, ['_created_at'])
 export class CommitTypeormEntity extends BaseTypeormEntity {
+  static getTableName(): string {
+    return EntityName;
+  }
   @Column({ type: 'integer', nullable: true, unique: true })
   id!: number;
 

@@ -28,6 +28,7 @@ const logout = async () => {
   try {
     await logout();
     router.push({ name: 'signin' });
+    window.location.reload();
   } catch (e: any) {
     FailAlert('Ошибка при выходе: ' + e.message);
   }

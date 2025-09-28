@@ -150,6 +150,12 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
 
       this.logger.log(`Removed ${affectedEntities.length} ${this.entityName} entities after fork at block ${forkBlockNum}`);
 
+      // Восстанавливаем сущности из версий
+      if (this.repository.restoreFromVersions) {
+        await this.repository.restoreFromVersions(forkBlockNum);
+        this.logger.log(`Restored ${this.entityName} entities from versions after fork at block ${forkBlockNum}`);
+      }
+
       // Вызываем метод для дополнительных действий после форка
       await this.afterForkProcessing(forkBlockNum, affectedEntities);
     } catch (error: any) {

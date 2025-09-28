@@ -8,6 +8,7 @@ import { InvestMapper } from '../mappers/invest.mapper';
 import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IInvestDatabaseData } from '../../domain/interfaces/invest-database.interface';
 import type { IInvestBlockchainData } from '../../domain/interfaces/invest-blockchain.interface';
 import type {
@@ -24,9 +25,10 @@ export class InvestTypeormRepository
 {
   constructor(
     @InjectRepository(InvestTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    repository: Repository<InvestTypeormEntity>
+    repository: Repository<InvestTypeormEntity>,
+    entityVersioningService: EntityVersioningService
   ) {
-    super(repository);
+    super(repository, entityVersioningService);
   }
 
   protected getMapper() {
@@ -35,6 +37,7 @@ export class InvestTypeormRepository
       toEntity: InvestMapper.toEntity,
     };
   }
+
 
   protected createDomainEntity(
     databaseData: IInvestDatabaseData,
