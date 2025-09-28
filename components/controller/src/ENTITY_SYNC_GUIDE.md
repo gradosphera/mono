@@ -444,12 +444,6 @@ export class ExpenseDeltaMapper implements IBlockchainDeltaMapper<IExpenseBlockc
         return null;
       }
 
-      // Валидируем обязательные поля
-      if (!this.validateBlockchainData(value)) {
-        this.logger.warn(`Invalid blockchain data in delta: table=${delta.table}, key=${delta.primary_key}`);
-        return null;
-      }
-
       // 🔥 ВАЖНО: Парсим документы ПЕРЕД возвратом
       const expense_statement = DomainToBlockchainUtils.convertChainDocumentToDomainFormat(value.expense_statement);
       const approved_statement = DomainToBlockchainUtils.convertChainDocumentToDomainFormat(value.approved_statement);
@@ -475,37 +469,6 @@ export class ExpenseDeltaMapper implements IBlockchainDeltaMapper<IExpenseBlockc
     return isRelevantContract && isRelevantTable;
   }
 
-  private validateBlockchainData(data: any): boolean {
-    if (!data || typeof data !== 'object') {
-      return false;
-    }
-
-    // Проверяем обязательные поля
-    const requiredFields = [
-      'id',
-      'coopname',
-      'username',
-      'project_hash',
-      'expense_hash',
-      'fund_id',
-      'status',
-      'amount',
-      'description',
-      'expense_statement',
-      'approved_statement',
-      'authorization',
-      'spended_at',
-    ];
-
-    for (const field of requiredFields) {
-      if (!(field in data)) {
-        this.logger.warn(`Missing required field '${field}' in blockchain data`);
-        return false;
-      }
-    }
-
-    return true;
-  }
 
   getSupportedTableNames(): string[] {
     return ['expenses', 'expenses*'];

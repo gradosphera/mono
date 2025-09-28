@@ -1,6 +1,6 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { ProjectStatus } from '../../../domain/enums/project-status.enum';
-import { BaseOutputDTO } from '../base.dto';
+import { BaseOutputDTO } from '~/shared/dto/base.dto';
 
 /**
  * GraphQL Output DTO для счетчиков участников проекта

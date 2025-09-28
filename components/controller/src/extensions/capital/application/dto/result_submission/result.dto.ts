@@ -1,7 +1,7 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { ResultStatus } from '../../../domain/enums/result-status.enum';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
-import { BaseOutputDTO } from '../base.dto';
+import { BaseOutputDTO } from '~/shared/dto/base.dto';
 
 /**
  * GraphQL Output DTO для сущности Result

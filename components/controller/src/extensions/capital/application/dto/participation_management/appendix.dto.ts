@@ -1,6 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { AppendixStatus } from '../../../domain/enums/appendix-status.enum';
-import { BaseOutputDTO } from '../base.dto';
+import { BaseOutputDTO } from '~/shared/dto/base.dto';
 
 /**
  * GraphQL Output DTO для сущности Appendix

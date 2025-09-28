@@ -1,5 +1,5 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
-import { BaseOutputDTO } from '../base.dto';
+import { BaseOutputDTO } from '~/shared/dto/base.dto';
 
 /**
  * GraphQL Output DTO для сущности ProgramWallet

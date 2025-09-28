@@ -1,5 +1,5 @@
 import { ObjectType, Field, Float } from '@nestjs/graphql';
-import { BaseOutputDTO } from '../base.dto';
+import { BaseOutputDTO } from '~/shared/dto/base.dto';
 
 /**
  * GraphQL DTO для конфигурации CAPITAL контракта

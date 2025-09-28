@@ -30,6 +30,11 @@ import { TypeOrmWebPushSubscriptionRepository } from './repositories/typeorm-web
 import { LEDGER_OPERATION_REPOSITORY } from '~/domain/ledger/repositories/ledger-operation.repository';
 import { TypeOrmLedgerOperationRepository } from './repositories/typeorm-ledger-operation.repository';
 import { LedgerOperationEntity } from './entities/ledger-operation.entity';
+import { AgreementTypeormEntity } from './entities/agreement.typeorm-entity';
+import { AGREEMENT_REPOSITORY } from '~/domain/agreement/repositories/agreement.repository';
+import { AgreementTypeormRepository } from './repositories/agreement.typeorm-repository';
+import { AgreementDeltaMapper } from './blockchain/mappers/agreement-delta.mapper';
+import { AgreementSyncService } from './blockchain/services/agreement-sync.service';
 import { ActionEntity } from './entities/action.entity';
 import { DeltaEntity } from './entities/delta.entity';
 import { ForkEntity } from './entities/fork.entity';
@@ -70,6 +75,7 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       PaymentEntity,
       WebPushSubscriptionEntity,
       LedgerOperationEntity,
+      AgreementTypeormEntity,
       ActionEntity,
       DeltaEntity,
       ForkEntity,
@@ -114,6 +120,14 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       provide: LEDGER_OPERATION_REPOSITORY,
       useClass: TypeOrmLedgerOperationRepository,
     },
+    // Agreement компоненты
+    {
+      provide: AGREEMENT_REPOSITORY,
+      useClass: AgreementTypeormRepository,
+    },
+    AgreementTypeormRepository,
+    AgreementDeltaMapper,
+    AgreementSyncService,
     {
       provide: ACTION_REPOSITORY_PORT,
       useClass: TypeOrmActionRepository,
@@ -144,6 +158,8 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
     PAYMENT_REPOSITORY,
     WEB_PUSH_SUBSCRIPTION_PORT,
     LEDGER_OPERATION_REPOSITORY,
+    AGREEMENT_REPOSITORY,
+    AgreementSyncService,
     ACTION_REPOSITORY_PORT,
     DELTA_REPOSITORY_PORT,
     FORK_REPOSITORY_PORT,

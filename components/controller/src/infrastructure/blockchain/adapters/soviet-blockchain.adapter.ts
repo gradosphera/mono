@@ -57,4 +57,50 @@ export class SovietBlockchainAdapter implements SovietBlockchainPort {
       data,
     });
   }
+
+  async sendAgreement(data: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  async confirmAgreement(
+    data: SovietContract.Actions.Agreements.ConfirmAgreement.IConfirmAgreement
+  ): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Agreements.ConfirmAgreement.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  async declineAgreement(
+    data: SovietContract.Actions.Agreements.DeclineAgreement.IDeclineAgreement
+  ): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Agreements.DeclineAgreement.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
 }

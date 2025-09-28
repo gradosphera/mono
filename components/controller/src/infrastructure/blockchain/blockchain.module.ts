@@ -24,6 +24,7 @@ import { GATEWAY_BLOCKCHAIN_PORT } from '~/domain/gateway/ports/gateway-blockcha
 import { WalletBlockchainAdapter } from './adapters/wallet-blockchain.adapter';
 import { LedgerBlockchainAdapter } from './adapters/ledger-blockchain.adapter';
 import { LEDGER_BLOCKCHAIN_PORT } from '~/domain/ledger/ports/ledger.port';
+import { SovietContractInfoService } from './services/soviet-contract-info.service';
 
 @Global()
 @Module({
@@ -75,6 +76,7 @@ import { LEDGER_BLOCKCHAIN_PORT } from '~/domain/ledger/ports/ledger.port';
       useClass: LedgerBlockchainAdapter,
     },
     DomainToBlockchainUtils,
+    SovietContractInfoService,
   ],
   exports: [
     BlockchainService,
@@ -90,6 +92,7 @@ import { LEDGER_BLOCKCHAIN_PORT } from '~/domain/ledger/ports/ledger.port';
     WALLET_BLOCKCHAIN_PORT,
     LEDGER_BLOCKCHAIN_PORT,
     DomainToBlockchainUtils,
+    SovietContractInfoService,
   ],
 })
 export class BlockchainModule {}

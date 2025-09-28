@@ -1,10 +1,10 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 
 /**
- * Базовый GraphQL Output DTO для сущностей CAPITAL
+ * Базовый GraphQL Output DTO для сущностей
  */
 @ObjectType('BaseEntity', {
-  description: 'Базовые поля сущности CAPITAL',
+  description: 'Базовые поля сущности',
 })
 export class BaseOutputDTO {
   @Field(() => String, {

@@ -1,5 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { BaseOutputDTO } from './base.dto';
+import { BaseOutputDTO } from '~/shared/dto/base.dto';
 import { ApprovalStatus } from '../../domain/enums/approval-status.enum';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
 
