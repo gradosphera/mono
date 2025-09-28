@@ -1,38 +1,38 @@
-import { BRANCH_BLOCKCHAIN_PORT, BranchBlockchainPort } from '../interfaces/branch-blockchain.port';
-import type { GetBranchesDomainInput } from '../interfaces/get-branches-domain-input.interface';
-import { BranchDomainEntity } from '../entities/branch-domain.entity';
+import { BRANCH_BLOCKCHAIN_PORT, BranchBlockchainPort } from '~/domain/branch/interfaces/branch-blockchain.port';
+import type { GetBranchesDomainInput } from '~/domain/branch/interfaces/get-branches-domain-input.interface';
+import { BranchDomainEntity } from '~/domain/branch/entities/branch-domain.entity';
 import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import type { CreateBranchDomainInput } from '../interfaces/create-branch-domain-input.interface';
+import type { CreateBranchDomainInput } from '~/domain/branch/interfaces/create-branch-domain-input.interface';
 import { HttpApiError } from '~/errors/http-api-error';
 import httpStatus from 'http-status';
-import type { EditBranchDomainInput } from '../interfaces/edit-branch-domain-input.interface';
-import type { DeleteBranchDomainInput } from '../interfaces/delete-branch-domain-input';
-import type { AddTrustedAccountDomainInterface } from '../interfaces/add-trusted-account-domain-input.interface';
-import type { DeleteTrustedAccountDomainInterface } from '../interfaces/delete-trusted-account-domain-input.interface';
+import type { EditBranchDomainInput } from '~/domain/branch/interfaces/edit-branch-domain-input.interface';
+import type { DeleteBranchDomainInput } from '~/domain/branch/interfaces/delete-branch-domain-input';
+import type { AddTrustedAccountDomainInterface } from '~/domain/branch/interfaces/add-trusted-account-domain-input.interface';
+import type { DeleteTrustedAccountDomainInterface } from '~/domain/branch/interfaces/delete-trusted-account-domain-input.interface';
 import { INDIVIDUAL_REPOSITORY, IndividualRepository } from '~/domain/common/repositories/individual.repository';
-import { IndividualDomainEntity } from '../entities/individual-domain.entity';
-import { OrganizationDomainEntity } from '../entities/organization-domain.entity';
+import { IndividualDomainEntity } from '~/domain/branch/entities/individual-domain.entity';
+import { OrganizationDomainEntity } from '~/domain/branch/entities/organization-domain.entity';
 import { PAYMENT_METHOD_REPOSITORY, PaymentMethodRepository } from '~/domain/common/repositories/payment-method.repository';
 import { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
 import { randomUUID } from 'crypto';
 import { BankPaymentMethodDTO } from '~/application/payment-method/dto/bank-payment-method.dto';
-import type { SelectBranchInputDomainInterface } from '../interfaces/select-branch-domain-input.interface';
+import type { SelectBranchInputDomainInterface } from '~/domain/branch/interfaces/select-branch-domain-input.interface';
 import config from '~/config/config';
 import { Cooperative } from 'cooptypes';
 import { DOCUMENT_REPOSITORY, DocumentRepository } from '~/domain/document/repository/document.repository';
-import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
+import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 
 @Injectable()
-export class BranchDomainInteractor {
+export class BranchInteractor {
   constructor(
     @Inject(PAYMENT_METHOD_REPOSITORY) private readonly paymentMethodRepository: PaymentMethodRepository,
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
     @Inject(INDIVIDUAL_REPOSITORY) private readonly individualRepository: IndividualRepository,
     @Inject(DOCUMENT_REPOSITORY) private readonly documentRepository: DocumentRepository,
     @Inject(BRANCH_BLOCKCHAIN_PORT) private readonly branchBlockchainPort: BranchBlockchainPort,
-    private readonly documentDomainService: DocumentDomainService
+    private readonly documentDomainInteractor: DocumentDomainInteractor
   ) {}
 
   async getBranch(coopname: string, braname: string): Promise<BranchDomainEntity> {
@@ -266,6 +266,6 @@ export class BranchDomainInteractor {
     options: Cooperative.Document.IGenerationOptions
   ): Promise<DocumentDomainEntity> {
     data.registry_id = Cooperative.Registry.SelectBranchStatement.registry_id;
-    return await this.documentDomainService.generateDocument({ data, options });
+    return await this.documentDomainInteractor.generateDocument({ data, options });
   }
 }

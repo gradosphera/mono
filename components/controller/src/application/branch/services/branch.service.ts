@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BranchDTO } from '../dto/branch.dto';
 import type { GetBranchesGraphQLInput } from '../dto/get-branches-input.dto';
-import { BranchDomainInteractor } from '~/domain/branch/interactors/branch.interactor';
+import { BranchInteractor } from '../use-cases/branch.interactor';
 import type { EditBranchGraphQLInput } from '../dto/edit-branch-input.dto';
 import type { CreateBranchGraphQLInput } from '../dto/create-branch-input.dto';
 import type { DeleteBranchGraphQLInput } from '../dto/delete-branch-input.dto';
@@ -14,10 +14,10 @@ import type { GeneratedDocumentDTO } from '~/application/document/dto/generated-
 
 @Injectable()
 export class BranchService {
-  constructor(private readonly branchDomainInteractor: BranchDomainInteractor) {}
+  constructor(private readonly branchInteractor: BranchInteractor) {}
 
   public async getBranches(data: GetBranchesGraphQLInput): Promise<BranchDTO[]> {
-    const branches = await this.branchDomainInteractor.getBranches(data);
+    const branches = await this.branchInteractor.getBranches(data);
 
     const result: BranchDTO[] = [];
 
@@ -30,34 +30,34 @@ export class BranchService {
   }
 
   public async createBranch(data: CreateBranchGraphQLInput): Promise<BranchDTO> {
-    const branch = await this.branchDomainInteractor.createBranch(data);
+    const branch = await this.branchInteractor.createBranch(data);
 
     return new BranchDTO(branch);
   }
 
   public async editBranch(data: EditBranchGraphQLInput): Promise<BranchDTO> {
-    const branch = await this.branchDomainInteractor.editBranch(data);
+    const branch = await this.branchInteractor.editBranch(data);
     return new BranchDTO(branch);
   }
 
   public async deleteBranch(data: DeleteBranchGraphQLInput): Promise<boolean> {
-    const deleted = await this.branchDomainInteractor.deleteBranch(data);
+    const deleted = await this.branchInteractor.deleteBranch(data);
 
     return deleted;
   }
 
   public async addTrustedAccount(data: AddTrustedAccountGraphQLInput): Promise<BranchDTO> {
-    const branch = await this.branchDomainInteractor.addTrustedAccount(data);
+    const branch = await this.branchInteractor.addTrustedAccount(data);
     return new BranchDTO(branch);
   }
 
   public async deleteTrustedAccount(data: DeleteTrustedAccountGraphQLInput): Promise<BranchDTO> {
-    const branch = await this.branchDomainInteractor.deleteTrustedAccount(data);
+    const branch = await this.branchInteractor.deleteTrustedAccount(data);
     return new BranchDTO(branch);
   }
 
   public async selectBranch(data: SelectBranchInputDTO): Promise<boolean> {
-    const selected = await this.branchDomainInteractor.selectBranch(data);
+    const selected = await this.branchInteractor.selectBranch(data);
     return selected;
   }
 
@@ -65,7 +65,7 @@ export class BranchService {
     data: SelectBranchGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.branchDomainInteractor.generateSelectBranchDocument(data, options);
+    const document = await this.branchInteractor.generateSelectBranchDocument(data, options);
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }

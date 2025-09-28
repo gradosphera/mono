@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { BranchService } from './services/branch.service';
 import { BranchResolver } from './resolvers/branch.resolver';
-import { BranchDomainInteractor } from '~/domain/branch/interactors/branch.interactor';
+import { BranchInteractor } from './use-cases/branch.interactor';
 import { DomainModule } from '~/domain/domain.module';
+import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
 
 @Module({
-  imports: [DomainModule],
+  imports: [DomainModule, InfrastructureModule],
   controllers: [],
-  providers: [BranchDomainInteractor, BranchService, BranchResolver],
+  providers: [BranchInteractor, BranchService, BranchResolver],
   exports: [],
 })
 export class BranchModule {}

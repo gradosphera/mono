@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
-import { AgreementDomainInteractor } from '~/domain/agreement/interactors/agreement-domain.interactor';
+import { AgreementInteractor } from '../use-cases/agreement.interactor';
 import {
   AgreementRepository,
   AGREEMENT_REPOSITORY,
@@ -20,7 +20,7 @@ import { TransactionDTO } from '~/application/common/dto/transaction-result-resp
 @Injectable()
 export class AgreementService {
   constructor(
-    private readonly agreementDomainInteractor: AgreementDomainInteractor,
+    private readonly agreementInteractor: AgreementInteractor,
     @Inject(AGREEMENT_REPOSITORY)
     private readonly agreementRepository: AgreementRepository,
     private readonly documentAggregationService: DocumentAggregationService
@@ -52,46 +52,42 @@ export class AgreementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.agreementDomainInteractor.generateWalletAgreement(data, options);
-    return document as GeneratedDocumentDTO;
+    return await this.agreementInteractor.generateWalletAgreement(data, options);
   }
 
   public async generatePrivacyAgreement(
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.agreementDomainInteractor.generatePrivacyAgreement(data, options);
-    return document as GeneratedDocumentDTO;
+    return await this.agreementInteractor.generatePrivacyAgreement(data, options);
   }
 
   public async generateSignatureAgreement(
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.agreementDomainInteractor.generateSignatureAgreement(data, options);
-    return document as GeneratedDocumentDTO;
+    return await this.agreementInteractor.generateSignatureAgreement(data, options);
   }
 
   public async generateUserAgreement(
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.agreementDomainInteractor.generateUserAgreement(data, options);
-    return document as GeneratedDocumentDTO;
+    return await this.agreementInteractor.generateUserAgreement(data, options);
   }
 
   public async sendAgreement(data: SendAgreementInputDTO): Promise<TransactionDTO> {
-    const result = await this.agreementDomainInteractor.sendAgreement(data);
+    const result = await this.agreementInteractor.sendAgreement(data);
     return result as TransactionDTO;
   }
 
   public async confirmAgreement(data: ConfirmAgreementInputDTO): Promise<TransactionDTO> {
-    const result = await this.agreementDomainInteractor.confirmAgreement(data);
+    const result = await this.agreementInteractor.confirmAgreement(data);
     return result as TransactionDTO;
   }
 
   public async declineAgreement(data: DeclineAgreementInputDTO): Promise<TransactionDTO> {
-    const result = await this.agreementDomainInteractor.declineAgreement(data);
+    const result = await this.agreementInteractor.declineAgreement(data);
     return result as TransactionDTO;
   }
 
